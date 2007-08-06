@@ -1,0 +1,224 @@
+/*! \mainpage OpenH323
+
+\section contents Table of Contents
+
+\li \ref intro
+\li \ref arch
+\li \ref classes
+\li \ref history
+
+\section intro Introduction
+
+OpenH323 is an Open Source class library for the development of applications
+using the H.323 protocol for multi-media communications over
+packet based networks. It uses the PWLib library to provide platform independence, and
+makes extensive use of the C++ techniques of inheritance and polymorphism.
+
+This document is intended as reference guide, not a tutorial. For examples
+of using OpenH323, see the sample programs provided in the samples directory.
+A tutorial on using PWLib and OpenH323 is also available at http://toncar.cz/openh323/tut.
+
+Last updated 17 May, 2004
+
+Copyright (C) 1999-2003 Equivalence Pty Ltd, All right reserved 
+
+Portions Copyright (C) 2004 Post Increment, All Rights Reserved
+
+
+\section arch Architecture
+
+The fundamental object in the ownership hierarchy is the H323Endpoint 
+class. An application would typically have one instance of a descendant of 
+this class. The application defined descendant would set up defaults for 
+various H323 parameters (timeouts etc), the most important of which is the 
+capability table which defines the codecs and channel types the application 
+is capable of handling.
+
+Also created by the application in the H323Endpoint would be instances of one 
+or more descendants of the H323Listener class. There is a descendant of this 
+class for each protocol that is supported. For example H323ListenerIP would 
+be for Internet use. Each listener spawns a thread that monitors its protocol 
+and when a new incoming call is detected, creates an instance of a 
+H323Transport class descendent. As for the H323Listener class, there is a 
+descendent for each protocol supported, eg H323TransportIP.
+
+When the first PDU arrives on a H323Transport using the Q.931 and H.225 
+protocols, there is a call reference that identifies the connection that has 
+been made. These connections are embodied by the H323Connection class, which 
+contains all of the state information for a connection between H323 endpoints. 
+The H323Endpoint instance keeps track of these active connections. If there 
+is no connection for the call reference number already, a new one is created 
+and H323 signalling negotiations begun.
+
+An application would often have the system create an instance of a descendant 
+of the H323Connection class, rather than that class itself. This is so that 
+any of a large number of virtual methods may be overridden. These virtual 
+methods are "callback" functions by the library to allow the application to 
+either obtain information or modify the behaviour at various phases of the 
+protocol negotiations. For example, there is a callback for when an incoming 
+call is in progress and the application user should be "alerted". This is 
+highly application specific being anything from a simple audible beep to 
+displaying a pop up window with bells and whistles.
+
+The H323Negotiator classes are used to maintain the state and functionality 
+of each command or variable defined by the H.245 protocol. Their main reason 
+for existence is actually to reduce the scope of the h225.h and h245.h files, 
+which define many hundreds of classes. A user of the H323Connection class 
+thus does not have to include all of these classes on every compilation unit.
+
+During some of the H.245 negotiations, logical channels may be created, both 
+by the remote endpoint and by the local application. The H323Channel class 
+descendants represents this. A typical use of one of these classes is to open 
+a stream of encoded audio data. The H323Channel class would create a 
+H323Codec using the H323Capability that was passed during the protocol 
+negotiations.
+
+\section classes Class hierarchy
+
+OpenH323 provides a rich class hierarchy that allows access to most of the functions
+requires for H.323 endponts. The list below is not intended an exhaustive list of the
+classes available (which is available here) but is good starting point for finding out
+more information on the various functions available
+
+\subsection endpoint Endpoint Classes
+
+\li H323EndPoint - implements a H.323 endpoint that can make or receive calls
+\li H323Connection - an instance  of the class is created for each outgoing or incoming call
+\li H323Channel - the base class for all H.323 logical channels
+\li H323Codec - the base class for all codecs. See also H323AudioCode and H323VideoCodec
+\li H323SignalPDU - the base class for all H.323 Protocol Data Units (PDU)
+\li H323DataPDU - the base class for all H.323 Protocol Data Units (PDU)
+\li H323GatekeeperServer - implements a H.323 Gatekeeper, i.e. a server for H.225 RAS protocl
+
+\subsection daattypes Data types
+\li H225_AliasAddress - defines a H.225 aliasAddress object
+\li H323TransportAddress - defines a IPv4 or IPv6 transport address as a string
+
+\subsection h225 H.225 Protocol Classes
+These classes are created from the H.225 ASN definitions
+\li H225_Setup_UUIE
+\li H225_CallProceeding_UUIE
+\li H225_Connect_UUIE
+\li H225_Alerting_UUIE
+\li H225_Information_UUIE
+\li H225_ReleaseComplete_UUIE
+\li H225_Facility_UUIE
+\li H225_Progress_UUIE
+\li H225_Status_UUIE
+\li H225_StatusInquiry_UUIE
+\li H225_SetupAcknowledge_UUIE
+\li H225_Notify_UUIE
+\li H225_GatekeeperRequest,
+\li H225_GatekeeperConfirm,
+\li H225_GatekeeperReject,
+\li H225_RegistrationRequest,
+\li H225_RegistrationConfirm,
+\li H225_RegistrationReject,
+\li H225_UnregistrationRequest,
+\li H225_UnregistrationConfirm,
+\li H225_UnregistrationReject,
+\li H225_AdmissionRequest,
+\li H225_AdmissionConfirm,
+\li H225_AdmissionReject,
+\li H225_BandwidthRequest,
+\li H225_BandwidthConfirm,
+\li H225_BandwidthReject,
+\li H225_DisengageRequest,
+\li H225_DisengageConfirm,
+\li H225_DisengageReject,
+\li H225_LocationRequest,
+\li H225_LocationConfirm,
+\li H225_LocationReject, 
+\li H225_InfoRequest,
+\li H225_InfoRequestResponse,
+\li H225_NonStandardMessage,
+\li H225_UnknownMessageResponse,
+\li H225_RequestInProgress,
+\li H225_ResourcesAvailableIndicate,
+\li H225_ResourcesAvailableConfirm,
+\li H225_InfoRequestAck,
+\li H225_InfoRequestNak,
+\li H225_ServiceControlIndication,
+\li H225_ServiceControlResponse,
+
+
+\subsection h245 H.245 Protocol Classes
+These classes are created from the H.245 ASN definitions
+
+\li H245_NonStandardMessage
+\li H245_MasterSlaveDetermination
+\li H245_TerminalCapabilitySet
+\li H245_OpenLogicalChannel
+\li H245_CloseLogicalChannel
+\li H245_RequestChannelClose
+\li H245_MultiplexEntrySend
+\li H245_RequestMultiplexEntry
+\li H245_RequestMode
+\li H245_RoundTripDelayRequest
+\li H245_MaintenanceLoopRequest
+\li H245_CommunicationModeRequest
+\li H245_ConferenceRequest
+\li H245_MultilinkRequest
+\li H245_LogicalChannelRateRequest
+\li H245_MasterSlaveDeterminationAck
+\li H245_MasterSlaveDeterminationReject
+\li H245_TerminalCapabilitySetAck
+\li H245_TerminalCapabilitySetReject
+\li H245_OpenLogicalChannelAck
+\li H245_OpenLogicalChannelReject
+\li H245_CloseLogicalChannelAck
+\li H245_RequestChannelCloseAck
+\li H245_RequestChannelCloseReject
+\li H245_MultiplexEntrySendAck
+\li H245_MultiplexEntrySendReject
+\li H245_RequestMultiplexEntryAck
+\li H245_RequestMultiplexEntryReject
+\li H245_RequestModeAck
+\li H245_RequestModeReject
+\li H245_RoundTripDelayResponse
+\li H245_MaintenanceLoopAck
+\li H245_MaintenanceLoopReject
+\li H245_CommunicationModeResponse
+\li H245_ConferenceResponse
+\li H245_MultilinkResponse
+\li H245_LogicalChannelRateAcknowledge
+\li H245_LogicalChannelRateReject
+\li H245_MaintenanceLoopOffCommand
+\li H245_SendTerminalCapabilitySet
+\li H245_EncryptionCommand
+\li H245_FlowControlCommand
+\li H245_EndSessionCommand
+\li H245_MiscellaneousCommand
+\li H245_CommunicationModeCommand
+\li H245_ConferenceCommand
+\li H245_H223MultiplexReconfiguration
+\li H245_NewATMVCCommand
+\li H245_MobileMultilinkReconfigurationCommand
+\li H245_FunctionNotUnderstood
+\li H245_MasterSlaveDeterminationRelease
+\li H245_TerminalCapabilitySetRelease
+\li H245_OpenLogicalChannelConfirm
+\li H245_RequestChannelCloseRelease
+\li H245_MultiplexEntrySendRelease
+\li H245_RequestMultiplexEntryRelease
+\li H245_RequestModeRelease
+\li H245_MiscellaneousIndication
+\li H245_JitterIndication
+\li H245_H223SkewIndication
+\li H245_NewATMVCIndication
+\li H245_UserInputIndication
+\li H245_H2250MaximumSkewIndication
+\li H245_MCLocationIndication
+\li H245_ConferenceIndication
+\li H245_VendorIdentification
+\li H245_FunctionNotSupported
+\li H245_MultilinkIndication
+\li H245_LogicalChannelRateRelease
+\li H245_FlowControlIndication
+\li H245_MobileMultilinkReconfigurationIndication
+
+\subsection history History
+
+\li 17 May 2004 - Converted from Doc++ to Doxygen format by Craig Southeren
+
+*/

@@ -1,0 +1,125 @@
+/**@name OpenH323 Libaray
+
+	This is a Open Source class library for the development of applications
+	that wish to use the H.323 protocol for multi-media communications over
+	packet based networks.
+
+@memo	A Class Libarary implementing the H.323 Protocol.
+@version 1.7
+@author	Equivalence Pty. Ltd.
+*/
+ 
+//@{
+
+/**@name Introduction
+\begin{center}
+ 	{\Large{\bf OpenH323 Class Library}}
+\end{center}
+
+OpenH323
+
+*/
+ 
+/**@name Architecture
+\begin{center}
+ 	{\Large{\bf OpenH323 Architecture}}
+\end{center}
+
+The fundamental object of the ownership hierarchy is of the H323Endpoint 
+class. An application would typically have one instance of a descendant of 
+this class. The application defined descendant would set up defaults for 
+various H323 parameters (timeouts etc), the most important of which is the 
+capability table which defines the codecs and channel types the application 
+is capable of handling.
+
+Also created by the application in the H323Endpoint would be instances of one 
+or more descendants of the H323Listener class. There is a descendant of this 
+class for each protocol that is supported. For example H323ListenerIP would 
+be for Internet use. Each listener spawns a thread that monitors its protocol 
+and when a new incoming call is detected, creates an instance of a 
+H323Transport class descendent. As for the H323Listener class, there is a 
+descendent for each protocol supported, eg H323TransportIP.
+
+When the first PDU arrives on a H323Transport using the Q.931 and H.225 
+protocols, there is a call reference that identifies the connection that has 
+been made. These connections are embodied by the H323Connection class, which 
+contains all of the state information for a connection between H323 endpoints. 
+The H323Endpoint instance keeps track of these active connections. If there 
+is no connection for the call reference number already, a new one is created 
+and H323 signalling negotiations begun.
+
+An application would often have the system create an instance of a descendant 
+of the H323Connection class, rather than that class itself. This is so that 
+any of a large number of virtual methods may be overridden. These virtual 
+methods are "callback" functions by the library to allow the application to 
+either obtain information or modify the behaviour at various phases of the 
+protocol negotiations. For example, there is a callback for when an incoming 
+call is in progress and the application user should be "alerted". This is 
+highly application specific being anything from a simple audible beep to 
+displaying a pop up window with bells and whistles.
+
+The H323Negotiator classes are used to maintain the state and functionality 
+of each command or variable defined by the H.245 protocol. Their main reason 
+for existence is actually to reduce the scope of the h225.h and h245.h files, 
+which define many hundreds of classes. A user of the H323Connection class 
+thus does not have to include all of these classes on every compilation unit.
+
+During some of the H.245 negotiations, logical channels may be created, both 
+by the remote endpoint and by the local application. The H323Channel class 
+descendants represents this. A typical use of one of these classes is to open 
+a stream of encoded audio data. The H323Channel class would create a 
+H323Codec using the H323Capability that was passed during the protocol 
+negotiations.
+
+*/
+ 
+/**@name	Using OpenH323
+Detailed tutorials will be forthcoming.
+
+@memo	Brief examples.
+*/
+
+/**@name	Class Reference
+
+@memo	Documentation on all classes.
+  */
+    //@{
+	//@Include: include/h323.h
+	//@Include: include/h323ep.h
+	//@Include: include/h323con.h
+	//@Include: include/transports.h
+	//@Include: include/gkserver.h
+	//@Include: include/gkclient.h
+	//@Include: include/channels.h
+	//@Include: include/mediafmt.h
+	//@Include: include/h323caps.h
+	//@Include: include/h323t120.h
+	//@Include: include/h323t38.h
+	//@Include: include/codecs.h
+	//@Include: include/h263codec.h
+	//@Include: include/h261codec.h
+	//@Include: include/lid.h
+	//@Include: include/ixjlid.h
+	//@Include: include/vpblid.h
+	//@Include: include/rtp.h
+	//@Include: include/jitter.h
+	//@Include: include/h323rtp.h
+	//@Include: include/h323neg.h
+	//@Include: include/h323pdu.h
+	//@Include: include/h450pdu.h
+	//@Include: include/h225ras.h
+	//@Include: include/h235auth.h
+	//@Include: include/guid.h
+	//@Include: include/t120proto.h
+	//@Include: include/t38proto.h
+	//@Include: include/q931.h
+	//@Include: include/x224.h
+
+        //@Include: plugins/audio/GSM0610/inc/gsm.h
+        //@Include: plugins/audio/LPC_10/lpc10.h
+        //@Include: plugins/audio/Speex/libspeex/lpc.h
+   //@}
+
+//@}
+
+
