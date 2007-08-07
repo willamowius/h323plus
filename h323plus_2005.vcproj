@@ -52,7 +52,7 @@
 				PrecompiledHeaderFile=".\lib\Release/h323plus.pch"
 				AssemblerListingLocation=".\lib\Release/"
 				ObjectFile=".\lib\Release/"
-				ProgramDataBaseFileName="lib\OpenH323.pdb"
+				ProgramDataBaseFileName="lib\h323plus.pdb"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="1"
@@ -69,7 +69,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="lib\OpenH323s.lib"
+				OutputFile="lib\h323plus.lib"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -123,7 +123,7 @@
 				PrecompiledHeaderFile=".\lib\Debug/h323plus.pch"
 				AssemblerListingLocation=".\lib\Debug/"
 				ObjectFile=".\lib\Debug/"
-				ProgramDataBaseFileName="lib\OpenH323d.pdb"
+				ProgramDataBaseFileName="lib\h323plusd.pdb"
 				BrowseInformation="1"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
@@ -141,7 +141,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="lib\OpenH323sd.lib"
+				OutputFile="lib\h323plusd.lib"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -198,7 +198,7 @@
 				PrecompiledHeaderFile=".\lib\NoTrace/h323plus.pch"
 				AssemblerListingLocation=".\lib\NoTrace/"
 				ObjectFile=".\lib\NoTrace/"
-				ProgramDataBaseFileName="lib\OpenH323n.pdb"
+				ProgramDataBaseFileName="lib\h323plusn.pdb"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
 			/>
@@ -214,7 +214,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="lib\OpenH323sn.lib"
+				OutputFile="lib\h323plusn.lib"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -971,7 +971,6 @@
 					/>
 				</FileConfiguration>
 			</File>
-
 			<File
 				RelativePath="src\opalvxml.cxx"
 				>
