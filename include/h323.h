@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:49  shorne
+ * First commit of h323plus
+ *
  * Revision 1.140.6.1  2006/12/23 19:08:02  shorne
  * Plugin video codecs & sundry
  *
@@ -488,16 +491,6 @@
 #include "gkclient.h"
 
 #include <h323pluginmgr.h>
-
-#ifndef PTLIB_LOAD
- #ifdef _DEBUG
-  #pragma comment(lib,"ptlibsd.lib")
- #else
-  #pragma comment(lib,"ptlibs.lib")
- #endif
-
- #define PTLIB_LOAD 1
-#endif
 
 PString  OpalGetVersion();
 unsigned OpalGetMajorVersion();
