@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:08  shorne
+ * First commit of h323plus
+ *
  * Revision 1.2.2.1  2007/07/20 22:03:27  shorne
  * Initial H.350 Support
  *
@@ -46,6 +49,10 @@
 #include "h248.h"
 
 #include "svcctrl.h"
+
+#ifdef H323_H350
+  #include "h350/h350_service.h"
+#endif
 
 #define new PNEW
 

@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:50  shorne
+ * First commit of h323plus
+ *
  * Revision 1.31.2.5  2007/08/02 20:11:57  shorne
  * Added H.341 Support
  *
@@ -187,7 +190,9 @@
 #undef H323_H248
 #undef H323_H249
 #undef H323_H341
+#ifdef P_LDAP
 #undef H323_H350
+#endif
 #undef H323_H450
 #undef H323_H460
 #undef H323_H501
