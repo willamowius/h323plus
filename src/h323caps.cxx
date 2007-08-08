@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:06  shorne
+ * First commit of h323plus
+ *
  * Revision 1.105.2.5  2007/07/19 20:05:05  shorne
  * Added QoS as default
  *
@@ -2007,7 +2010,7 @@ H323_UserInputCapability::H323_UserInputCapability(SubTypes _subType)
   
 #ifdef H323_H249
   if (subType > 5)
-       subTypeOID = SubTypeOID[subType-5];
+       subTypeOID = SubTypeOID[subType-6];
   else {
 #endif
   
