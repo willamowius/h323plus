@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:06  shorne
+ * First commit of h323plus
+ *
  * Revision 1.228.2.9  2007/07/20 22:03:27  shorne
  * Initial H.350 Support
  *
@@ -1142,7 +1145,7 @@ H323EndPoint::H323EndPoint()
 #  if defined(H323_AUDIO_CODECS) && defined(P_AUDIO)
      // Windows MultiMedia stuff seems to need greater depth due to enormous
      // latencies in its operation, need to use DirectSound maybe?
-     soundChannelBuffers = 3;
+     soundChannelBuffers = 5;
 #  endif
 
   rtpIpTypeofService = IPTOS_PREC_CRITIC_ECP|IPTOS_LOWDELAY;
