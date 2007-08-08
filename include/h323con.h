@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:49  shorne
+ * First commit of h323plus
+ *
  * Revision 1.101.2.12  2007/08/02 20:08:10  shorne
  * added virtual to GetPartyName
  *
@@ -2232,7 +2235,7 @@ class H323Connection : public PObject
       */
     virtual void SendUserInputIndicationSoftkey(
 		unsigned key, 
-		const PString & keyName = PString();
+		const PString & keyName = PString()
 	);
 
     virtual void OnUserInputIndicationSoftkey(
