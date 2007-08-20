@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:50  shorne
+ * First commit of h323plus
+ *
  * Revision 1.10.2.3  2007/02/19 20:12:45  shorne
  * added H.239 support
  *
@@ -110,6 +113,10 @@ extern "C" {
 
 #include <time.h>
 
+#ifdef _MSC_VER
+#pragma warning(disable:4201)
+#endif
+
 #ifdef _WIN32
 #  ifdef PLUGIN_CODEC_DLL_EXPORTS
 #    define PLUGIN_CODEC_DLL_API __declspec(dllexport)
@@ -123,11 +130,13 @@ extern "C" {
 
 #endif
 
-#define PWLIB_PLUGIN_API_VERSION             0
+#define PWLIB_PLUGIN_API_VERSION        0
 
-#define	PLUGIN_CODEC_VERSION		         1    // initial version
-#define	PLUGIN_CODEC_VERSION_WIDEBAND		 2    // added wideband
-#define	PLUGIN_CODEC_VERSION_VIDEO		     3    // added video
+#define	PLUGIN_CODEC_VERSION            1    // initial version
+#define	PLUGIN_CODEC_VERSION_WIDEBAND   2    // added wideband
+#define	PLUGIN_CODEC_VERSION_VIDEO      3    // added video
+#define PLUGIN_CODEC_VERSION_FAX        4    // added fax
+#define PLUGIN_CODEC_VERSION_OPTIONS    5    // added options handling
 
 #define PLUGIN_CODEC_API_VER_FN       PWLibPlugin_GetAPIVersion
 #define PLUGIN_CODEC_API_VER_FN_STR   "PWLibPlugin_GetAPIVersion"
@@ -184,6 +193,7 @@ enum PluginCodec_Flags {
   PluginCodec_MediaTypeAudio         = 0x0000,
   PluginCodec_MediaTypeVideo         = 0x0001,
   PluginCodec_MediaTypeAudioStreamed = 0x0002,
+  PluginCodec_MediaTypeFax           = 0x0003,
   PluginCodec_MediaTypeExtVideo      = 0x0004,
 
   PluginCodec_InputTypeMask          = 0x0010,
@@ -234,6 +244,55 @@ struct PluginCodec_ControlDefn {
  
 };
 
+enum PluginCodec_OptionTypes {
+  PluginCodec_StringOption,
+  PluginCodec_BoolOption,
+  PluginCodec_IntegerOption,
+  PluginCodec_RealOption,
+  PluginCodec_EnumOption,
+  PluginCodec_OctetsOption,
+  PluginCodec_NumOptionTypes,
+};
+
+enum PluginCodec_OptionMerge {
+  PluginCodec_NoMerge,
+  PluginCodec_MinMerge,
+  PluginCodec_MaxMerge,
+  PluginCodec_EqualMerge,
+  PluginCodec_NotEqualMerge,
+  PluginCodec_AlwaysMerge,
+  PluginCodec_NumOptionMerge,
+
+  PluginCodec_AndMerge = PluginCodec_MaxMerge,
+  PluginCodec_OrMerge  = PluginCodec_MinMerge,
+  PluginCodec_XorMerge = PluginCodec_NotEqualMerge,
+  PluginCodec_NotXorMerge = PluginCodec_EqualMerge
+};
+
+#define PluginCodec_H245_Collapsing    0x40000000
+#define PluginCodec_H245_NonCollapsing 0x20000000
+#define PluginCodec_H245_Unsigned32    0x10000000
+#define PluginCodec_H245_BooleanArray  0x08000000
+#define PluginCodec_H245_TCS           0x04000000
+#define PluginCodec_H245_OLC           0x02000000
+#define PluginCodec_H245_ReqMode       0x01000000
+#define PluginCodec_H245_OrdinalMask   0x0000ffff
+
+struct PluginCodec_Option {
+  // start of version 4 fields
+  enum PluginCodec_OptionTypes m_type;
+  const char *                 m_name;
+  unsigned                     m_readOnly;
+  enum PluginCodec_OptionMerge m_merge;
+  const char *                 m_value;
+  const char *                 m_FMTPName;
+  const char *                 m_FMTPDefault;
+  int                          m_H245Generic;
+  const char *                 m_minimum;
+  const char *                 m_maximum;
+};
+
+
 struct PluginCodec_Definition {
   unsigned int version;			               // codec structure version
 
@@ -255,12 +314,22 @@ struct PluginCodec_Definition {
 
   unsigned int sampleRate;                 // samples per second
   unsigned int bitsPerSec;     		       // raw bits per second
+  unsigned int usPerFrame;                 // microseconds per frame
 
-  unsigned int nsPerFrame;                 // nanoseconds per frame
-  unsigned int samplesPerFrame;		       // audio: samples per frame,                      video: frame width
-  unsigned int bytesPerFrame;              // audio: max bytes per frame,                    video: frame height
-  unsigned int recommendedFramesPerPacket; // audio: recommended number of frames per packet video: recommended frame rate
-  unsigned int maxFramesPerPacket;         // audio: maximum number of frames per packet     video: max frame rate
+  union _parm {
+    struct _audio {
+      unsigned int samplesPerFrame;            // audio: samples per frame
+      unsigned int bytesPerFrame;              // audio: max bytes per frame
+      unsigned int recommendedFramesPerPacket; // audio: recommended number of frames per packet
+      unsigned int maxFramesPerPacket;         // audio: maximum number of frames per packet
+    } audio;
+    struct _video {
+      unsigned int maxFrameWidth;              // video: frame width
+      unsigned int maxFrameHeight;             // video: frame height
+      unsigned int recommendedFrameRate;       // video: recommended frame rate
+      unsigned int maxFrameRate;               // video: max frame rate
+    } video;
+  } parm;
 
   unsigned char rtpPayload;    		         // IANA RTP payload code (if defined)
   const char * sdpFormat;                  // SDP format string (or NULL, if no SDP format)
@@ -275,9 +344,12 @@ struct PluginCodec_Definition {
  
   // H323 specific fields
   unsigned char h323CapabilityType;
-  void          * h323CapabilityData;
+  const void  * h323CapabilityData;
 
   // end of version 1 fields
+
+  // NOTE!!!!! Due to an error in judgement, you cannot add ANY more fields
+  // to this structure without an API version change!!!!
 };
 
 typedef struct PluginCodec_Definition * (* PluginCodec_GetCodecFunction)(unsigned int *, unsigned int);
@@ -308,36 +380,57 @@ struct PluginCodec_H323NonStandardCodecData {
 
 struct PluginCodec_H323GenericParameterDefinition
 {
-    int collapsing; /* boolean */
+  /* The following used to be a simple integer for the collapsing flag in
+     version 3 and earlier. We hope that all those implementations just used
+     zero and one (a good bet) and thus the below bit fields will be backward
+     compatible, putting the parameter in all three PDU types.
+   */ 
+  struct {
+    int collapsing:1; /* boolean */
+    int excludeTCS:1;
+    int excludeOLC:1;
+    int excludeReqMode:1;
+    int readOnly:1;
+  };
+
     unsigned int id;
+
     enum PluginCodec_H323GenericParameterType {
 	/* these need to be in the same order as the choices in
 	   H245_ParameterValue::Choices, as the value is just cast to that type
 	*/
 	PluginCodec_GenericParameter_Logical = 0,
 	PluginCodec_GenericParameter_BooleanArray,
-	PluginCodec_GenericParameter_unsignedMin,
-	PluginCodec_GenericParameter_unsignedMax,
-	PluginCodec_GenericParameter_unsigned32Min,
-	PluginCodec_GenericParameter_unsigned32Max,
+	PluginCodec_GenericParameter_UnsignedMin,
+	PluginCodec_GenericParameter_UnsignedMax,
+	PluginCodec_GenericParameter_Unsigned32Min,
+	PluginCodec_GenericParameter_Unsigned32Max,
 	PluginCodec_GenericParameter_OctetString,
-	PluginCodec_GenericParameter_GenericParameter
+	PluginCodec_GenericParameter_GenericParameter,
+	
+    PluginCodec_GenericParameter_logical = 0,
+    PluginCodec_GenericParameter_booleanArray,
+    PluginCodec_GenericParameter_unsignedMin,
+    PluginCodec_GenericParameter_unsignedMax,
+    PluginCodec_GenericParameter_unsigned32Min,
+    PluginCodec_GenericParameter_unsigned32Max,
+    PluginCodec_GenericParameter_octetString,
+    PluginCodec_GenericParameter_genericParameter
     } type;
+
     union {
 	unsigned long integer;
-	char *octetstring;
+    const char * octetstring;
 	struct PluginCodec_H323GenericParameterDefinition *genericparameter;
     } value;
 };
 
-    
-struct PluginCodec_H323GenericCodecData {
-    // XXX need a way of specifying non-standard identifiers?
-    
+struct PluginCodec_H323GenericCodecData
+{
     // some cunning structures & lists, and associated logic in 
     // H323CodecPluginGenericAudioCapability::H323CodecPluginGenericAudioCapability()
     const char * standardIdentifier;
-    unsigned int maxBitRate;
+    unsigned int maxBitRate; // Zero means use value from OpalMediaFormat
 
     /* parameters; these are the parameters which are set in the
        'TerminalCapabilitySet' and 'OpenLogicalChannel' requests */
@@ -346,6 +439,7 @@ struct PluginCodec_H323GenericCodecData {
     const struct PluginCodec_H323GenericParameterDefinition *params; 
 };
     
+
 struct PluginCodec_H323AudioGSMData {
   int comfortNoise:1;
   int scrambled:1;
@@ -361,7 +455,6 @@ struct  PluginCodec_H323AudioG7231AnnexC {
   int	sidMode0:4;		            // INTEGER (6..17),	-- units octets
   int	sidMode1:4;		            // INTEGER (6..17),	-- units octets
 };
-
 
 
 enum {
@@ -397,7 +490,10 @@ enum {
   PluginCodec_H323VideoCodec_h262,                // not yet implemented
   PluginCodec_H323VideoCodec_h263,                // implemented
   PluginCodec_H323VideoCodec_is11172,             // not yet implemented
+
+  // other capabilities
   PluginCodec_H323VideoCodec_Extended,            // implemented (for use with H.239)
+  PluginCodec_H323T38Codec,                       // not yet implemented
 
   // special codes
   PluginCodec_H323Codec_NoH323 = 0xff,            // used for SIP-only codecs
@@ -413,11 +509,14 @@ enum {
 #define OpalPluginCodec_Identifer_AMR             "0.0.8.245.1.1.1"
 
 // AMR-NB\WB  (as defined in H.245v13 Annex R)
-#define OpalPluginCodec_Identifer_AMR_NB          "0.0.8.245.1.9"
-#define OpalPluginCodec_Identifer_AMR_WB          "0.0.8.245.1.10"
+#define OpalPluginCodec_Identifer_AMR_NB          "0.0.8.245.1.1.9"
+#define OpalPluginCodec_Identifer_AMR_WB          "0.0.8.245.1.1.10"
+
+// G.722.2 (aka AMR-WB)
+#define OpalPluginCodec_Identifer_G7222           "0.0.7.7222.1.0"
 
 // iLBC (as defined in H.245v13 Annex S)
-#define OpalPluginCodec_Identifer_iLBC            "0.0.8.245.1.11"
+#define OpalPluginCodec_Identifer_iLBC            "0.0.8.245.1.1.11"
 
 
 // Video Capabilities
@@ -436,6 +535,20 @@ enum {
 #define OpalPluginCodec_Identifer_H239_Video      "0.0.8.239.2"
 #define OpalPluginCodec_Identifer_H239_Generic    "0.0.8.239.3"
 
+/////////////////
+//
+// RTP specific definitions
+//
+
+#define PluginCodec_RTP_GetHeaderLength(ptr)      ((((BYTE*)(ptr))[0] & 0x0f)*4 + 12)
+#define PluginCodec_RTP_GetPayloadPtr(ptr)          ((BYTE*)(ptr) + PluginCodec_RTP_GetHeaderLength(ptr))
+#define PluginCodec_RTP_GetPayloadType(ptr)        (((BYTE*)(ptr))[1] & 0x7f)
+#define PluginCodec_RTP_SetPayloadType(ptr, type)  (((BYTE*)(ptr))[1] = (((BYTE*)(ptr))[1] & 0x80) | (type & 0x7f))
+#define PluginCodec_RTP_GetMarker(ptr)            ((((BYTE*)(ptr))[1] & 0x80) != 0)
+#define PluginCodec_RTP_SetMarker(ptr, mark)       (((BYTE*)(ptr))[1] = (((BYTE*)(ptr))[1] & 0x7f) | (mark != 0 ? 0x80 : 0))
+#define PluginCodec_RTP_GetTimestamp(ptr)         ((((BYTE*)(ptr))[4] << 24) | (((BYTE*)(ptr))[5] << 16) | (((BYTE*)(ptr))[6] << 8) | ((BYTE*)(ptr))[7])
+#define PluginCodec_RTP_SetTimestamp(ptr, ts)     ((((BYTE*)(ptr))[4] = ((ts) >> 24)),(((BYTE*)(ptr))[5] = ((ts) >> 16)),(((BYTE*)(ptr))[6] = ((ts) >> 8)),(((BYTE*)(ptr))[7] = (ts)))
+
 
 /////////////////
 //
@@ -449,11 +562,6 @@ struct PluginCodec_Video_FrameHeader {
   unsigned int  height;
 };
 
-struct PluginCodec_File_FrameHeader {
-  long  segment;
-  long  segmentcount;
-};
-
 #ifdef __cplusplus
 };
 
@@ -463,13 +571,6 @@ inline unsigned char * OPAL_VIDEO_FRAME_DATA_PTR(struct PluginCodec_Video_FrameH
 inline unsigned char * OPAL_VIDEO_FRAME_DATA_PTR(const PluginCodec_Video_FrameHeader * base)
 { return (((unsigned char *)base) + sizeof(PluginCodec_Video_FrameHeader)); }
 
-
-inline unsigned char * OPAL_FILE_FRAME_DATA_PTR(struct PluginCodec_File_FrameHeader * base)
-{ return (((unsigned char *)base) + sizeof(PluginCodec_File_FrameHeader)); }
-
-inline unsigned char * OPAL_FILE_FRAME_DATA_PTR(const PluginCodec_File_FrameHeader * base)
-{ return (((unsigned char *)base) + sizeof(PluginCodec_File_FrameHeader)); }
-
 extern "C" {
 #endif
 
@@ -478,6 +579,7 @@ struct PluginCodec_Video_SetFrameInfo {
   int width;
   int height;
 };
+
 
 /////////////////
 //
@@ -501,11 +603,21 @@ struct PluginCodec_Definition * Opal_StaticCodec_##name##_GetCodecs(unsigned * p
 PLUGIN_CODEC_DLL_API unsigned int PLUGIN_CODEC_API_VER_FN() \
 { return PWLIB_PLUGIN_API_VERSION; } \
 
+#  define PLUGIN_CODEC_IMPLEMENT_ALL(name, table, ver) \
+PLUGIN_CODEC_IMPLEMENT(name) \
+PLUGIN_CODEC_DLL_API struct PluginCodec_Definition * PLUGIN_CODEC_GET_CODEC_FN(unsigned * count, unsigned version) \
+{ *count = sizeof(table)/sizeof(struct PluginCodec_Definition); return version < ver ? NULL : table; }
+
+
 #endif
 
 #ifdef __cplusplus
 };
 #endif
 
+
+#ifdef _MSC_VER
+#pragma warning(default:4201)
+#endif
 
 #endif // __OPAL_CODECPLUGIN_H

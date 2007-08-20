@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:07  shorne
+ * First commit of h323plus
+ *
  * Revision 1.154.2.1  2006/12/23 19:08:02  shorne
  * Plugin video codecs & sundry
  *
@@ -1548,7 +1551,7 @@ PString H323SignalPDU::GetSourceURL() const
 			   switch (aliases[i].GetTag()) {
 				  case H225_AliasAddress::e_url_ID :
 				  case H225_AliasAddress::e_email_ID:
-					 url = ((const PASN_IA5String &)aliases[i]).GetValue(); 
+					 url =  H323GetAliasAddressString(aliases[i]); 
 				  default:
 					 break;
 			   }

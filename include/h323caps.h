@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:49  shorne
+ * First commit of h323plus
+ *
  * Revision 1.53.2.5  2007/03/24 23:39:42  shorne
  * More H.239 work
  *
@@ -429,6 +432,12 @@ class H323Capability : public PObject
 
   /**@name Protocol manipulation */
   //@{
+    enum CommandType {
+      e_TCS,
+      e_OLC,
+      e_ReqMode
+    };
+
     /**This function is called whenever and outgoing TerminalCapabilitySet
        PDU is being constructed for the control channel. It allows the
        capability to set the PDU fields from information in members specific
@@ -490,17 +499,10 @@ class H323Capability : public PObject
       BOOL receiver               ///< Is receiver OLC
     ) = 0;
 
-
-    /**Compare the generic part of the capability, if applicable.
+    /**Compare the PDU part of the capability.
       */
-    virtual BOOL IsGenericMatch(
-      const H245_GenericCapability & /*param*/  ///< Generic field in PDU received
-      ) const { return FALSE; }
-    
-    /**Compare the nonStandardData part of the capability, if applicable.
-      */
-    virtual BOOL IsNonStandardMatch(
-      const H245_NonStandardParameter & param  ///< Non standard field in PDU received
+    virtual BOOL IsMatch(
+      const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
     ) const;
 
     /**Validate that the capability is usable given the connection.
@@ -545,7 +547,8 @@ class H323Capability : public PObject
 
     /**Get media format of the media data this class represents.
       */
-//    const OpalMediaFormat & GetMediaFormat() const;
+    const OpalMediaFormat & GetMediaFormat() const;
+    OpalMediaFormat & GetWritableMediaFormat();
 
     /// Get the payload type for the capaibility
     RTP_DataFrame::PayloadTypes GetPayloadType() const { return rtpPayloadType; }
@@ -564,6 +567,9 @@ class H323Capability : public PObject
     unsigned assignedCapabilityNumber;  /// Unique ID assigned to capability
     CapabilityDirection capabilityDirection;
     RTP_DataFrame::PayloadTypes rtpPayloadType;
+    
+  private:
+    OpalMediaFormat mediaFormat;
 };
 
 
@@ -639,6 +645,8 @@ class H323NonStandardCapabilityInfo
       const PBYTEArray & data  ///< Data field in PDU received
     );
 
+    BOOL IsMatch(const H245_NonStandardParameter & param) const;
+
   protected:
     BOOL OnSendingNonStandardPDU(
       PASN_Choice & pdu,
@@ -685,40 +693,32 @@ class H323GenericCapabilityInfo
     H323GenericCapabilityInfo(
         const PString &capabilityId,	///< generic codec identifier
         PINDEX maxBitRate = 0	      ///< maxBitRate parameter for the GenericCapability
-        );
+    );
     H323GenericCapabilityInfo(const H323GenericCapabilityInfo &obj);
     virtual ~H323GenericCapabilityInfo();
 
-    /**Compare the genericCapability part of the capability, if applicable.
-     */
-    virtual BOOL IsGenericMatch(
+    BOOL IsMatch(
       const H245_GenericCapability & param  ///< Non standard field in PDU received
     ) const;
-
-    /** Add a parameter which will be used in the TerminalCapabilitySet and
-     * OpenLogicalChannel messages */
-    virtual BOOL AddIntegerGenericParameter(
-	BOOL collapsing,
-	int standardId,
-	int type, ///< should be one of opalplugin.h:PluginCodec_H323GenericParameterType
-	long int value );
-
-    
   protected:
-    virtual BOOL OnSendingGenericPDU(H245_GenericCapability & pdu) const;
-    virtual BOOL OnReceivedGenericPDU(const H245_GenericCapability &pdu);
+    virtual BOOL OnSendingGenericPDU(
+      H245_GenericCapability & pdu,
+      const OpalMediaFormat & mediaFormat,
+      H323Capability::CommandType type
+    ) const;
+    virtual BOOL OnReceivedGenericPDU(
+      OpalMediaFormat & mediaFormat,
+      const H245_GenericCapability & pdu,
+      H323Capability::CommandType type
+    );
 
     PObject::Comparison CompareInfo(
 	const H323GenericCapabilityInfo & obj
 	) const;
 
-    PINDEX maxBitRate;
-    H245_CapabilityIdentifier *capId;
 
-    /* parameters sent in the TerminalCapabilitySet and OpenLogicalChannel
-       messages */
-    PList<H245_GenericParameter> collapsingParameters;
-    PList<H245_GenericParameter> nonCollapsingParameters;
+    H245_CapabilityIdentifier * identifier;
+    unsigned                    maxBitRate;
 };
 
     
@@ -878,6 +878,11 @@ class H323AudioCapability : public H323RealTimeCapability
       H245_AudioCapability & pdu,  ///< PDU to set information on
       unsigned packetSize          ///< Packet size to use in capability
     ) const;
+    virtual BOOL OnSendingPDU(
+      H245_AudioCapability & pdu,  ///<  PDU to set information on
+      unsigned packetSize,         ///<  Packet size to use in capability
+      CommandType type             ///<  Type of PDU to send in
+    ) const;
 
     /**This function is called whenever and outgoing RequestMode
        PDU is being constructed for the control channel. It allows the
@@ -931,6 +936,11 @@ class H323AudioCapability : public H323RealTimeCapability
     virtual BOOL OnReceivedPDU(
       const H245_AudioCapability & pdu,  ///< PDU to get information from
       unsigned & packetSize              ///< Packet size to use in capability
+    );
+    virtual BOOL OnReceivedPDU(
+      const H245_AudioCapability & pdu,  ///< PDU to get information from
+      unsigned & packetSize,             ///< Packet size to use in capability
+      CommandType type                   ///<  Type of PDU to send in
     );
   //@}
 
@@ -1080,8 +1090,8 @@ class H323NonStandardAudioCapability : public H323AudioCapability,
 
     /**Compare the nonStandardData part of the capability, if applicable.
       */
-    virtual BOOL IsNonStandardMatch(
-      const H245_NonStandardParameter & param  ///< Non standard field in PDU received
+    virtual BOOL IsMatch(
+      const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
     ) const;
   //@}
 };
@@ -1142,7 +1152,20 @@ class H323GenericAudioCapability : public H323AudioCapability,
      */
     virtual BOOL OnSendingPDU(
       H245_AudioCapability & pdu,  ///< PDU to set information on
-      unsigned packetSize          ///< Packet size to use in capability
+      unsigned packetSize,         ///<  Packet size to use in capability
+      CommandType type             ///<  Type of PDU to send in
+    ) const;
+
+    /**This function is called whenever and outgoing RequestMode
+       PDU is being constructed for the control channel. It allows the
+       capability to set the PDU fields from information in members specific
+       to the class.
+
+       The default behaviour sets the PDUs tag according to the GetSubType()
+       function (translated to different enum).
+     */
+    virtual BOOL OnSendingPDU(
+      H245_AudioMode & pdu  ///<  PDU to set information on
     ) const;
 
     /**This function is called whenever and incoming TerminalCapabilitySet
@@ -1155,15 +1178,15 @@ class H323GenericAudioCapability : public H323AudioCapability,
      */
     virtual BOOL OnReceivedPDU(
       const H245_AudioCapability & pdu,  ///< PDU to get information from
-      unsigned & packetSize              ///< Packet size to use in capability
+      unsigned & packetSize,             ///< Packet size to use in capability
+      CommandType type                   ///<  Type of PDU to send in
     );
 
     /**Compare the generic part of the capability, if applicable.
      */
-    virtual BOOL IsGenericMatch(
-      const H245_GenericCapability & param  ///< Generic field in PDU received
-      ) const { return H323GenericCapabilityInfo::IsGenericMatch(param); }
-
+    virtual BOOL IsMatch(
+      const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
+    ) const;
   //@}
 };
 
@@ -1256,7 +1279,11 @@ class H323VideoCapability : public H323RealTimeCapability
      */
     virtual BOOL OnSendingPDU(
       H245_VideoCapability & pdu  ///< PDU to set information on
-    ) const = 0;
+    ) const;
+    virtual BOOL OnSendingPDU(
+      H245_VideoCapability & pdu,  ///<  PDU to set information on
+      CommandType type             ///<  Type of PDU to send in
+    ) const;
 
     /**This function is called whenever and outgoing RequestMode
        PDU is being constructed for the control channel. It allows the
@@ -1304,7 +1331,11 @@ class H323VideoCapability : public H323RealTimeCapability
      */
     virtual BOOL OnReceivedPDU(
       const H245_VideoCapability & pdu  ///< PDU to set information on
-    ) = 0;
+    );
+    virtual BOOL OnReceivedPDU(
+      const H245_VideoCapability & pdu,  ///< PDU to get information from
+      CommandType type                   ///<  Type of PDU to send in
+    );
   //@}
 };
 
@@ -1426,8 +1457,8 @@ class H323NonStandardVideoCapability : public H323VideoCapability,
 
     /**Compare the nonStandardData part of the capability, if applicable.
       */
-    virtual BOOL IsNonStandardMatch(
-      const H245_NonStandardParameter & param  ///< Non standard field in PDU received
+    virtual BOOL IsMatch(
+      const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
     ) const;
   //@}
 };
@@ -1468,8 +1499,7 @@ class H323GenericVideoCapability : public H323VideoCapability,
     /**Get the sub-type of the capability. This is a code dependent on the
        main type of the capability.
 
-       This returns one of the four possible combinations of mode and speed
-       using the enum values of the protocol ASN H245_AudioCapability class.
+       This returns H245_VideoCapability::e_genericCapability.
      */
     virtual unsigned GetSubType() const;
   //@}
@@ -1485,7 +1515,8 @@ class H323GenericVideoCapability : public H323VideoCapability,
        to handle the PDU.
      */
     virtual BOOL OnSendingPDU(
-      H245_VideoCapability & pdu  ///< PDU to set information on
+      H245_VideoCapability & pdu,  ///<  PDU to set information on
+      CommandType type             ///<  Type of PDU to send in
     ) const;
 
     /**This function is called whenever and outgoing RequestMode
@@ -1493,8 +1524,8 @@ class H323GenericVideoCapability : public H323VideoCapability,
        capability to set the PDU fields from information in members specific
        to the class.
 
-       The default behaviour calls H323GenericCapabilityinfo::OnSendingPDU()
-       to handle the PDU.
+       The default behaviour sets the PDUs tag according to the GetSubType()
+       function (translated to different enum).
      */
     virtual BOOL OnSendingPDU(
       H245_VideoMode & pdu  ///< PDU to set information on
@@ -1505,19 +1536,20 @@ class H323GenericVideoCapability : public H323VideoCapability,
        channel. It allows the capability to set from the PDU fields,
        information in members specific to the class.
 
-       The default behaviour calls H323NonStandardCapabilityinfo::OnReceivedPDU()
+       The default behaviour calls H323GenericCapabilityinfo::OnReceivedPDU()
        to handle the provided PDU.
      */
     virtual BOOL OnReceivedPDU(
-      const H245_VideoCapability & pdu  ///< PDU to set information on
+      const H245_VideoCapability & pdu,  ///< PDU to get information from
+      CommandType type                   ///<  Type of PDU to send in
     );
+  //@}
 
     /**Compare the generic part of the capability, if applicable.
       */
-   virtual BOOL IsGenericMatch(
-     const H245_GenericCapability & param  ///< Generic field in PDU received
-     ) const { return H323GenericCapabilityInfo::IsGenericMatch(param); }
-  //@}
+    virtual BOOL IsMatch(
+      const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
+    ) const;
 };
 
 #endif
@@ -1617,7 +1649,11 @@ class H323DataCapability : public H323Capability
      */
     virtual BOOL OnSendingPDU(
       H245_DataApplicationCapability & pdu  ///< PDU to set information on
-    ) const = 0;
+    ) const;
+    virtual BOOL OnSendingPDU(
+      H245_DataApplicationCapability & pdu, ///<  PDU to set information on
+      CommandType type                      ///<  Type of PDU to send in
+    ) const;
 
     /**This function is called whenever and outgoing RequestMode
        PDU is being constructed for the control channel. It allows the
@@ -1665,7 +1701,11 @@ class H323DataCapability : public H323Capability
      */
     virtual BOOL OnReceivedPDU(
       const H245_DataApplicationCapability & pdu  ///< PDU to set information on
-    ) = 0;
+    );
+    virtual BOOL OnReceivedPDU(
+      const H245_DataApplicationCapability & pdu, ///<  PDU to set information on
+      CommandType type                            ///<  Type of PDU to send in
+    );
   //@}
 
   protected:
@@ -1782,8 +1822,8 @@ class H323NonStandardDataCapability : public H323DataCapability,
 
     /**Compare the nonStandardData part of the capability, if applicable.
       */
-    virtual BOOL IsNonStandardMatch(
-      const H245_NonStandardParameter & param  ///< Non standard field in PDU received
+    virtual BOOL IsMatch(
+      const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
     ) const;
   //@}
 };
@@ -2490,7 +2530,8 @@ class H323ExtendedVideoCapability : public H323Capability,
      */
 
     virtual BOOL OnReceivedPDU(
-      const H245_GenericCapability & cap  ///< PDU to get information from
+      const H245_GenericCapability & cap,  ///< PDU to get information from
+      CommandType type                     ///<  Type of PDU to send in
     );
 
     /**This function is called whenever and outgoing TerminalCapabilitySet
@@ -2501,7 +2542,8 @@ class H323ExtendedVideoCapability : public H323Capability,
        The default behaviour does nothing.
      */
     virtual BOOL OnSendingPDU(
-      H245_GenericCapability & cap  ///< PDU to get information from
+      H245_GenericCapability & cap,  ///< PDU to get information from
+      CommandType type               ///<  Type of PDU to send in
     ) const;
 
     /**This function is called whenever and outgoing OpenLogicalChannel
@@ -2539,11 +2581,11 @@ class H323ExtendedVideoCapability : public H323Capability,
     );
 
     /**Compare the generic part of the capability, if applicable.
-     */
-	 virtual BOOL IsGenericMatch(
-        const H245_GenericCapability & param    ///< Generic field in PDU received
-     ) const { return H323GenericCapabilityInfo::IsGenericMatch(param); }
-	//@}
+      */
+    virtual BOOL IsMatch(
+      const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
+    ) const;
+  //@}
 
   /**@name Operations */
   //@{

@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:06  shorne
+ * First commit of h323plus
+ *
  * Revision 1.385.2.12  2007/07/23 21:47:11  shorne
  * Added QoS GK Reporting
  *
@@ -559,6 +562,7 @@ if (connection->GetEndPoint().GetEPSecurityPolicy() != H323EndPoint::SecNone) {
   if (!pdu.HasOptionalField(PDUType::e_cryptoTokens)) {
 		PTRACE(2, "H235EP\tReceived unsecured EPAuthentication message (no crypto tokens),"
 			" expected one of:\n" << setfill(',') << connection->GetEPAuthenticators() << setfill(' '));
+       return connection->OnEPAuthenticationFailed(H235Authenticator::e_Absent);
   } else {
 
 	H235Authenticator::ValidationResult result = authenticators.ValidateSignalPDU(code, 
@@ -567,6 +571,7 @@ if (connection->GetEndPoint().GetEPSecurityPolicy() != H323EndPoint::SecNone) {
 		  PTRACE(4, "H235EP\tAuthentication succeeded");
 		  AuthResult = TRUE;
 	  }
+	  return AuthResult ? TRUE : connection->OnEPAuthenticationFailed(result);
   }
 }
 
@@ -4139,8 +4144,8 @@ H323Channel * H323Connection::CreateLogicalChannel(const H245_OpenLogicalChannel
 
     const H245_ArrayOf_GenericInformation & cape = open.m_genericInformation;
 	for (PINDEX i=0; i<cape.GetSize(); i++) {
-       H245_GenericMessage & gcap = cape[i];
-       const PASN_ObjectId &object_id = gcap.m_messageIdentifier;
+       const H245_GenericMessage & gcap = cape[i];
+       const PASN_ObjectId & object_id = gcap.m_messageIdentifier;
 	   if (object_id.AsString() == OpalPluginCodec_Identifer_H239_Video) {
 		   if (gcap.HasOptionalField(H245_GenericMessage::e_messageContent)) {
                const H245_ArrayOf_GenericParameter & params = gcap.m_messageContent;
@@ -5351,6 +5356,11 @@ BOOL H323Connection::OnCallAuthentication(const PString & username,
                                          PString & password)
 {
     return endpoint.OnCallAuthentication(username,password);
+}
+
+BOOL H323Connection::OnEPAuthenticationFailed(H235Authenticator::ValidationResult result) const
+{
+	return FALSE;
 }
 
 void H323Connection::OnAuthenticationFinalise(unsigned pdu,PBYTEArray & rawData)

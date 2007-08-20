@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/08/08 17:24:58  willamowius
+ * fix Linux compile error (gcc 4.1.2)
+ *
  * Revision 1.1  2007/08/06 20:50:49  shorne
  * First commit of h323plus
  *
@@ -2536,7 +2539,6 @@ class H323Connection : public PObject
      The default behavour returns H323Endpoint::CreateH224ProtocolHandler()
      */
      virtual OpalH281Handler *CreateH281ProtocolHandler(OpalH224Handler & h224Handler);
-
 #endif
 
     /**Get separate H.235 authentication for the connection.
@@ -2813,6 +2815,12 @@ class H323Connection : public PObject
     virtual BOOL OnCallAuthentication(const PString & username, 
                                       PString & password);
 
+    /** EP Authentication CallBack to allow the connection to approve the authentication
+	   even if it has failed. Use this to override authentication on a call by call basis
+	   Return TRUE to Authenticate.
+      */
+	virtual BOOL OnEPAuthenticationFailed(H235Authenticator::ValidationResult result) const;
+
     /** EP Authentication Finalise Callback. After the PDU has been built this
         Callback allows the Authentication mechanisms to finalise the PDU.
       */
@@ -2822,6 +2830,11 @@ class H323Connection : public PObject
 	  */
     BOOL HasAuthentication() const
        { return hasAuthentication; }
+
+    /** Whether the Authentication has Failed
+	  */
+	BOOL HasAuthenticationFailed() 
+	   { return AuthenticationFailed; };
   //@}
 #endif
 

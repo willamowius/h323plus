@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.1  2007/08/06 20:50:47  shorne
+# First commit of h323plus
+#
 # Revision 1.20  2006/08/10 04:14:21  csoutheren
 # Fixed problem with usage of SHAREDLIBEXT
 #
@@ -325,14 +328,9 @@ update:
 # standard build command
 $(subst tagbuild,,$(STANDARD_TARGETS)) ::
 	$(MAKE) -C src $@
-	$(MAKE) -C plugins $@
-
-# Pass through commands to the subdirectory for sample app
-apps:
-	set -e; $(foreach dir,$(SUBDIRS),$(MAKE) -C $(dir) opt)
 
 notrace::
-	$(MAKE) NOTRACE=1 opt
+	$(MAKE) NOTRACE=1
 
 docs: 
 	doxygen openh323_cfg.dxy
@@ -366,12 +364,10 @@ install:
 		$(INSTALL) -m 444 $$fn $(DESTDIR)$(PREFIX)/include/openh323 ; \
 	done)
 	$(INSTALL) -m 444 openh323u.mak $(DESTDIR)$(PREFIX)/share/openh323
-	(cd plugins; $(MAKE) install)
 
 uninstall:
 	rm -rf $(DESTDIR)$(PREFIX)/include/openh323 \
 	       $(PREFIX)/share/openh323
 	rm -f $(DESTDIR)$(LIBDIR)/$(OH323_FILE) \
 	      $(DESTDIR)$(LIBDIR)/libopenh323.so
-	(cd plugins; $(MAKE) uninstall)
 

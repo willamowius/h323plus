@@ -24,6 +24,9 @@
  * Contributor(s): Fürbass Franz <franz.fuerbass@infonova.at>
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:05  shorne
+ * First commit of h323plus
+ *
  * Revision 1.20.2.3  2007/07/19 19:57:36  shorne
  * added missiing secure signal PDU check
  *
@@ -444,16 +447,19 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
 #ifndef DISABLE_CALLAUTH
   // If has connection then EP Authenticator so CallBack to Check SenderID and Set Password
   if (connection != NULL) { 
-	 if (!crHashed.m_hashedVals.HasOptionalField(H235_ClearToken::e_generalID)) {
-		  PTRACE(1, "H235RAS\tH2351_Authenticator requires general ID.");
-			return e_Absent;
-	 }
-	 if (!connection->OnCallAuthentication(crHashed.m_hashedVals.m_generalID.GetValue(),password)) {
-		PTRACE(1, "H235EP\tH2351_Authenticator Authentication Fail UserName \""  
-				<< crHashed.m_hashedVals.m_generalID.GetValue() << "\", not Authorised. \"");
-		return e_BadPassword;
-	 }
+	// Senders ID is required for signal authentication
+    if (!crHashed.m_hashedVals.HasOptionalField(H235_ClearToken::e_sendersID)) {
+      PTRACE(1, "H235RAS\tH2351_Authenticator requires senders ID.");
+      return e_Error;
+    }
 
+	localId = crHashed.m_hashedVals.m_sendersID.GetValue();
+	remoteId = PString::Empty();
+	if (!connection->OnCallAuthentication(localId,password)) {
+	PTRACE(1, "H235EP\tH2351_Authenticator Authentication Fail UserName \""  
+			<< localId << "\", not Authorised. \"");
+	return e_BadPassword;
+	}
   } else {
 #endif
   //verify the username

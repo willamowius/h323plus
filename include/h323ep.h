@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:49  shorne
+ * First commit of h323plus
+ *
  * Revision 1.87.2.8  2007/07/20 22:03:21  shorne
  * Initial H.350 Support
  *
@@ -357,6 +360,7 @@ class PHandleAggregator;
    inclusion can be avoided.
  */
 class H225_EndpointType;
+class H225_ArrayOf_SupportedProtocols;
 class H225_VendorIdentifier;
 class H225_H221NonStandard;
 class H225_ServiceControlDescriptor;
@@ -445,6 +449,19 @@ class H323EndPoint : public PObject
     virtual void SetVendorIdentifierInfo(
       H225_VendorIdentifier & info
     ) const;
+
+	/**Set the Gateway supported protocol default always H.323
+	  */
+    BOOL SetGatewaySupportedProtocol(
+		H225_ArrayOf_SupportedProtocols & protocols
+	) const;
+
+   /**Set the gateway prefixes 
+      Override this to set the acceptable prefixes to the gatekeeper
+      */
+    virtual BOOL OnSetGatewayPrefixes(
+		PStringList & prefixes
+	) const;
 
     /**Set the H221NonStandard information in H225 PDU's.
       */

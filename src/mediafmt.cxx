@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:07  shorne
+ * First commit of h323plus
+ *
  * Revision 1.30.2.2  2007/02/11 00:29:35  shorne
  * Fix for broken Audio
  *
@@ -144,6 +147,9 @@
 #include "mediafmt.h"
 #include "rtp.h"
 #include "h323pluginmgr.h"
+
+
+#include <ptclib/cypher.h>
 
 namespace PWLibStupidLinkerHacks {
   extern int h323Loader;
@@ -387,6 +393,7 @@ OpalMediaOption::OpalMediaOption(const char * name, bool readOnly, MergeType mer
     m_merge(merge)
 {
   m_name.Replace("=", "_", TRUE);
+  memset(&m_H245Generic, 0, sizeof(m_H245Generic));
 }
 
 
@@ -620,6 +627,118 @@ void OpalMediaOptionString::SetValue(const PString & value)
 }
 
 
+OpalMediaOptionOctets::OpalMediaOptionOctets(const char * name, bool readOnly, bool base64)
+  : OpalMediaOption(name, readOnly, NoMerge)
+  , m_base64(base64)
+{
+}
+
+
+OpalMediaOptionOctets::OpalMediaOptionOctets(const char * name, bool readOnly, bool base64, const PBYTEArray & value)
+  : OpalMediaOption(name, readOnly, NoMerge)
+  , m_value(value)
+  , m_base64(base64)
+{
+}
+
+
+OpalMediaOptionOctets::OpalMediaOptionOctets(const char * name, bool readOnly, bool base64, const BYTE * data, PINDEX length)
+  : OpalMediaOption(name, readOnly, NoMerge)
+  , m_value(data, length)
+  , m_base64(base64)
+{
+}
+
+
+PObject * OpalMediaOptionOctets::Clone() const
+{
+  OpalMediaOptionOctets * newObj = new OpalMediaOptionOctets(*this);
+  newObj->m_value.MakeUnique();
+  return newObj;
+}
+
+
+void OpalMediaOptionOctets::PrintOn(ostream & strm) const
+{
+  if (m_base64)
+    strm << PBase64::Encode(m_value);
+  else {
+    _Ios_Fmtflags flags = strm.flags();
+    char fill = strm.fill();
+
+    strm << hex << setfill('0');
+    for (PINDEX i = 0; i < m_value.GetSize(); i++)
+      strm << setw(2) << (unsigned)m_value[i];
+
+    strm.fill(fill);
+    strm.flags(flags);
+  }
+}
+
+
+void OpalMediaOptionOctets::ReadFrom(istream & strm)
+{
+  if (m_base64) {
+    PString str;
+    strm >> str;
+    PBase64::Decode(str, m_value);
+  }
+  else {
+    char pair[3];
+    pair[2] = '\0';
+
+    PINDEX count = 0;
+
+    while (isxdigit(strm.peek())) {
+      pair[0] = (char)strm.get();
+      if (!isxdigit(strm.peek())) {
+        strm.putback(pair[0]);
+        break;
+      }
+      pair[1] = (char)strm.get();
+      if (!m_value.SetMinSize((count+1+99)%100))
+        break;
+      m_value[count++] = (BYTE)strtoul(pair, NULL, 16);
+    }
+
+    m_value.SetSize(count);
+  }
+}
+
+
+PObject::Comparison OpalMediaOptionOctets::CompareValue(const OpalMediaOption & option) const
+{
+  const OpalMediaOptionOctets * otherOption = PDownCast(const OpalMediaOptionOctets, &option);
+  if (otherOption == NULL)
+    return GreaterThan;
+
+  return m_value.Compare(otherOption->m_value);
+}
+
+
+void OpalMediaOptionOctets::Assign(const OpalMediaOption & option)
+{
+  const OpalMediaOptionOctets * otherOption = PDownCast(const OpalMediaOptionOctets, &option);
+  if (otherOption != NULL) {
+    m_value = otherOption->m_value;
+    m_value.MakeUnique();
+  }
+}
+
+
+void OpalMediaOptionOctets::SetValue(const PBYTEArray & value)
+{
+  m_value = value;
+  m_value.MakeUnique();
+}
+
+
+void OpalMediaOptionOctets::SetValue(const BYTE * data, PINDEX length)
+{
+  m_value = PBYTEArray(data, length);
+}
+
+
 /////////////////////////////////////////////////////////////////////////////
 
 OpalMediaFormat::OpalMediaFormat()
@@ -738,14 +857,11 @@ OpalMediaFormat & OpalMediaFormat::operator=(const OpalMediaFormat &format)
   options.MakeUnique();
   rtpPayloadType = format.rtpPayloadType;
   defaultSessionID = format.defaultSessionID;
-
-  if (format.NeedsJitterBuffer()) {   // Indicates Audio
-     needsJitter = format.NeedsJitterBuffer();
-     bandwidth = format.GetBandwidth();
-     frameSize = format.GetFrameSize();
-     frameTime = format.GetFrameTime();
-     timeUnits = format.GetTimeUnits();
-  }
+  needsJitter = format.NeedsJitterBuffer();
+  bandwidth = format.GetBandwidth();
+  frameSize = format.GetFrameSize();
+  frameTime = format.GetFrameTime();
+  timeUnits = format.GetTimeUnits();
   return *this;  
 }
 
@@ -946,17 +1062,23 @@ bool OpalMediaFormat::SetOptionString(const PString & name, const PString & valu
 }
 
 
-bool OpalMediaFormat::AddOption(OpalMediaOption * option)
+bool OpalMediaFormat::AddOption(OpalMediaOption * option, BOOL overwrite)
 {
   PWaitAndSignal m(media_format_mutex);
   if (PAssertNULL(option) == NULL)
     return false;
 
-  if (options.GetValuesIndex(*option) != P_MAX_INDEX) {
-    delete option;
-	return true;
+  PINDEX index = options.GetValuesIndex(*option);
+  if (index != P_MAX_INDEX) {
+    if (!overwrite) {
+      delete option;
+      return false;
+    }
+
+    options.RemoveAt(index);
   }
 
+  options.MakeUnique();
   options.Append(option);
   return true;
 }

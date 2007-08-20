@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/08/08 20:13:10  shorne
+ * Increased default Buffers to 5
+ *
  * Revision 1.1  2007/08/06 20:51:06  shorne
  * First commit of h323plus
  *
@@ -849,6 +852,10 @@
 #include <h224handler.h>
 #endif
 
+#ifdef H323_VIDEO
+#include "ptlib/video.h"
+#endif
+
 #if defined(H323_RTP_AGGREGATE) || defined(H323_SIGNAL_AGGREGATE)
 #include <ptclib/sockagg.h>
 #endif
@@ -1279,6 +1286,8 @@ void H323EndPoint::SetEndpointTypeInfo(H225_EndpointType & info) const
     case e_GatewayAndMCWithAudioMP :
     case e_GatewayAndMCWithAVMP :
       info.IncludeOptionalField(H225_EndpointType::e_gateway);
+	  if (SetGatewaySupportedProtocol(info.m_gateway.m_protocol))
+		  info.m_gateway.IncludeOptionalField(H225_GatewayInfo::e_protocol);
       break;
     case e_GatekeeperOnly :
     case e_GatekeeperWithDataMP :
@@ -1292,9 +1301,40 @@ void H323EndPoint::SetEndpointTypeInfo(H225_EndpointType & info) const
     case e_MCUWithAVMP :
       info.IncludeOptionalField(H225_EndpointType::e_mcu);
       info.m_mc = TRUE;
+	  if (SetGatewaySupportedProtocol(info.m_mcu.m_protocol))
+		  info.m_mcu.IncludeOptionalField(H225_McuInfo::e_protocol);
   }
 }
 
+BOOL H323EndPoint::SetGatewaySupportedProtocol(H225_ArrayOf_SupportedProtocols & protocols) const
+{
+	PStringList prefixes;
+
+	if (OnSetGatewayPrefixes(prefixes)) {
+		H225_SupportedProtocols proto;
+		proto.SetTag(H225_SupportedProtocols::e_h323);
+		H225_H323Caps & caps = proto;
+		caps.IncludeOptionalField(H225_H323Caps::e_supportedPrefixes);
+         H225_ArrayOf_SupportedPrefix & pre = caps.m_supportedPrefixes;	
+		 pre.SetSize(prefixes.GetSize());
+		  for (PINDEX i=0; i < prefixes.GetSize(); i++) {
+		     H225_SupportedPrefix p;
+			   H225_AliasAddress & alias = p.m_prefix;
+			   H323SetAliasAddress(prefixes[i],alias);
+		     pre[i] = p;
+		  }
+		protocols.SetSize(1);
+		protocols[0] = proto;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL H323EndPoint::OnSetGatewayPrefixes(PStringList & prefixes) const
+{
+	return FALSE;
+}
 
 void H323EndPoint::SetVendorIdentifierInfo(H225_VendorIdentifier & info) const
 {
@@ -2231,12 +2271,12 @@ BOOL H323EndPoint::ParsePartyName(const PString & _remoteParty,
         for (r = routes.begin(); r != routes.end(); ++r) {
           const LookupRecord & rec = *r;
           switch (rec.type) {
-/*          case LookupRecord::CallDirect:
+            case LookupRecord::CallDirect:
               address = H323TransportAddress(rec.addr, rec.port);
               PTRACE(3, "H323\tParty name \"" << url << "\" mapped to \"" << alias << "@" << address);
               return TRUE;
-              break; */
-/*  
+              break; 
+
             case LookupRecord::LRQ:
               {
                 H323TransportAddress newAddr, gkAddr(rec.addr, rec.port);
