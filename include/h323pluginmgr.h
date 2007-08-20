@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:49  shorne
+ * First commit of h323plus
+ *
  * Revision 1.24.4.1  2006/12/23 19:08:02  shorne
  * Plugin video codecs & sundry
  *
@@ -124,7 +127,7 @@
 #endif
 
 #include <ptlib/pluginmgr.h>
-#include <opalplugin.h>
+#include <codec/opalplugin.h>
 #include <mediafmt.h>
 #include <ptlib/pfactory.h>
 

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2007/08/20 19:13:28  shorne
+ * Added Generic Capability support. Fixed Linux compile errors
+ *
  * Revision 1.2  2007/08/08 20:13:29  shorne
  * Fix H.249 typo
  *
@@ -411,7 +414,7 @@
 #include "h323ep.h"
 #include "h225.h"
 #include "h245.h"
-#include "opalplugin.h"
+#include "codec/opalplugin.h"
 #include "mediafmt.h"
 
 #include <algorithm>

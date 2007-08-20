@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/08/20 19:13:29  shorne
+ * Added Generic Capability support. Fixed Linux compile errors
+ *
  * Revision 1.1  2007/08/06 20:51:07  shorne
  * First commit of h323plus
  *
@@ -332,7 +335,7 @@
 #include <ptlib/video.h>
 #include <h323.h>
 #include <h323pluginmgr.h>
-#include <opalplugin.h>
+#include <codec/opalplugin.h>
 #include <opalwavfile.h>
 #include <h323caps.h>
 #include <h245.h>
