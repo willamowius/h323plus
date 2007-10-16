@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:50  shorne
+ * First commit of h323plus
+ *
  * Revision 1.60.2.4  2007/07/23 21:47:10  shorne
  * Added QoS GK Reporting
  *
@@ -1120,7 +1123,7 @@ class RTP_UDP : public RTP_Session
 
     /** Enable QOS on Call Basis
       */
-     virtual void EnableGQoS();
+    virtual void EnableGQoS(BOOL success = TRUE);
 
 #if P_HAS_QOS
      /** Get the QOS settings

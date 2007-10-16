@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:07  shorne
+ * First commit of h323plus
+ *
  * Revision 1.106.2.5  2007/08/02 20:30:44  shorne
  * Added trace to determine which NAT method opened what ports
  *
@@ -1611,10 +1614,11 @@ RTP_UDP::~RTP_UDP()
 
 void RTP_UDP::ApplyQOS(const PIPSocket::Address & addr)
 {
-  if (controlSocket != NULL)
-    controlSocket->SetSendAddress(addr,GetRemoteControlPort());
   if (dataSocket != NULL)
     dataSocket->SetSendAddress(addr,GetRemoteDataPort());
+  else if (controlSocket != NULL)
+    controlSocket->SetSendAddress(addr,GetRemoteControlPort());
+
   appliedQOS = TRUE;
 }
 
@@ -1627,32 +1631,30 @@ BOOL RTP_UDP::ModifyQOS(RTP_QOS * rtpqos)
     return retval;
 
 #if P_HAS_QOS
-  if (controlSocket != NULL)
-    retval = controlSocket->ModifyQoSSpec(&(rtpqos->ctrlQoS));
-    
   if (dataSocket != NULL)
     retval &= dataSocket->ModifyQoSSpec(&(rtpqos->dataQoS));
+  else if (controlSocket != NULL)
+    retval = controlSocket->ModifyQoSSpec(&(rtpqos->ctrlQoS));
 #endif
 
   appliedQOS = FALSE;
   return retval;
 }
 
-void RTP_UDP::EnableGQoS()
+void RTP_UDP::EnableGQoS(BOOL success)
 {
-	enableGQOS = TRUE;
+	enableGQOS = success;
 }
 
 #if P_HAS_QOS
 PQoS & RTP_UDP::GetQOS()
 {
-    if (controlSocket != NULL) 
-       return controlSocket->GetQoSSpec();
-    
     if (dataSocket != NULL) 
        return dataSocket->GetQoSSpec();
-
-  return *new PQoS(); 
+    else if (controlSocket != NULL) 
+       return controlSocket->GetQoSSpec();
+	else
+       return *new PQoS(); 
 }
 #endif
 
