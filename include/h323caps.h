@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/08/20 19:13:27  shorne
+ * Added Generic Capability support. Fixed Linux compile errors
+ *
  * Revision 1.1  2007/08/06 20:50:49  shorne
  * First commit of h323plus
  *
@@ -320,6 +323,8 @@ class H323Capability : public PObject
       e_UserInput,
       /// Video Extention
 	  e_ExtendVideo,
+      /// Conference Control
+	  e_ConferenceControl,
       /// Count of main types
       e_NumMainTypes
     };
@@ -540,10 +545,10 @@ class H323Capability : public PObject
     ) { capabilityDirection = dir; }
 
     /// Get unique capability number.
-    unsigned GetCapabilityNumber() const { return assignedCapabilityNumber; }
+    virtual unsigned GetCapabilityNumber() const { return assignedCapabilityNumber; }
 
     /// Set unique capability number.
-    void SetCapabilityNumber(unsigned num) { assignedCapabilityNumber = num; }
+    virtual void SetCapabilityNumber(unsigned num) { assignedCapabilityNumber = num; }
 
     /**Get media format of the media data this class represents.
       */
@@ -2659,6 +2664,153 @@ typedef PFactory<H323Capability, std::string> H323ExtendedVideoFactory;
 
 #endif  // H323_H239
 #endif  // H323_VIDEO
+
+/////////////////////////////////////////////////////////////////////////////
+
+#ifdef H323_H230
+class H323_ConferenceControlCapability : public H323Capability
+{
+  PCLASSINFO(H323_ConferenceControlCapability, H323Capability);
+
+  public:
+  /**@name Construction */
+
+    /**Create the Conference capability
+      */
+    H323_ConferenceControlCapability();
+
+	H323_ConferenceControlCapability( 
+			       BOOL chairControls,
+	               BOOL T124Extension
+				   );
+  //@}
+
+  /**@name Overrides from class PObject */
+  //@{
+    /**Create a copy of the object.
+      */
+    virtual PObject * Clone() const;
+  //@}
+
+  /**@name Identification functions */
+  //@{
+    /**Get the main type of the capability.
+     */
+    virtual MainTypes GetMainType() const;
+
+    /**Get the sub-type of the capability. This is a code dependent on the
+       main type of the capability.
+     */
+    virtual unsigned  GetSubType()  const;
+
+    /**Get the name of the media data format this class represents.
+     */
+    virtual PString GetFormatName() const;
+  //@}
+
+  /**@name Operations */
+  //@{
+    /**Create the channel instance, allocating resources as required.
+       This creates a logical channel object appropriate for the parameters
+       provided. Not if param is NULL, sessionID must be provided, otherwise
+       this is taken from the fields in param.
+     */
+    virtual H323Channel * CreateChannel(
+      H323Connection & connection,    ///< Owner connection for channel
+      H323Channel::Directions dir,    ///< Direction of channel
+      unsigned sessionID,             ///< Session ID for RTP channel
+      const H245_H2250LogicalChannelParameters * param
+                                      ///< Parameters for channel
+    ) const;
+
+    /**Create the codec instance, allocating resources as required.
+     */
+    virtual H323Codec * CreateCodec(
+      H323Codec::Direction direction  ///< Direction in which this instance runs
+    ) const;
+
+  //@}
+
+  /**@name Protocol manipulation */
+  //@{
+    /**This function is called whenever and outgoing TerminalCapabilitySet
+       PDU is being constructed for the control channel. It allows the
+       capability to set the PDU fields from information in members specific
+       to the class.
+
+       The default behaviour is pure.
+     */
+    virtual BOOL OnSendingPDU(
+      H245_Capability & pdu  ///< PDU to set information on
+    ) const;
+
+    /**This function is called whenever and outgoing OpenLogicalChannel
+       PDU is being constructed for the control channel. It allows the
+       capability to set the PDU fields from information in members specific
+       to the class.
+
+       The default behaviour is pure.
+     */
+    virtual BOOL OnSendingPDU(
+      H245_DataType & pdu  ///< PDU to set information on
+    ) const;
+
+    /**This function is called whenever and outgoing RequestMode
+       PDU is being constructed for the control channel. It allows the
+       capability to set the PDU fields from information in members specific
+       to the class.
+
+       The default behaviour calls the OnSendingPDU() function with a more
+       specific PDU type.
+     */
+    virtual BOOL OnSendingPDU(
+      H245_ModeElement & pdu  ///< PDU to set information on
+    ) const;
+
+    /**This function is called whenever and incoming TerminalCapabilitySet
+       PDU is received on the control channel, and a new H323Capability
+       descendent was created. This completes reading fields from the PDU
+       into the classes members.
+
+       If the function returns FALSE then the received PDU codec description
+       is not supported, so will be ignored. The default behaviour simply
+       returns TRUE.
+     */
+    virtual BOOL OnReceivedPDU(
+      const H245_Capability & pdu  ///< PDU to get information from
+    );
+
+    /**This function is called whenever and incoming OpenLogicalChannel
+       PDU has been used to construct the control channel. It allows the
+       capability to set from the PDU fields, information in members specific
+       to the class.
+
+       The default behaviour is pure.
+     */
+    virtual BOOL OnReceivedPDU(
+      const H245_DataType & pdu,  ///< PDU to get information from
+      BOOL receiver               ///< Is receiver OLC
+    );
+  //@}
+
+  /**@name Option */
+  //@{
+	/**This function indicates whether the remote supports chair controls
+	 */
+	BOOL SupportChairControls() {  return chairControlCapability;  }
+
+	/**This function indicates whether the remote supports extended controls
+	   such as T.124 Tunnelling
+	 */
+	BOOL SupportExtControls() {  return nonStandardExtension;  }
+  //@}
+
+  protected:
+	  BOOL chairControlCapability;
+	  BOOL nonStandardExtension;
+
+};
+#endif // H323_H230
 
 
 ///////////////////////////////////////////////////////////////////////////////

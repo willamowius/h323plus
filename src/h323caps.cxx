@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2007/08/20 20:19:52  shorne
+ * Moved opalplugin.h to codec directory to be plugin compile compatible with Opal
+ *
  * Revision 1.3  2007/08/20 19:13:28  shorne
  * Added Generic Capability support. Fixed Linux compile errors
  *
@@ -1143,12 +1146,12 @@ H323AudioCapability::H323AudioCapability(unsigned rx, unsigned tx)
   txFramesInPacket = tx;
 
 #if P_HAS_QOS
-// Set to G.711 Settings
+// Set to G.729 Settings Avg 56kb/s Peek 110 kb/s
 	rtpqos = new RTP_QOS;
 	rtpqos->dataQoS.SetWinServiceType(SERVICETYPE_GUARANTEED);
-	rtpqos->dataQoS.SetAvgBytesPerSec(9250);
+	rtpqos->dataQoS.SetAvgBytesPerSec(7000);
 	rtpqos->dataQoS.SetMaxFrameBytes(680);
-	rtpqos->dataQoS.SetPeakBytesPerSec(13875);
+	rtpqos->dataQoS.SetPeakBytesPerSec(13750);
 	rtpqos->dataQoS.SetDSCP(PQoS::guaranteedDSCP);
 
 	rtpqos->ctrlQoS.SetWinServiceType(SERVICETYPE_CONTROLLEDLOAD);
@@ -1972,6 +1975,133 @@ BOOL H323CodecExtendedVideoCapability::OnReceivedGenericPDU(const H245_GenericCa
 #endif // H323_H239
 #endif // NO_H323_VIDEO
 
+/////////////////////////////////////////////////////////////////////////////
+
+#ifdef H323_H230
+H323_ConferenceControlCapability::H323_ConferenceControlCapability()
+{
+   chairControlCapability = FALSE;
+   nonStandardExtension = FALSE;
+}
+
+H323_ConferenceControlCapability::H323_ConferenceControlCapability(BOOL chairControls, BOOL T124Extension)
+{
+   chairControlCapability = chairControls;
+   nonStandardExtension = T124Extension;
+}
+
+PObject * H323_ConferenceControlCapability::Clone() const
+{
+  return new H323_ConferenceControlCapability(*this);
+}
+
+H323Capability::MainTypes H323_ConferenceControlCapability::GetMainType() const
+{
+  return e_ConferenceControl;
+}
+
+unsigned H323_ConferenceControlCapability::GetSubType()  const
+{
+    return 0;
+}
+
+PString H323_ConferenceControlCapability::GetFormatName() const
+{
+  return "H.230 Conference Controls";
+}
+
+H323Channel * H323_ConferenceControlCapability::CreateChannel(H323Connection &,
+                                                      H323Channel::Directions,
+                                                      unsigned,
+                                                      const H245_H2250LogicalChannelParameters *) const
+{
+  PTRACE(1, "Codec\tCannot create ConferenceControlCapability channel");
+  return NULL;
+}
+
+H323Codec * H323_ConferenceControlCapability::CreateCodec(H323Codec::Direction) const
+{
+  PTRACE(1, "Codec\tCannot create ConferenceControlCapability codec");
+  return NULL;
+}
+
+static const char * ExtConferenceControlOID = "0.0.20.124.2";  // Tunnel T.124
+BOOL H323_ConferenceControlCapability::OnSendingPDU(H245_Capability & pdu) const
+{
+   
+  pdu.SetTag(H245_Capability::e_conferenceCapability);
+  H245_ConferenceCapability & conf = pdu;
+  // Supports Chair control
+  conf.m_chairControlCapability = chairControlCapability;
+
+  // Include Extended Custom Controls such as INVITE/EJECT etc.
+  if (nonStandardExtension) {
+	conf.IncludeOptionalField(H245_ConferenceCapability::e_nonStandardData);
+	H245_ArrayOf_NonStandardParameter & nsParam = conf.m_nonStandardData;
+
+	H245_NonStandardParameter param;
+	H245_NonStandardIdentifier & id = param.m_nonStandardIdentifier;
+	id.SetTag(H245_NonStandardIdentifier::e_object);
+	PASN_ObjectId & oid = id;
+	oid.SetValue(ExtConferenceControlOID);
+	PASN_OctetString & data = param.m_data;
+	data.SetValue("");
+
+	nsParam.SetSize(1);
+	nsParam[0] = param;
+  }
+
+  return TRUE;
+}
+
+BOOL H323_ConferenceControlCapability::OnSendingPDU(H245_DataType &) const
+{
+  PTRACE(1, "Codec\tCannot have ConferenceControlCapability in DataType");
+  return FALSE;
+}
+
+BOOL H323_ConferenceControlCapability::OnSendingPDU(H245_ModeElement &) const
+{
+  PTRACE(1, "Codec\tCannot have ConferenceControlCapability in ModeElement");
+  return FALSE;
+}
+
+BOOL H323_ConferenceControlCapability::OnReceivedPDU(const H245_Capability & pdu)
+{
+
+  H323Capability::OnReceivedPDU(pdu);
+
+  if (pdu.GetTag() != H245_Capability::e_conferenceCapability)
+    return FALSE;
+
+  const H245_ConferenceCapability & conf = pdu;
+  // Supports Chair control
+  chairControlCapability = conf.m_chairControlCapability;
+
+  // Include Extended Custom Control support.
+  if (conf.HasOptionalField(H245_ConferenceCapability::e_nonStandardData)) {
+	const H245_ArrayOf_NonStandardParameter & nsParam = conf.m_nonStandardData;
+
+	for (PINDEX i=0; i < nsParam.GetSize(); i++) {
+		const H245_NonStandardParameter & param = nsParam[i];
+	    const H245_NonStandardIdentifier & id = param.m_nonStandardIdentifier;
+		if (id.GetTag() == H245_NonStandardIdentifier::e_object) {
+             const PASN_ObjectId & oid = id;
+			 if (oid.AsString() == ExtConferenceControlOID)
+				    nonStandardExtension = TRUE;
+		}
+	}
+  }
+  return TRUE;
+}
+
+BOOL H323_ConferenceControlCapability::OnReceivedPDU(const H245_DataType &, BOOL)
+{
+  PTRACE(1, "Codec\tCannot have ConferenceControlCapability in DataType");
+  return FALSE;
+}
+
+#endif  // H323_H230
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -2942,6 +3072,9 @@ H323Capability * H323Capabilities::FindCapability(const H245_Capability & cap) c
 
     case H245_Capability::e_receiveRTPAudioTelephonyEventCapability :
       return FindCapability(H323Capability::e_UserInput, SignalToneRFC2833_SubType);
+
+	case H245_Capability::e_conferenceCapability :
+	  return FindCapability(H323Capability::e_ConferenceControl);
 
     default :
       break;
