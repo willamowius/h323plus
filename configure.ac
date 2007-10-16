@@ -165,6 +165,7 @@ default_h450=yes
 default_h501=yes
 default_t38=yes
 default_h224=yes
+default_h230=yes
 default_h239=yes
 default_h248=yes
 default_h249=yes
@@ -182,6 +183,7 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_h501=no
   default_t38=no
   default_h224=no
+  default_h230=no
   default_h239=no
   default_h248=no
   default_h249=no
@@ -280,6 +282,26 @@ else
   AC_MSG_NOTICE(Disabling H.224)
 fi
 AC_SUBST(H323_H224)
+
+dnl ########################################################################
+dnl check for disabling H.230
+
+dnl MSWIN_DISPLAY h230,H.230
+dnl MSWIN_DEFINE  h230,H323_H230
+
+AC_ARG_ENABLE(h230,
+       [  --disable-h230          disable H.230])
+if test "${enable_h230}x" = "x" ; then
+  enable_h230=$default_h230
+fi
+if test "$enable_h230" = "yes" ; then
+  H323_H230=1
+  AC_DEFINE(H323_H230, 1)
+else
+  H323_H230=
+  AC_MSG_NOTICE(Disabling H.230)
+fi
+AC_SUBST(H323_H230)
 
 dnl ########################################################################
 dnl check for disabling H.239
