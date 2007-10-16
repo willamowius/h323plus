@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2007/08/20 19:13:27  shorne
+ * Added Generic Capability support. Fixed Linux compile errors
+ *
  * Revision 1.2  2007/08/08 17:24:58  willamowius
  * fix Linux compile error (gcc 4.1.2)
  *
@@ -1759,6 +1762,10 @@ class H323Connection : public PObject
       BOOL receiver         ///< Whether to open receivers
     );
 
+	/** Disable FastStart on a call by call basis
+	  */
+    void DisableFastStart();
+
     /**Open a new logical channel.
        This function will open a channel between the endpoints for the
        specified capability.
@@ -2404,6 +2411,13 @@ class H323Connection : public PObject
 	  */
 	BOOL isSameNAT() { return sameNAT; };
 
+	/** Set Endpoint Type Information
+	  Override this to advertise the Endpoint type on a Call by Call basis
+
+      The default behaviour calls H323EndPoint::SetEndpointTypeInfo().
+	  */
+    virtual void SetEndpointTypeInfo(H225_EndpointType & info) const;
+
   //@}
 
   /**@name Request Mode Changes */
@@ -2789,11 +2803,18 @@ class H323Connection : public PObject
     void SetEnforcedDurationLimit(
       unsigned seconds  ///< max duration of call in seconds
     );
-  //@}
+
+#ifdef H323_H460
+	/** Disable Feautures on a call by call basis
+	  */
+	void DisableFeatures();
+#endif
 
     virtual BOOL OnSendFeatureSet(unsigned, H225_FeatureSet &) const;
 
     virtual void OnReceiveFeatureSet(unsigned, const H225_FeatureSet &) const;
+
+  //@}
 
 #ifndef DISABLE_CALLAUTH
   /**@name Endpoint Authentication */
@@ -2921,6 +2942,17 @@ class H323Connection : public PObject
 
 	virtual BOOL OnHandleH245GenericMessage(h245MessageType, const H245_GenericMessage &)
 	{ return FALSE; }
+
+#ifdef H323_H230
+    /** Open Conference Controls
+      */
+	BOOL OpenConferenceControlSession(
+				        BOOL & chairControl,
+		                BOOL & extControls
+						);
+
+
+#endif
 
   protected:
     /**Internal function to check if call established.
@@ -3144,6 +3176,7 @@ class H323Connection : public PObject
 #endif
 
 #ifdef H323_H460
+	BOOL disableH460;
 	H460_FeatureSet & features;
 #endif
 

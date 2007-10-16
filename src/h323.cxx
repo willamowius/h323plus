@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/08/20 19:13:28  shorne
+ * Added Generic Capability support. Fixed Linux compile errors
+ *
  * Revision 1.1  2007/08/06 20:51:06  shorne
  * First commit of h323plus
  *
@@ -773,6 +776,7 @@ H323Connection::H323Connection(H323EndPoint & ep,
 #endif
 
 #ifdef H323_H460
+  disableH460 = ep.FeatureSetDisabled();
   features.LoadFeatureSet(H460_Feature::FeatureSignal,this);
 #endif
 
@@ -2464,7 +2468,11 @@ H323Connection::CallEndReason H323Connection::SendSignalSetup(const PString & al
   PTRACE(3, "H225\tSending Setup PDU");
   connectionState = AwaitingSignalConnect;
 
-  // Add H460 features if available (need to do this after the ARQ/ACF)
+ // Add CryptoTokens and H460 features if available (need to do this after the ARQ/ACF)
+#ifndef DISABLE_CALLAUTH
+   setupPDU.InsertCryptoTokensSetup(*this,setup);
+#endif
+
 #ifdef H323_H460
   setupPDU.InsertH460Setup(*this,setup);
 #endif
@@ -2559,6 +2567,11 @@ if (setup.m_conferenceGoal.GetTag() == H225_Setup_UUIE_conferenceGoal::e_create)
   signallingChannel->SetReadTimeout(endpoint.GetSignallingChannelCallTimeout());
 
   return NumCallEndReasons;
+}
+
+void H323Connection::SetEndpointTypeInfo(H225_EndpointType & info) const
+{
+	return endpoint.SetEndpointTypeInfo(info);
 }
 
 
@@ -3957,6 +3970,11 @@ void H323Connection::SelectDefaultLogicalChannel(unsigned sessionID)
   }
 }
 
+void H323Connection::DisableFastStart()
+{
+	fastStartState = FastStartDisabled;
+}
+
 
 void H323Connection::SelectFastStartChannels(unsigned sessionID,
                                              BOOL transmitter,
@@ -4273,7 +4291,7 @@ BOOL H323Connection::OnCreateLogicalChannel(const H323Capability & capability,
       }
       else {
         if (!localCapabilities.IsAllowed(capability, channel->GetCapability())) {
-          PTRACE(2, "H323\tOnCreateLogicalChannel - transmit capability " << capability
+          PTRACE(2, "H323\tOnCreateLogicalChannel - receive capability " << capability
                  << " and " << channel->GetCapability() << " incompatible.");
           return FALSE;
         }
@@ -5321,9 +5339,19 @@ void H323Connection::MonitorCallStatus()
   Unlock();
 }
 
+#ifdef H323_H460
+void H323Connection::DisableFeatures()
+{
+	 disableH460 = TRUE;
+}
+#endif
+
 BOOL H323Connection::OnSendFeatureSet(unsigned code, H225_FeatureSet & feats) const
 {
 #ifdef H323_H460
+   if (disableH460)
+	   return FALSE;
+
    return features.SendFeature(code, feats);
 #else
    return endpoint.OnSendFeatureSet(code, feats);
@@ -5333,6 +5361,9 @@ BOOL H323Connection::OnSendFeatureSet(unsigned code, H225_FeatureSet & feats) co
 void H323Connection::OnReceiveFeatureSet(unsigned code, const H225_FeatureSet & feats) const
 {
 #ifdef H323_H460
+   if (disableH460)
+	   return;
+
    features.ReceiveFeature(code, feats);
 #else
    endpoint.OnReceiveFeatureSet(code, feats);
@@ -5700,6 +5731,28 @@ BOOL H323Connection::OpenExtendedVideoChannel(BOOL isEncoding,H323VideoCodec & c
 
 #endif  // H323_H239
 #endif  // NO_H323_VIDEO
+
+#ifdef H323_H230
+BOOL H323Connection::OpenConferenceControlSession(BOOL & chairControl, BOOL & extControls)
+{
+  chairControl = FALSE;
+  extControls = FALSE;
+  for (PINDEX i = 0; i < localCapabilities.GetSize(); i++) {
+    H323Capability & localCapability = localCapabilities[i];
+	if (localCapability.GetMainType() == H323Capability::e_ConferenceControl) {
+      H323_ConferenceControlCapability * remoteCapability = (H323_ConferenceControlCapability *)remoteCapabilities.FindCapability(localCapability);
+      if (remoteCapability != NULL) {
+        PTRACE(3, "H323\tConference Controls Available " << *remoteCapability);
+          chairControl = remoteCapability->SupportChairControls();
+          extControls = remoteCapability->SupportExtControls();
+          return TRUE;
+      }
+    }
+  }
+  return FALSE;
+}
+
+#endif  // H323_H230
 
 /////////////////////////////////////////////////////////////////////////////
 
