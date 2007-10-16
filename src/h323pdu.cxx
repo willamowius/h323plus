@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/08/20 19:13:28  shorne
+ * Added Generic Capability support. Fixed Linux compile errors
+ *
  * Revision 1.1  2007/08/06 20:51:07  shorne
  * First commit of h323plus
  *
@@ -974,7 +977,6 @@ static unsigned SetH225Version(const H323Connection & connection,
 H225_Setup_UUIE & H323SignalPDU::BuildSetup(const H323Connection & connection,
                                             const H323TransportAddress & destAddr)
 {
-  H323EndPoint & endpoint = connection.GetEndPoint();
 
   q931pdu.BuildSetup(connection.GetCallReference());
   SetQ931Fields(connection, TRUE);
@@ -1021,15 +1023,18 @@ H225_Setup_UUIE & H323SignalPDU::BuildSetup(const H323Connection & connection,
       q931pdu.SetCalledPartyNumber(destAlias);
   }
 
-  endpoint.SetEndpointTypeInfo(setup.m_sourceInfo);
-
-#ifndef DISABLE_CALLAUTH
-  BuildAuthenticatorPDU<H225_Setup_UUIE>(setup,H225_H323_UU_PDU_h323_message_body::e_setup,
-	   &connection);
-#endif
+  connection.SetEndpointTypeInfo(setup.m_sourceInfo);
 
   return setup;
 }
+
+#ifndef DISABLE_CALLAUTH
+void H323SignalPDU::InsertCryptoTokensSetup(const H323Connection & connection, H225_Setup_UUIE & setup)
+{
+  BuildAuthenticatorPDU<H225_Setup_UUIE>(setup,H225_H323_UU_PDU_h323_message_body::e_setup,
+	   &connection);
+}
+#endif
 
 #ifdef H323_H460
 void H323SignalPDU::InsertH460Setup(const H323Connection & connection, H225_Setup_UUIE & setup)
@@ -1055,7 +1060,7 @@ H225_CallProceeding_UUIE &
 
   proceeding.m_callIdentifier.m_guid = connection.GetCallIdentifier();
 
-  connection.GetEndPoint().SetEndpointTypeInfo(proceeding.m_destinationInfo);
+  connection.SetEndpointTypeInfo(proceeding.m_destinationInfo);
 
 #ifdef H323_H460
    SendFeatureSet<H225_CallProceeding_UUIE>(&connection,H460_MessageType::e_callProceeding, m_h323_uu_pdu, proceeding);
@@ -1087,7 +1092,7 @@ H225_Connect_UUIE & H323SignalPDU::BuildConnect(const H323Connection & connectio
   connect.m_callIdentifier.m_guid = connection.GetCallIdentifier();
   connect.m_conferenceID = connection.GetConferenceIdentifier();
 
-  connection.GetEndPoint().SetEndpointTypeInfo(connect.m_destinationInfo);
+  connection.SetEndpointTypeInfo(connect.m_destinationInfo);
 
 #ifdef H323_H460
    SendFeatureSet<H225_Connect_UUIE>(&connection,H460_MessageType::e_connect, m_h323_uu_pdu,connect);
@@ -1132,7 +1137,7 @@ H225_Alerting_UUIE & H323SignalPDU::BuildAlerting(const H323Connection & connect
   }
 
   alerting.m_callIdentifier.m_guid = connection.GetCallIdentifier();
-  connection.GetEndPoint().SetEndpointTypeInfo(alerting.m_destinationInfo);
+  connection.SetEndpointTypeInfo(alerting.m_destinationInfo);
 
 #ifdef H323_H460
 	SendFeatureSet<H225_Alerting_UUIE>(&connection,H460_MessageType::e_alerting, m_h323_uu_pdu,alerting);
@@ -1376,7 +1381,7 @@ H225_Progress_UUIE & H323SignalPDU::BuildProgress(const H323Connection & connect
 
   SetH225Version(connection, progress.m_protocolIdentifier);
   progress.m_callIdentifier.m_guid = connection.GetCallIdentifier();
-  connection.GetEndPoint().SetEndpointTypeInfo(progress.m_destinationInfo);
+  connection.SetEndpointTypeInfo(progress.m_destinationInfo);
 
   return progress;
 }

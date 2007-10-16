@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:49  shorne
+ * First commit of h323plus
+ *
  * Revision 1.75.2.1  2006/12/23 19:08:02  shorne
  * Plugin video codecs & sundry
  *
@@ -516,6 +519,15 @@ class H323SignalPDU : public H225_H323_UserInformation
 	  */
 	void InsertH460Setup(const H323Connection & connection, H225_Setup_UUIE & setup);
 #endif
+
+#ifndef DISABLE_CALLAUTH
+	/** When sending the Setup PDU you have to ensure
+	    the ARQ is received first then add the cryptoFields to the Setup PDU
+		so we require a call back
+	  */
+    void InsertCryptoTokensSetup(const H323Connection & connection, H225_Setup_UUIE & setup);
+#endif
+
 
   protected:
     // Even though we generally deal with the H323 protocol (H225) it is
