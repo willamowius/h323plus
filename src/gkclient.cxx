@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:04  shorne
+ * First commit of h323plus
+ *
  * Revision 1.165.2.5  2007/07/23 21:47:11  shorne
  * Added QoS GK Reporting
  *
@@ -662,6 +665,7 @@ H323Gatekeeper::H323Gatekeeper(H323EndPoint & ep, H323Transport * trans)
   features.LoadFeatureSet(H460_Feature::FeatureRas);
 #endif
 
+  localId = PString();
   assignedGK = NULL;
 }
 
@@ -920,9 +924,14 @@ BOOL H323Gatekeeper::RegistrationRequest(BOOL autoReg)
   endpoint.SetEndpointTypeInfo(rrq.m_terminalType);
   endpoint.SetVendorIdentifierInfo(rrq.m_endpointVendor);
 
-  if (!IsRegistered()) {  // only send terminal aliases on full registration
+  if (!IsRegistered()) {  // only send terminal aliases on full registration reset localId
     rrq.IncludeOptionalField(H225_RegistrationRequest::e_terminalAlias);
     H323SetAliasAddresses(endpoint.GetAliasNames(), rrq.m_terminalAlias);
+		for (PINDEX i = 0; i < authenticators.GetSize(); i++) { 
+			H235Authenticator & authenticator = authenticators[i];
+			if (authenticator.UseGkAndEpIdentifiers())
+			    authenticator.SetLocalId(localId);
+		}
   }
 
   rrq.m_willSupplyUUIEs = TRUE;
@@ -2160,7 +2169,7 @@ void H323Gatekeeper::OnServiceControlSessions(const H225_ArrayOf_ServiceControlS
 void H323Gatekeeper::SetPassword(const PString & password, 
                                  const PString & username)
 {
-  PString localId = username;
+  localId = username;
   if (localId.IsEmpty())
     localId = endpoint.GetLocalUserName();
 
