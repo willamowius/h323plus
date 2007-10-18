@@ -9,7 +9,7 @@
 #endif
 
 #include <ptlib.h>
-#include "OID2.h"
+#include "h230/OID2.h"
 
 #define new PNEW
 

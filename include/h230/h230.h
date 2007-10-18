@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/10/16 16:35:44  shorne
+ * Added H.230 Support
+ *
  *
  *
  *
@@ -301,7 +304,7 @@ class H230Control_EndPoint   : public H230Control
 
 // Inherited
 	virtual void ConferenceJoined(int /*terminalId*/){};
-	virtual void ConferenceJoinInfo(int termId, PString number, PString name, PString vcard) {}; 
+	virtual void ConferenceJoinInfo(int /*termId*/, PString /*number*/, PString /*name*/, PString /*vcard*/) {}; 
 	virtual void ConferenceLeft(int /*terminalId*/) {};
 	virtual void OnFloorRequested(int /*terminalId*/,BOOL /*cancel*/) {};
 	virtual void OnChairAssigned(int /*node*/) {};

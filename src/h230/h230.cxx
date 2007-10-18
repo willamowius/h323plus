@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/10/16 16:35:44  shorne
+ * Added H.230 Support
+ *
  *
  *
  *
@@ -587,7 +590,7 @@ BOOL H230Control::ReceivedH230PDU(unsigned /*msgId*/, unsigned /*paramId*/, cons
 	return FALSE;
 }
 
-BOOL H230Control::WriteControlPDU(const H323ControlPDU & pdu)
+BOOL H230Control::WriteControlPDU(const H323ControlPDU & /*pdu*/)
 {
 	return FALSE;
 }
