@@ -1692,6 +1692,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\h230\h230.h"
+					>
+				</File>
+				<File
 					RelativePath="include\h235.h"
 					>
 				</File>
@@ -1809,6 +1813,10 @@
 				</File>
 				<File
 					RelativePath=".\src\h225_2.cxx"
+					>
+				</File>
+				<File
+					RelativePath=".\src\h230\h230.cxx"
 					>
 				</File>
 				<File
@@ -2062,6 +2070,10 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\src\h230\OID2.asn"
+					>
 				</File>
 				<File
 					RelativePath="src\t38.cxx"
