@@ -354,6 +354,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\h230\h230.cxx">
+			</File>
+			<File
 				RelativePath="src\h235auth.cxx">
 				<FileConfiguration
 					Name="Release|Win32">
@@ -1106,6 +1109,9 @@
 				RelativePath="include\h225ras.h">
 			</File>
 			<File
+				RelativePath=".\include\h230\h230.h">
+			</File>
+			<File
 				RelativePath="include\h235auth.h">
 			</File>
 			<File
@@ -1296,6 +1302,9 @@
 				RelativePath=".\src\asn\mcspdu.asn">
 			</File>
 			<File
+				RelativePath=".\src\h230\OID2.asn">
+			</File>
+			<File
 				RelativePath=".\src\asn\t38.asn">
 			</File>
 			<File
@@ -1366,6 +1375,9 @@
 				</File>
 				<File
 					RelativePath="include\mcspdu.h">
+				</File>
+				<File
+					RelativePath=".\include\h230\OID2.h">
 				</File>
 				<File
 					RelativePath="include\x880.h">
@@ -1602,6 +1614,9 @@
 							Optimization="1"
 							PreprocessorDefinitions=""/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\src\h230\OID2.cxx">
 				</File>
 				<File
 					RelativePath="src\t38.cxx">
