@@ -24,8 +24,17 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/08/20 19:13:28  shorne
+ * Added Generic Capability support. Fixed Linux compile errors
+ *
  * Revision 1.1  2007/08/06 20:50:50  shorne
  * First commit of h323plus
+ *
+ * Revision 1.26.2.4  2007/10/03 13:10:00  rjongbloed
+ * Removed duplicate OpalMediaFormat list caused by merge clash from OPAL
+ *
+ * Revision 1.26.2.3  2007/08/17 08:38:22  rjongbloed
+ * Back ported OPAL meda options based plug ins and H.323 generic capabilties.
  *
  * Revision 1.26.2.2  2007/03/24 23:39:42  shorne
  * More H.239 work
@@ -146,122 +155,6 @@
 #endif
 
 class OpalMediaFormat;
-
-
-///////////////////////////////////////////////////////////////////////////////
-
-PLIST(OpalMediaFormatBaseList, OpalMediaFormat);
-
-/**This class contains a list of media formats.
-  */
-class OpalMediaFormatList : public OpalMediaFormatBaseList
-{
-  PCLASSINFO(OpalMediaFormatList, OpalMediaFormatBaseList);
-  public:
-  /**@name Construction */
-  //@{
-    /**Create an empty media format list.
-     */
-    OpalMediaFormatList();
-
-    /**Create a media format list with one media format in it.
-     */
-    OpalMediaFormatList(
-      const OpalMediaFormat & format    ///<  Format to add
-    );
-
-    /**Create a copy of a media format list.
-     */
-    OpalMediaFormatList(const OpalMediaFormatList & l) : OpalMediaFormatBaseList(l) { }
-  //@}
-
-  /**@name Operations */
-  //@{
-    /**Add a format to the list.
-       If the format is invalid or already in the list then it is not added.
-      */
-    OpalMediaFormatList & operator+=(
-      const OpalMediaFormat & format    ///<  Format to add
-    );
-
-    /**Add a format to the list.
-       If the format is invalid or already in the list then it is not added.
-      */
-    OpalMediaFormatList & operator+=(
-      const OpalMediaFormatList & formats    ///<  Formats to add
-    );
-
-    /**Remove a format to the list.
-       If the format is invalid or not in the list then this does nothing.
-      */
-    OpalMediaFormatList & operator-=(
-      const OpalMediaFormat & format    ///<  Format to remove
-    );
-
-    /**Remove a format to the list.
-       If the format is invalid or not in the list then this does nothing.
-      */
-    OpalMediaFormatList & operator-=(
-      const OpalMediaFormatList & formats    ///<  Formats to remove
-    );
-
-    /**Get a format position in the list matching the payload type.
-
-       Returns P_MAX_INDEX if not in list.
-      */
-    PINDEX FindFormat(
-      RTP_DataFrame::PayloadTypes rtpPayloadType, ///<  RTP payload type code
-      const unsigned clockRate,                   ///<  clock rate
-      const char * rtpEncodingName = NULL         ///<  RTP payload type name
-    ) const;
-
-    /**Get a format position in the list matching the wildcard.
-       The wildcard string is a simple substring match using the '*'
-       character. For example: "G.711*" would match "G.711-uLaw-64k" and
-       "G.711-ALaw-64k".
-
-       Returns P_MAX_INDEX if not in list.
-      */
-    PINDEX FindFormat(
-      const PString & wildcard    ///<  Wildcard string name.
-    ) const;
-
-    /**Determine if a format matching the payload type is in the list.
-      */
-    BOOL HasFormat(
-      RTP_DataFrame::PayloadTypes rtpPayloadType ///<  RTP payload type code
-    ) const { return FindFormat(rtpPayloadType) != P_MAX_INDEX; }
-
-    /**Determine if a format matching the wildcard is in the list.
-       The wildcard string is a simple substring match using the '*'
-       character. For example: "G.711*" would match "G.711-uLaw-64k" and
-       "G.711-ALaw-64k".
-      */
-    BOOL HasFormat(
-      const PString & wildcard    ///<  Wildcard string name.
-    ) const { return FindFormat(wildcard) != P_MAX_INDEX; }
-
-    /**Remove all the formats specified.
-      */
-    void Remove(
-      const PStringArray & mask
-    );
-
-    /**Reorder the formats in the list.
-       The order variable is an array of wildcards and the list is reordered
-       according to the order in that array.
-      */
-    void Reorder(
-      const PStringArray & order
-    );
-  //@}
-
-  private:
-    virtual PINDEX Append(PObject *) { return P_MAX_INDEX; }
-    virtual PINDEX Insert(const PObject &, PObject *) { return P_MAX_INDEX; }
-    virtual PINDEX InsertAt(PINDEX, PObject *) { return P_MAX_INDEX; }
-    virtual BOOL SetAt(PINDEX, PObject *) { return FALSE; }
-};
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -575,13 +468,6 @@ class OpalMediaFormat : public PCaselessString
       const OpalMediaFormat & fmt ///<  other media format
     );
 
-    /**Search for the specified format type.
-       This is equivalent to going fmt = OpalMediaFormat(rtpPayloadType);
-      */
-    OpalMediaFormat & operator=(
-      RTP_DataFrame::PayloadTypes rtpPayloadType ///<  RTP payload type code
-    );
-
     /**Merge with another media format. This will alter and validate
        the options for this media format according to the merge rule for
        each option. The parameter is typically a "capability" while the
@@ -821,13 +707,6 @@ class OpalMediaFormat : public PCaselessString
       const PString & name,       ///<  Option name
       const BYTE * data,          ///<  Octets in option
       PINDEX length               ///<  Number of octets
-    );
-
-    /**Get a copy of the list of media formats that have been registered.
-      */
-    static OpalMediaFormatList GetAllRegisteredMediaFormats();
-    static void GetAllRegisteredMediaFormats(
-      OpalMediaFormatList & copy    ///<  List to receive the copy of the master list
     );
 
     /**Set the options on the master format list entry.

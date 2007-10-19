@@ -27,6 +27,12 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:03  shorne
+ * First commit of h323plus
+ *
+ * Revision 1.92.2.8  2007/09/03 09:45:47  rjongbloed
+ * Fixed failure to propagate meda format options to codec.
+ *
  * Revision 1.92.2.7  2007/07/19 20:10:28  shorne
  * Changed HAS_AEC to H323_AEC
  *
@@ -384,7 +390,7 @@ extern "C" {
 
 /////////////////////////////////////////////////////////////////////////////
 
-H323Codec::H323Codec(const char * fmt, Direction dir)
+H323Codec::H323Codec(const OpalMediaFormat & fmt, Direction dir)
   : mediaFormat(fmt)
 {
   logicalChannel = NULL;
@@ -547,7 +553,7 @@ BOOL H323Codec::SetRawDataHeld(BOOL /*hold*/)
 
 #ifdef H323_VIDEO
 
-H323VideoCodec::H323VideoCodec(const char * fmt, Direction dir)
+H323VideoCodec::H323VideoCodec(const OpalMediaFormat & fmt, Direction dir)
   : H323Codec(fmt, dir)
 {
   frameWidth = frameHeight = 0;
@@ -764,7 +770,7 @@ void H323VideoCodec::SendMiscCommand(unsigned command)
 
 #ifndef NO_H323_AUDIO_CODECS
 
-H323AudioCodec::H323AudioCodec(const char * fmt, Direction dir)
+H323AudioCodec::H323AudioCodec(const OpalMediaFormat & fmt, Direction dir)
   : H323Codec(fmt, dir)
 {
   samplesPerFrame = (mediaFormat.GetFrameTime() * mediaFormat.GetTimeUnits()) / 8;
@@ -988,7 +994,7 @@ BOOL H323AudioCodec::SetRawDataHeld(BOOL hold) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-H323FramedAudioCodec::H323FramedAudioCodec(const char * fmt, Direction dir)
+H323FramedAudioCodec::H323FramedAudioCodec(const OpalMediaFormat & fmt, Direction dir)
   : H323AudioCodec(fmt, dir),
     sampleBuffer(samplesPerFrame)
 {
@@ -1141,7 +1147,7 @@ void H323FramedAudioCodec::AttachAEC(PAec * _aec)
 
 /////////////////////////////////////////////////////////////////////////////
 
-H323StreamedAudioCodec::H323StreamedAudioCodec(const char * fmt,
+H323StreamedAudioCodec::H323StreamedAudioCodec(const OpalMediaFormat & fmt,
                                                Direction dir,
                                                unsigned samples,
                                                unsigned bits)

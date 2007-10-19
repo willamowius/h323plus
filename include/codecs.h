@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:48  shorne
+ * First commit of h323plus
+ *
  * Revision 1.81.2.5  2007/07/19 20:10:27  shorne
  * Changed HAS_AEC to H323_AEC
  *
@@ -362,7 +365,7 @@ class H323Codec : public PObject
     };
 
     H323Codec(
-      const char * mediaFormat, ///< Media format for codec
+      const OpalMediaFormat & mediaFormat, ///< Media format for codec
       Direction direction       ///< Direction in which this instance runs
     );
 
@@ -456,6 +459,7 @@ class H323Codec : public PObject
     Direction GetDirection()   const { return direction; }
 
     virtual const OpalMediaFormat & GetMediaFormat() const { return mediaFormat; }
+    OpalMediaFormat & GetWritableMediaFormat() { return mediaFormat; }
 
     virtual BOOL SetFrameSize(int /*frameWidth*/, int /*frameHeight*/) { return FALSE; };
 
@@ -600,7 +604,7 @@ class H323AudioCodec : public H323Codec
         decoding/encoding.
       */
     H323AudioCodec(
-      const char * mediaFormat, ///< Media format for codec
+      const OpalMediaFormat & mediaFormat, ///< Media format for codec
       Direction direction       ///< Direction in which this instance runs
     );
 
@@ -745,7 +749,7 @@ class H323FramedAudioCodec : public H323AudioCodec
         decoding/encoding.
       */
     H323FramedAudioCodec(
-      const char * mediaFormat, ///< Media format for codec
+      const OpalMediaFormat & mediaFormat, ///< Media format for codec
       Direction direction       ///< Direction in which this instance runs
     );
 
@@ -869,7 +873,7 @@ class H323StreamedAudioCodec : public H323FramedAudioCodec
         decoding/encoding.
       */
     H323StreamedAudioCodec(
-      const char * mediaFormat, ///< Media format for codec
+      const OpalMediaFormat & mediaFormat, ///< Media format for codec
       Direction direction,      ///< Direction in which this instance runs
       unsigned samplesPerFrame, ///< Number of samples in a frame
       unsigned bits             ///< Bits per sample
@@ -931,7 +935,7 @@ class H323VideoCodec : public H323Codec
         decoding/encoding.
       */
     H323VideoCodec(
-      const char * mediaFormat, ///< Media format for codec
+      const OpalMediaFormat & mediaFormat, ///< Media format for codec
       Direction direction      ///< Direction in which this instance runs
     );
 

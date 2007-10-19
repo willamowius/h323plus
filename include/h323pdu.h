@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/10/16 17:08:01  shorne
+ * Allow cryptoTokens to be insert in the setup after receiving ARQ
+ *
  * Revision 1.1  2007/08/06 20:50:49  shorne
  * First commit of h323plus
  *
@@ -736,6 +739,15 @@ Q931::CauseValues H323TranslateFromCallEndReason(
 
 PString H323GetApplicationInfo(const H225_VendorIdentifier & vendor);
 
+BOOL H323SetRTPPacketization(
+  H245_RTPPayloadType & rtpPacketization,
+  const OpalMediaFormat & mediaFormat,
+  RTP_DataFrame::PayloadTypes payloadType
+);
+BOOL H323GetRTPPacketization(
+  OpalMediaFormat & mediaFormat,
+  const H245_RTPPayloadType & rtpPacketization
+);
 
 #if PTRACING
 void H323TraceDumpPDU(

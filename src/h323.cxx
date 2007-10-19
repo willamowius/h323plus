@@ -24,11 +24,21 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2007/10/16 17:01:33  shorne
+ * Various little fixes
+ *
  * Revision 1.2  2007/08/20 19:13:28  shorne
  * Added Generic Capability support. Fixed Linux compile errors
  *
  * Revision 1.1  2007/08/06 20:51:06  shorne
  * First commit of h323plus
+ *
+ *
+ * Revision 1.385.2.14  2007/09/22 04:34:55  rjongbloed
+ * Fixed in-band tone decoder, incorrect number of samples used.
+ *
+ * Revision 1.385.2.13  2007/08/20 09:47:13  shorne
+ * Added OnEPAuthenticationFail callback
  *
  * Revision 1.385.2.12  2007/07/23 21:47:11  shorne
  * Added QoS GK Reporting
@@ -4852,7 +4862,7 @@ void H323Connection::OnUserInputInBandDTMF(H323Codec::FilterInfo & info, INT)
 
 #ifdef P_DTMF
   // Pass the 16 bit PCM audio through the DTMF decoder   
-  PString tones = dtmfDecoder.Decode((short *)info.buffer, info.bufferLength);
+  PString tones = dtmfDecoder.Decode((short *)info.buffer, info.bufferLength/sizeof(short));
   if (!tones.IsEmpty()) {
     PTRACE(1, "DTMF detected. " << tones);
     PINDEX i;

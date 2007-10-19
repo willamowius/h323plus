@@ -24,11 +24,20 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/20 20:19:53  shorne
+ * Moved opalplugin.h to codec directory to be plugin compile compatible with Opal
+ *
  * Revision 1.2  2007/08/20 19:13:28  shorne
  * Added Generic Capability support. Fixed Linux compile errors
  *
  * Revision 1.1  2007/08/06 20:50:50  shorne
  * First commit of h323plus
+ *
+ * Revision 1.10.2.5  2007/09/26 05:14:28  rjongbloed
+ * Added some extra RTP magic numbers: min header size, max packet size etc
+ *
+ * Revision 1.10.2.4  2007/08/17 08:38:22  rjongbloed
+ * Back ported OPAL meda options based plug ins and H.323 generic capabilties.
  *
  * Revision 1.10.2.3  2007/02/19 20:12:45  shorne
  * added H.239 support
@@ -133,7 +142,10 @@ extern "C" {
 
 #endif
 
-#define PWLIB_PLUGIN_API_VERSION        0
+#ifdef PWLIB_PLUGIN_API_VERSION
+#undef PWLIB_PLUGIN_API_VERSION
+#endif
+#define PWLIB_PLUGIN_API_VERSION 1
 
 #define	PLUGIN_CODEC_VERSION            1    // initial version
 #define	PLUGIN_CODEC_VERSION_WIDEBAND   2    // added wideband
@@ -543,7 +555,11 @@ enum {
 // RTP specific definitions
 //
 
-#define PluginCodec_RTP_GetHeaderLength(ptr)      ((((BYTE*)(ptr))[0] & 0x0f)*4 + 12)
+#define PluginCodec_RTP_MaxPacketSize  (1518-14-4-8-20-16)  // Max Ethernet packet (1518 bytes) minus 802.3/CRC, 802.3, IP, UDP headers
+#define PluginCodec_RTP_MinHeaderSize  (12)
+#define PluginCodec_RTP_MaxPayloadSize (PluginCodec_RTP_MaxPacketSize - PluginCodec_RTP_MinHeaderSize)
+
+#define PluginCodec_RTP_GetHeaderLength(ptr)      ((((BYTE*)(ptr))[0] & 0x0f)*4 + PluginCodec_RTP_MinHeaderSize)
 #define PluginCodec_RTP_GetPayloadPtr(ptr)          ((BYTE*)(ptr) + PluginCodec_RTP_GetHeaderLength(ptr))
 #define PluginCodec_RTP_GetPayloadType(ptr)        (((BYTE*)(ptr))[1] & 0x7f)
 #define PluginCodec_RTP_SetPayloadType(ptr, type)  (((BYTE*)(ptr))[1] = (((BYTE*)(ptr))[1] & 0x80) | (type & 0x7f))

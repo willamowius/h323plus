@@ -27,11 +27,17 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2007/10/16 17:05:38  shorne
+ * Allow cryptoTokens to be insert in the setup after receiving ARQ
+ *
  * Revision 1.2  2007/08/20 19:13:28  shorne
  * Added Generic Capability support. Fixed Linux compile errors
  *
  * Revision 1.1  2007/08/06 20:51:07  shorne
  * First commit of h323plus
+ *
+ * Revision 1.154.2.3  2007/09/05 04:14:40  rjongbloed
+ * Back ported from OPAL media packetization in TCS
  *
  * Revision 1.154.2.1  2006/12/23 19:08:02  shorne
  * Plugin video codecs & sundry
@@ -882,6 +888,80 @@ PString H323GetApplicationInfo(const H225_VendorIdentifier & vendor)
   str.MakeMinimumSize();
   return str;
 }
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+BOOL H323SetRTPPacketization(H245_RTPPayloadType & rtpPacketization,
+                             const OpalMediaFormat & mediaFormat,
+                             RTP_DataFrame::PayloadTypes payloadType)
+{
+  PString mediaPacketization = mediaFormat.GetOptionString("Media Packetization");
+  if (mediaPacketization.IsEmpty())
+    return FALSE;
+
+  if (mediaPacketization.NumCompare("RFC") == PObject::EqualTo) {
+    rtpPacketization.m_payloadDescriptor.SetTag(H245_RTPPayloadType_payloadDescriptor::e_rfc_number);
+    ((PASN_Integer &)rtpPacketization.m_payloadDescriptor) = mediaPacketization.Mid(3).AsUnsigned();
+  }
+  else if (mediaPacketization.FindSpan("0123456789.") == P_MAX_INDEX) {
+    rtpPacketization.m_payloadDescriptor.SetTag(H245_RTPPayloadType_payloadDescriptor::e_oid);
+    ((PASN_ObjectId &)rtpPacketization.m_payloadDescriptor) = mediaPacketization;
+  }
+  else {
+    rtpPacketization.m_payloadDescriptor.SetTag(H245_RTPPayloadType_payloadDescriptor::e_nonStandardIdentifier);
+    H245_NonStandardParameter & nonstd = rtpPacketization.m_payloadDescriptor;
+    nonstd.m_nonStandardIdentifier.SetTag(H245_NonStandardIdentifier::e_h221NonStandard);
+    H245_NonStandardIdentifier_h221NonStandard & h221 = nonstd.m_nonStandardIdentifier;
+    h221.m_t35CountryCode = 9;
+    h221.m_t35Extension = 0;
+    h221.m_manufacturerCode = 61;
+    nonstd.m_data = mediaPacketization;
+  }
+
+  if (payloadType == RTP_DataFrame::MaxPayloadType)
+    payloadType = mediaFormat.GetPayloadType();
+
+  rtpPacketization.IncludeOptionalField(H245_RTPPayloadType::e_payloadType);
+  rtpPacketization.m_payloadType = payloadType;
+
+  return TRUE;
+}
+
+
+BOOL H323GetRTPPacketization(OpalMediaFormat & mediaFormat, const H245_RTPPayloadType & rtpPacketization)
+{
+  PString mediaPacketization;
+
+  switch (rtpPacketization.m_payloadDescriptor.GetTag()) {
+    case H245_RTPPayloadType_payloadDescriptor::e_rfc_number :
+      mediaPacketization.sprintf("RFC%u", ((const PASN_Integer &)rtpPacketization.m_payloadDescriptor).GetValue());
+      break;
+
+    case H245_RTPPayloadType_payloadDescriptor::e_oid :
+      mediaPacketization = ((const PASN_ObjectId &)rtpPacketization.m_payloadDescriptor).AsString();
+      if (mediaPacketization.IsEmpty()) {
+        PTRACE(1, "RTP_UDP\tInvalid OID in packetization type.");
+        return FALSE;
+      }
+      break;
+    case H245_RTPPayloadType_payloadDescriptor::e_nonStandardIdentifier :
+      mediaPacketization = ((const H245_NonStandardParameter &)rtpPacketization.m_payloadDescriptor).m_data.AsString();
+      if (mediaPacketization.IsEmpty()) {
+        PTRACE(1, "RTP_UDP\tInvalid non-standard identifier in packetization type.");
+        return FALSE;
+      }
+      break;
+
+    default :
+      PTRACE(1, "RTP_UDP\tUnknown packetization type.");
+      return FALSE;
+  }
+  
+  mediaFormat.SetOptionString("Media Packetization", mediaPacketization);
+  return TRUE;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 #ifdef H323_H460

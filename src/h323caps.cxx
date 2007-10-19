@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2007/10/16 17:00:28  shorne
+ * Added H.230 Support
+ *
  * Revision 1.4  2007/08/20 20:19:52  shorne
  * Moved opalplugin.h to codec directory to be plugin compile compatible with Opal
  *
@@ -38,6 +41,9 @@
  *
  * Revision 1.1  2007/08/06 20:51:06  shorne
  * First commit of h323plus
+ *
+ * Revision 1.105.2.10  2007/09/05 04:14:40  rjongbloed
+ * Back ported from OPAL media packetization in TCS
  *
  * Revision 1.105.2.5  2007/07/19 20:05:05  shorne
  * Added QoS as default
@@ -415,8 +421,7 @@
 
 #include "h323caps.h"
 #include "h323ep.h"
-#include "h225.h"
-#include "h245.h"
+#include "h323pdu.h"
 #include "codec/opalplugin.h"
 #include "mediafmt.h"
 
@@ -3295,6 +3300,9 @@ void H323Capabilities::BuildPDU(const H323Connection & connection,
   // Set the table of capabilities
   pdu.IncludeOptionalField(H245_TerminalCapabilitySet::e_capabilityTable);
 
+  H245_H2250Capability & h225_0 = pdu.m_multiplexCapability;
+  PINDEX rtpPacketizationCount = 0;
+
   PINDEX count = 0;
   for (PINDEX i = 0; i < tableSize; i++) {
     H323Capability & capability = table[i];
@@ -3304,7 +3312,26 @@ void H323Capabilities::BuildPDU(const H323Connection & connection,
       entry.m_capabilityTableEntryNumber = capability.GetCapabilityNumber();
       entry.IncludeOptionalField(H245_CapabilityTableEntry::e_capability);
       capability.OnSendingPDU(entry.m_capability);
+
+      h225_0.m_mediaPacketizationCapability.m_rtpPayloadType.SetSize(rtpPacketizationCount+1);
+      if (H323SetRTPPacketization(h225_0.m_mediaPacketizationCapability.m_rtpPayloadType[rtpPacketizationCount],
+                                                    capability.GetMediaFormat(), RTP_DataFrame::MaxPayloadType)) {
+        // Check if already in list
+        PINDEX test;
+        for (test = 0; test < rtpPacketizationCount; test++) {
+          if (h225_0.m_mediaPacketizationCapability.m_rtpPayloadType[test] == h225_0.m_mediaPacketizationCapability.m_rtpPayloadType[rtpPacketizationCount])
+            break;
+        }
+        if (test == rtpPacketizationCount)
+          rtpPacketizationCount++;
+      }
     }
+  }
+
+  // Have some mediaPacketizations to include.
+  if (rtpPacketizationCount > 0) {
+    h225_0.m_mediaPacketizationCapability.m_rtpPayloadType.SetSize(rtpPacketizationCount);
+    h225_0.m_mediaPacketizationCapability.IncludeOptionalField(H245_MediaPacketizationCapability::e_rtpPayloadType);
   }
 
   // Set the sets of compatible capabilities

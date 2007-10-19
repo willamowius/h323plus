@@ -24,8 +24,17 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/10/16 17:08:57  shorne
+ * Qos capability negotiation
+ *
  * Revision 1.1  2007/08/06 20:51:07  shorne
  * First commit of h323plus
+ *
+ * Revision 1.34.2.5  2007/09/05 04:14:40  rjongbloed
+ * Back ported from OPAL media packetization in TCS
+ *
+ * Revision 1.34.2.4  2007/09/03 09:44:44  rjongbloed
+ * Back ported from OPAL the H.323 media packetization support
  *
  * Revision 1.34.2.3  2007/05/23 06:58:02  shorne
  * Nat Support for EP's nested behind same NAT
@@ -158,8 +167,7 @@
 #include "h323rtp.h"
 
 #include "h323ep.h"
-#include "h225.h"
-#include "h245.h"
+#include "h323pdu.h"
 
 
 #define new PNEW
@@ -261,10 +269,10 @@ BOOL H323_RTP_UDP::OnSendingPDU(const H323_RTPChannel & channel,
     mediaAddress.SetPDU(param.m_mediaChannel);
   }
 
-#ifndef NO_H323_AUDIO_CODECS
-  // Set flag for we are going to stop sending audio on silence
   H323Codec * codec = channel.GetCodec();
 
+#ifndef NO_H323_AUDIO_CODECS
+  // Set flag for we are going to stop sending audio on silence
   if (codec != NULL &&
       PIsDescendant(codec, H323AudioCodec) &&
       channel.GetDirection() != H323Channel::IsReceiver) {
@@ -274,10 +282,17 @@ BOOL H323_RTP_UDP::OnSendingPDU(const H323_RTPChannel & channel,
 #endif
 
   // Set dynamic payload type, if is one
-  int rtpPayloadType = channel.GetRTPPayloadType();
+  RTP_DataFrame::PayloadTypes rtpPayloadType = channel.GetRTPPayloadType();
   if (rtpPayloadType >= RTP_DataFrame::DynamicBase && rtpPayloadType <= RTP_DataFrame::MaxPayloadType) {
     param.IncludeOptionalField(H245_H2250LogicalChannelParameters::e_dynamicRTPPayloadType);
     param.m_dynamicRTPPayloadType = rtpPayloadType;
+  }
+
+  // Set the media packetization field if have an option to describe it.
+  if (codec != NULL) {
+    param.m_mediaPacketization.SetTag(H245_H2250LogicalChannelParameters_mediaPacketization::e_rtpPayloadType);
+    if (H323SetRTPPacketization(param.m_mediaPacketization, codec->GetMediaFormat(), rtpPayloadType))
+      param.IncludeOptionalField(H245_H2250LogicalChannelParameters::e_mediaPacketization);
   }
 
   // GQoS
@@ -377,6 +392,13 @@ BOOL H323_RTP_UDP::OnReceivedPDU(H323_RTPChannel & channel,
 
   if (param.HasOptionalField(H245_H2250LogicalChannelParameters::e_dynamicRTPPayloadType))
     channel.SetDynamicRTPPayloadType(param.m_dynamicRTPPayloadType);
+
+  H323Codec * codec = channel.GetCodec();
+
+  if (codec != NULL &&
+      param.HasOptionalField(H245_H2250LogicalChannelParameters::e_mediaPacketization) &&
+      param.m_mediaPacketization.GetTag() == H245_H2250LogicalChannelParameters_mediaPacketization::e_rtpPayloadType)
+    H323GetRTPPacketization(codec->GetWritableMediaFormat(), param.m_mediaPacketization);
 
   // GQoS
 #if P_HAS_QOS
