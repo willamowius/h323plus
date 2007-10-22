@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2007/08/20 19:13:28  shorne
+ * Added Generic Capability support. Fixed Linux compile errors
+ *
  * Revision 1.2  2007/08/08 20:13:10  shorne
  * Increased default Buffers to 5
  *
@@ -852,10 +855,6 @@
 #include <h224handler.h>
 #endif
 
-#ifdef H323_VIDEO
-#include "ptlib/video.h"
-#endif
-
 #if defined(H323_RTP_AGGREGATE) || defined(H323_SIGNAL_AGGREGATE)
 #include <ptclib/sockagg.h>
 #endif
@@ -1090,7 +1089,7 @@ H323EndPoint::H323EndPoint()
     username = PProcess::Current().GetName() & "User";
   localAliasNames.AppendString(username);
 
-#ifdef P_AUDIO
+#if defined(P_AUDIO) && defined(_WIN32)
   PString DefaultAudioDriver = "WindowsMultimedia";
   SetSoundChannelPlayDriver(DefaultAudioDriver);
   SetSoundChannelRecordDriver(DefaultAudioDriver);
