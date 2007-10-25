@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2007/10/16 17:00:28  shorne
+ * Added H.230 Support
+ *
  * Revision 1.2  2007/08/20 19:13:27  shorne
  * Added Generic Capability support. Fixed Linux compile errors
  *
@@ -403,7 +406,9 @@ class H323Capability : public PObject
          qcifMPI,
 		 cifMPI,
 		 cif4MPI,
-		 cif16MPI
+		 cif16MPI,
+		 p720MPI,
+		 i1080MPI
 	 };
 
     /**Set the Maximum Frame Size of the Video Capability.
@@ -2283,6 +2288,11 @@ class H323Capabilities : public PObject
     /**Remove all of the capabilities.
       */
     void RemoveAll();
+
+	/**Manually remove Capability type. This removes the specified Capability type out of the 
+	   default capability list.
+	  */
+	BOOL RemoveCapability(H323Capability::MainTypes capabilityType);
 
 #ifdef H323_VIDEO
 	/**Set the Video Frame Size. This is used for capabilities

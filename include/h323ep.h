@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/08/20 19:13:27  shorne
+ * Added Generic Capability support. Fixed Linux compile errors
+ *
  * Revision 1.1  2007/08/06 20:50:49  shorne
  * First commit of h323plus
  *
@@ -510,6 +513,13 @@ class H323EndPoint : public PObject
       PINDEX simultaneous,  ///< The member of the SimultaneousCapabilitySet to add
       H323Capability * cap  ///< New capability specification
     );
+
+	/**Manually remove capability type. This removes the specified Capability type out of the 
+	   default capability list.
+	  */
+	BOOL RemoveCapability(
+		H323Capability::MainTypes capabilityType  ///< capability type
+	);
 
 #ifdef H323_VIDEO
 	/**Set the Video Frame Size. This is used for capabilities

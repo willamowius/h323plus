@@ -27,6 +27,10 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2007/10/19 19:54:17  shorne
+ * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
+ *  Robert
+ *
  * Revision 1.5  2007/10/16 17:00:28  shorne
  * Added H.230 Support
  *
@@ -3258,25 +3262,48 @@ H323Capability * H323Capabilities::FindCapability(H323Capability::MainTypes main
   return NULL;
 }
 
+BOOL H323Capabilities::RemoveCapability(H323Capability::MainTypes capabilityType)
+{
+	// List of codecs
+	PStringList codecsToRemove;
+	for (PINDEX i = 0; i < table.GetSize(); i++) {
+	    H323Capability & capability = table[i];
+	    if (capability.GetMainType() == capabilityType)
+			   codecsToRemove.AppendString(capability.GetFormatName());  
+	}
+
+	for (PINDEX i=0; i < codecsToRemove.GetSize(); i++) 
+		      Remove(codecsToRemove[i]);
+
+	return TRUE;
+}
+
 #ifdef H323_VIDEO
 BOOL H323Capabilities::SetVideoFrameSize(H323Capability::CapabilityFrameSize frameSize, int frameUnits) 
 { 
     // Remove the unmatching capabilities
-   PString param;
-	switch (frameSize) {
-        case H323Capability::sqcifMPI: param = "*-SQCIF";
-        case H323Capability::qcifMPI: param = "*-QCIF";
-        case H323Capability::cifMPI: param = "*-CIF";
-        case H323Capability::cif4MPI: param = "*-CIF4";
-        case H323Capability::cif16MPI: param = "*-CIF16";
-		default: return FALSE;
+    if ((frameSize != H323Capability::cif16MPI) || (frameSize != H323Capability::p720MPI)) 
+		                 Remove("*-CIF16*");
+    if (frameSize != H323Capability::cif4MPI) Remove("*-CIF4*");
+	if (frameSize != H323Capability::cifMPI) Remove("*-CIF*");
+    if (frameSize != H323Capability::qcifMPI) Remove("*-QCIF*");
+	if (frameSize != H323Capability::sqcifMPI) Remove("*-SQCIF*");
+
+	// Remove Generic Capabilities
+	PStringList genericCaps;
+	if (frameSize != H323Capability::i1080MPI) {
+       	for (PINDEX i = 0; i < table.GetSize(); i++) {
+	     H323Capability & capability = table[i];
+		  if (capability.GetMainType() == H323Capability::e_Video) {
+			 PCaselessString str = table[i].GetFormatName();
+		     PString formatName = "*-*";
+		     PStringArray wildcard = formatName.Tokenise('*', FALSE);
+             if (!MatchWildcard(str, wildcard))
+			    genericCaps.AppendString(str);
+	      }
+	    }
+		Remove(genericCaps);
 	}
-   
-    if (param != "*-CIF16") Remove("*-CIF16");
-    if (param != "*-CIF4") Remove("*-CIF4");
-	if (param != "*-CIF") Remove("*-CIF");
-    if (param != "*-QCIF") Remove("*-QCIF");
-	if (param != "*-SQCIF") Remove("*-SQCIF");
 
 	// Instruct remaining Video Capabilities to set Frame Size to new Value
 	for (PINDEX i = 0; i < table.GetSize(); i++) {

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2007/10/22 08:24:08  shorne
+ * Fixed small bug
+ *
  * Revision 1.3  2007/08/20 19:13:28  shorne
  * Added Generic Capability support. Fixed Linux compile errors
  *
@@ -1387,6 +1390,11 @@ PINDEX H323EndPoint::SetCapability(PINDEX descriptorNum,
                                    H323Capability * capability)
 {
   return capabilities.SetCapability(descriptorNum, simultaneousNum, capability);
+}
+
+BOOL H323EndPoint::RemoveCapability(H323Capability::MainTypes capabilityType)
+{
+	return capabilities.RemoveCapability(capabilityType);
 }
 
 #ifdef H323_VIDEO

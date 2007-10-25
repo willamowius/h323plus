@@ -24,6 +24,10 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2007/10/19 19:54:17  shorne
+ * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
+ *  Robert
+ *
  * Revision 1.3  2007/08/20 20:19:52  shorne
  * Moved opalplugin.h to codec directory to be plugin compile compatible with Opal
  *
@@ -404,6 +408,8 @@ static const char * qcifMPI_tag                           = "QCIF MPI";
 static const char * cifMPI_tag                            = "CIF MPI";
 static const char * cif4MPI_tag                           = "CIF4 MPI";
 static const char * cif16MPI_tag                          = "CIF16 MPI";
+static const char * p720MPI_tag                           = "720P MPI";
+static const char * i1080MPI_tag                          = "I1080 MPI";
 
 // H.261 only
 static const char * h323_stillImageTransmission_tag            = H323CAP_TAG_PREFIX "_stillImageTransmission";
@@ -2107,11 +2113,13 @@ class H323VideoPluginCapability : public H323VideoCapability,
      {
          PString param;
          switch (framesize) {
-             case sqcifMPI  : param = sqcifMPI_tag;
-             case  qcifMPI  : param = qcifMPI_tag;
-             case   cifMPI  : param = cifMPI_tag;
-             case   cif4MPI : param = cif4MPI_tag;
-             case   cif16MPI: param = cif16MPI_tag;
+             case sqcifMPI : param = sqcifMPI_tag; break;
+             case  qcifMPI : param = qcifMPI_tag; break;
+             case   cifMPI : param = cifMPI_tag; break;
+             case  cif4MPI : param = cif4MPI_tag; break;
+             case cif16MPI : param = cif16MPI_tag; break;
+             case  p720MPI : param = p720MPI_tag; break;
+             case i1080MPI : param = i1080MPI_tag; break;
              default: return FALSE;
          }
 
