@@ -41,8 +41,8 @@
 
 #define MAJOR_VERSION 1
 #define MINOR_VERSION 19
-#define BUILD_TYPE    ReleaseCode
-#define BUILD_NUMBER 5
+#define BUILD_TYPE    BetaCode
+#define BUILD_NUMBER 6
 
 
 #endif  // _OpenH323_VERSION_H
