@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2007/10/25 21:08:04  shorne
+ * Added support for HD Video devices
+ *
  * Revision 1.4  2007/10/19 19:54:17  shorne
  * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
  *  Robert
@@ -2493,10 +2496,10 @@ void H323PluginCodecManager::CreateCapabilityAndMediaFormat(
   unsigned timeUnits = 0;
   switch (encoderCodec->flags & PluginCodec_MediaTypeMask) {
 #ifdef H323_VIDEO
-    case PluginCodec_MediaTypeExtVideo:
-      extended = TRUE;
     case PluginCodec_MediaTypeVideo:
       defaultSessionID = OpalMediaFormat::DefaultVideoSessionID;
+	  if ((encoderCodec->flags & PluginCodec_MediaExtensionMask) == PluginCodec_MediaTypeExtVideo)
+		    extended = TRUE;
       jitter = FALSE;
       break;
 #endif
@@ -2530,7 +2533,6 @@ void H323PluginCodecManager::CreateCapabilityAndMediaFormat(
       // manually register the new singleton type, as we do not have a concrete type
       switch (encoderCodec->flags & PluginCodec_MediaTypeMask) {
 #ifdef H323_VIDEO
-        case PluginCodec_MediaTypeExtVideo:
         case PluginCodec_MediaTypeVideo:
           mediaFormat = new OpalPluginVideoMediaFormat(
                                   encoderCodec, 
@@ -2609,7 +2611,6 @@ void H323PluginCodecManager::CreateCapabilityAndMediaFormat(
 #endif
 
 #ifdef H323_VIDEO
-    case PluginCodec_MediaTypeExtVideo:
     case PluginCodec_MediaTypeVideo:
       map = videoMaps;
       break;
@@ -2637,7 +2638,6 @@ void H323PluginCodecManager::CreateCapabilityAndMediaFormat(
 #endif // NO_H323_AUDIO
 
 #ifdef H323_VIDEO
-            case PluginCodec_MediaTypeExtVideo:
             case PluginCodec_MediaTypeVideo:
               // all video caps are created using the create functions
               break;
@@ -2653,7 +2653,7 @@ void H323PluginCodecManager::CreateCapabilityAndMediaFormat(
           H323CapabilityFactory::Register(CreateCodecName(encoderCodec, TRUE), cap);
 #ifdef H323_H239
              if (extended)
-                H323ExtendedVideoFactory::Register(CreateCodecName(encoderCodec, TRUE), cap);
+                H323ExtendedVideoFactory::Register(CreateCodecName(encoderCodec, TRUE), (H323VideoCapability *)cap);
 #endif
         }
         break;

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2007/10/25 21:08:03  shorne
+ * Added support for HD Video devices
+ *
  * Revision 1.3  2007/10/16 17:00:28  shorne
  * Added H.230 Support
  *
@@ -2466,7 +2469,7 @@ class H323Capabilities : public PObject
 #ifdef H323_H239
 
 class H323ExtendedVideoCapability : public H323Capability,
-	                              public H323GenericCapabilityInfo
+	                                public H323GenericCapabilityInfo
 {
   PCLASSINFO(H323ExtendedVideoCapability, H323Capability);
 
@@ -2491,9 +2494,6 @@ class H323ExtendedVideoCapability : public H323Capability,
   /**@name Identification functions */
   //@{
 
-	virtual PString GetFormatName() const
-    { return "H.239";}
-
     /**Get the main type of the capability.
        Always returns e_ExtendedVideo.
      */
@@ -2506,6 +2506,15 @@ class H323ExtendedVideoCapability : public H323Capability,
        using the enum values of the protocol ASN H245_AudioCapability class.
      */
 	virtual unsigned GetSubType() const;
+
+    /**Print Extended Capabilities list
+	 */
+    virtual void PrintOn(ostream & strm) const;
+
+	/** Create Codec Not Required
+	 */
+    virtual H323Codec * CreateCodec(H323Codec::Direction /*direction*/) const
+    { return NULL; }
   //@}
     
 
@@ -2630,9 +2639,28 @@ class H323ExtendedVideoCapability : public H323Capability,
   //@}
 
 protected:
-	static H323Capabilities localCapabilities;   ///< local Capability List
-	H323CapabilitiesList table;                  ///< common Capability List
+	H323Capabilities extCapabilities;     ///< local Capability List
+	H323CapabilitiesList table;           ///< common Capability List
 
+};
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// Class for Handling extended video control
+
+class H323ControlExtendedVideoCapability : public H323ExtendedVideoCapability
+{
+  PCLASSINFO(H323ControlExtendedVideoCapability, H323ExtendedVideoCapability);
+  public:
+	H323ControlExtendedVideoCapability();
+
+   virtual PString GetFormatName() const
+    { return "H.239 Control"; }
+
+   virtual PObject * Clone() const
+    {
+      return new H323ControlExtendedVideoCapability(*this);
+    }
 };
 
 
@@ -2646,22 +2674,28 @@ class H323CodecExtendedVideoCapability : public H323ExtendedVideoCapability
   PCLASSINFO(H323CodecExtendedVideoCapability, H323ExtendedVideoCapability);
   public:
     H323CodecExtendedVideoCapability();
+    ~H323CodecExtendedVideoCapability();
 
     virtual PObject * Clone() const
     { return new H323CodecExtendedVideoCapability(*this); }
- 
-    virtual H323Codec * CreateCodec(H323Codec::Direction /*direction*/) const
-    { return NULL; }
-
-	virtual BOOL SetMaxFrameSize(CapabilityFrameSize /*framesize*/, int /*frameunits*/) 
-	{ return TRUE; };
 
     virtual BOOL OnReceivedGenericPDU(
 		const H245_GenericCapability &pdu
 	);
 
+	virtual PString GetFormatName() const
+    { return "H.239 Capabilities";}
+
     virtual BOOL OnSendingPDU(
-      H245_VideoCapability & pdu  /// PDU to set information on
+		H245_Capability & cap
+	) const;
+
+    virtual BOOL OnReceivedPDU(
+	  const H245_Capability & cap
+	);
+
+    virtual BOOL OnSendingPDU(
+		H245_VideoCapability & cap
 	) const;
 
     virtual BOOL OnReceivedPDU(
@@ -2670,7 +2704,7 @@ class H323CodecExtendedVideoCapability : public H323ExtendedVideoCapability
 
 };
 
-typedef PFactory<H323Capability, std::string> H323ExtendedVideoFactory;
+typedef PFactory<H323VideoCapability, std::string> H323ExtendedVideoFactory;
 
 #endif  // H323_H239
 #endif  // H323_VIDEO

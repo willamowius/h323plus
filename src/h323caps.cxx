@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2007/10/25 21:08:04  shorne
+ * Added support for HD Video devices
+ *
  * Revision 1.6  2007/10/19 19:54:17  shorne
  * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
  *  Robert
@@ -1780,14 +1783,12 @@ BOOL H323GenericVideoCapability::IsMatch(const PASN_Choice & subTypePDU) const
 
 #ifdef H323_H239
 
-H323Capabilities H323ExtendedVideoCapability::localCapabilities;
-
 H323ExtendedVideoCapability::H323ExtendedVideoCapability(
       const PString &capabilityId )
         : H323Capability(),
           H323GenericCapabilityInfo(capabilityId, 0)
 {
-   SetCapabilityDirection(H323Capability::e_GenericControl);
+	SetCapabilityDirection(H323Capability::e_GenericControl);
 }
 
 BOOL H323ExtendedVideoCapability::OnSendingPDU(H245_Capability & cap) const
@@ -1803,7 +1804,7 @@ BOOL H323ExtendedVideoCapability::OnReceivedPDU(const H245_Capability & cap)
   if( cap.GetTag()!= H245_Capability::e_genericControlCapability)
     return FALSE;
 
-  return OnReceivedPDU((const H245_GenericCapability &)cap, e_TCS); 
+  return OnReceivedPDU((const H245_GenericCapability &)cap, e_TCS);
 } 
 
 BOOL H323ExtendedVideoCapability::OnReceivedPDU(const H245_GenericCapability & pdu, CommandType type)
@@ -1814,11 +1815,7 @@ BOOL H323ExtendedVideoCapability::OnReceivedPDU(const H245_GenericCapability & p
 
 BOOL H323ExtendedVideoCapability::OnSendingPDU(H245_GenericCapability & pdu, CommandType type) const
 {
-  if (localCapabilities.GetSize() == 0)
-    return FALSE;
-
-  OpalMediaFormat mediaFormat = GetMediaFormat();
-  return OnSendingGenericPDU(pdu, mediaFormat, type);
+  return OnSendingGenericPDU(pdu, GetMediaFormat(), type);
 }
 
 PObject::Comparison H323ExtendedVideoCapability::Compare(const PObject & obj) const
@@ -1837,6 +1834,21 @@ H323Capability::MainTypes H323ExtendedVideoCapability::GetMainType() const
 unsigned H323ExtendedVideoCapability::GetSubType() const
 {
   return H245_VideoCapability::e_extendedVideoCapability;
+}
+
+void H323ExtendedVideoCapability::PrintOn(ostream & strm) const
+{
+  strm << GetFormatName();
+  if (assignedCapabilityNumber != 0)
+    strm << " <" << assignedCapabilityNumber << '>';
+
+	if (extCapabilities.GetSize() > 0) {
+	  int indent = strm.precision() + 2;
+	  strm << '\n';
+      for (PINDEX i=0; i< extCapabilities.GetSize(); i++) {
+         strm << setw(indent+6) << " " << extCapabilities[i] << '\n';
+	  }
+	}
 }
 
 H323Channel * H323ExtendedVideoCapability::CreateChannel(H323Connection & /*connection*/,   
@@ -1870,8 +1882,13 @@ BOOL H323ExtendedVideoCapability::IsMatch(const PASN_Choice & subTypePDU) const
 void H323ExtendedVideoCapability::AddAllCapabilities(
       H323Capabilities & basecapabilities, PINDEX descriptorNum,PINDEX simultaneous)
 {
-  if (localCapabilities.GetSize() > 0)
-       basecapabilities.SetCapability(descriptorNum, simultaneous, new H323CodecExtendedVideoCapability());
+  H323ExtendedVideoFactory::KeyList_T extCaps = H323ExtendedVideoFactory::GetKeyList();
+  if (extCaps.size() > 0) {
+//      basecapabilities.SetCapability(descriptorNum, simultaneous, new H323ControlExtendedVideoCapability()); // control
+      basecapabilities.SetCapability(descriptorNum, simultaneous, new H323CodecExtendedVideoCapability());
+  } else {
+	  PTRACE(4,"EXT\tNo Extended Capabilities found to load");
+  }
 }
 
 H323Capability & H323ExtendedVideoCapability::operator[](PINDEX i) 
@@ -1881,24 +1898,53 @@ H323Capability & H323ExtendedVideoCapability::operator[](PINDEX i)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+H323ControlExtendedVideoCapability::H323ControlExtendedVideoCapability()
+  : H323ExtendedVideoCapability(OpalPluginCodec_Identifer_H239)
+{ 
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 H323CodecExtendedVideoCapability::H323CodecExtendedVideoCapability()
-   : H323ExtendedVideoCapability(OpalPluginCodec_Identifer_H239)
+   : H323ExtendedVideoCapability(OpalPluginCodec_Identifer_H239_Video)
 {
 	// Add all the extended Video Capabilities to the capability list
-    H323ExtendedVideoFactory::KeyList_T stdCaps = H323ExtendedVideoFactory::GetKeyList();
+    H323ExtendedVideoFactory::KeyList_T extCaps = H323ExtendedVideoFactory::GetKeyList();
     H323ExtendedVideoFactory::KeyList_T::const_iterator r;
 
-     for (r = stdCaps.begin(); r != stdCaps.end(); ++r) {
+     for (r = extCaps.begin(); r != extCaps.end(); ++r) {
        PString capName(*r);
        H323Capability * capability = H323ExtendedVideoFactory::CreateInstance(capName);
-	   localCapabilities.Add(capability);
-	 }
-   
+	   extCapabilities.Add(capability);
+	   H323ExtendedVideoFactory::Unregister(*r);  // To avoid nasty segfault on shutdown.
+	 } 
 }
+
+H323CodecExtendedVideoCapability::~H323CodecExtendedVideoCapability()
+{
+	extCapabilities.RemoveAll();
+}
+
+BOOL H323CodecExtendedVideoCapability::OnSendingPDU(H245_Capability & cap) const
+{
+	  cap.SetTag(H245_Capability::e_receiveAndTransmitVideoCapability);
+	  return OnSendingPDU((H245_VideoCapability &)cap);
+}
+
+BOOL H323CodecExtendedVideoCapability::OnReceivedPDU(const H245_Capability & cap)
+{
+  H323Capability::OnReceivedPDU(cap);
+
+  if( cap.GetTag()!= H245_Capability::e_receiveAndTransmitVideoCapability)
+    return FALSE;
+
+  return OnReceivedPDU((const H245_VideoCapability &)cap);
+} 
 
 BOOL H323CodecExtendedVideoCapability::OnSendingPDU(H245_VideoCapability & pdu) const 
 { 
-	if (localCapabilities.GetSize() == 0)
+	if (extCapabilities.GetSize() == 0)
 		return FALSE;
 
 	pdu.SetTag(H245_VideoCapability::e_extendedVideoCapability);
@@ -1907,31 +1953,39 @@ BOOL H323CodecExtendedVideoCapability::OnSendingPDU(H245_VideoCapability & pdu) 
 	extend.IncludeOptionalField(H245_ExtendedVideoCapability::e_videoCapabilityExtension);
     H245_ArrayOf_GenericCapability & cape = extend.m_videoCapabilityExtension;
 
-	H245_GenericCapability * gcap = new H245_GenericCapability();
-	 gcap->m_capabilityIdentifier = *(new H245_CapabilityIdentifier(H245_CapabilityIdentifier::e_standard));
-	 PASN_ObjectId &object_id = gcap->m_capabilityIdentifier;
+	H245_GenericCapability gcap;
+	 gcap.m_capabilityIdentifier = *(new H245_CapabilityIdentifier(H245_CapabilityIdentifier::e_standard));
+	 PASN_ObjectId &object_id = gcap.m_capabilityIdentifier;
      object_id = OpalPluginCodec_Identifer_H239_Video;
-   
-   cape.Append(gcap);
-   cape.SetSize(cape.GetSize()+1);
+
+	 // Add role
+      H245_GenericParameter * param = new H245_GenericParameter;
+      param->m_parameterIdentifier.SetTag(H245_ParameterIdentifier::e_standard);
+      (PASN_Integer &)param->m_parameterIdentifier = 1;
+	  param->m_parameterValue.SetTag(H245_ParameterValue::e_booleanArray);
+      (PASN_Integer &)param->m_parameterValue = 2;  // Live presentation
+
+      gcap.IncludeOptionalField(H245_GenericCapability::e_nonCollapsing);
+      gcap.m_nonCollapsing.Append(param);
+      cape.SetSize(1);
+      cape[0] = gcap;
+
 
     H245_ArrayOf_VideoCapability & caps = extend.m_videoCapability;
     
-	PINDEX i;
-	H245_VideoCapability * vidcap;
 	if (table.GetSize() > 0) {
-      for (i=0; i< table.GetSize(); i++) {
-	     vidcap = new H245_VideoCapability();
-         ((H323VideoCapability &)table[i]).OnSendingPDU(*vidcap);
-         caps.Append(vidcap);
-	     caps.SetSize(caps.GetSize()+1);
+	  caps.SetSize(table.GetSize());
+      for (PINDEX i=0; i< table.GetSize(); i++) {
+	     H245_VideoCapability vidcap;
+        ((H323VideoCapability &)table[i]).OnSendingPDU(vidcap);
+        caps[i] = vidcap;
 	  }
 	} else {
-      for (i=0; i< localCapabilities.GetSize(); i++) {
-	     vidcap = new H245_VideoCapability();
-         ((H323VideoCapability &)localCapabilities[i]).OnSendingPDU(*vidcap);
-         caps.Append(vidcap);
-	     caps.SetSize(caps.GetSize()+1);
+	  caps.SetSize(extCapabilities.GetSize());
+      for (PINDEX i=0; i< extCapabilities.GetSize(); i++) {
+	     H245_VideoCapability vidcap;
+         ((H323VideoCapability &)extCapabilities[i]).OnSendingPDU(vidcap);
+         caps[i] = vidcap;
       }
 	}
 
@@ -1950,17 +2004,47 @@ BOOL H323CodecExtendedVideoCapability::OnReceivedPDU(const H245_VideoCapability 
 
    // Role Information
    const H245_ArrayOf_GenericCapability & cape = extend.m_videoCapabilityExtension;
-   if (cape.GetSize() > 0) {
-	 for (PINDEX b =0; b < cape.GetSize(); b++) {
-			// process the role information here : To be completed
-	 }
+   if (cape.GetSize() == 0) {
+	   PTRACE(2,"H239\tERROR: Missing Capability Extension!");
+	   return FALSE;
    }
+
+   for (PINDEX b =0; b < cape.GetSize(); b++) {
+    const H245_GenericCapability & cap = cape[b];
+	if (cap.m_capabilityIdentifier.GetTag() != H245_CapabilityIdentifier::e_standard) {
+		PTRACE(4,"H239\tERROR: Wrong Capability type!");
+		return FALSE;
+	}
+	
+	const PASN_ObjectId & id = cap.m_capabilityIdentifier;
+	if (id != OpalPluginCodec_Identifer_H239_Video) {
+		PTRACE(4,"H239\tERROR: Wrong Capability Identifer " << id);
+		return FALSE;
+	}
+
+	if (!cap.HasOptionalField(H245_GenericCapability::e_nonCollapsing)) {
+		PTRACE(4,"H239\tERROR: No nonCollapsing field");
+		return FALSE;
+	}
+
+	for (PINDEX c =0; c < cap.m_nonCollapsing.GetSize(); c++) {
+		const H245_GenericParameter & param = cap.m_nonCollapsing[c];
+		if ((PASN_Integer &)param.m_parameterIdentifier != 1) {
+	        PTRACE(4,"H239\tERROR: Unknown Role Identifer");
+			return FALSE;
+		}
+		if ((PASN_Integer &)param.m_parameterValue != 2) {
+	        PTRACE(4,"H239\tERROR: Unsupported Role mode " << param.m_parameterValue );
+			return FALSE;
+		}
+	}
+  }
 
   // Get a Common Video Capability list
   const H245_ArrayOf_VideoCapability & caps = extend.m_videoCapability;
   H323Capabilities allCapabilities;
-  for (PINDEX c = 0; c < localCapabilities.GetSize(); c++)
-    allCapabilities.Add(allCapabilities.Copy(localCapabilities[c]));
+  for (PINDEX c = 0; c < extCapabilities.GetSize(); c++)
+    allCapabilities.Add(allCapabilities.Copy(extCapabilities[c]));
 
   // Decode out of the PDU, the list of known codecs.
     for (PINDEX i = 0; i < caps.GetSize(); i++) {
