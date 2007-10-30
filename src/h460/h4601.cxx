@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:52  shorne
+ * First commit of h323plus
+ *
  *
  *
 */
@@ -243,15 +246,14 @@ H460_FeatureContent::H460_FeatureContent(const H225_AliasAddress & add)
 H460_FeatureContent::H460_FeatureContent(const PURL & add)
 {
 
-	H225_AliasAddress * alias = new H225_AliasAddress();
-
-	alias->SetTag(H225_AliasAddress::e_url_ID);
-	PASN_IA5String & url = *alias;
+	H225_AliasAddress alias;
+	alias.SetTag(H225_AliasAddress::e_url_ID);
+	PASN_IA5String & url = alias;
 	url = add.AsString();
 
 	SetTag(H225_Content::e_alias); 
 	H225_AliasAddress & val = *this;
-	val = *alias;
+	val = alias;
 }
 
 H460_FeatureContent::H460_FeatureContent(const H323TransportAddress & add) 
@@ -509,7 +511,7 @@ H460_FeatureTable::H460_FeatureTable(const H225_ArrayOf_EnumeratedParameter & Xp
 	OnReceivedPDU(Xparams);
 }
 
-H460_FeatureParameter & H460_FeatureTable::AddParameter(H460_FeatureID & id)
+H460_FeatureParameter & H460_FeatureTable::AddParameter(const H460_FeatureID & id)
 {	
 PTRACE(6, "H460\tAdd ID: " << id );
 
@@ -519,7 +521,7 @@ PTRACE(6, "H460\tAdd ID: " << id );
 	  return *Nparam;
 }
 
-H460_FeatureParameter & H460_FeatureTable::AddParameter(H460_FeatureID & id, H460_FeatureContent & con)
+H460_FeatureParameter & H460_FeatureTable::AddParameter(const H460_FeatureID & id, const H460_FeatureContent & con)
 {	
 PTRACE(6, "H460\tAdd ID: " << id  << " content " << con);
 
@@ -601,7 +603,7 @@ void H460_FeatureTable::RemoveParameter(const H460_FeatureID & id)
 
 }
 
-void H460_FeatureTable::ReplaceParameter(const H460_FeatureID & id, H460_FeatureContent & con)
+void H460_FeatureTable::ReplaceParameter(const H460_FeatureID & id, const H460_FeatureContent & con)
 {
     
 PTRACE(6, "H460\tReplace ID: " << id  << " content " << con);
@@ -702,7 +704,7 @@ PString H460_Feature::GetFeatureIDAsString()
    return  ((H460_FeatureID)m_id).IDString();
 }
 
-H460_FeatureParameter & H460_Feature::AddParameter(H460_FeatureID * id, H460_FeatureContent & con)
+H460_FeatureParameter & H460_Feature::AddParameter(H460_FeatureID * id, const H460_FeatureContent & con)
 {
 	if (!HasOptionalField(e_parameters)) {	
 	    IncludeOptionalField(e_parameters);
@@ -739,7 +741,7 @@ void H460_Feature::RemoveParameter(PINDEX id)
 	}
 }
 
-void H460_Feature::ReplaceParameter(H460_FeatureID id, H460_FeatureContent & con)
+void H460_Feature::ReplaceParameter(const H460_FeatureID id, const H460_FeatureContent & con)
 {
 	CurrentTable->ReplaceParameter(id,con);
 }
@@ -865,7 +867,7 @@ H460_FeatureStd::H460_FeatureStd(unsigned Identifier)
 {
 }
 
-H460_FeatureParameter & H460_FeatureStd::Add(unsigned id, H460_FeatureContent & con)
+H460_FeatureParameter & H460_FeatureStd::Add(unsigned id, const H460_FeatureContent & con)
 {
     return AddParameter(new H460_FeatureID(id),con);
 }
@@ -875,7 +877,7 @@ void H460_FeatureStd::Remove(unsigned id)
 	RemoveParameter(H460_FeatureID(id));
 }
 
-void H460_FeatureStd::Replace(unsigned id, H460_FeatureContent & con)
+void H460_FeatureStd::Replace(unsigned id, const H460_FeatureContent & con)
 {
 	ReplaceParameter(H460_FeatureID(id),con);
 }
@@ -898,17 +900,17 @@ H460_FeatureNonStd::H460_FeatureNonStd(PString Identifier)
 {
 }
 	
-H460_FeatureParameter & H460_FeatureNonStd::Add(PString id, H460_FeatureContent & con)
+H460_FeatureParameter & H460_FeatureNonStd::Add(const PString id, const H460_FeatureContent & con)
 {
 	return AddParameter(new H460_FeatureID(id),con);
 }
 
-void H460_FeatureNonStd::Remove(PString id)
+void H460_FeatureNonStd::Remove(const PString & id)
 {
 	RemoveParameter(H460_FeatureID(id));
 }
 
-void H460_FeatureNonStd::Replace(PString id, H460_FeatureContent & con)
+void H460_FeatureNonStd::Replace(const PString & id, const H460_FeatureContent & con)
 {
 	ReplaceParameter(H460_FeatureID(id),con);
 }
@@ -930,7 +932,7 @@ H460_FeatureOID::H460_FeatureOID(OpalOID Identifier)
 {
 }
 
-H460_FeatureParameter & H460_FeatureOID::Add(const PString & id, H460_FeatureContent & con)
+H460_FeatureParameter & H460_FeatureOID::Add(const PString & id, const H460_FeatureContent & con)
 {
 	PString val = GetBase() + "." + id;
 	return AddParameter(new H460_FeatureID(OpalOID(val)),con);
@@ -942,7 +944,7 @@ void H460_FeatureOID::Remove(const PString & id)
 	RemoveParameter(H460_FeatureID(OpalOID(val)));
 }
 
-void H460_FeatureOID::Replace(const PString & id, H460_FeatureContent & con)
+void H460_FeatureOID::Replace(const PString & id, const H460_FeatureContent & con)
 {
 	PString val = GetBase() + "." + id;
 	ReplaceParameter(H460_FeatureID(OpalOID(val)),con);

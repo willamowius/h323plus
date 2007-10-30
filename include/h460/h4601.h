@@ -36,6 +36,9 @@
  * Contributor(s): ______________________________________.
  *
 * $Log$
+* Revision 1.1  2007/08/06 20:50:51  shorne
+* First commit of h323plus
+*
 *
 */
 
@@ -451,12 +454,12 @@ class H460_FeatureTable : public H460<H225_ArrayOf_EnumeratedParameter>
 		Add a parameter to the parameter list from the
 		two components which make up the parameter.
 	*/
-	H460_FeatureParameter & AddParameter(H460_FeatureID & id, H460_FeatureContent & con);
+	H460_FeatureParameter & AddParameter(const H460_FeatureID & id, const H460_FeatureContent & con);
 
 	/** AddParameter
 		Add parameter without any content
 	*/
-	H460_FeatureParameter & AddParameter(H460_FeatureID & id);
+	H460_FeatureParameter & AddParameter(const H460_FeatureID & id);
 
 	/** AddParameter
 		Add parameter from information received in a PDU
@@ -506,7 +509,7 @@ class H460_FeatureTable : public H460<H225_ArrayOf_EnumeratedParameter>
 		Replace the Feature contents of the unique Feature parameter 
 		with matching Feature ID in the parameter list.
 	*/
-    void ReplaceParameter(const H460_FeatureID & id, H460_FeatureContent & con);
+    void ReplaceParameter(const H460_FeatureID & id, const H460_FeatureContent & con);
 
 	/** ParameterCount
 		Number of Feature Parameters in the Parameter List.
@@ -628,7 +631,7 @@ class H460_Feature : public H460<H225_FeatureDescriptor>
   //@{
 	/** Add Parameter 
 	*/
-	virtual H460_FeatureParameter & AddParameter(H460_FeatureID * id, H460_FeatureContent & con);
+	virtual H460_FeatureParameter & AddParameter(H460_FeatureID * id, const H460_FeatureContent & con);
 
 	/** Add Parameter without contents 
 	*/
@@ -644,7 +647,7 @@ class H460_Feature : public H460<H225_FeatureDescriptor>
 
 	/** Replace Parameter
 	*/
-	virtual void ReplaceParameter(H460_FeatureID id, H460_FeatureContent & con);
+	virtual void ReplaceParameter(const H460_FeatureID id, const H460_FeatureContent & con);
 
 	/** Get Parameter at index id
 	*/
@@ -874,7 +877,7 @@ class H460_FeatureStd : public H460_Feature
   //@{
 	/** Add item 
 	*/
-	H460_FeatureParameter & Add(unsigned id, H460_FeatureContent & con);
+	H460_FeatureParameter & Add(unsigned id, const H460_FeatureContent & con);
 
 	/** Delete item 
 	*/
@@ -882,7 +885,7 @@ class H460_FeatureStd : public H460_Feature
 
 	/** Replace item 
 	*/
-	void Replace(unsigned id, H460_FeatureContent & con);
+	void Replace(unsigned id,const H460_FeatureContent & con);
 
 	/** Has Parameter
 	  */
@@ -917,15 +920,15 @@ class H460_FeatureNonStd : public H460_Feature
   //@{
 	/** Add item 
 	*/
-	H460_FeatureParameter & Add(PString id, H460_FeatureContent & con);
+	H460_FeatureParameter & Add(const PString id, const H460_FeatureContent & con);
 
 	/** Delete item 
 	*/
-	void Remove(PString id);
+	void Remove(const PString & id);
 
 	/** Replace item 
 	*/
-	void Replace(PString id, H460_FeatureContent & con);
+	void Replace( const PString & id, const H460_FeatureContent & con);
 
 	/** Has Parameter
 	  */
@@ -963,7 +966,7 @@ class H460_FeatureOID : public H460_Feature
   //@{
 	/** Add item 
 	*/
-	H460_FeatureParameter & Add(const PString & id, H460_FeatureContent & con);
+	H460_FeatureParameter & Add(const PString & id, const H460_FeatureContent & con);
 
 	/** Delete item 
 	*/
@@ -971,7 +974,7 @@ class H460_FeatureOID : public H460_Feature
 
 	/** Replace item 
 	*/
-	void Replace(const PString & id, H460_FeatureContent & con);
+	void Replace(const PString & id, const H460_FeatureContent & con);
 
 	/** Has Parameter
 	  */
