@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.2  2007/10/31 08:37:01  shorne
+# removed unused reference
+#
 # Revision 1.1  2007/08/06 20:51:02  shorne
 # First commit of h323plus
 #
@@ -303,9 +306,11 @@ endif
 
 ifdef H323_H460
 HEADER_FILES    += $(OH323_INCDIR)/h460/h460.h \
-                   $(OH323_INCDIR)/h460/h4601.h
+                   $(OH323_INCDIR)/h460/h4601.h \
+                   $(OH323_INCDIR)/h460/h4609.h
 
-COMMON_SOURCES  += $(OH323_SRCDIR)/h460/h4601.cxx
+COMMON_SOURCES  += $(OH323_SRCDIR)/h460/h4601.cxx \
+                   $(OH323_SRCDIR)/h460/h4609.cxx
 endif 
 
 ########### H.501
