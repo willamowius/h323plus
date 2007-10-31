@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.2  2007/10/31 08:36:05  willamowius
+# -lvich263 isn't used any more
+#
 # Revision 1.1  2007/08/06 20:50:48  shorne
 # First commit of h323plus
 #
@@ -181,21 +184,17 @@ LDFLAGS		+= @LDFLAGS@
 LDLIBS		+= @LDLIBS@
 ENDLDLIBS	:= @ENDLDLIBS@ $(ENDLDLIBS)
 
-H323_AVCODEC	     = @H323_AVCODEC@
-H323_RFC2190_AVCODEC = @H323_RFC2190_AVCODEC@
 NOAUDIOCODECS        = @NOAUDIOCODECS@
 NOVIDEO	             = @NOVIDEO@
 NOTRACE	             = @NOTRACE@
-H323_TRANSNEXUS_OSP  = @H323_TRANSNEXUS_OSP@
-H323_T38	     = @H323_T38@
-H323_T120	     = @H323_T120@
+H323_H224	     = @H323_H224@
 H323_H248	     = @H323_H248@
 H323_H450	     = @H323_H450@
-H323_H460        = @H323_H460@
+H323_H460            = @H323_H460@
 H323_H501	     = @H323_H501@
-H323_IXJ	     = @H323_IXJ@
-H323_VPB	     = @H323_VPB@
-OPAL_H224	     = @OPAL_H224@
+H323_T38	     = @H323_T38@
+H323_T120	     = @H323_T120@
+
 
 ifdef LIBRARY_MAKEFILE
 include $(PWLIBDIR)/make/unix.mak
@@ -238,21 +237,8 @@ LDLIBS	    := -l$(OH323_BASE) $(LDLIBS)
 
 STDCCFLAGS  += -I$(OH323_INCDIR)
 
-ifeq ($(H323_SYSTEM_SPEEX),1)
-ENDLDLIBS    := -lspeex $(ENDLDLIBS) 
-endif
-
 ifdef	OH323_SUPPRESS_H235
 STDCCFLAGS  += -DOH323_SUPPRESS_H235
-endif
-
-#Allow disabling of speex codec
-ifdef NO_SPEEX
-STDCCFLAGS += -DNO_SPEEX
-endif
-
-ifeq ($(H323_VPB),1)
-LDLIBS	   += -lvpb
 endif
 
 $(TARGET) :	$(OH323_LIBDIR)/$(OH323_FILE)
