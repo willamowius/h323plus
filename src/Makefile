@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.1  2007/08/06 20:51:02  shorne
+# First commit of h323plus
+#
 # Revision 1.136.2.5  2007/08/02 20:11:57  shorne
 # Added H.341 Support
 #
@@ -221,7 +224,7 @@ COMMON_SOURCES	+= $(OH323_SRCDIR)/h235auth.cxx
 HEADER_FILES	+= $(OH323_INCDIR)/rfc2833.h
 COMMON_SOURCES	+= $(OH323_SRCDIR)/rfc2833.cxx
 
-ifdef OPAL_H224
+ifdef H323_H224
 HEADER_FILES	+= $(OH323_INCDIR)/h224.h
 HEADER_FILES	+= $(OH323_INCDIR)/h224handler.h
 COMMON_SOURCES	+= $(OH323_SRCDIR)/h224.cxx
@@ -362,11 +365,6 @@ endif # NOAUDIOCODECS
 ifndef NOVIDEO
 ##### NOW PLUGINS
 endif # NOVIDEO
-
-ifdef H323_TRANSNEXUS_OSP
-COMMON_SOURCES	+=$(OH323_SRCDIR)/opalosp.cxx
-HEADER_FILES	+=$(OH323_INCDIR)/opalosp.h
-endif
 
 CLEAN_FILES	= $(OH323_LIB) 
 
