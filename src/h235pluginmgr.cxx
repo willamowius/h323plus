@@ -32,14 +32,20 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:05  shorne
+ * First commit of h323plus
+ *
  *
  *
 */
 
+#ifdef __GNUC__
+#pragma implementation "h235pluginmgr.h"
+#endif
+
 #include <ptlib.h>
 #include <ptclib/asner.h>
 
-// For OpenH323
 #include "h235pluginmgr.h"
 #include "h235plugin.h"
 #include <h225.h>
@@ -101,15 +107,15 @@ H235PluginAuthenticator::H235PluginAuthenticator(Pluginh235_Definition * _def)
 
 H235_ClearToken * H235PluginAuthenticator::CreateClearToken()
 {
-	BYTE * data;
+	BYTE data;
 	unsigned dataLen;
 	int ret = (*def->h235function)(def, NULL, H235_BuildClear,
-								  data, &dataLen,NULL,0);
+								  &data, &dataLen,NULL,0);
 
 	if (ret == 0)
 		return NULL;
 
-	PPER_Stream raw(data,dataLen);
+	PPER_Stream raw(&data,dataLen);
     H235_ClearToken * token = new H235_ClearToken;
 	token->Decode(raw);
     return token;
@@ -321,9 +327,6 @@ void h235PluginDeviceManager::Bootstrap()
 
 BOOL h235PluginDeviceManager::Registerh235(unsigned int count, void * _h235List)
 {
-  // make sure all non-timestamped codecs have the same concept of "now"
-  static time_t h235Now = ::time(NULL);
-
   Pluginh235_Definition * h235List = (Pluginh235_Definition *)_h235List;
 
   unsigned i;
