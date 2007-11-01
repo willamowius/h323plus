@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2007/10/30 04:23:45  shorne
+ * Corrections and Improvements for H.239 support
+ *
  * Revision 1.5  2007/10/25 21:08:04  shorne
  * Added support for HD Video devices
  *
@@ -2327,6 +2330,10 @@ void H323PluginCodecManager::OnShutdown()
   // unregister the plugin media formats
   OpalMediaFormatFactory::UnregisterAll();
 
+#ifdef H323_H239
+  H323ExtendedVideoFactory::UnregisterAll();
+#endif
+
   // unregister the plugin capabilities
   H323CapabilityFactory::UnregisterAll();
 }
@@ -2653,7 +2660,7 @@ void H323PluginCodecManager::CreateCapabilityAndMediaFormat(
           H323CapabilityFactory::Register(CreateCodecName(encoderCodec, TRUE), cap);
 #ifdef H323_H239
              if (extended)
-                H323ExtendedVideoFactory::Register(CreateCodecName(encoderCodec, TRUE), (H323VideoCapability *)cap);
+                H323ExtendedVideoFactory::Register(CreateCodecName(encoderCodec, FALSE), (H323VideoCapability *)cap);
 #endif
         }
         break;

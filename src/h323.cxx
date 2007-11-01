@@ -24,6 +24,10 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2007/10/19 19:54:17  shorne
+ * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
+ *  Robert
+ *
  * Revision 1.3  2007/10/16 17:01:33  shorne
  * Various little fixes
  *
@@ -316,7 +320,7 @@ const PTimeInterval MonitorCallStatusTime(0, 10); // Seconds
 
 class AggregatedH225Handle : public H323AggregatedH2x5Handle
 {
-  PCLASSINFO(AggregatedH225Handle, H323AggregatedH2x5Handle)
+//  PCLASSINFO(AggregatedH225Handle, H323AggregatedH2x5Handle)
   public:
     AggregatedH225Handle(H323Transport & _transport, H323Connection & _connection)
       : H323AggregatedH2x5Handle(_transport, _connection)
@@ -356,7 +360,7 @@ class AggregatedH225Handle : public H323AggregatedH2x5Handle
 
 class AggregatedH245Handle : public H323AggregatedH2x5Handle
 {
-  PCLASSINFO(AggregatedH245Handle, H323AggregatedH2x5Handle)
+//  PCLASSINFO(AggregatedH245Handle, H323AggregatedH2x5Handle)
   public:
     AggregatedH245Handle(H323Transport & _transport, H323Connection & _connection)
       : H323AggregatedH2x5Handle(_transport, _connection)
@@ -3915,6 +3919,10 @@ void H323Connection::OnSelectLogicalChannels()
       if (endpoint.CanAutoStartTransmitVideo())
         SelectDefaultLogicalChannel(RTP_Session::DefaultVideoSessionID);
 #endif
+#ifdef H323_H239
+      if (endpoint.CanAutoStartTransmitExtVideo())
+        SelectDefaultLogicalChannel(RTP_Session::DefaultExtVideoSessionID);
+#endif
 #ifdef H323_T38
       if (endpoint.CanAutoStartTransmitFax())
         SelectDefaultLogicalChannel(RTP_Session::DefaultFaxSessionID);
@@ -3930,8 +3938,14 @@ void H323Connection::OnSelectLogicalChannels()
                               endpoint.CanAutoStartTransmitVideo(),
                               endpoint.CanAutoStartReceiveVideo());
 #endif
+#ifdef H323_H239
+	  SelectFastStartChannels(RTP_Session::DefaultExtVideoSessionID,
+                              endpoint.CanAutoStartTransmitExtVideo(),
+                              endpoint.CanAutoStartReceiveExtVideo());
+#endif
 #ifdef H323_T38
-      SelectFastStartChannels(RTP_Session::DefaultFaxSessionID, endpoint.CanAutoStartTransmitFax(),
+      SelectFastStartChannels(RTP_Session::DefaultFaxSessionID, 
+		                      endpoint.CanAutoStartTransmitFax(),
                               endpoint.CanAutoStartReceiveFax());
 #endif
       break;
@@ -3946,6 +3960,12 @@ void H323Connection::OnSelectLogicalChannels()
         StartFastStartChannel(fastStartChannels, RTP_Session::DefaultVideoSessionID, H323Channel::IsTransmitter);
       if (endpoint.CanAutoStartReceiveVideo())
         StartFastStartChannel(fastStartChannels, RTP_Session::DefaultVideoSessionID, H323Channel::IsReceiver);
+#endif
+#ifdef H323_H239
+      if (endpoint.CanAutoStartTransmitExtVideo())
+        StartFastStartChannel(fastStartChannels, RTP_Session::DefaultExtVideoSessionID, H323Channel::IsTransmitter);
+      if (endpoint.CanAutoStartReceiveExtVideo())
+        StartFastStartChannel(fastStartChannels, RTP_Session::DefaultExtVideoSessionID, H323Channel::IsReceiver);
 #endif
 #ifdef H323_T38
       if (endpoint.CanAutoStartTransmitFax())
@@ -5699,19 +5719,20 @@ H460_FeatureSet * H323Connection::GetFeatureSet()
 
 #ifndef NO_H323_VIDEO
 #ifdef H323_H239
-BOOL H323Connection::OpenExtendedVideoSession(unsigned role, H323ChannelNumber & channelnum)
+BOOL H323Connection::OpenExtendedVideoSession(H323ChannelNumber & num)
 {
   BOOL applicationOpen = FALSE;
 
   for (PINDEX i = 0; i < localCapabilities.GetSize(); i++) {
     H323Capability & localCapability = localCapabilities[i];
-	if (localCapability.GetMainType() == H323Capability::e_ExtendVideo) {
+	if ((localCapability.GetMainType() == H323Capability::e_Video) && 
+		(localCapability.GetSubType() == H245_VideoCapability::e_extendedVideoCapability)) {
       H323ExtendedVideoCapability * remoteCapability = (H323ExtendedVideoCapability *)remoteCapabilities.FindCapability(localCapability);
       if (remoteCapability != NULL) {
         PTRACE(3, "H323\tApplication Available " << *remoteCapability);
          
 		for (PINDEX j = 0; j < remoteCapability->GetSize(); j++) {
-		  if (logicalChannels->Open(remoteCapability[j], OpalMediaFormat::DefaultExtVideoSessionID,channelnum,role)) {
+		  if (logicalChannels->Open(remoteCapability[j], OpalMediaFormat::DefaultExtVideoSessionID,num)) {
 		     applicationOpen = TRUE;
              break;
 		  }
@@ -5726,19 +5747,16 @@ BOOL H323Connection::OpenExtendedVideoSession(unsigned role, H323ChannelNumber &
   return applicationOpen;
 }
 
-void H323Connection::CloseExtendedVideoSession(const H323ChannelNumber & num)
+BOOL H323Connection::CloseExtendedVideoSession(const H323ChannelNumber & num)
 {
     CloseLogicalChannel(num,num.IsFromRemote());
+	return TRUE;
 }
 
 BOOL H323Connection::OpenExtendedVideoChannel(BOOL isEncoding,H323VideoCodec & codec)
 {
-  PTRACE(1, "Codec\tCould not open extended video channel for "
-         << (isEncoding ? "captur" : "display")
-         << "ing: not yet implemented");
-  return FALSE;
+   return endpoint.OpenExtendedVideoChannel(*this, isEncoding, codec);
 }
-
 #endif  // H323_H239
 #endif  // NO_H323_VIDEO
 

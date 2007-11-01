@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2007/10/16 17:01:33  shorne
+ * Various little fixes
+ *
  * Revision 1.3  2007/08/20 19:13:27  shorne
  * Added Generic Capability support. Fixed Linux compile errors
  *
@@ -1918,13 +1921,9 @@ class H323Connection : public PObject
 
 #ifdef H323_H239
 	/** Open an Extended Video Session
-	    This will open an Extended Video session with a session id of 
-		DefaultExtVideoSessionID. It return the channelnumber of the just opened channel.
+	    This will open an Extended Video session.
 	*/
-    virtual BOOL OpenExtendedVideoSession(
-		    unsigned role,                     ///< role 1-Presentation 2-Live
-		    H323ChannelNumber & channelnum     ///< Channel number of just opened channel
-	);
+    BOOL OpenExtendedVideoSession(H323ChannelNumber & num);
 
 	/** On Received an Extended Video OLC
 	    This indicates the receipt of Extended Video OLC
@@ -1937,7 +1936,7 @@ class H323Connection : public PObject
 	/** Close an Extended Video Session matching the channel number
 	    This will close the Extended Video matching the channel number (if open)
 	 */
-    virtual void CloseExtendedVideoSession(
+    virtual BOOL CloseExtendedVideoSession(
        const H323ChannelNumber & num     ///< Channel number to close.
 	);
 

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2007/10/25 21:08:04  shorne
+ * Added support for HD Video devices
+ *
  * Revision 1.4  2007/10/22 08:24:08  shorne
  * Fixed small bug
  *
@@ -1102,6 +1105,10 @@ H323EndPoint::H323EndPoint()
   autoStartReceiveVideo = autoStartTransmitVideo = TRUE;
 #endif
 
+#ifdef H323_H239
+  autoStartReceiveExtVideo = autoStartTransmitExtVideo = FALSE;
+#endif
+
 #ifdef H323_T38
   autoStartReceiveFax = autoStartTransmitFax = FALSE;
 #endif
@@ -1409,7 +1416,12 @@ PINDEX H323EndPoint::AddAllCapabilities(PINDEX descriptorNum,
                                         PINDEX simultaneous,
                                         const PString & name)
 {
-  return capabilities.AddAllCapabilities(descriptorNum, simultaneous, name);
+    PINDEX reply = simultaneous;
+	reply = capabilities.AddAllCapabilities(descriptorNum, simultaneous, name);
+#ifdef H323_H239
+	AddAllExtendedVideoCapabilities(descriptorNum, simultaneous);
+#endif
+  return reply;
 }
 
 
@@ -1420,6 +1432,35 @@ void H323EndPoint::AddAllUserInputCapabilities(PINDEX descriptorNum,
 }
 
 #ifdef H323_H239
+BOOL H323EndPoint::OpenExtendedVideoSession(const PString & token,H323ChannelNumber & num)
+{
+  H323Connection * connection = FindConnectionWithLock(token);
+ 
+  BOOL success = FALSE;
+  if (connection != NULL) {
+    success = connection->OpenExtendedVideoSession(num);
+    connection->Unlock();
+  }
+
+  return success;
+}
+
+BOOL H323EndPoint::CloseExtendedVideoSession(
+		                       const PString & token,         
+		                       const H323ChannelNumber & num  
+	                           )
+{
+  H323Connection * connection = FindConnectionWithLock(token);
+ 
+  BOOL success = FALSE;
+  if (connection != NULL) {
+    success = connection->CloseExtendedVideoSession(num);
+    connection->Unlock();
+  }
+
+  return success;
+}
+
 void H323EndPoint::AddAllExtendedVideoCapabilities(PINDEX descriptorNum,
                                                    PINDEX simultaneous)
 {
@@ -2989,6 +3030,18 @@ BOOL H323EndPoint::OpenVideoChannel(H323Connection & /*connection*/,
          << "ing: not yet implemented");
   return FALSE;
 }
+
+#ifdef H323_H239
+BOOL H323EndPoint::OpenExtendedVideoChannel(H323Connection & /*connection*/,
+											BOOL PTRACE_PARAM(isEncoding),
+											H323VideoCodec & /*codec*/)
+{
+  PTRACE(1, "Codec\tCould not open extended video channel for "
+         << (isEncoding ? "captur" : "display")
+         << "ing: not yet implemented");
+  return FALSE;
+}
+#endif // H323_H239
 #endif // NO_H323_VIDEO
 
 

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2007/10/25 21:08:03  shorne
+ * Added support for HD Video devices
+ *
  * Revision 1.2  2007/08/20 19:13:27  shorne
  * Added Generic Capability support. Fixed Linux compile errors
  *
@@ -550,6 +553,18 @@ class H323EndPoint : public PObject
     );
 
 #ifdef H323_H239
+    /** Open Extended Video Session
+	  */
+	BOOL OpenExtendedVideoSession(
+		const PString & token,   ///< Connection Token
+		H323ChannelNumber & num  ///< Opened Channel number
+	);
+
+    BOOL CloseExtendedVideoSession(
+		const PString & token,         ///< Connection Token
+		const H323ChannelNumber & num  ///< channel number
+	);
+
     /**Add all Extended Video capabilities to this endpoints capability table.
       */
     void AddAllExtendedVideoCapabilities(
@@ -1398,6 +1413,20 @@ class H323EndPoint : public PObject
       BOOL isEncoding,              ///< Direction of data flow
       H323VideoCodec & codec        ///< codec doing the opening
     );
+
+#ifdef H323_H239
+    /**Open a channel for use by an application share application.
+       The H323VideoCodec class will use this function to open the channel to
+       read/write image data (which is one frame in a video stream - YUV411 format).
+
+       The default function creates a PVideoChannel using the member variables.
+      */
+    virtual BOOL OpenExtendedVideoChannel(
+      H323Connection & connection,  ///< Connection for the channel
+      BOOL isEncoding,              ///< Direction of data flow
+      H323VideoCodec & codec        ///< codec doing the opening
+    );
+#endif // H323_H239
 #endif // NO_H323_VIDEO
 
     /**Callback from the RTP session for statistics monitoring.
@@ -1906,6 +1935,17 @@ class H323EndPoint : public PObject
 
 #endif  // H323_VIDEO
 
+#ifdef H323_H239
+    /**See if should auto-start receive extended Video channels on connection.
+     */
+    BOOL CanAutoStartReceiveExtVideo() const { return autoStartReceiveExtVideo; }
+
+    /**See if should auto-start transmit extended Video channels on connection.
+     */
+    BOOL CanAutoStartTransmitExtVideo() const { return autoStartTransmitExtVideo; }
+
+#endif
+
 #ifdef H323_T38
 
     /**See if should auto-start receive fax channels on connection.
@@ -2371,6 +2411,11 @@ class H323EndPoint : public PObject
     PString     videoChannelRecordDevice;
     BOOL        autoStartReceiveVideo;
     BOOL        autoStartTransmitVideo;
+
+#ifdef H323_H239
+    BOOL        autoStartReceiveExtVideo;
+    BOOL        autoStartTransmitExtVideo;
+#endif // H323_H239
 #endif // H323_VIDEO
 
 #ifdef H323_T38

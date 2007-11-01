@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2007/10/30 04:23:45  shorne
+ * Corrections and Improvements for H.239 support
+ *
  * Revision 1.4  2007/10/25 21:08:03  shorne
  * Added support for HD Video devices
  *
@@ -329,6 +332,8 @@ class H323Capability : public PObject
       e_UserInput,
       /// Video Extention
 	  e_ExtendVideo,
+	  /// Generic Control
+	  e_GenericControl,
       /// Conference Control
 	  e_ConferenceControl,
       /// Count of main types
@@ -538,7 +543,6 @@ class H323Capability : public PObject
       e_Transmit,
       e_ReceiveAndTransmit,
       e_NoDirection,
-	  e_GenericControl,
       NumCapabilityDirections
     };
 
@@ -2507,6 +2511,13 @@ class H323ExtendedVideoCapability : public H323Capability,
      */
 	virtual unsigned GetSubType() const;
 
+    /**Get the default RTP session.
+       This function gets the default RTP session ID for the capability
+       type. 
+       returns H323Capability::DefaultExtVideoSessionID .
+      */
+    virtual unsigned GetDefaultSessionID() const;
+
     /**Print Extended Capabilities list
 	 */
     virtual void PrintOn(ostream & strm) const;
@@ -2676,8 +2687,14 @@ class H323CodecExtendedVideoCapability : public H323ExtendedVideoCapability
     H323CodecExtendedVideoCapability();
     ~H323CodecExtendedVideoCapability();
 
+    virtual H323Capability::MainTypes GetMainType() const;
+
+	virtual unsigned GetSubType() const;
+
     virtual PObject * Clone() const
     { return new H323CodecExtendedVideoCapability(*this); }
+
+	virtual void AddCapability(H323Capability * capability);
 
     virtual BOOL OnReceivedGenericPDU(
 		const H245_GenericCapability &pdu
@@ -2685,6 +2702,8 @@ class H323CodecExtendedVideoCapability : public H323ExtendedVideoCapability
 
 	virtual PString GetFormatName() const
     { return "H.239 Capabilities";}
+
+    virtual BOOL IsMatch(const PASN_Choice & subTypePDU) const;
 
     virtual BOOL OnSendingPDU(
 		H245_Capability & cap
@@ -2745,7 +2764,7 @@ class H323_ConferenceControlCapability : public H323Capability
     /**Get the sub-type of the capability. This is a code dependent on the
        main type of the capability.
      */
-    virtual unsigned  GetSubType()  const;
+    virtual unsigned GetSubType()  const;
 
     /**Get the name of the media data format this class represents.
      */
