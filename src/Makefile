@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.3  2007/10/31 09:52:35  shorne
+# added missing reference to H460.9
+#
 # Revision 1.2  2007/10/31 08:37:01  shorne
 # removed unused reference
 #
@@ -224,6 +227,8 @@ HEADER_FILES	+= $(OH323_INCDIR)/h323trans.h
 COMMON_SOURCES	+= $(OH323_SRCDIR)/h323trans.cxx
 HEADER_FILES	+= $(OH323_INCDIR)/h235auth.h
 COMMON_SOURCES	+= $(OH323_SRCDIR)/h235auth.cxx
+HEADER_FILES	+= $(OH323_INCDIR)/h235pluginmgr.h
+COMMON_SOURCES	+= $(OH323_SRCDIR)/h235pluginmgr.cxx
 HEADER_FILES	+= $(OH323_INCDIR)/rfc2833.h
 COMMON_SOURCES	+= $(OH323_SRCDIR)/rfc2833.cxx
 
@@ -254,6 +259,15 @@ endif
 ifdef HAS_VXML
 HEADER_FILES	+= $(OH323_INCDIR)/opalvxml.h
 COMMON_SOURCES	+= $(OH323_SRCDIR)/opalvxml.cxx
+endif
+
+########### H.230
+
+ifdef H323_H230
+HEADER_FILES	+= $(OH323_INCDIR))/h230/h230.h \
+                     $(OH323_INCDIR))/h230/OID2.h
+COMMON_SOURCES	+= $(OH323_SRCDIR))/h230/h230.cxx \
+                     $(OH323_INCDIR))/h230/OID2.cxx
 endif
 
 ########### H.248

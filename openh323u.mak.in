@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.3  2007/10/31 08:56:44  shorne
+# remove obsolete items
+#
 # Revision 1.2  2007/10/31 08:36:05  willamowius
 # -lvich263 isn't used any more
 #
@@ -188,7 +191,11 @@ NOAUDIOCODECS        = @NOAUDIOCODECS@
 NOVIDEO	             = @NOVIDEO@
 NOTRACE	             = @NOTRACE@
 H323_H224	     = @H323_H224@
+H323_H230	     = @H323_H230@
+H323_H239	     = @H323_H239@
 H323_H248	     = @H323_H248@
+H323_H249	     = @H323_H249@
+H323_H350	     = @H323_H350@
 H323_H450	     = @H323_H450@
 H323_H460            = @H323_H460@
 H323_H501	     = @H323_H501@
