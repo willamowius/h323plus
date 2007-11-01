@@ -20,6 +20,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:07  shorne
+ * First commit of h323plus
+ *
  * Revision 1.2  2006/06/23 06:02:44  csoutheren
  * Added missing declarations for H.224 backport
  *
@@ -491,3 +494,4 @@ BOOL H323_H224Channel::ExtractTransport(const H245_TransportAddress & pdu,
 }
 
 #endif
+

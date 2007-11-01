@@ -19,6 +19,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:05  shorne
+ * First commit of h323plus
+ *
  * Revision 1.1  2006/06/22 11:07:23  shorne
  * Backport of FECC (H.224) from Opal
  *
@@ -692,3 +695,4 @@ void OpalH224ReceiverThread::Close()
 }
 
 #endif // H323_H224
+
