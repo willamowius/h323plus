@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/11/01 22:26:27  shorne
+ * fix linux compile warnings
+ *
  * Revision 1.1  2007/08/06 20:51:05  shorne
  * First commit of h323plus
  *
@@ -123,14 +126,14 @@ H235_ClearToken * H235PluginAuthenticator::CreateClearToken()
 
 H225_CryptoH323Token * H235PluginAuthenticator::CreateCryptoToken()
 {
-	BYTE * data;
+	BYTE data;
 	unsigned dataLen;
 	int ret = (*def->h235function)(def, NULL, H235_BuildCrypto,
-								  data, &dataLen,NULL,0);
+								  &data, &dataLen,NULL,0);
 	if (ret == 0)
 		return NULL;
 
-	PPER_Stream raw(data,dataLen);
+	PPER_Stream raw(&data,dataLen);
     H225_CryptoH323Token * token = new H225_CryptoH323Token;
 	token->Decode(raw);
     return token;
