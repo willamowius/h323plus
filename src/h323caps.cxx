@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2007/11/01 20:17:33  shorne
+ * updates for H.239 support
+ *
  * Revision 1.8  2007/10/30 04:23:45  shorne
  * Corrections and Improvements for H.239 support
  *
@@ -3428,8 +3431,7 @@ BOOL H323Capabilities::RemoveCapability(H323Capability::MainTypes capabilityType
 BOOL H323Capabilities::SetVideoFrameSize(H323Capability::CapabilityFrameSize frameSize, int frameUnits) 
 { 
     // Remove the unmatching capabilities
-    if ((frameSize != H323Capability::cif16MPI) || (frameSize != H323Capability::p720MPI)) 
-		                 Remove("*-CIF16*");
+    if (frameSize != H323Capability::cif16MPI) Remove("*-CIF16*");
     if (frameSize != H323Capability::cif4MPI) Remove("*-CIF4*");
 	if (frameSize != H323Capability::cifMPI) Remove("*-CIF*");
     if (frameSize != H323Capability::qcifMPI) Remove("*-QCIF*");
@@ -3437,7 +3439,9 @@ BOOL H323Capabilities::SetVideoFrameSize(H323Capability::CapabilityFrameSize fra
 
 	// Remove Generic Capabilities
 	PStringList genericCaps;
-	if (frameSize != H323Capability::i1080MPI) {
+	if ((frameSize != H323Capability::i1080MPI) ||
+	    (frameSize != H323Capability::p720MPI) ||
+	    (frameSize != H323Capability::i480MPI)) {
        	for (PINDEX i = 0; i < table.GetSize(); i++) {
 	     H323Capability & capability = table[i];
 		  if ((capability.GetMainType() == H323Capability::e_Video) &&

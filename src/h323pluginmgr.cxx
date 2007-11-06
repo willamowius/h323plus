@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2007/11/01 20:17:33  shorne
+ * updates for H.239 support
+ *
  * Revision 1.6  2007/10/30 04:23:45  shorne
  * Corrections and Improvements for H.239 support
  *
@@ -414,6 +417,7 @@ static const char * qcifMPI_tag                           = "QCIF MPI";
 static const char * cifMPI_tag                            = "CIF MPI";
 static const char * cif4MPI_tag                           = "CIF4 MPI";
 static const char * cif16MPI_tag                          = "CIF16 MPI";
+static const char * i480MPI_tag                           = "I480 MPI";
 static const char * p720MPI_tag                           = "720P MPI";
 static const char * i1080MPI_tag                          = "I1080 MPI";
 
@@ -2124,7 +2128,8 @@ class H323VideoPluginCapability : public H323VideoCapability,
              case   cifMPI : param = cifMPI_tag; break;
              case  cif4MPI : param = cif4MPI_tag; break;
              case cif16MPI : param = cif16MPI_tag; break;
-             case  p720MPI : param = p720MPI_tag; break;
+			 case  i480MPI : param = cif4MPI_tag; break;
+             case  p720MPI : param = cif16MPI_tag; break;
              case i1080MPI : param = i1080MPI_tag; break;
              default: return FALSE;
          }
@@ -3393,11 +3398,14 @@ BOOL H323CodecPluginGenericVideoCapability::SetMaxFrameSize(CapabilityFrameSize 
 {
     PString param;
     switch (framesize) {
-        case sqcifMPI  : param = sqcifMPI_tag;
-        case  qcifMPI  : param =  qcifMPI_tag;
-        case   cifMPI  : param =   cifMPI_tag;
-        case   cif4MPI : param =   cif4MPI_tag;
-        case   cif16MPI: param =   cif16MPI_tag;
+        case sqcifMPI  : param = sqcifMPI_tag; break;
+        case  qcifMPI  : param =  qcifMPI_tag; break;
+        case   cifMPI  : param =   cifMPI_tag; break;
+        case   cif4MPI : param =   cif4MPI_tag; break;
+        case   cif16MPI: param =   cif16MPI_tag; break;
+		case  i480MPI  : param =   cif4MPI_tag; break;
+        case  p720MPI  : param =   cif16MPI_tag; break;
+        case i1080MPI  : param =  i1080MPI_tag; break; 
         default: return FALSE;
     }
 

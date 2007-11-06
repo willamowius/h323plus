@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2007/10/30 04:23:43  shorne
+ * Corrections and Improvements for H.239 support
+ *
  * Revision 1.2  2007/10/19 19:53:43  shorne
  * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
  *  Robert
@@ -128,6 +131,10 @@ extern "C" {
 #endif
 
 #include <time.h>
+
+// indicator the this is h323plus version of the plugin codec
+// Most unfortunate!
+#define H323PlusLib    1  
 
 #ifdef _MSC_VER
 #pragma warning(disable:4201)

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2007/11/01 20:17:30  shorne
+ * updates for H.239 support
+ *
  * Revision 1.5  2007/10/30 04:23:45  shorne
  * Corrections and Improvements for H.239 support
  *
@@ -415,6 +418,7 @@ class H323Capability : public PObject
 		 cifMPI,
 		 cif4MPI,
 		 cif16MPI,
+		 i480MPI,
 		 p720MPI,
 		 i1080MPI
 	 };
