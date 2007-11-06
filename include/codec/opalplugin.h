@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2007/11/06 17:43:33  shorne
+ * added i480 standard framesize
+ *
  * Revision 1.3  2007/10/30 04:23:43  shorne
  * Corrections and Improvements for H.239 support
  *
@@ -134,7 +137,7 @@ extern "C" {
 
 // indicator the this is h323plus version of the plugin codec
 // Most unfortunate!
-#define H323PlusLib    1  
+#define h323pluslib    1  
 
 #ifdef _MSC_VER
 #pragma warning(disable:4201)
