@@ -65,23 +65,16 @@ dnl ########################################################################
 dnl look for ptlib, use a preference order of explicit PWLIBDIR, directory
 dnl at same level, home directory, /usr/local or /usr.
 
-if test "${PWLIBDIR:-unset}" != "unset" ; then
-  AC_CHECK_FILE(${PWLIBDIR}/version.h, HAS_PTLIB=1)
-fi
 if test "${HAS_PTLIB:-unset}" = "unset" ; then
-  AC_CHECK_FILE(${OPENH323DIR}/../pwlib/version.h, HAS_PTLIB=1)
   if test "${HAS_PTLIB:-unset}" != "unset" ; then
     PWLIBDIR="${OPENH323DIR}/../pwlib"
   else
-    AC_CHECK_FILE(${HOME}/pwlib/include/ptlib.h, HAS_PTLIB=1)
     if test "${HAS_PTLIB:-unset}" != "unset" ; then
       PWLIBDIR="${HOME}/pwlib"
     else
-      AC_CHECK_FILE(/usr/local/include/ptlib.h, HAS_PTLIB=1)
       if test "${HAS_PTLIB:-unset}" != "unset" ; then
         AC_PATH_PROG(PTLIB_CONFIG, ptlib-config, , /usr/local/bin)
       else
-        AC_CHECK_FILE(/usr/include/ptlib.h, HAS_PTLIB=1)
         if test "${HAS_PTLIB:-unset}" != "unset" ; then
           AC_PATH_PROG(PTLIB_CONFIG, ptlib-config, , /usr/share/pwlib/make/)
         fi
