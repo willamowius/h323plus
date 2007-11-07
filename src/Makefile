@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.5  2007/11/07 10:03:54  shorne
+# fix h230 compile error
+#
 # Revision 1.4  2007/11/01 19:44:24  shorne
 # *** empty log message ***
 #
@@ -396,6 +399,7 @@ endif
 
 
 VPATH_CXX := $(OH323_SRCDIR) \
+             $(OH323_SRCDIR)/h230 \
              $(OH323_SRCDIR)/h341 \
              $(OH323_SRCDIR)/h350 \
              $(OH323_SRCDIR)/h450 \
