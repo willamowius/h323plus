@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.4  2007/11/01 19:44:24  shorne
+# *** empty log message ***
+#
 # Revision 1.3  2007/10/31 09:52:35  shorne
 # added missing reference to H460.9
 #
@@ -264,10 +267,10 @@ endif
 ########### H.230
 
 ifdef H323_H230
-HEADER_FILES	+= $(OH323_INCDIR))/h230/h230.h \
-                     $(OH323_INCDIR))/h230/OID2.h
-COMMON_SOURCES	+= $(OH323_SRCDIR))/h230/h230.cxx \
-                     $(OH323_INCDIR))/h230/OID2.cxx
+HEADER_FILES	+= $(OH323_INCDIR)/h230/h230.h \
+                     $(OH323_INCDIR)/h230/OID2.h
+COMMON_SOURCES	+= $(OH323_SRCDIR)/h230/h230.cxx \
+                     $(OH323_INCDIR)/h230/OID2.cxx
 endif
 
 ########### H.248
