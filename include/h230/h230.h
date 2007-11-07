@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/10/18 17:44:12  shorne
+ * Small fixes during test compile
+ *
  * Revision 1.1  2007/10/16 16:35:44  shorne
  * Added H.230 Support
  *
@@ -223,7 +226,7 @@ public:
     BOOL OnFunctionNotSupportedResponse(const GCC_FunctionNotSupportedResponse & pdu);
 
 
-    BOOL H230Control::ReceivedPACKPDU(unsigned msgId, unsigned paramId, const H245_ParameterValue & value);
+    BOOL ReceivedPACKPDU(unsigned msgId, unsigned paramId, const H245_ParameterValue & value);
 
 	BOOL SendPACKGeneric(int msgid, PASN_OctetString & rawpdu);
 	BOOL OnReceivePACKRequest(const PASN_OctetString & rawpdu);

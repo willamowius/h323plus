@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/10/18 17:44:21  shorne
+ * Small fixes during test compile
+ *
  * Revision 1.1  2007/10/16 16:35:44  shorne
  * Added H.230 Support
  *
@@ -1646,3 +1649,4 @@ void H230Control_EndPoint::OnUserEnquiryResponse(PList<userInfo> info)
 }
 
 #endif
+
