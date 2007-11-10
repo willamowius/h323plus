@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2007/11/06 17:43:36  shorne
+ * added i480 standard framesize
+ *
  * Revision 1.9  2007/11/01 20:17:33  shorne
  * updates for H.239 support
  *
@@ -1831,12 +1834,12 @@ PObject::Comparison H323ExtendedVideoCapability::Compare(const PObject & obj) co
 
 H323Capability::MainTypes H323ExtendedVideoCapability::GetMainType() const
 {
-  return e_ExtendVideo;
+	return H323Capability::e_GenericControl;
 }
 
 unsigned H323ExtendedVideoCapability::GetSubType() const
 {
-  return H245_VideoCapability::e_extendedVideoCapability;
+	return 0; // Not used
 }
 
 unsigned H323ExtendedVideoCapability::GetDefaultSessionID() const
@@ -3218,7 +3221,7 @@ H323Capability * H323Capabilities::FindCapability(const H245_Capability & cap) c
       return FindCapability(H323Capability::e_UserInput, SignalToneRFC2833_SubType);
 
 	case H245_Capability::e_genericControlCapability :
-		return FindCapability(H323Capability::e_GenericControl);
+	  return FindCapability(H323Capability::e_GenericControl);
 
 	case H245_Capability::e_conferenceCapability :
 	  return FindCapability(H323Capability::e_ConferenceControl);
@@ -3386,7 +3389,9 @@ H323Capability * H323Capabilities::FindCapability(H323Capability::MainTypes main
 H323Capability * H323Capabilities::FindCapability(H323Capability::MainTypes mainType,
                                                   unsigned subType) const
 {
-  PTRACE(4, "H323\tFindCapability: " << mainType << " subtype=" << subType);
+  if (subType != UINT_MAX) {
+     PTRACE(4, "H323\tFindCapability: " << mainType << " subtype=" << subType);
+  }
 
   for (PINDEX i = 0; i < table.GetSize(); i++) {
     H323Capability & capability = table[i];
