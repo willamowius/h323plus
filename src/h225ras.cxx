@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:05  shorne
+ * First commit of h323plus
+ *
  * Revision 1.60.2.3  2007/07/23 08:17:07  shorne
  * Expanded H.460 Support
  *
@@ -621,6 +624,7 @@ static void SendFeatureSet(const H225_RAS * ras, unsigned code, PDUType & pdu)
 		return;
 
      switch (code) {
+#ifdef H323_H460
         case H460_MessageType::e_gatekeeperRequest:
         case H460_MessageType::e_gatekeeperConfirm:
         case H460_MessageType::e_gatekeeperReject:
@@ -632,6 +636,7 @@ static void SendFeatureSet(const H225_RAS * ras, unsigned code, PDUType & pdu)
             pdu.IncludeOptionalField(PDUType::e_featureSet);
 			pdu.m_featureSet = fs;
             break;
+#endif
         default:
 		  if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
 			pdu.IncludeOptionalField(PDUType::e_genericData);
