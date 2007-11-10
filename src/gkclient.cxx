@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/10/16 17:02:47  shorne
+ * Fix for H.235.1 on full reregistration
+ *
  * Revision 1.1  2007/08/06 20:51:04  shorne
  * First commit of h323plus
  *
@@ -1481,7 +1484,9 @@ BOOL H323Gatekeeper::AdmissionRequest(H323Connection & connection,
   arq.m_conferenceID = connection.GetConferenceIdentifier();
   arq.m_callIdentifier.m_guid = connection.GetCallIdentifier();
 
+#ifdef H323_H450
   connection.SetCallLinkage(pdu);
+#endif
 
   AdmissionRequestResponseInfo info(response, connection);
   info.accessTokenOID1 = connection.GetGkAccessTokenOID();
