@@ -27,6 +27,10 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/10/19 19:54:17  shorne
+ * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
+ *  Robert
+ *
  * Revision 1.1  2007/08/06 20:51:03  shorne
  * First commit of h323plus
  *
@@ -369,13 +373,15 @@
 #ifdef H323_AEC
 #include <ptclib/paec.h>
 
-#ifdef _DEBUG
-#pragma comment(lib,"paecd.lib")
+#if _DEBUG
+  #pragma comment(lib,"paecd.lib")
+#elif PTRACING
+  #pragma comment(lib,"paec.lib")
 #else
-#pragma comment(lib,"paec.lib")
+  #pragma comment(lib,"paecn.lib")
 #endif
+#endif // H323_AEC
 
-#endif
 
 #define new PNEW
 
