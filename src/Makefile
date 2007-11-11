@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.6  2007/11/07 14:47:47  shorne
+# h230 fix again!
+#
 # Revision 1.5  2007/11/07 10:03:54  shorne
 # fix h230 compile error
 #
@@ -270,10 +273,12 @@ endif
 ########### H.230
 
 ifdef H323_H230
-HEADER_FILES	+= $(OH323_INCDIR)/h230/h230.h \
-                     $(OH323_INCDIR)/h230/OID2.h
-COMMON_SOURCES	+= $(OH323_SRCDIR)/h230/h230.cxx \
-                     $(OH323_INCDIR)/h230/OID2.cxx
+HEADER_FILES	+= $(OH323_INCDIR)/gccpdu.h \
+                   $(OH323_INCDIR)/h230/h230.h \
+                   $(OH323_INCDIR)/h230/OID2.h
+COMMON_SOURCES	+= $(OH323_SRCDIR)/gccpdu.cxx \
+                   $(OH323_SRCDIR)/h230/h230.cxx \
+                   $(OH323_INCDIR)/h230/OID2.cxx
 endif
 
 ########### H.248
