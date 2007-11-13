@@ -3087,12 +3087,13 @@ else
   test "$cross_compiling" = yes &&
   { { echo "$as_me:$LINENO: error: cannot check for file existence when cross compiling" >&5
 echo "$as_me: error: cannot check for file existence when cross compiling" >&2;}
-   { (exit 1); exit 1; }; }
-if test -r "${PWLIBDIR}/version.h"; then
+   #{ (exit 1); exit 1; }; }
+   }
+#if test -r "${PWLIBDIR}/version.h"; then
   eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
+#else
+#  eval "$as_ac_File=no"
+#fi
 fi
 echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_File'}'`" >&5
 echo "${ECHO_T}`eval echo '${'$as_ac_File'}'`" >&6
