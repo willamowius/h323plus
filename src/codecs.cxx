@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2007/11/10 13:33:51  shorne
+ * Fix reference to the correct AEC library based on the type of build
+ *
  * Revision 1.2  2007/10/19 19:54:17  shorne
  * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
  *  Robert
@@ -779,6 +782,7 @@ void H323VideoCodec::SendMiscCommand(unsigned command)
 H323AudioCodec::H323AudioCodec(const OpalMediaFormat & fmt, Direction dir)
   : H323Codec(fmt, dir)
 {
+  framesReceived = 0;
   samplesPerFrame = (mediaFormat.GetFrameTime() * mediaFormat.GetTimeUnits()) / 8;
   if (samplesPerFrame == 0)
     samplesPerFrame = 8; // Default for non-frame based codecs.
