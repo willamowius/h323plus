@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2007/11/10 13:37:32  shorne
+ * Corrected Conference Control capability type and resolved error with PTRACE on release build
+ *
  * Revision 1.10  2007/11/06 17:43:36  shorne
  * added i480 standard framesize
  *
@@ -1157,7 +1160,7 @@ PObject::Comparison H323GenericCapabilityInfo::CompareInfo(const H323GenericCapa
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef NO_H323_AUDIO_CODECS
-
+int H323AudioCapability::DSCPvalue = PQoS::guaranteedDSCP;
 H323AudioCapability::H323AudioCapability(unsigned rx, unsigned tx)
 {
   rxFramesInPacket = rx;
@@ -1170,7 +1173,7 @@ H323AudioCapability::H323AudioCapability(unsigned rx, unsigned tx)
 	rtpqos->dataQoS.SetAvgBytesPerSec(7000);
 	rtpqos->dataQoS.SetMaxFrameBytes(680);
 	rtpqos->dataQoS.SetPeakBytesPerSec(13750);
-	rtpqos->dataQoS.SetDSCP(PQoS::guaranteedDSCP);
+	rtpqos->dataQoS.SetDSCP(DSCPvalue);
 
 	rtpqos->ctrlQoS.SetWinServiceType(SERVICETYPE_CONTROLLEDLOAD);
 	rtpqos->ctrlQoS.SetDSCP(PQoS::controlledLoadDSCP); 
@@ -1211,6 +1214,16 @@ unsigned H323AudioCapability::GetRxFramesInPacket() const
   return rxFramesInPacket;
 }
 
+void H323AudioCapability::SetDSCPvalue(int newValue) 
+{ 
+	if (newValue < 64)
+		DSCPvalue = newValue;
+}
+
+int H323AudioCapability::GetDSCPvalue() 
+{ 
+	return DSCPvalue; 
+} 
 
 BOOL H323AudioCapability::OnSendingPDU(H245_Capability & cap) const
 {
@@ -1551,7 +1564,7 @@ BOOL H323NonStandardAudioCapability::IsMatch(const PASN_Choice & subTypePDU) con
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef NO_H323_VIDEO
-
+int H323VideoCapability::DSCPvalue = PQoS::controlledLoadDSCP;
 H323VideoCapability::H323VideoCapability()
 {
 #if P_HAS_QOS
@@ -1560,7 +1573,7 @@ H323VideoCapability::H323VideoCapability()
 	rtpqos->dataQoS.SetWinServiceType(SERVICETYPE_CONTROLLEDLOAD);
 	rtpqos->dataQoS.SetAvgBytesPerSec(16000);
 	rtpqos->dataQoS.SetMaxFrameBytes(8192);
-	rtpqos->dataQoS.SetDSCP(PQoS::controlledLoadDSCP);
+	rtpqos->dataQoS.SetDSCP(DSCPvalue);
 
 	rtpqos->ctrlQoS.SetWinServiceType(SERVICETYPE_CONTROLLEDLOAD);
 	rtpqos->ctrlQoS.SetDSCP(PQoS::controlledLoadDSCP); 
@@ -1654,6 +1667,16 @@ unsigned H323VideoCapability::GetDefaultSessionID() const
   return RTP_Session::DefaultVideoSessionID;
 }
 
+void H323VideoCapability::SetDSCPvalue(int newValue) 
+{ 
+	if (newValue < 64)
+		DSCPvalue = newValue;
+}
+
+int H323VideoCapability::GetDSCPvalue() 
+{ 
+	return DSCPvalue; 
+}
 
 /////////////////////////////////////////////////////////////////////////////
 

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2007/11/06 17:43:36  shorne
+ * added i480 standard framesize
+ *
  * Revision 1.6  2007/11/01 20:17:30  shorne
  * updates for H.239 support
  *
@@ -847,7 +850,15 @@ class H323AudioCapability : public H323RealTimeCapability
        The default behaviour sends the rxFramesInPacket variable.
      */
     virtual unsigned GetRxFramesInPacket() const;
-  //@}
+
+	/** Set Audio DiffServ Value
+	    Use This to override the default DSCP value
+	  */
+	static void SetDSCPvalue(int newValue);
+
+	/** Get the current Audio DSCP value
+	  */
+	static int GetDSCPvalue(); 
 
   /**@name Protocol manipulation */
   //@{
@@ -968,6 +979,7 @@ class H323AudioCapability : public H323RealTimeCapability
   protected:
     unsigned rxFramesInPacket;
     unsigned txFramesInPacket;
+	static int DSCPvalue;          ///< DiffServ Value
 };
 
 
@@ -1251,6 +1263,15 @@ class H323VideoCapability : public H323RealTimeCapability
        based capability.
       */
     virtual unsigned GetDefaultSessionID() const;
+
+	/** Set Video DiffServ Value
+	    Use This to override the default DSCP value
+	  */
+	static void SetDSCPvalue(int newValue);
+
+	/** Get the current Video DSCP value
+	  */
+	static int GetDSCPvalue(); 
   //@}
 
   /**@name Protocol manipulation */
@@ -1358,6 +1379,9 @@ class H323VideoCapability : public H323RealTimeCapability
       CommandType type                   ///<  Type of PDU to send in
     );
   //@}
+
+  protected:
+	  static int DSCPvalue;             ///< Video DSCP Value
 };
 
 
