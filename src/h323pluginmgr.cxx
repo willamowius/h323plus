@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2007/11/06 17:43:36  shorne
+ * added i480 standard framesize
+ *
  * Revision 1.7  2007/11/01 20:17:33  shorne
  * updates for H.239 support
  *
@@ -1526,7 +1529,7 @@ H323PluginVideoCodec::H323PluginVideoCodec(const OpalMediaFormat & fmt, Directio
     // Need to allocate buffer to the maximum framesize statically
     // and clear the memory in the destructor to avoid segfault in destructor
     bytesPerFrame = (maxHeight * maxWidth * 3)/2;
-    bufferRTP = RTP_DataFrame(sizeof(PluginCodec_Video_FrameHeader) + bytesPerFrame,0);
+    bufferRTP = RTP_DataFrame(sizeof(PluginCodec_Video_FrameHeader) + bytesPerFrame, TRUE);
 
     PluginCodec_ControlDefn * ctl = GetCodecControl(codec, SET_CODEC_OPTIONS_CONTROL);
     if (ctl != NULL) {
@@ -1558,7 +1561,7 @@ H323PluginVideoCodec::~H323PluginVideoCodec()
     bufferRTP.SetSize(0);
 
     if (codec != NULL && codec->destroyCodec != NULL)
-               (*codec->destroyCodec)(codec, context);
+		(*codec->destroyCodec)(codec, context);
 }
 
 BOOL H323PluginVideoCodec::Read(BYTE * buffer, unsigned & length, RTP_DataFrame & dst)
