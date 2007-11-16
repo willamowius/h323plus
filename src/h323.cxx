@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2007/11/01 20:17:33  shorne
+ * updates for H.239 support
+ *
  * Revision 1.4  2007/10/19 19:54:17  shorne
  * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
  *  Robert
@@ -713,6 +716,8 @@ H323Connection::H323Connection(H323EndPoint & ep,
       doH245inSETUP = !ep.IsH245inSetupDisabled();
       break;
   }
+
+  doH245QoS = !ep.H245QoSDisabled();
 
 #ifdef H323_AUDIO_CODECS
   remoteMaxAudioDelayJitter = 0;
@@ -5705,6 +5710,16 @@ void H323Connection::DisableH245inSETUP()
 	doH245inSETUP = FALSE; 
 }
 
+void H323Connection::DisableH245QoS()
+{ 
+    doH245QoS = FALSE;
+}
+
+BOOL H323Connection::H245QoSEnabled() const
+{ 
+    return doH245QoS;
+}
+
 void H323Connection::SetNonCallConnection()
 {  
 	IsNonCallConnection = TRUE; 
@@ -5770,13 +5785,14 @@ BOOL H323Connection::OpenConferenceControlSession(BOOL & chairControl, BOOL & ex
 	if (localCapability.GetMainType() == H323Capability::e_ConferenceControl) {
       H323_ConferenceControlCapability * remoteCapability = (H323_ConferenceControlCapability *)remoteCapabilities.FindCapability(localCapability);
       if (remoteCapability != NULL) {
-        PTRACE(3, "H323\tConference Controls Available " << *remoteCapability);
           chairControl = remoteCapability->SupportChairControls();
           extControls = remoteCapability->SupportExtControls();
+          PTRACE(3, "H323\tConference Controls Available for " << GetCallToken() << " Chair " << chairControl << " T124 " << extControls);
           return TRUE;
       }
     }
   }
+  PTRACE(6, "H323\tConference Controls not available for " << GetCallToken());
   return FALSE;
 }
 

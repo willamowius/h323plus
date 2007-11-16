@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2007/11/01 20:17:30  shorne
+ * updates for H.239 support
+ *
  * Revision 1.4  2007/10/16 17:01:33  shorne
  * Various little fixes
  *
@@ -2900,6 +2903,15 @@ class H323Connection : public PObject
       */
     virtual void DisableH245inSETUP();
 
+    /** Disable QoS in H.245
+      */
+	virtual void DisableH245QoS();
+
+    /** Has QoS in H.245
+      */
+    virtual BOOL H245QoSEnabled() const;
+
+
     /** Set the connection as a non Standard Call
       */
     virtual void SetNonCallConnection();
@@ -3040,6 +3052,7 @@ class H323Connection : public PObject
     BOOL mediaWaitForConnect;
     BOOL transmitterSidePaused;
     BOOL earlyStart;
+    BOOL doH245QoS;
 
 #ifdef H323_T120
     BOOL startT120;

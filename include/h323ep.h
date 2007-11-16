@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2007/11/01 20:17:31  shorne
+ * updates for H.239 support
+ *
  * Revision 1.3  2007/10/25 21:08:03  shorne
  * Added support for HD Video devices
  *
@@ -1768,6 +1771,17 @@ class H323EndPoint : public PObject
       BOOL mode ///< New default mode
     ) { disableH245inSetup = mode; } 
 
+	/** Get the default H.245 QoS mode.
+	  */
+	BOOL H245QoSDisabled() const
+	  { return disableH245QoS; }
+
+    /** Disable H.245 QoS support
+	  */
+    void DisableH245QoS(
+      BOOL mode ///< New default mode
+    ) { disableH245QoS = mode; } 
+
     /**Get the detect in-band DTMF flag.
       */
     BOOL DetectInBandDTMFDisabled() const
@@ -2427,6 +2441,7 @@ class H323EndPoint : public PObject
     BOOL        disableFastStart;
     BOOL        disableH245Tunneling;
     BOOL        disableH245inSetup;
+	BOOL        disableH245QoS;
     BOOL        disableDetectInBandDTMF;
     BOOL        canDisplayAmountString;
     BOOL        canEnforceDurationLimit;

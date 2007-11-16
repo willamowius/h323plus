@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2007/11/01 20:17:33  shorne
+ * updates for H.239 support
+ *
  * Revision 1.5  2007/10/25 21:08:04  shorne
  * Added support for HD Video devices
  *
@@ -1122,6 +1125,7 @@ H323EndPoint::H323EndPoint()
   disableFastStart = FALSE;
   disableH245Tunneling = FALSE;
   disableH245inSetup = FALSE;
+  disableH245QoS = FALSE;
   disableDetectInBandDTMF = FALSE;
   canDisplayAmountString = FALSE;
   canEnforceDurationLimit = TRUE;

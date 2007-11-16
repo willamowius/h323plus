@@ -24,6 +24,10 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2007/10/19 19:54:18  shorne
+ * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
+ *  Robert
+ *
  * Revision 1.2  2007/10/16 17:08:57  shorne
  * Qos capability negotiation
  *
@@ -297,7 +301,7 @@ BOOL H323_RTP_UDP::OnSendingPDU(const H323_RTPChannel & channel,
 
   // GQoS
 #if P_HAS_QOS
-  if (WriteTransportCapPDU(param.m_transportCapability,channel)) {
+  if (connection.H245QoSEnabled() && WriteTransportCapPDU(param.m_transportCapability,channel)) {
 		param.IncludeOptionalField(H245_H2250LogicalChannelParameters::e_transportCapability);
   }
 #endif
@@ -402,7 +406,7 @@ BOOL H323_RTP_UDP::OnReceivedPDU(H323_RTPChannel & channel,
 
   // GQoS
 #if P_HAS_QOS
-  if (param.HasOptionalField(H245_H2250LogicalChannelParameters::e_transportCapability)) {
+  if (param.HasOptionalField(H245_H2250LogicalChannelParameters::e_transportCapability) && connection.H245QoSEnabled()) {
 	 H245_TransportCapability trans = param.m_transportCapability;
 		ReadTransportCapPDU(trans,channel);
   }
