@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2007/11/16 22:09:43  shorne
+ * Added ability to disable H.245 QoS for NetMeeting Interop
+ *
  * Revision 1.5  2007/11/01 20:17:33  shorne
  * updates for H.239 support
  *
@@ -717,7 +720,7 @@ H323Connection::H323Connection(H323EndPoint & ep,
       break;
   }
 
-  doH245QoS = !ep.H245QoSDisabled();
+  doH245QoS = !ep.IsH245QoSDisabled();
 
 #ifdef H323_AUDIO_CODECS
   remoteMaxAudioDelayJitter = 0;

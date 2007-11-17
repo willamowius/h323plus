@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2007/11/16 22:09:42  shorne
+ * Added ability to disable H.245 QoS for NetMeeting Interop
+ *
  * Revision 1.4  2007/11/01 20:17:31  shorne
  * updates for H.239 support
  *
@@ -1773,7 +1776,7 @@ class H323EndPoint : public PObject
 
 	/** Get the default H.245 QoS mode.
 	  */
-	BOOL H245QoSDisabled() const
+	BOOL IsH245QoSDisabled() const
 	  { return disableH245QoS; }
 
     /** Disable H.245 QoS support
