@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2007/11/07 15:45:43  willamowius
+ * linux compile fix
+ *
  * Revision 1.2  2007/10/18 17:44:21  shorne
  * Small fixes during test compile
  *
@@ -370,29 +373,30 @@ BOOL H230Control::OnReceiveChairResponse(const H245_ConferenceResponse_makeMeCha
 	return TRUE;
 }
 
-BOOL H230Control::OnReceiveTerminalListResponse(const H245_ArrayOf_TerminalLabel & list)
+BOOL H230Control::OnReceiveTerminalListResponse(const H245_ArrayOf_TerminalLabel & termlist)
 {
-    PList<int> node;
-	node.SetSize(list.GetSize());
-	for (PINDEX i = 0; i < list.GetSize(); i++)
-        list[i] = node[i];
+    list<int> node;
+	for (PINDEX i = 0; i < termlist.GetSize(); i++)
+        node.push_back(termlist[i].m_terminalNumber);
 
 	OnTerminalListResponse(node);
 	return TRUE;
 }
 
 
-BOOL H230Control::TerminalListResponse(PList<int> node)
+BOOL H230Control::TerminalListResponse(list<int> node)
 {
 	H323ControlPDU pdu;
 	H245_ConferenceResponse & resp = pdu.Build(H245_ResponseMessage::e_conferenceResponse);
 	resp.SetTag(H245_ConferenceResponse::e_terminalListResponse);
-	H245_ArrayOf_TerminalLabel & list = resp;
+	H245_ArrayOf_TerminalLabel & termlist = resp;
 
-	list.SetSize(node.GetSize());
-	for (PINDEX i = 0; i < node.GetSize(); i++) {
-		list[i].m_mcuNumber = m_mcuID;  
-        list[i].m_terminalNumber = node[i];
+	termlist.SetSize(node.size());
+	int i = 0;
+	for (list<int>::iterator r = node.begin(); r != node.end(); ++r) {
+		termlist[i].m_mcuNumber = m_mcuID;  
+        termlist[i].m_terminalNumber = *r;
+		i++;
 	}
 
     return WriteControlPDU(pdu);
@@ -894,7 +898,7 @@ BOOL H230Control::OnConferenceEjectUserRequest(const GCC_ConferenceEjectUserRequ
 
 }
 
-BOOL H230Control::TransferUser(PList<int> node,const PString & number)
+BOOL H230Control::TransferUser(list<int> node,const PString & number)
 {
 	if (!m_ConferenceChair) {  // only a conference chair can add user
 	   PTRACE(4,"H230T124\tInvite Fail: Not conference chair");
@@ -914,9 +918,11 @@ BOOL H230Control::TransferUser(PList<int> node,const PString & number)
 	pdu.IncludeOptionalField(GCC_ConferenceTransferRequest::e_transferringNodes);
     GCC_ArrayOf_UserID & nodes = pdu.m_transferringNodes;
 
-	nodes.SetSize(node.GetSize());
-	for (PINDEX i=0; i < node.GetSize(); i++) {
-		nodes[i] = node[i];
+	nodes.SetSize(node.size());
+	int i = 0;
+	for (list<int>::iterator r = node.begin(); r != node.end(); ++r) {
+		nodes[i] = *r;
+		i++;
 	}
 
 	H230T124PDU gpdu;
@@ -938,12 +944,11 @@ BOOL H230Control::OnConferenceTransferRequest(const GCC_ConferenceTransferReques
 			  destination = str;    
 	}
 
-    PList<int> node;
+    list<int> node;
 	if (pdu.HasOptionalField(GCC_ConferenceTransferRequest::e_transferringNodes)) {
         const GCC_ArrayOf_UserID & nodes = pdu.m_transferringNodes;
-		node.SetSize(nodes.GetSize());
 		  for (PINDEX i=0; i < nodes.GetSize(); i++) 
-			 node[i] = nodes[i];
+			 node.push_back(nodes[i]);
 	}
 
 	OnTransferUser(node,destination);
@@ -1088,7 +1093,7 @@ BOOL H230Control::OnConferenceEjectUserResponse(const GCC_ConferenceEjectUserRes
 	return TRUE;
 }
 
-BOOL H230Control::TransferUserResponse(PList<int> node,const PString & number,TransferResponse result)
+BOOL H230Control::TransferUserResponse(list<int> node,const PString & number,TransferResponse result)
 {
 	GCC_ResponsePDU resp;
 
@@ -1103,9 +1108,11 @@ BOOL H230Control::TransferUserResponse(PList<int> node,const PString & number,Tr
 	pdu.IncludeOptionalField(GCC_ConferenceTransferRequest::e_transferringNodes);
     GCC_ArrayOf_UserID & nodes = pdu.m_transferringNodes;
 
-	nodes.SetSize(node.GetSize());
-	for (PINDEX i=0; i < node.GetSize(); i++) {
-		nodes[i] = node[i];
+	nodes.SetSize(node.size());
+	int i = 0;
+	for (list<int>::iterator r = node.begin(); r != node.end(); ++r) {
+		nodes[i] = *r;
+		i++;
 	}
 
     GCC_ConferenceTransferResponse_result & rst = pdu.m_result;
@@ -1126,12 +1133,11 @@ BOOL H230Control::OnConferenceTransferResponse(const GCC_ConferenceTransferRespo
 			  destination = str;    
 	}
 
-    PList<int> node;
+    list<int> node;
 	if (pdu.HasOptionalField(GCC_ConferenceTransferRequest::e_transferringNodes)) {
         const GCC_ArrayOf_UserID & nodes = pdu.m_transferringNodes;
-		node.SetSize(nodes.GetSize());
 		  for (PINDEX i=0; i < nodes.GetSize(); i++) 
-			 node[i] = nodes[i];
+			 node.push_back(nodes[i]);
 	}
 
     const GCC_ConferenceTransferResponse_result & rst = pdu.m_result;
@@ -1149,7 +1155,7 @@ BOOL H230Control::OnFunctionNotSupportedResponse(const GCC_FunctionNotSupportedR
 
 ///////////////////////////////////////////////////////////////////////////
 
-BOOL H230Control::UserEnquiry(PList<int> node)
+BOOL H230Control::UserEnquiry(list<int> node)
 {
 	if (m_userID < 0) {
 		PTRACE(4,"H230\tRequest denied: No conference token");
@@ -1159,54 +1165,59 @@ BOOL H230Control::UserEnquiry(PList<int> node)
     PASN_OctetString rawpdu;
 
 	H245_ArrayOf_TerminalLabel labels;
-    labels.SetSize(node.GetSize());
-
-	for (PINDEX i=0; i < node.GetSize(); i++)
+    labels.SetSize(node.size());
+	int i = 0;
+	for (list<int>::iterator r = node.begin(); r != node.end(); ++r) 
 	{
         H245_TerminalLabel id;
 		H245_McuNumber & mcu = id.m_mcuNumber;
 		mcu = m_mcuID; 
         H245_TerminalNumber lab = id.m_terminalNumber;
-		lab = node[i];
+		lab = (int)*r;
 		labels[i] = id;
+		i++;
 	}
     rawpdu.EncodeSubType(labels);
 
-  return SendPACKGeneric(1,rawpdu);
+	PTRACE(6,"CONF\t" << labels);
+
+  return SendPACKGenericRequest(1,rawpdu);
 }
 
-BOOL H230Control::UserEnquiryResponse(PList<userInfo> userlist)
+BOOL H230Control::UserEnquiryResponse(const list<userInfo> & userlist)
 {
     PASN_OctetString rawpdu;
     
-	H230OID2_ParticipantList list;
-	H230OID2_ArrayOf_Participant & users = list.m_list;
+	H230OID2_ParticipantList ulist;
+	H230OID2_ArrayOf_Participant & users = ulist.m_list;
 
-	users.SetSize(userlist.GetSize());
-
-	for (PINDEX i=0; i < userlist.GetSize(); i++) 
+	users.SetSize(userlist.size());
+	int i = 0;
+	for (std::list<userInfo>::const_iterator r = userlist.begin(); r != userlist.end(); ++r) 
 	{
+        userInfo u = *r;
 		H230OID2_Participant & user = users[i];
-		user.m_token = userlist[i].m_Token;
-		user.m_number = userlist[i].m_Number;
-		if (userlist[i].m_Name.GetLength() > 0) {
+		user.m_token = u.m_Token;
+		user.m_number = u.m_Number;
+		if (u.m_Name.GetLength() > 0) {
 		   user.IncludeOptionalField(H230OID2_Participant::e_name);
-		   user.m_name = userlist[i].m_Name;
+		   user.m_name = u.m_Name;
 		}
-		if (userlist[i].m_vCard.GetLength() > 0) {
+		if (u.m_vCard.GetLength() > 0) {
 			user.IncludeOptionalField(H230OID2_Participant::e_vCard);
-		    user.m_vCard = userlist[i].m_vCard;
+		    user.m_vCard = u.m_vCard;
 		}
+        i++;
 	}
-
-    rawpdu.EncodeSubType(list);
-    return SendPACKGeneric(2,rawpdu);
+    rawpdu.EncodeSubType(ulist);
+    return SendPACKGenericResponse(2,rawpdu);
 }
 
-BOOL H230Control::SendPACKGeneric(int msgid,PASN_OctetString & rawpdu)
+BOOL H230Control::SendPACKGenericRequest(int msgid,const PASN_OctetString & rawpdu)
 {
-	H323ControlPDU pdu;
-	H245_GenericMessage & msg = pdu.Build(H245_RequestMessage::e_genericRequest);
+   H323ControlPDU pdu;
+
+   H245_GenericMessage & msg = pdu.Build(H245_RequestMessage::e_genericRequest);
 
 	msg.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
     msg.IncludeOptionalField(H245_GenericMessage::e_messageContent);
@@ -1230,7 +1241,40 @@ BOOL H230Control::SendPACKGeneric(int msgid,PASN_OctetString & rawpdu)
 		 idx = msgid;
 		 H245_ParameterValue & genvalue = param.m_parameterValue;
 		 genvalue.SetTag(H245_ParameterValue::e_octetString);
-		 PASN_OctetString & valg = rawpdu;
+		 PASN_OctetString & valg = param.m_parameterValue;
+		 valg = rawpdu;
+
+    return WriteControlPDU(pdu);
+}
+
+BOOL H230Control::SendPACKGenericResponse(int msgid, const PASN_OctetString & rawpdu)
+{
+    H323ControlPDU pdu;
+    H245_GenericMessage & msg = pdu.Build(H245_ResponseMessage::e_genericResponse);
+      
+	msg.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
+    msg.IncludeOptionalField(H245_GenericMessage::e_messageContent);
+
+    H245_CapabilityIdentifier & id = msg.m_messageIdentifier;
+     id.SetTag(H245_CapabilityIdentifier::e_standard);
+        PASN_ObjectId & val = id; 
+        val.SetValue(PACKOID);
+
+	PASN_Integer & num = msg.m_subMessageIdentifier;
+	  num = 1;
+
+    msg.SetTag(H245_GenericMessage::e_messageContent);
+    H245_ArrayOf_GenericParameter & content = msg.m_messageContent;
+
+	 content.SetSize(1);
+	   H245_GenericParameter & param = content[0];
+	   H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
+	     idm.SetTag(H245_ParameterIdentifier::e_standard);
+		 PASN_Integer & idx = idm;
+		 idx = msgid;
+		 H245_ParameterValue & genvalue = param.m_parameterValue;
+		 genvalue.SetTag(H245_ParameterValue::e_octetString);
+		 PASN_OctetString & valg = param.m_parameterValue;
 		 valg = rawpdu;
 
     return WriteControlPDU(pdu);
@@ -1263,12 +1307,11 @@ BOOL H230Control::OnReceivePACKRequest(const PASN_OctetString & rawpdu)
 		return FALSE;
 	}
 
-	PList<int> req;
-	req.SetSize(pdu.GetSize());
+	list<int> req;
 	for (PINDEX i =0; i < pdu.GetSize(); i++) 
 	{
         H245_TerminalNumber lab = pdu[i].m_terminalNumber;
-		req[i] = lab;
+		req.push_back(lab);
 	}
 
 	OnUserEnquiry(req);
@@ -1287,22 +1330,24 @@ BOOL H230Control::OnReceivePACKResponse(const PASN_OctetString & rawpdu)
 
 	H230OID2_ArrayOf_Participant & users = list.m_list;
 
-	PList<userInfo> userlist;
-	userlist.SetSize(users.GetSize());
+	std::list<userInfo> userlist;
 	for (PINDEX i=0; i < users.GetSize(); i++) 
 	{
+		userInfo u;
 		H230OID2_Participant & user = users[i];
-		userlist[i].m_Token = user.m_token;
-		userlist[i].m_Number = user.m_number;
+		u.m_Token = user.m_token;
+		u.m_Number = user.m_number;
 		if (user.HasOptionalField(H230OID2_Participant::e_name))
-		   userlist[i].m_Name = user.m_name;
+		   u.m_Name = user.m_name;
 		else
-		   userlist[i].m_Name = PString();
+		   u.m_Name = PString();
 
 		if (user.HasOptionalField(H230OID2_Participant::e_vCard))
-		   userlist[i].m_vCard = user.m_vCard;
+		   u.m_vCard = user.m_vCard;
 		else
-           userlist[i].m_vCard = PString();
+           u.m_vCard = PString();
+
+		userlist.push_back(u);
 	}
 
     OnUserEnquiryResponse(userlist);
@@ -1436,7 +1481,7 @@ BOOL H230Control_EndPoint::ReqEjectUser(int node)
 
 	return FALSE;
 }
-BOOL H230Control_EndPoint::ReqTransferUser(PList<int> node,const PString & number)
+BOOL H230Control_EndPoint::ReqTransferUser(list<int> node,const PString & number)
 {
 	PWaitAndSignal m(requestMutex);
 
@@ -1451,7 +1496,7 @@ BOOL H230Control_EndPoint::ReqTransferUser(PList<int> node,const PString & numbe
 	return FALSE;
 }
 
-BOOL H230Control_EndPoint::ReqTerminalList(PList<int> & node)
+BOOL H230Control_EndPoint::ReqTerminalList(list<int> & node)
 {
 	PWaitAndSignal m(requestMutex);
 
@@ -1543,7 +1588,7 @@ BOOL H230Control_EndPoint::ReqWhoIsChair(int & node)
 	return FALSE;
 }
 
-BOOL H230Control_EndPoint::ReqUserEnquiry(PList<int> node, PList<userInfo> & info)
+BOOL H230Control_EndPoint::ReqUserEnquiry(list<int> node, list<userInfo> & info)
 {
 	PWaitAndSignal m(requestMutex);
 
@@ -1589,7 +1634,7 @@ void H230Control_EndPoint::OnEjectUserResponse(int node, EjectResponse lock)
     responseMutex.Signal();
 }
 
-void H230Control_EndPoint::OnTransferUserResponse(PList<int> node,const PString & number, TransferResponse result)
+void H230Control_EndPoint::OnTransferUserResponse(list<int> node,const PString & number, TransferResponse result)
 {
 	res->ids = node;
 	res->name = number;
@@ -1597,12 +1642,12 @@ void H230Control_EndPoint::OnTransferUserResponse(PList<int> node,const PString 
     responseMutex.Signal();
 }
 
-void H230Control_EndPoint::OnTerminalListResponse(PList<int> node)
+void H230Control_EndPoint::OnTerminalListResponse(list<int> node)
 {
 	res->ids = node;
     res->errCode = 0;
-	 for (PINDEX i=0; i < node.GetSize(); i++) 
-	      ConferenceJoined(node[i]);
+	for (list<int>::iterator r = node.begin(); r != node.end(); ++r) 
+	      ConferenceJoined(*r);
 
     responseMutex.Signal();
 }
@@ -1638,12 +1683,15 @@ void H230Control_EndPoint::OnChairTokenResponse(int id, const PString & name)
     responseMutex.Signal();
 }
 
-void H230Control_EndPoint::OnUserEnquiryResponse(PList<userInfo> info) 
+void H230Control_EndPoint::OnUserEnquiryResponse(const list<userInfo> & info) 
 {
 	res->info = info;
 	res->errCode = 0;
-	 for (PINDEX i=0; i < info.GetSize(); i++)
-	    ConferenceJoinInfo(info[i].m_Token,info[i].m_Number,info[i].m_Name,info[i].m_vCard);
+	for (list<userInfo>::const_iterator r = info.begin(); r != info.end(); ++r) 
+	{
+        userInfo u = *r;
+	    ConferenceJoinInfo(u.m_Token,u.m_Number,u.m_Name,u.m_vCard);
+	}
 
     responseMutex.Signal();
 }

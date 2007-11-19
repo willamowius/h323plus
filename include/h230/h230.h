@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2007/11/07 15:45:42  willamowius
+ * linux compile fix
+ *
  * Revision 1.2  2007/10/18 17:44:12  shorne
  * Small fixes during test compile
  *
@@ -51,6 +54,7 @@
 #include <ptlib.h>
 #include <h323pdu.h>
 #include <gccpdu.h>
+#include <list>
 
 #ifdef H323_H230 
 
@@ -92,8 +96,9 @@ public:
       e_TransferinvalidRequester
 	};
 
-	struct userInfo
+	class userInfo
 	{
+	 public:
 		int       m_Token;
 		PString   m_Number;
 		PString   m_Name;
@@ -109,14 +114,14 @@ public:
 	BOOL LockConference();
     BOOL UnLockConference();
     BOOL EjectUser(int node);
-	BOOL TransferUser(PList<int> node,const PString & number);
+	BOOL TransferUser(list<int> node,const PString & number);
 	BOOL TerminalListRequest();
 	BOOL ChairRequest(BOOL revoke);
 	BOOL ChairAssign(int node);
 	BOOL FloorRequest();
 	BOOL FloorAssign(int node);
 	BOOL WhoIsChair();
-	BOOL UserEnquiry(PList<int> node);
+	BOOL UserEnquiry(list<int> node);
 
 // Endpoint Events
 	virtual void OnControlsEnabled(BOOL /*success*/) {};
@@ -126,8 +131,8 @@ public:
 	virtual void OnLockConferenceResponse(LockResponse /*lock*/)  {};
 	virtual void OnUnLockConferenceResponse(LockResponse /*lock*/)  {};
 	virtual void OnEjectUserResponse(int /*node*/, EjectResponse /*lock*/) {};
-	virtual void OnTransferUserResponse(PList<int> /*node*/,const PString & /*number*/, TransferResponse /*result*/) {};
-	virtual void OnTerminalListResponse(PList<int> node) {};
+	virtual void OnTransferUserResponse(list<int> /*node*/,const PString & /*number*/, TransferResponse /*result*/) {};
+	virtual void OnTerminalListResponse(list<int> node) {};
 	virtual void ConferenceJoined(int /*terminalId*/){};
 	virtual void ConferenceLeft(int /*terminalId*/) {};
 	virtual void MakeChairResponse(BOOL /*success*/) {};
@@ -135,7 +140,7 @@ public:
 	virtual void FloorAssigned(int /*node*/) {};
 	virtual void OnChairTokenResponse(int /*id*/, const PString & /*name*/) {};
 	virtual void OnFloorRequested(int /*terminalId*/,BOOL /*cancel*/) {};
-	virtual void OnUserEnquiryResponse(PList<userInfo>) {};
+	virtual void OnUserEnquiryResponse(const list<userInfo> &) {};
 
 
 ///////////////////////////////////////////
@@ -143,14 +148,14 @@ public:
 	virtual void OnInvite(const PStringList & /*alias*/) const {};
 	virtual void OnLockConference(BOOL /*state*/) const {};
     virtual void OnEjectUser(int /*node*/) const {};
-	virtual void OnTransferUser(PList<int> /*node*/,const PString & /*number*/) const {};
+	virtual void OnTransferUser(list<int> /*node*/,const PString & /*number*/) const {};
 	virtual void OnTerminalListRequest() const {};
 	virtual void ChairRequested(const int & /*terminalId*/,BOOL /*cancel*/) {};
 	virtual void OnFloorRequest() {};
 	virtual void OnChairTokenRequest() const {};
 	virtual void OnChairAssign(int /*node*/) const {};
 	virtual void OnFloorAssign(int /*node*/) const {};
-	virtual void OnUserEnquiry(PList<int>) const {};
+	virtual void OnUserEnquiry(list<int>) const {};
 
 
 //  Server Commands
@@ -158,12 +163,12 @@ public:
 	BOOL LockConferenceResponse(LockResponse lock);
 	BOOL UnLockConferenceResponse(LockResponse lock);
 	BOOL EjectUserResponse(int node, EjectResponse lock);
-	BOOL TransferUserResponse(PList<int> node,const PString & number, TransferResponse result);
-	BOOL TerminalListResponse(PList<int> node);
+	BOOL TransferUserResponse(list<int> node,const PString & number, TransferResponse result);
+	BOOL TerminalListResponse(list<int> node);
 	BOOL ChairTokenResponse(int termid,const PString & termname);
 	BOOL ChairAssignResponse(int termid,const PString & termname);
 	BOOL FloorAssignResponse(int termid,const PString & termname);
-	BOOL UserEnquiryResponse(PList<userInfo>);
+	BOOL UserEnquiryResponse(const list<userInfo> &);
 
 // Server Indications
 	BOOL ConferenceJoinedInd(int termId);
@@ -228,7 +233,8 @@ public:
 
     BOOL ReceivedPACKPDU(unsigned msgId, unsigned paramId, const H245_ParameterValue & value);
 
-	BOOL SendPACKGeneric(int msgid, PASN_OctetString & rawpdu);
+	BOOL SendPACKGenericRequest(int msgid, const PASN_OctetString & rawpdu);
+	BOOL SendPACKGenericResponse(int msgid, const PASN_OctetString & rawpdu);
 	BOOL OnReceivePACKRequest(const PASN_OctetString & rawpdu);
 	BOOL OnReceivePACKResponse(const PASN_OctetString & rawpdu);
 
@@ -262,7 +268,6 @@ protected:
 };
 
 
-
 class H230Control_EndPoint   : public H230Control 
 {
   public:
@@ -276,8 +281,8 @@ class H230Control_EndPoint   : public H230Control
 		 int node;
 		 BOOL cancel;
 		 PString name;
-		 PList<int> ids;
-		 PList<userInfo> info;
+		 list<int> ids;
+		 list<userInfo> info;
 	  };
 
   	H230Control_EndPoint(const PString & _h323token);
@@ -288,16 +293,16 @@ class H230Control_EndPoint   : public H230Control
 	BOOL ReqLockConference();
     BOOL ReqUnLockConference();
     BOOL ReqEjectUser(int node);
-	BOOL ReqTransferUser(PList<int> node,const PString & number);
+	BOOL ReqTransferUser(list<int> node,const PString & number);
 	BOOL ReqChairAssign(int node);
 	BOOL ReqFloorAssign(int node);
 
 // General Requests
-	BOOL ReqTerminalList(PList<int> & node);
+	BOOL ReqTerminalList(list<int> & node);
 	BOOL ReqChair(BOOL revoke);
 	BOOL ReqFloor();
 	BOOL ReqWhoIsChair(int & node);
-	BOOL ReqUserEnquiry(PList<int> node, PList<userInfo> & info);
+	BOOL ReqUserEnquiry(list<int> node, list<userInfo> & info);
 
 // conference Indications
 	virtual void OnControlsEnabled(BOOL /*success*/) {};
@@ -319,11 +324,11 @@ class H230Control_EndPoint   : public H230Control
 	void OnLockConferenceResponse(LockResponse /*lock*/);
 	void OnUnLockConferenceResponse(LockResponse /*lock*/);
 	void OnEjectUserResponse(int /*node*/, EjectResponse /*lock*/);
-	void OnTransferUserResponse(PList<int> /*node*/,const PString & /*number*/, TransferResponse /*result*/);
-	void OnTerminalListResponse(PList<int> node);
+	void OnTransferUserResponse(list<int> /*node*/,const PString & /*number*/, TransferResponse /*result*/);
+	void OnTerminalListResponse(list<int> node);
 	void MakeChairResponse(BOOL /*success*/);
 	void OnChairTokenResponse(int /*id*/, const PString & /*name*/);
-	void OnUserEnquiryResponse(PList<userInfo>);
+	void OnUserEnquiryResponse(const list<userInfo> &);
 	void ChairAssigned(int /*node*/);
 	void FloorAssigned(int /*node*/);
 
