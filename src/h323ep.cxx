@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2007/11/16 22:09:43  shorne
+ * Added ability to disable H.245 QoS for NetMeeting Interop
+ *
  * Revision 1.6  2007/11/01 20:17:33  shorne
  * updates for H.239 support
  *
@@ -1173,8 +1176,10 @@ H323EndPoint::H323EndPoint()
 #else
 
 #  ifdef H323_AUDIO_CODECS
+#ifdef P_AUDIO
      // Should only need double buffering for Unix platforms
      soundChannelBuffers = 2;
+#endif
 #  endif
 
   // Don't use IPTOS_PREC_CRITIC_ECP on Unix platforms as then need to be root

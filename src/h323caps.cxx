@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.12  2007/11/14 08:55:22  shorne
+ * Added ability to set DSCP values for audio/video
+ *
  * Revision 1.11  2007/11/10 13:37:32  shorne
  * Corrected Conference Control capability type and resolved error with PTRACE on release build
  *
@@ -967,7 +970,11 @@ BOOL H323GenericCapabilityInfo::OnSendingGenericPDU(H245_GenericCapability & pdu
 {
   pdu.m_capabilityIdentifier = *identifier;
 
+#ifndef NO_H323_VIDEO
   unsigned bitRate = maxBitRate != 0 ? maxBitRate : ((mediaFormat.GetOptionInteger(OpalVideoFormat::MaxBitRateOption)+99)/100);
+#else
+  unsigned bitRate = maxBitRate;
+#endif
   if (bitRate != 0) {
     pdu.IncludeOptionalField(H245_GenericCapability::e_maxBitRate);
     pdu.m_maxBitRate = bitRate;
@@ -1056,7 +1063,11 @@ BOOL H323GenericCapabilityInfo::OnReceivedGenericPDU(OpalMediaFormat & mediaForm
 
   if (pdu.HasOptionalField(H245_GenericCapability::e_maxBitRate)) {
     maxBitRate = pdu.m_maxBitRate;
+#ifndef NO_H323_VIDEO
     mediaFormat.SetOptionInteger(OpalVideoFormat::MaxBitRateOption, maxBitRate*100);
+#else
+    mediaFormat.SetOptionInteger(maxBitRate, maxBitRate*100);
+#endif
   }
 
   for (PINDEX i = 0; i < mediaFormat.GetOptionCount(); i++) {
