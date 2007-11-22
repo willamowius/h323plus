@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2007/11/14 19:34:51  willamowius
+ * use dynamic RTP frame allocation, static allocation had a memory leak of 2 frames per call
+ *
  * Revision 1.8  2007/11/06 17:43:36  shorne
  * added i480 standard framesize
  *
@@ -450,6 +453,10 @@ static const char * h323_pbFrames_tag                          = H323CAP_TAG_PRE
 static const char * h323_hrdB_tag                              = H323CAP_TAG_PREFIX "_hrdB";
 static const char * h323_bppMaxKb_tag                          = H323CAP_TAG_PREFIX "_bppMaxKb";
 static const char * h323_errorCompensation_tag                 = H323CAP_TAG_PREFIX "_errorCompensation";
+
+inline static bool IsValidMPI(int mpi) {
+  return (mpi > 0) && (mpi < 5);
+}
 
 #endif // H323_VIDEO
 
@@ -3157,18 +3164,18 @@ PObject::Comparison H323H263PluginCapability::Compare(const PObject & obj) const
   int other_cif4MPI  = otherFormat.GetOptionInteger(cif4MPI_tag);
   int other_cif16MPI = otherFormat.GetOptionInteger(cif16MPI_tag);
 
-  if ((sqcifMPI && other_sqcifMPI) ||
-      (qcifMPI && other_qcifMPI) ||
-      (cifMPI && other_cifMPI) ||
-      (cif4MPI && other_cif4MPI) ||
-      (cif16MPI && other_cif16MPI))
+  if ((IsValidMPI(sqcifMPI) == IsValidMPI(other_sqcifMPI)) &&
+      (IsValidMPI(qcifMPI) == IsValidMPI(other_qcifMPI)) &&
+      (IsValidMPI(cifMPI) == IsValidMPI(other_cifMPI)) &&
+      (IsValidMPI(cif4MPI) == IsValidMPI(other_cif4MPI)) &&
+      (IsValidMPI(cif16MPI) == IsValidMPI(other_cif16MPI)))
     return EqualTo;
 
-  if ((!cif16MPI && other_cif16MPI) ||
-      (!cif4MPI && other_cif4MPI) ||
-      (!cifMPI && other_cifMPI) ||
-      (!qcifMPI && other_qcifMPI) ||
-      (!sqcifMPI && other_sqcifMPI))
+  if ((!IsValidMPI(cif16MPI) && IsValidMPI(other_cif16MPI)) ||
+      (!IsValidMPI(cif4MPI) && IsValidMPI(other_cif4MPI)) ||
+      (!IsValidMPI(cifMPI) && IsValidMPI(other_cifMPI)) ||
+      (!IsValidMPI(qcifMPI) && IsValidMPI(other_qcifMPI)) ||
+      (!IsValidMPI(sqcifMPI) && IsValidMPI(other_sqcifMPI)))
     return LessThan;
 
   return GreaterThan;
