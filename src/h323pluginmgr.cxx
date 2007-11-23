@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2007/11/22 22:37:09  willamowius
+ * fix from H.263 frame size negotiation
+ *
  * Revision 1.9  2007/11/14 19:34:51  willamowius
  * use dynamic RTP frame allocation, static allocation had a memory leak of 2 frames per call
  *
@@ -2077,7 +2080,7 @@ class H323VideoPluginCapability : public H323VideoCapability,
            H323PluginCapabilityInfo(_encoderCodec, _decoderCodec),
         pluginSubType(_pluginSubType)
       { 
-        SetCommonOptions(GetWritableMediaFormat(),encoderCodec->parm.audio.samplesPerFrame, encoderCodec->parm.audio.bytesPerFrame, encoderCodec->parm.audio.recommendedFramesPerPacket);
+        SetCommonOptions(GetWritableMediaFormat(),encoderCodec->parm.video.maxFrameWidth, encoderCodec->parm.video.maxFrameHeight, encoderCodec->parm.video.recommendedFrameRate);
         PopulateMediaFormatOptions(encoderCodec,GetWritableMediaFormat());
 
         rtpPayloadType = (RTP_DataFrame::PayloadTypes)(((_encoderCodec->flags & PluginCodec_RTPTypeMask) == PluginCodec_RTPTypeDynamic) ? RTP_DataFrame::DynamicBase : _encoderCodec->rtpPayload);
