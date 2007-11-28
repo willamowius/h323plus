@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2007/11/28 06:03:37  shorne
+ * Video capability merge. Thx again Jan Willamowius
+ *
  * Revision 1.7  2007/11/17 00:14:47  shorne
  * Fix to make disabling function calls consistent
  *
@@ -4001,7 +4004,7 @@ void H323Connection::SelectDefaultLogicalChannel(unsigned sessionID)
       if (remoteCapability != NULL) {
         PTRACE(3, "H323\tSelecting " << *remoteCapability);
         
-		MergeCapabilities(sessionID,localCapability,remoteCapability);
+		MergeCapabilities(localCapability, remoteCapability);
         
         if (OpenLogicalChannel(*remoteCapability, sessionID, H323Channel::IsTransmitter))
           break;
@@ -4013,19 +4016,19 @@ void H323Connection::SelectDefaultLogicalChannel(unsigned sessionID)
 }
 
 
-BOOL H323Connection::MergeCapabilities(unsigned sessionID, const H323Capability & local, H323Capability * remote)
-{ 
+BOOL H323Connection::MergeCapabilities(const H323Capability & local, H323Capability * remote)
+{
 	// Only the Video and Extended Video Capabilities require merging
-	if ((sessionID != H323Capability::e_Video) ||
-		(sessionID != H323Capability::e_ExtendVideo))
-	               return FALSE;
+	if ((remote->GetMainType() != H323Capability::e_Video) &&
+		(remote->GetMainType() != H323Capability::e_ExtendVideo))
+			return FALSE;
 
    OpalMediaFormat & remoteFormat = remote->GetWritableMediaFormat();
    const OpalMediaFormat & localFormat = local.GetMediaFormat();
 
    if (remoteFormat.Merge(localFormat)) {
 #if PTRACING
-	  PTRACE(6, "H323\t" << ((sessionID != H323Capability::e_Video) ? "Ext " : "") << "Video Capability Merge: "); 
+	  PTRACE(6, "H323\t" << ((remote->GetMainType() != H323Capability::e_Video) ? "Ext " : "") << "Video Capability Merge: "); 
 	  OpalMediaFormat::DebugOptionList(remoteFormat);
 #endif
       return TRUE;

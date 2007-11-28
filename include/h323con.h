@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2007/11/28 06:03:36  shorne
+ * Video capability merge. Thx again Jan Willamowius
+ *
  * Revision 1.6  2007/11/16 22:09:42  shorne
  * Added ability to disable H.245 QoS for NetMeeting Interop
  *
@@ -1766,7 +1769,6 @@ class H323Connection : public PObject
 	    correct maximum framesize is negotiated between the parties.
 	  */
 	virtual BOOL MergeCapabilities(
-		unsigned sessionID,               ///< Session ID to find default logical channel.
 		const H323Capability & local,     ///< Local Capability
 		H323Capability * remote           ///< remote Capability
 	);
