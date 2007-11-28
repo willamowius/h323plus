@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2007/11/16 22:09:42  shorne
+ * Added ability to disable H.245 QoS for NetMeeting Interop
+ *
  * Revision 1.5  2007/11/01 20:17:30  shorne
  * updates for H.239 support
  *
@@ -1758,6 +1761,15 @@ class H323Connection : public PObject
     virtual void SelectDefaultLogicalChannel(
       unsigned sessionID    ///< Session ID to find default logical channel.
     );
+
+	/** MinMerge the local and remote Video and Extended Video Capabilities to ensure
+	    correct maximum framesize is negotiated between the parties.
+	  */
+	virtual BOOL MergeCapabilities(
+		unsigned sessionID,               ///< Session ID to find default logical channel.
+		const H323Capability & local,     ///< Local Capability
+		H323Capability * remote           ///< remote Capability
+	);
 
     /**Select default logical channel for fast start.
        Internal function, not for normal use.

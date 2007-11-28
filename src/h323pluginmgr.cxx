@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2007/11/23 04:29:30  shorne
+ * small correction with video codec definitions reading. Only a naming map issue.
+ *
  * Revision 1.10  2007/11/22 22:37:09  willamowius
  * fix from H.263 frame size negotiation
  *
@@ -3167,12 +3170,12 @@ PObject::Comparison H323H263PluginCapability::Compare(const PObject & obj) const
   int other_cif4MPI  = otherFormat.GetOptionInteger(cif4MPI_tag);
   int other_cif16MPI = otherFormat.GetOptionInteger(cif16MPI_tag);
 
-  if ((IsValidMPI(sqcifMPI) == IsValidMPI(other_sqcifMPI)) &&
-      (IsValidMPI(qcifMPI) == IsValidMPI(other_qcifMPI)) &&
-      (IsValidMPI(cifMPI) == IsValidMPI(other_cifMPI)) &&
-      (IsValidMPI(cif4MPI) == IsValidMPI(other_cif4MPI)) &&
-      (IsValidMPI(cif16MPI) == IsValidMPI(other_cif16MPI)))
-    return EqualTo;
+  if ((IsValidMPI(sqcifMPI) && IsValidMPI(other_sqcifMPI)) ||
+      (IsValidMPI(qcifMPI) && IsValidMPI(other_qcifMPI)) ||
+      (IsValidMPI(cifMPI) && IsValidMPI(other_cifMPI)) ||
+      (IsValidMPI(cif4MPI) && IsValidMPI(other_cif4MPI)) ||
+      (IsValidMPI(cif16MPI) && IsValidMPI(other_cif16MPI)))
+           return EqualTo;
 
   if ((!IsValidMPI(cif16MPI) && IsValidMPI(other_cif16MPI)) ||
       (!IsValidMPI(cif4MPI) && IsValidMPI(other_cif4MPI)) ||
