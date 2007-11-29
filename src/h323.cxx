@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2007/11/28 15:30:38  willamowius
+ * fix capability type detection for merging
+ *
  * Revision 1.8  2007/11/28 06:03:37  shorne
  * Video capability merge. Thx again Jan Willamowius
  *
@@ -4004,7 +4007,7 @@ void H323Connection::SelectDefaultLogicalChannel(unsigned sessionID)
       if (remoteCapability != NULL) {
         PTRACE(3, "H323\tSelecting " << *remoteCapability);
         
-		MergeCapabilities(localCapability, remoteCapability);
+		MergeCapabilities(sessionID, localCapability, remoteCapability);
         
         if (OpenLogicalChannel(*remoteCapability, sessionID, H323Channel::IsTransmitter))
           break;
@@ -4016,14 +4019,14 @@ void H323Connection::SelectDefaultLogicalChannel(unsigned sessionID)
 }
 
 
-BOOL H323Connection::MergeCapabilities(const H323Capability & local, H323Capability * remote)
+BOOL H323Connection::MergeCapabilities(unsigned sessionID, const H323Capability & local, H323Capability * remote)
 {
 	// Only the Video and Extended Video Capabilities require merging
-	if ((remote->GetMainType() != H323Capability::e_Video) &&
-		(remote->GetMainType() != H323Capability::e_ExtendVideo))
+	if ((sessionID != RTP_Session::DefaultVideoSessionID) &&
+		(sessionID != RTP_Session::DefaultExtVideoSessionID))
 			return FALSE;
 
-   OpalMediaFormat & remoteFormat = remote->GetWritableMediaFormat();
+   OpalVideoFormat & remoteFormat = (OpalVideoFormat &)(remote->GetWritableMediaFormat());
    const OpalMediaFormat & localFormat = local.GetMediaFormat();
 
    if (remoteFormat.Merge(localFormat)) {

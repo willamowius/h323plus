@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2007/11/28 15:30:38  willamowius
+ * fix capability type detection for merging
+ *
  * Revision 1.7  2007/11/28 06:03:36  shorne
  * Video capability merge. Thx again Jan Willamowius
  *
@@ -1769,6 +1772,7 @@ class H323Connection : public PObject
 	    correct maximum framesize is negotiated between the parties.
 	  */
 	virtual BOOL MergeCapabilities(
+		unsigned sessionID,                ///< Session ID to find default logical channel.
 		const H323Capability & local,     ///< Local Capability
 		H323Capability * remote           ///< remote Capability
 	);
