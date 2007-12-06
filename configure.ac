@@ -76,7 +76,11 @@ if test "${HAS_PTLIB:-unset}" = "unset" ; then
         AC_PATH_PROG(PTLIB_CONFIG, ptlib-config, , /usr/local/bin)
       else
         if test "${HAS_PTLIB:-unset}" != "unset" ; then
-          AC_PATH_PROG(PTLIB_CONFIG, ptlib-config, , /usr/share/pwlib/make/)
+          AC_PATH_PROG(PTLIB_CONFIG, ptlib-config, , /usr/share/ptlib/make/)
+        else
+           if test "${HAS_PTLIB:-unset}" != "unset" ; then
+             AC_PATH_PROG(PTLIB_CONFIG, ptlib-config, , /usr/share/pwlib/make/)
+           fi
         fi
       fi
     fi
