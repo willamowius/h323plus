@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.13  2007/11/20 11:40:47  willamowius
+ * fix compilation without audio support Thanks Vladimir Voronin
+ *
  * Revision 1.12  2007/11/14 08:55:22  shorne
  * Added ability to set DSCP values for audio/video
  *
@@ -3470,17 +3473,17 @@ BOOL H323Capabilities::RemoveCapability(H323Capability::MainTypes capabilityType
 BOOL H323Capabilities::SetVideoFrameSize(H323Capability::CapabilityFrameSize frameSize, int frameUnits) 
 { 
     // Remove the unmatching capabilities
-    if (frameSize != H323Capability::cif16MPI) Remove("*-CIF16*");
-    if (frameSize != H323Capability::cif4MPI) Remove("*-CIF4*");
 	if (frameSize != H323Capability::cifMPI) Remove("*-CIF*");
     if (frameSize != H323Capability::qcifMPI) Remove("*-QCIF*");
 	if (frameSize != H323Capability::sqcifMPI) Remove("*-SQCIF*");
 
-	// Remove Generic Capabilities
+	// Remove Generic size Capabilities
 	PStringList genericCaps;
-	if ((frameSize != H323Capability::i1080MPI) ||
-	    (frameSize != H323Capability::p720MPI) ||
-	    (frameSize != H323Capability::i480MPI)) {
+	if ((frameSize != H323Capability::i1080MPI) &&
+	    (frameSize != H323Capability::p720MPI) &&
+	    (frameSize != H323Capability::i480MPI) &&
+		(frameSize != H323Capability::cif16MPI) &&
+        (frameSize != H323Capability::cif4MPI)) {
        	for (PINDEX i = 0; i < table.GetSize(); i++) {
 	     H323Capability & capability = table[i];
 		  if ((capability.GetMainType() == H323Capability::e_Video) &&
