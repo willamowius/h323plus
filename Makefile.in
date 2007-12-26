@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.2  2007/08/20 19:13:27  shorne
+# Added Generic Capability support. Fixed Linux compile errors
+#
 # Revision 1.1  2007/08/06 20:50:47  shorne
 # First commit of h323plus
 #
@@ -357,11 +360,35 @@ install:
 	)
 	( for dir in $(DESTDIR)$(LIBDIR) \
 		     $(DESTDIR)$(PREFIX)/include/openh323 \
+		     $(DESTDIR)$(PREFIX)/include/openh323/codec \
+		     $(DESTDIR)$(PREFIX)/include/openh323/h230 \
+		     $(DESTDIR)$(PREFIX)/include/openh323/h341 \
+		     $(DESTDIR)$(PREFIX)/include/openh323/h350 \
+		     $(DESTDIR)$(PREFIX)/include/openh323/h450 \
+		     $(DESTDIR)$(PREFIX)/include/openh323/h460 \
 		     $(DESTDIR)$(PREFIX)/share/openh323 ;\
 		do mkdir -p $$dir ; chmod 755 $$dir ; \
 	done)
 	( for fn in include/*.h ; do \
 		$(INSTALL) -m 444 $$fn $(DESTDIR)$(PREFIX)/include/openh323 ; \
+	done)
+	( for fn in include/codec/*.h ; do \
+		$(INSTALL) -m 444 $$fn $(DESTDIR)$(PREFIX)/include/openh323/codec ; \
+	done)
+	( for fn in include/h230/*.h ; do \
+		$(INSTALL) -m 444 $$fn $(DESTDIR)$(PREFIX)/include/openh323/h230 ; \
+	done)
+	( for fn in include/h341/*.h ; do \
+		$(INSTALL) -m 444 $$fn $(DESTDIR)$(PREFIX)/include/openh323/h341 ; \
+	done)
+	( for fn in include/h350/*.h ; do \
+		$(INSTALL) -m 444 $$fn $(DESTDIR)$(PREFIX)/include/openh323/h350 ; \
+	done)
+	( for fn in include/h450/*.h ; do \
+		$(INSTALL) -m 444 $$fn $(DESTDIR)$(PREFIX)/include/openh323/h450 ; \
+	done)
+	( for fn in include/h460/*.h ; do \
+		$(INSTALL) -m 444 $$fn $(DESTDIR)$(PREFIX)/include/openh323/h460 ; \
 	done)
 	$(INSTALL) -m 444 openh323u.mak $(DESTDIR)$(PREFIX)/share/openh323
 
