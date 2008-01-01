@@ -35,6 +35,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:38  shorne
+ * First commit of h323plus
+ *
  *
  *
  */
@@ -220,7 +223,7 @@ void H350_Session::NewRecord(LDAP_Record & rec)
 BOOL H350_Session::PostNew(const PString & dn, const LDAP_Record & record)
 {
 	PList<PLDAPSession::ModAttrib> attrib;
-	PLDAPSession::ModAttrib::Operation mode = PLDAPSession::ModAttrib::Operation::Add;
+	PLDAPSession::ModAttrib::Operation mode = PLDAPSession::ModAttrib::Add;
 
 	for (std::list<PLDAPSchema>::const_iterator r = record.begin(); r != record.end(); ++r) {
 		PLDAPSchema schema = *r;
@@ -234,7 +237,7 @@ BOOL H350_Session::PostNew(const PString & dn, const LDAP_Record & record)
 BOOL H350_Session::PostUpdate(const PString & dn, const LDAP_Record & record)
 {
 	PList<PLDAPSession::ModAttrib> attrib;
-	PLDAPSession::ModAttrib::Operation mode = PLDAPSession::ModAttrib::Operation::Replace;
+	PLDAPSession::ModAttrib::Operation mode = PLDAPSession::ModAttrib::Replace;
 
 	for (std::list<PLDAPSchema>::const_iterator r = record.begin(); r != record.end(); ++r) {
 		PLDAPSchema schema = *r;
