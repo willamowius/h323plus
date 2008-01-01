@@ -24,6 +24,9 @@
  * Contributor(s): Fürbass Franz <franz.fuerbass@infonova.at>
  *
  * $Log$
+ * Revision 1.2  2007/08/20 19:13:28  shorne
+ * Added Generic Capability support. Fixed Linux compile errors
+ *
  * Revision 1.1  2007/08/06 20:51:05  shorne
  * First commit of h323plus
  *
@@ -428,7 +431,7 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
   
   //first verify the timestamp
   PTime now;
-  int deltaTime = now.GetTimeInSeconds() - crHashed.m_hashedVals.m_timeStamp;
+  int deltaTime = (int)now.GetTimeInSeconds() - crHashed.m_hashedVals.m_timeStamp;
   if (PABS(deltaTime) > timestampGracePeriod) {
     PTRACE(1, "H235RAS\tInvalid timestamp ABS(" << now.GetTimeInSeconds() << '-' 
            << (int)crHashed.m_hashedVals.m_timeStamp << ") > " << timestampGracePeriod);
