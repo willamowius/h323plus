@@ -301,6 +301,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\gnugknat.cxx">
+			</File>
+			<File
 				RelativePath="src\guid.cxx">
 				<FileConfiguration
 					Name="Release|Win32">
@@ -508,6 +511,12 @@
 						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\h323filetransfer.cxx">
+			</File>
+			<File
+				RelativePath=".\src\h323h224.cxx">
 			</File>
 			<File
 				RelativePath="src\h323neg.cxx">
@@ -1097,6 +1106,9 @@
 				RelativePath="include\gkserver.h">
 			</File>
 			<File
+				RelativePath=".\include\gnugknat.h">
+			</File>
+			<File
 				RelativePath="include\guid.h">
 			</File>
 			<File
@@ -1145,7 +1157,7 @@
 				RelativePath="include\h323ep.h">
 			</File>
 			<File
-				RelativePath=".\src\h323h224.cxx">
+				RelativePath=".\include\h323filetransfer.h">
 			</File>
 			<File
 				RelativePath=".\include\h323h224.h">

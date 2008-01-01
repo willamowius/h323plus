@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.4  2007/11/01 19:44:24  shorne
+# *** empty log message ***
+#
 # Revision 1.3  2007/10/31 08:56:44  shorne
 # remove obsolete items
 #
@@ -201,6 +204,7 @@ H323_H460            = @H323_H460@
 H323_H501	     = @H323_H501@
 H323_T38	     = @H323_T38@
 H323_T120	     = @H323_T120@
+H323_GNUGK	     = @H323_GNUGK@
 
 
 ifdef LIBRARY_MAKEFILE

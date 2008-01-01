@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2007/11/29 14:19:42  willamowius
+ * use seionID to test session type when doig capability merge
+ *
  * Revision 1.9  2007/11/28 15:30:38  willamowius
  * fix capability type detection for merging
  *
@@ -319,6 +322,10 @@
 
 #ifdef H323_H224
 #include "h323h224.h"
+#endif
+
+#ifdef H323_FILE
+#include "h323filetransfer.h"
 #endif
 
 #ifdef H323_AEC
@@ -779,6 +786,10 @@ H323Connection::H323Connection(H323EndPoint & ep,
 #ifdef H323_H224
   h224handler = NULL;
   h281handler = NULL;
+#endif
+
+#ifdef H323_FILE
+  filehandler = NULL;
 #endif
 
   endSync = NULL;
@@ -5325,6 +5336,51 @@ OpalH281Handler * H323Connection::CreateH281ProtocolHandler(OpalH224Handler & h2
 {
   return endpoint.CreateH281ProtocolHandler(h224Handler);
 }
+#endif
+
+#ifdef H323_FILE
+BOOL H323Connection::OpenFileTransferSession(H323ChannelNumber & num)
+{
+  BOOL filetransferOpen = FALSE;
+
+  for (PINDEX i = 0; i < localCapabilities.GetSize(); i++) {
+    H323Capability & localCapability = localCapabilities[i];
+	if ((localCapability.GetMainType() == H323Capability::e_Data) && 
+		(localCapability.GetSubType() == H245_DataApplicationCapability_application::e_genericDataCapability)) {
+      H323FileTransferCapability * remoteCapability = (H323FileTransferCapability *)remoteCapabilities.FindCapability(localCapability);
+      if (remoteCapability != NULL) {
+        PTRACE(3, "H323\tFile Transfer Available " << *remoteCapability);      
+		if (logicalChannels->Open(*remoteCapability, OpalMediaFormat::DefaultDataSessionID,num)) {
+		   filetransferOpen = TRUE;
+           break;
+		}
+        PTRACE(2, "H323\tFileTranfer OpenLogicalChannel failed: " << *remoteCapability);
+      }
+	  break;
+    }
+  }
+
+  return filetransferOpen;
+}
+
+H323FileTransferHandler * H323Connection::CreateFileTransferHandler(unsigned sessionID,	
+																	H323Channel::Directions dir,
+						                                            H323FileTransferList & filelist)
+{
+  if ((filehandler == NULL) && (OpenFileTransferChannel(dir, filelist)))
+     return new H323FileTransferHandler(*this, sessionID, dir, filelist);
+  else
+     return NULL;
+}
+
+BOOL H323Connection::OpenFileTransferChannel( H323Channel::Directions dir,
+						                      H323FileTransferList & filelist
+											 ) 
+{
+   return endpoint.OpenFileTransferChannel(*this,dir,filelist);
+}
+
+
 #endif
 
 

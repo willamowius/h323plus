@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.7  2007/11/11 03:02:46  shorne
+# Added GCCPDU references for H230 implementation
+#
 # Revision 1.6  2007/11/07 14:47:47  shorne
 # h230 fix again!
 #
@@ -55,122 +58,7 @@
 # Revision 1.136.2.1  2006/12/23 19:08:02  shorne
 # Plugin video codecs & sundry
 #
-# Revision 1.136  2006/06/27 12:35:03  csoutheren
-# Patch 1366328 - Support for H.450.3 divertingLegInformation2
-# Thanks to Norbert Bartalsky
 #
-# Revision 1.135  2006/06/23 07:06:04  csoutheren
-# Fixed linux compile
-#
-# Revision 1.134  2006/06/23 03:18:23  shorne
-# Backport FECC (H.224) from Opal
-#
-# Revision 1.133  2006/05/30 11:15:54  hfriederich
-# Enable to build H.460
-#
-# Revision 1.132  2005/06/07 07:59:11  csoutheren
-# Applied patch 1176459 for PocketPC. Thanks to Matthias Weber
-#
-# Revision 1.131  2005/01/03 14:03:21  csoutheren
-# Added new configure options and ability to disable/enable modules
-#
-# Revision 1.130  2005/01/03 06:25:53  csoutheren
-# Added extensive support for disabling code modules at compile time
-#
-# Revision 1.129  2004/12/08 05:16:14  csoutheren
-# Fixed OSP compilation on Linux
-#
-# Revision 1.128  2004/06/10 13:16:31  csoutheren
-# Added configure option to remove ASN tracing
-#
-# Revision 1.127  2004/05/18 22:27:35  csoutheren
-# Initial support for embedded codecs
-#
-# Revision 1.126  2004/05/10 12:44:43  csoutheren
-# Removed G.726 and IMA ADPCM codecs
-#
-# Revision 1.125  2004/05/04 12:50:55  csoutheren
-# Having a bad day with endifs
-#
-# Revision 1.124  2004/05/04 12:46:42  csoutheren
-# Moved LPC-10 to plugins
-#
-# Revision 1.123  2004/05/04 00:06:57  csoutheren
-# Restored deleted endif
-#
-# Revision 1.122  2004/05/04 00:05:53  csoutheren
-# Removed usage of g729codec.cxx
-#
-# Revision 1.121  2004/05/02 13:36:31  csoutheren
-# Removed GSM as this is now a plugin
-#
-# Revision 1.120  2004/04/25 01:52:47  rjongbloed
-# Fixed GCC 3.4 warnings
-#
-# Revision 1.119  2004/04/22 22:35:00  csoutheren
-# Fixed mispelling of Guilhem Tardy - my apologies to him
-#
-# Revision 1.118  2004/04/22 14:22:20  csoutheren
-# Added RFC 2190 H.263 code as created by Guilhem Tardy and AliceStreet
-# Many thanks to them for their contributions.
-#
-# Revision 1.117  2004/04/18 21:49:11  ykiryanov
-# Ifdef'd inclusion of ixjunix for BeOS platform
-#
-# Revision 1.116  2004/04/14 11:40:05  csoutheren
-# Updated to detect system GSM library
-#
-# Revision 1.115  2004/04/11 13:27:25  csoutheren
-# Added plugin manager to Makefile
-#
-# Revision 1.114  2004/04/04 13:21:22  csoutheren
-# Remove requirement for ASN parser at compile time by adding in
-# pre-processed versions of all ASN files
-# Removed iLBC and Speex as these are now plugin codecs
-#
-# Revision 1.113  2004/04/03 10:38:25  csoutheren
-# Added in initial cut at codec plugin code. Branches are for wimps :)
-#
-# Revision 1.112.2.1  2004/03/31 11:50:25  csoutheren
-# Removed references to builtin iLBC as this has been moved to plugins
-#
-# Revision 1.112  2004/03/22 22:11:11  csoutheren
-# Fixed typo preventing compliltion on x86-64 thanks to Klaus Kaempf
-#
-# Revision 1.111  2004/02/26 11:27:36  csoutheren
-# Added extra flag for compiled C files, thanks to Klaus Kaempf
-#
-# Revision 1.110  2004/01/31 13:13:22  csoutheren
-# Fixed problem with HAS_IXJ being tested but not included
-#
-# Revision 1.109  2003/12/29 12:13:26  csoutheren
-# configure now checks for libspeex in system libraries and compares
-# version against version in local sources. Also use --enable-localspeex to
-# force use of local Speex or system Speex
-#
-# Revision 1.108  2003/08/04 00:03:29  dereksmithies
-# Reorganise tests for H263 codecs
-#
-# Revision 1.107  2003/07/29 12:34:18  csoutheren
-# Changed to ensure dynamic libraries dynamically link pwlib
-#
-# Revision 1.106  2003/07/26 03:54:30  dereksmithies
-# Fixes for New H263 support from ffmpeg and Vic H263
-#
-# Revision 1.105  2003/06/06 03:55:52  rjongbloed
-# Added missing iLBC file.
-#
-# Revision 1.104  2003/06/06 02:37:05  rjongbloed
-# Fixed iLBC build
-#
-# Revision 1.103  2003/06/06 02:19:04  rjongbloed
-# Added iLBC codec
-#
-# Revision 1.102  2003/05/14 20:37:29  csoutheren
-# Changed for new AVC
-#
-# Revision 1.101  2003/05/05 12:14:03  robertj
-# Removed internal ldap as now use OpenLDAP
 #
 
 ifndef OPENH323DIR
@@ -240,6 +128,7 @@ HEADER_FILES	+= $(OH323_INCDIR)/h235pluginmgr.h
 COMMON_SOURCES	+= $(OH323_SRCDIR)/h235pluginmgr.cxx
 HEADER_FILES	+= $(OH323_INCDIR)/rfc2833.h
 COMMON_SOURCES	+= $(OH323_SRCDIR)/rfc2833.cxx
+
 
 ifdef H323_H224
 HEADER_FILES	+= $(OH323_INCDIR)/h224.h
@@ -357,6 +246,13 @@ HEADER_FILES	+= $(OH323_INCDIR)/h323t120.h
 COMMON_SOURCES	+= $(OH323_SRCDIR)/h323t120.cxx
 HEADER_FILES	+= $(OH323_INCDIR)/t120proto.h
 COMMON_SOURCES	+= $(OH323_SRCDIR)/t120proto.cxx
+endif
+
+########### GNUGK
+
+ifdef H323_GNUGK
+HEADER_FILES	+= $(OH323_INCDIR)/gnugknat.h
+COMMON_SOURCES	+= $(OH323_SRCDIR)/gnugknat.cxx
 endif
 
 ########## H.235

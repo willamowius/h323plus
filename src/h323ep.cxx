@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2007/11/20 11:40:47  willamowius
+ * fix compilation without audio support Thanks Vladimir Voronin
+ *
  * Revision 1.7  2007/11/16 22:09:43  shorne
  * Added ability to disable H.245 QoS for NetMeeting Interop
  *
@@ -865,6 +868,10 @@
 
 #ifdef H323_H224
 #include <h224handler.h>
+#endif
+
+#ifdef H323_FILE
+#include "h323filetransfer.h"
 #endif
 
 #if defined(H323_RTP_AGGREGATE) || defined(H323_SIGNAL_AGGREGATE)
@@ -3082,12 +3089,40 @@ void H323EndPoint::OnUserInputTone(H323Connection & connection,
     connection.OnUserInputString(PString(tone));
 }
 
+#ifdef H323_GNUGK
 void H323EndPoint::OnGatekeeperNATDetect(
-                                   PIPSocket::Address /* publicAddr*/,   
-                                   PString & /*gkIdentifier*/,
-				   H323TransportAddress & /*gkRouteAddress*/
+                                   PIPSocket::Address publicAddr,   
+                                   PString & gkIdentifier,
+				           H323TransportAddress & gkRouteAddress
                                    )
 {
+	if (gnugk != NULL) {
+		if (gnugk->ReRegister(gkIdentifier))
+			return;
+		else {
+		   	PTRACE(4, "GNUGK\tReRegistration Failure. Attempting new connection");
+			if (!gnugk->CreateNewTransport()) {
+			  PTRACE(4, "GNUGK\tNAT Support Failure: Retry from scratch");	
+			   delete gnugk;
+			   gnugk = NULL;
+			}
+		}
+	}
+
+	gnugk = new GNUGK_Feature(*this,gkRouteAddress,gkIdentifier);
+
+	 if (gnugk->IsOpen()) {
+ 	     PTRACE(4, "GNUGK\tNat Address " << gkRouteAddress);
+
+		 PNatMethod_GnuGk * natMethod = new PNatMethod_GnuGk();
+		 natMethod->AttachEndPoint(this);
+	     natMethods.AddMethod(natMethod);
+		 return; 
+	 } 
+
+	  PTRACE(4, "GNUGK\tConnection failed. Disabling support.");
+	  delete gnugk;
+      gnugk = NULL;
 }
 
 void H323EndPoint::OnGatekeeperOpenNATDetect(
@@ -3096,6 +3131,7 @@ void H323EndPoint::OnGatekeeperOpenNATDetect(
                                    )
 {
 }
+#endif
 
 BOOL H323EndPoint::OnGatekeeperAliases(
 		const H225_ArrayOf_AliasAddress & /*aliases*/  
@@ -3208,6 +3244,30 @@ OpalH281Handler * H323EndPoint::CreateH281ProtocolHandler(OpalH224Handler & h224
   return new OpalH281Handler(h224Handler);
 }
 
+#endif
+
+#ifdef H323_FILE
+BOOL H323EndPoint::OpenFileTransferSession( const PString & token, H323ChannelNumber & num)
+{
+  H323Connection * connection = FindConnectionWithLock(token);
+ 
+  BOOL success = FALSE;
+  if (connection != NULL) {
+    success = connection->OpenFileTransferSession(num);
+    connection->Unlock();
+  }
+
+  return success;
+}
+
+BOOL H323EndPoint::OpenFileTransferChannel(H323Connection & connection,
+											 H323Channel::Directions dir,
+						                     H323FileTransferList & filelist
+											) 
+{
+   PTRACE(2,"FT\tAttempt to open File Transfer session! Not implemented Yet!");
+   return FALSE;
+}
 #endif
 
 void H323EndPoint::SetLocalUserName(const PString & name)
@@ -3665,5 +3725,30 @@ PHandleAggregator * H323EndPoint::GetSignallingAggregator()
     signallingAggregator = new PHandleAggregator(signallingAggregationSize);
 
   return signallingAggregator;
+}
+#endif
+
+#ifdef H323_GNUGK
+void H323EndPoint::NATLostConnection(BOOL lost)
+{
+	PTRACE(4,"GNUGK\tNAT Connection" << (lost ? "Lost" : " Re-established"));
+	if (!lost)
+		RegInvokeReRegistration();  
+}
+
+void H323EndPoint::RegInvokeReRegistration()
+{
+	 RegThread = PThread::Create(PCREATE_NOTIFIER(RegMethod), 0,
+					PThread::AutoDeleteThread,
+					PThread::NormalPriority,
+					"regmeth:%x");
+}
+
+void H323EndPoint::RegMethod(PThread &, INT)
+{
+	PWaitAndSignal m(reregmutex);
+
+	PTRACE(4,"GNUGK\tForcing ReRegistration");
+	gatekeeper->ReRegisterNow();
 }
 #endif

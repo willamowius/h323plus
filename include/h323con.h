@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2007/11/29 14:19:42  willamowius
+ * use seionID to test session type when doig capability merge
+ *
  * Revision 1.8  2007/11/28 15:30:38  willamowius
  * fix capability type detection for merging
  *
@@ -454,11 +457,6 @@
 #include "openh323buildopts.h"
 #include "h235auth.h"
 
-#if H323_H224
-class OpalH224Handler;
-class OpalH281Handler;
-#endif
-
 #ifdef H323_SIGNAL_AGGREGATE
 #include <ptclib/sockagg.h>
 
@@ -581,6 +579,10 @@ class OpalRFC2833Info;
 class H460_FeatureSet;
 #endif
 
+#if H323_FILE
+class H323FileTransferHandler;
+class H323FileTransferList;
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -2555,7 +2557,7 @@ class H323Connection : public PObject
   		
         Note that if the application overrides this it should return a pointer
         to a heap variable (using new) as it will be automatically deleted when
-        the OpalConnection is deleted.
+        the H323Connection is deleted.
  	
         The default behaviour calls the OpalEndpoint function of the same name if
         there is not already a H.224 handler associated with this connection. If there
@@ -2573,6 +2575,45 @@ class H323Connection : public PObject
      The default behavour returns H323Endpoint::CreateH224ProtocolHandler()
      */
      virtual OpalH281Handler *CreateH281ProtocolHandler(OpalH224Handler & h224Handler);
+#endif
+
+#ifdef H323_FILE
+	/** Open an File Transfer Session
+	    Use this to open a file transfer session for the tranferring of files
+		between H323 clients.
+	*/
+     BOOL OpenFileTransferSession(H323ChannelNumber & num   ///< Created Channel number
+		                          );
+
+    /** Create an instance of the File Transfer handler.
+        This is called when the subsystem requires that a a file transfer channel be established.
+  		
+        Note that if the application overrides this it should return a pointer
+        to a heap variable (using new) as it will be automatically deleted when
+        the H323Connection is deleted.
+ 	
+        The default behaviour calls the OpalEndpoint function of the same name if
+        there is not already a H.224 handler associated with this connection. If there
+        is already such a H.224 handler associated, this instance is returned instead.
+    */
+     virtual H323FileTransferHandler *CreateFileTransferHandler(unsigned sessionID,           ///< Session Identifier
+															H323Channel::Directions dir,      ///< direction of channel
+						                                    H323FileTransferList & filelist   ///< Transfer File List
+															);
+
+	/** Open a File Transfer Channel.
+        This is called when the subsystem requires that a File Transfer channel be established.
+
+		An implementer should override this function to facilitate file transfer. 
+		If transmitting, list of files should be populated to notify the channel which files to read.
+		If receiving, the list of files should be altered to include path information for the storage
+		of received files.
+		
+        The default behaviour returns FALSE to indicate File Transfer is not implemented. 
+      */
+      virtual BOOL OpenFileTransferChannel( H323Channel::Directions dir,           ///< direction of channel
+						                  H323FileTransferList & filelist          ///< Transfer File List
+										 ); 
 #endif
 
     /**Get separate H.235 authentication for the connection.
@@ -3153,6 +3194,10 @@ class H323Connection : public PObject
     OpalH281Handler                  * h281handler;
 #endif
 
+#ifdef H323_FILE
+	H323FileTransferHandler          * filehandler;
+#endif
+
 #ifdef P_DTMF
     // The In-Band DTMF detector. This is used inside an audio filter which is
     // added to the audio channel.
@@ -3212,6 +3257,10 @@ class H323Connection : public PObject
 
 #ifdef H323_H224
   OpalH224Handler		  * h224Handler;
+#endif
+
+#ifdef H323_FILE
+  H323FileTransferHandler * fileHandler;
 #endif
 };
 

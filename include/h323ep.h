@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2007/11/17 00:14:47  shorne
+ * Fix to make disabling function calls consistent
+ *
  * Revision 1.5  2007/11/16 22:09:42  shorne
  * Added ability to disable H.245 QoS for NetMeeting Interop
  *
@@ -399,9 +402,9 @@ class OpalT120Protocol;
 class OpalT38Protocol;
 #endif
 
-#ifdef H323_H224
-class OpalH224Handler;
-class OpalH281Handler;
+#ifdef H323_FILE
+class H323FileTransferHandler;
+class H323FileTransferList;
 #endif
 
 #ifdef P_STUN
@@ -415,6 +418,10 @@ class PSTUNClient;
 
 #ifdef H323_H460
 #include "h460/h4601.h"
+#endif
+
+#ifdef H323_GNUGK
+#include "gnugknat.h"
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1483,6 +1490,7 @@ class H323EndPoint : public PObject
       unsigned rtpTimestamp         ///< RTP timestamp in logical channel sync.
     );
 
+#ifdef H323_GNUGK
      /**Call back from GK admission confirm to notify the Endpoint it is behind a NAT
 	(GNUGK Gatekeeper) The default does nothing. Override this to notify the user they are behind a NAT.
      */
@@ -1500,6 +1508,12 @@ class H323EndPoint : public PObject
 		PString & gkIdentifier,                ///< Identifier at the gatekeeper
 		H323TransportAddress & gkRouteAddress  ///< Gatekeeper Route Address
 		);
+
+	/** Fired with the keep-alive connection to GnuGk fails or is re-established
+	    This allows the endpoint to re-register.
+	  */
+	virtual void NATLostConnection(BOOL lost);
+#endif
 
 	/** Call back for GK assigned aliases returned from the gatekeeper in the RCF. 
 	    The default returns FALSE which appends the new aliases to the existing alias list. 
@@ -1625,7 +1639,7 @@ class H323EndPoint : public PObject
         heap variable (using new) as it will be automatically deleted when the Connection
         is deleted.
 		
-        The default behaviour calls the OpalManager function of the same name.
+        The default behaviour creates a new OpalH224Handler.
       */
     virtual OpalH224Handler * CreateH224ProtocolHandler(
       H323Connection & connection, 
@@ -1639,11 +1653,36 @@ class H323EndPoint : public PObject
         heap variable (using new) as it will be automatically deleted when the Connection
         is deleted.
 		
-        The default behaviour calls the OpalManager function of the same name
+        The default behaviour creates a new OpalH281Handler.
       */
     virtual OpalH281Handler * CreateH281ProtocolHandler(
       OpalH224Handler & h224Handler
     ) const;
+#endif
+
+#ifdef H323_FILE
+    /** Open File Transfer Session
+	    Use this to initiate a file transfer.
+	  */
+	BOOL OpenFileTransferSession(
+		const PString & token,   ///< Connection Token
+		H323ChannelNumber & num  ///< Opened Channel number
+	);
+
+	/** Open a File Transfer Channel.
+        This is called when the subsystem requires that a File Transfer channel be established.
+
+		An implementer should override this function to facilitate file transfer. 
+		If transmitting, list of files should be populated to notify the channel which files to read.
+		If receiving, the list of files should be altered to include path information for the storage
+		of received files.
+		
+        The default behaviour returns FALSE to indicate File Transfer is not implemented. 
+      */
+    virtual BOOL OpenFileTransferChannel(H323Connection & connection,         ///< Connection
+										   H323Channel::Directions dir,       ///< direction of channel
+						                   H323FileTransferList & filelist    ///< Transfer File List
+										   ); 
 #endif
 
   /**@name Additional call services */
@@ -2594,6 +2633,14 @@ class H323EndPoint : public PObject
 
 #ifdef H323_AEC
     BOOL enableAEC;
+#endif
+
+#ifdef H323_GNUGK
+    void RegInvokeReRegistration();
+	PMutex reregmutex;
+	GNUGK_Feature * gnugk;
+    PThread  *  RegThread;
+    PDECLARE_NOTIFIER(PThread, H323EndPoint, RegMethod);
 #endif
 };
 

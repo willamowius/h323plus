@@ -408,6 +408,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\gnugknat.cxx"
+				>
+			</File>
+			<File
 				RelativePath="src\guid.cxx"
 				>
 				<FileConfiguration
@@ -672,6 +676,14 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\h323filetransfer.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\src\h323h224.cxx"
+				>
+			</File>
+			<File
 				RelativePath="src\h323neg.cxx"
 				>
 				<FileConfiguration
@@ -866,6 +878,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\h350\h350.cxx"
+				>
 			</File>
 			<File
 				RelativePath=".\src\h450\h450pdu.cxx"
@@ -1416,6 +1432,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\gnugknat.h"
+				>
+			</File>
+			<File
 				RelativePath="include\guid.h"
 				>
 			</File>
@@ -1476,7 +1496,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\h323h224.cxx"
+				RelativePath=".\include\h323filetransfer.h"
 				>
 			</File>
 			<File
@@ -1509,6 +1529,10 @@
 			</File>
 			<File
 				RelativePath="include\h323trans.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\h350\h350.h"
 				>
 			</File>
 			<File
@@ -1609,6 +1633,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\h350\h350_service.asn"
+				>
+			</File>
+			<File
 				RelativePath=".\src\asn\h4501.asn"
 				>
 			</File>
@@ -1705,6 +1733,10 @@
 				</File>
 				<File
 					RelativePath="src\h248.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\h350\h350_service.h"
 					>
 				</File>
 				<File
@@ -1950,6 +1982,10 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\src\h350\h350_service.cxx"
+					>
 				</File>
 				<File
 					RelativePath=".\src\h450\h4501.cxx"

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2007/11/10 23:07:35  willamowius
+ * fix --disable-h450
+ *
  * Revision 1.2  2007/10/16 17:02:47  shorne
  * Fix for H.235.1 on full reregistration
  *
@@ -1127,6 +1130,7 @@ BOOL H323Gatekeeper::OnReceiveRegistrationConfirm(const H225_RegistrationConfirm
 #endif
 
 // NAT Detection with GNUGK
+#ifdef H323_GNUGK
   if (rcf.HasOptionalField(H225_RegistrationConfirm::e_nonStandardData))
   {
 	  PString NATaddr = rcf.m_nonStandardData.m_data.AsString();
@@ -1136,6 +1140,7 @@ BOOL H323Gatekeeper::OnReceiveRegistrationConfirm(const H225_RegistrationConfirm
 		  else
               endpoint.OnGatekeeperOpenNATDetect(endpointIdentifier,gkRouteAddress);
   }
+#endif
 
   endpoint.OnRegistrationConfirm(gkRouteAddress);
 

@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2007/10/16 16:35:44  shorne
+ * Added H.230 Support
+ *
  * Revision 1.2  2007/08/07 22:25:46  shorne
  * update for H323_H350
  *
@@ -200,6 +203,8 @@
 #undef H323_H450
 #undef H323_H460
 #undef H323_H501
+#undef H323_GNUGK
+#undef H323_FILE
 
 #undef H323_SIGNAL_AGGREGATE
 #undef H323_RTP_AGGREGATE

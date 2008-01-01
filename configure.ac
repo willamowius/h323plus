@@ -154,7 +154,6 @@ AC_ARG_ENABLE(minsize,
        [  --enable-minsize        minimise the size of the lib by disabling least used options])
 
 dnl these are the default configure settings
-default_ixj=yes
 default_audio=yes
 default_video=yes
 default_asntracing=yes
@@ -170,9 +169,10 @@ default_h341=yes
 default_h350=yes
 default_h460=yes
 default_t120=yes
+default_gnugk=no
+default_file=yes
 
 if test "${enable_minsize}x" = "yesx" ; then
-  default_ixj=no
   default_audio=yes
   default_video=yes
   default_asntracing=no
@@ -188,6 +188,8 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_h350=no
   default_h460=no
   default_t120=no
+  default_gnugk=no
+  default_file=no
 fi
 
 
@@ -500,6 +502,46 @@ else
   AC_DEFINE(H323_T120, 1)
 fi
 AC_SUBST(H323_T120)
+
+dnl ########################################################################
+dnl check for disabling GNUGK Support
+
+dnl MSWIN_DISPLAY gnugk,GNUGKnat
+dnl MSWIN_DEFINE  gnugk,H323_GNUGK
+
+AC_ARG_ENABLE(gnugk,
+       [  --disable-gnugk          disable GnuGk])
+if test "${enable_gnugk}x" = "x" ; then
+  enable_gnugk=$default_gnugk
+fi
+if test "$enable_gnugk" = "yes" ; then
+  H323_GNUGK=1
+  AC_DEFINE(H323_GNUGK, 1)
+else
+  H323_GNUGK=
+  AC_MSG_NOTICE(Disabling GnuGk)
+fi
+AC_SUBST(H323_GNUGK)
+
+dnl ########################################################################
+dnl check for disabling File Transfer Support
+
+dnl MSWIN_DISPLAY file,FileTransfer
+dnl MSWIN_DEFINE  file,H323_FILE
+
+AC_ARG_ENABLE(file,
+       [  --disable-file          disable File Transfer])
+if test "${enable_file}x" = "x" ; then
+  enable_gnugk=$default_file
+fi
+if test "$enable_file" = "yes" ; then
+  H323_FILE=1
+  AC_DEFINE(H323_FILE, 1)
+else
+  H323_FILE=
+  AC_MSG_NOTICE(Disabling File Transfer)
+fi
+AC_SUBST(H323_FILE)
 
 dnl ########################################################################
 dnl make directives
