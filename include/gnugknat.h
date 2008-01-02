@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2008/01/01 00:16:12  shorne
+ * Added GnuGknat and FileTransfer support
+ *
  *
  *
  */
@@ -225,7 +228,7 @@ public:
   */
    virtual BOOL IsAvailable() { return available; };
 
-   BOOL SetAvailable() { available = TRUE; };
+   void SetAvailable() { available = TRUE; };
 
    BOOL OpenSocket(PUDPSocket & socket, PortInfo & portInfo) const;
 
