@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2008/01/01 00:16:12  shorne
+ * Added GnuGknat and FileTransfer support
+ *
  * Revision 1.8  2007/11/20 11:40:47  willamowius
  * fix compilation without audio support Thanks Vladimir Voronin
  *
@@ -3752,3 +3755,4 @@ void H323EndPoint::RegMethod(PThread &, INT)
 	gatekeeper->ReRegisterNow();
 }
 #endif
+
