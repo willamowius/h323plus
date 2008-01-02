@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:50  shorne
+ * First commit of h323plus
+ *
  * Revision 1.1.2.1  2007/08/02 20:11:58  shorne
  * Added H.341 Support
  *
@@ -40,13 +43,6 @@
  */
 
 #pragma once
-
-#if !P_SNMP
-    #undef H323_H341
-    #pragma message("H341 disabled due to missing SNMP Support")
-#else
-   #define H323_H341 1
-#endif
 
 #ifdef H323_H341
 
