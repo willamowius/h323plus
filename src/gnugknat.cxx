@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2008/01/01 00:16:12  shorne
+ * Added GnuGknat and FileTransfer support
+ *
  *
  *
  */
@@ -419,7 +422,7 @@ GNUGK_Feature::GNUGK_Feature(H323EndPoint & EP,
 							 H323TransportAddress & remoteAddress, 
 							 PString gkid,
 							 WORD KeepAlive )
-     :  address(remoteAddress), GKid(gkid),ep(EP)
+     :  ep(EP), address(remoteAddress), GKid(gkid)
 {
  PTRACE(4, "GNUGK\tCreating GNUGK Feature.");	
 	keepalive = KeepAlive;
