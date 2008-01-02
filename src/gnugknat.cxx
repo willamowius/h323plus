@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/01/02 20:10:28  willamowius
+ * fix initialization order for gcc
+ *
  * Revision 1.1  2008/01/01 00:16:12  shorne
  * Added GnuGknat and FileTransfer support
  *
@@ -283,10 +286,11 @@ BOOL GNUGKTransport::WritePDU( const PBYTEArray & pdu )
 	
 BOOL GNUGKTransport::ReadPDU(PBYTEArray & pdu)
 {
-	LastRawRead = NULL;
 	BOOL ok = H323TransportTCP::ReadPDU(LastRawRead);
-	if (ok) pdu = LastRawRead;
-	return ok;
+	if (ok) { 
+		pdu = LastRawRead;
+	    return ok;
+	}
 
     ReadMutex.Wait(ReadTimeOut);
 
@@ -294,9 +298,7 @@ BOOL GNUGKTransport::ReadPDU(PBYTEArray & pdu)
           PTRACE(4, "GNUGK\tFail Read PDU.");	
 	      return FALSE;
 	}
-
 	pdu = readbuffer;
-	readbuffer = NULL;
 	return TRUE;
 }
 
