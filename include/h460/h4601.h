@@ -36,6 +36,9 @@
  * Contributor(s): ______________________________________.
  *
 * $Log$
+* Revision 1.2  2007/10/30 09:38:48  shorne
+* Better Linux interoperability and fix for small memory leak
+*
 * Revision 1.1  2007/08/06 20:50:51  shorne
 * First commit of h323plus
 *
@@ -1037,7 +1040,7 @@ class H460_FeatureSet : public PObject
 
     /** Derive new Feature Set based on this Feature Set ie Clone this FeatureSet
 	  */
-	H460_FeatureSet & DeriveNewFeatureSet();
+	H460_FeatureSet * DeriveNewFeatureSet();
 
 	/** Load Entire Feature Sets from PFactory loader
 	   */

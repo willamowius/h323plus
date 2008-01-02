@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2008/01/01 00:16:12  shorne
+ * Added GnuGknat and FileTransfer support
+ *
  * Revision 1.6  2007/11/17 00:14:47  shorne
  * Fix to make disabling function calls consistent
  *
@@ -2113,8 +2116,9 @@ class H323EndPoint : public PObject
 
 #ifdef H323_H460
 	/** Get the Endpoint FeatureSet
+	    This creates a new instance of the featureSet
 	 */
-    H460_FeatureSet & GetFeatureSet() {  return features.DeriveNewFeatureSet(); };
+    H460_FeatureSet & GetFeatureSet() {  return *features.DeriveNewFeatureSet(); };
 
     /** Is the FeatureSet disabled
 	  */
