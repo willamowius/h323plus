@@ -310,7 +310,7 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all plugins"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT CC CFLAGS ac_ct_CC CPP EGREP OPENH323DIR INSTALLPREFIX LIBDIR MAJOR_VERSION MINOR_VERSION BUILD_NUMBER OPENH323_VERSION PTLIB_CONFIG PWLIBDIR NOTRACE NOAUDIOCODECS NOVIDEO H323_T38 H323_H224 H323_H230 H323_H239 H323_H248 H323_H249 H323_H350 H323_H450 H323_H460 H323_H501 H323_GNUGK H323_T120 STDCCFLAGS LDLIBS ENDLDLIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA subdirs LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT CC CFLAGS ac_ct_CC CPP EGREP OPENH323DIR INSTALLPREFIX LIBDIR MAJOR_VERSION MINOR_VERSION BUILD_NUMBER OPENH323_VERSION PTLIB_CONFIG PWLIBDIR NOTRACE NOAUDIOCODECS NOVIDEO H323_T38 H323_H224 H323_H230 H323_H239 H323_H248 H323_H249 H323_H350 H323_H450 H323_H460 H323_H501 H323_GNUGK H323_FILE H323_T120 STDCCFLAGS LDLIBS ENDLDLIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA subdirs LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -866,7 +866,8 @@ Optional Features:
   --disable-h501          disable H.501
   --disable-t38           disable T.38
   --disable-t120          disable T.120
-  --disable-gnugk         disable GNUGK
+  --disable-gnugk         disable GNUGKnat
+  --disable-gnugk         disable FileTransfer
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -3372,7 +3373,8 @@ default_h249=yes
 default_h350=yes
 default_h460=yes
 default_t120=yes
-default_gnugk=no
+default_gnugk=yes
+default_file=yes
 
 if test "${enable_minsize}x" = "yesx" ; then
   default_ixj=no
@@ -3391,6 +3393,7 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_h460=no
   default_t120=no
   default_gnugk=no
+  default_file=no
 fi
 
 
@@ -3852,8 +3855,29 @@ _ACEOF
 
 else
   H323_GNUGK=
-  { echo "$as_me:$LINENO: Disabling GNUGK" >&5
-echo "$as_me: Disabling GNUGK" >&6;}
+  { echo "$as_me:$LINENO: Disabling GNUGKnat" >&5
+echo "$as_me: Disabling GNUGKnat" >&6;}
+fi
+
+
+# Check whether --enable-file or --disable-file was given.
+if test "${enable_file+set}" = set; then
+  enableval="$enable_file"
+
+fi;
+if test "${enable_file}x" = "x" ; then
+  enable_file=$default_file
+fi
+if test "$enable_file" = "yes" ; then
+  H323_FILE=1
+  cat >>confdefs.h <<\_ACEOF
+#define H323_FILE 1
+_ACEOF
+
+else
+  H323_FILE=
+  { echo "$as_me:$LINENO: Disabling FILEtransfer" >&5
+echo "$as_me: Disabling FILEtransfer" >&6;}
 fi
 
 
@@ -4649,6 +4673,7 @@ s,@H323_H450@,$H323_H450,;t t
 s,@H323_H460@,$H323_H460,;t t
 s,@H323_H501@,$H323_H501,;t t
 s,@H323_GNUGK@,$H323_GNUGK,;t t
+s,@H323_FILE@,$H323_FILE,;t t
 s,@H323_T120@,$H323_T120,;t t
 s,@STDCCFLAGS@,$STDCCFLAGS,;t t
 s,@LDLIBS@,$LDLIBS,;t t

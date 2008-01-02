@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.5  2008/01/01 00:16:12  shorne
+# Added GnuGknat and FileTransfer support
+#
 # Revision 1.4  2007/11/01 19:44:24  shorne
 # *** empty log message ***
 #
@@ -205,6 +208,7 @@ H323_H501	     = @H323_H501@
 H323_T38	     = @H323_T38@
 H323_T120	     = @H323_T120@
 H323_GNUGK	     = @H323_GNUGK@
+H323_FILE	     = @H323_FILE@
 
 
 ifdef LIBRARY_MAKEFILE
