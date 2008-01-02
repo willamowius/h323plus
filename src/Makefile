@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.8  2008/01/01 00:16:12  shorne
+# Added GnuGknat and FileTransfer support
+#
 # Revision 1.7  2007/11/11 03:02:46  shorne
 # Added GCCPDU references for H230 implementation
 #
@@ -253,6 +256,13 @@ endif
 ifdef H323_GNUGK
 HEADER_FILES	+= $(OH323_INCDIR)/gnugknat.h
 COMMON_SOURCES	+= $(OH323_SRCDIR)/gnugknat.cxx
+endif
+
+########### FILE
+
+ifdef H323_FILE
+HEADER_FILES	+= $(OH323_INCDIR)/h323filetransfer.h
+COMMON_SOURCES	+= $(OH323_SRCDIR)/h323filetransfer.cxx
 endif
 
 ########## H.235
