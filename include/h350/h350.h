@@ -35,6 +35,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:50  shorne
+ * First commit of h323plus
+ *
  *
  *
  */
@@ -92,10 +95,10 @@ class cname##_schema  : public PLDAPSchema \
 {   \
   public: static PStringList SchemaName() { return PStringList(cname##_SchemaName); } \
   void AttributeList(attributeList & attrib) { \
-   for (PINDEX i = 0; i< PARRAYSIZE(##cname##_attributes); i++) \
-	 attrib.push_back(Attribute(##cname##_attributes[i].name,(AttributeType)##cname##_attributes[i].type)); }; \
+   for (PINDEX i = 0; i< PARRAYSIZE(cname##_attributes ); i++) \
+	 attrib.push_back(Attribute(cname##_attributes[i].name,(AttributeType)cname##_attributes[i].type)); }; \
 }; \
-LDAP_Schema(##cname##); 
+LDAP_Schema(cname); 
 
 
 #endif
