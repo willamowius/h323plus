@@ -35,6 +35,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/01/02 18:57:56  willamowius
+ * compile fix for macro concatenation with gcc
+ *
  * Revision 1.1  2007/08/06 20:50:50  shorne
  * First commit of h323plus
  *
@@ -44,16 +47,8 @@
 
 #pragma once
 
-#if !P_LDAP
-    #undef H323_H350
-    #pragma message("H350 disabled due to missing OpenLDAP Support")
-#else
-   #define H323_H350 1
-#endif
-
 #ifdef H323_H350
 
-#include <ptlib/pluginmgr.h>
 #include <ptclib/pldap.h>
 #include <map>
 #include <list>
