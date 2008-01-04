@@ -1,0 +1,65 @@
+H460PRES {itu-t(0) recommendation(0) h(8) 460 x} DEFINITIONS AUTOMATIC TAGS ::=
+
+BEGIN
+
+IMPORTS
+		AliasAddress,
+		TransportAddress,
+		TimeToLive,
+		GenericData,
+		CryptoH323Token
+	FROM MULTIMEDIA-SYSTEM-CONTROL
+		ClearToken
+	FROM H235-SECURITY-MESSAGES;
+
+SubscriptionIdentifier ::= SEQUENCE
+{
+	guid			OCTET STRING (SIZE(16)),
+	...
+}
+
+
+PresenceSubscription ::= SEQUENCE
+{
+        approved		BOOLEAN,
+        subscribe		AliasAddress,    
+        alias			SEQUENCE OF AliasAddress,
+        rasAddress		TransportAddress            OPTIONAL,  
+        timeToLive		TimeToLive                  OPTIONAL,
+        identifier		SubscriptionIdentifier      OPTIONAL,
+        tokens			SEQUENCE OF ClearToken      OPTIONAL,
+        cryptoTokens		SEQUENCE OF CryptoH323Token OPTIONAL,
+        genericData		SEQUENCE OF GenericData     OPTIONAL,
+        ...
+}
+
+PresenceState ::= ENUMERATED
+{
+	presHidden           (0),
+	presAvailable        (1),  
+	presOnline           (2),
+	presOffline          (3),
+	presOnCall           (4),
+	presVoiceMail        (5),
+	presNotAvailable     (8),
+	presGeneric          (9)
+}
+
+Presentity ::= SEQUENCE
+{
+	state		PresenceState,                      -- State according to table 3 H.460.x
+        display	BMPString (SIZE (1..256)) OPTIONAL, -- Basic ISO/IEC 10646-1 (Unicode)
+        geolocation	OCTET STRING              OPTIONAL, -- Geographic Location
+        genericData	SEQUENCE OF GenericData   OPTIONAL, -- Generic Presence Information                
+        ...
+}
+
+PresenceNotification ::= SEQUENCE
+{
+	aliasAddress		SEQUENCE OF AliasAddress,
+	presentity		Presentity,                
+	subscribers		SEQUENCE OF AliasAddress  OPTIONAL,
+	...	
+}
+
+END
