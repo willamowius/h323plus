@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2008/01/02 19:37:45  willamowius
+ * add newline at eof
+ *
  * Revision 1.9  2008/01/01 00:16:12  shorne
  * Added GnuGknat and FileTransfer support
  *
@@ -1178,7 +1181,8 @@ H323EndPoint::H323EndPoint()
 #  if defined(H323_AUDIO_CODECS) && defined(P_AUDIO)
      // Windows MultiMedia stuff seems to need greater depth due to enormous
      // latencies in its operation, need to use DirectSound maybe?
-     soundChannelBuffers = 5;
+     // for Win2000 and XP you need 5, for Vista you need 10! so set to 10! -SH
+     soundChannelBuffers = 10;
 #  endif
 
   rtpIpTypeofService = IPTOS_PREC_CRITIC_ECP|IPTOS_LOWDELAY;
