@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2008/01/01 00:16:12  shorne
+ * Added GnuGknat and FileTransfer support
+ *
  * Revision 1.9  2007/11/29 14:19:42  willamowius
  * use seionID to test session type when doig capability merge
  *
@@ -3252,7 +3255,7 @@ class H323Connection : public PObject
 
 #ifdef H323_H460
 	BOOL disableH460;
-	H460_FeatureSet & features;
+	H460_FeatureSet       * features;
 #endif
 
 #ifdef H323_H224

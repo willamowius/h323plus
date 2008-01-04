@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2008/01/01 00:16:12  shorne
+ * Added GnuGknat and FileTransfer support
+ *
  * Revision 1.10  2007/11/29 14:19:42  willamowius
  * use seionID to test session type when doig capability merge
  *
@@ -819,7 +822,7 @@ H323Connection::H323Connection(H323EndPoint & ep,
 
 #ifdef H323_H460
   disableH460 = ep.FeatureSetDisabled();
-  features.LoadFeatureSet(H460_Feature::FeatureSignal,this);
+  features->LoadFeatureSet(H460_Feature::FeatureSignal,this);
 #endif
 
   IsNonCallConnection = FALSE;
@@ -855,6 +858,9 @@ H323Connection::~H323Connection()
 #ifdef H323_H450
   delete holdAudioMediaChannel;
   delete holdVideoMediaChannel;
+#endif
+#ifdef H323_H460
+  delete features;
 #endif
 
   PTRACE(3, "H323\tConnection " << callToken << " deleted.");
@@ -5479,7 +5485,7 @@ BOOL H323Connection::OnSendFeatureSet(unsigned code, H225_FeatureSet & feats) co
    if (disableH460)
 	   return FALSE;
 
-   return features.SendFeature(code, feats);
+   return features->SendFeature(code, feats);
 #else
    return endpoint.OnSendFeatureSet(code, feats);
 #endif
@@ -5491,7 +5497,7 @@ void H323Connection::OnReceiveFeatureSet(unsigned code, const H225_FeatureSet & 
    if (disableH460)
 	   return;
 
-   features.ReceiveFeature(code, feats);
+   features->ReceiveFeature(code, feats);
 #else
    endpoint.OnReceiveFeatureSet(code, feats);
 #endif
@@ -5820,7 +5826,7 @@ void H323Connection::SetNonCallConnection()
 #ifdef H323_H460
 H460_FeatureSet * H323Connection::GetFeatureSet()
 {
-	return &features;
+	return features;
 }
 #endif
 

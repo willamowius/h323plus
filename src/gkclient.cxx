@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2008/01/01 00:16:12  shorne
+ * Added GnuGknat and FileTransfer support
+ *
  * Revision 1.3  2007/11/10 23:07:35  willamowius
  * fix --disable-h450
  *
@@ -668,7 +671,7 @@ H323Gatekeeper::H323Gatekeeper(H323EndPoint & ep, H323Transport * trans)
                             PThread::NormalPriority,
                             "GkMonitor:%x");
 #ifdef H323_H460
-  features.LoadFeatureSet(H460_Feature::FeatureRas);
+  features->LoadFeatureSet(H460_Feature::FeatureRas);
 #endif
 
   localId = PString();
@@ -684,6 +687,9 @@ H323Gatekeeper::~H323Gatekeeper()
     monitor->WaitForTermination();
     delete monitor;
   }
+#ifdef H323_H460
+  delete features;
+#endif
 
   StopChannel();
 }
@@ -2451,7 +2457,7 @@ void H323Gatekeeper::AlternateInfo::PrintOn(ostream & strm) const
 BOOL H323Gatekeeper::OnSendFeatureSet(unsigned pduType, H225_FeatureSet & feats) const
 {
 #ifdef H323_H460
-    return features.SendFeature(pduType, feats);
+    return features->SendFeature(pduType, feats);
 #else
     return endpoint.OnSendFeatureSet(pduType, feats);
 #endif
@@ -2460,7 +2466,7 @@ BOOL H323Gatekeeper::OnSendFeatureSet(unsigned pduType, H225_FeatureSet & feats)
 void H323Gatekeeper::OnReceiveFeatureSet(unsigned pduType, const H225_FeatureSet & feats) const
 {
 #ifdef H323_H460
-    features.ReceiveFeature(pduType, feats);
+    features->ReceiveFeature(pduType, feats);
 #else
     endpoint.OnReceiveFeatureSet(pduType, feats);
 #endif

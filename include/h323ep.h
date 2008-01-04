@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2008/01/02 17:50:57  shorne
+ * Fix for memory leak in H.460 module
+ *
  * Revision 1.7  2008/01/01 00:16:12  shorne
  * Added GnuGknat and FileTransfer support
  *
@@ -2118,7 +2121,7 @@ class H323EndPoint : public PObject
 	/** Get the Endpoint FeatureSet
 	    This creates a new instance of the featureSet
 	 */
-    H460_FeatureSet & GetFeatureSet() {  return *features.DeriveNewFeatureSet(); };
+    H460_FeatureSet * GetFeatureSet() {  return features.DeriveNewFeatureSet(); };
 
     /** Is the FeatureSet disabled
 	  */

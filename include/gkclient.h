@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/10/16 16:54:32  shorne
+ * Fix for H.235.1 on full reregistration
+ *
  * Revision 1.1  2007/08/06 20:50:48  shorne
  * First commit of h323plus
  *
@@ -588,7 +591,7 @@ class H323Gatekeeper : public H225_RAS
 #endif
 
 #ifdef H323_H460
-    H460_FeatureSet & features;
+    H460_FeatureSet     * features;
 #endif
 
 };
