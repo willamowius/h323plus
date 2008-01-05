@@ -35,6 +35,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/01/02 16:19:25  willamowius
+ * add newline at end-of-file
+ *
  * Revision 1.2  2008/01/01 00:16:14  shorne
  * Fix compile warning on VS2005
  *
@@ -51,6 +54,7 @@
 #include <ptclib/pdns.h>
 #endif
 
+#include "openh323buildopts.h"
 #include "h350/h350.h"
 
 #ifdef H323_H350
