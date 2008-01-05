@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/01/02 19:24:02  shorne
+ * Removed P_SNMP check
+ *
  * Revision 1.1  2007/08/06 20:50:50  shorne
  * First commit of h323plus
  *
@@ -66,17 +69,18 @@ class H323_H341Server : public PSNMPServer
     BOOL OnSetRequest     (PINDEX reqID, PSNMP::BindingList & vars, PSNMP::ErrorType & errCode);
 
     //Events
-    virtual BOOL Authorise(const PIPSocket::Address & /*received*/) {};
+    virtual BOOL Authorise(const PIPSocket::Address & /*received*/) 
+				                             { return FALSE; }
 
 	virtual BOOL OnRequest(H323_H341Server::messagetype /*msgtype*/, 
 		                              PSNMP::BindingList & /*vars*/,
-						                PSNMP::ErrorType & /*errCode*/) {};
-
+						                PSNMP::ErrorType & /*errCode*/) 
+	                                          { return FALSE; }
 
   protected:
 
 };
 
-
-
 #endif
+
+

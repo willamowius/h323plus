@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:38  shorne
+ * First commit of h323plus
+ *
  * Revision 1.1.2.1  2007/08/02 20:12:05  shorne
  * Added H.341 Support
  *
@@ -42,15 +45,16 @@
 
 #include <ptlib.h>
 
+#include "openh323buildopts.h"
 #include "h341/h341.h"
 
-#ifdef H323_SNMP
+#ifdef H323_H341
 
 #include "h341/h341_oid.h"
 
 
 H323_H341Server::H323_H341Server(WORD listenPort)
-    PSNMPServer(PIPSocket::GetDefaultIpAny(), listenPort)   
+: PSNMPServer(PIPSocket::GetDefaultIpAny(), listenPort)   
 {
 
 }
@@ -61,83 +65,85 @@ H323_H341Server::~H323_H341Server()
 }
 
 
-static BOOL ValidateOID(messagetype reqType PSNMP::BindingList & vars, PSNMP::ErrorType & errCode)
+static BOOL ValidateOID(H323_H341Server::messagetype reqType,
+						        PSNMP::BindingList & varlist,
+								PSNMP::ErrorType & errCode)
 {
 
-    PSNMP::BindingList::const_iterator Iter = vars.begin();
-    found = TRUE;
-    while (Iter != varlist.end()) {
-      BOOL found = FALSE;
+    PSNMP::BindingList::const_iterator Iter = varlist.begin();
+    BOOL found = FALSE;
+    do {
+     for (Iter = varlist.begin(); Iter != varlist.end(); ++Iter) {
        for (PINDEX i = 0; i< PARRAYSIZE(H341_Field); i++) {
-           if (H341_Field[i].oid == Iter->first) {  // Found the item
-		      found = TRUE;
-              switch (reqType) {
-                case e_request:
-                case e_nextrequest:
-                  if (H341_Field[i].access == H341_NoAccess) {
-					  PTRACE(4,"H341\tAttribute request FAILED: No permitted access " << Iter->first );
-                      PSNMP::ErrorType = PSNMP::GenErr;
-                      return FALSE;    
-                  }
-                  break;
-                case e_set:
-                  if (H341_Field[i].access == H341_ReadOnly) {
-					  PTRACE(4,"H341\tAttribute set FAILED: Read Only " << Iter->first );
-                      PSNMP::ErrorType = PSNMP::ReadOnly;
-                      return FALSE;    
-                  }
-                  break;
-                default:   // Unknown request
-				  PTRACE(4,"H341\tGENERAL FAILURE: Unknown request");
-                  PSNMP::ErrorType = PSNMP::GenErr;
+          if (H341_Field[i].oid != Iter->first) 
+			   continue;
+
+	      found = TRUE;
+		  switch (reqType) {
+            case H323_H341Server::e_request:
+            case H323_H341Server::e_nextrequest:
+			  if (H341_Field[i].access == H341_NoAccess) {
+				  PTRACE(4,"H341\tAttribute request FAILED: No permitted access " << Iter->first );
+                  errCode = PSNMP::GenErr;
                   return FALSE;    
-			  }
+              }
+              break;
+            case H323_H341Server::e_set:
+              if (H341_Field[i].access == H341_ReadOnly) {
+				  PTRACE(4,"H341\tAttribute set FAILED: Read Only " << Iter->first );
+                  errCode = PSNMP::ReadOnly;
+                  return FALSE;    
+              }
+              break;
+            default:   // Unknown request
+			  PTRACE(4,"H341\tGENERAL FAILURE: Unknown request");
+              errCode = PSNMP::GenErr;
+              return FALSE;    
+		  }
              
-			  if (Iter->second.GetTag() != H341_Field[i].type ) {
-				  PTRACE(4,"H341\tAttribute FAILED Not valid field type " << Iter->first)
-                  PSNMP::ErrorType = PSNMP::BadValue;
-                  return FALSE;    
-			  }
-		   }
-			  // Found and everything is OK so move to the next iteration
-              continue;   
-	   } 
-
-		if (!found) {
-		   	PTRACE(4,"H341\tRequest FAILED: Not valid attribute " << Iter->first);
-            PSNMP::ErrorType = PSNMP::NoSuchName;
-            return FALSE;
-		}
-
+		  if (Iter->second.GetTag() != (unsigned)H341_Field[i].type ) {
+			  PTRACE(4,"H341\tAttribute FAILED Not valid field type " << Iter->first);
+              errCode = PSNMP::BadValue;
+              return FALSE;    
+		  }
+		  break;
 	   }
+	   if (found) break;
+	 }
+	} while (Iter != varlist.end() && !found);
+
+	if (!found) {
+	   	PTRACE(4,"H341\tRequest FAILED: Not valid attribute " << Iter->first);
+        errCode = PSNMP::NoSuchName;
+        return FALSE;
 	}
 
     return TRUE;
 }
 
-BOOL H323_H341Server::OnGetRequest(PINDEX reqID, PSNMP::BindingList & vars, PSNMP::ErrorType & errCode)
+BOOL H323_H341Server::OnGetRequest(PINDEX /*reqID*/, PSNMP::BindingList & vars, PSNMP::ErrorType & errCode)
 {
 	messagetype reqType = H323_H341Server::e_request;
-	if (!ValidateOID(reqType,vars, errCode)
+	if (!ValidateOID(reqType,vars, errCode))
 		     return FALSE;
 
 	return OnRequest(reqType, vars,errCode);
 
 }
 
-BOOL H323_H341Server::OnGetNextRequest(PINDEX reqID, PSNMP::BindingList & vars, PSNMP::ErrorType & errCode)
+BOOL H323_H341Server::OnGetNextRequest(PINDEX /*reqID*/, PSNMP::BindingList & vars, PSNMP::ErrorType & errCode)
 {
 	messagetype reqType = H323_H341Server::e_nextrequest;
-	if (!ValidateOID(reqType,vars, errCode)
+	if (!ValidateOID(reqType,vars, errCode))
 		     return FALSE;
 
 	return OnRequest(reqType, vars,errCode);
 }
 
-BOOL H323_H341Server::OnSetRequest(PINDEX reqID, PSNMP::BindingList & vars, PSNMP::ErrorType & errCode)
+BOOL H323_H341Server::OnSetRequest(PINDEX /*reqID*/, PSNMP::BindingList & vars, PSNMP::ErrorType & errCode)
 {
 	messagetype reqType = H323_H341Server::e_set;
-	if (!ValidateOID(reqType,vars, errCode)
+	if (!ValidateOID(reqType,vars, errCode))
 		     return FALSE;
 
 	return OnRequest(reqType, vars,errCode);
