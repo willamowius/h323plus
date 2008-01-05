@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="h323plus"
 	ProjectGUID="{71C46EAF-48C9-47BA-9532-27B51744548D}"
 	RootNamespace="h323plus"
@@ -409,6 +409,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\gnugknat.cxx"
+				>
+			</File>
+			<File
 				RelativePath="src\guid.cxx"
 				>
 				<FileConfiguration
@@ -475,6 +479,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\h230\h230.cxx"
+				>
 			</File>
 			<File
 				RelativePath="src\h235auth.cxx"
@@ -673,6 +681,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\h323filetransfer.cxx"
+				>
+			</File>
+			<File
 				RelativePath="src\h323neg.cxx"
 				>
 				<FileConfiguration
@@ -867,6 +879,14 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\h341\h341.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\src\h350\h350.cxx"
+				>
 			</File>
 			<File
 				RelativePath=".\src\h450\h450pdu.cxx"
@@ -1417,6 +1437,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\gnugknat.h"
+				>
+			</File>
+			<File
 				RelativePath="include\guid.h"
 				>
 			</File>
@@ -1430,6 +1454,10 @@
 			</File>
 			<File
 				RelativePath="include\h225ras.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\h230\h230.h"
 				>
 			</File>
 			<File
@@ -1477,6 +1505,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\h323filetransfer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\h323h224.cxx"
 				>
 			</File>
@@ -1510,6 +1542,18 @@
 			</File>
 			<File
 				RelativePath="include\h323trans.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\h341\h341.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\h341\h341_oid.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\h350\h350.h"
 				>
 			</File>
 			<File
@@ -1610,6 +1654,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\asn\h350_service.asn"
+				>
+			</File>
+			<File
 				RelativePath=".\src\asn\h4501.asn"
 				>
 			</File>
@@ -1666,11 +1714,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\asn\h460pres.asn"
+				>
+			</File>
+			<File
 				RelativePath=".\src\asn\h501.asn"
 				>
 			</File>
 			<File
 				RelativePath=".\src\asn\mcspdu.asn"
+				>
+			</File>
+			<File
+				RelativePath=".\src\asn\OID2.asn"
 				>
 			</File>
 			<File
@@ -1693,10 +1749,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\include\h230\h230.h"
-					>
-				</File>
-				<File
 					RelativePath="include\h235.h"
 					>
 				</File>
@@ -1706,6 +1758,10 @@
 				</File>
 				<File
 					RelativePath="src\h248.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\h350\h350_service.h"
 					>
 				</File>
 				<File
@@ -1765,7 +1821,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\h460\h460pres.h"
+					>
+				</File>
+				<File
 					RelativePath="include\mcspdu.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\h230\OID2.h"
 					>
 				</File>
 				<File
@@ -1814,10 +1878,6 @@
 				</File>
 				<File
 					RelativePath=".\src\h225_2.cxx"
-					>
-				</File>
-				<File
-					RelativePath=".\src\h230\h230.cxx"
 					>
 				</File>
 				<File
@@ -1953,6 +2013,10 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\src\h350\h350_service.cxx"
+					>
+				</File>
+				<File
 					RelativePath=".\src\h450\h4501.cxx"
 					>
 				</File>
@@ -2006,6 +2070,10 @@
 				</File>
 				<File
 					RelativePath=".\src\h460\h4609.cxx"
+					>
+				</File>
+				<File
+					RelativePath=".\src\h460\h460pres.cxx"
 					>
 				</File>
 				<File
@@ -2074,6 +2142,10 @@
 				</File>
 				<File
 					RelativePath=".\src\h230\OID2.asn"
+					>
+				</File>
+				<File
+					RelativePath=".\src\h230\OID2.cxx"
 					>
 				</File>
 				<File

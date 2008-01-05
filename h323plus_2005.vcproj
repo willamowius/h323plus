@@ -480,6 +480,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\h230\h230.cxx"
+				>
+			</File>
+			<File
 				RelativePath="src\h235auth.cxx"
 				>
 				<FileConfiguration
@@ -878,6 +882,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\h341\h341.cxx"
+				>
 			</File>
 			<File
 				RelativePath=".\src\h350\h350.cxx"
@@ -1452,6 +1460,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\h230\h230.h"
+				>
+			</File>
+			<File
 				RelativePath="include\h235auth.h"
 				>
 			</File>
@@ -1529,6 +1541,10 @@
 			</File>
 			<File
 				RelativePath="include\h323trans.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\h341\h341.h"
 				>
 			</File>
 			<File
@@ -1693,11 +1709,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\asn\h460pres.asn"
+				>
+			</File>
+			<File
 				RelativePath=".\src\asn\h501.asn"
 				>
 			</File>
 			<File
 				RelativePath=".\src\asn\mcspdu.asn"
+				>
+			</File>
+			<File
+				RelativePath=".\src\asn\OID2.asn"
 				>
 			</File>
 			<File
@@ -1717,10 +1741,6 @@
 				</File>
 				<File
 					RelativePath="include\h225.h"
-					>
-				</File>
-				<File
-					RelativePath=".\include\h230\h230.h"
 					>
 				</File>
 				<File
@@ -1796,7 +1816,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\h460\h460pres.h"
+					>
+				</File>
+				<File
 					RelativePath="include\mcspdu.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\h230\OID2.h"
 					>
 				</File>
 				<File
@@ -1845,10 +1873,6 @@
 				</File>
 				<File
 					RelativePath=".\src\h225_2.cxx"
-					>
-				</File>
-				<File
-					RelativePath=".\src\h230\h230.cxx"
 					>
 				</File>
 				<File
@@ -2044,6 +2068,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\h460\h460pres.cxx"
+					>
+				</File>
+				<File
 					RelativePath="src\h501.cxx"
 					>
 					<FileConfiguration
@@ -2108,7 +2136,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\src\h230\OID2.asn"
+					RelativePath=".\src\h230\OID2.cxx"
 					>
 				</File>
 				<File

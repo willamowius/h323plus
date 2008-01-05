@@ -684,6 +684,9 @@
 				RelativePath=".\src\h460\h4601.cxx">
 			</File>
 			<File
+				RelativePath=".\src\h460\h460pres.cxx">
+			</File>
+			<File
 				RelativePath="src\h501pdu.cxx">
 				<FileConfiguration
 					Name="Release|Win32">
@@ -1196,6 +1199,9 @@
 				RelativePath=".\include\h460\h4601.h">
 			</File>
 			<File
+				RelativePath=".\include\h460\h460pres.h">
+			</File>
+			<File
 				RelativePath="include\jitter.h">
 			</File>
 			<File
@@ -1306,6 +1312,9 @@
 			</File>
 			<File
 				RelativePath=".\src\asn\h4609.asn">
+			</File>
+			<File
+				RelativePath=".\src\asn\h460pres.asn">
 			</File>
 			<File
 				RelativePath=".\src\asn\h501.asn">
