@@ -35,6 +35,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2008/01/05 11:36:01  shorne
+ * More Fixes for Linux
+ *
  * Revision 1.3  2008/01/02 19:28:02  shorne
  * Removed duplicate link to plugin factory
  *
@@ -68,7 +71,7 @@ class H350_Session   : public PLDAPSession
 
 	 BOOL Open(const PString & hostname, WORD port = 389);
 
-	 BOOL Login(const PString & who, const PString & passwd, AuthenticationMethod authMethod=AuthSimple);
+	 BOOL Login(const PString & who, const PString & passwd, PLDAPSession::AuthenticationMethod authMethod=AuthSimple);
 
 	 void NewRecord(LDAP_Record & rec);
 
