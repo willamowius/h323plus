@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/01/05 07:11:39  shorne
+ * Major overhaul of H.341 code
+ *
  * Revision 1.2  2008/01/02 19:24:02  shorne
  * Removed P_SNMP check
  *
@@ -49,7 +52,8 @@
 
 #ifdef H323_H341
 
-#include <ptclib/psnmp.h>
+#ifndef _H323_H341
+#define _H323_H341
 
 class H323_H341Server : public PSNMPServer
 {
@@ -80,6 +84,8 @@ class H323_H341Server : public PSNMPServer
   protected:
 
 };
+
+#endif // _H323_H341
 
 #endif
 

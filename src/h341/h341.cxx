@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/01/05 07:11:39  shorne
+ * Major overhaul of H.341 code
+ *
  * Revision 1.1  2007/08/06 20:51:38  shorne
  * First commit of h323plus
  *
@@ -46,10 +49,11 @@
 #include <ptlib.h>
 
 #include "openh323buildopts.h"
-#include "h341/h341.h"
 
 #ifdef H323_H341
 
+#include <ptclib/psnmp.h>
+#include "h341/h341.h"
 #include "h341/h341_oid.h"
 
 

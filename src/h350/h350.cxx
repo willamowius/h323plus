@@ -35,6 +35,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2008/01/05 07:09:53  shorne
+ * added reference to buildopts to ensure if enabled everything gets compiled
+ *
  * Revision 1.3  2008/01/02 16:19:25  willamowius
  * add newline at end-of-file
  *
@@ -50,16 +53,15 @@
 
 #include <ptlib.h>
 
-#if P_DNS
-#include <ptclib/pdns.h>
-#endif
-
 #include "openh323buildopts.h"
-#include "h350/h350.h"
 
 #ifdef H323_H350
 
-#include <ldap.h>
+#include <ptclib/pldap.h>
+#include "h350/h350.h"
+#if P_DNS
+#include <ptclib/pdns.h>
+#endif
 
 //////////////////////////////////////////////////////////////////////////
 // Define H.350 schemas for H.350, H.350.1, H.350.2

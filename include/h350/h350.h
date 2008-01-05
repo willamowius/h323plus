@@ -35,6 +35,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/01/02 19:28:02  shorne
+ * Removed duplicate link to plugin factory
+ *
  * Revision 1.2  2008/01/02 18:57:56  willamowius
  * compile fix for macro concatenation with gcc
  *
@@ -49,7 +52,9 @@
 
 #ifdef H323_H350
 
-#include <ptclib/pldap.h>
+#ifndef _H323_H350
+#define _H323_H350
+
 #include <map>
 #include <list>
 
@@ -95,6 +100,7 @@ class cname##_schema  : public PLDAPSchema \
 }; \
 LDAP_Schema(cname); 
 
+#endif // _H323_H350
 
-#endif
+#endif  
 
