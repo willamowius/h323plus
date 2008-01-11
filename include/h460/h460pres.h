@@ -20,16 +20,78 @@
 
 
 //
-// SubscriptionIdentifier
+// PresenceMessage
 //
 
-class H460P_SubscriptionIdentifier : public PASN_Sequence
+class H460P_PresenceMessage : public PASN_Enumeration
 {
 #ifndef PASN_LEANANDMEAN
-    PCLASSINFO(H460P_SubscriptionIdentifier, PASN_Sequence);
+    PCLASSINFO(H460P_PresenceMessage, PASN_Enumeration);
 #endif
   public:
-    H460P_SubscriptionIdentifier(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+    H460P_PresenceMessage(unsigned tag = UniversalEnumeration, TagClass tagClass = UniversalTagClass);
+
+    enum Enumerations {
+      e_preState,
+      e_preInstruct,
+      e_preAuthorize,
+      e_preNotify,
+      e_preRequest,
+      e_preResponse,
+      e_preAlive,
+      e_preRemove,
+      e_preAlert
+    };
+
+    H460P_PresenceMessage & operator=(unsigned v);
+    PObject * Clone() const;
+};
+
+
+//
+// PresenceInstruction
+//
+
+class H225_AliasAddress;
+
+class H460P_PresenceInstruction : public PASN_Choice
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_PresenceInstruction, PASN_Choice);
+#endif
+  public:
+    H460P_PresenceInstruction(unsigned tag = 0, TagClass tagClass = UniversalTagClass);
+
+    enum Choices {
+      e_subscribe,
+      e_unsubscribe,
+      e_block,
+      e_unblock
+    };
+
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+    operator H225_AliasAddress &() const;
+#else
+    operator H225_AliasAddress &();
+    operator const H225_AliasAddress &() const;
+#endif
+
+    BOOL CreateObject();
+    PObject * Clone() const;
+};
+
+
+//
+// PresenceIdentifier
+//
+
+class H460P_PresenceIdentifier : public PASN_Sequence
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_PresenceIdentifier, PASN_Sequence);
+#endif
+  public:
+    H460P_PresenceIdentifier(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
 
     PASN_OctetString m_guid;
 
@@ -73,21 +135,81 @@ class H460P_PresenceState : public PASN_Enumeration
 
 
 //
-// ArrayOf_AliasAddress
+// ArrayOf_PresenceNotification
 //
 
-class H225_AliasAddress;
+class H460P_PresenceNotification;
 
-class H460P_ArrayOf_AliasAddress : public PASN_Array
+class H460P_ArrayOf_PresenceNotification : public PASN_Array
 {
 #ifndef PASN_LEANANDMEAN
-    PCLASSINFO(H460P_ArrayOf_AliasAddress, PASN_Array);
+    PCLASSINFO(H460P_ArrayOf_PresenceNotification, PASN_Array);
 #endif
   public:
-    H460P_ArrayOf_AliasAddress(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+    H460P_ArrayOf_PresenceNotification(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
 
     PASN_Object * CreateObject() const;
-    H225_AliasAddress & operator[](PINDEX i) const;
+    H460P_PresenceNotification & operator[](PINDEX i) const;
+    PObject * Clone() const;
+};
+
+
+//
+// ArrayOf_PresenceSubscription
+//
+
+class H460P_PresenceSubscription;
+
+class H460P_ArrayOf_PresenceSubscription : public PASN_Array
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_ArrayOf_PresenceSubscription, PASN_Array);
+#endif
+  public:
+    H460P_ArrayOf_PresenceSubscription(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    PASN_Object * CreateObject() const;
+    H460P_PresenceSubscription & operator[](PINDEX i) const;
+    PObject * Clone() const;
+};
+
+
+//
+// ArrayOf_PresenceInstruction
+//
+
+class H460P_PresenceInstruction;
+
+class H460P_ArrayOf_PresenceInstruction : public PASN_Array
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_ArrayOf_PresenceInstruction, PASN_Array);
+#endif
+  public:
+    H460P_ArrayOf_PresenceInstruction(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    PASN_Object * CreateObject() const;
+    H460P_PresenceInstruction & operator[](PINDEX i) const;
+    PObject * Clone() const;
+};
+
+
+//
+// ArrayOf_PresenceIdentifier
+//
+
+class H460P_PresenceIdentifier;
+
+class H460P_ArrayOf_PresenceIdentifier : public PASN_Array
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_ArrayOf_PresenceIdentifier, PASN_Array);
+#endif
+  public:
+    H460P_ArrayOf_PresenceIdentifier(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    PASN_Object * CreateObject() const;
+    H460P_PresenceIdentifier & operator[](PINDEX i) const;
     PObject * Clone() const;
 };
 
@@ -133,6 +255,26 @@ class H460P_ArrayOf_CryptoH323Token : public PASN_Array
 
 
 //
+// ArrayOf_AliasAddress
+//
+
+class H225_AliasAddress;
+
+class H460P_ArrayOf_AliasAddress : public PASN_Array
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_ArrayOf_AliasAddress, PASN_Array);
+#endif
+  public:
+    H460P_ArrayOf_AliasAddress(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    PASN_Object * CreateObject() const;
+    H225_AliasAddress & operator[](PINDEX i) const;
+    PObject * Clone() const;
+};
+
+
+//
 // ArrayOf_GenericData
 //
 
@@ -153,6 +295,46 @@ class H460P_ArrayOf_GenericData : public PASN_Array
 
 
 //
+// PresencePDU
+//
+
+class H460P_PresencePDU : public PASN_Sequence
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_PresencePDU, PASN_Sequence);
+#endif
+  public:
+    H460P_PresencePDU(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    enum OptionalFields {
+      e_notification,
+      e_subscription,
+      e_instruction,
+      e_identifier,
+      e_tokens,
+      e_cryptoTokens
+    };
+
+    H460P_PresenceMessage m_messageId;
+    H460P_ArrayOf_PresenceNotification m_notification;
+    H460P_ArrayOf_PresenceSubscription m_subscription;
+    H460P_ArrayOf_PresenceInstruction m_instruction;
+    H460P_ArrayOf_PresenceIdentifier m_identifier;
+    H460P_ArrayOf_ClearToken m_tokens;
+    H460P_ArrayOf_CryptoH323Token m_cryptoTokens;
+
+    PINDEX GetDataLength() const;
+    BOOL Decode(PASN_Stream & strm);
+    void Encode(PASN_Stream & strm) const;
+#ifndef PASN_NOPRINTON
+    void PrintOn(ostream & strm) const;
+#endif
+    Comparison Compare(const PObject & obj) const;
+    PObject * Clone() const;
+};
+
+
+//
 // PresenceSubscription
 //
 
@@ -168,19 +350,15 @@ class H460P_PresenceSubscription : public PASN_Sequence
       e_rasAddress,
       e_timeToLive,
       e_identifier,
-      e_tokens,
-      e_cryptoTokens,
       e_genericData
     };
 
     PASN_Boolean m_approved;
     H225_AliasAddress m_subscribe;
-    H460P_ArrayOf_AliasAddress m_alias;
+    H460P_ArrayOf_AliasAddress m_aliases;
     H225_TransportAddress m_rasAddress;
     H225_TimeToLive m_timeToLive;
-    H460P_SubscriptionIdentifier m_identifier;
-    H460P_ArrayOf_ClearToken m_tokens;
-    H460P_ArrayOf_CryptoH323Token m_cryptoTokens;
+    H460P_PresenceIdentifier m_identifier;
     H460P_ArrayOf_GenericData m_genericData;
 
     PINDEX GetDataLength() const;

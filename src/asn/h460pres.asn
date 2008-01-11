@@ -12,25 +12,81 @@ IMPORTS
 		ClearToken
 	FROM H235-SECURITY-MESSAGES;
 
-SubscriptionIdentifier ::= SEQUENCE
+--
+-- Presence PDU
+--
+
+PresencePDU ::= SEQUENCE
+{
+	messageId	PresenceMessage,
+	notification	SEQUENCE OF PresenceNotification	OPTIONAL,
+	subscription	SEQUENCE OF PresenceSubscription	OPTIONAL,
+	instruction	SEQUENCE OF PresenceInstruction		OPTIONAL,
+	identifier	SEQUENCE OF PresenceIdentifier		OPTIONAL,
+	tokens		SEQUENCE OF ClearToken			OPTIONAL,
+	cryptoTokens	SEQUENCE OF CryptoH323Token		OPTIONAL,
+	...
+}
+
+PresenceMessage ::= ENUMERATED
+{
+	preState,
+	preInstruct,
+	preAuthorize,
+	preNotify,
+	preRequest,
+	preResponse,
+	preAlive,
+	preRemove,
+	preAlert,
+	...
+}
+
+--
+-- Presence Instruction
+--
+
+PresenceInstruction ::= CHOICE
+{
+	subscribe		AliasAddress,
+	unsubscribe		AliasAddress,
+	block			AliasAddress,
+	unblock			AliasAddress,
+	...
+}
+
+--
+-- Presence Subscription
+--
+
+PresenceSubscription ::= SEQUENCE
+{
+	approved		BOOLEAN,
+	subscribe		AliasAddress,    
+	aliases			SEQUENCE OF AliasAddress,
+	rasAddress		TransportAddress		OPTIONAL,  
+	timeToLive		TimeToLive			OPTIONAL,
+	identifier		PresenceIdentifier		OPTIONAL,
+	genericData		SEQUENCE OF GenericData		OPTIONAL,
+	...
+}
+
+PresenceIdentifier ::= SEQUENCE
 {
 	guid			OCTET STRING (SIZE(16)),
 	...
 }
 
+--
+-- Presence Notification
+--
 
-PresenceSubscription ::= SEQUENCE
+PresenceNotification ::= SEQUENCE
 {
-        approved		BOOLEAN,
-        subscribe		AliasAddress,    
-        alias			SEQUENCE OF AliasAddress,
-        rasAddress		TransportAddress            OPTIONAL,  
-        timeToLive		TimeToLive                  OPTIONAL,
-        identifier		SubscriptionIdentifier      OPTIONAL,
-        tokens			SEQUENCE OF ClearToken      OPTIONAL,
-        cryptoTokens		SEQUENCE OF CryptoH323Token OPTIONAL,
-        genericData		SEQUENCE OF GenericData     OPTIONAL,
-        ...
+	aliasAddress		SEQUENCE OF AliasAddress,
+	presentity		Presentity,                
+	subscribers		SEQUENCE OF AliasAddress  OPTIONAL,
+	...	
 }
 
 PresenceState ::= ENUMERATED
@@ -47,19 +103,12 @@ PresenceState ::= ENUMERATED
 
 Presentity ::= SEQUENCE
 {
-	state		PresenceState,                      -- State according to table 3 H.460.x
-        display	BMPString (SIZE (1..256)) OPTIONAL, -- Basic ISO/IEC 10646-1 (Unicode)
-        geolocation	OCTET STRING              OPTIONAL, -- Geographic Location
-        genericData	SEQUENCE OF GenericData   OPTIONAL, -- Generic Presence Information                
-        ...
-}
-
-PresenceNotification ::= SEQUENCE
-{
-	aliasAddress		SEQUENCE OF AliasAddress,
-	presentity		Presentity,                
-	subscribers		SEQUENCE OF AliasAddress  OPTIONAL,
-	...	
+	state			PresenceState,                     		-- Presence State 
+	display			BMPString (SIZE (1..256))	OPTIONAL, 	-- Basic ISO/IEC 10646-1 (Unicode)
+	geolocation		OCTET STRING			OPTIONAL, 	-- Geographic Location
+	genericData		SEQUENCE OF GenericData   	OPTIONAL,	-- Generic Presence Information                
+	...
 }
 
 END
+
