@@ -5,11 +5,11 @@
 //
 
 #ifdef P_USE_PRAGMA
-#pragma implementation "H460pres.h"
+#pragma implementation "h460pres.h"
 #endif
 
 #include <ptlib.h>
-#include "H460pres.h"
+#include "h460/h460pres.h"
 
 #define new PNEW
 
