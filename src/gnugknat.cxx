@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/01/02 20:43:05  shorne
+ * Fix compile warning on Linux
+ *
  * Revision 1.2  2008/01/02 20:10:28  willamowius
  * fix initialization order for gcc
  *
@@ -286,6 +289,7 @@ BOOL GNUGKTransport::WritePDU( const PBYTEArray & pdu )
 	
 BOOL GNUGKTransport::ReadPDU(PBYTEArray & pdu)
 {
+	LastRawRead.SetSize(0);
 	BOOL ok = H323TransportTCP::ReadPDU(LastRawRead);
 	if (ok) { 
 		pdu = LastRawRead;
