@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/01/02 18:35:40  willamowius
+ * make SetAvailable() return void
+ *
  * Revision 1.1  2008/01/01 00:16:12  shorne
  * Added GnuGknat and FileTransfer support
  *
@@ -130,9 +133,6 @@ class GNUGKTransport  : public H323TransportTCP
 
   protected:
 	 PString GKid;
-	 PBYTEArray  readbuffer;		 /// Read Buffer to dispatch 
-	 PBYTEArray  LastRawRead;		 /// Raw Read from Transport
-
 
 	 PMutex connectionsMutex;
 	 PMutex WriteMutex;

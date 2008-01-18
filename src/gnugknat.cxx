@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2008/01/15 02:25:34  shorne
+ * readbuffer not being emptied after each read.
+ *
  * Revision 1.3  2008/01/02 20:43:05  shorne
  * Fix compile warning on Linux
  *
@@ -289,24 +292,8 @@ BOOL GNUGKTransport::WritePDU( const PBYTEArray & pdu )
 	
 BOOL GNUGKTransport::ReadPDU(PBYTEArray & pdu)
 {
-	LastRawRead.SetSize(0);
-	BOOL ok = H323TransportTCP::ReadPDU(LastRawRead);
-	if (ok) { 
-		pdu = LastRawRead;
-	    return ok;
-	}
-
-    ReadMutex.Wait(ReadTimeOut);
-
-	if (readbuffer.GetSize() == 0) {
-          PTRACE(4, "GNUGK\tFail Read PDU.");	
-	      return FALSE;
-	}
-	pdu = readbuffer;
-	return TRUE;
+	return H323TransportTCP::ReadPDU(pdu);
 }
-
-
 
 BOOL GNUGKTransport::Connect() 
 { 
@@ -314,11 +301,7 @@ BOOL GNUGKTransport::Connect()
 	if (!H323TransportTCP::Connect())
 		return FALSE;
 	
-/// Send the initialisation PDU
-	if (!InitialPDU()) 
-	    return FALSE; 
-
-    return TRUE;
+	return InitialPDU();
 }
 
 void GNUGKTransport::ConnectionLost(BOOL established)
