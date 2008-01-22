@@ -4,10 +4,10 @@ BEGIN
 
 Participant ::= SEQUENCE
 {
-   token	 INTEGER (0..255),
-   number    BMPString (SIZE (1..256)),
-   name      BMPString (SIZE (1..256)) OPTIONAL,
-   vCard     BMPString (SIZE (1..256)) OPTIONAL,
+   token	INTEGER (0..255),
+   number	BMPString (SIZE (1..256)),
+   name		BMPString (SIZE (1..256)) OPTIONAL,
+   vCard	OCTET STRING              OPTIONAL,
    ...
 }
 

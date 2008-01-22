@@ -35,7 +35,7 @@ class H230OID2_Participant : public PASN_Sequence
     PASN_Integer m_token;
     PASN_BMPString m_number;
     PASN_BMPString m_name;
-    PASN_BMPString m_vCard;
+    PASN_OctetString m_vCard;
 
     PINDEX GetDataLength() const;
     BOOL Decode(PASN_Stream & strm);

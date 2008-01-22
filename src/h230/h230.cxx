@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2007/11/19 18:06:32  shorne
+ * changed lists from PList to std::list
+ *
  * Revision 1.3  2007/11/07 15:45:43  willamowius
  * linux compile fix
  *
@@ -561,11 +564,19 @@ BOOL H230Control::OnHandleGenericPDU(const H245_GenericMessage & msg)
 
     const PASN_ObjectId & val = id; 
 	PString oid = val.AsString();
-	 if ((oid != h230OID) || (oid != T124OID))
-		 return FALSE;
+	 if ((oid != h230OID) && 
+		 (oid != T124OID) && 
+		 (oid != PACKOID)) {
+	   PTRACE(5,"H230\tRecieved unknown Identifier " << oid);
+	   return FALSE;
+	}
 
-     if (msg.GetTag() != H245_GenericMessage::e_messageContent)
+	 if (!msg.HasOptionalField(H245_GenericMessage::e_messageContent)) {
+		 PTRACE(5,"H230\tReceived No Message contents!");
 		 return FALSE;
+	 }
+
+ 	 PTRACE(5,"H230\tHandling Incoming PDU");
 
     unsigned msgid;
 	const PASN_Integer & num = msg.m_subMessageIdentifier;
@@ -580,11 +591,11 @@ BOOL H230Control::OnHandleGenericPDU(const H245_GenericMessage & msg)
 			const PASN_Integer & idx = id;
 			const H245_ParameterValue & genvalue = param.m_parameterValue;
 			 if (oid == h230OID)
-		       ReceivedH230PDU(msgid, idx, genvalue);
+		       return ReceivedH230PDU(msgid, idx, genvalue);
 			 else if (oid == T124OID)
- 		       ReceivedT124PDU(msgid, idx, genvalue);
+ 		       return ReceivedT124PDU(msgid, idx, genvalue);
 			 else if (oid == PACKOID)
-			   ReceivedPACKPDU(msgid, idx, genvalue);
+			   return ReceivedPACKPDU(msgid, idx, genvalue);
 		}    
 	  } else 
 		  return FALSE;
@@ -1209,11 +1220,12 @@ BOOL H230Control::UserEnquiryResponse(const list<userInfo> & userlist)
 		}
         i++;
 	}
+	PTRACE(4,"H230PACK\tSending UserList " << ulist);
     rawpdu.EncodeSubType(ulist);
     return SendPACKGenericResponse(2,rawpdu);
 }
 
-BOOL H230Control::SendPACKGenericRequest(int msgid,const PASN_OctetString & rawpdu)
+BOOL H230Control::SendPACKGenericRequest(int paramid,const PASN_OctetString & rawpdu)
 {
    H323ControlPDU pdu;
 
@@ -1238,7 +1250,7 @@ BOOL H230Control::SendPACKGenericRequest(int msgid,const PASN_OctetString & rawp
 	   H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
 	     idm.SetTag(H245_ParameterIdentifier::e_standard);
 		 PASN_Integer & idx = idm;
-		 idx = msgid;
+		 idx = paramid;
 		 H245_ParameterValue & genvalue = param.m_parameterValue;
 		 genvalue.SetTag(H245_ParameterValue::e_octetString);
 		 PASN_OctetString & valg = param.m_parameterValue;
@@ -1247,7 +1259,7 @@ BOOL H230Control::SendPACKGenericRequest(int msgid,const PASN_OctetString & rawp
     return WriteControlPDU(pdu);
 }
 
-BOOL H230Control::SendPACKGenericResponse(int msgid, const PASN_OctetString & rawpdu)
+BOOL H230Control::SendPACKGenericResponse(int paramid, const PASN_OctetString & rawpdu)
 {
     H323ControlPDU pdu;
     H245_GenericMessage & msg = pdu.Build(H245_ResponseMessage::e_genericResponse);
@@ -1261,7 +1273,7 @@ BOOL H230Control::SendPACKGenericResponse(int msgid, const PASN_OctetString & ra
         val.SetValue(PACKOID);
 
 	PASN_Integer & num = msg.m_subMessageIdentifier;
-	  num = 1;
+	  num = 2;
 
     msg.SetTag(H245_GenericMessage::e_messageContent);
     H245_ArrayOf_GenericParameter & content = msg.m_messageContent;
@@ -1271,7 +1283,7 @@ BOOL H230Control::SendPACKGenericResponse(int msgid, const PASN_OctetString & ra
 	   H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
 	     idm.SetTag(H245_ParameterIdentifier::e_standard);
 		 PASN_Integer & idx = idm;
-		 idx = msgid;
+		 idx = paramid;
 		 H245_ParameterValue & genvalue = param.m_parameterValue;
 		 genvalue.SetTag(H245_ParameterValue::e_octetString);
 		 PASN_OctetString & valg = param.m_parameterValue;
@@ -1280,14 +1292,14 @@ BOOL H230Control::SendPACKGenericResponse(int msgid, const PASN_OctetString & ra
     return WriteControlPDU(pdu);
 }
 
-BOOL H230Control::ReceivedPACKPDU(unsigned /*msgId*/, unsigned paramId, const H245_ParameterValue & value)
+BOOL H230Control::ReceivedPACKPDU(unsigned msgId, unsigned paramId, const H245_ParameterValue & value)
 {
 	if (value.GetTag() != H245_ParameterValue::e_octetString) {
 		  PTRACE(4, "H230PACK\tError: Message Incorrect Format");
 		  return FALSE;
 	}
-
-	switch (paramId) {
+    PTRACE(4, "H230PACK\tProcessing message " << paramId);
+	switch (msgId) {
 		case 1:
             return OnReceivePACKRequest(value);
 		case 2:
@@ -1303,9 +1315,10 @@ BOOL H230Control::OnReceivePACKRequest(const PASN_OctetString & rawpdu)
 	H245_ArrayOf_TerminalLabel pdu;
 
 	if (!pdu.Decode(argStream)) {
-		PTRACE(4, "H230T124\tError decoding Message");
+		PTRACE(4, "H230PACK\tError decoding Message");
 		return FALSE;
 	}
+	PTRACE(5, "H230PACK\tDecoded Message " << pdu);
 
 	list<int> req;
 	for (PINDEX i =0; i < pdu.GetSize(); i++) 
@@ -1324,33 +1337,37 @@ BOOL H230Control::OnReceivePACKResponse(const PASN_OctetString & rawpdu)
 	H230OID2_ParticipantList list;
 
 	if (!list.Decode(argStream)) {
-		PTRACE(4, "H230T124\tError decoding Message");
+		PTRACE(4, "H230PACK\tError decoding Message");
 		return FALSE;
 	}
+	PTRACE(5, "H230PACK\tDecoded Message " << list);
 
 	H230OID2_ArrayOf_Participant & users = list.m_list;
 
 	std::list<userInfo> userlist;
-	for (PINDEX i=0; i < users.GetSize(); i++) 
+	for (PINDEX i=0; i < users.GetSize(); ++i) 
 	{
-		userInfo u;
+		userInfo * u = new userInfo();
 		H230OID2_Participant & user = users[i];
-		u.m_Token = user.m_token;
-		u.m_Number = user.m_number;
+		u->m_Token = user.m_token;
+		u->m_Number = user.m_number;
 		if (user.HasOptionalField(H230OID2_Participant::e_name))
-		   u.m_Name = user.m_name;
+		   u->m_Name = user.m_name;
 		else
-		   u.m_Name = PString();
+		   u->m_Name = PString();
 
 		if (user.HasOptionalField(H230OID2_Participant::e_vCard))
-		   u.m_vCard = user.m_vCard;
+		   u->m_vCard = user.m_vCard.AsString();
 		else
-           u.m_vCard = PString();
+           u->m_vCard = PString();
 
-		userlist.push_back(u);
+        PTRACE(4,"H230PACK\tReading " << u->m_Number);
+		userlist.push_back(*u);
 	}
 
-    OnUserEnquiryResponse(userlist);
+	if (userlist.size() > 0)
+       OnUserEnquiryResponse(userlist);
+
     return TRUE;
 }
 
@@ -1644,8 +1661,8 @@ void H230Control_EndPoint::OnTransferUserResponse(list<int> node,const PString &
 
 void H230Control_EndPoint::OnTerminalListResponse(list<int> node)
 {
-	res->ids = node;
-    res->errCode = 0;
+//	res->ids = node;
+//  res->errCode = 0;
 	for (list<int>::iterator r = node.begin(); r != node.end(); ++r) 
 	      ConferenceJoined(*r);
 
@@ -1661,16 +1678,16 @@ void H230Control_EndPoint::MakeChairResponse(BOOL success)
 
 void H230Control_EndPoint::ChairAssigned(int node)
 {
-	res->node = node;
-    res->errCode = 0;
+//	res->node = node;
+//  res->errCode = 0;
 	OnChairAssigned(node);
     responseMutex.Signal();
 }
 
 void H230Control_EndPoint::FloorAssigned(int node)
 {
-	res->node = node;
-    res->errCode = 0;
+//	res->node = node;
+//  res->errCode = 0;
 	OnFloorAssigned(node);
     responseMutex.Signal();
 }
@@ -1685,12 +1702,12 @@ void H230Control_EndPoint::OnChairTokenResponse(int id, const PString & name)
 
 void H230Control_EndPoint::OnUserEnquiryResponse(const list<userInfo> & info) 
 {
-	res->info = info;
-	res->errCode = 0;
-	for (list<userInfo>::const_iterator r = info.begin(); r != info.end(); ++r) 
-	{
-        userInfo u = *r;
-	    ConferenceJoinInfo(u.m_Token,u.m_Number,u.m_Name,u.m_vCard);
+//	res->info = info;
+//	res->errCode = 0;
+	std::list<userInfo>::const_iterator r = info.begin();
+	while (r != info.end()) {
+	    ConferenceJoinInfo(r->m_Token,r->m_Number,r->m_Name,r->m_vCard);
+		r++;
 	}
 
     responseMutex.Signal();

@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2007/11/19 18:06:31  shorne
+ * changed lists from PList to std::list
+ *
  * Revision 1.3  2007/11/07 15:45:42  willamowius
  * linux compile fix
  *
@@ -233,8 +236,8 @@ public:
 
     BOOL ReceivedPACKPDU(unsigned msgId, unsigned paramId, const H245_ParameterValue & value);
 
-	BOOL SendPACKGenericRequest(int msgid, const PASN_OctetString & rawpdu);
-	BOOL SendPACKGenericResponse(int msgid, const PASN_OctetString & rawpdu);
+	BOOL SendPACKGenericRequest(int paramid, const PASN_OctetString & rawpdu);
+	BOOL SendPACKGenericResponse(int paramid, const PASN_OctetString & rawpdu);
 	BOOL OnReceivePACKRequest(const PASN_OctetString & rawpdu);
 	BOOL OnReceivePACKResponse(const PASN_OctetString & rawpdu);
 

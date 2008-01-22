@@ -26,7 +26,6 @@ H230OID2_Participant::H230OID2_Participant(unsigned tag, PASN_Object::TagClass t
   m_token.SetConstraints(PASN_Object::FixedConstraint, 0, 255);
   m_number.SetConstraints(PASN_Object::FixedConstraint, 1, 256);
   m_name.SetConstraints(PASN_Object::FixedConstraint, 1, 256);
-  m_vCard.SetConstraints(PASN_Object::FixedConstraint, 1, 256);
 }
 
 
