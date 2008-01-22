@@ -20,6 +20,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/11/01 14:34:50  willamowius
+ * add newline at end of file
+ *
  * Revision 1.1  2007/08/06 20:51:07  shorne
  * First commit of h323plus
  *
@@ -133,8 +136,17 @@ BOOL H323_H224Capability::OnSendingPDU(H245_DataMode & pdu) const
   return TRUE;
 }
 
-BOOL H323_H224Capability::OnReceivedPDU(const H245_DataApplicationCapability & /*pdu*/)
+BOOL H323_H224Capability::OnReceivedPDU(const H245_DataApplicationCapability & pdu)
 {
+
+  if (pdu.m_application.GetTag() != H245_DataApplicationCapability_application::e_h224)
+	  return FALSE;
+
+  H245_DataProtocolCapability & dataProtocolCapability = (H245_DataProtocolCapability &)pdu.m_application;
+  if (dataProtocolCapability.GetTag() != H245_DataProtocolCapability::e_hdlcFrameTunnelling)
+	  return FALSE;
+
+  maxBitRate = pdu.m_maxBitRate;
   return TRUE;
 }
 
