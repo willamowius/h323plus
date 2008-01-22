@@ -13,33 +13,84 @@ IMPORTS
 	FROM H235-SECURITY-MESSAGES;
 
 --
--- Presence PDU
+-- Presence Base Message
 --
 
-PresencePDU ::= SEQUENCE
+PresenceMessage ::= CHOICE
 {
-	messageId	PresenceMessage,
-	notification	SEQUENCE OF PresenceNotification	OPTIONAL,
-	subscription	SEQUENCE OF PresenceSubscription	OPTIONAL,
-	instruction	SEQUENCE OF PresenceInstruction		OPTIONAL,
-	identifier	SEQUENCE OF PresenceIdentifier		OPTIONAL,
-	tokens		SEQUENCE OF ClearToken			OPTIONAL,
-	cryptoTokens	SEQUENCE OF CryptoH323Token		OPTIONAL,
+	presenceStatus		PresenceStatus,
+	presenceInstruct	PresenceInstruct,
+	presenceAuthorize	PresenceAuthorize,
+	presenceNotify		PresenceNotify,
+	presenceRequest		PresenceRequest,
+	presenceResponse	PresenceResponse,
+	presenceAlive		PresenceAlive,
+	presenceRemove		PresenceRemove,
+	presenceAlert		PresenceAlert,
 	...
 }
 
-PresenceMessage ::= ENUMERATED
+--
+-- Presence Message
+--
+
+PresenceStatus ::= SEQUENCE  
 {
-	preState,
-	preInstruct,
-	preAuthorize,
-	preNotify,
-	preRequest,
-	preResponse,
-	preAlive,
-	preRemove,
-	preAlert,
+	notification		SEQUENCE OF PresenceNotification,
+	instruction		SEQUENCE OF PresenceInstruction		OPTIONAL,
 	...
+}
+
+PresenceInstruct ::= SEQUENCE
+{
+	instruction		SEQUENCE OF PresenceInstruction,
+	...
+}
+
+PresenceAuthorize ::= SEQUENCE
+{
+	subscription		SEQUENCE OF PresenceSubscription,
+	...
+}
+
+PresenceNotify ::= SEQUENCE
+{
+	notification		SEQUENCE OF PresenceNotification,
+	...
+}
+
+PresenceRequest ::= SEQUENCE
+{
+	subscription		SEQUENCE OF PresenceSubscription,
+	tokens			SEQUENCE OF ClearToken			OPTIONAL,
+	cryptoTokens		SEQUENCE OF CryptoH323Token		OPTIONAL,
+	...
+}
+
+PresenceResponse ::= SEQUENCE
+{
+	subscription		SEQUENCE OF PresenceSubscription,
+	tokens			SEQUENCE OF ClearToken			OPTIONAL,
+	cryptoTokens		SEQUENCE OF CryptoH323Token		OPTIONAL,
+	...
+}
+
+PresenceAlive ::= SEQUENCE
+{
+	identifier		SEQUENCE OF PresenceIdentifier,
+	...
+}
+PresenceRemove ::= SEQUENCE
+{
+	identifier		SEQUENCE OF PresenceIdentifier,
+	...
+}
+
+PresenceAlert ::= SEQUENCE
+{
+	notification		SEQUENCE OF PresenceNotification,
+	...
+
 }
 
 --
@@ -91,14 +142,14 @@ PresenceNotification ::= SEQUENCE
 
 PresenceState ::= ENUMERATED
 {
-	presHidden           (0),
-	presAvailable        (1),  
-	presOnline           (2),
-	presOffline          (3),
-	presOnCall           (4),
-	presVoiceMail        (5),
-	presNotAvailable     (8),
-	presGeneric          (9)
+	hidden           (0),
+	available        (1),  
+	online           (2),
+	offline          (3),
+	onCall           (4),
+	voiceMail        (5),
+	notAvailable     (8),
+	generic          (9)
 }
 
 Presentity ::= SEQUENCE
