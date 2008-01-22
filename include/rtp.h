@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/10/16 17:03:53  shorne
+ * Qos capability negotiation
+ *
  * Revision 1.1  2007/08/06 20:50:50  shorne
  * First commit of h323plus
  *
@@ -533,6 +536,7 @@ class RTP_Session : public PObject
       DefaultAudioSessionID    = 1,
       DefaultVideoSessionID    = 2,
       DefaultFaxSessionID      = 3,
+	  DefaultH224SessionID     = 4,
 	  DefaultExtVideoSessionID = 5
     };
 

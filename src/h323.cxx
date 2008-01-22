@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.12  2008/01/04 06:23:09  shorne
+ * Cleaner setup and teardown of h460 module
+ *
  * Revision 1.11  2008/01/01 00:16:12  shorne
  * Added GnuGknat and FileTransfer support
  *
@@ -2716,6 +2719,8 @@ BOOL H323Connection::SendFastStartAcknowledge(H225_ArrayOf_PASN_OctetString & ar
   // Set flag so internal establishment check does not require H.245
   fastStartState = FastStartAcknowledged;
 
+  endSessionNeeded = FALSE;  
+
   return TRUE;
 }
 
@@ -2809,6 +2814,9 @@ BOOL H323Connection::HandleFastStartAcknowledge(const H225_ArrayOf_PASN_OctetStr
   fastStartChannels.RemoveAll();
 
   fastStartState = FastStartAcknowledged;
+
+  endSessionNeeded = FALSE; 
+
   return TRUE;
 }
 
@@ -3884,20 +3892,12 @@ void H323Connection::InternalEstablishedConnectionCheck()
 #endif
 
 #ifdef H323_H224
-  if(h245_available && startH224) {
+  if (h245_available && startH224) {
     if(remoteCapabilities.FindCapability("H.224") != NULL) {
       H323Capability * capability = localCapabilities.FindCapability("H.224");
-      if(capability != NULL) {
-	    if(logicalChannels->Open(*capability, OpalMediaFormat::DefaultH224SessionID)) {
-		  H323Channel * channel = capability->CreateChannel(*this, H323Channel::IsTransmitter, OpalMediaFormat::DefaultH224SessionID, NULL);
-          if(channel != NULL) {
-			channel->SetNumber(logicalChannels->GetNextChannelNumber());
-			fastStartChannels.Append(channel);
-          }
-        }
-      }
-    }
-	   
+      if(capability != NULL) 
+         OpenLogicalChannel(*capability,RTP_Session::DefaultH224SessionID, H323Channel::IsBidirectional);
+    }	   
 	startH224 = FALSE;
   }
 #endif
