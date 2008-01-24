@@ -20,6 +20,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2008/01/23 22:08:12  shorne
+ * added missing const
+ *
  * Revision 1.3  2008/01/22 01:11:22  shorne
  * Fix H.224 Capability exchange
  *
@@ -145,7 +148,7 @@ BOOL H323_H224Capability::OnReceivedPDU(const H245_DataApplicationCapability & p
   if (pdu.m_application.GetTag() != H245_DataApplicationCapability_application::e_h224)
 	  return FALSE;
 
-  const H245_DataProtocolCapability & dataProtocolCapability = (H245_DataProtocolCapability &)pdu.m_application;
+  const H245_DataProtocolCapability & dataProtocolCapability = pdu.m_application;
   if (dataProtocolCapability.GetTag() != H245_DataProtocolCapability::e_hdlcFrameTunnelling)
 	  return FALSE;
 
