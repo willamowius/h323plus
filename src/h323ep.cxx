@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2008/01/04 22:53:40  shorne
+ * Increased default soundBuffers to 10 for Vista
+ *
  * Revision 1.10  2008/01/02 19:37:45  willamowius
  * add newline at eof
  *
@@ -1251,6 +1254,10 @@ H323EndPoint::H323EndPoint()
 
 #ifdef H323_AEC 
   enableAEC = FALSE;
+#endif
+
+#ifdef H323_GNUGK
+  gnugk = NULL;
 #endif
 
   PTRACE(3, "H323\tCreated endpoint.");
