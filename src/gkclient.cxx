@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2008/01/04 06:23:09  shorne
+ * Cleaner setup and teardown of h460 module
+ *
  * Revision 1.4  2008/01/01 00:16:12  shorne
  * Added GnuGknat and FileTransfer support
  *
@@ -671,6 +674,7 @@ H323Gatekeeper::H323Gatekeeper(H323EndPoint & ep, H323Transport * trans)
                             PThread::NormalPriority,
                             "GkMonitor:%x");
 #ifdef H323_H460
+  features->AttachEndPoint(&ep);
   features->LoadFeatureSet(H460_Feature::FeatureRas);
 #endif
 
@@ -2126,6 +2130,19 @@ BOOL H323Gatekeeper::OnReceiveInfoRequest(const H225_InfoRequest & irq)
 }
 
 #ifdef H323_H248
+
+BOOL H323Gatekeeper::SendServiceControlIndication()
+{
+  PTRACE(3, "RAS\tSending Empty ServiceControlIndication");
+
+  H323RasPDU pdu;
+  H225_ServiceControlIndication & sci = pdu.BuildServiceControlIndication(GetNextSequenceNumber());
+
+  sci.m_serviceControl.SetSize(0);
+
+  Request request(sci.m_requestSeqNum, pdu);
+  return MakeRequest(request);
+}
 
 BOOL H323Gatekeeper::OnReceiveServiceControlIndication(const H225_ServiceControlIndication & sci)
 {

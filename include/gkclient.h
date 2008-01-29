@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/01/04 06:23:07  shorne
+ * Cleaner setup and teardown of h460 module
+ *
  * Revision 1.2  2007/10/16 16:54:32  shorne
  * Fix for H.235.1 on full reregistration
  *
@@ -302,6 +305,9 @@ class H323Gatekeeper : public H225_RAS
 
     void OnSendGatekeeperRequest(H225_GatekeeperRequest & grq);
     void OnSendAdmissionRequest(H225_AdmissionRequest & arq);
+#ifdef H323_H248
+    BOOL SendServiceControlIndication();
+#endif
     BOOL OnSendFeatureSet(unsigned, H225_FeatureSet & features) const;
     void OnReceiveFeatureSet(unsigned, const H225_FeatureSet & features) const;
   //@}
