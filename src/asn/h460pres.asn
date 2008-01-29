@@ -112,9 +112,9 @@ PresenceInstruction ::= CHOICE
 
 PresenceSubscription ::= SEQUENCE
 {
-	approved		BOOLEAN,
 	subscribe		AliasAddress,    
 	aliases			SEQUENCE OF AliasAddress,
+	approved		BOOLEAN				OPTIONAL,
 	rasAddress		TransportAddress		OPTIONAL,  
 	timeToLive		TimeToLive			OPTIONAL,
 	identifier		PresenceIdentifier		OPTIONAL,
@@ -134,22 +134,23 @@ PresenceIdentifier ::= SEQUENCE
 
 PresenceNotification ::= SEQUENCE
 {
-	aliasAddress		SEQUENCE OF AliasAddress,
-	presentity		Presentity,                
-	subscribers		SEQUENCE OF AliasAddress  OPTIONAL,
+	presentity		Presentity,
+	aliasAddress		AliasAddress			OPTIONAL,         
+	subscribers		SEQUENCE OF PresenceIdentifier  OPTIONAL,
 	...	
 }
 
-PresenceState ::= ENUMERATED
+PresenceState ::= CHOICE
 {
-	hidden           (0),
-	available        (1),  
-	online           (2),
-	offline          (3),
-	onCall           (4),
-	voiceMail        (5),
-	notAvailable     (8),
-	generic          (9)
+	hidden           NULL,
+	available        NULL,  
+	online           NULL,
+	offline          NULL,
+	onCall           NULL,
+	voiceMail        NULL,
+	notAvailable     NULL,
+	generic          BMPString (SIZE (1..256)),
+	...
 }
 
 Presentity ::= SEQUENCE

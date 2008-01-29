@@ -437,16 +437,17 @@ PObject * H460P_PresenceIdentifier::Clone() const
 }
 
 
+
 #ifndef PASN_NOPRINTON
 const static PASN_Names Names_H460P_PresenceState[]={
-        {"hidden",0}
-       ,{"available",1}
-       ,{"online",2}
-       ,{"offline",3}
-       ,{"onCall",4}
-       ,{"voiceMail",5}
-       ,{"notAvailable",8}
-       ,{"generic",9}
+      {"hidden",0}
+     ,{"available",1}
+     ,{"online",2}
+     ,{"offline",3}
+     ,{"onCall",4}
+     ,{"voiceMail",5}
+     ,{"notAvailable",6}
+     ,{"generic",7}
 };
 #endif
 //
@@ -454,19 +455,35 @@ const static PASN_Names Names_H460P_PresenceState[]={
 //
 
 H460P_PresenceState::H460P_PresenceState(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Enumeration(tag, tagClass, 9, FALSE
+  : PASN_Choice(tag, tagClass, 8, TRUE
 #ifndef PASN_NOPRINTON
     ,(const PASN_Names *)Names_H460P_PresenceState,8
 #endif
-    )
+)
 {
 }
 
 
-H460P_PresenceState & H460P_PresenceState::operator=(unsigned v)
+BOOL H460P_PresenceState::CreateObject()
 {
-  SetValue(v);
-  return *this;
+  switch (tag) {
+    case e_hidden :
+    case e_available :
+    case e_online :
+    case e_offline :
+    case e_onCall :
+    case e_voiceMail :
+    case e_notAvailable :
+      choice = new PASN_Null();
+      return TRUE;
+    case e_generic :
+      choice = new PASN_BMPString();
+      choice->SetConstraints(PASN_Object::FixedConstraint, 1, 256);
+      return TRUE;
+  }
+
+  choice = NULL;
+  return FALSE;
 }
 
 
@@ -1466,7 +1483,7 @@ PObject * H460P_PresenceAlert::Clone() const
 //
 
 H460P_PresenceSubscription::H460P_PresenceSubscription(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Sequence(tag, tagClass, 4, TRUE, 0)
+  : PASN_Sequence(tag, tagClass, 5, TRUE, 0)
 {
 }
 
@@ -1476,9 +1493,10 @@ void H460P_PresenceSubscription::PrintOn(ostream & strm) const
 {
   int indent = strm.precision() + 2;
   strm << "{\n";
-  strm << setw(indent+11) << "approved = " << setprecision(indent) << m_approved << '\n';
   strm << setw(indent+12) << "subscribe = " << setprecision(indent) << m_subscribe << '\n';
   strm << setw(indent+10) << "aliases = " << setprecision(indent) << m_aliases << '\n';
+  if (HasOptionalField(e_approved))
+    strm << setw(indent+11) << "approved = " << setprecision(indent) << m_approved << '\n';
   if (HasOptionalField(e_rasAddress))
     strm << setw(indent+13) << "rasAddress = " << setprecision(indent) << m_rasAddress << '\n';
   if (HasOptionalField(e_timeToLive))
@@ -1501,11 +1519,11 @@ PObject::Comparison H460P_PresenceSubscription::Compare(const PObject & obj) con
 
   Comparison result;
 
-  if ((result = m_approved.Compare(other.m_approved)) != EqualTo)
-    return result;
   if ((result = m_subscribe.Compare(other.m_subscribe)) != EqualTo)
     return result;
   if ((result = m_aliases.Compare(other.m_aliases)) != EqualTo)
+    return result;
+  if ((result = m_approved.Compare(other.m_approved)) != EqualTo)
     return result;
   if ((result = m_rasAddress.Compare(other.m_rasAddress)) != EqualTo)
     return result;
@@ -1523,9 +1541,10 @@ PObject::Comparison H460P_PresenceSubscription::Compare(const PObject & obj) con
 PINDEX H460P_PresenceSubscription::GetDataLength() const
 {
   PINDEX length = 0;
-  length += m_approved.GetObjectLength();
   length += m_subscribe.GetObjectLength();
   length += m_aliases.GetObjectLength();
+  if (HasOptionalField(e_approved))
+    length += m_approved.GetObjectLength();
   if (HasOptionalField(e_rasAddress))
     length += m_rasAddress.GetObjectLength();
   if (HasOptionalField(e_timeToLive))
@@ -1543,11 +1562,11 @@ BOOL H460P_PresenceSubscription::Decode(PASN_Stream & strm)
   if (!PreambleDecode(strm))
     return FALSE;
 
-  if (!m_approved.Decode(strm))
-    return FALSE;
   if (!m_subscribe.Decode(strm))
     return FALSE;
   if (!m_aliases.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_approved) && !m_approved.Decode(strm))
     return FALSE;
   if (HasOptionalField(e_rasAddress) && !m_rasAddress.Decode(strm))
     return FALSE;
@@ -1566,9 +1585,10 @@ void H460P_PresenceSubscription::Encode(PASN_Stream & strm) const
 {
   PreambleEncode(strm);
 
-  m_approved.Encode(strm);
   m_subscribe.Encode(strm);
   m_aliases.Encode(strm);
+  if (HasOptionalField(e_approved))
+    m_approved.Encode(strm);
   if (HasOptionalField(e_rasAddress))
     m_rasAddress.Encode(strm);
   if (HasOptionalField(e_timeToLive))
@@ -1703,7 +1723,7 @@ PObject * H460P_Presentity::Clone() const
 //
 
 H460P_PresenceNotification::H460P_PresenceNotification(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Sequence(tag, tagClass, 1, TRUE, 0)
+  : PASN_Sequence(tag, tagClass, 2, TRUE, 0)
 {
 }
 
@@ -1713,8 +1733,9 @@ void H460P_PresenceNotification::PrintOn(ostream & strm) const
 {
   int indent = strm.precision() + 2;
   strm << "{\n";
-  strm << setw(indent+15) << "aliasAddress = " << setprecision(indent) << m_aliasAddress << '\n';
   strm << setw(indent+13) << "presentity = " << setprecision(indent) << m_presentity << '\n';
+  if (HasOptionalField(e_aliasAddress))
+    strm << setw(indent+15) << "aliasAddress = " << setprecision(indent) << m_aliasAddress << '\n';
   if (HasOptionalField(e_subscribers))
     strm << setw(indent+14) << "subscribers = " << setprecision(indent) << m_subscribers << '\n';
   strm << setw(indent-1) << setprecision(indent-2) << "}";
@@ -1731,9 +1752,9 @@ PObject::Comparison H460P_PresenceNotification::Compare(const PObject & obj) con
 
   Comparison result;
 
-  if ((result = m_aliasAddress.Compare(other.m_aliasAddress)) != EqualTo)
-    return result;
   if ((result = m_presentity.Compare(other.m_presentity)) != EqualTo)
+    return result;
+  if ((result = m_aliasAddress.Compare(other.m_aliasAddress)) != EqualTo)
     return result;
   if ((result = m_subscribers.Compare(other.m_subscribers)) != EqualTo)
     return result;
@@ -1745,8 +1766,9 @@ PObject::Comparison H460P_PresenceNotification::Compare(const PObject & obj) con
 PINDEX H460P_PresenceNotification::GetDataLength() const
 {
   PINDEX length = 0;
-  length += m_aliasAddress.GetObjectLength();
   length += m_presentity.GetObjectLength();
+  if (HasOptionalField(e_aliasAddress))
+    length += m_aliasAddress.GetObjectLength();
   if (HasOptionalField(e_subscribers))
     length += m_subscribers.GetObjectLength();
   return length;
@@ -1758,9 +1780,9 @@ BOOL H460P_PresenceNotification::Decode(PASN_Stream & strm)
   if (!PreambleDecode(strm))
     return FALSE;
 
-  if (!m_aliasAddress.Decode(strm))
-    return FALSE;
   if (!m_presentity.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_aliasAddress) && !m_aliasAddress.Decode(strm))
     return FALSE;
   if (HasOptionalField(e_subscribers) && !m_subscribers.Decode(strm))
     return FALSE;
@@ -1773,8 +1795,9 @@ void H460P_PresenceNotification::Encode(PASN_Stream & strm) const
 {
   PreambleEncode(strm);
 
-  m_aliasAddress.Encode(strm);
   m_presentity.Encode(strm);
+  if (HasOptionalField(e_aliasAddress))
+    m_aliasAddress.Encode(strm);
   if (HasOptionalField(e_subscribers))
     m_subscribers.Encode(strm);
 

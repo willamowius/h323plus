@@ -175,26 +175,26 @@ class H460P_PresenceIdentifier : public PASN_Sequence
 // PresenceState
 //
 
-class H460P_PresenceState : public PASN_Enumeration
+class H460P_PresenceState : public PASN_Choice
 {
 #ifndef PASN_LEANANDMEAN
-    PCLASSINFO(H460P_PresenceState, PASN_Enumeration);
+    PCLASSINFO(H460P_PresenceState, PASN_Choice);
 #endif
   public:
-    H460P_PresenceState(unsigned tag = UniversalEnumeration, TagClass tagClass = UniversalTagClass);
+    H460P_PresenceState(unsigned tag = 0, TagClass tagClass = UniversalTagClass);
 
-    enum Enumerations {
+    enum Choices {
       e_hidden,
       e_available,
       e_online,
       e_offline,
       e_onCall,
       e_voiceMail,
-      e_notAvailable = 8,
+      e_notAvailable,
       e_generic
     };
 
-    H460P_PresenceState & operator=(unsigned v);
+    BOOL CreateObject();
     PObject * Clone() const;
 };
 
@@ -616,15 +616,16 @@ class H460P_PresenceSubscription : public PASN_Sequence
     H460P_PresenceSubscription(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
 
     enum OptionalFields {
+      e_approved,
       e_rasAddress,
       e_timeToLive,
       e_identifier,
       e_genericData
     };
 
-    PASN_Boolean m_approved;
     H225_AliasAddress m_subscribe;
     H460P_ArrayOf_AliasAddress m_aliases;
+    PASN_Boolean m_approved;
     H225_TransportAddress m_rasAddress;
     H225_TimeToLive m_timeToLive;
     H460P_PresenceIdentifier m_identifier;
@@ -688,12 +689,13 @@ class H460P_PresenceNotification : public PASN_Sequence
     H460P_PresenceNotification(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
 
     enum OptionalFields {
+      e_aliasAddress,
       e_subscribers
     };
 
-    H460P_ArrayOf_AliasAddress m_aliasAddress;
     H460P_Presentity m_presentity;
-    H460P_ArrayOf_AliasAddress m_subscribers;
+    H225_AliasAddress m_aliasAddress;
+    H460P_ArrayOf_PresenceIdentifier m_subscribers;
 
     PINDEX GetDataLength() const;
     BOOL Decode(PASN_Stream & strm);
