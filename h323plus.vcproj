@@ -684,6 +684,9 @@
 				RelativePath=".\src\h460\h4601.cxx">
 			</File>
 			<File
+				RelativePath=".\src\h460\h460p.cxx">
+			</File>
+			<File
 				RelativePath=".\src\h460\h460pres.cxx">
 			</File>
 			<File
@@ -1199,6 +1202,9 @@
 				RelativePath=".\include\h460\h4601.h">
 			</File>
 			<File
+				RelativePath=".\include\h460\h460p.h">
+			</File>
+			<File
 				RelativePath=".\include\h460\h460pres.h">
 			</File>
 			<File
@@ -1317,6 +1323,9 @@
 				RelativePath=".\src\asn\h460pres.asn">
 			</File>
 			<File
+				RelativePath=".\src\asn\h460tm.asn">
+			</File>
+			<File
 				RelativePath=".\src\asn\h501.asn">
 			</File>
 			<File
@@ -1393,6 +1402,9 @@
 				</File>
 				<File
 					RelativePath=".\include\h460\h4609.h">
+				</File>
+				<File
+					RelativePath=".\include\h460\h460tm.h">
 				</File>
 				<File
 					RelativePath="include\mcspdu.h">
@@ -1585,6 +1597,9 @@
 				</File>
 				<File
 					RelativePath=".\src\h460\h4609.cxx">
+				</File>
+				<File
+					RelativePath=".\src\h460\h460tm.cxx">
 				</File>
 				<File
 					RelativePath="src\h501.cxx">
