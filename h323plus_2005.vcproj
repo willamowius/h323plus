@@ -552,6 +552,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\h281.cxx"
+				>
+			</File>
+			<File
 				RelativePath="src\h323.cxx"
 				>
 				<FileConfiguration
@@ -897,6 +901,10 @@
 			</File>
 			<File
 				RelativePath=".\src\h460\h4601.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\src\h460\h460p.cxx"
 				>
 			</File>
 			<File
@@ -1476,10 +1484,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\h281.cxx"
-				>
-			</File>
-			<File
 				RelativePath=".\include\h281.h"
 				>
 			</File>
@@ -1557,6 +1561,10 @@
 			</File>
 			<File
 				RelativePath=".\include\h460\h4601.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\h460\h460p.h"
 				>
 			</File>
 			<File
@@ -1713,6 +1721,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\asn\h460tm.asn"
+				>
+			</File>
+			<File
 				RelativePath=".\src\asn\h501.asn"
 				>
 			</File>
@@ -1817,6 +1829,10 @@
 				</File>
 				<File
 					RelativePath=".\include\h460\h460pres.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\h460\h460tm.h"
 					>
 				</File>
 				<File
@@ -2069,6 +2085,10 @@
 				</File>
 				<File
 					RelativePath=".\src\h460\h460pres.cxx"
+					>
+				</File>
+				<File
+					RelativePath=".\src\h460\h460tm.cxx"
 					>
 				</File>
 				<File
