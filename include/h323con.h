@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2008/01/04 06:23:07  shorne
+ * Cleaner setup and teardown of h460 module
+ *
  * Revision 1.10  2008/01/01 00:16:12  shorne
  * Added GnuGknat and FileTransfer support
  *
@@ -3256,10 +3259,6 @@ class H323Connection : public PObject
 #ifdef H323_H460
 	BOOL disableH460;
 	H460_FeatureSet       * features;
-#endif
-
-#ifdef H323_H224
-  OpalH224Handler		  * h224Handler;
 #endif
 
 #ifdef H323_FILE

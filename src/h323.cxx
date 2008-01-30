@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.13  2008/01/22 01:10:33  shorne
+ * Fix H.224 opening unidirectional channel
+ *
  * Revision 1.12  2008/01/04 06:23:09  shorne
  * Cleaner setup and teardown of h460 module
  *
@@ -5332,10 +5335,10 @@ BOOL H323Connection::RequestModeChangeT38(const char * capabilityNames)
 #ifdef H323_H224
 OpalH224Handler * H323Connection::CreateH224ProtocolHandler(unsigned sessionID)
 {
-  if(h224Handler == NULL)
-    h224Handler = endpoint.CreateH224ProtocolHandler(*this, sessionID);
+  if (h224handler == NULL)
+    h224handler = endpoint.CreateH224ProtocolHandler(*this, sessionID);
 	
-  return h224Handler;
+  return h224handler;
 }
 
 OpalH281Handler * H323Connection::CreateH281ProtocolHandler(OpalH224Handler & h224Handler)
