@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.14  2007/12/07 07:33:22  shorne
+ * Settled on codecs greater than CIF to be generic
+ *
  * Revision 1.13  2007/11/20 11:40:47  willamowius
  * fix compilation without audio support Thanks Vladimir Voronin
  *
@@ -1989,7 +1992,6 @@ H323CodecExtendedVideoCapability::H323CodecExtendedVideoCapability()
 
 H323CodecExtendedVideoCapability::~H323CodecExtendedVideoCapability()
 {
-	extCapabilities.RemoveAll();
 }
 
 void H323CodecExtendedVideoCapability::AddCapability(H323Capability * capability)
@@ -3452,12 +3454,10 @@ BOOL H323Capabilities::RemoveCapability(H323Capability::MainTypes capabilityType
 		    if ((capability.GetMainType() == H323Capability::e_Video) &&
 			    (capability.GetSubType() != H245_VideoCapability::e_extendedVideoCapability))
 			      codecsToRemove.AppendString(capability.GetFormatName()); 
-		    else if ((capabilityType == H323Capability::e_ExtendVideo) &&
+		} else if ((capabilityType == H323Capability::e_ExtendVideo) &&
              (capability.GetMainType() == H323Capability::e_Video) &&
-			 (capability.GetSubType() == H245_VideoCapability::e_extendedVideoCapability))
+			 (capability.GetSubType() == H245_VideoCapability::e_extendedVideoCapability)) {
                   codecsToRemove.AppendString(capability.GetFormatName());
-			else 
-			  continue;
 		} else 
 			 if (capability.GetMainType() == capabilityType)
 			   codecsToRemove.AppendString(capability.GetFormatName());  
