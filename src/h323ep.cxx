@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.12  2008/01/29 04:28:55  shorne
+ * Initialise gnugk as NULL
+ *
  * Revision 1.11  2008/01/04 22:53:40  shorne
  * Increased default soundBuffers to 10 for Vista
  *
@@ -1384,7 +1387,7 @@ void H323EndPoint::SetVendorIdentifierInfo(H225_VendorIdentifier & info) const
   info.m_productId.SetSize(info.m_productId.GetSize()+2);
 
   info.IncludeOptionalField(H225_VendorIdentifier::e_versionId);
-  info.m_versionId = PProcess::Current().GetVersion(TRUE) + " (OpenH323 v" + OpalGetVersion() + ')';
+  info.m_versionId = PProcess::Current().GetVersion(TRUE) + " (H323plus v" + OpalGetVersion() + ')';
   info.m_versionId.SetSize(info.m_versionId.GetSize()+2);
 }
 
