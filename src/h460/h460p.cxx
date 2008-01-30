@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2008/01/29 04:38:13  shorne
+ * completed Initial implementation
+ *
  *
  *
  */
@@ -55,7 +58,7 @@ static struct {
 //messageId 									Notification	Subscription	Instruction	 Identifier	 Crypto/Tokens
 { H460P_PresenceMessage::e_presenceStatus			,1				,0				,2			,0          ,0 },	
 { H460P_PresenceMessage::e_presenceInstruct			,0				,0				,1			,0			,0 },		
-{ H460P_PresenceMessage::e_presenceAuthorize		,0				,1				,0			,0			,0 },			
+{ H460P_PresenceMessage::e_presenceAuthorize			,0				,1				,0			,0			,0 },			
 { H460P_PresenceMessage::e_presenceNotify			,1				,0				,0			,0			,0 },				
 { H460P_PresenceMessage::e_presenceRequest			,0				,1				,0			,0			,3 },	
 { H460P_PresenceMessage::e_presenceResponse			,0				,1				,0			,0			,2 },
@@ -164,26 +167,28 @@ bool H323PresenceBase::ReadNotification(const H460P_ArrayOf_PresenceNotification
 {
 	for (PINDEX i = 0; i < notify.GetSize(); i++)
 		handler->OnNotification((H323PresenceHandler::MsgType)tag, m_id, notify[i]);
-    return true;
+
+	return true;
 }
 
 bool H323PresenceBase::ReadSubscription(const H460P_ArrayOf_PresenceSubscription & subscription)
 {
 	for (PINDEX i = 0; i < subscription.GetSize(); i++)
-        handler->OnSubscription((H323PresenceHandler::MsgType)tag, m_id, subscription[i]);
-    return true;
+        	handler->OnSubscription((H323PresenceHandler::MsgType)tag, m_id, subscription[i]);
+
+	return true;
 }
 
 bool H323PresenceBase::ReadInstruction(const H460P_ArrayOf_PresenceInstruction & instruction)
 {
-    handler->OnInstructions((H323PresenceHandler::MsgType)tag, m_id, instruction);
-    return true;
+	handler->OnInstructions((H323PresenceHandler::MsgType)tag, m_id, instruction);
+	return true;
 }
 
 bool H323PresenceBase::ReadIdentifier(const H460P_ArrayOf_PresenceIdentifier & identifier)
 {
-    handler->OnIdentifiers((H323PresenceHandler::MsgType)tag, identifier);
-    return true;
+	handler->OnIdentifiers((H323PresenceHandler::MsgType)tag, identifier);
+	return true;
 }
 
 
@@ -192,7 +197,7 @@ bool H323PresenceBase::ReadIdentifier(const H460P_ArrayOf_PresenceIdentifier & i
 
 template<class Msg>
 class H323PresencePDU : public H323PresenceBase {
-public:
+  public:
 
 	H323PresencePDU(H323PresenceMessage *m) : H323PresenceBase(m), request(m->m_recvPDU) {}
 	H323PresencePDU(unsigned tag) : request(*new Msg) {}
@@ -200,91 +205,91 @@ public:
 	operator Msg & () { return request; }
 	operator const Msg & () const { return request; }
 
-protected:
+  protected:
 	Msg & request;
 };
 
 class H323PresenceStatus  : public H323PresencePDU<H460P_PresenceStatus>
 {
-public:
+  public:
 	H323PresenceStatus(H323PresenceMessage *m) : H323PresencePDU<H460P_PresenceStatus>(m) {}
 
-protected:
+  protected:
 	virtual bool HandleNotification(bool opt);
 	virtual bool HandleInstruction(bool opt); 
 };
 
 class H323PresenceInstruct  : public H323PresencePDU<H460P_PresenceInstruct>
 {
-public:
+  public:
 	H323PresenceInstruct(H323PresenceMessage *m) : H323PresencePDU<H460P_PresenceInstruct>(m) {}
 
-protected:
+  protected:
 	virtual bool HandleInstruction(bool opt); 
 };	
 
 class H323PresenceAuthorize  : public H323PresencePDU<H460P_PresenceAuthorize>
 {
-public:
+  public:
 	H323PresenceAuthorize(H323PresenceMessage *m) : H323PresencePDU<H460P_PresenceAuthorize>(m) {}
 
-protected:
+  protected:
 	virtual bool HandleSubscription(bool opt); 
 };
 		
 class H323PresenceNotify  : public H323PresencePDU<H460P_PresenceNotify>
 {
-public:
+  public:
 	H323PresenceNotify(H323PresenceMessage *m) : H323PresencePDU<H460P_PresenceNotify>(m) {}
 
-protected:
+  protected:
 	virtual bool HandleNotification(bool opt);
 };
 				
 class H323PresenceRequest  : public H323PresencePDU<H460P_PresenceRequest>
 {
-public:
+  public:
 	H323PresenceRequest(H323PresenceMessage *m) : H323PresencePDU<H460P_PresenceRequest>(m) {}
 
-protected:
+  protected:
 	virtual bool HandleSubscription(bool opt); 
 };
 
 class H323PresenceResponse  : public H323PresencePDU<H460P_PresenceResponse>
 {
-public:
+  public:
 	H323PresenceResponse(H323PresenceMessage *m) : H323PresencePDU<H460P_PresenceResponse>(m) {}
 
-protected:
+  protected:
 	virtual bool HandleSubscription(bool opt);
 
 };
 
 class H323PresenceAlive  : public H323PresencePDU<H460P_PresenceAlive>
 {
-public:
+  public:
 	H323PresenceAlive(H323PresenceMessage *m) : H323PresencePDU<H460P_PresenceAlive>(m) {}
 
-protected:
+  protected:
 	virtual bool HandleIdentifier(bool opt); 
 };
 
 
 class H323PresenceRemove  : public H323PresencePDU<H460P_PresenceRemove>
 {
-public:
+  public:
 	H323PresenceRemove(H323PresenceMessage *m) : H323PresencePDU<H460P_PresenceRemove>(m) {}
 
-protected:
+  protected:
 	virtual bool HandleIdentifier(bool opt);
 };
 
 class H323PresenceAlert  : public H323PresencePDU<H460P_PresenceAlert>
 {
-public:
+  public:
 	H323PresenceAlert(H323PresenceMessage *m) : H323PresencePDU<H460P_PresenceAlert>(m) {}
 
-protected:
+  protected:
 	virtual bool HandleNotification(bool opt);
 
 };
@@ -343,7 +348,7 @@ bool H323PresenceHandler::ReceivedPDU(const H225_EndpointIdentifier * id, const 
 	if (handler != NULL && handler->Process())
 			return true;
 
-    PTRACE(2,"PRES\tUnable to handle Message." << m->GetTagName()); 
+    	PTRACE(2,"PRES\tUnable to handle Message." << m->GetTagName()); 
 	return false;
 }
 
@@ -363,8 +368,8 @@ class H323PresenceMsg  : public H460P_PresenceMessage
 
 
 H460P_PresenceStatus &  H323PresenceHandler::BuildStatus(H460P_PresenceMessage & msg, 
-													const H323PresenceNotifications & not,
-													const H323PresenceInstructions & inst)
+						const H323PresenceNotifications & not,
+						const H323PresenceInstructions & inst)
 {
 	H323PresenceMsg<H460P_PresenceStatus> m;
 	H460P_PresenceStatus & pdu = m.Build(H460P_PresenceMessage::e_presenceStatus);
@@ -433,7 +438,7 @@ H460P_PresenceAlive & H323PresenceHandler::BuildAlive(H460P_PresenceMessage & ms
 {
 	H323PresenceMsg<H460P_PresenceAlive> m;
 	H460P_PresenceAlive & pdu = m.Build(H460P_PresenceMessage::e_presenceAlive);
-    pdu.m_identifier = id;
+	pdu.m_identifier = id;
 
 	msg = *(H460P_PresenceMessage *)m.Clone();
 	return msg;
@@ -443,7 +448,7 @@ H460P_PresenceRemove & H323PresenceHandler::BuildRemove(H460P_PresenceMessage & 
 {
 	H323PresenceMsg<H460P_PresenceRemove> m;
 	H460P_PresenceRemove & pdu = m.Build(H460P_PresenceMessage::e_presenceRemove);
-    pdu.m_identifier = id;
+	pdu.m_identifier = id;
 
 	msg = *(H460P_PresenceMessage *)m.Clone();
 	return msg;
@@ -490,7 +495,7 @@ bool H323PresenceAuthorize::HandleSubscription(bool opt)
    if (!opt)
 	   return ReadSubscription(request.m_subscription);
 
-	return false; 
+   return false; 
 }
 
 bool H323PresenceRequest::HandleSubscription(bool opt) 
@@ -498,7 +503,7 @@ bool H323PresenceRequest::HandleSubscription(bool opt)
    if (!opt)
 	   return ReadSubscription(request.m_subscription);
 
-	return false; 
+   return false; 
 }
 
 bool H323PresenceResponse::HandleSubscription(bool opt) 
@@ -506,23 +511,23 @@ bool H323PresenceResponse::HandleSubscription(bool opt)
    if (!opt)
 	   return ReadSubscription(request.m_subscription);
 
-	return false; 
+   return false; 
 }
 
 bool H323PresenceStatus::HandleInstruction(bool opt) 
 { 
-	if (!opt || request.HasOptionalField(H460P_PresenceStatus::e_instruction))
+   if (!opt || request.HasOptionalField(H460P_PresenceStatus::e_instruction))
 	   return ReadInstruction(request.m_instruction);
 
-	return false; 
+   return false; 
 }
 
 bool H323PresenceInstruct::HandleInstruction(bool opt) 
 { 
-	if (!opt)
+   if (!opt)
 	   return ReadInstruction(request.m_instruction);
 
-	return false; 
+   return false; 
 }
 
 bool H323PresenceAlive::HandleIdentifier(bool opt) 
@@ -530,7 +535,7 @@ bool H323PresenceAlive::HandleIdentifier(bool opt)
    if (!opt)
 	   return ReadIdentifier(request.m_identifier);
 
-	return false; 
+   return false; 
 }
 
 bool H323PresenceRemove::HandleIdentifier(bool opt) 
@@ -538,7 +543,7 @@ bool H323PresenceRemove::HandleIdentifier(bool opt)
    if (!opt)
 	   return ReadIdentifier(request.m_identifier);
 
-	return false; 
+   return false; 
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -566,7 +571,7 @@ PString H323PresenceInstruction::GetAlias()
 
 void H323PresenceInstructions::Add(const H323PresenceInstruction & instruct)
 {
-    int size = GetSize();
+    	int size = GetSize();
 	SetSize(size+1);
 	array.SetAt(size, instruct.Clone());
 }
@@ -577,10 +582,10 @@ H323PresenceInstruction & H323PresenceInstructions::operator[](PINDEX i) const
 }
 
 static const char *InstructState[] = {
-	  "Subscribe",
-      "Unsubscribe",
-      "Block",
-      "Unblock"
+	"Subscribe",
+	"Unsubscribe",
+	"Block",
+	"Unblock"
 };
 
 PString H323PresenceInstruction::GetInstructionString(unsigned instruct)
@@ -592,7 +597,7 @@ PString H323PresenceInstruction::GetInstructionString(unsigned instruct)
 
 void H323PresenceIdentifiers::Add(const OpalGloballyUniqueID & guid)
 {
-    H460P_PresenceIdentifier id;
+	H460P_PresenceIdentifier id;
 	id.m_guid = guid;
 	int size = GetSize();
 	SetSize(size+1);
@@ -609,14 +614,14 @@ OpalGloballyUniqueID H323PresenceIdentifiers::GetIdentifier(PINDEX i)
 
 void H323PresenceNotifications::Add(const H323PresenceNotification & not)
 {
-    int size = GetSize();
+	int size = GetSize();
 	SetSize(size+1);
 	array.SetAt(size, not.Clone());
 }
 
 
 void H323PresenceNotification::SetPresenceState(H323PresenceNotification::States state, 
-												const PString & display)
+						const PString & display)
 {
 	H460P_Presentity & e = m_presentity;
 	e.m_state.SetTag((unsigned)state);
@@ -628,10 +633,10 @@ void H323PresenceNotification::SetPresenceState(H323PresenceNotification::States
 }
 
 void H323PresenceNotification::GetPresenceState(H323PresenceNotification::States & state, 
-												PString & display)
+						PString & display)
 {
 	H460P_Presentity & e = m_presentity;
-    state = (H323PresenceNotification::States)e.m_state.GetTag();
+	state = (H323PresenceNotification::States)e.m_state.GetTag();
 
 	if (state != e_generic) {
 	   if (e.HasOptionalField(H460P_Presentity::e_display))
@@ -656,11 +661,11 @@ void H323PresenceNotification::AddSubscriber(const OpalGloballyUniqueID & guid)
 	if (!HasOptionalField(H460P_PresenceNotification::e_subscribers))
 		IncludeOptionalField(H460P_PresenceNotification::e_subscribers);
 
-    H460P_PresenceIdentifier id;
+	H460P_PresenceIdentifier id;
 	id.m_guid = guid;
 	int size = m_subscribers.GetSize();
 	m_subscribers.SetSize(size+1);
-    m_subscribers[size] = id;
+	m_subscribers[size] = id;
 }
 
 void H323PresenceNotification::RemoveSubscribers()
@@ -673,12 +678,12 @@ void H323PresenceNotification::RemoveSubscribers()
 
 OpalGloballyUniqueID H323PresenceNotification::GetSubscriber(PINDEX i)
 {
-   if (HasOptionalField(H460P_PresenceNotification::e_subscribers)) {
+	if (HasOptionalField(H460P_PresenceNotification::e_subscribers)) {
 		H460P_PresenceIdentifier & id = m_subscribers[i];
 		return OpalGloballyUniqueID(id.m_guid);
-   }
+	}
 
-   return OpalGloballyUniqueID();
+	return OpalGloballyUniqueID();
 }
 
 void H323PresenceNotification::AddAlias(const PString & alias)
@@ -691,20 +696,20 @@ void H323PresenceNotification::AddAlias(const PString & alias)
 
 PString H323PresenceNotification::GetAlias()
 {
-     if (HasOptionalField(H460P_PresenceNotification::e_aliasAddress))
+	if (HasOptionalField(H460P_PresenceNotification::e_aliasAddress))
 	     return H323GetAliasAddressString(m_aliasAddress);
 
  	return PString();
 }
 
 static const char *PresState[] = {
-    "Hidden",
-    "Available",
-    "Online",
-    "Offline",
-    "OnCall",
-    "VoiceMail",
-    "NotAvailable",
+	"Hidden",
+	"Available",
+	"Online",
+	"Offline",
+	"OnCall",
+	"VoiceMail",
+	"NotAvailable",
 	"Generic"
 };
 
@@ -717,7 +722,7 @@ PString H323PresenceNotification::GetStateString(unsigned state)
 
 void H323PresenceSubscriptions::Add(const H323PresenceSubscription & sub)
 {
-    int size = GetSize();
+	int size = GetSize();
 	SetSize(size+1);
 	array.SetAt(size, sub.Clone());
 }
@@ -749,7 +754,7 @@ void H323PresenceSubscription::GetSubscriberDetails(PStringList & aliases)
 
 PString H323PresenceSubscription::GetSubscribed()
 {
-		return H323GetAliasAddressString(m_subscribe);
+	return H323GetAliasAddressString(m_subscribe);
 }
 
 void H323PresenceSubscription::SetGatekeeperRAS(const H323TransportAddress & address)
@@ -785,7 +790,7 @@ int H323PresenceSubscription::IsApproved()
 void H323PresenceSubscription::SetTimeToLive(int t)
 {
 	IncludeOptionalField(H460P_PresenceSubscription::e_timeToLive);
-    m_timeToLive = t;
+	m_timeToLive = t;
 }
 	
 void H323PresenceSubscription::SetSubscription(const OpalGloballyUniqueID & guid)
@@ -796,7 +801,7 @@ void H323PresenceSubscription::SetSubscription(const OpalGloballyUniqueID & guid
 
 OpalGloballyUniqueID H323PresenceSubscription::GetSubscription()
 {
-    if (!HasOptionalField(H460P_PresenceSubscription::e_identifier))
+	if (!HasOptionalField(H460P_PresenceSubscription::e_identifier))
 		return OpalGloballyUniqueID();
 
 	return OpalGloballyUniqueID(m_identifier.m_guid);
@@ -813,5 +818,6 @@ bool H323PresenceSubscription::IsDecisionMade()
 }
 
 #endif
+
 
 

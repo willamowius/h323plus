@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2008/01/18 01:36:43  shorne
+ * Fix blocking and timeout on call ending
+ *
  * Revision 1.4  2008/01/15 02:25:34  shorne
  * readbuffer not being emptied after each read.
  *
@@ -75,17 +78,17 @@ BOOL GNUGK_Feature::connectionlost = FALSE;
 
 class GNUGKTransportThread : public PThread
 {
-  PCLASSINFO(GNUGKTransportThread, PThread)
+   PCLASSINFO(GNUGKTransportThread, PThread)
 
-  public:
-    GNUGKTransportThread(H323EndPoint & endpoint, GNUGKTransport * transport, WORD KeepAlive =0);
+   public:
+	GNUGKTransportThread(H323EndPoint & endpoint, GNUGKTransport * transport, WORD KeepAlive =0);
 
-  protected:
-    void Main();
-    PDECLARE_NOTIFIER(PTimer, GNUGKTransportThread, Ping);  /// Timer to notify to poll for External IP
-	PTimer	Keep;						 /// Polling Timer													
+   protected:
+	void Main();
+	PDECLARE_NOTIFIER(PTimer, GNUGKTransportThread, Ping);	/// Timer to notify to poll for External IP
+	PTimer	Keep;						/// Polling Timer													
 	BOOL    isConnected;
-    GNUGKTransport * transport;
+	GNUGKTransport * transport;
 	WORD   keepAlive;
 
 	PTime   lastupdate;
@@ -106,8 +109,8 @@ GNUGKTransportThread::GNUGKTransportThread(H323EndPoint & ep, GNUGKTransport * t
    keepAlive = KeepAlive;
 
    if (keepAlive > 0 ) {
-    // Send the first PDU.
-	  transport->InitialPDU();
+      // Send the first PDU.
+      transport->InitialPDU();
 
       Keep.SetNotifier(PCREATE_NOTIFIER(Ping));
       Keep.RunContinuous(keepAlive * 1000); 
@@ -120,21 +123,21 @@ GNUGKTransportThread::GNUGKTransportThread(H323EndPoint & ep, GNUGKTransport * t
 void GNUGKTransportThread::Ping(PTimer &, INT)
 { 
 
-// Fix for some PC's that fail on the runcontinuously time interval.
-PSyncPoint handlewait;
+   // Fix for some PC's that fail on the runcontinuously time interval.
+   PSyncPoint handlewait;
 
    PTime curTime = PTime();
    if ((curTime - lastupdate) < PTimeInterval(GNUGK_Feature::keepalive * 1000))
-	   handlewait.Wait(lastupdate + PTimeInterval(GNUGK_Feature::keepalive * 1000) - curTime);
+	handlewait.Wait(lastupdate + PTimeInterval(GNUGK_Feature::keepalive * 1000) - curTime);
 	   
 
-	if (transport->isCall() ||     // We have call or we are closing down
-		   transport->CloseTransport()) 
-                  Keep.Stop();
-	else                              /// Stop what we are doing 
-	     transport->InitialPDU();
+   if (transport->isCall() ||		/// We have call or we are closing down
+       transport->CloseTransport()) 
+	Keep.Stop();
+   else					/// Stop what we are doing 
+	transport->InitialPDU();
 
-	lastupdate = PTime();
+   lastupdate = PTime();
 }
 
 void GNUGKTransportThread::Main()
@@ -142,33 +145,33 @@ void GNUGKTransportThread::Main()
   PTRACE(3, "GNUGK\tStarted Listening-KeepAlive Thread");
 
   BOOL ret = TRUE;
-  while ((transport->IsOpen()) &&           // Transport is Open
-	      (!isConnected) &&                 // Does not have a call connection 
-		  (ret) &&	                        // is not a Failed connection
-		  (!transport->CloseTransport())) {  // not close due to shutdown
-	          ret = transport->HandleGNUGKSignallingChannelPDU();
+  while ((transport->IsOpen()) &&		// Transport is Open
+	(!isConnected) &&			// Does not have a call connection 
+	(ret) &&	                        // is not a Failed connection
+	(!transport->CloseTransport())) {	// not close due to shutdown
+	  ret = transport->HandleGNUGKSignallingChannelPDU();
 
 	  if (!ret && transport->CloseTransport()) {  // Closing down Instruction
-          PTRACE(3, "GNUGK\tShutting down GnuGk Thread");
-		  GNUGK_Feature::curtransport = NULL;
-		  transport->ConnectionLost(TRUE);
-//	      delete transport;
-	  } else if (!ret) {   // We have a socket failure wait 1 sec and try again.
-         PTRACE(3, "GNUGK\tConnection Lost! Retrying Connection..");
-	     transport->ConnectionLost(TRUE);
-          while (!transport->CloseTransport() && 
-			    !transport->Connect()) {
-                   PTRACE(3, "GNUGK\tReconnect Failed! Waiting 1 sec");
-                   PProcess::Sleep(1000);
-				}
+            PTRACE(3, "GNUGK\tShutting down GnuGk Thread");
+            GNUGK_Feature::curtransport = NULL;
+            transport->ConnectionLost(TRUE);
 
-	      if (!transport->CloseTransport()) {
-			  PTRACE(3, "GNUGK\tConnection ReEstablished");
-		      transport->ConnectionLost(FALSE);
-			  ret = TRUE;   // Signal that the connection has been ReEstablished.
-	      }
-	  } else {    // We are connected to a call on this thread 
-         isConnected = TRUE;
+	  } else if (!ret) {   // We have a socket failure wait 1 sec and try again.
+             PTRACE(3, "GNUGK\tConnection Lost! Retrying Connection..");
+	     transport->ConnectionLost(TRUE);
+             while (!transport->CloseTransport() && 
+                           !transport->Connect()) {
+                PTRACE(3, "GNUGK\tReconnect Failed! Waiting 1 sec");
+                PProcess::Sleep(1000);
+             }
+
+	    if (!transport->CloseTransport()) {
+              PTRACE(3, "GNUGK\tConnection ReEstablished");
+	      transport->ConnectionLost(FALSE);
+              ret = TRUE;			// Signal that the connection has been ReEstablished.
+	    }
+	  } else {				// We are connected to a call on this thread 
+              isConnected = TRUE;
 	  } 
   }
 
@@ -178,9 +181,9 @@ void GNUGKTransportThread::Main()
 ///////////////////////////////////////////////////////////////////////////////////////
 
 GNUGKTransport::GNUGKTransport(H323EndPoint & endpoint,
-							   GNUGK_Feature * feat,
-							   PString & gkid  
-							   )	
+				GNUGK_Feature * feat,
+				PString & gkid  
+				)	
    : H323TransportTCP(endpoint), GKid(gkid), Feature(feat)
 {
 	GNUGK_Feature::curtransport = this;
@@ -204,22 +207,21 @@ BOOL GNUGKTransport::HandleGNUGKSignallingSocket(H323SignalPDU & pdu)
 
 	  H323SignalPDU rpdu;
 	  if (!rpdu.Read(*this)) { 
-         PTRACE(3, "GNUGK\tSocket Read Failure");
-		   if (GetErrorNumber(PChannel::LastReadError) == 0) {
+            PTRACE(3, "GNUGK\tSocket Read Failure");
+            if (GetErrorNumber(PChannel::LastReadError) == 0) {
               PTRACE(3, "GNUGK\tRemote SHUT DOWN or Intermediary Shutdown!");
-			  remoteShutDown = TRUE;
-		   }
-         return FALSE;
+              remoteShutDown = TRUE;
+            }
+            return FALSE;
 	  } else if ((rpdu.GetQ931().GetMessageType() == Q931::InformationMsg) &&
-          (endpoint.HandleUnsolicitedInformation(rpdu))) {
-           // Handle unsolicited Information Message
-			  return FALSE;
+                          (endpoint.HandleUnsolicitedInformation(rpdu))) {
+              // Handle unsolicited Information Message
 	  } else if (rpdu.GetQ931().GetMessageType() == Q931::SetupMsg) {
-		      pdu = rpdu;
+              pdu = rpdu;
               return TRUE;
 	  } else {
 	     PTRACE(3, "GNUGK\tUnknown PDU Received");
-		 return FALSE;
+             return FALSE;
 	  }
 
   }
@@ -230,11 +232,11 @@ BOOL GNUGKTransport::HandleGNUGKSignallingChannelPDU()
 
   H323SignalPDU pdu;
   if (!HandleGNUGKSignallingSocket(pdu)) {
-	  if (remoteShutDown) {   // Intentional Shutdown?
-		  GNUGK_Feature::curtransport = NULL;
-		  Close();
-	  }
-      return FALSE;
+    if (remoteShutDown) {   // Intentional Shutdown?
+      GNUGK_Feature::curtransport = NULL;
+      Close();
+    }
+    return FALSE;
   }
 
     // Create a new transport to the GK as this one will be closed at the end of the call.
@@ -248,7 +250,7 @@ BOOL GNUGKTransport::HandleGNUGKSignallingChannelPDU()
 
 	  H323Connection * connection = endpoint.CreateConnection(callReference, NULL, this, &pdu);
 		if (connection == NULL) {
-			PTRACE(1, "GNUGK\tEndpoint could not create connection, "
+			PTRACE(1, "GNUGK\tEndpoint could not create connection, " <<
 					  "sending release complete PDU: callRef=" << callReference);
 			Q931 pdu;
 			pdu.BuildReleaseComplete(callReference, TRUE);
@@ -297,7 +299,7 @@ BOOL GNUGKTransport::ReadPDU(PBYTEArray & pdu)
 
 BOOL GNUGKTransport::Connect() 
 { 
- PTRACE(4, "GNUGK\tConnecting to GK"  );
+        PTRACE(4, "GNUGK\tConnecting to GK"  );
 	if (!H323TransportTCP::Connect())
 		return FALSE;
 	
@@ -308,8 +310,8 @@ void GNUGKTransport::ConnectionLost(BOOL established)
 {
 	if (closeTransport)
 		return;
-PTRACE(4,"GnuGK\tConnection lost " << established 
-	      << " have " << GNUGK_Feature::connectionlost);
+         PTRACE(4,"GnuGK\tConnection lost " << established 
+              << " have " << GNUGK_Feature::connectionlost);
 	if (GNUGK_Feature::connectionlost != established) {
 	   GetEndPoint().NATLostConnection(established);
 	   GNUGK_Feature::connectionlost = established;
@@ -332,9 +334,9 @@ BOOL GNUGKTransport::InitialPDU()
  PBYTEArray bytes(GKid,GKid.GetLength(), false);
 
    Q931 qPDU;
-	qPDU.BuildInformation(0,false);
-	qPDU.SetCallState(Q931::CallState_IncomingCallProceeding);
-	qPDU.SetIE(Q931::FacilityIE, bytes);
+   qPDU.BuildInformation(0,false);
+   qPDU.SetCallState(Q931::CallState_IncomingCallProceeding);
+   qPDU.SetIE(Q931::FacilityIE, bytes);
  
 
   PBYTEArray rawData;
@@ -348,7 +350,7 @@ BOOL GNUGKTransport::InitialPDU()
 	 return FALSE;
   }
 
-PTRACE(6, "GNUGK\tSent KeepAlive PDU.");
+  PTRACE(6, "GNUGK\tSent KeepAlive PDU.");
 
  return TRUE;
 }
@@ -370,7 +372,7 @@ BOOL GNUGKTransport::CreateNewTransport()
 	transport->SetRemoteAddress(remote);
 
 	if (transport->Connect()) {
-      PTRACE(3, "GNUGK\tConnected to " << transport->GetRemoteAddress());
+          PTRACE(3, "GNUGK\tConnected to " << transport->GetRemoteAddress());
 	    new GNUGKTransportThread(transport->GetEndPoint(), transport,GNUGK_Feature::keepalive);
 		if (transport->IsConnectionLost())
 		     transport->ConnectionLost(FALSE);
@@ -381,14 +383,14 @@ BOOL GNUGKTransport::CreateNewTransport()
 
 BOOL GNUGKTransport::Close() 
 { 
-    PTRACE(4, "GNUGK\tClosing GnuGK NAT channel.");	
-	closeTransport = TRUE;
-	return H323TransportTCP::Close(); 
+   PTRACE(4, "GNUGK\tClosing GnuGK NAT channel.");	
+   closeTransport = TRUE;
+   return H323TransportTCP::Close(); 
 }
 
 BOOL GNUGKTransport::IsOpen () const
 {
-		return H323TransportTCP::IsOpen();
+   return H323TransportTCP::IsOpen();
 }
 
 BOOL GNUGKTransport::IsListening() const
@@ -413,7 +415,7 @@ GNUGK_Feature::GNUGK_Feature(H323EndPoint & EP,
 							 WORD KeepAlive )
      :  ep(EP), address(remoteAddress), GKid(gkid)
 {
- PTRACE(4, "GNUGK\tCreating GNUGK Feature.");	
+	PTRACE(4, "GNUGK\tCreating GNUGK Feature.");	
 	keepalive = KeepAlive;
 	open = CreateNewTransport();
 }
@@ -424,18 +426,18 @@ GNUGK_Feature::~GNUGK_Feature()
 
 BOOL GNUGK_Feature::CreateNewTransport()
 {
- PTRACE(5, "GNUGK\tCreating Transport.");
+	PTRACE(5, "GNUGK\tCreating Transport.");
 
 	GNUGKTransport * transport = new GNUGKTransport(ep,this,GKid);
 	transport->SetRemoteAddress(address);
 
 	if (transport->Connect()) {
-      PTRACE(3, "GNUGK\tConnected to " << transport->GetRemoteAddress());
+	 PTRACE(3, "GNUGK\tConnected to " << transport->GetRemoteAddress());
 	    new GNUGKTransportThread(transport->GetEndPoint(), transport,keepalive);
 		return TRUE;
 	}
 
-    PTRACE(3, "GNUGK\tTransport Failure " << transport->GetRemoteAddress());
+	 PTRACE(3, "GNUGK\tTransport Failure " << transport->GetRemoteAddress());
 	return FALSE;
 }
 
