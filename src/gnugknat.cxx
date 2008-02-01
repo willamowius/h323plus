@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2008/01/30 02:53:42  shorne
+ * code format tidy up
+ *
  * Revision 1.5  2008/01/18 01:36:43  shorne
  * Fix blocking and timeout on call ending
  *
@@ -308,6 +311,8 @@ BOOL GNUGKTransport::Connect()
 
 void GNUGKTransport::ConnectionLost(BOOL established)
 {
+	PWaitAndSignal m(shutdownMutex);
+
 	if (closeTransport)
 		return;
          PTRACE(4,"GnuGK\tConnection lost " << established 
@@ -383,6 +388,8 @@ BOOL GNUGKTransport::CreateNewTransport()
 
 BOOL GNUGKTransport::Close() 
 { 
+   PWaitAndSignal m(shutdownMutex);
+
    PTRACE(4, "GNUGK\tClosing GnuGK NAT channel.");	
    closeTransport = TRUE;
    return H323TransportTCP::Close(); 

@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/01/18 01:36:42  shorne
+ * Fix blocking and timeout on call ending
+ *
  * Revision 1.2  2008/01/02 18:35:40  willamowius
  * make SetAvailable() return void
  *
@@ -137,6 +140,7 @@ class GNUGKTransport  : public H323TransportTCP
 	 PMutex connectionsMutex;
 	 PMutex WriteMutex;
 	 PMutex IntMutex;
+	 PMutex shutdownMutex;
 	 PTimeInterval ReadTimeOut;
 	 PSyncPoint ReadMutex;
 
