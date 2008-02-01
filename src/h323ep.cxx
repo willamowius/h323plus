@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.13  2008/01/30 02:10:19  shorne
+ * Changed ASN.1 vendor information from OpenH323 to H323plus
+ *
  * Revision 1.12  2008/01/29 04:28:55  shorne
  * Initialise gnugk as NULL
  *
@@ -1291,6 +1294,10 @@ H323EndPoint::~H323EndPoint()
 
   // And shut down the gatekeeper (if there was one)
   RemoveGatekeeper();
+
+#if H323_FILE
+  delete gnugk;
+#endif
 
   // Shut down the listeners as soon as possible to avoid race conditions
   listeners.RemoveAll();

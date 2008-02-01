@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2008/02/01 07:50:17  shorne
+ * added shutdown mutex to fix occasion shutdown timing errors.
+ *
  * Revision 1.6  2008/01/30 02:53:42  shorne
  * code format tidy up
  *
@@ -429,6 +432,8 @@ GNUGK_Feature::GNUGK_Feature(H323EndPoint & EP,
 
 GNUGK_Feature::~GNUGK_Feature()
 {
+	if (curtransport != NULL)
+		curtransport->Close();
 }
 
 BOOL GNUGK_Feature::CreateNewTransport()
