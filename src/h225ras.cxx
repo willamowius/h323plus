@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/11/10 23:07:50  willamowius
+ * fix --disable-h460
+ *
  * Revision 1.1  2007/08/06 20:51:05  shorne
  * First commit of h323plus
  *
@@ -657,21 +660,21 @@ static void SendFeatureSet(const H225_RAS * ras, unsigned code, PDUType & pdu)
 
 void H225_RAS::OnSendGatekeeperRequest(H323RasPDU &, H225_GatekeeperRequest & grq)
 {
+  // This function is never called during sending GRQ
   if (!gatekeeperIdentifier) {
     grq.IncludeOptionalField(H225_GatekeeperRequest::e_gatekeeperIdentifier);
     grq.m_gatekeeperIdentifier = gatekeeperIdentifier;
   }
 
-#ifdef H323_H460
-  SendFeatureSet<H225_GatekeeperRequest>(this, H460_MessageType::e_gatekeeperRequest, grq);
-#endif
-
   OnSendGatekeeperRequest(grq);
 }
 
 
-void H225_RAS::OnSendGatekeeperRequest(H225_GatekeeperRequest & /*grq*/)
+void H225_RAS::OnSendGatekeeperRequest(H225_GatekeeperRequest & grq)
 {
+#ifdef H323_H460
+  SendFeatureSet<H225_GatekeeperRequest>(this, H460_MessageType::e_gatekeeperRequest, grq);
+#endif
 }
 
 
