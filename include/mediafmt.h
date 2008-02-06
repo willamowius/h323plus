@@ -24,6 +24,10 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2007/10/19 19:53:44  shorne
+ * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
+ *  Robert
+ *
  * Revision 1.2  2007/08/20 19:13:28  shorne
  * Added Generic Capability support. Fixed Linux compile errors
  *
@@ -297,6 +301,10 @@ class OpalMediaOptionValue : public OpalMediaOption
     }
 
     virtual Comparison CompareValue(const OpalMediaOption & option) const {
+	  if (!PIsDescendant(&option, OpalMediaOptionValue)) {
+		  PTRACE(6,"MediaOpt\t" << option.GetName() << " not compared! Not descendent of OpalMediaOptionValue");
+		  return GreaterThan;
+	  }
       const OpalMediaOptionValue * otherOption = PDownCast(const OpalMediaOptionValue, &option);
       if (otherOption == NULL)
         return GreaterThan;
@@ -310,6 +318,10 @@ class OpalMediaOptionValue : public OpalMediaOption
     virtual void Assign(
       const OpalMediaOption & option
     ) {
+	  if (!PIsDescendant(&option, OpalMediaOptionValue)) {
+		  PTRACE(6,"MediaOpt\t" << option.GetName() << " not assigned! Not descendent of OpalMediaOptionValue");
+		  return;
+	  }
       const OpalMediaOptionValue * otherOption = PDownCast(const OpalMediaOptionValue, &option);
       if (otherOption != NULL)
         m_value = otherOption->m_value;
