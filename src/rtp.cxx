@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/10/16 17:03:54  shorne
+ * Qos capability negotiation
+ *
  * Revision 1.1  2007/08/06 20:51:07  shorne
  * First commit of h323plus
  *
@@ -406,6 +409,7 @@
 #include "openh323buildopts.h"
 
 #include "rtp.h"
+#include "h323con.h"
 
 #ifndef NO_H323_AUDIO_CODECS
 #include "jitter.h"
@@ -1661,6 +1665,7 @@ PQoS & RTP_UDP::GetQOS()
 BOOL RTP_UDP::Open(PIPSocket::Address _localAddress,
                    WORD portBase, WORD portMax,
                    BYTE tos,
+				   const H323Connection & connection,
 #ifdef P_STUN
                    PNatMethod * meth,
 #else
@@ -1690,6 +1695,8 @@ BOOL RTP_UDP::Open(PIPSocket::Address _localAddress,
 
 #ifdef P_STUN
   if (meth != NULL) {
+	connection.OnSetRTPNat(GetSessionID(),*meth);
+
     if (meth->CreateSocketPair(dataSocket, controlSocket)) {
       dataSocket->GetLocalAddress(localAddress, localDataPort);
       controlSocket->GetLocalAddress(localAddress, localControlPort);

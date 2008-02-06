@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2007/11/16 22:09:43  shorne
+ * Added ability to disable H.245 QoS for NetMeeting Interop
+ *
  * Revision 1.3  2007/10/19 19:54:18  shorne
  * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
  *  Robert
@@ -234,6 +237,7 @@ H323_RTP_UDP::H323_RTP_UDP(const H323Connection & conn,
   while (!rtp.Open(localAddress,
                    nextPort, nextPort,
                    endpoint.GetRtpIpTypeofService(),
+				   conn,
 #ifdef P_STUN
                    meth,
 #else
@@ -309,9 +313,12 @@ BOOL H323_RTP_UDP::OnSendingPDU(const H323_RTPChannel & channel,
 }
 
 BOOL H323_RTP_UDP::OnSendingAltPDU(const H323_RTPChannel & channel,
-				H245_ArrayOf_GenericInformation & alternate) const
+				H245_ArrayOf_GenericInformation & generic) const
 {
-  return connection.OnSendingRTPAltInformation(*this,alternate); 
+	if (connection.isSameNAT()) 
+        return connection.OnSendingRTPAltInformation(*this,generic);
+	else
+		return connection.OnSendingOLCGenericInformation(*this,generic);
 }
 
 void H323_RTP_UDP::OnSendingAckPDU(const H323_RTPChannel & channel,

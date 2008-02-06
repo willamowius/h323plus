@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.12  2008/01/30 18:51:35  shorne
+ * fix for duplicate h224handler definition
+ *
  * Revision 1.11  2008/01/04 06:23:07  shorne
  * Cleaner setup and teardown of h460 module
  *
@@ -2382,6 +2385,12 @@ class H323Connection : public PObject
 				        H245_ArrayOf_GenericInformation & alternate) const;
 
 
+	/**Send Generic Information with the OLC. This is used to include generic
+	   information in the openlogicalchannel
+	  */
+    virtual BOOL OnSendingOLCGenericInformation(const H323_RTP_UDP & rtp,
+				        H245_ArrayOf_GenericInformation & generic) const;
+
     /**Callback from the RTP session for statistics monitoring.
        This is called every so many packets on the transmitter and receiver
        threads of the RTP session indicating that the statistics have been
@@ -2437,8 +2446,18 @@ class H323Connection : public PObject
 
 	/** Determine if the two parties are behind the same NAT
 	  */
-	BOOL isSameNAT() { return sameNAT; };
+	BOOL isSameNAT() const { return sameNAT; };
 
+#if P_STUN
+	/** On Set RTP information from H.225 & H.245 signalling
+	 */
+	virtual void OnSetRTPNat(unsigned sessionid, PNatMethod & nat) const;
+
+	/** Set RTP NAT information callback
+	  */
+	virtual void SetRTPNAT(unsigned /*sessionid*/, PUDPSocket * /*socket*/) {};
+
+#endif
 	/** Set Endpoint Type Information
 	  Override this to advertise the Endpoint type on a Call by Call basis
 
@@ -3235,6 +3254,7 @@ class H323Connection : public PObject
 
   public:
     BOOL StartHandleControlChannel();
+	virtual BOOL OnStartHandleControlChannel();
     void EndHandleControlChannel();
 
 #ifdef H323_RTP_AGGREGATE

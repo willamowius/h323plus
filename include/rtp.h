@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/01/22 01:10:32  shorne
+ * Fix H.224 opening unidirectional channel
+ *
  * Revision 1.2  2007/10/16 17:03:53  shorne
  * Qos capability negotiation
  *
@@ -1070,6 +1073,7 @@ class RTP_SessionManager : public PObject
 
 /**This class is for the IETF Real Time Protocol interface on UDP/IP.
  */
+class H323Connection;
 class RTP_UDP : public RTP_Session
 {
   PCLASSINFO(RTP_UDP, RTP_Session);
@@ -1145,6 +1149,7 @@ class RTP_UDP : public RTP_Session
       WORD portBase,                    ///<  Base of ports to search
       WORD portMax,                     ///<  end of ports to search (inclusive)
       BYTE ipTypeOfService,             ///<  Type of Service byte
+	  const H323Connection & connection, ///< Connection
 #ifdef P_STUN
      PNatMethod * meth = NULL,          ///* Nat Method to use to create sockets (or NULL if no Method)
 #else

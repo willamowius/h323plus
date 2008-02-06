@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:03  shorne
+ * First commit of h323plus
+ *
  * Revision 1.147.2.1  2007/05/23 06:58:02  shorne
  * Nat Support for EP's nested behind same NAT
  *
@@ -935,7 +938,7 @@ BOOL H323_RealTimeChannel::OnSendingPDU(H245_OpenLogicalChannel & open) const
                 H245_OpenLogicalChannel_reverseLogicalChannelParameters_multiplexParameters
                     ::e_h2250LogicalChannelParameters);
 
-	if (connection.isSameNAT() && OnSendingAltPDU(open.m_genericInformation))
+	if (OnSendingAltPDU(open.m_genericInformation))
 		open.IncludeOptionalField(H245_OpenLogicalChannel::e_genericInformation);
 
     return OnSendingPDU(open.m_reverseLogicalChannelParameters.m_multiplexParameters);
@@ -946,7 +949,7 @@ BOOL H323_RealTimeChannel::OnSendingPDU(H245_OpenLogicalChannel & open) const
                 H245_OpenLogicalChannel_forwardLogicalChannelParameters_multiplexParameters
                     ::e_h2250LogicalChannelParameters);
 
-	if (connection.isSameNAT() && OnSendingAltPDU(open.m_genericInformation))
+	if (OnSendingAltPDU(open.m_genericInformation))
 		open.IncludeOptionalField(H245_OpenLogicalChannel::e_genericInformation);
 
     return OnSendingPDU(open.m_forwardLogicalChannelParameters.m_multiplexParameters);

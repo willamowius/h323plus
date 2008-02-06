@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.14  2008/01/30 18:51:36  shorne
+ * fix for duplicate h224handler definition
+ *
  * Revision 1.13  2008/01/22 01:10:33  shorne
  * Fix H.224 opening unidirectional channel
  *
@@ -2623,6 +2626,12 @@ if (setup.m_conferenceGoal.GetTag() == H225_Setup_UUIE_conferenceGoal::e_create)
   return NumCallEndReasons;
 }
 
+#if P_STUN
+void H323Connection::OnSetRTPNat(unsigned sessionid, PNatMethod & nat) const
+{
+}
+#endif
+
 void H323Connection::SetEndpointTypeInfo(H225_EndpointType & info) const
 {
 	return endpoint.SetEndpointTypeInfo(info);
@@ -2932,7 +2941,7 @@ BOOL H323Connection::WriteControlPDU(const H323ControlPDU & pdu)
 
 BOOL H323Connection::StartControlNegotiations(BOOL renegotiate)
 {
-  PTRACE(2, "H245\tStarted control channel");
+  PTRACE(2, "H245\tStart control negotiations");
 
   if(renegotiate)  // makes reopening of media channels possible 
     connectionState = HasExecutedSignalConnect;
@@ -2953,6 +2962,11 @@ BOOL H323Connection::StartControlNegotiations(BOOL renegotiate)
   return TRUE;
 }
 
+BOOL H323Connection::OnStartHandleControlChannel()
+{
+  PTRACE(2, "H245\tStarted control channel");
+  return StartHandleControlChannel();
+}
 
 BOOL H323Connection::StartHandleControlChannel()
 {
@@ -2984,7 +2998,7 @@ void H323Connection::EndHandleControlChannel()
 
 void H323Connection::HandleControlChannel()
 {
-  if (!StartHandleControlChannel())
+  if (!OnStartHandleControlChannel())
     return;
 
   BOOL ok = TRUE;
@@ -5039,6 +5053,11 @@ BOOL H323Connection::OnSendingRTPAltInformation(const H323_RTP_UDP & rtp,
   return FALSE; 
 }
 
+BOOL H323Connection::OnSendingOLCGenericInformation(const H323_RTP_UDP & rtp,
+				H245_ArrayOf_GenericInformation & generic) const
+{
+  return FALSE; 
+}
 
 void H323Connection::ReleaseSession(unsigned sessionID)
 {
@@ -5549,7 +5568,7 @@ void H323Connection::AggregateSignalChannel(H323Transport * transport)
 
 void H323Connection::AggregateControlChannel(H323Transport * transport)
 {
-  if (!StartHandleControlChannel())
+  if (!OnStartHandleControlChannel())
     return;
 
   controlAggregator = new AggregatedH245Handle(*transport, *this);
