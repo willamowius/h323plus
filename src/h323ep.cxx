@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.14  2008/02/01 09:34:20  shorne
+ * Cleaner shutdown of GnuGk NAT support
+ *
  * Revision 1.13  2008/01/30 02:10:19  shorne
  * Changed ASN.1 vendor information from OpenH323 to H323plus
  *
@@ -1131,10 +1134,10 @@ H323EndPoint::H323EndPoint()
 
 #ifdef H323_VIDEO
   autoStartReceiveVideo = autoStartTransmitVideo = TRUE;
-#endif
 
 #ifdef H323_H239
   autoStartReceiveExtVideo = autoStartTransmitExtVideo = FALSE;
+#endif
 #endif
 
 #ifdef H323_T38
@@ -1471,6 +1474,7 @@ void H323EndPoint::AddAllUserInputCapabilities(PINDEX descriptorNum,
   H323_UserInputCapability::AddAllCapabilities(capabilities, descriptorNum, simultaneous);
 }
 
+#ifdef H323_VIDEO
 #ifdef H323_H239
 BOOL H323EndPoint::OpenExtendedVideoSession(const PString & token,H323ChannelNumber & num)
 {
@@ -1506,7 +1510,8 @@ void H323EndPoint::AddAllExtendedVideoCapabilities(PINDEX descriptorNum,
 {
   H323ExtendedVideoCapability::AddAllCapabilities(capabilities, descriptorNum, simultaneous);
 }
-#endif
+#endif  // H323_H239
+#endif  // H323_VIDEO
 
 void H323EndPoint::RemoveCapabilities(const PStringArray & codecNames)
 {

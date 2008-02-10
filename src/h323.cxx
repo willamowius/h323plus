@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.15  2008/02/06 02:52:59  shorne
+ * Added support for Standards based NAT Traversal
+ *
  * Revision 1.14  2008/01/30 18:51:36  shorne
  * fix for duplicate h224handler definition
  *
@@ -1940,7 +1943,7 @@ BOOL H323Connection::OnReceivedSignalConnect(const H323SignalPDU & pdu)
   // and this is just so user indications work, or we don't have media and
   // desperately need it!
   if (h245Tunneling || controlChannel != NULL)
-    return StartControlNegotiations();
+      return OnStartHandleControlChannel();
 
   // We have no tunnelling and not separate channel, but we really want one
   // so we will start one using a facility message
@@ -3969,11 +3972,11 @@ void H323Connection::OnSelectLogicalChannels()
 #ifdef H323_VIDEO
       if (endpoint.CanAutoStartTransmitVideo())
         SelectDefaultLogicalChannel(RTP_Session::DefaultVideoSessionID);
-#endif
 #ifdef H323_H239
       if (endpoint.CanAutoStartTransmitExtVideo())
         SelectDefaultLogicalChannel(RTP_Session::DefaultExtVideoSessionID);
 #endif
+#endif // H323_VIDEO
 #ifdef H323_T38
       if (endpoint.CanAutoStartTransmitFax())
         SelectDefaultLogicalChannel(RTP_Session::DefaultFaxSessionID);
@@ -3988,12 +3991,13 @@ void H323Connection::OnSelectLogicalChannels()
       SelectFastStartChannels(RTP_Session::DefaultVideoSessionID,
                               endpoint.CanAutoStartTransmitVideo(),
                               endpoint.CanAutoStartReceiveVideo());
-#endif
 #ifdef H323_H239
 	  SelectFastStartChannels(RTP_Session::DefaultExtVideoSessionID,
                               endpoint.CanAutoStartTransmitExtVideo(),
                               endpoint.CanAutoStartReceiveExtVideo());
 #endif
+#endif // H323_VIDEO
+
 #ifdef H323_T38
       SelectFastStartChannels(RTP_Session::DefaultFaxSessionID, 
 		                      endpoint.CanAutoStartTransmitFax(),
@@ -4011,13 +4015,15 @@ void H323Connection::OnSelectLogicalChannels()
         StartFastStartChannel(fastStartChannels, RTP_Session::DefaultVideoSessionID, H323Channel::IsTransmitter);
       if (endpoint.CanAutoStartReceiveVideo())
         StartFastStartChannel(fastStartChannels, RTP_Session::DefaultVideoSessionID, H323Channel::IsReceiver);
-#endif
+
 #ifdef H323_H239
       if (endpoint.CanAutoStartTransmitExtVideo())
         StartFastStartChannel(fastStartChannels, RTP_Session::DefaultExtVideoSessionID, H323Channel::IsTransmitter);
       if (endpoint.CanAutoStartReceiveExtVideo())
         StartFastStartChannel(fastStartChannels, RTP_Session::DefaultExtVideoSessionID, H323Channel::IsReceiver);
 #endif
+#endif  // H323_VIDEO
+
 #ifdef H323_T38
       if (endpoint.CanAutoStartTransmitFax())
         StartFastStartChannel(fastStartChannels, RTP_Session::DefaultFaxSessionID, H323Channel::IsTransmitter);
@@ -4055,11 +4061,12 @@ void H323Connection::SelectDefaultLogicalChannel(unsigned sessionID)
 
 BOOL H323Connection::MergeCapabilities(unsigned sessionID, const H323Capability & local, H323Capability * remote)
 {
+
 	// Only the Video and Extended Video Capabilities require merging
 	if ((sessionID != RTP_Session::DefaultVideoSessionID) &&
 		(sessionID != RTP_Session::DefaultExtVideoSessionID))
 			return FALSE;
-
+#if H323_VIDEO
    OpalVideoFormat & remoteFormat = (OpalVideoFormat &)(remote->GetWritableMediaFormat());
    const OpalMediaFormat & localFormat = local.GetMediaFormat();
 
@@ -4070,7 +4077,7 @@ BOOL H323Connection::MergeCapabilities(unsigned sessionID, const H323Capability 
 #endif
       return TRUE;
    }
-
+#endif
    return FALSE;
 }
 
@@ -4258,6 +4265,7 @@ H323Channel * H323Connection::CreateLogicalChannel(const H245_OpenLogicalChannel
 
   unsigned sessionID = param->m_sessionID;
 
+#ifdef H323_VIDEO
 #ifdef H323_H239
   if (!startingFast &&
 	  open.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation)) {  // check for extended Video OLC
@@ -4286,6 +4294,7 @@ H323Channel * H323Connection::CreateLogicalChannel(const H245_OpenLogicalChannel
 	}
   }
 #endif
+#endif // H323_VIDEO
 
   // See if datatype is supported
   H323Capability * capability = localCapabilities.FindCapability(*dataType);

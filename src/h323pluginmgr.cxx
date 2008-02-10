@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.12  2007/11/28 06:03:37  shorne
+ * Video capability merge. Thx again Jan Willamowius
+ *
  * Revision 1.11  2007/11/23 04:29:30  shorne
  * small correction with video codec definitions reading. Only a naming map issue.
  *
@@ -399,14 +402,14 @@
 #include <rtp.h>
 #include <mediafmt.h>
 
-#ifdef H323_VIDEO
-
 #define H323CAP_TAG_PREFIX    "h323"
 static const char GET_CODEC_OPTIONS_CONTROL[]    = "get_codec_options";
 static const char FREE_CODEC_OPTIONS_CONTROL[]   = "free_codec_options";
 static const char GET_OUTPUT_DATA_SIZE_CONTROL[] = "get_output_data_size";
 static const char SET_CODEC_OPTIONS_CONTROL[]    = "set_codec_options";
 static const char EVENT_CODEC_CONTROL[]          = "event_codec";
+
+#ifdef H323_VIDEO
 
 #define CIF_WIDTH         352
 #define CIF_HEIGHT        288
@@ -678,8 +681,6 @@ int OpalG711uLaw64k_Decoder::Encode(const void * _from, unsigned * fromLen, void
 // Helper functions for codec control operators
 //
 
-#ifdef H323_VIDEO
-
 static PluginCodec_ControlDefn * GetCodecControl(const PluginCodec_Definition * codec, const char * name)
 {
   PluginCodec_ControlDefn * codecControls = codec->codecControls;
@@ -719,6 +720,8 @@ static BOOL SetCodecControl(const PluginCodec_Definition * codec,
   return SetCodecControl(codec, context, name, parm, PString(PString::Signed, value));
 }
 
+#ifdef H323_VIDEO
+
 static BOOL EventCodecControl(PluginCodec_Definition * codec, 
                                                void * context,
                                          const char * name,
@@ -733,7 +736,6 @@ static BOOL EventCodecControl(PluginCodec_Definition * codec,
 
   return FALSE;
 }
-
 
 static BOOL CallCodecControl(PluginCodec_Definition * codec, 
                                                void * context,
@@ -944,6 +946,29 @@ static void PopulateMediaFormatOptions(PluginCodec_Definition * _encoderCodec, O
   
 }
 
+static void SetDefaultVideoOptions(OpalMediaFormat & mediaFormat)
+{
+  mediaFormat.AddOption(new OpalMediaOptionInteger(qcifMPI_tag,  false, OpalMediaOption::MinMerge, 0));
+  mediaFormat.AddOption(new OpalMediaOptionInteger(cifMPI_tag,   false, OpalMediaOption::MinMerge, 0));
+  mediaFormat.AddOption(new OpalMediaOptionInteger(sqcifMPI_tag, false, OpalMediaOption::MinMerge, 0));
+  mediaFormat.AddOption(new OpalMediaOptionInteger(cif4MPI_tag,  false, OpalMediaOption::MinMerge, 0));
+  mediaFormat.AddOption(new OpalMediaOptionInteger(cif16MPI_tag, false, OpalMediaOption::MinMerge, 0));
+
+  mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::FrameWidthOption,          true,  OpalMediaOption::MinMerge, CIF_WIDTH, 11, 32767));
+  mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::FrameHeightOption,         true,  OpalMediaOption::MinMerge, CIF_HEIGHT, 9, 32767));
+  mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::EncodingQualityOption,     false, OpalMediaOption::MinMerge, 15,          1, 31));
+  mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::TargetBitRateOption,       false, OpalMediaOption::MinMerge, 64000,    1000));
+  mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::MaxBitRateOption,          false, OpalMediaOption::MinMerge, mediaFormat.GetBandwidth(), 1000));
+  mediaFormat.AddOption(new OpalMediaOptionBoolean(OpalVideoFormat::DynamicVideoQualityOption, false, OpalMediaOption::NoMerge,  false));
+  mediaFormat.AddOption(new OpalMediaOptionBoolean(OpalVideoFormat::AdaptivePacketDelayOption, false, OpalMediaOption::NoMerge,  false));
+  mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::FrameTimeOption,           false, OpalMediaOption::NoMerge,  9000));
+
+  mediaFormat.AddOption(new OpalMediaOptionBoolean(h323_temporalSpatialTradeOffCapability_tag, false, OpalMediaOption::NoMerge,  false));
+  mediaFormat.AddOption(new OpalMediaOptionBoolean(h323_stillImageTransmission_tag           , false, OpalMediaOption::NoMerge,  false));
+}
+
+#endif  // #ifdef H323_VIDEO
+
 static void PopulateMediaFormatFromGenericData(OpalMediaFormat & mediaFormat, const PluginCodec_H323GenericCodecData * genericData)
 {
   const PluginCodec_H323GenericParameterDefinition *ptr = genericData->params;
@@ -999,29 +1024,6 @@ static void PopulateMediaFormatFromGenericData(OpalMediaFormat & mediaFormat, co
     }
   }
 }
-
-static void SetDefaultVideoOptions(OpalMediaFormat & mediaFormat)
-{
-  mediaFormat.AddOption(new OpalMediaOptionInteger(qcifMPI_tag,  false, OpalMediaOption::MinMerge, 0));
-  mediaFormat.AddOption(new OpalMediaOptionInteger(cifMPI_tag,   false, OpalMediaOption::MinMerge, 0));
-  mediaFormat.AddOption(new OpalMediaOptionInteger(sqcifMPI_tag, false, OpalMediaOption::MinMerge, 0));
-  mediaFormat.AddOption(new OpalMediaOptionInteger(cif4MPI_tag,  false, OpalMediaOption::MinMerge, 0));
-  mediaFormat.AddOption(new OpalMediaOptionInteger(cif16MPI_tag, false, OpalMediaOption::MinMerge, 0));
-
-  mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::FrameWidthOption,          true,  OpalMediaOption::MinMerge, CIF_WIDTH, 11, 32767));
-  mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::FrameHeightOption,         true,  OpalMediaOption::MinMerge, CIF_HEIGHT, 9, 32767));
-  mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::EncodingQualityOption,     false, OpalMediaOption::MinMerge, 15,          1, 31));
-  mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::TargetBitRateOption,       false, OpalMediaOption::MinMerge, 64000,    1000));
-  mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::MaxBitRateOption,          false, OpalMediaOption::MinMerge, mediaFormat.GetBandwidth(), 1000));
-  mediaFormat.AddOption(new OpalMediaOptionBoolean(OpalVideoFormat::DynamicVideoQualityOption, false, OpalMediaOption::NoMerge,  false));
-  mediaFormat.AddOption(new OpalMediaOptionBoolean(OpalVideoFormat::AdaptivePacketDelayOption, false, OpalMediaOption::NoMerge,  false));
-  mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::FrameTimeOption,           false, OpalMediaOption::NoMerge,  9000));
-
-  mediaFormat.AddOption(new OpalMediaOptionBoolean(h323_temporalSpatialTradeOffCapability_tag, false, OpalMediaOption::NoMerge,  false));
-  mediaFormat.AddOption(new OpalMediaOptionBoolean(h323_stillImageTransmission_tag           , false, OpalMediaOption::NoMerge,  false));
-}
-
-#endif  // #ifdef H323_VIDEO
 
 template <typename CodecClass>
 class OpalFixedCodecFactory : public PFactory<OpalFactoryCodec>
@@ -2350,11 +2352,11 @@ void H323PluginCodecManager::OnShutdown()
 {
   // unregister the plugin media formats
   OpalMediaFormatFactory::UnregisterAll();
-
+#ifdef H323_VIDEO
 #ifdef H323_H239
   H323ExtendedVideoFactory::UnregisterAll();
 #endif
-
+#endif
   // unregister the plugin capabilities
   H323CapabilityFactory::UnregisterAll();
 }
@@ -2519,7 +2521,9 @@ void H323PluginCodecManager::CreateCapabilityAndMediaFormat(
 
   unsigned defaultSessionID = 0;
   BOOL jitter = FALSE;
+#ifdef H323_VIDEO
   BOOL extended = FALSE;
+#endif
   unsigned frameTime = 0;
   unsigned timeUnits = 0;
   switch (encoderCodec->flags & PluginCodec_MediaTypeMask) {
@@ -2679,9 +2683,11 @@ void H323PluginCodecManager::CreateCapabilityAndMediaFormat(
         // manually register the new singleton type, as we do not have a concrete type
         if (cap != NULL){
           H323CapabilityFactory::Register(CreateCodecName(encoderCodec, TRUE), cap);
+#ifdef H323_VIDEO
 #ifdef H323_H239
              if (extended)
                 H323ExtendedVideoFactory::Register(CreateCodecName(encoderCodec, FALSE), (H323VideoCapability *)cap);
+#endif
 #endif
         }
         break;

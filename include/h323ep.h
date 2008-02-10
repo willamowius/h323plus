@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2008/01/04 06:23:07  shorne
+ * Cleaner setup and teardown of h460 module
+ *
  * Revision 1.8  2008/01/02 17:50:57  shorne
  * Fix for memory leak in H.460 module
  *
@@ -1995,8 +1998,6 @@ class H323EndPoint : public PObject
      */
     BOOL CanAutoStartTransmitVideo() const { return autoStartTransmitVideo; }
 
-#endif  // H323_VIDEO
-
 #ifdef H323_H239
     /**See if should auto-start receive extended Video channels on connection.
      */
@@ -2006,7 +2007,8 @@ class H323EndPoint : public PObject
      */
     BOOL CanAutoStartTransmitExtVideo() const { return autoStartTransmitExtVideo; }
 
-#endif
+#endif  // H323_H239
+#endif  // H323_VIDEO
 
 #ifdef H323_T38
 
