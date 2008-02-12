@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2008/01/01 00:16:12  shorne
+ * Added GnuGknat and FileTransfer support
+ *
  *
  *
  */
@@ -152,9 +155,9 @@ BOOL H323FileTransferCapability::OnReceivedPDU(const H245_GenericCapability & pd
    for (PINDEX j=0; j<params.GetSize(); j++) {
 	 const H245_GenericParameter & content = params[j];
 	 if (content.m_parameterIdentifier.GetTag() == H245_ParameterIdentifier::e_standard) {
-       const PASN_Integer & id = (PASN_Integer &)content.m_parameterIdentifier;
+       const PASN_Integer & id = (const PASN_Integer &)content.m_parameterIdentifier;
         if (content.m_parameterValue.GetTag() == H245_ParameterValue::e_booleanArray) {
-		  const PASN_Integer & val = (PASN_Integer &)content.m_parameterValue;
+		  const PASN_Integer & val = (const PASN_Integer &)content.m_parameterValue;
 		     if (id == 1) {
 			   m_blockSize = val;
 			   m_blockOctets = GetParameterBlockSize(m_blockSize);
@@ -296,10 +299,10 @@ BOOL H323FileTransferChannel::Start()
      fileHandler->SetPayloadType(rtpPayloadType);
 	  if (fileHandler->GetBlockSize() == 0)
          fileHandler->SetBlockSize((H323FileTransferCapability::blockSizes)
-		                             ((const H323FileTransferCapability &)capability).GetOctetSize());
+		                             ((H323FileTransferCapability *)capability)->GetOctetSize());
 	  if (fileHandler->GetBlockRate() == 0)
          fileHandler->SetMaxBlockRate((H323FileTransferCapability::blockSizes)
-		                               ((const H323FileTransferCapability &)capability).GetBlockRate());
+		                               ((H323FileTransferCapability *)capability)->GetBlockRate());
 	}
   }
 
@@ -1337,7 +1340,7 @@ int H323FilePacket::GetACKBlockNo()
 H323FilePacket::opcodes H323FilePacket::GetPacketType()
 {
    PString val = (const char *)(const BYTE *)theArray[1];
-   return (opcodes)val.AsInteger();
+   return (opcodes)((short)val.AsInteger());
 }
 
 ////////////////////////////////////////////////////////////////////
