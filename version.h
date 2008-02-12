@@ -42,7 +42,7 @@
 #define MAJOR_VERSION 1
 #define MINOR_VERSION 20
 #define BUILD_TYPE    AlphaCode
-#define BUILD_NUMBER 1
+#define BUILD_NUMBER 2
 
 
 #endif  // _OpenH323_VERSION_H
