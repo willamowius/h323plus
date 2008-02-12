@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.13  2008/02/10 23:11:33  shorne
+ * Fix to compile H323plus without Video
+ *
  * Revision 1.12  2007/11/28 06:03:37  shorne
  * Video capability merge. Thx again Jan Willamowius
  *
@@ -1482,8 +1485,8 @@ class H323PluginVideoCodec : public H323VideoCodec
     unsigned GetMaxBitRate() const
     { return mediaFormat.GetOptionInteger(OpalVideoFormat::MaxBitRateOption); }
 
-    void SetMaxBitRate(int bitRate) 
-    { SetCodecControl(codec, context, SET_CODEC_OPTIONS_CONTROL, "Max Bit Rate", bitRate); }
+    BOOL SetMaxBitRate(unsigned bitRate) 
+    { return SetCodecControl(codec, context, SET_CODEC_OPTIONS_CONTROL, "Max Bit Rate", bitRate); }
 
     void SetGeneralCodecOption(const char * opt, int val)
     { SetCodecControl(codec, context, SET_CODEC_OPTIONS_CONTROL, opt, val);}
