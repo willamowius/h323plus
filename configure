@@ -867,7 +867,7 @@ Optional Features:
   --disable-t38           disable T.38
   --disable-t120          disable T.120
   --disable-gnugk         disable GNUGKnat
-  --disable-gnugk         disable FileTransfer
+  --disable-file          disable FileTransfer
 
 Some influential environment variables:
   CXX         C++ compiler command
