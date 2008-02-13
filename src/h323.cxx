@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.16  2008/02/10 23:11:33  shorne
+ * Fix to compile H323plus without Video
+ *
  * Revision 1.15  2008/02/06 02:52:59  shorne
  * Added support for Standards based NAT Traversal
  *
@@ -2967,8 +2970,11 @@ BOOL H323Connection::StartControlNegotiations(BOOL renegotiate)
 
 BOOL H323Connection::OnStartHandleControlChannel()
 {
-  PTRACE(2, "H245\tStarted control channel");
-  return StartHandleControlChannel();
+  if (controlChannel != NULL) {
+     PTRACE(2, "H245\tHandle control channel");
+     return StartHandleControlChannel();
+  } else 
+     return StartControlNegotiations();
 }
 
 BOOL H323Connection::StartHandleControlChannel()
