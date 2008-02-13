@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.9  2008/01/02 18:48:37  willamowius
+# add file transfer files
+#
 # Revision 1.8  2008/01/01 00:16:12  shorne
 # Added GnuGknat and FileTransfer support
 #
@@ -329,7 +332,10 @@ include $(PWLIBDIR)/make/common.mak
 
 # make sure pwlib is in the list of external libraries
 # this ensures pwlib is not statically linked
-LDFLAGS        += -L$(PW_LIBDIR)
+ifndef PT_LIBDIR
+PT_LIBDIR=$(PW_LIBDIR)
+endif
+LDFLAGS        += -L$(PT_LIBDIR)
 SYSLIBS        += -l$(PTLIB_BASE)$(LIB_TYPE)
 
 LIB_BASENAME=$(OH323_BASE)
