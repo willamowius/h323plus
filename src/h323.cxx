@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.17  2008/02/13 09:26:48  shorne
+ * Fix Bug for Fast Start from last commit
+ *
  * Revision 1.16  2008/02/10 23:11:33  shorne
  * Fix to compile H323plus without Video
  *
@@ -4068,9 +4071,8 @@ void H323Connection::SelectDefaultLogicalChannel(unsigned sessionID)
 BOOL H323Connection::MergeCapabilities(unsigned sessionID, const H323Capability & local, H323Capability * remote)
 {
 
-	// Only the Video and Extended Video Capabilities require merging
-	if ((sessionID != RTP_Session::DefaultVideoSessionID) &&
-		(sessionID != RTP_Session::DefaultExtVideoSessionID))
+	// Only the Video Capabilities require merging
+	if (sessionID != RTP_Session::DefaultVideoSessionID)
 			return FALSE;
 #if H323_VIDEO
    OpalVideoFormat & remoteFormat = (OpalVideoFormat &)(remote->GetWritableMediaFormat());
