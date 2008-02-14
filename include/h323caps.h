@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2007/11/14 08:55:22  shorne
+ * Added ability to set DSCP values for audio/video
+ *
  * Revision 1.7  2007/11/06 17:43:36  shorne
  * added i480 standard framesize
  *
@@ -433,6 +436,15 @@ class H323Capability : public PObject
 	 virtual BOOL SetMaxFrameSize(
 		   CapabilityFrameSize /*framesize*/, 
 		   int /*frameUnits*/) 
+	 { return FALSE; };
+
+     /**Set the MPI value.
+         This is used to set the individual MPI values for a capability.
+     */
+	 virtual BOOL SetMPIValue(
+		   const PString & /*param*/, 
+		   int /*value*/, 
+		   BOOL /*zero*/ ) 
 	 { return FALSE; };
 
     /**Create the channel instance, allocating resources as required.
