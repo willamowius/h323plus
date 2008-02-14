@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.15  2008/01/30 02:09:38  shorne
+ * Fixes for removing and reloading extended Video Capability
+ *
  * Revision 1.14  2007/12/07 07:33:22  shorne
  * Settled on codecs greater than CIF to be generic
  *
@@ -2868,8 +2871,8 @@ H323Capabilities::H323Capabilities(const H323Connection & connection,
   const H323Capabilities & localCapabilities = connection.GetLocalCapabilities();
   for (PINDEX c = 0; c < localCapabilities.GetSize(); c++)
     allCapabilities.Add(allCapabilities.Copy(localCapabilities[c]));
-  allCapabilities.AddAllCapabilities(0, 0, "*");
-  H323_UserInputCapability::AddAllCapabilities(allCapabilities, P_MAX_INDEX, P_MAX_INDEX);
+//  allCapabilities.AddAllCapabilities(0, 0, "*");
+//  H323_UserInputCapability::AddAllCapabilities(allCapabilities, P_MAX_INDEX, P_MAX_INDEX);
 
   // Decode out of the PDU, the list of known codecs.
   if (pdu.HasOptionalField(H245_TerminalCapabilitySet::e_capabilityTable)) {
