@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.14  2008/02/12 07:59:31  shorne
+ * fix for the correct SetMaxBitRate being called
+ *
  * Revision 1.13  2008/02/10 23:11:33  shorne
  * Fix to compile H323plus without Video
  *
@@ -2143,23 +2146,44 @@ class H323VideoPluginCapability : public H323VideoCapability,
      virtual BOOL SetMaxFrameSize(CapabilityFrameSize framesize, int frameunits = 1)
      {
          PString param;
+		 int w; int h;
          switch (framesize) {
-             case sqcifMPI : param = sqcifMPI_tag; break;
-             case  qcifMPI : param = qcifMPI_tag; break;
-             case   cifMPI : param = cifMPI_tag; break;
-             case  cif4MPI : param = cif4MPI_tag; break;
-             case cif16MPI : param = cif16MPI_tag; break;
-			 case  i480MPI : param = cif4MPI_tag; break;
-             case  p720MPI : param = cif16MPI_tag; break;
-             case i1080MPI : param = i1080MPI_tag; break;
+             case sqcifMPI : param = sqcifMPI_tag; w = SQCIF_WIDTH; h = SQCIF_HEIGHT;
+				 break;
+             case  qcifMPI : param = qcifMPI_tag; w = QCIF_WIDTH; h = QCIF_HEIGHT;
+				 break;
+             case   cifMPI : param = cifMPI_tag; w = CIF_WIDTH; h = CIF_HEIGHT;
+				 break;
+             case  cif4MPI : param = cif4MPI_tag; w = CIF4_WIDTH; h = CIF4_HEIGHT;
+				 break;
+             case cif16MPI : param = cif16MPI_tag; w = CIF16_WIDTH; h = CIF16_HEIGHT;
+				 break;
+			 case  i480MPI : param = cif4MPI_tag; w = CIF4_WIDTH; h = CIF4_HEIGHT; 
+				 break;
+             case  p720MPI : param = cif16MPI_tag; w = CIF16_WIDTH; h = CIF16_HEIGHT;
+				 break;
              default: return FALSE;
          }
 
-         SetCodecControl(encoderCodec, NULL, SET_CODEC_OPTIONS_CONTROL, param, frameunits);
-         SetCodecControl(decoderCodec, NULL, SET_CODEC_OPTIONS_CONTROL, param, frameunits);
-         PopulateMediaFormatOptions(encoderCodec,GetWritableMediaFormat());
-         return TRUE;
+		 OpalMediaFormat & fmt = GetWritableMediaFormat();
+		 fmt.SetOptionInteger(OpalVideoFormat::FrameWidthOption,w); 
+         fmt.SetOptionInteger(OpalVideoFormat::FrameHeightOption,h); 
+         return SetMPIValue(param, frameunits,1);
      }
+
+	 virtual BOOL SetMPIValue(const PString & param, int value, BOOL zero = FALSE) {
+		 OpalMediaFormat & fmt = GetWritableMediaFormat();
+		   // Zero out the existing options
+		 if (zero) {
+			if (fmt.GetOptionInteger(sqcifMPI_tag) > 0) fmt.SetOptionInteger(sqcifMPI_tag,0);
+			if (fmt.GetOptionInteger(qcifMPI_tag) > 0) fmt.SetOptionInteger(qcifMPI_tag,0);
+			if (fmt.GetOptionInteger(cifMPI_tag) > 0) fmt.SetOptionInteger(cifMPI_tag,0);
+			if (fmt.GetOptionInteger(cif4MPI_tag) > 0) fmt.SetOptionInteger(cif4MPI_tag,0);
+			if (fmt.GetOptionInteger(cif16MPI_tag) > 0) fmt.SetOptionInteger(cif16MPI_tag,0);
+		}
+           // Set the desired option
+		return fmt.SetOptionInteger(param,value);
+	 }
    
     virtual H323Codec * CreateCodec(H323Codec::Direction direction) const
     { return H323PluginCapabilityInfo::CreateCodec(GetMediaFormat(), direction); }
