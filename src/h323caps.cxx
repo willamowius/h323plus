@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.16  2008/02/14 07:00:19  shorne
+ * commented out reloading all capabilities on media exchange
+ *
  * Revision 1.15  2008/01/30 02:09:38  shorne
  * Fixes for removing and reloading extended Video Capability
  *
@@ -2022,10 +2025,17 @@ BOOL H323CodecExtendedVideoCapability::OnReceivedPDU(const H245_Capability & cap
 {
   H323Capability::OnReceivedPDU(cap);
 
+  if (extCapabilities.GetSize() == 0)
+		return FALSE;
+
   if (cap.GetTag()!= H245_Capability::e_transmitVideoCapability)
     return FALSE;
 
-  return OnReceivedPDU((const H245_VideoCapability &)cap);
+  const H245_VideoCapability & vidcap = (const H245_VideoCapability &)cap;
+  if (vidcap.GetTag() != H245_VideoCapability::e_extendedVideoCapability)
+	  return FALSE;
+
+  return OnReceivedPDU(vidcap);
 } 
 
 BOOL H323CodecExtendedVideoCapability::OnSendingPDU(H245_VideoCapability & pdu) const 
