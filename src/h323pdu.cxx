@@ -27,6 +27,10 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2007/10/19 19:54:17  shorne
+ * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
+ *  Robert
+ *
  * Revision 1.3  2007/10/16 17:05:38  shorne
  * Allow cryptoTokens to be insert in the setup after receiving ARQ
  *
@@ -670,7 +674,7 @@ void H323SetAliasAddresses(const PStringList & names,
 
 static BOOL IsE164(const PString & str)
 {
-  return !str && strspn(str, "1234567890*#") == strlen(str);
+  return !str && strspn(str, "1234567890*#,") == strlen(str);
 }
 
 static BOOL IsURL(const PString & str)
