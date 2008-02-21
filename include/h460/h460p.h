@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2008/01/29 04:38:12  shorne
+ * completed Initial implementation
+ *
  *
  *
  */
@@ -87,14 +90,14 @@ public:
 
 // Build Messages
      H460P_PresenceStatus & BuildStatus(H460P_PresenceMessage & msg, 
-									const H323PresenceNotifications & not,
+									const H323PresenceNotifications & notify,
 									const H323PresenceInstructions & inst);
      H460P_PresenceInstruct & BuildInstruct(H460P_PresenceMessage & msg, 
 									const H323PresenceInstructions & inst);
      H460P_PresenceAuthorize & BuildAuthorize(H460P_PresenceMessage & msg, 
 									const H323PresenceSubscriptions & subs);
      H460P_PresenceNotify & BuildNotify(H460P_PresenceMessage & msg, 
-									const H323PresenceNotifications & not);
+									const H323PresenceNotifications & notify);
      H460P_PresenceRequest & BuildRequest(H460P_PresenceMessage & msg, 
 									const H323PresenceSubscriptions & subs);
      H460P_PresenceResponse & BuildResponse(H460P_PresenceMessage & msg, 
@@ -104,7 +107,7 @@ public:
      H460P_PresenceRemove & BuildRemove(H460P_PresenceMessage & msg, 
 									const H323PresenceIdentifiers & id);
      H460P_PresenceAlert & BuildAlert(H460P_PresenceMessage & msg, 
-									const H323PresenceNotifications & not);
+									const H323PresenceNotifications & notify);
 };
 
 
@@ -143,7 +146,7 @@ class H323PresenceNotifications : public H460P_ArrayOf_PresenceNotification
 {
 
   public:
-     void Add(const H323PresenceNotification & not);
+     void Add(const H323PresenceNotification & notify);
 };
 
 class H323PresenceSubscription : public H460P_PresenceSubscription

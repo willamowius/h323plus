@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/01/30 02:53:42  shorne
+ * code format tidy up
+ *
  * Revision 1.1  2008/01/29 04:38:13  shorne
  * completed Initial implementation
  *
@@ -110,6 +113,7 @@ class H323PresenceBase
 {
  public: 
 	H323PresenceBase(H323PresenceMessage *m);
+	virtual ~H323PresenceBase() {};
 
 	bool Process();
 
@@ -368,12 +372,12 @@ class H323PresenceMsg  : public H460P_PresenceMessage
 
 
 H460P_PresenceStatus &  H323PresenceHandler::BuildStatus(H460P_PresenceMessage & msg, 
-						const H323PresenceNotifications & not,
+						const H323PresenceNotifications & notify,
 						const H323PresenceInstructions & inst)
 {
 	H323PresenceMsg<H460P_PresenceStatus> m;
 	H460P_PresenceStatus & pdu = m.Build(H460P_PresenceMessage::e_presenceStatus);
-	pdu.m_notification = not;
+	pdu.m_notification = notify;
 
 	if (inst.GetSize() > 0) {
 		pdu.IncludeOptionalField(H460P_PresenceStatus::e_instruction);
@@ -404,11 +408,11 @@ H460P_PresenceAuthorize &  H323PresenceHandler::BuildAuthorize(H460P_PresenceMes
 	return msg;
 }
 
-H460P_PresenceNotify &  H323PresenceHandler::BuildNotify(H460P_PresenceMessage & msg, const H323PresenceNotifications & not)
+H460P_PresenceNotify &  H323PresenceHandler::BuildNotify(H460P_PresenceMessage & msg, const H323PresenceNotifications & notify)
 {
 	H323PresenceMsg<H460P_PresenceNotify> m;
 	H460P_PresenceNotify & pdu = m.Build(H460P_PresenceMessage::e_presenceNotify);
-	pdu.m_notification = not;
+	pdu.m_notification = notify;
 
 	msg = *(H460P_PresenceMessage *)m.Clone();
 	return msg;
@@ -454,11 +458,11 @@ H460P_PresenceRemove & H323PresenceHandler::BuildRemove(H460P_PresenceMessage & 
 	return msg;
 }
      
-H460P_PresenceAlert &  H323PresenceHandler::BuildAlert(H460P_PresenceMessage & msg, const H323PresenceNotifications & not)
+H460P_PresenceAlert &  H323PresenceHandler::BuildAlert(H460P_PresenceMessage & msg, const H323PresenceNotifications & notify)
 {
 	H323PresenceMsg<H460P_PresenceAlert> m;
 	H460P_PresenceAlert & pdu = m.Build(H460P_PresenceMessage::e_presenceAlert);
-	pdu.m_notification = not;
+	pdu.m_notification = notify;
 
 	msg = *(H460P_PresenceMessage *)m.Clone();
 	return msg;
@@ -612,11 +616,11 @@ OpalGloballyUniqueID H323PresenceIdentifiers::GetIdentifier(PINDEX i)
 
 ////////////////////////////////////////////////////////////////////////
 
-void H323PresenceNotifications::Add(const H323PresenceNotification & not)
+void H323PresenceNotifications::Add(const H323PresenceNotification & notify)
 {
-	int size = GetSize();
-	SetSize(size+1);
-	array.SetAt(size, not.Clone());
+	int addsize = GetSize();
+	SetSize(addsize+1);
+	array.SetAt(addsize, notify.Clone());
 }
 
 
