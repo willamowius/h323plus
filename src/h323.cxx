@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.18  2008/02/14 07:02:10  shorne
+ * Fixed small bug with what capability gets merged.
+ *
  * Revision 1.17  2008/02/13 09:26:48  shorne
  * Fix Bug for Fast Start from last commit
  *
@@ -2336,11 +2339,15 @@ void H323Connection::AnsweringCall(AnswerCallResponse response)
     case AnswerCallNow :
       if (connectPDU != NULL) {
         H225_Connect_UUIE & connect = connectPDU->m_h323_uu_pdu.m_h323_message_body;
-        // Now ask the application to select which channels to start
-        if (SendFastStartAcknowledge(connect.m_fastStart))
-          connect.IncludeOptionalField(H225_Connect_UUIE::e_fastStart);
-        else
-          connect.IncludeOptionalField(H225_Connect_UUIE::e_fastConnectRefused);
+
+		// If we have not already negotiated Fast Connect (early media)
+		if (fastStartState != FastStartAcknowledged) {
+		  // Now ask the application to select which channels to start
+		  if (SendFastStartAcknowledge(connect.m_fastStart))
+			connect.IncludeOptionalField(H225_Connect_UUIE::e_fastStart);
+		  else
+			connect.IncludeOptionalField(H225_Connect_UUIE::e_fastConnectRefused);
+		}
 
         // See if aborted call
         if (connectionState == ShuttingDownConnection)
