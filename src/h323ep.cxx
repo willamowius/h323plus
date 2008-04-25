@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.15  2008/02/10 23:11:33  shorne
+ * Fix to compile H323plus without Video
+ *
  * Revision 1.14  2008/02/01 09:34:20  shorne
  * Cleaner shutdown of GnuGk NAT support
  *
@@ -1298,7 +1301,7 @@ H323EndPoint::~H323EndPoint()
   // And shut down the gatekeeper (if there was one)
   RemoveGatekeeper();
 
-#if H323_FILE
+#if H323_GNUGK
   delete gnugk;
 #endif
 
@@ -3234,8 +3237,13 @@ BOOL H323EndPoint::OnSendCallIndependentSupplementaryService(const H323Connectio
 }
 
 BOOL H323EndPoint::OnReceiveCallIndependentSupplementaryService(const H323Connection * /*connection*/, 
-														        const H323SignalPDU & /* pdu */)
+														        const H323SignalPDU & pdu)
 {
+#ifdef H323_H450
+  if (pdu.m_h323_uu_pdu.HasOptionalField(H225_H323_UU_PDU::e_h4501SupplementaryService)) {
+      return TRUE;
+  }
+#endif
   return FALSE;
 }
 
@@ -3722,6 +3730,11 @@ void H323EndPoint::LoadBaseFeatureSet()
   features.LoadFeatureSet(H460_Feature::FeatureBase);
 #endif
 
+}
+
+BOOL H323EndPoint::OnFeatureInstance(int instType, const PString & identifer)
+{
+	return TRUE;
 }
 
 BOOL H323EndPoint::HandleUnsolicitedInformation(const H323SignalPDU & )

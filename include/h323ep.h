@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2008/02/10 23:11:33  shorne
+ * Fix to compile H323plus without Video
+ *
  * Revision 1.9  2008/01/04 06:23:07  shorne
  * Cleaner setup and teardown of h460 module
  *
@@ -2101,6 +2104,8 @@ class H323EndPoint : public PObject
      */
     void SetInitialBandwidth(unsigned bandwidth) { initialBandwidth = bandwidth; }
 
+	virtual void OnSetInitialBandwidth(H323VideoCodec * codec) {};
+
     /**Called when an outgoing PDU requires a feature set
      */
     virtual BOOL OnSendFeatureSet(unsigned, H225_FeatureSet &);
@@ -2113,6 +2118,12 @@ class H323EndPoint : public PObject
 	   registering with a gatekeeper.
 	  */
 	virtual void LoadBaseFeatureSet();
+
+	/**Callback when creating Feature Instance. This can be used to disable features on
+	   a case by case basis by returning FALSE
+	   Default returns TRUE
+      */
+	virtual BOOL OnFeatureInstance(int instType, const PString & identifer);
 
     /**Handle Unsolicited Information PDU received on the signal listening socket not
        associated with a connection.
