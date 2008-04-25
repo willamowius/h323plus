@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2008/02/06 13:19:13  shorne
+ * Critical Bug Fix: Stop Assert on unhandled mediaOptions
+ *
  * Revision 1.3  2007/10/19 19:53:44  shorne
  * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
  *  Robert
@@ -524,6 +527,10 @@ class OpalMediaFormat : public PCaselessString
     /**Get the average bandwidth used in bits/second.
       */
     unsigned GetBandwidth() const { return bandwidth; }
+
+    /**Get the average bandwidth used in bits/second.
+      */
+    void SetBandwidth(unsigned newbandwidth) { bandwidth = newbandwidth; }
 
     /**Get the maximum frame size in bytes. If this returns zero then the
        media format has no intrinsic maximum frame size, eg G.711 would 
