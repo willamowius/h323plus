@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.15  2008/02/14 07:02:29  shorne
+ * Fixed setting MaxFrameSize for non fixed size codecs
+ *
  * Revision 1.14  2008/02/12 07:59:31  shorne
  * fix for the correct SetMaxBitRate being called
  *
@@ -1871,7 +1874,10 @@ class H323AudioPluginCapability : public H323AudioCapability,
       : H323AudioCapability(_decoderCodec->parm.audio.maxFramesPerPacket, _encoderCodec->parm.audio.recommendedFramesPerPacket), 
         H323PluginCapabilityInfo(_encoderCodec, _decoderCodec),
         pluginSubType(_pluginSubType)
-      { }
+      { 
+		  rtpPayloadType = (RTP_DataFrame::PayloadTypes)(((_encoderCodec->flags & PluginCodec_RTPTypeMask) == PluginCodec_RTPTypeDynamic) ? 
+																					RTP_DataFrame::DynamicBase : _encoderCodec->rtpPayload);
+      }
 
     // this constructor is only used when creating a capability without a codec
     H323AudioPluginCapability(const PString & _mediaFormat, const PString & _baseName,
@@ -2982,6 +2988,8 @@ H323CodecPluginNonStandardAudioCapability::H323CodecPluginNonStandardAudioCapabi
     t35Extension     = nonStdData->t35Extension;
     manufacturerCode = nonStdData->manufacturerCode;
   }
+    rtpPayloadType = (RTP_DataFrame::PayloadTypes)(((_encoderCodec->flags & PluginCodec_RTPTypeMask) == PluginCodec_RTPTypeDynamic) ? 
+																			  RTP_DataFrame::DynamicBase : _encoderCodec->rtpPayload);
 }
 
 /////////////////////////////////////////////////////////////////////////////
