@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2007/11/14 18:48:44  willamowius
+ * avoid comparing a uninitialized variable
+ *
  * Revision 1.3  2007/11/10 13:33:51  shorne
  * Fix reference to the correct AEC library based on the type of build
  *
@@ -746,6 +749,9 @@ BOOL H323VideoCodec::SetMaxBitRate(unsigned bitRate)
 
   if (0 == bitRateHighLimit) // disable bitrate control
     videoBitRateControlModes &= ~AdaptivePacketDelay;
+
+  // Set the maximum bit rate for capability exchange
+  GetWritableMediaFormat().SetBandwidth(bitRate);
   return TRUE;
 }
 
