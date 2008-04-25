@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/01/02 17:50:59  shorne
+ * Fix for memory leak in H.460 module
+ *
  * Revision 1.2  2007/10/30 09:38:48  shorne
  * Better Linux interoperability and fix for small memory leak
  *
@@ -1075,7 +1078,10 @@ BOOL H460_FeatureSet::LoadFeatureSet(int inst, H323Connection * con)
   PStringList features = H460_Feature::GetFeatureNames();
 
       for (PINDEX i = 0; i < features.GetSize(); i++) {
-
+  	    if ((ep) && (!ep->OnFeatureInstance(inst,features[i]))) {
+			PTRACE(4,"H460\tFeature " << features[i] << " disabled due to policy.");
+			continue;
+		} 
         H460_FeatureID id;
         H460_Feature * feat = NULL;
         if (baseSet && baseSet->HasFeature(features[i])) {
