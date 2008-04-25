@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.19  2008/03/31 11:23:06  shorne
+ * Fix for Fast Connect and Early Media
+ *
  * Revision 1.18  2008/02/14 07:02:10  shorne
  * Fixed small bug with what capability gets merged.
  *
@@ -4546,6 +4549,10 @@ unsigned H323Connection::GetBandwidthUsed() const
   return used;
 }
 
+void H323Connection::OnSetInitialBandwidth(H323VideoCodec * codec)
+{
+	endpoint.OnSetInitialBandwidth(codec);
+}
 
 BOOL H323Connection::UseBandwidth(unsigned bandwidth, BOOL removing)
 {

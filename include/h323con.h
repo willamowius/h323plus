@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.13  2008/02/06 02:52:58  shorne
+ * Added support for Standards based NAT Traversal
+ *
  * Revision 1.12  2008/01/30 18:51:35  shorne
  * fix for duplicate h224handler definition
  *
@@ -2098,6 +2101,8 @@ class H323Connection : public PObject
       unsigned bandwidth,     ///< Bandwidth required
       BOOL removing           ///< Flag for adding/removing bandwidth usage
     );
+
+	void OnSetInitialBandwidth(H323VideoCodec * codec);
 
     /**Get the available bandwidth in 100's of bits/sec.
       */
