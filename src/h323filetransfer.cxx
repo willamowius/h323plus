@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/02/12 05:47:42  shorne
+ * Fix compiling on older GCC versions
+ *
  * Revision 1.1  2008/01/01 00:16:12  shorne
  * Added GnuGknat and FileTransfer support
  *
@@ -55,7 +58,7 @@
 #include <h323pdu.h>
 
 
-static const char * FileTransferOID = "1.3.6.1.4.1.17090.0.3";
+static const char * FileTransferOID = "1.3.6.1.4.1.17090.3.1";
 
 static struct  {
    int blocksize;
