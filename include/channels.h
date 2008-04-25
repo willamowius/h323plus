@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:48  shorne
+ * First commit of h323plus
+ *
  * Revision 1.42.4.1  2007/05/23 06:58:01  shorne
  * Nat Support for EP's nested behind same NAT
  *
@@ -950,6 +953,47 @@ class H323_ExternalRTPChannel : public H323_RealTimeChannel
     virtual BOOL OnReceivedAckPDU(
       const H245_H2250LogicalChannelAckParameters & param ///< Acknowledgement PDU
     );
+
+	/**Sending alternate RTP ports if behind same NAT
+	  */
+	virtual BOOL OnSendingAltPDU(
+	  H245_ArrayOf_GenericInformation & /*alternate*/  ///< Alternate RTP ports
+	  ) const  {  return FALSE;  }
+
+	/**This is called if the call parties are detected behind the same NAT
+	   Use this to set alternate internal LAN ports
+	  */
+	virtual void OnSendOpenAckAlt(
+	  H245_ArrayOf_GenericInformation & /*alternate*/  ///< Alternate RTP ports
+	) const {}
+
+	/**Alternate RTP port information for Same NAT
+	  */
+	virtual BOOL OnReceivedAltPDU(
+	  const H245_ArrayOf_GenericInformation & /*alternate*/  ///< Alternate RTP ports
+	)   { return FALSE;  }
+
+	/**Alternate RTP port information for Same NAT
+	  */
+	virtual BOOL OnReceivedAltPDU(
+	   H323_RTPChannel & /*channel*/,                                       ///< Channel using this session.
+	  const H245_ArrayOf_GenericInformation & /*alternate*/  ///< Alternate RTP ports
+	  )  { return FALSE;  }
+
+      /**This is called after a request to create a channel occurs from the
+       local machine via the H245LogicalChannelDict::Open() function, and
+       the request has been acknowledged by the remote endpoint.
+     */
+	virtual BOOL OnReceivedAckAltPDU(
+      H323_RTPChannel & /*channel*/,                                        ///< Channel using this session.
+	  const H245_ArrayOf_GenericInformation & /*alternate*/  ///< Alternate RTP ports
+	  )   { return FALSE; }
+
+	/**Alternate RTP port information for Same NAT
+	  */
+  	virtual BOOL OnReceivedAckAltPDU(
+	  const H245_ArrayOf_GenericInformation & /*alternate*/  ///< Alternate RTP ports
+	 )    { return FALSE; };
   //@}
 
     void SetExternalAddress(
