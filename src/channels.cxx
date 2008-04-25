@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/02/06 02:52:59  shorne
+ * Added support for Standards based NAT Traversal
+ *
  * Revision 1.1  2007/08/06 20:51:03  shorne
  * First commit of h323plus
  *
@@ -798,6 +801,10 @@ BOOL H323Channel::SetInitialBandwidth()
 {
   if (GetCodec() == NULL)
     return TRUE;
+
+  if ((GetDirection() == H323Channel::IsTransmitter) && 
+	  (GetSessionID() == OpalMediaFormat::DefaultVideoSessionID))
+			connection.OnSetInitialBandwidth((H323VideoCodec *)codec);
 
   return SetBandwidthUsed(codec->GetMediaFormat().GetBandwidth()/100);
 }
