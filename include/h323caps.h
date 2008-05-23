@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2008/02/14 06:58:51  shorne
+ * Added H323Capability::SetMPIValue
+ *
  * Revision 1.8  2007/11/14 08:55:22  shorne
  * Added ability to set DSCP values for audio/video
  *
@@ -433,7 +436,7 @@ class H323Capability : public PObject
 	   This is used for set Capabilities to only utilise the specified Max FrameSizes.
        The default behaviour returns False.
      */
-	 virtual BOOL SetMaxFrameSize(
+	 virtual PBoolean SetMaxFrameSize(
 		   CapabilityFrameSize /*framesize*/, 
 		   int /*frameUnits*/) 
 	 { return FALSE; };
@@ -441,10 +444,10 @@ class H323Capability : public PObject
      /**Set the MPI value.
          This is used to set the individual MPI values for a capability.
      */
-	 virtual BOOL SetMPIValue(
+	 virtual PBoolean SetMPIValue(
 		   const PString & /*param*/, 
 		   int /*value*/, 
-		   BOOL /*zero*/ ) 
+		   PBoolean /*zero*/ ) 
 	 { return FALSE; };
 
     /**Create the channel instance, allocating resources as required.
@@ -482,7 +485,7 @@ class H323Capability : public PObject
 
        The default behaviour is pure.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_Capability & pdu  ///< PDU to set information on
     ) const = 0;
 
@@ -493,7 +496,7 @@ class H323Capability : public PObject
 
        The default behaviour is pure.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_DataType & pdu  ///< PDU to set information on
     ) const = 0;
 
@@ -504,7 +507,7 @@ class H323Capability : public PObject
 
        The default behaviour is pure.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_ModeElement & pdu  ///< PDU to set information on
     ) const = 0;
 
@@ -520,7 +523,7 @@ class H323Capability : public PObject
          from the PDU and then returns TRUE. Note that this means it is very
          important to call the ancestor function when overriding.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_Capability & pdu ///< PDU to get information from
     );
 
@@ -531,14 +534,14 @@ class H323Capability : public PObject
 
        The default behaviour is pure.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_DataType & pdu,  ///< PDU to get information from
-      BOOL receiver               ///< Is receiver OLC
+      PBoolean receiver               ///< Is receiver OLC
     ) = 0;
 
     /**Compare the PDU part of the capability.
       */
-    virtual BOOL IsMatch(
+    virtual PBoolean IsMatch(
       const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
     ) const;
 
@@ -549,7 +552,7 @@ class H323Capability : public PObject
 
        The default behaviour returns TRUE.
       */
-    virtual BOOL IsUsable(
+    virtual PBoolean IsUsable(
       const H323Connection & connection
     ) const;
   //@}
@@ -669,7 +672,7 @@ class H323NonStandardCapabilityInfo
 
        The default behaviour sets data to fixedData.
       */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       PBYTEArray & data  ///< Data field in PDU to send
     ) const;
 
@@ -677,18 +680,18 @@ class H323NonStandardCapabilityInfo
 
        The default behaviour returns TRUE if data is equal to fixedData.
       */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const PBYTEArray & data  ///< Data field in PDU received
     );
 
-    BOOL IsMatch(const H245_NonStandardParameter & param) const;
+    PBoolean IsMatch(const H245_NonStandardParameter & param) const;
 
   protected:
-    BOOL OnSendingNonStandardPDU(
+    PBoolean OnSendingNonStandardPDU(
       PASN_Choice & pdu,
       unsigned nonStandardTag
     ) const;
-    BOOL OnReceivedNonStandardPDU(
+    PBoolean OnReceivedNonStandardPDU(
       const PASN_Choice & pdu,
       unsigned nonStandardTag
     );
@@ -733,16 +736,16 @@ class H323GenericCapabilityInfo
     H323GenericCapabilityInfo(const H323GenericCapabilityInfo &obj);
     virtual ~H323GenericCapabilityInfo();
 
-    BOOL IsMatch(
+    PBoolean IsMatch(
       const H245_GenericCapability & param  ///< Non standard field in PDU received
     ) const;
   protected:
-    virtual BOOL OnSendingGenericPDU(
+    virtual PBoolean OnSendingGenericPDU(
       H245_GenericCapability & pdu,
       const OpalMediaFormat & mediaFormat,
       H323Capability::CommandType type
     ) const;
-    virtual BOOL OnReceivedGenericPDU(
+    virtual PBoolean OnReceivedGenericPDU(
       OpalMediaFormat & mediaFormat,
       const H245_GenericCapability & pdu,
       H323Capability::CommandType type
@@ -882,7 +885,7 @@ class H323AudioCapability : public H323RealTimeCapability
        The default behaviour calls the OnSendingPDU() function with a more
        specific PDU type.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_Capability & pdu  ///< PDU to set information on
     ) const;
 
@@ -894,7 +897,7 @@ class H323AudioCapability : public H323RealTimeCapability
        The default behaviour calls the OnSendingPDU() function with a more
        specific PDU type.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_DataType & pdu  ///< PDU to set information on
     ) const;
 
@@ -906,7 +909,7 @@ class H323AudioCapability : public H323RealTimeCapability
        The default behaviour calls the OnSendingPDU() function with a more
        specific PDU type.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_ModeElement & pdu  ///< PDU to set information on
     ) const;
 
@@ -918,11 +921,11 @@ class H323AudioCapability : public H323RealTimeCapability
        The default behaviour assumes the pdu is an integer number of frames
        per packet.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_AudioCapability & pdu,  ///< PDU to set information on
       unsigned packetSize          ///< Packet size to use in capability
     ) const;
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_AudioCapability & pdu,  ///<  PDU to set information on
       unsigned packetSize,         ///<  Packet size to use in capability
       CommandType type             ///<  Type of PDU to send in
@@ -936,7 +939,7 @@ class H323AudioCapability : public H323RealTimeCapability
        The default behaviour sets the PDUs tag according to the GetSubType()
        function (translated to different enum).
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_AudioMode & pdu  ///< PDU to set information on
     ) const;
 
@@ -951,7 +954,7 @@ class H323AudioCapability : public H323RealTimeCapability
        The default behaviour calls the OnReceivedPDU() that takes a
        H245_AudioCapability and clamps the txFramesInPacket.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_Capability & pdu  ///< PDU to get information from
     );
 
@@ -964,9 +967,9 @@ class H323AudioCapability : public H323RealTimeCapability
        H245_AudioCapability and clamps the txFramesInPacket or
        rxFramesInPacket.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_DataType & pdu,  ///< PDU to get information from
-      BOOL receiver               ///< Is receiver OLC
+      PBoolean receiver               ///< Is receiver OLC
     );
 
     /**This function is called whenever and incoming TerminalCapabilitySet
@@ -977,11 +980,11 @@ class H323AudioCapability : public H323RealTimeCapability
        The default behaviour assumes the pdu is an integer number of frames
        per packet.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_AudioCapability & pdu,  ///< PDU to get information from
       unsigned & packetSize              ///< Packet size to use in capability
     );
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_AudioCapability & pdu,  ///< PDU to get information from
       unsigned & packetSize,             ///< Packet size to use in capability
       CommandType type                   ///<  Type of PDU to send in
@@ -1103,7 +1106,7 @@ class H323NonStandardAudioCapability : public H323AudioCapability,
        The default behaviour calls H323NonStandardCapabilityinfo::OnSendingPDU()
        to handle the PDU.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_AudioCapability & pdu,  ///< PDU to set information on
       unsigned packetSize          ///< Packet size to use in capability
     ) const;
@@ -1116,7 +1119,7 @@ class H323NonStandardAudioCapability : public H323AudioCapability,
        The default behaviour calls H323NonStandardCapabilityinfo::OnSendingPDU()
        to handle the PDU.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_AudioMode & pdu  ///< PDU to set information on
     ) const;
 
@@ -1128,14 +1131,14 @@ class H323NonStandardAudioCapability : public H323AudioCapability,
        The default behaviour calls H323NonStandardCapabilityinfo::OnReceivedPDU()
        to handle the provided PDU.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_AudioCapability & pdu,  ///< PDU to get information from
       unsigned & packetSize              ///< Packet size to use in capability
     );
 
     /**Compare the nonStandardData part of the capability, if applicable.
       */
-    virtual BOOL IsMatch(
+    virtual PBoolean IsMatch(
       const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
     ) const;
   //@}
@@ -1195,7 +1198,7 @@ class H323GenericAudioCapability : public H323AudioCapability,
        The default behaviour calls H323GenericCapabilityinfo::OnSendingPDU()
        to handle the PDU.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_AudioCapability & pdu,  ///< PDU to set information on
       unsigned packetSize,         ///<  Packet size to use in capability
       CommandType type             ///<  Type of PDU to send in
@@ -1209,7 +1212,7 @@ class H323GenericAudioCapability : public H323AudioCapability,
        The default behaviour sets the PDUs tag according to the GetSubType()
        function (translated to different enum).
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_AudioMode & pdu  ///<  PDU to set information on
     ) const;
 
@@ -1221,7 +1224,7 @@ class H323GenericAudioCapability : public H323AudioCapability,
        The default behaviour calls H323GenericCapabilityinfo::OnReceivedPDU()
        to handle the provided PDU.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_AudioCapability & pdu,  ///< PDU to get information from
       unsigned & packetSize,             ///< Packet size to use in capability
       CommandType type                   ///<  Type of PDU to send in
@@ -1229,7 +1232,7 @@ class H323GenericAudioCapability : public H323AudioCapability,
 
     /**Compare the generic part of the capability, if applicable.
      */
-    virtual BOOL IsMatch(
+    virtual PBoolean IsMatch(
       const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
     ) const;
   //@}
@@ -1296,7 +1299,7 @@ class H323VideoCapability : public H323RealTimeCapability
        The default behaviour calls the OnSendingPDU() function with a more
        specific PDU type.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_Capability & pdu  ///< PDU to set information on
     ) const;
 
@@ -1308,7 +1311,7 @@ class H323VideoCapability : public H323RealTimeCapability
        The default behaviour calls the OnSendingPDU() function with a more
        specific PDU type.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_DataType & pdu  ///< PDU to set information on
     ) const;
 
@@ -1320,7 +1323,7 @@ class H323VideoCapability : public H323RealTimeCapability
        The default behaviour calls the OnSendingPDU() function with a more
        specific PDU type.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_ModeElement & pdu  ///< PDU to set information on
     ) const;
 
@@ -1331,10 +1334,10 @@ class H323VideoCapability : public H323RealTimeCapability
 
        The default behaviour is pure.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_VideoCapability & pdu  ///< PDU to set information on
     ) const;
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_VideoCapability & pdu,  ///<  PDU to set information on
       CommandType type             ///<  Type of PDU to send in
     ) const;
@@ -1347,7 +1350,7 @@ class H323VideoCapability : public H323RealTimeCapability
        The default behaviour sets the PDUs tag according to the GetSubType()
        function (translated to different enum).
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_VideoMode & pdu  ///< PDU to set information on
     ) const = 0;
 
@@ -1360,7 +1363,7 @@ class H323VideoCapability : public H323RealTimeCapability
        is not supported, so will be ignored. The default behaviour simply
        returns TRUE.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_Capability & pdu  ///< PDU to get information from
     );
 
@@ -1371,9 +1374,9 @@ class H323VideoCapability : public H323RealTimeCapability
 
        The default behaviour is pure.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_DataType & pdu,  ///< PDU to get information from
-      BOOL receiver               ///< Is receiver OLC
+      PBoolean receiver               ///< Is receiver OLC
     );
 
     /**This function is called whenever and incoming TerminalCapabilitySet
@@ -1383,10 +1386,10 @@ class H323VideoCapability : public H323RealTimeCapability
 
        The default behaviour is pure.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_VideoCapability & pdu  ///< PDU to set information on
     );
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_VideoCapability & pdu,  ///< PDU to get information from
       CommandType type                   ///<  Type of PDU to send in
     );
@@ -1484,7 +1487,7 @@ class H323NonStandardVideoCapability : public H323VideoCapability,
        The default behaviour calls H323NonStandardCapabilityinfo::OnSendingPDU()
        to handle the PDU.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_VideoCapability & pdu  ///< PDU to set information on
     ) const;
 
@@ -1496,7 +1499,7 @@ class H323NonStandardVideoCapability : public H323VideoCapability,
        The default behaviour calls H323NonStandardCapabilityinfo::OnSendingPDU()
        to handle the PDU.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_VideoMode & pdu  ///< PDU to set information on
     ) const;
 
@@ -1508,13 +1511,13 @@ class H323NonStandardVideoCapability : public H323VideoCapability,
        The default behaviour calls H323NonStandardCapabilityinfo::OnReceivedPDU()
        to handle the provided PDU.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_VideoCapability & pdu  ///< PDU to set information on
     );
 
     /**Compare the nonStandardData part of the capability, if applicable.
       */
-    virtual BOOL IsMatch(
+    virtual PBoolean IsMatch(
       const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
     ) const;
   //@}
@@ -1571,7 +1574,7 @@ class H323GenericVideoCapability : public H323VideoCapability,
        The default behaviour calls H323GenericCapabilityinfo::OnSendingPDU()
        to handle the PDU.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_VideoCapability & pdu,  ///<  PDU to set information on
       CommandType type             ///<  Type of PDU to send in
     ) const;
@@ -1584,7 +1587,7 @@ class H323GenericVideoCapability : public H323VideoCapability,
        The default behaviour sets the PDUs tag according to the GetSubType()
        function (translated to different enum).
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_VideoMode & pdu  ///< PDU to set information on
     ) const;
 
@@ -1596,7 +1599,7 @@ class H323GenericVideoCapability : public H323VideoCapability,
        The default behaviour calls H323GenericCapabilityinfo::OnReceivedPDU()
        to handle the provided PDU.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_VideoCapability & pdu,  ///< PDU to get information from
       CommandType type                   ///<  Type of PDU to send in
     );
@@ -1604,7 +1607,7 @@ class H323GenericVideoCapability : public H323VideoCapability,
 
     /**Compare the generic part of the capability, if applicable.
       */
-    virtual BOOL IsMatch(
+    virtual PBoolean IsMatch(
       const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
     ) const;
 };
@@ -1669,7 +1672,7 @@ class H323DataCapability : public H323Capability
        The default behaviour calls the OnSendingPDU() function with a more
        specific PDU type.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_Capability & pdu  ///< PDU to set information on
     ) const;
 
@@ -1681,7 +1684,7 @@ class H323DataCapability : public H323Capability
        The default behaviour calls the OnSendingPDU() function with a more
        specific PDU type.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_DataType & pdu  ///< PDU to set information on
     ) const;
 
@@ -1693,7 +1696,7 @@ class H323DataCapability : public H323Capability
        The default behaviour calls the OnSendingPDU() function with a more
        specific PDU type.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_ModeElement & pdu  ///< PDU to set information on
     ) const;
 
@@ -1704,10 +1707,10 @@ class H323DataCapability : public H323Capability
 
        The default behaviour is pure.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_DataApplicationCapability & pdu  ///< PDU to set information on
     ) const;
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_DataApplicationCapability & pdu, ///<  PDU to set information on
       CommandType type                      ///<  Type of PDU to send in
     ) const;
@@ -1720,7 +1723,7 @@ class H323DataCapability : public H323Capability
        The default behaviour sets the PDUs tag according to the GetSubType()
        function (translated to different enum).
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_DataMode & pdu  ///< PDU to set information on
     ) const = 0;
 
@@ -1733,7 +1736,7 @@ class H323DataCapability : public H323Capability
        is not supported, so will be ignored. The default behaviour simply
        returns TRUE.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_Capability & pdu  ///< PDU to get information from
     );
 
@@ -1744,9 +1747,9 @@ class H323DataCapability : public H323Capability
 
        The default behaviour is pure.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_DataType & pdu,  ///< PDU to get information from
-      BOOL receiver               ///< Is receiver OLC
+      PBoolean receiver               ///< Is receiver OLC
     );
 
     /**This function is called whenever and incoming TerminalCapabilitySet
@@ -1756,10 +1759,10 @@ class H323DataCapability : public H323Capability
 
        The default behaviour is pure.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_DataApplicationCapability & pdu  ///< PDU to set information on
     );
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_DataApplicationCapability & pdu, ///<  PDU to set information on
       CommandType type                            ///<  Type of PDU to send in
     );
@@ -1849,7 +1852,7 @@ class H323NonStandardDataCapability : public H323DataCapability,
        The default behaviour calls H323NonStandardCapabilityinfo::OnSendingPDU()
        to handle the PDU.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_DataApplicationCapability & pdu  ///< PDU to set information on
     ) const;
 
@@ -1861,7 +1864,7 @@ class H323NonStandardDataCapability : public H323DataCapability,
        The default behaviour calls H323NonStandardCapabilityinfo::OnSendingPDU()
        to handle the PDU.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_DataMode & pdu  ///< PDU to set information on
     ) const;
 
@@ -1873,13 +1876,13 @@ class H323NonStandardDataCapability : public H323DataCapability,
        The default behaviour calls H323NonStandardCapabilityinfo::OnReceivedPDU()
        to handle the provided PDU.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_DataApplicationCapability & pdu  ///< PDU to set information on
     );
 
     /**Compare the nonStandardData part of the capability, if applicable.
       */
-    virtual BOOL IsMatch(
+    virtual PBoolean IsMatch(
       const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
     ) const;
   //@}
@@ -2081,7 +2084,7 @@ class H323_UserInputCapability : public H323Capability
 
        The default behaviour is pure.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_Capability & pdu  ///< PDU to set information on
     ) const;
 
@@ -2092,7 +2095,7 @@ class H323_UserInputCapability : public H323Capability
 
        The default behaviour is pure.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_DataType & pdu  ///< PDU to set information on
     ) const;
 
@@ -2104,7 +2107,7 @@ class H323_UserInputCapability : public H323Capability
        The default behaviour calls the OnSendingPDU() function with a more
        specific PDU type.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_ModeElement & pdu  ///< PDU to set information on
     ) const;
 
@@ -2117,7 +2120,7 @@ class H323_UserInputCapability : public H323Capability
        is not supported, so will be ignored. The default behaviour simply
        returns TRUE.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_Capability & pdu  ///< PDU to get information from
     );
 
@@ -2128,9 +2131,9 @@ class H323_UserInputCapability : public H323Capability
 
        The default behaviour is pure.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_DataType & pdu,  ///< PDU to get information from
-      BOOL receiver               ///< Is receiver OLC
+      PBoolean receiver               ///< Is receiver OLC
     );
 
     /**Validate that the capability is usable given the connection.
@@ -2141,7 +2144,7 @@ class H323_UserInputCapability : public H323Capability
        The default behaviour will check for early versions and return FALSE
        for RFC2833 mode.
       */
-    virtual BOOL IsUsable(
+    virtual PBoolean IsUsable(
       const H323Connection & connection
     ) const;
   //@}
@@ -2173,7 +2176,7 @@ class H323SimultaneousCapabilities : public H323CapabilitiesListArray
 {
   PCLASSINFO(H323SimultaneousCapabilities, H323CapabilitiesListArray);
   public:
-    BOOL SetSize(PINDEX newSize);
+    PBoolean SetSize(PINDEX newSize);
 };
 
 
@@ -2185,7 +2188,7 @@ class H323CapabilitiesSet : public H323CapabilitiesSetArray
   PCLASSINFO(H323CapabilitiesSet, H323CapabilitiesSetArray);
   public:
     /// Set the new size of the table, internal use only.
-    BOOL SetSize(PINDEX newSize);
+    PBoolean SetSize(PINDEX newSize);
 };
 
 
@@ -2339,7 +2342,7 @@ class H323Capabilities : public PObject
 	/**Manually remove Capability type. This removes the specified Capability type out of the 
 	   default capability list.
 	  */
-	BOOL RemoveCapability(H323Capability::MainTypes capabilityType);
+	PBoolean RemoveCapability(H323Capability::MainTypes capabilityType);
 
 #ifdef H323_VIDEO
 	/**Set the Video Frame Size. This is used for capabilities
@@ -2347,7 +2350,7 @@ class H323Capabilities : public PObject
 	   not matching the specified Frame Size and send a message to the remaining video capabilities 
 	   to set the maximum framesize allowed to the specified value
 	  */
-	BOOL SetVideoFrameSize(H323Capability::CapabilityFrameSize frameSize, 
+	PBoolean SetVideoFrameSize(H323Capability::CapabilityFrameSize frameSize, 
 		                  int frameUnits
 	);
 #endif
@@ -2461,7 +2464,7 @@ class H323Capabilities : public PObject
 
     /**Merge the capabilities into this set.
       */
-    BOOL Merge(
+    PBoolean Merge(
       const H323Capabilities & newCaps
     );
 
@@ -2477,26 +2480,26 @@ class H323Capabilities : public PObject
 
     /**Test if the capability is allowed.
       */
-    BOOL IsAllowed(
+    PBoolean IsAllowed(
       const H323Capability & capability
     );
 
     /**Test if the capability is allowed.
       */
-    BOOL IsAllowed(
+    PBoolean IsAllowed(
       unsigned capabilityNumber
     );
 
     /**Test if the capabilities are an allowed combination.
       */
-    BOOL IsAllowed(
+    PBoolean IsAllowed(
       const H323Capability & capability1,
       const H323Capability & capability2
     );
 
     /**Test if the capabilities are an allowed combination.
       */
-    BOOL IsAllowed(
+    PBoolean IsAllowed(
       unsigned capabilityNumber1,
       unsigned capabilityNumber2
     );
@@ -2579,7 +2582,7 @@ class H323ExtendedVideoCapability : public H323Capability,
        The default behaviour calls the OnSendingPDU() function with a more
        specific PDU type.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_Capability & pdu  ///< PDU to set information on
     ) const;
 
@@ -2592,7 +2595,7 @@ class H323ExtendedVideoCapability : public H323Capability,
        is not supported, so will be ignored. The default behaviour simply
        returns TRUE.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_Capability & pdu  ///< PDU to get information from
     );
 
@@ -2604,7 +2607,7 @@ class H323ExtendedVideoCapability : public H323Capability,
        The default behaviour does nothing.
      */
 
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_GenericCapability & cap,  ///< PDU to get information from
       CommandType type                     ///<  Type of PDU to send in
     );
@@ -2616,7 +2619,7 @@ class H323ExtendedVideoCapability : public H323Capability,
 
        The default behaviour does nothing.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_GenericCapability & cap,  ///< PDU to get information from
       CommandType type               ///<  Type of PDU to send in
     ) const;
@@ -2628,7 +2631,7 @@ class H323ExtendedVideoCapability : public H323Capability,
 
        The default behaviour is pure.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_DataType & pdu  ///< PDU to set information on
     ) const;
 
@@ -2639,7 +2642,7 @@ class H323ExtendedVideoCapability : public H323Capability,
 
        The default behaviour is pure.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_ModeElement & pdu  ///< PDU to set information on
     ) const;
 
@@ -2650,14 +2653,14 @@ class H323ExtendedVideoCapability : public H323Capability,
 
        The default behaviour is pure.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_DataType & pdu,  ///< PDU to get information from
-      BOOL receiver               ///< Is receiver OLC
+      PBoolean receiver               ///< Is receiver OLC
     );
 
     /**Compare the generic part of the capability, if applicable.
       */
-    virtual BOOL IsMatch(
+    virtual PBoolean IsMatch(
       const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
     ) const;
   //@}
@@ -2736,28 +2739,28 @@ class H323CodecExtendedVideoCapability : public H323ExtendedVideoCapability
 
 	virtual void AddCapability(H323Capability * capability);
 
-    virtual BOOL OnReceivedGenericPDU(
+    virtual PBoolean OnReceivedGenericPDU(
 		const H245_GenericCapability &pdu
 	);
 
 	virtual PString GetFormatName() const
     { return "H.239 Capabilities";}
 
-    virtual BOOL IsMatch(const PASN_Choice & subTypePDU) const;
+    virtual PBoolean IsMatch(const PASN_Choice & subTypePDU) const;
 
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
 		H245_Capability & cap
 	) const;
 
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
 	  const H245_Capability & cap
 	);
 
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
 		H245_VideoCapability & cap
 	) const;
 
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_VideoCapability & pdu  /// PDU to get information from
 	);
 
@@ -2783,8 +2786,8 @@ class H323_ConferenceControlCapability : public H323Capability
     H323_ConferenceControlCapability();
 
 	H323_ConferenceControlCapability( 
-			       BOOL chairControls,
-	               BOOL T124Extension
+			       PBoolean chairControls,
+	               PBoolean T124Extension
 				   );
   //@}
 
@@ -2843,7 +2846,7 @@ class H323_ConferenceControlCapability : public H323Capability
 
        The default behaviour is pure.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_Capability & pdu  ///< PDU to set information on
     ) const;
 
@@ -2854,7 +2857,7 @@ class H323_ConferenceControlCapability : public H323Capability
 
        The default behaviour is pure.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_DataType & pdu  ///< PDU to set information on
     ) const;
 
@@ -2866,7 +2869,7 @@ class H323_ConferenceControlCapability : public H323Capability
        The default behaviour calls the OnSendingPDU() function with a more
        specific PDU type.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_ModeElement & pdu  ///< PDU to set information on
     ) const;
 
@@ -2879,7 +2882,7 @@ class H323_ConferenceControlCapability : public H323Capability
        is not supported, so will be ignored. The default behaviour simply
        returns TRUE.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_Capability & pdu  ///< PDU to get information from
     );
 
@@ -2890,9 +2893,9 @@ class H323_ConferenceControlCapability : public H323Capability
 
        The default behaviour is pure.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_DataType & pdu,  ///< PDU to get information from
-      BOOL receiver               ///< Is receiver OLC
+      PBoolean receiver               ///< Is receiver OLC
     );
   //@}
 
@@ -2900,17 +2903,17 @@ class H323_ConferenceControlCapability : public H323Capability
   //@{
 	/**This function indicates whether the remote supports chair controls
 	 */
-	BOOL SupportChairControls() {  return chairControlCapability;  }
+	PBoolean SupportChairControls() {  return chairControlCapability;  }
 
 	/**This function indicates whether the remote supports extended controls
 	   such as T.124 Tunnelling
 	 */
-	BOOL SupportExtControls() {  return nonStandardExtension;  }
+	PBoolean SupportExtControls() {  return nonStandardExtension;  }
   //@}
 
   protected:
-	  BOOL chairControlCapability;
-	  BOOL nonStandardExtension;
+	  PBoolean chairControlCapability;
+	  PBoolean nonStandardExtension;
 
 };
 #endif // H323_H230

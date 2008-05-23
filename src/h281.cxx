@@ -19,6 +19,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:05  shorne
+ * First commit of h323plus
+ *
  * Revision 1.1  2006/06/22 11:07:23  shorne
  * Backport of FECC (H.224) from Opal
  *
@@ -371,7 +374,7 @@ void H281VideoSource::SetVideoSourceNumber(BYTE number)
   firstOctet |= (number << 4) & 0xf0;
 }
 
-void H281VideoSource::SetCanMotionVideo(BOOL flag)
+void H281VideoSource::SetCanMotionVideo(PBoolean flag)
 {
   if(flag) {
     firstOctet |= 0x04;
@@ -380,7 +383,7 @@ void H281VideoSource::SetCanMotionVideo(BOOL flag)
   }
 }
 
-void H281VideoSource::SetCanNormalResolutionStillImage(BOOL flag)
+void H281VideoSource::SetCanNormalResolutionStillImage(PBoolean flag)
 {
   if(flag) {
     firstOctet |= 0x02;
@@ -389,7 +392,7 @@ void H281VideoSource::SetCanNormalResolutionStillImage(BOOL flag)
   }
 }
 
-void H281VideoSource::SetCanDoubleResolutionStillImage(BOOL flag)
+void H281VideoSource::SetCanDoubleResolutionStillImage(PBoolean flag)
 {
   if(flag) {
     firstOctet |= 0x01;
@@ -398,7 +401,7 @@ void H281VideoSource::SetCanDoubleResolutionStillImage(BOOL flag)
   }
 }
 
-void H281VideoSource::SetCanPan(BOOL flag)
+void H281VideoSource::SetCanPan(PBoolean flag)
 {
   if(flag) {
     secondOctet |= 0x80;
@@ -407,7 +410,7 @@ void H281VideoSource::SetCanPan(BOOL flag)
   }
 }
 
-void H281VideoSource::SetCanTilt(BOOL flag)
+void H281VideoSource::SetCanTilt(PBoolean flag)
 {
   if(flag) {
     secondOctet |= 0x40;
@@ -416,7 +419,7 @@ void H281VideoSource::SetCanTilt(BOOL flag)
   }
 }
 
-void H281VideoSource::SetCanZoom(BOOL flag)
+void H281VideoSource::SetCanZoom(PBoolean flag)
 {
   if(flag) {
     secondOctet |= 0x20;
@@ -425,7 +428,7 @@ void H281VideoSource::SetCanZoom(BOOL flag)
   }
 }
 
-void H281VideoSource::SetCanFocus(BOOL flag)
+void H281VideoSource::SetCanFocus(PBoolean flag)
 {
   if(flag) {
     secondOctet |= 0x10;
@@ -440,7 +443,7 @@ void H281VideoSource::Encode(BYTE *data) const
   data[1] = secondOctet;
 }
 
-BOOL H281VideoSource::Decode(const BYTE *data)
+PBoolean H281VideoSource::Decode(const BYTE *data)
 {	
   // only accepting the standard video sources
   BYTE videoSourceNumber = (data[0] >> 4) & 0x0f;

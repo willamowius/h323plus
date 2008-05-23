@@ -31,7 +31,7 @@ class H225_H350ServiceControl : public PASN_Sequence
     PASN_IA5String m_ldapDN;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;

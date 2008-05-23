@@ -77,7 +77,7 @@ class H4508_Name : public PASN_Choice
     operator const H4508_NamePresentationRestricted &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -115,7 +115,7 @@ class H4508_NamePresentationAllowed : public PASN_Choice
     operator const H4508_ExtendedName &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -154,7 +154,7 @@ class H4508_NamePresentationRestricted : public PASN_Choice
     operator const H4508_ExtendedName &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -196,7 +196,7 @@ class H4508_ExtendedName : public PASN_BMPString
 
     H4508_ExtendedName & operator=(const char * v);
     H4508_ExtendedName & operator=(const PString & v);
-    H4508_ExtendedName & operator=(const PWORDArray & v);
+    H4508_ExtendedName & operator=(const PWCharArray & v);
     H4508_ExtendedName & operator=(const PASN_BMPString & v);
     PObject * Clone() const;
 };

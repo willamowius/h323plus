@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:08  shorne
+ * First commit of h323plus
+ *
  * Revision 1.12  2002/09/03 06:21:01  robertj
  * Cosmetic change to formatting.
  *
@@ -130,7 +133,7 @@ void X224::PrintOn(ostream & strm) const
 }
 
 
-BOOL X224::Decode(const PBYTEArray & rawData)
+PBoolean X224::Decode(const PBYTEArray & rawData)
 {
   PINDEX packetLength = rawData.GetSize();
 
@@ -150,7 +153,7 @@ BOOL X224::Decode(const PBYTEArray & rawData)
 }
 
 
-BOOL X224::Encode(PBYTEArray & rawData) const
+PBoolean X224::Encode(PBYTEArray & rawData) const
 {
   PINDEX headerLength = header.GetSize();
   PINDEX dataLength = data.GetSize();

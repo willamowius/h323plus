@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/04/25 00:53:20  shorne
+ * Added callback to set maximum video bandwidth
+ *
  * Revision 1.2  2008/02/06 02:52:59  shorne
  * Added support for Standards based NAT Traversal
  *
@@ -534,11 +537,11 @@ class H323LogicalChannelThread : public PThread
 {
     PCLASSINFO(H323LogicalChannelThread, PThread)
   public:
-    H323LogicalChannelThread(H323EndPoint & endpoint, H323Channel & channel, BOOL rx);
+    H323LogicalChannelThread(H323EndPoint & endpoint, H323Channel & channel, PBoolean rx);
     void Main();
   private:
     H323Channel & channel;
-    BOOL receiver;
+    PBoolean receiver;
 };
 
 
@@ -568,7 +571,7 @@ ostream & operator<<(ostream & out, H323Channel::Directions dir)
 
 H323LogicalChannelThread::H323LogicalChannelThread(H323EndPoint & endpoint,
                                                    H323Channel & c,
-                                                   BOOL rx)
+                                                   PBoolean rx)
   : PThread(endpoint.GetChannelThreadStackSize(),
             NoAutoDeleteThread,
             endpoint.GetChannelThreadPriority(),
@@ -597,7 +600,7 @@ void H323LogicalChannelThread::Main()
 
 /////////////////////////////////////////////////////////////////////////////
 
-H323ChannelNumber::H323ChannelNumber(unsigned num, BOOL fromRem)
+H323ChannelNumber::H323ChannelNumber(unsigned num, PBoolean fromRem)
 {
   PAssert(num < 0x10000, PInvalidParameter);
   number = num;
@@ -726,7 +729,7 @@ void H323Channel::CleanUpOnTermination()
 }
 
 
-BOOL H323Channel::IsRunning() const
+PBoolean H323Channel::IsRunning() const
 {
   if (receiveThread  != NULL && !receiveThread ->IsTerminated())
     return TRUE;
@@ -738,14 +741,14 @@ BOOL H323Channel::IsRunning() const
 }
 
 
-BOOL H323Channel::OnReceivedPDU(const H245_OpenLogicalChannel & /*pdu*/,
+PBoolean H323Channel::OnReceivedPDU(const H245_OpenLogicalChannel & /*pdu*/,
                                 unsigned & /*errorCode*/)
 {
   return TRUE;
 }
 
 
-BOOL H323Channel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & /*pdu*/)
+PBoolean H323Channel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & /*pdu*/)
 {
   return TRUE;
 }
@@ -797,7 +800,7 @@ void H323Channel::OnJitterIndication(DWORD PTRACE_PARAM(jitter),
 }
 
 
-BOOL H323Channel::SetInitialBandwidth()
+PBoolean H323Channel::SetInitialBandwidth()
 {
   if (GetCodec() == NULL)
     return TRUE;
@@ -810,7 +813,7 @@ BOOL H323Channel::SetInitialBandwidth()
 }
 
 
-BOOL H323Channel::SetBandwidthUsed(unsigned bandwidth)
+PBoolean H323Channel::SetBandwidthUsed(unsigned bandwidth)
 {
   PTRACE(3, "LogChan\tBandwidth requested/used = "
          << bandwidth/10 << '.' << bandwidth%10 << '/'
@@ -827,7 +830,7 @@ BOOL H323Channel::SetBandwidthUsed(unsigned bandwidth)
 }
 
 
-BOOL H323Channel::Open()
+PBoolean H323Channel::Open()
 {
   if (opened)
     return TRUE;
@@ -882,7 +885,7 @@ H323Channel::Directions H323UnidirectionalChannel::GetDirection() const
 }
 
 
-BOOL H323UnidirectionalChannel::Start()
+PBoolean H323UnidirectionalChannel::Start()
 {
   if (!Open())
     return FALSE;
@@ -912,7 +915,7 @@ H323Channel::Directions H323BidirectionalChannel::GetDirection() const
 }
 
 
-BOOL H323BidirectionalChannel::Start()
+PBoolean H323BidirectionalChannel::Start()
 {
   receiveThread  = new H323LogicalChannelThread(endpoint, *this, TRUE);
   transmitThread = new H323LogicalChannelThread(endpoint, *this, FALSE);
@@ -931,7 +934,7 @@ H323_RealTimeChannel::H323_RealTimeChannel(H323Connection & connection,
 }
 
 
-BOOL H323_RealTimeChannel::OnSendingPDU(H245_OpenLogicalChannel & open) const
+PBoolean H323_RealTimeChannel::OnSendingPDU(H245_OpenLogicalChannel & open) const
 {
   PTRACE(3, "H323RTP\tOnSendingPDU");
 
@@ -997,7 +1000,7 @@ void H323_RealTimeChannel::OnSendOpenAck(const H245_OpenLogicalChannel & open,
 }
 
 
-BOOL H323_RealTimeChannel::OnReceivedPDU(const H245_OpenLogicalChannel & open,
+PBoolean H323_RealTimeChannel::OnReceivedPDU(const H245_OpenLogicalChannel & open,
                                          unsigned & errorCode)
 {
   if (receiver)
@@ -1009,7 +1012,7 @@ BOOL H323_RealTimeChannel::OnReceivedPDU(const H245_OpenLogicalChannel & open,
   unsigned prevRxFrames = capability->GetRxFramesInPacket();
   PString  prevFormat   = capability->GetFormatName();
 
-  BOOL reverse = open.HasOptionalField(H245_OpenLogicalChannel::e_reverseLogicalChannelParameters);
+  PBoolean reverse = open.HasOptionalField(H245_OpenLogicalChannel::e_reverseLogicalChannelParameters);
   const H245_DataType & dataType = reverse ? open.m_reverseLogicalChannelParameters.m_dataType
                                            : open.m_forwardLogicalChannelParameters.m_dataType;
 
@@ -1050,7 +1053,7 @@ BOOL H323_RealTimeChannel::OnReceivedPDU(const H245_OpenLogicalChannel & open,
 }
 
 
-BOOL H323_RealTimeChannel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & ack)
+PBoolean H323_RealTimeChannel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & ack)
 {
   PTRACE(3, "H323RTP\tOnReceiveOpenAck");
 
@@ -1088,7 +1091,7 @@ RTP_DataFrame::PayloadTypes H323_RealTimeChannel::GetRTPPayloadType() const
 }
 
 
-BOOL H323_RealTimeChannel::SetDynamicRTPPayloadType(int newType)
+PBoolean H323_RealTimeChannel::SetDynamicRTPPayloadType(int newType)
 {
   PTRACE(1, "H323RTP\tSetting dynamic RTP payload type: " << newType);
 
@@ -1155,7 +1158,7 @@ unsigned H323_RTPChannel::GetSessionID() const
 }
 
 
-BOOL H323_RTPChannel::Open()
+PBoolean H323_RTPChannel::Open()
 {
   if (opened)
     return TRUE;
@@ -1197,12 +1200,12 @@ BOOL H323_RTPChannel::Open()
 }
 
 
-BOOL H323_RTPChannel::OnSendingPDU(H245_H2250LogicalChannelParameters & param) const
+PBoolean H323_RTPChannel::OnSendingPDU(H245_H2250LogicalChannelParameters & param) const
 {
   return rtpCallbacks.OnSendingPDU(*this, param);
 }
 
-BOOL H323_RTPChannel::OnSendingAltPDU(H245_ArrayOf_GenericInformation & alternate) const
+PBoolean H323_RTPChannel::OnSendingAltPDU(H245_ArrayOf_GenericInformation & alternate) const
 {
   return rtpCallbacks.OnSendingAltPDU(*this, alternate);
 }
@@ -1217,24 +1220,24 @@ void H323_RTPChannel::OnSendOpenAckAlt(H245_ArrayOf_GenericInformation & alterna
   rtpCallbacks.OnSendOpenAckAlt(*this, alternate);
 }
 
-BOOL H323_RTPChannel::OnReceivedPDU(const H245_H2250LogicalChannelParameters & param,
+PBoolean H323_RTPChannel::OnReceivedPDU(const H245_H2250LogicalChannelParameters & param,
                                     unsigned & errorCode)
 {
   return rtpCallbacks.OnReceivedPDU(*this, param, errorCode);
 }
 
-BOOL H323_RTPChannel::OnReceivedAltPDU(const H245_ArrayOf_GenericInformation & alternate)
+PBoolean H323_RTPChannel::OnReceivedAltPDU(const H245_ArrayOf_GenericInformation & alternate)
 {
   return rtpCallbacks.OnReceivedAltPDU(*this, alternate);
 }
 
 
-BOOL H323_RTPChannel::OnReceivedAckPDU(const H245_H2250LogicalChannelAckParameters & param)
+PBoolean H323_RTPChannel::OnReceivedAckPDU(const H245_H2250LogicalChannelAckParameters & param)
 {
   return rtpCallbacks.OnReceivedAckPDU(*this, param);
 }
 
-BOOL H323_RTPChannel::OnReceivedAckAltPDU(const H245_ArrayOf_GenericInformation & alternate)
+PBoolean H323_RTPChannel::OnReceivedAckAltPDU(const H245_ArrayOf_GenericInformation & alternate)
 { 
   return rtpCallbacks.OnReceivedAckAltPDU(*this, alternate);
 }
@@ -1291,7 +1294,7 @@ class CodecReadAnalyser
   const OpalMediaFormat & mediaFormat = codec->GetMediaFormat();
 
   // Get parameters from the codec on time and data sizes
-  BOOL isAudio = mediaFormat.NeedsJitterBuffer();
+  PBoolean isAudio = mediaFormat.NeedsJitterBuffer();
   unsigned framesInPacket = capability->GetTxFramesInPacket();
   unsigned maxFrameSize = mediaFormat.GetFrameSize();
   if (maxFrameSize == 0)
@@ -1312,7 +1315,7 @@ class CodecReadAnalyser
                     << (framesInPacket*maxFrameSize) );
 
   // This is real time so need to keep track of elapsed milliseconds
-  BOOL silent = TRUE;
+  PBoolean silent = TRUE;
   unsigned length;
   unsigned frameOffset = 0;
   unsigned frameCount = 0;
@@ -1393,7 +1396,7 @@ class CodecReadAnalyser
       }
     }
 
-    BOOL sendPacket = FALSE;
+    PBoolean sendPacket = FALSE;
 
     // Have read number of frames for packet (or just went silent)
     if (frameCount >= framesInPacket) {
@@ -1475,7 +1478,7 @@ void H323_RTPChannel::Receive()
      return;
   }
 
-  BOOL allowRtpPayloadChange = codec->GetMediaFormat().GetDefaultSessionID() == OpalMediaFormat::DefaultAudioSessionID;
+  PBoolean allowRtpPayloadChange = codec->GetMediaFormat().GetDefaultSessionID() == OpalMediaFormat::DefaultAudioSessionID;
 
   RTP_DataFrame frame;
   while (rtpSession.ReadBufferedData(rtpTimestamp, frame)) {
@@ -1496,14 +1499,14 @@ void H323_RTPChannel::Receive()
 #endif
 
     unsigned written;
-    BOOL ok = TRUE;
+    PBoolean ok = TRUE;
     if (size == 0) {
       ok = codec->Write(NULL, 0, frame, written);
       rtpTimestamp += codecFrameRate;
     } else {
       silenceStartTick = PTimer::Tick();
 
-      BOOL isCodecPacket = TRUE;
+      PBoolean isCodecPacket = TRUE;
 
       if (frame.GetPayloadType() == rtpPayloadType) {
         PTRACE_IF(2, consecutiveMismatches > 0,
@@ -1629,14 +1632,14 @@ unsigned H323_ExternalRTPChannel::GetSessionID() const
 }
 
 
-BOOL H323_ExternalRTPChannel::Start()
+PBoolean H323_ExternalRTPChannel::Start()
 {
   isRunning = TRUE;
   return Open();
 }
 
 
-BOOL H323_ExternalRTPChannel::IsRunning() const
+PBoolean H323_ExternalRTPChannel::IsRunning() const
 {
   return opened && isRunning;
 }
@@ -1654,7 +1657,7 @@ void H323_ExternalRTPChannel::Transmit()
 }
 
 
-BOOL H323_ExternalRTPChannel::OnSendingPDU(H245_H2250LogicalChannelParameters & param) const
+PBoolean H323_ExternalRTPChannel::OnSendingPDU(H245_H2250LogicalChannelParameters & param) const
 {
   param.m_sessionID = sessionID;
 
@@ -1690,7 +1693,7 @@ void H323_ExternalRTPChannel::OnSendOpenAck(H245_H2250LogicalChannelAckParameter
 }
 
 
-BOOL H323_ExternalRTPChannel::OnReceivedPDU(const H245_H2250LogicalChannelParameters & param,
+PBoolean H323_ExternalRTPChannel::OnReceivedPDU(const H245_H2250LogicalChannelParameters & param,
                                           unsigned & errorCode)
 {
   // Only support a single audio session
@@ -1720,7 +1723,7 @@ BOOL H323_ExternalRTPChannel::OnReceivedPDU(const H245_H2250LogicalChannelParame
 }
 
 
-BOOL H323_ExternalRTPChannel::OnReceivedAckPDU(const H245_H2250LogicalChannelAckParameters & param)
+PBoolean H323_ExternalRTPChannel::OnReceivedAckPDU(const H245_H2250LogicalChannelAckParameters & param)
 {
   if (param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_sessionID) && (param.m_sessionID != sessionID)) {
     PTRACE(1, "LogChan\twarning: Ack for invalid session: " << param.m_sessionID);
@@ -1765,7 +1768,7 @@ void H323_ExternalRTPChannel::SetExternalAddress(const H323TransportAddress & da
 }
 
 
-BOOL H323_ExternalRTPChannel::GetRemoteAddress(PIPSocket::Address & ip,
+PBoolean H323_ExternalRTPChannel::GetRemoteAddress(PIPSocket::Address & ip,
                                                WORD & dataPort) const
 {
   if (!remoteMediaControlAddress) {
@@ -1832,7 +1835,7 @@ unsigned H323DataChannel::GetSessionID() const
 }
 
 
-BOOL H323DataChannel::OnSendingPDU(H245_OpenLogicalChannel & open) const
+PBoolean H323DataChannel::OnSendingPDU(H245_OpenLogicalChannel & open) const
 {
   PTRACE(3, "LogChan\tOnSendingPDU for channel: " << number);
 
@@ -1901,7 +1904,7 @@ void H323DataChannel::OnSendOpenAck(const H245_OpenLogicalChannel & /*open*/,
 }
 
 
-BOOL H323DataChannel::OnReceivedPDU(const H245_OpenLogicalChannel & open,
+PBoolean H323DataChannel::OnReceivedPDU(const H245_OpenLogicalChannel & open,
                                     unsigned & errorCode)
 {
   number = H323ChannelNumber(open.m_forwardLogicalChannelNumber, TRUE);
@@ -1931,7 +1934,7 @@ BOOL H323DataChannel::OnReceivedPDU(const H245_OpenLogicalChannel & open,
 }
 
 
-BOOL H323DataChannel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & ack)
+PBoolean H323DataChannel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & ack)
 {
   PTRACE(3, "LogChan\tOnReceivedAckPDU");
 
@@ -2001,7 +2004,7 @@ BOOL H323DataChannel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & ack)
 }
 
 
-BOOL H323DataChannel::CreateListener()
+PBoolean H323DataChannel::CreateListener()
 {
   if (listener == NULL) {
     listener = connection.GetControlChannel().GetLocalAddress().CreateCompatibleListener(connection.GetEndPoint());
@@ -2015,7 +2018,7 @@ BOOL H323DataChannel::CreateListener()
 }
 
 
-BOOL H323DataChannel::CreateTransport()
+PBoolean H323DataChannel::CreateTransport()
 {
   if (transport == NULL) {
     transport = connection.GetControlChannel().GetLocalAddress().CreateTransport(connection.GetEndPoint());

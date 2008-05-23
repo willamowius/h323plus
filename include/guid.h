@@ -24,11 +24,14 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:48  shorne
+ * First commit of h323plus
+ *
  * Revision 1.6  2005/11/30 13:05:01  csoutheren
  * Changed tags for Doxygen
  *
  * Revision 1.5  2004/04/18 04:38:16  rjongbloed
- * Changed all operators that return BOOL to return standard type bool. This is primarily
+ * Changed all operators that return PBoolean to return standard type bool. This is primarily
  *   for improved compatibility with std STL usage removing many warnings.
  *
  * Revision 1.4  2002/09/16 01:14:15  robertj
@@ -136,7 +139,7 @@ class OpalGloballyUniqueID : public PBYTEArray
 
     /**Test if the GUID is null, ie consists of all zeros.
       */
-    BOOL IsNULL() const;
+    PBoolean IsNULL() const;
 
     bool operator!() const { return !IsNULL(); }
   //@}

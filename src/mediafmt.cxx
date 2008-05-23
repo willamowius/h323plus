@@ -24,6 +24,10 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2007/10/19 19:54:18  shorne
+ * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
+ *  Robert
+ *
  * Revision 1.2  2007/08/20 19:13:29  shorne
  * Added Generic Capability support. Fixed Linux compile errors
  *
@@ -752,7 +756,7 @@ OpalMediaFormat::OpalMediaFormat()
 }
 
 
-OpalMediaFormat::OpalMediaFormat(const char * search, BOOL exact)
+OpalMediaFormat::OpalMediaFormat(const char * search, PBoolean exact)
 {
   rtpPayloadType = RTP_DataFrame::IllegalPayloadType;
 
@@ -788,7 +792,7 @@ OpalMediaFormat::OpalMediaFormat(const char * search, BOOL exact)
 OpalMediaFormat::OpalMediaFormat(const char * fullName,
                                  unsigned dsid,
                                  RTP_DataFrame::PayloadTypes pt,
-                                 BOOL     nj,
+                                 PBoolean     nj,
                                  unsigned bw,
                                  PINDEX   fs,
                                  unsigned ft,
@@ -1065,7 +1069,7 @@ bool OpalMediaFormat::SetOptionString(const PString & name, const PString & valu
 }
 
 
-bool OpalMediaFormat::AddOption(OpalMediaOption * option, BOOL overwrite)
+bool OpalMediaFormat::AddOption(OpalMediaOption * option, PBoolean overwrite)
 {
   PWaitAndSignal m(media_format_mutex);
   if (PAssertNULL(option) == NULL)

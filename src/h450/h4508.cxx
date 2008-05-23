@@ -122,7 +122,7 @@ H4508_Name::operator const H4508_NamePresentationRestricted &() const
 }
 
 
-BOOL H4508_Name::CreateObject()
+PBoolean H4508_Name::CreateObject()
 {
   switch (tag) {
     case e_namePresentationAllowed :
@@ -215,7 +215,7 @@ H4508_NamePresentationAllowed::operator const H4508_ExtendedName &() const
 }
 
 
-BOOL H4508_NamePresentationAllowed::CreateObject()
+PBoolean H4508_NamePresentationAllowed::CreateObject()
 {
   switch (tag) {
     case e_simpleName :
@@ -306,7 +306,7 @@ H4508_NamePresentationRestricted::operator const H4508_ExtendedName &() const
 }
 
 
-BOOL H4508_NamePresentationRestricted::CreateObject()
+PBoolean H4508_NamePresentationRestricted::CreateObject()
 {
   switch (tag) {
     case e_simpleName :
@@ -418,7 +418,7 @@ H4508_ExtendedName & H4508_ExtendedName::operator=(const PString & v)
 }
 
 
-H4508_ExtendedName & H4508_ExtendedName::operator=(const PWORDArray & v)
+H4508_ExtendedName & H4508_ExtendedName::operator=(const PWCharArray & v)
 {
   SetValue(v);
   return *this;

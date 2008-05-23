@@ -24,6 +24,9 @@
  * Contributor(s): Fürbass Franz <franz.fuerbass@infonova.at>
  *
  * $Log$
+ * Revision 1.3  2008/01/01 00:12:11  shorne
+ * Remove warning on VS2005
+ *
  * Revision 1.2  2007/08/20 19:13:28  shorne
  * Added Generic Capability support. Fixed Linux compile errors
  *
@@ -324,7 +327,7 @@ H225_CryptoH323Token * H2351_Authenticator::CreateCryptoToken()
 }
 
 
-BOOL H2351_Authenticator::Finalise(PBYTEArray & rawPDU)
+PBoolean H2351_Authenticator::Finalise(PBYTEArray & rawPDU)
 {
   if (!IsActive())
     return FALSE;
@@ -371,7 +374,7 @@ BOOL H2351_Authenticator::Finalise(PBYTEArray & rawPDU)
 }
 
 
-static BOOL CheckOID(const PASN_ObjectId & oid1, const PASN_ObjectId & oid2)
+static PBoolean CheckOID(const PASN_ObjectId & oid1, const PASN_ObjectId & oid2)
 {
   if (oid1.GetSize() != oid2.GetSize())
     return FALSE;
@@ -578,7 +581,7 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
 }
 
 
-BOOL H2351_Authenticator::IsCapability(const H235_AuthenticationMechanism & mechansim,
+PBoolean H2351_Authenticator::IsCapability(const H235_AuthenticationMechanism & mechansim,
                                       const PASN_ObjectId & algorithmOID)
 {
   return mechansim.GetTag() == H235_AuthenticationMechanism::e_pwdHash &&
@@ -586,13 +589,13 @@ BOOL H2351_Authenticator::IsCapability(const H235_AuthenticationMechanism & mech
 }
 
 
-BOOL H2351_Authenticator::SetCapability(H225_ArrayOf_AuthenticationMechanism & mechanisms,
+PBoolean H2351_Authenticator::SetCapability(H225_ArrayOf_AuthenticationMechanism & mechanisms,
                                       H225_ArrayOf_PASN_ObjectId & algorithmOIDs)
 {
   return AddCapability(H235_AuthenticationMechanism::e_pwdHash, OID_U, mechanisms, algorithmOIDs);
 }
 
-BOOL H2351_Authenticator::IsSecuredPDU(unsigned rasPDU, BOOL received) const
+PBoolean H2351_Authenticator::IsSecuredPDU(unsigned rasPDU, PBoolean received) const
 {
   switch (rasPDU) {
     case H225_RasMessage::e_registrationRequest :
@@ -604,7 +607,7 @@ BOOL H2351_Authenticator::IsSecuredPDU(unsigned rasPDU, BOOL received) const
   }  
 }
 
-BOOL H2351_Authenticator::IsSecuredSignalPDU(unsigned signalPDU, BOOL received) const
+PBoolean H2351_Authenticator::IsSecuredSignalPDU(unsigned signalPDU, PBoolean received) const
 {
   switch (signalPDU) {
     case H225_H323_UU_PDU_h323_message_body::e_setup:       
@@ -615,7 +618,7 @@ BOOL H2351_Authenticator::IsSecuredSignalPDU(unsigned signalPDU, BOOL received) 
   }
 }
 
-BOOL H2351_Authenticator::UseGkAndEpIdentifiers() const
+PBoolean H2351_Authenticator::UseGkAndEpIdentifiers() const
 {
   return TRUE;
 }

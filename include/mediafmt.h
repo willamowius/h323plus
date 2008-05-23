@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2008/04/25 01:16:36  shorne
+ * Added ability to set the video maximum bitrate
+ *
  * Revision 1.4  2008/02/06 13:19:13  shorne
  * Critical Bug Fix: Stop Assert on unhandled mediaOptions
  *
@@ -468,14 +471,14 @@ class OpalMediaFormat : public PCaselessString
       */
     OpalMediaFormat(
       const char * search,  ///<  Name to search for
-      BOOL exact = TRUE     ///<  Flag for if search is to match name exactly
+      PBoolean exact = TRUE     ///<  Flag for if search is to match name exactly
     );
 
     /**Return TRUE if media format info is valid. This may be used if the
        single string constructor is used to check that it matched something
        in the registered media formats database.
       */
-    BOOL IsValid() const { return rtpPayloadType <= RTP_DataFrame::MaxPayloadType; }
+    PBoolean IsValid() const { return rtpPayloadType <= RTP_DataFrame::MaxPayloadType; }
 
     /**Copy a media format
       */
@@ -522,7 +525,7 @@ class OpalMediaFormat : public PCaselessString
     /**Determine if the media format requires a jitter buffer. As a rule an
        audio codec needs a jitter buffer and all others do not.
       */
-    BOOL NeedsJitterBuffer() const { return needsJitter; }
+    PBoolean NeedsJitterBuffer() const { return needsJitter; }
 
     /**Get the average bandwidth used in bits/second.
       */
@@ -582,7 +585,7 @@ class OpalMediaFormat : public PCaselessString
       const char * fullName,  ///<  Full name of media format
       unsigned defaultSessionID,  ///<  Default session for codec type
       RTP_DataFrame::PayloadTypes rtpPayloadType, ///<  RTP payload type code
-      BOOL     needsJitter,   ///<  Indicate format requires a jitter buffer
+      PBoolean     needsJitter,   ///<  Indicate format requires a jitter buffer
       unsigned bandwidth,     ///<  Bandwidth in bits/second
       PINDEX   frameSize = 0, ///<  Size of frame in bytes (if applicable)
       unsigned frameTime = 0, ///<  Time for frame in RTP units (if applicable)
@@ -740,7 +743,7 @@ class OpalMediaFormat : public PCaselessString
       */
     bool AddOption(
       OpalMediaOption * option,
-      BOOL overwrite = FALSE
+      PBoolean overwrite = FALSE
     );
     
     /**
@@ -770,7 +773,7 @@ class OpalMediaFormat : public PCaselessString
   protected:
     RTP_DataFrame::PayloadTypes rtpPayloadType;
     unsigned defaultSessionID;
-    BOOL     needsJitter;
+    PBoolean     needsJitter;
     unsigned bandwidth;
     PINDEX   frameSize;
     unsigned frameTime;
@@ -877,7 +880,7 @@ extern char OpalGSM0610[];
 //        const char * _fullName,  /// Full name of media format
 //        unsigned _defaultSessionID,  /// Default session for codec type
 //        RTP_DataFrame::PayloadTypes _rtpPayloadType, /// RTP payload type code
-//        BOOL     _needsJitter,       /// Indicate format requires a jitter buffer
+//        PBoolean     _needsJitter,       /// Indicate format requires a jitter buffer
 //        unsigned _bandwidth,         /// Bandwidth in bits/second
 //        PINDEX   _frameSize,         /// Size of frame in bytes (if applicable)
 //        unsigned _frameTime,         /// Time for frame in RTP units (if applicable)

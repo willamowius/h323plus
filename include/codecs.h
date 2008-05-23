@@ -27,6 +27,10 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/10/19 19:53:44  shorne
+ * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
+ *  Robert
+ *
  * Revision 1.1  2007/08/06 20:50:48  shorne
  * First commit of h323plus
  *
@@ -382,7 +386,7 @@ class H323Codec : public PObject
 
        The default behaviour does nothing.
       */
-    virtual BOOL Open(
+    virtual PBoolean Open(
       H323Connection & connection ///< Connection between the endpoints
     );
 
@@ -407,7 +411,7 @@ class H323Codec : public PObject
        no data encoded. This is typically used for silence detection in an
        audio codec.
      */
-    virtual BOOL Read(
+    virtual PBoolean Read(
       BYTE * buffer,            ///< Buffer of encoded data
       unsigned & length,        ///< Actual length of encoded data buffer
       RTP_DataFrame & rtpFrame  ///< RTP data frame
@@ -424,7 +428,7 @@ class H323Codec : public PObject
        This function is called every GetFrameRate() timestamp units, so MUST
        take less than that amount of time to complete!
      */
-    virtual BOOL Write(
+    virtual PBoolean Write(
       const BYTE * buffer,          ///< Buffer of encoded data
       unsigned length,              ///< Length of encoded data buffer
       const RTP_DataFrame & frame,  ///< Entire RTP frame
@@ -461,7 +465,7 @@ class H323Codec : public PObject
     virtual const OpalMediaFormat & GetMediaFormat() const { return mediaFormat; }
     OpalMediaFormat & GetWritableMediaFormat() { return mediaFormat; }
 
-    virtual BOOL SetFrameSize(int /*frameWidth*/, int /*frameHeight*/) { return FALSE; };
+    virtual PBoolean SetFrameSize(int /*frameWidth*/, int /*frameHeight*/) { return FALSE; };
 
     /**Attach the raw data channel for use by codec.
        Note the channel provided will be deleted on destruction of the codec.
@@ -470,9 +474,9 @@ class H323Codec : public PObject
        Thus, the video codec provides a pointer to the data, which the renderer/grabber
        then accesses to display/grab the image from/to.
       */
-    virtual BOOL AttachChannel(
+    virtual PBoolean AttachChannel(
       PChannel * channel,     ///< Channel to read/write raw codec data
-      BOOL autoDelete = TRUE  ///< Channel is to be automatically deleted
+      PBoolean autoDelete = TRUE  ///< Channel is to be automatically deleted
     );
 
     /**Attach a new channel and returns the previous one, without neither
@@ -481,12 +485,12 @@ class H323Codec : public PObject
      */
     virtual PChannel * SwapChannel(
       PChannel * newChannel,  ///< Channel to read/write raw codec data
-      BOOL autoDelete = TRUE  ///< Channel is to be automatically deleted
+      PBoolean autoDelete = TRUE  ///< Channel is to be automatically deleted
     );
 
     /**Close the raw data channel, described in H323Codec::AttachChannel
       */
-    virtual BOOL CloseRawDataChannel();
+    virtual PBoolean CloseRawDataChannel();
 
     /**Return a pointer to the raw data channel, which can then be used to
        access the recording/playing device. (or testing if channel is attached).
@@ -500,11 +504,11 @@ class H323Codec : public PObject
 
        The default behaviour returns FALSE.
       */
-    virtual BOOL IsRawDataChannelNative() const;
+    virtual PBoolean IsRawDataChannelNative() const;
 
     /**Read from the raw data channel.
       */
-    BOOL ReadRaw(
+    PBoolean ReadRaw(
       void * data,
       PINDEX size,
       PINDEX & length
@@ -512,7 +516,7 @@ class H323Codec : public PObject
 
     /**Write from the raw data channel.
       */
-    BOOL WriteRaw(
+    PBoolean WriteRaw(
       void * data,
       PINDEX length
     );
@@ -523,7 +527,7 @@ class H323Codec : public PObject
        The logical channel provides a means for the codec to send control messages.
        E.G. the receive video codec wants to receive a frame update.
     */
-    BOOL AttachLogicalChannel(H323Channel *channel);
+    PBoolean AttachLogicalChannel(H323Channel *channel);
 
     class FilterInfo : public PObject {
         PCLASSINFO(FilterInfo, PObject);
@@ -551,7 +555,7 @@ class H323Codec : public PObject
            // DO something with data
          }
        and to connect to a codec:
-         BOOL YourClass::OnStartLogicalChannel(H323Channel & channel)
+         PBoolean YourClass::OnStartLogicalChannel(H323Channel & channel)
          {
            H323Codec * codec = channel.GetCodec();
            codec->AddFilter(PCREATE_NOTIFIER(YourFunction));
@@ -565,7 +569,7 @@ class H323Codec : public PObject
    /**SetRawDataHeld is called when the cuurent call has been held and the raw 
          data channel has been swapped out and released.
     */
-    virtual BOOL SetRawDataHeld(BOOL hold );
+    virtual PBoolean SetRawDataHeld(PBoolean hold );
 
   protected:
     Direction direction;
@@ -574,7 +578,7 @@ class H323Codec : public PObject
     H323Channel * logicalChannel; // sends messages from receive codec to tx codec.
 
     PChannel * rawDataChannel;  // connection to the hardware for reading/writing data.
-    BOOL       deleteChannel;
+    PBoolean       deleteChannel;
     PMutex     rawChannelMutex;
 
     PINDEX     lastSequenceNumber;  // Detects lost RTP packets in the video codec.
@@ -618,7 +622,7 @@ class H323AudioCodec : public H323Codec
        function and assigns the result of that function to the raw data
        channel in the H323Codec class.
       */
-    virtual BOOL Open(
+    virtual PBoolean Open(
       H323Connection & connection ///< Connection between the endpoints
     );
 
@@ -661,7 +665,7 @@ class H323AudioCodec : public H323Codec
        as the threshold value for 16 bit PCM data.
       */
     SilenceDetectionMode GetSilenceDetectionMode(
-      BOOL * isInTalkBurst = NULL,        ///< Current silence detct state.
+      PBoolean * isInTalkBurst = NULL,        ///< Current silence detct state.
       unsigned * currentThreshold = NULL  ///< Current signal/silence threshold
     ) const;
 
@@ -685,7 +689,7 @@ class H323AudioCodec : public H323Codec
        levelThreshold, signalDeadbandFrames and silenceDeadbandFrames
        member variables.
       */
-    virtual BOOL DetectSilence();
+    virtual PBoolean DetectSilence();
 
     /**Get the average signal level in the audio stream.
        This is called from within DetectSilence() to calculate the average
@@ -699,7 +703,7 @@ class H323AudioCodec : public H323Codec
    /**SetRawDataHeld is called when the call has been held and the raw 
       data channel has been swapped out and released for another connection.
       */
-    virtual BOOL SetRawDataHeld(BOOL hold);
+    virtual PBoolean SetRawDataHeld(PBoolean hold);
 
 #ifdef H323_AEC	
 	/** Attach Acoustic Echo Cancellation.
@@ -718,14 +722,14 @@ class H323AudioCodec : public H323Codec
     unsigned silenceDeadbandFrames; // Frames of silence before talk burst ends
     unsigned adaptiveThresholdFrames; // Frames to min/max over for adaptive threshold
 
-    BOOL     inTalkBurst;           // Currently sending RTP data
+    PBoolean     inTalkBurst;           // Currently sending RTP data
     unsigned framesReceived;        // Signal/Silence frames received so far.
     unsigned levelThreshold;        // Threshold level for silence/signal
     unsigned signalMinimum;         // Minimum of frames above threshold
     unsigned silenceMaximum;        // Maximum of frames below threshold
     unsigned signalFramesReceived;  // Frames of signal received
     unsigned silenceFramesReceived; // Frames of silence received
-    BOOL	 IsRawDataHeld;
+    PBoolean	 IsRawDataHeld;
 };
 
 
@@ -770,7 +774,7 @@ class H323FramedAudioCodec : public H323AudioCodec
        no data encoded. This is typically used for silence detection in an
        audio codec.
      */
-    virtual BOOL Read(
+    virtual PBoolean Read(
       BYTE * buffer,            ///< Buffer of encoded data
       unsigned & length,        ///< Actual length of encoded data buffer
       RTP_DataFrame & rtpFrame  ///< RTP data frame
@@ -788,7 +792,7 @@ class H323FramedAudioCodec : public H323AudioCodec
        This function is called every GetFrameRate() timestamp units, so MUST
        take less than that amount of time to complete!
      */
-    virtual BOOL Write(
+    virtual PBoolean Write(
       const BYTE * buffer,            ///< Buffer of encoded data
       unsigned length,                ///< Length of encoded data buffer
       const RTP_DataFrame & rtpFrame, ///< RTP data frame
@@ -808,7 +812,7 @@ class H323FramedAudioCodec : public H323AudioCodec
        variable. it is expected this function will encode exactly
        bytesPerFrame bytes.
      */
-    virtual BOOL EncodeFrame(
+    virtual PBoolean EncodeFrame(
       BYTE * buffer,    ///< Buffer into which encoded bytes are placed
       unsigned & length ///< Actual length of encoded data buffer
     ) = 0;
@@ -817,13 +821,13 @@ class H323FramedAudioCodec : public H323AudioCodec
        The samples must be placed into the writeBuffer member variable. It is
        expected that exactly samplesPerFrame samples is decoded.
      */
-    virtual BOOL DecodeFrame(
+    virtual PBoolean DecodeFrame(
       const BYTE * buffer,   ///< Buffer from which encoded data is found
       unsigned length,       ///< Length of encoded data buffer
       unsigned & written,    ///< Number of bytes used from data buffer
       unsigned & bytesOutput ///< Number of bytes in decoded data
     );
-    virtual BOOL DecodeFrame(
+    virtual PBoolean DecodeFrame(
       const BYTE * buffer,  ///< Buffer from which encoded data is found
       unsigned length,      ///< Length of encoded data buffer
       unsigned & written    ///< Number of bytes used from data buffer
@@ -884,7 +888,7 @@ class H323StreamedAudioCodec : public H323FramedAudioCodec
        variable. it is expected this function will encode exactly
        encodedBlockSize bytes.
      */
-    virtual BOOL EncodeFrame(
+    virtual PBoolean EncodeFrame(
       BYTE * buffer,    ///< Buffer into which encoded bytes are placed
       unsigned & length ///< Actual length of encoded data buffer
     );
@@ -894,7 +898,7 @@ class H323StreamedAudioCodec : public H323FramedAudioCodec
        expected that no more than frameSamples is decoded. The return value
        is the number of samples decoded. Zero indicates an error.
      */
-    virtual BOOL DecodeFrame(
+    virtual PBoolean DecodeFrame(
       const BYTE * buffer,  ///< Buffer from which encoded data is found
       unsigned length,      ///< Length of encoded data buffer
       unsigned & written,   ///< Number of bytes used from data buffer
@@ -949,7 +953,7 @@ class H323VideoCodec : public H323Codec
        function and assigns the result of that function to the raw data
        channel in the H323Codec class.
       */
-    virtual BOOL Open(
+    virtual PBoolean Open(
       H323Connection & connection ///< Connection between the endpoints
     );
 
@@ -980,9 +984,9 @@ class H323VideoCodec : public H323Codec
     //    /**Attach the raw data device for use by codec.
     //   Note the device provided will be deleted on destruction of the codec.
     //   */
-    // virtual BOOL AttachDevice(
+    // virtual PBoolean AttachDevice(
     //  H323VideoDevice * device, ///< Device to read/write data
-    //  BOOL autoDelete = TRUE    ///< Device is to be automatically deleted
+    //  PBoolean autoDelete = TRUE    ///< Device is to be automatically deleted
     // );
 
     /**Process a FreezePicture command from remote endpoint.
@@ -1087,7 +1091,7 @@ class H323VideoCodec : public H323Codec
 
        @return TRUE if success
     */
-    virtual BOOL SetMaxBitRate(
+    virtual PBoolean SetMaxBitRate(
       unsigned bitRate ///< New bit rate
     );
 
@@ -1105,7 +1109,7 @@ class H323VideoCodec : public H323Codec
        means the channel will attempt to run at the video grabber frame rate
        Sometimes the channel cannot transmit as fast as the video grabber.
     */
-    virtual BOOL SetTargetFrameTimeMs(
+    virtual PBoolean SetTargetFrameTimeMs(
       unsigned ms ///< new time between frames
     );
 
@@ -1178,7 +1182,7 @@ class H323_ALawCodec : public H323StreamedAudioCodec
      */
     H323_ALawCodec(
       Direction direction,  ///< Direction in which this instance runs
-      BOOL at56kbps,        ///< Encoding bit rate.
+      PBoolean at56kbps,        ///< Encoding bit rate.
       unsigned frameSize    ///< Size of frame in bytes
     );
   //@}
@@ -1190,7 +1194,7 @@ class H323_ALawCodec : public H323StreamedAudioCodec
     static short DecodeSample(int   sample);
 
   protected:
-    BOOL sevenBit;
+    PBoolean sevenBit;
 };
 
 
@@ -1207,7 +1211,7 @@ class H323_muLawCodec : public H323StreamedAudioCodec
      */
     H323_muLawCodec(
       Direction direction,  ///< Direction in which this instance runs
-      BOOL at56kbps,        ///< Encoding bit rate.
+      PBoolean at56kbps,        ///< Encoding bit rate.
       unsigned frameSize    ///< Size of frame in bytes
     );
   //@}
@@ -1219,7 +1223,7 @@ class H323_muLawCodec : public H323StreamedAudioCodec
     static short DecodeSample(int   sample);
 
   protected:
-    BOOL sevenBit;
+    PBoolean sevenBit;
 };
 
 #endif // NO_H323_AUDIO_CODECS

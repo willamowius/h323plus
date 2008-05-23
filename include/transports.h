@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:50  shorne
+ * First commit of h323plus
+ *
  * Revision 1.51.2.1  2007/02/11 00:45:20  shorne
  * Added ability to disable NAT method on a call by call basis
  *
@@ -247,26 +250,26 @@ class H323TransportAddress : public PString
     H323TransportAddress(const H245_TransportAddress &);
     H323TransportAddress(const PIPSocket::Address &, WORD);
 
-    BOOL SetPDU(H225_TransportAddress & pdu) const;
-    BOOL SetPDU(H245_TransportAddress & pdu) const;
+    PBoolean SetPDU(H225_TransportAddress & pdu) const;
+    PBoolean SetPDU(H245_TransportAddress & pdu) const;
 
     /**Determine if the two transport addresses are equivalent.
       */
-    BOOL IsEquivalent(
+    PBoolean IsEquivalent(
       const H323TransportAddress & address
     );
 
     /**Extract the ip address from transport address.
        Returns FALSE, if the address is not an IP transport address.
       */
-    BOOL GetIpAddress(
+    PBoolean GetIpAddress(
       PIPSocket::Address & ip
     ) const;
 
     /**Extract the ip address and port number from transport address.
        Returns FALSE, if the address is not an IP transport address.
       */
-    BOOL GetIpAndPort(
+    PBoolean GetIpAndPort(
       PIPSocket::Address & ip,
       WORD & port,
       const char * proto = "tcp"
@@ -387,11 +390,11 @@ class H323Listener : public PThread
   //@{
     /** Open the listener.
       */
-    virtual BOOL Open() = 0;
+    virtual PBoolean Open() = 0;
 
     /**Stop the listener thread and no longer accept incoming connections.
      */
-    virtual BOOL Close() = 0;
+    virtual PBoolean Close() = 0;
 
     /**Accept a new incoming transport.
       */
@@ -405,7 +408,7 @@ class H323Listener : public PThread
 
     /**Set up a transport address PDU for bidirectional logical channels.
       */
-    virtual BOOL SetUpTransportPDU(
+    virtual PBoolean SetUpTransportPDU(
       H245_TransportAddress & pdu,         ///<  Transport addresses listening on
       const H323Transport & associatedTransport ///<  Associated transport for precendence and translation
     ) = 0;
@@ -423,14 +426,14 @@ PLIST(H323ListenerList, H323Listener);
   */
 H323TransportAddressArray H323GetInterfaceAddresses(
   const H323ListenerList & listeners, ///<  List of listeners
-  BOOL excludeLocalHost = TRUE,       ///<  Flag to exclude 127.0.0.1
+  PBoolean excludeLocalHost = TRUE,       ///<  Flag to exclude 127.0.0.1
   H323Transport * associatedTransport = NULL
                           ///<  Associated transport for precedence and translation
 );
 
 H323TransportAddressArray H323GetInterfaceAddresses(
   const H323TransportAddress & addr,  ///<  Possible INADDR_ANY address
-  BOOL excludeLocalHost = TRUE,       ///<  Flag to exclude 127.0.0.1
+  PBoolean excludeLocalHost = TRUE,       ///<  Flag to exclude 127.0.0.1
   H323Transport * associatedTransport = NULL
                           ///<  Associated transport for precedence and translation
 );
@@ -483,27 +486,27 @@ class H323Transport : public PIndirectChannel
        connection, but only indicates where to connect to. The actual
        connection is made by the Connect() function.
       */
-    virtual BOOL SetRemoteAddress(
+    virtual PBoolean SetRemoteAddress(
       const H323TransportAddress & address
     ) = 0;
 
     /**Connect to the remote address.
       */
-    virtual BOOL Connect() = 0;
+    virtual PBoolean Connect() = 0;
 
     /**Connect to the specified address.
       */
-    BOOL ConnectTo(
+    PBoolean ConnectTo(
       const H323TransportAddress & address
     ) { return SetRemoteAddress(address) && Connect(); }
 
     /**Close the channel.
       */
-    virtual BOOL Close();
+    virtual PBoolean Close();
 
     /**Check that the transport address PDU is compatible with transport.
       */
-    virtual BOOL IsCompatibleTransport(
+    virtual PBoolean IsCompatibleTransport(
       const H225_TransportAddress & pdu
     ) const;
 
@@ -511,7 +514,7 @@ class H323Transport : public PIndirectChannel
       */
     virtual void SetUpTransportPDU(
       H225_TransportAddress & pdu,
-      BOOL localTsap,
+      PBoolean localTsap,
 	  H323Connection * connection = NULL
     ) const;
 
@@ -563,7 +566,7 @@ class H323Transport : public PIndirectChannel
        example UDP is a single Read() call, while for TCP there is a TPKT
        header that indicates the size of the PDU.
       */
-    virtual BOOL ReadPDU(
+    virtual PBoolean ReadPDU(
       PBYTEArray & pdu   ///<  PDU read from transport
     ) = 0;
 
@@ -571,7 +574,7 @@ class H323Transport : public PIndirectChannel
        This is used by the aggregator to deblock the incoming data stream
        into valid PDUs.
       */
-    virtual BOOL ExtractPDU(
+    virtual PBoolean ExtractPDU(
       const PBYTEArray & pdu, 
       PINDEX & len
     ) = 0;
@@ -581,7 +584,7 @@ class H323Transport : public PIndirectChannel
        example UDP is a single Write() call, while for TCP there is a TPKT
        header that indicates the size of the PDU.
       */
-    virtual BOOL WritePDU(
+    virtual PBoolean WritePDU(
       const PBYTEArray & pdu  ///<  PDU to write
     ) = 0;
   //@}
@@ -590,12 +593,12 @@ class H323Transport : public PIndirectChannel
   //@{
 	/** Handle the PDU Reading for the first connection object
 	  */
-    BOOL HandleSignallingSocket(H323SignalPDU & pdu);
+    PBoolean HandleSignallingSocket(H323SignalPDU & pdu);
 
     /**Wait for first PDU and find/create connection object.
        If returns FALSE, then the transport is deleted by the calling thread.
       */
-    BOOL HandleFirstSignallingChannelPDU();
+    PBoolean HandleFirstSignallingChannelPDU();
   //@}
 
   /**@name Control Channel */
@@ -613,7 +616,7 @@ class H323Transport : public PIndirectChannel
        This waits for the connect backfrom the remote endpoint, completing the
        control channel open sequence.
       */
-    virtual BOOL AcceptControlChannel(
+    virtual PBoolean AcceptControlChannel(
       H323Connection & connection
     );
 
@@ -630,7 +633,7 @@ class H323Transport : public PIndirectChannel
        This locates a gatekeeper on the network and associates this transport
        object with packet exchange with that gatekeeper.
       */
-    virtual BOOL DiscoverGatekeeper(
+    virtual PBoolean DiscoverGatekeeper(
       H323Gatekeeper & gk,                  ///<  Gatekeeper to set on discovery.
       H323RasPDU & pdu,                     ///<  GatekeeperRequest PDU
       const H323TransportAddress & address  ///<  Address of gatekeeper (if present)
@@ -658,7 +661,7 @@ class H323Transport : public PIndirectChannel
   protected:
     H323EndPoint & endpoint;    /// Endpoint that owns the listener.
     PThread      * thread;      /// Thread handling the transport
-    BOOL canGetInterface;
+    PBoolean canGetInterface;
 };
 
 
@@ -692,7 +695,7 @@ class H323TransportIP : public H323Transport
 
     /**Check that the transport address PDU is compatible with transport.
       */
-    virtual BOOL IsCompatibleTransport(
+    virtual PBoolean IsCompatibleTransport(
       const H225_TransportAddress & pdu
     ) const;
 
@@ -700,7 +703,7 @@ class H323TransportIP : public H323Transport
       */
     virtual void SetUpTransportPDU(
       H225_TransportAddress & pdu,
-      BOOL localTsap,
+      PBoolean localTsap,
 	  H323Connection * connection = NULL
     ) const;
 
@@ -736,7 +739,7 @@ class H323ListenerTCP : public H323Listener
       H323EndPoint & endpoint,    ///<  Endpoint instance for channel
       PIPSocket::Address binding, ///<  Local interface to listen on
       WORD port,                  ///<  TCP port to listen for connections
-      BOOL exclusive = FALSE      ///<  Fail if listener port in use
+      PBoolean exclusive = FALSE      ///<  Fail if listener port in use
     );
 
     /** Destroy the listener thread.
@@ -746,11 +749,11 @@ class H323ListenerTCP : public H323Listener
   // Overrides from H323Listener
     /** Open the listener.
       */
-    virtual BOOL Open();
+    virtual PBoolean Open();
 
     /**Stop the listener thread and no longer accept incoming connections.
      */
-    virtual BOOL Close();
+    virtual PBoolean Close();
 
     /**Accept a new incoming transport.
       */
@@ -764,7 +767,7 @@ class H323ListenerTCP : public H323Listener
 
     /**Set up a transport address PDU for bidirectional logical channels.
       */
-    virtual BOOL SetUpTransportPDU(
+    virtual PBoolean SetUpTransportPDU(
       H245_TransportAddress & pdu,        ///<  Transport addresses listening on
       const H323Transport & associatedTransport ///<  Associated transport for precendence and translation
     );
@@ -786,7 +789,7 @@ class H323ListenerTCP : public H323Listener
 
     PTCPSocket listener;
     PIPSocket::Address localAddress;
-    BOOL exclusiveListener;
+    PBoolean exclusiveListener;
 };
 
 
@@ -802,7 +805,7 @@ class H323TransportTCP : public H323TransportIP
     H323TransportTCP(
       H323EndPoint & endpoint,    ///<  H323 End Point object
       PIPSocket::Address binding = PIPSocket::GetDefaultIpAny(), ///<  Local interface to use
-      BOOL listen = FALSE         ///<  Flag for need to wait for remote to connect
+      PBoolean listen = FALSE         ///<  Flag for need to wait for remote to connect
     );
 
     /**Destroy transport channel.
@@ -814,30 +817,30 @@ class H323TransportTCP : public H323TransportIP
        connection, but only indicates where to connect to. The actual
        connection is made by the Connect() function.
       */
-    virtual BOOL SetRemoteAddress(
+    virtual PBoolean SetRemoteAddress(
       const H323TransportAddress & address
     );
 
     /**Connect to the remote party.
       */
-    virtual BOOL Connect();
+    virtual PBoolean Connect();
 
     /**Close the channel.
       */
-    virtual BOOL Close();
+    virtual PBoolean Close();
 
     /**Read a protocol data unit from the transport.
        This will read using the transports mechanism for PDU boundaries, for
        example UDP is a single Read() call, while for TCP there is a TPKT
        header that indicates the size of the PDU.
       */
-    BOOL ReadPDU(
+    PBoolean ReadPDU(
       PBYTEArray & pdu   ///<  PDU read from transport
     );
 
     /**Extract a protocol data unit from the transport
       */
-    BOOL ExtractPDU(
+    PBoolean ExtractPDU(
       const PBYTEArray & pdu, 
       PINDEX & len
     );
@@ -847,7 +850,7 @@ class H323TransportTCP : public H323TransportIP
        example UDP is a single Write() call, while for TCP there is a TPKT
        header that indicates the size of the PDU.
       */
-    BOOL WritePDU(
+    PBoolean WritePDU(
       const PBYTEArray & pdu  ///<  PDU to write
     );
 
@@ -863,13 +866,13 @@ class H323TransportTCP : public H323TransportIP
        This waits for the connect backfrom the remote endpoint, completing the
        control channel open sequence.
       */
-    virtual BOOL AcceptControlChannel(
+    virtual PBoolean AcceptControlChannel(
       H323Connection & connection
     );
 
     /**Indicate we are waiting from remote to connect back to us.
       */
-    virtual BOOL IsListening() const;
+    virtual PBoolean IsListening() const;
 
 
   protected:
@@ -882,7 +885,7 @@ class H323TransportTCP : public H323TransportIP
        @return
        Returns TRUE if the protocol handshaking is successful.
      */
-    virtual BOOL OnOpen();
+    virtual PBoolean OnOpen();
 
 
     PTCPSocket * h245listener;
@@ -914,13 +917,13 @@ class H323TransportUDP : public H323TransportIP
        connection, but only indicates where to connect to. The actual
        connection is made by the Connect() function.
       */
-    virtual BOOL SetRemoteAddress(
+    virtual PBoolean SetRemoteAddress(
       const H323TransportAddress & address
     );
 
     /**Connect to the remote party.
       */
-    virtual BOOL Connect();
+    virtual PBoolean Connect();
 
     /**Set read to promiscuous mode.
        Normally only reads from the specifed remote address are accepted. This
@@ -948,13 +951,13 @@ class H323TransportUDP : public H323TransportIP
        example UDP is a single Read() call, while for TCP there is a TPKT
        header that indicates the size of the PDU.
       */
-    virtual BOOL ReadPDU(
+    virtual PBoolean ReadPDU(
       PBYTEArray & pdu   ///<  PDU read from transport
     );
 
     /**Extract a protocol data unit from the transport
       */
-    BOOL ExtractPDU(
+    PBoolean ExtractPDU(
       const PBYTEArray & pdu, 
       PINDEX & len
     );
@@ -964,7 +967,7 @@ class H323TransportUDP : public H323TransportIP
        example UDP is a single Write() call, while for TCP there is a TPKT
        header that indicates the size of the PDU.
       */
-    virtual BOOL WritePDU(
+    virtual PBoolean WritePDU(
       const PBYTEArray & pdu  ///<  PDU to write
     );
 
@@ -973,7 +976,7 @@ class H323TransportUDP : public H323TransportIP
        object with packet exchange with that gatekeeper. This broadcasts a UDP
        packet on the local network to find the gatekeeper's IP address.
       */
-    virtual BOOL DiscoverGatekeeper(
+    virtual PBoolean DiscoverGatekeeper(
       H323Gatekeeper & gk,                  ///<  Gatekeeper to set on discovery.
       H323RasPDU & pdu,                     ///<  GatekeeperRequest PDU
       const H323TransportAddress & address  ///<  Address of gatekeeper (if present)

@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.16  2008/04/25 01:05:44  shorne
+ * Added missing payloadType setting for Audio plugins
+ *
  * Revision 1.15  2008/02/14 07:02:29  shorne
  * Fixed setting MaxFrameSize for non fixed size codecs
  *
@@ -705,7 +708,7 @@ static PluginCodec_ControlDefn * GetCodecControl(const PluginCodec_Definition * 
   return NULL;
 }
 
-static BOOL SetCodecControl(const PluginCodec_Definition * codec, 
+static PBoolean SetCodecControl(const PluginCodec_Definition * codec, 
                                                     void * context,
                                               const char * name,
                                               const char * parm, 
@@ -720,7 +723,7 @@ static BOOL SetCodecControl(const PluginCodec_Definition * codec,
   return (*codecControls->control)(codec, context, SET_CODEC_OPTIONS_CONTROL, options, &optionsLen);
 }
 
-static BOOL SetCodecControl(const PluginCodec_Definition * codec, 
+static PBoolean SetCodecControl(const PluginCodec_Definition * codec, 
                                                     void * context,
                                               const char * name,
                                               const char * parm, 
@@ -731,7 +734,7 @@ static BOOL SetCodecControl(const PluginCodec_Definition * codec,
 
 #ifdef H323_VIDEO
 
-static BOOL EventCodecControl(PluginCodec_Definition * codec, 
+static PBoolean EventCodecControl(PluginCodec_Definition * codec, 
                                                void * context,
                                          const char * name,
                                          const char * parm )
@@ -746,7 +749,7 @@ static BOOL EventCodecControl(PluginCodec_Definition * codec,
   return FALSE;
 }
 
-static BOOL CallCodecControl(PluginCodec_Definition * codec, 
+static PBoolean CallCodecControl(PluginCodec_Definition * codec, 
                                                void * context,
                                          const char * name,
                                                void * parm, 
@@ -1052,7 +1055,7 @@ class OpalFixedCodecFactory : public PFactory<OpalFactoryCodec>
 };
 
 
-static PString CreateCodecName(PluginCodec_Definition * codec, BOOL addSW)
+static PString CreateCodecName(PluginCodec_Definition * codec, PBoolean addSW)
 {
   PString str;
   if (codec->destFormat != NULL)
@@ -1064,7 +1067,7 @@ static PString CreateCodecName(PluginCodec_Definition * codec, BOOL addSW)
   return str;
 }
 
-static PString CreateCodecName(const PString & baseName, BOOL addSW)
+static PString CreateCodecName(const PString & baseName, PBoolean addSW)
 {
   PString str(baseName);
   if (addSW)
@@ -1080,7 +1083,7 @@ class OpalPluginAudioMediaFormat : public OpalMediaFormat
     OpalPluginAudioMediaFormat(
       PluginCodec_Definition * _encoderCodec,
       unsigned defaultSessionID,  /// Default session for codec type
-      BOOL     needsJitter,   /// Indicate format requires a jitter buffer
+      PBoolean     needsJitter,   /// Indicate format requires a jitter buffer
       unsigned frameTime,     /// Time for frame in RTP units (if applicable)
       unsigned timeUnits,     /// RTP units for frameTime (if applicable)
       time_t timeStamp        /// timestamp (for versioning)
@@ -1314,7 +1317,7 @@ class H323PluginFramedAudioCodec : public H323FramedAudioCodec
     ~H323PluginFramedAudioCodec()
     { if (codec != NULL && codec->destroyCodec != NULL) (*codec->destroyCodec)(codec, context); }
 
-    BOOL EncodeFrame(
+    PBoolean EncodeFrame(
       BYTE * buffer,        /// Buffer into which encoded bytes are placed
       unsigned int & toLen  /// Actual length of encoded data buffer
     )
@@ -1330,7 +1333,7 @@ class H323PluginFramedAudioCodec : public H323FramedAudioCodec
                                  &flags) != 0;
     };
 
-    BOOL DecodeFrame(
+    PBoolean DecodeFrame(
       const BYTE * buffer,    /// Buffer from which encoded data is found
       unsigned length,        /// Length of encoded data buffer
       unsigned & written,     /// Number of bytes used from data buffer
@@ -1451,30 +1454,30 @@ class H323PluginVideoCodec : public H323VideoCodec
  
     ~H323PluginVideoCodec();
 
-    virtual BOOL Read(
+    virtual PBoolean Read(
       BYTE * buffer,            ///< Buffer of encoded data
       unsigned & length,        ///< Actual length of encoded data buffer
       RTP_DataFrame & dst       ///< RTP data frame
     );
 
-    virtual BOOL Write(
+    virtual PBoolean Write(
       const BYTE * buffer,        ///< Buffer of encoded data
       unsigned length,            ///< Length of encoded data buffer
       const RTP_DataFrame & src,  ///< RTP data frame
       unsigned & written          ///< Number of bytes used from data buffer
     );
 
-    BOOL RenderFrame(
+    PBoolean RenderFrame(
       const BYTE * buffer         ///< Buffer of data to render
     );
  
     virtual unsigned GetFrameRate() const 
     { return lastFrameTimeRTP; }
 
-    BOOL SetTargetFrameTimeMs(unsigned ms)  // Requires implementing
+    PBoolean SetTargetFrameTimeMs(unsigned ms)  // Requires implementing
     {  targetFrameTimeMs = ms; return TRUE; }
 
-    virtual BOOL SetFrameSize(int width, int height);
+    virtual PBoolean SetFrameSize(int width, int height);
 
     void SetTxQualityLevel(int qlevel)
     { SetCodecControl(codec, context, SET_CODEC_OPTIONS_CONTROL, "Encoding Quality", qlevel); }
@@ -1491,7 +1494,7 @@ class H323PluginVideoCodec : public H323VideoCodec
     unsigned GetMaxBitRate() const
     { return mediaFormat.GetOptionInteger(OpalVideoFormat::MaxBitRateOption); }
 
-    BOOL SetMaxBitRate(unsigned bitRate) 
+    PBoolean SetMaxBitRate(unsigned bitRate) 
     { return SetCodecControl(codec, context, SET_CODEC_OPTIONS_CONTROL, "Max Bit Rate", bitRate); }
 
     void SetGeneralCodecOption(const char * opt, int val)
@@ -1518,7 +1521,7 @@ class H323PluginVideoCodec : public H323VideoCodec
     void *       context;
     PluginCodec_Definition * codec;
     RTP_DataFrame bufferRTP;
-    BOOL         lastPacketSent;
+    PBoolean         lastPacketSent;
 
     unsigned     bytesPerFrame;
     unsigned     lastFrameTimeRTP;
@@ -1588,7 +1591,7 @@ H323PluginVideoCodec::~H323PluginVideoCodec()
 		(*codec->destroyCodec)(codec, context);
 }
 
-BOOL H323PluginVideoCodec::Read(BYTE * buffer, unsigned & length, RTP_DataFrame & dst)
+PBoolean H323PluginVideoCodec::Read(BYTE * buffer, unsigned & length, RTP_DataFrame & dst)
 {
     PWaitAndSignal mutex(videoHandlerActive);
 
@@ -1692,7 +1695,7 @@ BOOL H323PluginVideoCodec::Read(BYTE * buffer, unsigned & length, RTP_DataFrame 
     return TRUE;
 }
 
-BOOL H323PluginVideoCodec::Write(const BYTE * buffer, unsigned length, const RTP_DataFrame & src, unsigned & written)
+PBoolean H323PluginVideoCodec::Write(const BYTE * buffer, unsigned length, const RTP_DataFrame & src, unsigned & written)
 {
   PWaitAndSignal mutex(videoHandlerActive);
 
@@ -1755,7 +1758,7 @@ BOOL H323PluginVideoCodec::Write(const BYTE * buffer, unsigned length, const RTP
 }
 
 
-BOOL H323PluginVideoCodec::RenderFrame(const BYTE * buffer)
+PBoolean H323PluginVideoCodec::RenderFrame(const BYTE * buffer)
 {
     PVideoChannel *videoOut = (PVideoChannel *)rawDataChannel; // guaranteed to be non-NULL when called from Read() or Write()
 
@@ -1768,7 +1771,7 @@ BOOL H323PluginVideoCodec::RenderFrame(const BYTE * buffer)
     return videoOut->Write(buffer, 0 /*unused parameter*/);
 }
 
-BOOL H323PluginVideoCodec::SetFrameSize(int _width, int _height)
+PBoolean H323PluginVideoCodec::SetFrameSize(int _width, int _height)
 {
     if ((frameWidth == _width) && (frameHeight == _height))
         return TRUE;
@@ -1985,7 +1988,7 @@ class H323PluginG7231Capability : public H323AudioPluginCapability
   public:
     H323PluginG7231Capability(PluginCodec_Definition * _encoderCodec,
                                PluginCodec_Definition * _decoderCodec,
-                               BOOL _annexA = TRUE)
+                               PBoolean _annexA = TRUE)
       : H323AudioPluginCapability(_encoderCodec, _decoderCodec, H245_AudioCapability::e_g7231),
         annexA(_annexA)
       { }
@@ -1999,7 +2002,7 @@ class H323PluginG7231Capability : public H323AudioPluginCapability
       if (result != EqualTo)
         return result;
 
-      BOOL otherAnnexA = ((const H323PluginG7231Capability &)obj).annexA;
+      PBoolean otherAnnexA = ((const H323PluginG7231Capability &)obj).annexA;
       if (annexA == otherAnnexA)
         return EqualTo;
 
@@ -2014,7 +2017,7 @@ class H323PluginG7231Capability : public H323AudioPluginCapability
       return new H323PluginG7231Capability(*this);
     }
 
-    virtual BOOL OnSendingPDU(H245_AudioCapability & cap, unsigned packetSize) const
+    virtual PBoolean OnSendingPDU(H245_AudioCapability & cap, unsigned packetSize) const
     {
       cap.SetTag(H245_AudioCapability::e_g7231);
       H245_AudioCapability_g7231 & g7231 = cap;
@@ -2023,7 +2026,7 @@ class H323PluginG7231Capability : public H323AudioPluginCapability
       return TRUE;
     }
 
-    virtual BOOL OnReceivedPDU(const H245_AudioCapability & cap,  unsigned & packetSize)
+    virtual PBoolean OnReceivedPDU(const H245_AudioCapability & cap,  unsigned & packetSize)
     {
       if (cap.GetTag() != H245_AudioCapability::e_g7231)
         return FALSE;
@@ -2034,7 +2037,7 @@ class H323PluginG7231Capability : public H323AudioPluginCapability
     }
 
   protected:
-    BOOL annexA;
+    PBoolean annexA;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2060,12 +2063,12 @@ class H323GSMPluginCapability : public H323AudioPluginCapability
       return new H323GSMPluginCapability(*this);
     }
 
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_AudioCapability & pdu,  /// PDU to set information on
       unsigned packetSize          /// Packet size to use in capability
     ) const;
 
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_AudioCapability & pdu,  /// PDU to get information from
       unsigned & packetSize              /// Packet size to use in capability
     );
@@ -2129,7 +2132,7 @@ class H323VideoPluginCapability : public H323VideoCapability,
     { return pluginSubType; }
 
 
-    static BOOL SetCommonOptions(OpalMediaFormat & mediaFormat, int frameWidth, int frameHeight, int frameRate)
+    static PBoolean SetCommonOptions(OpalMediaFormat & mediaFormat, int frameWidth, int frameHeight, int frameRate)
     {
         if (!mediaFormat.SetOptionInteger(OpalVideoFormat::FrameWidthOption, frameWidth)) {
            PTRACE(3,"PLUGIN Error setting " << OpalVideoFormat::FrameWidthOption << " to " << frameWidth);
@@ -2149,7 +2152,7 @@ class H323VideoPluginCapability : public H323VideoCapability,
       return TRUE;
     }
 
-     virtual BOOL SetMaxFrameSize(CapabilityFrameSize framesize, int frameunits = 1)
+     virtual PBoolean SetMaxFrameSize(CapabilityFrameSize framesize, int frameunits = 1)
      {
          PString param;
 		 int w; int h;
@@ -2177,7 +2180,7 @@ class H323VideoPluginCapability : public H323VideoCapability,
          return SetMPIValue(param, frameunits,1);
      }
 
-	 virtual BOOL SetMPIValue(const PString & param, int value, BOOL zero = FALSE) {
+	 virtual PBoolean SetMPIValue(const PString & param, int value, PBoolean zero = FALSE) {
 		 OpalMediaFormat & fmt = GetWritableMediaFormat();
 		   // Zero out the existing options
 		 if (zero) {
@@ -2256,7 +2259,7 @@ class H323CodecPluginGenericVideoCapability : public H323GenericVideoCapability,
 
     virtual void LoadGenericData(const PluginCodec_H323GenericCodecData *ptr);
 
-    virtual BOOL SetMaxFrameSize(CapabilityFrameSize framesize, int frameunits = 1);
+    virtual PBoolean SetMaxFrameSize(CapabilityFrameSize framesize, int frameunits = 1);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2278,15 +2281,15 @@ class H323H261PluginCapability : public H323VideoPluginCapability
       return new H323H261PluginCapability(*this); 
     }
 
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_VideoCapability & pdu  /// PDU to set information on
     ) const;
 
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_VideoMode & pdu
     ) const;
 
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_VideoCapability & pdu  /// PDU to get information from
     );
 
@@ -2310,15 +2313,15 @@ class H323H263PluginCapability : public H323VideoPluginCapability
     virtual PObject * Clone() const
     { return new H323H263PluginCapability(*this); }
 
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_VideoCapability & pdu  /// PDU to set information on
     ) const;
 
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_VideoMode & pdu
     ) const;
 
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_VideoCapability & pdu  /// PDU to get information from
     );
 };
@@ -2454,11 +2457,11 @@ void H323PluginCodecManager::RegisterCodecs(unsigned int count, void * _codecLis
 
     PluginCodec_Definition & encoder = codecList[i];
 
-    BOOL videoSupported = encoder.version >= PLUGIN_CODEC_VERSION_VIDEO;
+    PBoolean videoSupported = encoder.version >= PLUGIN_CODEC_VERSION_VIDEO;
 
     // for every encoder, we need a decoder
-    BOOL found = FALSE;
-    BOOL isEncoder = FALSE;
+    PBoolean found = FALSE;
+    PBoolean isEncoder = FALSE;
     if (encoder.h323CapabilityType != PluginCodec_H323Codec_undefined &&
          (
            ((encoder.flags & PluginCodec_MediaTypeMask) == PluginCodec_MediaTypeAudio) && 
@@ -2553,9 +2556,9 @@ void H323PluginCodecManager::CreateCapabilityAndMediaFormat(
     timeStamp = mediaNow;
 
   unsigned defaultSessionID = 0;
-  BOOL jitter = FALSE;
+  PBoolean jitter = FALSE;
 #ifdef H323_VIDEO
-  BOOL extended = FALSE;
+  PBoolean extended = FALSE;
 #endif
   unsigned frameTime = 0;
   unsigned timeUnits = 0;
@@ -3028,7 +3031,7 @@ PObject::Comparison H323GSMPluginCapability::Compare(const PObject & obj) const
 }
 
 
-BOOL H323GSMPluginCapability::OnSendingPDU(H245_AudioCapability & cap, unsigned packetSize) const
+PBoolean H323GSMPluginCapability::OnSendingPDU(H245_AudioCapability & cap, unsigned packetSize) const
 {
   cap.SetTag(pluginSubType);
   H245_GSMAudioCapability & gsm = cap;
@@ -3040,7 +3043,7 @@ BOOL H323GSMPluginCapability::OnSendingPDU(H245_AudioCapability & cap, unsigned 
 }
 
 
-BOOL H323GSMPluginCapability::OnReceivedPDU(const H245_AudioCapability & cap, unsigned & packetSize)
+PBoolean H323GSMPluginCapability::OnReceivedPDU(const H245_AudioCapability & cap, unsigned & packetSize)
 {
   const H245_GSMAudioCapability & gsm = cap;
   packetSize   = gsm.m_audioUnitSize / encoderCodec->parm.audio.bytesPerFrame;
@@ -3098,7 +3101,7 @@ PObject::Comparison H323H261PluginCapability::Compare(const PObject & obj) const
 }
 
 
-BOOL H323H261PluginCapability::OnSendingPDU(H245_VideoCapability & cap) const
+PBoolean H323H261PluginCapability::OnSendingPDU(H245_VideoCapability & cap) const
 {
   cap.SetTag(H245_VideoCapability::e_h261VideoCapability);
 
@@ -3127,7 +3130,7 @@ BOOL H323H261PluginCapability::OnSendingPDU(H245_VideoCapability & cap) const
 }
 
 
-BOOL H323H261PluginCapability::OnSendingPDU(H245_VideoMode & pdu) const
+PBoolean H323H261PluginCapability::OnSendingPDU(H245_VideoMode & pdu) const
 {
   pdu.SetTag(H245_VideoMode::e_h261VideoMode);
   H245_H261VideoMode & mode = pdu;
@@ -3145,7 +3148,7 @@ BOOL H323H261PluginCapability::OnSendingPDU(H245_VideoMode & pdu) const
   return TRUE;
 }
 
-BOOL H323H261PluginCapability::OnReceivedPDU(const H245_VideoCapability & cap)
+PBoolean H323H261PluginCapability::OnReceivedPDU(const H245_VideoCapability & cap)
 {
   if (cap.GetTag() != H245_VideoCapability::e_h261VideoCapability)
     return FALSE;
@@ -3248,7 +3251,7 @@ static void SetTransmittedCap(const OpalMediaFormat & mediaFormat,
 }
 
 
-BOOL H323H263PluginCapability::OnSendingPDU(H245_VideoCapability & cap) const
+PBoolean H323H263PluginCapability::OnSendingPDU(H245_VideoCapability & cap) const
 {
   cap.SetTag(H245_VideoCapability::e_h263VideoCapability);
   H245_H263VideoCapability & h263 = cap;
@@ -3289,7 +3292,7 @@ BOOL H323H263PluginCapability::OnSendingPDU(H245_VideoCapability & cap) const
 }
 
 
-BOOL H323H263PluginCapability::OnSendingPDU(H245_VideoMode & pdu) const
+PBoolean H323H263PluginCapability::OnSendingPDU(H245_VideoMode & pdu) const
 {
   pdu.SetTag(H245_VideoMode::e_h263VideoMode);
   H245_H263VideoMode & mode = pdu;
@@ -3317,7 +3320,7 @@ BOOL H323H263PluginCapability::OnSendingPDU(H245_VideoMode & pdu) const
   return TRUE;
 }
 
-static BOOL SetReceivedH263Cap(OpalMediaFormat & mediaFormat, 
+static PBoolean SetReceivedH263Cap(OpalMediaFormat & mediaFormat, 
                                const H245_H263VideoCapability & h263, 
                                const char * mpiTag,
                                int mpiEnum,
@@ -3325,7 +3328,7 @@ static BOOL SetReceivedH263Cap(OpalMediaFormat & mediaFormat,
                                int slowMpiEnum,
                                const PASN_Integer & slowMpi,
                                int frameWidth, int frameHeight,
-                               BOOL & formatDefined)
+                               PBoolean & formatDefined)
 {
   if (h263.HasOptionalField(mpiEnum)) {
     if (!mediaFormat.SetOptionInteger(mpiTag, mpi))
@@ -3345,14 +3348,14 @@ static BOOL SetReceivedH263Cap(OpalMediaFormat & mediaFormat,
 }
 
 
-BOOL H323H263PluginCapability::OnReceivedPDU(const H245_VideoCapability & cap)
+PBoolean H323H263PluginCapability::OnReceivedPDU(const H245_VideoCapability & cap)
 {
   if (cap.GetTag() != H245_VideoCapability::e_h263VideoCapability)
     return FALSE;
 
   OpalMediaFormat & fmt = GetWritableMediaFormat();
 
-  BOOL formatDefined = FALSE;
+  PBoolean formatDefined = FALSE;
 
   const H245_H263VideoCapability & h263 = cap;
 
@@ -3451,7 +3454,7 @@ void H323CodecPluginGenericVideoCapability::LoadGenericData(const PluginCodec_H3
   PopulateMediaFormatFromGenericData(GetWritableMediaFormat(), data);
 }
 
-BOOL H323CodecPluginGenericVideoCapability::SetMaxFrameSize(CapabilityFrameSize framesize, int frameunits)
+PBoolean H323CodecPluginGenericVideoCapability::SetMaxFrameSize(CapabilityFrameSize framesize, int frameunits)
 {
     PString param;
     switch (framesize) {
@@ -3502,7 +3505,7 @@ void H323DynaLink::Load()
   }
 }
 
-BOOL H323DynaLink::LoadPlugin(const PString & filename)
+PBoolean H323DynaLink::LoadPlugin(const PString & filename)
 {
     return PDynaLink::Open(filename);
 }

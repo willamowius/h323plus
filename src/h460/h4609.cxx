@@ -137,7 +137,7 @@ PINDEX H4609_Extension::GetDataLength() const
 }
 
 
-BOOL H4609_Extension::Decode(PASN_Stream & strm)
+PBoolean H4609_Extension::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -260,7 +260,7 @@ H4609_QosMonitoringReportData::operator const H4609_InterGKQosMonReport &() cons
 }
 
 
-BOOL H4609_QosMonitoringReportData::CreateObject()
+PBoolean H4609_QosMonitoringReportData::CreateObject()
 {
   switch (tag) {
     case e_periodic :
@@ -341,7 +341,7 @@ PINDEX H4609_RTCPMeasures_mediaSenderMeasures::GetDataLength() const
 }
 
 
-BOOL H4609_RTCPMeasures_mediaSenderMeasures::Decode(PASN_Stream & strm)
+PBoolean H4609_RTCPMeasures_mediaSenderMeasures::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -457,7 +457,7 @@ PINDEX H4609_RTCPMeasures_mediaReceiverMeasures::GetDataLength() const
 }
 
 
-BOOL H4609_RTCPMeasures_mediaReceiverMeasures::Decode(PASN_Stream & strm)
+PBoolean H4609_RTCPMeasures_mediaReceiverMeasures::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -680,7 +680,7 @@ PINDEX H4609_RTCPMeasures::GetDataLength() const
 }
 
 
-BOOL H4609_RTCPMeasures::Decode(PASN_Stream & strm)
+PBoolean H4609_RTCPMeasures::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -804,7 +804,7 @@ PINDEX H4609_PerCallQoSReport::GetDataLength() const
 }
 
 
-BOOL H4609_PerCallQoSReport::Decode(PASN_Stream & strm)
+PBoolean H4609_PerCallQoSReport::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -904,7 +904,7 @@ PINDEX H4609_PeriodicQoSMonReport::GetDataLength() const
 }
 
 
-BOOL H4609_PeriodicQoSMonReport::Decode(PASN_Stream & strm)
+PBoolean H4609_PeriodicQoSMonReport::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -996,7 +996,7 @@ PINDEX H4609_FinalQosMonReport::GetDataLength() const
 }
 
 
-BOOL H4609_FinalQosMonReport::Decode(PASN_Stream & strm)
+PBoolean H4609_FinalQosMonReport::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1092,7 +1092,7 @@ PINDEX H4609_InterGKQosMonReport::GetDataLength() const
 }
 
 
-BOOL H4609_InterGKQosMonReport::Decode(PASN_Stream & strm)
+PBoolean H4609_InterGKQosMonReport::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;

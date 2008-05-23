@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:51  shorne
+ * First commit of h323plus
+ *
  * Revision 1.1.2.1  2006/12/23 19:02:56  shorne
  * File restructuring
  *
@@ -127,7 +130,7 @@ class H450ServiceAPDU : public X880_ROS
     void BuildCallIntrusionForceRelesed(int invokeId);
 
     void AttachSupplementaryServiceAPDU(H323SignalPDU & pdu);
-    BOOL WriteFacilityPDU(
+    PBoolean WriteFacilityPDU(
       H323Connection & connection
     );
 
@@ -163,23 +166,23 @@ class H450xHandler : public PObject
       H323SignalPDU & pdu
     );
 
-    virtual BOOL OnReceivedInvoke(
+    virtual PBoolean OnReceivedInvoke(
       int opcode,
       int invokeId,                           ///<  InvokeId of operation (used in response)
       int linkedId,                           ///<  InvokeId of associated operation (if any)
       PASN_OctetString * argument             ///<  Parameters for the initiate operation
     ) = 0;
 
-    virtual BOOL OnReceivedReturnResult(
+    virtual PBoolean OnReceivedReturnResult(
       X880_ReturnResult & returnResult
     );
 
-    virtual BOOL OnReceivedReturnError(
+    virtual PBoolean OnReceivedReturnError(
       int errorCode,
       X880_ReturnError & returnError
     );
 
-    virtual BOOL OnReceivedReject(
+    virtual PBoolean OnReceivedReject(
       int problemType,
       int problemNumber
     );
@@ -196,7 +199,7 @@ class H450xHandler : public PObject
 
     void SendReturnErrorReject(int problem);
 
-    BOOL DecodeArguments(
+    PBoolean DecodeArguments(
       PASN_OctetString * argString,
       PASN_Object & argObject,
       int absentErrorCode
@@ -249,7 +252,7 @@ class H450xDispatcher : public PObject
 
     /** Handle the H.450.x Supplementary Service PDU if present in the H225_H323_UU_PDU
      */
-    virtual BOOL HandlePDU(
+    virtual PBoolean HandlePDU(
       const H323SignalPDU & pdu
     );
 
@@ -257,28 +260,28 @@ class H450xDispatcher : public PObject
        The default behaviour is to attempt to decode the invoke operation
        and call the corresponding OnReceived<Operation> method on the EndPoint.
      */
-    virtual BOOL OnReceivedInvoke(X880_Invoke& invoke, H4501_InterpretationApdu& interpretation);
+    virtual PBoolean OnReceivedInvoke(X880_Invoke& invoke, H4501_InterpretationApdu& interpretation);
 
     /**Handle an incoming X880 Return Result PDU.
        The default behaviour is to attempt to match the return result
        to a previous invoke operation and call the corresponding
        OnReceived<Operation>Success method on the EndPoint.
      */
-    virtual BOOL OnReceivedReturnResult(X880_ReturnResult& returnResult);
+    virtual PBoolean OnReceivedReturnResult(X880_ReturnResult& returnResult);
 
     /**Handle an incoming X880 Return Error PDU.
        The default behaviour is to attempt to match the return error
        to a previous invoke operation and call the corresponding
        OnReceived<Operation>Error method on the EndPoint.
      */
-    virtual BOOL OnReceivedReturnError(X880_ReturnError& returnError);
+    virtual PBoolean OnReceivedReturnError(X880_ReturnError& returnError);
 
     /**Handle an incoming X880 Reject PDU.
        The default behaviour is to attempt to match the reject
        to a previous invoke, return result or return error operation
        and call OnReceived<Operation>Reject method on the EndPoint.
      */
-    virtual BOOL OnReceivedReject(X880_Reject& reject);
+    virtual PBoolean OnReceivedReject(X880_Reject& reject);
 
     /**Send a return error in response to an invoke operation.
      */
@@ -329,7 +332,7 @@ class H4502Handler : public H450xHandler
       H323SignalPDU & pdu
     );
 
-    virtual BOOL OnReceivedInvoke(
+    virtual PBoolean OnReceivedInvoke(
       int opcode,
       int invokeId,                           ///<  InvokeId of operation (used in response)
       int linkedId,                           ///<  InvokeId of associated operation (if any)
@@ -390,7 +393,7 @@ class H4502Handler : public H450xHandler
       PASN_OctetString * argument             ///<  Parameters for the active operation
     );
 
-    virtual BOOL OnReceivedReturnResult(
+    virtual PBoolean OnReceivedReturnResult(
       X880_ReturnResult & returnResult
     );
 
@@ -413,7 +416,7 @@ class H4502Handler : public H450xHandler
      */
     void OnReceivedIdentifyReturnResult(X880_ReturnResult &returnResult);
 
-    virtual BOOL OnReceivedReturnError(
+    virtual PBoolean OnReceivedReturnError(
       int errorCode,
       X880_ReturnError & returnError
     );
@@ -516,7 +519,7 @@ class H4502Handler : public H450xHandler
 
     /**Is the Call Transfer Timer running?
      */
-    BOOL IsctTimerRunning() { return ctTimer.IsRunning(); }
+    PBoolean IsctTimerRunning() { return ctTimer.IsRunning(); }
 
     /**Callback mechanism for Call Transfer Timers CT-T1, CT-T2, CT-T3 & CT-T4
      */
@@ -540,17 +543,17 @@ class H4502Handler : public H450xHandler
 
     /**Was the transfer through consultation successful.
      */
-    BOOL isConsultationTransferSuccess() { return consultationTransfer; }
+    PBoolean isConsultationTransferSuccess() { return consultationTransfer; }
 
   protected:
     PString transferringCallToken;    // Stores the call token for the transferring connection (if there is one)
     PString transferringCallIdentity; // Stores the call identity for the transferring call (if there is one)
     State   ctState;                  // Call Transfer state of the conneciton
-    BOOL    ctResponseSent;           // Has a callTransferSetupReturnResult been sent?
+    PBoolean    ctResponseSent;           // Has a callTransferSetupReturnResult been sent?
     PTimer  ctTimer;                  // Call Transfer Timer - Handles all four timers CT-T1,
     PString CallToken;                // Call Token of the associated connection 
                                       // (used during a consultation transfer).
-    BOOL consultationTransfer;        // Flag used to indicate whether an incoming call is involved in
+    PBoolean consultationTransfer;        // Flag used to indicate whether an incoming call is involved in
                                       // a transfer through consultation.
 };
 
@@ -564,7 +567,7 @@ class H4503Handler : public H450xHandler
       H450xDispatcher & dispatcher
     );
 
-    virtual BOOL OnReceivedInvoke(
+    virtual PBoolean OnReceivedInvoke(
       int opcode,
       int invokeId,                           /// InvokeId of operation (used in response)
       int linkedId,                           /// InvokeId of associated operation (if any)
@@ -578,7 +581,7 @@ class H4503Handler : public H450xHandler
       PASN_OctetString * argument 
     );
 
-    BOOL GetRedirectingNumber(
+    PBoolean GetRedirectingNumber(
       PString &originalCalledNr,               /// InvokeId of associated operation (if any)
       PString &lastDivertingNr ,
       int &divCounter, 
@@ -604,7 +607,7 @@ class H4504Handler : public H450xHandler
       H450xDispatcher & dispatcher
     );
 
-    virtual BOOL OnReceivedInvoke(
+    virtual PBoolean OnReceivedInvoke(
       int opcode,
       int invokeId,                           ///<  InvokeId of operation (used in response)
       int linkedId,                           ///<  InvokeId of associated operation (if any)
@@ -641,7 +644,7 @@ class H4504Handler : public H450xHandler
     * NOTE: Only Local Hold is implemented so far. 
     */
     void HoldCall(
-      BOOL localHold   ///<  true for Local Hold, false for Remote Hold
+      PBoolean localHold   ///<  true for Local Hold, false for Remote Hold
     );
 
     /**Retrieve the call from hold, activating all media channels (H.450.4)
@@ -676,7 +679,7 @@ class H4506Handler : public H450xHandler
       H450xDispatcher & dispatcher
     );
 
-    virtual BOOL OnReceivedInvoke(
+    virtual PBoolean OnReceivedInvoke(
       int opcode,
       int invokeId,                           ///<  InvokeId of operation (used in response)
       int linkedId,                           ///<  InvokeId of associated operation (if any)
@@ -740,7 +743,7 @@ class H45011Handler : public H450xHandler
       H323SignalPDU & pdu
     );
 
-    virtual BOOL OnReceivedInvoke(
+    virtual PBoolean OnReceivedInvoke(
       int opcode,
       int invokeId,                           ///<  InvokeId of operation (used in response)
       int linkedId,                           ///<  InvokeId of associated operation (if any)
@@ -770,7 +773,7 @@ class H45011Handler : public H450xHandler
 
     /**Handle an incoming Call Intrusion Forced Release operation
     */
-    virtual BOOL OnReceivedCallIntrusionForcedRelease(
+    virtual PBoolean OnReceivedCallIntrusionForcedRelease(
       int linkedId,
       PASN_OctetString *argument
     );
@@ -817,18 +820,18 @@ class H45011Handler : public H450xHandler
       PASN_OctetString *argument
     );
 
-    virtual BOOL OnReceivedReturnResult(
+    virtual PBoolean OnReceivedReturnResult(
       X880_ReturnResult & returnResult
     );
 
     void OnReceivedCIRequestResult(/*X880_ReturnResult & returnResult*/);
 
-    virtual BOOL OnReceivedReturnError(
+    virtual PBoolean OnReceivedReturnError(
       int errorCode,
       X880_ReturnError & returnError
     );
 
-    BOOL OnReceivedInvokeReturnError (
+    PBoolean OnReceivedInvokeReturnError (
       int errorCode,
       const bool timerExpiry = false ///<  Flag to indicate expiry
     );
@@ -837,7 +840,7 @@ class H45011Handler : public H450xHandler
       X880_ReturnResult & returnResult
     );
 
-    BOOL OnReceivedGetCIPLReturnError(
+    PBoolean OnReceivedGetCIPLReturnError(
       int errorCode,
       const bool timerExpiry = false ///<  Flag to indicate expiry
     );
@@ -849,7 +852,7 @@ class H45011Handler : public H450xHandler
       const PString & identity
     );
 
-    BOOL GetRemoteCallIntrusionProtectionLevel(
+    PBoolean GetRemoteCallIntrusionProtectionLevel(
       const PString & intrusionCallToken,
       unsigned intrusionCICL
     );
@@ -860,7 +863,7 @@ class H45011Handler : public H450xHandler
 
     void SetIntrusionNotAuthorized();
 
-    virtual BOOL OnReceivedReject(
+    virtual PBoolean OnReceivedReject(
       int problemType,
       int problemNumber
     );
@@ -931,7 +934,7 @@ class H45011Handler : public H450xHandler
 
     /**Is the Call Intrusion Timer running?
      */
-    BOOL IsctTimerRunning() { return ciTimer.IsRunning(); }
+    PBoolean IsctTimerRunning() { return ciTimer.IsRunning(); }
 
     /**Callback mechanism for Call Intrusion Timers CI-T1, CI-T2, CI-T3 & CI-T4 & CI-T5 & CI-T6
      */

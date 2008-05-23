@@ -30,6 +30,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:49  shorne
+ * First commit of h323plus
+ *
  *
  *
 */
@@ -60,7 +63,7 @@ class H235PluginAuthenticator : public H235Authenticator
     H235_ClearToken * CreateClearToken();
     H225_CryptoH323Token * CreateCryptoToken();
 
-    BOOL Finalise(
+    PBoolean Finalise(
       PBYTEArray & rawPDU
     );
 
@@ -76,29 +79,29 @@ class H235PluginAuthenticator : public H235Authenticator
       const PBYTEArray & rawPDU
     );
 
-    BOOL IsCapability(
+    PBoolean IsCapability(
       const H235_AuthenticationMechanism & mechansim,
       const PASN_ObjectId & algorithmOID
     );
 
-    BOOL SetCapability(
+    PBoolean SetCapability(
       H225_ArrayOf_AuthenticationMechanism & mechansims,
       H225_ArrayOf_PASN_ObjectId & algorithmOIDs
     );
 
-    BOOL UseGkAndEpIdentifiers() const;
+    PBoolean UseGkAndEpIdentifiers() const;
 
-    BOOL IsSecuredPDU(
+    PBoolean IsSecuredPDU(
       unsigned rasPDU,
-      BOOL received
+      PBoolean received
     ) const;
 
-    BOOL IsSecuredSignalPDU(
+    PBoolean IsSecuredSignalPDU(
       unsigned signalPDU,
-      BOOL received
+      PBoolean received
     ) const;
 
-    BOOL IsActive() const;
+    PBoolean IsActive() const;
 
     const PString & GetRemoteId() const;
     void SetRemoteId(const PString & id);
@@ -138,8 +141,8 @@ class h235PluginDeviceManager : public PPluginModuleManager
 
     static void Bootstrap();
 
-    virtual BOOL Registerh235(unsigned int count, void * _h235List);
-    virtual BOOL Unregisterh235(unsigned int count, void * _h235List);
+    virtual PBoolean Registerh235(unsigned int count, void * _h235List);
+    virtual PBoolean Unregisterh235(unsigned int count, void * _h235List);
 
     void CreateH235Authenticator(Pluginh235_Definition * h235authenticator);
 

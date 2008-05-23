@@ -38,7 +38,7 @@ class H230OID2_Participant : public PASN_Sequence
     PASN_OctetString m_vCard;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -83,7 +83,7 @@ class H230OID2_ParticipantList : public PASN_Sequence
     H230OID2_ArrayOf_Participant m_list;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;

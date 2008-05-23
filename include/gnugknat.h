@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2008/02/01 07:50:17  shorne
+ * added shutdown mutex to fix occasion shutdown timing errors.
+ *
  * Revision 1.3  2008/01/18 01:36:42  shorne
  * Fix blocking and timeout on call ending
  *
@@ -82,18 +85,18 @@ class GNUGKTransport  : public H323TransportTCP
 
 	/**Handle the GNUGK Signalling
 	  */
-	BOOL HandleGNUGKSignallingChannelPDU();
+	PBoolean HandleGNUGKSignallingChannelPDU();
 
 	/**Handle the GNUGK Signalling
 	  */
-	BOOL HandleGNUGKSignallingSocket(H323SignalPDU & pdu);
+	PBoolean HandleGNUGKSignallingSocket(H323SignalPDU & pdu);
 
     /**Write a protocol data unit from the transport.
        This will write using the transports mechanism for PDU boundaries, for
        example UDP is a single Write() call, while for TCP there is a TPKT
        header that indicates the size of the PDU.
       */
-    virtual BOOL WritePDU(
+    virtual PBoolean WritePDU(
       const PBYTEArray & pdu  /// PDU to write
     );
 
@@ -102,37 +105,37 @@ class GNUGKTransport  : public H323TransportTCP
        example UDP is a single Read() call, while for TCP there is a TPKT
        header that indicates the size of the PDU.
       */
-	virtual BOOL ReadPDU(
+	virtual PBoolean ReadPDU(
          PBYTEArray & pdu  /// PDU to Read
 	);
 
-	BOOL CreateNewTransport();
+	PBoolean CreateNewTransport();
 
-	BOOL InitialPDU();
+	PBoolean InitialPDU();
 
-	BOOL SetGKID(const PString & newid);
+	PBoolean SetGKID(const PString & newid);
 
-	BOOL isCall() { return isConnected; };
+	PBoolean isCall() { return isConnected; };
 
-	void ConnectionLost(BOOL established);
+	void ConnectionLost(PBoolean established);
 
-	BOOL IsConnectionLost();
+	PBoolean IsConnectionLost();
 
 
 // Overrides
     /**Connect to the remote party.
       */
-    virtual BOOL Connect();
+    virtual PBoolean Connect();
 
     /**Close the channel.(Don't do anything)
       */
-    virtual BOOL Close();
+    virtual PBoolean Close();
 
-    virtual BOOL IsListening() const;
+    virtual PBoolean IsListening() const;
 
-	virtual BOOL IsOpen () const;
+	virtual PBoolean IsOpen () const;
 
-	BOOL CloseTransport() { return closeTransport; };
+	PBoolean CloseTransport() { return closeTransport; };
 
   protected:
 	 PString GKid;
@@ -146,9 +149,9 @@ class GNUGKTransport  : public H323TransportTCP
 
 	 GNUGK_Feature * Feature;
 
-	 BOOL   isConnected;
-	 BOOL   remoteShutDown;
-	 BOOL	closeTransport;
+	 PBoolean   isConnected;
+	 PBoolean   remoteShutDown;
+	 PBoolean	closeTransport;
 	 
 };
 
@@ -168,22 +171,22 @@ public:
 
 	~GNUGK_Feature();
 
-	BOOL CreateNewTransport();
+	PBoolean CreateNewTransport();
 
-	BOOL ReRegister(const PString & newid);
+	PBoolean ReRegister(const PString & newid);
 
-	BOOL IsOpen() { return open; };
+	PBoolean IsOpen() { return open; };
 
 	static WORD keepalive;
 	static GNUGKTransport * curtransport;
-	static BOOL connectionlost;
+	static PBoolean connectionlost;
 		
 protected:	
 
 	H323EndPoint & ep;
 	H323TransportAddress address;
 	PString GKid;
-	BOOL open;
+	PBoolean open;
 
 };
 
@@ -208,7 +211,7 @@ public:
   //@{
    void AttachEndPoint(H323EndPoint * ep);
 
-   virtual BOOL GetExternalAddress(
+   virtual PBoolean GetExternalAddress(
       PIPSocket::Address & externalAddress, /// External address of router
       const PTimeInterval & maxAge = 1000   /// Maximum age for caching
 	  );
@@ -216,7 +219,7 @@ public:
   /**  CreateSocketPair
 		Create the UDP Socket pair
   */
-    virtual BOOL CreateSocketPair(
+    virtual PBoolean CreateSocketPair(
       PUDPSocket * & socket1,
       PUDPSocket * & socket2,
       const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny()
@@ -230,11 +233,11 @@ public:
 		The Order of adding to the PNstStrategy determines which method
 		is used
   */
-   virtual BOOL IsAvailable() { return available; };
+   virtual bool IsAvailable(const PIPSocket::Address&) { return available; };
 
    void SetAvailable() { available = TRUE; };
 
-   BOOL OpenSocket(PUDPSocket & socket, PortInfo & portInfo) const;
+   PBoolean OpenSocket(PUDPSocket & socket, PortInfo & portInfo) const;
 
    static PStringList GetNatMethodName() {  return PStringList("GNUGK"); };
 
@@ -243,7 +246,7 @@ public:
   //@}
 
 protected:
-	BOOL available;
+	PBoolean available;
 
 };
 

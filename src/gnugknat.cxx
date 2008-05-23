@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2008/02/01 09:34:20  shorne
+ * Cleaner shutdown of GnuGk NAT support
+ *
  * Revision 1.7  2008/02/01 07:50:17  shorne
  * added shutdown mutex to fix occasion shutdown timing errors.
  *
@@ -76,7 +79,7 @@ PCREATE_NAT_PLUGIN(GnuGk);
 WORD GNUGK_Feature::keepalive = 10;
 
 GNUGKTransport * GNUGK_Feature::curtransport = NULL;
-BOOL GNUGK_Feature::connectionlost = FALSE;
+PBoolean GNUGK_Feature::connectionlost = FALSE;
 
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -93,7 +96,7 @@ class GNUGKTransportThread : public PThread
 	void Main();
 	PDECLARE_NOTIFIER(PTimer, GNUGKTransportThread, Ping);	/// Timer to notify to poll for External IP
 	PTimer	Keep;						/// Polling Timer													
-	BOOL    isConnected;
+	PBoolean    isConnected;
 	GNUGKTransport * transport;
 	WORD   keepAlive;
 
@@ -150,7 +153,7 @@ void GNUGKTransportThread::Main()
 {
   PTRACE(3, "GNUGK\tStarted Listening-KeepAlive Thread");
 
-  BOOL ret = TRUE;
+  PBoolean ret = TRUE;
   while ((transport->IsOpen()) &&		// Transport is Open
 	(!isConnected) &&			// Does not have a call connection 
 	(ret) &&	                        // is not a Failed connection
@@ -204,7 +207,7 @@ GNUGKTransport::~GNUGKTransport()
 	Close();
 }
 
-BOOL GNUGKTransport::HandleGNUGKSignallingSocket(H323SignalPDU & pdu)
+PBoolean GNUGKTransport::HandleGNUGKSignallingSocket(H323SignalPDU & pdu)
 {
   for (;;) {
 
@@ -233,7 +236,7 @@ BOOL GNUGKTransport::HandleGNUGKSignallingSocket(H323SignalPDU & pdu)
   }
 }
 
-BOOL GNUGKTransport::HandleGNUGKSignallingChannelPDU()
+PBoolean GNUGKTransport::HandleGNUGKSignallingChannelPDU()
 {
 
   H323SignalPDU pdu;
@@ -291,19 +294,19 @@ BOOL GNUGKTransport::HandleGNUGKSignallingChannelPDU()
 }
 
 
-BOOL GNUGKTransport::WritePDU( const PBYTEArray & pdu )
+PBoolean GNUGKTransport::WritePDU( const PBYTEArray & pdu )
 {
 	PWaitAndSignal m(WriteMutex);
 	return H323TransportTCP::WritePDU(pdu);
 
 }
 	
-BOOL GNUGKTransport::ReadPDU(PBYTEArray & pdu)
+PBoolean GNUGKTransport::ReadPDU(PBYTEArray & pdu)
 {
 	return H323TransportTCP::ReadPDU(pdu);
 }
 
-BOOL GNUGKTransport::Connect() 
+PBoolean GNUGKTransport::Connect() 
 { 
         PTRACE(4, "GNUGK\tConnecting to GK"  );
 	if (!H323TransportTCP::Connect())
@@ -312,7 +315,7 @@ BOOL GNUGKTransport::Connect()
 	return InitialPDU();
 }
 
-void GNUGKTransport::ConnectionLost(BOOL established)
+void GNUGKTransport::ConnectionLost(PBoolean established)
 {
 	PWaitAndSignal m(shutdownMutex);
 
@@ -326,13 +329,13 @@ void GNUGKTransport::ConnectionLost(BOOL established)
 	}
 }
 
-BOOL GNUGKTransport::IsConnectionLost()  
+PBoolean GNUGKTransport::IsConnectionLost()  
 { 
 	return GNUGK_Feature::connectionlost; 
 }
 
 
-BOOL GNUGKTransport::InitialPDU()
+PBoolean GNUGKTransport::InitialPDU()
 {
   PWaitAndSignal mutex(IntMutex);
 
@@ -363,7 +366,7 @@ BOOL GNUGKTransport::InitialPDU()
  return TRUE;
 }
 
-BOOL GNUGKTransport::SetGKID(const PString & newid)
+PBoolean GNUGKTransport::SetGKID(const PString & newid)
 {
 	if (GKid != newid) {
 	   GKid = newid;
@@ -372,7 +375,7 @@ BOOL GNUGKTransport::SetGKID(const PString & newid)
 	return FALSE;
 }
 
-BOOL GNUGKTransport::CreateNewTransport()
+PBoolean GNUGKTransport::CreateNewTransport()
 {
 
 	GNUGKTransport * transport = new GNUGKTransport(GetEndPoint(),Feature,GKid);
@@ -389,7 +392,7 @@ BOOL GNUGKTransport::CreateNewTransport()
 	return FALSE;
 }
 
-BOOL GNUGKTransport::Close() 
+PBoolean GNUGKTransport::Close() 
 { 
    PWaitAndSignal m(shutdownMutex);
 
@@ -398,12 +401,12 @@ BOOL GNUGKTransport::Close()
    return H323TransportTCP::Close(); 
 }
 
-BOOL GNUGKTransport::IsOpen () const
+PBoolean GNUGKTransport::IsOpen () const
 {
    return H323TransportTCP::IsOpen();
 }
 
-BOOL GNUGKTransport::IsListening() const
+PBoolean GNUGKTransport::IsListening() const
 {	  
   if (isConnected)
     return FALSE;
@@ -436,7 +439,7 @@ GNUGK_Feature::~GNUGK_Feature()
 		curtransport->Close();
 }
 
-BOOL GNUGK_Feature::CreateNewTransport()
+PBoolean GNUGK_Feature::CreateNewTransport()
 {
 	PTRACE(5, "GNUGK\tCreating Transport.");
 
@@ -453,7 +456,7 @@ BOOL GNUGK_Feature::CreateNewTransport()
 	return FALSE;
 }
 
-BOOL GNUGK_Feature::ReRegister(const PString & newid)
+PBoolean GNUGK_Feature::ReRegister(const PString & newid)
 {
   // If there is a change in the gatekeeper id then notify the update socket
 	if ((GNUGK_Feature::curtransport != NULL) && curtransport->SetGKID(newid))
@@ -510,7 +513,7 @@ void PNatMethod_GnuGk::AttachEndPoint(H323EndPoint * ep)
 	available = FALSE;
 }
 
-BOOL PNatMethod_GnuGk::GetExternalAddress(
+PBoolean PNatMethod_GnuGk::GetExternalAddress(
       PIPSocket::Address & /*externalAddress*/, /// External address of router
       const PTimeInterval & /* maxAge */         /// Maximum age for caching
 	  )
@@ -519,7 +522,7 @@ BOOL PNatMethod_GnuGk::GetExternalAddress(
 }
 
 
-BOOL PNatMethod_GnuGk::CreateSocketPair(
+PBoolean PNatMethod_GnuGk::CreateSocketPair(
 							PUDPSocket * & socket1,
 							PUDPSocket * & socket2,
 							const PIPSocket::Address & /*binding*/
@@ -553,7 +556,7 @@ BOOL PNatMethod_GnuGk::CreateSocketPair(
     return TRUE;
 }
 
-BOOL PNatMethod_GnuGk::OpenSocket(PUDPSocket & socket, PortInfo & portInfo) const
+PBoolean PNatMethod_GnuGk::OpenSocket(PUDPSocket & socket, PortInfo & portInfo) const
 {
   PWaitAndSignal mutex(portInfo.mutex);
 

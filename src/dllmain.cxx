@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:03  shorne
+ * First commit of h323plus
+ *
  * Revision 1.3  2002/11/10 23:14:40  robertj
  * Made sure static variables are included in DLL
  *
@@ -43,7 +46,7 @@
 
 HINSTANCE PDllInstance;
 
-BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID)
+PBoolean WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID)
 {
   if (fdwReason == DLL_PROCESS_ATTACH)
     PDllInstance = hinstDLL;

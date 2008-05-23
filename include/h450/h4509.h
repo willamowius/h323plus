@@ -83,7 +83,7 @@ class H4509_CcArg : public PASN_Choice
     operator const H4509_CcLongArg &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -159,7 +159,7 @@ class H4509_CcRequestArg : public PASN_Sequence
     H4509_ArrayOf_MixedExtension m_extension;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -189,7 +189,7 @@ class H4509_CcRequestRes : public PASN_Sequence
     H4509_ArrayOf_MixedExtension m_extension;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -220,7 +220,7 @@ class H4509_CcShortArg : public PASN_Sequence
     H4509_ArrayOf_MixedExtension m_extension;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -257,7 +257,7 @@ class H4509_CcLongArg : public PASN_Sequence
     H4509_ArrayOf_MixedExtension m_extension;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;

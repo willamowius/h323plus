@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2008/01/22 01:17:11  shorne
+ * Fixes to the H.230 system
+ *
  * Revision 1.4  2007/11/19 18:06:31  shorne
  * changed lists from PList to std::list
  *
@@ -113,23 +116,23 @@ public:
 
 ///////////////////////////////////////////
 // Endpoint Functions
-    BOOL Invite(const PStringList & aliases);
-	BOOL LockConference();
-    BOOL UnLockConference();
-    BOOL EjectUser(int node);
-	BOOL TransferUser(list<int> node,const PString & number);
-	BOOL TerminalListRequest();
-	BOOL ChairRequest(BOOL revoke);
-	BOOL ChairAssign(int node);
-	BOOL FloorRequest();
-	BOOL FloorAssign(int node);
-	BOOL WhoIsChair();
-	BOOL UserEnquiry(list<int> node);
+    PBoolean Invite(const PStringList & aliases);
+	PBoolean LockConference();
+    PBoolean UnLockConference();
+    PBoolean EjectUser(int node);
+	PBoolean TransferUser(list<int> node,const PString & number);
+	PBoolean TerminalListRequest();
+	PBoolean ChairRequest(PBoolean revoke);
+	PBoolean ChairAssign(int node);
+	PBoolean FloorRequest();
+	PBoolean FloorAssign(int node);
+	PBoolean WhoIsChair();
+	PBoolean UserEnquiry(list<int> node);
 
 // Endpoint Events
-	virtual void OnControlsEnabled(BOOL /*success*/) {};
-	virtual void OnConferenceChair(BOOL /*success*/) {};
-	virtual void OnConferenceFloor(BOOL /*success*/) {};
+	virtual void OnControlsEnabled(PBoolean /*success*/) {};
+	virtual void OnConferenceChair(PBoolean /*success*/) {};
+	virtual void OnConferenceFloor(PBoolean /*success*/) {};
 	virtual void OnInviteResponse(int /*id*/, const PString & /*calledNo*/, AddResponse /*response*/, int /*errCode*/){};
 	virtual void OnLockConferenceResponse(LockResponse /*lock*/)  {};
 	virtual void OnUnLockConferenceResponse(LockResponse /*lock*/)  {};
@@ -138,22 +141,22 @@ public:
 	virtual void OnTerminalListResponse(list<int> node) {};
 	virtual void ConferenceJoined(int /*terminalId*/){};
 	virtual void ConferenceLeft(int /*terminalId*/) {};
-	virtual void MakeChairResponse(BOOL /*success*/) {};
+	virtual void MakeChairResponse(PBoolean /*success*/) {};
 	virtual void ChairAssigned(int /*node*/) {};
 	virtual void FloorAssigned(int /*node*/) {};
 	virtual void OnChairTokenResponse(int /*id*/, const PString & /*name*/) {};
-	virtual void OnFloorRequested(int /*terminalId*/,BOOL /*cancel*/) {};
+	virtual void OnFloorRequested(int /*terminalId*/,PBoolean /*cancel*/) {};
 	virtual void OnUserEnquiryResponse(const list<userInfo> &) {};
 
 
 ///////////////////////////////////////////
 // Server Events
 	virtual void OnInvite(const PStringList & /*alias*/) const {};
-	virtual void OnLockConference(BOOL /*state*/) const {};
+	virtual void OnLockConference(PBoolean /*state*/) const {};
     virtual void OnEjectUser(int /*node*/) const {};
 	virtual void OnTransferUser(list<int> /*node*/,const PString & /*number*/) const {};
 	virtual void OnTerminalListRequest() const {};
-	virtual void ChairRequested(const int & /*terminalId*/,BOOL /*cancel*/) {};
+	virtual void ChairRequested(const int & /*terminalId*/,PBoolean /*cancel*/) {};
 	virtual void OnFloorRequest() {};
 	virtual void OnChairTokenRequest() const {};
 	virtual void OnChairAssign(int /*node*/) const {};
@@ -162,86 +165,86 @@ public:
 
 
 //  Server Commands
-	BOOL InviteResponse(int /*id*/, const PString & /*calledNo*/, AddResponse /*response*/, int /*errCode*/);
-	BOOL LockConferenceResponse(LockResponse lock);
-	BOOL UnLockConferenceResponse(LockResponse lock);
-	BOOL EjectUserResponse(int node, EjectResponse lock);
-	BOOL TransferUserResponse(list<int> node,const PString & number, TransferResponse result);
-	BOOL TerminalListResponse(list<int> node);
-	BOOL ChairTokenResponse(int termid,const PString & termname);
-	BOOL ChairAssignResponse(int termid,const PString & termname);
-	BOOL FloorAssignResponse(int termid,const PString & termname);
-	BOOL UserEnquiryResponse(const list<userInfo> &);
+	PBoolean InviteResponse(int /*id*/, const PString & /*calledNo*/, AddResponse /*response*/, int /*errCode*/);
+	PBoolean LockConferenceResponse(LockResponse lock);
+	PBoolean UnLockConferenceResponse(LockResponse lock);
+	PBoolean EjectUserResponse(int node, EjectResponse lock);
+	PBoolean TransferUserResponse(list<int> node,const PString & number, TransferResponse result);
+	PBoolean TerminalListResponse(list<int> node);
+	PBoolean ChairTokenResponse(int termid,const PString & termname);
+	PBoolean ChairAssignResponse(int termid,const PString & termname);
+	PBoolean FloorAssignResponse(int termid,const PString & termname);
+	PBoolean UserEnquiryResponse(const list<userInfo> &);
 
 // Server Indications
-	BOOL ConferenceJoinedInd(int termId);
-	BOOL ConferenceLeftInd(int termId);
-	BOOL ConferenceTokenAssign(int mcuId,int termId);
+	PBoolean ConferenceJoinedInd(int termId);
+	PBoolean ConferenceLeftInd(int termId);
+	PBoolean ConferenceTokenAssign(int mcuId,int termId);
 
-	void SetChair(BOOL success);
-	void SetFloor(BOOL success);
+	void SetChair(PBoolean success);
+	void SetFloor(PBoolean success);
 
 
 ////////////////////////////////////////////////
 // Common
  // standard incoming requests
-    BOOL OnHandleConferenceRequest(const H245_ConferenceRequest &);
-    BOOL OnHandleConferenceResponse(const H245_ConferenceResponse &);
-    BOOL OnHandleConferenceCommand(const H245_ConferenceCommand &);
-    BOOL OnHandleConferenceIndication(const H245_ConferenceIndication &);
+    PBoolean OnHandleConferenceRequest(const H245_ConferenceRequest &);
+    PBoolean OnHandleConferenceResponse(const H245_ConferenceResponse &);
+    PBoolean OnHandleConferenceCommand(const H245_ConferenceCommand &);
+    PBoolean OnHandleConferenceIndication(const H245_ConferenceIndication &);
 
   // Generic incoming requests
-	BOOL OnHandleGenericPDU(const H245_GenericMessage & msg);
+	PBoolean OnHandleGenericPDU(const H245_GenericMessage & msg);
 
 
  protected:
   // H.245
-	BOOL OnGeneralRequest(int request);
-	BOOL OnGeneralIndication(int req, const H245_TerminalLabel & label);
+	PBoolean OnGeneralRequest(int request);
+	PBoolean OnGeneralIndication(int req, const H245_TerminalLabel & label);
 
-	BOOL OnReceiveTerminalListResponse(const H245_ArrayOf_TerminalLabel & list);
-	BOOL OnReceiveChairResponse(const H245_ConferenceResponse_makeMeChairResponse & resp);
-	BOOL OnReceiveChairTokenResponse(const H245_ConferenceResponse_chairTokenOwnerResponse & resp);
-	BOOL OnReceiveChairTokenRequest();
-	BOOL OnReceiveChairAssignRequest(const H245_TerminalLabel & req);
-	BOOL OnReceiveChairAssignResponse(const H245_ConferenceResponse_terminalIDResponse & req);
-    BOOL OnReceiveFloorAssignRequest(const H245_TerminalLabel & req);
-    BOOL OnReceiveFloorAssignResponse(const H245_ConferenceResponse_conferenceIDResponse & resp);
+	PBoolean OnReceiveTerminalListResponse(const H245_ArrayOf_TerminalLabel & list);
+	PBoolean OnReceiveChairResponse(const H245_ConferenceResponse_makeMeChairResponse & resp);
+	PBoolean OnReceiveChairTokenResponse(const H245_ConferenceResponse_chairTokenOwnerResponse & resp);
+	PBoolean OnReceiveChairTokenRequest();
+	PBoolean OnReceiveChairAssignRequest(const H245_TerminalLabel & req);
+	PBoolean OnReceiveChairAssignResponse(const H245_ConferenceResponse_terminalIDResponse & req);
+    PBoolean OnReceiveFloorAssignRequest(const H245_TerminalLabel & req);
+    PBoolean OnReceiveFloorAssignResponse(const H245_ConferenceResponse_conferenceIDResponse & resp);
 	
   // H.230
-	BOOL ReceivedH230PDU(unsigned msgId, unsigned paramId, const H245_ParameterValue & value);
+	PBoolean ReceivedH230PDU(unsigned msgId, unsigned paramId, const H245_ParameterValue & value);
 
   // T.124
-	BOOL ReceivedT124PDU(unsigned msgId, unsigned paramId, const H245_ParameterValue & value);
-	BOOL OnReceivedT124Request(const GCC_RequestPDU &);
-    BOOL OnReceivedT124Response(const GCC_ResponsePDU &);
-    BOOL OnReceivedT124Indication(const GCC_IndicationPDU &);
+	PBoolean ReceivedT124PDU(unsigned msgId, unsigned paramId, const H245_ParameterValue & value);
+	PBoolean OnReceivedT124Request(const GCC_RequestPDU &);
+    PBoolean OnReceivedT124Response(const GCC_ResponsePDU &);
+    PBoolean OnReceivedT124Indication(const GCC_IndicationPDU &);
 
-    BOOL OnConferenceJoinRequest(const GCC_ConferenceJoinRequest &);
-    BOOL OnConferenceAddRequest(const GCC_ConferenceAddRequest &);
-    BOOL OnConferenceLockRequest(const GCC_ConferenceLockRequest &);
-    BOOL OnConferenceUnlockRequest(const GCC_ConferenceUnlockRequest &);
-    BOOL OnConferenceTerminateRequest(const GCC_ConferenceTerminateRequest &);
-    BOOL OnConferenceEjectUserRequest(const GCC_ConferenceEjectUserRequest &);
-    BOOL OnConferenceTransferRequest(const GCC_ConferenceTransferRequest &);
+    PBoolean OnConferenceJoinRequest(const GCC_ConferenceJoinRequest &);
+    PBoolean OnConferenceAddRequest(const GCC_ConferenceAddRequest &);
+    PBoolean OnConferenceLockRequest(const GCC_ConferenceLockRequest &);
+    PBoolean OnConferenceUnlockRequest(const GCC_ConferenceUnlockRequest &);
+    PBoolean OnConferenceTerminateRequest(const GCC_ConferenceTerminateRequest &);
+    PBoolean OnConferenceEjectUserRequest(const GCC_ConferenceEjectUserRequest &);
+    PBoolean OnConferenceTransferRequest(const GCC_ConferenceTransferRequest &);
 
-    BOOL OnConferenceJoinResponse(const GCC_ConferenceJoinResponse & pdu);
-    BOOL OnConferenceAddResponse(const GCC_ConferenceAddResponse & pdu);
-    BOOL OnConferenceLockResponse(const GCC_ConferenceLockResponse & pdu);
-    BOOL OnConferenceUnlockResponse(const GCC_ConferenceUnlockResponse & pdu);
-    BOOL OnConferenceEjectUserResponse(const GCC_ConferenceEjectUserResponse & pdu);
-    BOOL OnConferenceTransferResponse(const GCC_ConferenceTransferResponse & pdu);
-    BOOL OnFunctionNotSupportedResponse(const GCC_FunctionNotSupportedResponse & pdu);
+    PBoolean OnConferenceJoinResponse(const GCC_ConferenceJoinResponse & pdu);
+    PBoolean OnConferenceAddResponse(const GCC_ConferenceAddResponse & pdu);
+    PBoolean OnConferenceLockResponse(const GCC_ConferenceLockResponse & pdu);
+    PBoolean OnConferenceUnlockResponse(const GCC_ConferenceUnlockResponse & pdu);
+    PBoolean OnConferenceEjectUserResponse(const GCC_ConferenceEjectUserResponse & pdu);
+    PBoolean OnConferenceTransferResponse(const GCC_ConferenceTransferResponse & pdu);
+    PBoolean OnFunctionNotSupportedResponse(const GCC_FunctionNotSupportedResponse & pdu);
 
 
-    BOOL ReceivedPACKPDU(unsigned msgId, unsigned paramId, const H245_ParameterValue & value);
+    PBoolean ReceivedPACKPDU(unsigned msgId, unsigned paramId, const H245_ParameterValue & value);
 
-	BOOL SendPACKGenericRequest(int paramid, const PASN_OctetString & rawpdu);
-	BOOL SendPACKGenericResponse(int paramid, const PASN_OctetString & rawpdu);
-	BOOL OnReceivePACKRequest(const PASN_OctetString & rawpdu);
-	BOOL OnReceivePACKResponse(const PASN_OctetString & rawpdu);
+	PBoolean SendPACKGenericRequest(int paramid, const PASN_OctetString & rawpdu);
+	PBoolean SendPACKGenericResponse(int paramid, const PASN_OctetString & rawpdu);
+	PBoolean OnReceivePACKRequest(const PASN_OctetString & rawpdu);
+	PBoolean OnReceivePACKResponse(const PASN_OctetString & rawpdu);
 
-	virtual BOOL WriteControlPDU(const H323ControlPDU & pdu);
+	virtual PBoolean WriteControlPDU(const H323ControlPDU & pdu);
 
 	void SetLocalID(int mcu, int num);
 	int GetLocalID();
@@ -251,8 +254,8 @@ public:
 	int m_mcuID;
     int m_userID;
 
-    BOOL m_ConferenceChair;
-	BOOL m_ConferenceFloor;
+    PBoolean m_ConferenceChair;
+	PBoolean m_ConferenceFloor;
 };
 
 
@@ -282,7 +285,7 @@ class H230Control_EndPoint   : public H230Control
 
          int errCode;
 		 int node;
-		 BOOL cancel;
+		 PBoolean cancel;
 		 PString name;
 		 list<int> ids;
 		 list<userInfo> info;
@@ -292,32 +295,32 @@ class H230Control_EndPoint   : public H230Control
 	~H230Control_EndPoint();
 
 // Chair Instructions
-    BOOL ReqInvite(const PStringList & aliases);
-	BOOL ReqLockConference();
-    BOOL ReqUnLockConference();
-    BOOL ReqEjectUser(int node);
-	BOOL ReqTransferUser(list<int> node,const PString & number);
-	BOOL ReqChairAssign(int node);
-	BOOL ReqFloorAssign(int node);
+    PBoolean ReqInvite(const PStringList & aliases);
+	PBoolean ReqLockConference();
+    PBoolean ReqUnLockConference();
+    PBoolean ReqEjectUser(int node);
+	PBoolean ReqTransferUser(list<int> node,const PString & number);
+	PBoolean ReqChairAssign(int node);
+	PBoolean ReqFloorAssign(int node);
 
 // General Requests
-	BOOL ReqTerminalList(list<int> & node);
-	BOOL ReqChair(BOOL revoke);
-	BOOL ReqFloor();
-	BOOL ReqWhoIsChair(int & node);
-	BOOL ReqUserEnquiry(list<int> node, list<userInfo> & info);
+	PBoolean ReqTerminalList(list<int> & node);
+	PBoolean ReqChair(PBoolean revoke);
+	PBoolean ReqFloor();
+	PBoolean ReqWhoIsChair(int & node);
+	PBoolean ReqUserEnquiry(list<int> node, list<userInfo> & info);
 
 // conference Indications
-	virtual void OnControlsEnabled(BOOL /*success*/) {};
-	virtual void OnConferenceChair(BOOL /*success*/) {};
-	virtual void OnConferenceFloor(BOOL /*success*/) {};
+	virtual void OnControlsEnabled(PBoolean /*success*/) {};
+	virtual void OnConferenceChair(PBoolean /*success*/) {};
+	virtual void OnConferenceFloor(PBoolean /*success*/) {};
 
 
 // Inherited
 	virtual void ConferenceJoined(int /*terminalId*/){};
 	virtual void ConferenceJoinInfo(int /*termId*/, PString /*number*/, PString /*name*/, PString /*vcard*/) {}; 
 	virtual void ConferenceLeft(int /*terminalId*/) {};
-	virtual void OnFloorRequested(int /*terminalId*/,BOOL /*cancel*/) {};
+	virtual void OnFloorRequested(int /*terminalId*/,PBoolean /*cancel*/) {};
 	virtual void OnChairAssigned(int /*node*/) {};
 	virtual void OnFloorAssigned(int /*node*/) {};
 	virtual void OnInviteResponse(int /*id*/, const PString & /*calledNo*/, AddResponse /*response*/, int /*errCode*/) {};
@@ -329,7 +332,7 @@ class H230Control_EndPoint   : public H230Control
 	void OnEjectUserResponse(int /*node*/, EjectResponse /*lock*/);
 	void OnTransferUserResponse(list<int> /*node*/,const PString & /*number*/, TransferResponse /*result*/);
 	void OnTerminalListResponse(list<int> node);
-	void MakeChairResponse(BOOL /*success*/);
+	void MakeChairResponse(PBoolean /*success*/);
 	void OnChairTokenResponse(int /*id*/, const PString & /*name*/);
 	void OnUserEnquiryResponse(const list<userInfo> &);
 	void ChairAssigned(int /*node*/);

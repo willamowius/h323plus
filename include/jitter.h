@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:50  shorne
+ * First commit of h323plus
+ *
  * Revision 1.15  2006/01/18 07:46:08  csoutheren
  * Initial version of RTP aggregation (disabled by default)
  *
@@ -119,14 +122,14 @@ class RTP_JitterBuffer : public PObject
       unsigned maxJitterDelay  ///<  Maximum delay in RTP timestamp units
     );
 
-    void UseImmediateReduction(BOOL state) { doJitterReductionImmediately = state; }
+    void UseImmediateReduction(PBoolean state) { doJitterReductionImmediately = state; }
 
     /**Read a data frame from the RTP channel.
        Any control frames received are dispatched to callbacks and are not
        returned by this function. It will block until a data frame is
        available or an error occurs.
       */
-    virtual BOOL ReadData(
+    virtual PBoolean ReadData(
       DWORD timestamp,        ///<  Timestamp to read from buffer.
       RTP_DataFrame & frame   ///<  Frame read from the RTP session
     );
@@ -190,8 +193,8 @@ class RTP_JitterBuffer : public PObject
     DWORD    jitterCalc;
     DWORD    targetJitterTime;
     unsigned jitterCalcPacketCount;
-    BOOL     doJitterReductionImmediately;
-    BOOL     doneFreeTrash;
+    PBoolean     doJitterReductionImmediately;
+    PBoolean     doneFreeTrash;
 
     Entry * oldestFrame;
     Entry * newestFrame;
@@ -199,9 +202,9 @@ class RTP_JitterBuffer : public PObject
     Entry * currentWriteFrame;
 
     PMutex bufferMutex;
-    BOOL   shuttingDown;
-    BOOL   preBuffering;
-    BOOL   doneFirstWrite;
+    PBoolean   shuttingDown;
+    PBoolean   preBuffering;
+    PBoolean   doneFirstWrite;
 
     RTP_JitterBufferAnalyser * analyser;
 
@@ -212,10 +215,10 @@ class RTP_JitterBuffer : public PObject
     RTP_AggregatedHandle * aggregratedHandle;
 #endif
 
-    BOOL Init(Entry * & currentReadFrame, BOOL & markerWarning);
-    BOOL PreRead(Entry * & currentReadFrame, BOOL & markerWarning);
-    BOOL OnRead(Entry * & currentReadFrame, BOOL & markerWarning, BOOL loop);
-    void DeInit(Entry * & currentReadFrame, BOOL & markerWarning);
+    PBoolean Init(Entry * & currentReadFrame, PBoolean & markerWarning);
+    PBoolean PreRead(Entry * & currentReadFrame, PBoolean & markerWarning);
+    PBoolean OnRead(Entry * & currentReadFrame, PBoolean & markerWarning, PBoolean loop);
+    void DeInit(Entry * & currentReadFrame, PBoolean & markerWarning);
 };
 
 #endif // __OPAL_JITTER_H

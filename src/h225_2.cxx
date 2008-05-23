@@ -416,7 +416,7 @@ PINDEX H225_RegistrationRejectReason_invalidTerminalAliases::GetDataLength() con
 }
 
 
-BOOL H225_RegistrationRejectReason_invalidTerminalAliases::Decode(PASN_Stream & strm)
+PBoolean H225_RegistrationRejectReason_invalidTerminalAliases::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -699,7 +699,7 @@ PINDEX H225_ServiceControlIndication_callSpecific::GetDataLength() const
 }
 
 
-BOOL H225_ServiceControlIndication_callSpecific::Decode(PASN_Stream & strm)
+PBoolean H225_ServiceControlIndication_callSpecific::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -760,7 +760,7 @@ H225_ServiceControlResponse_result::H225_ServiceControlResponse_result(unsigned 
 }
 
 
-BOOL H225_ServiceControlResponse_result::CreateObject()
+PBoolean H225_ServiceControlResponse_result::CreateObject()
 {
   choice = (tag <= e_neededFeatureNotSupported) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -830,7 +830,7 @@ H225_TransportAddress_ipSourceRoute_routing::H225_TransportAddress_ipSourceRoute
 }
 
 
-BOOL H225_TransportAddress_ipSourceRoute_routing::CreateObject()
+PBoolean H225_TransportAddress_ipSourceRoute_routing::CreateObject()
 {
   choice = (tag <= e_loose) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -1031,7 +1031,7 @@ PINDEX H225_Status_UUIE::GetDataLength() const
 }
 
 
-BOOL H225_Status_UUIE::Decode(PASN_Stream & strm)
+PBoolean H225_Status_UUIE::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1134,7 +1134,7 @@ PINDEX H225_StatusInquiry_UUIE::GetDataLength() const
 }
 
 
-BOOL H225_StatusInquiry_UUIE::Decode(PASN_Stream & strm)
+PBoolean H225_StatusInquiry_UUIE::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1237,7 +1237,7 @@ PINDEX H225_SetupAcknowledge_UUIE::GetDataLength() const
 }
 
 
-BOOL H225_SetupAcknowledge_UUIE::Decode(PASN_Stream & strm)
+PBoolean H225_SetupAcknowledge_UUIE::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1340,7 +1340,7 @@ PINDEX H225_Notify_UUIE::GetDataLength() const
 }
 
 
-BOOL H225_Notify_UUIE::Decode(PASN_Stream & strm)
+PBoolean H225_Notify_UUIE::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1443,7 +1443,7 @@ PINDEX H225_VendorIdentifier::GetDataLength() const
 }
 
 
-BOOL H225_VendorIdentifier::Decode(PASN_Stream & strm)
+PBoolean H225_VendorIdentifier::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1537,7 +1537,7 @@ PINDEX H225_TunnelledProtocol::GetDataLength() const
 }
 
 
-BOOL H225_TunnelledProtocol::Decode(PASN_Stream & strm)
+PBoolean H225_TunnelledProtocol::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1621,7 +1621,7 @@ PINDEX H225_NonStandardParameter::GetDataLength() const
 }
 
 
-BOOL H225_NonStandardParameter::Decode(PASN_Stream & strm)
+PBoolean H225_NonStandardParameter::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1704,7 +1704,7 @@ PINDEX H225_PublicPartyNumber::GetDataLength() const
 }
 
 
-BOOL H225_PublicPartyNumber::Decode(PASN_Stream & strm)
+PBoolean H225_PublicPartyNumber::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1787,7 +1787,7 @@ PINDEX H225_PrivatePartyNumber::GetDataLength() const
 }
 
 
-BOOL H225_PrivatePartyNumber::Decode(PASN_Stream & strm)
+PBoolean H225_PrivatePartyNumber::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1943,7 +1943,7 @@ PINDEX H225_ANSI_41_UIM::GetDataLength() const
 }
 
 
-BOOL H225_ANSI_41_UIM::Decode(PASN_Stream & strm)
+PBoolean H225_ANSI_41_UIM::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2067,7 +2067,7 @@ PINDEX H225_IsupPublicPartyNumber::GetDataLength() const
 }
 
 
-BOOL H225_IsupPublicPartyNumber::Decode(PASN_Stream & strm)
+PBoolean H225_IsupPublicPartyNumber::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2150,7 +2150,7 @@ PINDEX H225_IsupPrivatePartyNumber::GetDataLength() const
 }
 
 
-BOOL H225_IsupPrivatePartyNumber::Decode(PASN_Stream & strm)
+PBoolean H225_IsupPrivatePartyNumber::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2233,7 +2233,7 @@ PINDEX H225_AlternateTransportAddresses::GetDataLength() const
 }
 
 
-BOOL H225_AlternateTransportAddresses::Decode(PASN_Stream & strm)
+PBoolean H225_AlternateTransportAddresses::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2328,7 +2328,7 @@ PINDEX H225_AlternateGK::GetDataLength() const
 }
 
 
-BOOL H225_AlternateGK::Decode(PASN_Stream & strm)
+PBoolean H225_AlternateGK::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2418,7 +2418,7 @@ PINDEX H225_AltGKInfo::GetDataLength() const
 }
 
 
-BOOL H225_AltGKInfo::Decode(PASN_Stream & strm)
+PBoolean H225_AltGKInfo::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2511,7 +2511,7 @@ PINDEX H225_SecurityCapabilities::GetDataLength() const
 }
 
 
-BOOL H225_SecurityCapabilities::Decode(PASN_Stream & strm)
+PBoolean H225_SecurityCapabilities::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2625,7 +2625,7 @@ PINDEX H225_QseriesOptions::GetDataLength() const
 }
 
 
-BOOL H225_QseriesOptions::Decode(PASN_Stream & strm)
+PBoolean H225_QseriesOptions::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2735,7 +2735,7 @@ PINDEX H225_DataRate::GetDataLength() const
 }
 
 
-BOOL H225_DataRate::Decode(PASN_Stream & strm)
+PBoolean H225_DataRate::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2825,7 +2825,7 @@ PINDEX H225_SupportedPrefix::GetDataLength() const
 }
 
 
-BOOL H225_SupportedPrefix::Decode(PASN_Stream & strm)
+PBoolean H225_SupportedPrefix::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2905,7 +2905,7 @@ PINDEX H225_CapacityReportingSpecification::GetDataLength() const
 }
 
 
-BOOL H225_CapacityReportingSpecification::Decode(PASN_Stream & strm)
+PBoolean H225_CapacityReportingSpecification::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3045,7 +3045,7 @@ PINDEX H225_CallCapacityInfo::GetDataLength() const
 }
 
 
-BOOL H225_CallCapacityInfo::Decode(PASN_Stream & strm)
+PBoolean H225_CallCapacityInfo::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3175,7 +3175,7 @@ PINDEX H225_CallsAvailable::GetDataLength() const
 }
 
 
-BOOL H225_CallsAvailable::Decode(PASN_Stream & strm)
+PBoolean H225_CallsAvailable::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3263,7 +3263,7 @@ PINDEX H225_CicInfo::GetDataLength() const
 }
 
 
-BOOL H225_CicInfo::Decode(PASN_Stream & strm)
+PBoolean H225_CicInfo::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3349,7 +3349,7 @@ PINDEX H225_GroupID::GetDataLength() const
 }
 
 
-BOOL H225_GroupID::Decode(PASN_Stream & strm)
+PBoolean H225_GroupID::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3440,7 +3440,7 @@ PINDEX H225_ServiceControlSession::GetDataLength() const
 }
 
 
-BOOL H225_ServiceControlSession::Decode(PASN_Stream & strm)
+PBoolean H225_ServiceControlSession::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3541,7 +3541,7 @@ PINDEX H225_RasUsageInfoTypes::GetDataLength() const
 }
 
 
-BOOL H225_RasUsageInfoTypes::Decode(PASN_Stream & strm)
+PBoolean H225_RasUsageInfoTypes::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3639,7 +3639,7 @@ PINDEX H225_RasUsageSpecification::GetDataLength() const
 }
 
 
-BOOL H225_RasUsageSpecification::Decode(PASN_Stream & strm)
+PBoolean H225_RasUsageSpecification::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3740,7 +3740,7 @@ PINDEX H225_RasUsageInformation::GetDataLength() const
 }
 
 
-BOOL H225_RasUsageInformation::Decode(PASN_Stream & strm)
+PBoolean H225_RasUsageInformation::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3840,7 +3840,7 @@ PINDEX H225_BandwidthDetails::GetDataLength() const
 }
 
 
-BOOL H225_BandwidthDetails::Decode(PASN_Stream & strm)
+PBoolean H225_BandwidthDetails::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3953,7 +3953,7 @@ PINDEX H225_CallCreditServiceControl::GetDataLength() const
 }
 
 
-BOOL H225_CallCreditServiceControl::Decode(PASN_Stream & strm)
+PBoolean H225_CallCreditServiceControl::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4053,7 +4053,7 @@ PINDEX H225_GenericData::GetDataLength() const
 }
 
 
-BOOL H225_GenericData::Decode(PASN_Stream & strm)
+PBoolean H225_GenericData::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4139,7 +4139,7 @@ PINDEX H225_EnumeratedParameter::GetDataLength() const
 }
 
 
-BOOL H225_EnumeratedParameter::Decode(PASN_Stream & strm)
+PBoolean H225_EnumeratedParameter::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4237,7 +4237,7 @@ PINDEX H225_FeatureSet::GetDataLength() const
 }
 
 
-BOOL H225_FeatureSet::Decode(PASN_Stream & strm)
+PBoolean H225_FeatureSet::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4351,7 +4351,7 @@ PINDEX H225_RTPSession::GetDataLength() const
 }
 
 
-BOOL H225_RTPSession::Decode(PASN_Stream & strm)
+PBoolean H225_RTPSession::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4490,7 +4490,7 @@ PINDEX H225_GatekeeperConfirm::GetDataLength() const
 }
 
 
-BOOL H225_GatekeeperConfirm::Decode(PASN_Stream & strm)
+PBoolean H225_GatekeeperConfirm::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4645,7 +4645,7 @@ PINDEX H225_GatekeeperReject::GetDataLength() const
 }
 
 
-BOOL H225_GatekeeperReject::Decode(PASN_Stream & strm)
+PBoolean H225_GatekeeperReject::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4787,7 +4787,7 @@ PINDEX H225_RegistrationReject::GetDataLength() const
 }
 
 
-BOOL H225_RegistrationReject::Decode(PASN_Stream & strm)
+PBoolean H225_RegistrationReject::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4942,7 +4942,7 @@ PINDEX H225_UnregistrationRequest::GetDataLength() const
 }
 
 
-BOOL H225_UnregistrationRequest::Decode(PASN_Stream & strm)
+PBoolean H225_UnregistrationRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5082,7 +5082,7 @@ PINDEX H225_UnregistrationConfirm::GetDataLength() const
 }
 
 
-BOOL H225_UnregistrationConfirm::Decode(PASN_Stream & strm)
+PBoolean H225_UnregistrationConfirm::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5197,7 +5197,7 @@ PINDEX H225_UnregistrationReject::GetDataLength() const
 }
 
 
-BOOL H225_UnregistrationReject::Decode(PASN_Stream & strm)
+PBoolean H225_UnregistrationReject::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5323,7 +5323,7 @@ PINDEX H225_AdmissionReject::GetDataLength() const
 }
 
 
-BOOL H225_AdmissionReject::Decode(PASN_Stream & strm)
+PBoolean H225_AdmissionReject::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5457,7 +5457,7 @@ PINDEX H225_BandwidthReject::GetDataLength() const
 }
 
 
-BOOL H225_BandwidthReject::Decode(PASN_Stream & strm)
+PBoolean H225_BandwidthReject::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5582,7 +5582,7 @@ PINDEX H225_LocationReject::GetDataLength() const
 }
 
 
-BOOL H225_LocationReject::Decode(PASN_Stream & strm)
+PBoolean H225_LocationReject::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5706,7 +5706,7 @@ PINDEX H225_DisengageReject::GetDataLength() const
 }
 
 
-BOOL H225_DisengageReject::Decode(PASN_Stream & strm)
+PBoolean H225_DisengageReject::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5846,7 +5846,7 @@ PINDEX H225_InfoRequest::GetDataLength() const
 }
 
 
-BOOL H225_InfoRequest::Decode(PASN_Stream & strm)
+PBoolean H225_InfoRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5993,7 +5993,7 @@ PINDEX H225_InfoRequestAck::GetDataLength() const
 }
 
 
-BOOL H225_InfoRequestAck::Decode(PASN_Stream & strm)
+PBoolean H225_InfoRequestAck::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6119,7 +6119,7 @@ PINDEX H225_InfoRequestNak::GetDataLength() const
 }
 
 
-BOOL H225_InfoRequestNak::Decode(PASN_Stream & strm)
+PBoolean H225_InfoRequestNak::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6232,7 +6232,7 @@ PINDEX H225_NonStandardMessage::GetDataLength() const
 }
 
 
-BOOL H225_NonStandardMessage::Decode(PASN_Stream & strm)
+PBoolean H225_NonStandardMessage::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6335,7 +6335,7 @@ PINDEX H225_UnknownMessageResponse::GetDataLength() const
 }
 
 
-BOOL H225_UnknownMessageResponse::Decode(PASN_Stream & strm)
+PBoolean H225_UnknownMessageResponse::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6452,7 +6452,7 @@ PINDEX H225_RequestInProgress::GetDataLength() const
 }
 
 
-BOOL H225_RequestInProgress::Decode(PASN_Stream & strm)
+PBoolean H225_RequestInProgress::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6577,7 +6577,7 @@ PINDEX H225_ResourcesAvailableConfirm::GetDataLength() const
 }
 
 
-BOOL H225_ResourcesAvailableConfirm::Decode(PASN_Stream & strm)
+PBoolean H225_ResourcesAvailableConfirm::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6727,7 +6727,7 @@ PINDEX H225_ServiceControlIndication::GetDataLength() const
 }
 
 
-BOOL H225_ServiceControlIndication::Decode(PASN_Stream & strm)
+PBoolean H225_ServiceControlIndication::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6880,7 +6880,7 @@ PINDEX H225_ServiceControlResponse::GetDataLength() const
 }
 
 
-BOOL H225_ServiceControlResponse::Decode(PASN_Stream & strm)
+PBoolean H225_ServiceControlResponse::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7000,7 +7000,7 @@ PINDEX H225_H323_UU_PDU_tunnelledSignallingMessage::GetDataLength() const
 }
 
 
-BOOL H225_H323_UU_PDU_tunnelledSignallingMessage::Decode(PASN_Stream & strm)
+PBoolean H225_H323_UU_PDU_tunnelledSignallingMessage::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7101,7 +7101,7 @@ PINDEX H225_TransportAddress_ipSourceRoute::GetDataLength() const
 }
 
 
-BOOL H225_TransportAddress_ipSourceRoute::Decode(PASN_Stream & strm)
+PBoolean H225_TransportAddress_ipSourceRoute::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7207,7 +7207,7 @@ PINDEX H225_RegistrationConfirm_preGrantedARQ::GetDataLength() const
 }
 
 
-BOOL H225_RegistrationConfirm_preGrantedARQ::Decode(PASN_Stream & strm)
+PBoolean H225_RegistrationConfirm_preGrantedARQ::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7318,7 +7318,7 @@ PINDEX H225_StimulusControl::GetDataLength() const
 }
 
 
-BOOL H225_StimulusControl::Decode(PASN_Stream & strm)
+PBoolean H225_StimulusControl::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7417,7 +7417,7 @@ PINDEX H225_ConferenceList::GetDataLength() const
 }
 
 
-BOOL H225_ConferenceList::Decode(PASN_Stream & strm)
+PBoolean H225_ConferenceList::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7510,7 +7510,7 @@ PINDEX H225_GatewayInfo::GetDataLength() const
 }
 
 
-BOOL H225_GatewayInfo::Decode(PASN_Stream & strm)
+PBoolean H225_GatewayInfo::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7598,7 +7598,7 @@ PINDEX H225_H310Caps::GetDataLength() const
 }
 
 
-BOOL H225_H310Caps::Decode(PASN_Stream & strm)
+PBoolean H225_H310Caps::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7688,7 +7688,7 @@ PINDEX H225_H320Caps::GetDataLength() const
 }
 
 
-BOOL H225_H320Caps::Decode(PASN_Stream & strm)
+PBoolean H225_H320Caps::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7778,7 +7778,7 @@ PINDEX H225_H321Caps::GetDataLength() const
 }
 
 
-BOOL H225_H321Caps::Decode(PASN_Stream & strm)
+PBoolean H225_H321Caps::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7868,7 +7868,7 @@ PINDEX H225_H322Caps::GetDataLength() const
 }
 
 
-BOOL H225_H322Caps::Decode(PASN_Stream & strm)
+PBoolean H225_H322Caps::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7958,7 +7958,7 @@ PINDEX H225_H323Caps::GetDataLength() const
 }
 
 
-BOOL H225_H323Caps::Decode(PASN_Stream & strm)
+PBoolean H225_H323Caps::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8048,7 +8048,7 @@ PINDEX H225_H324Caps::GetDataLength() const
 }
 
 
-BOOL H225_H324Caps::Decode(PASN_Stream & strm)
+PBoolean H225_H324Caps::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8138,7 +8138,7 @@ PINDEX H225_VoiceCaps::GetDataLength() const
 }
 
 
-BOOL H225_VoiceCaps::Decode(PASN_Stream & strm)
+PBoolean H225_VoiceCaps::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8228,7 +8228,7 @@ PINDEX H225_T120OnlyCaps::GetDataLength() const
 }
 
 
-BOOL H225_T120OnlyCaps::Decode(PASN_Stream & strm)
+PBoolean H225_T120OnlyCaps::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8323,7 +8323,7 @@ PINDEX H225_NonStandardProtocol::GetDataLength() const
 }
 
 
-BOOL H225_NonStandardProtocol::Decode(PASN_Stream & strm)
+PBoolean H225_NonStandardProtocol::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8427,7 +8427,7 @@ PINDEX H225_T38FaxAnnexbOnlyCaps::GetDataLength() const
 }
 
 
-BOOL H225_T38FaxAnnexbOnlyCaps::Decode(PASN_Stream & strm)
+PBoolean H225_T38FaxAnnexbOnlyCaps::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8531,7 +8531,7 @@ PINDEX H225_SIPCaps::GetDataLength() const
 }
 
 
-BOOL H225_SIPCaps::Decode(PASN_Stream & strm)
+PBoolean H225_SIPCaps::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8620,7 +8620,7 @@ PINDEX H225_McuInfo::GetDataLength() const
 }
 
 
-BOOL H225_McuInfo::Decode(PASN_Stream & strm)
+PBoolean H225_McuInfo::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8702,7 +8702,7 @@ PINDEX H225_TerminalInfo::GetDataLength() const
 }
 
 
-BOOL H225_TerminalInfo::Decode(PASN_Stream & strm)
+PBoolean H225_TerminalInfo::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8781,7 +8781,7 @@ PINDEX H225_GatekeeperInfo::GetDataLength() const
 }
 
 
-BOOL H225_GatekeeperInfo::Decode(PASN_Stream & strm)
+PBoolean H225_GatekeeperInfo::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8885,7 +8885,7 @@ PINDEX H225_CallCapacity::GetDataLength() const
 }
 
 
-BOOL H225_CallCapacity::Decode(PASN_Stream & strm)
+PBoolean H225_CallCapacity::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8976,7 +8976,7 @@ PINDEX H225_CircuitIdentifier::GetDataLength() const
 }
 
 
-BOOL H225_CircuitIdentifier::Decode(PASN_Stream & strm)
+PBoolean H225_CircuitIdentifier::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9132,7 +9132,7 @@ PINDEX H225_RegistrationConfirm::GetDataLength() const
 }
 
 
-BOOL H225_RegistrationConfirm::Decode(PASN_Stream & strm)
+PBoolean H225_RegistrationConfirm::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9343,7 +9343,7 @@ PINDEX H225_BandwidthRequest::GetDataLength() const
 }
 
 
-BOOL H225_BandwidthRequest::Decode(PASN_Stream & strm)
+PBoolean H225_BandwidthRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9497,7 +9497,7 @@ PINDEX H225_BandwidthConfirm::GetDataLength() const
 }
 
 
-BOOL H225_BandwidthConfirm::Decode(PASN_Stream & strm)
+PBoolean H225_BandwidthConfirm::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9642,7 +9642,7 @@ PINDEX H225_ResourcesAvailableIndicate::GetDataLength() const
 }
 
 
-BOOL H225_ResourcesAvailableIndicate::Decode(PASN_Stream & strm)
+PBoolean H225_ResourcesAvailableIndicate::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9777,7 +9777,7 @@ PINDEX H225_H323_UU_PDU::GetDataLength() const
 }
 
 
-BOOL H225_H323_UU_PDU::Decode(PASN_Stream & strm)
+PBoolean H225_H323_UU_PDU::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9909,7 +9909,7 @@ PINDEX H225_ReleaseComplete_UUIE::GetDataLength() const
 }
 
 
-BOOL H225_ReleaseComplete_UUIE::Decode(PASN_Stream & strm)
+PBoolean H225_ReleaseComplete_UUIE::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10061,7 +10061,7 @@ PINDEX H225_EndpointType::GetDataLength() const
 }
 
 
-BOOL H225_EndpointType::Decode(PASN_Stream & strm)
+PBoolean H225_EndpointType::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10184,7 +10184,7 @@ PINDEX H225_CircuitInfo::GetDataLength() const
 }
 
 
-BOOL H225_CircuitInfo::Decode(PASN_Stream & strm)
+PBoolean H225_CircuitInfo::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10330,7 +10330,7 @@ PINDEX H225_GatekeeperRequest::GetDataLength() const
 }
 
 
-BOOL H225_GatekeeperRequest::Decode(PASN_Stream & strm)
+PBoolean H225_GatekeeperRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10568,7 +10568,7 @@ PINDEX H225_RegistrationRequest::GetDataLength() const
 }
 
 
-BOOL H225_RegistrationRequest::Decode(PASN_Stream & strm)
+PBoolean H225_RegistrationRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10871,7 +10871,7 @@ PINDEX H225_AdmissionRequest::GetDataLength() const
 }
 
 
-BOOL H225_AdmissionRequest::Decode(PASN_Stream & strm)
+PBoolean H225_AdmissionRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11129,7 +11129,7 @@ PINDEX H225_AdmissionConfirm::GetDataLength() const
 }
 
 
-BOOL H225_AdmissionConfirm::Decode(PASN_Stream & strm)
+PBoolean H225_AdmissionConfirm::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11348,7 +11348,7 @@ PINDEX H225_LocationRequest::GetDataLength() const
 }
 
 
-BOOL H225_LocationRequest::Decode(PASN_Stream & strm)
+PBoolean H225_LocationRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11537,7 +11537,7 @@ PINDEX H225_LocationConfirm::GetDataLength() const
 }
 
 
-BOOL H225_LocationConfirm::Decode(PASN_Stream & strm)
+PBoolean H225_LocationConfirm::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11724,7 +11724,7 @@ PINDEX H225_DisengageRequest::GetDataLength() const
 }
 
 
-BOOL H225_DisengageRequest::Decode(PASN_Stream & strm)
+PBoolean H225_DisengageRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11877,7 +11877,7 @@ PINDEX H225_DisengageConfirm::GetDataLength() const
 }
 
 
-BOOL H225_DisengageConfirm::Decode(PASN_Stream & strm)
+PBoolean H225_DisengageConfirm::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -12033,7 +12033,7 @@ PINDEX H225_InfoRequestResponse::GetDataLength() const
 }
 
 
-BOOL H225_InfoRequestResponse::Decode(PASN_Stream & strm)
+PBoolean H225_InfoRequestResponse::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -12229,7 +12229,7 @@ PINDEX H225_InfoRequestResponse_perCallInfo_subtype::GetDataLength() const
 }
 
 
-BOOL H225_InfoRequestResponse_perCallInfo_subtype::Decode(PASN_Stream & strm)
+PBoolean H225_InfoRequestResponse_perCallInfo_subtype::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -12371,7 +12371,7 @@ PINDEX H225_InfoRequestResponse_perCallInfo_subtype_pdu_subtype::GetDataLength()
 }
 
 
-BOOL H225_InfoRequestResponse_perCallInfo_subtype_pdu_subtype::Decode(PASN_Stream & strm)
+PBoolean H225_InfoRequestResponse_perCallInfo_subtype_pdu_subtype::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -12456,7 +12456,7 @@ PINDEX H225_H323_UserInformation::GetDataLength() const
 }
 
 
-BOOL H225_H323_UserInformation::Decode(PASN_Stream & strm)
+PBoolean H225_H323_UserInformation::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -12577,7 +12577,7 @@ PINDEX H225_Alerting_UUIE::GetDataLength() const
 }
 
 
-BOOL H225_Alerting_UUIE::Decode(PASN_Stream & strm)
+PBoolean H225_Alerting_UUIE::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -12733,7 +12733,7 @@ PINDEX H225_CallProceeding_UUIE::GetDataLength() const
 }
 
 
-BOOL H225_CallProceeding_UUIE::Decode(PASN_Stream & strm)
+PBoolean H225_CallProceeding_UUIE::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -12890,7 +12890,7 @@ PINDEX H225_Connect_UUIE::GetDataLength() const
 }
 
 
-BOOL H225_Connect_UUIE::Decode(PASN_Stream & strm)
+PBoolean H225_Connect_UUIE::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13034,7 +13034,7 @@ PINDEX H225_Information_UUIE::GetDataLength() const
 }
 
 
-BOOL H225_Information_UUIE::Decode(PASN_Stream & strm)
+PBoolean H225_Information_UUIE::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13250,7 +13250,7 @@ PINDEX H225_Setup_UUIE::GetDataLength() const
 }
 
 
-BOOL H225_Setup_UUIE::Decode(PASN_Stream & strm)
+PBoolean H225_Setup_UUIE::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13507,7 +13507,7 @@ PINDEX H225_Facility_UUIE::GetDataLength() const
 }
 
 
-BOOL H225_Facility_UUIE::Decode(PASN_Stream & strm)
+PBoolean H225_Facility_UUIE::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13692,7 +13692,7 @@ PINDEX H225_Progress_UUIE::GetDataLength() const
 }
 
 
-BOOL H225_Progress_UUIE::Decode(PASN_Stream & strm)
+PBoolean H225_Progress_UUIE::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13866,7 +13866,7 @@ PINDEX H225_Endpoint::GetDataLength() const
 }
 
 
-BOOL H225_Endpoint::Decode(PASN_Stream & strm)
+PBoolean H225_Endpoint::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;

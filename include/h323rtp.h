@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:49  shorne
+ * First commit of h323plus
+ *
  * Revision 1.13.2.2  2007/05/23 06:58:02  shorne
  * Nat Support for EP's nested behind same NAT
  *
@@ -145,14 +148,14 @@ class H323_RTP_Session : public RTP_UserData
   //@{
     /**Fill out the OpenLogicalChannel PDU for the particular channel type.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       const H323_RTPChannel & channel,            ///< Channel using this session.
       H245_H2250LogicalChannelParameters & param  ///< Open PDU to send.
     ) const = 0;
 
 	/**Sending alternate RTP ports if behind same NAT
 	  */
-	virtual BOOL OnSendingAltPDU(
+	virtual PBoolean OnSendingAltPDU(
     const H323_RTPChannel & channel,               ///< Channel using this session.
 	  H245_ArrayOf_GenericInformation & alternate  ///< Alternate RTP ports
 	) const = 0;
@@ -177,7 +180,7 @@ class H323_RTP_Session : public RTP_UserData
        local machine via the H245LogicalChannelDict::Open() function, and
        the request has been acknowledged by the remote endpoint.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       H323_RTPChannel & channel,                  ///< Channel using this session.
       const H245_H2250LogicalChannelParameters & param, ///< Acknowledgement PDU
       unsigned & errorCode                              ///< Error on failure
@@ -185,7 +188,7 @@ class H323_RTP_Session : public RTP_UserData
 
 	/**Alternate RTP port information for Same NAT
 	  */
-	virtual BOOL OnReceivedAltPDU(
+	virtual PBoolean OnReceivedAltPDU(
 	   H323_RTPChannel & channel,                  ///< Channel using this session.
 	  const H245_ArrayOf_GenericInformation & alternate  ///< Alternate RTP ports
 	) = 0;
@@ -194,14 +197,14 @@ class H323_RTP_Session : public RTP_UserData
        local machine via the H245LogicalChannelDict::Open() function, and
        the request has been acknowledged by the remote endpoint.
      */
-    virtual BOOL OnReceivedAckPDU(
+    virtual PBoolean OnReceivedAckPDU(
       H323_RTPChannel & channel,                  ///< Channel using this session.
       const H245_H2250LogicalChannelAckParameters & param ///< Acknowledgement PDU
     ) = 0;
 
 	/**Alternate RTP port information for Same NAT
 	  */
-	virtual BOOL OnReceivedAckAltPDU(
+	virtual PBoolean OnReceivedAckAltPDU(
       H323_RTPChannel & channel,                         ///< Channel using this session.
 	  const H245_ArrayOf_GenericInformation & alternate  ///< Alternate RTP ports
 	) = 0;
@@ -254,14 +257,14 @@ class H323_RTP_UDP : public H323_RTP_Session
   //@{
     /**Fill out the OpenLogicalChannel PDU for the particular channel type.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       const H323_RTPChannel & channel,            ///< Channel using this session.
       H245_H2250LogicalChannelParameters & param  ///< Open PDU to send.
     ) const;
 
 	/**Sending alternate RTP ports if behind same NAT
 	  */
-	virtual BOOL OnSendingAltPDU(
+	virtual PBoolean OnSendingAltPDU(
     const H323_RTPChannel & channel,               ///< Channel using this session.
 	  H245_ArrayOf_GenericInformation & alternate  ///< Alternate RTP ports
 	) const;
@@ -288,7 +291,7 @@ class H323_RTP_UDP : public H323_RTP_Session
 
        The default behaviour sets the remote ports to send UDP packets to.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       H323_RTPChannel & channel,                  ///< Channel using this session.
       const H245_H2250LogicalChannelParameters & param, ///< Acknowledgement PDU
       unsigned & errorCode                              ///< Error on failure
@@ -296,7 +299,7 @@ class H323_RTP_UDP : public H323_RTP_Session
 
 	/**Alternate RTP port information for Same NAT
 	  */
-	virtual BOOL OnReceivedAltPDU(
+	virtual PBoolean OnReceivedAltPDU(
 	   H323_RTPChannel & channel,                  ///< Channel using this session.
 	  const H245_ArrayOf_GenericInformation & alternate  ///< Alternate RTP ports
 	);
@@ -307,14 +310,14 @@ class H323_RTP_UDP : public H323_RTP_Session
 
        The default behaviour sets the remote ports to send UDP packets to.
      */
-    virtual BOOL OnReceivedAckPDU(
+    virtual PBoolean OnReceivedAckPDU(
       H323_RTPChannel & channel,                  ///< Channel using this session.
       const H245_H2250LogicalChannelAckParameters & param ///< Acknowledgement PDU
     );
 
 	/**Alternate RTP port information for Same NAT
 	  */
-	virtual BOOL OnReceivedAckAltPDU(
+	virtual PBoolean OnReceivedAckAltPDU(
       H323_RTPChannel & channel,                         ///< Channel using this session.
 	  const H245_ArrayOf_GenericInformation & alternate  ///< Alternate RTP ports
 	);
@@ -336,7 +339,7 @@ class H323_RTP_UDP : public H323_RTP_Session
   //@{
     /**Write the Transport Capability PDU to Include GQoS Support.
      */
-    virtual BOOL WriteTransportCapPDU(
+    virtual PBoolean WriteTransportCapPDU(
        H245_TransportCapability & cap,	  ///* Transport Capability PDU
        const H323_RTPChannel & channel    ///* Channel using this session.
        ) const;
@@ -351,9 +354,9 @@ class H323_RTP_UDP : public H323_RTP_Session
 #endif
   
   protected:
-    virtual BOOL ExtractTransport(
+    virtual PBoolean ExtractTransport(
       const H245_TransportAddress & pdu,
-      BOOL isDataPort,
+      PBoolean isDataPort,
       unsigned & errorCode
     );
 

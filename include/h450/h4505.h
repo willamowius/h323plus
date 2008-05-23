@@ -182,7 +182,7 @@ class H4505_CpRequestArg : public PASN_Sequence
     H4505_ArrayOf_MixedExtension m_extensionArg;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -215,7 +215,7 @@ class H4505_CpRequestRes : public PASN_Sequence
     H4505_ArrayOf_MixedExtension m_extensionRes;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -249,7 +249,7 @@ class H4505_CpSetupArg : public PASN_Sequence
     H4505_ArrayOf_MixedExtension m_extensionArg;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -282,7 +282,7 @@ class H4505_CpSetupRes : public PASN_Sequence
     H4505_ArrayOf_MixedExtension m_extensionRes;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -318,7 +318,7 @@ class H4505_GroupIndicationOnArg : public PASN_Sequence
     H4505_ArrayOf_MixedExtension m_extensionArg;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -347,7 +347,7 @@ class H4505_GroupIndicationOnRes : public PASN_Sequence
     H4505_ArrayOf_MixedExtension m_extensionRes;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -378,7 +378,7 @@ class H4505_GroupIndicationOffArg : public PASN_Sequence
     H4505_ArrayOf_MixedExtension m_extensionArg;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -407,7 +407,7 @@ class H4505_GroupIndicationOffRes : public PASN_Sequence
     H4505_ArrayOf_MixedExtension m_extensionRes;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -444,7 +444,7 @@ class H4505_PickrequArg : public PASN_Sequence
     H4505_ArrayOf_MixedExtension m_extensionArg;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -474,7 +474,7 @@ class H4505_PickrequRes : public PASN_Sequence
     H4505_ArrayOf_MixedExtension m_extensionRes;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -505,7 +505,7 @@ class H4505_PickupArg : public PASN_Sequence
     H4505_ArrayOf_MixedExtension m_extensionArg;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -534,7 +534,7 @@ class H4505_PickupRes : public PASN_Sequence
     H4505_ArrayOf_MixedExtension m_extensionRes;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -566,7 +566,7 @@ class H4505_PickExeArg : public PASN_Sequence
     H4505_ArrayOf_MixedExtension m_extensionArg;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -595,7 +595,7 @@ class H4505_PickExeRes : public PASN_Sequence
     H4505_ArrayOf_MixedExtension m_extensionRes;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -626,7 +626,7 @@ class H4505_CpNotifyArg : public PASN_Sequence
     H4505_ArrayOf_MixedExtension m_extensionArg;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -657,7 +657,7 @@ class H4505_CpickupNotifyArg : public PASN_Sequence
     H4505_ArrayOf_MixedExtension m_extensionArg;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;

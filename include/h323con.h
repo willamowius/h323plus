@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.14  2008/04/25 01:19:52  shorne
+ * Added callback to set maximum video bandwidth
+ *
  * Revision 1.13  2008/02/06 02:52:58  shorne
  * Added support for Standards based NAT Traversal
  *
@@ -483,8 +486,8 @@ class H323AggregatedH2x5Handle : public PAggregatedHandle
 
     PAggregatorFDList_t GetFDs();
 
-    BOOL OnRead();
-    virtual BOOL HandlePDU(BOOL ok, PBYTEArray & pdu) = 0;
+    PBoolean OnRead();
+    virtual PBoolean HandlePDU(PBoolean ok, PBYTEArray & pdu) = 0;
     PTimeInterval GetTimeout()
     { return transport.GetReadTimeout(); }
 
@@ -665,7 +668,7 @@ class H323Connection : public PObject
        Returns FALSE if the lock was not obtainable due to the connection being
        shut down.
      */
-    BOOL Lock();
+    PBoolean Lock();
 
     /**Try to lock connection.
        When the H323EndPoint::FindConnectionWithLock() function is used to gain
@@ -751,14 +754,14 @@ class H323Connection : public PObject
        is not quite the same as IsEstablished() as that indicates the call is
        connected AND there is media open.
       */
-    BOOL IsConnected() const { return connectionState == HasExecutedSignalConnect || connectionState == EstablishedConnection; }
+    PBoolean IsConnected() const { return connectionState == HasExecutedSignalConnect || connectionState == EstablishedConnection; }
 
     /**Determine if the call has been established.
        This can be used in combination with the GetCallEndReason() function
        to determine the three main phases of a call, call setup, call
        established and call cleared.
       */
-    BOOL IsEstablished() const { return connectionState == EstablishedConnection; }
+    PBoolean IsEstablished() const { return connectionState == EstablishedConnection; }
 
     /**Call clearance reasons.
        NOTE: if anything is added to this, you also need to add the field to
@@ -825,13 +828,13 @@ class H323Connection : public PObject
        calls the endpoint version of the ClearCall() function to avoid
        possible multithreading race conditions.
       */
-    virtual BOOL ClearCall(
+    virtual PBoolean ClearCall(
       CallEndReason reason = EndedByLocalUser  ///< Reason for call clearing
     );
 
     /**Clear a current connection, synchronously
       */
-    virtual BOOL ClearCallSynchronous(
+    virtual PBoolean ClearCallSynchronous(
       PSyncPoint * sync,
       CallEndReason reason = EndedByLocalUser  ///< Reason for call clearing
     );
@@ -855,12 +858,12 @@ class H323Connection : public PObject
     virtual void AttachSignalChannel(
       const PString & token,    ///< New token to use to identify connection
       H323Transport * channel,  ///< Transport for the PDU's
-      BOOL answeringCall        ///< Flag for if incoming/outgoing call.
+      PBoolean answeringCall        ///< Flag for if incoming/outgoing call.
     );
 
     /**Write a PDU to the signalling channel.
       */
-    BOOL WriteSignalPDU(
+    PBoolean WriteSignalPDU(
       H323SignalPDU & pdu       ///< PDU to write.
     );
 
@@ -872,17 +875,17 @@ class H323Connection : public PObject
     /**Handle a single received PDU from the signalling channel.
        This is an internal function and is unlikely to be used by applications.
     */
-    virtual BOOL HandleReceivedSignalPDU(BOOL readStatus, H323SignalPDU & pdu);
+    virtual PBoolean HandleReceivedSignalPDU(PBoolean readStatus, H323SignalPDU & pdu);
 
     /**Handle a single received PDU from the control channel.
        This is an internal function and is unlikely to be used by applications.
     */
-    virtual BOOL HandleReceivedControlPDU(BOOL readStatus, PPER_Stream & strm);
+    virtual PBoolean HandleReceivedControlPDU(PBoolean readStatus, PPER_Stream & strm);
 
     /**Handle PDU from the signalling channel.
        This is an internal function and is unlikely to be used by applications.
      */
-    virtual BOOL HandleSignalPDU(
+    virtual PBoolean HandleSignalPDU(
       H323SignalPDU & pdu       ///< PDU to handle.
     );
 
@@ -900,7 +903,7 @@ class H323Connection : public PObject
        If FALSE is returned the connection is aborted and a Release Complete
        PDU is sent.
      */
-    virtual BOOL OnReceivedSignalSetup(
+    virtual PBoolean OnReceivedSignalSetup(
       const H323SignalPDU & pdu   ///< Received setup PDU
     );
 
@@ -910,7 +913,7 @@ class H323Connection : public PObject
 
        The default behaviour does nothing.
      */
-    virtual BOOL OnReceivedSignalSetupAck(
+    virtual PBoolean OnReceivedSignalSetupAck(
       const H323SignalPDU & pdu   ///< Received setup PDU
     );
 
@@ -920,7 +923,7 @@ class H323Connection : public PObject
 
        The default behaviour does nothing.
      */
-    virtual BOOL OnReceivedSignalInformation(
+    virtual PBoolean OnReceivedSignalInformation(
       const H323SignalPDU & pdu   ///< Received setup PDU
     );
 
@@ -932,7 +935,7 @@ class H323Connection : public PObject
        starts the separate H245 channel, if successful or not present it
        returns TRUE.
      */
-    virtual BOOL OnReceivedCallProceeding(
+    virtual PBoolean OnReceivedCallProceeding(
       const H323SignalPDU & pdu   ///< Received call proceeding PDU
     );
 
@@ -944,7 +947,7 @@ class H323Connection : public PObject
        starts the separate H245 channel, if successful or not present it
        returns TRUE.
      */
-    virtual BOOL OnReceivedProgress(
+    virtual PBoolean OnReceivedProgress(
       const H323SignalPDU & pdu   ///< Received call proceeding PDU
     );
 
@@ -954,7 +957,7 @@ class H323Connection : public PObject
 
        The default behaviour obtains the display name and calls OnAlerting().
      */
-    virtual BOOL OnReceivedAlerting(
+    virtual PBoolean OnReceivedAlerting(
       const H323SignalPDU & pdu   ///< Received Alerting PDU
     );
 
@@ -966,7 +969,7 @@ class H323Connection : public PObject
        starts the separate H245 channel, if successful it returns TRUE.
        If not present and there is no H245Tunneling then it returns FALSE.
      */
-    virtual BOOL OnReceivedSignalConnect(
+    virtual PBoolean OnReceivedSignalConnect(
       const H323SignalPDU & pdu   ///< Received connect PDU
     );
 
@@ -978,7 +981,7 @@ class H323Connection : public PObject
        starts the separate H245 channel, if successful or not present it
        returns TRUE.
      */
-    virtual BOOL OnReceivedFacility(
+    virtual PBoolean OnReceivedFacility(
       const H323SignalPDU & pdu   ///< Received Facility PDU
     );
 
@@ -988,7 +991,7 @@ class H323Connection : public PObject
 
        The default behaviour simply returns TRUE.
      */
-    virtual BOOL OnReceivedSignalNotify(
+    virtual PBoolean OnReceivedSignalNotify(
       const H323SignalPDU & pdu   ///< Received Notify PDU
     );
 
@@ -998,7 +1001,7 @@ class H323Connection : public PObject
 
        The default behaviour simply returns TRUE.
      */
-    virtual BOOL OnReceivedSignalStatus(
+    virtual PBoolean OnReceivedSignalStatus(
       const H323SignalPDU & pdu   ///< Received Status PDU
     );
 
@@ -1008,7 +1011,7 @@ class H323Connection : public PObject
 
        The default behaviour sends a Q931 Status PDU back.
      */
-    virtual BOOL OnReceivedStatusEnquiry(
+    virtual PBoolean OnReceivedStatusEnquiry(
       const H323SignalPDU & pdu   ///< Received Status Enquiry PDU
     );
 
@@ -1026,7 +1029,7 @@ class H323Connection : public PObject
        If FALSE is returned the connection is aborted and a Release Complete
        PDU is sent. The default behaviour returns TRUE.
      */
-    virtual BOOL OnUnknownSignalPDU(
+    virtual PBoolean OnUnknownSignalPDU(
       const H323SignalPDU & pdu  ///< Received PDU
     );
 
@@ -1041,11 +1044,11 @@ class H323Connection : public PObject
 
        The default behaviour calls the endpoint function of the same name.
      */
-    virtual BOOL OnIncomingCall(
+    virtual PBoolean OnIncomingCall(
       const H323SignalPDU & setupPDU,   ///< Received setup PDU
       H323SignalPDU & alertingPDU       ///< Alerting PDU to send
     );
-    virtual BOOL OnIncomingCall(
+    virtual PBoolean OnIncomingCall(
       const H323SignalPDU & setupPDU,   ///< Received setup PDU
       H323SignalPDU & alertingPDU,      ///< Alerting PDU to send
       CallEndReason & reason            ///< reason for call refusal, if returned false
@@ -1060,7 +1063,7 @@ class H323Connection : public PObject
        otherwise. Note that if the call is forwarded the current connection is
        cleared with the ended call code of EndedByCallForwarded.
       */
-    virtual BOOL ForwardCall(
+    virtual PBoolean ForwardCall(
       const PString & forwardParty   ///< Party to forward call to.
     );
 
@@ -1102,11 +1105,11 @@ class H323Connection : public PObject
 
     /**Determine whether this connection is being transferred.
      */
-    BOOL IsTransferringCall() const;
+    PBoolean IsTransferringCall() const;
 
     /**Determine whether this connection is the result of a transferred call.
      */
-    BOOL IsTransferredCall() const;
+    PBoolean IsTransferredCall() const;
 
     /**Handle the transfer of an existing connection to a new remote.
        This is an internal function and it is not expected the user will call
@@ -1171,7 +1174,7 @@ class H323Connection : public PObject
 	   supplementary service 
 	*/
 
-    BOOL GetRedirectingNumber(
+    PBoolean GetRedirectingNumber(
       PString &originalCalledNr,               
       PString &lastDivertingNr,
       int &divCounter, 
@@ -1183,7 +1186,7 @@ class H323Connection : public PObject
        endpoint.  So far only Local Hold has been implemented. 
      */
     void HoldCall(
-      BOOL localHold   ///< true for Local Hold, false for Remote Hold
+      PBoolean localHold   ///< true for Local Hold, false for Remote Hold
     );
 
     /**Retrieve the call from hold, activating all media channels (H.450.4).
@@ -1216,7 +1219,7 @@ class H323Connection : public PObject
     /**CallBack when Call is put on hold. This allows the device to release the 
        Local Input device to be used for another active connection
       */
-    virtual PChannel *  OnCallHold(BOOL IsEncoder,     ///* Direction
+    virtual PChannel *  OnCallHold(PBoolean IsEncoder,     ///* Direction
                                unsigned sessionId,     ///* Session Id 
                                unsigned bufferSize,    ///* Size of each sound buffer (Audio)
                                PChannel * channel);    ///* Channel being Held
@@ -1224,26 +1227,26 @@ class H323Connection : public PObject
      /**CallBack when call is about to be retrieved. This allows the Local Input device
        to be reattached to the Held Channel.
        */
-    virtual PChannel *  OnCallRetrieve(BOOL IsEncoder,  ///* Direction
+    virtual PChannel *  OnCallRetrieve(PBoolean IsEncoder,  ///* Direction
                                unsigned sessionId,      ///* Session Id    
                                unsigned bufferSize,     ///* Size of each sound buffer (Audio)
                                PChannel * channel);	///* Channel being Held
 
     /**Determine if Meadia On Hold is enabled.
       */
-    BOOL IsMediaOnHold() const;
+    PBoolean IsMediaOnHold() const;
 
     /**Determine if held.
       */
-    BOOL IsLocalHold() const;
+    PBoolean IsLocalHold() const;
 
     /**Determine if held.
       */
-    BOOL IsRemoteHold() const;
+    PBoolean IsRemoteHold() const;
 
     /**Determine if the current call is held or in the process of being held.
       */
-    BOOL IsCallOnHold() const;
+    PBoolean IsCallOnHold() const;
 
     /**Begin a call intrusion request.
        Calls h45011handler->IntrudeCall where SS pdu is added to Call Setup
@@ -1269,7 +1272,7 @@ class H323Connection : public PObject
       */
     void SetCallIntrusion() { isCallIntrusion = TRUE; }
 
-    BOOL IsCallIntrusion() { return isCallIntrusion; }
+    PBoolean IsCallIntrusion() { return isCallIntrusion; }
 
     /**Get Call Intrusion Protection Level of the local endpoint.
       */
@@ -1278,7 +1281,7 @@ class H323Connection : public PObject
     /**Get Call Intrusion Protection Level of other endpoints that we are in
        connection with.
       */
-    virtual BOOL GetRemoteCallIntrusionProtectionLevel(
+    virtual PBoolean GetRemoteCallIntrusionProtectionLevel(
       const PString & callToken,
       unsigned callIntrusionProtectionLevel
     );
@@ -1387,7 +1390,7 @@ class H323Connection : public PObject
        with the TCP/IP data. Therefore if you override this in your
        application make sure you call the ancestor function.
      */
-    virtual BOOL OnSendSignalSetup(
+    virtual PBoolean OnSendSignalSetup(
       H323SignalPDU & setupPDU   ///< Setup PDU to send
     );
 
@@ -1399,7 +1402,7 @@ class H323Connection : public PObject
 
        The default behaviour simply returns TRUE.
      */
-    virtual BOOL OnSendCallProceeding(
+    virtual PBoolean OnSendCallProceeding(
       H323SignalPDU & callProceedingPDU   ///< Call Proceeding PDU to send
     );
 
@@ -1414,7 +1417,7 @@ class H323Connection : public PObject
 
        The default behaviour simply returns TRUE.
       */
-    virtual BOOL OnSendReleaseComplete(
+    virtual PBoolean OnSendReleaseComplete(
       H323SignalPDU & releaseCompletePDU ///< Release Complete PDU to send
     );
 
@@ -1428,7 +1431,7 @@ class H323Connection : public PObject
 
        The default behaviour calls the endpoint function of the same name.
      */
-    virtual BOOL OnAlerting(
+    virtual PBoolean OnAlerting(
       const H323SignalPDU & alertingPDU,  ///< Received Alerting PDU
       const PString & user                ///< Username of remote endpoint
     );
@@ -1447,7 +1450,7 @@ class H323Connection : public PObject
 
        The default behaviour simply returns FALSE.
      */
-    virtual BOOL OnInsufficientDigits();
+    virtual PBoolean OnInsufficientDigits();
 
     /**This function is called when sufficient digits have been entered.
        This supports overlapped dialling so that a call can begin when it is
@@ -1474,7 +1477,7 @@ class H323Connection : public PObject
 
        The default behaviour calls H323EndPoint::OnOutgoingCall
      */
-    virtual BOOL OnOutgoingCall(
+    virtual PBoolean OnOutgoingCall(
       const H323SignalPDU & connectPDU   ///< Received Connect PDU
     );
 
@@ -1489,7 +1492,7 @@ class H323Connection : public PObject
        The default behaviour uses OnSelectLogicalChannels() to find a pair of
        channels and adds then to the provided PDU.
      */
-    virtual BOOL SendFastStartAcknowledge(
+    virtual PBoolean SendFastStartAcknowledge(
       H225_ArrayOf_PASN_OctetString & array   ///< Array of H245_OpenLogicalChannel
     );
 
@@ -1504,7 +1507,7 @@ class H323Connection : public PObject
        The default behaviour parses the provided array and starts the channels
        acknowledged in it.
      */
-    virtual BOOL HandleFastStartAcknowledge(
+    virtual PBoolean HandleFastStartAcknowledge(
       const H225_ArrayOf_PASN_OctetString & array   ///< Array of H245_OpenLogicalChannel
     );
 
@@ -1515,7 +1518,7 @@ class H323Connection : public PObject
        If FALSE is returned the connection is aborted and a Release Complete
        PDU is sent.
      */
-    virtual BOOL StartControlChannel();
+    virtual PBoolean StartControlChannel();
 
     /**Start a separate H245 channel.
        This function is called from one of a number of functions after it
@@ -1528,7 +1531,7 @@ class H323Connection : public PObject
        creates a corresponding H323Transport decendent for the control
        channel.
      */
-    virtual BOOL StartControlChannel(
+    virtual PBoolean StartControlChannel(
       const H225_TransportAddress & h245Address   ///< H245 address
     );
   //@}
@@ -1539,14 +1542,14 @@ class H323Connection : public PObject
        If there is no control channel open then this will tunnel the PDU
        into the signalling channel.
       */
-    BOOL WriteControlPDU(
+    PBoolean WriteControlPDU(
       const H323ControlPDU & pdu
     );
 
     /**Start control channel negotiations.
       */
-    virtual BOOL StartControlNegotiations(
-      BOOL renegotiate = FALSE  ///< Force renogotiation of TCS/MSD
+    virtual PBoolean StartControlNegotiations(
+      PBoolean renegotiate = FALSE  ///< Force renogotiation of TCS/MSD
     );
 
     /**Handle reading data on the control channel.
@@ -1559,7 +1562,7 @@ class H323Connection : public PObject
        If FALSE is returned the connection is aborted. The default behaviour
        returns TRUE.
      */
-    virtual BOOL HandleControlData(
+    virtual PBoolean HandleControlData(
       PPER_Stream & strm
     );
 
@@ -1569,7 +1572,7 @@ class H323Connection : public PObject
        If FALSE is returned the connection is aborted. The default behaviour
        returns TRUE.
      */
-    virtual BOOL HandleControlPDU(
+    virtual PBoolean HandleControlPDU(
       const H323ControlPDU & pdu
     );
 
@@ -1582,41 +1585,41 @@ class H323Connection : public PObject
        The default behaviour send a FunctioNotUnderstood indication back to
        the sender, and returns TRUE to continue operation.
      */
-    virtual BOOL OnUnknownControlPDU(
+    virtual PBoolean OnUnknownControlPDU(
       const H323ControlPDU & pdu  ///< Received PDU
     );
 
     /**Handle incoming request PDU's on the control channel.
        Dispatches them to the various virtuals off this class.
      */
-    virtual BOOL OnH245Request(
+    virtual PBoolean OnH245Request(
       const H323ControlPDU & pdu  ///< Received PDU
     );
 
     /**Handle incoming response PDU's on the control channel.
        Dispatches them to the various virtuals off this class.
      */
-    virtual BOOL OnH245Response(
+    virtual PBoolean OnH245Response(
       const H323ControlPDU & pdu  ///< Received PDU
     );
 
     /**Handle incoming command PDU's on the control channel.
        Dispatches them to the various virtuals off this class.
      */
-    virtual BOOL OnH245Command(
+    virtual PBoolean OnH245Command(
       const H323ControlPDU & pdu  ///< Received PDU
     );
 
     /**Handle incoming indication PDU's on the control channel.
        Dispatches them to the various virtuals off this class.
      */
-    virtual BOOL OnH245Indication(
+    virtual PBoolean OnH245Indication(
       const H323ControlPDU & pdu  ///< Received PDU
     );
 
     /**Handle H245 command to send terminal capability set.
      */
-    virtual BOOL OnH245_SendTerminalCapabilitySet(
+    virtual PBoolean OnH245_SendTerminalCapabilitySet(
       const H245_SendTerminalCapabilitySet & pdu  ///< Received PDU
     );
 
@@ -1624,7 +1627,7 @@ class H323Connection : public PObject
        This function calls OnLogicalChannelFlowControl() with the channel and
        bit rate restriction.
      */
-    virtual BOOL OnH245_FlowControlCommand(
+    virtual PBoolean OnH245_FlowControlCommand(
       const H245_FlowControlCommand & pdu  ///< Received PDU
     );
 
@@ -1632,7 +1635,7 @@ class H323Connection : public PObject
        This function passes the miscellaneous command on to the channel
        defined by the pdu.
      */
-    virtual BOOL OnH245_MiscellaneousCommand(
+    virtual PBoolean OnH245_MiscellaneousCommand(
       const H245_MiscellaneousCommand & pdu  ///< Received PDU
     );
 
@@ -1640,7 +1643,7 @@ class H323Connection : public PObject
        This function passes the miscellaneous indication on to the channel
        defined by the pdu.
      */
-    virtual BOOL OnH245_MiscellaneousIndication(
+    virtual PBoolean OnH245_MiscellaneousIndication(
       const H245_MiscellaneousIndication & pdu  ///< Received PDU
     );
 
@@ -1648,7 +1651,7 @@ class H323Connection : public PObject
        This function calls OnLogicalChannelJitter() with the channel and
        estimated jitter.
      */
-    virtual BOOL OnH245_JitterIndication(
+    virtual PBoolean OnH245_JitterIndication(
       const H245_JitterIndication & pdu  ///< Received PDU
     );
 
@@ -1673,7 +1676,7 @@ class H323Connection : public PObject
        If FALSE is returned the connection is aborted. The default behaviour
        returns TRUE.
      */
-    virtual BOOL OnControlProtocolError(
+    virtual PBoolean OnControlProtocolError(
       ControlProtocolErrors errorSource,  ///< Source of the proptoerror
       const void * errorData = NULL       ///< Data associated with error
     );
@@ -1700,7 +1703,7 @@ class H323Connection : public PObject
        The default behaviour assigns the table and set to member variables and
        returns TRUE if the remoteCodecs list is not empty.
      */
-    virtual BOOL OnReceivedCapabilitySet(
+    virtual PBoolean OnReceivedCapabilitySet(
       const H323Capabilities & remoteCaps,      ///< Capability combinations remote supports
       const H245_MultiplexCapability * muxCap,  ///< Transport capability, if present
       H245_TerminalCapabilitySetReject & reject ///< Rejection PDU (if return FALSE)
@@ -1709,7 +1712,7 @@ class H323Connection : public PObject
     /**Send a new capability set.
       */
     virtual void SendCapabilitySet(
-      BOOL empty  ///< Send an empty set.
+      PBoolean empty  ///< Send an empty set.
     );
 
     /**Call back to set the local capabilities.
@@ -1724,7 +1727,7 @@ class H323Connection : public PObject
 
     /**Return if this H245 connection is a master or slave
      */
-    BOOL IsH245Master() const;
+    PBoolean IsH245Master() const;
 
     /**Start the round trip delay calculation over the control channel.
      */
@@ -1785,7 +1788,7 @@ class H323Connection : public PObject
 	/** MinMerge the local and remote Video and Extended Video Capabilities to ensure
 	    correct maximum framesize is negotiated between the parties.
 	  */
-	virtual BOOL MergeCapabilities(
+	virtual PBoolean MergeCapabilities(
 		unsigned sessionID,                ///< Session ID to find default logical channel.
 		const H323Capability & local,     ///< Local Capability
 		H323Capability * remote           ///< remote Capability
@@ -1796,8 +1799,8 @@ class H323Connection : public PObject
       */
     virtual void SelectFastStartChannels(
       unsigned sessionID,   ///< Session ID to find default logical channel.
-      BOOL transmitter,     ///< Whether to open transmitters
-      BOOL receiver         ///< Whether to open receivers
+      PBoolean transmitter,     ///< Whether to open transmitters
+      PBoolean receiver         ///< Whether to open receivers
     );
 
 	/** Disable FastStart on a call by call basis
@@ -1818,7 +1821,7 @@ class H323Connection : public PObject
        OnSelectLogicalChannels(), then it may only establish a transmit
        channel, ie fromRemote must be FALSE.
       */
-    virtual BOOL OpenLogicalChannel(
+    virtual PBoolean OpenLogicalChannel(
       const H323Capability & capability,  ///< Capability to open channel with
       unsigned sessionID,                 ///< Session for the channel
       H323Channel::Directions dir         ///< Direction of channel
@@ -1833,7 +1836,7 @@ class H323Connection : public PObject
 
        The default behaviour simply returns TRUE.
      */
-    virtual BOOL OnOpenLogicalChannel(
+    virtual PBoolean OnOpenLogicalChannel(
       const H245_OpenLogicalChannel & openPDU,  ///< Received PDU for the channel open
       H245_OpenLogicalChannelAck & ackPDU,      ///< PDU to send for acknowledgement
       unsigned & errorCode                      ///< Error to return if refused
@@ -1846,7 +1849,7 @@ class H323Connection : public PObject
        try and open a new transmitter channel using the same codec as the
        receiver that is being opened.
       */
-    virtual BOOL OnConflictingLogicalChannel(
+    virtual PBoolean OnConflictingLogicalChannel(
       H323Channel & channel    ///< Channel that conflicted
     );
 
@@ -1856,7 +1859,7 @@ class H323Connection : public PObject
       */
     virtual H323Channel * CreateLogicalChannel(
       const H245_OpenLogicalChannel & open, ///< Parameters for opening channel
-      BOOL startingFast,                    ///< Flag for fast/slow starting.
+      PBoolean startingFast,                    ///< Flag for fast/slow starting.
       unsigned & errorCode                  ///< Reason for create failure
     );
 
@@ -1882,7 +1885,7 @@ class H323Connection : public PObject
        of the remote endpoints media server RTP addresses to complete the
        setting up of the external RTP stack. eg:
 
-         BOOL OnStartLogicalChannel(H323Channel & channel)
+         PBoolean OnStartLogicalChannel(H323Channel & channel)
          {
            H323_ExternalRTPChannel & external = (H323_ExternalRTPChannel &)channel;
            external.GetRemoteAddress(remoteIpAddress, remotePort);
@@ -1914,7 +1917,7 @@ class H323Connection : public PObject
        The default behaviour checks the capability set for if this capability
        is allowed to be opened with other channels that may already be open.
      */
-    virtual BOOL OnCreateLogicalChannel(
+    virtual PBoolean OnCreateLogicalChannel(
       const H323Capability & capability,  ///< Capability for the channel open
       H323Channel::Directions dir,        ///< Direction of channel
       unsigned & errorCode                ///< Error to return if refused
@@ -1924,7 +1927,7 @@ class H323Connection : public PObject
 
        The default behaviour does nothing and returns TRUE.
       */
-    virtual BOOL OnStartLogicalChannel(
+    virtual PBoolean OnStartLogicalChannel(
       H323Channel & channel    ///< Channel that has been started.
     );
 
@@ -1935,8 +1938,8 @@ class H323Connection : public PObject
 
        The default behaviour calls the equivalent function on the endpoint.
       */
-    virtual BOOL OpenAudioChannel(
-      BOOL isEncoding,       ///< Direction of data flow
+    virtual PBoolean OpenAudioChannel(
+      PBoolean isEncoding,       ///< Direction of data flow
       unsigned bufferSize,   ///< Size of each sound buffer
       H323AudioCodec & codec ///< codec that is doing the opening
     );
@@ -1949,8 +1952,8 @@ class H323Connection : public PObject
 
        The default behaviour calls the equivalent function on the endpoint.
       */
-    virtual BOOL OpenVideoChannel(
-      BOOL isEncoding,       ///< Direction of data flow
+    virtual PBoolean OpenVideoChannel(
+      PBoolean isEncoding,       ///< Direction of data flow
       H323VideoCodec & codec ///< codec doing the opening
     );
 
@@ -1958,7 +1961,7 @@ class H323Connection : public PObject
 	/** Open an Extended Video Session
 	    This will open an Extended Video session.
 	*/
-    BOOL OpenExtendedVideoSession(H323ChannelNumber & num);
+    PBoolean OpenExtendedVideoSession(H323ChannelNumber & num);
 
 	/** On Received an Extended Video OLC
 	    This indicates the receipt of Extended Video OLC
@@ -1971,7 +1974,7 @@ class H323Connection : public PObject
 	/** Close an Extended Video Session matching the channel number
 	    This will close the Extended Video matching the channel number (if open)
 	 */
-    virtual BOOL CloseExtendedVideoSession(
+    virtual PBoolean CloseExtendedVideoSession(
        const H323ChannelNumber & num     ///< Channel number to close.
 	);
 
@@ -1981,8 +1984,8 @@ class H323Connection : public PObject
 
        The default behaviour returns FALSE.
       */
-    virtual BOOL OpenExtendedVideoChannel(
-      BOOL isEncoding,       ///< Direction of data flow
+    virtual PBoolean OpenExtendedVideoChannel(
+      PBoolean isEncoding,       ///< Direction of data flow
       H323VideoCodec & codec ///< codec doing the opening
     );
 
@@ -1994,7 +1997,7 @@ class H323Connection : public PObject
       */
     virtual void CloseLogicalChannel(
       unsigned number,    ///< Channel number to close.
-      BOOL fromRemote     ///< Indicates close request of remote channel
+      PBoolean fromRemote     ///< Indicates close request of remote channel
     );
 
     /**Close a logical channel by number.
@@ -2006,7 +2009,7 @@ class H323Connection : public PObject
     /**Close a logical channel.
       */
     virtual void CloseAllLogicalChannels(
-      BOOL fromRemote     ///< Indicates close request of remote channel
+      PBoolean fromRemote     ///< Indicates close request of remote channel
     );
 
     /**This function is called when the remote endpoint has closed down
@@ -2026,7 +2029,7 @@ class H323Connection : public PObject
 
        The default behaviour returns TRUE.
      */
-    virtual BOOL OnClosingLogicalChannel(
+    virtual PBoolean OnClosingLogicalChannel(
       H323Channel & channel   ///< Channel that is to be closed
     );
 
@@ -2070,7 +2073,7 @@ class H323Connection : public PObject
       */
     H323Channel * GetLogicalChannel(
       unsigned number,    ///< Channel number to get.
-      BOOL fromRemote     ///< Indicates get a remote channel
+      PBoolean fromRemote     ///< Indicates get a remote channel
     ) const;
 
     /**Find a logical channel.
@@ -2080,7 +2083,7 @@ class H323Connection : public PObject
       */
     H323Channel * FindChannel(
       unsigned sessionId,   ///< Session ID to search for.
-      BOOL fromRemote       ///< Indicates the direction of RTP data.
+      PBoolean fromRemote       ///< Indicates the direction of RTP data.
     ) const;
   //@}
 
@@ -2097,9 +2100,9 @@ class H323Connection : public PObject
        sufficient bandwidth is available, then TRUE is returned and the amount
        of available bandwidth is reduced by the specified amount.
       */
-    BOOL UseBandwidth(
+    PBoolean UseBandwidth(
       unsigned bandwidth,     ///< Bandwidth required
-      BOOL removing           ///< Flag for adding/removing bandwidth usage
+      PBoolean removing           ///< Flag for adding/removing bandwidth usage
     );
 
 	void OnSetInitialBandwidth(H323VideoCodec * codec);
@@ -2112,9 +2115,9 @@ class H323Connection : public PObject
        Note if the force parameter is TRUE this function will close down
        active logical channels to meet the new bandwidth requirement.
       */
-    BOOL SetBandwidthAvailable(
+    PBoolean SetBandwidthAvailable(
       unsigned newBandwidth,    ///< New bandwidth limit
-      BOOL force = FALSE        ///< Force bandwidth limit
+      PBoolean force = FALSE        ///< Force bandwidth limit
     );
   //@}
 
@@ -2379,21 +2382,21 @@ class H323Connection : public PObject
 	   destination information in the generic information field in the OLC for the
 	   purpose of probing for an alternate route to the remote party.
 	  */
-	virtual BOOL OnReceiveRTPAltInformation(H323_RTP_UDP & rtp, 
+	virtual PBoolean OnReceiveRTPAltInformation(H323_RTP_UDP & rtp, 
 	                    const H245_ArrayOf_GenericInformation & alternate) const;
 
 	/**Send RTP alternate Information. This is used to supply alternate RTP 
 	   destination information in the generic information field in the OLC for the
 	   purpose of probing for an alternate route to the remote party.
 	  */
-    virtual BOOL OnSendingRTPAltInformation(const H323_RTP_UDP & rtp,
+    virtual PBoolean OnSendingRTPAltInformation(const H323_RTP_UDP & rtp,
 				        H245_ArrayOf_GenericInformation & alternate) const;
 
 
 	/**Send Generic Information with the OLC. This is used to include generic
 	   information in the openlogicalchannel
 	  */
-    virtual BOOL OnSendingOLCGenericInformation(const H323_RTP_UDP & rtp,
+    virtual PBoolean OnSendingOLCGenericInformation(const H323_RTP_UDP & rtp,
 				        H245_ArrayOf_GenericInformation & generic) const;
 
     /**Callback from the RTP session for statistics monitoring.
@@ -2426,7 +2429,7 @@ class H323Connection : public PObject
 
     /** Return TRUE if the remote appears to be behind a NAT firewall
     */
-    BOOL IsBehindNAT() const
+    PBoolean IsBehindNAT() const
     { return remoteIsNAT; }
 
     /** Set Remote is behind NAT
@@ -2436,7 +2439,7 @@ class H323Connection : public PObject
 
 	/** Is NAT Support Available
 	  */
-	BOOL HasNATSupport() const
+	PBoolean HasNATSupport() const
 	{ return NATsupport; }
 
 	/** Disable NAT Support for allocation of RTP sockets
@@ -2451,7 +2454,7 @@ class H323Connection : public PObject
 
 	/** Determine if the two parties are behind the same NAT
 	  */
-	BOOL isSameNAT() const { return sameNAT; };
+	PBoolean isSameNAT() const { return sameNAT; };
 
 #if P_STUN
 	/** On Set RTP information from H.225 & H.245 signalling
@@ -2489,7 +2492,7 @@ class H323Connection : public PObject
        Returns FALSE if a mode change is currently in progress, only one mode
        change may be done at a time.
       */
-    virtual BOOL RequestModeChange(
+    virtual PBoolean RequestModeChange(
       const PString & newModes  ///< New modes to select
     );
 
@@ -2500,13 +2503,13 @@ class H323Connection : public PObject
        Returns FALSE if a mode change is currently in progress, only one mode
        change may be done at a time.
       */
-    virtual BOOL RequestModeChange(
+    virtual PBoolean RequestModeChange(
       const H245_ArrayOf_ModeDescription & newModes  ///< New modes to select
     );
 
     /**Received request for mode change from remote.
       */
-    virtual BOOL OnRequestModeChange(
+    virtual PBoolean OnRequestModeChange(
       const H245_RequestMode & pdu,     ///< Received PDU
       H245_RequestModeAck & ack,        ///< Ack PDU to send
       H245_RequestModeReject & reject,  ///< Reject PDU to send
@@ -2575,7 +2578,7 @@ class H323Connection : public PObject
 
     /**Request a mode change to T.38 data.
       */
-    virtual BOOL RequestModeChangeT38(
+    virtual PBoolean RequestModeChangeT38(
       const char * capabilityNames = "T.38\nT38FaxUDP"
     );
 #endif
@@ -2612,7 +2615,7 @@ class H323Connection : public PObject
 	    Use this to open a file transfer session for the tranferring of files
 		between H323 clients.
 	*/
-     BOOL OpenFileTransferSession(H323ChannelNumber & num   ///< Created Channel number
+     PBoolean OpenFileTransferSession(H323ChannelNumber & num   ///< Created Channel number
 		                          );
 
     /** Create an instance of the File Transfer handler.
@@ -2641,7 +2644,7 @@ class H323Connection : public PObject
 		
         The default behaviour returns FALSE to indicate File Transfer is not implemented. 
       */
-      virtual BOOL OpenFileTransferChannel( H323Channel::Directions dir,           ///< direction of channel
+      virtual PBoolean OpenFileTransferChannel( H323Channel::Directions dir,           ///< direction of channel
 						                  H323FileTransferList & filelist          ///< Transfer File List
 										 ); 
 #endif
@@ -2655,7 +2658,7 @@ class H323Connection : public PObject
 
        The default behavour does nothing and returns FALSE.
       */
-    virtual BOOL GetAdmissionRequestAuthentication(
+    virtual PBoolean GetAdmissionRequestAuthentication(
       const H225_AdmissionRequest & arq,  ///< ARQ being constructed
       H235Authenticators & authenticators ///< New authenticators for ARQ
     );
@@ -2669,11 +2672,11 @@ class H323Connection : public PObject
 
     /**Get the call direction for this connection.
      */
-    BOOL HadAnsweredCall() const { return callAnswered; }
+    PBoolean HadAnsweredCall() const { return callAnswered; }
 
     /**Determined if connection is gatekeeper routed.
      */
-    BOOL IsGatekeeperRouted() const { return gatekeeperRouted; }
+    PBoolean IsGatekeeperRouted() const { return gatekeeperRouted; }
 
     /**Get the Q.931 cause code (Q.850) that terminated this call.
        See Q931::CauseValues for common values.
@@ -2901,7 +2904,7 @@ class H323Connection : public PObject
 	void DisableFeatures();
 #endif
 
-    virtual BOOL OnSendFeatureSet(unsigned, H225_FeatureSet &) const;
+    virtual PBoolean OnSendFeatureSet(unsigned, H225_FeatureSet &) const;
 
     virtual void OnReceiveFeatureSet(unsigned, const H225_FeatureSet &) const;
 
@@ -2924,14 +2927,14 @@ class H323Connection : public PObject
 	for Call Authentication. By Default it calls the corresponding
 	Endpoint Function. 
       */
-    virtual BOOL OnCallAuthentication(const PString & username, 
+    virtual PBoolean OnCallAuthentication(const PString & username, 
                                       PString & password);
 
     /** EP Authentication CallBack to allow the connection to approve the authentication
 	   even if it has failed. Use this to override authentication on a call by call basis
 	   Return TRUE to Authenticate.
       */
-	virtual BOOL OnEPAuthenticationFailed(H235Authenticator::ValidationResult result) const;
+	virtual PBoolean OnEPAuthenticationFailed(H235Authenticator::ValidationResult result) const;
 
     /** EP Authentication Finalise Callback. After the PDU has been built this
         Callback allows the Authentication mechanisms to finalise the PDU.
@@ -2940,12 +2943,12 @@ class H323Connection : public PObject
 
     /** Whether the Call has Authentication
 	  */
-    BOOL HasAuthentication() const
+    PBoolean HasAuthentication() const
        { return hasAuthentication; }
 
     /** Whether the Authentication has Failed
 	  */
-	BOOL HasAuthenticationFailed() 
+	PBoolean HasAuthenticationFailed() 
 	   { return AuthenticationFailed; };
   //@}
 #endif
@@ -2955,7 +2958,7 @@ class H323Connection : public PObject
   //@{
     /** On Send Service Control Session
       */
-    BOOL OnSendServiceControlSessions(
+    PBoolean OnSendServiceControlSessions(
 	         H225_ArrayOf_ServiceControlSession & serviceControl, ///< Service control PDU
                  H225_ServiceControlSession_reason reason           ///< Reason for Service Control
 		) const;
@@ -2969,7 +2972,7 @@ class H323Connection : public PObject
     /** On Send Call Credit 
       */
     virtual void OnReceiveServiceControl(const PString & amount,    ///< Current Balance 
-                                         BOOL credit,               ///< Debit or Credit
+                                         PBoolean credit,               ///< Debit or Credit
                                          const unsigned & timelimit,///< Time Remaining
                                          const PString & url,	    ///< url for TopUp
 	 									 const PString & ldapURL,   ///< LDAP URL
@@ -2978,8 +2981,8 @@ class H323Connection : public PObject
 
     /** On Receive Call Credit
      */
-    virtual BOOL OnSendServiceControl(PString & amount,          ///< Current Balance 
-                                      BOOL credit,               ///< Debit or Credit
+    virtual PBoolean OnSendServiceControl(PString & amount,          ///< Current Balance 
+                                      PBoolean credit,               ///< Debit or Credit
                                       unsigned & timelimit,      ///< Time Remaining
                                       PString & url		 ///< url for TopUp
 								     ) const;
@@ -2998,7 +3001,7 @@ class H323Connection : public PObject
 
     /** Has QoS in H.245
       */
-    virtual BOOL H245QoSEnabled() const;
+    virtual PBoolean H245QoSEnabled() const;
 
 
     /** Set the connection as a non Standard Call
@@ -3021,16 +3024,16 @@ class H323Connection : public PObject
     ReleaseSequence GetReleaseSequence() const
     { return releaseSequence; }
 
-    virtual BOOL OnHandleConferenceRequest(const H245_ConferenceRequest &)
+    virtual PBoolean OnHandleConferenceRequest(const H245_ConferenceRequest &)
     { return FALSE; }
 
-    virtual BOOL OnHandleConferenceResponse(const H245_ConferenceResponse &)
+    virtual PBoolean OnHandleConferenceResponse(const H245_ConferenceResponse &)
     { return FALSE; }
 
-    virtual BOOL OnHandleConferenceCommand(const H245_ConferenceCommand &)
+    virtual PBoolean OnHandleConferenceCommand(const H245_ConferenceCommand &)
     { return FALSE; }
 
-    virtual BOOL OnHandleConferenceIndication(const H245_ConferenceIndication &)
+    virtual PBoolean OnHandleConferenceIndication(const H245_ConferenceIndication &)
     { return FALSE; }
 
     enum h245MessageType {
@@ -3040,15 +3043,15 @@ class H323Connection : public PObject
 	  h245indication
     };
 
-	virtual BOOL OnHandleH245GenericMessage(h245MessageType, const H245_GenericMessage &)
+	virtual PBoolean OnHandleH245GenericMessage(h245MessageType, const H245_GenericMessage &)
 	{ return FALSE; }
 
 #ifdef H323_H230
     /** Open Conference Controls
       */
-	BOOL OpenConferenceControlSession(
-				        BOOL & chairControl,
-		                BOOL & extControls
+	PBoolean OpenConferenceControlSession(
+				        PBoolean & chairControl,
+		                PBoolean & extControls
 						);
 
 
@@ -3061,8 +3064,8 @@ class H323Connection : public PObject
        the fast start algorithm.
     */
     virtual void InternalEstablishedConnectionCheck();
-    BOOL DecodeFastStartCaps(const H225_ArrayOf_PASN_OctetString & fastStartCaps);
-    BOOL InternalEndSessionCheck(PPER_Stream & strm);
+    PBoolean DecodeFastStartCaps(const H225_ArrayOf_PASN_OctetString & fastStartCaps);
+    PBoolean InternalEndSessionCheck(PPER_Stream & strm);
     void SetRemoteVersions(const H225_ProtocolIdentifier & id);
     void MonitorCallStatus();
     PDECLARE_NOTIFIER(OpalRFC2833Info, H323Connection, OnUserInputInlineRFC2833);
@@ -3072,8 +3075,8 @@ class H323Connection : public PObject
     PSyncPoint     * endSync;
 
     int                  remoteCallWaiting; // Number of call's waiting at the remote endpoint
-    BOOL                 callAnswered;
-    BOOL                 gatekeeperRouted;
+    PBoolean                 callAnswered;
+    PBoolean                 gatekeeperRouted;
     unsigned             distinctiveRing;
     PString              callToken;
     unsigned             callReference;
@@ -3099,12 +3102,12 @@ class H323Connection : public PObject
     unsigned           uuiesRequested;
     PString            gkAccessTokenOID;
     PBYTEArray         gkAccessTokenData;
-    BOOL               addAccessTokenToSetup;
+    PBoolean               addAccessTokenToSetup;
     SendUserInputModes sendUserInputMode;
 
     H323Transport * signallingChannel;
     H323Transport * controlChannel;
-    BOOL            h245Tunneling;
+    PBoolean            h245Tunneling;
     H323SignalPDU * h245TunnelRxPDU;
     H323SignalPDU * h245TunnelTxPDU;
     H323SignalPDU * alertingPDU;
@@ -3133,18 +3136,18 @@ class H323Connection : public PObject
 
     unsigned   h225version;
     unsigned   h245version;
-    BOOL       h245versionSet;
-    BOOL doH245inSETUP;
-    BOOL lastPDUWasH245inSETUP;
-    BOOL detectInBandDTMF;
-    BOOL mustSendDRQ;
-    BOOL mediaWaitForConnect;
-    BOOL transmitterSidePaused;
-    BOOL earlyStart;
-    BOOL doH245QoS;
+    PBoolean       h245versionSet;
+    PBoolean doH245inSETUP;
+    PBoolean lastPDUWasH245inSETUP;
+    PBoolean detectInBandDTMF;
+    PBoolean mustSendDRQ;
+    PBoolean mediaWaitForConnect;
+    PBoolean transmitterSidePaused;
+    PBoolean earlyStart;
+    PBoolean doH245QoS;
 
 #ifdef H323_T120
-    BOOL startT120;
+    PBoolean startT120;
 #endif
 
 #ifdef H323_T38
@@ -3152,12 +3155,12 @@ class H323Connection : public PObject
 #endif
 
 #ifdef H323_H224
-	BOOL startH224;
+	PBoolean startH224;
 #endif
 
     PSyncPoint digitsWaitFlag;
-    BOOL       endSessionNeeded;
-    BOOL       endSessionSent;
+    PBoolean       endSessionNeeded;
+    PBoolean       endSessionSent;
     PSyncPoint endSessionReceived;
     PTimer     enforcedDurationLimit;
 
@@ -3165,10 +3168,10 @@ class H323Connection : public PObject
     // Used as part of a local call hold operation involving MOH
     PChannel * holdAudioMediaChannel;
     PChannel * holdVideoMediaChannel;
-    BOOL       isConsultationTransfer;
+    PBoolean       isConsultationTransfer;
 
     /** Call Intrusion flag and parameters */
-    BOOL     isCallIntrusion;
+    PBoolean     isCallIntrusion;
     unsigned callIntrusionProtectionLevel;
 #endif
 
@@ -3235,13 +3238,13 @@ class H323Connection : public PObject
 #endif
 
     // used to detect remote NAT endpoints
-    BOOL remoteIsNAT;    ///< Remote Caller is NAT
-	BOOL NATsupport;     ///< Disable support for NATed callers
-	BOOL sameNAT;        ///< Call parties are behind the same NAT
+    PBoolean remoteIsNAT;    ///< Remote Caller is NAT
+	PBoolean NATsupport;     ///< Disable support for NATed callers
+	PBoolean sameNAT;        ///< Call parties are behind the same NAT
 
 #ifndef DISABLE_CALLAUTH
-    BOOL AuthenticationFailed;
-    BOOL hasAuthentication;
+    PBoolean AuthenticationFailed;
+    PBoolean hasAuthentication;
     const H235Authenticators  EPAuthenticators;
 #endif
 
@@ -3249,7 +3252,7 @@ class H323Connection : public PObject
 	PAec * aec;
 #endif
 
-    BOOL IsNonCallConnection; 
+    PBoolean IsNonCallConnection; 
 
   private:
     PChannel * SwapHoldMediaChannels(PChannel * newChannel,unsigned sessionId);
@@ -3258,13 +3261,13 @@ class H323Connection : public PObject
     PMutex innerMutex;
 
   public:
-    BOOL StartHandleControlChannel();
-	virtual BOOL OnStartHandleControlChannel();
+    PBoolean StartHandleControlChannel();
+	virtual PBoolean OnStartHandleControlChannel();
     void EndHandleControlChannel();
 
 #ifdef H323_RTP_AGGREGATE
   private:
-    BOOL useRTPAggregation;
+    PBoolean useRTPAggregation;
 #endif
 
 #ifdef H323_SIGNAL_AGGREGATE
@@ -3272,7 +3275,7 @@ class H323Connection : public PObject
     void AggregateSignalChannel(H323Transport * transport);
     void AggregateControlChannel(H323Transport * transport);
   protected:
-    BOOL useSignallingAggregation;
+    PBoolean useSignallingAggregation;
     H323AggregatedH2x5Handle * signalAggregator;
     H323AggregatedH2x5Handle * controlAggregator;
 #endif
@@ -3282,7 +3285,7 @@ class H323Connection : public PObject
 #endif
 
 #ifdef H323_H460
-	BOOL disableH460;
+	PBoolean disableH460;
 	H460_FeatureSet       * features;
 #endif
 

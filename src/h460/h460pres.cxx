@@ -244,7 +244,7 @@ H460P_PresenceMessage::operator const H460P_PresenceAlert &() const
 }
 
 
-BOOL H460P_PresenceMessage::CreateObject()
+PBoolean H460P_PresenceMessage::CreateObject()
 {
   switch (tag) {
     case e_presenceStatus :
@@ -335,7 +335,7 @@ H460P_PresenceInstruction::operator const H225_AliasAddress &() const
 }
 
 
-BOOL H460P_PresenceInstruction::CreateObject()
+PBoolean H460P_PresenceInstruction::CreateObject()
 {
   switch (tag) {
     case e_subscribe :
@@ -406,7 +406,7 @@ PINDEX H460P_PresenceIdentifier::GetDataLength() const
 }
 
 
-BOOL H460P_PresenceIdentifier::Decode(PASN_Stream & strm)
+PBoolean H460P_PresenceIdentifier::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -464,7 +464,7 @@ H460P_PresenceState::H460P_PresenceState(unsigned tag, PASN_Object::TagClass tag
 }
 
 
-BOOL H460P_PresenceState::CreateObject()
+PBoolean H460P_PresenceState::CreateObject()
 {
   switch (tag) {
     case e_hidden :
@@ -795,7 +795,7 @@ PINDEX H460P_PresenceStatus::GetDataLength() const
 }
 
 
-BOOL H460P_PresenceStatus::Decode(PASN_Stream & strm)
+PBoolean H460P_PresenceStatus::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -875,7 +875,7 @@ PINDEX H460P_PresenceInstruct::GetDataLength() const
 }
 
 
-BOOL H460P_PresenceInstruct::Decode(PASN_Stream & strm)
+PBoolean H460P_PresenceInstruct::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -951,7 +951,7 @@ PINDEX H460P_PresenceAuthorize::GetDataLength() const
 }
 
 
-BOOL H460P_PresenceAuthorize::Decode(PASN_Stream & strm)
+PBoolean H460P_PresenceAuthorize::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1027,7 +1027,7 @@ PINDEX H460P_PresenceNotify::GetDataLength() const
 }
 
 
-BOOL H460P_PresenceNotify::Decode(PASN_Stream & strm)
+PBoolean H460P_PresenceNotify::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1115,7 +1115,7 @@ PINDEX H460P_PresenceRequest::GetDataLength() const
 }
 
 
-BOOL H460P_PresenceRequest::Decode(PASN_Stream & strm)
+PBoolean H460P_PresenceRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1211,7 +1211,7 @@ PINDEX H460P_PresenceResponse::GetDataLength() const
 }
 
 
-BOOL H460P_PresenceResponse::Decode(PASN_Stream & strm)
+PBoolean H460P_PresenceResponse::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1295,7 +1295,7 @@ PINDEX H460P_PresenceAlive::GetDataLength() const
 }
 
 
-BOOL H460P_PresenceAlive::Decode(PASN_Stream & strm)
+PBoolean H460P_PresenceAlive::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1371,7 +1371,7 @@ PINDEX H460P_PresenceRemove::GetDataLength() const
 }
 
 
-BOOL H460P_PresenceRemove::Decode(PASN_Stream & strm)
+PBoolean H460P_PresenceRemove::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1447,7 +1447,7 @@ PINDEX H460P_PresenceAlert::GetDataLength() const
 }
 
 
-BOOL H460P_PresenceAlert::Decode(PASN_Stream & strm)
+PBoolean H460P_PresenceAlert::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1557,7 +1557,7 @@ PINDEX H460P_PresenceSubscription::GetDataLength() const
 }
 
 
-BOOL H460P_PresenceSubscription::Decode(PASN_Stream & strm)
+PBoolean H460P_PresenceSubscription::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1675,7 +1675,7 @@ PINDEX H460P_Presentity::GetDataLength() const
 }
 
 
-BOOL H460P_Presentity::Decode(PASN_Stream & strm)
+PBoolean H460P_Presentity::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1775,7 +1775,7 @@ PINDEX H460P_PresenceNotification::GetDataLength() const
 }
 
 
-BOOL H460P_PresenceNotification::Decode(PASN_Stream & strm)
+PBoolean H460P_PresenceNotification::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;

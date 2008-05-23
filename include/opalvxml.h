@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:50  shorne
+ * First commit of h323plus
+ *
  * Revision 1.16  2004/07/15 11:20:37  rjongbloed
  * Migrated changes from crs_vxnml_devel branch into main trunk
  *
@@ -115,10 +118,10 @@ class G7231_File_Codec : public H323AudioCodec
     unsigned GetBandwidth() const;
     static int GetFrameLen(int val);
       
-    BOOL Read(BYTE * buffer, unsigned & length, RTP_DataFrame &);
-    BOOL Write(const BYTE * buffer, unsigned length, const RTP_DataFrame & rtp, unsigned & frames);
+    PBoolean Read(BYTE * buffer, unsigned & length, RTP_DataFrame &);
+    PBoolean Write(const BYTE * buffer, unsigned length, const RTP_DataFrame & rtp, unsigned & frames);
 
-    BOOL IsRawDataChannelNative() const;
+    PBoolean IsRawDataChannelNative() const;
 
     unsigned GetAverageSignalLevel();
 
@@ -139,8 +142,8 @@ class G7231_File_Capability : public H323AudioCapability
 
     H323Codec * CreateCodec(H323Codec::Direction direction) const;
 
-    BOOL OnSendingPDU(H245_AudioCapability & cap, unsigned packetSize) const;
-    BOOL OnReceivedPDU(const H245_AudioCapability & pdu, unsigned & packetSize);
+    PBoolean OnSendingPDU(H245_AudioCapability & cap, unsigned packetSize) const;
+    PBoolean OnReceivedPDU(const H245_AudioCapability & pdu, unsigned & packetSize);
     PObject * Clone() const;
 };
 
@@ -156,8 +159,8 @@ class OpalVXMLSession : public PVXMLSession
 {
   PCLASSINFO(OpalVXMLSession, PVXMLSession);
   public:
-    OpalVXMLSession(H323Connection * _conn, PTextToSpeech * tts = NULL, BOOL autoDelete = FALSE);
-    BOOL Close();
+    OpalVXMLSession(H323Connection * _conn, PTextToSpeech * tts = NULL, PBoolean autoDelete = FALSE);
+    PBoolean Close();
 
   protected:
     H323Connection * conn;

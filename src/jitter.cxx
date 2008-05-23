@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:07  shorne
+ * First commit of h323plus
+ *
  * Revision 1.38  2006/01/18 07:46:08  csoutheren
  * Initial version of RTP aggregation (disabled by default)
  *
@@ -231,17 +234,17 @@ class RTP_AggregatedHandle : public PAggregatedHandle
       return list; 
     }
 
-    BOOL Init()
+    PBoolean Init()
     {
       return jitterBuffer.Init(currentReadFrame, markerWarning);
     }
 
-    BOOL PreRead()
+    PBoolean PreRead()
     {
       return jitterBuffer.PreRead(currentReadFrame, markerWarning);
     }
 
-    BOOL OnRead()
+    PBoolean OnRead()
     {
       return jitterBuffer.OnRead(currentReadFrame, markerWarning, FALSE);
     }
@@ -254,12 +257,12 @@ class RTP_AggregatedHandle : public PAggregatedHandle
     PTimeInterval GetTimeout()
     { return jitterBuffer.session.GetReportTimer(); }
 
-    BOOL Remove()
+    PBoolean Remove()
     { return owner->RemoveHandle(this); }
 
     RTP_JitterBuffer & jitterBuffer;
     RTP_JitterBuffer::Entry * currentReadFrame;
-    BOOL markerWarning;
+    PBoolean markerWarning;
 
   protected:
     PAggregatorFD dataFd, controlFd;
@@ -456,7 +459,7 @@ void RTP_JitterBuffer::Resume(
 void RTP_JitterBuffer::JitterThreadMain(PThread &, INT)
 {
   RTP_JitterBuffer::Entry * currentReadFrame;
-  BOOL markerWarning;
+  PBoolean markerWarning;
 
   PTRACE(3, "RTP\tJitter RTP receive thread started: " << this);
 
@@ -477,19 +480,19 @@ void RTP_JitterBuffer::JitterThreadMain(PThread &, INT)
 }
 
 
-BOOL RTP_JitterBuffer::Init(Entry * & /*currentReadFrame*/, BOOL & markerWarning)
+PBoolean RTP_JitterBuffer::Init(Entry * & /*currentReadFrame*/, PBoolean & markerWarning)
 {
   bufferMutex.Wait();
   markerWarning = FALSE;
   return TRUE;
 }
 
-void RTP_JitterBuffer::DeInit(Entry * & /*currentReadFrame*/, BOOL & /*markerWarning*/)
+void RTP_JitterBuffer::DeInit(Entry * & /*currentReadFrame*/, PBoolean & /*markerWarning*/)
 {
 }
 
 
-BOOL RTP_JitterBuffer::PreRead(RTP_JitterBuffer::Entry * & currentReadFrame, BOOL & /*markerWarning*/)
+PBoolean RTP_JitterBuffer::PreRead(RTP_JitterBuffer::Entry * & currentReadFrame, PBoolean & /*markerWarning*/)
 {
   // Get the next free frame available for use for reading from the RTP
   // transport. Place it into a parking spot.
@@ -533,7 +536,7 @@ BOOL RTP_JitterBuffer::PreRead(RTP_JitterBuffer::Entry * & currentReadFrame, BOO
   return TRUE;
 }
 
-BOOL RTP_JitterBuffer::OnRead(RTP_JitterBuffer::Entry * & currentReadFrame, BOOL & markerWarning, BOOL loop)
+PBoolean RTP_JitterBuffer::OnRead(RTP_JitterBuffer::Entry * & currentReadFrame, PBoolean & markerWarning, PBoolean loop)
 {
   // Keep reading from the RTP transport frames
   if (!session.ReadData(*currentReadFrame, loop)) {
@@ -608,7 +611,7 @@ BOOL RTP_JitterBuffer::OnRead(RTP_JitterBuffer::Entry * & currentReadFrame, BOOL
 }
 
 
-BOOL RTP_JitterBuffer::ReadData(DWORD timestamp, RTP_DataFrame & frame)
+PBoolean RTP_JitterBuffer::ReadData(DWORD timestamp, RTP_DataFrame & frame)
 {
   if (shuttingDown)
     return FALSE;
@@ -704,7 +707,7 @@ BOOL RTP_JitterBuffer::ReadData(DWORD timestamp, RTP_DataFrame & frame)
 
   //Handle short silence bursts in the middle of the buffer
   // - if we think we're getting marker bit information, use that
-  BOOL shortSilence = FALSE;
+  PBoolean shortSilence = FALSE;
   if (consecutiveMarkerBits < maxConsecutiveMarkerBits) {
       if (oldestFrame->GetMarker() &&
           (PTimer::Tick() - oldestFrame->tick).GetInterval()* 8 < currentJitterTime / 2)

@@ -108,7 +108,7 @@ class H460P_PresenceMessage : public PASN_Choice
     operator const H460P_PresenceAlert &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -141,7 +141,7 @@ class H460P_PresenceInstruction : public PASN_Choice
     operator const H225_AliasAddress &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -161,7 +161,7 @@ class H460P_PresenceIdentifier : public PASN_Sequence
     PASN_OctetString m_guid;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -194,7 +194,7 @@ class H460P_PresenceState : public PASN_Choice
       e_generic
     };
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -379,7 +379,7 @@ class H460P_PresenceStatus : public PASN_Sequence
     H460P_ArrayOf_PresenceInstruction m_instruction;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -404,7 +404,7 @@ class H460P_PresenceInstruct : public PASN_Sequence
     H460P_ArrayOf_PresenceInstruction m_instruction;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -429,7 +429,7 @@ class H460P_PresenceAuthorize : public PASN_Sequence
     H460P_ArrayOf_PresenceSubscription m_subscription;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -454,7 +454,7 @@ class H460P_PresenceNotify : public PASN_Sequence
     H460P_ArrayOf_PresenceNotification m_notification;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -486,7 +486,7 @@ class H460P_PresenceRequest : public PASN_Sequence
     H460P_ArrayOf_CryptoH323Token m_cryptoTokens;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -518,7 +518,7 @@ class H460P_PresenceResponse : public PASN_Sequence
     H460P_ArrayOf_CryptoH323Token m_cryptoTokens;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -543,7 +543,7 @@ class H460P_PresenceAlive : public PASN_Sequence
     H460P_ArrayOf_PresenceIdentifier m_identifier;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -568,7 +568,7 @@ class H460P_PresenceRemove : public PASN_Sequence
     H460P_ArrayOf_PresenceIdentifier m_identifier;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -593,7 +593,7 @@ class H460P_PresenceAlert : public PASN_Sequence
     H460P_ArrayOf_PresenceNotification m_notification;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -632,7 +632,7 @@ class H460P_PresenceSubscription : public PASN_Sequence
     H460P_ArrayOf_GenericData m_genericData;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -666,7 +666,7 @@ class H460P_Presentity : public PASN_Sequence
     H460P_ArrayOf_GenericData m_genericData;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -698,7 +698,7 @@ class H460P_PresenceNotification : public PASN_Sequence
     H460P_ArrayOf_PresenceIdentifier m_subscribers;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;

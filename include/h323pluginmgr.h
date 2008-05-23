@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/08/20 20:19:52  shorne
+ * Moved opalplugin.h to codec directory to be plugin compile compatible with Opal
+ *
  * Revision 1.1  2007/08/06 20:50:49  shorne
  * First commit of h323plus
  *
@@ -195,13 +198,13 @@ class H323DynaLink : public PDynaLink
   H323DynaLink(const char * basename, const char * reason = NULL);
 
   virtual void Load();
-  virtual BOOL IsLoaded()
+  virtual PBoolean IsLoaded()
   { PWaitAndSignal m(processLock); return isLoadedOK; }
-  virtual BOOL LoadPlugin (const PString & fileName);
+  virtual PBoolean LoadPlugin (const PString & fileName);
 
 protected:
   PMutex processLock;
-  BOOL isLoadedOK;
+  PBoolean isLoadedOK;
   const char * baseName;
   const char * reason;
 };

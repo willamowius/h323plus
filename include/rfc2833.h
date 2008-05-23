@@ -23,6 +23,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:50  shorne
+ * First commit of h323plus
+ *
  * Revision 1.4  2005/11/30 13:05:01  csoutheren
  * Changed tags for Doxygen
  *
@@ -63,7 +66,7 @@ class OpalRFC2833Info : public PObject {
     char GetTone() const { return tone; }
     unsigned GetDuration() const { return duration; }
     unsigned GetTimestamp() const { return timestamp; }
-    BOOL IsToneStart() const { return duration == 0; }
+    PBoolean IsToneStart() const { return duration == 0; }
 
   protected:
     char     tone;
@@ -79,15 +82,15 @@ class OpalRFC2833 : public PObject {
       const PNotifier & receiveNotifier
     );
 
-    virtual BOOL SendTone(
+    virtual PBoolean SendTone(
       char tone,              ///<  DTMF tone code
       unsigned duration       ///<  Duration of tone in milliseconds
     );
 
-    virtual BOOL BeginTransmit(
+    virtual PBoolean BeginTransmit(
       char tone  ///<  DTMF tone code
     );
-    virtual BOOL EndTransmit();
+    virtual PBoolean EndTransmit();
 
     virtual void OnStartReceive(
       char tone
@@ -118,7 +121,7 @@ class OpalRFC2833 : public PObject {
     PMutex mutex;
 
     PNotifier receiveNotifier;
-    BOOL      receiveComplete;
+    PBoolean      receiveComplete;
     BYTE      receivedTone;
     unsigned  receivedDuration;
     unsigned  receiveTimestamp;

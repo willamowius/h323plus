@@ -19,6 +19,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:48  shorne
+ * First commit of h323plus
+ *
  * Revision 1.1  2006/06/22 11:07:22  shorne
  * Backport of FECC (H.224) from Opal
  *
@@ -67,7 +70,7 @@ private:
   mutable PMutex inUse;
   unsigned timestamp;
   RTP_Session & rtpSession;
-  BOOL terminate;
+  PBoolean terminate;
 };
 
 class OpalH281Handler;
@@ -87,21 +90,21 @@ public:
   virtual void StartReceive();
   virtual void StopReceive();
 	
-  BOOL SendClientList();
-  BOOL SendExtraCapabilities();
-  BOOL SendClientListCommand();
-  BOOL SendExtraCapabilitiesCommand(BYTE clientID);
+  PBoolean SendClientList();
+  PBoolean SendExtraCapabilities();
+  PBoolean SendClientListCommand();
+  PBoolean SendExtraCapabilitiesCommand(BYTE clientID);
 
-  BOOL SendExtraCapabilitiesMessage(BYTE clientID, BYTE *data, PINDEX length);
+  PBoolean SendExtraCapabilitiesMessage(BYTE clientID, BYTE *data, PINDEX length);
 
-  BOOL TransmitClientFrame(BYTE clientID, H224_Frame & frame);
+  PBoolean TransmitClientFrame(BYTE clientID, H224_Frame & frame);
 	
-  virtual BOOL OnReceivedFrame(H224_Frame & frame);
-  virtual BOOL OnReceivedCMEMessage(H224_Frame & frame);
-  virtual BOOL OnReceivedClientList(H224_Frame & frame);
-  virtual BOOL OnReceivedClientListCommand();
-  virtual BOOL OnReceivedExtraCapabilities(H224_Frame & frame);
-  virtual BOOL OnReceivedExtraCapabilitiesCommand();
+  virtual PBoolean OnReceivedFrame(H224_Frame & frame);
+  virtual PBoolean OnReceivedCMEMessage(H224_Frame & frame);
+  virtual PBoolean OnReceivedClientList(H224_Frame & frame);
+  virtual PBoolean OnReceivedClientListCommand();
+  virtual PBoolean OnReceivedExtraCapabilities(H224_Frame & frame);
+  virtual PBoolean OnReceivedExtraCapabilitiesCommand();
 	
   PMutex & GetTransmitMutex() { return transmitMutex; }
 	
@@ -115,7 +118,7 @@ protected:
 
   RTP_Session * session;
 
-  BOOL canTransmit;
+  PBoolean canTransmit;
   PMutex transmitMutex;
   RTP_DataFrame *transmitFrame;
   BYTE transmitBitIndex;

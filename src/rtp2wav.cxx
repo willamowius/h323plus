@@ -23,6 +23,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:08  shorne
+ * First commit of h323plus
+ *
  * Revision 1.3  2003/01/07 07:52:50  craigs
  * Fixed problem with multi-frame G.723.1 packets
  *
@@ -78,7 +81,7 @@ OpalRtpToWavFile::OpalRtpToWavFile(const PString & filename)
 }
 
 
-BOOL OpalRtpToWavFile::OnFirstPacket(RTP_DataFrame & frame)
+PBoolean OpalRtpToWavFile::OnFirstPacket(RTP_DataFrame & frame)
 {
   static int SupportedTypes[] = {
     PWAVFile::fmt_uLaw,

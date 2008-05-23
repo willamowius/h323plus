@@ -532,7 +532,7 @@ dnl MSWIN_DEFINE  file,H323_FILE
 AC_ARG_ENABLE(file,
        [  --disable-file          disable File Transfer])
 if test "${enable_file}x" = "x" ; then
-  enable_gnugk=$default_file
+  enable_file=$default_file
 fi
 if test "$enable_file" = "yes" ; then
   H323_FILE=1

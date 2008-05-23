@@ -378,7 +378,7 @@ H4503_IntResult_extension::operator const H225_NonStandardParameter &() const
 }
 
 
-BOOL H4503_IntResult_extension::CreateObject()
+PBoolean H4503_IntResult_extension::CreateObject()
 {
   switch (tag) {
     case e_extensionSeq :
@@ -468,7 +468,7 @@ H4503_DivertingLegInfo2Arg_extension::operator const H225_NonStandardParameter &
 }
 
 
-BOOL H4503_DivertingLegInfo2Arg_extension::CreateObject()
+PBoolean H4503_DivertingLegInfo2Arg_extension::CreateObject()
 {
   switch (tag) {
     case e_extensionSeq :
@@ -560,7 +560,7 @@ PINDEX H4503_IntResult::GetDataLength() const
 }
 
 
-BOOL H4503_IntResult::Decode(PASN_Stream & strm)
+PBoolean H4503_IntResult::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -695,7 +695,7 @@ PINDEX H4503_DivertingLegInfo2Arg::GetDataLength() const
 }
 
 
-BOOL H4503_DivertingLegInfo2Arg::Decode(PASN_Stream & strm)
+PBoolean H4503_DivertingLegInfo2Arg::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;

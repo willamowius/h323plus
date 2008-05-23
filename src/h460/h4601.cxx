@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2008/04/25 01:22:47  shorne
+ * Added callback to enable developers to disable features when instancing
+ *
  * Revision 1.3  2008/01/02 17:50:59  shorne
  * Fix for memory leak in H.460 module
  *
@@ -198,7 +201,7 @@ H460_FeatureContent::H460_FeatureContent(PASN_BMPString & param)
 	val.SetValue(param);
 }
 
-H460_FeatureContent::H460_FeatureContent(BOOL param) 
+H460_FeatureContent::H460_FeatureContent(PBoolean param) 
 {
 	SetTag(H225_Content::e_bool); 
 	PASN_Boolean & val = *this;
@@ -368,7 +371,7 @@ H460_FeatureContent  H460_FeatureParameter::operator=( const PASN_BMPString & va
 	return m_content; 
 }
 
-H460_FeatureContent  H460_FeatureParameter::operator=( const BOOL & value ) 
+H460_FeatureContent  H460_FeatureParameter::operator=( const PBoolean & value ) 
 {
 	m_content = H460_FeatureContent(value);
 	SetTag(e_content);
@@ -445,10 +448,10 @@ H460_FeatureParameter::operator PASN_BMPString &()
 	return content;
 };
 
-H460_FeatureParameter::operator BOOL ()  
+H460_FeatureParameter::operator PBoolean ()  
 { 
 	PASN_Boolean & content = m_content;
-	BOOL con = content;
+	PBoolean con = content;
 	return con;
 };
 
@@ -584,7 +587,7 @@ PINDEX H460_FeatureTable::GetParameterIndex(const H460_FeatureID & id)
 	return GetSize();
 }
 
-BOOL H460_FeatureTable::HasParameter(const H460_FeatureID & id) {
+PBoolean H460_FeatureTable::HasParameter(const H460_FeatureID & id) {
 
 PTRACE(6, "H460\tCheck has Parameter " << id);
 
@@ -628,7 +631,7 @@ PTRACE(6, "H460\tReplace ID: " << id  << " content " << con);
 }
 
 
-BOOL H460_FeatureTable::ParameterIsUnique(const H460_FeatureID & id)
+PBoolean H460_FeatureTable::ParameterIsUnique(const H460_FeatureID & id)
 {
 	PINDEX i;
 	PINDEX j =0;
@@ -762,12 +765,12 @@ H460_FeatureParameter & H460_Feature::GetFeatureParameter(const H460_FeatureID &
 	return CurrentTable->GetParameter(id);
 }
 
-BOOL H460_Feature::HasFeatureParameter(const H460_FeatureID & id)
+PBoolean H460_Feature::HasFeatureParameter(const H460_FeatureID & id)
 {
 	return CurrentTable->HasParameter(id);
 }
 
-BOOL H460_Feature::Contains(const H460_FeatureID & id)
+PBoolean H460_Feature::Contains(const H460_FeatureID & id)
 {
 	PTRACE(6, "H460\tCheck for Parameter " << id);
 
@@ -888,7 +891,7 @@ void H460_FeatureStd::Replace(unsigned id, const H460_FeatureContent & con)
 	ReplaceParameter(H460_FeatureID(id),con);
 }
 
-BOOL H460_FeatureStd::HasParameter(unsigned id)
+PBoolean H460_FeatureStd::HasParameter(unsigned id)
 {
 	return HasFeatureParameter(H460_FeatureID(id));
 }
@@ -921,7 +924,7 @@ void H460_FeatureNonStd::Replace(const PString & id, const H460_FeatureContent &
 	ReplaceParameter(H460_FeatureID(id),con);
 }
 
-BOOL H460_FeatureNonStd::HasParameter(PString id)
+PBoolean H460_FeatureNonStd::HasParameter(PString id)
 {
 	return HasFeatureParameter(H460_FeatureID(id));
 }
@@ -957,7 +960,7 @@ void H460_FeatureOID::Replace(const PString & id, const H460_FeatureContent & co
 }
 
 
-BOOL H460_FeatureOID::HasParameter(OpalOID id)
+PBoolean H460_FeatureOID::HasParameter(OpalOID id)
 {
 	return HasFeatureParameter(H460_FeatureID(id));
 }
@@ -969,7 +972,7 @@ H460_FeatureParameter & H460_FeatureOID::operator[](OpalOID id)
 	return GetFeatureParameter(H460_FeatureID(OpalOID(val)));
 }
 
-BOOL H460_FeatureOID::Contains(const PString & id) 
+PBoolean H460_FeatureOID::Contains(const PString & id) 
 {
 	PString val = GetBase() + "." + id;
 	return  H460_Feature::Contains(OpalOID(val));
@@ -1020,7 +1023,7 @@ H460_FeatureSet::H460_FeatureSet(const H225_ArrayOf_GenericData & generic)
 	}
 }
 
-BOOL H460_FeatureSet::ProcessFirstPDU(const H225_FeatureSet & fs)
+PBoolean H460_FeatureSet::ProcessFirstPDU(const H225_FeatureSet & fs)
 {
   
 PTRACE(6,"H460\tCreate Common FeatureSet");
@@ -1041,7 +1044,7 @@ PTRACE(6,"H460\tCreate Common FeatureSet");
 	return TRUE;
 }
 
-BOOL H460_FeatureSet::CreateFeatureSet(const H225_FeatureSet & fs)
+PBoolean H460_FeatureSet::CreateFeatureSet(const H225_FeatureSet & fs)
 {
 	PTRACE(6,"H460\tCreate FeatureSet from FeatureSet PDU");
 
@@ -1069,7 +1072,7 @@ BOOL H460_FeatureSet::CreateFeatureSet(const H225_FeatureSet & fs)
 }
 
 
-BOOL H460_FeatureSet::LoadFeatureSet(int inst, H323Connection * con)
+PBoolean H460_FeatureSet::LoadFeatureSet(int inst, H323Connection * con)
 {
 
   if ((ep) && (ep->FeatureSetDisabled()))
@@ -1106,7 +1109,7 @@ BOOL H460_FeatureSet::LoadFeatureSet(int inst, H323Connection * con)
   return TRUE;
 }
 
-BOOL H460_FeatureSet::LoadFeature(const PString & featid)
+PBoolean H460_FeatureSet::LoadFeature(const PString & featid)
 {
 	
 	H460_Feature * newfeat = H460_Feature::CreateFeature(featid);
@@ -1123,7 +1126,7 @@ H460_FeatureSet * H460_FeatureSet::DeriveNewFeatureSet()
 }
 
 
-BOOL H460_FeatureSet::AddFeature(H460_Feature * Nfeat)
+PBoolean H460_FeatureSet::AddFeature(H460_Feature * Nfeat)
 {
 
 	PTRACE(4, "H460\tLoaded " << Nfeat->GetFeatureIDAsString());
@@ -1165,11 +1168,11 @@ PString featureType(PINDEX id)
 }
 #endif
 
-BOOL H460_FeatureSet::CreateFeatureSetPDU(H225_FeatureSet & fs, unsigned MessageID)
+PBoolean H460_FeatureSet::CreateFeatureSetPDU(H225_FeatureSet & fs, unsigned MessageID)
 {
 	PTRACE(6,"H460\tCreate FeatureSet " << PTracePDU(MessageID) << " PDU");
 	
-	BOOL buildPDU = FALSE;
+	PBoolean buildPDU = FALSE;
 
 	for (PINDEX i = 0; i < Features.GetSize(); i++) {    // Iterate thro the features
 	   H460_Feature & feat = Features.GetDataAt(i);
@@ -1341,7 +1344,7 @@ H460_FeatureID H460_FeatureSet::GetFeatureIDPDU(H225_FeatureDescriptor & pdu)
     return fid;
 }
 
-BOOL H460_FeatureSet::CreateFeaturePDU(H460_Feature & Feat, H225_FeatureDescriptor & pdu,unsigned MessageID)
+PBoolean H460_FeatureSet::CreateFeaturePDU(H460_Feature & Feat, H225_FeatureDescriptor & pdu,unsigned MessageID)
 {
 
 PTRACE(6,"H460\tEncoding " << PTracePDU(MessageID) << " PDU for " << Feat.GetFeatureIDAsString() );
@@ -1576,7 +1579,7 @@ void H460_FeatureSet::ReceiveFeature(unsigned id, const H225_FeatureSet & Messag
 	ReadFeatureSetPDU(Message,id);
 }
 
-BOOL H460_FeatureSet::SendFeature(unsigned id, H225_FeatureSet & Message)
+PBoolean H460_FeatureSet::SendFeature(unsigned id, H225_FeatureSet & Message)
 {
 	return CreateFeatureSetPDU(Message,id);
 }
@@ -1592,7 +1595,7 @@ void H460_FeatureSet::AttachBaseFeatureSet(H460_FeatureSet * _baseSet)
    baseSet = _baseSet;
 }
 
-BOOL H460_FeatureSet::HasFeature(const H460_FeatureID & id)
+PBoolean H460_FeatureSet::HasFeature(const H460_FeatureID & id)
 {
 
 	for (PINDEX i =0; i < Features.GetSize(); i++) {

@@ -81,7 +81,7 @@ T38_Type_of_msg::operator const T38_Type_of_msg_data &() const
 }
 
 
-BOOL T38_Type_of_msg::CreateObject()
+PBoolean T38_Type_of_msg::CreateObject()
 {
   switch (tag) {
     case e_t30_indicator :
@@ -326,7 +326,7 @@ T38_UDPTLPacket_error_recovery::operator const T38_UDPTLPacket_error_recovery_fe
 }
 
 
-BOOL T38_UDPTLPacket_error_recovery::CreateObject()
+PBoolean T38_UDPTLPacket_error_recovery::CreateObject()
 {
   switch (tag) {
     case e_secondary_ifp_packets :
@@ -548,7 +548,7 @@ PINDEX T38_IFPPacket::GetDataLength() const
 }
 
 
-BOOL T38_IFPPacket::Decode(PASN_Stream & strm)
+PBoolean T38_IFPPacket::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -634,7 +634,7 @@ PINDEX T38_PreCorrigendum_IFPPacket::GetDataLength() const
 }
 
 
-BOOL T38_PreCorrigendum_IFPPacket::Decode(PASN_Stream & strm)
+PBoolean T38_PreCorrigendum_IFPPacket::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -721,7 +721,7 @@ PINDEX T38_Data_Field_subtype::GetDataLength() const
 }
 
 
-BOOL T38_Data_Field_subtype::Decode(PASN_Stream & strm)
+PBoolean T38_Data_Field_subtype::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -808,7 +808,7 @@ PINDEX T38_PreCorrigendum_Data_Field_subtype::GetDataLength() const
 }
 
 
-BOOL T38_PreCorrigendum_Data_Field_subtype::Decode(PASN_Stream & strm)
+PBoolean T38_PreCorrigendum_Data_Field_subtype::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -911,7 +911,7 @@ PINDEX T38_UDPTLPacket_error_recovery_fec_info::GetDataLength() const
 }
 
 
-BOOL T38_UDPTLPacket_error_recovery_fec_info::Decode(PASN_Stream & strm)
+PBoolean T38_UDPTLPacket_error_recovery_fec_info::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1018,7 +1018,7 @@ PINDEX T38_UDPTLPacket::GetDataLength() const
 }
 
 
-BOOL T38_UDPTLPacket::Decode(PASN_Stream & strm)
+PBoolean T38_UDPTLPacket::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;

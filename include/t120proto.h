@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:50  shorne
+ * First commit of h323plus
+ *
  * Revision 1.4  2002/09/16 01:14:15  robertj
  * Added #define so can select if #pragma interface/implementation is used on
  *   platform basis (eg MacOS) rather than compiler, thanks Robert Monaghan.
@@ -85,13 +88,13 @@ class OpalT120Protocol : public PObject
   //@{
     /**Handle the origination of a T.120 connection.
       */
-    virtual BOOL Originate(
+    virtual PBoolean Originate(
       H323Transport & transport
     );
 
     /**Handle the origination of a T.120 connection.
       */
-    virtual BOOL Answer(
+    virtual PBoolean Answer(
       H323Transport & transport
     );
 
@@ -99,7 +102,7 @@ class OpalT120Protocol : public PObject
 
        If returns FALSE, then the reading loop should be terminated.
       */
-    virtual BOOL HandleConnect(
+    virtual PBoolean HandleConnect(
       const MCS_ConnectMCSPDU & pdu
     );
 
@@ -107,7 +110,7 @@ class OpalT120Protocol : public PObject
 
        If returns FALSE, then the reading loop should be terminated.
       */
-    virtual BOOL HandleDomain(
+    virtual PBoolean HandleDomain(
       const MCS_DomainMCSPDU & pdu
     );
   //@}

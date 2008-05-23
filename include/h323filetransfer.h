@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2008/01/01 00:16:12  shorne
+ * Added GnuGknat and FileTransfer support
+ *
  *
  *
  */
@@ -111,15 +114,15 @@ class H323FileTransferChannel : public H323Channel
 
        The default behaviour does nothing.
      */
-    virtual BOOL SetInitialBandwidth();
+    virtual PBoolean SetInitialBandwidth();
 
     /**Fill out the OpenLogicalChannel PDU for the particular channel type.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_OpenLogicalChannel & openPDU  ///<  Open PDU to send. 
     ) const;
 
-    virtual BOOL OnSendingPDU(H245_H2250LogicalChannelParameters & param) const;
+    virtual PBoolean OnSendingPDU(H245_H2250LogicalChannelParameters & param) const;
 
     virtual void OnSendOpenAck(const H245_OpenLogicalChannel & openPDU, 
 							 H245_OpenLogicalChannelAck & ack) const;
@@ -134,17 +137,17 @@ class H323FileTransferChannel : public H323Channel
        The default makes sure the parameters are compatible and passes on
        the PDU to the rtp session.
      */
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_OpenLogicalChannel & pdu,    ///<  Open PDU
       unsigned & errorCode                    ///<  Error code on failure
     );
 
-    virtual BOOL OnReceivedPDU(const H245_H2250LogicalChannelParameters & param,
+    virtual PBoolean OnReceivedPDU(const H245_H2250LogicalChannelParameters & param,
 							 unsigned & errorCode);
 
-    virtual BOOL OnReceivedAckPDU(const H245_OpenLogicalChannelAck & pdu);
+    virtual PBoolean OnReceivedAckPDU(const H245_OpenLogicalChannelAck & pdu);
 
-    virtual BOOL OnReceivedAckPDU(const H245_H2250LogicalChannelAckParameters & param);
+    virtual PBoolean OnReceivedAckPDU(const H245_H2250LogicalChannelAckParameters & param);
 
 
     /**Handle channel data reception.
@@ -164,13 +167,13 @@ class H323FileTransferChannel : public H323Channel
     virtual void Transmit();
 
 
-    virtual BOOL Open();
+    virtual PBoolean Open();
 
-    virtual BOOL Start();
+    virtual PBoolean Start();
 
     virtual void Close();
 
-    virtual BOOL SetDynamicRTPPayloadType(int newType);
+    virtual PBoolean SetDynamicRTPPayloadType(int newType);
     RTP_DataFrame::PayloadTypes GetDynamicRTPPayloadType() const { return rtpPayloadType; }
 	
     H323FileTransferHandler * GetHandler() const { return fileHandler; }
@@ -178,17 +181,17 @@ class H323FileTransferChannel : public H323Channel
   //@}
 
   protected:
-    BOOL ExtractTransport(const H245_TransportAddress & pdu,
-			     BOOL isDataPort,
+    PBoolean ExtractTransport(const H245_TransportAddress & pdu,
+			     PBoolean isDataPort,
 			     unsigned & errorCode
 						 );
 
-    BOOL RetreiveFileInfo(const H245_GenericInformation & info, 
+    PBoolean RetreiveFileInfo(const H245_GenericInformation & info, 
 			     H323FileTransferList & filelist
 						 );
 
     void SetFileList(H245_OpenLogicalChannel & open, H323FileTransferList flist) const;
-    BOOL GetFileList(const H245_OpenLogicalChannel & open);
+    PBoolean GetFileList(const H245_OpenLogicalChannel & open);
 
     unsigned sessionID;
     Directions direction;
@@ -247,7 +250,7 @@ class H323FileTransferCapability : public H323DataCapability
        The default behaviour sets the pdu and calls OnSendingPDU with a
        H245_DataProtocolCapability parameter.
      */
-    virtual BOOL OnSendingPDU(
+    virtual PBoolean OnSendingPDU(
       H245_DataApplicationCapability & pdu
     ) const;
 
@@ -259,7 +262,7 @@ class H323FileTransferCapability : public H323DataCapability
        The default behaviour does nothing.
      */
 
-    virtual BOOL OnReceivedPDU(
+    virtual PBoolean OnReceivedPDU(
       const H245_DataApplicationCapability & cap  ///< PDU to get information from
     );
 
@@ -270,7 +273,7 @@ class H323FileTransferCapability : public H323DataCapability
 
        The default behaviour does nothing.
      */
-    BOOL OnReceivedPDU(const H245_GenericCapability & pdu);
+    PBoolean OnReceivedPDU(const H245_GenericCapability & pdu);
 
     /**This function is called whenever and outgoing TerminalCapabilitySet
        PDU is being constructed for the control channel. It allows the
@@ -280,7 +283,7 @@ class H323FileTransferCapability : public H323DataCapability
        The default behaviour calls the OnSendingPDU() function with a more
        specific PDU type.
      */
-    BOOL OnSendingPDU(H245_GenericCapability & pdu) const;
+    PBoolean OnSendingPDU(H245_GenericCapability & pdu) const;
 
 	//@}
 
@@ -394,22 +397,22 @@ class H323FileIOChannel : public PIndirectChannel
 		  e_FileExists = 6
 	  };
 
-    H323FileIOChannel(PFilePath _file, BOOL read);
+    H323FileIOChannel(PFilePath _file, PBoolean read);
 	~H323FileIOChannel();
 
-	BOOL IsError(fileError err);
+	PBoolean IsError(fileError err);
 
-	BOOL Open();
-	BOOL Close();
+	PBoolean Open();
+	PBoolean Close();
 
-    BOOL Read(void * buffer, PINDEX & amount);
-    BOOL Write(const void * buf, PINDEX amount);
+    PBoolean Read(void * buffer, PINDEX & amount);
+    PBoolean Write(const void * buf, PINDEX amount);
 
   protected:
-	BOOL CheckFile(PFilePath _file, BOOL read, fileError & errCode);
+	PBoolean CheckFile(PFilePath _file, PBoolean read, fileError & errCode);
 
     PMutex chanMutex;
-	BOOL fileopen;
+	PBoolean fileopen;
 	fileError IOError;
 };
 
@@ -460,12 +463,12 @@ public:
 // User override to get events
 
   virtual void OnStateChange(transferState newState) {};
-  virtual void OnFileStart(const PString & filename, unsigned filesize, BOOL transmit) {};
+  virtual void OnFileStart(const PString & filename, unsigned filesize, PBoolean transmit) {};
   virtual void OnFileOpenError(const PString & filename,H323FileIOChannel::fileError _err) {};
   virtual void OnError(const PString ErrMsg) {};
   virtual void OnFileComplete() {};
-  virtual void OnFileProgress(int Blockno,unsigned OctetsSent, BOOL transmit) {};
-  virtual void OnFileError(int Blockno, BOOL transmit) {};
+  virtual void OnFileProgress(int Blockno,unsigned OctetsSent, PBoolean transmit) {};
+  virtual void OnFileError(int Blockno, PBoolean transmit) {};
   virtual void OnTransferComplete() {};
 
 //////////////////////////
@@ -476,15 +479,15 @@ public:
   unsigned GetBlockRate()  
         { return blockRate; }
 
-  BOOL Start(H323Channel::Directions direction);
-  BOOL Stop(H323Channel::Directions direction);
+  PBoolean Start(H323Channel::Directions direction);
+  PBoolean Stop(H323Channel::Directions direction);
 
   void SetPayloadType(RTP_DataFrame::PayloadTypes _type);
 
 protected:
 
-  BOOL TransmitFrame(H323FilePacket & buffer, BOOL final);
-  BOOL ReceiveFrame(H323FilePacket & buffer, BOOL & final);
+  PBoolean TransmitFrame(H323FilePacket & buffer, PBoolean final);
+  PBoolean ReceiveFrame(H323FilePacket & buffer, PBoolean & final);
 
   void ChangeState(transferState newState);
 
@@ -506,8 +509,8 @@ protected:
   PINDEX responseTimeOut;   ///< Time to wait for a response (set at 1.5 sec)
 
   PTime *StartTime;
-  BOOL IsStarter;           ///< Was Initiator of the channel
-  BOOL shutdown;
+  PBoolean IsStarter;           ///< Was Initiator of the channel
+  PBoolean shutdown;
 
 private:
   RTP_DataFrame::PayloadTypes rtpPayloadType;  ///< Payload Type should be dynamically allocated

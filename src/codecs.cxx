@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2008/04/25 00:54:12  shorne
+ * Added ability to set the video maximum bitrate
+ *
  * Revision 1.4  2007/11/14 18:48:44  willamowius
  * avoid comparing a uninitialized variable
  *
@@ -414,7 +417,7 @@ H323Codec::H323Codec(const OpalMediaFormat & fmt, Direction dir)
 }
 
 
-BOOL H323Codec::Open(H323Connection & /*connection*/)
+PBoolean H323Codec::Open(H323Connection & /*connection*/)
 {
   return TRUE;
 }
@@ -444,7 +447,7 @@ void H323Codec::OnMiscellaneousIndication(const H245_MiscellaneousIndication_typ
 }
 
 
-BOOL H323Codec::AttachChannel(PChannel * channel, BOOL autoDelete)
+PBoolean H323Codec::AttachChannel(PChannel * channel, PBoolean autoDelete)
 {
   PWaitAndSignal mutex(rawChannelMutex);
 
@@ -461,7 +464,7 @@ BOOL H323Codec::AttachChannel(PChannel * channel, BOOL autoDelete)
   return channel->IsOpen();
 }
 
-PChannel * H323Codec::SwapChannel(PChannel * newChannel, BOOL autoDelete)
+PChannel * H323Codec::SwapChannel(PChannel * newChannel, PBoolean autoDelete)
 {
   PWaitAndSignal mutex(rawChannelMutex);
 
@@ -474,12 +477,12 @@ PChannel * H323Codec::SwapChannel(PChannel * newChannel, BOOL autoDelete)
 }
 
 
-BOOL H323Codec::CloseRawDataChannel()
+PBoolean H323Codec::CloseRawDataChannel()
 {
   if (rawDataChannel == NULL)
     return FALSE;
   
-  BOOL closeOK = rawDataChannel->Close();
+  PBoolean closeOK = rawDataChannel->Close();
   
   if (deleteChannel) {
      delete rawDataChannel;
@@ -490,13 +493,13 @@ BOOL H323Codec::CloseRawDataChannel()
 }  
 
 
-BOOL H323Codec::IsRawDataChannelNative() const
+PBoolean H323Codec::IsRawDataChannelNative() const
 {
   return FALSE;
 }
 
 
-BOOL H323Codec::ReadRaw(void * data, PINDEX size, PINDEX & length)
+PBoolean H323Codec::ReadRaw(void * data, PINDEX size, PINDEX & length)
 {
   if (rawDataChannel == NULL) {
     PTRACE(1, "Codec\tNo audio channel for read");
@@ -520,7 +523,7 @@ BOOL H323Codec::ReadRaw(void * data, PINDEX size, PINDEX & length)
 }
 
 
-BOOL H323Codec::WriteRaw(void * data, PINDEX length)
+PBoolean H323Codec::WriteRaw(void * data, PINDEX length)
 {
   if (rawDataChannel == NULL) {
     PTRACE(1, "Codec\tNo audio channel for write");
@@ -541,7 +544,7 @@ BOOL H323Codec::WriteRaw(void * data, PINDEX length)
 }
 
 
-BOOL H323Codec::AttachLogicalChannel(H323Channel *channel)
+PBoolean H323Codec::AttachLogicalChannel(H323Channel *channel)
 {
   logicalChannel = channel;
 
@@ -556,7 +559,7 @@ void H323Codec::AddFilter(const PNotifier & notifier)
   rawChannelMutex.Signal();
 }
 
-BOOL H323Codec::SetRawDataHeld(BOOL /*hold*/) 
+PBoolean H323Codec::SetRawDataHeld(PBoolean /*hold*/) 
 {
 	return FALSE;
 }
@@ -584,7 +587,7 @@ H323VideoCodec::~H323VideoCodec()
 }
 
 
-BOOL H323VideoCodec::Open(H323Connection & connection)
+PBoolean H323VideoCodec::Open(H323Connection & connection)
 {
 #ifdef H323_H239
   if (logicalChannel->GetSessionID() == OpalMediaFormat::DefaultExtVideoSessionID)
@@ -741,7 +744,7 @@ void H323VideoCodec::Close()
 }
 
 
-BOOL H323VideoCodec::SetMaxBitRate(unsigned bitRate)
+PBoolean H323VideoCodec::SetMaxBitRate(unsigned bitRate)
 {
   PTRACE(1,"Set bitRateHighLimit for video to " << bitRate << " bps");
         
@@ -755,7 +758,7 @@ BOOL H323VideoCodec::SetMaxBitRate(unsigned bitRate)
   return TRUE;
 }
 
-BOOL H323VideoCodec::SetTargetFrameTimeMs(unsigned ms)
+PBoolean H323VideoCodec::SetTargetFrameTimeMs(unsigned ms)
 {
   PTRACE(1,"Set targetFrameTimeMs for video to " << ms << " milliseconds");
 
@@ -811,7 +814,7 @@ H323AudioCodec::~H323AudioCodec()
 }
 
 
-BOOL H323AudioCodec::Open(H323Connection & connection)
+PBoolean H323AudioCodec::Open(H323Connection & connection)
 {
   return connection.OpenAudioChannel(direction == Encoder, samplesPerFrame*2, *this);
 }
@@ -833,7 +836,7 @@ unsigned H323AudioCodec::GetFrameRate() const
 
 
 H323AudioCodec::SilenceDetectionMode H323AudioCodec::GetSilenceDetectionMode(
-                                BOOL * isInTalkBurst, unsigned * currentThreshold) const
+                                PBoolean * isInTalkBurst, unsigned * currentThreshold) const
 {
   if (isInTalkBurst != NULL)
     *isInTalkBurst = inTalkBurst;
@@ -880,7 +883,7 @@ void H323AudioCodec::SetSilenceDetectionMode(SilenceDetectionMode mode,
 }
 
 
-BOOL H323AudioCodec::DetectSilence()
+PBoolean H323AudioCodec::DetectSilence()
 {
   // Can never have silence if NoSilenceDetection
   if (silenceDetectMode == NoSilenceDetection)
@@ -896,7 +899,7 @@ BOOL H323AudioCodec::DetectSilence()
   level = linear2ulaw(level) ^ 0xff;
 
   // Now if signal level above threshold we are "talking"
-  BOOL haveSignal = level > levelThreshold;
+  PBoolean haveSignal = level > levelThreshold;
 
   // If no change ie still talking or still silent, resent frame counter
   if (inTalkBurst == haveSignal)
@@ -999,7 +1002,7 @@ unsigned H323AudioCodec::GetAverageSignalLevel()
   return UINT_MAX;
 }
 
-BOOL H323AudioCodec::SetRawDataHeld(BOOL hold) { 
+PBoolean H323AudioCodec::SetRawDataHeld(PBoolean hold) { 
 	
   PTimedMutex m;
 	m.Wait(50);    // wait for 50ms to avoid current locks
@@ -1018,7 +1021,7 @@ H323FramedAudioCodec::H323FramedAudioCodec(const OpalMediaFormat & fmt, Directio
 }
 
 
-BOOL H323FramedAudioCodec::Read(BYTE * buffer, unsigned & length, RTP_DataFrame &)
+PBoolean H323FramedAudioCodec::Read(BYTE * buffer, unsigned & length, RTP_DataFrame &)
 {
   PWaitAndSignal mutex(rawChannelMutex);
 
@@ -1066,7 +1069,7 @@ BOOL H323FramedAudioCodec::Read(BYTE * buffer, unsigned & length, RTP_DataFrame 
 }
 
 
-BOOL H323FramedAudioCodec::Write(const BYTE * buffer,
+PBoolean H323FramedAudioCodec::Write(const BYTE * buffer,
                                  unsigned length,
                                  const RTP_DataFrame & /*rtpFrame*/,
                                  unsigned & written)
@@ -1137,7 +1140,7 @@ unsigned H323FramedAudioCodec::GetAverageSignalLevel()
 }
 
 
-BOOL H323FramedAudioCodec::DecodeFrame(const BYTE * buffer,
+PBoolean H323FramedAudioCodec::DecodeFrame(const BYTE * buffer,
                                        unsigned length,
                                        unsigned & written,
                                        unsigned & /*decodedBytes*/)
@@ -1146,7 +1149,7 @@ BOOL H323FramedAudioCodec::DecodeFrame(const BYTE * buffer,
 }
 
 
-BOOL H323FramedAudioCodec::DecodeFrame(const BYTE * /*buffer*/,
+PBoolean H323FramedAudioCodec::DecodeFrame(const BYTE * /*buffer*/,
                                        unsigned /*length*/,
                                        unsigned & /*written*/)
 {
@@ -1175,7 +1178,7 @@ H323StreamedAudioCodec::H323StreamedAudioCodec(const OpalMediaFormat & fmt,
 }
 
 
-BOOL H323StreamedAudioCodec::EncodeFrame(BYTE * buffer, unsigned &)
+PBoolean H323StreamedAudioCodec::EncodeFrame(BYTE * buffer, unsigned &)
 {
   PINDEX i;
   unsigned short position = 0;
@@ -1319,7 +1322,7 @@ BOOL H323StreamedAudioCodec::EncodeFrame(BYTE * buffer, unsigned &)
 }
 
 
-BOOL H323StreamedAudioCodec::DecodeFrame(const BYTE * buffer,
+PBoolean H323StreamedAudioCodec::DecodeFrame(const BYTE * buffer,
                                          unsigned length,
                                          unsigned & written,
                                          unsigned & decodedBytes)
@@ -1443,7 +1446,7 @@ BOOL H323StreamedAudioCodec::DecodeFrame(const BYTE * buffer,
 /////////////////////////////////////////////////////////////////////////////
 
 H323_ALawCodec::H323_ALawCodec(Direction dir,
-                               BOOL at56kbps,
+                               PBoolean at56kbps,
                                unsigned frameSize)
   : H323StreamedAudioCodec(OpalG711ALaw, dir, frameSize, 8)
 {
@@ -1471,7 +1474,7 @@ short H323_ALawCodec::DecodeSample(int sample)
 /////////////////////////////////////////////////////////////////////////////
 
 H323_muLawCodec::H323_muLawCodec(Direction dir,
-                                 BOOL at56kbps,
+                                 PBoolean at56kbps,
                                  unsigned frameSize)
   : H323StreamedAudioCodec(OpalG711uLaw, dir, frameSize, 8)
 {

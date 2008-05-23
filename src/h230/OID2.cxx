@@ -80,7 +80,7 @@ PINDEX H230OID2_Participant::GetDataLength() const
 }
 
 
-BOOL H230OID2_Participant::Decode(PASN_Stream & strm)
+PBoolean H230OID2_Participant::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -199,7 +199,7 @@ PINDEX H230OID2_ParticipantList::GetDataLength() const
 }
 
 
-BOOL H230OID2_ParticipantList::Decode(PASN_Stream & strm)
+PBoolean H230OID2_ParticipantList::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;

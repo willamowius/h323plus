@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2007/11/02 03:58:30  shorne
+ * fixed missed warning on last commit
+ *
  * Revision 1.2  2007/11/01 22:26:27  shorne
  * fix linux compile warnings
  *
@@ -139,7 +142,7 @@ H225_CryptoH323Token * H235PluginAuthenticator::CreateCryptoToken()
     return token;
 }
 
-BOOL H235PluginAuthenticator::Finalise(PBYTEArray & rawPDU)
+PBoolean H235PluginAuthenticator::Finalise(PBYTEArray & rawPDU)
 {
    BYTE * data = rawPDU.GetPointer();
    unsigned dataLen = rawPDU.GetSize();
@@ -184,35 +187,35 @@ H235Authenticator::ValidationResult H235PluginAuthenticator::ValidateCryptoToken
     return (H235Authenticator::ValidationResult)ret;
 }
 
-BOOL H235PluginAuthenticator::IsCapability(const H235_AuthenticationMechanism & mechanism,
+PBoolean H235PluginAuthenticator::IsCapability(const H235_AuthenticationMechanism & mechanism,
                                            const PASN_ObjectId & algorithmOID)
 {
   return ((mechanism.GetTag() == type) && (algorithmOID.AsString() == def->identifier));
 }
 
-BOOL H235PluginAuthenticator::SetCapability(H225_ArrayOf_AuthenticationMechanism & mechanisms,
+PBoolean H235PluginAuthenticator::SetCapability(H225_ArrayOf_AuthenticationMechanism & mechanisms,
                                             H225_ArrayOf_PASN_ObjectId & algorithmOIDs)
 {
   return AddCapability(type, def->identifier,mechanisms, algorithmOIDs);
 }
 
-BOOL H235PluginAuthenticator::UseGkAndEpIdentifiers() const
+PBoolean H235PluginAuthenticator::UseGkAndEpIdentifiers() const
 {
    return (PluginControl(def, NULL,GET_PLUGINH235_SETTINGS, Pluginh235_Set_UseGkAndEpIdentifiers, NULL)); 
 }
 
-BOOL H235PluginAuthenticator::IsSecuredPDU(unsigned rasPDU,BOOL received) const
+PBoolean H235PluginAuthenticator::IsSecuredPDU(unsigned rasPDU,PBoolean received) const
 {
    return (PluginControl(def, NULL,GET_PLUGINH235_SETTINGS, Pluginh235_Set_IsSecuredPDU, PString(rasPDU))); 
 }
 
-BOOL H235PluginAuthenticator::IsSecuredSignalPDU(unsigned signalPDU,
-                                                 BOOL received) const
+PBoolean H235PluginAuthenticator::IsSecuredSignalPDU(unsigned signalPDU,
+                                                 PBoolean received) const
 {
    return (PluginControl(def, NULL,GET_PLUGINH235_SETTINGS, Pluginh235_Set_IsSecuredSignalPDU, PString(signalPDU)));
 }
 
-BOOL H235PluginAuthenticator::IsActive() const
+PBoolean H235PluginAuthenticator::IsActive() const
 {
    return (PluginControl(def, NULL,GET_PLUGINH235_SETTINGS, Pluginh235_Set_IsActive, NULL));
 }
@@ -328,7 +331,7 @@ void h235PluginDeviceManager::Bootstrap()
 
 }
 
-BOOL h235PluginDeviceManager::Registerh235(unsigned int count, void * _h235List)
+PBoolean h235PluginDeviceManager::Registerh235(unsigned int count, void * _h235List)
 {
   Pluginh235_Definition * h235List = (Pluginh235_Definition *)_h235List;
 
@@ -340,7 +343,7 @@ BOOL h235PluginDeviceManager::Registerh235(unsigned int count, void * _h235List)
   return TRUE;
 }
 
-BOOL h235PluginDeviceManager::Unregisterh235(unsigned int /*count*/, void * /*_h235List*/)
+PBoolean h235PluginDeviceManager::Unregisterh235(unsigned int /*count*/, void * /*_h235List*/)
 {
 
 	return FALSE;

@@ -74,7 +74,7 @@ class H4609_Extension : public PASN_Sequence
     PASN_OctetString m_extensionContent;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -125,7 +125,7 @@ class H4609_QosMonitoringReportData : public PASN_Choice
     operator const H4609_InterGKQosMonReport &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -151,7 +151,7 @@ class H4609_RTCPMeasures_mediaSenderMeasures : public PASN_Sequence
     H4609_EstimatedEnd2EndDelay m_meanEstimatedEnd2EndDelay;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -190,7 +190,7 @@ class H4609_RTCPMeasures_mediaReceiverMeasures : public PASN_Sequence
     H4609_CalculatedJitter m_meanJitter;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -288,7 +288,7 @@ class H4609_RTCPMeasures : public PASN_Sequence
     H4609_ArrayOf_Extension m_extensions;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -324,7 +324,7 @@ class H4609_PerCallQoSReport : public PASN_Sequence
     H4609_ArrayOf_Extension m_extensions;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -354,7 +354,7 @@ class H4609_PeriodicQoSMonReport : public PASN_Sequence
     H4609_ArrayOf_Extension m_extensions;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -386,7 +386,7 @@ class H4609_FinalQosMonReport : public PASN_Sequence
     H4609_ArrayOf_Extension m_extensions;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -418,7 +418,7 @@ class H4609_InterGKQosMonReport : public PASN_Sequence
     H4609_ArrayOf_Extension m_extensions;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;

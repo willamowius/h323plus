@@ -77,7 +77,7 @@ class H4504_MixedExtension : public PASN_Choice
     operator const H225_NonStandardParameter &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -98,7 +98,7 @@ class H4504_Extension : public PASN_Sequence
     PASN_OctetString m_argument;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -147,7 +147,7 @@ class H4504_HoldNotificArg : public PASN_Sequence
     H4504_ArrayOf_MixedExtension m_extensionArg;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -176,7 +176,7 @@ class H4504_RetrieveNotificArg : public PASN_Sequence
     H4504_ArrayOf_MixedExtension m_extensionArg;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -205,7 +205,7 @@ class H4504_RemoteHoldArg : public PASN_Sequence
     H4504_ArrayOf_MixedExtension m_extensionArg;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -234,7 +234,7 @@ class H4504_RemoteHoldRes : public PASN_Sequence
     H4504_ArrayOf_MixedExtension m_extensionRes;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -263,7 +263,7 @@ class H4504_RemoteRetrieveArg : public PASN_Sequence
     H4504_ArrayOf_MixedExtension m_extensionArg;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -292,7 +292,7 @@ class H4504_RemoteRetrieveRes : public PASN_Sequence
     H4504_ArrayOf_MixedExtension m_extensionRes;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;

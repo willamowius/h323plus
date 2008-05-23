@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:07  shorne
+ * First commit of h323plus
+ *
  * Revision 1.29  2005/03/10 06:24:09  csoutheren
  * Removed leak of transactor handle when calling SetTransport
  * Thanks to Victor Ivashin
@@ -166,7 +169,7 @@ ostream & operator<<(ostream & strm, const H323TransactionPDU & pdu)
 }
 
 
-BOOL H323TransactionPDU::Read(H323Transport & transport)
+PBoolean H323TransactionPDU::Read(H323Transport & transport)
 {
   if (!transport.ReadPDU(rawPDU)) {
     PTRACE(1, GetProtocolName() << "\tRead error ("
@@ -176,7 +179,7 @@ BOOL H323TransactionPDU::Read(H323Transport & transport)
   }
 
   rawPDU.ResetDecoder();
-  BOOL ok = GetPDU().Decode(rawPDU);
+  PBoolean ok = GetPDU().Decode(rawPDU);
   if (!ok) {
     PTRACE(1, GetProtocolName() << "\tRead error: PER decode failure:\n  "
            << setprecision(2) << rawPDU << "\n "  << setprecision(2) << *this);
@@ -191,7 +194,7 @@ BOOL H323TransactionPDU::Read(H323Transport & transport)
 }
 
 
-BOOL H323TransactionPDU::Write(H323Transport & transport)
+PBoolean H323TransactionPDU::Write(H323Transport & transport)
 {
   PPER_Stream strm;
   GetPDU().Encode(strm);
@@ -289,7 +292,7 @@ void H323Transactor::PrintOn(ostream & strm) const
 }
 
 
-BOOL H323Transactor::SetTransport(const H323TransportAddress & iface)
+PBoolean H323Transactor::SetTransport(const H323TransportAddress & iface)
 {
   H323Transport * oldTransport = NULL;
   PIPSocket::Address addr;
@@ -323,7 +326,7 @@ BOOL H323Transactor::SetTransport(const H323TransportAddress & iface)
   }
 }
 
-H323TransportAddressArray H323Transactor::GetInterfaceAddresses(BOOL excludeLocalHost,
+H323TransportAddressArray H323Transactor::GetInterfaceAddresses(PBoolean excludeLocalHost,
                                                                 H323Transport * associatedTransport)
 {
   if (transport == NULL)
@@ -334,7 +337,7 @@ H323TransportAddressArray H323Transactor::GetInterfaceAddresses(BOOL excludeLoca
                                      associatedTransport);
 }
 
-BOOL H323Transactor::StartChannel()
+PBoolean H323Transactor::StartChannel()
 {
   if (transport == NULL)
     return FALSE;
@@ -368,7 +371,7 @@ void H323Transactor::HandleTransactions(PThread &, INT)
 
   PINDEX consecutiveErrors = 0;
 
-  BOOL ok = TRUE;
+  PBoolean ok = TRUE;
   while (ok) {
     PTRACE(5, "Trans\tReading PDU");
     H323TransactionPDU * response = CreateTransactionPDU();
@@ -414,7 +417,7 @@ void H323Transactor::HandleTransactions(PThread &, INT)
 }
 
 
-BOOL H323Transactor::SetUpCallSignalAddresses(H225_ArrayOf_TransportAddress & addresses)
+PBoolean H323Transactor::SetUpCallSignalAddresses(H225_ArrayOf_TransportAddress & addresses)
 {
   if (PAssertNULL(transport) == NULL)
     return FALSE;
@@ -456,7 +459,7 @@ void H323Transactor::AgeResponses()
 }
 
 
-BOOL H323Transactor::SendCachedResponse(const H323TransactionPDU & pdu)
+PBoolean H323Transactor::SendCachedResponse(const H323TransactionPDU & pdu)
 {
   if (PAssertNULL(transport) == NULL)
     return FALSE;
@@ -474,7 +477,7 @@ BOOL H323Transactor::SendCachedResponse(const H323TransactionPDU & pdu)
 }
 
 
-BOOL H323Transactor::WritePDU(H323TransactionPDU & pdu)
+PBoolean H323Transactor::WritePDU(H323TransactionPDU & pdu)
 {
   if (PAssertNULL(transport) == NULL)
     return FALSE;
@@ -492,9 +495,9 @@ BOOL H323Transactor::WritePDU(H323TransactionPDU & pdu)
 }
 
 
-BOOL H323Transactor::WriteTo(H323TransactionPDU & pdu,
+PBoolean H323Transactor::WriteTo(H323TransactionPDU & pdu,
                              const H323TransportAddressArray & addresses,
-                             BOOL callback)
+                             PBoolean callback)
 {
   if (PAssertNULL(transport) == NULL)
     return FALSE;
@@ -510,7 +513,7 @@ BOOL H323Transactor::WriteTo(H323TransactionPDU & pdu,
 
   H323TransportAddress oldAddress = transport->GetRemoteAddress();
 
-  BOOL ok = FALSE;
+  PBoolean ok = FALSE;
   for (PINDEX i = 0; i < addresses.GetSize(); i++) {
     if (transport->ConnectTo(addresses[i])) {
       PTRACE(3, "Trans\tWrite address set to " << addresses[i]);
@@ -529,7 +532,7 @@ BOOL H323Transactor::WriteTo(H323TransactionPDU & pdu,
 }
 
 
-BOOL H323Transactor::MakeRequest(Request & request)
+PBoolean H323Transactor::MakeRequest(Request & request)
 {
   PTRACE(3, "Trans\tMaking request: " << request.requestPDU.GetChoice().GetTagName());
 
@@ -539,7 +542,7 @@ BOOL H323Transactor::MakeRequest(Request & request)
   requests.SetAt(request.sequenceNumber, &request);
   requestsMutex.Signal();
 
-  BOOL ok = request.Poll(*this);
+  PBoolean ok = request.Poll(*this);
 
   requestsMutex.Wait();
   requests.SetAt(request.sequenceNumber, NULL);
@@ -549,7 +552,7 @@ BOOL H323Transactor::MakeRequest(Request & request)
 }
 
 
-BOOL H323Transactor::CheckForResponse(unsigned reqTag, unsigned seqNum, const PASN_Choice * reason)
+PBoolean H323Transactor::CheckForResponse(unsigned reqTag, unsigned seqNum, const PASN_Choice * reason)
 {
   requestsMutex.Wait();
   lastRequest = requests.GetAt(seqNum);
@@ -568,7 +571,7 @@ BOOL H323Transactor::CheckForResponse(unsigned reqTag, unsigned seqNum, const PA
 }
 
 
-BOOL H323Transactor::HandleRequestInProgress(const H323TransactionPDU & pdu,
+PBoolean H323Transactor::HandleRequestInProgress(const H323TransactionPDU & pdu,
                                              unsigned delay)
 {
   unsigned seqNum = pdu.GetSequenceNumber();
@@ -591,7 +594,7 @@ BOOL H323Transactor::HandleRequestInProgress(const H323TransactionPDU & pdu,
 }
 
 
-BOOL H323Transactor::CheckCryptoTokens(const H323TransactionPDU & pdu,
+PBoolean H323Transactor::CheckCryptoTokens(const H323TransactionPDU & pdu,
                                        const PASN_Array & clearTokens,
                                        unsigned clearOptionalField,
                                        const PASN_Array & cryptoTokens,
@@ -648,7 +651,7 @@ H323Transactor::Request::Request(unsigned seqNum,
 }
 
 
-BOOL H323Transactor::Request::Poll(H323Transactor & rasChannel)
+PBoolean H323Transactor::Request::Poll(H323Transactor & rasChannel)
 {
   H323EndPoint & endpoint = rasChannel.GetEndPoint();
 
@@ -791,7 +794,7 @@ void H323Transactor::Response::SetPDU(const H323TransactionPDU & pdu)
 }
 
 
-BOOL H323Transactor::Response::SendCachedResponse(H323Transport & transport)
+PBoolean H323Transactor::Response::SendCachedResponse(H323Transport & transport)
 {
   PTRACE(3, "Trans\tSending cached response: " << *this);
 
@@ -837,7 +840,7 @@ H323Transaction::~H323Transaction()
 }
 
 
-BOOL H323Transaction::HandlePDU()
+PBoolean H323Transaction::HandlePDU()
 {
   int response = OnHandlePDU();
   switch (response) {
@@ -856,7 +859,7 @@ BOOL H323Transaction::HandlePDU()
   }
 
   H323TransactionPDU * rip = CreateRIP(request->GetSequenceNumber(), response);
-  BOOL ok = WritePDU(*rip);
+  PBoolean ok = WritePDU(*rip);
   delete rip;
 
   if (!ok)
@@ -887,14 +890,14 @@ void H323Transaction::SlowHandler(PThread &, INT)
 }
 
 
-BOOL H323Transaction::WritePDU(H323TransactionPDU & pdu)
+PBoolean H323Transaction::WritePDU(H323TransactionPDU & pdu)
 {
   pdu.SetAuthenticators(authenticators);
   return transactor.WriteTo(pdu, replyAddresses, TRUE);
 }
 
 
-BOOL H323Transaction::CheckCryptoTokens(const H235Authenticators & auth)
+PBoolean H323Transaction::CheckCryptoTokens(const H235Authenticators & auth)
 {
   authenticators = auth;
 
@@ -924,7 +927,7 @@ H323TransactionServer::~H323TransactionServer()
 }
 
 
-BOOL H323TransactionServer::AddListeners(const H323TransportAddressArray & ifaces)
+PBoolean H323TransactionServer::AddListeners(const H323TransportAddressArray & ifaces)
 {
   if (ifaces.IsEmpty())
     return AddListener("*");
@@ -933,7 +936,7 @@ BOOL H323TransactionServer::AddListeners(const H323TransportAddressArray & iface
 
   mutex.Wait();
   for (i = 0; i < listeners.GetSize(); i++) {
-    BOOL remove = TRUE;
+    PBoolean remove = TRUE;
     for (PINDEX j = 0; j < ifaces.GetSize(); j++) {
       if (listeners[i].GetTransport().GetLocalAddress().IsEquivalent(ifaces[j])) {
         remove = FALSE;
@@ -956,11 +959,11 @@ BOOL H323TransactionServer::AddListeners(const H323TransportAddressArray & iface
 }
 
 
-BOOL H323TransactionServer::AddListener(const H323TransportAddress & interfaceName)
+PBoolean H323TransactionServer::AddListener(const H323TransportAddress & interfaceName)
 {
   PIPSocket::Address addr;
   WORD port = GetDefaultUdpPort();
-  BOOL hasInterfaceInfo = interfaceName.GetIpAndPort(addr, port);
+  PBoolean hasInterfaceInfo = interfaceName.GetIpAndPort(addr, port);
   if (port == 0)
     port = GetDefaultUdpPort();
 
@@ -990,7 +993,7 @@ BOOL H323TransactionServer::AddListener(const H323TransportAddress & interfaceNa
 }
 
 
-BOOL H323TransactionServer::AddListener(H323Transport * transport)
+PBoolean H323TransactionServer::AddListener(H323Transport * transport)
 {
   if (transport == NULL)
     return FALSE;
@@ -1004,7 +1007,7 @@ BOOL H323TransactionServer::AddListener(H323Transport * transport)
 }
 
 
-BOOL H323TransactionServer::AddListener(H323Transactor * listener)
+PBoolean H323TransactionServer::AddListener(H323Transactor * listener)
 {
   if (listener == NULL)
     return FALSE;
@@ -1021,9 +1024,9 @@ BOOL H323TransactionServer::AddListener(H323Transactor * listener)
 }
 
 
-BOOL H323TransactionServer::RemoveListener(H323Transactor * listener)
+PBoolean H323TransactionServer::RemoveListener(H323Transactor * listener)
 {
-  BOOL ok = TRUE;
+  PBoolean ok = TRUE;
 
   mutex.Wait();
   if (listener != NULL) {

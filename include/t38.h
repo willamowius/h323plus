@@ -48,7 +48,7 @@ class T38_Type_of_msg : public PASN_Choice
     operator const T38_Type_of_msg_data &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -191,7 +191,7 @@ class T38_UDPTLPacket_error_recovery : public PASN_Choice
     operator const T38_UDPTLPacket_error_recovery_fec_info &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -310,7 +310,7 @@ class T38_IFPPacket : public PASN_Sequence
     T38_Data_Field m_data_field;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -340,7 +340,7 @@ class T38_PreCorrigendum_IFPPacket : public PASN_Sequence
     T38_PreCorrigendum_Data_Field m_data_field;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -370,7 +370,7 @@ class T38_Data_Field_subtype : public PASN_Sequence
     PASN_OctetString m_field_data;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -400,7 +400,7 @@ class T38_PreCorrigendum_Data_Field_subtype : public PASN_Sequence
     PASN_OctetString m_field_data;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -422,7 +422,7 @@ class T38_UDPTLPacket_primary_ifp_packet : public PASN_OctetString
   public:
     T38_UDPTLPacket_primary_ifp_packet(unsigned tag = 0, TagClass tagClass = UniversalTagClass);
 
-    BOOL DecodeSubType(T38_IFPPacket & obj) { return PASN_OctetString::DecodeSubType(obj); }
+    PBoolean DecodeSubType(T38_IFPPacket & obj) { return PASN_OctetString::DecodeSubType(obj); }
     void EncodeSubType(const T38_IFPPacket & obj) { PASN_OctetString::EncodeSubType(obj); } 
 
     PObject * Clone() const;
@@ -445,7 +445,7 @@ class T38_UDPTLPacket_error_recovery_fec_info : public PASN_Sequence
     T38_ArrayOf_PASN_OctetString m_fec_data;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -467,7 +467,7 @@ class T38_UDPTLPacket_error_recovery_secondary_ifp_packets_subtype : public PASN
   public:
     T38_UDPTLPacket_error_recovery_secondary_ifp_packets_subtype(unsigned tag = 0, TagClass tagClass = UniversalTagClass);
 
-    BOOL DecodeSubType(T38_IFPPacket & obj) { return PASN_OctetString::DecodeSubType(obj); }
+    PBoolean DecodeSubType(T38_IFPPacket & obj) { return PASN_OctetString::DecodeSubType(obj); }
     void EncodeSubType(const T38_IFPPacket & obj) { PASN_OctetString::EncodeSubType(obj); } 
 
     PObject * Clone() const;
@@ -491,7 +491,7 @@ class T38_UDPTLPacket : public PASN_Sequence
     T38_UDPTLPacket_error_recovery m_error_recovery;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;

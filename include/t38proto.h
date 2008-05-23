@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:50  shorne
+ * First commit of h323plus
+ *
  * Revision 1.9  2002/12/02 04:07:58  robertj
  * Turned T.38 Originate inside out, so now has WriteXXX() functions that can
  *   be call ed in different thread contexts.
@@ -100,23 +103,23 @@ class OpalT38Protocol : public PObject
        An application would normally override this. The default just sends
        "heartbeat" T.30 no signal indicator.
       */
-    virtual BOOL Originate();
+    virtual PBoolean Originate();
 
     /**Write packet to the T.38 connection.
       */
-    virtual BOOL WritePacket(
+    virtual PBoolean WritePacket(
       const T38_IFPPacket & pdu
     );
 
     /**Write T.30 indicator packet to the T.38 connection.
       */
-    virtual BOOL WriteIndicator(
+    virtual PBoolean WriteIndicator(
       unsigned indicator
     );
 
     /**Write data packet to the T.38 connection.
       */
-    virtual BOOL WriteMultipleData(
+    virtual PBoolean WriteMultipleData(
       unsigned mode,
       PINDEX count,
       unsigned * type,
@@ -125,7 +128,7 @@ class OpalT38Protocol : public PObject
 
     /**Write data packet to the T.38 connection.
       */
-    virtual BOOL WriteData(
+    virtual PBoolean WriteData(
       unsigned mode,
       unsigned type,
       const PBYTEArray & data
@@ -133,13 +136,13 @@ class OpalT38Protocol : public PObject
 
     /**Handle the origination of a T.38 connection.
       */
-    virtual BOOL Answer();
+    virtual PBoolean Answer();
 
     /**Handle incoming T.38 packet.
 
        If returns FALSE, then the reading loop should be terminated.
       */
-    virtual BOOL HandlePacket(
+    virtual PBoolean HandlePacket(
       const T38_IFPPacket & pdu
     );
 
@@ -147,36 +150,36 @@ class OpalT38Protocol : public PObject
 
        If returns FALSE, then the reading loop should be terminated.
       */
-    virtual BOOL HandlePacketLost(
+    virtual PBoolean HandlePacketLost(
       unsigned nLost
     );
 
     /**Handle incoming T.38 indicator packet.
        If returns FALSE, then the reading loop should be terminated.
       */
-    virtual BOOL OnIndicator(
+    virtual PBoolean OnIndicator(
       unsigned indicator
     );
 
     /**Handle incoming T.38 CNG indicator.
        If returns FALSE, then the reading loop should be terminated.
       */
-    virtual BOOL OnCNG();
+    virtual PBoolean OnCNG();
 
     /**Handle incoming T.38 CED indicator.
        If returns FALSE, then the reading loop should be terminated.
       */
-    virtual BOOL OnCED();
+    virtual PBoolean OnCED();
 
     /**Handle incoming T.38 V.21 preamble indicator.
        If returns FALSE, then the reading loop should be terminated.
       */
-    virtual BOOL OnPreamble();
+    virtual PBoolean OnPreamble();
 
     /**Handle incoming T.38 data mode training indicator.
        If returns FALSE, then the reading loop should be terminated.
       */
-    virtual BOOL OnTraining(
+    virtual PBoolean OnTraining(
       unsigned indicator
     );
 
@@ -184,7 +187,7 @@ class OpalT38Protocol : public PObject
 
        If returns FALSE, then the reading loop should be terminated.
       */
-    virtual BOOL OnData(
+    virtual PBoolean OnData(
       unsigned mode,
       unsigned type,
       const PBYTEArray & data
@@ -194,18 +197,18 @@ class OpalT38Protocol : public PObject
     H323Transport * GetTransport() const { return transport; }
     void SetTransport(
       H323Transport * transport,
-      BOOL autoDelete = TRUE
+      PBoolean autoDelete = TRUE
     );
 
   protected:
-    BOOL HandleRawIFP(
+    PBoolean HandleRawIFP(
       const PASN_OctetString & pdu
     );
 
     H323Transport * transport;
-    BOOL            autoDeleteTransport;
+    PBoolean            autoDeleteTransport;
 
-    BOOL     corrigendumASN;
+    PBoolean     corrigendumASN;
     unsigned indicatorRedundancy;
     unsigned lowSpeedRedundancy;
     unsigned highSpeedRedundancy;

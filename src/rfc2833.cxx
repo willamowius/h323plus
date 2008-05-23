@@ -23,6 +23,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:07  shorne
+ * First commit of h323plus
+ *
  * Revision 1.4  2003/06/03 05:02:18  rjongbloed
  * Added comment and test for NULL pointer parameter.
  *
@@ -91,7 +94,7 @@ OpalRFC2833::OpalRFC2833(const PNotifier & rx)
 }
 
 
-BOOL OpalRFC2833::SendTone(char tone, unsigned duration)
+PBoolean OpalRFC2833::SendTone(char tone, unsigned duration)
 {
   if (!BeginTransmit(tone))
     return FALSE;
@@ -101,7 +104,7 @@ BOOL OpalRFC2833::SendTone(char tone, unsigned duration)
 }
 
 
-BOOL OpalRFC2833::BeginTransmit(char tone)
+PBoolean OpalRFC2833::BeginTransmit(char tone)
 {
   PWaitAndSignal m(mutex);
 
@@ -124,7 +127,7 @@ BOOL OpalRFC2833::BeginTransmit(char tone)
 }
 
 
-BOOL OpalRFC2833::EndTransmit()
+PBoolean OpalRFC2833::EndTransmit()
 {
   PWaitAndSignal m(mutex);
 
@@ -230,7 +233,7 @@ void OpalRFC2833::TransmitPacket(RTP_DataFrame & frame, INT param)
 
   // Set flag to force a packet to be sent.
   if (param != 0)
-    *(BOOL *)param = TRUE;
+    *(PBoolean *)param = TRUE;
 
   PWaitAndSignal m(mutex);
 

@@ -27,6 +27,10 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2007/10/19 19:53:44  shorne
+ * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
+ *  Robert
+ *
  * Revision 1.2  2007/10/16 17:08:01  shorne
  * Allow cryptoTokens to be insert in the setup after receiving ARQ
  *
@@ -371,7 +375,7 @@ class H323SignalPDU : public H225_H323_UserInformation
       */
     H225_Facility_UUIE * BuildFacility(
       const H323Connection & connection,  ///< Connection PDU is generated for
-      BOOL empty,                         ///< Flag for empty facility message
+      PBoolean empty,                         ///< Flag for empty facility message
 	  unsigned reason = H225_FacilityReason::e_undefinedReason ///< Reason for Facility
     );
 
@@ -417,20 +421,20 @@ class H323SignalPDU : public H225_H323_UserInformation
 
     /**Read PDU from the specified transport.
       */
-    BOOL Read(
+    PBoolean Read(
       H323Transport & transport   ///< Transport to read from
     );
 
     /** Process a block of raw read as a PDU
       */
-    BOOL ProcessReadData(
+    PBoolean ProcessReadData(
       H323Transport & transport,   ///< Transport to read from
       const PBYTEArray & rawData
     );
 
     /**Write the PDU to the transport.
       */
-    BOOL Write(
+    PBoolean Write(
       H323Transport & transport,   ///* Transport to write to
       H323Connection & connection  ///* Connection for CallBack
     );
@@ -478,14 +482,14 @@ class H323SignalPDU : public H225_H323_UserInformation
        incoming connection.
       */
     PString GetDestinationAlias(
-      BOOL firstAliasOnly = FALSE   ///< Only return the first possible alias
+      PBoolean firstAliasOnly = FALSE   ///< Only return the first possible alias
     ) const;
 
     /**Get the source endpoints identification as a phone number.
        This returns FALSE if the remote never provided any alias or Q.931
        field that indicated a valid e.164 telephone number.
       */
-    BOOL GetSourceE164(
+    PBoolean GetSourceE164(
       PString & number    ///< String to receive number
     ) const;
 
@@ -493,7 +497,7 @@ class H323SignalPDU : public H225_H323_UserInformation
        This returns FALSE if the remote never provided any alias or Q.931
        field that indicated a valid e.164 telephone number.
       */
-    BOOL GetDestinationE164(
+    PBoolean GetDestinationE164(
       PString & number    ///< String to receive number
     ) const;
 
@@ -508,7 +512,7 @@ class H323SignalPDU : public H225_H323_UserInformation
       */
     void SetQ931Fields(
       const H323Connection & connection,
-      BOOL insertPartyNumbers = FALSE,
+      PBoolean insertPartyNumbers = FALSE,
       unsigned plan = 1,
       unsigned type = 0,
       int presentation = -1,
@@ -558,7 +562,7 @@ class H323ControlPDU : public H245_MultimediaSystemControlMessage
       unsigned statusDeterminationNumber
     );
     H245_MasterSlaveDeterminationAck & BuildMasterSlaveDeterminationAck(
-      BOOL isMaster
+      PBoolean isMaster
     );
     H245_MasterSlaveDeterminationReject & BuildMasterSlaveDeterminationReject(
       unsigned cause
@@ -567,7 +571,7 @@ class H323ControlPDU : public H245_MultimediaSystemControlMessage
     H245_TerminalCapabilitySet & BuildTerminalCapabilitySet(
       const H323Connection & connection,
       unsigned sequenceNumber,
-      BOOL empty
+      PBoolean empty
     );
     H245_TerminalCapabilitySetAck & BuildTerminalCapabilitySetAck(
       unsigned sequenceNumber
@@ -739,12 +743,12 @@ Q931::CauseValues H323TranslateFromCallEndReason(
 
 PString H323GetApplicationInfo(const H225_VendorIdentifier & vendor);
 
-BOOL H323SetRTPPacketization(
+PBoolean H323SetRTPPacketization(
   H245_RTPPayloadType & rtpPacketization,
   const OpalMediaFormat & mediaFormat,
   RTP_DataFrame::PayloadTypes payloadType
 );
-BOOL H323GetRTPPacketization(
+PBoolean H323GetRTPPacketization(
   OpalMediaFormat & mediaFormat,
   const H245_RTPPayloadType & rtpPacketization
 );
@@ -752,7 +756,7 @@ BOOL H323GetRTPPacketization(
 #if PTRACING
 void H323TraceDumpPDU(
   const char * proto,
-  BOOL writing,
+  PBoolean writing,
   const PBYTEArray & rawData,
   const PASN_Object & pdu,
   const PASN_Choice & tag1,

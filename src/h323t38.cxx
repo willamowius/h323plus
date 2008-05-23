@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:07  shorne
+ * First commit of h323plus
+ *
  * Revision 1.27  2004/08/24 14:23:11  csoutheren
  * Fixed problem with plugin codecs using capability compare functions
  *
@@ -199,7 +202,7 @@ H323Channel * H323_T38Capability::CreateChannel(H323Connection & connection,
 }
 
 
-BOOL H323_T38Capability::OnSendingPDU(H245_DataApplicationCapability & pdu) const
+PBoolean H323_T38Capability::OnSendingPDU(H245_DataApplicationCapability & pdu) const
 {
   PTRACE(3, "H323T38\tOnSendingPDU for capability");
 
@@ -210,7 +213,7 @@ BOOL H323_T38Capability::OnSendingPDU(H245_DataApplicationCapability & pdu) cons
 }
 
 
-BOOL H323_T38Capability::OnSendingPDU(H245_DataMode & pdu) const
+PBoolean H323_T38Capability::OnSendingPDU(H245_DataMode & pdu) const
 {
   pdu.m_bitRate = FAX_BIT_RATE;
   pdu.m_application.SetTag(H245_DataMode_application::e_t38fax);
@@ -219,7 +222,7 @@ BOOL H323_T38Capability::OnSendingPDU(H245_DataMode & pdu) const
 }
 
 
-BOOL H323_T38Capability::OnSendingPDU(H245_DataProtocolCapability & proto,
+PBoolean H323_T38Capability::OnSendingPDU(H245_DataProtocolCapability & proto,
                                       H245_T38FaxProfile & profile) const
 {
   if (mode == e_UDP) {
@@ -245,7 +248,7 @@ BOOL H323_T38Capability::OnSendingPDU(H245_DataProtocolCapability & proto,
 }
 
 
-BOOL H323_T38Capability::OnReceivedPDU(const H245_DataApplicationCapability & cap)
+PBoolean H323_T38Capability::OnReceivedPDU(const H245_DataApplicationCapability & cap)
 {
   PTRACE(3, "H323T38\tOnRecievedPDU for capability");
 
@@ -369,7 +372,7 @@ void H323_T38Channel::CleanUpOnTermination()
 }
 
 
-BOOL H323_T38Channel::OnSendingPDU(H245_OpenLogicalChannel & open) const
+PBoolean H323_T38Channel::OnSendingPDU(H245_OpenLogicalChannel & open) const
 {
   if (t38handler != NULL)
     return H323DataChannel::OnSendingPDU(open);
@@ -379,7 +382,7 @@ BOOL H323_T38Channel::OnSendingPDU(H245_OpenLogicalChannel & open) const
 }
 
 
-BOOL H323_T38Channel::OnReceivedPDU(const H245_OpenLogicalChannel & open,
+PBoolean H323_T38Channel::OnReceivedPDU(const H245_OpenLogicalChannel & open,
                                     unsigned & errorCode)
 {
   if (t38handler != NULL)
@@ -438,7 +441,7 @@ void H323_T38Channel::Transmit()
 }
 
 
-BOOL H323_T38Channel::CreateTransport()
+PBoolean H323_T38Channel::CreateTransport()
 {
   if (transport != NULL)
     return TRUE;
@@ -458,7 +461,7 @@ BOOL H323_T38Channel::CreateTransport()
 }
 
 
-BOOL H323_T38Channel::CreateListener()
+PBoolean H323_T38Channel::CreateListener()
 {
   if (listener != NULL)
     return TRUE;

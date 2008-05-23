@@ -19,6 +19,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:49  shorne
+ * First commit of h323plus
+ *
  * Revision 1.1  2006/06/22 11:07:22  shorne
  * Backport of FECC (H.224) from Opal
  *
@@ -59,39 +62,39 @@ public:
   H281VideoSource();
   ~H281VideoSource();
 	
-  BOOL IsEnabled() const { return isEnabled; }
-  void SetEnabled(BOOL flag) { isEnabled = flag; }
+  PBoolean IsEnabled() const { return isEnabled; }
+  void SetEnabled(PBoolean flag) { isEnabled = flag; }
 	
   BYTE GetVideoSourceNumber() const { return (firstOctet >> 4) & 0x0f; }
   void SetVideoSourceNumber(BYTE number);
 	
-  BOOL CanMotionVideo() const { return (firstOctet >> 2) & 0x01; }
-  void SetCanMotionVideo(BOOL flag);
+  PBoolean CanMotionVideo() const { return (firstOctet >> 2) & 0x01; }
+  void SetCanMotionVideo(PBoolean flag);
 
-  BOOL CanNormalResolutionStillImage() const { return (firstOctet >> 1) & 0x01; }
-  void SetCanNormalResolutionStillImage(BOOL flag);
+  PBoolean CanNormalResolutionStillImage() const { return (firstOctet >> 1) & 0x01; }
+  void SetCanNormalResolutionStillImage(PBoolean flag);
 
-  BOOL CanDoubleResolutionStillImage() const { return (firstOctet & 0x01); }
-  void SetCanDoubleResolutionStillImage(BOOL flag);
+  PBoolean CanDoubleResolutionStillImage() const { return (firstOctet & 0x01); }
+  void SetCanDoubleResolutionStillImage(PBoolean flag);
 
-  BOOL CanPan() const { return (secondOctet >> 7) & 0x01; }
-  void SetCanPan(BOOL flag);
+  PBoolean CanPan() const { return (secondOctet >> 7) & 0x01; }
+  void SetCanPan(PBoolean flag);
 	
-  BOOL CanTilt() const { return (secondOctet >> 6) & 0x01; }
-  void SetCanTilt(BOOL flag);
+  PBoolean CanTilt() const { return (secondOctet >> 6) & 0x01; }
+  void SetCanTilt(PBoolean flag);
 	
-  BOOL CanZoom() const { return (secondOctet >> 5) & 0x01; }
-  void SetCanZoom(BOOL flag);
+  PBoolean CanZoom() const { return (secondOctet >> 5) & 0x01; }
+  void SetCanZoom(PBoolean flag);
 	
-  BOOL CanFocus() const { return (secondOctet >> 4) & 0x01; }
-  void SetCanFocus(BOOL flag);
+  PBoolean CanFocus() const { return (secondOctet >> 4) & 0x01; }
+  void SetCanFocus(PBoolean flag);
 	
   void Encode(BYTE *data) const;
-  BOOL Decode(const BYTE *data);
+  PBoolean Decode(const BYTE *data);
 	
 protected:
 	
-  BOOL isEnabled;
+  PBoolean isEnabled;
   BYTE firstOctet;
   BYTE secondOctet;
 	
@@ -117,8 +120,8 @@ public:
 	VideoPlaybackSource		= 0x05
   };
 	
-  BOOL GetRemoteHasH281() const { return remoteHasH281; }
-  void SetRemoteHasH281(BOOL flag) { remoteHasH281 = flag; }
+  PBoolean GetRemoteHasH281() const { return remoteHasH281; }
+  void SetRemoteHasH281(PBoolean flag) { remoteHasH281 = flag; }
 	
   BYTE GetLocalNumberOfPresets() const { return localNumberOfPresets; }
   void SetLocalNumberOfPresets(BYTE presets) { localNumberOfPresets = presets; }
@@ -206,7 +209,7 @@ protected:
   PDECLARE_NOTIFIER(PTimer, OpalH281Handler, StopActionLocally);
 	
   OpalH224Handler & h224Handler;
-  BOOL remoteHasH281;
+  PBoolean remoteHasH281;
   BYTE localNumberOfPresets;
   BYTE remoteNumberOfPresets;
   H281VideoSource localVideoSources[6];

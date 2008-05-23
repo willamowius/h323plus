@@ -127,7 +127,7 @@ X880_ROS::operator const X880_Reject &() const
 }
 
 
-BOOL X880_ROS::CreateObject()
+PBoolean X880_ROS::CreateObject()
 {
   switch (tag) {
     case e_invoke :
@@ -377,7 +377,7 @@ X880_Code::X880_Code(unsigned tag, PASN_Object::TagClass tagClass)
 }
 
 
-BOOL X880_Code::CreateObject()
+PBoolean X880_Code::CreateObject()
 {
   switch (tag) {
     case e_local :
@@ -451,7 +451,7 @@ PINDEX X880_ReturnResult_result::GetDataLength() const
 }
 
 
-BOOL X880_ReturnResult_result::Decode(PASN_Stream & strm)
+PBoolean X880_ReturnResult_result::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -596,7 +596,7 @@ X880_Reject_problem::operator const X880_ReturnErrorProblem &() const
 }
 
 
-BOOL X880_Reject_problem::CreateObject()
+PBoolean X880_Reject_problem::CreateObject()
 {
   switch (tag) {
     case e_general :
@@ -689,7 +689,7 @@ PINDEX X880_Invoke::GetDataLength() const
 }
 
 
-BOOL X880_Invoke::Decode(PASN_Stream & strm)
+PBoolean X880_Invoke::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -782,7 +782,7 @@ PINDEX X880_ReturnResult::GetDataLength() const
 }
 
 
-BOOL X880_ReturnResult::Decode(PASN_Stream & strm)
+PBoolean X880_ReturnResult::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -872,7 +872,7 @@ PINDEX X880_ReturnError::GetDataLength() const
 }
 
 
-BOOL X880_ReturnError::Decode(PASN_Stream & strm)
+PBoolean X880_ReturnError::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -959,7 +959,7 @@ PINDEX X880_Reject::GetDataLength() const
 }
 
 
-BOOL X880_Reject::Decode(PASN_Stream & strm)
+PBoolean X880_Reject::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;

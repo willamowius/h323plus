@@ -305,7 +305,7 @@ H248_MId::operator const H248_PathName &() const
 }
 
 
-BOOL H248_MId::CreateObject()
+PBoolean H248_MId::CreateObject()
 {
   switch (tag) {
     case e_ip4Address :
@@ -392,7 +392,7 @@ PINDEX H248_DomainName::GetDataLength() const
 }
 
 
-BOOL H248_DomainName::Decode(PASN_Stream & strm)
+PBoolean H248_DomainName::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -480,7 +480,7 @@ PINDEX H248_IP4Address::GetDataLength() const
 }
 
 
-BOOL H248_IP4Address::Decode(PASN_Stream & strm)
+PBoolean H248_IP4Address::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -568,7 +568,7 @@ PINDEX H248_IP6Address::GetDataLength() const
 }
 
 
-BOOL H248_IP6Address::Decode(PASN_Stream & strm)
+PBoolean H248_IP6Address::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -748,7 +748,7 @@ H248_Transaction::operator const H248_TransactionResponseAck &() const
 }
 
 
-BOOL H248_Transaction::CreateObject()
+PBoolean H248_Transaction::CreateObject()
 {
   switch (tag) {
     case e_transactionRequest :
@@ -858,7 +858,7 @@ PINDEX H248_TransactionPending::GetDataLength() const
 }
 
 
-BOOL H248_TransactionPending::Decode(PASN_Stream & strm)
+PBoolean H248_TransactionPending::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -971,7 +971,7 @@ PINDEX H248_TransactionAck::GetDataLength() const
 }
 
 
-BOOL H248_TransactionAck::Decode(PASN_Stream & strm)
+PBoolean H248_TransactionAck::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1166,7 +1166,7 @@ PINDEX H248_ContextAttrAuditRequest::GetDataLength() const
 }
 
 
-BOOL H248_ContextAttrAuditRequest::Decode(PASN_Stream & strm)
+PBoolean H248_ContextAttrAuditRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1343,7 +1343,7 @@ H248_Command::operator const H248_ServiceChangeRequest &() const
 }
 
 
-BOOL H248_Command::CreateObject()
+PBoolean H248_Command::CreateObject()
 {
   switch (tag) {
     case e_addReq :
@@ -1495,7 +1495,7 @@ H248_CommandReply::operator const H248_ServiceChangeReply &() const
 }
 
 
-BOOL H248_CommandReply::CreateObject()
+PBoolean H248_CommandReply::CreateObject()
 {
   switch (tag) {
     case e_addReply :
@@ -1733,7 +1733,7 @@ H248_AmmDescriptor::operator const H248_AuditDescriptor &() const
 }
 
 
-BOOL H248_AmmDescriptor::CreateObject()
+PBoolean H248_AmmDescriptor::CreateObject()
 {
   switch (tag) {
     case e_mediaDescriptor :
@@ -1864,7 +1864,7 @@ H248_AuditReply::operator const H248_AuditResult &() const
 }
 
 
-BOOL H248_AuditReply::CreateObject()
+PBoolean H248_AuditReply::CreateObject()
 {
   switch (tag) {
     case e_contextAuditResult :
@@ -2218,7 +2218,7 @@ H248_AuditReturnParameter::operator const H248_AuditDescriptor &() const
 }
 
 
-BOOL H248_AuditReturnParameter::CreateObject()
+PBoolean H248_AuditReturnParameter::CreateObject()
 {
   switch (tag) {
     case e_errorDescriptor :
@@ -2453,7 +2453,7 @@ H248_IndAuditParameter::operator const H248_IndAudPackagesDescriptor &() const
 }
 
 
-BOOL H248_IndAuditParameter::CreateObject()
+PBoolean H248_IndAuditParameter::CreateObject()
 {
   switch (tag) {
     case e_indaudmediaDescriptor :
@@ -2589,7 +2589,7 @@ H248_IndAudSignalsDescriptor::operator const H248_IndAudSeqSigList &() const
 }
 
 
-BOOL H248_IndAudSignalsDescriptor::CreateObject()
+PBoolean H248_IndAudSignalsDescriptor::CreateObject()
 {
   switch (tag) {
     case e_signal :
@@ -2679,7 +2679,7 @@ H248_ServiceChangeResult::operator const H248_ServiceChangeResParm &() const
 }
 
 
-BOOL H248_ServiceChangeResult::CreateObject()
+PBoolean H248_ServiceChangeResult::CreateObject()
 {
   switch (tag) {
     case e_errorDescriptor :
@@ -3230,7 +3230,7 @@ H248_EventDM::operator const H248_DigitMapValue &() const
 }
 
 
-BOOL H248_EventDM::CreateObject()
+PBoolean H248_EventDM::CreateObject()
 {
   switch (tag) {
     case e_digitMapName :
@@ -3382,7 +3382,7 @@ H248_SignalRequest::operator const H248_SeqSigList &() const
 }
 
 
-BOOL H248_SignalRequest::CreateObject()
+PBoolean H248_SignalRequest::CreateObject()
 {
   switch (tag) {
     case e_signal :
@@ -3725,7 +3725,7 @@ PINDEX H248_DigitMapValue::GetDataLength() const
 }
 
 
-BOOL H248_DigitMapValue::Decode(PASN_Stream & strm)
+PBoolean H248_DigitMapValue::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3884,7 +3884,7 @@ H248_ServiceChangeAddress::operator const H248_PathName &() const
 }
 
 
-BOOL H248_ServiceChangeAddress::CreateObject()
+PBoolean H248_ServiceChangeAddress::CreateObject()
 {
   switch (tag) {
     case e_portNumber :
@@ -4009,7 +4009,7 @@ PINDEX H248_ServiceChangeProfile::GetDataLength() const
 }
 
 
-BOOL H248_ServiceChangeProfile::Decode(PASN_Stream & strm)
+PBoolean H248_ServiceChangeProfile::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4121,7 +4121,7 @@ PINDEX H248_PackagesItem::GetDataLength() const
 }
 
 
-BOOL H248_PackagesItem::Decode(PASN_Stream & strm)
+PBoolean H248_PackagesItem::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4230,7 +4230,7 @@ H248_NonStandardIdentifier::operator const H248_H221NonStandard &() const
 }
 
 
-BOOL H248_NonStandardIdentifier::CreateObject()
+PBoolean H248_NonStandardIdentifier::CreateObject()
 {
   switch (tag) {
     case e_object :
@@ -4320,7 +4320,7 @@ PINDEX H248_H221NonStandard::GetDataLength() const
 }
 
 
-BOOL H248_H221NonStandard::Decode(PASN_Stream & strm)
+PBoolean H248_H221NonStandard::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4411,7 +4411,7 @@ PINDEX H248_TimeNotation::GetDataLength() const
 }
 
 
-BOOL H248_TimeNotation::Decode(PASN_Stream & strm)
+PBoolean H248_TimeNotation::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4541,7 +4541,7 @@ H248_Message_messageBody::operator const H248_ArrayOf_Transaction &() const
 }
 
 
-BOOL H248_Message_messageBody::CreateObject()
+PBoolean H248_Message_messageBody::CreateObject()
 {
   switch (tag) {
     case e_messageError :
@@ -4662,7 +4662,7 @@ H248_TransactionReply_transactionResult::operator const H248_ArrayOf_ActionReply
 }
 
 
-BOOL H248_TransactionReply_transactionResult::CreateObject()
+PBoolean H248_TransactionReply_transactionResult::CreateObject()
 {
   switch (tag) {
     case e_transactionError :
@@ -4944,7 +4944,7 @@ H248_IndAudMediaDescriptor_streams::operator const H248_ArrayOf_IndAudStreamDesc
 }
 
 
-BOOL H248_IndAudMediaDescriptor_streams::CreateObject()
+PBoolean H248_IndAudMediaDescriptor_streams::CreateObject()
 {
   switch (tag) {
     case e_oneStream :
@@ -5106,7 +5106,7 @@ H248_EventParameter_extraInfo::operator const H248_Relation &() const
 }
 
 
-BOOL H248_EventParameter_extraInfo::CreateObject()
+PBoolean H248_EventParameter_extraInfo::CreateObject()
 {
   switch (tag) {
     case e_relation :
@@ -5228,7 +5228,7 @@ H248_MediaDescriptor_streams::operator const H248_ArrayOf_StreamDescriptor &() c
 }
 
 
-BOOL H248_MediaDescriptor_streams::CreateObject()
+PBoolean H248_MediaDescriptor_streams::CreateObject()
 {
   switch (tag) {
     case e_oneStream :
@@ -5359,7 +5359,7 @@ H248_PropertyParm_extraInfo::operator const H248_Relation &() const
 }
 
 
-BOOL H248_PropertyParm_extraInfo::CreateObject()
+PBoolean H248_PropertyParm_extraInfo::CreateObject()
 {
   switch (tag) {
     case e_relation :
@@ -5615,7 +5615,7 @@ H248_SigParameter_extraInfo::operator const H248_Relation &() const
 }
 
 
-BOOL H248_SigParameter_extraInfo::CreateObject()
+PBoolean H248_SigParameter_extraInfo::CreateObject()
 {
   switch (tag) {
     case e_relation :
@@ -5849,7 +5849,7 @@ PINDEX H248_AuthenticationHeader::GetDataLength() const
 }
 
 
-BOOL H248_AuthenticationHeader::Decode(PASN_Stream & strm)
+PBoolean H248_AuthenticationHeader::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5940,7 +5940,7 @@ PINDEX H248_Message::GetDataLength() const
 }
 
 
-BOOL H248_Message::Decode(PASN_Stream & strm)
+PBoolean H248_Message::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6026,7 +6026,7 @@ PINDEX H248_TransactionRequest::GetDataLength() const
 }
 
 
-BOOL H248_TransactionRequest::Decode(PASN_Stream & strm)
+PBoolean H248_TransactionRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6115,7 +6115,7 @@ PINDEX H248_TransactionReply::GetDataLength() const
 }
 
 
-BOOL H248_TransactionReply::Decode(PASN_Stream & strm)
+PBoolean H248_TransactionReply::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6204,7 +6204,7 @@ PINDEX H248_ErrorDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_ErrorDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_ErrorDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6299,7 +6299,7 @@ PINDEX H248_ContextRequest::GetDataLength() const
 }
 
 
-BOOL H248_ContextRequest::Decode(PASN_Stream & strm)
+PBoolean H248_ContextRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6396,7 +6396,7 @@ PINDEX H248_CommandRequest::GetDataLength() const
 }
 
 
-BOOL H248_CommandRequest::Decode(PASN_Stream & strm)
+PBoolean H248_CommandRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6484,7 +6484,7 @@ PINDEX H248_AmmRequest::GetDataLength() const
 }
 
 
-BOOL H248_AmmRequest::Decode(PASN_Stream & strm)
+PBoolean H248_AmmRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6569,7 +6569,7 @@ PINDEX H248_AmmsReply::GetDataLength() const
 }
 
 
-BOOL H248_AmmsReply::Decode(PASN_Stream & strm)
+PBoolean H248_AmmsReply::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6653,7 +6653,7 @@ PINDEX H248_AuditDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_AuditDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_AuditDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6753,7 +6753,7 @@ PINDEX H248_IndAudLocalControlDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_IndAudLocalControlDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_IndAudLocalControlDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6842,7 +6842,7 @@ PINDEX H248_IndAudPropertyParm::GetDataLength() const
 }
 
 
-BOOL H248_IndAudPropertyParm::Decode(PASN_Stream & strm)
+PBoolean H248_IndAudPropertyParm::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6925,7 +6925,7 @@ PINDEX H248_IndAudLocalRemoteDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_IndAudLocalRemoteDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_IndAudLocalRemoteDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7017,7 +7017,7 @@ PINDEX H248_IndAudTerminationStateDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_IndAudTerminationStateDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_IndAudTerminationStateDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7113,7 +7113,7 @@ PINDEX H248_IndAudEventsDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_IndAudEventsDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_IndAudEventsDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7203,7 +7203,7 @@ PINDEX H248_IndAudEventBufferDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_IndAudEventBufferDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_IndAudEventBufferDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7289,7 +7289,7 @@ PINDEX H248_IndAudSignal::GetDataLength() const
 }
 
 
-BOOL H248_IndAudSignal::Decode(PASN_Stream & strm)
+PBoolean H248_IndAudSignal::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7371,7 +7371,7 @@ PINDEX H248_IndAudDigitMapDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_IndAudDigitMapDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_IndAudDigitMapDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7448,7 +7448,7 @@ PINDEX H248_IndAudStatisticsDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_IndAudStatisticsDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_IndAudStatisticsDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7529,7 +7529,7 @@ PINDEX H248_IndAudPackagesDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_IndAudPackagesDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_IndAudPackagesDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7614,7 +7614,7 @@ PINDEX H248_NotifyReply::GetDataLength() const
 }
 
 
-BOOL H248_NotifyReply::Decode(PASN_Stream & strm)
+PBoolean H248_NotifyReply::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7698,7 +7698,7 @@ PINDEX H248_ObservedEventsDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_ObservedEventsDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_ObservedEventsDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7845,7 +7845,7 @@ PINDEX H248_EventParameter::GetDataLength() const
 }
 
 
-BOOL H248_EventParameter::Decode(PASN_Stream & strm)
+PBoolean H248_EventParameter::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7932,7 +7932,7 @@ PINDEX H248_ServiceChangeReply::GetDataLength() const
 }
 
 
-BOOL H248_ServiceChangeReply::Decode(PASN_Stream & strm)
+PBoolean H248_ServiceChangeReply::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8016,7 +8016,7 @@ PINDEX H248_TerminationID::GetDataLength() const
 }
 
 
-BOOL H248_TerminationID::Decode(PASN_Stream & strm)
+PBoolean H248_TerminationID::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8113,7 +8113,7 @@ PINDEX H248_LocalControlDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_LocalControlDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_LocalControlDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8211,7 +8211,7 @@ PINDEX H248_PropertyParm::GetDataLength() const
 }
 
 
-BOOL H248_PropertyParm::Decode(PASN_Stream & strm)
+PBoolean H248_PropertyParm::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8294,7 +8294,7 @@ PINDEX H248_LocalRemoteDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_LocalRemoteDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_LocalRemoteDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8382,7 +8382,7 @@ PINDEX H248_TerminationStateDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_TerminationStateDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_TerminationStateDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8472,7 +8472,7 @@ PINDEX H248_EventsDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_EventsDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_EventsDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8558,7 +8558,7 @@ PINDEX H248_SecondEventsDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_SecondEventsDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_SecondEventsDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8652,7 +8652,7 @@ PINDEX H248_SecondRequestedActions::GetDataLength() const
 }
 
 
-BOOL H248_SecondRequestedActions::Decode(PASN_Stream & strm)
+PBoolean H248_SecondRequestedActions::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8747,7 +8747,7 @@ PINDEX H248_EventSpec::GetDataLength() const
 }
 
 
-BOOL H248_EventSpec::Decode(PASN_Stream & strm)
+PBoolean H248_EventSpec::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8835,7 +8835,7 @@ PINDEX H248_SeqSigList::GetDataLength() const
 }
 
 
-BOOL H248_SeqSigList::Decode(PASN_Stream & strm)
+PBoolean H248_SeqSigList::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8949,7 +8949,7 @@ PINDEX H248_Signal::GetDataLength() const
 }
 
 
-BOOL H248_Signal::Decode(PASN_Stream & strm)
+PBoolean H248_Signal::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9058,7 +9058,7 @@ PINDEX H248_SigParameter::GetDataLength() const
 }
 
 
-BOOL H248_SigParameter::Decode(PASN_Stream & strm)
+PBoolean H248_SigParameter::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9149,7 +9149,7 @@ PINDEX H248_DigitMapDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_DigitMapDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_DigitMapDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9257,7 +9257,7 @@ PINDEX H248_ServiceChangeResParm::GetDataLength() const
 }
 
 
-BOOL H248_ServiceChangeResParm::Decode(PASN_Stream & strm)
+PBoolean H248_ServiceChangeResParm::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9356,7 +9356,7 @@ PINDEX H248_StatisticsParameter::GetDataLength() const
 }
 
 
-BOOL H248_StatisticsParameter::Decode(PASN_Stream & strm)
+PBoolean H248_StatisticsParameter::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9440,7 +9440,7 @@ PINDEX H248_NonStandardData::GetDataLength() const
 }
 
 
-BOOL H248_NonStandardData::Decode(PASN_Stream & strm)
+PBoolean H248_NonStandardData::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9525,7 +9525,7 @@ PINDEX H248_MegacoMessage::GetDataLength() const
 }
 
 
-BOOL H248_MegacoMessage::Decode(PASN_Stream & strm)
+PBoolean H248_MegacoMessage::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9621,7 +9621,7 @@ PINDEX H248_ActionRequest::GetDataLength() const
 }
 
 
-BOOL H248_ActionRequest::Decode(PASN_Stream & strm)
+PBoolean H248_ActionRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9724,7 +9724,7 @@ PINDEX H248_ActionReply::GetDataLength() const
 }
 
 
-BOOL H248_ActionReply::Decode(PASN_Stream & strm)
+PBoolean H248_ActionReply::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9821,7 +9821,7 @@ PINDEX H248_TopologyRequest::GetDataLength() const
 }
 
 
-BOOL H248_TopologyRequest::Decode(PASN_Stream & strm)
+PBoolean H248_TopologyRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9912,7 +9912,7 @@ PINDEX H248_SubtractRequest::GetDataLength() const
 }
 
 
-BOOL H248_SubtractRequest::Decode(PASN_Stream & strm)
+PBoolean H248_SubtractRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9996,7 +9996,7 @@ PINDEX H248_AuditRequest::GetDataLength() const
 }
 
 
-BOOL H248_AuditRequest::Decode(PASN_Stream & strm)
+PBoolean H248_AuditRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10079,7 +10079,7 @@ PINDEX H248_AuditResult::GetDataLength() const
 }
 
 
-BOOL H248_AuditResult::Decode(PASN_Stream & strm)
+PBoolean H248_AuditResult::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10166,7 +10166,7 @@ PINDEX H248_IndAudMediaDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_IndAudMediaDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_IndAudMediaDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10261,7 +10261,7 @@ PINDEX H248_IndAudStreamParms::GetDataLength() const
 }
 
 
-BOOL H248_IndAudStreamParms::Decode(PASN_Stream & strm)
+PBoolean H248_IndAudStreamParms::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10353,7 +10353,7 @@ PINDEX H248_IndAudSeqSigList::GetDataLength() const
 }
 
 
-BOOL H248_IndAudSeqSigList::Decode(PASN_Stream & strm)
+PBoolean H248_IndAudSeqSigList::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10443,7 +10443,7 @@ PINDEX H248_NotifyRequest::GetDataLength() const
 }
 
 
-BOOL H248_NotifyRequest::Decode(PASN_Stream & strm)
+PBoolean H248_NotifyRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10542,7 +10542,7 @@ PINDEX H248_ObservedEvent::GetDataLength() const
 }
 
 
-BOOL H248_ObservedEvent::Decode(PASN_Stream & strm)
+PBoolean H248_ObservedEvent::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10637,7 +10637,7 @@ PINDEX H248_MediaDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_MediaDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_MediaDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10732,7 +10732,7 @@ PINDEX H248_StreamParms::GetDataLength() const
 }
 
 
-BOOL H248_StreamParms::Decode(PASN_Stream & strm)
+PBoolean H248_StreamParms::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10827,7 +10827,7 @@ PINDEX H248_MuxDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_MuxDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_MuxDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10930,7 +10930,7 @@ PINDEX H248_RequestedActions::GetDataLength() const
 }
 
 
-BOOL H248_RequestedActions::Decode(PASN_Stream & strm)
+PBoolean H248_RequestedActions::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11035,7 +11035,7 @@ PINDEX H248_SecondRequestedEvent::GetDataLength() const
 }
 
 
-BOOL H248_SecondRequestedEvent::Decode(PASN_Stream & strm)
+PBoolean H248_SecondRequestedEvent::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11132,7 +11132,7 @@ PINDEX H248_ModemDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_ModemDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_ModemDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11265,7 +11265,7 @@ PINDEX H248_ServiceChangeParm::GetDataLength() const
 }
 
 
-BOOL H248_ServiceChangeParm::Decode(PASN_Stream & strm)
+PBoolean H248_ServiceChangeParm::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11379,7 +11379,7 @@ PINDEX H248_IndAudStreamDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_IndAudStreamDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_IndAudStreamDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11462,7 +11462,7 @@ PINDEX H248_ServiceChangeRequest::GetDataLength() const
 }
 
 
-BOOL H248_ServiceChangeRequest::Decode(PASN_Stream & strm)
+PBoolean H248_ServiceChangeRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11545,7 +11545,7 @@ PINDEX H248_StreamDescriptor::GetDataLength() const
 }
 
 
-BOOL H248_StreamDescriptor::Decode(PASN_Stream & strm)
+PBoolean H248_StreamDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11640,7 +11640,7 @@ PINDEX H248_RequestedEvent::GetDataLength() const
 }
 
 
-BOOL H248_RequestedEvent::Decode(PASN_Stream & strm)
+PBoolean H248_RequestedEvent::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;

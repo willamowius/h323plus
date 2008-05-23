@@ -124,7 +124,7 @@ H4509_CcArg::operator const H4509_CcLongArg &() const
 }
 
 
-BOOL H4509_CcArg::CreateObject()
+PBoolean H4509_CcArg::CreateObject()
 {
   switch (tag) {
     case e_shortArg :
@@ -294,7 +294,7 @@ PINDEX H4509_CcRequestArg::GetDataLength() const
 }
 
 
-BOOL H4509_CcRequestArg::Decode(PASN_Stream & strm)
+PBoolean H4509_CcRequestArg::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -398,7 +398,7 @@ PINDEX H4509_CcRequestRes::GetDataLength() const
 }
 
 
-BOOL H4509_CcRequestRes::Decode(PASN_Stream & strm)
+PBoolean H4509_CcRequestRes::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -487,7 +487,7 @@ PINDEX H4509_CcShortArg::GetDataLength() const
 }
 
 
-BOOL H4509_CcShortArg::Decode(PASN_Stream & strm)
+PBoolean H4509_CcShortArg::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -595,7 +595,7 @@ PINDEX H4509_CcLongArg::GetDataLength() const
 }
 
 
-BOOL H4509_CcLongArg::Decode(PASN_Stream & strm)
+PBoolean H4509_CcLongArg::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;

@@ -292,7 +292,7 @@ class H501_MessageBody : public PASN_Choice
     operator const H501_AuthenticationRejection &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -323,7 +323,7 @@ class H501_ServiceRejectionReason : public PASN_Choice
       e_unknownUsageSendTo
     };
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -347,7 +347,7 @@ class H501_ServiceReleaseReason : public PASN_Choice
       e_expired
     };
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -376,7 +376,7 @@ class H501_DescriptorRejectionReason : public PASN_Choice
       e_unknownServiceID
     };
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -395,7 +395,7 @@ class H501_DescriptorIDRequest : public PASN_Sequence
 
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -427,7 +427,7 @@ class H501_DescriptorIDRejectionReason : public PASN_Choice
       e_unknownServiceID
     };
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -446,7 +446,7 @@ class H501_DescriptorUpdateAck : public PASN_Sequence
 
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -487,7 +487,7 @@ class H501_AccessRejectionReason : public PASN_Choice
       e_unknownUsageSendTo
     };
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -506,7 +506,7 @@ class H501_UsageConfirmation : public PASN_Sequence
 
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -531,7 +531,7 @@ class H501_UsageField : public PASN_Sequence
     PASN_OctetString m_value;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -564,7 +564,7 @@ class H501_UsageRejectReason : public PASN_Choice
       e_unknownServiceID
     };
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -583,7 +583,7 @@ class H501_UsageIndicationConfirmation : public PASN_Sequence
 
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -615,7 +615,7 @@ class H501_UsageIndicationRejectionReason : public PASN_Choice
       e_unknownServiceID
     };
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -645,7 +645,7 @@ class H501_ValidationRejectionReason : public PASN_Choice
       e_unknownServiceID
     };
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -664,7 +664,7 @@ class H501_NonStandardRequest : public PASN_Sequence
 
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -687,7 +687,7 @@ class H501_NonStandardConfirmation : public PASN_Sequence
 
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -717,7 +717,7 @@ class H501_NonStandardRejectionReason : public PASN_Choice
       e_unknownServiceID
     };
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -739,7 +739,7 @@ class H501_UnknownMessageReason : public PASN_Choice
       e_undefined
     };
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -781,7 +781,7 @@ class H501_AuthenticationConfirmation : public PASN_Sequence
 
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -818,7 +818,7 @@ class H501_AuthenticationRejectionReason : public PASN_Choice
       e_securityWrongOID
     };
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -857,7 +857,7 @@ class H501_Pattern : public PASN_Choice
     operator const H501_Pattern_range &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -903,7 +903,7 @@ class H501_AccessToken : public PASN_Choice
     operator const H225_GenericData &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -929,7 +929,7 @@ class H501_CallInformation : public PASN_Sequence
     H225_CircuitInfo m_circuitID;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -958,7 +958,7 @@ class H501_UsageCallStatus : public PASN_Choice
       e_registrationLost
     };
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -990,7 +990,7 @@ class H501_Role : public PASN_Choice
     operator const H225_NonStandardParameter &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -1035,7 +1035,7 @@ class H501_TerminationCause : public PASN_Sequence
     H225_NonStandardParameter m_nonStandardData;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1075,7 +1075,7 @@ class H501_ElementIdentifier : public PASN_BMPString
 
     H501_ElementIdentifier & operator=(const char * v);
     H501_ElementIdentifier & operator=(const PString & v);
-    H501_ElementIdentifier & operator=(const PWORDArray & v);
+    H501_ElementIdentifier & operator=(const PWCharArray & v);
     H501_ElementIdentifier & operator=(const PASN_BMPString & v);
     PObject * Clone() const;
 };
@@ -1350,7 +1350,7 @@ class H501_UpdateInformation_descriptorInfo : public PASN_Choice
     operator const H501_Descriptor &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -1373,7 +1373,7 @@ class H501_UpdateInformation_updateType : public PASN_Choice
       e_changed
     };
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -1534,7 +1534,7 @@ class H501_Pattern_range : public PASN_Sequence
     H225_PartyNumber m_endOfRange;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1562,7 +1562,7 @@ class H501_RouteInformation_messageType : public PASN_Choice
       e_nonExistent
     };
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -1668,7 +1668,7 @@ class H501_PriceElement_units : public PASN_Choice
       e_maximum
     };
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -1720,7 +1720,7 @@ class H501_UsageSpecification_when : public PASN_Sequence
     PASN_Null m_failures;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1788,7 +1788,7 @@ class H501_MessageCommonInfo : public PASN_Sequence
     H501_ProtocolVersion m_version;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1821,7 +1821,7 @@ class H501_SecurityMode : public PASN_Sequence
     H501_ArrayOf_PASN_ObjectId m_algorithmOIDs;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1846,7 +1846,7 @@ class H501_DescriptorRequest : public PASN_Sequence
     H501_ArrayOf_GloballyUniqueID m_descriptorID;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1871,7 +1871,7 @@ class H501_DescriptorConfirmation : public PASN_Sequence
     H501_ArrayOf_Descriptor m_descriptor;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1901,7 +1901,7 @@ class H501_DescriptorRejection : public PASN_Sequence
     H225_GloballyUniqueID m_descriptorID;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1926,7 +1926,7 @@ class H501_DescriptorIDConfirmation : public PASN_Sequence
     H501_ArrayOf_DescriptorInfo m_descriptorInfo;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1951,7 +1951,7 @@ class H501_DescriptorIDRejection : public PASN_Sequence
     H501_DescriptorIDRejectionReason m_reason;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1977,7 +1977,7 @@ class H501_DescriptorUpdate : public PASN_Sequence
     H501_ArrayOf_UpdateInformation m_updateInfo;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2003,7 +2003,7 @@ class H501_UpdateInformation : public PASN_Sequence
     H501_UpdateInformation_updateType m_updateType;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2036,7 +2036,7 @@ class H501_AccessConfirmation : public PASN_Sequence
     H501_ArrayOf_ServiceControlSession m_serviceControl;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2066,7 +2066,7 @@ class H501_AccessRejection : public PASN_Sequence
     H501_ArrayOf_ServiceControlSession m_serviceControl;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2091,7 +2091,7 @@ class H501_UsageRejection : public PASN_Sequence
     H501_UsageRejectReason m_reason;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2116,7 +2116,7 @@ class H501_UsageIndicationRejection : public PASN_Sequence
     H501_UsageIndicationRejectionReason m_reason;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2141,7 +2141,7 @@ class H501_ValidationRejection : public PASN_Sequence
     H501_ValidationRejectionReason m_reason;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2171,7 +2171,7 @@ class H501_RequestInProgress : public PASN_Sequence
     H501_ArrayOf_ServiceControlSession m_serviceControl;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2196,7 +2196,7 @@ class H501_NonStandardRejection : public PASN_Sequence
     H501_NonStandardRejectionReason m_reason;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2222,7 +2222,7 @@ class H501_UnknownMessageResponse : public PASN_Sequence
     H501_UnknownMessageReason m_reason;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2247,7 +2247,7 @@ class H501_AuthenticationRequest : public PASN_Sequence
     H501_ApplicationMessage m_applicationMessage;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2272,7 +2272,7 @@ class H501_AuthenticationRejection : public PASN_Sequence
     H501_AuthenticationRejectionReason m_reason;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2306,7 +2306,7 @@ class H501_AddressTemplate : public PASN_Sequence
     H225_FeatureSet m_featureSet;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2349,7 +2349,7 @@ class H501_ContactInformation : public PASN_Sequence
     H501_ArrayOf_CircuitIdentifier m_supportedCircuits;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2390,7 +2390,7 @@ class H501_PriceInfoSpec : public PASN_Sequence
     PASN_IA5String m_priceFormula;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2417,7 +2417,7 @@ class H501_PriceElement : public PASN_Sequence
     H501_PriceElement_units m_units;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2443,7 +2443,7 @@ class H501_DescriptorInfo : public PASN_Sequence
     H501_GlobalTimeStamp m_lastChanged;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2469,7 +2469,7 @@ class H501_AlternatePEInfo : public PASN_Sequence
     PASN_Boolean m_alternateIsPermanent;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2500,7 +2500,7 @@ class H501_AlternatePE : public PASN_Sequence
     H501_ElementIdentifier m_elementIdentifier;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2530,7 +2530,7 @@ class H501_UserInformation : public PASN_Sequence
     H501_ArrayOf_CryptoH323Token m_userAuthenticator;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2563,7 +2563,7 @@ class H501_UsageSpecification : public PASN_Sequence
     H225_AliasAddress m_sendToPEAddress;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2601,7 +2601,7 @@ class H501_PartyInformation : public PASN_Sequence
     H501_TimeZone m_timeZone;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2627,7 +2627,7 @@ class H501_Message : public PASN_Sequence
     H501_MessageCommonInfo m_common;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2664,7 +2664,7 @@ class H501_ServiceRequest : public PASN_Sequence
     H501_UsageSpecification m_usageSpec;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2701,7 +2701,7 @@ class H501_ServiceConfirmation : public PASN_Sequence
     H501_UsageSpecification m_usageSpec;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2731,7 +2731,7 @@ class H501_ServiceRejection : public PASN_Sequence
     H501_AlternatePEInfo m_alternates;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2761,7 +2761,7 @@ class H501_ServiceRelease : public PASN_Sequence
     H501_AlternatePEInfo m_alternates;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2797,7 +2797,7 @@ class H501_AccessRequest : public PASN_Sequence
     H501_ArrayOf_SupportedProtocols m_desiredProtocols;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2823,7 +2823,7 @@ class H501_UsageRequest : public PASN_Sequence
     H501_UsageSpecification m_usageSpec;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2865,7 +2865,7 @@ class H501_UsageIndication : public PASN_Sequence
     H501_ArrayOf_UsageField m_usageFields;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2901,7 +2901,7 @@ class H501_ValidationRequest : public PASN_Sequence
     H501_UsageSpecification m_usageSpec;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2932,7 +2932,7 @@ class H501_ValidationConfirmation : public PASN_Sequence
     H501_UsageSpecification m_usageSpec;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2974,7 +2974,7 @@ class H501_RouteInformation : public PASN_Sequence
     H501_ArrayOf_CircuitIdentifier m_supportedCircuits;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3005,7 +3005,7 @@ class H501_Descriptor : public PASN_Sequence
     H225_GatekeeperIdentifier m_gatekeeperID;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;

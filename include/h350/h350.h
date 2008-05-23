@@ -35,6 +35,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2008/01/05 12:05:53  shorne
+ * small code tidy up
+ *
  * Revision 1.4  2008/01/05 11:36:01  shorne
  * More Fixes for Linux
  *
@@ -69,22 +72,22 @@ class H350_Session   : public PLDAPSession
      typedef std::list<PLDAPSchema> LDAP_Record;
      typedef std::map<PString,LDAP_Record> LDAP_RecordList;
 
-	 BOOL Open(const PString & hostname, WORD port = 389);
+	 PBoolean Open(const PString & hostname, WORD port = 389);
 
-	 BOOL Login(const PString & who, const PString & passwd, PLDAPSession::AuthenticationMethod authMethod=AuthSimple);
+	 PBoolean Login(const PString & who, const PString & passwd, PLDAPSession::AuthenticationMethod authMethod=AuthSimple);
 
 	 void NewRecord(LDAP_Record & rec);
 
-	 BOOL SetAttribute(LDAP_Record & record,const PString & attrib, const PString & value);
-     BOOL SetAttribute(LDAP_Record & record,const PString & attrib, const PBYTEArray & value);
+	 PBoolean SetAttribute(LDAP_Record & record,const PString & attrib, const PString & value);
+     PBoolean SetAttribute(LDAP_Record & record,const PString & attrib, const PBYTEArray & value);
 
- 	 BOOL GetAttribute(LDAP_Record & record,const PString & attrib, PString & value);
-	 BOOL GetAttribute(LDAP_Record & record,const PString & attrib, PBYTEArray & value);
+ 	 PBoolean GetAttribute(LDAP_Record & record,const PString & attrib, PString & value);
+	 PBoolean GetAttribute(LDAP_Record & record,const PString & attrib, PBYTEArray & value);
 
-	 BOOL PostNew(const PString & dn, const LDAP_Record & record);
-	 BOOL PostUpdate(const PString & dn, const LDAP_Record & record);
+	 PBoolean PostNew(const PString & dn, const LDAP_Record & record);
+	 PBoolean PostUpdate(const PString & dn, const LDAP_Record & record);
 
-	 BOOL Delete() { return FALSE; }
+	 PBoolean Delete() { return FALSE; }
 
 	 int Search(const PString & base, 
 		         const PString & filter, 

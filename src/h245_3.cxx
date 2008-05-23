@@ -57,7 +57,7 @@ PINDEX H245_FECData_rfc2733_pktMode_rfc2733diffport::GetDataLength() const
 }
 
 
-BOOL H245_FECData_rfc2733_pktMode_rfc2733diffport::Decode(PASN_Stream & strm)
+PBoolean H245_FECData_rfc2733_pktMode_rfc2733diffport::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -153,7 +153,7 @@ H245_DepFECMode_rfc2733Mode_mode_separateStream::operator const H245_DepFECMode_
 }
 
 
-BOOL H245_DepFECMode_rfc2733Mode_mode_separateStream::CreateObject()
+PBoolean H245_DepFECMode_rfc2733Mode_mode_separateStream::CreateObject()
 {
   switch (tag) {
     case e_differentPort :
@@ -199,7 +199,7 @@ H245_MultilinkResponse_addConnection_responseCode_rejected::H245_MultilinkRespon
 }
 
 
-BOOL H245_MultilinkResponse_addConnection_responseCode_rejected::CreateObject()
+PBoolean H245_MultilinkResponse_addConnection_responseCode_rejected::CreateObject()
 {
   choice = (tag <= e_userRejected) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -238,7 +238,7 @@ H245_MiscellaneousCommand_type_progressiveRefinementStart_repeatCount::H245_Misc
 }
 
 
-BOOL H245_MiscellaneousCommand_type_progressiveRefinementStart_repeatCount::CreateObject()
+PBoolean H245_MiscellaneousCommand_type_progressiveRefinementStart_repeatCount::CreateObject()
 {
   choice = (tag <= e_doContinuousIndependentProgressions) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -276,7 +276,7 @@ H245_NewATMVCCommand_aal_aal1_clockRecovery::H245_NewATMVCCommand_aal_aal1_clock
 }
 
 
-BOOL H245_NewATMVCCommand_aal_aal1_clockRecovery::CreateObject()
+PBoolean H245_NewATMVCCommand_aal_aal1_clockRecovery::CreateObject()
 {
   choice = (tag <= e_adaptiveClockRecovery) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -315,7 +315,7 @@ H245_NewATMVCCommand_aal_aal1_errorCorrection::H245_NewATMVCCommand_aal_aal1_err
 }
 
 
-BOOL H245_NewATMVCCommand_aal_aal1_errorCorrection::CreateObject()
+PBoolean H245_NewATMVCCommand_aal_aal1_errorCorrection::CreateObject()
 {
   choice = (tag <= e_errorCorrectionOnly) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -353,7 +353,7 @@ H245_NewATMVCIndication_aal_aal1_clockRecovery::H245_NewATMVCIndication_aal_aal1
 }
 
 
-BOOL H245_NewATMVCIndication_aal_aal1_clockRecovery::CreateObject()
+PBoolean H245_NewATMVCIndication_aal_aal1_clockRecovery::CreateObject()
 {
   choice = (tag <= e_adaptiveClockRecovery) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -392,7 +392,7 @@ H245_NewATMVCIndication_aal_aal1_errorCorrection::H245_NewATMVCIndication_aal_aa
 }
 
 
-BOOL H245_NewATMVCIndication_aal_aal1_errorCorrection::CreateObject()
+PBoolean H245_NewATMVCIndication_aal_aal1_errorCorrection::CreateObject()
 {
   choice = (tag <= e_errorCorrectionOnly) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -461,7 +461,7 @@ PINDEX H245_DepFECData_rfc2733_mode_separateStream_differentPort::GetDataLength(
 }
 
 
-BOOL H245_DepFECData_rfc2733_mode_separateStream_differentPort::Decode(PASN_Stream & strm)
+PBoolean H245_DepFECData_rfc2733_mode_separateStream_differentPort::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -542,7 +542,7 @@ PINDEX H245_DepFECData_rfc2733_mode_separateStream_samePort::GetDataLength() con
 }
 
 
-BOOL H245_DepFECData_rfc2733_mode_separateStream_samePort::Decode(PASN_Stream & strm)
+PBoolean H245_DepFECData_rfc2733_mode_separateStream_samePort::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -626,7 +626,7 @@ PINDEX H245_DepFECMode_rfc2733Mode_mode_separateStream_differentPort::GetDataLen
 }
 
 
-BOOL H245_DepFECMode_rfc2733Mode_mode_separateStream_differentPort::Decode(PASN_Stream & strm)
+PBoolean H245_DepFECMode_rfc2733Mode_mode_separateStream_differentPort::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -706,7 +706,7 @@ PINDEX H245_DepFECMode_rfc2733Mode_mode_separateStream_samePort::GetDataLength()
 }
 
 
-BOOL H245_DepFECMode_rfc2733Mode_mode_separateStream_samePort::Decode(PASN_Stream & strm)
+PBoolean H245_DepFECMode_rfc2733Mode_mode_separateStream_samePort::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -795,7 +795,7 @@ PINDEX H245_GenericMessage::GetDataLength() const
 }
 
 
-BOOL H245_GenericMessage::Decode(PASN_Stream & strm)
+PBoolean H245_GenericMessage::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -902,7 +902,7 @@ PINDEX H245_NonStandardParameter::GetDataLength() const
 }
 
 
-BOOL H245_NonStandardParameter::Decode(PASN_Stream & strm)
+PBoolean H245_NonStandardParameter::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -981,7 +981,7 @@ PINDEX H245_MasterSlaveDeterminationAck::GetDataLength() const
 }
 
 
-BOOL H245_MasterSlaveDeterminationAck::Decode(PASN_Stream & strm)
+PBoolean H245_MasterSlaveDeterminationAck::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1057,7 +1057,7 @@ PINDEX H245_MasterSlaveDeterminationReject::GetDataLength() const
 }
 
 
-BOOL H245_MasterSlaveDeterminationReject::Decode(PASN_Stream & strm)
+PBoolean H245_MasterSlaveDeterminationReject::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1159,7 +1159,7 @@ PINDEX H245_TerminalCapabilitySet::GetDataLength() const
 }
 
 
-BOOL H245_TerminalCapabilitySet::Decode(PASN_Stream & strm)
+PBoolean H245_TerminalCapabilitySet::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1259,7 +1259,7 @@ PINDEX H245_CapabilityTableEntry::GetDataLength() const
 }
 
 
-BOOL H245_CapabilityTableEntry::Decode(PASN_Stream & strm)
+PBoolean H245_CapabilityTableEntry::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1346,7 +1346,7 @@ PINDEX H245_CapabilityDescriptor::GetDataLength() const
 }
 
 
-BOOL H245_CapabilityDescriptor::Decode(PASN_Stream & strm)
+PBoolean H245_CapabilityDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1428,7 +1428,7 @@ PINDEX H245_TerminalCapabilitySetAck::GetDataLength() const
 }
 
 
-BOOL H245_TerminalCapabilitySetAck::Decode(PASN_Stream & strm)
+PBoolean H245_TerminalCapabilitySetAck::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1513,7 +1513,7 @@ PINDEX H245_TerminalCapabilitySetReject::GetDataLength() const
 }
 
 
-BOOL H245_TerminalCapabilitySetReject::Decode(PASN_Stream & strm)
+PBoolean H245_TerminalCapabilitySetReject::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1579,7 +1579,7 @@ PINDEX H245_TerminalCapabilitySetRelease::GetDataLength() const
 }
 
 
-BOOL H245_TerminalCapabilitySetRelease::Decode(PASN_Stream & strm)
+PBoolean H245_TerminalCapabilitySetRelease::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1660,7 +1660,7 @@ PINDEX H245_H222Capability::GetDataLength() const
 }
 
 
-BOOL H245_H222Capability::Decode(PASN_Stream & strm)
+PBoolean H245_H222Capability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1809,7 +1809,7 @@ PINDEX H245_H223Capability::GetDataLength() const
 }
 
 
-BOOL H245_H223Capability::Decode(PASN_Stream & strm)
+PBoolean H245_H223Capability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2001,7 +2001,7 @@ PINDEX H245_V76Capability::GetDataLength() const
 }
 
 
-BOOL H245_V76Capability::Decode(PASN_Stream & strm)
+PBoolean H245_V76Capability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2122,7 +2122,7 @@ PINDEX H245_MediaPacketizationCapability::GetDataLength() const
 }
 
 
-BOOL H245_MediaPacketizationCapability::Decode(PASN_Stream & strm)
+PBoolean H245_MediaPacketizationCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2238,7 +2238,7 @@ PINDEX H245_RSVPParameters::GetDataLength() const
 }
 
 
-BOOL H245_RSVPParameters::Decode(PASN_Stream & strm)
+PBoolean H245_RSVPParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2337,7 +2337,7 @@ PINDEX H245_ServicePriorityValue::GetDataLength() const
 }
 
 
-BOOL H245_ServicePriorityValue::Decode(PASN_Stream & strm)
+PBoolean H245_ServicePriorityValue::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2426,7 +2426,7 @@ PINDEX H245_ServicePriority::GetDataLength() const
 }
 
 
-BOOL H245_ServicePriority::Decode(PASN_Stream & strm)
+PBoolean H245_ServicePriority::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2512,7 +2512,7 @@ PINDEX H245_AuthorizationParameters::GetDataLength() const
 }
 
 
-BOOL H245_AuthorizationParameters::Decode(PASN_Stream & strm)
+PBoolean H245_AuthorizationParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2599,7 +2599,7 @@ PINDEX H245_QOSDescriptor::GetDataLength() const
 }
 
 
-BOOL H245_QOSDescriptor::Decode(PASN_Stream & strm)
+PBoolean H245_QOSDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2712,7 +2712,7 @@ PINDEX H245_GenericTransportParameters::GetDataLength() const
 }
 
 
-BOOL H245_GenericTransportParameters::Decode(PASN_Stream & strm)
+PBoolean H245_GenericTransportParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2832,7 +2832,7 @@ PINDEX H245_QOSCapability::GetDataLength() const
 }
 
 
-BOOL H245_QOSCapability::Decode(PASN_Stream & strm)
+PBoolean H245_QOSCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2951,7 +2951,7 @@ PINDEX H245_TransportCapability::GetDataLength() const
 }
 
 
-BOOL H245_TransportCapability::Decode(PASN_Stream & strm)
+PBoolean H245_TransportCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3047,7 +3047,7 @@ PINDEX H245_RedundancyEncodingCapability::GetDataLength() const
 }
 
 
-BOOL H245_RedundancyEncodingCapability::Decode(PASN_Stream & strm)
+PBoolean H245_RedundancyEncodingCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3146,7 +3146,7 @@ PINDEX H245_RTPH263VideoRedundancyEncoding::GetDataLength() const
 }
 
 
-BOOL H245_RTPH263VideoRedundancyEncoding::Decode(PASN_Stream & strm)
+PBoolean H245_RTPH263VideoRedundancyEncoding::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3237,7 +3237,7 @@ PINDEX H245_RTPH263VideoRedundancyFrameMapping::GetDataLength() const
 }
 
 
-BOOL H245_RTPH263VideoRedundancyFrameMapping::Decode(PASN_Stream & strm)
+PBoolean H245_RTPH263VideoRedundancyFrameMapping::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3324,7 +3324,7 @@ PINDEX H245_MultipointCapability::GetDataLength() const
 }
 
 
-BOOL H245_MultipointCapability::Decode(PASN_Stream & strm)
+PBoolean H245_MultipointCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3438,7 +3438,7 @@ PINDEX H245_MediaDistributionCapability::GetDataLength() const
 }
 
 
-BOOL H245_MediaDistributionCapability::Decode(PASN_Stream & strm)
+PBoolean H245_MediaDistributionCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3543,7 +3543,7 @@ PINDEX H245_ExtendedVideoCapability::GetDataLength() const
 }
 
 
-BOOL H245_ExtendedVideoCapability::Decode(PASN_Stream & strm)
+PBoolean H245_ExtendedVideoCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3644,7 +3644,7 @@ PINDEX H245_EnhancementLayerInfo::GetDataLength() const
 }
 
 
-BOOL H245_EnhancementLayerInfo::Decode(PASN_Stream & strm)
+PBoolean H245_EnhancementLayerInfo::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3818,7 +3818,7 @@ PINDEX H245_H263ModeComboFlags::GetDataLength() const
 }
 
 
-BOOL H245_H263ModeComboFlags::Decode(PASN_Stream & strm)
+PBoolean H245_H263ModeComboFlags::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3971,7 +3971,7 @@ PINDEX H245_G7231AnnexCCapability::GetDataLength() const
 }
 
 
-BOOL H245_G7231AnnexCCapability::Decode(PASN_Stream & strm)
+PBoolean H245_G7231AnnexCCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4059,7 +4059,7 @@ PINDEX H245_DataApplicationCapability::GetDataLength() const
 }
 
 
-BOOL H245_DataApplicationCapability::Decode(PASN_Stream & strm)
+PBoolean H245_DataApplicationCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4150,7 +4150,7 @@ PINDEX H245_T38FaxUdpOptions::GetDataLength() const
 }
 
 
-BOOL H245_T38FaxUdpOptions::Decode(PASN_Stream & strm)
+PBoolean H245_T38FaxUdpOptions::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4238,7 +4238,7 @@ PINDEX H245_AuthenticationCapability::GetDataLength() const
 }
 
 
-BOOL H245_AuthenticationCapability::Decode(PASN_Stream & strm)
+PBoolean H245_AuthenticationCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4320,7 +4320,7 @@ PINDEX H245_IntegrityCapability::GetDataLength() const
 }
 
 
-BOOL H245_IntegrityCapability::Decode(PASN_Stream & strm)
+PBoolean H245_IntegrityCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4408,7 +4408,7 @@ PINDEX H245_ConferenceCapability::GetDataLength() const
 }
 
 
-BOOL H245_ConferenceCapability::Decode(PASN_Stream & strm)
+PBoolean H245_ConferenceCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4525,7 +4525,7 @@ PINDEX H245_GenericCapability::GetDataLength() const
 }
 
 
-BOOL H245_GenericCapability::Decode(PASN_Stream & strm)
+PBoolean H245_GenericCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4631,7 +4631,7 @@ PINDEX H245_GenericParameter::GetDataLength() const
 }
 
 
-BOOL H245_GenericParameter::Decode(PASN_Stream & strm)
+PBoolean H245_GenericParameter::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4725,7 +4725,7 @@ PINDEX H245_MultiplexedStreamCapability::GetDataLength() const
 }
 
 
-BOOL H245_MultiplexedStreamCapability::Decode(PASN_Stream & strm)
+PBoolean H245_MultiplexedStreamCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4809,7 +4809,7 @@ PINDEX H245_MultiplePayloadStreamCapability::GetDataLength() const
 }
 
 
-BOOL H245_MultiplePayloadStreamCapability::Decode(PASN_Stream & strm)
+PBoolean H245_MultiplePayloadStreamCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4897,7 +4897,7 @@ PINDEX H245_FECCapability::GetDataLength() const
 }
 
 
-BOOL H245_FECCapability::Decode(PASN_Stream & strm)
+PBoolean H245_FECCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5000,7 +5000,7 @@ PINDEX H245_NetworkAccessParameters::GetDataLength() const
 }
 
 
-BOOL H245_NetworkAccessParameters::Decode(PASN_Stream & strm)
+PBoolean H245_NetworkAccessParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5097,7 +5097,7 @@ PINDEX H245_Q2931Address::GetDataLength() const
 }
 
 
-BOOL H245_Q2931Address::Decode(PASN_Stream & strm)
+PBoolean H245_Q2931Address::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5181,7 +5181,7 @@ PINDEX H245_H223LogicalChannelParameters::GetDataLength() const
 }
 
 
-BOOL H245_H223LogicalChannelParameters::Decode(PASN_Stream & strm)
+PBoolean H245_H223LogicalChannelParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5288,7 +5288,7 @@ PINDEX H245_H223AL1MParameters::GetDataLength() const
 }
 
 
-BOOL H245_H223AL1MParameters::Decode(PASN_Stream & strm)
+PBoolean H245_H223AL1MParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5389,7 +5389,7 @@ PINDEX H245_H223AL2MParameters::GetDataLength() const
 }
 
 
-BOOL H245_H223AL2MParameters::Decode(PASN_Stream & strm)
+PBoolean H245_H223AL2MParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5488,7 +5488,7 @@ PINDEX H245_H223AL3MParameters::GetDataLength() const
 }
 
 
-BOOL H245_H223AL3MParameters::Decode(PASN_Stream & strm)
+PBoolean H245_H223AL3MParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5584,7 +5584,7 @@ PINDEX H245_H223AnnexCArqParameters::GetDataLength() const
 }
 
 
-BOOL H245_H223AnnexCArqParameters::Decode(PASN_Stream & strm)
+PBoolean H245_H223AnnexCArqParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5672,7 +5672,7 @@ PINDEX H245_V76HDLCParameters::GetDataLength() const
 }
 
 
-BOOL H245_V76HDLCParameters::Decode(PASN_Stream & strm)
+PBoolean H245_V76HDLCParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5761,7 +5761,7 @@ PINDEX H245_RTPPayloadType::GetDataLength() const
 }
 
 
-BOOL H245_RTPPayloadType::Decode(PASN_Stream & strm)
+PBoolean H245_RTPPayloadType::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5841,7 +5841,7 @@ PINDEX H245_MultiplePayloadStream::GetDataLength() const
 }
 
 
-BOOL H245_MultiplePayloadStream::Decode(PASN_Stream & strm)
+PBoolean H245_MultiplePayloadStream::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5938,7 +5938,7 @@ PINDEX H245_EncryptionSync::GetDataLength() const
 }
 
 
-BOOL H245_EncryptionSync::Decode(PASN_Stream & strm)
+PBoolean H245_EncryptionSync::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6034,7 +6034,7 @@ PINDEX H245_OpenLogicalChannelReject::GetDataLength() const
 }
 
 
-BOOL H245_OpenLogicalChannelReject::Decode(PASN_Stream & strm)
+PBoolean H245_OpenLogicalChannelReject::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6118,7 +6118,7 @@ PINDEX H245_OpenLogicalChannelConfirm::GetDataLength() const
 }
 
 
-BOOL H245_OpenLogicalChannelConfirm::Decode(PASN_Stream & strm)
+PBoolean H245_OpenLogicalChannelConfirm::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6231,7 +6231,7 @@ PINDEX H245_H2250LogicalChannelAckParameters::GetDataLength() const
 }
 
 
-BOOL H245_H2250LogicalChannelAckParameters::Decode(PASN_Stream & strm)
+PBoolean H245_H2250LogicalChannelAckParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6337,7 +6337,7 @@ PINDEX H245_CloseLogicalChannel::GetDataLength() const
 }
 
 
-BOOL H245_CloseLogicalChannel::Decode(PASN_Stream & strm)
+PBoolean H245_CloseLogicalChannel::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6424,7 +6424,7 @@ PINDEX H245_RequestChannelClose::GetDataLength() const
 }
 
 
-BOOL H245_RequestChannelClose::Decode(PASN_Stream & strm)
+PBoolean H245_RequestChannelClose::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6510,7 +6510,7 @@ PINDEX H245_RequestChannelCloseReject::GetDataLength() const
 }
 
 
-BOOL H245_RequestChannelCloseReject::Decode(PASN_Stream & strm)
+PBoolean H245_RequestChannelCloseReject::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6594,7 +6594,7 @@ PINDEX H245_MultiplexEntrySend::GetDataLength() const
 }
 
 
-BOOL H245_MultiplexEntrySend::Decode(PASN_Stream & strm)
+PBoolean H245_MultiplexEntrySend::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6680,7 +6680,7 @@ PINDEX H245_MultiplexEntryDescriptor::GetDataLength() const
 }
 
 
-BOOL H245_MultiplexEntryDescriptor::Decode(PASN_Stream & strm)
+PBoolean H245_MultiplexEntryDescriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6764,7 +6764,7 @@ PINDEX H245_MultiplexElement::GetDataLength() const
 }
 
 
-BOOL H245_MultiplexElement::Decode(PASN_Stream & strm)
+PBoolean H245_MultiplexElement::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6848,7 +6848,7 @@ PINDEX H245_MultiplexEntrySendAck::GetDataLength() const
 }
 
 
-BOOL H245_MultiplexEntrySendAck::Decode(PASN_Stream & strm)
+PBoolean H245_MultiplexEntrySendAck::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6932,7 +6932,7 @@ PINDEX H245_MultiplexEntrySendReject::GetDataLength() const
 }
 
 
-BOOL H245_MultiplexEntrySendReject::Decode(PASN_Stream & strm)
+PBoolean H245_MultiplexEntrySendReject::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7015,7 +7015,7 @@ PINDEX H245_MultiplexEntryRejectionDescriptions::GetDataLength() const
 }
 
 
-BOOL H245_MultiplexEntryRejectionDescriptions::Decode(PASN_Stream & strm)
+PBoolean H245_MultiplexEntryRejectionDescriptions::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7095,7 +7095,7 @@ PINDEX H245_MultiplexEntrySendRelease::GetDataLength() const
 }
 
 
-BOOL H245_MultiplexEntrySendRelease::Decode(PASN_Stream & strm)
+PBoolean H245_MultiplexEntrySendRelease::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7172,7 +7172,7 @@ PINDEX H245_RequestMultiplexEntry::GetDataLength() const
 }
 
 
-BOOL H245_RequestMultiplexEntry::Decode(PASN_Stream & strm)
+PBoolean H245_RequestMultiplexEntry::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7249,7 +7249,7 @@ PINDEX H245_RequestMultiplexEntryAck::GetDataLength() const
 }
 
 
-BOOL H245_RequestMultiplexEntryAck::Decode(PASN_Stream & strm)
+PBoolean H245_RequestMultiplexEntryAck::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7331,7 +7331,7 @@ PINDEX H245_RequestMultiplexEntryReject::GetDataLength() const
 }
 
 
-BOOL H245_RequestMultiplexEntryReject::Decode(PASN_Stream & strm)
+PBoolean H245_RequestMultiplexEntryReject::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7414,7 +7414,7 @@ PINDEX H245_RequestMultiplexEntryRejectionDescriptions::GetDataLength() const
 }
 
 
-BOOL H245_RequestMultiplexEntryRejectionDescriptions::Decode(PASN_Stream & strm)
+PBoolean H245_RequestMultiplexEntryRejectionDescriptions::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7494,7 +7494,7 @@ PINDEX H245_RequestMultiplexEntryRelease::GetDataLength() const
 }
 
 
-BOOL H245_RequestMultiplexEntryRelease::Decode(PASN_Stream & strm)
+PBoolean H245_RequestMultiplexEntryRelease::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7575,7 +7575,7 @@ PINDEX H245_RequestMode::GetDataLength() const
 }
 
 
-BOOL H245_RequestMode::Decode(PASN_Stream & strm)
+PBoolean H245_RequestMode::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7658,7 +7658,7 @@ PINDEX H245_RequestModeAck::GetDataLength() const
 }
 
 
-BOOL H245_RequestModeAck::Decode(PASN_Stream & strm)
+PBoolean H245_RequestModeAck::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7741,7 +7741,7 @@ PINDEX H245_RequestModeReject::GetDataLength() const
 }
 
 
-BOOL H245_RequestModeReject::Decode(PASN_Stream & strm)
+PBoolean H245_RequestModeReject::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7820,7 +7820,7 @@ PINDEX H245_RedundancyEncodingDTModeElement::GetDataLength() const
 }
 
 
-BOOL H245_RedundancyEncodingDTModeElement::Decode(PASN_Stream & strm)
+PBoolean H245_RedundancyEncodingDTModeElement::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7896,7 +7896,7 @@ PINDEX H245_MultiplePayloadStreamMode::GetDataLength() const
 }
 
 
-BOOL H245_MultiplePayloadStreamMode::Decode(PASN_Stream & strm)
+PBoolean H245_MultiplePayloadStreamMode::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7984,7 +7984,7 @@ PINDEX H245_FECMode::GetDataLength() const
 }
 
 
-BOOL H245_FECMode::Decode(PASN_Stream & strm)
+PBoolean H245_FECMode::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8072,7 +8072,7 @@ PINDEX H245_H223ModeParameters::GetDataLength() const
 }
 
 
-BOOL H245_H223ModeParameters::Decode(PASN_Stream & strm)
+PBoolean H245_H223ModeParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8157,7 +8157,7 @@ PINDEX H245_RedundancyEncodingMode::GetDataLength() const
 }
 
 
-BOOL H245_RedundancyEncodingMode::Decode(PASN_Stream & strm)
+PBoolean H245_RedundancyEncodingMode::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8246,7 +8246,7 @@ PINDEX H245_H261VideoMode::GetDataLength() const
 }
 
 
-BOOL H245_H261VideoMode::Decode(PASN_Stream & strm)
+PBoolean H245_H261VideoMode::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8370,7 +8370,7 @@ PINDEX H245_H262VideoMode::GetDataLength() const
 }
 
 
-BOOL H245_H262VideoMode::Decode(PASN_Stream & strm)
+PBoolean H245_H262VideoMode::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8483,7 +8483,7 @@ PINDEX H245_IS11172AudioMode::GetDataLength() const
 }
 
 
-BOOL H245_IS11172AudioMode::Decode(PASN_Stream & strm)
+PBoolean H245_IS11172AudioMode::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8589,7 +8589,7 @@ PINDEX H245_IS13818AudioMode::GetDataLength() const
 }
 
 
-BOOL H245_IS13818AudioMode::Decode(PASN_Stream & strm)
+PBoolean H245_IS13818AudioMode::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8689,7 +8689,7 @@ PINDEX H245_G7231AnnexCMode::GetDataLength() const
 }
 
 
-BOOL H245_G7231AnnexCMode::Decode(PASN_Stream & strm)
+PBoolean H245_G7231AnnexCMode::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8776,7 +8776,7 @@ PINDEX H245_DataMode::GetDataLength() const
 }
 
 
-BOOL H245_DataMode::Decode(PASN_Stream & strm)
+PBoolean H245_DataMode::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8855,7 +8855,7 @@ PINDEX H245_MaintenanceLoopRequest::GetDataLength() const
 }
 
 
-BOOL H245_MaintenanceLoopRequest::Decode(PASN_Stream & strm)
+PBoolean H245_MaintenanceLoopRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8931,7 +8931,7 @@ PINDEX H245_MaintenanceLoopAck::GetDataLength() const
 }
 
 
-BOOL H245_MaintenanceLoopAck::Decode(PASN_Stream & strm)
+PBoolean H245_MaintenanceLoopAck::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9011,7 +9011,7 @@ PINDEX H245_MaintenanceLoopReject::GetDataLength() const
 }
 
 
-BOOL H245_MaintenanceLoopReject::Decode(PASN_Stream & strm)
+PBoolean H245_MaintenanceLoopReject::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9091,7 +9091,7 @@ PINDEX H245_CommunicationModeCommand::GetDataLength() const
 }
 
 
-BOOL H245_CommunicationModeCommand::Decode(PASN_Stream & strm)
+PBoolean H245_CommunicationModeCommand::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9171,7 +9171,7 @@ PINDEX H245_TerminalLabel::GetDataLength() const
 }
 
 
-BOOL H245_TerminalLabel::Decode(PASN_Stream & strm)
+PBoolean H245_TerminalLabel::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9250,7 +9250,7 @@ PINDEX H245_RequestAllTerminalIDsResponse::GetDataLength() const
 }
 
 
-BOOL H245_RequestAllTerminalIDsResponse::Decode(PASN_Stream & strm)
+PBoolean H245_RequestAllTerminalIDsResponse::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9330,7 +9330,7 @@ PINDEX H245_TerminalInformation::GetDataLength() const
 }
 
 
-BOOL H245_TerminalInformation::Decode(PASN_Stream & strm)
+PBoolean H245_TerminalInformation::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9422,7 +9422,7 @@ PINDEX H245_DialingInformationNumber::GetDataLength() const
 }
 
 
-BOOL H245_DialingInformationNumber::Decode(PASN_Stream & strm)
+PBoolean H245_DialingInformationNumber::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9519,7 +9519,7 @@ PINDEX H245_LogicalChannelRateReject::GetDataLength() const
 }
 
 
-BOOL H245_LogicalChannelRateReject::Decode(PASN_Stream & strm)
+PBoolean H245_LogicalChannelRateReject::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9609,7 +9609,7 @@ PINDEX H245_FlowControlCommand::GetDataLength() const
 }
 
 
-BOOL H245_FlowControlCommand::Decode(PASN_Stream & strm)
+PBoolean H245_FlowControlCommand::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9694,7 +9694,7 @@ PINDEX H245_MiscellaneousCommand::GetDataLength() const
 }
 
 
-BOOL H245_MiscellaneousCommand::Decode(PASN_Stream & strm)
+PBoolean H245_MiscellaneousCommand::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9786,7 +9786,7 @@ PINDEX H245_MobileMultilinkReconfigurationCommand::GetDataLength() const
 }
 
 
-BOOL H245_MobileMultilinkReconfigurationCommand::Decode(PASN_Stream & strm)
+PBoolean H245_MobileMultilinkReconfigurationCommand::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9874,7 +9874,7 @@ PINDEX H245_FunctionNotSupported::GetDataLength() const
 }
 
 
-BOOL H245_FunctionNotSupported::Decode(PASN_Stream & strm)
+PBoolean H245_FunctionNotSupported::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9958,7 +9958,7 @@ PINDEX H245_MiscellaneousIndication::GetDataLength() const
 }
 
 
-BOOL H245_MiscellaneousIndication::Decode(PASN_Stream & strm)
+PBoolean H245_MiscellaneousIndication::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10061,7 +10061,7 @@ PINDEX H245_JitterIndication::GetDataLength() const
 }
 
 
-BOOL H245_JitterIndication::Decode(PASN_Stream & strm)
+PBoolean H245_JitterIndication::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10155,7 +10155,7 @@ PINDEX H245_FlowControlIndication::GetDataLength() const
 }
 
 
-BOOL H245_FlowControlIndication::Decode(PASN_Stream & strm)
+PBoolean H245_FlowControlIndication::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10234,7 +10234,7 @@ PINDEX H245_VCCapability_availableBitRates::GetDataLength() const
 }
 
 
-BOOL H245_VCCapability_availableBitRates::Decode(PASN_Stream & strm)
+PBoolean H245_VCCapability_availableBitRates::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10347,7 +10347,7 @@ PINDEX H245_VCCapability_aal1ViaGateway::GetDataLength() const
 }
 
 
-BOOL H245_VCCapability_aal1ViaGateway::Decode(PASN_Stream & strm)
+PBoolean H245_VCCapability_aal1ViaGateway::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10452,7 +10452,7 @@ PINDEX H245_RefPictureSelection_enhancedReferencePicSelect::GetDataLength() cons
 }
 
 
-BOOL H245_RefPictureSelection_enhancedReferencePicSelect::Decode(PASN_Stream & strm)
+PBoolean H245_RefPictureSelection_enhancedReferencePicSelect::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10538,7 +10538,7 @@ PINDEX H245_CustomPictureFormat_mPI::GetDataLength() const
 }
 
 
-BOOL H245_CustomPictureFormat_mPI::Decode(PASN_Stream & strm)
+PBoolean H245_CustomPictureFormat_mPI::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10623,7 +10623,7 @@ PINDEX H245_DepFECCapability_rfc2733::GetDataLength() const
 }
 
 
-BOOL H245_DepFECCapability_rfc2733::Decode(PASN_Stream & strm)
+PBoolean H245_DepFECCapability_rfc2733::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10717,7 +10717,7 @@ PINDEX H245_OpenLogicalChannel_forwardLogicalChannelParameters::GetDataLength() 
 }
 
 
-BOOL H245_OpenLogicalChannel_forwardLogicalChannelParameters::Decode(PASN_Stream & strm)
+PBoolean H245_OpenLogicalChannel_forwardLogicalChannelParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10816,7 +10816,7 @@ PINDEX H245_OpenLogicalChannel_reverseLogicalChannelParameters::GetDataLength() 
 }
 
 
-BOOL H245_OpenLogicalChannel_reverseLogicalChannelParameters::Decode(PASN_Stream & strm)
+PBoolean H245_OpenLogicalChannel_reverseLogicalChannelParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10910,7 +10910,7 @@ PINDEX H245_RedundancyEncoding_rtpRedundancyEncoding::GetDataLength() const
 }
 
 
-BOOL H245_RedundancyEncoding_rtpRedundancyEncoding::Decode(PASN_Stream & strm)
+PBoolean H245_RedundancyEncoding_rtpRedundancyEncoding::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10991,7 +10991,7 @@ PINDEX H245_DepFECData_rfc2733::GetDataLength() const
 }
 
 
-BOOL H245_DepFECData_rfc2733::Decode(PASN_Stream & strm)
+PBoolean H245_DepFECData_rfc2733::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11078,7 +11078,7 @@ PINDEX H245_FECData_rfc2733::GetDataLength() const
 }
 
 
-BOOL H245_FECData_rfc2733::Decode(PASN_Stream & strm)
+PBoolean H245_FECData_rfc2733::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11175,7 +11175,7 @@ PINDEX H245_UnicastAddress_iPSourceRouteAddress::GetDataLength() const
 }
 
 
-BOOL H245_UnicastAddress_iPSourceRouteAddress::Decode(PASN_Stream & strm)
+PBoolean H245_UnicastAddress_iPSourceRouteAddress::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11275,7 +11275,7 @@ PINDEX H245_OpenLogicalChannelAck_reverseLogicalChannelParameters::GetDataLength
 }
 
 
-BOOL H245_OpenLogicalChannelAck_reverseLogicalChannelParameters::Decode(PASN_Stream & strm)
+PBoolean H245_OpenLogicalChannelAck_reverseLogicalChannelParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11362,7 +11362,7 @@ PINDEX H245_DepFECMode_rfc2733Mode::GetDataLength() const
 }
 
 
-BOOL H245_DepFECMode_rfc2733Mode::Decode(PASN_Stream & strm)
+PBoolean H245_DepFECMode_rfc2733Mode::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11453,7 +11453,7 @@ PINDEX H245_ConferenceRequest_requestTerminalCertificate::GetDataLength() const
 }
 
 
-BOOL H245_ConferenceRequest_requestTerminalCertificate::Decode(PASN_Stream & strm)
+PBoolean H245_ConferenceRequest_requestTerminalCertificate::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11542,7 +11542,7 @@ PINDEX H245_ConferenceResponse_mCTerminalIDResponse::GetDataLength() const
 }
 
 
-BOOL H245_ConferenceResponse_mCTerminalIDResponse::Decode(PASN_Stream & strm)
+PBoolean H245_ConferenceResponse_mCTerminalIDResponse::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11625,7 +11625,7 @@ PINDEX H245_ConferenceResponse_terminalIDResponse::GetDataLength() const
 }
 
 
-BOOL H245_ConferenceResponse_terminalIDResponse::Decode(PASN_Stream & strm)
+PBoolean H245_ConferenceResponse_terminalIDResponse::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11708,7 +11708,7 @@ PINDEX H245_ConferenceResponse_conferenceIDResponse::GetDataLength() const
 }
 
 
-BOOL H245_ConferenceResponse_conferenceIDResponse::Decode(PASN_Stream & strm)
+PBoolean H245_ConferenceResponse_conferenceIDResponse::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11791,7 +11791,7 @@ PINDEX H245_ConferenceResponse_passwordResponse::GetDataLength() const
 }
 
 
-BOOL H245_ConferenceResponse_passwordResponse::Decode(PASN_Stream & strm)
+PBoolean H245_ConferenceResponse_passwordResponse::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11874,7 +11874,7 @@ PINDEX H245_ConferenceResponse_chairTokenOwnerResponse::GetDataLength() const
 }
 
 
-BOOL H245_ConferenceResponse_chairTokenOwnerResponse::Decode(PASN_Stream & strm)
+PBoolean H245_ConferenceResponse_chairTokenOwnerResponse::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11962,7 +11962,7 @@ PINDEX H245_ConferenceResponse_terminalCertificateResponse::GetDataLength() cons
 }
 
 
-BOOL H245_ConferenceResponse_terminalCertificateResponse::Decode(PASN_Stream & strm)
+PBoolean H245_ConferenceResponse_terminalCertificateResponse::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -12043,7 +12043,7 @@ PINDEX H245_MultilinkRequest_maximumHeaderInterval::GetDataLength() const
 }
 
 
-BOOL H245_MultilinkRequest_maximumHeaderInterval::Decode(PASN_Stream & strm)
+PBoolean H245_MultilinkRequest_maximumHeaderInterval::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -12123,7 +12123,7 @@ PINDEX H245_MultilinkResponse_addConnection::GetDataLength() const
 }
 
 
-BOOL H245_MultilinkResponse_addConnection::Decode(PASN_Stream & strm)
+PBoolean H245_MultilinkResponse_addConnection::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -12216,7 +12216,7 @@ PINDEX H245_SendTerminalCapabilitySet_specificRequest::GetDataLength() const
 }
 
 
-BOOL H245_SendTerminalCapabilitySet_specificRequest::Decode(PASN_Stream & strm)
+PBoolean H245_SendTerminalCapabilitySet_specificRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -12304,7 +12304,7 @@ PINDEX H245_EncryptionCommand_encryptionAlgorithmID::GetDataLength() const
 }
 
 
-BOOL H245_EncryptionCommand_encryptionAlgorithmID::Decode(PASN_Stream & strm)
+PBoolean H245_EncryptionCommand_encryptionAlgorithmID::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -12396,7 +12396,7 @@ PINDEX H245_NewATMVCCommand_reverseParameters::GetDataLength() const
 }
 
 
-BOOL H245_NewATMVCCommand_reverseParameters::Decode(PASN_Stream & strm)
+PBoolean H245_NewATMVCCommand_reverseParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -12494,7 +12494,7 @@ PINDEX H245_NewATMVCIndication_reverseParameters::GetDataLength() const
 }
 
 
-BOOL H245_NewATMVCIndication_reverseParameters::Decode(PASN_Stream & strm)
+PBoolean H245_NewATMVCIndication_reverseParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -12603,7 +12603,7 @@ PINDEX H245_UserInputIndication_signal::GetDataLength() const
 }
 
 
-BOOL H245_UserInputIndication_signal::Decode(PASN_Stream & strm)
+PBoolean H245_UserInputIndication_signal::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -12706,7 +12706,7 @@ PINDEX H245_UserInputIndication_signalUpdate::GetDataLength() const
 }
 
 
-BOOL H245_UserInputIndication_signalUpdate::Decode(PASN_Stream & strm)
+PBoolean H245_UserInputIndication_signalUpdate::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -12794,7 +12794,7 @@ PINDEX H245_UserInputIndication_extendedAlphanumeric::GetDataLength() const
 }
 
 
-BOOL H245_UserInputIndication_extendedAlphanumeric::Decode(PASN_Stream & strm)
+PBoolean H245_UserInputIndication_extendedAlphanumeric::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -12882,7 +12882,7 @@ PINDEX H245_V76LogicalChannelParameters_mode_eRM::GetDataLength() const
 }
 
 
-BOOL H245_V76LogicalChannelParameters_mode_eRM::Decode(PASN_Stream & strm)
+PBoolean H245_V76LogicalChannelParameters_mode_eRM::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -12961,7 +12961,7 @@ PINDEX H245_MiscellaneousCommand_type_progressiveRefinementStart::GetDataLength(
 }
 
 
-BOOL H245_MiscellaneousCommand_type_progressiveRefinementStart::Decode(PASN_Stream & strm)
+PBoolean H245_MiscellaneousCommand_type_progressiveRefinementStart::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13043,7 +13043,7 @@ PINDEX H245_MiscellaneousCommand_type_encryptionUpdateCommand::GetDataLength() c
 }
 
 
-BOOL H245_MiscellaneousCommand_type_encryptionUpdateCommand::Decode(PASN_Stream & strm)
+PBoolean H245_MiscellaneousCommand_type_encryptionUpdateCommand::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13135,7 +13135,7 @@ PINDEX H245_NewATMVCCommand_aal_aal1::GetDataLength() const
 }
 
 
-BOOL H245_NewATMVCCommand_aal_aal1::Decode(PASN_Stream & strm)
+PBoolean H245_NewATMVCCommand_aal_aal1::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13232,7 +13232,7 @@ PINDEX H245_NewATMVCIndication_aal_aal1::GetDataLength() const
 }
 
 
-BOOL H245_NewATMVCIndication_aal_aal1::Decode(PASN_Stream & strm)
+PBoolean H245_NewATMVCIndication_aal_aal1::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13317,7 +13317,7 @@ PINDEX H245_NonStandardMessage::GetDataLength() const
 }
 
 
-BOOL H245_NonStandardMessage::Decode(PASN_Stream & strm)
+PBoolean H245_NonStandardMessage::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13415,7 +13415,7 @@ PINDEX H245_VCCapability::GetDataLength() const
 }
 
 
-BOOL H245_VCCapability::Decode(PASN_Stream & strm)
+PBoolean H245_VCCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13544,7 +13544,7 @@ PINDEX H245_H2250Capability::GetDataLength() const
 }
 
 
-BOOL H245_H2250Capability::Decode(PASN_Stream & strm)
+PBoolean H245_H2250Capability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13663,7 +13663,7 @@ PINDEX H245_RefPictureSelection::GetDataLength() const
 }
 
 
-BOOL H245_RefPictureSelection::Decode(PASN_Stream & strm)
+PBoolean H245_RefPictureSelection::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13773,7 +13773,7 @@ PINDEX H245_CustomPictureFormat::GetDataLength() const
 }
 
 
-BOOL H245_CustomPictureFormat::Decode(PASN_Stream & strm)
+PBoolean H245_CustomPictureFormat::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13869,7 +13869,7 @@ PINDEX H245_H263VideoModeCombos::GetDataLength() const
 }
 
 
-BOOL H245_H263VideoModeCombos::Decode(PASN_Stream & strm)
+PBoolean H245_H263VideoModeCombos::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13967,7 +13967,7 @@ PINDEX H245_T38FaxProfile::GetDataLength() const
 }
 
 
-BOOL H245_T38FaxProfile::Decode(PASN_Stream & strm)
+PBoolean H245_T38FaxProfile::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -14077,7 +14077,7 @@ PINDEX H245_EncryptionAuthenticationAndIntegrity::GetDataLength() const
 }
 
 
-BOOL H245_EncryptionAuthenticationAndIntegrity::Decode(PASN_Stream & strm)
+PBoolean H245_EncryptionAuthenticationAndIntegrity::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -14181,7 +14181,7 @@ PINDEX H245_OpenLogicalChannel::GetDataLength() const
 }
 
 
-BOOL H245_OpenLogicalChannel::Decode(PASN_Stream & strm)
+PBoolean H245_OpenLogicalChannel::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -14277,7 +14277,7 @@ PINDEX H245_H235Media::GetDataLength() const
 }
 
 
-BOOL H245_H235Media::Decode(PASN_Stream & strm)
+PBoolean H245_H235Media::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -14372,7 +14372,7 @@ PINDEX H245_V76LogicalChannelParameters::GetDataLength() const
 }
 
 
-BOOL H245_V76LogicalChannelParameters::Decode(PASN_Stream & strm)
+PBoolean H245_V76LogicalChannelParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -14468,7 +14468,7 @@ PINDEX H245_RedundancyEncoding::GetDataLength() const
 }
 
 
-BOOL H245_RedundancyEncoding::Decode(PASN_Stream & strm)
+PBoolean H245_RedundancyEncoding::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -14565,7 +14565,7 @@ PINDEX H245_OpenLogicalChannelAck::GetDataLength() const
 }
 
 
-BOOL H245_OpenLogicalChannelAck::Decode(PASN_Stream & strm)
+PBoolean H245_OpenLogicalChannelAck::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -14661,7 +14661,7 @@ PINDEX H245_H235Mode::GetDataLength() const
 }
 
 
-BOOL H245_H235Mode::Decode(PASN_Stream & strm)
+PBoolean H245_H235Mode::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -14748,7 +14748,7 @@ PINDEX H245_RedundancyEncodingDTMode::GetDataLength() const
 }
 
 
-BOOL H245_RedundancyEncodingDTMode::Decode(PASN_Stream & strm)
+PBoolean H245_RedundancyEncodingDTMode::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -14832,7 +14832,7 @@ PINDEX H245_H2250ModeParameters::GetDataLength() const
 }
 
 
-BOOL H245_H2250ModeParameters::Decode(PASN_Stream & strm)
+PBoolean H245_H2250ModeParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -14969,7 +14969,7 @@ PINDEX H245_CommunicationModeTableEntry::GetDataLength() const
 }
 
 
-BOOL H245_CommunicationModeTableEntry::Decode(PASN_Stream & strm)
+PBoolean H245_CommunicationModeTableEntry::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -15114,7 +15114,7 @@ PINDEX H245_NewATMVCCommand::GetDataLength() const
 }
 
 
-BOOL H245_NewATMVCCommand::Decode(PASN_Stream & strm)
+PBoolean H245_NewATMVCCommand::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -15233,7 +15233,7 @@ PINDEX H245_NewATMVCIndication::GetDataLength() const
 }
 
 
-BOOL H245_NewATMVCIndication::Decode(PASN_Stream & strm)
+PBoolean H245_NewATMVCIndication::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -15331,7 +15331,7 @@ PINDEX H245_DataApplicationCapability_application_t38fax::GetDataLength() const
 }
 
 
-BOOL H245_DataApplicationCapability_application_t38fax::Decode(PASN_Stream & strm)
+PBoolean H245_DataApplicationCapability_application_t38fax::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -15414,7 +15414,7 @@ PINDEX H245_DataMode_application_t38fax::GetDataLength() const
 }
 
 
-BOOL H245_DataMode_application_t38fax::Decode(PASN_Stream & strm)
+PBoolean H245_DataMode_application_t38fax::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -15497,7 +15497,7 @@ PINDEX H245_H235SecurityCapability::GetDataLength() const
 }
 
 
-BOOL H245_H235SecurityCapability::Decode(PASN_Stream & strm)
+PBoolean H245_H235SecurityCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -15707,7 +15707,7 @@ PINDEX H245_H263Options::GetDataLength() const
 }
 
 
-BOOL H245_H263Options::Decode(PASN_Stream & strm)
+PBoolean H245_H263Options::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -15947,7 +15947,7 @@ PINDEX H245_H2250LogicalChannelParameters::GetDataLength() const
 }
 
 
-BOOL H245_H2250LogicalChannelParameters::Decode(PASN_Stream & strm)
+PBoolean H245_H2250LogicalChannelParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -16088,7 +16088,7 @@ PINDEX H245_ModeElement::GetDataLength() const
 }
 
 
-BOOL H245_ModeElement::Decode(PASN_Stream & strm)
+PBoolean H245_ModeElement::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -16211,7 +16211,7 @@ PINDEX H245_H263VideoMode::GetDataLength() const
 }
 
 
-BOOL H245_H263VideoMode::Decode(PASN_Stream & strm)
+PBoolean H245_H263VideoMode::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -16403,7 +16403,7 @@ PINDEX H245_H263VideoCapability::GetDataLength() const
 }
 
 
-BOOL H245_H263VideoCapability::Decode(PASN_Stream & strm)
+PBoolean H245_H263VideoCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -16639,7 +16639,7 @@ PINDEX H245_EnhancementOptions::GetDataLength() const
 }
 
 
-BOOL H245_EnhancementOptions::Decode(PASN_Stream & strm)
+PBoolean H245_EnhancementOptions::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -16776,7 +16776,7 @@ PINDEX H245_BEnhancementParameters::GetDataLength() const
 }
 
 
-BOOL H245_BEnhancementParameters::Decode(PASN_Stream & strm)
+PBoolean H245_BEnhancementParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;

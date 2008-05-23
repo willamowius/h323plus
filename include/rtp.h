@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2008/02/06 02:52:59  shorne
+ * Added support for Standards based NAT Traversal
+ *
  * Revision 1.3  2008/01/22 01:10:32  shorne
  * Fix H.224 opening unidirectional channel
  *
@@ -293,7 +296,7 @@ class RTP_DataFrame : public PBYTEArray
   PCLASSINFO(RTP_DataFrame, PBYTEArray);
 
   public:
-    RTP_DataFrame(PINDEX payloadSize = 2048, BOOL dynamicAllocation = TRUE);
+    RTP_DataFrame(PINDEX payloadSize = 2048, PBoolean dynamicAllocation = TRUE);
 
     enum {
       ProtocolVersion = 2,
@@ -339,11 +342,11 @@ class RTP_DataFrame : public PBYTEArray
 
     unsigned GetVersion() const { return (theArray[0]>>6)&3; }
 
-    BOOL GetExtension() const   { return (theArray[0]&0x10) != 0; }
-    void SetExtension(BOOL ext);
+    PBoolean GetExtension() const   { return (theArray[0]&0x10) != 0; }
+    void SetExtension(PBoolean ext);
 
-    BOOL GetMarker() const { return (theArray[1]&0x80) != 0; }
-    void SetMarker(BOOL m);
+    PBoolean GetMarker() const { return (theArray[1]&0x80) != 0; }
+    void SetMarker(PBoolean m);
 
     PayloadTypes GetPayloadType() const { return (PayloadTypes)(theArray[1]&0x7f); }
     void         SetPayloadType(PayloadTypes t);
@@ -366,11 +369,11 @@ class RTP_DataFrame : public PBYTEArray
     int GetExtensionType() const; // -1 is no extension
     void   SetExtensionType(int type);
     PINDEX GetExtensionSize() const;
-    BOOL   SetExtensionSize(PINDEX sz);
+    PBoolean   SetExtensionSize(PINDEX sz);
     BYTE * GetExtensionPtr() const;
 
     PINDEX GetPayloadSize() const { return payloadSize; }
-    BOOL   SetPayloadSize(PINDEX sz);
+    PBoolean   SetPayloadSize(PINDEX sz);
     BYTE * GetPayloadPtr()     const { return (BYTE *)(theArray+GetHeaderSize()); }
 
   protected:
@@ -414,8 +417,8 @@ class RTP_ControlFrame : public PBYTEArray
 
     BYTE * GetPayloadPtr() const { return (BYTE *)(theArray+compoundOffset+4); }
 
-    BOOL ReadNextCompound();
-    BOOL WriteNextCompound();
+    PBoolean ReadNextCompound();
+    PBoolean WriteNextCompound();
 
     PINDEX GetCompoundSize() const { return compoundSize; }
 
@@ -586,7 +589,7 @@ class RTP_Session : public PObject
     unsigned GetJitterBufferSize() const;
 
     /**Modifies the QOS specifications for this RTP session*/
-    virtual BOOL ModifyQOS(RTP_QOS * )
+    virtual PBoolean ModifyQOS(RTP_QOS * )
     { return FALSE; }
 
     /**Read a data frame from the RTP channel.
@@ -594,7 +597,7 @@ class RTP_Session : public PObject
        directly if there is no jitter buffer enabled. An application should
        generally use this in preference to directly calling ReadData().
       */
-    BOOL ReadBufferedData(
+    PBoolean ReadBufferedData(
       DWORD timestamp,        ///<  Timestamp to read from buffer.
       RTP_DataFrame & frame   ///<  Frame read from the RTP session
     );
@@ -604,31 +607,31 @@ class RTP_Session : public PObject
        returned by this function. It will block until a data frame is
        available or an error occurs.
       */
-    virtual BOOL ReadData(
+    virtual PBoolean ReadData(
       RTP_DataFrame & frame,   ///<  Frame read from the RTP session
-      BOOL loop                ///<  If TRUE, loop as long as data is available, if FALSE, only process once
+      PBoolean loop                ///<  If TRUE, loop as long as data is available, if FALSE, only process once
     ) = 0;
 
     /**Write a data frame from the RTP channel.
       */
-    virtual BOOL WriteData(
+    virtual PBoolean WriteData(
       RTP_DataFrame & frame   ///<  Frame to write to the RTP session
     ) = 0;
 
     /**Write a control frame from the RTP channel.
       */
-    virtual BOOL WriteControl(
+    virtual PBoolean WriteControl(
       RTP_ControlFrame & frame    ///<  Frame to write to the RTP session
     ) = 0;
 
     /**Write the RTCP reports.
       */
-    virtual BOOL SendReport();
+    virtual PBoolean SendReport();
 
     /**Close down the RTP session.
       */
     virtual void Close(
-      BOOL reading    ///<  Closing the read side of the session
+      PBoolean reading    ///<  Closing the read side of the session
     ) = 0;
 
     /**Get the local host name as used in SDES packes.
@@ -739,26 +742,26 @@ class RTP_Session : public PObject
 
     /**Decrement reference count for RTP session.
       */
-    BOOL DecrementReference() { return --referenceCount == 0; }
+    PBoolean DecrementReference() { return --referenceCount == 0; }
 
     /**Indicate if will ignore all but first received SSRC value.
       */
-    BOOL WillIgnoreOtherSources() const { return ignoreOtherSources; }
+    PBoolean WillIgnoreOtherSources() const { return ignoreOtherSources; }
 
     /**Indicate if will ignore all but first received SSRC value.
       */
     void SetIgnoreOtherSources(
-      BOOL ignore   ///<  Flag for ignore other SSRC values
+      PBoolean ignore   ///<  Flag for ignore other SSRC values
     ) { ignoreOtherSources = ignore; }
 
     /**Indicate if will ignore out of order packets.
       */
-    BOOL WillIgnoreOutOfOrderPackets() const { return ignoreOutOfOrderPackets; }
+    PBoolean WillIgnoreOutOfOrderPackets() const { return ignoreOutOfOrderPackets; }
 
     /**Indicate if will ignore out of order packets.
       */
     void SetIgnoreOutOfOrderPackets(
-      BOOL ignore   ///<  Flag for ignore out of order packets
+      PBoolean ignore   ///<  Flag for ignore out of order packets
     ) { ignoreOutOfOrderPackets = ignore; }
 
     /**Get the time interval for sending RTCP reports in the session.
@@ -909,8 +912,8 @@ class RTP_Session : public PObject
     RTP_JitterBuffer * jitter;
 #endif
 
-    BOOL          ignoreOtherSources;
-    BOOL          ignoreOutOfOrderPackets;
+    PBoolean          ignoreOtherSources;
+    PBoolean          ignoreOutOfOrderPackets;
     DWORD         syncSourceOut;
     DWORD         syncSourceIn;
     PTimeInterval reportTimeInterval;
@@ -1088,7 +1091,7 @@ class RTP_UDP : public RTP_Session
       PHandleAggregator * aggregator, ///< RTP aggregator
 #endif
       unsigned id,                    ///<  Session ID for RTP channel
-      BOOL remoteIsNat = FALSE        ///<  If TRUE, we have hints the remote endpoint is behind a NAT
+      PBoolean remoteIsNat = FALSE        ///<  If TRUE, we have hints the remote endpoint is behind a NAT
     );
 
     /// Destroy the RTP
@@ -1102,20 +1105,20 @@ class RTP_UDP : public RTP_Session
        returned by this function. It will block until a data frame is
        available or an error occurs.
       */
-    virtual BOOL ReadData(RTP_DataFrame & frame, BOOL loop);
+    virtual PBoolean ReadData(RTP_DataFrame & frame, PBoolean loop);
 
     /**Write a data frame from the RTP channel.
       */
-    virtual BOOL WriteData(RTP_DataFrame & frame);
+    virtual PBoolean WriteData(RTP_DataFrame & frame);
 
     /**Write a control frame from the RTP channel.
       */
-    virtual BOOL WriteControl(RTP_ControlFrame & frame);
+    virtual PBoolean WriteControl(RTP_ControlFrame & frame);
 
     /**Close down the RTP session.
       */
     virtual void Close(
-      BOOL reading    ///<  Closing the read side of the session
+      PBoolean reading    ///<  Closing the read side of the session
     );
 
     /**Get the session description name.
@@ -1127,11 +1130,11 @@ class RTP_UDP : public RTP_Session
   //@{
     /**Change the QoS settings
       */
-    virtual BOOL ModifyQOS(RTP_QOS * rtpqos);
+    virtual PBoolean ModifyQOS(RTP_QOS * rtpqos);
 
     /** Enable QOS on Call Basis
       */
-    virtual void EnableGQoS(BOOL success = TRUE);
+    virtual void EnableGQoS(PBoolean success = TRUE);
 
 #if P_HAS_QOS
      /** Get the QOS settings
@@ -1144,7 +1147,7 @@ class RTP_UDP : public RTP_Session
   //@{
     /**Open the UDP ports for the RTP session.
       */
-    BOOL Open(
+    PBoolean Open(
       PIPSocket::Address localAddress,  ///<  Local interface to bind to
       WORD portBase,                    ///<  Base of ports to search
       WORD portMax,                     ///<  end of ports to search (inclusive)
@@ -1161,7 +1164,7 @@ class RTP_UDP : public RTP_Session
 
    /**Reopens an existing session in the given direction.
       */
-    void Reopen(BOOL isReading);
+    void Reopen(PBoolean isReading);
   //@}
 
   /**@name Member variable access */
@@ -1206,10 +1209,10 @@ class RTP_UDP : public RTP_Session
 
     /**Set the remote address and port information for session.
       */
-    BOOL SetRemoteSocketInfo(
+    PBoolean SetRemoteSocketInfo(
       PIPSocket::Address address,   ///<  Address of remote
       WORD port,                    ///<  Port on remote
-      BOOL isDataPort               ///<  Flag for data or control channel
+      PBoolean isDataPort               ///<  Flag for data or control channel
     );
 
     /**Apply QOS - requires address to connect the socket on Windows platforms
@@ -1231,7 +1234,7 @@ class RTP_UDP : public RTP_Session
     SendReceiveStatus ReadDataOrControlPDU(
       PUDPSocket & socket,
       PBYTEArray & frame,
-      BOOL fromDataChannel
+      PBoolean fromDataChannel
     );
 
     PIPSocket::Address localAddress;
@@ -1244,16 +1247,16 @@ class RTP_UDP : public RTP_Session
 
     PIPSocket::Address remoteTransmitAddress;
 
-    BOOL shutdownRead;
-    BOOL shutdownWrite;
+    PBoolean shutdownRead;
+    PBoolean shutdownWrite;
 
     PUDPSocket * dataSocket;
     PUDPSocket * controlSocket;
 
-    BOOL appliedQOS;
-    BOOL enableGQOS;
+    PBoolean appliedQOS;
+    PBoolean enableGQOS;
 
-    BOOL remoteIsNAT;
+    PBoolean remoteIsNAT;
 };
 
 

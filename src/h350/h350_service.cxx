@@ -65,7 +65,7 @@ PINDEX H225_H350ServiceControl::GetDataLength() const
 }
 
 
-BOOL H225_H350ServiceControl::Decode(PASN_Stream & strm)
+PBoolean H225_H350ServiceControl::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;

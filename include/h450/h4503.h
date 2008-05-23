@@ -243,7 +243,7 @@ class H4503_IntResult_extension : public PASN_Choice
     operator const H225_NonStandardParameter &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -281,7 +281,7 @@ class H4503_DivertingLegInfo2Arg_extension : public PASN_Choice
     operator const H225_NonStandardParameter &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -310,7 +310,7 @@ class H4503_IntResult : public PASN_Sequence
     H4503_IntResult_extension m_extension;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -351,7 +351,7 @@ class H4503_DivertingLegInfo2Arg : public PASN_Sequence
     H4503_DivertingLegInfo2Arg_extension m_extension;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;

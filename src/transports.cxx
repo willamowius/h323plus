@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:08  shorne
+ * First commit of h323plus
+ *
  * Revision 1.161.2.2  2007/07/22 14:19:20  shorne
  * Removed initialisation warning under windows
  *
@@ -619,7 +622,7 @@ class H245TransportThread : public PThread
     H323Connection & connection;
     H323Transport  & transport;
 #ifdef H323_SIGNAL_AGGREGATE
-    BOOL useAggregator;
+    PBoolean useAggregator;
 #endif
 };
 
@@ -805,7 +808,7 @@ void H323TransportAddress::Validate()
 }
 
 
-BOOL H323TransportAddress::SetPDU(H225_TransportAddress & pdu) const
+PBoolean H323TransportAddress::SetPDU(H225_TransportAddress & pdu) const
 {
   PIPSocket::Address ip;
   WORD port = H323EndPoint::DefaultTcpPort;
@@ -833,7 +836,7 @@ BOOL H323TransportAddress::SetPDU(H225_TransportAddress & pdu) const
 }
 
 
-BOOL H323TransportAddress::SetPDU(H245_TransportAddress & pdu) const
+PBoolean H323TransportAddress::SetPDU(H245_TransportAddress & pdu) const
 {
   PIPSocket::Address ip;
   WORD port = 0;
@@ -865,7 +868,7 @@ BOOL H323TransportAddress::SetPDU(H245_TransportAddress & pdu) const
 }
 
 
-BOOL H323TransportAddress::IsEquivalent(const H323TransportAddress & address)
+PBoolean H323TransportAddress::IsEquivalent(const H323TransportAddress & address)
 {
   if (*this == address)
     return TRUE;
@@ -882,14 +885,14 @@ BOOL H323TransportAddress::IsEquivalent(const H323TransportAddress & address)
 }
 
 
-BOOL H323TransportAddress::GetIpAddress(PIPSocket::Address & ip) const
+PBoolean H323TransportAddress::GetIpAddress(PIPSocket::Address & ip) const
 {
   WORD dummy = 65535;
   return GetIpAndPort(ip, dummy);
 }
 
 
-static BOOL SplitAddress(const PString & addr, PString & host, PString & service)
+static PBoolean SplitAddress(const PString & addr, PString & host, PString & service)
 {
   if (strncmp(addr, IpPrefix, 3) != 0) {
     PTRACE(2, "H323\tUse of non IP transport address: \"" << addr << '"');
@@ -916,7 +919,7 @@ static BOOL SplitAddress(const PString & addr, PString & host, PString & service
 }
 
 
-BOOL H323TransportAddress::GetIpAndPort(PIPSocket::Address & ip,
+PBoolean H323TransportAddress::GetIpAndPort(PIPSocket::Address & ip,
                                         WORD & port,
                                         const char * proto) const
 {
@@ -1019,7 +1022,7 @@ H323Transport * H323TransportAddress::CreateTransport(H323EndPoint & endpoint) c
 
 
 H323TransportAddressArray H323GetInterfaceAddresses(const H323ListenerList & listeners,
-                                                    BOOL excludeLocalHost,
+                                                    PBoolean excludeLocalHost,
                                                     H323Transport * associatedTransport)
 {
   H323TransportAddressArray interfaceAddresses;
@@ -1040,7 +1043,7 @@ H323TransportAddressArray H323GetInterfaceAddresses(const H323ListenerList & lis
 
 
 H323TransportAddressArray H323GetInterfaceAddresses(const H323TransportAddress & addr,
-                                                    BOOL excludeLocalHost,
+                                                    PBoolean excludeLocalHost,
                                                     H323Transport * associatedTransport)
 {
   PIPSocket::Address ip;
@@ -1206,7 +1209,7 @@ void H323Transport::PrintOn(ostream & strm) const
 }
 
 
-BOOL H323Transport::Close()
+PBoolean H323Transport::Close()
 {
   PTRACE(3, "H323\tH323Transport::Close");
 
@@ -1223,7 +1226,7 @@ BOOL H323Transport::Close()
   return TRUE;
 }
 
-BOOL H323Transport::HandleSignallingSocket(H323SignalPDU & pdu)
+PBoolean H323Transport::HandleSignallingSocket(H323SignalPDU & pdu)
 {
 
   for (;;) {
@@ -1245,7 +1248,7 @@ BOOL H323Transport::HandleSignallingSocket(H323SignalPDU & pdu)
   return FALSE;
 }
 
-BOOL H323Transport::HandleFirstSignallingChannelPDU()
+PBoolean H323Transport::HandleFirstSignallingChannelPDU()
 {
   PTRACE(3, "H225\tAwaiting first PDU");
   SetReadTimeout(15000); // Await 15 seconds after connect for first byte
@@ -1353,7 +1356,7 @@ void H323Transport::CleanUpOnTermination()
 }
 
 
-BOOL H323Transport::IsCompatibleTransport(const H225_TransportAddress & /*pdu*/) const
+PBoolean H323Transport::IsCompatibleTransport(const H225_TransportAddress & /*pdu*/) const
 {
   PAssertAlways(PUnimplementedFunction);
   return FALSE;
@@ -1361,7 +1364,7 @@ BOOL H323Transport::IsCompatibleTransport(const H225_TransportAddress & /*pdu*/)
 
 
 void H323Transport::SetUpTransportPDU(H225_TransportAddress & /*pdu*/,
-                                      BOOL /*localTsap*/,
+                                      PBoolean /*localTsap*/,
 									  H323Connection * /*connection*/
 									  ) const
 {
@@ -1394,14 +1397,14 @@ H323Transport * H323Transport::CreateControlChannel(H323Connection & /*connectio
 }
 
 
-BOOL H323Transport::AcceptControlChannel(H323Connection & /*connection*/)
+PBoolean H323Transport::AcceptControlChannel(H323Connection & /*connection*/)
 {
   PAssertAlways(PUnimplementedFunction);
   return FALSE;
 }
 
 
-BOOL H323Transport::DiscoverGatekeeper(H323Gatekeeper & /*gk*/,
+PBoolean H323Transport::DiscoverGatekeeper(H323Gatekeeper & /*gk*/,
                                        H323RasPDU & /*pdu*/,
                                        const H323TransportAddress & /*address*/)
 {
@@ -1415,7 +1418,7 @@ BOOL H323Transport::DiscoverGatekeeper(H323Gatekeeper & /*gk*/,
 H323ListenerTCP::H323ListenerTCP(H323EndPoint & end,
                                  PIPSocket::Address binding,
                                  WORD port,
-                                 BOOL exclusive)
+                                 PBoolean exclusive)
   : H323Listener(end),
 	  listener((port == 0) ? (WORD)H323EndPoint::DefaultTcpPort : port),
     localAddress(binding)
@@ -1430,7 +1433,7 @@ H323ListenerTCP::~H323ListenerTCP()
 }
 
 
-BOOL H323ListenerTCP::Open()
+PBoolean H323ListenerTCP::Open()
 {
   if (listener.Listen(localAddress, 100, 0,
                       exclusiveListener ? PSocket::AddressIsExclusive
@@ -1443,9 +1446,9 @@ BOOL H323ListenerTCP::Open()
 }
 
 
-BOOL H323ListenerTCP::Close()
+PBoolean H323ListenerTCP::Close()
 {
-  BOOL ok = listener.Close();
+  PBoolean ok = listener.Close();
 
   PAssert(PThread::Current() != this, PLogicError);
 
@@ -1491,7 +1494,7 @@ H323TransportAddress H323ListenerTCP::GetTransportAddress() const
 }
 
 
-BOOL H323ListenerTCP::SetUpTransportPDU(H245_TransportAddress & pdu,
+PBoolean H323ListenerTCP::SetUpTransportPDU(H245_TransportAddress & pdu,
                                         const H323Transport & associatedTransport)
 {
   if (!localAddress.IsAny())
@@ -1543,7 +1546,7 @@ H323TransportAddress H323TransportIP::GetRemoteAddress() const
 }
 
 
-BOOL H323TransportIP::IsCompatibleTransport(const H225_TransportAddress & pdu) const
+PBoolean H323TransportIP::IsCompatibleTransport(const H225_TransportAddress & pdu) const
 {
   return pdu.GetTag() == H225_TransportAddress::e_ipAddress
 #if P_HAS_IPV6
@@ -1553,7 +1556,7 @@ BOOL H323TransportIP::IsCompatibleTransport(const H225_TransportAddress & pdu) c
 }
 
 
-void H323TransportIP::SetUpTransportPDU(H225_TransportAddress & pdu, BOOL localTsap,H323Connection * connection) const
+void H323TransportIP::SetUpTransportPDU(H225_TransportAddress & pdu, PBoolean localTsap,H323Connection * connection) const
 {
   H323TransportAddress transAddr;
   if (!localTsap) 
@@ -1595,7 +1598,7 @@ void H323TransportIP::SetUpTransportPDU(H245_TransportAddress & pdu, unsigned po
 
 H323TransportTCP::H323TransportTCP(H323EndPoint & end,
                                    PIPSocket::Address binding,
-                                   BOOL listen)
+                                   PBoolean listen)
   : H323TransportIP(end, binding, H323EndPoint::DefaultTcpPort)
 {
   h245listener = NULL;
@@ -1631,7 +1634,7 @@ H323TransportTCP::~H323TransportTCP()
 }
 
 
-BOOL H323TransportTCP::OnOpen()
+PBoolean H323TransportTCP::OnOpen()
 {
   PIPSocket * socket = (PIPSocket *)GetReadChannel();
 
@@ -1674,7 +1677,7 @@ BOOL H323TransportTCP::OnOpen()
 }
 
 
-BOOL H323TransportTCP::Close()
+PBoolean H323TransportTCP::Close()
 {
   // Close listening socket to break waiting accept
   if (IsListening())
@@ -1684,12 +1687,12 @@ BOOL H323TransportTCP::Close()
 }
 
 
-BOOL H323TransportTCP::SetRemoteAddress(const H323TransportAddress & address)
+PBoolean H323TransportTCP::SetRemoteAddress(const H323TransportAddress & address)
 {
   return address.GetIpAndPort(remoteAddress, remotePort, "tcp");
 }
 
-BOOL H323TransportTCP::ExtractPDU(const PBYTEArray & pdu, PINDEX & pduLen)
+PBoolean H323TransportTCP::ExtractPDU(const PBYTEArray & pdu, PINDEX & pduLen)
 {
   //
   // TPKT format is :
@@ -1738,7 +1741,7 @@ BOOL H323TransportTCP::ExtractPDU(const PBYTEArray & pdu, PINDEX & pduLen)
   return TRUE;
 }
 
-BOOL H323TransportTCP::ReadPDU(PBYTEArray & pdu)
+PBoolean H323TransportTCP::ReadPDU(PBYTEArray & pdu)
 {
   // Make sure is a RFC1006 TPKT
   switch (ReadChar()) {
@@ -1760,7 +1763,7 @@ BOOL H323TransportTCP::ReadPDU(PBYTEArray & pdu)
 
   // Get TPKT length
   BYTE header[3];
-  BOOL ok = ReadBlock(header, sizeof(header));
+  PBoolean ok = ReadBlock(header, sizeof(header));
   if (ok) {
     PINDEX packetLength = ((header[1] << 8)|header[2]);
     if (packetLength < 4) {
@@ -1778,7 +1781,7 @@ BOOL H323TransportTCP::ReadPDU(PBYTEArray & pdu)
 }
 
 
-BOOL H323TransportTCP::WritePDU(const PBYTEArray & pdu)
+PBoolean H323TransportTCP::WritePDU(const PBYTEArray & pdu)
 {
   // We copy the data into a new buffer so we can do a single write call. This
   // is necessary as we have disabled the Nagle TCP delay algorithm to improve
@@ -1798,7 +1801,7 @@ BOOL H323TransportTCP::WritePDU(const PBYTEArray & pdu)
 }
 
 
-BOOL H323TransportTCP::Connect()
+PBoolean H323TransportTCP::Connect()
 {
   if (IsListening())
     return TRUE;
@@ -1859,7 +1862,7 @@ H323Transport * H323TransportTCP::CreateControlChannel(H323Connection & connecti
 }
 
 
-BOOL H323TransportTCP::AcceptControlChannel(H323Connection & connection)
+PBoolean H323TransportTCP::AcceptControlChannel(H323Connection & connection)
 {
   if (IsOpen())
     return TRUE;
@@ -1890,7 +1893,7 @@ BOOL H323TransportTCP::AcceptControlChannel(H323Connection & connection)
 }
 
 
-BOOL H323TransportTCP::IsListening() const
+PBoolean H323TransportTCP::IsListening() const
 {
   if (IsOpen())
     return FALSE;
@@ -1904,7 +1907,7 @@ BOOL H323TransportTCP::IsListening() const
 
 /////////////////////////////////////////////////////////////////////////////
 
-static BOOL ListenUDP(PUDPSocket & socket,
+static PBoolean ListenUDP(PUDPSocket & socket,
                       H323EndPoint & endpoint,
                       PIPSocket::Address binding,
                       WORD localPort)
@@ -1972,13 +1975,13 @@ H323TransportUDP::~H323TransportUDP()
 }
 
 
-BOOL H323TransportUDP::SetRemoteAddress(const H323TransportAddress & address)
+PBoolean H323TransportUDP::SetRemoteAddress(const H323TransportAddress & address)
 {
   return address.GetIpAndPort(remoteAddress, remotePort, "udp");
 }
 
 
-BOOL H323TransportUDP::Connect()
+PBoolean H323TransportUDP::Connect()
 {
   if (remoteAddress == 0 || remotePort == 0)
     return FALSE;
@@ -2019,12 +2022,12 @@ H323TransportAddress H323TransportUDP::GetLastReceivedAddress() const
   return H323Transport::GetLastReceivedAddress();
 }
 
-BOOL H323TransportUDP::ExtractPDU(const PBYTEArray & /*pdu*/, PINDEX & /*len*/)
+PBoolean H323TransportUDP::ExtractPDU(const PBYTEArray & /*pdu*/, PINDEX & /*len*/)
 {
   return TRUE;
 }
 
-BOOL H323TransportUDP::ReadPDU(PBYTEArray & pdu)
+PBoolean H323TransportUDP::ReadPDU(PBYTEArray & pdu)
 {
   for (;;) {
     if (!Read(pdu.GetPointer(10000), 10000)) {
@@ -2078,13 +2081,13 @@ BOOL H323TransportUDP::ReadPDU(PBYTEArray & pdu)
 }
 
 
-BOOL H323TransportUDP::WritePDU(const PBYTEArray & pdu)
+PBoolean H323TransportUDP::WritePDU(const PBYTEArray & pdu)
 {
   return Write((const BYTE *)pdu, pdu.GetSize());
 }
 
 
-BOOL H323TransportUDP::DiscoverGatekeeper(H323Gatekeeper & gk,
+PBoolean H323TransportUDP::DiscoverGatekeeper(H323Gatekeeper & gk,
                                           H323RasPDU & request,
                                           const H323TransportAddress & address)
 {

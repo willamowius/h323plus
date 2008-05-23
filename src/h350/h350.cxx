@@ -35,6 +35,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2008/01/05 11:36:02  shorne
+ * More Fixes for Linux
+ *
  * Revision 1.4  2008/01/05 07:09:53  shorne
  * added reference to buildopts to ensure if enabled everything gets compiled
  *
@@ -124,7 +127,7 @@ H350_Schema(H235Identity);
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-BOOL H350_Session::Open(const PString & hostname, WORD port)
+PBoolean H350_Session::Open(const PString & hostname, WORD port)
 {
 
 #if P_DNS
@@ -147,7 +150,7 @@ BOOL H350_Session::Open(const PString & hostname, WORD port)
   
 }
 
-BOOL H350_Session::Login(const PString & who,const PString & passwd,AuthenticationMethod authMethod)
+PBoolean H350_Session::Login(const PString & who,const PString & passwd,AuthenticationMethod authMethod)
 {
 	   return Bind(who,passwd,authMethod);
 }
@@ -229,7 +232,7 @@ void H350_Session::NewRecord(LDAP_Record & rec)
 	}
 }
 
-BOOL H350_Session::PostNew(const PString & dn, const LDAP_Record & record)
+PBoolean H350_Session::PostNew(const PString & dn, const LDAP_Record & record)
 {
 	PList<PLDAPSession::ModAttrib> attrib;
 	PLDAPSession::ModAttrib::Operation mode = PLDAPSession::ModAttrib::Add;
@@ -243,7 +246,7 @@ BOOL H350_Session::PostNew(const PString & dn, const LDAP_Record & record)
 }
 
 
-BOOL H350_Session::PostUpdate(const PString & dn, const LDAP_Record & record)
+PBoolean H350_Session::PostUpdate(const PString & dn, const LDAP_Record & record)
 {
 	PList<PLDAPSession::ModAttrib> attrib;
 	PLDAPSession::ModAttrib::Operation mode = PLDAPSession::ModAttrib::Replace;
@@ -257,7 +260,7 @@ BOOL H350_Session::PostUpdate(const PString & dn, const LDAP_Record & record)
 }
 
 
-BOOL H350_Session::SetAttribute(LDAP_Record & record,const PString & attrib, const PString & value)
+PBoolean H350_Session::SetAttribute(LDAP_Record & record,const PString & attrib, const PString & value)
 {
 	for (std::list<PLDAPSchema>::const_iterator r = record.begin(); r != record.end(); ++r) {
 	   PLDAPSchema schema = *r;
@@ -267,7 +270,7 @@ BOOL H350_Session::SetAttribute(LDAP_Record & record,const PString & attrib, con
 	return FALSE;
 }
 
-BOOL H350_Session::SetAttribute(LDAP_Record & record,const PString & attrib, const PBYTEArray & value)
+PBoolean H350_Session::SetAttribute(LDAP_Record & record,const PString & attrib, const PBYTEArray & value)
 {
 	for (std::list<PLDAPSchema>::const_iterator r = record.begin(); r != record.end(); ++r) {
 	   PLDAPSchema schema = *r;
@@ -277,7 +280,7 @@ BOOL H350_Session::SetAttribute(LDAP_Record & record,const PString & attrib, con
 	return FALSE;
 }
 
-BOOL H350_Session::GetAttribute(LDAP_Record & record,const PString & attrib, PString & value)
+PBoolean H350_Session::GetAttribute(LDAP_Record & record,const PString & attrib, PString & value)
 {
 	for (std::list<PLDAPSchema>::const_iterator r = record.begin(); r != record.end(); ++r) {
 	   PLDAPSchema schema = *r;
@@ -287,7 +290,7 @@ BOOL H350_Session::GetAttribute(LDAP_Record & record,const PString & attrib, PSt
 	return FALSE;
 }
 	 
-BOOL H350_Session::GetAttribute(LDAP_Record & record,const PString & attrib, PBYTEArray & value)
+PBoolean H350_Session::GetAttribute(LDAP_Record & record,const PString & attrib, PBYTEArray & value)
 {
 	for (std::list<PLDAPSchema>::const_iterator r = record.begin(); r != record.end(); ++r) {
 	   PLDAPSchema schema = *r;

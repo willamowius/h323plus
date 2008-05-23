@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/04/25 01:08:31  shorne
+ * Correct FileTransfer Capability OID
+ *
  * Revision 1.2  2008/02/12 05:47:42  shorne
  * Fix compiling on older GCC versions
  *
@@ -100,7 +103,7 @@ H323FileTransferCapability::H323FileTransferCapability(unsigned maxBitRate)
 	m_transferMode = 1;    // Transfer mode is RTP encaptulated
 }
 
-BOOL H323FileTransferCapability::OnReceivedPDU(const H245_DataApplicationCapability & pdu)
+PBoolean H323FileTransferCapability::OnReceivedPDU(const H245_DataApplicationCapability & pdu)
 {
   if (pdu.m_application.GetTag() != H245_DataApplicationCapability_application::e_genericDataCapability)
         return FALSE;
@@ -110,7 +113,7 @@ BOOL H323FileTransferCapability::OnReceivedPDU(const H245_DataApplicationCapabil
   return OnReceivedPDU(genCapability);
 }
 
-BOOL H323FileTransferCapability::OnSendingPDU(H245_DataApplicationCapability & pdu) const
+PBoolean H323FileTransferCapability::OnSendingPDU(H245_DataApplicationCapability & pdu) const
 {
   pdu.m_maxBitRate = maxBitRate;
   pdu.m_application.SetTag(H245_DataApplicationCapability_application::e_genericDataCapability);
@@ -134,7 +137,7 @@ PObject::Comparison H323FileTransferCapability::Compare(const PObject & obj) con
   return GreaterThan;
 }
 
-BOOL H323FileTransferCapability::OnReceivedPDU(const H245_GenericCapability & pdu)
+PBoolean H323FileTransferCapability::OnReceivedPDU(const H245_GenericCapability & pdu)
 {
 
    const H245_CapabilityIdentifier & capId = pdu.m_capabilityIdentifier; 
@@ -174,7 +177,7 @@ BOOL H323FileTransferCapability::OnReceivedPDU(const H245_GenericCapability & pd
   return TRUE;
 }
 
-BOOL H323FileTransferCapability::OnSendingPDU(H245_GenericCapability & pdu) const
+PBoolean H323FileTransferCapability::OnSendingPDU(H245_GenericCapability & pdu) const
 {
    H245_CapabilityIdentifier & capId = pdu.m_capabilityIdentifier; 
 
@@ -271,7 +274,7 @@ H323Channel::Directions H323FileTransferChannel::GetDirection() const
   return direction;
 }
 
-BOOL H323FileTransferChannel::SetInitialBandwidth()
+PBoolean H323FileTransferChannel::SetInitialBandwidth()
 {
   return TRUE;
 }
@@ -286,12 +289,12 @@ void H323FileTransferChannel::Transmit()
 
 }
 
-BOOL H323FileTransferChannel::Open()
+PBoolean H323FileTransferChannel::Open()
 {
   return H323Channel::Open();
 }
 
-BOOL H323FileTransferChannel::Start()
+PBoolean H323FileTransferChannel::Start()
 {
   if (!Open())
     return FALSE;
@@ -324,7 +327,7 @@ void H323FileTransferChannel::Close()
       fileHandler->Stop(direction);
 }
 
-BOOL H323FileTransferChannel::OnSendingPDU(H245_OpenLogicalChannel & open) const
+PBoolean H323FileTransferChannel::OnSendingPDU(H245_OpenLogicalChannel & open) const
 {
   open.m_forwardLogicalChannelNumber = (unsigned)number;
 
@@ -374,7 +377,7 @@ void H323FileTransferChannel::OnSendOpenAck(const H245_OpenLogicalChannel & open
   OnSendOpenAck(param);
 }
 
-BOOL H323FileTransferChannel::OnReceivedPDU(const H245_OpenLogicalChannel & open,
+PBoolean H323FileTransferChannel::OnReceivedPDU(const H245_OpenLogicalChannel & open,
 									 unsigned & errorCode)
 {
   if (direction == H323Channel::IsReceiver) {
@@ -382,7 +385,7 @@ BOOL H323FileTransferChannel::OnReceivedPDU(const H245_OpenLogicalChannel & open
 	GetFileList(open);
   }
 	
-  BOOL reverse = open.HasOptionalField(H245_OpenLogicalChannel::e_reverseLogicalChannelParameters);
+  PBoolean reverse = open.HasOptionalField(H245_OpenLogicalChannel::e_reverseLogicalChannelParameters);
   const H245_DataType & dataType = reverse ? open.m_reverseLogicalChannelParameters.m_dataType
 										   : open.m_forwardLogicalChannelParameters.m_dataType;
 	
@@ -411,7 +414,7 @@ BOOL H323FileTransferChannel::OnReceivedPDU(const H245_OpenLogicalChannel & open
   return FALSE;
 }
 
-BOOL H323FileTransferChannel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & ack)
+PBoolean H323FileTransferChannel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & ack)
 {
   if (!ack.HasOptionalField(H245_OpenLogicalChannelAck::e_forwardMultiplexAckParameters)) {
     return FALSE;
@@ -426,7 +429,7 @@ BOOL H323FileTransferChannel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck 
   return OnReceivedAckPDU(ack.m_forwardMultiplexAckParameters);
 }
 
-BOOL H323FileTransferChannel::OnSendingPDU(H245_H2250LogicalChannelParameters & param) const
+PBoolean H323FileTransferChannel::OnSendingPDU(H245_H2250LogicalChannelParameters & param) const
 {
   param.m_sessionID = sessionID;
 	
@@ -479,7 +482,7 @@ void H323FileTransferChannel::OnSendOpenAck(H245_H2250LogicalChannelAckParameter
   }
 }
 
-BOOL H323FileTransferChannel::OnReceivedPDU(const H245_H2250LogicalChannelParameters & param,
+PBoolean H323FileTransferChannel::OnReceivedPDU(const H245_H2250LogicalChannelParameters & param,
 						   unsigned & errorCode)
 {
   if (param.m_sessionID != sessionID) {
@@ -487,7 +490,7 @@ BOOL H323FileTransferChannel::OnReceivedPDU(const H245_H2250LogicalChannelParame
 	return FALSE;
   }
 	
-  BOOL ok = FALSE;
+  PBoolean ok = FALSE;
 	
   if (param.HasOptionalField(H245_H2250LogicalChannelParameters::e_mediaControlChannel)) {
 		
@@ -520,7 +523,7 @@ BOOL H323FileTransferChannel::OnReceivedPDU(const H245_H2250LogicalChannelParame
   return FALSE;
 }
 
-BOOL H323FileTransferChannel::OnReceivedAckPDU(const H245_H2250LogicalChannelAckParameters & param)
+PBoolean H323FileTransferChannel::OnReceivedAckPDU(const H245_H2250LogicalChannelAckParameters & param)
 {
   if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_sessionID)) {
   }
@@ -549,7 +552,7 @@ BOOL H323FileTransferChannel::OnReceivedAckPDU(const H245_H2250LogicalChannelAck
   return TRUE;
 }
 
-BOOL H323FileTransferChannel::SetDynamicRTPPayloadType(int newType)
+PBoolean H323FileTransferChannel::SetDynamicRTPPayloadType(int newType)
 {
   if (newType == -1) {
     return TRUE;
@@ -568,8 +571,8 @@ BOOL H323FileTransferChannel::SetDynamicRTPPayloadType(int newType)
   return TRUE;
 }
 
-BOOL H323FileTransferChannel::ExtractTransport(const H245_TransportAddress & pdu,
-										         BOOL isDataPort,
+PBoolean H323FileTransferChannel::ExtractTransport(const H245_TransportAddress & pdu,
+										         PBoolean isDataPort,
 										        unsigned & errorCode)
 {
   if (pdu.GetTag() != H245_TransportAddress::e_unicastAddress) {
@@ -588,7 +591,7 @@ BOOL H323FileTransferChannel::ExtractTransport(const H245_TransportAddress & pdu
   return FALSE;
 }
 
-BOOL H323FileTransferChannel::RetreiveFileInfo(const H245_GenericInformation & info, H323FileTransferList & filelist)
+PBoolean H323FileTransferChannel::RetreiveFileInfo(const H245_GenericInformation & info, H323FileTransferList & filelist)
 {
 	  if (info.m_messageIdentifier.GetTag() != H245_CapabilityIdentifier::e_standard)
 		  return FALSE;
@@ -629,7 +632,7 @@ BOOL H323FileTransferChannel::RetreiveFileInfo(const H245_GenericInformation & i
     return TRUE;
 }
 
-BOOL H323FileTransferChannel::GetFileList(const H245_OpenLogicalChannel & open) 
+PBoolean H323FileTransferChannel::GetFileList(const H245_OpenLogicalChannel & open) 
 {
 
   if (!open.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation))
@@ -814,7 +817,7 @@ H323FileTransferHandler::~H323FileTransferHandler()
   shutdown = TRUE;
 }
 
-BOOL H323FileTransferHandler::Start(H323Channel::Directions direction)
+PBoolean H323FileTransferHandler::Start(H323Channel::Directions direction)
 {
   IsStarter = (direction == H323Channel::IsTransmitter);
 
@@ -829,7 +832,7 @@ BOOL H323FileTransferHandler::Start(H323Channel::Directions direction)
   return TRUE;
 }
 
-BOOL H323FileTransferHandler::Stop(H323Channel::Directions direction)
+PBoolean H323FileTransferHandler::Stop(H323Channel::Directions direction)
 {
   PWaitAndSignal m(transferMutex);
 	
@@ -865,7 +868,7 @@ void H323FileTransferHandler::ChangeState(transferState newState)
    OnStateChange(currentState);
 }
 
-BOOL H323FileTransferHandler::TransmitFrame(H323FilePacket & buffer, BOOL final)
+PBoolean H323FileTransferHandler::TransmitFrame(H323FilePacket & buffer, PBoolean final)
 {	
 
   // determining correct timestamp
@@ -880,7 +883,7 @@ BOOL H323FileTransferHandler::TransmitFrame(H323FilePacket & buffer, BOOL final)
   return session->WriteData(transmitFrame);
 }
 
-BOOL H323FileTransferHandler::ReceiveFrame(H323FilePacket & buffer, BOOL & final)
+PBoolean H323FileTransferHandler::ReceiveFrame(H323FilePacket & buffer, PBoolean & final)
 {	
 
    RTP_DataFrame packet = RTP_DataFrame(1024);
@@ -896,7 +899,7 @@ BOOL H323FileTransferHandler::ReceiveFrame(H323FilePacket & buffer, BOOL & final
   return TRUE;
 }
 
-BOOL Segment(PBYTEArray & lastBlock, const int size, int & segment, PBYTEArray & thearray)
+PBoolean Segment(PBYTEArray & lastBlock, const int size, int & segment, PBYTEArray & thearray)
 {
 	int newsize;
 	if (lastBlock.GetSize() < (segment + size)) {
@@ -922,12 +925,12 @@ BOOL Segment(PBYTEArray & lastBlock, const int size, int & segment, PBYTEArray &
 
 void H323FileTransferHandler::Transmit(PThread &, INT)
 {
-	BOOL success = TRUE;
+	PBoolean success = TRUE;
 	H323File * f = NULL;
 	PFilePath p;
 
-	BOOL read = FALSE;
-	BOOL waitforResponse = FALSE;
+	PBoolean read = FALSE;
+	PBoolean waitforResponse = FALSE;
 	int fileid = 0;
 	PBYTEArray readBlock(blockSize);
 	H323FilePacket lastBlock;
@@ -937,7 +940,7 @@ void H323FileTransferHandler::Transmit(PThread &, INT)
 	while (success && !shutdown) {
 	    
 		H323FilePacket packet;
-		BOOL final = FALSE;
+		PBoolean final = FALSE;
 		switch (currentState) {
 		   case e_probing:
 			    probMutex.Wait(100);
@@ -1074,14 +1077,14 @@ void H323FileTransferHandler::Transmit(PThread &, INT)
 void H323FileTransferHandler::Receive(PThread &, INT)
 {
 
-	BOOL success = TRUE;
+	PBoolean success = TRUE;
 	H323FilePacket packet;
 	packet.SetSize(0);
     PFilePath p;
 
 	while (success && !shutdown) {
 
-	   BOOL final = FALSE;
+	   PBoolean final = FALSE;
 	   H323FilePacket buffer;
        success = ReceiveFrame(buffer, final);
 
@@ -1348,7 +1351,7 @@ H323FilePacket::opcodes H323FilePacket::GetPacketType()
 
 ////////////////////////////////////////////////////////////////////
 
-H323FileIOChannel::H323FileIOChannel(PFilePath _file, BOOL read)
+H323FileIOChannel::H323FileIOChannel(PFilePath _file, PBoolean read)
 {
 	if (!CheckFile(_file,read,IOError))
 		return;
@@ -1379,15 +1382,15 @@ H323FileIOChannel::~H323FileIOChannel()
 {
 }
 
-BOOL H323FileIOChannel::IsError(fileError err)
+PBoolean H323FileIOChannel::IsError(fileError err)
 {
 	err = IOError;
 	return (err > 0);
 }
 
-BOOL H323FileIOChannel::CheckFile(PFilePath _file, BOOL read, fileError & errCode)
+PBoolean H323FileIOChannel::CheckFile(PFilePath _file, PBoolean read, fileError & errCode)
 {
-	BOOL exists = PFile::Exists(_file);
+	PBoolean exists = PFile::Exists(_file);
 	
 	if (read && !exists) {
 		errCode = e_NotFound;
@@ -1411,7 +1414,7 @@ BOOL H323FileIOChannel::CheckFile(PFilePath _file, BOOL read, fileError & errCod
 	return TRUE;
 }
 
-BOOL H323FileIOChannel::Open()
+PBoolean H323FileIOChannel::Open()
 {
   PWaitAndSignal mutex(chanMutex);
 
@@ -1421,7 +1424,7 @@ BOOL H323FileIOChannel::Open()
 	return TRUE;
 }
 	
-BOOL H323FileIOChannel::Close()
+PBoolean H323FileIOChannel::Close()
 {
   PWaitAndSignal mutex(chanMutex);
 
@@ -1432,20 +1435,20 @@ BOOL H323FileIOChannel::Close()
   return TRUE;
 }
 
-BOOL H323FileIOChannel::Read(void * buffer, PINDEX & amount)
+PBoolean H323FileIOChannel::Read(void * buffer, PINDEX & amount)
 {
     PWaitAndSignal mutex(chanMutex);
 
 	if (!fileopen)
 		return FALSE;
 
-	BOOL result = PIndirectChannel::Read(buffer, amount);
+	PBoolean result = PIndirectChannel::Read(buffer, amount);
 	amount = GetLastReadCount();
 
     return result;
 }
    
-BOOL H323FileIOChannel::Write(const void * buf, PINDEX amount)
+PBoolean H323FileIOChannel::Write(const void * buf, PINDEX amount)
 {
     PWaitAndSignal mutex(chanMutex);
 

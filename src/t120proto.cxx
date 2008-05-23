@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:08  shorne
+ * First commit of h323plus
+ *
  * Revision 1.6  2004/05/20 02:07:29  csoutheren
  * Use macro to work around MSVC internal compiler errors
  *
@@ -60,16 +63,16 @@
 class T120_X224 : public X224 {
     PCLASSINFO(T120_X224, X224);
   public:
-    BOOL Read(H323Transport & transport);
-    BOOL Write(H323Transport & transport);
+    PBoolean Read(H323Transport & transport);
+    PBoolean Write(H323Transport & transport);
 };
 
 
 class T120ConnectPDU : public MCS_ConnectMCSPDU {
     PCLASSINFO(T120ConnectPDU, MCS_ConnectMCSPDU);
   public:
-    BOOL Read(H323Transport & transport);
-    BOOL Write(H323Transport & transport);
+    PBoolean Read(H323Transport & transport);
+    PBoolean Write(H323Transport & transport);
   protected:
     T120_X224 x224;
 };
@@ -79,7 +82,7 @@ class T120ConnectPDU : public MCS_ConnectMCSPDU {
 
 /////////////////////////////////////////////////////////////////////////////
 
-BOOL T120_X224::Read(H323Transport & transport)
+PBoolean T120_X224::Read(H323Transport & transport)
 {
   PBYTEArray rawData;
 
@@ -98,7 +101,7 @@ BOOL T120_X224::Read(H323Transport & transport)
 }
 
 
-BOOL T120_X224::Write(H323Transport & transport)
+PBoolean T120_X224::Write(H323Transport & transport)
 {
   PBYTEArray rawData;
 
@@ -120,7 +123,7 @@ BOOL T120_X224::Write(H323Transport & transport)
 
 /////////////////////////////////////////////////////////////////////////////
 
-BOOL T120ConnectPDU::Read(H323Transport & transport)
+PBoolean T120ConnectPDU::Read(H323Transport & transport)
 {
   if (!x224.Read(transport))
     return FALSE;
@@ -143,7 +146,7 @@ BOOL T120ConnectPDU::Read(H323Transport & transport)
 }
 
 
-BOOL T120ConnectPDU::Write(H323Transport & transport)
+PBoolean T120ConnectPDU::Write(H323Transport & transport)
 {
   PTRACE(4, "T120\tSending MCS Connect PDU:\n  " << setprecision(2) << *this);
 
@@ -162,7 +165,7 @@ OpalT120Protocol::OpalT120Protocol()
 }
 
 
-BOOL OpalT120Protocol::Originate(H323Transport & transport)
+PBoolean OpalT120Protocol::Originate(H323Transport & transport)
 {
   PTRACE(3, "T120\tOriginate, sending X224 CONNECT-REQUEST");
 
@@ -190,7 +193,7 @@ BOOL OpalT120Protocol::Originate(H323Transport & transport)
 }
 
 
-BOOL OpalT120Protocol::Answer(H323Transport & transport)
+PBoolean OpalT120Protocol::Answer(H323Transport & transport)
 {
   PTRACE(3, "T120\tAnswer, awaiting X224 CONNECT-REQUEST");
 
@@ -216,13 +219,13 @@ BOOL OpalT120Protocol::Answer(H323Transport & transport)
 }
 
 
-BOOL OpalT120Protocol::HandleConnect(const MCS_ConnectMCSPDU & /*pdu*/)
+PBoolean OpalT120Protocol::HandleConnect(const MCS_ConnectMCSPDU & /*pdu*/)
 {
   return TRUE;
 }
 
 
-BOOL OpalT120Protocol::HandleDomain(const MCS_DomainMCSPDU & /*pdu*/)
+PBoolean OpalT120Protocol::HandleDomain(const MCS_DomainMCSPDU & /*pdu*/)
 {
   return TRUE;
 }

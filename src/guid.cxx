@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:05  shorne
+ * First commit of h323plus
+ *
  * Revision 1.15  2003/04/15 03:04:08  robertj
  * Fixed string constructor being able to build non null GUID.
  *
@@ -151,7 +154,7 @@ OpalGloballyUniqueID::OpalGloballyUniqueID()
   theArray[9] = (BYTE)clockSequence;
 
   static PEthSocket::Address macAddress;
-  static BOOL needMacAddress = TRUE;
+  static PBoolean needMacAddress = TRUE;
   if (needMacAddress) {
     PIPSocket::InterfaceTable interfaces;
     if (PIPSocket::GetInterfaceTable(interfaces)) {
@@ -295,7 +298,7 @@ PString OpalGloballyUniqueID::AsString() const
 }
 
 
-BOOL OpalGloballyUniqueID::IsNULL() const
+PBoolean OpalGloballyUniqueID::IsNULL() const
 {
   PAssert(GetSize() == GUID_SIZE, "OpalGloballyUniqueID is invalid size");
 

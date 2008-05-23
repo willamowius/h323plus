@@ -19,6 +19,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2007/11/01 14:35:52  willamowius
+ * add newline at end of file
+ *
  * Revision 1.1  2007/08/06 20:51:05  shorne
  * First commit of h323plus
  *
@@ -82,7 +85,7 @@ H224_Frame::~H224_Frame()
 {
 }
 
-void H224_Frame::SetHighPriority(BOOL flag)
+void H224_Frame::SetHighPriority(PBoolean flag)
 {
   SetHighOrderAddressOctet(0x00);
 	
@@ -137,14 +140,14 @@ void H224_Frame::SetClientID(BYTE clientID)
   data[4] = clientID;
 }
 
-BOOL H224_Frame::GetBS() const
+PBoolean H224_Frame::GetBS() const
 {
   BYTE *data = GetInformationFieldPtr();
 	
   return (data[5] & 0x80) != 0;
 }
 
-void H224_Frame::SetBS(BOOL flag)
+void H224_Frame::SetBS(PBoolean flag)
 {
   BYTE *data = GetInformationFieldPtr();
 	
@@ -155,14 +158,14 @@ void H224_Frame::SetBS(BOOL flag)
   }
 }
 
-BOOL H224_Frame::GetES() const
+PBoolean H224_Frame::GetES() const
 {
   BYTE *data = GetInformationFieldPtr();
 	
   return (data[5] & 0x40) != 0;
 }
 
-void H224_Frame::SetES(BOOL flag)
+void H224_Frame::SetES(PBoolean flag)
 {
   BYTE *data = GetInformationFieldPtr();
 	
@@ -173,14 +176,14 @@ void H224_Frame::SetES(BOOL flag)
   }
 }
 
-BOOL H224_Frame::GetC1() const
+PBoolean H224_Frame::GetC1() const
 {
   BYTE *data = GetInformationFieldPtr();
 	
   return (data[5] & 0x20) != 0;
 }
 
-void H224_Frame::SetC1(BOOL flag)
+void H224_Frame::SetC1(PBoolean flag)
 {
   BYTE *data = GetInformationFieldPtr();
 	
@@ -191,14 +194,14 @@ void H224_Frame::SetC1(BOOL flag)
   }
 }
 
-BOOL H224_Frame::GetC0() const
+PBoolean H224_Frame::GetC0() const
 {
   BYTE *data = GetInformationFieldPtr();
 	
   return (data[5] & 0x10) != 0;
 }
 
-void H224_Frame::SetC0(BOOL flag)
+void H224_Frame::SetC0(PBoolean flag)
 {
   BYTE *data = GetInformationFieldPtr();
 	
@@ -224,10 +227,10 @@ void H224_Frame::SetSegmentNumber(BYTE segmentNumber)
   data[5] |= (segmentNumber & 0x0f);
 }
 
-BOOL H224_Frame::Decode(const BYTE *data, 
+PBoolean H224_Frame::Decode(const BYTE *data, 
 						PINDEX size)
 {
-  BOOL result = Q922_Frame::Decode(data, size);
+  PBoolean result = Q922_Frame::Decode(data, size);
 	
   if(result == FALSE) {
 	return FALSE;
@@ -321,7 +324,7 @@ void OpalH224Handler::StopReceive()
   }
 }
 
-BOOL OpalH224Handler::SendClientList()
+PBoolean OpalH224Handler::SendClientList()
 {
   PWaitAndSignal m(transmitMutex);
 	
@@ -356,7 +359,7 @@ BOOL OpalH224Handler::SendClientList()
   return TRUE;
 }
 
-BOOL OpalH224Handler::SendExtraCapabilities()
+PBoolean OpalH224Handler::SendExtraCapabilities()
 {
   PWaitAndSignal m(transmitMutex);
 	
@@ -369,7 +372,7 @@ BOOL OpalH224Handler::SendExtraCapabilities()
   return TRUE;
 }
 
-BOOL OpalH224Handler::SendClientListCommand()
+PBoolean OpalH224Handler::SendClientListCommand()
 {
   PWaitAndSignal m(transmitMutex);
 	
@@ -402,7 +405,7 @@ BOOL OpalH224Handler::SendClientListCommand()
   return TRUE;
 }
 
-BOOL OpalH224Handler::SendExtraCapabilitiesCommand(BYTE clientID)
+PBoolean OpalH224Handler::SendExtraCapabilitiesCommand(BYTE clientID)
 {
   PWaitAndSignal m(transmitMutex);
 	
@@ -440,7 +443,7 @@ BOOL OpalH224Handler::SendExtraCapabilitiesCommand(BYTE clientID)
   return TRUE;
 }
 
-BOOL OpalH224Handler::SendExtraCapabilitiesMessage(BYTE clientID, 
+PBoolean OpalH224Handler::SendExtraCapabilitiesMessage(BYTE clientID, 
 												   BYTE *data, PINDEX length)
 {	
   PWaitAndSignal m(transmitMutex);
@@ -483,7 +486,7 @@ BOOL OpalH224Handler::SendExtraCapabilitiesMessage(BYTE clientID,
   return TRUE;	
 }
 
-BOOL OpalH224Handler::TransmitClientFrame(BYTE clientID, H224_Frame & frame)
+PBoolean OpalH224Handler::TransmitClientFrame(BYTE clientID, H224_Frame & frame)
 {
   PWaitAndSignal m(transmitMutex);
 	
@@ -499,7 +502,7 @@ BOOL OpalH224Handler::TransmitClientFrame(BYTE clientID, H224_Frame & frame)
   return TRUE;
 }
 
-BOOL OpalH224Handler::OnReceivedFrame(H224_Frame & frame)
+PBoolean OpalH224Handler::OnReceivedFrame(H224_Frame & frame)
 {
   if(frame.GetDestinationTerminalAddress() != H224_BROADCAST) {
     // only broadcast frames are handled at the moment
@@ -519,7 +522,7 @@ BOOL OpalH224Handler::OnReceivedFrame(H224_Frame & frame)
   return TRUE;
 }
 
-BOOL OpalH224Handler::OnReceivedCMEMessage(H224_Frame & frame)
+PBoolean OpalH224Handler::OnReceivedCMEMessage(H224_Frame & frame)
 {
   BYTE *data = frame.GetClientDataPtr();
 	
@@ -546,7 +549,7 @@ BOOL OpalH224Handler::OnReceivedCMEMessage(H224_Frame & frame)
   return TRUE;
 }
 
-BOOL OpalH224Handler::OnReceivedClientList(H224_Frame & frame)
+PBoolean OpalH224Handler::OnReceivedClientList(H224_Frame & frame)
 {
   BYTE *data = frame.GetClientDataPtr();
 	
@@ -554,7 +557,7 @@ BOOL OpalH224Handler::OnReceivedClientList(H224_Frame & frame)
 	
   PINDEX i = 3;
 	
-  BOOL remoteHasH281 = FALSE;
+  PBoolean remoteHasH281 = FALSE;
 	
   while(numberOfClients > 0) {
 	  
@@ -578,13 +581,13 @@ BOOL OpalH224Handler::OnReceivedClientList(H224_Frame & frame)
   return TRUE;
 }
 
-BOOL OpalH224Handler::OnReceivedClientListCommand()
+PBoolean OpalH224Handler::OnReceivedClientListCommand()
 {
   SendClientList();
   return TRUE;
 }
 
-BOOL OpalH224Handler::OnReceivedExtraCapabilities(H224_Frame & frame)
+PBoolean OpalH224Handler::OnReceivedExtraCapabilities(H224_Frame & frame)
 {
   BYTE *data = frame.GetClientDataPtr();
 	
@@ -598,7 +601,7 @@ BOOL OpalH224Handler::OnReceivedExtraCapabilities(H224_Frame & frame)
   return TRUE;
 }
 
-BOOL OpalH224Handler::OnReceivedExtraCapabilitiesCommand()
+PBoolean OpalH224Handler::OnReceivedExtraCapabilitiesCommand()
 {
   SendExtraCapabilities();
   return TRUE;
@@ -663,7 +666,7 @@ void OpalH224ReceiverThread::Main()
     timestamp = packet.GetTimestamp();
 		
     if(h224Frame.Decode(packet.GetPayloadPtr(), packet.GetPayloadSize())) {
-      BOOL result = h224Handler->OnReceivedFrame(h224Frame);
+      PBoolean result = h224Handler->OnReceivedFrame(h224Frame);
 
       if(result == FALSE) {
         // FALSE indicates a serious problem, therefore the thread is closed

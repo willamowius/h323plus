@@ -23,6 +23,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:50  shorne
+ * First commit of h323plus
+ *
  * Revision 1.4  2003/01/07 07:53:00  craigs
  * Fixed problem with multi-frame G.723.1 packets
  *
@@ -66,7 +69,7 @@ class OpalRtpToWavFile : public PWAVFile
       const PString & filename
     );
 
-    virtual BOOL OnFirstPacket(RTP_DataFrame & frame);
+    virtual PBoolean OnFirstPacket(RTP_DataFrame & frame);
 
     const PNotifier & GetReceiveHandler() const { return receiveHandler; }
 

@@ -169,7 +169,7 @@ H235_Password & H235_Password::operator=(const PString & v)
 }
 
 
-H235_Password & H235_Password::operator=(const PWORDArray & v)
+H235_Password & H235_Password::operator=(const PWCharArray & v)
 {
   SetValue(v);
   return *this;
@@ -217,7 +217,7 @@ H235_Identifier & H235_Identifier::operator=(const PString & v)
 }
 
 
-H235_Identifier & H235_Identifier::operator=(const PWORDArray & v)
+H235_Identifier & H235_Identifier::operator=(const PWCharArray & v)
 {
   SetValue(v);
   return *this;
@@ -309,7 +309,7 @@ PINDEX H235_NonStandardParameter::GetDataLength() const
 }
 
 
-BOOL H235_NonStandardParameter::Decode(PASN_Stream & strm)
+PBoolean H235_NonStandardParameter::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -399,7 +399,7 @@ PINDEX H235_DHset::GetDataLength() const
 }
 
 
-BOOL H235_DHset::Decode(PASN_Stream & strm)
+PBoolean H235_DHset::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -491,7 +491,7 @@ PINDEX H235_ECpoint::GetDataLength() const
 }
 
 
-BOOL H235_ECpoint::Decode(PASN_Stream & strm)
+PBoolean H235_ECpoint::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -592,7 +592,7 @@ H235_ECKASDH::operator const H235_ECKASDH_eckasdh2 &() const
 }
 
 
-BOOL H235_ECKASDH::CreateObject()
+PBoolean H235_ECKASDH::CreateObject()
 {
   switch (tag) {
     case e_eckasdhp :
@@ -668,7 +668,7 @@ PINDEX H235_ECGDSASignature::GetDataLength() const
 }
 
 
-BOOL H235_ECGDSASignature::Decode(PASN_Stream & strm)
+PBoolean H235_ECGDSASignature::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -751,7 +751,7 @@ PINDEX H235_TypedCertificate::GetDataLength() const
 }
 
 
-BOOL H235_TypedCertificate::Decode(PASN_Stream & strm)
+PBoolean H235_TypedCertificate::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -806,7 +806,7 @@ H235_AuthenticationBES::H235_AuthenticationBES(unsigned tag, PASN_Object::TagCla
 }
 
 
-BOOL H235_AuthenticationBES::CreateObject()
+PBoolean H235_AuthenticationBES::CreateObject()
 {
   choice = (tag <= e_radius) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -894,7 +894,7 @@ H235_AuthenticationMechanism::operator const H235_AuthenticationBES &() const
 }
 
 
-BOOL H235_AuthenticationMechanism::CreateObject()
+PBoolean H235_AuthenticationMechanism::CreateObject()
 {
   switch (tag) {
     case e_dhExch :
@@ -954,7 +954,7 @@ H235_Element::H235_Element(unsigned tag, PASN_Object::TagClass tagClass)
 }
 
 
-BOOL H235_Element::CreateObject()
+PBoolean H235_Element::CreateObject()
 {
   switch (tag) {
     case e_octets :
@@ -1165,7 +1165,7 @@ PINDEX H235_Params::GetDataLength() const
 }
 
 
-BOOL H235_Params::Decode(PASN_Stream & strm)
+PBoolean H235_Params::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1271,7 +1271,7 @@ PINDEX H235_ReturnSig::GetDataLength() const
 }
 
 
-BOOL H235_ReturnSig::Decode(PASN_Stream & strm)
+PBoolean H235_ReturnSig::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1381,7 +1381,7 @@ PINDEX H235_KeySyncMaterial::GetDataLength() const
 }
 
 
-BOOL H235_KeySyncMaterial::Decode(PASN_Stream & strm)
+PBoolean H235_KeySyncMaterial::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1523,7 +1523,7 @@ PINDEX H235_V3KeySyncMaterial::GetDataLength() const
 }
 
 
-BOOL H235_V3KeySyncMaterial::Decode(PASN_Stream & strm)
+PBoolean H235_V3KeySyncMaterial::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1649,7 +1649,7 @@ PINDEX H235_ECKASDH_eckasdhp::GetDataLength() const
 }
 
 
-BOOL H235_ECKASDH_eckasdhp::Decode(PASN_Stream & strm)
+PBoolean H235_ECKASDH_eckasdhp::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1756,7 +1756,7 @@ PINDEX H235_ECKASDH_eckasdh2::GetDataLength() const
 }
 
 
-BOOL H235_ECKASDH_eckasdh2::Decode(PASN_Stream & strm)
+PBoolean H235_ECKASDH_eckasdh2::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1888,7 +1888,7 @@ PINDEX H235_ProfileElement::GetDataLength() const
 }
 
 
-BOOL H235_ProfileElement::Decode(PASN_Stream & strm)
+PBoolean H235_ProfileElement::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1992,7 +1992,7 @@ PINDEX H235_KeySignedMaterial::GetDataLength() const
 }
 
 
-BOOL H235_KeySignedMaterial::Decode(PASN_Stream & strm)
+PBoolean H235_KeySignedMaterial::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2115,7 +2115,7 @@ PINDEX H235_H235CertificateSignature::GetDataLength() const
 }
 
 
-BOOL H235_H235CertificateSignature::Decode(PASN_Stream & strm)
+PBoolean H235_H235CertificateSignature::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2267,7 +2267,7 @@ H235_H235Key::operator const H235_V3KeySyncMaterial &() const
 }
 
 
-BOOL H235_H235Key::CreateObject()
+PBoolean H235_H235Key::CreateObject()
 {
   switch (tag) {
     case e_secureChannel :
@@ -2399,7 +2399,7 @@ PINDEX H235_ClearToken::GetDataLength() const
 }
 
 
-BOOL H235_ClearToken::Decode(PASN_Stream & strm)
+PBoolean H235_ClearToken::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2644,7 +2644,7 @@ H235_CryptoToken::operator const H235_ENCRYPTED<H235_EncodedPwdCertToken> &() co
 }
 
 
-BOOL H235_CryptoToken::CreateObject()
+PBoolean H235_CryptoToken::CreateObject()
 {
   switch (tag) {
     case e_cryptoEncryptedToken :
@@ -2724,7 +2724,7 @@ PINDEX H235_CryptoToken_cryptoEncryptedToken::GetDataLength() const
 }
 
 
-BOOL H235_CryptoToken_cryptoEncryptedToken::Decode(PASN_Stream & strm)
+PBoolean H235_CryptoToken_cryptoEncryptedToken::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2807,7 +2807,7 @@ PINDEX H235_CryptoToken_cryptoSignedToken::GetDataLength() const
 }
 
 
-BOOL H235_CryptoToken_cryptoSignedToken::Decode(PASN_Stream & strm)
+PBoolean H235_CryptoToken_cryptoSignedToken::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2894,7 +2894,7 @@ PINDEX H235_CryptoToken_cryptoHashedToken::GetDataLength() const
 }
 
 
-BOOL H235_CryptoToken_cryptoHashedToken::Decode(PASN_Stream & strm)
+PBoolean H235_CryptoToken_cryptoHashedToken::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;

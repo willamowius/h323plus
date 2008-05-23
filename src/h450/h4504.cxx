@@ -121,7 +121,7 @@ H4504_MixedExtension::operator const H225_NonStandardParameter &() const
 }
 
 
-BOOL H4504_MixedExtension::CreateObject()
+PBoolean H4504_MixedExtension::CreateObject()
 {
   switch (tag) {
     case e_extension :
@@ -195,7 +195,7 @@ PINDEX H4504_Extension::GetDataLength() const
 }
 
 
-BOOL H4504_Extension::Decode(PASN_Stream & strm)
+PBoolean H4504_Extension::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -308,7 +308,7 @@ PINDEX H4504_HoldNotificArg::GetDataLength() const
 }
 
 
-BOOL H4504_HoldNotificArg::Decode(PASN_Stream & strm)
+PBoolean H4504_HoldNotificArg::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -388,7 +388,7 @@ PINDEX H4504_RetrieveNotificArg::GetDataLength() const
 }
 
 
-BOOL H4504_RetrieveNotificArg::Decode(PASN_Stream & strm)
+PBoolean H4504_RetrieveNotificArg::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -468,7 +468,7 @@ PINDEX H4504_RemoteHoldArg::GetDataLength() const
 }
 
 
-BOOL H4504_RemoteHoldArg::Decode(PASN_Stream & strm)
+PBoolean H4504_RemoteHoldArg::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -548,7 +548,7 @@ PINDEX H4504_RemoteHoldRes::GetDataLength() const
 }
 
 
-BOOL H4504_RemoteHoldRes::Decode(PASN_Stream & strm)
+PBoolean H4504_RemoteHoldRes::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -628,7 +628,7 @@ PINDEX H4504_RemoteRetrieveArg::GetDataLength() const
 }
 
 
-BOOL H4504_RemoteRetrieveArg::Decode(PASN_Stream & strm)
+PBoolean H4504_RemoteRetrieveArg::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -708,7 +708,7 @@ PINDEX H4504_RemoteRetrieveRes::GetDataLength() const
 }
 
 
-BOOL H4504_RemoteRetrieveRes::Decode(PASN_Stream & strm)
+PBoolean H4504_RemoteRetrieveRes::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;

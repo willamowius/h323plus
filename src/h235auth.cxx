@@ -24,6 +24,9 @@
  * Contributor(s): __________________________________
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:05  shorne
+ * First commit of h323plus
+ *
  * Revision 1.31.2.3  2007/07/19 19:56:10  shorne
  * added missiing secure signal PDU check
  *
@@ -193,7 +196,7 @@ void H235Authenticator::PrintOn(ostream & strm) const
 }
 
 
-BOOL H235Authenticator::PrepareTokens(PASN_Array & clearTokens,
+PBoolean H235Authenticator::PrepareTokens(PASN_Array & clearTokens,
                                       PASN_Array & cryptoTokens)
 {
   PWaitAndSignal m(mutex);
@@ -238,7 +241,7 @@ H225_CryptoH323Token * H235Authenticator::CreateCryptoToken()
 }
 
 
-BOOL H235Authenticator::Finalise(PBYTEArray & /*rawPDU*/)
+PBoolean H235Authenticator::Finalise(PBYTEArray & /*rawPDU*/)
 {
   return TRUE;
 }
@@ -286,29 +289,29 @@ H235Authenticator::ValidationResult H235Authenticator::ValidateCryptoToken(
 }
 
 
-BOOL H235Authenticator::UseGkAndEpIdentifiers() const
+PBoolean H235Authenticator::UseGkAndEpIdentifiers() const
 {
   return FALSE;
 }
 
 
-BOOL H235Authenticator::IsSecuredPDU(unsigned, BOOL) const
+PBoolean H235Authenticator::IsSecuredPDU(unsigned, PBoolean) const
 {
   return TRUE;
 }
 
-BOOL H235Authenticator::IsSecuredSignalPDU(unsigned, BOOL) const
+PBoolean H235Authenticator::IsSecuredSignalPDU(unsigned, PBoolean) const
 {
   return FALSE;
 }
 
-BOOL H235Authenticator::IsActive() const
+PBoolean H235Authenticator::IsActive() const
 {
   return enabled && !password;
 }
 
 
-BOOL H235Authenticator::AddCapability(unsigned mechanism,
+PBoolean H235Authenticator::AddCapability(unsigned mechanism,
                                       const PString & oid,
                                       H225_ArrayOf_AuthenticationMechanism & mechanisms,
                                       H225_ArrayOf_PASN_ObjectId & algorithmOIDs)
@@ -389,7 +392,7 @@ H235Authenticator::ValidationResult
                                        unsigned cryptoOptionalField,
                                        const PBYTEArray & rawPDU) const
 {
-  BOOL noneActive = TRUE;
+  PBoolean noneActive = TRUE;
   PINDEX i;
   for (i = 0; i < GetSize(); i++) {
     H235Authenticator & authenticator = (*this)[i];
@@ -507,7 +510,7 @@ H235Authenticator::ValidationResult
 
 ///////////////////////////////////////////////////////////////////////////////
 
-BOOL H235AuthenticatorList::HasUserName(PString UserName) const
+PBoolean H235AuthenticatorList::HasUserName(PString UserName) const
 {
 	for (PINDEX i = 0; i < GetSize(); i++) {
         H235AuthenticatorInfo & info = (*this)[i];
@@ -530,7 +533,7 @@ void H235AuthenticatorList::LoadPassword(PString UserName, PString & pass) const
 	}
 }
 
-void H235AuthenticatorList::Add(PString username, PString password, BOOL isHashed)
+void H235AuthenticatorList::Add(PString username, PString password, PBoolean isHashed)
 {
   H235AuthenticatorInfo * info = new H235AuthenticatorInfo(username,password,isHashed);
 
@@ -569,7 +572,7 @@ const PString key = AuthenticatorListHashKey;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-H235AuthenticatorInfo::H235AuthenticatorInfo(PString username,PString password,BOOL ishashed)
+H235AuthenticatorInfo::H235AuthenticatorInfo(PString username,PString password,PBoolean ishashed)
 	: UserName(username), Password(password), isHashed(ishashed)
 {
 }
@@ -602,9 +605,9 @@ const char * H235AuthSimpleMD5::GetName() const
 }
 
 
-static PWORDArray GetUCS2plusNULL(const PString & str)
+static PWCharArray GetUCS2plusNULL(const PString & str)
 {
-  PWORDArray ucs2 = str.AsUCS2();
+  PWCharArray ucs2 = str.AsUCS2();
   PINDEX len = ucs2.GetSize();
   if (len > 0 && ucs2[len-1] != 0)
     ucs2.SetSize(len+1);
@@ -731,7 +734,7 @@ H235Authenticator::ValidationResult H235AuthSimpleMD5::ValidateCryptoToken(
 }
 
 
-BOOL H235AuthSimpleMD5::IsCapability(const H235_AuthenticationMechanism & mechanism,
+PBoolean H235AuthSimpleMD5::IsCapability(const H235_AuthenticationMechanism & mechanism,
                                      const PASN_ObjectId & algorithmOID)
 {
   return mechanism.GetTag() == H235_AuthenticationMechanism::e_pwdHash &&
@@ -739,14 +742,14 @@ BOOL H235AuthSimpleMD5::IsCapability(const H235_AuthenticationMechanism & mechan
 }
 
 
-BOOL H235AuthSimpleMD5::SetCapability(H225_ArrayOf_AuthenticationMechanism & mechanisms,
+PBoolean H235AuthSimpleMD5::SetCapability(H225_ArrayOf_AuthenticationMechanism & mechanisms,
                                       H225_ArrayOf_PASN_ObjectId & algorithmOIDs)
 {
   return AddCapability(H235_AuthenticationMechanism::e_pwdHash, OID_MD5, mechanisms, algorithmOIDs);
 }
 
 
-BOOL H235AuthSimpleMD5::IsSecuredPDU(unsigned rasPDU, BOOL received) const
+PBoolean H235AuthSimpleMD5::IsSecuredPDU(unsigned rasPDU, PBoolean received) const
 {
   switch (rasPDU) {
     case H225_RasMessage::e_registrationRequest :
@@ -762,7 +765,7 @@ BOOL H235AuthSimpleMD5::IsSecuredPDU(unsigned rasPDU, BOOL received) const
   }
 }
 
-BOOL H235AuthSimpleMD5::IsSecuredSignalPDU(unsigned signalPDU, BOOL received) const
+PBoolean H235AuthSimpleMD5::IsSecuredSignalPDU(unsigned signalPDU, PBoolean received) const
 {
   switch (signalPDU) {
     case H225_H323_UU_PDU_h323_message_body::e_setup:       
@@ -916,7 +919,7 @@ H235Authenticator::ValidationResult
 }
 
 
-BOOL H235AuthCAT::IsCapability(const H235_AuthenticationMechanism & mechanism,
+PBoolean H235AuthCAT::IsCapability(const H235_AuthenticationMechanism & mechanism,
                                      const PASN_ObjectId & algorithmOID)
 {
   if (mechanism.GetTag() != H235_AuthenticationMechanism::e_authenticationBES ||
@@ -928,7 +931,7 @@ BOOL H235AuthCAT::IsCapability(const H235_AuthenticationMechanism & mechanism,
 }
 
 
-BOOL H235AuthCAT::SetCapability(H225_ArrayOf_AuthenticationMechanism & mechanisms,
+PBoolean H235AuthCAT::SetCapability(H225_ArrayOf_AuthenticationMechanism & mechanisms,
                                 H225_ArrayOf_PASN_ObjectId & algorithmOIDs)
 {
   if (!AddCapability(H235_AuthenticationMechanism::e_authenticationBES, OID_CAT,
@@ -941,7 +944,7 @@ BOOL H235AuthCAT::SetCapability(H225_ArrayOf_AuthenticationMechanism & mechanism
 }
 
 
-BOOL H235AuthCAT::IsSecuredPDU(unsigned rasPDU, BOOL received) const
+PBoolean H235AuthCAT::IsSecuredPDU(unsigned rasPDU, PBoolean received) const
 {
   switch (rasPDU) {
     case H225_RasMessage::e_registrationRequest :

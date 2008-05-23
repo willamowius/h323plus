@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/01/05 11:36:01  shorne
+ * More Fixes for Linux
+ *
  * Revision 1.2  2008/01/05 07:11:39  shorne
  * Major overhaul of H.341 code
  *
@@ -69,13 +72,13 @@ H323_H341Server::~H323_H341Server()
 }
 
 
-static BOOL ValidateOID(H323_H341Server::messagetype reqType,
+static PBoolean ValidateOID(H323_H341Server::messagetype reqType,
 						        PSNMP::BindingList & varlist,
 								PSNMP::ErrorType & errCode)
 {
 
     PSNMP::BindingList::const_iterator Iter = varlist.begin();
-    BOOL found = FALSE;
+    PBoolean found = FALSE;
     do {
      for (Iter = varlist.begin(); Iter != varlist.end(); ++Iter) {
        for (PINDEX i = 0; i< PARRAYSIZE(H341_Field); i++) {
@@ -125,7 +128,7 @@ static BOOL ValidateOID(H323_H341Server::messagetype reqType,
     return TRUE;
 }
 
-BOOL H323_H341Server::OnGetRequest(PINDEX /*reqID*/, PSNMP::BindingList & vars, PSNMP::ErrorType & errCode)
+PBoolean H323_H341Server::OnGetRequest(PINDEX /*reqID*/, PSNMP::BindingList & vars, PSNMP::ErrorType & errCode)
 {
 	messagetype reqType = H323_H341Server::e_request;
 	if (!ValidateOID(reqType,vars, errCode))
@@ -135,7 +138,7 @@ BOOL H323_H341Server::OnGetRequest(PINDEX /*reqID*/, PSNMP::BindingList & vars, 
 
 }
 
-BOOL H323_H341Server::OnGetNextRequest(PINDEX /*reqID*/, PSNMP::BindingList & vars, PSNMP::ErrorType & errCode)
+PBoolean H323_H341Server::OnGetNextRequest(PINDEX /*reqID*/, PSNMP::BindingList & vars, PSNMP::ErrorType & errCode)
 {
 	messagetype reqType = H323_H341Server::e_nextrequest;
 	if (!ValidateOID(reqType,vars, errCode))
@@ -144,7 +147,7 @@ BOOL H323_H341Server::OnGetNextRequest(PINDEX /*reqID*/, PSNMP::BindingList & va
 	return OnRequest(reqType, vars,errCode);
 }
 
-BOOL H323_H341Server::OnSetRequest(PINDEX /*reqID*/, PSNMP::BindingList & vars, PSNMP::ErrorType & errCode)
+PBoolean H323_H341Server::OnSetRequest(PINDEX /*reqID*/, PSNMP::BindingList & vars, PSNMP::ErrorType & errCode)
 {
 	messagetype reqType = H323_H341Server::e_set;
 	if (!ValidateOID(reqType,vars, errCode))

@@ -773,7 +773,7 @@ H501_MessageBody::operator const H501_AuthenticationRejection &() const
 }
 
 
-BOOL H501_MessageBody::CreateObject()
+PBoolean H501_MessageBody::CreateObject()
 {
   switch (tag) {
     case e_serviceRequest :
@@ -918,7 +918,7 @@ H501_ServiceRejectionReason::H501_ServiceRejectionReason(unsigned tag, PASN_Obje
 }
 
 
-BOOL H501_ServiceRejectionReason::CreateObject()
+PBoolean H501_ServiceRejectionReason::CreateObject()
 {
   choice = (tag <= e_unknownUsageSendTo) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -957,7 +957,7 @@ H501_ServiceReleaseReason::H501_ServiceReleaseReason(unsigned tag, PASN_Object::
 }
 
 
-BOOL H501_ServiceReleaseReason::CreateObject()
+PBoolean H501_ServiceReleaseReason::CreateObject()
 {
   choice = (tag <= e_expired) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -1001,7 +1001,7 @@ H501_DescriptorRejectionReason::H501_DescriptorRejectionReason(unsigned tag, PAS
 }
 
 
-BOOL H501_DescriptorRejectionReason::CreateObject()
+PBoolean H501_DescriptorRejectionReason::CreateObject()
 {
   choice = (tag <= e_unknownServiceID) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -1044,7 +1044,7 @@ PINDEX H501_DescriptorIDRequest::GetDataLength() const
 }
 
 
-BOOL H501_DescriptorIDRequest::Decode(PASN_Stream & strm)
+PBoolean H501_DescriptorIDRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1099,7 +1099,7 @@ H501_DescriptorIDRejectionReason::H501_DescriptorIDRejectionReason(unsigned tag,
 }
 
 
-BOOL H501_DescriptorIDRejectionReason::CreateObject()
+PBoolean H501_DescriptorIDRejectionReason::CreateObject()
 {
   choice = (tag <= e_unknownServiceID) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -1142,7 +1142,7 @@ PINDEX H501_DescriptorUpdateAck::GetDataLength() const
 }
 
 
-BOOL H501_DescriptorUpdateAck::Decode(PASN_Stream & strm)
+PBoolean H501_DescriptorUpdateAck::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1206,7 +1206,7 @@ H501_AccessRejectionReason::H501_AccessRejectionReason(unsigned tag, PASN_Object
 }
 
 
-BOOL H501_AccessRejectionReason::CreateObject()
+PBoolean H501_AccessRejectionReason::CreateObject()
 {
   choice = (tag <= e_unknownUsageSendTo) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -1249,7 +1249,7 @@ PINDEX H501_UsageConfirmation::GetDataLength() const
 }
 
 
-BOOL H501_UsageConfirmation::Decode(PASN_Stream & strm)
+PBoolean H501_UsageConfirmation::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1326,7 +1326,7 @@ PINDEX H501_UsageField::GetDataLength() const
 }
 
 
-BOOL H501_UsageField::Decode(PASN_Stream & strm)
+PBoolean H501_UsageField::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1387,7 +1387,7 @@ H501_UsageRejectReason::H501_UsageRejectReason(unsigned tag, PASN_Object::TagCla
 }
 
 
-BOOL H501_UsageRejectReason::CreateObject()
+PBoolean H501_UsageRejectReason::CreateObject()
 {
   choice = (tag <= e_unknownServiceID) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -1430,7 +1430,7 @@ PINDEX H501_UsageIndicationConfirmation::GetDataLength() const
 }
 
 
-BOOL H501_UsageIndicationConfirmation::Decode(PASN_Stream & strm)
+PBoolean H501_UsageIndicationConfirmation::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1485,7 +1485,7 @@ H501_UsageIndicationRejectionReason::H501_UsageIndicationRejectionReason(unsigne
 }
 
 
-BOOL H501_UsageIndicationRejectionReason::CreateObject()
+PBoolean H501_UsageIndicationRejectionReason::CreateObject()
 {
   choice = (tag <= e_unknownServiceID) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -1530,7 +1530,7 @@ H501_ValidationRejectionReason::H501_ValidationRejectionReason(unsigned tag, PAS
 }
 
 
-BOOL H501_ValidationRejectionReason::CreateObject()
+PBoolean H501_ValidationRejectionReason::CreateObject()
 {
   choice = (tag <= e_unknownServiceID) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -1573,7 +1573,7 @@ PINDEX H501_NonStandardRequest::GetDataLength() const
 }
 
 
-BOOL H501_NonStandardRequest::Decode(PASN_Stream & strm)
+PBoolean H501_NonStandardRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1628,7 +1628,7 @@ PINDEX H501_NonStandardConfirmation::GetDataLength() const
 }
 
 
-BOOL H501_NonStandardConfirmation::Decode(PASN_Stream & strm)
+PBoolean H501_NonStandardConfirmation::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1681,7 +1681,7 @@ H501_NonStandardRejectionReason::H501_NonStandardRejectionReason(unsigned tag, P
 }
 
 
-BOOL H501_NonStandardRejectionReason::CreateObject()
+PBoolean H501_NonStandardRejectionReason::CreateObject()
 {
   choice = (tag <= e_unknownServiceID) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -1718,7 +1718,7 @@ H501_UnknownMessageReason::H501_UnknownMessageReason(unsigned tag, PASN_Object::
 }
 
 
-BOOL H501_UnknownMessageReason::CreateObject()
+PBoolean H501_UnknownMessageReason::CreateObject()
 {
   choice = (tag <= e_undefined) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -1819,7 +1819,7 @@ PINDEX H501_AuthenticationConfirmation::GetDataLength() const
 }
 
 
-BOOL H501_AuthenticationConfirmation::Decode(PASN_Stream & strm)
+PBoolean H501_AuthenticationConfirmation::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1879,7 +1879,7 @@ H501_AuthenticationRejectionReason::H501_AuthenticationRejectionReason(unsigned 
 }
 
 
-BOOL H501_AuthenticationRejectionReason::CreateObject()
+PBoolean H501_AuthenticationRejectionReason::CreateObject()
 {
   choice = (tag <= e_securityWrongOID) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -1961,7 +1961,7 @@ H501_Pattern::operator const H501_Pattern_range &() const
 }
 
 
-BOOL H501_Pattern::CreateObject()
+PBoolean H501_Pattern::CreateObject()
 {
   switch (tag) {
     case e_specific :
@@ -2075,7 +2075,7 @@ H501_AccessToken::operator const H225_GenericData &() const
 }
 
 
-BOOL H501_AccessToken::CreateObject()
+PBoolean H501_AccessToken::CreateObject()
 {
   switch (tag) {
     case e_token :
@@ -2154,7 +2154,7 @@ PINDEX H501_CallInformation::GetDataLength() const
 }
 
 
-BOOL H501_CallInformation::Decode(PASN_Stream & strm)
+PBoolean H501_CallInformation::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2214,7 +2214,7 @@ H501_UsageCallStatus::H501_UsageCallStatus(unsigned tag, PASN_Object::TagClass t
 }
 
 
-BOOL H501_UsageCallStatus::CreateObject()
+PBoolean H501_UsageCallStatus::CreateObject()
 {
   choice = (tag <= e_registrationLost) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -2274,7 +2274,7 @@ H501_Role::operator const H225_NonStandardParameter &() const
 }
 
 
-BOOL H501_Role::CreateObject()
+PBoolean H501_Role::CreateObject()
 {
   switch (tag) {
     case e_originator :
@@ -2392,7 +2392,7 @@ PINDEX H501_TerminationCause::GetDataLength() const
 }
 
 
-BOOL H501_TerminationCause::Decode(PASN_Stream & strm)
+PBoolean H501_TerminationCause::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2475,7 +2475,7 @@ H501_ElementIdentifier & H501_ElementIdentifier::operator=(const PString & v)
 }
 
 
-H501_ElementIdentifier & H501_ElementIdentifier::operator=(const PWORDArray & v)
+H501_ElementIdentifier & H501_ElementIdentifier::operator=(const PWCharArray & v)
 {
   SetValue(v);
   return *this;
@@ -2938,7 +2938,7 @@ H501_UpdateInformation_descriptorInfo::operator const H501_Descriptor &() const
 }
 
 
-BOOL H501_UpdateInformation_descriptorInfo::CreateObject()
+PBoolean H501_UpdateInformation_descriptorInfo::CreateObject()
 {
   switch (tag) {
     case e_descriptorID :
@@ -2985,7 +2985,7 @@ H501_UpdateInformation_updateType::H501_UpdateInformation_updateType(unsigned ta
 }
 
 
-BOOL H501_UpdateInformation_updateType::CreateObject()
+PBoolean H501_UpdateInformation_updateType::CreateObject()
 {
   choice = (tag <= e_changed) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -3267,7 +3267,7 @@ PINDEX H501_Pattern_range::GetDataLength() const
 }
 
 
-BOOL H501_Pattern_range::Decode(PASN_Stream & strm)
+PBoolean H501_Pattern_range::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3323,7 +3323,7 @@ H501_RouteInformation_messageType::H501_RouteInformation_messageType(unsigned ta
 }
 
 
-BOOL H501_RouteInformation_messageType::CreateObject()
+PBoolean H501_RouteInformation_messageType::CreateObject()
 {
   choice = (tag <= e_nonExistent) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -3488,7 +3488,7 @@ H501_PriceElement_units::H501_PriceElement_units(unsigned tag, PASN_Object::TagC
 }
 
 
-BOOL H501_PriceElement_units::CreateObject()
+PBoolean H501_PriceElement_units::CreateObject()
 {
   choice = (tag <= e_maximum) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -3607,7 +3607,7 @@ PINDEX H501_UsageSpecification_when::GetDataLength() const
 }
 
 
-BOOL H501_UsageSpecification_when::Decode(PASN_Stream & strm)
+PBoolean H501_UsageSpecification_when::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3780,7 +3780,7 @@ PINDEX H501_MessageCommonInfo::GetDataLength() const
 }
 
 
-BOOL H501_MessageCommonInfo::Decode(PASN_Stream & strm)
+PBoolean H501_MessageCommonInfo::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3908,7 +3908,7 @@ PINDEX H501_SecurityMode::GetDataLength() const
 }
 
 
-BOOL H501_SecurityMode::Decode(PASN_Stream & strm)
+PBoolean H501_SecurityMode::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3993,7 +3993,7 @@ PINDEX H501_DescriptorRequest::GetDataLength() const
 }
 
 
-BOOL H501_DescriptorRequest::Decode(PASN_Stream & strm)
+PBoolean H501_DescriptorRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4069,7 +4069,7 @@ PINDEX H501_DescriptorConfirmation::GetDataLength() const
 }
 
 
-BOOL H501_DescriptorConfirmation::Decode(PASN_Stream & strm)
+PBoolean H501_DescriptorConfirmation::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4151,7 +4151,7 @@ PINDEX H501_DescriptorRejection::GetDataLength() const
 }
 
 
-BOOL H501_DescriptorRejection::Decode(PASN_Stream & strm)
+PBoolean H501_DescriptorRejection::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4231,7 +4231,7 @@ PINDEX H501_DescriptorIDConfirmation::GetDataLength() const
 }
 
 
-BOOL H501_DescriptorIDConfirmation::Decode(PASN_Stream & strm)
+PBoolean H501_DescriptorIDConfirmation::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4307,7 +4307,7 @@ PINDEX H501_DescriptorIDRejection::GetDataLength() const
 }
 
 
-BOOL H501_DescriptorIDRejection::Decode(PASN_Stream & strm)
+PBoolean H501_DescriptorIDRejection::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4387,7 +4387,7 @@ PINDEX H501_DescriptorUpdate::GetDataLength() const
 }
 
 
-BOOL H501_DescriptorUpdate::Decode(PASN_Stream & strm)
+PBoolean H501_DescriptorUpdate::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4470,7 +4470,7 @@ PINDEX H501_UpdateInformation::GetDataLength() const
 }
 
 
-BOOL H501_UpdateInformation::Decode(PASN_Stream & strm)
+PBoolean H501_UpdateInformation::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4557,7 +4557,7 @@ PINDEX H501_AccessConfirmation::GetDataLength() const
 }
 
 
-BOOL H501_AccessConfirmation::Decode(PASN_Stream & strm)
+PBoolean H501_AccessConfirmation::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4644,7 +4644,7 @@ PINDEX H501_AccessRejection::GetDataLength() const
 }
 
 
-BOOL H501_AccessRejection::Decode(PASN_Stream & strm)
+PBoolean H501_AccessRejection::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4723,7 +4723,7 @@ PINDEX H501_UsageRejection::GetDataLength() const
 }
 
 
-BOOL H501_UsageRejection::Decode(PASN_Stream & strm)
+PBoolean H501_UsageRejection::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4799,7 +4799,7 @@ PINDEX H501_UsageIndicationRejection::GetDataLength() const
 }
 
 
-BOOL H501_UsageIndicationRejection::Decode(PASN_Stream & strm)
+PBoolean H501_UsageIndicationRejection::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4875,7 +4875,7 @@ PINDEX H501_ValidationRejection::GetDataLength() const
 }
 
 
-BOOL H501_ValidationRejection::Decode(PASN_Stream & strm)
+PBoolean H501_ValidationRejection::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4954,7 +4954,7 @@ PINDEX H501_RequestInProgress::GetDataLength() const
 }
 
 
-BOOL H501_RequestInProgress::Decode(PASN_Stream & strm)
+PBoolean H501_RequestInProgress::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5033,7 +5033,7 @@ PINDEX H501_NonStandardRejection::GetDataLength() const
 }
 
 
-BOOL H501_NonStandardRejection::Decode(PASN_Stream & strm)
+PBoolean H501_NonStandardRejection::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5113,7 +5113,7 @@ PINDEX H501_UnknownMessageResponse::GetDataLength() const
 }
 
 
-BOOL H501_UnknownMessageResponse::Decode(PASN_Stream & strm)
+PBoolean H501_UnknownMessageResponse::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5192,7 +5192,7 @@ PINDEX H501_AuthenticationRequest::GetDataLength() const
 }
 
 
-BOOL H501_AuthenticationRequest::Decode(PASN_Stream & strm)
+PBoolean H501_AuthenticationRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5268,7 +5268,7 @@ PINDEX H501_AuthenticationRejection::GetDataLength() const
 }
 
 
-BOOL H501_AuthenticationRejection::Decode(PASN_Stream & strm)
+PBoolean H501_AuthenticationRejection::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5357,7 +5357,7 @@ PINDEX H501_AddressTemplate::GetDataLength() const
 }
 
 
-BOOL H501_AddressTemplate::Decode(PASN_Stream & strm)
+PBoolean H501_AddressTemplate::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5476,7 +5476,7 @@ PINDEX H501_ContactInformation::GetDataLength() const
 }
 
 
-BOOL H501_ContactInformation::Decode(PASN_Stream & strm)
+PBoolean H501_ContactInformation::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5624,7 +5624,7 @@ PINDEX H501_PriceInfoSpec::GetDataLength() const
 }
 
 
-BOOL H501_PriceInfoSpec::Decode(PASN_Stream & strm)
+PBoolean H501_PriceInfoSpec::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5737,7 +5737,7 @@ PINDEX H501_PriceElement::GetDataLength() const
 }
 
 
-BOOL H501_PriceElement::Decode(PASN_Stream & strm)
+PBoolean H501_PriceElement::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5823,7 +5823,7 @@ PINDEX H501_DescriptorInfo::GetDataLength() const
 }
 
 
-BOOL H501_DescriptorInfo::Decode(PASN_Stream & strm)
+PBoolean H501_DescriptorInfo::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5906,7 +5906,7 @@ PINDEX H501_AlternatePEInfo::GetDataLength() const
 }
 
 
-BOOL H501_AlternatePEInfo::Decode(PASN_Stream & strm)
+PBoolean H501_AlternatePEInfo::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5996,7 +5996,7 @@ PINDEX H501_AlternatePE::GetDataLength() const
 }
 
 
-BOOL H501_AlternatePE::Decode(PASN_Stream & strm)
+PBoolean H501_AlternatePE::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6085,7 +6085,7 @@ PINDEX H501_UserInformation::GetDataLength() const
 }
 
 
-BOOL H501_UserInformation::Decode(PASN_Stream & strm)
+PBoolean H501_UserInformation::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6179,7 +6179,7 @@ PINDEX H501_UsageSpecification::GetDataLength() const
 }
 
 
-BOOL H501_UsageSpecification::Decode(PASN_Stream & strm)
+PBoolean H501_UsageSpecification::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6297,7 +6297,7 @@ PINDEX H501_PartyInformation::GetDataLength() const
 }
 
 
-BOOL H501_PartyInformation::Decode(PASN_Stream & strm)
+PBoolean H501_PartyInformation::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6397,7 +6397,7 @@ PINDEX H501_Message::GetDataLength() const
 }
 
 
-BOOL H501_Message::Decode(PASN_Stream & strm)
+PBoolean H501_Message::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6499,7 +6499,7 @@ PINDEX H501_ServiceRequest::GetDataLength() const
 }
 
 
-BOOL H501_ServiceRequest::Decode(PASN_Stream & strm)
+PBoolean H501_ServiceRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6616,7 +6616,7 @@ PINDEX H501_ServiceConfirmation::GetDataLength() const
 }
 
 
-BOOL H501_ServiceConfirmation::Decode(PASN_Stream & strm)
+PBoolean H501_ServiceConfirmation::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6716,7 +6716,7 @@ PINDEX H501_ServiceRejection::GetDataLength() const
 }
 
 
-BOOL H501_ServiceRejection::Decode(PASN_Stream & strm)
+PBoolean H501_ServiceRejection::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6802,7 +6802,7 @@ PINDEX H501_ServiceRelease::GetDataLength() const
 }
 
 
-BOOL H501_ServiceRelease::Decode(PASN_Stream & strm)
+PBoolean H501_ServiceRelease::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6902,7 +6902,7 @@ PINDEX H501_AccessRequest::GetDataLength() const
 }
 
 
-BOOL H501_AccessRequest::Decode(PASN_Stream & strm)
+PBoolean H501_AccessRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6997,7 +6997,7 @@ PINDEX H501_UsageRequest::GetDataLength() const
 }
 
 
-BOOL H501_UsageRequest::Decode(PASN_Stream & strm)
+PBoolean H501_UsageRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7122,7 +7122,7 @@ PINDEX H501_UsageIndication::GetDataLength() const
 }
 
 
-BOOL H501_UsageIndication::Decode(PASN_Stream & strm)
+PBoolean H501_UsageIndication::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7254,7 +7254,7 @@ PINDEX H501_ValidationRequest::GetDataLength() const
 }
 
 
-BOOL H501_ValidationRequest::Decode(PASN_Stream & strm)
+PBoolean H501_ValidationRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7354,7 +7354,7 @@ PINDEX H501_ValidationConfirmation::GetDataLength() const
 }
 
 
-BOOL H501_ValidationConfirmation::Decode(PASN_Stream & strm)
+PBoolean H501_ValidationConfirmation::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7467,7 +7467,7 @@ PINDEX H501_RouteInformation::GetDataLength() const
 }
 
 
-BOOL H501_RouteInformation::Decode(PASN_Stream & strm)
+PBoolean H501_RouteInformation::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7580,7 +7580,7 @@ PINDEX H501_Descriptor::GetDataLength() const
 }
 
 
-BOOL H501_Descriptor::Decode(PASN_Stream & strm)
+PBoolean H501_Descriptor::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;

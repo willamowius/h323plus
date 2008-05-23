@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2008/01/05 11:35:59  shorne
+ * More Fixes for Linux
+ *
  * Revision 1.3  2008/01/05 07:11:39  shorne
  * Major overhaul of H.341 code
  *
@@ -68,15 +71,15 @@ class H323_H341Server : public PSNMPServer
    };
  
     // Inherited from PSNMPServer
-    BOOL OnGetRequest     (PINDEX reqID, PSNMP::BindingList & vars, PSNMP::ErrorType & errCode);
-    BOOL OnGetNextRequest (PINDEX reqID, PSNMP::BindingList & vars, PSNMP::ErrorType & errCode);
-    BOOL OnSetRequest     (PINDEX reqID, PSNMP::BindingList & vars, PSNMP::ErrorType & errCode);
+    PBoolean OnGetRequest     (PINDEX reqID, PSNMP::BindingList & vars, PSNMP::ErrorType & errCode);
+    PBoolean OnGetNextRequest (PINDEX reqID, PSNMP::BindingList & vars, PSNMP::ErrorType & errCode);
+    PBoolean OnSetRequest     (PINDEX reqID, PSNMP::BindingList & vars, PSNMP::ErrorType & errCode);
 
     //Events
-    virtual BOOL Authorise(const PIPSocket::Address & /*received*/) 
+    virtual PBoolean Authorise(const PIPSocket::Address & /*received*/) 
 				                             { return FALSE; }
 
-	virtual BOOL OnRequest(H323_H341Server::messagetype /*msgtype*/, 
+	virtual PBoolean OnRequest(H323_H341Server::messagetype /*msgtype*/, 
 		                              PSNMP::BindingList & /*vars*/,
 						                PSNMP::ErrorType & /*errCode*/) 
 	                                          { return FALSE; }

@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:07  shorne
+ * First commit of h323plus
+ *
  * Revision 1.22  2004/07/15 11:20:38  rjongbloed
  * Migrated changes from crs_vxnml_devel branch into main trunk
  *
@@ -151,7 +154,7 @@ PString G7231_File_Capability::GetFormatName() const
   return "G.723.1{file}";
 }
 
-BOOL G7231_File_Capability::OnSendingPDU(H245_AudioCapability & cap, unsigned packetSize) const
+PBoolean G7231_File_Capability::OnSendingPDU(H245_AudioCapability & cap, unsigned packetSize) const
 {
   // set the choice to the correct type
   cap.SetTag(GetSubType());
@@ -168,7 +171,7 @@ BOOL G7231_File_Capability::OnSendingPDU(H245_AudioCapability & cap, unsigned pa
   return TRUE;
 }
 
-BOOL G7231_File_Capability::OnReceivedPDU(const H245_AudioCapability & cap, unsigned & packetSize)
+PBoolean G7231_File_Capability::OnReceivedPDU(const H245_AudioCapability & cap, unsigned & packetSize)
 {
   const H245_AudioCapability_g7231 & g7231 = cap;
   packetSize = g7231.m_maxAl_sduAudioFrames;
@@ -200,7 +203,7 @@ int G7231_File_Codec::GetFrameLen(int val)
   return frameLen[val & 3];
 }
 
-BOOL G7231_File_Codec::Read(BYTE * buffer, unsigned & length, RTP_DataFrame &)
+PBoolean G7231_File_Codec::Read(BYTE * buffer, unsigned & length, RTP_DataFrame &)
 {
   if (rawDataChannel == NULL)
     return FALSE;
@@ -216,7 +219,7 @@ BOOL G7231_File_Codec::Read(BYTE * buffer, unsigned & length, RTP_DataFrame &)
 }
 
 
-BOOL G7231_File_Codec::Write(const BYTE * buffer,
+PBoolean G7231_File_Codec::Write(const BYTE * buffer,
                              unsigned length,
                              const RTP_DataFrame & /* rtp */,
                              unsigned & writtenLength)
@@ -268,7 +271,7 @@ unsigned G7231_File_Codec::GetBandwidth() const
 }
 
 
-BOOL G7231_File_Codec::IsRawDataChannelNative() const
+PBoolean G7231_File_Codec::IsRawDataChannelNative() const
 {
   return TRUE;
 }
@@ -285,15 +288,15 @@ unsigned G7231_File_Codec::GetAverageSignalLevel()
 
 #if P_EXPAT
 
-OpalVXMLSession::OpalVXMLSession(H323Connection * _conn, PTextToSpeech * tts, BOOL autoDelete)
+OpalVXMLSession::OpalVXMLSession(H323Connection * _conn, PTextToSpeech * tts, PBoolean autoDelete)
   : PVXMLSession(tts, autoDelete), conn(_conn)
 {
 }
 
 
-BOOL OpalVXMLSession::Close()
+PBoolean OpalVXMLSession::Close()
 {
-  BOOL ok = PVXMLSession::Close();
+  PBoolean ok = PVXMLSession::Close();
   conn->ClearCall();
   return ok;
 }

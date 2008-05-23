@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/02/06 02:52:59  shorne
+ * Added support for Standards based NAT Traversal
+ *
  * Revision 1.2  2007/10/16 17:03:54  shorne
  * Qos capability negotiation
  *
@@ -437,7 +440,7 @@ const unsigned SecondsFrom1900to1970 = (70*365+17)*24*60*60U;
 
 /////////////////////////////////////////////////////////////////////////////
 
-RTP_DataFrame::RTP_DataFrame(PINDEX sz, BOOL dynamicAllocation)
+RTP_DataFrame::RTP_DataFrame(PINDEX sz, PBoolean dynamicAllocation)
   : PBYTEArray(MIN_HEADER_SIZE+sz)
 {
   payloadSize = sz;
@@ -446,7 +449,7 @@ RTP_DataFrame::RTP_DataFrame(PINDEX sz, BOOL dynamicAllocation)
 }
 
 
-void RTP_DataFrame::SetExtension(BOOL ext)
+void RTP_DataFrame::SetExtension(PBoolean ext)
 {
   if (ext)
     theArray[0] |= 0x10;
@@ -455,7 +458,7 @@ void RTP_DataFrame::SetExtension(BOOL ext)
 }
 
 
-void RTP_DataFrame::SetMarker(BOOL m)
+void RTP_DataFrame::SetMarker(PBoolean m)
 {
   if (m)
     theArray[1] |= 0x80;
@@ -537,7 +540,7 @@ PINDEX RTP_DataFrame::GetExtensionSize() const
 }
 
 
-BOOL RTP_DataFrame::SetExtensionSize(PINDEX sz)
+PBoolean RTP_DataFrame::SetExtensionSize(PINDEX sz)
 {
   if (!SetMinSize(MIN_HEADER_SIZE + 4*GetContribSrcCount() + 4+4*sz + payloadSize))
     return FALSE;
@@ -557,7 +560,7 @@ BYTE * RTP_DataFrame::GetExtensionPtr() const
 }
 
 
-BOOL RTP_DataFrame::SetPayloadSize(PINDEX sz)
+PBoolean RTP_DataFrame::SetPayloadSize(PINDEX sz)
 {
   payloadSize = sz;
   return SetMinSize(GetHeaderSize()+payloadSize);
@@ -645,7 +648,7 @@ void RTP_ControlFrame::SetPayloadSize(PINDEX sz)
 }
 
 
-BOOL RTP_ControlFrame::ReadNextCompound()
+PBoolean RTP_ControlFrame::ReadNextCompound()
 {
   compoundOffset += GetPayloadSize()+4;
   if (compoundOffset+4 > GetSize())
@@ -654,7 +657,7 @@ BOOL RTP_ControlFrame::ReadNextCompound()
 }
 
 
-BOOL RTP_ControlFrame::WriteNextCompound()
+PBoolean RTP_ControlFrame::WriteNextCompound()
 {
   compoundOffset += GetPayloadSize()+4;
   if (!SetMinSize(compoundOffset+4))
@@ -906,7 +909,7 @@ unsigned RTP_Session::GetJitterBufferSize() const
 }
 
 
-BOOL RTP_Session::ReadBufferedData(DWORD timestamp, RTP_DataFrame & frame)
+PBoolean RTP_Session::ReadBufferedData(DWORD timestamp, RTP_DataFrame & frame)
 {
 #ifndef NO_H323_AUDIO_CODECS
   if (jitter != NULL)
@@ -1171,7 +1174,7 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveData(const RTP_DataFrame & 
 }
 
 
-BOOL RTP_Session::SendReport()
+PBoolean RTP_Session::SendReport()
 {
   PWaitAndSignal mutex(reportMutex);
 
@@ -1585,7 +1588,7 @@ RTP_UDP::RTP_UDP(
 #ifdef H323_RTP_AGGREGATE
                  PHandleAggregator * _aggregator, 
 #endif
-                 unsigned id, BOOL _remoteIsNAT)
+                 unsigned id, PBoolean _remoteIsNAT)
   : RTP_Session(
 #ifdef H323_RTP_AGGREGATE
   _aggregator, 
@@ -1627,9 +1630,9 @@ void RTP_UDP::ApplyQOS(const PIPSocket::Address & addr)
 }
 
 
-BOOL RTP_UDP::ModifyQOS(RTP_QOS * rtpqos)
+PBoolean RTP_UDP::ModifyQOS(RTP_QOS * rtpqos)
 {
-  BOOL retval = FALSE;
+  PBoolean retval = FALSE;
 
   if (rtpqos == NULL)
     return retval;
@@ -1645,7 +1648,7 @@ BOOL RTP_UDP::ModifyQOS(RTP_QOS * rtpqos)
   return retval;
 }
 
-void RTP_UDP::EnableGQoS(BOOL success)
+void RTP_UDP::EnableGQoS(PBoolean success)
 {
 	enableGQOS = success;
 }
@@ -1662,7 +1665,7 @@ PQoS & RTP_UDP::GetQOS()
 }
 #endif
 
-BOOL RTP_UDP::Open(PIPSocket::Address _localAddress,
+PBoolean RTP_UDP::Open(PIPSocket::Address _localAddress,
                    WORD portBase, WORD portMax,
                    BYTE tos,
 				   const H323Connection & connection,
@@ -1747,7 +1750,7 @@ BOOL RTP_UDP::Open(PIPSocket::Address _localAddress,
 }
 
 
-void RTP_UDP::Reopen(BOOL reading)
+void RTP_UDP::Reopen(PBoolean reading)
 {
   if (reading)
     shutdownRead = FALSE;
@@ -1756,7 +1759,7 @@ void RTP_UDP::Reopen(BOOL reading)
 }
 
 
-void RTP_UDP::Close(BOOL reading)
+void RTP_UDP::Close(PBoolean reading)
 {
   if (reading) {
     if (!shutdownRead) {
@@ -1785,7 +1788,7 @@ PString RTP_UDP::GetLocalHostName()
 }
 
 
-BOOL RTP_UDP::SetRemoteSocketInfo(PIPSocket::Address address, WORD port, BOOL isDataPort)
+PBoolean RTP_UDP::SetRemoteSocketInfo(PIPSocket::Address address, WORD port, PBoolean isDataPort)
 {
   if (remoteIsNAT) {
     PTRACE(3, "RTP_UDP\tIgnoring remote socket info as remote is behind NAT");
@@ -1821,7 +1824,7 @@ BOOL RTP_UDP::SetRemoteSocketInfo(PIPSocket::Address address, WORD port, BOOL is
 }
 
 
-BOOL RTP_UDP::ReadData(RTP_DataFrame & frame, BOOL loop)
+PBoolean RTP_UDP::ReadData(RTP_DataFrame & frame, PBoolean loop)
 {
   do {
 #ifdef H323_RTP_AGGREGATE
@@ -1887,7 +1890,7 @@ BOOL RTP_UDP::ReadData(RTP_DataFrame & frame, BOOL loop)
 
 RTP_Session::SendReceiveStatus RTP_UDP::ReadDataOrControlPDU(PUDPSocket & socket,
                                                              PBYTEArray & frame,
-                                                             BOOL fromDataChannel)
+                                                             PBoolean fromDataChannel)
 {
 #if PTRACING
   const char * channelName = fromDataChannel ? "Data" : "Control";
@@ -1989,7 +1992,7 @@ RTP_Session::SendReceiveStatus RTP_UDP::ReadControlPDU()
 }
 
 
-BOOL RTP_UDP::WriteData(RTP_DataFrame & frame)
+PBoolean RTP_UDP::WriteData(RTP_DataFrame & frame)
 {
   if (shutdownWrite) {
     PTRACE(3, "RTP_UDP\tSession " << sessionID << ", Write shutdown.");
@@ -2032,7 +2035,7 @@ BOOL RTP_UDP::WriteData(RTP_DataFrame & frame)
 }
 
 
-BOOL RTP_UDP::WriteControl(RTP_ControlFrame & frame)
+PBoolean RTP_UDP::WriteControl(RTP_ControlFrame & frame)
 {
   // Trying to send a PDU before we are set up!
   if (!remoteAddress.IsValid() || remoteControlPort == 0)

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2008/02/20 03:07:43  shorne
+ * Added comma to allowable E164 numbers for T38Modem
+ *
  * Revision 1.4  2007/10/19 19:54:17  shorne
  * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
  *  Robert
@@ -586,7 +589,7 @@ static const char NSPNumberPrefix[] = "NSP:";
 
 #if PTRACING
 void H323TraceDumpPDU(const char * proto,
-                      BOOL writing,
+                      PBoolean writing,
                       const PBYTEArray & rawData,
                       const PASN_Object & pdu,
                       const PASN_Choice & tags,
@@ -672,12 +675,12 @@ void H323SetAliasAddresses(const PStringList & names,
 }
 
 
-static BOOL IsE164(const PString & str)
+static PBoolean IsE164(const PString & str)
 {
   return !str && strspn(str, "1234567890*#,") == strlen(str);
 }
 
-static BOOL IsURL(const PString & str)
+static PBoolean IsURL(const PString & str)
 {
   return !str && str.Find("@") != P_MAX_INDEX;
 }
@@ -896,7 +899,7 @@ PString H323GetApplicationInfo(const H225_VendorIdentifier & vendor)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-BOOL H323SetRTPPacketization(H245_RTPPayloadType & rtpPacketization,
+PBoolean H323SetRTPPacketization(H245_RTPPayloadType & rtpPacketization,
                              const OpalMediaFormat & mediaFormat,
                              RTP_DataFrame::PayloadTypes payloadType)
 {
@@ -933,7 +936,7 @@ BOOL H323SetRTPPacketization(H245_RTPPayloadType & rtpPacketization,
 }
 
 
-BOOL H323GetRTPPacketization(OpalMediaFormat & mediaFormat, const H245_RTPPayloadType & rtpPacketization)
+PBoolean H323GetRTPPacketization(OpalMediaFormat & mediaFormat, const H245_RTPPayloadType & rtpPacketization)
 {
   PString mediaPacketization;
 
@@ -1423,7 +1426,7 @@ H225_ReleaseComplete_UUIE &
 
 
 H225_Facility_UUIE * H323SignalPDU::BuildFacility(const H323Connection & connection,
-                                                  BOOL empty, unsigned reason)
+                                                  PBoolean empty, unsigned reason)
 {
   q931pdu.BuildFacility(connection.GetCallReference(), connection.HadAnsweredCall());
   if (empty) {
@@ -1549,7 +1552,7 @@ void H323SignalPDU::PrintOn(ostream & strm) const
 }
 
 
-BOOL H323SignalPDU::Read(H323Transport & transport)
+PBoolean H323SignalPDU::Read(H323Transport & transport)
 {
   PBYTEArray rawData;
   if (!transport.ReadPDU(rawData)) {
@@ -1562,7 +1565,7 @@ BOOL H323SignalPDU::Read(H323Transport & transport)
   return ProcessReadData(transport, rawData);
 }
 
-BOOL H323SignalPDU::ProcessReadData(H323Transport & transport, const PBYTEArray & rawData)
+PBoolean H323SignalPDU::ProcessReadData(H323Transport & transport, const PBYTEArray & rawData)
 {
   if (!q931pdu.Decode(rawData)) {
     PTRACE(1, "H225\tParse error of Q931 PDU:\n" << hex << setfill('0')
@@ -1599,7 +1602,7 @@ BOOL H323SignalPDU::ProcessReadData(H323Transport & transport, const PBYTEArray 
 }
 
 
-BOOL H323SignalPDU::Write(H323Transport & transport, H323Connection & connection)
+PBoolean H323SignalPDU::Write(H323Transport & transport, H323Connection & connection)
 {
   if (!q931pdu.HasIE(Q931::UserUserIE) && m_h323_uu_pdu.m_h323_message_body.IsValid())
     BuildQ931();
@@ -1692,8 +1695,8 @@ PString H323SignalPDU::GetSourceAliases(const H323Transport * transport) const
     }
 
     if (setup.m_sourceAddress.GetSize() > 0) {
-      BOOL needParen = !aliases.IsEmpty();
-      BOOL needComma = FALSE;
+      PBoolean needParen = !aliases.IsEmpty();
+      PBoolean needComma = FALSE;
       for (PINDEX i = 0; i < setup.m_sourceAddress.GetSize(); i++) {
         PString alias = H323GetAliasAddressString(setup.m_sourceAddress[i]);
         if (alias != displayName && alias != remoteHostName) {
@@ -1719,7 +1722,7 @@ PString H323SignalPDU::GetSourceAliases(const H323Transport * transport) const
 }
 
 
-PString H323SignalPDU::GetDestinationAlias(BOOL firstAliasOnly) const
+PString H323SignalPDU::GetDestinationAlias(PBoolean firstAliasOnly) const
 {
   PStringStream aliases;
 
@@ -1755,7 +1758,7 @@ PString H323SignalPDU::GetDestinationAlias(BOOL firstAliasOnly) const
 }
 
 
-BOOL H323SignalPDU::GetSourceE164(PString & number) const
+PBoolean H323SignalPDU::GetSourceE164(PString & number) const
 {
   if (GetQ931().GetCallingPartyNumber(number))
     return TRUE;
@@ -1787,7 +1790,7 @@ BOOL H323SignalPDU::GetSourceE164(PString & number) const
 }
 
 
-BOOL H323SignalPDU::GetDestinationE164(PString & number) const
+PBoolean H323SignalPDU::GetDestinationE164(PString & number) const
 {
   if (GetQ931().GetCalledPartyNumber(number))
     return TRUE;
@@ -1830,7 +1833,7 @@ unsigned H323SignalPDU::GetDistinctiveRing() const
 
 
 void H323SignalPDU::SetQ931Fields(const H323Connection & connection,
-                                  BOOL insertPartyNumbers,
+                                  PBoolean insertPartyNumbers,
                                   unsigned plan,
                                   unsigned type,
                                   int presentation,
@@ -1947,7 +1950,7 @@ H245_MasterSlaveDetermination &
 
 
 H245_MasterSlaveDeterminationAck &
-      H323ControlPDU::BuildMasterSlaveDeterminationAck(BOOL isMaster)
+      H323ControlPDU::BuildMasterSlaveDeterminationAck(PBoolean isMaster)
 {
   H245_MasterSlaveDeterminationAck & msda = Build(H245_ResponseMessage::e_masterSlaveDeterminationAck);
   msda.m_decision.SetTag(isMaster
@@ -1969,7 +1972,7 @@ H245_MasterSlaveDeterminationReject &
 H245_TerminalCapabilitySet &
       H323ControlPDU::BuildTerminalCapabilitySet(const H323Connection & connection,
                                                  unsigned sequenceNumber,
-                                                 BOOL empty)
+                                                 PBoolean empty)
 {
   H245_TerminalCapabilitySet & cap = Build(H245_RequestMessage::e_terminalCapabilitySet);
 

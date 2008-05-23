@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:07  shorne
+ * First commit of h323plus
+ *
  * Revision 1.66  2006/08/12 03:59:46  csoutheren
  * Added additional Q.931 message types
  * Thanks to ii7@bk.ru
@@ -394,7 +397,7 @@ Q931 & Q931::operator=(const Q931 & other)
 }
 
 
-void Q931::BuildFacility(int callRef, BOOL fromDest)
+void Q931::BuildFacility(int callRef, PBoolean fromDest)
 {
   messageType = FacilityMsg;
   callReference = callRef;
@@ -405,7 +408,7 @@ void Q931::BuildFacility(int callRef, BOOL fromDest)
 }
 
 
-void Q931::BuildInformation(int callRef, BOOL fromDest)
+void Q931::BuildInformation(int callRef, PBoolean fromDest)
 {
   messageType = InformationMsg;
   callReference = callRef;
@@ -415,7 +418,7 @@ void Q931::BuildInformation(int callRef, BOOL fromDest)
 
 
 void Q931::BuildProgress(int callRef,
-                         BOOL fromDest,
+                         PBoolean fromDest,
                          unsigned description,
                          unsigned codingStandard,
                          unsigned location)
@@ -428,7 +431,7 @@ void Q931::BuildProgress(int callRef,
 }
 
 
-void Q931::BuildNotify(int callRef, BOOL fromDest)
+void Q931::BuildNotify(int callRef, PBoolean fromDest)
 {
   messageType = NotifyMsg;
   callReference = callRef;
@@ -486,7 +489,7 @@ void Q931::BuildConnect(int callRef)
   SetBearerCapabilities(TransferSpeech, 1);
 }
 
-void Q931::BuildConnectAck(int callRef, BOOL fromDest)
+void Q931::BuildConnectAck(int callRef, PBoolean fromDest)
 {
   messageType = ConnectAckMsg;
   callReference = callRef;
@@ -495,7 +498,7 @@ void Q931::BuildConnectAck(int callRef, BOOL fromDest)
 }
 
 
-void Q931::BuildStatus(int callRef, BOOL fromDest)
+void Q931::BuildStatus(int callRef, PBoolean fromDest)
 {
   messageType = StatusMsg;
   callReference = callRef;
@@ -507,7 +510,7 @@ void Q931::BuildStatus(int callRef, BOOL fromDest)
 }
 
 
-void Q931::BuildStatusEnquiry(int callRef, BOOL fromDest)
+void Q931::BuildStatusEnquiry(int callRef, PBoolean fromDest)
 {
   messageType = StatusEnquiryMsg;
   callReference = callRef;
@@ -516,7 +519,7 @@ void Q931::BuildStatusEnquiry(int callRef, BOOL fromDest)
 }
 
 
-void Q931::BuildReleaseComplete(int callRef, BOOL fromDest)
+void Q931::BuildReleaseComplete(int callRef, PBoolean fromDest)
 {
   messageType = ReleaseCompleteMsg;
   callReference = callRef;
@@ -525,7 +528,7 @@ void Q931::BuildReleaseComplete(int callRef, BOOL fromDest)
 }
 
 
-BOOL Q931::Decode(const PBYTEArray & data)
+PBoolean Q931::Decode(const PBYTEArray & data)
 {
   // Clear all existing data before reading new
   informationElements.RemoveAll();
@@ -585,7 +588,7 @@ BOOL Q931::Decode(const PBYTEArray & data)
 }
 
 
-BOOL Q931::Encode(PBYTEArray & data) const
+PBoolean Q931::Encode(PBYTEArray & data) const
 {
   PINDEX totalBytes = 5;
   unsigned discriminator;
@@ -776,7 +779,7 @@ unsigned Q931::GenerateCallReference()
 }
 
 
-BOOL Q931::HasIE(InformationElementCodes ie) const
+PBoolean Q931::HasIE(InformationElementCodes ie) const
 {
   return informationElements.Contains(POrdinalKey(ie));
 }
@@ -856,7 +859,7 @@ void Q931::SetBearerCapabilities(InformationTransferCapability capability,
 }
 
 
-BOOL Q931::GetBearerCapabilities(InformationTransferCapability & capability,
+PBoolean Q931::GetBearerCapabilities(InformationTransferCapability & capability,
                                  unsigned & transferRate,
                                  unsigned * codingStandard,
                                  unsigned * userInfoLayer1)
@@ -1020,7 +1023,7 @@ void Q931::SetProgressIndicator(unsigned description,
 }
 
 
-BOOL Q931::GetProgressIndicator(unsigned & description,
+PBoolean Q931::GetProgressIndicator(unsigned & description,
                                 unsigned * codingStandard,
                                 unsigned * location) const
 {
@@ -1109,7 +1112,7 @@ static PBYTEArray SetNumberIE(const PString & number,
 }
 
 
-static BOOL GetNumberIE(const PBYTEArray & bytes,
+static PBoolean GetNumberIE(const PBYTEArray & bytes,
                         PString  & number,
                         unsigned * plan,
                         unsigned * type,
@@ -1191,7 +1194,7 @@ void Q931::SetCallingPartyNumber(const PString & number,
 }
 
 
-BOOL Q931::GetCallingPartyNumber(PString  & number,
+PBoolean Q931::GetCallingPartyNumber(PString  & number,
                                  unsigned * plan,
                                  unsigned * type,
                                  unsigned * presentation,
@@ -1212,7 +1215,7 @@ void Q931::SetCalledPartyNumber(const PString & number, unsigned plan, unsigned 
 }
 
 
-BOOL Q931::GetCalledPartyNumber(PString & number, unsigned * plan, unsigned * type) const
+PBoolean Q931::GetCalledPartyNumber(PString & number, unsigned * plan, unsigned * type) const
 {
   return GetNumberIE(GetIE(CalledPartyNumberIE),
                      number, plan, type, NULL, NULL, NULL, 0, 0, 0);
@@ -1231,7 +1234,7 @@ void Q931::SetRedirectingNumber(const PString & number,
 }
 
 
-BOOL Q931::GetRedirectingNumber(PString  & number,
+PBoolean Q931::GetRedirectingNumber(PString  & number,
                                 unsigned * plan,
                                 unsigned * type,
                                 unsigned * presentation,
@@ -1247,7 +1250,7 @@ BOOL Q931::GetRedirectingNumber(PString  & number,
 }
 
 
-BOOL Q931::GetConnectedNumber(PString  & number,
+PBoolean Q931::GetConnectedNumber(PString  & number,
                               unsigned * plan,
                               unsigned * type,
                               unsigned * presentation,
@@ -1324,7 +1327,7 @@ void Q931::SetChannelIdentification(unsigned interfaceType,
 }
 
 
-BOOL Q931::GetChannelIdentification(unsigned * interfaceType,
+PBoolean Q931::GetChannelIdentification(unsigned * interfaceType,
                                     unsigned * preferredOrExclusive,
                                     int      * channelNumber) const
 {

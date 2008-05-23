@@ -48,7 +48,7 @@ class H46019_TraversalParameters : public PASN_Sequence
     H225_TimeToLive m_keepAliveInterval;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;

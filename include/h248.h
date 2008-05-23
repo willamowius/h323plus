@@ -134,7 +134,7 @@ class H248_MId : public PASN_Choice
     operator const H248_PathName &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -159,7 +159,7 @@ class H248_DomainName : public PASN_Sequence
     PASN_Integer m_portNumber;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -189,7 +189,7 @@ class H248_IP4Address : public PASN_Sequence
     PASN_Integer m_portNumber;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -219,7 +219,7 @@ class H248_IP6Address : public PASN_Sequence
     PASN_Integer m_portNumber;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -296,7 +296,7 @@ class H248_Transaction : public PASN_Choice
     operator const H248_TransactionResponseAck &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -334,7 +334,7 @@ class H248_TransactionPending : public PASN_Sequence
     H248_TransactionId m_transactionId;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -384,7 +384,7 @@ class H248_TransactionAck : public PASN_Sequence
     H248_TransactionId m_lastAck;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -471,7 +471,7 @@ class H248_ContextAttrAuditRequest : public PASN_Sequence
     PASN_Null m_priority;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -541,7 +541,7 @@ class H248_Command : public PASN_Choice
     operator const H248_ServiceChangeRequest &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -599,7 +599,7 @@ class H248_CommandReply : public PASN_Choice
     operator const H248_ServiceChangeReply &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -685,7 +685,7 @@ class H248_AmmDescriptor : public PASN_Choice
     operator const H248_AuditDescriptor &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -731,7 +731,7 @@ class H248_AuditReply : public PASN_Choice
     operator const H248_AuditResult &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -869,7 +869,7 @@ class H248_AuditReturnParameter : public PASN_Choice
     operator const H248_AuditDescriptor &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -947,7 +947,7 @@ class H248_IndAuditParameter : public PASN_Choice
     operator const H248_IndAudPackagesDescriptor &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -1005,7 +1005,7 @@ class H248_IndAudSignalsDescriptor : public PASN_Choice
     operator const H248_IndAudSeqSigList &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -1043,7 +1043,7 @@ class H248_ServiceChangeResult : public PASN_Choice
     operator const H248_ServiceChangeResParm &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -1326,7 +1326,7 @@ class H248_EventDM : public PASN_Choice
     operator const H248_DigitMapValue &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -1404,7 +1404,7 @@ class H248_SignalRequest : public PASN_Choice
     operator const H248_SeqSigList &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -1567,7 +1567,7 @@ class H248_DigitMapValue : public PASN_Sequence
     PASN_Integer m_durationTimer;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1628,7 +1628,7 @@ class H248_ServiceChangeAddress : public PASN_Choice
     operator const H248_PathName &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -1674,7 +1674,7 @@ class H248_ServiceChangeProfile : public PASN_Sequence
     PASN_IA5String m_profileName;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1720,7 +1720,7 @@ class H248_PackagesItem : public PASN_Sequence
     PASN_Integer m_packageVersion;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1777,7 +1777,7 @@ class H248_NonStandardIdentifier : public PASN_Choice
     operator const H248_H221NonStandard &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -1800,7 +1800,7 @@ class H248_H221NonStandard : public PASN_Sequence
     PASN_Integer m_manufacturerCode;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1826,7 +1826,7 @@ class H248_TimeNotation : public PASN_Sequence
     PASN_IA5String m_time;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1887,7 +1887,7 @@ class H248_Message_messageBody : public PASN_Choice
     operator const H248_ArrayOf_Transaction &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -1945,7 +1945,7 @@ class H248_TransactionReply_transactionResult : public PASN_Choice
     operator const H248_ArrayOf_ActionReply &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -2106,7 +2106,7 @@ class H248_IndAudMediaDescriptor_streams : public PASN_Choice
     operator const H248_ArrayOf_IndAudStreamDescriptor &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -2198,7 +2198,7 @@ class H248_EventParameter_extraInfo : public PASN_Choice
     operator const H248_Relation &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -2256,7 +2256,7 @@ class H248_MediaDescriptor_streams : public PASN_Choice
     operator const H248_ArrayOf_StreamDescriptor &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -2326,7 +2326,7 @@ class H248_PropertyParm_extraInfo : public PASN_Choice
     operator const H248_Relation &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -2478,7 +2478,7 @@ class H248_SigParameter_extraInfo : public PASN_Choice
     operator const H248_Relation &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -2600,7 +2600,7 @@ class H248_AuthenticationHeader : public PASN_Sequence
     H248_AuthData m_ad;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2627,7 +2627,7 @@ class H248_Message : public PASN_Sequence
     H248_Message_messageBody m_messageBody;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2653,7 +2653,7 @@ class H248_TransactionRequest : public PASN_Sequence
     H248_ArrayOf_ActionRequest m_actions;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2684,7 +2684,7 @@ class H248_TransactionReply : public PASN_Sequence
     H248_TransactionReply_transactionResult m_transactionResult;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2714,7 +2714,7 @@ class H248_ErrorDescriptor : public PASN_Sequence
     H248_ErrorText m_errorText;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2747,7 +2747,7 @@ class H248_ContextRequest : public PASN_Sequence
     H248_ArrayOf_TopologyRequest m_topologyReq;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2779,7 +2779,7 @@ class H248_CommandRequest : public PASN_Sequence
     PASN_Null m_wildcardReturn;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2805,7 +2805,7 @@ class H248_AmmRequest : public PASN_Sequence
     H248_ArrayOf_AmmDescriptor m_descriptors;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2835,7 +2835,7 @@ class H248_AmmsReply : public PASN_Sequence
     H248_TerminationAudit m_terminationAudit;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2866,7 +2866,7 @@ class H248_AuditDescriptor : public PASN_Sequence
     H248_ArrayOf_IndAuditParameter m_auditPropertyToken;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2901,7 +2901,7 @@ class H248_IndAudLocalControlDescriptor : public PASN_Sequence
     H248_ArrayOf_IndAudPropertyParm m_propertyParms;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2926,7 +2926,7 @@ class H248_IndAudPropertyParm : public PASN_Sequence
     H248_PkgdName m_name;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2956,7 +2956,7 @@ class H248_IndAudLocalRemoteDescriptor : public PASN_Sequence
     H248_IndAudPropertyGroup m_propGrps;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2988,7 +2988,7 @@ class H248_IndAudTerminationStateDescriptor : public PASN_Sequence
     PASN_Null m_serviceState;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3020,7 +3020,7 @@ class H248_IndAudEventsDescriptor : public PASN_Sequence
     H248_StreamID m_streamID;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3050,7 +3050,7 @@ class H248_IndAudEventBufferDescriptor : public PASN_Sequence
     H248_StreamID m_streamID;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3080,7 +3080,7 @@ class H248_IndAudSignal : public PASN_Sequence
     H248_StreamID m_streamID;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3109,7 +3109,7 @@ class H248_IndAudDigitMapDescriptor : public PASN_Sequence
     H248_DigitMapName m_digitMapName;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3134,7 +3134,7 @@ class H248_IndAudStatisticsDescriptor : public PASN_Sequence
     H248_PkgdName m_statName;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3160,7 +3160,7 @@ class H248_IndAudPackagesDescriptor : public PASN_Sequence
     PASN_Integer m_packageVersion;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3190,7 +3190,7 @@ class H248_NotifyReply : public PASN_Sequence
     H248_ErrorDescriptor m_errorDescriptor;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3216,7 +3216,7 @@ class H248_ObservedEventsDescriptor : public PASN_Sequence
     H248_ArrayOf_ObservedEvent m_observedEventLst;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3270,7 +3270,7 @@ class H248_EventParameter : public PASN_Sequence
     H248_EventParameter_extraInfo m_extraInfo;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3296,7 +3296,7 @@ class H248_ServiceChangeReply : public PASN_Sequence
     H248_ServiceChangeResult m_serviceChangeResult;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3322,7 +3322,7 @@ class H248_TerminationID : public PASN_Sequence
     PASN_OctetString m_id;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3356,7 +3356,7 @@ class H248_LocalControlDescriptor : public PASN_Sequence
     H248_ArrayOf_PropertyParm m_propertyParms;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3387,7 +3387,7 @@ class H248_PropertyParm : public PASN_Sequence
     H248_PropertyParm_extraInfo m_extraInfo;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3412,7 +3412,7 @@ class H248_LocalRemoteDescriptor : public PASN_Sequence
     H248_ArrayOf_PropertyGroup m_propGrps;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3444,7 +3444,7 @@ class H248_TerminationStateDescriptor : public PASN_Sequence
     H248_ServiceState m_serviceState;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3474,7 +3474,7 @@ class H248_EventsDescriptor : public PASN_Sequence
     H248_ArrayOf_RequestedEvent m_eventList;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3504,7 +3504,7 @@ class H248_SecondEventsDescriptor : public PASN_Sequence
     H248_ArrayOf_SecondRequestedEvent m_eventList;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3537,7 +3537,7 @@ class H248_SecondRequestedActions : public PASN_Sequence
     H248_SignalsDescriptor m_signalsDescriptor;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3568,7 +3568,7 @@ class H248_EventSpec : public PASN_Sequence
     H248_ArrayOf_EventParameter m_eventParList;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3594,7 +3594,7 @@ class H248_SeqSigList : public PASN_Sequence
     H248_ArrayOf_Signal m_signalList;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3633,7 +3633,7 @@ class H248_Signal : public PASN_Sequence
     H248_ArrayOf_SigParameter m_sigParList;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3664,7 +3664,7 @@ class H248_SigParameter : public PASN_Sequence
     H248_SigParameter_extraInfo m_extraInfo;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3695,7 +3695,7 @@ class H248_DigitMapDescriptor : public PASN_Sequence
     H248_DigitMapValue m_digitMapValue;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3732,7 +3732,7 @@ class H248_ServiceChangeResParm : public PASN_Sequence
     H248_TimeNotation m_timestamp;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3762,7 +3762,7 @@ class H248_StatisticsParameter : public PASN_Sequence
     H248_Value m_statValue;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3788,7 +3788,7 @@ class H248_NonStandardData : public PASN_Sequence
     PASN_OctetString m_data;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3818,7 +3818,7 @@ class H248_MegacoMessage : public PASN_Sequence
     H248_Message m_mess;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3851,7 +3851,7 @@ class H248_ActionRequest : public PASN_Sequence
     H248_ArrayOf_CommandRequest m_commandRequests;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3884,7 +3884,7 @@ class H248_ActionReply : public PASN_Sequence
     H248_ArrayOf_CommandReply m_commandReply;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3916,7 +3916,7 @@ class H248_TopologyRequest : public PASN_Sequence
     H248_StreamID m_streamID;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3946,7 +3946,7 @@ class H248_SubtractRequest : public PASN_Sequence
     H248_AuditDescriptor m_auditDescriptor;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3972,7 +3972,7 @@ class H248_AuditRequest : public PASN_Sequence
     H248_AuditDescriptor m_auditDescriptor;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3998,7 +3998,7 @@ class H248_AuditResult : public PASN_Sequence
     H248_TerminationAudit m_terminationAuditResult;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4029,7 +4029,7 @@ class H248_IndAudMediaDescriptor : public PASN_Sequence
     H248_IndAudMediaDescriptor_streams m_streams;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4062,7 +4062,7 @@ class H248_IndAudStreamParms : public PASN_Sequence
     H248_IndAudLocalRemoteDescriptor m_remoteDescriptor;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4092,7 +4092,7 @@ class H248_IndAudSeqSigList : public PASN_Sequence
     H248_IndAudSignal m_signalList;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4123,7 +4123,7 @@ class H248_NotifyRequest : public PASN_Sequence
     H248_ErrorDescriptor m_errorDescriptor;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4156,7 +4156,7 @@ class H248_ObservedEvent : public PASN_Sequence
     H248_TimeNotation m_timeNotation;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4187,7 +4187,7 @@ class H248_MediaDescriptor : public PASN_Sequence
     H248_MediaDescriptor_streams m_streams;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4220,7 +4220,7 @@ class H248_StreamParms : public PASN_Sequence
     H248_LocalRemoteDescriptor m_remoteDescriptor;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4251,7 +4251,7 @@ class H248_MuxDescriptor : public PASN_Sequence
     H248_NonStandardData m_nonStandardData;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4286,7 +4286,7 @@ class H248_RequestedActions : public PASN_Sequence
     H248_SignalsDescriptor m_signalsDescriptor;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4319,7 +4319,7 @@ class H248_SecondRequestedEvent : public PASN_Sequence
     H248_ArrayOf_EventParameter m_evParList;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4350,7 +4350,7 @@ class H248_ModemDescriptor : public PASN_Sequence
     H248_NonStandardData m_nonStandardData;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4395,7 +4395,7 @@ class H248_ServiceChangeParm : public PASN_Sequence
     H248_AuditDescriptor m_serviceChangeInfo;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4421,7 +4421,7 @@ class H248_IndAudStreamDescriptor : public PASN_Sequence
     H248_IndAudStreamParms m_streamParms;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4447,7 +4447,7 @@ class H248_ServiceChangeRequest : public PASN_Sequence
     H248_ServiceChangeParm m_serviceChangeParms;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4473,7 +4473,7 @@ class H248_StreamDescriptor : public PASN_Sequence
     H248_StreamParms m_streamParms;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4506,7 +4506,7 @@ class H248_RequestedEvent : public PASN_Sequence
     H248_ArrayOf_EventParameter m_evParList;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;

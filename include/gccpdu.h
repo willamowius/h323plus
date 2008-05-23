@@ -226,7 +226,7 @@ class GCC_Key : public PASN_Choice
     operator const GCC_H221NonStandardIdentifier &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -247,7 +247,7 @@ class GCC_NonStandardParameter : public PASN_Sequence
     PASN_OctetString m_data;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -271,7 +271,7 @@ class GCC_TextString : public PASN_BMPString
 
     GCC_TextString & operator=(const char * v);
     GCC_TextString & operator=(const PString & v);
-    GCC_TextString & operator=(const PWORDArray & v);
+    GCC_TextString & operator=(const PWCharArray & v);
     GCC_TextString & operator=(const PASN_BMPString & v);
     PObject * Clone() const;
 };
@@ -291,7 +291,7 @@ class GCC_SimpleTextString : public PASN_BMPString
 
     GCC_SimpleTextString & operator=(const char * v);
     GCC_SimpleTextString & operator=(const PString & v);
-    GCC_SimpleTextString & operator=(const PWORDArray & v);
+    GCC_SimpleTextString & operator=(const PWCharArray & v);
     GCC_SimpleTextString & operator=(const PASN_BMPString & v);
     PObject * Clone() const;
 };
@@ -365,7 +365,7 @@ class GCC_ExtraDialingString : public PASN_BMPString
 
     GCC_ExtraDialingString & operator=(const char * v);
     GCC_ExtraDialingString & operator=(const PString & v);
-    GCC_ExtraDialingString & operator=(const PWORDArray & v);
+    GCC_ExtraDialingString & operator=(const PWCharArray & v);
     GCC_ExtraDialingString & operator=(const PASN_BMPString & v);
     PObject * Clone() const;
 };
@@ -411,7 +411,7 @@ class GCC_Password : public PASN_Sequence
     GCC_SimpleTextString m_text;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -454,7 +454,7 @@ class GCC_PasswordSelector : public PASN_Choice
     operator const GCC_SimpleTextString &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -492,7 +492,7 @@ class GCC_ChallengeResponseItem : public PASN_Choice
     operator const GCC_UserData &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -523,7 +523,7 @@ class GCC_ChallengeResponseAlgorithm : public PASN_Choice
     operator const GCC_NonStandardParameter &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -544,7 +544,7 @@ class GCC_ChallengeItem : public PASN_Sequence
     GCC_UserData m_challengeData;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -571,7 +571,7 @@ class GCC_ChallengeResponse : public PASN_Sequence
     GCC_ChallengeResponseItem m_responseItem;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -614,7 +614,7 @@ class GCC_PasswordChallengeRequestResponse : public PASN_Choice
     operator const GCC_PasswordChallengeRequestResponse_challengeRequestResponse &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -639,7 +639,7 @@ class GCC_ConferenceName : public PASN_Sequence
     GCC_SimpleTextString m_text;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -682,7 +682,7 @@ class GCC_ConferenceNameSelector : public PASN_Choice
     operator const GCC_SimpleTextString &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -777,7 +777,7 @@ class GCC_ConferencePriorityScheme : public PASN_Choice
     operator const GCC_NonStandardParameter &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -798,7 +798,7 @@ class GCC_ConferencePriority : public PASN_Sequence
     GCC_ConferencePriorityScheme m_scheme;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -867,7 +867,7 @@ class GCC_NodeProperties : public PASN_Sequence
     PASN_Boolean m_peripheralDevice;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -895,7 +895,7 @@ class GCC_AsymmetryIndicator : public PASN_Choice
       e_unknown
     };
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -916,7 +916,7 @@ class GCC_AlternativeNodeID : public PASN_Choice
       e_h243NodeID
     };
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -949,7 +949,7 @@ class GCC_ConferenceDescriptor : public PASN_Sequence
     PASN_Boolean m_defaultConferenceFlag;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -979,7 +979,7 @@ class GCC_SessionKey : public PASN_Sequence
     GCC_ChannelID m_sessionID;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1039,7 +1039,7 @@ class GCC_CapabilityID : public PASN_Choice
     operator const GCC_Key &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -1062,7 +1062,7 @@ class GCC_CapabilityClass : public PASN_Choice
       e_unsignedMax
     };
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -1101,7 +1101,7 @@ class GCC_RegistryKey : public PASN_Sequence
     PASN_OctetString m_resourceID;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1146,7 +1146,7 @@ class GCC_RegistryItem : public PASN_Choice
     operator const GCC_DynamicTokenID &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -1177,7 +1177,7 @@ class GCC_RegistryEntryOwner : public PASN_Choice
     operator const GCC_RegistryEntryOwner_owned &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -1220,7 +1220,7 @@ class GCC_UserIDIndication : public PASN_Sequence
     PASN_Integer m_tag;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1252,7 +1252,7 @@ class GCC_ConferenceQueryRequest : public PASN_Sequence
     GCC_UserData m_userData;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1293,7 +1293,7 @@ class GCC_ConferenceJoinRequest : public PASN_Sequence
     GCC_UserData m_userData;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1327,7 +1327,7 @@ class GCC_ConferenceAddRequest : public PASN_Sequence
     GCC_UserData m_userData;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1351,7 +1351,7 @@ class GCC_ConferenceLockRequest : public PASN_Sequence
 
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1374,7 +1374,7 @@ class GCC_ConferenceLockIndication : public PASN_Sequence
 
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1397,7 +1397,7 @@ class GCC_ConferenceUnlockRequest : public PASN_Sequence
 
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1420,7 +1420,7 @@ class GCC_ConferenceUnlockIndication : public PASN_Sequence
 
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1446,7 +1446,7 @@ class GCC_RegistryRegisterChannelRequest : public PASN_Sequence
     GCC_DynamicChannelID m_channelID;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1472,7 +1472,7 @@ class GCC_RegistryAssignTokenRequest : public PASN_Sequence
     GCC_RegistryKey m_key;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1504,7 +1504,7 @@ class GCC_RegistrySetParameterRequest : public PASN_Sequence
     GCC_RegistryModificationRights m_modificationRights;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1530,7 +1530,7 @@ class GCC_RegistryRetrieveEntryRequest : public PASN_Sequence
     GCC_RegistryKey m_key;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1556,7 +1556,7 @@ class GCC_RegistryDeleteEntryRequest : public PASN_Sequence
     GCC_RegistryKey m_key;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1582,7 +1582,7 @@ class GCC_RegistryMonitorEntryRequest : public PASN_Sequence
     GCC_RegistryKey m_key;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1614,7 +1614,7 @@ class GCC_RegistryMonitorEntryIndication : public PASN_Sequence
     GCC_RegistryModificationRights m_modificationRights;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1640,7 +1640,7 @@ class GCC_RegistryAllocateHandleRequest : public PASN_Sequence
     PASN_Integer m_numberOfHandles;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1665,7 +1665,7 @@ class GCC_ConductorAssignIndication : public PASN_Sequence
     GCC_UserID m_conductingNode;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1689,7 +1689,7 @@ class GCC_ConductorReleaseIndication : public PASN_Sequence
 
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1713,7 +1713,7 @@ class GCC_ConductorPermissionAskIndication : public PASN_Sequence
     PASN_Boolean m_grantFlag;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1743,7 +1743,7 @@ class GCC_ConferenceTimeRemainingIndication : public PASN_Sequence
     GCC_UserID m_nodeID;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1768,7 +1768,7 @@ class GCC_ConferenceTimeInquireIndication : public PASN_Sequence
     PASN_Boolean m_nodeSpecificTimeFlag;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1794,7 +1794,7 @@ class GCC_ConferenceTimeExtendIndication : public PASN_Sequence
     PASN_Boolean m_nodeSpecificTimeFlag;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1823,7 +1823,7 @@ class GCC_ConferenceAssistanceIndication : public PASN_Sequence
     GCC_UserData m_userData;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1848,7 +1848,7 @@ class GCC_TextMessageIndication : public PASN_Sequence
     GCC_TextString m_message;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1873,7 +1873,7 @@ class GCC_NonStandardPDU : public PASN_Sequence
     GCC_NonStandardParameter m_data;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1899,7 +1899,7 @@ class GCC_ConnectData : public PASN_Sequence
     PASN_OctetString m_connectPDU;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -1990,7 +1990,7 @@ class GCC_ConnectGCCPDU : public PASN_Choice
     operator const GCC_ConferenceInviteResponse &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -2036,7 +2036,7 @@ class GCC_GCCPDU : public PASN_Choice
     operator const GCC_IndicationPDU &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -2178,7 +2178,7 @@ class GCC_RequestPDU : public PASN_Choice
     operator const GCC_NonStandardPDU &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -2288,7 +2288,7 @@ class GCC_ResponsePDU : public PASN_Choice
     operator const GCC_NonStandardPDU &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -2462,7 +2462,7 @@ class GCC_IndicationPDU : public PASN_Choice
     operator const GCC_NonStandardPDU &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -2487,7 +2487,7 @@ class GCC_UserData_subtype : public PASN_Sequence
     PASN_OctetString m_value;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -2558,7 +2558,7 @@ class GCC_NetworkAddress_subtype : public PASN_Choice
     operator const GCC_NonStandardParameter &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -2639,7 +2639,7 @@ class GCC_RegistryEntryOwner_owned : public PASN_Sequence
     GCC_EntityID m_entityID;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3169,7 +3169,7 @@ class GCC_NetworkAddress_subtype_transportConnection : public PASN_Sequence
     PASN_OctetString m_transportSelector;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3199,7 +3199,7 @@ class GCC_ApplicationRecord_nonCollapsingCapabilities_subtype : public PASN_Sequ
     PASN_OctetString m_applicationData;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3225,7 +3225,7 @@ class GCC_ApplicationInvokeSpecifier_expectedCapabilitySet_subtype : public PASN
     GCC_CapabilityClass m_capabilityClass;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3269,7 +3269,7 @@ class GCC_RosterUpdateIndication_nodeInformation_nodeRecordList : public PASN_Ch
     operator const GCC_RosterUpdateIndication_nodeInformation_nodeRecordList_update &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -3306,7 +3306,7 @@ class GCC_NetworkAddress_subtype_aggregatedChannel_transferModes : public PASN_S
     PASN_Boolean m_atm;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3337,7 +3337,7 @@ class GCC_NetworkAddress_subtype_aggregatedChannel_highLayerCompatibility : publ
     PASN_Boolean m_multimedia;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3421,7 +3421,7 @@ class GCC_RosterUpdateIndication_applicationInformation_subtype_applicationRecor
     operator const GCC_RosterUpdateIndication_applicationInformation_subtype_applicationRecordList_update &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -3452,7 +3452,7 @@ class GCC_RosterUpdateIndication_applicationInformation_subtype_applicationCapab
     operator const GCC_RosterUpdateIndication_applicationInformation_subtype_applicationCapabilitiesList_refresh &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -3544,7 +3544,7 @@ class GCC_RosterUpdateIndication_nodeInformation_nodeRecordList_update_subtype_n
     operator const GCC_NodeRecord &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -3566,7 +3566,7 @@ class GCC_RosterUpdateIndication_applicationInformation_subtype_applicationCapab
     PASN_Integer m_numberOfEntities;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3603,7 +3603,7 @@ class GCC_RosterUpdateIndication_applicationInformation_subtype_applicationRecor
     operator const GCC_ApplicationRecord &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -3624,7 +3624,7 @@ class GCC_ChallengeRequest : public PASN_Sequence
     GCC_ArrayOf_ChallengeItem m_challengeSet;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3667,7 +3667,7 @@ class GCC_NodeRecord : public PASN_Sequence
     GCC_UserData m_userData;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3702,7 +3702,7 @@ class GCC_ApplicationRecord : public PASN_Sequence
     GCC_ApplicationRecord_nonCollapsingCapabilities m_nonCollapsingCapabilities;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3735,7 +3735,7 @@ class GCC_ApplicationInvokeSpecifier : public PASN_Sequence
     PASN_Boolean m_mandatoryFlag;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3785,7 +3785,7 @@ class GCC_ConferenceCreateRequest : public PASN_Sequence
     GCC_ConferencePriority m_conferencePriority;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3817,7 +3817,7 @@ class GCC_ConferenceCreateResponse : public PASN_Sequence
     GCC_UserData m_userData;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3855,7 +3855,7 @@ class GCC_ConferenceQueryResponse : public PASN_Sequence
     PASN_Boolean m_noUnlistedConferenceFlag;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3906,7 +3906,7 @@ class GCC_ConferenceJoinResponse : public PASN_Sequence
     GCC_UserData m_userData;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3956,7 +3956,7 @@ class GCC_ConferenceInviteRequest : public PASN_Sequence
     GCC_ConferencePriority m_conferencePriority;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -3986,7 +3986,7 @@ class GCC_ConferenceInviteResponse : public PASN_Sequence
     GCC_UserData m_userData;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4017,7 +4017,7 @@ class GCC_ConferenceAddResponse : public PASN_Sequence
     GCC_UserData m_userData;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4042,7 +4042,7 @@ class GCC_ConferenceLockResponse : public PASN_Sequence
     GCC_ConferenceLockResponse_result m_result;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4067,7 +4067,7 @@ class GCC_ConferenceUnlockResponse : public PASN_Sequence
     GCC_ConferenceUnlockResponse_result m_result;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4092,7 +4092,7 @@ class GCC_ConferenceTerminateRequest : public PASN_Sequence
     GCC_ConferenceTerminateRequest_reason m_reason;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4117,7 +4117,7 @@ class GCC_ConferenceTerminateResponse : public PASN_Sequence
     GCC_ConferenceTerminateResponse_result m_result;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4142,7 +4142,7 @@ class GCC_ConferenceTerminateIndication : public PASN_Sequence
     GCC_ConferenceTerminateIndication_reason m_reason;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4168,7 +4168,7 @@ class GCC_ConferenceEjectUserRequest : public PASN_Sequence
     GCC_ConferenceEjectUserRequest_reason m_reason;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4194,7 +4194,7 @@ class GCC_ConferenceEjectUserResponse : public PASN_Sequence
     GCC_ConferenceEjectUserResponse_result m_result;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4220,7 +4220,7 @@ class GCC_ConferenceEjectUserIndication : public PASN_Sequence
     GCC_ConferenceEjectUserIndication_reason m_reason;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4256,7 +4256,7 @@ class GCC_ConferenceTransferRequest : public PASN_Sequence
     GCC_PasswordSelector m_password;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4289,7 +4289,7 @@ class GCC_ConferenceTransferResponse : public PASN_Sequence
     GCC_ConferenceTransferResponse_result m_result;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4325,7 +4325,7 @@ class GCC_ConferenceTransferIndication : public PASN_Sequence
     GCC_PasswordSelector m_password;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4355,7 +4355,7 @@ class GCC_ApplicationInvokeIndication : public PASN_Sequence
     GCC_ArrayOf_UserID m_destinationNodes;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4383,7 +4383,7 @@ class GCC_RegistryAllocateHandleResponse : public PASN_Sequence
     GCC_RegistryAllocateHandleResponse_result m_result;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4418,7 +4418,7 @@ class GCC_RegistryResponse : public PASN_Sequence
     GCC_RegistryResponse_result m_result;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4448,7 +4448,7 @@ class GCC_ConductorPermissionGrantIndication : public PASN_Sequence
     GCC_ArrayOf_UserID m_waitingList;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4473,7 +4473,7 @@ class GCC_FunctionNotSupportedResponse : public PASN_Sequence
     GCC_RequestPDU m_request;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4504,7 +4504,7 @@ class GCC_PasswordChallengeRequestResponse_challengeRequestResponse : public PAS
     GCC_ChallengeResponse m_challengeResponse;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4532,7 +4532,7 @@ class GCC_RosterUpdateIndication_nodeInformation : public PASN_Sequence
     PASN_Boolean m_nodesRemoved;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4567,7 +4567,7 @@ class GCC_NetworkAddress_subtype_aggregatedChannel : public PASN_Sequence
     GCC_NetworkAddress_subtype_aggregatedChannel_highLayerCompatibility m_highLayerCompatibility;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4597,7 +4597,7 @@ class GCC_RosterUpdateIndication_applicationInformation_subtype : public PASN_Se
     PASN_Boolean m_peerEntitiesRemoved;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4623,7 +4623,7 @@ class GCC_RosterUpdateIndication_nodeInformation_nodeRecordList_refresh_subtype 
     GCC_NodeRecord m_nodeRecord;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4649,7 +4649,7 @@ class GCC_RosterUpdateIndication_nodeInformation_nodeRecordList_update_subtype :
     GCC_RosterUpdateIndication_nodeInformation_nodeRecordList_update_subtype_nodeUpdate m_nodeUpdate;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4676,7 +4676,7 @@ class GCC_RosterUpdateIndication_applicationInformation_subtype_applicationRecor
     GCC_ApplicationRecord m_applicationRecord;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4703,7 +4703,7 @@ class GCC_RosterUpdateIndication_applicationInformation_subtype_applicationRecor
     GCC_RosterUpdateIndication_applicationInformation_subtype_applicationRecordList_update_subtype_applicationUpdate m_applicationUpdate;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -4730,7 +4730,7 @@ class GCC_RosterUpdateIndication : public PASN_Sequence
     GCC_RosterUpdateIndication_applicationInformation m_applicationInformation;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;

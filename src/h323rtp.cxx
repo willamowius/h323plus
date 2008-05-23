@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2008/02/06 02:52:59  shorne
+ * Added support for Standards based NAT Traversal
+ *
  * Revision 1.4  2007/11/16 22:09:43  shorne
  * Added ability to disable H.245 QoS for NetMeeting Interop
  *
@@ -255,7 +258,7 @@ H323_RTP_UDP::H323_RTP_UDP(const H323Connection & conn,
 }
 
 
-BOOL H323_RTP_UDP::OnSendingPDU(const H323_RTPChannel & channel,
+PBoolean H323_RTP_UDP::OnSendingPDU(const H323_RTPChannel & channel,
                                 H245_H2250LogicalChannelParameters & param) const
 {
   PTRACE(3, "RTP\tOnSendingPDU");
@@ -312,7 +315,7 @@ BOOL H323_RTP_UDP::OnSendingPDU(const H323_RTPChannel & channel,
   return TRUE;
 }
 
-BOOL H323_RTP_UDP::OnSendingAltPDU(const H323_RTPChannel & channel,
+PBoolean H323_RTP_UDP::OnSendingAltPDU(const H323_RTPChannel & channel,
 				H245_ArrayOf_GenericInformation & generic) const
 {
 	if (connection.isSameNAT()) 
@@ -350,8 +353,8 @@ void H323_RTP_UDP::OnSendOpenAckAlt(const H323_RTPChannel & channel,
    connection.OnSendingRTPAltInformation(*this,alternate);
 }
 
-BOOL H323_RTP_UDP::ExtractTransport(const H245_TransportAddress & pdu,
-                                    BOOL isDataPort,
+PBoolean H323_RTP_UDP::ExtractTransport(const H245_TransportAddress & pdu,
+                                    PBoolean isDataPort,
                                     unsigned & errorCode)
 {
   if (pdu.GetTag() != H245_TransportAddress::e_unicastAddress) {
@@ -371,7 +374,7 @@ BOOL H323_RTP_UDP::ExtractTransport(const H245_TransportAddress & pdu,
 }
 
 
-BOOL H323_RTP_UDP::OnReceivedPDU(H323_RTPChannel & channel,
+PBoolean H323_RTP_UDP::OnReceivedPDU(H323_RTPChannel & channel,
                                  const H245_H2250LogicalChannelParameters & param,
                                  unsigned & errorCode)
 {
@@ -381,7 +384,7 @@ BOOL H323_RTP_UDP::OnReceivedPDU(H323_RTPChannel & channel,
     return FALSE;
   }
 
-  BOOL ok = FALSE;
+  PBoolean ok = FALSE;
 
   if (param.HasOptionalField(H245_H2250LogicalChannelParameters::e_mediaControlChannel)) {
     if (!ExtractTransport(param.m_mediaControlChannel, FALSE, errorCode)) {
@@ -427,13 +430,13 @@ BOOL H323_RTP_UDP::OnReceivedPDU(H323_RTPChannel & channel,
   return FALSE;
 }
 
-BOOL H323_RTP_UDP::OnReceivedAltPDU(H323_RTPChannel & channel, 
+PBoolean H323_RTP_UDP::OnReceivedAltPDU(H323_RTPChannel & channel, 
 	  const H245_ArrayOf_GenericInformation & alternate)
 {
 	return connection.OnReceiveRTPAltInformation(*this,alternate);
 }
 
-BOOL H323_RTP_UDP::OnReceivedAckPDU(H323_RTPChannel & channel,
+PBoolean H323_RTP_UDP::OnReceivedAckPDU(H323_RTPChannel & channel,
                                     const H245_H2250LogicalChannelAckParameters & param)
 {
   if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_sessionID)) {
@@ -467,7 +470,7 @@ BOOL H323_RTP_UDP::OnReceivedAckPDU(H323_RTPChannel & channel,
   return TRUE;
 }
 
-BOOL H323_RTP_UDP::OnReceivedAckAltPDU(H323_RTPChannel & channel,
+PBoolean H323_RTP_UDP::OnReceivedAckAltPDU(H323_RTPChannel & channel,
 	  const H245_ArrayOf_GenericInformation & alternate)
 {
 	return connection.OnReceiveRTPAltInformation(*this,alternate);
@@ -491,7 +494,7 @@ void H323_RTP_UDP::OnSendRasInfo(H225_RTPSession & info)
 }
 
 #if P_HAS_QOS
-BOOL H323_RTP_UDP::WriteTransportCapPDU(H245_TransportCapability & cap, 
+PBoolean H323_RTP_UDP::WriteTransportCapPDU(H245_TransportCapability & cap, 
 											const H323_RTPChannel & channel) const
 {
  

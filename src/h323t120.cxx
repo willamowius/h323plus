@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:07  shorne
+ * First commit of h323plus
+ *
  * Revision 1.12  2002/11/10 08:10:43  robertj
  * Moved constants for "well known" ports to better place (OPAL change).
  *
@@ -119,28 +122,28 @@ H323Channel * H323_T120Capability::CreateChannel(H323Connection & connection,
 }
 
 
-BOOL H323_T120Capability::OnSendingPDU(H245_DataApplicationCapability & pdu) const
+PBoolean H323_T120Capability::OnSendingPDU(H245_DataApplicationCapability & pdu) const
 {
   pdu.m_application.SetTag(H245_DataApplicationCapability_application::e_t120);
   return OnSendingPDU((H245_DataProtocolCapability &)pdu.m_application);
 }
 
 
-BOOL H323_T120Capability::OnSendingPDU(H245_DataMode & pdu) const
+PBoolean H323_T120Capability::OnSendingPDU(H245_DataMode & pdu) const
 {
   pdu.m_application.SetTag(H245_DataMode_application::e_t120);
   return OnSendingPDU((H245_DataProtocolCapability &)pdu.m_application);
 }
 
 
-BOOL H323_T120Capability::OnSendingPDU(H245_DataProtocolCapability & pdu) const
+PBoolean H323_T120Capability::OnSendingPDU(H245_DataProtocolCapability & pdu) const
 {
   pdu.SetTag(H245_DataProtocolCapability::e_separateLANStack);
   return TRUE;
 }
 
 
-BOOL H323_T120Capability::OnReceivedPDU(const H245_DataApplicationCapability & cap)
+PBoolean H323_T120Capability::OnReceivedPDU(const H245_DataApplicationCapability & cap)
 {
   if (cap.m_application.GetTag() != H245_DataApplicationCapability_application::e_t120)
     return FALSE;
@@ -205,7 +208,7 @@ void H323_T120Channel::HandleChannel()
 }
 
 
-BOOL H323_T120Channel::OnSendingPDU(H245_OpenLogicalChannel & open) const
+PBoolean H323_T120Channel::OnSendingPDU(H245_OpenLogicalChannel & open) const
 {
   if (!H323DataChannel::OnSendingPDU(open))
     return FALSE;
@@ -245,7 +248,7 @@ void H323_T120Channel::OnSendOpenAck(const H245_OpenLogicalChannel & /*open*/,
 }
 
 
-BOOL H323_T120Channel::OnReceivedPDU(const H245_OpenLogicalChannel & open,
+PBoolean H323_T120Channel::OnReceivedPDU(const H245_OpenLogicalChannel & open,
                                      unsigned & errorCode)
 {
   number = H323ChannelNumber(open.m_forwardLogicalChannelNumber, TRUE);
@@ -261,7 +264,7 @@ BOOL H323_T120Channel::OnReceivedPDU(const H245_OpenLogicalChannel & open,
     return FALSE;
   }
 
-  BOOL listen = connection.HadAnsweredCall();
+  PBoolean listen = connection.HadAnsweredCall();
 
   H323TransportAddress address;
   if (open.HasOptionalField(H245_OpenLogicalChannel::e_separateStack) &&
@@ -328,7 +331,7 @@ BOOL H323_T120Channel::OnReceivedPDU(const H245_OpenLogicalChannel & open,
 }
 
 
-BOOL H323_T120Channel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & /*ack*/)
+PBoolean H323_T120Channel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & /*ack*/)
 {
   PTRACE(3, "H323T120\tOnReceivedAckPDU");
 

@@ -19,6 +19,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:07  shorne
+ * First commit of h323plus
+ *
  * Revision 1.1  2006/06/22 11:07:23  shorne
  * Backport of FECC (H.224) from Opal
  *
@@ -112,7 +115,7 @@ void Q922_Frame::SetInformationFieldSize(PINDEX size)
 }
 
 
-BOOL Q922_Frame::Decode(const BYTE *data, PINDEX size)
+PBoolean Q922_Frame::Decode(const BYTE *data, PINDEX size)
 {	
   // a valid frame must contain at least 2xFLAG, 3 octets Q922 header,
   // 2 octets FCS and at least 1 octet information
@@ -198,13 +201,13 @@ PINDEX Q922_Frame::GetEncodedSize() const
   return 3+2*dataSize+3;
 }
 
-BOOL Q922_Frame::Encode(BYTE *buffer, PINDEX & size) const
+PBoolean Q922_Frame::Encode(BYTE *buffer, PINDEX & size) const
 {
   BYTE bitIndex = 7;
   return Encode(buffer, size, bitIndex);
 }
 
-BOOL Q922_Frame::Encode(BYTE *buffer, PINDEX & size, BYTE & theBitIndex) const
+PBoolean Q922_Frame::Encode(BYTE *buffer, PINDEX & size, BYTE & theBitIndex) const
 {
   if(informationFieldSize == 0)	{
     return FALSE;
@@ -260,7 +263,7 @@ BOOL Q922_Frame::Encode(BYTE *buffer, PINDEX & size, BYTE & theBitIndex) const
   
 }
 
-BOOL Q922_Frame::FindFlagEnd(const BYTE *buffer, 
+PBoolean Q922_Frame::FindFlagEnd(const BYTE *buffer, 
 							 PINDEX bufferSize, 
 							 PINDEX & octetIndex, BYTE & bitIndex)
 {

@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:48  shorne
+ * First commit of h323plus
+ *
  * Revision 1.2  2003/04/30 04:57:13  craigs
  * Changed interface to DLL codec to improve Opal compatibility
  *
@@ -51,13 +54,13 @@ class OpalDynaCodecDLL : public PDynaLink
     PCLASSINFO(OpalDynaCodecDLL, PDynaLink);
 
     OpalDynaCodecDLL(const PFilePath & codec);
-    BOOL Load();
+    PBoolean Load();
 
     OpalDLLCodecInfo * EnumerateCodecs(unsigned * count);
 
-    static BOOL LoadCodecs();
-    static BOOL LoadCodecs(const PDirectory & dir);
-    static BOOL LoadCodec(const PFilePath & file);
+    static PBoolean LoadCodecs();
+    static PBoolean LoadCodecs(const PDirectory & dir);
+    static PBoolean LoadCodec(const PFilePath & file);
 
     static PINDEX AddAudioCapabilities(H323EndPoint & ep,
                                        PINDEX descriptorNum,
@@ -80,7 +83,7 @@ class OpalDynaCodecDLL : public PDynaLink
   protected:
     OpalDLLCodecInfo * (*EnumerateCodecsFn)(unsigned apiVersion, unsigned * count);
     static PMutex mutex;
-    static BOOL inited;
+    static PBoolean inited;
     int referenceCount;
 };
 
@@ -120,8 +123,8 @@ class OpalDynaAudioCodec : public H323FramedAudioCodec
   public:
     OpalDynaAudioCodec(const OpalDLLCodecRec & _info, Direction direction);
     ~OpalDynaAudioCodec();
-    virtual BOOL EncodeFrame(BYTE * buffer, unsigned & length);
-    virtual BOOL DecodeFrame(const BYTE * buffer, unsigned length, unsigned & written);
+    virtual PBoolean EncodeFrame(BYTE * buffer, unsigned & length);
+    virtual PBoolean DecodeFrame(const BYTE * buffer, unsigned length, unsigned & written);
 
   protected:
     const OpalDLLCodecRec & info;
@@ -203,8 +206,8 @@ class OpalDynaCodecStandardAudioCapability : public H323AudioCapability
       unsigned desiredPacketSize,     /// Desired transmit size of an audio packet in frames
       unsigned subType);
 
-    BOOL OnSendingPDU(H245_AudioCapability & cap, unsigned packetSize) const;
-    BOOL OnReceivedPDU(const H245_AudioCapability & cap, unsigned & packetSize);
+    PBoolean OnSendingPDU(H245_AudioCapability & cap, unsigned packetSize) const;
+    PBoolean OnReceivedPDU(const H245_AudioCapability & cap, unsigned & packetSize);
 
     PObject * Clone() const;
     H323Codec * CreateCodec(H323Codec::Direction direction) const;
@@ -229,9 +232,9 @@ class OpalDynaCodecStandardVideoCapability : public H323VideoCapability
       H323EndPoint & _endpoint,
       unsigned subType);
 
-    BOOL OnSendingPDU(H245_VideoCapability & pdu) const;
-    BOOL OnSendingPDU(H245_VideoMode & pdu) const;
-    BOOL OnReceivedPDU(const H245_VideoCapability & pdu);
+    PBoolean OnSendingPDU(H245_VideoCapability & pdu) const;
+    PBoolean OnSendingPDU(H245_VideoMode & pdu) const;
+    PBoolean OnReceivedPDU(const H245_VideoCapability & pdu);
 
     PObject * Clone() const;
     H323Codec * CreateCodec(H323Codec::Direction direction) const;
@@ -256,8 +259,8 @@ class OpalDynaVideoCodec : public H323VideoCodec
 
     ~OpalDynaVideoCodec();
 
-    BOOL Read(BYTE * buffer,unsigned & length,RTP_DataFrame & rtpFrame);
-    BOOL Write(const BYTE * buffer, unsigned length, const RTP_DataFrame & rtp, unsigned & written);
+    PBoolean Read(BYTE * buffer,unsigned & length,RTP_DataFrame & rtpFrame);
+    PBoolean Write(const BYTE * buffer, unsigned length, const RTP_DataFrame & rtp, unsigned & written);
 
   protected:
     const OpalDLLCodecRec & info;

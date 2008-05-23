@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/02/04 00:15:54  shorne
+ * BUGFIX: Features being sent on GRQ
+ *
  * Revision 1.2  2007/11/10 23:07:50  willamowius
  * fix --disable-h460
  *
@@ -297,7 +300,7 @@ H323TransactionPDU * H225_RAS::CreateTransactionPDU() const
 }
 
 
-BOOL H225_RAS::HandleTransaction(const PASN_Object & rawPDU)
+PBoolean H225_RAS::HandleTransaction(const PASN_Object & rawPDU)
 {
   const H323RasPDU & pdu = (const H323RasPDU &)rawPDU;
 
@@ -581,7 +584,7 @@ void H225_RAS::OnSendingPDU(PASN_Object & rawPDU)
 }
 
 
-BOOL H225_RAS::OnReceiveRequestInProgress(const H323RasPDU & pdu, const H225_RequestInProgress & rip)
+PBoolean H225_RAS::OnReceiveRequestInProgress(const H323RasPDU & pdu, const H225_RequestInProgress & rip)
 {
   if (!HandleRequestInProgress(pdu, rip.m_delay))
     return FALSE;
@@ -590,7 +593,7 @@ BOOL H225_RAS::OnReceiveRequestInProgress(const H323RasPDU & pdu, const H225_Req
 }
 
 
-BOOL H225_RAS::OnReceiveRequestInProgress(const H225_RequestInProgress & /*rip*/)
+PBoolean H225_RAS::OnReceiveRequestInProgress(const H225_RequestInProgress & /*rip*/)
 {
   return TRUE;
 }
@@ -748,7 +751,7 @@ static void ReceiveFeatureSet(const H225_RAS * ras, unsigned code, const PDUType
 }
 
 
-BOOL H225_RAS::OnReceiveGatekeeperRequest(const H323RasPDU &, const H225_GatekeeperRequest & grq)
+PBoolean H225_RAS::OnReceiveGatekeeperRequest(const H323RasPDU &, const H225_GatekeeperRequest & grq)
 {
 #ifdef H323_H460
   ReceiveFeatureSet<H225_GatekeeperRequest>(this, H460_MessageType::e_gatekeeperRequest, grq);
@@ -758,13 +761,13 @@ BOOL H225_RAS::OnReceiveGatekeeperRequest(const H323RasPDU &, const H225_Gatekee
 }
 
 
-BOOL H225_RAS::OnReceiveGatekeeperRequest(const H225_GatekeeperRequest &)
+PBoolean H225_RAS::OnReceiveGatekeeperRequest(const H225_GatekeeperRequest &)
 {
   return TRUE;
 }
 
 
-BOOL H225_RAS::OnReceiveGatekeeperConfirm(const H323RasPDU &, const H225_GatekeeperConfirm & gcf)
+PBoolean H225_RAS::OnReceiveGatekeeperConfirm(const H323RasPDU &, const H225_GatekeeperConfirm & gcf)
 {
   if (!CheckForResponse(H225_RasMessage::e_gatekeeperRequest, gcf.m_requestSeqNum))
     return FALSE;
@@ -790,13 +793,13 @@ BOOL H225_RAS::OnReceiveGatekeeperConfirm(const H323RasPDU &, const H225_Gatekee
 }
 
 
-BOOL H225_RAS::OnReceiveGatekeeperConfirm(const H225_GatekeeperConfirm & /*gcf*/)
+PBoolean H225_RAS::OnReceiveGatekeeperConfirm(const H225_GatekeeperConfirm & /*gcf*/)
 {
   return TRUE;
 }
 
 
-BOOL H225_RAS::OnReceiveGatekeeperReject(const H323RasPDU &, const H225_GatekeeperReject & grj)
+PBoolean H225_RAS::OnReceiveGatekeeperReject(const H323RasPDU &, const H225_GatekeeperReject & grj)
 {
   if (!CheckForResponse(H225_RasMessage::e_gatekeeperRequest, grj.m_requestSeqNum, &grj.m_rejectReason))
     return FALSE;
@@ -809,7 +812,7 @@ BOOL H225_RAS::OnReceiveGatekeeperReject(const H323RasPDU &, const H225_Gatekeep
 }
 
 
-BOOL H225_RAS::OnReceiveGatekeeperReject(const H225_GatekeeperReject & /*grj*/)
+PBoolean H225_RAS::OnReceiveGatekeeperReject(const H225_GatekeeperReject & /*grj*/)
 {
   return TRUE;
 }
@@ -881,7 +884,7 @@ void H225_RAS::OnSendRegistrationReject(H225_RegistrationReject & /*rrj*/)
 }
 
 
-BOOL H225_RAS::OnReceiveRegistrationRequest(const H323RasPDU &, const H225_RegistrationRequest & rrq)
+PBoolean H225_RAS::OnReceiveRegistrationRequest(const H323RasPDU &, const H225_RegistrationRequest & rrq)
 {
 #ifdef H323_H460
   ReceiveFeatureSet<H225_RegistrationRequest>(this, H460_MessageType::e_registrationRequest, rrq);
@@ -891,13 +894,13 @@ BOOL H225_RAS::OnReceiveRegistrationRequest(const H323RasPDU &, const H225_Regis
 }
 
 
-BOOL H225_RAS::OnReceiveRegistrationRequest(const H225_RegistrationRequest &)
+PBoolean H225_RAS::OnReceiveRegistrationRequest(const H225_RegistrationRequest &)
 {
   return TRUE;
 }
 
 
-BOOL H225_RAS::OnReceiveRegistrationConfirm(const H323RasPDU & pdu, const H225_RegistrationConfirm & rcf)
+PBoolean H225_RAS::OnReceiveRegistrationConfirm(const H323RasPDU & pdu, const H225_RegistrationConfirm & rcf)
 {
   if (!CheckForResponse(H225_RasMessage::e_registrationRequest, rcf.m_requestSeqNum))
     return FALSE;
@@ -925,13 +928,13 @@ BOOL H225_RAS::OnReceiveRegistrationConfirm(const H323RasPDU & pdu, const H225_R
 }
 
 
-BOOL H225_RAS::OnReceiveRegistrationConfirm(const H225_RegistrationConfirm & /*rcf*/)
+PBoolean H225_RAS::OnReceiveRegistrationConfirm(const H225_RegistrationConfirm & /*rcf*/)
 {
   return TRUE;
 }
 
 
-BOOL H225_RAS::OnReceiveRegistrationReject(const H323RasPDU & pdu, const H225_RegistrationReject & rrj)
+PBoolean H225_RAS::OnReceiveRegistrationReject(const H323RasPDU & pdu, const H225_RegistrationReject & rrj)
 {
   if (!CheckForResponse(H225_RasMessage::e_registrationRequest, rrj.m_requestSeqNum, &rrj.m_rejectReason))
     return FALSE;
@@ -949,7 +952,7 @@ BOOL H225_RAS::OnReceiveRegistrationReject(const H323RasPDU & pdu, const H225_Re
 }
 
 
-BOOL H225_RAS::OnReceiveRegistrationReject(const H225_RegistrationReject & /*rrj*/)
+PBoolean H225_RAS::OnReceiveRegistrationReject(const H225_RegistrationReject & /*rrj*/)
 {
   return TRUE;
 }
@@ -994,7 +997,7 @@ void H225_RAS::OnSendUnregistrationReject(H225_UnregistrationReject & /*urj*/)
 }
 
 
-BOOL H225_RAS::OnReceiveUnregistrationRequest(const H323RasPDU & pdu, const H225_UnregistrationRequest & urq)
+PBoolean H225_RAS::OnReceiveUnregistrationRequest(const H323RasPDU & pdu, const H225_UnregistrationRequest & urq)
 {
   if (!CheckCryptoTokens(pdu,
                          urq.m_tokens, H225_UnregistrationRequest::e_tokens,
@@ -1009,13 +1012,13 @@ BOOL H225_RAS::OnReceiveUnregistrationRequest(const H323RasPDU & pdu, const H225
 }
 
 
-BOOL H225_RAS::OnReceiveUnregistrationRequest(const H225_UnregistrationRequest & /*urq*/)
+PBoolean H225_RAS::OnReceiveUnregistrationRequest(const H225_UnregistrationRequest & /*urq*/)
 {
   return TRUE;
 }
 
 
-BOOL H225_RAS::OnReceiveUnregistrationConfirm(const H323RasPDU & pdu, const H225_UnregistrationConfirm & ucf)
+PBoolean H225_RAS::OnReceiveUnregistrationConfirm(const H323RasPDU & pdu, const H225_UnregistrationConfirm & ucf)
 {
   if (!CheckForResponse(H225_RasMessage::e_unregistrationRequest, ucf.m_requestSeqNum))
     return FALSE;
@@ -1029,13 +1032,13 @@ BOOL H225_RAS::OnReceiveUnregistrationConfirm(const H323RasPDU & pdu, const H225
 }
 
 
-BOOL H225_RAS::OnReceiveUnregistrationConfirm(const H225_UnregistrationConfirm & /*ucf*/)
+PBoolean H225_RAS::OnReceiveUnregistrationConfirm(const H225_UnregistrationConfirm & /*ucf*/)
 {
   return TRUE;
 }
 
 
-BOOL H225_RAS::OnReceiveUnregistrationReject(const H323RasPDU & pdu, const H225_UnregistrationReject & urj)
+PBoolean H225_RAS::OnReceiveUnregistrationReject(const H323RasPDU & pdu, const H225_UnregistrationReject & urj)
 {
   if (!CheckForResponse(H225_RasMessage::e_unregistrationRequest, urj.m_requestSeqNum, &urj.m_rejectReason))
     return FALSE;
@@ -1049,7 +1052,7 @@ BOOL H225_RAS::OnReceiveUnregistrationReject(const H323RasPDU & pdu, const H225_
 }
 
 
-BOOL H225_RAS::OnReceiveUnregistrationReject(const H225_UnregistrationReject & /*urj*/)
+PBoolean H225_RAS::OnReceiveUnregistrationReject(const H225_UnregistrationReject & /*urj*/)
 {
   return TRUE;
 }
@@ -1105,7 +1108,7 @@ void H225_RAS::OnSendAdmissionReject(H225_AdmissionReject & /*arj*/)
 }
 
 
-BOOL H225_RAS::OnReceiveAdmissionRequest(const H323RasPDU & pdu, const H225_AdmissionRequest & arq)
+PBoolean H225_RAS::OnReceiveAdmissionRequest(const H323RasPDU & pdu, const H225_AdmissionRequest & arq)
 {
   if (!CheckCryptoTokens(pdu,
                          arq.m_tokens, H225_AdmissionRequest::e_tokens,
@@ -1120,13 +1123,13 @@ BOOL H225_RAS::OnReceiveAdmissionRequest(const H323RasPDU & pdu, const H225_Admi
 }
 
 
-BOOL H225_RAS::OnReceiveAdmissionRequest(const H225_AdmissionRequest & /*arq*/)
+PBoolean H225_RAS::OnReceiveAdmissionRequest(const H225_AdmissionRequest & /*arq*/)
 {
   return TRUE;
 }
 
 
-BOOL H225_RAS::OnReceiveAdmissionConfirm(const H323RasPDU & pdu, const H225_AdmissionConfirm & acf)
+PBoolean H225_RAS::OnReceiveAdmissionConfirm(const H323RasPDU & pdu, const H225_AdmissionConfirm & acf)
 {
   if (!CheckForResponse(H225_RasMessage::e_admissionRequest, acf.m_requestSeqNum))
     return FALSE;
@@ -1141,13 +1144,13 @@ BOOL H225_RAS::OnReceiveAdmissionConfirm(const H323RasPDU & pdu, const H225_Admi
 }
 
 
-BOOL H225_RAS::OnReceiveAdmissionConfirm(const H225_AdmissionConfirm & /*acf*/)
+PBoolean H225_RAS::OnReceiveAdmissionConfirm(const H225_AdmissionConfirm & /*acf*/)
 {
   return TRUE;
 }
 
 
-BOOL H225_RAS::OnReceiveAdmissionReject(const H323RasPDU & pdu, const H225_AdmissionReject & arj)
+PBoolean H225_RAS::OnReceiveAdmissionReject(const H323RasPDU & pdu, const H225_AdmissionReject & arj)
 {
   if (!CheckForResponse(H225_RasMessage::e_admissionRequest, arj.m_requestSeqNum, &arj.m_rejectReason))
     return FALSE;
@@ -1161,7 +1164,7 @@ BOOL H225_RAS::OnReceiveAdmissionReject(const H323RasPDU & pdu, const H225_Admis
 }
 
 
-BOOL H225_RAS::OnReceiveAdmissionReject(const H225_AdmissionReject & /*arj*/)
+PBoolean H225_RAS::OnReceiveAdmissionReject(const H225_AdmissionReject & /*arj*/)
 {
   return TRUE;
 }
@@ -1180,7 +1183,7 @@ void H225_RAS::OnSendBandwidthRequest(H225_BandwidthRequest & /*brq*/)
 }
 
 
-BOOL H225_RAS::OnReceiveBandwidthRequest(const H323RasPDU & pdu, const H225_BandwidthRequest & brq)
+PBoolean H225_RAS::OnReceiveBandwidthRequest(const H323RasPDU & pdu, const H225_BandwidthRequest & brq)
 {
   if (!CheckCryptoTokens(pdu,
                          brq.m_tokens, H225_BandwidthRequest::e_tokens,
@@ -1191,7 +1194,7 @@ BOOL H225_RAS::OnReceiveBandwidthRequest(const H323RasPDU & pdu, const H225_Band
 }
 
 
-BOOL H225_RAS::OnReceiveBandwidthRequest(const H225_BandwidthRequest & /*brq*/)
+PBoolean H225_RAS::OnReceiveBandwidthRequest(const H225_BandwidthRequest & /*brq*/)
 {
   return TRUE;
 }
@@ -1210,7 +1213,7 @@ void H225_RAS::OnSendBandwidthConfirm(H225_BandwidthConfirm & /*bcf*/)
 }
 
 
-BOOL H225_RAS::OnReceiveBandwidthConfirm(const H323RasPDU & pdu, const H225_BandwidthConfirm & bcf)
+PBoolean H225_RAS::OnReceiveBandwidthConfirm(const H323RasPDU & pdu, const H225_BandwidthConfirm & bcf)
 {
   if (!CheckForResponse(H225_RasMessage::e_bandwidthRequest, bcf.m_requestSeqNum))
     return FALSE;
@@ -1224,7 +1227,7 @@ BOOL H225_RAS::OnReceiveBandwidthConfirm(const H323RasPDU & pdu, const H225_Band
 }
 
 
-BOOL H225_RAS::OnReceiveBandwidthConfirm(const H225_BandwidthConfirm & /*bcf*/)
+PBoolean H225_RAS::OnReceiveBandwidthConfirm(const H225_BandwidthConfirm & /*bcf*/)
 {
   return TRUE;
 }
@@ -1243,7 +1246,7 @@ void H225_RAS::OnSendBandwidthReject(H225_BandwidthReject & /*brj*/)
 }
 
 
-BOOL H225_RAS::OnReceiveBandwidthReject(const H323RasPDU & pdu, const H225_BandwidthReject & brj)
+PBoolean H225_RAS::OnReceiveBandwidthReject(const H323RasPDU & pdu, const H225_BandwidthReject & brj)
 {
   if (!CheckForResponse(H225_RasMessage::e_bandwidthRequest, brj.m_requestSeqNum, &brj.m_rejectReason))
     return FALSE;
@@ -1257,7 +1260,7 @@ BOOL H225_RAS::OnReceiveBandwidthReject(const H323RasPDU & pdu, const H225_Bandw
 }
 
 
-BOOL H225_RAS::OnReceiveBandwidthReject(const H225_BandwidthReject & /*brj*/)
+PBoolean H225_RAS::OnReceiveBandwidthReject(const H225_BandwidthReject & /*brj*/)
 {
   return TRUE;
 }
@@ -1280,7 +1283,7 @@ void H225_RAS::OnSendDisengageRequest(H225_DisengageRequest & /*drq*/)
 }
 
 
-BOOL H225_RAS::OnReceiveDisengageRequest(const H323RasPDU & pdu, const H225_DisengageRequest & drq)
+PBoolean H225_RAS::OnReceiveDisengageRequest(const H323RasPDU & pdu, const H225_DisengageRequest & drq)
 {
   if (!CheckCryptoTokens(pdu,
                          drq.m_tokens, H225_DisengageRequest::e_tokens,
@@ -1295,7 +1298,7 @@ BOOL H225_RAS::OnReceiveDisengageRequest(const H323RasPDU & pdu, const H225_Dise
 }
 
 
-BOOL H225_RAS::OnReceiveDisengageRequest(const H225_DisengageRequest & /*drq*/)
+PBoolean H225_RAS::OnReceiveDisengageRequest(const H225_DisengageRequest & /*drq*/)
 {
   return TRUE;
 }
@@ -1318,7 +1321,7 @@ void H225_RAS::OnSendDisengageConfirm(H225_DisengageConfirm & /*dcf*/)
 }
 
 
-BOOL H225_RAS::OnReceiveDisengageConfirm(const H323RasPDU & pdu, const H225_DisengageConfirm & dcf)
+PBoolean H225_RAS::OnReceiveDisengageConfirm(const H323RasPDU & pdu, const H225_DisengageConfirm & dcf)
 {
   if (!CheckForResponse(H225_RasMessage::e_disengageRequest, dcf.m_requestSeqNum))
     return FALSE;
@@ -1336,7 +1339,7 @@ BOOL H225_RAS::OnReceiveDisengageConfirm(const H323RasPDU & pdu, const H225_Dise
 }
 
 
-BOOL H225_RAS::OnReceiveDisengageConfirm(const H225_DisengageConfirm & /*dcf*/)
+PBoolean H225_RAS::OnReceiveDisengageConfirm(const H225_DisengageConfirm & /*dcf*/)
 {
   return TRUE;
 }
@@ -1355,7 +1358,7 @@ void H225_RAS::OnSendDisengageReject(H225_DisengageReject & /*drj*/)
 }
 
 
-BOOL H225_RAS::OnReceiveDisengageReject(const H323RasPDU & pdu, const H225_DisengageReject & drj)
+PBoolean H225_RAS::OnReceiveDisengageReject(const H323RasPDU & pdu, const H225_DisengageReject & drj)
 {
   if (!CheckForResponse(H225_RasMessage::e_disengageRequest, drj.m_requestSeqNum, &drj.m_rejectReason))
     return FALSE;
@@ -1369,7 +1372,7 @@ BOOL H225_RAS::OnReceiveDisengageReject(const H323RasPDU & pdu, const H225_Disen
 }
 
 
-BOOL H225_RAS::OnReceiveDisengageReject(const H225_DisengageReject & /*drj*/)
+PBoolean H225_RAS::OnReceiveDisengageReject(const H225_DisengageReject & /*drj*/)
 {
   return TRUE;
 }
@@ -1393,7 +1396,7 @@ void H225_RAS::OnSendLocationRequest(H225_LocationRequest & /*lrq*/)
 }
 
 
-BOOL H225_RAS::OnReceiveLocationRequest(const H323RasPDU & pdu, const H225_LocationRequest & lrq)
+PBoolean H225_RAS::OnReceiveLocationRequest(const H323RasPDU & pdu, const H225_LocationRequest & lrq)
 {
   if (!CheckCryptoTokens(pdu,
                          lrq.m_tokens, H225_LocationRequest::e_tokens,
@@ -1408,7 +1411,7 @@ BOOL H225_RAS::OnReceiveLocationRequest(const H323RasPDU & pdu, const H225_Locat
 }
 
 
-BOOL H225_RAS::OnReceiveLocationRequest(const H225_LocationRequest & /*lrq*/)
+PBoolean H225_RAS::OnReceiveLocationRequest(const H225_LocationRequest & /*lrq*/)
 {
   return TRUE;
 }
@@ -1432,7 +1435,7 @@ void H225_RAS::OnSendLocationConfirm(H225_LocationConfirm & /*lcf*/)
 }
 
 
-BOOL H225_RAS::OnReceiveLocationConfirm(const H323RasPDU &, const H225_LocationConfirm & lcf)
+PBoolean H225_RAS::OnReceiveLocationConfirm(const H323RasPDU &, const H225_LocationConfirm & lcf)
 {
   if (!CheckForResponse(H225_RasMessage::e_locationRequest, lcf.m_requestSeqNum))
     return FALSE;
@@ -1450,7 +1453,7 @@ BOOL H225_RAS::OnReceiveLocationConfirm(const H323RasPDU &, const H225_LocationC
 }
 
 
-BOOL H225_RAS::OnReceiveLocationConfirm(const H225_LocationConfirm & /*lcf*/)
+PBoolean H225_RAS::OnReceiveLocationConfirm(const H225_LocationConfirm & /*lcf*/)
 {
   return TRUE;
 }
@@ -1474,7 +1477,7 @@ void H225_RAS::OnSendLocationReject(H225_LocationReject & /*lrj*/)
 }
 
 
-BOOL H225_RAS::OnReceiveLocationReject(const H323RasPDU & pdu, const H225_LocationReject & lrj)
+PBoolean H225_RAS::OnReceiveLocationReject(const H323RasPDU & pdu, const H225_LocationReject & lrj)
 {
   if (!CheckForResponse(H225_RasMessage::e_locationRequest, lrj.m_requestSeqNum, &lrj.m_rejectReason))
     return FALSE;
@@ -1492,7 +1495,7 @@ BOOL H225_RAS::OnReceiveLocationReject(const H323RasPDU & pdu, const H225_Locati
 }
 
 
-BOOL H225_RAS::OnReceiveLocationReject(const H225_LocationReject & /*lrj*/)
+PBoolean H225_RAS::OnReceiveLocationReject(const H225_LocationReject & /*lrj*/)
 {
   return TRUE;
 }
@@ -1515,7 +1518,7 @@ void H225_RAS::OnSendInfoRequest(H225_InfoRequest & /*irq*/)
 }
 
 
-BOOL H225_RAS::OnReceiveInfoRequest(const H323RasPDU & pdu, const H225_InfoRequest & irq)
+PBoolean H225_RAS::OnReceiveInfoRequest(const H323RasPDU & pdu, const H225_InfoRequest & irq)
 {
   if (!CheckCryptoTokens(pdu,
                          irq.m_tokens, H225_InfoRequest::e_tokens,
@@ -1530,7 +1533,7 @@ BOOL H225_RAS::OnReceiveInfoRequest(const H323RasPDU & pdu, const H225_InfoReque
 }
 
 
-BOOL H225_RAS::OnReceiveInfoRequest(const H225_InfoRequest & /*irq*/)
+PBoolean H225_RAS::OnReceiveInfoRequest(const H225_InfoRequest & /*irq*/)
 {
   return TRUE;
 }
@@ -1553,7 +1556,7 @@ void H225_RAS::OnSendInfoRequestResponse(H225_InfoRequestResponse & /*irr*/)
 }
 
 
-BOOL H225_RAS::OnReceiveInfoRequestResponse(const H323RasPDU & pdu, const H225_InfoRequestResponse & irr)
+PBoolean H225_RAS::OnReceiveInfoRequestResponse(const H323RasPDU & pdu, const H225_InfoRequestResponse & irr)
 {
   if (!CheckForResponse(H225_RasMessage::e_infoRequest, irr.m_requestSeqNum))
     return FALSE;
@@ -1571,7 +1574,7 @@ BOOL H225_RAS::OnReceiveInfoRequestResponse(const H323RasPDU & pdu, const H225_I
 }
 
 
-BOOL H225_RAS::OnReceiveInfoRequestResponse(const H225_InfoRequestResponse & /*irr*/)
+PBoolean H225_RAS::OnReceiveInfoRequestResponse(const H225_InfoRequestResponse & /*irr*/)
 {
   return TRUE;
 }
@@ -1595,7 +1598,7 @@ void H225_RAS::OnSendNonStandardMessage(H225_NonStandardMessage & /*nsm*/)
 }
 
 
-BOOL H225_RAS::OnReceiveNonStandardMessage(const H323RasPDU & pdu, const H225_NonStandardMessage & nsm)
+PBoolean H225_RAS::OnReceiveNonStandardMessage(const H323RasPDU & pdu, const H225_NonStandardMessage & nsm)
 {
   if (!CheckCryptoTokens(pdu,
                          nsm.m_tokens, H225_NonStandardMessage::e_tokens,
@@ -1610,7 +1613,7 @@ BOOL H225_RAS::OnReceiveNonStandardMessage(const H323RasPDU & pdu, const H225_No
 }
 
 
-BOOL H225_RAS::OnReceiveNonStandardMessage(const H225_NonStandardMessage & /*nsm*/)
+PBoolean H225_RAS::OnReceiveNonStandardMessage(const H225_NonStandardMessage & /*nsm*/)
 {
   return TRUE;
 }
@@ -1629,7 +1632,7 @@ void H225_RAS::OnSendUnknownMessageResponse(H225_UnknownMessageResponse & /*umr*
 }
 
 
-BOOL H225_RAS::OnReceiveUnknownMessageResponse(const H323RasPDU & pdu, const H225_UnknownMessageResponse & umr)
+PBoolean H225_RAS::OnReceiveUnknownMessageResponse(const H323RasPDU & pdu, const H225_UnknownMessageResponse & umr)
 {
   if (!CheckCryptoTokens(pdu,
                          umr.m_tokens, H225_UnknownMessageResponse::e_tokens,
@@ -1640,7 +1643,7 @@ BOOL H225_RAS::OnReceiveUnknownMessageResponse(const H323RasPDU & pdu, const H22
 }
 
 
-BOOL H225_RAS::OnReceiveUnknownMessageResponse(const H225_UnknownMessageResponse & /*umr*/)
+PBoolean H225_RAS::OnReceiveUnknownMessageResponse(const H225_UnknownMessageResponse & /*umr*/)
 {
   return TRUE;
 }
@@ -1672,7 +1675,7 @@ void H225_RAS::OnSendResourcesAvailableIndicate(H225_ResourcesAvailableIndicate 
 }
 
 
-BOOL H225_RAS::OnReceiveResourcesAvailableIndicate(const H323RasPDU & pdu, const H225_ResourcesAvailableIndicate & rai)
+PBoolean H225_RAS::OnReceiveResourcesAvailableIndicate(const H323RasPDU & pdu, const H225_ResourcesAvailableIndicate & rai)
 {
   if (!CheckCryptoTokens(pdu,
                          rai.m_tokens, H225_ResourcesAvailableIndicate::e_tokens,
@@ -1683,7 +1686,7 @@ BOOL H225_RAS::OnReceiveResourcesAvailableIndicate(const H323RasPDU & pdu, const
 }
 
 
-BOOL H225_RAS::OnReceiveResourcesAvailableIndicate(const H225_ResourcesAvailableIndicate & /*rai*/)
+PBoolean H225_RAS::OnReceiveResourcesAvailableIndicate(const H225_ResourcesAvailableIndicate & /*rai*/)
 {
   return TRUE;
 }
@@ -1702,7 +1705,7 @@ void H225_RAS::OnSendResourcesAvailableConfirm(H225_ResourcesAvailableConfirm & 
 }
 
 
-BOOL H225_RAS::OnReceiveResourcesAvailableConfirm(const H323RasPDU & pdu, const H225_ResourcesAvailableConfirm & rac)
+PBoolean H225_RAS::OnReceiveResourcesAvailableConfirm(const H323RasPDU & pdu, const H225_ResourcesAvailableConfirm & rac)
 {
   if (!CheckForResponse(H225_RasMessage::e_resourcesAvailableIndicate, rac.m_requestSeqNum))
     return FALSE;
@@ -1716,7 +1719,7 @@ BOOL H225_RAS::OnReceiveResourcesAvailableConfirm(const H323RasPDU & pdu, const 
 }
 
 
-BOOL H225_RAS::OnReceiveResourcesAvailableConfirm(const H225_ResourcesAvailableConfirm & /*rac*/)
+PBoolean H225_RAS::OnReceiveResourcesAvailableConfirm(const H225_ResourcesAvailableConfirm & /*rac*/)
 {
   return TRUE;
 }
@@ -1741,7 +1744,7 @@ void H225_RAS::OnSendServiceControlIndication(H225_ServiceControlIndication & /*
 }
 
 
-BOOL H225_RAS::OnReceiveServiceControlIndication(const H323RasPDU & pdu, const H225_ServiceControlIndication & sci)
+PBoolean H225_RAS::OnReceiveServiceControlIndication(const H323RasPDU & pdu, const H225_ServiceControlIndication & sci)
 {
   if (!CheckCryptoTokens(pdu,
                          sci.m_tokens, H225_ServiceControlIndication::e_tokens,
@@ -1756,7 +1759,7 @@ BOOL H225_RAS::OnReceiveServiceControlIndication(const H323RasPDU & pdu, const H
 }
 
 
-BOOL H225_RAS::OnReceiveServiceControlIndication(const H225_ServiceControlIndication & /*sci*/)
+PBoolean H225_RAS::OnReceiveServiceControlIndication(const H225_ServiceControlIndication & /*sci*/)
 {
   return TRUE;
 }
@@ -1780,7 +1783,7 @@ void H225_RAS::OnSendServiceControlResponse(H225_ServiceControlResponse & /*scr*
 }
 
 
-BOOL H225_RAS::OnReceiveServiceControlResponse(const H323RasPDU & pdu, const H225_ServiceControlResponse & scr)
+PBoolean H225_RAS::OnReceiveServiceControlResponse(const H323RasPDU & pdu, const H225_ServiceControlResponse & scr)
 {
   if (!CheckForResponse(H225_RasMessage::e_serviceControlIndication, scr.m_requestSeqNum))
     return FALSE;
@@ -1798,7 +1801,7 @@ BOOL H225_RAS::OnReceiveServiceControlResponse(const H323RasPDU & pdu, const H22
 }
 
 
-BOOL H225_RAS::OnReceiveServiceControlResponse(const H225_ServiceControlResponse & /*scr*/)
+PBoolean H225_RAS::OnReceiveServiceControlResponse(const H225_ServiceControlResponse & /*scr*/)
 {
   return TRUE;
 }
@@ -1819,7 +1822,7 @@ void H225_RAS::OnSendInfoRequestAck(H225_InfoRequestAck & /*iack*/)
 }
 
 
-BOOL H225_RAS::OnReceiveInfoRequestAck(const H323RasPDU & pdu, const H225_InfoRequestAck & iack)
+PBoolean H225_RAS::OnReceiveInfoRequestAck(const H323RasPDU & pdu, const H225_InfoRequestAck & iack)
 {
   if (!CheckForResponse(H225_RasMessage::e_infoRequestResponse, iack.m_requestSeqNum))
     return FALSE;
@@ -1833,7 +1836,7 @@ BOOL H225_RAS::OnReceiveInfoRequestAck(const H323RasPDU & pdu, const H225_InfoRe
 }
 
 
-BOOL H225_RAS::OnReceiveInfoRequestAck(const H225_InfoRequestAck & /*iack*/)
+PBoolean H225_RAS::OnReceiveInfoRequestAck(const H225_InfoRequestAck & /*iack*/)
 {
   return TRUE;
 }
@@ -1852,7 +1855,7 @@ void H225_RAS::OnSendInfoRequestNak(H225_InfoRequestNak & /*inak*/)
 }
 
 
-BOOL H225_RAS::OnReceiveInfoRequestNak(const H323RasPDU & pdu, const H225_InfoRequestNak & inak)
+PBoolean H225_RAS::OnReceiveInfoRequestNak(const H323RasPDU & pdu, const H225_InfoRequestNak & inak)
 {
   if (!CheckForResponse(H225_RasMessage::e_infoRequestResponse, inak.m_requestSeqNum, &inak.m_nakReason))
     return FALSE;
@@ -1866,13 +1869,13 @@ BOOL H225_RAS::OnReceiveInfoRequestNak(const H323RasPDU & pdu, const H225_InfoRe
 }
 
 
-BOOL H225_RAS::OnReceiveInfoRequestNak(const H225_InfoRequestNak & /*inak*/)
+PBoolean H225_RAS::OnReceiveInfoRequestNak(const H225_InfoRequestNak & /*inak*/)
 {
   return TRUE;
 }
 
 
-BOOL H225_RAS::OnReceiveUnknown(const H323RasPDU &)
+PBoolean H225_RAS::OnReceiveUnknown(const H323RasPDU &)
 {
   H323RasPDU response;
   response.BuildUnknownMessageResponse(0);

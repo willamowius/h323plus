@@ -111,7 +111,7 @@ class H4507_MsgCentreId : public PASN_Choice
     operator const H4501_EndpointAddress &() const;
 #endif
 
-    BOOL CreateObject();
+    PBoolean CreateObject();
     PObject * Clone() const;
 };
 
@@ -253,7 +253,7 @@ class H4507_MWIActivateArg : public PASN_Sequence
     H4507_ArrayOf_MixedExtension m_extensionArg;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -288,7 +288,7 @@ class H4507_MWIDeactivateArg : public PASN_Sequence
     H4507_ArrayOf_MixedExtension m_extensionArg;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -323,7 +323,7 @@ class H4507_MWIInterrogateArg : public PASN_Sequence
     H4507_ArrayOf_MixedExtension m_extensionArg;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;
@@ -363,7 +363,7 @@ class H4507_MWIInterrogateResElt : public PASN_Sequence
     H4507_ArrayOf_MixedExtension m_extensionArg;
 
     PINDEX GetDataLength() const;
-    BOOL Decode(PASN_Stream & strm);
+    PBoolean Decode(PASN_Stream & strm);
     void Encode(PASN_Stream & strm) const;
 #ifndef PASN_NOPRINTON
     void PrintOn(ostream & strm) const;

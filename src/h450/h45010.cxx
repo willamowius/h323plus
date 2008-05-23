@@ -134,7 +134,7 @@ PINDEX H45010_CoReqOptArg::GetDataLength() const
 }
 
 
-BOOL H45010_CoReqOptArg::Decode(PASN_Stream & strm)
+PBoolean H45010_CoReqOptArg::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -214,7 +214,7 @@ PINDEX H45010_RUAlertOptArg::GetDataLength() const
 }
 
 
-BOOL H45010_RUAlertOptArg::Decode(PASN_Stream & strm)
+PBoolean H45010_RUAlertOptArg::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -294,7 +294,7 @@ PINDEX H45010_CfbOvrOptArg::GetDataLength() const
 }
 
 
-BOOL H45010_CfbOvrOptArg::Decode(PASN_Stream & strm)
+PBoolean H45010_CfbOvrOptArg::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;

@@ -150,7 +150,7 @@ H45011_CIStatusInformation::H45011_CIStatusInformation(unsigned tag, PASN_Object
 }
 
 
-BOOL H45011_CIStatusInformation::CreateObject()
+PBoolean H45011_CIStatusInformation::CreateObject()
 {
   choice = (tag <= e_callIntrusionEnd) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -286,7 +286,7 @@ PINDEX H45011_CIRequestArg::GetDataLength() const
 }
 
 
-BOOL H45011_CIRequestArg::Decode(PASN_Stream & strm)
+PBoolean H45011_CIRequestArg::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -373,7 +373,7 @@ PINDEX H45011_CIRequestRes::GetDataLength() const
 }
 
 
-BOOL H45011_CIRequestRes::Decode(PASN_Stream & strm)
+PBoolean H45011_CIRequestRes::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -456,7 +456,7 @@ PINDEX H45011_CIGetCIPLOptArg::GetDataLength() const
 }
 
 
-BOOL H45011_CIGetCIPLOptArg::Decode(PASN_Stream & strm)
+PBoolean H45011_CIGetCIPLOptArg::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -546,7 +546,7 @@ PINDEX H45011_CIGetCIPLRes::GetDataLength() const
 }
 
 
-BOOL H45011_CIGetCIPLRes::Decode(PASN_Stream & strm)
+PBoolean H45011_CIGetCIPLRes::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -633,7 +633,7 @@ PINDEX H45011_CIIsOptArg::GetDataLength() const
 }
 
 
-BOOL H45011_CIIsOptArg::Decode(PASN_Stream & strm)
+PBoolean H45011_CIIsOptArg::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -713,7 +713,7 @@ PINDEX H45011_CIIsOptRes::GetDataLength() const
 }
 
 
-BOOL H45011_CIIsOptRes::Decode(PASN_Stream & strm)
+PBoolean H45011_CIIsOptRes::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -797,7 +797,7 @@ PINDEX H45011_CIFrcRelArg::GetDataLength() const
 }
 
 
-BOOL H45011_CIFrcRelArg::Decode(PASN_Stream & strm)
+PBoolean H45011_CIFrcRelArg::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -880,7 +880,7 @@ PINDEX H45011_CIFrcRelOptRes::GetDataLength() const
 }
 
 
-BOOL H45011_CIFrcRelOptRes::Decode(PASN_Stream & strm)
+PBoolean H45011_CIFrcRelOptRes::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -960,7 +960,7 @@ PINDEX H45011_CIWobOptArg::GetDataLength() const
 }
 
 
-BOOL H45011_CIWobOptArg::Decode(PASN_Stream & strm)
+PBoolean H45011_CIWobOptArg::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1040,7 +1040,7 @@ PINDEX H45011_CIWobOptRes::GetDataLength() const
 }
 
 
-BOOL H45011_CIWobOptRes::Decode(PASN_Stream & strm)
+PBoolean H45011_CIWobOptRes::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1130,7 +1130,7 @@ PINDEX H45011_CISilentArg::GetDataLength() const
 }
 
 
-BOOL H45011_CISilentArg::Decode(PASN_Stream & strm)
+PBoolean H45011_CISilentArg::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1217,7 +1217,7 @@ PINDEX H45011_CISilentOptRes::GetDataLength() const
 }
 
 
-BOOL H45011_CISilentOptRes::Decode(PASN_Stream & strm)
+PBoolean H45011_CISilentOptRes::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1301,7 +1301,7 @@ PINDEX H45011_CINotificationArg::GetDataLength() const
 }
 
 
-BOOL H45011_CINotificationArg::Decode(PASN_Stream & strm)
+PBoolean H45011_CINotificationArg::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;

@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:50  shorne
+ * First commit of h323plus
+ *
  * Revision 1.56  2005/11/30 13:05:01  csoutheren
  * Changed tags for Doxygen
  *
@@ -255,35 +258,35 @@ class Q931 : public PObject
     Q931(const Q931 & other);
     Q931 & operator=(const Q931 & other);
 
-    void BuildFacility(int callRef, BOOL fromDest);
-    void BuildInformation(int callRef, BOOL fromDest);
+    void BuildFacility(int callRef, PBoolean fromDest);
+    void BuildInformation(int callRef, PBoolean fromDest);
     void BuildProgress(
       int callRef,
-      BOOL fromDest,
+      PBoolean fromDest,
       unsigned description,
       unsigned codingStandard = 0,
       unsigned location = 0
     );
-    void BuildNotify(int callRef, BOOL fromDest);
+    void BuildNotify(int callRef, PBoolean fromDest);
     void BuildCallProceeding(int callRef);
     void BuildSetupAcknowledge(int callRef);
     void BuildAlerting(int callRef);
     void BuildSetup(int callRef = -1);
     void BuildConnect(int callRef);
-    void BuildConnectAck(int callRef, BOOL fromDest);
-    void BuildStatus(int callRef, BOOL fromDest);
-    void BuildStatusEnquiry(int callRef, BOOL fromDest);
-    void BuildReleaseComplete(int callRef, BOOL fromDest);
+    void BuildConnectAck(int callRef, PBoolean fromDest);
+    void BuildStatus(int callRef, PBoolean fromDest);
+    void BuildStatusEnquiry(int callRef, PBoolean fromDest);
+    void BuildReleaseComplete(int callRef, PBoolean fromDest);
 
-    BOOL Decode(const PBYTEArray & data);
-    BOOL Encode(PBYTEArray & data) const;
+    PBoolean Decode(const PBYTEArray & data);
+    PBoolean Encode(PBYTEArray & data) const;
 
     void PrintOn(ostream & strm) const;
     PString GetMessageTypeName() const;
 
     static unsigned GenerateCallReference();
     unsigned GetCallReference() const { return callReference; }
-    BOOL IsFromDestination() const { return fromDestination; }
+    PBoolean IsFromDestination() const { return fromDestination; }
     MsgTypes GetMessageType() const { return messageType; }
 
     enum InformationElementCodes {
@@ -304,7 +307,7 @@ class Q931 : public PObject
     };
     friend ostream & operator<<(ostream & strm, InformationElementCodes ie);
 
-    BOOL HasIE(InformationElementCodes ie) const;
+    PBoolean HasIE(InformationElementCodes ie) const;
     PBYTEArray GetIE(InformationElementCodes ie) const;
     void SetIE(InformationElementCodes ie, const PBYTEArray & userData);
     void RemoveIE(InformationElementCodes ie);
@@ -325,7 +328,7 @@ class Q931 : public PObject
       unsigned userInfoLayer1 = 5   ///<  5 = Recommendations H.221 and H.242
     );
 
-    BOOL GetBearerCapabilities(
+    PBoolean GetBearerCapabilities(
       InformationTransferCapability & capability,
       unsigned & transferRate,        ///<  Number of 64k B channels
       unsigned * codingStandard = NULL,
@@ -492,7 +495,7 @@ class Q931 : public PObject
       unsigned codingStandard = 0,
       unsigned location = 0
     );
-    BOOL GetProgressIndicator(
+    PBoolean GetProgressIndicator(
       unsigned & description,
       unsigned * codingStandard = NULL,
       unsigned * location = NULL
@@ -528,7 +531,7 @@ class Q931 : public PObject
       int presentation = -1,  ///<  0 = presentation allowed, -1 = no octet3a
       int screening = -1      ///<   0 = user provided, not screened
     );
-    BOOL GetCallingPartyNumber(
+    PBoolean GetCallingPartyNumber(
       PString & number,               ///<  Number string
       unsigned * plan = NULL,         ///<  ISDN/Telephony numbering system
       unsigned * type = NULL,         ///<  Number type
@@ -543,7 +546,7 @@ class Q931 : public PObject
       unsigned plan = 1,      ///<  1 = ISDN/Telephony numbering system
       unsigned type = 0       ///<  0 = Unknown number type
     );
-    BOOL GetCalledPartyNumber(
+    PBoolean GetCalledPartyNumber(
       PString & number,       ///<  Number string
       unsigned * plan = NULL, ///<  ISDN/Telephony numbering system
       unsigned * type = NULL  ///<  Number type
@@ -557,7 +560,7 @@ class Q931 : public PObject
       int screening = -1,     ///<  0 = user provided, not screened
       int reason = -1         ///<  0 = Unknown reason , -1 = no octet 3b
     );
-    BOOL GetRedirectingNumber(
+    PBoolean GetRedirectingNumber(
       PString & number,               ///<  Number string
       unsigned * plan = NULL,         ///<  ISDN/Telephony numbering system
       unsigned * type = NULL,         ///<  Number type
@@ -577,7 +580,7 @@ class Q931 : public PObject
       int screening = -1,     ///<  0 = user provided, not screened
       int reason = -1         ///<  0 = Unknown reason , -1 = no octet 3b
     );
-    BOOL GetConnectedNumber(
+    PBoolean GetConnectedNumber(
       PString & number,               ///<  Number string
       unsigned * plan = NULL,         ///<  ISDN/Telephony numbering system
       unsigned * type = NULL,         ///<  Number type
@@ -603,7 +606,7 @@ class Q931 : public PObject
 
     /**Get the limitations to ChannelIdentification.
       */
-    BOOL GetChannelIdentification(
+    PBoolean GetChannelIdentification(
       unsigned * interfaceType = NULL,        ///<  Interface type
       unsigned * preferredOrExclusive = NULL, ///<  Channel negotiation preference
       int      * channelNumber = NULL         ///<  Channel number
@@ -611,7 +614,7 @@ class Q931 : public PObject
 
   protected:
     unsigned callReference;
-    BOOL fromDestination;
+    PBoolean fromDestination;
     unsigned protocolDiscriminator;
     MsgTypes messageType;
 

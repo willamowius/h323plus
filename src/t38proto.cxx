@@ -24,6 +24,9 @@
  * Contributor(s): Vyacheslav Frolov.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:51:08  shorne
+ * First commit of h323plus
+ *
  * Revision 1.19  2006/07/05 04:37:44  csoutheren
  * Applied 1488904 - SetPromiscuous(AcceptFromLastReceivedOnly) for T.38
  * Thanks to Vyacheslav Frolov
@@ -133,7 +136,7 @@ void OpalT38Protocol::CleanUpOnTermination()
 }
 
 
-void OpalT38Protocol::SetTransport(H323Transport * t, BOOL autoDelete)
+void OpalT38Protocol::SetTransport(H323Transport * t, PBoolean autoDelete)
 {
   if (transport != t) {
     if (autoDeleteTransport)
@@ -146,7 +149,7 @@ void OpalT38Protocol::SetTransport(H323Transport * t, BOOL autoDelete)
 }
 
 
-BOOL OpalT38Protocol::Originate()
+PBoolean OpalT38Protocol::Originate()
 {
   PTRACE(3, "T38\tOriginate, transport=" << *transport);
 
@@ -159,7 +162,7 @@ BOOL OpalT38Protocol::Originate()
 }
 
 
-BOOL OpalT38Protocol::WritePacket(const T38_IFPPacket & ifp)
+PBoolean OpalT38Protocol::WritePacket(const T38_IFPPacket & ifp)
 {
   T38_UDPTLPacket udptl;
 
@@ -243,7 +246,7 @@ BOOL OpalT38Protocol::WritePacket(const T38_IFPPacket & ifp)
 }
 
 
-BOOL OpalT38Protocol::WriteIndicator(unsigned indicator)
+PBoolean OpalT38Protocol::WriteIndicator(unsigned indicator)
 {
   T38_IFPPacket ifp;
 
@@ -255,7 +258,7 @@ BOOL OpalT38Protocol::WriteIndicator(unsigned indicator)
 }
 
 
-BOOL OpalT38Protocol::WriteMultipleData(unsigned mode,
+PBoolean OpalT38Protocol::WriteMultipleData(unsigned mode,
                                         PINDEX count,
                                         unsigned * type,
                                         const PBYTEArray * data)
@@ -277,13 +280,13 @@ BOOL OpalT38Protocol::WriteMultipleData(unsigned mode,
 }
 
 
-BOOL OpalT38Protocol::WriteData(unsigned mode, unsigned type, const PBYTEArray & data)
+PBoolean OpalT38Protocol::WriteData(unsigned mode, unsigned type, const PBYTEArray & data)
 {
   return WriteMultipleData(mode, 1, &type, &data);
 }
 
 
-BOOL OpalT38Protocol::Answer()
+PBoolean OpalT38Protocol::Answer()
 {
   PTRACE(3, "T38\tAnswer, transport=" << *transport);
 
@@ -293,7 +296,7 @@ BOOL OpalT38Protocol::Answer()
 
   int consecutiveBadPackets = 0;
   int expectedSequenceNumber = 0;	// 16 bit
-  BOOL firstPacket = TRUE;
+  PBoolean firstPacket = TRUE;
 
   for (;;) {
     PPER_Stream rawData;
@@ -388,7 +391,7 @@ BOOL OpalT38Protocol::Answer()
 }
 
 
-BOOL OpalT38Protocol::HandleRawIFP(const PASN_OctetString & pdu)
+PBoolean OpalT38Protocol::HandleRawIFP(const PASN_OctetString & pdu)
 {
   T38_IFPPacket ifp;
 
@@ -425,7 +428,7 @@ BOOL OpalT38Protocol::HandleRawIFP(const PASN_OctetString & pdu)
 }
 
 
-BOOL OpalT38Protocol::HandlePacket(const T38_IFPPacket & ifp)
+PBoolean OpalT38Protocol::HandlePacket(const T38_IFPPacket & ifp)
 {
   if (ifp.m_type_of_msg.GetTag() == T38_Type_of_msg::e_t30_indicator)
     return OnIndicator((T38_Type_of_msg_t30_indicator)ifp.m_type_of_msg);
@@ -440,7 +443,7 @@ BOOL OpalT38Protocol::HandlePacket(const T38_IFPPacket & ifp)
 }
 
 
-BOOL OpalT38Protocol::OnIndicator(unsigned indicator)
+PBoolean OpalT38Protocol::OnIndicator(unsigned indicator)
 {
   switch (indicator) {
     case T38_Type_of_msg_t30_indicator::e_no_signal :
@@ -477,31 +480,31 @@ BOOL OpalT38Protocol::OnIndicator(unsigned indicator)
 }
 
 
-BOOL OpalT38Protocol::OnCNG()
+PBoolean OpalT38Protocol::OnCNG()
 {
   return TRUE;
 }
 
 
-BOOL OpalT38Protocol::OnCED()
+PBoolean OpalT38Protocol::OnCED()
 {
   return TRUE;
 }
 
 
-BOOL OpalT38Protocol::OnPreamble()
+PBoolean OpalT38Protocol::OnPreamble()
 {
   return TRUE;
 }
 
 
-BOOL OpalT38Protocol::OnTraining(unsigned /*indicator*/)
+PBoolean OpalT38Protocol::OnTraining(unsigned /*indicator*/)
 {
   return TRUE;
 }
 
 
-BOOL OpalT38Protocol::OnData(unsigned /*mode*/,
+PBoolean OpalT38Protocol::OnData(unsigned /*mode*/,
                              unsigned /*type*/,
                              const PBYTEArray & /*data*/)
 {
@@ -509,7 +512,7 @@ BOOL OpalT38Protocol::OnData(unsigned /*mode*/,
 }
 
 
-BOOL OpalT38Protocol::HandlePacketLost(unsigned PTRACE_PARAM(nLost))
+PBoolean OpalT38Protocol::HandlePacketLost(unsigned PTRACE_PARAM(nLost))
 {
   PTRACE(2, "T38\tHandlePacketLost, n=" << nLost);
   /* don't handle lost packets yet */

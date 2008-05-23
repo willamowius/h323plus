@@ -127,7 +127,7 @@ H245_MultimediaSystemControlMessage::operator const H245_IndicationMessage &() c
 }
 
 
-BOOL H245_MultimediaSystemControlMessage::CreateObject()
+PBoolean H245_MultimediaSystemControlMessage::CreateObject()
 {
   switch (tag) {
     case e_request :
@@ -545,7 +545,7 @@ H245_RequestMessage::operator const H245_GenericMessage &() const
 }
 
 
-BOOL H245_RequestMessage::CreateObject()
+PBoolean H245_RequestMessage::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -1206,7 +1206,7 @@ H245_ResponseMessage::operator const H245_GenericMessage &() const
 }
 
 
-BOOL H245_ResponseMessage::CreateObject()
+PBoolean H245_ResponseMessage::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -1618,7 +1618,7 @@ H245_CommandMessage::operator const H245_GenericMessage &() const
 }
 
 
-BOOL H245_CommandMessage::CreateObject()
+PBoolean H245_CommandMessage::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -2247,7 +2247,7 @@ H245_IndicationMessage::operator const H245_GenericMessage &() const
 }
 
 
-BOOL H245_IndicationMessage::CreateObject()
+PBoolean H245_IndicationMessage::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -2415,7 +2415,7 @@ H245_NonStandardIdentifier::operator const H245_NonStandardIdentifier_h221NonSta
 }
 
 
-BOOL H245_NonStandardIdentifier::CreateObject()
+PBoolean H245_NonStandardIdentifier::CreateObject()
 {
   switch (tag) {
     case e_object :
@@ -2491,7 +2491,7 @@ PINDEX H245_MasterSlaveDetermination::GetDataLength() const
 }
 
 
-BOOL H245_MasterSlaveDetermination::Decode(PASN_Stream & strm)
+PBoolean H245_MasterSlaveDetermination::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2552,7 +2552,7 @@ PINDEX H245_MasterSlaveDeterminationRelease::GetDataLength() const
 }
 
 
-BOOL H245_MasterSlaveDeterminationRelease::Decode(PASN_Stream & strm)
+PBoolean H245_MasterSlaveDeterminationRelease::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3102,7 +3102,7 @@ H245_Capability::operator const H245_AlternativeCapabilitySet &() const
 }
 
 
-BOOL H245_Capability::CreateObject()
+PBoolean H245_Capability::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -3346,7 +3346,7 @@ H245_MultiplexCapability::operator const H245_GenericCapability &() const
 }
 
 
-BOOL H245_MultiplexCapability::CreateObject()
+PBoolean H245_MultiplexCapability::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -3481,7 +3481,7 @@ PINDEX H245_H223AnnexCCapability::GetDataLength() const
 }
 
 
-BOOL H245_H223AnnexCCapability::Decode(PASN_Stream & strm)
+PBoolean H245_H223AnnexCCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3596,7 +3596,7 @@ PINDEX H245_V75Capability::GetDataLength() const
 }
 
 
-BOOL H245_V75Capability::Decode(PASN_Stream & strm)
+PBoolean H245_V75Capability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3648,7 +3648,7 @@ H245_QOSMode::H245_QOSMode(unsigned tag, PASN_Object::TagClass tagClass)
 }
 
 
-BOOL H245_QOSMode::CreateObject()
+PBoolean H245_QOSMode::CreateObject()
 {
   choice = (tag <= e_controlledLoad) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -3730,7 +3730,7 @@ PINDEX H245_ATMParameters::GetDataLength() const
 }
 
 
-BOOL H245_ATMParameters::Decode(PASN_Stream & strm)
+PBoolean H245_ATMParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -3797,7 +3797,7 @@ H245_QOSType::H245_QOSType(unsigned tag, PASN_Object::TagClass tagClass)
 }
 
 
-BOOL H245_QOSType::CreateObject()
+PBoolean H245_QOSType::CreateObject()
 {
   choice = (tag <= e_required) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -3838,7 +3838,7 @@ H245_QOSClass::H245_QOSClass(unsigned tag, PASN_Object::TagClass tagClass)
 }
 
 
-BOOL H245_QOSClass::CreateObject()
+PBoolean H245_QOSClass::CreateObject()
 {
   choice = (tag <= e_class5) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -3900,7 +3900,7 @@ H245_MediaTransportType::operator const H245_MediaTransportType_atm_AAL5_compres
 }
 
 
-BOOL H245_MediaTransportType::CreateObject()
+PBoolean H245_MediaTransportType::CreateObject()
 {
   switch (tag) {
     case e_ip_UDP :
@@ -3975,7 +3975,7 @@ PINDEX H245_MediaChannelCapability::GetDataLength() const
 }
 
 
-BOOL H245_MediaChannelCapability::Decode(PASN_Stream & strm)
+PBoolean H245_MediaChannelCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4073,7 +4073,7 @@ H245_RedundancyEncodingMethod::operator const H245_RTPH263VideoRedundancyEncodin
 }
 
 
-BOOL H245_RedundancyEncodingMethod::CreateObject()
+PBoolean H245_RedundancyEncodingMethod::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -4281,7 +4281,7 @@ H245_VideoCapability::operator const H245_ExtendedVideoCapability &() const
 }
 
 
-BOOL H245_VideoCapability::CreateObject()
+PBoolean H245_VideoCapability::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -4392,7 +4392,7 @@ PINDEX H245_H261VideoCapability::GetDataLength() const
 }
 
 
-BOOL H245_H261VideoCapability::Decode(PASN_Stream & strm)
+PBoolean H245_H261VideoCapability::Decode(PASN_Stream & strm)
 {
 
   if (!PreambleDecode(strm))
@@ -4571,7 +4571,7 @@ PINDEX H245_H262VideoCapability::GetDataLength() const
 }
 
 
-BOOL H245_H262VideoCapability::Decode(PASN_Stream & strm)
+PBoolean H245_H262VideoCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4725,7 +4725,7 @@ PINDEX H245_TransparencyParameters::GetDataLength() const
 }
 
 
-BOOL H245_TransparencyParameters::Decode(PASN_Stream & strm)
+PBoolean H245_TransparencyParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4854,7 +4854,7 @@ PINDEX H245_CustomPictureClockFrequency::GetDataLength() const
 }
 
 
-BOOL H245_CustomPictureClockFrequency::Decode(PASN_Stream & strm)
+PBoolean H245_CustomPictureClockFrequency::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4981,7 +4981,7 @@ PINDEX H245_H263Version3Options::GetDataLength() const
 }
 
 
-BOOL H245_H263Version3Options::Decode(PASN_Stream & strm)
+PBoolean H245_H263Version3Options::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5123,7 +5123,7 @@ PINDEX H245_IS11172VideoCapability::GetDataLength() const
 }
 
 
-BOOL H245_IS11172VideoCapability::Decode(PASN_Stream & strm)
+PBoolean H245_IS11172VideoCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5467,7 +5467,7 @@ H245_AudioCapability::operator const H245_NoPTAudioToneCapability &() const
 }
 
 
-BOOL H245_AudioCapability::CreateObject()
+PBoolean H245_AudioCapability::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -5645,7 +5645,7 @@ PINDEX H245_G729Extensions::GetDataLength() const
 }
 
 
-BOOL H245_G729Extensions::Decode(PASN_Stream & strm)
+PBoolean H245_G729Extensions::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5776,7 +5776,7 @@ PINDEX H245_IS11172AudioCapability::GetDataLength() const
 }
 
 
-BOOL H245_IS11172AudioCapability::Decode(PASN_Stream & strm)
+PBoolean H245_IS11172AudioCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5957,7 +5957,7 @@ PINDEX H245_IS13818AudioCapability::GetDataLength() const
 }
 
 
-BOOL H245_IS13818AudioCapability::Decode(PASN_Stream & strm)
+PBoolean H245_IS13818AudioCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6102,7 +6102,7 @@ PINDEX H245_GSMAudioCapability::GetDataLength() const
 }
 
 
-BOOL H245_GSMAudioCapability::Decode(PASN_Stream & strm)
+PBoolean H245_GSMAudioCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6184,7 +6184,7 @@ PINDEX H245_VBDCapability::GetDataLength() const
 }
 
 
-BOOL H245_VBDCapability::Decode(PASN_Stream & strm)
+PBoolean H245_VBDCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6292,7 +6292,7 @@ H245_DataProtocolCapability::operator const H245_DataProtocolCapability_v76wComp
 }
 
 
-BOOL H245_DataProtocolCapability::CreateObject()
+PBoolean H245_DataProtocolCapability::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -6373,7 +6373,7 @@ H245_CompressionType::operator const H245_V42bis &() const
 }
 
 
-BOOL H245_CompressionType::CreateObject()
+PBoolean H245_CompressionType::CreateObject()
 {
   switch (tag) {
     case e_v42bis :
@@ -6446,7 +6446,7 @@ PINDEX H245_V42bis::GetDataLength() const
 }
 
 
-BOOL H245_V42bis::Decode(PASN_Stream & strm)
+PBoolean H245_V42bis::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6523,7 +6523,7 @@ H245_T84Profile::operator const H245_T84Profile_t84Restricted &() const
 }
 
 
-BOOL H245_T84Profile::CreateObject()
+PBoolean H245_T84Profile::CreateObject()
 {
   switch (tag) {
     case e_t84Unrestricted :
@@ -6569,7 +6569,7 @@ H245_T38FaxRateManagement::H245_T38FaxRateManagement(unsigned tag, PASN_Object::
 }
 
 
-BOOL H245_T38FaxRateManagement::CreateObject()
+PBoolean H245_T38FaxRateManagement::CreateObject()
 {
   choice = (tag <= e_transferredTCF) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -6630,7 +6630,7 @@ PINDEX H245_T38FaxTcpOptions::GetDataLength() const
 }
 
 
-BOOL H245_T38FaxTcpOptions::Decode(PASN_Stream & strm)
+PBoolean H245_T38FaxTcpOptions::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6736,7 +6736,7 @@ H245_MediaEncryptionAlgorithm::operator const H245_NonStandardParameter &() cons
 }
 
 
-BOOL H245_MediaEncryptionAlgorithm::CreateObject()
+PBoolean H245_MediaEncryptionAlgorithm::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -6836,7 +6836,7 @@ H245_UserInputCapability::operator const H245_GenericCapability &() const
 }
 
 
-BOOL H245_UserInputCapability::CreateObject()
+PBoolean H245_UserInputCapability::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -6919,7 +6919,7 @@ H245_CapabilityIdentifier::operator const H245_NonStandardParameter &() const
 }
 
 
-BOOL H245_CapabilityIdentifier::CreateObject()
+PBoolean H245_CapabilityIdentifier::CreateObject()
 {
   switch (tag) {
     case e_standard :
@@ -6997,7 +6997,7 @@ H245_ParameterIdentifier::operator const H245_NonStandardParameter &() const
 }
 
 
-BOOL H245_ParameterIdentifier::CreateObject()
+PBoolean H245_ParameterIdentifier::CreateObject()
 {
   switch (tag) {
     case e_standard :
@@ -7080,7 +7080,7 @@ H245_ParameterValue::operator const H245_ArrayOf_GenericParameter &() const
 }
 
 
-BOOL H245_ParameterValue::CreateObject()
+PBoolean H245_ParameterValue::CreateObject()
 {
   switch (tag) {
     case e_logical :
@@ -7216,7 +7216,7 @@ H245_MultiplexFormat::operator const H245_H223Capability &() const
 }
 
 
-BOOL H245_MultiplexFormat::CreateObject()
+PBoolean H245_MultiplexFormat::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -7294,7 +7294,7 @@ PINDEX H245_AudioTelephonyEventCapability::GetDataLength() const
 }
 
 
-BOOL H245_AudioTelephonyEventCapability::Decode(PASN_Stream & strm)
+PBoolean H245_AudioTelephonyEventCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7374,7 +7374,7 @@ PINDEX H245_AudioToneCapability::GetDataLength() const
 }
 
 
-BOOL H245_AudioToneCapability::Decode(PASN_Stream & strm)
+PBoolean H245_AudioToneCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7450,7 +7450,7 @@ PINDEX H245_NoPTAudioTelephonyEventCapability::GetDataLength() const
 }
 
 
-BOOL H245_NoPTAudioTelephonyEventCapability::Decode(PASN_Stream & strm)
+PBoolean H245_NoPTAudioTelephonyEventCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7508,7 +7508,7 @@ PINDEX H245_NoPTAudioToneCapability::GetDataLength() const
 }
 
 
-BOOL H245_NoPTAudioToneCapability::Decode(PASN_Stream & strm)
+PBoolean H245_NoPTAudioToneCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7578,7 +7578,7 @@ H245_DepFECCapability::operator const H245_DepFECCapability_rfc2733 &() const
 }
 
 
-BOOL H245_DepFECCapability::CreateObject()
+PBoolean H245_DepFECCapability::CreateObject()
 {
   switch (tag) {
     case e_rfc2733 :
@@ -7713,7 +7713,7 @@ PINDEX H245_V75Parameters::GetDataLength() const
 }
 
 
-BOOL H245_V75Parameters::Decode(PASN_Stream & strm)
+PBoolean H245_V75Parameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8018,7 +8018,7 @@ H245_DataType::operator const H245_FECData &() const
 }
 
 
-BOOL H245_DataType::CreateObject()
+PBoolean H245_DataType::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -8123,7 +8123,7 @@ PINDEX H245_MultiplexedStreamParameter::GetDataLength() const
 }
 
 
-BOOL H245_MultiplexedStreamParameter::Decode(PASN_Stream & strm)
+PBoolean H245_MultiplexedStreamParameter::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8227,7 +8227,7 @@ PINDEX H245_H222LogicalChannelParameters::GetDataLength() const
 }
 
 
-BOOL H245_H222LogicalChannelParameters::Decode(PASN_Stream & strm)
+PBoolean H245_H222LogicalChannelParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8295,7 +8295,7 @@ H245_CRCLength::H245_CRCLength(unsigned tag, PASN_Object::TagClass tagClass)
 }
 
 
-BOOL H245_CRCLength::CreateObject()
+PBoolean H245_CRCLength::CreateObject()
 {
   choice = (tag <= e_crc32bit) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -8363,7 +8363,7 @@ PINDEX H245_RedundancyEncodingElement::GetDataLength() const
 }
 
 
-BOOL H245_RedundancyEncodingElement::Decode(PASN_Stream & strm)
+PBoolean H245_RedundancyEncodingElement::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8450,7 +8450,7 @@ PINDEX H245_MultiplePayloadStreamElement::GetDataLength() const
 }
 
 
-BOOL H245_MultiplePayloadStreamElement::Decode(PASN_Stream & strm)
+PBoolean H245_MultiplePayloadStreamElement::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -8527,7 +8527,7 @@ H245_DepFECData::operator const H245_DepFECData_rfc2733 &() const
 }
 
 
-BOOL H245_DepFECData::CreateObject()
+PBoolean H245_DepFECData::CreateObject()
 {
   switch (tag) {
     case e_rfc2733 :
@@ -8591,7 +8591,7 @@ H245_FECData::operator const H245_FECData_rfc2733 &() const
 }
 
 
-BOOL H245_FECData::CreateObject()
+PBoolean H245_FECData::CreateObject()
 {
   switch (tag) {
     case e_rfc2733 :
@@ -8678,7 +8678,7 @@ H245_TransportAddress::operator const H245_MulticastAddress &() const
 }
 
 
-BOOL H245_TransportAddress::CreateObject()
+PBoolean H245_TransportAddress::CreateObject()
 {
   switch (tag) {
     case e_unicastAddress :
@@ -8839,7 +8839,7 @@ H245_UnicastAddress::operator const H245_NonStandardParameter &() const
 }
 
 
-BOOL H245_UnicastAddress::CreateObject()
+PBoolean H245_UnicastAddress::CreateObject()
 {
   switch (tag) {
     case e_iPAddress :
@@ -8970,7 +8970,7 @@ H245_MulticastAddress::operator const H245_NonStandardParameter &() const
 }
 
 
-BOOL H245_MulticastAddress::CreateObject()
+PBoolean H245_MulticastAddress::CreateObject()
 {
   switch (tag) {
     case e_iPAddress :
@@ -9052,7 +9052,7 @@ PINDEX H245_EscrowData::GetDataLength() const
 }
 
 
-BOOL H245_EscrowData::Decode(PASN_Stream & strm)
+PBoolean H245_EscrowData::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9131,7 +9131,7 @@ PINDEX H245_CloseLogicalChannelAck::GetDataLength() const
 }
 
 
-BOOL H245_CloseLogicalChannelAck::Decode(PASN_Stream & strm)
+PBoolean H245_CloseLogicalChannelAck::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9207,7 +9207,7 @@ PINDEX H245_RequestChannelCloseAck::GetDataLength() const
 }
 
 
-BOOL H245_RequestChannelCloseAck::Decode(PASN_Stream & strm)
+PBoolean H245_RequestChannelCloseAck::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9283,7 +9283,7 @@ PINDEX H245_RequestChannelCloseRelease::GetDataLength() const
 }
 
 
-BOOL H245_RequestChannelCloseRelease::Decode(PASN_Stream & strm)
+PBoolean H245_RequestChannelCloseRelease::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9375,7 +9375,7 @@ PINDEX H245_RequestModeRelease::GetDataLength() const
 }
 
 
-BOOL H245_RequestModeRelease::Decode(PASN_Stream & strm)
+PBoolean H245_RequestModeRelease::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9707,7 +9707,7 @@ H245_ModeElementType::operator const H245_FECMode &() const
 }
 
 
-BOOL H245_ModeElementType::CreateObject()
+PBoolean H245_ModeElementType::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -9804,7 +9804,7 @@ PINDEX H245_MultiplexedStreamModeParameters::GetDataLength() const
 }
 
 
-BOOL H245_MultiplexedStreamModeParameters::Decode(PASN_Stream & strm)
+PBoolean H245_MultiplexedStreamModeParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9880,7 +9880,7 @@ PINDEX H245_MultiplePayloadStreamElementMode::GetDataLength() const
 }
 
 
-BOOL H245_MultiplePayloadStreamElementMode::Decode(PASN_Stream & strm)
+PBoolean H245_MultiplePayloadStreamElementMode::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -9953,7 +9953,7 @@ H245_DepFECMode::operator const H245_DepFECMode_rfc2733Mode &() const
 }
 
 
-BOOL H245_DepFECMode::CreateObject()
+PBoolean H245_DepFECMode::CreateObject()
 {
   switch (tag) {
     case e_rfc2733Mode :
@@ -9996,7 +9996,7 @@ H245_V76ModeParameters::H245_V76ModeParameters(unsigned tag, PASN_Object::TagCla
 }
 
 
-BOOL H245_V76ModeParameters::CreateObject()
+PBoolean H245_V76ModeParameters::CreateObject()
 {
   choice = (tag <= e_suspendResumewoAddress) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -10169,7 +10169,7 @@ H245_VideoMode::operator const H245_GenericCapability &() const
 }
 
 
-BOOL H245_VideoMode::CreateObject()
+PBoolean H245_VideoMode::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -10293,7 +10293,7 @@ PINDEX H245_IS11172VideoMode::GetDataLength() const
 }
 
 
-BOOL H245_IS11172VideoMode::Decode(PASN_Stream & strm)
+PBoolean H245_IS11172VideoMode::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10588,7 +10588,7 @@ H245_AudioMode::operator const H245_VBDMode &() const
 }
 
 
-BOOL H245_AudioMode::CreateObject()
+PBoolean H245_AudioMode::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -10701,7 +10701,7 @@ PINDEX H245_VBDMode::GetDataLength() const
 }
 
 
-BOOL H245_VBDMode::Decode(PASN_Stream & strm)
+PBoolean H245_VBDMode::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10775,7 +10775,7 @@ H245_EncryptionMode::operator const H245_NonStandardParameter &() const
 }
 
 
-BOOL H245_EncryptionMode::CreateObject()
+PBoolean H245_EncryptionMode::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -10845,7 +10845,7 @@ PINDEX H245_RoundTripDelayRequest::GetDataLength() const
 }
 
 
-BOOL H245_RoundTripDelayRequest::Decode(PASN_Stream & strm)
+PBoolean H245_RoundTripDelayRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10921,7 +10921,7 @@ PINDEX H245_RoundTripDelayResponse::GetDataLength() const
 }
 
 
-BOOL H245_RoundTripDelayResponse::Decode(PASN_Stream & strm)
+PBoolean H245_RoundTripDelayResponse::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -10979,7 +10979,7 @@ PINDEX H245_MaintenanceLoopOffCommand::GetDataLength() const
 }
 
 
-BOOL H245_MaintenanceLoopOffCommand::Decode(PASN_Stream & strm)
+PBoolean H245_MaintenanceLoopOffCommand::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11034,7 +11034,7 @@ PINDEX H245_CommunicationModeRequest::GetDataLength() const
 }
 
 
-BOOL H245_CommunicationModeRequest::Decode(PASN_Stream & strm)
+PBoolean H245_CommunicationModeRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11104,7 +11104,7 @@ H245_CommunicationModeResponse::operator const H245_ArrayOf_CommunicationModeTab
 }
 
 
-BOOL H245_CommunicationModeResponse::CreateObject()
+PBoolean H245_CommunicationModeResponse::CreateObject()
 {
   switch (tag) {
     case e_communicationModeTable :
@@ -11250,7 +11250,7 @@ H245_ConferenceRequest::operator const H245_RemoteMCRequest &() const
 }
 
 
-BOOL H245_ConferenceRequest::CreateObject()
+PBoolean H245_ConferenceRequest::CreateObject()
 {
   switch (tag) {
     case e_terminalListRequest :
@@ -11377,7 +11377,7 @@ PINDEX H245_Criteria::GetDataLength() const
 }
 
 
-BOOL H245_Criteria::Decode(PASN_Stream & strm)
+PBoolean H245_Criteria::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -11822,7 +11822,7 @@ H245_ConferenceResponse::operator const H245_RemoteMCResponse &() const
 }
 
 
-BOOL H245_ConferenceResponse::CreateObject()
+PBoolean H245_ConferenceResponse::CreateObject()
 {
   switch (tag) {
     case e_mCTerminalIDResponse :
@@ -12087,7 +12087,7 @@ H245_RemoteMCRequest::H245_RemoteMCRequest(unsigned tag, PASN_Object::TagClass t
 }
 
 
-BOOL H245_RemoteMCRequest::CreateObject()
+PBoolean H245_RemoteMCRequest::CreateObject()
 {
   choice = (tag <= e_deActivate) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -12146,7 +12146,7 @@ H245_RemoteMCResponse::operator const H245_RemoteMCResponse_reject &() const
 }
 
 
-BOOL H245_RemoteMCResponse::CreateObject()
+PBoolean H245_RemoteMCResponse::CreateObject()
 {
   switch (tag) {
     case e_accept :
@@ -12305,7 +12305,7 @@ H245_MultilinkRequest::operator const H245_MultilinkRequest_maximumHeaderInterva
 }
 
 
-BOOL H245_MultilinkRequest::CreateObject()
+PBoolean H245_MultilinkRequest::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -12473,7 +12473,7 @@ H245_MultilinkResponse::operator const H245_MultilinkResponse_maximumHeaderInter
 }
 
 
-BOOL H245_MultilinkResponse::CreateObject()
+PBoolean H245_MultilinkResponse::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -12595,7 +12595,7 @@ H245_MultilinkIndication::operator const H245_MultilinkIndication_excessiveError
 }
 
 
-BOOL H245_MultilinkIndication::CreateObject()
+PBoolean H245_MultilinkIndication::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -12689,7 +12689,7 @@ H245_DialingInformation::operator const H245_ArrayOf_DialingInformationNumber &(
 }
 
 
-BOOL H245_DialingInformation::CreateObject()
+PBoolean H245_DialingInformation::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -12764,7 +12764,7 @@ H245_DialingInformationNetworkType::operator const H245_NonStandardMessage &() c
 }
 
 
-BOOL H245_DialingInformationNetworkType::CreateObject()
+PBoolean H245_DialingInformationNetworkType::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -12842,7 +12842,7 @@ PINDEX H245_ConnectionIdentifier::GetDataLength() const
 }
 
 
-BOOL H245_ConnectionIdentifier::Decode(PASN_Stream & strm)
+PBoolean H245_ConnectionIdentifier::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -12963,7 +12963,7 @@ PINDEX H245_LogicalChannelRateRequest::GetDataLength() const
 }
 
 
-BOOL H245_LogicalChannelRateRequest::Decode(PASN_Stream & strm)
+PBoolean H245_LogicalChannelRateRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13053,7 +13053,7 @@ PINDEX H245_LogicalChannelRateAcknowledge::GetDataLength() const
 }
 
 
-BOOL H245_LogicalChannelRateAcknowledge::Decode(PASN_Stream & strm)
+PBoolean H245_LogicalChannelRateAcknowledge::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13111,7 +13111,7 @@ H245_LogicalChannelRateRejectReason::H245_LogicalChannelRateRejectReason(unsigne
 }
 
 
-BOOL H245_LogicalChannelRateRejectReason::CreateObject()
+PBoolean H245_LogicalChannelRateRejectReason::CreateObject()
 {
   choice = (tag <= e_insufficientResources) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -13154,7 +13154,7 @@ PINDEX H245_LogicalChannelRateRelease::GetDataLength() const
 }
 
 
-BOOL H245_LogicalChannelRateRelease::Decode(PASN_Stream & strm)
+PBoolean H245_LogicalChannelRateRelease::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13225,7 +13225,7 @@ H245_SendTerminalCapabilitySet::operator const H245_SendTerminalCapabilitySet_sp
 }
 
 
-BOOL H245_SendTerminalCapabilitySet::CreateObject()
+PBoolean H245_SendTerminalCapabilitySet::CreateObject()
 {
   switch (tag) {
     case e_specificRequest :
@@ -13294,7 +13294,7 @@ H245_EncryptionCommand::operator const H245_EncryptionCommand_encryptionAlgorith
 }
 
 
-BOOL H245_EncryptionCommand::CreateObject()
+PBoolean H245_EncryptionCommand::CreateObject()
 {
   switch (tag) {
     case e_encryptionSE :
@@ -13434,7 +13434,7 @@ H245_EndSessionCommand::operator const H245_ArrayOf_GenericInformation &() const
 }
 
 
-BOOL H245_EndSessionCommand::CreateObject()
+PBoolean H245_EndSessionCommand::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -13561,7 +13561,7 @@ H245_ConferenceCommand::operator const H245_SubstituteConferenceIDCommand &() co
 }
 
 
-BOOL H245_ConferenceCommand::CreateObject()
+PBoolean H245_ConferenceCommand::CreateObject()
 {
   switch (tag) {
     case e_broadcastMyLogicalChannel :
@@ -13642,7 +13642,7 @@ PINDEX H245_SubstituteConferenceIDCommand::GetDataLength() const
 }
 
 
-BOOL H245_SubstituteConferenceIDCommand::Decode(PASN_Stream & strm)
+PBoolean H245_SubstituteConferenceIDCommand::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13694,7 +13694,7 @@ H245_EncryptionUpdateDirection::H245_EncryptionUpdateDirection(unsigned tag, PAS
 }
 
 
-BOOL H245_EncryptionUpdateDirection::CreateObject()
+PBoolean H245_EncryptionUpdateDirection::CreateObject()
 {
   choice = (tag <= e_slaveToMaster) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -13763,7 +13763,7 @@ PINDEX H245_KeyProtectionMethod::GetDataLength() const
 }
 
 
-BOOL H245_KeyProtectionMethod::Decode(PASN_Stream & strm)
+PBoolean H245_KeyProtectionMethod::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13850,7 +13850,7 @@ PINDEX H245_EncryptionUpdateRequest::GetDataLength() const
 }
 
 
-BOOL H245_EncryptionUpdateRequest::Decode(PASN_Stream & strm)
+PBoolean H245_EncryptionUpdateRequest::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -13906,7 +13906,7 @@ H245_PictureReference::H245_PictureReference(unsigned tag, PASN_Object::TagClass
 }
 
 
-BOOL H245_PictureReference::CreateObject()
+PBoolean H245_PictureReference::CreateObject()
 {
   switch (tag) {
     case e_pictureNumber :
@@ -13998,7 +13998,7 @@ H245_H223MultiplexReconfiguration::operator const H245_H223MultiplexReconfigurat
 }
 
 
-BOOL H245_H223MultiplexReconfiguration::CreateObject()
+PBoolean H245_H223MultiplexReconfiguration::CreateObject()
 {
   switch (tag) {
     case e_h223ModeChange :
@@ -14111,7 +14111,7 @@ H245_FunctionNotUnderstood::operator const H245_CommandMessage &() const
 }
 
 
-BOOL H245_FunctionNotUnderstood::CreateObject()
+PBoolean H245_FunctionNotUnderstood::CreateObject()
 {
   switch (tag) {
     case e_request :
@@ -14238,7 +14238,7 @@ H245_ConferenceIndication::operator const H245_VideoIndicateCompose &() const
 }
 
 
-BOOL H245_ConferenceIndication::CreateObject()
+PBoolean H245_ConferenceIndication::CreateObject()
 {
   switch (tag) {
     case e_sbeNumber :
@@ -14332,7 +14332,7 @@ PINDEX H245_TerminalYouAreSeeingInSubPictureNumber::GetDataLength() const
 }
 
 
-BOOL H245_TerminalYouAreSeeingInSubPictureNumber::Decode(PASN_Stream & strm)
+PBoolean H245_TerminalYouAreSeeingInSubPictureNumber::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -14412,7 +14412,7 @@ PINDEX H245_VideoIndicateCompose::GetDataLength() const
 }
 
 
-BOOL H245_VideoIndicateCompose::Decode(PASN_Stream & strm)
+PBoolean H245_VideoIndicateCompose::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -14497,7 +14497,7 @@ PINDEX H245_H223SkewIndication::GetDataLength() const
 }
 
 
-BOOL H245_H223SkewIndication::Decode(PASN_Stream & strm)
+PBoolean H245_H223SkewIndication::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -14588,7 +14588,7 @@ PINDEX H245_H2250MaximumSkewIndication::GetDataLength() const
 }
 
 
-BOOL H245_H2250MaximumSkewIndication::Decode(PASN_Stream & strm)
+PBoolean H245_H2250MaximumSkewIndication::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -14670,7 +14670,7 @@ PINDEX H245_MCLocationIndication::GetDataLength() const
 }
 
 
-BOOL H245_MCLocationIndication::Decode(PASN_Stream & strm)
+PBoolean H245_MCLocationIndication::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -14760,7 +14760,7 @@ PINDEX H245_VendorIdentification::GetDataLength() const
 }
 
 
-BOOL H245_VendorIdentification::Decode(PASN_Stream & strm)
+PBoolean H245_VendorIdentification::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -14976,7 +14976,7 @@ PINDEX H245_Params::GetDataLength() const
 }
 
 
-BOOL H245_Params::Decode(PASN_Stream & strm)
+PBoolean H245_Params::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -15197,7 +15197,7 @@ H245_UserInputIndication::operator const H245_ArrayOf_GenericInformation &() con
 }
 
 
-BOOL H245_UserInputIndication::CreateObject()
+PBoolean H245_UserInputIndication::CreateObject()
 {
   switch (tag) {
     case e_nonStandard :
@@ -15291,7 +15291,7 @@ PINDEX H245_MobileMultilinkReconfigurationIndication::GetDataLength() const
 }
 
 
-BOOL H245_MobileMultilinkReconfigurationIndication::Decode(PASN_Stream & strm)
+PBoolean H245_MobileMultilinkReconfigurationIndication::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -15412,7 +15412,7 @@ PINDEX H245_NonStandardIdentifier_h221NonStandard::GetDataLength() const
 }
 
 
-BOOL H245_NonStandardIdentifier_h221NonStandard::Decode(PASN_Stream & strm)
+PBoolean H245_NonStandardIdentifier_h221NonStandard::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -15470,7 +15470,7 @@ H245_MasterSlaveDeterminationAck_decision::H245_MasterSlaveDeterminationAck_deci
 }
 
 
-BOOL H245_MasterSlaveDeterminationAck_decision::CreateObject()
+PBoolean H245_MasterSlaveDeterminationAck_decision::CreateObject()
 {
   choice = (tag <= e_slave) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -15506,7 +15506,7 @@ H245_MasterSlaveDeterminationReject_cause::H245_MasterSlaveDeterminationReject_c
 }
 
 
-BOOL H245_MasterSlaveDeterminationReject_cause::CreateObject()
+PBoolean H245_MasterSlaveDeterminationReject_cause::CreateObject()
 {
   choice = (tag <= e_identicalNumbers) ? new PASN_Null() : NULL;
   return choice != NULL;
@@ -15691,7 +15691,7 @@ H245_TerminalCapabilitySetReject_cause::operator const H245_TerminalCapabilitySe
 }
 
 
-BOOL H245_TerminalCapabilitySetReject_cause::CreateObject()
+PBoolean H245_TerminalCapabilitySetReject_cause::CreateObject()
 {
   switch (tag) {
     case e_unspecified :
@@ -15764,7 +15764,7 @@ PINDEX H245_Capability_h233EncryptionReceiveCapability::GetDataLength() const
 }
 
 
-BOOL H245_Capability_h233EncryptionReceiveCapability::Decode(PASN_Stream & strm)
+PBoolean H245_Capability_h233EncryptionReceiveCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -15903,7 +15903,7 @@ PINDEX H245_VCCapability_aal1::GetDataLength() const
 }
 
 
-BOOL H245_VCCapability_aal1::Decode(PASN_Stream & strm)
+PBoolean H245_VCCapability_aal1::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -16009,7 +16009,7 @@ PINDEX H245_VCCapability_aal5::GetDataLength() const
 }
 
 
-BOOL H245_VCCapability_aal5::Decode(PASN_Stream & strm)
+PBoolean H245_VCCapability_aal5::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -16086,7 +16086,7 @@ H245_H223Capability_h223MultiplexTableCapability::operator const H245_H223Capabi
 }
 
 
-BOOL H245_H223Capability_h223MultiplexTableCapability::CreateObject()
+PBoolean H245_H223Capability_h223MultiplexTableCapability::CreateObject()
 {
   switch (tag) {
     case e_basic :
@@ -16172,7 +16172,7 @@ PINDEX H245_H223Capability_mobileOperationTransmitCapability::GetDataLength() co
 }
 
 
-BOOL H245_H223Capability_mobileOperationTransmitCapability::Decode(PASN_Stream & strm)
+PBoolean H245_H223Capability_mobileOperationTransmitCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -16266,7 +16266,7 @@ PINDEX H245_H223Capability_mobileMultilinkFrameCapability::GetDataLength() const
 }
 
 
-BOOL H245_H223Capability_mobileMultilinkFrameCapability::Decode(PASN_Stream & strm)
+PBoolean H245_H223Capability_mobileMultilinkFrameCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -16349,7 +16349,7 @@ PINDEX H245_H2250Capability_mcCapability::GetDataLength() const
 }
 
 
-BOOL H245_H2250Capability_mcCapability::Decode(PASN_Stream & strm)
+PBoolean H245_H2250Capability_mcCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -16490,7 +16490,7 @@ PINDEX H245_MediaTransportType_atm_AAL5_compressed::GetDataLength() const
 }
 
 
-BOOL H245_MediaTransportType_atm_AAL5_compressed::Decode(PASN_Stream & strm)
+PBoolean H245_MediaTransportType_atm_AAL5_compressed::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -16657,7 +16657,7 @@ H245_RTPH263VideoRedundancyEncoding_frameToThreadMapping::operator const H245_Ar
 }
 
 
-BOOL H245_RTPH263VideoRedundancyEncoding_frameToThreadMapping::CreateObject()
+PBoolean H245_RTPH263VideoRedundancyEncoding_frameToThreadMapping::CreateObject()
 {
   switch (tag) {
     case e_roundrobin :

@@ -432,7 +432,7 @@ PINDEX MCS_DomainParameters::GetDataLength() const
 }
 
 
-BOOL MCS_DomainParameters::Decode(PASN_Stream & strm)
+PBoolean MCS_DomainParameters::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -553,7 +553,7 @@ PINDEX MCS_Connect_Initial::GetDataLength() const
 }
 
 
-BOOL MCS_Connect_Initial::Decode(PASN_Stream & strm)
+PBoolean MCS_Connect_Initial::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -652,7 +652,7 @@ PINDEX MCS_Connect_Additional::GetDataLength() const
 }
 
 
-BOOL MCS_Connect_Additional::Decode(PASN_Stream & strm)
+PBoolean MCS_Connect_Additional::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -732,7 +732,7 @@ PINDEX MCS_PDin::GetDataLength() const
 }
 
 
-BOOL MCS_PDin::Decode(PASN_Stream & strm)
+PBoolean MCS_PDin::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -814,7 +814,7 @@ PINDEX MCS_EDrq::GetDataLength() const
 }
 
 
-BOOL MCS_EDrq::Decode(PASN_Stream & strm)
+PBoolean MCS_EDrq::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -959,7 +959,7 @@ MCS_ChannelAttributes::operator const MCS_ChannelAttributes_assigned &() const
 }
 
 
-BOOL MCS_ChannelAttributes::CreateObject()
+PBoolean MCS_ChannelAttributes::CreateObject()
 {
   switch (tag) {
     case e_static :
@@ -1124,7 +1124,7 @@ MCS_TokenAttributes::operator const MCS_TokenAttributes_given &() const
 }
 
 
-BOOL MCS_TokenAttributes::CreateObject()
+PBoolean MCS_TokenAttributes::CreateObject()
 {
   switch (tag) {
     case e_grabbed :
@@ -1185,7 +1185,7 @@ PINDEX MCS_AUrq::GetDataLength() const
 }
 
 
-BOOL MCS_AUrq::Decode(PASN_Stream & strm)
+PBoolean MCS_AUrq::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1262,7 +1262,7 @@ PINDEX MCS_CJrq::GetDataLength() const
 }
 
 
-BOOL MCS_CJrq::Decode(PASN_Stream & strm)
+PBoolean MCS_CJrq::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1341,7 +1341,7 @@ PINDEX MCS_CCrq::GetDataLength() const
 }
 
 
-BOOL MCS_CCrq::Decode(PASN_Stream & strm)
+PBoolean MCS_CCrq::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1421,7 +1421,7 @@ PINDEX MCS_CDrq::GetDataLength() const
 }
 
 
-BOOL MCS_CDrq::Decode(PASN_Stream & strm)
+PBoolean MCS_CDrq::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1500,7 +1500,7 @@ PINDEX MCS_CDin::GetDataLength() const
 }
 
 
-BOOL MCS_CDin::Decode(PASN_Stream & strm)
+PBoolean MCS_CDin::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1592,7 +1592,7 @@ PINDEX MCS_SDrq::GetDataLength() const
 }
 
 
-BOOL MCS_SDrq::Decode(PASN_Stream & strm)
+PBoolean MCS_SDrq::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1696,7 +1696,7 @@ PINDEX MCS_SDin::GetDataLength() const
 }
 
 
-BOOL MCS_SDin::Decode(PASN_Stream & strm)
+PBoolean MCS_SDin::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1800,7 +1800,7 @@ PINDEX MCS_USrq::GetDataLength() const
 }
 
 
-BOOL MCS_USrq::Decode(PASN_Stream & strm)
+PBoolean MCS_USrq::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1904,7 +1904,7 @@ PINDEX MCS_USin::GetDataLength() const
 }
 
 
-BOOL MCS_USin::Decode(PASN_Stream & strm)
+PBoolean MCS_USin::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -1996,7 +1996,7 @@ PINDEX MCS_TGrq::GetDataLength() const
 }
 
 
-BOOL MCS_TGrq::Decode(PASN_Stream & strm)
+PBoolean MCS_TGrq::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2079,7 +2079,7 @@ PINDEX MCS_TIrq::GetDataLength() const
 }
 
 
-BOOL MCS_TIrq::Decode(PASN_Stream & strm)
+PBoolean MCS_TIrq::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2166,7 +2166,7 @@ PINDEX MCS_TVrq::GetDataLength() const
 }
 
 
-BOOL MCS_TVrq::Decode(PASN_Stream & strm)
+PBoolean MCS_TVrq::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2256,7 +2256,7 @@ PINDEX MCS_TVin::GetDataLength() const
 }
 
 
-BOOL MCS_TVin::Decode(PASN_Stream & strm)
+PBoolean MCS_TVin::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2342,7 +2342,7 @@ PINDEX MCS_TPrq::GetDataLength() const
 }
 
 
-BOOL MCS_TPrq::Decode(PASN_Stream & strm)
+PBoolean MCS_TPrq::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2425,7 +2425,7 @@ PINDEX MCS_TPin::GetDataLength() const
 }
 
 
-BOOL MCS_TPin::Decode(PASN_Stream & strm)
+PBoolean MCS_TPin::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2508,7 +2508,7 @@ PINDEX MCS_TRrq::GetDataLength() const
 }
 
 
-BOOL MCS_TRrq::Decode(PASN_Stream & strm)
+PBoolean MCS_TRrq::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2591,7 +2591,7 @@ PINDEX MCS_TTrq::GetDataLength() const
 }
 
 
-BOOL MCS_TTrq::Decode(PASN_Stream & strm)
+PBoolean MCS_TTrq::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2678,7 +2678,7 @@ PINDEX MCS_TTcf::GetDataLength() const
 }
 
 
-BOOL MCS_TTcf::Decode(PASN_Stream & strm)
+PBoolean MCS_TTcf::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -2963,7 +2963,7 @@ MCS_ConnectMCSPDU::operator const MCS_Connect_Result &() const
 }
 
 
-BOOL MCS_ConnectMCSPDU::CreateObject()
+PBoolean MCS_ConnectMCSPDU::CreateObject()
 {
   switch (tag) {
     case e_connect_initial :
@@ -4002,7 +4002,7 @@ MCS_DomainMCSPDU::operator const MCS_TTcf &() const
 }
 
 
-BOOL MCS_DomainMCSPDU::CreateObject()
+PBoolean MCS_DomainMCSPDU::CreateObject()
 {
   switch (tag) {
     case e_pdin :
@@ -4195,7 +4195,7 @@ PINDEX MCS_ChannelAttributes_static::GetDataLength() const
 }
 
 
-BOOL MCS_ChannelAttributes_static::Decode(PASN_Stream & strm)
+PBoolean MCS_ChannelAttributes_static::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4275,7 +4275,7 @@ PINDEX MCS_ChannelAttributes_userId::GetDataLength() const
 }
 
 
-BOOL MCS_ChannelAttributes_userId::Decode(PASN_Stream & strm)
+PBoolean MCS_ChannelAttributes_userId::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4354,7 +4354,7 @@ PINDEX MCS_ChannelAttributes_assigned::GetDataLength() const
 }
 
 
-BOOL MCS_ChannelAttributes_assigned::Decode(PASN_Stream & strm)
+PBoolean MCS_ChannelAttributes_assigned::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4527,7 +4527,7 @@ PINDEX MCS_TokenAttributes_grabbed::GetDataLength() const
 }
 
 
-BOOL MCS_TokenAttributes_grabbed::Decode(PASN_Stream & strm)
+PBoolean MCS_TokenAttributes_grabbed::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4610,7 +4610,7 @@ PINDEX MCS_TokenAttributes_inhibited::GetDataLength() const
 }
 
 
-BOOL MCS_TokenAttributes_inhibited::Decode(PASN_Stream & strm)
+PBoolean MCS_TokenAttributes_inhibited::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4697,7 +4697,7 @@ PINDEX MCS_TokenAttributes_giving::GetDataLength() const
 }
 
 
-BOOL MCS_TokenAttributes_giving::Decode(PASN_Stream & strm)
+PBoolean MCS_TokenAttributes_giving::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4783,7 +4783,7 @@ PINDEX MCS_TokenAttributes_ungivable::GetDataLength() const
 }
 
 
-BOOL MCS_TokenAttributes_ungivable::Decode(PASN_Stream & strm)
+PBoolean MCS_TokenAttributes_ungivable::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4866,7 +4866,7 @@ PINDEX MCS_TokenAttributes_given::GetDataLength() const
 }
 
 
-BOOL MCS_TokenAttributes_given::Decode(PASN_Stream & strm)
+PBoolean MCS_TokenAttributes_given::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5020,7 +5020,7 @@ PINDEX MCS_Connect_Response::GetDataLength() const
 }
 
 
-BOOL MCS_Connect_Response::Decode(PASN_Stream & strm)
+PBoolean MCS_Connect_Response::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5105,7 +5105,7 @@ PINDEX MCS_Connect_Result::GetDataLength() const
 }
 
 
-BOOL MCS_Connect_Result::Decode(PASN_Stream & strm)
+PBoolean MCS_Connect_Result::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5185,7 +5185,7 @@ PINDEX MCS_MCrq::GetDataLength() const
 }
 
 
-BOOL MCS_MCrq::Decode(PASN_Stream & strm)
+PBoolean MCS_MCrq::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5268,7 +5268,7 @@ PINDEX MCS_MCcf::GetDataLength() const
 }
 
 
-BOOL MCS_MCcf::Decode(PASN_Stream & strm)
+PBoolean MCS_MCcf::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5351,7 +5351,7 @@ PINDEX MCS_PCin::GetDataLength() const
 }
 
 
-BOOL MCS_PCin::Decode(PASN_Stream & strm)
+PBoolean MCS_PCin::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5434,7 +5434,7 @@ PINDEX MCS_MTrq::GetDataLength() const
 }
 
 
-BOOL MCS_MTrq::Decode(PASN_Stream & strm)
+PBoolean MCS_MTrq::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5517,7 +5517,7 @@ PINDEX MCS_MTcf::GetDataLength() const
 }
 
 
-BOOL MCS_MTcf::Decode(PASN_Stream & strm)
+PBoolean MCS_MTcf::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5596,7 +5596,7 @@ PINDEX MCS_PTin::GetDataLength() const
 }
 
 
-BOOL MCS_PTin::Decode(PASN_Stream & strm)
+PBoolean MCS_PTin::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5672,7 +5672,7 @@ PINDEX MCS_DPum::GetDataLength() const
 }
 
 
-BOOL MCS_DPum::Decode(PASN_Stream & strm)
+PBoolean MCS_DPum::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5752,7 +5752,7 @@ PINDEX MCS_RJum::GetDataLength() const
 }
 
 
-BOOL MCS_RJum::Decode(PASN_Stream & strm)
+PBoolean MCS_RJum::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5837,7 +5837,7 @@ PINDEX MCS_AUcf::GetDataLength() const
 }
 
 
-BOOL MCS_AUcf::Decode(PASN_Stream & strm)
+PBoolean MCS_AUcf::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -5921,7 +5921,7 @@ PINDEX MCS_DUrq::GetDataLength() const
 }
 
 
-BOOL MCS_DUrq::Decode(PASN_Stream & strm)
+PBoolean MCS_DUrq::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6004,7 +6004,7 @@ PINDEX MCS_DUin::GetDataLength() const
 }
 
 
-BOOL MCS_DUin::Decode(PASN_Stream & strm)
+PBoolean MCS_DUin::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6097,7 +6097,7 @@ PINDEX MCS_CJcf::GetDataLength() const
 }
 
 
-BOOL MCS_CJcf::Decode(PASN_Stream & strm)
+PBoolean MCS_CJcf::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6183,7 +6183,7 @@ PINDEX MCS_CLrq::GetDataLength() const
 }
 
 
-BOOL MCS_CLrq::Decode(PASN_Stream & strm)
+PBoolean MCS_CLrq::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6269,7 +6269,7 @@ PINDEX MCS_CCcf::GetDataLength() const
 }
 
 
-BOOL MCS_CCcf::Decode(PASN_Stream & strm)
+PBoolean MCS_CCcf::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6360,7 +6360,7 @@ PINDEX MCS_CArq::GetDataLength() const
 }
 
 
-BOOL MCS_CArq::Decode(PASN_Stream & strm)
+PBoolean MCS_CArq::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6450,7 +6450,7 @@ PINDEX MCS_CAin::GetDataLength() const
 }
 
 
-BOOL MCS_CAin::Decode(PASN_Stream & strm)
+PBoolean MCS_CAin::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6540,7 +6540,7 @@ PINDEX MCS_CErq::GetDataLength() const
 }
 
 
-BOOL MCS_CErq::Decode(PASN_Stream & strm)
+PBoolean MCS_CErq::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6626,7 +6626,7 @@ PINDEX MCS_CEin::GetDataLength() const
 }
 
 
-BOOL MCS_CEin::Decode(PASN_Stream & strm)
+PBoolean MCS_CEin::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6717,7 +6717,7 @@ PINDEX MCS_TGcf::GetDataLength() const
 }
 
 
-BOOL MCS_TGcf::Decode(PASN_Stream & strm)
+PBoolean MCS_TGcf::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6814,7 +6814,7 @@ PINDEX MCS_TIcf::GetDataLength() const
 }
 
 
-BOOL MCS_TIcf::Decode(PASN_Stream & strm)
+PBoolean MCS_TIcf::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -6907,7 +6907,7 @@ PINDEX MCS_TVrs::GetDataLength() const
 }
 
 
-BOOL MCS_TVrs::Decode(PASN_Stream & strm)
+PBoolean MCS_TVrs::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7001,7 +7001,7 @@ PINDEX MCS_TVcf::GetDataLength() const
 }
 
 
-BOOL MCS_TVcf::Decode(PASN_Stream & strm)
+PBoolean MCS_TVcf::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7098,7 +7098,7 @@ PINDEX MCS_TRcf::GetDataLength() const
 }
 
 
-BOOL MCS_TRcf::Decode(PASN_Stream & strm)
+PBoolean MCS_TRcf::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -7195,7 +7195,7 @@ PINDEX MCS_ChannelAttributes_private::GetDataLength() const
 }
 
 
-BOOL MCS_ChannelAttributes_private::Decode(PASN_Stream & strm)
+PBoolean MCS_ChannelAttributes_private::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;

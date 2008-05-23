@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:50  shorne
+ * First commit of h323plus
+ *
  * Revision 1.10  2002/09/16 01:14:15  robertj
  * Added #define so can select if #pragma interface/implementation is used on
  *   platform basis (eg MacOS) rather than compiler, thanks Robert Monaghan.
@@ -91,8 +94,8 @@ class X224 : public PObject
     void BuildData(const PBYTEArray & data);
 
     void PrintOn(ostream & strm) const;
-    BOOL Decode(const PBYTEArray & rawData);
-    BOOL Encode(PBYTEArray & rawData) const;
+    PBoolean Decode(const PBYTEArray & rawData);
+    PBoolean Encode(PBYTEArray & rawData) const;
 
     int GetCode() const { return header[0]; }
     const PBYTEArray & GetData() const { return data; }
