@@ -1,6 +1,7 @@
 
 H323plus 1.20 - 1.21
 
+Updated to compile with Ptlib 2.2.x and 2.3.x (PBoolean etc.)
 (Fixed) Early Media Fixed as the FastStartState is now checked if acknowledged prior to sending connect message.
 (Fixed) RTP Payload Types not read from the audio plugin codecs (standard and non-standard)
 (Fixed) External RTP Channel: Added new virtual functions to avoid compiling errors when using old OpenH323 code.
