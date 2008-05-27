@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.21  2008/05/23 11:21:53  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.20  2008/04/25 01:19:52  shorne
  * Added callback to set maximum video bandwidth
  *
@@ -503,7 +506,8 @@ ostream & operator<<(ostream & o, H323Connection::AnswerCallResponse s)
     "AnswerCallPending",
     "AnswerCallDeferred",
     "AnswerCallAlertWithMedia",
-    "AnswerCallDeferredWithMedia"
+    "AnswerCallDeferredWithMedia",
+    "AnswerCallNowWithAlert"
   };
   if ((PINDEX)s >= PARRAYSIZE(AnswerCallResponseNames))
     o << "InvalidAnswerCallResponse<" << (unsigned)s << '>';
@@ -1932,20 +1936,27 @@ PBoolean H323Connection::OnReceivedSignalConnect(const H323SignalPDU & pdu)
   // have answer, so set timeout to interval for monitoring calls health
   signallingChannel->SetReadTimeout(MonitorCallStatusTime);
 
+  // If we are already faststartacknowledged (early media)
+  // there is no need to proceed any further
+  if (fastStartState == FastStartAcknowledged) {
+	  PTRACE(4, "H225\tConnect Accepted: Early Media already negotiated.");
+	  return TRUE;
+  }
+
   // Check for fastStart data and start fast
   if (connect.HasOptionalField(H225_Connect_UUIE::e_fastStart))
     HandleFastStartAcknowledge(connect.m_fastStart);
 
   // Check that it has the H.245 channel connection info
-  if (connect.HasOptionalField(H225_Connect_UUIE::e_h245Address)) {
-    if (!StartControlChannel(connect.m_h245Address)) {
-      if (fastStartState != FastStartAcknowledged)
+  // ignore if we already have a Fast Start connection
+  if (connect.HasOptionalField(H225_Connect_UUIE::e_h245Address) && 
+	         fastStartState != FastStartAcknowledged) {
+    if (!StartControlChannel(connect.m_h245Address)) 
         return FALSE;
-    }
   }
 
   // If didn't get fast start channels accepted by remote then clear our
-  // proposed channels
+  // proposed channels so we can renegotiate
   if (fastStartState != FastStartAcknowledged) {
     fastStartState = FastStartDisabled;
     fastStartChannels.RemoveAll();
@@ -2342,6 +2353,20 @@ void H323Connection::AnsweringCall(AnswerCallResponse response)
       ClearCall(EndedByInvalidConferenceID);
       break;
 
+	case AnswerCallNowWithAlert :
+      if (alertingPDU != NULL) {
+        // send Q931 Alerting PDU
+        PTRACE(3, "H225\tSending Alerting PDU prior to AnswerCall Now");
+
+        HandleTunnelPDU(alertingPDU);
+
+#ifdef H323_H450
+        h450dispatcher->AttachToAlerting(*alertingPDU);
+#endif
+        WriteSignalPDU(*alertingPDU);
+        alertingTime = PTime();
+	  }
+	    // Now we progress with AnswerCallNow.
     case AnswerCallNow :
       if (connectPDU != NULL) {
         H225_Connect_UUIE & connect = connectPDU->m_h323_uu_pdu.m_h323_message_body;
@@ -3989,7 +4014,8 @@ void H323Connection::OnSelectLogicalChannels()
   switch (fastStartState) {
     default : //FastStartDisabled :
 #ifdef H323_AUDIO_CODECS
-      SelectDefaultLogicalChannel(RTP_Session::DefaultAudioSessionID);
+	  if (endpoint.CanAutoStartTransmitAudio())
+         SelectDefaultLogicalChannel(RTP_Session::DefaultAudioSessionID);
 #endif
 #ifdef H323_VIDEO
       if (endpoint.CanAutoStartTransmitVideo())
@@ -4007,7 +4033,9 @@ void H323Connection::OnSelectLogicalChannels()
 
     case FastStartInitiate :
 #ifdef H323_AUDIO_CODECS
-      SelectFastStartChannels(RTP_Session::DefaultAudioSessionID, TRUE, TRUE);
+      SelectFastStartChannels(RTP_Session::DefaultAudioSessionID, 
+							  endpoint.CanAutoStartTransmitAudio(), 
+							  endpoint.CanAutoStartReceiveAudio());
 #endif
 #ifdef H323_VIDEO
       SelectFastStartChannels(RTP_Session::DefaultVideoSessionID,
@@ -4029,8 +4057,10 @@ void H323Connection::OnSelectLogicalChannels()
 
     case FastStartResponse :
 #ifdef H323_AUDIO_CODECS
-      StartFastStartChannel(fastStartChannels, RTP_Session::DefaultAudioSessionID, H323Channel::IsTransmitter);
-      StartFastStartChannel(fastStartChannels, RTP_Session::DefaultAudioSessionID, H323Channel::IsReceiver);
+      if (endpoint.CanAutoStartTransmitAudio())
+        StartFastStartChannel(fastStartChannels, RTP_Session::DefaultAudioSessionID, H323Channel::IsTransmitter);
+      if (endpoint.CanAutoStartReceiveAudio())
+        StartFastStartChannel(fastStartChannels, RTP_Session::DefaultAudioSessionID, H323Channel::IsReceiver);
 #endif
 #ifdef H323_VIDEO
       if (endpoint.CanAutoStartTransmitVideo())
@@ -5946,7 +5976,7 @@ PBoolean H323Connection::OpenConferenceControlSession(PBoolean & chairControl, P
       }
     }
   }
-  PTRACE(6, "H323\tConference Controls not available for " << GetCallToken());
+  PTRACE(4, "H323\tConference Controls not available for " << GetCallToken());
   return FALSE;
 }
 

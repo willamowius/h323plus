@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.15  2008/05/23 11:19:34  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.14  2008/04/25 01:19:52  shorne
  * Added callback to set maximum video bandwidth
  *
@@ -1312,6 +1315,7 @@ class H323Connection : public PObject
       AnswerCallAlertWithMedia,    ///< As for AnswerCallPending but starts media channels
       AnswerCallDeferredWithMedia, ///< As for AnswerCallDeferred but starts media channels
       AnswerCallDeniedByInvalidCID, ///< As for AnswerCallDenied but returns e_invalidCID
+	  AnswerCallNowWithAlert,
       NumAnswerCallResponses
     };
 #if PTRACING
