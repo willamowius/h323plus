@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2008/05/23 11:22:21  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.3  2007/10/19 19:54:18  shorne
  * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
  *  Robert
@@ -164,8 +167,13 @@
 #include "rtp.h"
 #include "h323pluginmgr.h"
 
-
 #include <ptclib/cypher.h>
+
+#ifdef _WIN32
+#ifndef _Ios_Fmtflags
+  #define _Ios_Fmtflags ios::fmtflags
+#endif
+#endif
 
 namespace PWLibStupidLinkerHacks {
   extern int h323Loader;

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/05/23 11:22:32  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.1  2007/08/06 20:51:07  shorne
  * First commit of h323plus
  *
@@ -252,6 +255,12 @@
 #include "q931.h"
 
 #include <ptclib/random.h>
+
+#ifdef _WIN32
+#ifndef _Ios_Fmtflags
+  #define _Ios_Fmtflags ios::fmtflags
+#endif
+#endif
 
 
 #define new PNEW
