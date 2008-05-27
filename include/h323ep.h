@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.12  2008/05/23 11:19:35  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.11  2008/04/25 01:15:42  shorne
  * Added callback for H.460 Instances
  *
@@ -1994,6 +1997,18 @@ class H323EndPoint : public PObject
       */
     void SetSendUserInputMode(H323Connection::SendUserInputModes mode) { defaultSendUserInputMode = mode; }
 
+#ifdef H323_AUDIO_CODECS
+
+    /**See if should auto-start receive audio channels on connection.
+     */
+    PBoolean CanAutoStartReceiveAudio() const { return autoStartReceiveAudio; }
+
+    /**See if should auto-start transmit audio channels on connection.
+     */
+    PBoolean CanAutoStartTransmitAudio() const { return autoStartTransmitAudio; }
+
+#endif
+
 #ifdef H323_VIDEO
 
     /**See if should auto-start receive video channels on connection.
@@ -2483,6 +2498,8 @@ class H323EndPoint : public PObject
     PString     soundChannelRecordDriver;
     unsigned    soundChannelBuffers;
 #endif // P_AUDIO
+    PBoolean	autoStartReceiveAudio;
+    PBoolean	autoStartTransmitAudio;
 #endif // H323_AUDIO_CODECS
 
 #ifdef H323_VIDEO

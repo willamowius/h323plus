@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.17  2008/05/23 11:21:58  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.16  2008/04/25 01:15:42  shorne
  * Added callback for H.460 Instances
  *
@@ -1136,6 +1139,10 @@ H323EndPoint::H323EndPoint()
   PString DefaultAudioDriver = "WindowsMultimedia";
   SetSoundChannelPlayDriver(DefaultAudioDriver);
   SetSoundChannelRecordDriver(DefaultAudioDriver);
+#endif
+
+#ifdef H323_AUDIO_CODECS
+  autoStartReceiveAudio = autoStartTransmitAudio = TRUE;
 #endif
 
 #ifdef H323_VIDEO
