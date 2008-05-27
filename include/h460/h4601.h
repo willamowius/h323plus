@@ -36,6 +36,9 @@
  * Contributor(s): ______________________________________.
  *
 * $Log$
+* Revision 1.4  2008/05/23 11:20:51  willamowius
+* switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+*
 * Revision 1.3  2008/01/02 17:50:59  shorne
 * Fix for memory leak in H.460 module
 *
@@ -1127,7 +1130,7 @@ template <class className> class H460PluginServiceDescriptor : public PDevicePlu
 {
   public:
     virtual PObject *   CreateInstance(int /*userData*/) const { return new className; }
-    virtual PStringList GetDeviceNames(int /*userData*/) const { return className::GetFeatureFriendlyName(); }
+    virtual PStringArray GetDeviceNames(int /*userData*/) const { return className::GetFeatureFriendlyName(); }
     virtual bool  ValidateDeviceName(const PString & deviceName, int userData) const 
 	{ 
 	     PStringList devices = className::GetFeatureName(); 
