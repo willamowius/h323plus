@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2008/05/23 11:19:18  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.4  2008/02/01 07:50:17  shorne
  * added shutdown mutex to fix occasion shutdown timing errors.
  *
@@ -241,8 +244,35 @@ public:
 
    static PStringList GetNatMethodName() {  return PStringList("GNUGK"); };
 
+   // PNatMethod was changed from PTLib v2.3 onwards 
+   // Need to put this directive in to compile with v2.2.1
+#if PTLIB_MAJOR <= 2 && PTLIB_MINOR < 3
    virtual PStringList GetName() const
             { return GetNatMethodName(); }
+#else
+   virtual PString GetName() const
+            { return GetNatMethodName()[0]; }
+#endif
+
+   // All these are virtual and never used. 
+    virtual bool GetServerAddress(
+      PIPSocket::Address & address,   ///< Address of server
+      WORD & port                     ///< Port server is using.
+	  ) const { return false; }
+
+    virtual bool GetInterfaceAddress(
+      PIPSocket::Address & internalAddress
+	  ) const { return false; }
+
+    virtual PBoolean CreateSocket(
+      PUDPSocket * & socket,
+      const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny(),
+      WORD localPort = 0
+	  ) { return false; }
+
+    virtual RTPSupportTypes GetRTPSupport(
+      PBoolean force = PFalse    ///< Force a new check
+	  )  { return RTPSupported; }
   //@}
 
 protected:
