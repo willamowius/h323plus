@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.22  2008/05/27 15:37:56  shorne
+ * Fixes for early media and addition of AnswerCallNowWithAlert
+ *
  * Revision 1.21  2008/05/23 11:21:53  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -1703,9 +1706,11 @@ if (!IsNonCallConnection) {
             return TRUE;
 
   // Check that it has the H.245 channel connection info
-  if (setup.HasOptionalField(H225_Setup_UUIE::e_h245Address))
+  if (setup.HasOptionalField(H225_Setup_UUIE::e_h245Address)) {
+	fastStartState = FastStartDisabled;   // Remote is doing H.245 in Setup
     if (!StartControlChannel(setup.m_h245Address))
       return FALSE;
+  }
 
   // See if remote endpoint wants to start fast
   if ((fastStartState != FastStartDisabled) && 
@@ -1813,12 +1818,20 @@ PBoolean H323Connection::OnReceivedCallProceeding(const H323SignalPDU & pdu)
 #endif
 
   // Check for fastStart data and start fast
-  if (call.HasOptionalField(H225_CallProceeding_UUIE::e_fastStart))
+/*  Commented out as MIRA gatekeepers send fast start in call proceeding then
+    decide to send a different one in either Alert,Progress or Connect and has assumed
+	you have ignored the one in the CallProceeding.. Very Frustrating - S.H.
+ if (call.HasOptionalField(H225_CallProceeding_UUIE::e_fastStart))
     HandleFastStartAcknowledge(call.m_fastStart);
-
-  // Check that it has the H.245 channel connection info
-  if (call.HasOptionalField(H225_CallProceeding_UUIE::e_h245Address))
-    return StartControlChannel(call.m_h245Address);
+*/
+  if (fastStartState == FastStartAcknowledged) {
+        lastPDUWasH245inSETUP = FALSE;
+        masterSlaveDeterminationProcedure->Stop();
+        capabilityExchangeProcedure->Stop();
+  } else {
+	    if (call.HasOptionalField(H225_CallProceeding_UUIE::e_h245Address))
+               return StartControlChannel(call.m_h245Address);
+  }
 
   return TRUE;
 }
