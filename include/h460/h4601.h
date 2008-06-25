@@ -36,6 +36,9 @@
  * Contributor(s): ______________________________________.
  *
 * $Log$
+* Revision 1.5  2008/05/27 15:39:07  shorne
+* Replace PStringList with PStringArray with latest ptlib SVN
+*
 * Revision 1.4  2008/05/23 11:20:51  willamowius
 * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
 *
@@ -1133,14 +1136,14 @@ template <class className> class H460PluginServiceDescriptor : public PDevicePlu
     virtual PStringArray GetDeviceNames(int /*userData*/) const { return className::GetFeatureFriendlyName(); }
     virtual bool  ValidateDeviceName(const PString & deviceName, int userData) const 
 	{ 
-	     PStringList devices = className::GetFeatureName(); 
+	     PStringArray devices = className::GetFeatureName(); 
 		 if ((deviceName == devices[0]) &&
 			 (className::GetPurpose() >= userData) && 
 			 (className::GetPurpose() < userData*2)) {
 
-		        return TRUE; 
+		        return true; 
 		 } else
-			    return FALSE;
+			    return false;
 	} 
 };
 
