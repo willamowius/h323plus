@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.18  2008/05/23 11:21:56  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.17  2008/02/19 06:31:38  shorne
  * Simplified detecting extended Video Capability
  *
@@ -1910,7 +1913,7 @@ void H323ExtendedVideoCapability::PrintOn(ostream & strm) const
 	if (extCapabilities.GetSize() > 0) {
 	  int indent = strm.precision() + 2;
       for (PINDEX i=0; i< extCapabilities.GetSize(); i++) {
-         strm << '\n' << setw(indent+6) << extCapabilities[i];
+         strm << '\n' << setw(indent+16) << extCapabilities[i];
 	  }
 	}
 }
@@ -1960,18 +1963,17 @@ void H323ExtendedVideoCapability::AddAllCapabilities(
 {
   H323ExtendedVideoFactory::KeyList_T extCaps = H323ExtendedVideoFactory::GetKeyList();
   if (extCaps.size() > 0) {
-	  H323CodecExtendedVideoCapability * extCapability = new H323CodecExtendedVideoCapability();
-    // Add all the extended Video Capabilities to the capability list
-    H323ExtendedVideoFactory::KeyList_T::const_iterator r;
-    for (r = extCaps.begin(); r != extCaps.end(); ++r) {
-       PString capName(*r);
-       H323Capability * capability = H323ExtendedVideoFactory::CreateInstance(capName);
-	   extCapability->AddCapability(capability);
-	   H323ExtendedVideoFactory::Unregister(*r);  // To avoid nasty segfault on shutdown.
-	}
-      basecapabilities.SetCapability(descriptorNum, simultaneous,extCapability);
- // control not yet available
- //     basecapabilities.SetCapability(descriptorNum, simultaneous, new H323ControlExtendedVideoCapability()); 
+    basecapabilities.SetCapability(descriptorNum, simultaneous,new H323CodecExtendedVideoCapability());
+    H323CodecExtendedVideoCapability * extCapability = 
+		     (H323CodecExtendedVideoCapability *)basecapabilities.FindCapability(H323Capability::e_Video, 
+			                                                H245_VideoCapability::e_extendedVideoCapability);
+	 if (extCapability != NULL) {
+		// Add all the extended Video Capabilities to the capability list
+		H323ExtendedVideoFactory::KeyList_T::const_iterator r;
+		for (r = extCaps.begin(); r != extCaps.end(); ++r) {
+		   extCapability->AddCapability(*r);
+		}
+	 }
   } else {
 	  PTRACE(4,"EXT\tNo Extended Capabilities found to load");
   }
@@ -2003,9 +2005,9 @@ H323CodecExtendedVideoCapability::~H323CodecExtendedVideoCapability()
 {
 }
 
-void H323CodecExtendedVideoCapability::AddCapability(H323Capability * capability)
+void H323CodecExtendedVideoCapability::AddCapability(const PString & cap)
 {
-	extCapabilities.Add(capability);
+	extCapabilities.Add(H323ExtendedVideoFactory::CreateInstance(cap));
 }
 
 H323Capability::MainTypes H323CodecExtendedVideoCapability::GetMainType() const
