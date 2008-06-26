@@ -35,6 +35,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2008/05/23 11:20:34  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.5  2008/01/05 12:05:53  shorne
  * small code tidy up
  *
@@ -63,8 +66,6 @@
 
 #include <map>
 #include <list>
-
-#define P_FORCE_STATIC_PLUGIN
 
 class H350_Session   : public PLDAPSession
 {

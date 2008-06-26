@@ -35,6 +35,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2008/05/23 11:22:47  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.5  2008/01/05 11:36:02  shorne
  * More Fixes for Linux
  *
@@ -234,7 +237,7 @@ void H350_Session::NewRecord(LDAP_Record & rec)
 
 PBoolean H350_Session::PostNew(const PString & dn, const LDAP_Record & record)
 {
-	PList<PLDAPSession::ModAttrib> attrib;
+	PArray<PLDAPSession::ModAttrib> attrib;
 	PLDAPSession::ModAttrib::Operation mode = PLDAPSession::ModAttrib::Add;
 
 	for (std::list<PLDAPSchema>::const_iterator r = record.begin(); r != record.end(); ++r) {
@@ -248,7 +251,7 @@ PBoolean H350_Session::PostNew(const PString & dn, const LDAP_Record & record)
 
 PBoolean H350_Session::PostUpdate(const PString & dn, const LDAP_Record & record)
 {
-	PList<PLDAPSession::ModAttrib> attrib;
+	PArray<PLDAPSession::ModAttrib> attrib;
 	PLDAPSession::ModAttrib::Operation mode = PLDAPSession::ModAttrib::Replace;
 
 	for (std::list<PLDAPSchema>::const_iterator r = record.begin(); r != record.end(); ++r) {
