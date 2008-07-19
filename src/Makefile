@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.10  2008/02/13 15:45:29  willamowius
+# fix for PTLib 2.0.x: PW_LIBDIR is no longer provided
+#
 # Revision 1.9  2008/01/02 18:48:37  willamowius
 # add file transfer files
 #
@@ -326,7 +329,7 @@ SOURCES		+= $(COMMON_SOURCES)
 
 ####################################################
 
-include $(PWLIBDIR)/make/common.mak
+include $(PTLIBDIR)/make/common.mak
 
 ####################################################
 
@@ -341,7 +344,7 @@ SYSLIBS        += -l$(PTLIB_BASE)$(LIB_TYPE)
 LIB_BASENAME=$(OH323_BASE)
 LIB_FILENAME=$(OH323_FILE)
 
-include $(PWLIBDIR)/make/lib.mak
+include $(PTLIBDIR)/make/lib.mak
 
 ####################################################
 
@@ -349,8 +352,8 @@ include $(PWLIBDIR)/make/lib.mak
 # Make sure the asnparser is built and if new version force recompiles
 
 # Use a different variable here to support cross compiling
-ifndef HOSTPWLIBDIR
-HOSTPWLIBDIR=$(PWLIBDIR)
+ifndef HOSTPTLIBDIR
+HOSTPTLIBDIR=$(PTLIBDIR)
 endif
 
 ifndef HOST_PLATFORM_TYPE
@@ -361,16 +364,16 @@ endif
 # Set library path so asnparser will run
 
 ifdef LD_LIBRARY_PATH
-LD_LIBRARY_PATH:=$(LD_LIBRARY_PATH):$(HOSTPWLIBDIR)/lib
+LD_LIBRARY_PATH:=$(LD_LIBRARY_PATH):$(HOSTPTLIBDIR)/lib
 else
-LD_LIBRARY_PATH:=$(HOSTPWLIBDIR)/lib
+LD_LIBRARY_PATH:=$(HOSTPTLIBDIR)/lib
 endif
 export LD_LIBRARY_PATH
 
 
 # If we're cross compiling, we want the host's asnparser
 # otherwise use the one for the current platform
-ASNPARSE_DIR = $(HOSTPWLIBDIR)/tools/asnparser
+ASNPARSE_DIR = $(HOSTPTLIBDIR)/tools/asnparser
 ASNPARSER = $(ASNPARSE_DIR)/obj_$(HOST_PLATFORM_TYPE)_d/asnparser
 
 

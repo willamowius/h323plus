@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2008/05/23 11:20:31  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.4  2008/01/05 11:35:59  shorne
  * More Fixes for Linux
  *
@@ -53,10 +56,15 @@
 
 #pragma once
 
+#include <openh323buildopts.h>
+
 #ifdef H323_H341
 
 #ifndef _H323_H341
 #define _H323_H341
+
+#include <ptlib.h>
+#include <ptclib/psnmp.h>
 
 class H323_H341Server : public PSNMPServer
 {

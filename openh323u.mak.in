@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.6  2008/01/02 19:38:16  shorne
+# Enabled GnuGknat and FileTransfer by default
+#
 # Revision 1.5  2008/01/01 00:16:12  shorne
 # Added GnuGknat and FileTransfer support
 #
@@ -186,7 +189,7 @@
 # Added auto inclusion of ptlib make rules
 #
 
-PWLIBDIR	= @PWLIBDIR@
+PTLIBDIR	= @PTLIBDIR@
 OPENH323DIR	= @OPENH323DIR@
 STDCCFLAGS	+= @STDCCFLAGS@
 LDFLAGS		+= @LDFLAGS@
@@ -201,6 +204,7 @@ H323_H230	     = @H323_H230@
 H323_H239	     = @H323_H239@
 H323_H248	     = @H323_H248@
 H323_H249	     = @H323_H249@
+H323_H341	     = @H323_H341@
 H323_H350	     = @H323_H350@
 H323_H450	     = @H323_H450@
 H323_H460            = @H323_H460@
@@ -212,12 +216,12 @@ H323_FILE	     = @H323_FILE@
 
 
 ifdef LIBRARY_MAKEFILE
-include $(PWLIBDIR)/make/unix.mak
+include $(PTLIBDIR)/make/unix.mak
 else
 ifeq ($(NOTRACE), 1)
 OBJDIR_SUFFIX := n
 endif # NOTRACE
-include $(PWLIBDIR)/make/ptlib.mak
+include $(PTLIBDIR)/make/ptlib.mak
 endif # LIBRARY_MAKEFILE
 
 LIBDIRS += $(OPENH323DIR)
