@@ -5,9 +5,9 @@ AC_HEADER_STDC
 
 dnl this must be updated for every minor revision, and for
 dnl builds when and as necessary
-REQUIRED_PWLIB_MAJOR=1
-REQUIRED_PWLIB_MINOR=11
-REQUIRED_PWLIB_BUILD=1
+REQUIRED_PTLIB_MAJOR=2
+REQUIRED_PTLIB_MINOR=2
+REQUIRED_PTLIB_BUILD=1
 
 dnl ########################################################################
 dnl set the OpenH323 directory to the current directory
@@ -62,15 +62,19 @@ AC_DEFINE_UNQUOTED(OPENH323_BUILD,   ${BUILD_NUMBER})
 AC_DEFINE_UNQUOTED(OPENH323_VERSION, "$OPENH323_VERSION")
 
 dnl ########################################################################
-dnl look for ptlib, use a preference order of explicit PWLIBDIR, directory
+dnl look for ptlib, use a preference order of explicit PTLIBDIR, directory
 dnl at same level, home directory, /usr/local or /usr.
+
+if test "${PWLIBDIR:-unset}" != "unset" ; then 	 
+   AC_CHECK_FILE(${PTLIBDIR}/version.h, HAS_PTLIB=1) 	 
+fi
 
 if test "${HAS_PTLIB:-unset}" = "unset" ; then
   if test "${HAS_PTLIB:-unset}" != "unset" ; then
-    PWLIBDIR="${OPENH323DIR}/../pwlib"
+    PTLIBDIR="${OPENH323DIR}/../ptlib"
   else
     if test "${HAS_PTLIB:-unset}" != "unset" ; then
-      PWLIBDIR="${HOME}/pwlib"
+      PTLIBDIR="${HOME}/ptlib"
     else
       if test "${HAS_PTLIB:-unset}" != "unset" ; then
         AC_PATH_PROG(PTLIB_CONFIG, ptlib-config, , /usr/local/bin)
@@ -79,7 +83,7 @@ if test "${HAS_PTLIB:-unset}" = "unset" ; then
           AC_PATH_PROG(PTLIB_CONFIG, ptlib-config, , /usr/share/ptlib/make/)
         else
            if test "${HAS_PTLIB:-unset}" != "unset" ; then
-             AC_PATH_PROG(PTLIB_CONFIG, ptlib-config, , /usr/share/pwlib/make/)
+             AC_PATH_PROG(PTLIB_CONFIG, ptlib-config, , /usr/share/ptlib/make/)
            fi
         fi
       fi
@@ -88,64 +92,64 @@ if test "${HAS_PTLIB:-unset}" = "unset" ; then
 fi
 
 if test "${HAS_PTLIB:-unset}" = "unset" ; then
-  echo "Cannot find pwlib - please install or set PWLIBDIR and try again"
+  echo "Cannot find ptlib - please install or set PTLIBDIR and try again"
   exit
 fi
 
-if test "${PWLIBDIR:-unset}" = "unset" ; then
+if test "${PTLIBDIR:-unset}" = "unset" ; then
   if test "${PTLIB_CONFIG:-unset}" = "unset" ; then
     echo "Cannot find ptlib-config - please install and try again"
     exit
   fi
-  PWLIBDIR=`$PTLIB_CONFIG --prefix`
+  PTLIBDIR=`$PTLIB_CONFIG --prefix`
 fi
 
-if test "x$PWLIBDIR" = "x/usr" -o "x$PWLIBDIR" = "x/usr/"; then
-  PWLIBDIR="/usr/share/pwlib/"
+if test "x$PTLIBDIR" = "x/usr" -o "x$PTLIBDIR" = "x/usr/"; then
+  PTLIBDIR="/usr/share/ptlib/"
 fi
-if test "x$PWLIBDIR" = "x/usr/local" -o "x$PWLIBDIR" = "x/usr/"; then
-  PWLIBDIR="/usr/local/share/pwlib/"
+if test "x$PTLIBDIR" = "x/usr/local" -o "x$PTLIBDIR" = "x/usr/"; then
+  PTLIBDIR="/usr/local/share/ptlib/"
 fi
 
-echo "PWLib prefix set to.... $PWLIBDIR"
+echo "PTLib prefix set to.... $PTLIBDIR"
 
-if test "${PWLIBDIR:-unset}" = "unset" ; then
-  PWVERSION=`$PTLIB_CONFIG --version`
-  PW_MAJOR_VERSION=`echo $PW_VERSION | cut -d'.' -f1`
-  PW_MINOR_VERSION=`echo $PW_VERSION | cut -d'.' -f2`
-  PW_BUILD_NUMBER=`echo $PW_VERSION | cut -d'.' -f3`
+if test "${PTLIBDIR:-unset}" = "unset" ; then
+  PTVERSION=`$PTLIB_CONFIG --version`
+  PT_MAJOR_VERSION=`echo $PTVERSION | cut -d'.' -f1`
+  PT_MINOR_VERSION=`echo $PTVERSION | cut -d'.' -f2`
+  PT_BUILD_NUMBER=`echo $PTVERSION | cut -d'.' -f3`
   
 else
-  PW_MAJOR_VERSION=`cat ${PWLIBDIR}/version.h | grep MAJOR_VERSION | cut -f3 -d' '`
-  PW_MINOR_VERSION=`cat ${PWLIBDIR}/version.h | grep MINOR_VERSION | cut -f3 -d' '`
-  PW_BUILD_NUMBER=`cat ${PWLIBDIR}/version.h | grep BUILD_NUMBER | cut -f3 -d' '`
-  PWVERSION="${PW_MAJOR_VERSION}.${PW_MINOR_VERSION}.${PW_BUILD_NUMBER}"
+  PT_MAJOR_VERSION=`cat ${PTLIBDIR}/version.h | grep MAJOR_VERSION | cut -f3 -d' '`
+  PT_MINOR_VERSION=`cat ${PTLIBDIR}/version.h | grep MINOR_VERSION | cut -f3 -d' '`
+  PT_BUILD_NUMBER=`cat ${PTLIBDIR}/version.h | grep BUILD_NUMBER | cut -f3 -d' '`
+  PTVERSION="${PT_MAJOR_VERSION}.${PT_MINOR_VERSION}.${PT_BUILD_NUMBER}"
 fi
 
 AC_ARG_ENABLE(versioncheck,
-		[  --disable-versioncheck    disable PWLib version check],
-		PWLIB_VERSION_CHECK=$enableval)
+		[  --disable-versioncheck    disable PTLib version check],
+		PTLIB_VERSION_CHECK=$enableval)
 
-AC_MSG_CHECKING(Checking PWLib version ${PWVERSION})
-if test "${PWLIB_VERSION_CHECK}x" = "nox" ; then
+AC_MSG_CHECKING(Checking PTLib version ${PTVERSION})
+if test "${PTLIB_VERSION_CHECK}x" = "nox" ; then
   AC_MSG_RESULT(check disabled)
 else
-  if test $PW_MAJOR_VERSION -lt $REQUIRED_PWLIB_MAJOR ; then
-    AC_MSG_RESULT(Major version less than required $REQUIRED_PWLIB_MAJOR)
+  if test $PT_MAJOR_VERSION -lt $REQUIRED_PTLIB_MAJOR ; then
+    AC_MSG_RESULT(Major version less than required $REQUIRED_PTLIB_MAJOR)
     exit 1
   fi
-  if test $PW_MINOR_VERSION -lt $REQUIRED_PWLIB_MINOR ; then
-    AC_MSG_RESULT(Minor version less than required $REQUIRED_PWLIB_MINOR)
+  if test $PT_MINOR_VERSION -lt $REQUIRED_PTLIB_MINOR ; then
+    AC_MSG_RESULT(Minor version less than required $REQUIRED_PTLIB_MINOR)
     exit 1
   fi
-  if test $PW_BUILD_NUMBER -lt $REQUIRED_PWLIB_BUILD ; then
-    AC_MSG_RESULT(Build version less than required $REQUIRED_PWLIB_BUILD)
+  if test $PT_BUILD_NUMBER -lt $REQUIRED_PTLIB_BUILD ; then
+    AC_MSG_RESULT(Build version less than required $REQUIRED_PTLIB_BUILD)
     exit 1
   fi
   AC_MSG_RESULT(ok)
 fi
 
-AC_SUBST(PWLIBDIR)
+AC_SUBST(PTLIBDIR)
 
 dnl ########################################################################
 dnl check for setting minimum size
