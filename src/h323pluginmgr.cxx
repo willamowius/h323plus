@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.17  2008/05/23 11:22:07  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.16  2008/04/25 01:05:44  shorne
  * Added missing payloadType setting for Audio plugins
  *
@@ -2462,20 +2465,20 @@ void H323PluginCodecManager::RegisterCodecs(unsigned int count, void * _codecLis
     // for every encoder, we need a decoder
     PBoolean found = FALSE;
     PBoolean isEncoder = FALSE;
-    if (encoder.h323CapabilityType != PluginCodec_H323Codec_undefined &&
-         (
+    if ((encoder.h323CapabilityType != PluginCodec_H323Codec_undefined) &&
+         ((
            ((encoder.flags & PluginCodec_MediaTypeMask) == PluginCodec_MediaTypeAudio) && 
-            strcmp(encoder.sourceFormat, "L16") == 0
+            (strcmp(encoder.sourceFormat, "L16") == 0)
          ) ||
          (
            ((encoder.flags & PluginCodec_MediaTypeMask) == PluginCodec_MediaTypeAudioStreamed) && 
-            strcmp(encoder.sourceFormat, "L16") == 0
+            (strcmp(encoder.sourceFormat, "L16") == 0)
          ) ||
          (
            videoSupported &&
            ((encoder.flags & PluginCodec_MediaTypeMask) == PluginCodec_MediaTypeVideo) && 
-           strcmp(encoder.sourceFormat, "YUV420P") == 0
-        )
+            (strcmp(encoder.sourceFormat, "YUV420P") == 0)
+        ))
        ) {
       isEncoder = TRUE;
       for (j = 0; j < count; j++) {
