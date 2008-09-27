@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/05/23 11:22:41  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.1  2007/08/06 20:51:08  shorne
  * First commit of h323plus
  *
@@ -1286,7 +1289,7 @@ PBoolean H323Transport::HandleFirstSignallingChannelPDU()
     q931PDU.SetCause(Q931::TemporaryFailure);
 
     // Send the PDU
-    releaseComplete.Write(*this,*connection);
+    releaseComplete.Write(*this);
     return FALSE;
   }
 
@@ -1655,9 +1658,10 @@ PBoolean H323TransportTCP::OnOpen()
     PTRACE(1, "H323TCP\tSetOption(TCP_NODELAY) failed: " << socket->GetErrorText());
   }
 
-  if (!socket->SetOption(IP_TOS, endpoint.GetTcpIpTypeofService(), IPPROTO_IP)) { 
-    PTRACE(1, "H323TCP\tSetOption(IP_TOS) failed: " << socket->GetErrorText()); 
-  }
+  //if (!socket->SetOption(IP_TOS, endpoint.GetTcpIpTypeofService(), IPPROTO_IP)) { 
+  //  PTRACE(1, "H323TCP\tSetOption(IP_TOS) failed: " << socket->GetErrorText()); 
+  //}
+
 
 #ifndef P_VXWORKS // VxWorks has alternative behaviour, so skip it
   // make sure do not lose outgoing packets on close

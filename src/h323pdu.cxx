@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2008/05/23 11:22:05  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.5  2008/02/20 03:07:43  shorne
  * Added comma to allowable E164 numbers for T38Modem
  *
@@ -1602,7 +1605,7 @@ PBoolean H323SignalPDU::ProcessReadData(H323Transport & transport, const PBYTEAr
 }
 
 
-PBoolean H323SignalPDU::Write(H323Transport & transport, H323Connection & connection)
+PBoolean H323SignalPDU::Write(H323Transport & transport, H323Connection * connection)
 {
   if (!q931pdu.HasIE(Q931::UserUserIE) && m_h323_uu_pdu.m_h323_message_body.IsValid())
     BuildQ931();
@@ -1612,8 +1615,10 @@ PBoolean H323SignalPDU::Write(H323Transport & transport, H323Connection & connec
     return FALSE;
 
 #ifndef DISABLE_CALLAUTH
-  int tag = m_h323_uu_pdu.m_h323_message_body.GetTag();
-  connection.OnAuthenticationFinalise(tag,rawData);
+  if (connection != NULL) {
+      int tag = m_h323_uu_pdu.m_h323_message_body.GetTag();
+      connection->OnAuthenticationFinalise(tag,rawData);
+  }
 #endif
 
   H323TraceDumpPDU("H225", TRUE, rawData, *this, m_h323_uu_pdu.m_h323_message_body, 0, 

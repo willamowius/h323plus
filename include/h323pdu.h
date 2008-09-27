@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2008/05/23 11:19:43  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.3  2007/10/19 19:53:44  shorne
  * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
  *  Robert
@@ -435,8 +438,8 @@ class H323SignalPDU : public H225_H323_UserInformation
     /**Write the PDU to the transport.
       */
     PBoolean Write(
-      H323Transport & transport,   ///* Transport to write to
-      H323Connection & connection  ///* Connection for CallBack
+      H323Transport & transport,          ///* Transport to write to
+      H323Connection * connection = NULL  ///* Connection for CallBack
     );
 
     /**Get the Q.931 wrapper PDU for H.225 signalling PDU.
