@@ -36,6 +36,9 @@
  * Contributor(s): ______________________________________.
  *
 * $Log$
+* Revision 1.6  2008/06/25 10:49:13  shorne
+* Change to PStringArray to bring in line with changes in ptlib
+*
 * Revision 1.5  2008/05/27 15:39:07  shorne
 * Replace PStringList with PStringArray with latest ptlib SVN
 *
@@ -1128,6 +1131,8 @@ class H460_FeatureSet : public PObject
 };
 
 /////////////////////////////////////////////////////////////////////
+
+typedef PFactory<H460_Feature, std::string> H460Factory;
 
 template <class className> class H460PluginServiceDescriptor : public PDevicePluginServiceDescriptor
 {
