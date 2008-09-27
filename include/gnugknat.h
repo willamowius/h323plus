@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2008/06/18 21:21:19  shorne
+ * Fix for changes in ptlib v2.3.0
+ *
  * Revision 1.5  2008/05/23 11:19:18  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -242,14 +245,14 @@ public:
 
    PBoolean OpenSocket(PUDPSocket & socket, PortInfo & portInfo) const;
 
-   static PStringList GetNatMethodName() {  return PStringList("GNUGK"); };
-
    // PNatMethod was changed from PTLib v2.3 onwards 
    // Need to put this directive in to compile with v2.2.1
 #if PTLIB_MAJOR <= 2 && PTLIB_MINOR < 3
+   static PStringList GetNatMethodName() {  return PStringList("GNUGK"); };
    virtual PStringList GetName() const
             { return GetNatMethodName(); }
 #else
+   static PStringArray GetNatMethodName() {  return PStringArray("GNUGK"); };
    virtual PString GetName() const
             { return GetNatMethodName()[0]; }
 #endif
