@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.13  2008/05/27 15:40:42  shorne
+ * Enable the ability to be able to only autostart Transmit or Receive Audio
+ *
  * Revision 1.12  2008/05/23 11:19:35  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -2200,7 +2203,7 @@ class H323EndPoint : public PObject
 
     /** Get the Nat Methods List
        */
-    PNatStrategy GetNatMethods();
+    PNatStrategy & GetNatMethods();
 
 #endif // P_NONCORE
 
@@ -2582,9 +2585,9 @@ class H323EndPoint : public PObject
     } tcpPorts, udpPorts, rtpIpPorts;
 
 #ifdef P_STUN
+    PNatStrategy * natMethods;
     PSTUNClient * stun;
 	PBoolean disableSTUNTranslate;
-    PNatStrategy natMethods;
 #endif
 
     BYTE t35CountryCode;

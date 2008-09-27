@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.18  2008/05/27 15:40:42  shorne
+ * Enable the ability to be able to only autostart Transmit or Receive Audio
+ *
  * Revision 1.17  2008/05/23 11:21:58  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -1165,8 +1168,8 @@ H323EndPoint::H323EndPoint()
   autoCallForward = TRUE;
   disableFastStart = FALSE;
   disableH245Tunneling = FALSE;
-  disableH245inSetup = FALSE;
-  disableH245QoS = FALSE;
+  disableH245inSetup = TRUE;
+  disableH245QoS = TRUE;
   disableDetectInBandDTMF = FALSE;
   canDisplayAmountString = FALSE;
   canEnforceDurationLimit = TRUE;
@@ -1197,6 +1200,7 @@ H323EndPoint::H323EndPoint()
   udpPorts.current = udpPorts.base = udpPorts.max = 0;
 
 #ifdef P_STUN
+  natMethods = new PNatStrategy();
   stun = NULL;
   disableSTUNTranslate = FALSE;
 #endif
@@ -1328,7 +1332,12 @@ H323EndPoint::~H323EndPoint()
   CleanUpConnections();
 
 #ifdef P_STUN
- // delete stun;
+  delete natMethods;
+  NatFactory::UnregisterAll();
+#endif
+
+#ifdef H323_H460
+  H460Factory::UnregisterAll();
 #endif
 
   PTRACE(3, "H323\tDeleted endpoint.");
@@ -3158,7 +3167,7 @@ void H323EndPoint::OnGatekeeperNATDetect(
 
 		 PNatMethod_GnuGk * natMethod = new PNatMethod_GnuGk();
 		 natMethod->AttachEndPoint(this);
-	     natMethods.AddMethod(natMethod);
+	     natMethods->AddMethod(natMethod);
 		 return; 
 	 } 
 
@@ -3524,7 +3533,7 @@ PNatMethod * H323EndPoint::GetPreferedNatMethod(const PIPSocket::Address & ip)
 
 #if PTRACING
     PNatMethod * meth = NULL;
-    PNatList list = natMethods.GetNATList();
+    PNatList & list = natMethods->GetNATList();
 
     if (list.GetSize() > 0) {
       for (PINDEX i=0; i < list.GetSize(); i++) {
@@ -3539,19 +3548,19 @@ PNatMethod * H323EndPoint::GetPreferedNatMethod(const PIPSocket::Address & ip)
     }
     return meth;
 #else 
-  return natMethods.GetMethod();
+  return natMethods->GetMethod();
 #endif
 
 }
 
-PNatStrategy H323EndPoint::GetNatMethods() 
+PNatStrategy & H323EndPoint::GetNatMethods() 
 { 
-	return natMethods; 
+	return *natMethods; 
 }
 
 void H323EndPoint::SetSTUNServer(const PString & server)
 {
-  natMethods.RemoveMethod("STUN");
+  natMethods->RemoveMethod("STUN");
   delete stun;
 
   if (server.IsEmpty())
@@ -3561,7 +3570,7 @@ void H323EndPoint::SetSTUNServer(const PString & server)
                            GetUDPPortBase(), GetUDPPortMax(),
                            GetRtpIpPortBase(), GetRtpIpPortMax());
 
-    natMethods.AddMethod(stun);
+    natMethods->AddMethod(stun);
 
     PTRACE(2, "H323\tSTUN server \"" << server << "\" replies " << stun->GetNatTypeName());
 	
@@ -3672,7 +3681,7 @@ void H323EndPoint::SetUDPPorts(unsigned udpBase, unsigned udpMax)
   udpPorts.Set(udpBase, udpMax, 199, 0);
 
 #ifdef P_STUN
-    natMethods.SetPortRanges(GetUDPPortBase(), GetUDPPortMax(), GetRtpIpPortBase(), GetRtpIpPortMax());
+    natMethods->SetPortRanges(GetUDPPortBase(), GetUDPPortMax(), GetRtpIpPortBase(), GetRtpIpPortMax());
 #endif
 }
 
@@ -3688,7 +3697,7 @@ void H323EndPoint::SetRtpIpPorts(unsigned rtpIpBase, unsigned rtpIpMax)
   rtpIpPorts.Set((rtpIpBase+1)&0xfffe, rtpIpMax&0xfffe, 999, 5000);
 
 #ifdef P_STUN
-     natMethods.SetPortRanges(GetUDPPortBase(), GetUDPPortMax(), GetRtpIpPortBase(), GetRtpIpPortMax());
+  natMethods->SetPortRanges(GetUDPPortBase(), GetUDPPortMax(), GetRtpIpPortBase(), GetRtpIpPortMax());
 #endif
 }
 
