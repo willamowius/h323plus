@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2008/05/23 11:22:34  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.3  2008/02/06 02:52:59  shorne
  * Added support for Standards based NAT Traversal
  *
@@ -2039,7 +2042,7 @@ PBoolean RTP_UDP::WriteControl(RTP_ControlFrame & frame)
 {
   // Trying to send a PDU before we are set up!
   if (!remoteAddress.IsValid() || remoteControlPort == 0)
-    return TRUE;
+    return true;
 
   while (!controlSocket->WriteTo(frame.GetPointer(), frame.GetCompoundSize(),
                                 remoteAddress, remoteControlPort)) {
@@ -2054,10 +2057,11 @@ PBoolean RTP_UDP::WriteControl(RTP_ControlFrame & frame)
                << ", Write error on control port ("
                << controlSocket->GetErrorNumber(PChannel::LastWriteError) << "): "
                << controlSocket->GetErrorText(PChannel::LastWriteError));
+		return false;
     }
   }
 
-  return TRUE;
+  return true;
 }
 
 
