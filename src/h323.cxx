@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.23  2008/06/22 02:28:53  shorne
+ * Fixes for bad equipment that send both H.245 Address and FastStart in Setup
+ *
  * Revision 1.22  2008/05/27 15:37:56  shorne
  * Fixes for early media and addition of AnswerCallNowWithAlert
  *
@@ -1120,7 +1123,7 @@ PBoolean H323Connection::WriteSignalPDU(H323SignalPDU & pdu)
     if (gk != NULL)
       gk->InfoRequestResponse(*this, pdu.m_h323_uu_pdu, TRUE);
 
-    if (pdu.Write(*signallingChannel,*this))
+    if (pdu.Write(*signallingChannel,this))
       return TRUE;
   }
 
@@ -1705,19 +1708,18 @@ if (!IsNonCallConnection) {
   if (IsNonCallConnection) 
             return TRUE;
 
-  // Check that it has the H.245 channel connection info
-  if (setup.HasOptionalField(H225_Setup_UUIE::e_h245Address)) {
-	fastStartState = FastStartDisabled;   // Remote is doing H.245 in Setup
-    if (!StartControlChannel(setup.m_h245Address))
-      return FALSE;
-  }
-
   // See if remote endpoint wants to start fast
-  if ((fastStartState != FastStartDisabled) && 
-       setup.HasOptionalField(H225_Setup_UUIE::e_fastStart) &&
+  if (setup.HasOptionalField(H225_Setup_UUIE::e_fastStart) &&
        localCapabilities.GetSize() > 0) {
 
     DecodeFastStartCaps(setup.m_fastStart);
+  }
+
+  // Check that if we are not doing Fast Connect that we have H.245 channel info
+  if (fastStartState != FastStartResponse &&
+	  setup.HasOptionalField(H225_Setup_UUIE::e_h245Address)) {
+         if (!StartControlChannel(setup.m_h245Address))
+                   return FALSE;
   }
 
   // Build the reply with the channels we are actually using
@@ -2126,7 +2128,7 @@ PBoolean H323Connection::OnReceivedStatusEnquiry(const H323SignalPDU & pdu)
 
   H323SignalPDU reply;
   reply.BuildStatus(*this);
-  return reply.Write(*signallingChannel,*this);
+  return reply.Write(*signallingChannel,this);
 }
 
 
@@ -2645,7 +2647,7 @@ if (setup.m_conferenceGoal.GetTag() == H225_Setup_UUIE_conferenceGoal::e_create)
   setupPDU.SetQ931Fields(*this, TRUE);
   setupPDU.GetQ931().GetCalledPartyNumber(remotePartyNumber);
 
-  fastStartState = FastStartDisabled;
+  //fastStartState = FastStartDisabled;
   PBoolean set_lastPDUWasH245inSETUP = FALSE;
 
   if (h245Tunneling && doH245inSETUP) {
@@ -2658,7 +2660,8 @@ if (setup.m_conferenceGoal.GetTag() == H225_Setup_UUIE_conferenceGoal::e_create)
     h245TunnelTxPDU = NULL;
 
     if (!ok)
-      return EndedByTransportFail;
+      return EndedByTransportFail; 
+
 
     if (setup.m_fastStart.GetSize() > 0) {
       // Now if fast start as well need to put this in setup specific field
@@ -2787,6 +2790,11 @@ PBoolean H323Connection::SendFastStartAcknowledge(H225_ArrayOf_PASN_OctetString 
 
   // Have moved open channels to logicalChannels structure, remove all others.
   fastStartChannels.RemoveAll();
+
+  // Last minute check to see that the remote has not decided
+  // to send slow connect while we are doing fast!
+  if (fastStartState == FastStartDisabled)
+	  return FALSE;
 
   // Set flag so internal establishment check does not require H.245
   fastStartState = FastStartAcknowledged;
@@ -3202,10 +3210,18 @@ PBoolean H323Connection::OnH245Request(const H323ControlPDU & pdu)
 
   switch (request.GetTag()) {
     case H245_RequestMessage::e_masterSlaveDetermination :
-      return masterSlaveDeterminationProcedure->HandleIncoming(request);
+	  if (fastStartState == FastStartResponse) {
+		 PTRACE(4,"H245\tIgnoring masterSlaveDetermination, already doing Fast Connect");
+		 return TRUE;
+	  }
+	  return masterSlaveDeterminationProcedure->HandleIncoming(request);
 
     case H245_RequestMessage::e_terminalCapabilitySet :
     {
+	  if (fastStartState == FastStartResponse) {
+		 PTRACE(4,"H245\tIgnoring TerminalCapabilitySet, already doing Fast Connect");
+		 return TRUE;
+	  }
       const H245_TerminalCapabilitySet & tcs = request;
       if (tcs.m_protocolIdentifier.GetSize() >= 6) {
         h245version = tcs.m_protocolIdentifier[5];
