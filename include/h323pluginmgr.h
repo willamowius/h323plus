@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/05/23 11:19:44  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.2  2007/08/20 20:19:52  shorne
  * Moved opalplugin.h to codec directory to be plugin compile compatible with Opal
  *
@@ -189,6 +192,8 @@ class H323PluginCodecManager : public PPluginModuleManager
     CapabilityCreateListType capabilityCreateList;
     
 };
+
+static PFactory<PPluginModuleManager>::Worker<H323PluginCodecManager> h323PluginCodecManagerFactory("h323PluginCodecManager", true);
 
 class H323DynaLink : public PDynaLink
 {
