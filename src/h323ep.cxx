@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.19  2008/09/27 06:18:08  shorne
+ * Change in NatStrategy to a pointer which is created and distroyed in the constructor/destructor of H323EndPoint
+ *
  * Revision 1.18  2008/05/27 15:40:42  shorne
  * Enable the ability to be able to only autostart Transmit or Receive Audio
  *
@@ -3533,7 +3536,7 @@ PNatMethod * H323EndPoint::GetPreferedNatMethod(const PIPSocket::Address & ip)
 
 #if PTRACING
     PNatMethod * meth = NULL;
-    PNatList & list = natMethods->GetNATList();
+    const PNatList & list = natMethods->GetNATList();
 
     if (list.GetSize() > 0) {
       for (PINDEX i=0; i < list.GetSize(); i++) {
