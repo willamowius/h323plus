@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2008/09/27 06:16:43  shorne
+ * Addition of H323CodecManager Factory loader to correctly load Codecs due to changes in PTLIB v2.3
+ *
  * Revision 1.3  2008/05/23 11:19:44  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -193,7 +196,10 @@ class H323PluginCodecManager : public PPluginModuleManager
     
 };
 
+// keep compatibility with PTLib v2.2.1
+#if PTLIB_MAJOR == 2 && PTLIB_MINOR >= 3
 static PFactory<PPluginModuleManager>::Worker<H323PluginCodecManager> h323PluginCodecManagerFactory("h323PluginCodecManager", true);
+#endif
 
 class H323DynaLink : public PDynaLink
 {
