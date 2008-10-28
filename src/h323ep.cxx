@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.20  2008/10/01 13:36:06  willamowius
+ * must use a const reference
+ *
  * Revision 1.19  2008/09/27 06:18:08  shorne
  * Change in NatStrategy to a pointer which is created and distroyed in the constructor/destructor of H323EndPoint
  *
@@ -1102,9 +1105,11 @@ void H323ConnectionsCleaner::Main()
 
 H323EndPoint::H323EndPoint()
   :
+#ifdef H323_AUDIO_CODECS
 #ifdef P_AUDIO
     soundChannelPlayDevice(PSoundChannel::GetDefaultDevice(PSoundChannel::Player)),
     soundChannelRecordDevice(PSoundChannel::GetDefaultDevice(PSoundChannel::Recorder)),
+#endif
 #endif
     signallingChannelConnectTimeout(0, 10, 0), // seconds
     signallingChannelCallTimeout(0, 0, 1),  // Minutes

@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.18  2008/09/03 12:41:53  willamowius
+ * avoid gcc 4.3.x compiler warning
+ *
  * Revision 1.17  2008/05/23 11:22:07  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -1893,12 +1896,14 @@ class H323AudioPluginCapability : public H323AudioCapability,
         H323PluginCapabilityInfo(_mediaFormat, _baseName),
         pluginSubType(_pluginSubType)
       { 
+#ifndef NO_H323_AUDIO_CODECS
         for (PINDEX i = 0; audioMaps[i].pluginCapType >= 0; i++) {
           if (audioMaps[i].pluginCapType == (int)_pluginSubType) { 
             h323subType = audioMaps[i].h323SubType;
             break;
           }
         }
+#endif
         rtpPayloadType = OpalMediaFormat(_mediaFormat).GetPayloadType();
       }
 

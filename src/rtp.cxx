@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2008/09/27 06:20:26  shorne
+ * BUG FIX: RTP_UDP::Write now returns false if there is an error writing to the control channel
+ *
  * Revision 1.4  2008/05/23 11:22:34  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -883,11 +886,11 @@ void RTP_Session::SetJitterBufferSize(unsigned minJitterDelay,
     jitter = NULL;
 #endif
   }
-  else if (jitter != NULL) {
 #ifndef NO_H323_AUDIO_CODECS
+  else if (jitter != NULL) {
     jitter->SetDelay(minJitterDelay, maxJitterDelay);
-#endif
   }
+#endif
   else {
     SetIgnoreOutOfOrderPackets(FALSE);
 #ifndef NO_H323_AUDIO_CODECS

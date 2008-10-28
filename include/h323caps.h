@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2008/06/26 00:01:51  shorne
+ * Fix for loading H.239 Capabilities to avoid segfault
+ *
  * Revision 1.10  2008/05/23 11:19:33  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -800,7 +803,7 @@ class H323RealTimeCapability : public H323Capability
   //@}
 };
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifndef NO_H323_AUDIO
 
 /**This class describes the interface to an audio codec used to transfer data
    via the logical channels opened and managed by the H323 control channel.
