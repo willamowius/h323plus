@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.21  2008/10/28 23:06:28  willamowius
+ * fixes to compile with audio disabled
+ *
  * Revision 1.20  2008/10/01 13:36:06  willamowius
  * must use a const reference
  *
@@ -1491,8 +1494,10 @@ PINDEX H323EndPoint::AddAllCapabilities(PINDEX descriptorNum,
 {
     PINDEX reply = simultaneous;
 	reply = capabilities.AddAllCapabilities(descriptorNum, simultaneous, name);
+#ifdef H323_VIDEO
 #ifdef H323_H239
 	AddAllExtendedVideoCapabilities(descriptorNum, simultaneous);
+#endif
 #endif
   return reply;
 }

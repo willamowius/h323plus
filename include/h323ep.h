@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.15  2008/11/08 16:18:42  willamowius
+ * fixes to compile with video disabled
+ *
  * Revision 1.14  2008/09/27 06:14:22  shorne
  * Change in NatStrategy to a pointer which is created and distroyed in the constructor/destructor of H323EndPoint
  *
@@ -589,6 +592,7 @@ class H323EndPoint : public PObject
       PINDEX simultaneous   ///< The member of the SimultaneousCapabilitySet to add
     );
 
+#ifdef H323_VIDEO
 #ifdef H323_H239
     /** Open Extended Video Session
 	  */
@@ -608,6 +612,7 @@ class H323EndPoint : public PObject
       PINDEX descriptorNum, ///< The member of the capabilityDescriptor to add
       PINDEX simultaneous   ///< The member of the SimultaneousCapabilitySet to add
     );
+#endif
 #endif
 
     /**Remove capabilites in table.
