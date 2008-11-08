@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2008/05/23 11:21:11  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.3  2008/04/25 00:53:20  shorne
  * Added callback to set maximum video bandwidth
  *
@@ -805,9 +808,11 @@ PBoolean H323Channel::SetInitialBandwidth()
   if (GetCodec() == NULL)
     return TRUE;
 
+#ifndef NO_H323_VIDEO
   if ((GetDirection() == H323Channel::IsTransmitter) && 
 	  (GetSessionID() == OpalMediaFormat::DefaultVideoSessionID))
 			connection.OnSetInitialBandwidth((H323VideoCodec *)codec);
+#endif
 
   return SetBandwidthUsed(codec->GetMediaFormat().GetBandwidth()/100);
 }

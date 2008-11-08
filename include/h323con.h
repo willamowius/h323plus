@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.16  2008/05/27 15:37:56  shorne
+ * Fixes for early media and addition of AnswerCallNowWithAlert
+ *
  * Revision 1.15  2008/05/23 11:19:34  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -2109,7 +2112,9 @@ class H323Connection : public PObject
       PBoolean removing           ///< Flag for adding/removing bandwidth usage
     );
 
+#ifndef NO_H323_VIDEO
 	void OnSetInitialBandwidth(H323VideoCodec * codec);
+#endif
 
     /**Get the available bandwidth in 100's of bits/sec.
       */

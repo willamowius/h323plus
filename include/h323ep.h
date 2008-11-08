@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.14  2008/09/27 06:14:22  shorne
+ * Change in NatStrategy to a pointer which is created and distroyed in the constructor/destructor of H323EndPoint
+ *
  * Revision 1.13  2008/05/27 15:40:42  shorne
  * Enable the ability to be able to only autostart Transmit or Receive Audio
  *
@@ -2125,7 +2128,9 @@ class H323EndPoint : public PObject
      */
     void SetInitialBandwidth(unsigned bandwidth) { initialBandwidth = bandwidth; }
 
+#ifndef NO_H323_VIDEO
 	virtual void OnSetInitialBandwidth(H323VideoCodec * codec) {};
+#endif
 
     /**Called when an outgoing PDU requires a feature set
      */

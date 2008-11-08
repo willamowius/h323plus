@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.24  2008/09/27 06:22:53  shorne
+ * BUG FIX: H323SignalPDU::Write to correctly handle NULL H323Connection Thx Nir Soffer, Remove buggy code in handling Fast Connect in Call Proceeding, Added checks for Fast Connect negotiation before processing Slow Connect messages
+ *
  * Revision 1.23  2008/06/22 02:28:53  shorne
  * Fixes for bad equipment that send both H.245 Address and FastStart in Setup
  *
@@ -4611,10 +4614,12 @@ unsigned H323Connection::GetBandwidthUsed() const
   return used;
 }
 
+#ifndef NO_H323_VIDEO
 void H323Connection::OnSetInitialBandwidth(H323VideoCodec * codec)
 {
 	endpoint.OnSetInitialBandwidth(codec);
 }
+#endif
 
 PBoolean H323Connection::UseBandwidth(unsigned bandwidth, PBoolean removing)
 {
