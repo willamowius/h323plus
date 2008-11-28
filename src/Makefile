@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.11  2008/07/19 01:12:29  willamowius
+# enable building og H.341 on Linux
+#
 # Revision 1.10  2008/02/13 15:45:29  willamowius
 # fix for PTLib 2.0.x: PW_LIBDIR is no longer provided
 #
@@ -230,10 +233,14 @@ endif
 ifdef H323_H460
 HEADER_FILES    += $(OH323_INCDIR)/h460/h460.h \
                    $(OH323_INCDIR)/h460/h4601.h \
-                   $(OH323_INCDIR)/h460/h4609.h
+                   $(OH323_INCDIR)/h460/h4609.h \
+                   $(OH323_INCDIR)/h460/h46018.h \
+                   $(OH323_INCDIR)/h460/h46019.h
 
 COMMON_SOURCES  += $(OH323_SRCDIR)/h460/h4601.cxx \
-                   $(OH323_SRCDIR)/h460/h4609.cxx
+                   $(OH323_SRCDIR)/h460/h4609.cxx \
+                   $(OH323_SRCDIR)/h460/h46018.cxx \
+                   $(OH323_SRCDIR)/h460/h46019.cxx
 endif 
 
 ########### H.501
