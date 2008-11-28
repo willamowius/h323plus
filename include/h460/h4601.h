@@ -36,6 +36,9 @@
  * Contributor(s): ______________________________________.
  *
 * $Log$
+* Revision 1.7  2008/09/27 06:17:30  shorne
+* Moved H.460 Factory loader to ensure correct loading of H.460 features
+*
 * Revision 1.6  2008/06/25 10:49:13  shorne
 * Change to PStringArray to bring in line with changes in ptlib
 *
@@ -1154,7 +1157,7 @@ template <class className> class H460PluginServiceDescriptor : public PDevicePlu
 
 #define H460_FEATURE(name)    \
 static H460PluginServiceDescriptor<H460_Feature##name> H460_Feature##name##_descriptor; \
-PCREATE_PLUGIN(H460_Feature##name##, H460_Feature, &H460_Feature##name##_descriptor); \
+PCREATE_PLUGIN(H460_Feature##name, H460_Feature, &H460_Feature##name##_descriptor); \
 
 
 #ifdef _MSC_VER
