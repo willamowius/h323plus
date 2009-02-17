@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/05/23 11:21:20  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.1  2007/08/06 20:51:05  shorne
  * First commit of h323plus
  *
@@ -3623,8 +3626,10 @@ H323RegisteredEndPoint * H323GatekeeperServer::CreateRegisteredEndPoint(H323Gate
 
 PString H323GatekeeperServer::CreateEndPointIdentifier()
 {
+  PStringStream id;
   PWaitAndSignal wait(mutex);
-  return psprintf("%x:%u", identifierBase, nextIdentifier++);
+  id << hex << identifierBase << ':' << nextIdentifier++;
+  return id;
 }
 
 
