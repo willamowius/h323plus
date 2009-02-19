@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2008/05/23 11:23:12  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.4  2008/04/25 01:22:47  shorne
  * Added callback to enable developers to disable features when instancing
  *
@@ -878,7 +881,7 @@ H460_FeatureStd::H460_FeatureStd(unsigned Identifier)
 
 H460_FeatureParameter & H460_FeatureStd::Add(unsigned id, const H460_FeatureContent & con)
 {
-    return AddParameter(new H460_FeatureID(id),con);
+    return AddParameter(new H460_FeatureID(id),con);	// TODO: memory leak
 }
 
 void H460_FeatureStd::Remove(unsigned id)
@@ -911,7 +914,7 @@ H460_FeatureNonStd::H460_FeatureNonStd(PString Identifier)
 	
 H460_FeatureParameter & H460_FeatureNonStd::Add(const PString id, const H460_FeatureContent & con)
 {
-	return AddParameter(new H460_FeatureID(id),con);
+	return AddParameter(new H460_FeatureID(id),con);	// TODO: memory leak
 }
 
 void H460_FeatureNonStd::Remove(const PString & id)
@@ -944,7 +947,7 @@ H460_FeatureOID::H460_FeatureOID(OpalOID Identifier)
 H460_FeatureParameter & H460_FeatureOID::Add(const PString & id, const H460_FeatureContent & con)
 {
 	PString val = GetBase() + "." + id;
-	return AddParameter(new H460_FeatureID(OpalOID(val)),con);
+	return AddParameter(new H460_FeatureID(OpalOID(val)),con);	// TODO: memory leak
 }
 
 void H460_FeatureOID::Remove(const PString & id)
