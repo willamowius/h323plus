@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.12  2008/10/28 23:06:27  willamowius
+ * fixes to compile with audio disabled
+ *
  * Revision 1.11  2008/06/26 00:01:51  shorne
  * Fix for loading H.239 Capabilities to avoid segfault
  *
@@ -2473,6 +2476,10 @@ class H323Capabilities : public PObject
     PBoolean Merge(
       const H323Capabilities & newCaps
     );
+
+	/**Retreive the capability set
+	  */
+	const H323CapabilitiesSet & GetCapabilitySet();
 
     /**Change the order of capabilities in the table to the order specified.
        Note that this does not change the unique capability numbers assigned
