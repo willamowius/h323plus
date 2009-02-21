@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.25  2008/11/08 16:18:42  willamowius
+ * fixes to compile with video disabled
+ *
  * Revision 1.24  2008/09/27 06:22:53  shorne
  * BUG FIX: H323SignalPDU::Write to correctly handle NULL H323Connection Thx Nir Soffer, Remove buggy code in handling Fast Connect in Call Proceeding, Added checks for Fast Connect negotiation before processing Slow Connect messages
  *
@@ -758,7 +761,7 @@ H323Connection::H323Connection(H323EndPoint & ep,
 #endif
 
 #ifdef H323_H224
-  startH224 = TRUE;
+  startH224 = FALSE;
 #endif
 
   lastPDUWasH245inSETUP = FALSE;
@@ -831,10 +834,6 @@ H323Connection::H323Connection(H323EndPoint & ep,
   h281handler = NULL;
 #endif
 
-#ifdef H323_FILE
-  filehandler = NULL;
-#endif
-
   endSync = NULL;
 
   remoteIsNAT = FALSE;
@@ -865,7 +864,7 @@ H323Connection::H323Connection(H323EndPoint & ep,
   features->LoadFeatureSet(H460_Feature::FeatureSignal,this);
 #endif
 
-  IsNonCallConnection = FALSE;
+  nonCallConnection = FALSE;
 }
 
 
@@ -1563,8 +1562,8 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
       return endpoint.OnConferenceInvite(FALSE,this,setupPDU);
 
     case H225_Setup_UUIE_conferenceGoal::e_callIndependentSupplementaryService:
-      IsNonCallConnection = endpoint.OnReceiveCallIndependentSupplementaryService(this,setupPDU);
-	  if (!IsNonCallConnection) return FALSE;
+      nonCallConnection = endpoint.OnReceiveCallIndependentSupplementaryService(this,setupPDU);
+	  if (!nonCallConnection) return FALSE;
 	   break;
 
     case H225_Setup_UUIE_conferenceGoal::e_capability_negotiation:
@@ -1616,7 +1615,7 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
   mediaWaitForConnect = setup.m_mediaWaitForConnect;
 
   // Get the local capabilities before fast start or tunnelled TCS is handled
-   if (!IsNonCallConnection)
+   if (!nonCallConnection)
       OnSetLocalCapabilities();
 
 #ifdef H323_H460
@@ -1639,7 +1638,7 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
         return FALSE;
     }
 
-if (!IsNonCallConnection) {
+if (!nonCallConnection) {
 
     /** Here is a spot where we should wait in case of Call Intrusion
 	for CIPL from other endpoints 
@@ -1708,7 +1707,7 @@ if (!IsNonCallConnection) {
   }
 #endif
 
-  if (IsNonCallConnection) 
+  if (nonCallConnection) 
             return TRUE;
 
   // See if remote endpoint wants to start fast
@@ -1907,7 +1906,7 @@ PBoolean H323Connection::OnReceivedAlerting(const H323SignalPDU & pdu)
 PBoolean H323Connection::OnReceivedSignalConnect(const H323SignalPDU & pdu)
 {
 
-  if (IsNonCallConnection) {
+  if (nonCallConnection) {
     connectedTime = PTime();
     connectionState = EstablishedConnection;
     return TRUE;
@@ -1982,7 +1981,7 @@ PBoolean H323Connection::OnReceivedSignalConnect(const H323SignalPDU & pdu)
 
   PTRACE(4, "H225\tFast Start " << (h245Tunneling ? "TRUE" : "FALSE")
 									<< " fastStartState " << fastStartState);
-
+  
   // If we have a H.245 channel available, bring it up. We either have media
   // and this is just so user indications work, or we don't have media and
   // desperately need it!
@@ -3909,7 +3908,12 @@ PBoolean H323Connection::OnReceivedCapabilitySet(const H323Capabilities & remote
     }
   }
 
-  return TRUE;
+  return OnCommonCapabilitySet(remoteCapabilities);
+}
+
+PBoolean H323Connection::OnCommonCapabilitySet(H323Capabilities & caps) const
+{
+	return TRUE;
 }
 
 
@@ -4021,7 +4025,7 @@ void H323Connection::InternalEstablishedConnectionCheck()
   OnEstablished();
 }
 
-#if defined(H323_AUDIO_CODECS) || defined(H323_VIDEO) || defined(H323_T38)
+#if defined(H323_AUDIO_CODECS) || defined(H323_VIDEO) || defined(H323_T38) || defined(H323_FILE)
 
 static void StartFastStartChannel(H323LogicalChannelList & fastStartChannels,
                                   unsigned sessionID, H323Channel::Directions direction)
@@ -4080,7 +4084,7 @@ void H323Connection::OnSelectLogicalChannels()
 #endif
 #endif // H323_VIDEO
 
-#ifdef H323_T38
+#if defined(H323_T38) || defined(H323_FILE)
       SelectFastStartChannels(RTP_Session::DefaultFaxSessionID, 
 		                      endpoint.CanAutoStartTransmitFax(),
                               endpoint.CanAutoStartReceiveFax());
@@ -5465,7 +5469,7 @@ OpalH281Handler * H323Connection::CreateH281ProtocolHandler(OpalH224Handler & h2
 #endif
 
 #ifdef H323_FILE
-PBoolean H323Connection::OpenFileTransferSession(H323ChannelNumber & num)
+PBoolean H323Connection::OpenFileTransferSession(const H323FileTransferList & list, H323ChannelNumber & num)
 {
   PBoolean filetransferOpen = FALSE;
 
@@ -5475,7 +5479,8 @@ PBoolean H323Connection::OpenFileTransferSession(H323ChannelNumber & num)
 		(localCapability.GetSubType() == H245_DataApplicationCapability_application::e_genericDataCapability)) {
       H323FileTransferCapability * remoteCapability = (H323FileTransferCapability *)remoteCapabilities.FindCapability(localCapability);
       if (remoteCapability != NULL) {
-        PTRACE(3, "H323\tFile Transfer Available " << *remoteCapability);      
+        PTRACE(3, "H323\tFile Transfer Available " << *remoteCapability);   
+		remoteCapability->SetFileTransferList(list);
 		if (logicalChannels->Open(*remoteCapability, OpalMediaFormat::DefaultDataSessionID,num)) {
 		   filetransferOpen = TRUE;
            break;
@@ -5489,21 +5494,36 @@ PBoolean H323Connection::OpenFileTransferSession(H323ChannelNumber & num)
   return filetransferOpen;
 }
 
+PBoolean H323Connection::CloseFileTransferSession(unsigned num)
+{
+    CloseLogicalChannel(num,false);
+	return TRUE;
+}
+
 H323FileTransferHandler * H323Connection::CreateFileTransferHandler(unsigned sessionID,	
 																	H323Channel::Directions dir,
 						                                            H323FileTransferList & filelist)
 {
-  if ((filehandler == NULL) && (OpenFileTransferChannel(dir, filelist)))
-     return new H323FileTransferHandler(*this, sessionID, dir, filelist);
-  else
-     return NULL;
+    
+  if (!filelist.IsMaster() && !OpenFileTransferChannel(dir == H323Channel::IsTransmitter, filelist)) 
+	    return NULL;
+
+  return OnCreateFileTransferHandler(sessionID,dir,filelist);;
 }
 
-PBoolean H323Connection::OpenFileTransferChannel( H323Channel::Directions dir,
+H323FileTransferHandler * H323Connection::OnCreateFileTransferHandler(unsigned sessionID,	
+																	H323Channel::Directions dir,
+						                                            H323FileTransferList & filelist)
+{
+    return new H323FileTransferHandler(*this, sessionID, dir, filelist);
+}
+
+
+PBoolean H323Connection::OpenFileTransferChannel( PBoolean isEncoder,
 						                      H323FileTransferList & filelist
 											 ) 
 {
-   return endpoint.OpenFileTransferChannel(*this,dir,filelist);
+   return endpoint.OpenFileTransferChannel(*this,isEncoder,filelist);
 }
 
 
@@ -5940,7 +5960,12 @@ PBoolean H323Connection::H245QoSEnabled() const
 
 void H323Connection::SetNonCallConnection()
 {  
-	IsNonCallConnection = TRUE; 
+	nonCallConnection = TRUE; 
+}
+
+PBoolean H323Connection::IsNonCallConnection() const
+{
+	return nonCallConnection;
 }
 
 #ifdef H323_H460
