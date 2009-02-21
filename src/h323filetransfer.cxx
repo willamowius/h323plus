@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2008/05/23 11:22:00  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.3  2008/04/25 01:08:31  shorne
  * Correct FileTransfer Capability OID
  *
@@ -95,12 +98,18 @@ static int GetParameterBlockSize(int size)
 	return 16;
 }
 
-H323FileTransferCapability::H323FileTransferCapability(unsigned maxBitRate)
-: H323DataCapability(maxBitRate)
+H323FileTransferCapability::H323FileTransferCapability()
+: H323DataCapability(132000), m_blockOctets(4096)
 {
-    m_blockSize = 16;      // Indicating blocks are 4096 octets
-	m_blockOctets = 4096;  // blockOctets
-	m_transferMode = 1;    // Transfer mode is RTP encaptulated
+    m_blockSize = SetParameterBlockSize(m_blockOctets);  // parameter block size
+	m_transferMode = 1;									 // Transfer mode is RTP encaptulated
+}
+
+H323FileTransferCapability::H323FileTransferCapability(unsigned maxBitRate, unsigned maxBlockSize)
+: H323DataCapability(maxBitRate), m_blockOctets(maxBlockSize)
+{
+    m_blockSize = SetParameterBlockSize(m_blockOctets);  // parameter block size
+	m_transferMode = 1;									 // Transfer mode is RTP encaptulated
 }
 
 PBoolean H323FileTransferCapability::OnReceivedPDU(const H245_DataApplicationCapability & pdu)
@@ -129,12 +138,16 @@ PObject::Comparison H323FileTransferCapability::Compare(const PObject & obj) con
 
   const H323FileTransferCapability & other = (const H323FileTransferCapability &)obj;
 
-  // We only support block sizes of 8196 octets in RTP encaptulation mode
-  if ((m_blockSize == other.GetBlockSize()) &&
+  if (//(m_blockSize == other.GetBlockSize()) && 'We don't need to check the Max Block size
       (m_transferMode == other.GetTransferMode()))
                 return EqualTo;
 
   return GreaterThan;
+}
+
+PObject * H323FileTransferCapability::Clone() const
+{
+   return new H323FileTransferCapability(*this);
 }
 
 PBoolean H323FileTransferCapability::OnReceivedPDU(const H245_GenericCapability & pdu)
@@ -144,7 +157,7 @@ PBoolean H323FileTransferCapability::OnReceivedPDU(const H245_GenericCapability 
 
    if (capId.GetTag() != H245_CapabilityIdentifier::e_standard)
 	   return FALSE;
-      
+    
    const PASN_ObjectId & id = capId;
    if (id.AsString() != FileTransferOID)
 	   return FALSE;
@@ -156,7 +169,7 @@ PBoolean H323FileTransferCapability::OnReceivedPDU(const H245_GenericCapability 
 
    if (!pdu.HasOptionalField(H245_GenericCapability::e_collapsing)) 
 		return FALSE;
- 
+
    const H245_ArrayOf_GenericParameter & params = pdu.m_collapsing;
    for (PINDEX j=0; j<params.GetSize(); j++) {
 	 const H245_GenericParameter & content = params[j];
@@ -175,6 +188,11 @@ PBoolean H323FileTransferCapability::OnReceivedPDU(const H245_GenericCapability 
 	}
 
   return TRUE;
+}
+
+PBoolean H323FileTransferCapability::OnSendingPDU(H245_DataMode & /*pdu*/) const
+{
+   return false;
 }
 
 PBoolean H323FileTransferCapability::OnSendingPDU(H245_GenericCapability & pdu) const
@@ -203,11 +221,18 @@ PBoolean H323FileTransferCapability::OnSendingPDU(H245_GenericCapability & pdu) 
    modeparam->m_parameterValue.SetTag(H245_ParameterValue::e_booleanArray);
    (PASN_Integer &)modeparam->m_parameterValue = m_transferMode;  
    
-   pdu.HasOptionalField(H245_GenericCapability::e_collapsing);
+   pdu.IncludeOptionalField(H245_GenericCapability::e_collapsing);
    pdu.m_collapsing.Append(blockparam);
    pdu.m_collapsing.Append(modeparam);
 
    return TRUE;
+}
+
+void H323FileTransferCapability::SetFileTransferList(const H323FileTransferList & list)
+{
+	m_filelist.clear();
+	m_filelist = list;
+	m_filelist.SetMaster(true);
 }
 
 unsigned H323FileTransferCapability::GetSubType() const
@@ -228,7 +253,7 @@ H323Channel * H323FileTransferCapability::CreateChannel(H323Connection & connect
     return NULL;
   } 
   
-  return new H323FileTransferChannel(connection, *this, direction, (RTP_UDP &)*session, sessionID);
+  return new H323FileTransferChannel(connection, *this, direction, (RTP_UDP &)*session, sessionID, m_filelist);
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -237,11 +262,13 @@ H323FileTransferChannel::H323FileTransferChannel(H323Connection & connection,
                                  const H323Capability & capability,
                                  H323Channel::Directions theDirection,
                                  RTP_UDP & rtp,
-                                 unsigned theSessionID
+                                 unsigned theSessionID,
+                                 const H323FileTransferList & list
                                  )
  : H323Channel(connection, capability),
   rtpSession(rtp),
-  rtpCallbacks(*(H323_RTP_Session *)rtp.GetUserData())
+  rtpCallbacks(*(H323_RTP_Session *)rtp.GetUserData()),
+  filelist(list)
 {
 
   direction = theDirection;
@@ -249,19 +276,11 @@ H323FileTransferChannel::H323FileTransferChannel(H323Connection & connection,
 	
   rtpPayloadType = (RTP_DataFrame::PayloadTypes)101;
 
-  // Call back to load the file list
-  if (direction == H323Channel::IsTransmitter) {
-    fileHandler = connection.CreateFileTransferHandler(sessionID,direction,filelist);
-	if (fileHandler != NULL) {
-	  if (fileHandler->GetBlockSize() == 0)
-         fileHandler->SetBlockSize((H323FileTransferCapability::blockSizes)
-		                               ((const H323FileTransferCapability &)capability).GetOctetSize());
-	  if (fileHandler->GetBlockRate() == 0)
-         fileHandler->SetMaxBlockRate((H323FileTransferCapability::blockSizes)
-		                               ((const H323FileTransferCapability &)capability).GetBlockRate());
-	}
-  } else
-      fileHandler = NULL;
+  // We create the fileHandler here if we are transmitting (ie. Opening a file Transfer request)
+  if (theDirection == H323Channel::IsTransmitter)
+     fileHandler = connection.CreateFileTransferHandler(sessionID, theDirection,filelist);
+  else
+	 fileHandler = NULL;
 }
 
 
@@ -296,25 +315,21 @@ PBoolean H323FileTransferChannel::Open()
 
 PBoolean H323FileTransferChannel::Start()
 {
+  if (fileHandler == NULL)
+     return FALSE;
+
   if (!Open())
     return FALSE;
 	
-  if(fileHandler == NULL) {
-	 fileHandler = connection.CreateFileTransferHandler(sessionID,direction,filelist);
-	if (fileHandler != NULL) {
-     fileHandler->SetPayloadType(rtpPayloadType);
-	  if (fileHandler->GetBlockSize() == 0)
-         fileHandler->SetBlockSize((H323FileTransferCapability::blockSizes)
-		                             ((H323FileTransferCapability *)capability)->GetOctetSize());
-	  if (fileHandler->GetBlockRate() == 0)
-         fileHandler->SetMaxBlockRate((H323FileTransferCapability::blockSizes)
-		                               ((H323FileTransferCapability *)capability)->GetBlockRate());
-	}
-  }
+   fileHandler->SetPayloadType(rtpPayloadType);
 
-  if (fileHandler == NULL)
-     return FALSE;
- 
+  if (fileHandler->GetBlockSize() == 0)
+	  fileHandler->SetBlockSize((H323FileTransferCapability::blockSizes)
+									 ((H323FileTransferCapability *)capability)->GetOctetSize());
+   
+  if (fileHandler->GetBlockRate() == 0)
+	   fileHandler->SetMaxBlockRate(((H323FileTransferCapability *)capability)->GetBlockRate());
+
   return fileHandler->Start(direction);
 }
 
@@ -331,8 +346,8 @@ PBoolean H323FileTransferChannel::OnSendingPDU(H245_OpenLogicalChannel & open) c
 {
   open.m_forwardLogicalChannelNumber = (unsigned)number;
 
-  if (direction == H323Channel::IsTransmitter) 
-                SetFileList(open,filelist);
+  if (direction == H323Channel::IsTransmitter)
+      SetFileList(open,filelist);
 		
   if (open.HasOptionalField(H245_OpenLogicalChannel::e_reverseLogicalChannelParameters)) {
 	  
@@ -382,7 +397,8 @@ PBoolean H323FileTransferChannel::OnReceivedPDU(const H245_OpenLogicalChannel & 
 {
   if (direction == H323Channel::IsReceiver) {
     number = H323ChannelNumber(open.m_forwardLogicalChannelNumber, TRUE);
-	GetFileList(open);
+	if (!GetFileList(open))
+		return FALSE;
   }
 	
   PBoolean reverse = open.HasOptionalField(H245_OpenLogicalChannel::e_reverseLogicalChannelParameters);
@@ -447,7 +463,7 @@ PBoolean H323FileTransferChannel::OnSendingPDU(H245_H2250LogicalChannelParameter
     param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel);
     mediaAddress.SetPDU(param.m_mediaChannel);
 	
-  }	else{
+  }	else {
 
   }
 	
@@ -643,8 +659,11 @@ PBoolean H323FileTransferChannel::GetFileList(const H245_OpenLogicalChannel & op
   for (PINDEX i=0; i<cape.GetSize(); i++) {
       RetreiveFileInfo(cape[i], filelist);
   }
+
+  // We create the fileHandler once we have received the filelist
+  fileHandler = connection.CreateFileTransferHandler(sessionID, H323Channel::IsReceiver, filelist);
   
-  return TRUE;	
+  return (fileHandler != NULL);	
 }
 
 static H245_GenericParameter * BuildGenericParameter(unsigned id,unsigned type, const PString & value)
@@ -676,6 +695,7 @@ static H245_GenericParameter * BuildGenericParameter(unsigned id,unsigned type, 
 
 void H323FileTransferChannel::SetFileList(H245_OpenLogicalChannel & open, H323FileTransferList flist) const
 {
+  
   if (flist.GetSize() == 0)
 	  return;
 
@@ -705,11 +725,8 @@ void H323FileTransferChannel::SetFileList(H245_OpenLogicalChannel & open, H323Fi
 			if (flist.GetDirection() == H323Channel::IsTransmitter)
               params.Append(BuildGenericParameter(3,H245_ParameterValue::e_unsigned32Max,r->m_Filesize));
 
-		params.SetSize(params.GetSize()+1);
      cape.Append(gcap);
   }
-  cape.SetSize(cape.GetSize()+1);
- 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -717,7 +734,8 @@ void H323FileTransferChannel::SetFileList(H245_OpenLogicalChannel & open, H323Fi
 H323FileTransferList::H323FileTransferList()
 {
 	saveDirectory = PProcess::Current().GetFile().GetDirectory();
-	direction = H323Channel::IsReceiver;
+	direction = H323Channel::IsBidirectional;
+	master = false;
 }
 
 void H323FileTransferList::Add(const PString & filename, const PDirectory & directory, long filesize)
@@ -759,11 +777,21 @@ H323File * H323FileTransferList::GetAt(PINDEX i)
 {
 	PINDEX c=0;
     for (H323FileTransferList::iterator r = begin(); r != end(); ++r) {
-		c++;
 		if (c == i)
 			return &(*r);
+		c++;
 	}
 	return NULL;
+}
+
+void H323FileTransferList::SetMaster(PBoolean state)
+{
+	master = state;
+}
+
+PBoolean H323FileTransferList::IsMaster()
+{
+	return master;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -775,18 +803,80 @@ static PString errString[] = {
 	  "Disk Full/Allocation exceeded.",
       "Illegal TFTP operation.",
 	  "Unknown transfer ID.",
-	  "File Already Exist.s",
-	  "No such user."
+	  "File Already Exists.",
+	  "No such user.",
+	  "Incomplete Block."
 };
+
+static PString tranState[] = {
+	  "Probing",         
+	  "Connected",         
+	  "Waiting",         
+	  "Sending",         
+	  "Receiving",       
+	  "Completed",      
+	  "Error"           
+  };
+
+static PString blkState[] = {
+	  "ok",             
+	  "partial",       
+	  "complete",       
+	  "Incomplete",     
+	  "Timeout",        
+	  "Ready"           
+  };
+
+#if PTRACING
+
+PString DataPacketAnalysis(PBoolean isEncoder, const H323FilePacket & packet, PBoolean final)
+{
+	PString direct = (isEncoder ? "<- " : "-> " );
+
+	if (!final) 
+		return direct + "blk partial size : " + PString(packet.GetSize()) + " bytes";
+
+	PString pload;
+	int errcode = 0;
+	PString errstr;
+	switch (packet.GetPacketType()) {
+		case H323FilePacket::e_PROB:
+			pload = direct + "prb size : " + PString(packet.GetSize()) + " bytes";
+			break;
+		case H323FilePacket::e_RRQ:
+			pload = direct + "rrq file " + packet.GetFileName() + " : " + PString(packet.GetFileSize()) + " bytes";
+			break;
+		case H323FilePacket::e_WRQ:
+		    pload = direct + "wrq file " + packet.GetFileName() + " : " + PString(packet.GetFileSize()) + " bytes";
+			break;
+		case H323FilePacket::e_DATA:
+			pload = direct + "blk " + PString(packet.GetBlockNo()) + " : " + PString(packet.GetSize()) + " bytes";
+			break;
+		case H323FilePacket::e_ACK:
+			pload = direct + "ack " + PString(packet.GetACKBlockNo());
+			if (packet.GetFileSize() > 0)
+			    pload = pload + " : " + PString(packet.GetFileSize()) + " bytes";
+			break;
+		case H323FilePacket::e_ERROR:
+			packet.GetErrorInformation(errcode,errstr);
+			pload = direct + "err " + PString(errcode) + ": " + errstr;
+			break;
+		default:
+            break;
+	}
+
+	return pload;
+}
+#endif
 
 H323FileTransferHandler::H323FileTransferHandler(H323Connection & connection, 
 												 unsigned sessionID, 
 												 H323Channel::Directions dir,
 												 H323FileTransferList & _filelist
 												 )
- :filelist(_filelist)
+ :filelist(_filelist), master(_filelist.IsMaster())
 {
-  RTP_Session *session;
+
   H245_TransportAddress addr;
   connection.GetControlChannel().SetUpTransportPDU(addr, H323Transport::UseLocalTSAP);
   session = connection.UseSession(sessionID,addr,H323Channel::IsBidirectional);
@@ -801,32 +891,39 @@ H323FileTransferHandler::H323FileTransferHandler(H323Connection & connection,
   curFile = NULL;
   timestamp = 0;
   lastBlockNo = 0;
-  curFileSize = 0;                     
+  lastBlockSize = 0;
+  curFileName = PString();
+  curFileSize = 0;
+  curBlockSize = 0;
   curProgSize = 0;	
   rtpPayloadType = (RTP_DataFrame::PayloadTypes)101;
   responseTimeOut = 1500;
 
-  currentState = e_probing;
-  IsStarter = FALSE;
+  transmitRunning = FALSE;
+  receiveRunning = FALSE;
 
-  shutdown = FALSE;
 }
 
 H323FileTransferHandler::~H323FileTransferHandler()
 {
-  shutdown = TRUE;
+  // order is important
+  session->Close(true);
+  if (receiveRunning)
+       exitReceive.Signal();
+
+  if (transmitRunning)
+       exitTransmit.Signal();
 }
 
 PBoolean H323FileTransferHandler::Start(H323Channel::Directions direction)
 {
-  IsStarter = (direction == H323Channel::IsTransmitter);
+	  // reset the current state 
+      currentState = e_probing;
 
-  transmitFrame.SetPayloadType(rtpPayloadType);
-
-  ReceiveThread = PThread::Create(PCREATE_NOTIFIER(Receive), 0, PThread::AutoDeleteThread);
-  TransmitThread = PThread::Create(PCREATE_NOTIFIER(Transmit), 0, PThread::AutoDeleteThread);
-
-  StartTime = new PTime();
+	  StartTime = new PTime();
+	  transmitFrame.SetPayloadType(rtpPayloadType);
+      TransmitThread = PThread::Create(PCREATE_NOTIFIER(Transmit), 0, PThread::AutoDeleteThread); 
+      ReceiveThread = PThread::Create(PCREATE_NOTIFIER(Receive), 0, PThread::AutoDeleteThread);
 
 
   return TRUE;
@@ -839,9 +936,16 @@ PBoolean H323FileTransferHandler::Stop(H323Channel::Directions direction)
   delete StartTime;
   StartTime = NULL;
   
+  
   // CloseDown the Transmit/Receive Threads
-  shutdown = TRUE;
   nextFrame.Signal();
+
+  session->Close(true);
+  if (direction == H323Channel::IsReceiver && receiveRunning)
+       exitReceive.Signal();
+
+  if (direction == H323Channel::IsTransmitter && transmitRunning)
+       exitTransmit.Signal();
 
   return TRUE;
 }
@@ -859,13 +963,31 @@ void H323FileTransferHandler::SetBlockSize(H323FileTransferCapability::blockSize
 void H323FileTransferHandler::SetMaxBlockRate(unsigned rate)
 {
 	blockRate = rate;
-	msBetweenBlocks = (int)(1.000/((double)rate))*1000;
+	msBetweenBlocks = (int)((1.000/((double)rate))*1000);
 }
 
 void H323FileTransferHandler::ChangeState(transferState newState)
 {
+   PWaitAndSignal m(stateMutex);
+
+   if (currentState == newState)
+	   return;
+
+   PTRACE(4,"FT\tState Change to " << tranState[newState]);
+
    currentState = newState;
    OnStateChange(currentState);
+}
+
+void H323FileTransferHandler::SetBlockState(receiveStates state) 
+{
+   PWaitAndSignal m(stateMutex);
+
+	if (blockState == state)
+		return;
+
+	PTRACE(6,"FT\t	blk: " << blkState[state]);
+   blockState = state;
 }
 
 PBoolean H323FileTransferHandler::TransmitFrame(H323FilePacket & buffer, PBoolean final)
@@ -886,7 +1008,7 @@ PBoolean H323FileTransferHandler::TransmitFrame(H323FilePacket & buffer, PBoolea
 PBoolean H323FileTransferHandler::ReceiveFrame(H323FilePacket & buffer, PBoolean & final)
 {	
 
-   RTP_DataFrame packet = RTP_DataFrame(1024);
+   RTP_DataFrame packet = RTP_DataFrame(1440);
 
    if(!session->ReadBufferedData(timestamp, packet)) 
       return FALSE;
@@ -894,29 +1016,26 @@ PBoolean H323FileTransferHandler::ReceiveFrame(H323FilePacket & buffer, PBoolean
     timestamp = packet.GetTimestamp();
    
    final = packet.GetMarker();
-   buffer.SetSize(0);
-   buffer.Attach(packet.GetPayloadPtr(), packet.GetPayloadSize());
+   buffer.SetSize(packet.GetPayloadSize());
+   memmove(buffer.GetPointer(),packet.GetPayloadPtr(), packet.GetPayloadSize());
   return TRUE;
 }
 
 PBoolean Segment(PBYTEArray & lastBlock, const int size, int & segment, PBYTEArray & thearray)
 {
-	int newsize;
-	if (lastBlock.GetSize() < (segment + size)) {
-       newsize = lastBlock.GetSize() - segment;
-	} else {
-	  if (segment == 0)
-		newsize = 4 + size;
-	  else
+	int bsize = lastBlock.GetSize();
+	int newsize=0;
+	if (bsize < (segment + size)) 
+       newsize = bsize - segment;
+	else 
 		newsize = size;
-	}
-
+	
 	BYTE * seg = lastBlock.GetPointer();
     thearray.SetSize(newsize);
     memcpy(thearray.GetPointer(),seg+segment, newsize);
-	segment =+ newsize;
+	segment = segment + newsize;
 
-	if (segment == lastBlock.GetSize()) {
+	if (segment == bsize) {
 		segment = 0;
 		return TRUE;
 	}
@@ -926,45 +1045,48 @@ PBoolean Segment(PBYTEArray & lastBlock, const int size, int & segment, PBYTEArr
 void H323FileTransferHandler::Transmit(PThread &, INT)
 {
 	PBoolean success = TRUE;
+	PBoolean datapacket = FALSE;
 	H323File * f = NULL;
 	PFilePath p;
 
-	PBoolean read = FALSE;
+	PBoolean read = (filelist.GetDirection() == H323Channel::IsTransmitter);
 	PBoolean waitforResponse = FALSE;
+	PBoolean lastFrame = FALSE;
 	int fileid = 0;
-	PBYTEArray readBlock(blockSize);
 	H323FilePacket lastBlock;
 	PBYTEArray lastSegment;
 	int offset = 0;
+	int sentBlock = 0;
 
-	while (success && !shutdown) {
+	transmitRunning = TRUE;
+
+	while (success && !exitTransmit.Wait(0)) {
 	    
 		H323FilePacket packet;
 		PBoolean final = FALSE;
 		switch (currentState) {
 		   case e_probing:
-			    probMutex.Wait(100);
+			    probMutex.Wait(50);
+				if (currentState != e_probing) 
+					continue;
+
 			    packet.BuildPROB();
 				final = TRUE;
 			    break;
 		   case e_connect:
-			    packet.BuildACK(0);
+			    packet.BuildACK(99);
 				final = TRUE;
-                ChangeState(e_waiting);
-			    break;
+                ChangeState(e_waiting);		
+   			    break;
 		   case e_waiting:
-			    // if we have something to send
-			     if (IsStarter) {
+			    // if we have something to send/Receive
+			     if (master) {
 					 if (waitforResponse) {
-                        blockState = recTimeOut;
-			            nextFrame.Wait(responseTimeOut);
 						if (blockState != recTimeOut) {
 							waitforResponse = FALSE;  
-							if (read) 
-								ChangeState(e_receiving);
-							else
-                                ChangeState(e_sending);
-						    break;   // Move to next state!
+							if (read)
+								ChangeState(e_sending);
+						    break;
 						}
 					 } else {
 						fileid++;
@@ -973,17 +1095,18 @@ void H323FileTransferHandler::Transmit(PThread &, INT)
 						     ChangeState(e_completed);
 						     break;
 						}
-						delete f;
-						f = filelist.GetAt(fileid);
+						//delete f;
+						f = filelist.GetAt(fileid-1);
 						if (f == NULL) {
-							OnFileOpenError("",H323FileIOChannel::e_NotFound);
+							ioerr = H323FileIOChannel::e_NotFound;
+							OnFileOpenError("",ioerr);
 							ChangeState(e_error);
 							break;
 						}
 
 						p = f->m_Directory + PDIR_SEPARATOR + f->m_Filename;
+						curFileName = f->m_Filename;
 					 
-						read = (filelist.GetDirection() == H323Channel::IsTransmitter);
 						if (read) {
 							curFileSize = f->m_Filesize;
 							delete curFile;
@@ -994,9 +1117,7 @@ void H323FileTransferHandler::Transmit(PThread &, INT)
 								break;
 							}
 							OnFileStart(p, curFileSize,read);  // Notify to start send
-						} else {
-						    OnFileStart(f->m_Filename, f->m_Filesize,read);  // Notify to start receive
-						}
+						}  
 					 }   
 				     if (!read) {
 					   packet.BuildRequest(H323FilePacket::e_RRQ ,f->m_Filename, f->m_Filesize, blockSize);
@@ -1007,53 +1128,114 @@ void H323FileTransferHandler::Transmit(PThread &, INT)
 					   final = TRUE;
 					   waitforResponse = TRUE;
 				     } 
-			    }
+				 } else {
+					 if (blockState == recComplete) {  // We are waiting to shutdown
+						if (shutdownTimer.GetResetTime() == 0) 
+							shutdownTimer.SetInterval(responseTimeOut);
+						else {
+						  if (shutdownTimer == 0)   // We have waited long enough without response
+                            ChangeState(e_completed);   
+						  else
+						    continue;
+						}
+					 } else
+						 continue;
+				 }
 			    break;
 		   case e_sending:
-			   if (blockState != recPartial) {
-                 blockState = recTimeOut;
-			     nextFrame.Wait(responseTimeOut);
+			   // Signal we are ready to send file
+			   if (blockState == recReady) {
+ 			       packet.BuildACK(0,curFileSize);
+				   final = TRUE;
+				   SetBlockState(recOK);
+				   break;
+			   } 
+		  
+			    if (blockState != recPartial) {
 					if (blockState == recOK) {
-						sendwait.Delay(msBetweenBlocks);
+						if (lastFrame) {  
+							// We have successfully sent the last frame of data.
+							// switch back to waiting to queue the next file
+						   OnFileComplete(curFileName);
+						   delete curFile;
+						   curFile = NULL;
+						   curFileName = PString();
+						   waitforResponse = FALSE;
+						   lastFrame = FALSE;
+						   lastBlockSize = 0;
+                           lastBlockNo = 0;
+						   SetBlockState(recComplete);
+						   ChangeState(e_waiting);
+						   continue;
+						}
 						offset = 0;
 						lastBlockNo++;
-                        if (lastBlockNo > 99) lastBlockNo = 0;
-						readBlock.SetSize(blockSize);
-						int readsize = readBlock.GetSize();
-						curFile->Read(readBlock.GetPointer(),readsize);
-						lastBlock.BuildData(lastBlockNo,readBlock);
+                        if (lastBlockNo > 99) lastBlockNo = 1;
+						 lastBlock.BuildData(lastBlockNo,blockSize);
+						 int size = blockSize;
+						 curFile->Read(lastBlock.GetDataPtr(),size);
+						 // Wait for Bandwidth limits
+						 sendwait.Delay(msBetweenBlocks);
+						 if (size < (int)blockSize) {
+							 lastBlock.SetSize(4+size);
+							 lastFrame = TRUE;
+						 }
+						 lastBlockSize = lastBlock.GetDataSize();
+ 		               PTRACE(5,"FT\t" << DataPacketAnalysis(true,lastBlock,true));
+					} else if (blockState != recComplete) {
+                        OnFileError(curFileName,lastBlockNo, TRUE);
 					}
 			   }
                 // Segment and mark as recPartial
+			   datapacket = true;
 			   if (blockSize > H323FileTransferCapability::e_1428)
-			      final = Segment(readBlock, blockSize, offset, packet);
-			    else {
-			      packet.Attach(readBlock.GetPointer(),readBlock.GetSize());
+			      final = Segment(lastBlock, H323FileTransferCapability::e_1428, offset, packet);
+			   else {
+			      packet.Attach(lastBlock.GetPointer(),lastBlock.GetSize());
 				  final = TRUE;
-			    }
+			   }
 
 				if (final) {
-                  blockState = recComplete;
-				} else
-				  blockState = recPartial;
+                  SetBlockState(recComplete);
+				  waitforResponse = TRUE;
+				} else {
+				  SetBlockState(recPartial);
+				  waitforResponse = FALSE;
+				}
 				break;
 		   case e_receiving:
-                blockState = recTimeOut;
-			    nextFrame.Wait(responseTimeOut);
-				if ((blockState == recOK) || (blockState == recComplete)) {
+			   // Signal we are ready to receive file.
+			   if (blockState == recReady) {
+ 			       packet.BuildACK(0);
+				   final = TRUE;
+                   SetBlockState(recOK);
+				   break;
+			   } else if (sentBlock == lastBlockNo) {
+				   nextFrame.Wait(responseTimeOut);
+			   }
+
+			   if (curFileSize == curProgSize)
+                    SetBlockState(recComplete);
+
+			   if ((blockState == recOK) || (blockState == recComplete)) {
 				    packet.BuildACK(lastBlockNo);
-					if (blockState != recComplete) {
-				      lastBlockNo++;
-                      if (lastBlockNo > 99) lastBlockNo = 0;
-					} else
-                      lastBlockNo = 0;  // Indicating a new file
-				} else if  (blockState == recIncomplete) {
-                    OnFileError(lastBlockNo, FALSE);
+				    if (lastBlockNo == 99) lastBlockNo = 0;
+					sentBlock = lastBlockNo;
+					final = TRUE;
+				     if (blockState == recComplete) { // Switch to wait for next instruction	
+ 							lastBlockNo = 0;
+							curProgSize = 0;
+							curFile->Close();
+						    ChangeState(e_waiting);
+							waitforResponse = FALSE;
+					 } 
+			   } else if  (blockState == recIncomplete) {
+                    OnFileError(curFileName,lastBlockNo, TRUE);
                     packet.BuildError(0,"");   // Indicate to remote to resend the last block
-				} else {
+			   } else {
 					// Do nothing
 					continue;
-				}
+			   }
 
 			    break;
 		   case e_error:
@@ -1063,14 +1245,37 @@ void H323FileTransferHandler::Transmit(PThread &, INT)
 			    break;
 		   case e_completed:
 		   default:
-			    shutdown = TRUE;
+			    success = false;
 			    break;
 		}
-          
-		success = TransmitFrame(packet,final);
+
+		if (success && packet.GetSize() > 0) {
+		   success = TransmitFrame(packet,final);
+
+		   if (!datapacket) {
+#if PTRACING	   
+		      PTRACE(5,"FT\t" << DataPacketAnalysis(true,packet,final));	   
+#endif 
+		      packet.SetSize(0);
+		   }
+		    datapacket = false;
+			if (waitforResponse) {
+			  SetBlockState(recTimeOut);
+			  nextFrame.Wait(responseTimeOut);
+			}
+		}
 	}
 
-	delete curFile;
+	session->Close(false);
+	exitTransmit.Acknowledge();
+	transmitRunning = FALSE;
+
+	PTRACE(6,"FILE\tClosing Transmit Thread");
+
+	// close down the channel which will 
+	// release the thread to close automatically
+	if (receiveRunning)
+		session->Close(true);
 
 }
 
@@ -1082,39 +1287,50 @@ void H323FileTransferHandler::Receive(PThread &, INT)
 	packet.SetSize(0);
     PFilePath p;
 
-	while (success && !shutdown) {
+	receiveRunning = TRUE;
+	while (success && !exitReceive.Wait(0)) {
 
 	   PBoolean final = FALSE;
 	   H323FilePacket buffer;
        success = ReceiveFrame(buffer, final);
 
-	   if (!success)
+	   if (!success || buffer.GetSize() == 0)
 		   continue;
 
 	   if (currentState == e_receiving) {
 		     packet.Concatenate(buffer);
-		      if (!final) 
+			 if (!final) 
 		        continue;
+			 else {
+			    buffer.SetSize(0);
+			}
 	   } else {
 		   packet = buffer;
 	   }
 
-	   int ptype = packet.GetPacketType();
+	   if (packet.GetSize() == 0)
+		   continue;
 
+#if PTRACING
+	   PTRACE(5,"FT\t" << DataPacketAnalysis(false,packet,final));
+#endif
+
+	   int ptype = packet.GetPacketType();
 	   if (ptype == H323FilePacket::e_ERROR) {
 		   int errCode;
 		   PString errString;
 		   packet.GetErrorInformation(errCode,errString);
 		   if (errCode > 0) {
 			   OnError(errString);
-			   currentState = e_error;
+			   ChangeState(e_completed);
+			   nextFrame.Signal();
 		   }
 	   }
 
 		switch (currentState) {
 		   case e_probing:
-			  if (ptype == H323FilePacket::e_ACK)
-                   ChangeState(e_connect);
+              ChangeState(e_connect);
+			  probMutex.Signal();
 			 break;
 		   case e_connect:
 			   // Do nothing
@@ -1122,6 +1338,9 @@ void H323FileTransferHandler::Receive(PThread &, INT)
 		   case e_waiting:
 			   if (ptype == H323FilePacket::e_WRQ) {
 				   p = filelist.GetSaveDirectory() + PDIR_SEPARATOR + packet.GetFileName();
+				   curFileName = packet.GetFileName();
+				   curFileSize = packet.GetFileSize();
+				   curBlockSize = packet.GetBlockSize();
 				   delete curFile;
 				   curFile = new H323FileIOChannel(p,FALSE);
 				   if (curFile->IsError(ioerr)) {
@@ -1129,9 +1348,10 @@ void H323FileTransferHandler::Receive(PThread &, INT)
 						ChangeState(e_error);
 						break;
 				   }
-				   packet.SetSize(0);
+				   SetBlockState(recReady);
 				   ChangeState(e_receiving);
 				   OnFileStart(p, curFileSize,FALSE);  // Notify to start receive
+				   shutdownTimer.SetInterval(0); 
 			   } else if (ptype == H323FilePacket::e_RRQ) {
 				   p = filelist.GetSaveDirectory() + PDIR_SEPARATOR + packet.GetFileName();
 				   delete curFile;
@@ -1141,63 +1361,108 @@ void H323FileTransferHandler::Receive(PThread &, INT)
 						ChangeState(e_error);
 						break;
 				   }
+				   curFileSize = curFile->GetFileSize();
+				   SetBlockState(recReady);
 				   ChangeState(e_sending);
 				   OnFileStart(p, curFileSize,TRUE);  // Notify to start send
-                   
-			   } else if (ptype != H323FilePacket::e_ACK) {
-                   // Do nothing
+				   shutdownTimer.SetInterval(0);
+			   } else if ((ptype == H323FilePacket::e_ACK) && (packet.GetACKBlockNo() == 0)) {
+                   // We have received acknowledgement
+				   int size = packet.GetFileSize();
+				   if (size > 0) {
+                        curFileSize = size;
+					    p = filelist.GetSaveDirectory() + PDIR_SEPARATOR + curFileName;
+						delete curFile;
+						curFile = new H323FileIOChannel(p,false);
+						if (curFile->IsError(ioerr)) {
+							delete curFile;
+							curFile = NULL;
+							OnFileOpenError(p,ioerr);
+							ChangeState(e_error);
+							break;
+					    }
+					   SetBlockState(recOK);
+					   ChangeState(e_receiving);
+				       OnFileStart(curFileName, curFileSize, false);  // Notify to start receive
+					   nextFrame.Signal();
+				   } else {  
+				       SetBlockState(recOK);
+					   if (!master || (master && (filelist.GetDirection() == H323Channel::IsTransmitter)))
+					      nextFrame.Signal();
+				   }
 				   break;
 			   }
-			    blockState = recOK;
-				nextFrame.Signal();
+
 			   break;
 		   case e_receiving:
 			   if (ptype == H323FilePacket::e_DATA) {
+				   PBoolean OKtoWrite = FALSE;
+				   int blockNo = 0;
 				   if ((packet.GetDataSize() == blockSize) ||  // We have complete block
-					   (curFileSize == (curProgSize + packet.GetDataSize()))) {  // We have the last block
-				        curProgSize =+ packet.GetDataSize(); 
-						lastBlockNo++;
-                        if (lastBlockNo > 99) lastBlockNo = 0;
-						// Write away to file.
-                        curFile->Write(packet.GetPointer(),packet.GetSize());
+					  (curFileSize == (curProgSize + packet.GetDataSize()))) {  // We have the last block
+				   
+					  if (packet.GetBlockNo() > lastBlockNo) {  // Make sure we have not already received this block
+							if (packet.GetBlockNo() != lastBlockNo + 1) {
+								// This is not the next block request to resend. We are in trouble if we are here!
+								SetBlockState(recIncomplete);
+								OnFileError(curFileName,lastBlockNo, FALSE);
+								packet.SetSize(0);
+								nextFrame.Signal();
+							   break;
+							}
 
-						if (curFileSize != curProgSize) {
-							blockState = recOK;
-							OnFileProgress(lastBlockNo,curProgSize, FALSE);
-						} else { 
-							blockState = recComplete;
-                            OnFileComplete();
-							ChangeState(e_waiting);
-						}
+							lastBlockNo = packet.GetBlockNo(); 
+							curProgSize = curProgSize + packet.GetDataSize(); 
+							
+							blockNo = lastBlockNo;
+							OKtoWrite = TRUE;
+					  } 
+					  SetBlockState(recOK);	
 				   } else {
-					    blockState = recIncomplete;
-						OnFileError(lastBlockNo, FALSE);
+					    SetBlockState(recIncomplete);
+						OnFileError(curFileName,lastBlockNo, FALSE);
 				   }
-				 packet.SetSize(0);
-				 nextFrame.Signal();
+				          
+				   // Now write away block to file.
+				   if (OKtoWrite) {
+				        curFile->Write(packet.GetDataPtr(),packet.GetDataSize());
+						OnFileProgress(curFileName,blockNo,curProgSize, FALSE);
+				   }
+				   // Signal to send confirmation
+                   nextFrame.Signal();
 			   }
+			   packet.SetSize(0);
 			  break;
  		   case e_sending:
 			   if (ptype == H323FilePacket::e_ACK) {
-					curProgSize =+ blockSize;
-					OnFileProgress(lastBlockNo,curProgSize, TRUE);
-				    blockState = recOK;
-                    nextFrame.Signal();
+				    if (packet.GetACKBlockNo() == 0)  // Control ACKs = 0 so ignore.
+						continue;
+					if (packet.GetACKBlockNo() == lastBlockNo) {
+						curProgSize = curProgSize + lastBlockSize;
+					    OnFileProgress(curFileName,lastBlockNo,curProgSize, TRUE);
+						SetBlockState(recOK);	
+					} else {
+						PTRACE(6,"FT\tExpecting block " << lastBlockNo << " Received " << packet.GetACKBlockNo());
+					}
 			   } else if (ptype == H323FilePacket::e_ERROR) {
-					OnFileError(lastBlockNo, TRUE);
-                    blockState = recIncomplete;
-					nextFrame.Signal();
+					OnFileError(curFileName,lastBlockNo, TRUE);
+                    SetBlockState(recIncomplete);
 			   }
+			   nextFrame.Signal();
 			   break;
 		   case e_error:
-                // Do nothing
-			    break;
 		   case e_completed:
 		   default:
-			    shutdown = TRUE;
+			    success = FALSE;
 			    break;
 		}
+		packet.SetSize(0);
 	}
+
+	exitReceive.Acknowledge();
+    receiveRunning = FALSE;
+
+	PTRACE(6,"FILE\tClosing Receive Thread");
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1211,6 +1476,12 @@ static PString opStr[] = {
 	  "05"
   };
 
+void H323FilePacket::attach(PString & data)
+{
+	SetSize(data.GetSize());
+	memcpy(theArray, data.GetPointer(), data.GetSize());
+}
+
 void H323FilePacket::BuildPROB()
 {
   PString header = opStr[e_PROB];
@@ -1221,33 +1492,37 @@ void H323FilePacket::BuildRequest(opcodes code, const PString & filename, int fi
 {
    PString header = opStr[code] + filename + "0octet0blksize0" + PString(blocksize) 
 	                    + "0tsize0" + PString(filesize) + "0";
-   Attach(header,header.GetSize());
+   attach(header);
 
 }
 
-void H323FilePacket::BuildData(int blockid,PBYTEArray data)
+void H323FilePacket::BuildData(int blockid, int size)
 {
    PString blkstr;
    if (blockid < 10)
-	   blkstr = "0" + blockid;
+	   blkstr = "0" + PString(blockid);
    else
        blkstr = blockid;
 
-   PString header = opStr[e_DATA] + PString(blockid);
-   Attach(header,header.GetSize());
-   Concatenate(data);
+   PString data = opStr[e_DATA] + blkstr;
+
+   SetSize(size+4);
+   memcpy(theArray, data.GetPointer(), data.GetSize()); 
 }
 
-void H323FilePacket::BuildACK(int blockid)
+void H323FilePacket::BuildACK(int blockid, int filesize)
 {
    PString blkstr;
    if (blockid < 10)
-	   blkstr = "0" + blockid;
+	   blkstr = "0" + PString(blockid);
    else
        blkstr = blockid;
 
-   PString header = opStr[e_ACK] + PString(blockid);
-   Attach(header,header.GetSize());
+   PString header = opStr[e_ACK] + blkstr;
+
+   if (filesize > 0)
+	   header = header + "0tsize0" + PString(filesize) + "0";
+   attach(header);
 }
 
 void H323FilePacket::BuildError(int errorcode,PString errmsg)
@@ -1259,66 +1534,67 @@ void H323FilePacket::BuildError(int errorcode,PString errmsg)
        blkerr = PString(errorcode);
 
    PString header = opStr[e_ERROR] + blkerr + errmsg + "0";
-   Attach(header,header.GetSize());
+   attach(header);
 }
 
-PString H323FilePacket::GetFileName()
+PString H323FilePacket::GetFileName() const
 {
-  if ((GetPacketType() != e_RRQ) ||
+  if ((GetPacketType() != e_RRQ) &&
 	   (GetPacketType() != e_WRQ))
 	      return PString();
 
-  PString data((const char *)GetPointer(), GetSize());
+  PString data(theArray, GetSize());
 
-  PStringArray array = (data.Mid(2)).Tokenise('0');
+  PStringArray ar = (data.Mid(2)).Tokenise('0');
 
-  return array[0];
+  return ar[0];
 }
 
-unsigned H323FilePacket::GetFileSize()
+unsigned H323FilePacket::GetFileSize() const
 {
-  if ((GetPacketType() != e_RRQ) ||
+  if ((GetPacketType() != e_RRQ) &&
+	   (GetPacketType() != e_WRQ) &&
+	   (GetPacketType() != e_ACK))
+	      return 0;
+
+  PString data(theArray, GetSize());
+
+  int i = data.Find("tsize");
+  if (i == P_MAX_INDEX)
+	  return 0;
+
+  i = data.Find('0',i);
+  int l = data.GetLength()-1-i;
+
+  return data.Mid(i,l).AsUnsigned();
+}
+
+unsigned H323FilePacket::GetBlockSize() const
+{
+  if ((GetPacketType() != e_RRQ) &&
 	   (GetPacketType() != e_WRQ))
 	      return 0;
 
-  PString data((const char *)GetPointer(), GetSize());
+  PString data(theArray, GetSize());
 
-  PStringArray array = (data.Mid(2)).Tokenise('0');
+  int i = data.Find("blksize");
+  i = data.Find('0',i);
+  int j = data.Find("tsize",i)-1;
+  int l = j-i;
 
-  for (PINDEX i=0; i<array.GetSize()-1; i++)
-	  if (array[i] == "tsize")
-		  return array[i+1].AsInteger();
-
-  return 0;
+  return data.Mid(i,l).AsUnsigned();
 }
 
-unsigned H323FilePacket::GetBlockSize()
-{
-  if ((GetPacketType() != e_RRQ) ||
-	   (GetPacketType() != e_WRQ))
-	      return 0;
-
-  PString data((const char *)GetPointer(), GetSize());
-
-  PStringArray array = (data.Mid(2)).Tokenise('0');
-
-  for (PINDEX i=0; i<array.GetSize()-1; i++)
-	  if (array[i] == "blksize")
-		  return array[i+1].AsInteger();
-
-  return 0;
-}
-
-void H323FilePacket::GetErrorInformation(int & ErrCode, PString & ErrStr)
+void H323FilePacket::GetErrorInformation(int & ErrCode, PString & ErrStr) const
 {
   if (GetPacketType() != e_ERROR) 
 	      return;
 
-  PString data((const char *)GetPointer(), GetSize());
-  PString array = data.Mid(2);
+  PString data(theArray, GetSize());
+  PString ar = data.Mid(2);
 
-  ErrCode = (array.Left(2)).AsInteger();
-  ErrStr = array.Mid(3,array.GetLength()-3);
+  ErrCode = (ar.Left(2)).AsInteger();
+  ErrStr = ar.Mid(2,ar.GetLength()-3);
 }
     
 BYTE * H323FilePacket::GetDataPtr() 
@@ -1326,7 +1602,7 @@ BYTE * H323FilePacket::GetDataPtr()
 	return (BYTE *)(theArray+4); 
 }
 
-unsigned H323FilePacket::GetDataSize() 
+unsigned H323FilePacket::GetDataSize() const
 {
   if (GetPacketType() == e_DATA)
 	return GetSize() - 4; 
@@ -1334,19 +1610,28 @@ unsigned H323FilePacket::GetDataSize()
     return 0;
 }
 
-int H323FilePacket::GetACKBlockNo()
+int H323FilePacket::GetBlockNo() const
+{
+  if (GetPacketType() != e_DATA) 
+	      return 0;
+
+  PString data(theArray, GetSize());
+  return data.Mid(2,2).AsInteger();
+}
+
+int H323FilePacket::GetACKBlockNo() const
 {
   if (GetPacketType() != e_ACK) 
 	      return 0;
 
-  PString data((const char *)GetPointer(), GetSize());
-  return data.Mid(2).AsInteger();
+  PString data(theArray, GetSize());
+  return data.Mid(2,2).AsInteger();
 }
 
-H323FilePacket::opcodes H323FilePacket::GetPacketType()
+H323FilePacket::opcodes H323FilePacket::GetPacketType() const
 {
-   PString val = (const char *)(const BYTE *)theArray[1];
-   return (opcodes)((short)val.AsInteger());
+  PString data(theArray, GetSize());
+  return (opcodes)data.Mid(1,1).AsUnsigned();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -1369,8 +1654,11 @@ H323FileIOChannel::H323FileIOChannel(PFilePath _file, PBoolean read)
 		IOError = e_AccessDenied;
 		delete file;
 		file = NULL;
+		filesize = 0;
 		return;
 	}
+
+	filesize = file->GetLength();
 
    if (read) 
 	   SetReadChannel(file, TRUE);
@@ -1382,7 +1670,7 @@ H323FileIOChannel::~H323FileIOChannel()
 {
 }
 
-PBoolean H323FileIOChannel::IsError(fileError err)
+PBoolean H323FileIOChannel::IsError(fileError & err)
 {
 	err = IOError;
 	return (err > 0);
@@ -1433,6 +1721,11 @@ PBoolean H323FileIOChannel::Close()
 
   PIndirectChannel::Close();
   return TRUE;
+}
+
+unsigned H323FileIOChannel::GetFileSize()
+{
+    return filesize;
 }
 
 PBoolean H323FileIOChannel::Read(void * buffer, PINDEX & amount)
