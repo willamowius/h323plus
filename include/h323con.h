@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.18  2009/02/21 14:04:35  shorne
+ * Added OnCapabilitySet Callback, FileTransfer Handlers,baseline H.450 Message warning support
+ *
  * Revision 1.17  2008/11/08 16:18:42  willamowius
  * fixes to compile with video disabled
  *
@@ -3052,7 +3055,7 @@ class H323Connection : public PObject
 
 	/** Is a Non-Call related connection like text messaging or file transfer
 	  */
-	virtual PBoolean H323Connection::IsNonCallConnection() const;
+	virtual PBoolean IsNonCallConnection() const;
 
 #ifdef H323_H460
     /** Get the connection FeatureSet
