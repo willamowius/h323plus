@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.19  2008/10/28 23:06:28  willamowius
+ * fixes to compile with audio disabled
+ *
  * Revision 1.18  2008/09/03 12:41:53  willamowius
  * avoid gcc 4.3.x compiler warning
  *
@@ -2506,7 +2509,7 @@ void H323PluginCodecManager::RegisterCodecs(unsigned int count, void * _codecLis
           CreateCapabilityAndMediaFormat(&encoder, &decoder);
           found = TRUE;
 
-          PTRACE(2, "H323PLUGIN\tPlugin codec " << encoder.descr << " defined");
+          PTRACE(5, "H323PLUGIN\tPlugin codec " << encoder.descr << " defined");
           break;
         }
       }
@@ -2599,10 +2602,10 @@ void H323PluginCodecManager::CreateCapabilityAndMediaFormat(
     PString fmtName = CreateCodecName(encoderCodec, FALSE);
     OpalMediaFormat existingFormat(fmtName, TRUE);
     if (existingFormat.IsValid()) {
-      PTRACE(3, "H323PLUGIN\tMedia format " << fmtName << " already exists");
+      PTRACE(5, "H323PLUGIN\tMedia format " << fmtName << " already exists");
       H323PluginCodecManager::AddFormat(existingFormat);
     } else {
-      PTRACE(3, "H323PLUGIN\tCreating new media format " << fmtName);
+      PTRACE(5, "H323PLUGIN\tCreating new media format " << fmtName);
 
       OpalMediaFormat * mediaFormat = NULL;
 
@@ -3540,6 +3543,22 @@ void H323PluginCodecManager::Bootstrap()
   new OpalFixedCodecFactory<OpalG711uLaw64k_Decoder>::Worker(OpalG711uLaw64k_Decoder::GetFactoryName());
 #endif
 
+}
+
+void H323PluginCodecManager::Reboot()
+{
+	  // unregister the plugin media formats
+	  OpalMediaFormatFactory::UnregisterAll();
+#ifdef H323_VIDEO
+#ifdef H323_H239
+	  H323ExtendedVideoFactory::UnregisterAll();
+#endif
+#endif
+	  // unregister the plugin capabilities
+	  H323CapabilityFactory::UnregisterAll();
+
+    bootStrapCount--;
+	Bootstrap();
 }
 
 /////////////////////////////////////////////////////////////////////////////
