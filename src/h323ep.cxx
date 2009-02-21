@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.22  2008/11/08 16:56:22  willamowius
+ * fixes to compile with video disabled
+ *
  * Revision 1.21  2008/10/28 23:06:28  willamowius
  * fixes to compile with audio disabled
  *
@@ -889,6 +892,11 @@
 #include "h450/h450pdu.h"
 #endif
 
+#ifdef H323_H460
+#include "h460/h460.h"
+#include "h225.h"
+#endif
+
 #include "gkclient.h"
 
 #ifdef H323_T38
@@ -1286,7 +1294,7 @@ H323EndPoint::H323EndPoint()
 #endif
 
 #ifdef H323_H460
-  disableH460 = FALSE;
+  disableH460 = false;
 #endif
 
 #ifdef H323_AEC 
@@ -1344,11 +1352,6 @@ H323EndPoint::~H323EndPoint()
 
 #ifdef P_STUN
   delete natMethods;
-  NatFactory::UnregisterAll();
-#endif
-
-#ifdef H323_H460
-  H460Factory::UnregisterAll();
 #endif
 
   PTRACE(3, "H323\tDeleted endpoint.");
@@ -1847,6 +1850,18 @@ H323Connection * H323EndPoint::MakeAuthenticatedCall(const PString & remoteParty
 }
 #endif
 
+#ifdef H323_H460 
+H323Connection * H323EndPoint::MakeSupplimentaryCall (
+                        const PString & remoteParty,  ///* Remote party to call
+                        PString & token,              ///* String to receive token for connection
+                        void * userData               ///* user data to pass to CreateConnection
+                        )
+{
+
+	return MakeCall(remoteParty, token, userData,true);
+}
+#endif
+
 PBoolean H323EndPoint::StartListeners(const H323TransportAddressArray & ifaces)
 {
   if (ifaces.IsEmpty())
@@ -1944,16 +1959,20 @@ H323TransportAddressArray H323EndPoint::GetInterfaceAddresses(PBoolean excludeLo
 
 H323Connection * H323EndPoint::MakeCall(const PString & remoteParty,
                                         PString & token,
-                                        void * userData)
+                                        void * userData,
+										PBoolean supplimentary
+										)
 {
-  return MakeCall(remoteParty, NULL, token, userData);
+  return MakeCall(remoteParty, NULL, token, userData, supplimentary);
 }
 
 
 H323Connection * H323EndPoint::MakeCall(const PString & remoteParty,
                                         H323Transport * transport,
                                         PString & token,
-                                        void * userData)
+                                        void * userData,
+										PBoolean supplimentary
+										)
 {
   token = PString::Empty();
 
@@ -1969,7 +1988,9 @@ H323Connection * H323EndPoint::MakeCall(const PString & remoteParty,
                                      Addresses[i],
                                      transport,
                                      token,
-                                     userData);
+                                     userData,
+                                     supplimentary
+									 );
     if (connection != NULL) {
         connection->Unlock();
 	    break;
@@ -2014,7 +2035,9 @@ H323Connection * H323EndPoint::InternalMakeCall(const PString & trasferFromToken
                                                 const PString & remoteParty,
                                                 H323Transport * transport,
                                                 PString & newToken,
-                                                void * userData)
+                                                void * userData,
+												PBoolean supplimentary
+												)
 {
   PTRACE(2, "H323\tMaking call to: " << remoteParty);
 
@@ -2074,6 +2097,9 @@ H323Connection * H323EndPoint::InternalMakeCall(const PString & trasferFromToken
     connectionsMutex.Signal();
     return NULL;
   }
+
+  if (supplimentary) 
+	  connection->SetNonCallConnection();     
 
   connection->Lock();
 
@@ -3262,21 +3288,95 @@ PBoolean H323EndPoint::OnConferenceInvite(PBoolean /*sending*/,
   return FALSE;
 }
 
-PBoolean H323EndPoint::OnSendCallIndependentSupplementaryService(const H323Connection * /*connection*/, 
-														     H323SignalPDU & /* pdu */)
+PBoolean H323EndPoint::OnSendCallIndependentSupplementaryService(const H323Connection * connection, 
+														     H323SignalPDU & pdu )
 {
-  return FALSE;
+  
+#ifdef H323_H460
+
+  if (!connection->IsNonCallConnection())
+	  return false;
+
+  H225_Setup_UUIE & setup = pdu.m_h323_uu_pdu.m_h323_message_body;
+  setup.m_conferenceGoal.SetTag(H225_Setup_UUIE_conferenceGoal::e_callIndependentSupplementaryService);
+/*
+  // This is horrible however it's the easiest way to get the connection featureSet.
+  H460_FeatureSet * featset = NULL;
+  H323Connection* conn = FindConnectionWithLock(connection->GetCallToken());
+  if (conn != NULL) {
+	  featset = conn->GetFeatureSet();
+	  conn->Unlock();
+  }
+
+  if (featset == NULL)
+	  return false;
+
+  H225_FeatureSet fs;
+  if (featset->SendFeature(H460_MessageType::e_setup, fs)) {
+	if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
+        setup.IncludeOptionalField(H225_Setup_UUIE::e_supportedFeatures);
+	    H225_ArrayOf_FeatureDescriptor & fsn = setup.m_supportedFeatures;
+	    fsn = fs.m_supportedFeatures;
+	} */
+	PTRACE(6,"MyEP\tSending H.460 Call Independent Supplementary Service"); 
+	return true;
+//  } else
+ 
+#endif
+ // {
+    return false;
+//  }
 }
 
-PBoolean H323EndPoint::OnReceiveCallIndependentSupplementaryService(const H323Connection * /*connection*/, 
+PBoolean H323EndPoint::OnReceiveCallIndependentSupplementaryService(const H323Connection * connection, 
 														        const H323SignalPDU & pdu)
 {
 #ifdef H323_H450
   if (pdu.m_h323_uu_pdu.HasOptionalField(H225_H323_UU_PDU::e_h4501SupplementaryService)) {
-      return TRUE;
+	  PTRACE(6,"MyEP\tReceived H.450 Call Independent Supplementary Service");
+      return true;
   }
 #endif
-  return FALSE;
+
+#ifdef H323_H460
+
+  if (disableH460)
+	  return false;
+
+  H225_FeatureSet fs;
+  const H225_Setup_UUIE & setup = pdu.m_h323_uu_pdu.m_h323_message_body;
+		
+  if (setup.HasOptionalField(H225_Setup_UUIE::e_supportedFeatures)) {
+	  fs.IncludeOptionalField(H225_FeatureSet::e_supportedFeatures);
+	  fs.m_supportedFeatures = setup.m_supportedFeatures;
+  }
+
+  if (setup.HasOptionalField(H225_Setup_UUIE::e_neededFeatures)) {
+	  fs.IncludeOptionalField(H225_FeatureSet::e_neededFeatures);
+	  fs.m_supportedFeatures = setup.m_neededFeatures;
+  }
+
+  if (setup.HasOptionalField(H225_Setup_UUIE::e_desiredFeatures)) {
+	  fs.IncludeOptionalField(H225_FeatureSet::e_desiredFeatures);
+	  fs.m_supportedFeatures = setup.m_desiredFeatures;
+  }
+
+  H460_FeatureSet * featset = NULL;
+  H323Connection* conn = FindConnectionWithLock(connection->GetCallToken());
+  if (conn != NULL) {
+	  featset = conn->GetFeatureSet();
+	  conn->Unlock();
+  }
+
+  if (featset->SupportNonCallService(fs)) {
+     PTRACE(6,"MyEP\tReceived H.460 Call Independent Supplementary Service");
+     return true;
+  } else 
+#endif
+  {
+    PTRACE(6,"MyEP\tRejected CallIndependentSupplementaryService as no support in EndPoint.");
+    return false;
+  }
 }
 
 PBoolean H323EndPoint::OnNegotiateConferenceCapabilities(const H323SignalPDU & /* setupPDU */)
@@ -3316,13 +3416,16 @@ OpalH281Handler * H323EndPoint::CreateH281ProtocolHandler(OpalH224Handler & h224
 #endif
 
 #ifdef H323_FILE
-PBoolean H323EndPoint::OpenFileTransferSession( const PString & token, H323ChannelNumber & num)
+PBoolean H323EndPoint::OpenFileTransferSession( const H323FileTransferList & list,
+	                                            const PString & token, 
+												H323ChannelNumber & num
+												)
 {
   H323Connection * connection = FindConnectionWithLock(token);
  
   PBoolean success = FALSE;
   if (connection != NULL) {
-    success = connection->OpenFileTransferSession(num);
+    success = connection->OpenFileTransferSession(list,num);
     connection->Unlock();
   }
 
@@ -3330,7 +3433,7 @@ PBoolean H323EndPoint::OpenFileTransferSession( const PString & token, H323Chann
 }
 
 PBoolean H323EndPoint::OpenFileTransferChannel(H323Connection & connection,
-											 H323Channel::Directions dir,
+											 PBoolean PTRACE_PARAM(isEncoder),
 						                     H323FileTransferList & filelist
 											) 
 {
@@ -3822,7 +3925,6 @@ void H323EndPoint::RegMethod(PThread &, INT)
 {
 	PWaitAndSignal m(reregmutex);
 
-	PTRACE(4,"GNUGK\tForcing ReRegistration");
 	gatekeeper->ReRegisterNow();
 }
 #endif
