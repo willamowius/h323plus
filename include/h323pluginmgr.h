@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2008/10/09 12:13:58  willamowius
+ * keep compatibility with PTLib 2.2.1
+ *
  * Revision 1.4  2008/09/27 06:16:43  shorne
  * Addition of H323CodecManager Factory loader to correctly load Codecs due to changes in PTLIB v2.3
  *
@@ -164,6 +167,8 @@ class H323PluginCodecManager : public PPluginModuleManager
     virtual void OnShutdown();
 
     static void Bootstrap();
+
+	static void Reboot();
 /*
     H323Capability * CreateCapability(
           const PString & _mediaFormat, 
