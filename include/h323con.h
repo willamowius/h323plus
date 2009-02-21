@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.17  2008/11/08 16:18:42  willamowius
+ * fixes to compile with video disabled
+ *
  * Revision 1.16  2008/05/27 15:37:56  shorne
  * Fixes for early media and addition of AnswerCallNowWithAlert
  *
@@ -1716,6 +1719,16 @@ class H323Connection : public PObject
       H245_TerminalCapabilitySetReject & reject ///< Rejection PDU (if return FALSE)
     );
 
+    /**This function is called when a common capability set has been calculated
+		Override this function to display to the user the various Capabilities
+		available (started and not started) for the call.
+
+       The default behaviour returns TRUE.
+     */
+	virtual PBoolean OnCommonCapabilitySet(
+	  H323Capabilities & caps				///< Common Capability Set
+    ) const;
+
     /**Send a new capability set.
       */
     virtual void SendCapabilitySet(
@@ -2624,24 +2637,44 @@ class H323Connection : public PObject
 	    Use this to open a file transfer session for the tranferring of files
 		between H323 clients.
 	*/
-     PBoolean OpenFileTransferSession(H323ChannelNumber & num   ///< Created Channel number
-		                          );
+     PBoolean OpenFileTransferSession( const H323FileTransferList & list,
+		                               H323ChannelNumber & num   ///< Created Channel number
+		                              );
+
+
+    /** Close the File Transfer Session
+	    Use this to close the file transfer session. 
+
+	 */
+     PBoolean CloseFileTransferSession(unsigned num  ///< Channel number
+		                               );
 
     /** Create an instance of the File Transfer handler.
         This is called when the subsystem requires that a a file transfer channel be established.
   		
-        Note that if the application overrides this it should return a pointer
+        The default behaviour calls the OnCreateFileTransferHandler function of the same name if
+        there is not already a file transfer handler associated with this connection. If there
+        is already such a file transfer handler associated, this instance is returned instead.
+    */
+     H323FileTransferHandler *CreateFileTransferHandler(unsigned sessionID,					///< Session Identifier
+														H323Channel::Directions dir,		///< direction of channel
+						                                H323FileTransferList & filelist		///< Transfer File List
+														);
+
+
+    /** OnCreateFileTransferHandler Function
+
+	    Override this function and create your own derived FileTransfer Handler
+		to collect File Transfer events
+
+	    Note that if the application overrides this it should return a pointer
         to a heap variable (using new) as it will be automatically deleted when
         the H323Connection is deleted.
- 	
-        The default behaviour calls the OpalEndpoint function of the same name if
-        there is not already a H.224 handler associated with this connection. If there
-        is already such a H.224 handler associated, this instance is returned instead.
-    */
-     virtual H323FileTransferHandler *CreateFileTransferHandler(unsigned sessionID,           ///< Session Identifier
-															H323Channel::Directions dir,      ///< direction of channel
-						                                    H323FileTransferList & filelist   ///< Transfer File List
-															);
+	 */
+     virtual H323FileTransferHandler *OnCreateFileTransferHandler(unsigned sessionID,		///< Session Identifier
+														H323Channel::Directions dir,		///< direction of channel
+						                                H323FileTransferList & filelist		///< Transfer File List
+														);
 
 	/** Open a File Transfer Channel.
         This is called when the subsystem requires that a File Transfer channel be established.
@@ -2653,8 +2686,8 @@ class H323Connection : public PObject
 		
         The default behaviour returns FALSE to indicate File Transfer is not implemented. 
       */
-      virtual PBoolean OpenFileTransferChannel( H323Channel::Directions dir,           ///< direction of channel
-						                  H323FileTransferList & filelist          ///< Transfer File List
+      virtual PBoolean OpenFileTransferChannel( PBoolean isEncoder,						///< direction of channel
+						                        H323FileTransferList & filelist			///< Transfer File List
 										 ); 
 #endif
 
@@ -3017,6 +3050,10 @@ class H323Connection : public PObject
       */
     virtual void SetNonCallConnection();
 
+	/** Is a Non-Call related connection like text messaging or file transfer
+	  */
+	virtual PBoolean H323Connection::IsNonCallConnection() const;
+
 #ifdef H323_H460
     /** Get the connection FeatureSet
       */
@@ -3236,10 +3273,6 @@ class H323Connection : public PObject
     OpalH281Handler                  * h281handler;
 #endif
 
-#ifdef H323_FILE
-	H323FileTransferHandler          * filehandler;
-#endif
-
 #ifdef P_DTMF
     // The In-Band DTMF detector. This is used inside an audio filter which is
     // added to the audio channel.
@@ -3261,7 +3294,7 @@ class H323Connection : public PObject
 	PAec * aec;
 #endif
 
-    PBoolean IsNonCallConnection; 
+    PBoolean nonCallConnection; 
 
   private:
     PChannel * SwapHoldMediaChannels(PChannel * newChannel,unsigned sessionId);
@@ -3298,9 +3331,6 @@ class H323Connection : public PObject
 	H460_FeatureSet       * features;
 #endif
 
-#ifdef H323_FILE
-  H323FileTransferHandler * fileHandler;
-#endif
 };
 
 

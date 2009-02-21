@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.16  2008/11/08 16:56:22  willamowius
+ * fixes to compile with video disabled
+ *
  * Revision 1.15  2008/11/08 16:18:42  willamowius
  * fixes to compile with video disabled
  *
@@ -888,7 +891,17 @@ class H323EndPoint : public PObject
                         PString & token,              ///* String to receive token for connection
                         void * userData = NULL        ///* user data to pass to CreateConnection
      );											
-#endif								
+#endif	
+
+     /**Make a Supplimentary call to a remote party. 
+		This Function makes a Non Call supplimentary connection (lightweight call) for the purpose
+		of delivering H.450 & H.460 non call content such as instant messaging and messagebank messages
+       */
+      H323Connection * MakeSupplimentaryCall (
+                        const PString & remoteParty,  ///* Remote party to call
+                        PString & token,              ///* String to receive token for connection
+                        void * userData = NULL        ///* user data to pass to CreateConnection
+      );													
 
     /**Make a call to a remote party. An appropriate transport is determined
        from the remoteParty parameter. The general form for this parameter is
@@ -909,9 +922,10 @@ class H323EndPoint : public PObject
        MakeCallLocked() be usedin instead.
      */
     H323Connection * MakeCall(
-      const PString & remoteParty,  ///< Remote party to call
-      PString & token,              ///< String to receive token for connection
-      void * userData = NULL        ///< user data to pass to CreateConnection
+      const PString & remoteParty,     ///< Remote party to call
+      PString & token,                 ///< String to receive token for connection
+      void * userData = NULL,           ///< user data to pass to CreateConnection
+	  PBoolean supplimentary = false   ///< Whether the call is a supplimentary call
     );
 
     /**Make a call to a remote party using the specified transport.
@@ -938,7 +952,8 @@ class H323EndPoint : public PObject
       const PString & remoteParty,  ///< Remote party to call
       H323Transport * transport,    ///< Transport to use for call.
       PString & token,              ///< String to receive token for connection
-      void * userData = NULL        ///< user data to pass to CreateConnection
+      void * userData = NULL,        ///< user data to pass to CreateConnection
+	  PBoolean supplimentary = false   ///< Whether the call is a supplimentary call
     );
 
     /**Make a call to a remote party using the specified transport.
@@ -1694,8 +1709,9 @@ class H323EndPoint : public PObject
 	    Use this to initiate a file transfer.
 	  */
 	PBoolean OpenFileTransferSession(
-		const PString & token,   ///< Connection Token
-		H323ChannelNumber & num  ///< Opened Channel number
+        const H323FileTransferList & list,      ///< List of Files Requested
+		const PString & token,                  ///< Connection Token
+		H323ChannelNumber & num                 ///< Opened Channel number
 	);
 
 	/** Open a File Transfer Channel.
@@ -1709,8 +1725,8 @@ class H323EndPoint : public PObject
         The default behaviour returns FALSE to indicate File Transfer is not implemented. 
       */
     virtual PBoolean OpenFileTransferChannel(H323Connection & connection,         ///< Connection
-										   H323Channel::Directions dir,       ///< direction of channel
-						                   H323FileTransferList & filelist    ///< Transfer File List
+										   PBoolean isEncoder,                    ///< direction of channel
+						                   H323FileTransferList & filelist        ///< Transfer File List
 										   ); 
 #endif
 
@@ -2488,13 +2504,14 @@ class H323EndPoint : public PObject
     PBoolean InternalRegisterGatekeeper(H323Gatekeeper * gk, PBoolean discovered);
     H323Connection * FindConnectionWithoutLocks(const PString & token);
     virtual H323Connection * InternalMakeCall(
-      const PString & existingToken,/// Existing connection to be transferred
-      const PString & callIdentity, /// Call identity of the secondary call (if it exists)
-      unsigned capabilityLevel,     /// Intrusion capability level
-      const PString & remoteParty,  /// Remote party to call
-      H323Transport * transport,    /// Transport to use for call.
-      PString & token,              /// String to use/receive token for connection
-      void * userData               /// user data to pass to CreateConnection
+      const PString & existingToken, /// Existing connection to be transferred
+      const PString & callIdentity,  /// Call identity of the secondary call (if it exists)
+      unsigned capabilityLevel,      /// Intrusion capability level
+      const PString & remoteParty,   /// Remote party to call
+      H323Transport * transport,     /// Transport to use for call.
+      PString & token,               /// String to use/receive token for connection
+      void * userData,               /// user data to pass to CreateConnection
+	  PBoolean supplimentary = false ///< Whether the call is a supplimentary call
     );
 
     // Configuration variables, commonly changed
@@ -2696,6 +2713,25 @@ class H323EndPoint : public PObject
     PDECLARE_NOTIFIER(PThread, H323EndPoint, RegMethod);
 #endif
 };
+
+#ifdef P_STUN
+
+/////////////////////////////////////////////////////////////////////
+// Startup/Shutdown loader for NATFactory
+
+class NATFactoryStartup : public PProcessStartup
+{
+  PCLASSINFO(NATFactoryStartup, PProcessStartup)
+  public:
+   // On Shutdown unregister the NAT factory
+    virtual void OnShutdown() 
+	   {    NatFactory::UnregisterAll();  }
+};
+static PProcessStartupFactory::Worker<NATFactoryStartup> NATStartupFactory("NAT", true);
+
+#endif
+
+/////////////////////////////////////////////////////////////////////
 
 
 #endif // __OPAL_H323EP_H
