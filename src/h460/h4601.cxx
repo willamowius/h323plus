@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2009/02/19 15:06:33  willamowius
+ * note memory leaks - not fixed, yet
+ *
  * Revision 1.5  2008/05/23 11:23:12  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -183,7 +186,7 @@ H460_FeatureContent::H460_FeatureContent()
 
 }
 
-H460_FeatureContent::H460_FeatureContent(PASN_OctetString & param) 
+H460_FeatureContent::H460_FeatureContent(const PASN_OctetString & param) 
 {
 	SetTag(H225_Content::e_raw); 
 	PASN_OctetString & val = *this;
@@ -204,7 +207,7 @@ H460_FeatureContent::H460_FeatureContent(PASN_BMPString & param)
 	val.SetValue(param);
 }
 
-H460_FeatureContent::H460_FeatureContent(PBoolean param) 
+H460_FeatureContent::H460_FeatureContent(const PBoolean & param) 
 {
 	SetTag(H225_Content::e_bool); 
 	PASN_Boolean & val = *this;
@@ -340,8 +343,8 @@ H460_FeatureParameter::H460_FeatureParameter(const H460_FeatureID & ID)
 
 H460_FeatureContent H460_FeatureParameter::operator=( const PASN_OctetString & value) 
 {
-	m_content = H460_FeatureContent(*value);
 	SetTag(e_content);
+	m_content = H460_FeatureContent(value);
 	return m_content; 
 }
 
@@ -879,9 +882,9 @@ H460_FeatureStd::H460_FeatureStd(unsigned Identifier)
 {
 }
 
-H460_FeatureParameter & H460_FeatureStd::Add(unsigned id, const H460_FeatureContent & con)
+void H460_FeatureStd::Add(unsigned id, const H460_FeatureContent & con)
 {
-    return AddParameter(new H460_FeatureID(id),con);	// TODO: memory leak
+    AddParameter(new H460_FeatureID(id),con);	
 }
 
 void H460_FeatureStd::Remove(unsigned id)
@@ -912,9 +915,9 @@ H460_FeatureNonStd::H460_FeatureNonStd(PString Identifier)
 {
 }
 	
-H460_FeatureParameter & H460_FeatureNonStd::Add(const PString id, const H460_FeatureContent & con)
+void H460_FeatureNonStd::Add(const PString id, const H460_FeatureContent & con)
 {
-	return AddParameter(new H460_FeatureID(id),con);	// TODO: memory leak
+	AddParameter(new H460_FeatureID(id),con);	
 }
 
 void H460_FeatureNonStd::Remove(const PString & id)
@@ -944,10 +947,10 @@ H460_FeatureOID::H460_FeatureOID(OpalOID Identifier)
 {
 }
 
-H460_FeatureParameter & H460_FeatureOID::Add(const PString & id, const H460_FeatureContent & con)
+void H460_FeatureOID::Add(const PString & id, const H460_FeatureContent & con)
 {
 	PString val = GetBase() + "." + id;
-	return AddParameter(new H460_FeatureID(OpalOID(val)),con);	// TODO: memory leak
+	AddParameter(new H460_FeatureID(OpalOID(val)),con);	
 }
 
 void H460_FeatureOID::Remove(const PString & id)
@@ -1319,6 +1322,43 @@ PTRACE(6,"H460\tRead FeatureSet " << PTracePDU(MessageID) << " PDU");
 	  }
 }
 
+PBoolean H460_FeatureSet::SupportNonCallService(const H225_FeatureSet & fs)
+{
+	H460_FeatureID ID;
+
+	  if (fs.HasOptionalField(H225_FeatureSet::e_neededFeatures)) {
+	    const H225_ArrayOf_FeatureDescriptor & fsn = fs.m_neededFeatures;
+		  for (PINDEX i=0; i < fsn.GetSize(); i++) {
+			  H225_FeatureDescriptor & fd = fsn[i];
+			  ID = GetFeatureIDPDU(fd);
+
+			  return SupportNonCallService(ID);
+		  }
+	  }
+
+	  if (fs.HasOptionalField(H225_FeatureSet::e_desiredFeatures)) {
+	    const H225_ArrayOf_FeatureDescriptor & fsd = fs.m_desiredFeatures;
+		  for (PINDEX i=0; i < fsd.GetSize(); i++) {
+			  H225_FeatureDescriptor & fd = fsd[i];
+			  ID = GetFeatureIDPDU(fd);
+
+              return SupportNonCallService(ID);
+		  }
+	  }
+
+	  if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
+	    const H225_ArrayOf_FeatureDescriptor & fss = fs.m_supportedFeatures; 
+		  for (PINDEX i=0; i < fss.GetSize(); i++) {
+			  H225_FeatureDescriptor & fd = fss[i];	
+			  ID = GetFeatureIDPDU(fd);
+
+			  return SupportNonCallService(ID);
+		  }
+	  }
+
+	  return false;
+}
+
 H460_FeatureID H460_FeatureSet::GetFeatureIDPDU(H225_FeatureDescriptor & pdu)
 {
 	
@@ -1600,11 +1640,21 @@ void H460_FeatureSet::AttachBaseFeatureSet(H460_FeatureSet * _baseSet)
 
 PBoolean H460_FeatureSet::HasFeature(const H460_FeatureID & id)
 {
-
 	for (PINDEX i =0; i < Features.GetSize(); i++) {
 	   H460_Feature & feat = Features.GetDataAt(i);
 		if (feat.GetFeatureID() == id) {
 			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+PBoolean H460_FeatureSet::SupportNonCallService(const H460_FeatureID & id)
+{
+	for (PINDEX i =0; i < Features.GetSize(); i++) {
+	   H460_Feature & feat = Features.GetDataAt(i);
+		if (feat.GetFeatureID() == id) {
+			return feat.SupportNonCallService();
 		}
 	}
 	return FALSE;
