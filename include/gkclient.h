@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2008/05/23 11:19:17  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.4  2008/01/29 04:33:24  shorne
  * Added SendServiceControlIndication - fixed Endpoint initiation with H.460
  *
@@ -545,6 +548,7 @@ class H323Gatekeeper : public H225_RAS
     PString  endpointIdentifier;
 	PString  localId;
     RegistrationFailReasons registrationFailReason;
+	PMutex RegisterMutex;
 
     class AlternateInfo : public PObject {
         PCLASSINFO(AlternateInfo, PObject);

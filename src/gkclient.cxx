@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2008/05/23 11:21:18  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.6  2008/01/29 04:33:24  shorne
  * Added SendServiceControlIndication - fixed Endpoint initiation with H.460
  *
@@ -913,6 +916,8 @@ PBoolean H323Gatekeeper::OnReceiveGatekeeperReject(const H225_GatekeeperReject &
 
 PBoolean H323Gatekeeper::RegistrationRequest(PBoolean autoReg)
 {
+  PWaitAndSignal m(RegisterMutex);
+
   if (PAssertNULL(transport) == NULL)
     return FALSE;
 
