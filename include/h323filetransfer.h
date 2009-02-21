@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/05/23 11:19:38  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.1  2008/01/01 00:16:12  shorne
  * Added GnuGknat and FileTransfer support
  *
@@ -70,9 +73,13 @@ class H323FileTransferList : public list<H323File>
 	void SetDirection(H323Channel::Directions _direction);
 	H323Channel::Directions GetDirection();
 
+	void SetMaster(PBoolean state);
+	PBoolean IsMaster();
+
   protected:
 	H323Channel::Directions direction;
 	PDirectory saveDirectory;
+	PBoolean master;
 };
 
 
@@ -93,7 +100,8 @@ class H323FileTransferChannel : public H323Channel
       const H323Capability & capability,    ///<  Capability channel is using
       Directions theDirection,              ///<  Direction of channel
 	  RTP_UDP & rtp,                        ///<  RTP Session for channel
-      unsigned theSessionID                 ///<  Session ID for channel
+      unsigned theSessionID,                ///<  Session ID for channel
+	  const H323FileTransferList & list		///<  List of files to Request/Send
     );
 
     ~H323FileTransferChannel();
@@ -212,9 +220,13 @@ class H323FileTransferCapability : public H323DataCapability
   public:
   /**@name Construction */
   //@{
-    /**Create a new Extended Video capability.
+    /**Create a new File Transfer capability with default values.
       */
-    H323FileTransferCapability(unsigned maxBitRate = 132000);
+    H323FileTransferCapability();
+
+    /**Create a new File Transfer capability with defined value.
+      */
+    H323FileTransferCapability(unsigned maxBitRate, unsigned maxBlockSize);
   //@}
 
   /**@name Overrides from class PObject */
@@ -223,13 +235,18 @@ class H323FileTransferCapability : public H323DataCapability
        of the capability.
      */
     Comparison Compare(const PObject & obj) const;
+
+
+	/**Clone the File Transfer Capability
+	  */
+	PObject * Clone() const;
   //@}
 
   /**@name Identification functions */
   //@{
 
     virtual PString GetFormatName() const
-    { return "TFTP Data"; }
+    { return "TFTP over RTP"; }
 
     /**Get the sub-type of the capability. This is a code dependent on the
        main type of the capability.
@@ -265,6 +282,18 @@ class H323FileTransferCapability : public H323DataCapability
     virtual PBoolean OnReceivedPDU(
       const H245_DataApplicationCapability & cap  ///< PDU to get information from
     );
+
+    /**This function is called whenever and outgoing RequestMode
+       PDU is being constructed for the control channel. It allows the
+       capability to set the PDU fields from information in members specific
+       to the class.
+
+       The default behaviour sets the PDUs tag according to the GetSubType()
+       function (translated to different enum).
+     */
+    virtual PBoolean OnSendingPDU(
+      H245_DataMode & pdu  ///< PDU to set information on
+    ) const;
 
     /**This function is called whenever and incoming TerminalCapabilitySet
        or OpenLogicalChannel PDU has been used to construct the control
@@ -317,7 +346,7 @@ class H323FileTransferCapability : public H323DataCapability
 
     /**Get the BlockSize of data to be sent (as Capability Parameter).
      */
-	unsigned GetBlockRate() const  { return (maxBitRate/8) / m_blockOctets; }
+	unsigned GetBlockRate() const  { return maxBitRate / m_blockOctets; }
 
     /**Get the BlockSize of data to be sent (as Octets size).
      */
@@ -326,12 +355,17 @@ class H323FileTransferCapability : public H323DataCapability
     /**Get the Transfer Mode.
      */
 	unsigned GetTransferMode() const  { return m_transferMode; }
+
+	/**Set the List of files to send
+	 */
+	void SetFileTransferList(const H323FileTransferList & list);
   //@}
 
   protected:
-    unsigned m_blockSize;          ///< Size indicator in capability negotiation
-	unsigned m_blockOctets;        ///< Block Octet size
-	unsigned m_transferMode;       ///< Mode of transfer Raw Tftp or RTP encaptulated
+    unsigned				m_blockSize;          ///< Size indicator in capability negotiation
+	unsigned				m_blockOctets;        ///< Block Octet size
+	unsigned				m_transferMode;       ///< Mode of transfer Raw Tftp or RTP encaptulated
+	H323FileTransferList	m_filelist;           ///< File list to Request/Send
 
 };
 
@@ -350,7 +384,7 @@ public:
   };
 
   enum errCodes {
-          ErrNotDefined,
+      ErrNotDefined,
 	  ErrFileNotFound,
 	  ErrAccessViolation,
 	  ErrDiskFull,
@@ -362,27 +396,30 @@ public:
 
   void BuildPROB();
   void BuildRequest(opcodes code, const PString & filename, int filesize, int blocksize);
-  void BuildData(int blockid,PBYTEArray data);
-  void BuildACK(int blockid);
+  void BuildData(int blockid, int size);
+  void BuildACK(int blockid,int filesize = 0);
   void BuildError(int errorcode,PString errmsg);
 
-  H323FilePacket::opcodes GetPacketType();
+  H323FilePacket::opcodes GetPacketType() const;
 
   // for RRQ/WRQ Only
-  PString GetFileName();
-  unsigned GetFileSize();
-  unsigned GetBlockSize();
-  int GetBlockNo();
+  PString GetFileName() const;
+  unsigned GetFileSize() const;
+  unsigned GetBlockSize() const;
 
   // for DATA only
-  unsigned GetDataSize();
+  unsigned GetDataSize() const;
   BYTE * GetDataPtr();
+  int GetBlockNo() const;
 
   // For ACK
-  int GetACKBlockNo();
+  int GetACKBlockNo() const;
 
   // for ERROR messages
-  void GetErrorInformation(int & ErrCode, PString & ErrStr);
+  void GetErrorInformation(int & ErrCode, PString & ErrStr) const;
+
+  protected:
+	void attach(PString & data);
 
 };
 
@@ -400,7 +437,7 @@ class H323FileIOChannel : public PIndirectChannel
     H323FileIOChannel(PFilePath _file, PBoolean read);
 	~H323FileIOChannel();
 
-	PBoolean IsError(fileError err);
+	PBoolean IsError(fileError & err);
 
 	PBoolean Open();
 	PBoolean Close();
@@ -408,11 +445,14 @@ class H323FileIOChannel : public PIndirectChannel
     PBoolean Read(void * buffer, PINDEX & amount);
     PBoolean Write(const void * buf, PINDEX amount);
 
+	unsigned GetFileSize();
+
   protected:
 	PBoolean CheckFile(PFilePath _file, PBoolean read, fileError & errCode);
 
     PMutex chanMutex;
 	PBoolean fileopen;
+	unsigned filesize;
 	fileError IOError;
 };
 
@@ -452,6 +492,7 @@ public:
 	  recComplete,       ///< File was fully received
 	  recIncomplete,     ///< Incomplete receival of File.
 	  recTimeOut,        ///< TimeOut waiting for packet.
+	  recReady           ///< Ready to receive files
   };
 
 //////////////////////////
@@ -464,11 +505,11 @@ public:
 
   virtual void OnStateChange(transferState newState) {};
   virtual void OnFileStart(const PString & filename, unsigned filesize, PBoolean transmit) {};
-  virtual void OnFileOpenError(const PString & filename,H323FileIOChannel::fileError _err) {};
+  virtual void OnFileOpenError(const PString & filename, H323FileIOChannel::fileError _err) {};
   virtual void OnError(const PString ErrMsg) {};
-  virtual void OnFileComplete() {};
-  virtual void OnFileProgress(int Blockno,unsigned OctetsSent, PBoolean transmit) {};
-  virtual void OnFileError(int Blockno, PBoolean transmit) {};
+  virtual void OnFileComplete(const PString & filename) {};
+  virtual void OnFileProgress(const PString & filename, int Blockno, unsigned OctetsSent, PBoolean transmit) {};
+  virtual void OnFileError(const PString & filename, int Blockno, PBoolean transmit) {};
   virtual void OnTransferComplete() {};
 
 //////////////////////////
@@ -484,12 +525,16 @@ public:
 
   void SetPayloadType(RTP_DataFrame::PayloadTypes _type);
 
+  void SetMaster(PBoolean newVal) 
+	        { master = newVal; }
+
 protected:
 
   PBoolean TransmitFrame(H323FilePacket & buffer, PBoolean final);
   PBoolean ReceiveFrame(H323FilePacket & buffer, PBoolean & final);
 
   void ChangeState(transferState newState);
+  void SetBlockState(receiveStates state);
 
   H323FileTransferList filelist;
 
@@ -499,18 +544,24 @@ protected:
   PDECLARE_NOTIFIER(PThread, H323FileTransferHandler, Transmit);
   PDECLARE_NOTIFIER(PThread, H323FileTransferHandler, Receive);
 
+  PBoolean transmitRunning;
+  PBoolean receiveRunning;
+  PSyncPointAck        exitTransmit;
+  PSyncPointAck        exitReceive;
+  PTimer               shutdownTimer;
+
   RTP_DataFrame transmitFrame;   ///< Template RTP Frame for sending/receiving
 
   RTP_Session * session;         ///< RTP Session
 
-  PTimedMutex probMutex;    ///< probing Mutex
+  PSyncPoint probMutex;    ///< probing Mutex
   PMutex transferMutex;     ///< Mutex for read/write operation
+  PMutex stateMutex;        ///< Mutex for state change
   PSyncPoint nextFrame;     ///< Wait for confirmation before sending the next block
   PINDEX responseTimeOut;   ///< Time to wait for a response (set at 1.5 sec)
 
   PTime *StartTime;
-  PBoolean IsStarter;           ///< Was Initiator of the channel
-  PBoolean shutdown;
+  PBoolean master;          ///< Was Initiator of the channel
 
 private:
   RTP_DataFrame::PayloadTypes rtpPayloadType;  ///< Payload Type should be dynamically allocated
@@ -526,7 +577,10 @@ private:
   transferState currentState;                  ///< Current state of Transmission
   receiveStates blockState;                    ///< State of Received block          
   int lastBlockNo;                             ///< Last Block No sent
+  unsigned lastBlockSize;                      ///< Last Block Size sent
+  PString curFileName;						   ///< Current FileName being sent/received
   unsigned curFileSize;                        ///< Current File being Transmitted size
+  unsigned curBlockSize;                       ///< Block size of current transmittion
   unsigned curProgSize;						   ///< Current amount of data sent/received
 };
 
