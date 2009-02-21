@@ -36,6 +36,9 @@
  * Contributor(s): ______________________________________.
  *
 * $Log$
+* Revision 1.9  2008/11/28 14:39:52  willamowius
+* use static plugins for H.460 features
+*
 * Revision 1.8  2008/11/28 13:07:04  willamowius
 * fix token concatenation for gcc
 *
@@ -174,7 +177,7 @@ class H460_FeatureID : public H460<H225_GenericIdentifier>
 
 	/** OID Feature ID 
 	*/
-       operator OpalOID & () 
+       operator OpalOID & () const
 	   { return (OpalOID &)*choice; };
 
 	/** NonStandard Feature ID 
@@ -228,7 +231,7 @@ class H460_FeatureContent : public H460<H225_Content>
 	/** PASN_OctetString Raw information which can 
 		be deseminated by Derived Class
 	*/
-	   H460_FeatureContent(PASN_OctetString & param);
+	   H460_FeatureContent(const PASN_OctetString & param);
 
 	/** String Value
 	*/
@@ -240,7 +243,7 @@ class H460_FeatureContent : public H460<H225_Content>
 
 	/** Boolean Value
 	*/
-	   H460_FeatureContent(PBoolean param);
+	   H460_FeatureContent(const PBoolean & param);
 
 	/** Integer Value
 	*/
@@ -625,7 +628,7 @@ class H460_Feature : public H460<H225_FeatureDescriptor>
 
 	/** OID Feature ID 
 	*/
- //      operator OpalOID () const { return (H460_FeatureID)m_id; };
+    //   operator OpalOID () const { return (H460_FeatureID)m_id; };
 
 	/** NonStandard Feature ID 
 	*/
@@ -646,6 +649,10 @@ class H460_Feature : public H460<H225_FeatureDescriptor>
 	/** Get the FeatureType
 	*/
 	   unsigned GetFeatureType() { return ((H460_FeatureID)m_id).GetFeatureType(); };
+
+    /** Whether Supports Non-Call Supplimentary Service
+	 */
+	   virtual PBoolean SupportNonCallService() { return false; };
   //@}
 
   /**@name Parameter Control */
@@ -898,7 +905,7 @@ class H460_FeatureStd : public H460_Feature
   //@{
 	/** Add item 
 	*/
-	H460_FeatureParameter & Add(unsigned id, const H460_FeatureContent & con);
+	void Add(unsigned id, const H460_FeatureContent & con);
 
 	/** Delete item 
 	*/
@@ -941,7 +948,7 @@ class H460_FeatureNonStd : public H460_Feature
   //@{
 	/** Add item 
 	*/
-	H460_FeatureParameter & Add(const PString id, const H460_FeatureContent & con);
+	void Add(const PString id, const H460_FeatureContent & con);
 
 	/** Delete item 
 	*/
@@ -987,7 +994,7 @@ class H460_FeatureOID : public H460_Feature
   //@{
 	/** Add item 
 	*/
-	H460_FeatureParameter & Add(const PString & id, const H460_FeatureContent & con);
+	void Add(const PString & id, const H460_FeatureContent & con);
 
 	/** Delete item 
 	*/
@@ -1117,6 +1124,11 @@ class H460_FeatureSet : public PObject
 	  */
 	H323EndPoint * GetEndPoint() { return ep; };
 
+	/** Determine whether the FeatureSet supports
+	    NonCallSupplimentaryServices. 
+	  */
+	virtual PBoolean SupportNonCallService(const H225_FeatureSet & fs);
+
   protected:
 
    PBoolean CreateFeatureSetPDU(H225_FeatureSet & fs, unsigned MessageID);
@@ -1128,6 +1140,8 @@ class H460_FeatureSet : public PObject
    PBoolean CreateFeaturePDU(H460_Feature & Feat, H225_FeatureDescriptor & pdu, unsigned MessageID);
    void ReadFeaturePDU(H460_Feature & Feat, const H225_FeatureDescriptor & pdu, unsigned MessageID);
 
+   virtual PBoolean SupportNonCallService(const H460_FeatureID & id);
+
    PString PTracePDU(PINDEX id) const;
 
    H460_Features  Features;
@@ -1137,6 +1151,7 @@ class H460_FeatureSet : public PObject
 };
 
 /////////////////////////////////////////////////////////////////////
+
 
 typedef PFactory<H460_Feature, std::string> H460Factory;
 
@@ -1162,6 +1177,22 @@ template <class className> class H460PluginServiceDescriptor : public PDevicePlu
 static H460PluginServiceDescriptor<H460_Feature##name> H460_Feature##name##_descriptor; \
 PCREATE_PLUGIN_STATIC(H460_Feature##name, H460_Feature, &H460_Feature##name##_descriptor); \
 
+
+/////////////////////////////////////////////////////////////////////
+// Startup/Shutdown loader
+
+class H460FactoryStartup : public PProcessStartup
+{
+  PCLASSINFO(H460FactoryStartup, PProcessStartup)
+  public:
+   // On Shutdown unregister the H.460 factory
+    virtual void OnShutdown() 
+	   {   H460Factory::UnregisterAll();  }
+};
+
+static PProcessStartupFactory::Worker<H460FactoryStartup> H460StartupFactory("H460", true);
+
+/////////////////////////////////////////////////////////////////////
 
 #ifdef _MSC_VER
 #pragma warning(disable:4100)
