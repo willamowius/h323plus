@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.19  2008/06/26 00:01:51  shorne
+ * Fix for loading H.239 Capabilities to avoid segfault
+ *
  * Revision 1.18  2008/05/23 11:21:56  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -3634,6 +3637,10 @@ PBoolean H323Capabilities::Merge(const H323Capabilities & newCaps)
   return !table.IsEmpty();
 }
 
+const H323CapabilitiesSet & H323Capabilities::GetCapabilitySet()
+{
+	return set;
+}
 
 void H323Capabilities::Reorder(const PStringArray & preferenceOrder)
 {
