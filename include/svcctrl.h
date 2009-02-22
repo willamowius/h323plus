@@ -23,6 +23,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/05/23 11:20:04  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.2  2007/08/07 22:25:46  shorne
  * update for H323_H350
  *
@@ -143,6 +146,8 @@ class H323ServiceControlSession : public PObject
   //@}
 };
 
+
+#ifdef H323_H248
 
 /**This class is for H.323 Service Control Session handling for HTTP.
    This implements the HTTP channel management as per Annex K/H.323.
@@ -380,6 +385,8 @@ class H323CallCreditServiceControl : public H323ServiceControlSession
     PBoolean     mode;
     unsigned durationLimit;
 };
+
+#endif //H323_H248
 
 
 #ifdef H323_H350

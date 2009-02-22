@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/05/23 11:22:37  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.2  2007/08/07 22:25:47  shorne
  * update for H323_H350
  *
@@ -74,6 +77,8 @@ PString H323ServiceControlSession::GetServiceControlType() const
 
 
 /////////////////////////////////////////////////////////////////////////////
+
+#ifdef H323_H248
 
 H323HTTPServiceControl::H323HTTPServiceControl(const PString & u)
   : url(u)
@@ -277,6 +282,8 @@ void H323CallCreditServiceControl::OnChange(unsigned /*type*/,
     connection->SetEnforcedDurationLimit(durationLimit);
 }
 
+#endif //H323_H248
+
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef H323_H350
@@ -371,6 +378,6 @@ void H323H350ServiceControl::OnChange(unsigned type,
   endpoint.OnH350ServiceControl(ldapURL,ldapDN);
 }
 
-#endif
+#endif  // H323_H350
 
 /////////////////////////////////////////////////////////////////////////////

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/05/23 11:19:23  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.1  2007/08/06 20:50:48  shorne
  * First commit of h323plus
  *
@@ -182,10 +185,7 @@
 #include "transports.h"
 #include "h235auth.h"
 #include "h323trans.h"
-
-#ifdef H323_H248
 #include "svcctrl.h"
-#endif
 
 class PASN_Sequence;
 class PASN_Choice;
@@ -402,7 +402,6 @@ class H225_RAS : public H323Transactor
     virtual PBoolean OnReceiveResourcesAvailableIndicate(const H225_ResourcesAvailableIndicate &);
     virtual PBoolean OnReceiveResourcesAvailableConfirm(const H225_ResourcesAvailableConfirm &);
 
-#ifdef H323_H248
     virtual void OnSendServiceControlIndication(H323RasPDU &, H225_ServiceControlIndication &);
     virtual void OnSendServiceControlResponse(H323RasPDU &, H225_ServiceControlResponse &);
     virtual void OnSendServiceControlIndication(H225_ServiceControlIndication &);
@@ -411,7 +410,6 @@ class H225_RAS : public H323Transactor
     virtual PBoolean OnReceiveServiceControlResponse(const H323RasPDU &, const H225_ServiceControlResponse &);
     virtual PBoolean OnReceiveServiceControlIndication(const H225_ServiceControlIndication &);
     virtual PBoolean OnReceiveServiceControlResponse(const H225_ServiceControlResponse &);
-#endif 
 
     virtual void OnSendNonStandardMessage(H323RasPDU &, H225_NonStandardMessage &);
     virtual void OnSendNonStandardMessage(H225_NonStandardMessage &);

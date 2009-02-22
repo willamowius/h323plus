@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2008/05/23 11:21:29  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.3  2008/02/04 00:15:54  shorne
  * BUGFIX: Features being sent on GRQ
  *
@@ -424,7 +427,6 @@ PBoolean H225_RAS::HandleTransaction(const PASN_Object & rawPDU)
     case H225_RasMessage::e_infoRequestNak :
       return OnReceiveInfoRequestNak(pdu, pdu);
 
-#ifdef H323_H248
     case H225_RasMessage::e_serviceControlIndication :
       if (SendCachedResponse(pdu))
         return FALSE;
@@ -433,7 +435,6 @@ PBoolean H225_RAS::HandleTransaction(const PASN_Object & rawPDU)
 
     case H225_RasMessage::e_serviceControlResponse :
       return OnReceiveServiceControlResponse(pdu, pdu);
-#endif
 
     default :
       OnReceiveUnknown(pdu);
@@ -568,7 +569,6 @@ void H225_RAS::OnSendingPDU(PASN_Object & rawPDU)
       OnSendInfoRequestNak(pdu, pdu);
       break;
 
-#ifdef H323_H248
     case H225_RasMessage::e_serviceControlIndication :
       OnSendServiceControlIndication(pdu, pdu);
       break;
@@ -576,7 +576,6 @@ void H225_RAS::OnSendingPDU(PASN_Object & rawPDU)
     case H225_RasMessage::e_serviceControlResponse :
       OnSendServiceControlResponse(pdu, pdu);
       break;
-#endif
 
     default :
       break;
@@ -1724,8 +1723,6 @@ PBoolean H225_RAS::OnReceiveResourcesAvailableConfirm(const H225_ResourcesAvaila
   return TRUE;
 }
 
-#ifdef H323_H248
-
 void H225_RAS::OnSendServiceControlIndication(H323RasPDU & pdu, H225_ServiceControlIndication & sci)
 {
   OnSendServiceControlIndication(sci);
@@ -1805,9 +1802,6 @@ PBoolean H225_RAS::OnReceiveServiceControlResponse(const H225_ServiceControlResp
 {
   return TRUE;
 }
-
-#endif // H323_H248
-
 
 void H225_RAS::OnSendInfoRequestAck(H323RasPDU & pdu, H225_InfoRequestAck & iack)
 {
