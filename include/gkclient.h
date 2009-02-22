@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2009/02/21 13:59:05  shorne
+ * Added Registration Mutex
+ *
  * Revision 1.5  2008/05/23 11:19:17  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -305,15 +308,13 @@ class H323Gatekeeper : public H225_RAS
     PBoolean OnReceiveBandwidthRequest(const H225_BandwidthRequest & brq);
     PBoolean OnReceiveInfoRequest(const H225_InfoRequest & irq);
 
-#ifdef H323_H248
+
     PBoolean OnReceiveServiceControlIndication(const H225_ServiceControlIndication &);
-#endif
+    PBoolean SendServiceControlIndication();
 
     void OnSendGatekeeperRequest(H225_GatekeeperRequest & grq);
     void OnSendAdmissionRequest(H225_AdmissionRequest & arq);
-#ifdef H323_H248
-    PBoolean SendServiceControlIndication();
-#endif
+
     PBoolean OnSendFeatureSet(unsigned, H225_FeatureSet & features) const;
     void OnReceiveFeatureSet(unsigned, const H225_FeatureSet & features) const;
   //@}

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2009/02/21 13:58:45  shorne
+ * Added Registration Mutex
+ *
  * Revision 1.7  2008/05/23 11:21:18  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -2137,7 +2140,6 @@ PBoolean H323Gatekeeper::OnReceiveInfoRequest(const H225_InfoRequest & irq)
   return ok;
 }
 
-#ifdef H323_H248
 
 PBoolean H323Gatekeeper::SendServiceControlIndication()
 {
@@ -2166,7 +2168,9 @@ PBoolean H323Gatekeeper::OnReceiveServiceControlIndication(const H225_ServiceCon
     connection = endpoint.FindConnectionWithLock(id.AsString());
   }
 
+#ifdef H323_H248
   OnServiceControlSessions(sci.m_serviceControl, connection);
+#endif
 
 
   H323RasPDU response(authenticators);
@@ -2174,6 +2178,7 @@ PBoolean H323Gatekeeper::OnReceiveServiceControlIndication(const H225_ServiceCon
   return WritePDU(response);
 }
 
+#ifdef H323_H248
 
 void H323Gatekeeper::OnServiceControlSessions(const H225_ArrayOf_ServiceControlSession & serviceControl,
                                               H323Connection * connection)
