@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2009/02/22 02:02:37  shorne
+ * Added ability to enable SCI/SCR without needing H248 support
+ *
  * Revision 1.3  2008/05/23 11:22:37  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -62,7 +65,7 @@
 
 #define new PNEW
 
-
+#ifdef H323_H248
 /////////////////////////////////////////////////////////////////////////////
 
 H323ServiceControlSession::H323ServiceControlSession()
@@ -78,7 +81,7 @@ PString H323ServiceControlSession::GetServiceControlType() const
 
 /////////////////////////////////////////////////////////////////////////////
 
-#ifdef H323_H248
+
 
 H323HTTPServiceControl::H323HTTPServiceControl(const PString & u)
   : url(u)

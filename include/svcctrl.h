@@ -23,6 +23,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2009/02/22 02:02:05  shorne
+ * Added ability to enable SCI/SCR without needing H248 support
+ *
  * Revision 1.3  2008/05/23 11:20:04  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -61,6 +64,7 @@ class H248_SignalRequest;
 class H323EndPoint;
 class H323Connection;
 
+#ifdef H323_H248
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -147,7 +151,6 @@ class H323ServiceControlSession : public PObject
 };
 
 
-#ifdef H323_H248
 
 /**This class is for H.323 Service Control Session handling for HTTP.
    This implements the HTTP channel management as per Annex K/H.323.
@@ -386,8 +389,6 @@ class H323CallCreditServiceControl : public H323ServiceControlSession
     unsigned durationLimit;
 };
 
-#endif //H323_H248
-
 
 #ifdef H323_H350
 /**This nonstandard class is for H.323 Service Control Session 
@@ -471,7 +472,8 @@ class H323H350ServiceControl : public H323ServiceControlSession
 	PString ldapDN;
 };
 
-#endif
+#endif  // H323_H350
+#endif  // H323_H248
 
 
 #endif // __OPAL_SVCCTRL_H
