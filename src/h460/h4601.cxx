@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2009/02/21 14:22:22  shorne
+ * Fixed Memory leak. Added NonCallSupplimentaryService support
+ *
  * Revision 1.6  2009/02/19 15:06:33  willamowius
  * note memory leaks - not fixed, yet
  *
@@ -884,7 +887,9 @@ H460_FeatureStd::H460_FeatureStd(unsigned Identifier)
 
 void H460_FeatureStd::Add(unsigned id, const H460_FeatureContent & con)
 {
-    AddParameter(new H460_FeatureID(id),con);	
+	H460_FeatureID * feat_id = new H460_FeatureID(id);
+	AddParameter(feat_id, con);
+	delete feat_id;	
 }
 
 void H460_FeatureStd::Remove(unsigned id)
@@ -917,7 +922,9 @@ H460_FeatureNonStd::H460_FeatureNonStd(PString Identifier)
 	
 void H460_FeatureNonStd::Add(const PString id, const H460_FeatureContent & con)
 {
-	AddParameter(new H460_FeatureID(id),con);	
+	H460_FeatureID * feat_id = new H460_FeatureID(id);
+	AddParameter(feat_id, con);
+	delete feat_id;
 }
 
 void H460_FeatureNonStd::Remove(const PString & id)
@@ -950,7 +957,9 @@ H460_FeatureOID::H460_FeatureOID(OpalOID Identifier)
 void H460_FeatureOID::Add(const PString & id, const H460_FeatureContent & con)
 {
 	PString val = GetBase() + "." + id;
-	AddParameter(new H460_FeatureID(OpalOID(val)),con);	
+	H460_FeatureID * feat_id = new H460_FeatureID(OpalOID(val));
+	AddParameter(feat_id, con);
+	delete feat_id;
 }
 
 void H460_FeatureOID::Remove(const PString & id)
