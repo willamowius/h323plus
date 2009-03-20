@@ -36,6 +36,9 @@
  * Contributor(s): ______________________________________.
  *
 * $Log$
+* Revision 1.10  2009/02/21 14:06:30  shorne
+* Fix Memory leak
+*
 * Revision 1.9  2008/11/28 14:39:52  willamowius
 * use static plugins for H.460 features
 *
@@ -905,6 +908,7 @@ class H460_FeatureStd : public H460_Feature
   //@{
 	/** Add item 
 	*/
+	void Add(unsigned id);
 	void Add(unsigned id, const H460_FeatureContent & con);
 
 	/** Delete item 
@@ -948,6 +952,7 @@ class H460_FeatureNonStd : public H460_Feature
   //@{
 	/** Add item 
 	*/
+	void Add(const PString id);
 	void Add(const PString id, const H460_FeatureContent & con);
 
 	/** Delete item 
@@ -994,6 +999,7 @@ class H460_FeatureOID : public H460_Feature
   //@{
 	/** Add item 
 	*/
+	void Add(const PString & id);
 	void Add(const PString & id, const H460_FeatureContent & con);
 
 	/** Delete item 
