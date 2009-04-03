@@ -138,13 +138,19 @@ else
     AC_MSG_RESULT(Major version less than required $REQUIRED_PTLIB_MAJOR)
     exit 1
   fi
-  if test $PT_MINOR_VERSION -lt $REQUIRED_PTLIB_MINOR ; then
-    AC_MSG_RESULT(Minor version less than required $REQUIRED_PTLIB_MINOR)
-    exit 1
+  if test $PT_MAJOR_VERSION -eq $REQUIRED_PTLIB_MAJOR ; then
+    if test $PT_MINOR_VERSION -lt $REQUIRED_PTLIB_MINOR ; then
+      AC_MSG_RESULT(Minor version less than required $REQUIRED_PTLIB_MINOR)
+      exit 1
+  	fi
   fi
-  if test $PT_BUILD_NUMBER -lt $REQUIRED_PTLIB_BUILD ; then
-    AC_MSG_RESULT(Build version less than required $REQUIRED_PTLIB_BUILD)
-    exit 1
+  if test $PT_MAJOR_VERSION -eq $REQUIRED_PTLIB_MAJOR ; then
+    if test $PT_MINOR_VERSION -eq $REQUIRED_PTLIB_MINOR ; then
+      if test $PT_BUILD_NUMBER -lt $REQUIRED_PTLIB_BUILD ; then
+        AC_MSG_RESULT(Build version less than required $REQUIRED_PTLIB_BUILD)
+        exit 1
+      fi
+    fi
   fi
   AC_MSG_RESULT(ok)
 fi
