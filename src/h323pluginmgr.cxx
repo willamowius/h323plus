@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.20  2009/02/21 14:18:33  shorne
+ * Adjusted Tracelevels and added ability to reread the plugins during program execution
+ *
  * Revision 1.19  2008/10/28 23:06:28  willamowius
  * fixes to compile with audio disabled
  *
@@ -3523,7 +3526,7 @@ PBoolean H323DynaLink::LoadPlugin(const PString & filename)
 
 /////////////////////////////////////////////////////////////////////////////
 
-static PAtomicInteger bootStrapCount = 0;
+static PAtomicInteger bootStrapCount;
 
 void H323PluginCodecManager::Bootstrap()
 {
