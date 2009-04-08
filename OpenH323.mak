@@ -1,13 +1,13 @@
-!ifndef PWLIBDIR
-PWLIBDIR=c:\work\pwlib
+!ifndef PTLIBDIR
+PTLIBDIR=c:\work\pwlib
 !endif
 
 !ifndef OPENH323DIR
 OPENH323DIR=$(MAKEDIR)
 !endif
 
-INCLUDE=$(INCLUDE);$(PWLIBDIR)\include\ptlib\msos;$(PWLIBDIR)\include\pwlib\mswin;$(PWLIBDIR)\include;$(OPENH323DIR)/include
-LIB=$(LIB);$(PWLIBDIR)\Lib;$(OPENH323DIR)/Lib
+INCLUDE=$(INCLUDE);$(PTLIBDIR)\include\ptlib\msos;$(PTLIBDIR)\include\pwlib\mswin;$(PTLIBDIR)\include;$(OPENH323DIR)/include
+LIB=$(LIB);$(PTLIBDIR)\Lib;$(OPENH323DIR)/Lib
 
 all:
 	msdev OpenH323Lib.dsp /MAKE "OpenH323Lib - Win32 Release" /USEENV
