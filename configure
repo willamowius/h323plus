@@ -3728,7 +3728,7 @@ _ACEOF
 
 
 
-if test "${PWLIBDIR:-unset}" != "unset" ; then
+if test "${PTLIBDIR:-unset}" != "unset" ; then
    as_ac_File=`$as_echo "ac_cv_file_${PTLIBDIR}/version.h" | $as_tr_sh`
 { $as_echo "$as_me:$LINENO: checking for ${PTLIBDIR}/version.h" >&5
 $as_echo_n "checking for ${PTLIBDIR}/version.h... " >&6; }

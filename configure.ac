@@ -65,7 +65,7 @@ dnl ########################################################################
 dnl look for ptlib, use a preference order of explicit PTLIBDIR, directory
 dnl at same level, home directory, /usr/local or /usr.
 
-if test "${PWLIBDIR:-unset}" != "unset" ; then 	 
+if test "${PTLIBDIR:-unset}" != "unset" ; then 	 
    AC_CHECK_FILE(${PTLIBDIR}/version.h, HAS_PTLIB=1) 	 
 fi
 
