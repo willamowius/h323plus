@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2009/03/20 14:18:10  willamowius
+ * Add() an item without content
+ *
  * Revision 1.8  2009/02/27 13:47:15  willamowius
  * fix memory leaks
  *
@@ -180,7 +183,8 @@ PString H460_FeatureID::IDString() const
 
 	if (GetFeatureType() == H225_GenericIdentifier::e_nonStandard) {
 		    const H225_GloballyUniqueID & gui = *this;
-			return "NonStd " + gui.AsString();
+		    const OpalGloballyUniqueID opalguid(gui);
+			return "NonStd " + opalguid.AsString();
 	}
 
 	return PString("unknown");
