@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2009/05/11 22:33:30  willamowius
+ * avoid printing non-printable characters in the trace when printing NonStandard OIDs
+ *
  * Revision 1.9  2009/03/20 14:18:10  willamowius
  * Add() an item without content
  *
@@ -116,8 +119,9 @@ H460_FeatureID::H460_FeatureID(OpalOID ID)
 H460_FeatureID::H460_FeatureID(PString ID)
 {
 	SetTag(H225_GenericIdentifier::e_nonStandard); 
+	OpalGloballyUniqueID uid(ID);
 	H225_GloballyUniqueID & val = *this;
-	val.SetValue(ID);
+	val = uid;
 }
 
 H460_FeatureID::H460_FeatureID(H225_GenericIdentifier ID)
@@ -164,8 +168,9 @@ PINLINE H460_FeatureID & H460_FeatureID::operator=(OpalOID ID)
 PINLINE H460_FeatureID & H460_FeatureID::operator=(PString ID)
 {  
 	SetTag(H225_GenericIdentifier::e_nonStandard); 
+	OpalGloballyUniqueID uid(ID);
 	H225_GloballyUniqueID & val = *this;
-	val.SetValue(ID);
+	val = uid;
 	return *this;
 };
 
@@ -1182,7 +1187,7 @@ PBoolean H460_FeatureSet::AddFeature(H460_Feature * Nfeat)
 void H460_FeatureSet::RemoveFeature(H460_FeatureID id)
 {
   PStringStream info;
-  info << "H460\t Removed ";
+  info << "H460\tRemoved ";
 	switch (id.GetFeatureType()) {
 	   case H460_FeatureID::e_standard:
 			info << "Std Feature " << (unsigned)id << "\n";
@@ -1191,7 +1196,9 @@ void H460_FeatureSet::RemoveFeature(H460_FeatureID id)
 			info << "OID Feature " << (OpalOID)id << "\n";
 			break;
 	   case H460_FeatureID::e_nonStandard:
-			info << "NonStd Feature " << ((H225_GloballyUniqueID &)(id)).AsString() << "\n";
+			const H225_GloballyUniqueID h225_guid = ((H225_GloballyUniqueID &)(id));
+			const OpalGloballyUniqueID guid(h225_guid);
+			info << "NonStd Feature " << guid.AsString() << "\n";
 			break;
 	}
 	PTRACE(4, info);
