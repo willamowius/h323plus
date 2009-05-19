@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2009/02/21 14:08:58  shorne
+ * Added the ability to reread the plugins during program execution
+ *
  * Revision 1.5  2008/10/09 12:13:58  willamowius
  * keep compatibility with PTLib 2.2.1
  *
@@ -205,25 +208,6 @@ class H323PluginCodecManager : public PPluginModuleManager
 #if PTLIB_MAJOR == 2 && PTLIB_MINOR >= 3
 static PFactory<PPluginModuleManager>::Worker<H323PluginCodecManager> h323PluginCodecManagerFactory("h323PluginCodecManager", true);
 #endif
-
-class H323DynaLink : public PDynaLink
-{
-  PCLASSINFO(H323DynaLink, PDynaLink)
-    
- public:
-  H323DynaLink(const char * basename, const char * reason = NULL);
-
-  virtual void Load();
-  virtual PBoolean IsLoaded()
-  { PWaitAndSignal m(processLock); return isLoadedOK; }
-  virtual PBoolean LoadPlugin (const PString & fileName);
-
-protected:
-  PMutex processLock;
-  PBoolean isLoadedOK;
-  const char * baseName;
-  const char * reason;
-};
 
 //////////////////////////////////////////////////////
 //

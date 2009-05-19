@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.21  2009/04/03 13:29:49  willamowius
+ * compile fix for newer PTLib versions
+ *
  * Revision 1.20  2009/02/21 14:18:33  shorne
  * Adjusted Tracelevels and added ability to reread the plugins during program execution
  *
@@ -3493,36 +3496,6 @@ PBoolean H323CodecPluginGenericVideoCapability::SetMaxFrameSize(CapabilityFrameS
 /////////////////////////////////////////////////////////////////////////////
 
 #endif  // H323_VIDEO
-
-/////////////////////////////////////////////////////////////////////////////
-
-H323DynaLink::H323DynaLink(const char * _baseName, const char * _reason)
-  : baseName(_baseName), reason(_reason)
-{
-  isLoadedOK = FALSE;
-}
-
-void H323DynaLink::Load()
-{
-  PStringArray dirs = PPluginManager::GetPluginDirs();
-  PINDEX i;
-  for (i = 0; !PDynaLink::IsLoaded() && i < dirs.GetSize(); i++)
-    PLoadPluginDirectory<H323DynaLink>(*this, dirs[i]);
-  
-  if (!PDynaLink::IsLoaded()) {
-    cerr << "Cannot find " << baseName << " as required for " << ((reason != NULL) ? reason : " a code module") << "." << endl
-         << "This function may appear to be installed, but will not operate correctly." << endl
-         << "Please put the file " << baseName << PDynaLink::GetExtension() << " into one of the following directories:" << endl
-         << "     " << setfill(',') << dirs << setfill(' ') << endl
-         << "This list of directories can be set using the PWLIBPLUGINDIR environment variable." << endl;
-    return;
-  }
-}
-
-PBoolean H323DynaLink::LoadPlugin(const PString & filename)
-{
-    return PDynaLink::Open(filename);
-}
 
 /////////////////////////////////////////////////////////////////////////////
 
