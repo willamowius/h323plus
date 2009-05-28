@@ -1,11 +1,7 @@
 /*
  * version.h
  *
- * Version number header file for simple OpenH323 sample.
- *
- * A H.323 "net telephone" application.
- *
- * Copyright (c) 2000 Equivalence Pty. Ltd.
+ * Version number header file for H323Plus.
  *
  * The contents of this file are subject to the Mozilla Public License
  * Version 1.0 (the "License"); you may not use this file except in
@@ -17,20 +13,10 @@
  * the License for the specific language governing rights and limitations
  * under the License.
  *
- * The Original Code is Open H323 Library.
- *
- * The Initial Developer of the Original Code is Equivalence Pty. Ltd.
- *
- * Contributor(s): ______________________________________.
- *
- *
- * Library dependencies:
- *
- *   pwlib: v1.9.0   CVS tag:
  */
 
-#ifndef _OpenH323_VERSION_H
-#define _OpenH323_VERSION_H
+#ifndef _H323PLUS_VERSION_H
+#define _H323PLUS_VERSION_H
 
 
 
@@ -40,12 +26,12 @@
  */
 
 #define MAJOR_VERSION 1
-#define MINOR_VERSION 20
+#define MINOR_VERSION 21
 #define BUILD_TYPE    BetaCode
-#define BUILD_NUMBER 5
+#define BUILD_NUMBER 0
 
 
-#endif  // _OpenH323_VERSION_H
+#endif  // _H323PLUS_VERSION_H
 
 
 // End of File ///////////////////////////////////////////////////////////////
