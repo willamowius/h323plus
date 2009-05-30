@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2008/09/27 06:11:50  shorne
+ * Change from PStringList to PStringArray to compile with PTLIB v2.3
+ *
  * Revision 1.6  2008/06/18 21:21:19  shorne
  * Fix for changes in ptlib v2.3.0
  *
@@ -283,7 +286,11 @@ protected:
 
 };
 
-PWLIB_STATIC_LOAD_PLUGIN(GnuGk, PNatMethod);
+#if defined(PPLUGIN_STATIC_LOAD)
+   PPLUGIN_STATIC_LOAD(GnuGk,PNatMethod);
+#else
+   PWLIB_STATIC_LOAD_PLUGIN(GnuGk, PNatMethod);
+#endif
 
 class GNUGKUDPSocket : public PUDPSocket
 {
