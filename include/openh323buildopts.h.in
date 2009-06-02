@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2008/01/01 00:16:12  shorne
+ * Added GnuGknat and FileTransfer support
+ *
  * Revision 1.3  2007/10/16 16:35:44  shorne
  * Added H.230 Support
  *
@@ -169,7 +172,9 @@
 #endif
 
 
+#ifdef P_VIDEO
 #undef H323_VIDEO
+#endif
 
 #ifndef H323_VIDEO
 #define NO_H323_VIDEO
