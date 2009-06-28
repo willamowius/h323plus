@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.12  2008/11/28 13:06:49  willamowius
+# add new files
+#
 # Revision 1.11  2008/07/19 01:12:29  willamowius
 # enable building og H.341 on Linux
 #
@@ -240,6 +243,7 @@ HEADER_FILES    += $(OH323_INCDIR)/h460/h460.h \
 COMMON_SOURCES  += $(OH323_SRCDIR)/h460/h4601.cxx \
                    $(OH323_SRCDIR)/h460/h4609.cxx \
                    $(OH323_SRCDIR)/h460/h46018.cxx \
+                   $(OH323_SRCDIR)/h460/h460_std18.cxx \
                    $(OH323_SRCDIR)/h460/h46019.cxx
 endif 
 
