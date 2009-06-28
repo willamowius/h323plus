@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2009/06/28 00:25:23  shorne
+ * H.460.18 disabled by default (removed compile warning)
+ *
  * Revision 1.6  2009/06/28 00:11:03  shorne
  * Added H.460.18/19 Support
  *
@@ -160,6 +163,8 @@
 
 #ifndef _OPENH323_BUILDOPTS_H
 #define _OPENH323_BUILDOPTS_H
+
+#include <ptbuildopts.h>
 
 /////////////////////////////////////////////////
 //
