@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.14  2009/06/28 10:06:04  willamowius
+# add h46018_h225.cxx
+#
 # Revision 1.13  2009/06/28 09:45:46  willamowius
 # add h460_std18.cxx
 #
@@ -241,6 +244,8 @@ HEADER_FILES    += $(OH323_INCDIR)/h460/h460.h \
                    $(OH323_INCDIR)/h460/h4601.h \
                    $(OH323_INCDIR)/h460/h4609.h \
                    $(OH323_INCDIR)/h460/h46018.h \
+                   $(OH323_INCDIR)/h460/h460_std18.h \
+                   $(OH323_INCDIR)/h460/h46018_h225.h \
                    $(OH323_INCDIR)/h460/h46019.h
 
 COMMON_SOURCES  += $(OH323_SRCDIR)/h460/h4601.cxx \
