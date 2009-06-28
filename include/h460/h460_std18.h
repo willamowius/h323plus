@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2009/06/28 00:11:03  shorne
+ * Added H.460.18/19 Support
+ *
  *
  *
  */
@@ -67,7 +70,7 @@ public:
     // Universal Declarations Every H460 Feature should have the following
     virtual void AttachEndPoint(H323EndPoint * _ep);
 
-    static PStringArray GetFeatureName() { return PStringArray("H460_FeatureStd18"); };
+    static PStringArray GetFeatureName() { return PStringArray("Std18"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("NatTraversal-H.460.18"); };
     static int GetPurpose()	{ return FeatureRas; };
 
@@ -115,7 +118,7 @@ public:
     virtual void AttachEndPoint(H323EndPoint * _ep);
     virtual void AttachConnection(H323Connection * _con);
 
-    static PStringArray GetFeatureName() { return PStringArray("H460_FeatureStd19"); };
+    static PStringArray GetFeatureName() { return PStringArray("Std19"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("NatTraversal-H.460.19"); };
     static int GetPurpose()	{ return FeatureSignal; };
 
