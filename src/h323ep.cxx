@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.24  2009/06/28 00:11:03  shorne
+ * Added H.460.18/19 Support
+ *
  * Revision 1.23  2009/02/21 14:15:43  shorne
  * Added more NonCallSuplimentaryService support, fixed FileTransfer and better factory loader cleanup
  *
@@ -3658,17 +3661,13 @@ PSTUNClient * H323EndPoint::GetSTUN(const PIPSocket::Address & ip) const
 PNatMethod * H323EndPoint::GetPreferedNatMethod(const PIPSocket::Address & ip)
 {
 
-  if (ip.IsValid() && IsLocalAddress(ip))
-    return NULL;
-
 #if PTRACING
     PNatMethod * meth = NULL;
     const PNatList & list = natMethods->GetNATList();
-
     if (list.GetSize() > 0) {
       for (PINDEX i=0; i < list.GetSize(); i++) {
-        PTRACE(6, "H323\tNAT Method " << i << " " << list[i].GetName()[0] << " Ready: " << (list[i].IsAvailable() ? "Yes" : "No"));   
-        if (list[i].IsAvailable()) {
+        PTRACE(6, "H323\tNAT Method " << i << " " << list[i].GetName() << " Ready: " << (list[i].IsAvailable(ip) ? "Yes" : "No"));   
+        if (list[i].IsAvailable(ip)) {
              meth = &list[i];
              break;
         }
@@ -3678,7 +3677,7 @@ PNatMethod * H323EndPoint::GetPreferedNatMethod(const PIPSocket::Address & ip)
     }
     return meth;
 #else 
-  return natMethods->GetMethod();
+  return natMethods->GetMethod(ip);
 #endif
 
 }

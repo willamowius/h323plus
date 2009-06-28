@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2009/06/28 01:41:52  shorne
+ * Replaced P_HAS_QOS with P_QOS (depreciated in PTLib)
+ *
  * Revision 1.7  2009/06/28 00:11:03  shorne
  * Added H.460.18/19 Support
  *
@@ -236,7 +239,7 @@ H323_RTP_UDP::H323_RTP_UDP(const H323Connection & conn,
   if (conn.HasNATSupport()) {
       meth = endpoint.GetPreferedNatMethod(remoteAddress);
 	  if (meth != NULL) {
-	     PTRACE(4, "RTP\tNAT Method " << meth->GetName()[0] << " selected for call.");
+	     PTRACE(4, "RTP\tNAT Method " << meth->GetName() << " selected for call.");
 	  }
   }
 #endif
@@ -328,7 +331,7 @@ PBoolean H323_RTP_UDP::OnSendingPDU(const H323_RTPChannel & channel,
 PBoolean H323_RTP_UDP::OnSendingAltPDU(const H323_RTPChannel & channel,
 				H245_ArrayOf_GenericInformation & generic) const
 {
-		return connection.OnSendingOLCGenericInformation(*this,generic);
+		return connection.OnSendingOLCGenericInformation(*this,generic,false);
 }
 
 void H323_RTP_UDP::OnSendingAckPDU(const H323_RTPChannel & channel,
@@ -357,7 +360,7 @@ void H323_RTP_UDP::OnSendingAckPDU(const H323_RTPChannel & channel,
 void H323_RTP_UDP::OnSendOpenAckAlt(const H323_RTPChannel & channel, 
 	  H245_ArrayOf_GenericInformation & alternate) const
 {
-   connection.OnSendingOLCGenericInformation(*this,alternate);
+   connection.OnSendingOLCGenericInformation(*this,alternate,true);
 }
 
 PBoolean H323_RTP_UDP::ExtractTransport(const H245_TransportAddress & pdu,

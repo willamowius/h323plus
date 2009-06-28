@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.21  2009/06/28 01:41:52  shorne
+ * Replaced P_HAS_QOS with P_QOS (depreciated in PTLib)
+ *
  * Revision 1.20  2009/06/28 00:11:03  shorne
  * Added H.460.18/19 Support
  *
@@ -2421,7 +2424,8 @@ class H323Connection : public PObject
 	  */
     virtual PBoolean OnSendingOLCGenericInformation(
 						const H323_RTP_UDP & rtp,						///< RTP Information
-				        H245_ArrayOf_GenericInformation & generic		///< Generic OLC/OLCack message
+				        H245_ArrayOf_GenericInformation & generic,		///< Generic OLC/OLCack message
+						PBoolean isAck
 						) const;
 
     /**Callback from the RTP session for statistics monitoring.
@@ -3359,6 +3363,7 @@ class H323Connection : public PObject
 	PBoolean m_h245Connect;
 #endif
 #endif
+	PMutex NATSocketMutex;
 	std::map<unsigned,NAT_Sockets> m_NATSockets;
 };
 

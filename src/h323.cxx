@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.29  2009/06/28 01:41:52  shorne
+ * Replaced P_HAS_QOS with P_QOS (depreciated in PTLib)
+ *
  * Revision 1.28  2009/06/28 00:25:23  shorne
  * H.460.18 disabled by default (removed compile warning)
  *
@@ -851,9 +854,9 @@ H323Connection::H323Connection(H323EndPoint & ep,
 
   endSync = NULL;
 
-  remoteIsNAT = FALSE;
-  NATsupport =  TRUE;
-  sameNAT = FALSE;
+  remoteIsNAT = true;
+  NATsupport =  true;
+  sameNAT = false;
 
 #ifndef DISABLE_CALLAUTH
   AuthenticationFailed = FALSE;
@@ -2726,15 +2729,15 @@ void H323Connection::OnSetRTPNat(unsigned sessionid, PNatMethod & nat) const
 
 void H323Connection::SetRTPNAT(unsigned sessionid, PUDPSocket * _rtp, PUDPSocket * _rtcp)
 {
-#ifdef H323_H46018
-	PTRACE(4,"H46019\tRTP NAT Connection Callback! Session: " << sessionid);
+	PWaitAndSignal m(NATSocketMutex);
+
+	PTRACE(4,"H323\tRTP NAT Connection Callback! Session: " << sessionid);
 
 	NAT_Sockets sockets;
 	 sockets.rtp = _rtp;
 	 sockets.rtcp = _rtcp;
 
 	m_NATSockets.insert(pair<unsigned, NAT_Sockets>(sessionid, sockets));
-#endif
 }
 #endif
 
@@ -5254,11 +5257,10 @@ RTP_Session * H323Connection::UseSession(unsigned sessionID,
   return udp_session;
 }
 
-#pragma comment
 PBoolean H323Connection::OnReceiveOLCGenericInformation(H323_RTP_UDP & rtp, 
 	                    const H245_ArrayOf_GenericInformation & alternate) const
 {
-
+	PTRACE(4,"H323\tReceived OLC Generic Information");
 	PBoolean success = false;
 
 #ifdef H323_H460
@@ -5323,8 +5325,13 @@ PBoolean H323Connection::OnReceiveOLCGenericInformation(H323_RTP_UDP & rtp,
 }
 
 PBoolean H323Connection::OnSendingOLCGenericInformation(const H323_RTP_UDP & rtp,
-				H245_ArrayOf_GenericInformation & generic) const
+				H245_ArrayOf_GenericInformation & generic, PBoolean isAck) const
 {
+#ifdef H323_H46018
+	if (isAck && m_H46019enabled) {
+		// Send an Acknowledgement
+	}
+#endif
   return FALSE; 
 }
 

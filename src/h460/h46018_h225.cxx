@@ -37,6 +37,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2009/06/28 00:11:03  shorne
+ * Added H.460.18/19 Support
+ *
  *
  *
  */
@@ -323,6 +326,7 @@ H46018Handler::H46018Handler(H323EndPoint * ep)
 	if (nat != NULL) {
 	  nat->AttachHandler(this);
 	  nat->SetAvailable();
+	  ep->GetNatMethods().AddMethod(nat);
 	}
 
 	SocketCreateThread = NULL;
@@ -330,6 +334,8 @@ H46018Handler::H46018Handler(H323EndPoint * ep)
 
 H46018Handler::~H46018Handler()
 {
+	PTRACE(4, "H46018\tClosing H46018 Handler.");
+	EP->GetNatMethods().RemoveMethod("H46019");
 }
 
 PBoolean H46018Handler::CreateH225Transport(const PASN_OctetString & information)
