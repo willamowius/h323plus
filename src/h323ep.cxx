@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.25  2009/06/28 04:47:53  shorne
+ * Fixes for H.460.19 NAT Method loading
+ *
  * Revision 1.24  2009/06/28 00:11:03  shorne
  * Added H.460.18/19 Support
  *
@@ -903,7 +906,7 @@
 #include "h225.h"
 
 #ifdef H323_H46018 
-#include "h460/h460_Std18.h"
+#include "h460/h460_std18.h"
 #include "h460/h46018_h225.h"
 #endif  // H323_H46018
 #endif  // H323_H460
