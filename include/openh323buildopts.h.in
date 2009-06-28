@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2009/06/28 00:11:03  shorne
+ * Added H.460.18/19 Support
+ *
  * Revision 1.5  2009/06/02 12:57:40  willamowius
  * detect missing video in PTLib
  *
@@ -210,7 +213,7 @@
 #endif
 #undef H323_H450
 #undef H323_H460
-#define H323_H46018  1
+#undef H323_H46018
 #undef H323_H501
 #undef H323_GNUGK
 #undef H323_FILE

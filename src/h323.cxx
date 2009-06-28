@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.27  2009/06/28 00:11:03  shorne
+ * Added H.460.18/19 Support
+ *
  * Revision 1.26  2009/02/21 14:11:40  shorne
  * Added OnCapabilitySet Callback,FileTransfer handlers,basic support for H.450 message warning
  *
@@ -5247,6 +5250,7 @@ RTP_Session * H323Connection::UseSession(unsigned sessionID,
   return udp_session;
 }
 
+#pragma comment
 PBoolean H323Connection::OnReceiveOLCGenericInformation(H323_RTP_UDP & rtp, 
 	                    const H245_ArrayOf_GenericInformation & alternate) const
 {
@@ -5260,9 +5264,8 @@ PBoolean H323Connection::OnReceiveOLCGenericInformation(H323_RTP_UDP & rtp,
 		  if (id.GetTag() != H245_CapabilityIdentifier::e_standard) 
 			  break;
 
-			const PASN_ObjectId & oid = id;	
-
 #ifdef H323_H46018
+		    const PASN_ObjectId & oid = id;	
 			if (m_H46019enabled && (oid.AsString() == H46019OID)) {
 				const H245_ArrayOf_GenericParameter & msg = info.m_messageContent;
 				H245_GenericParameter & val = msg[0];
