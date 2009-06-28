@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2009/06/28 00:11:03  shorne
+ * Added H.460.18/19 Support
+ *
  * Revision 1.2  2008/05/23 11:19:46  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -341,7 +344,7 @@ class H323_RTP_UDP : public H323_RTP_Session
     );
   //@}
 
-#if P_HAS_QOS
+#if P_QOS
   /**@name GQoS Support */
   //@{
     /**Write the Transport Capability PDU to Include GQoS Support.

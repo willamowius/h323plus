@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2008/05/23 11:20:01  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.4  2008/02/06 02:52:59  shorne
  * Added support for Standards based NAT Traversal
  *
@@ -270,7 +273,7 @@ class PNatMethod;
 // 
 // class to hold the QoS definitions for an RTP channel
 
-#if P_HAS_QOS
+#if P_QOS
 
 class RTP_QOS : public PObject
 {
@@ -1136,7 +1139,7 @@ class RTP_UDP : public RTP_Session
       */
     virtual void EnableGQoS(PBoolean success = TRUE);
 
-#if P_HAS_QOS
+#if P_QOS
      /** Get the QOS settings
        */
       PQoS & GetQOS();

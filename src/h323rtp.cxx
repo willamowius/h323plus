@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2009/06/28 00:11:03  shorne
+ * Added H.460.18/19 Support
+ *
  * Revision 1.6  2008/05/23 11:22:09  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -314,7 +317,7 @@ PBoolean H323_RTP_UDP::OnSendingPDU(const H323_RTPChannel & channel,
   }
 
   // GQoS
-#if P_HAS_QOS
+#if P_QOS
   if (connection.H245QoSEnabled() && WriteTransportCapPDU(param.m_transportCapability,channel)) {
 		param.IncludeOptionalField(H245_H2250LogicalChannelParameters::e_transportCapability);
   }
@@ -419,7 +422,7 @@ PBoolean H323_RTP_UDP::OnReceivedPDU(H323_RTPChannel & channel,
     H323GetRTPPacketization(codec->GetWritableMediaFormat(), param.m_mediaPacketization);
 
   // GQoS
-#if P_HAS_QOS
+#if P_QOS
   if (param.HasOptionalField(H245_H2250LogicalChannelParameters::e_transportCapability) && connection.H245QoSEnabled()) {
 	 H245_TransportCapability trans = param.m_transportCapability;
 		ReadTransportCapPDU(trans,channel);
@@ -497,7 +500,7 @@ void H323_RTP_UDP::OnSendRasInfo(H225_RTPSession & info)
   ta2.SetPDU(info.m_rtcpAddress.m_sendAddress);
 }
 
-#if P_HAS_QOS
+#if P_QOS
 PBoolean H323_RTP_UDP::WriteTransportCapPDU(H245_TransportCapability & cap, 
 											const H323_RTPChannel & channel) const
 {

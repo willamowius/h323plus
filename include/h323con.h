@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.20  2009/06/28 00:11:03  shorne
+ * Added H.460.18/19 Support
+ *
  * Revision 1.19  2009/02/21 21:19:35  willamowius
  * fix gcc compile error
  *
@@ -2478,7 +2481,7 @@ class H323Connection : public PObject
 	  */
 	PBoolean isSameNAT() const { return sameNAT; };
 
-#if P_STUN
+#ifdef P_STUN
 	/** On Set RTP information from H.225 & H.245 signalling
 	 */
 	virtual void OnSetRTPNat(unsigned sessionid, PNatMethod & nat) const;

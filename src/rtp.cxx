@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2008/10/28 23:06:28  willamowius
+ * fixes to compile with audio disabled
+ *
  * Revision 1.5  2008/09/27 06:20:26  shorne
  * BUG FIX: RTP_UDP::Write now returns false if there is an error writing to the control channel
  *
@@ -1643,7 +1646,7 @@ PBoolean RTP_UDP::ModifyQOS(RTP_QOS * rtpqos)
   if (rtpqos == NULL)
     return retval;
 
-#if P_HAS_QOS
+#if P_QOS
   if (dataSocket != NULL)
     retval &= dataSocket->ModifyQoSSpec(&(rtpqos->dataQoS));
   else if (controlSocket != NULL)
@@ -1659,7 +1662,7 @@ void RTP_UDP::EnableGQoS(PBoolean success)
 	enableGQOS = success;
 }
 
-#if P_HAS_QOS
+#if P_QOS
 PQoS & RTP_UDP::GetQOS()
 {
     if (dataSocket != NULL) 
@@ -1696,7 +1699,7 @@ PBoolean RTP_UDP::Open(PIPSocket::Address _localAddress,
   PQoS * dataQos = NULL;
   PQoS * ctrlQos = NULL;
   if (rtpQos != NULL) {
-#if P_HAS_QOS
+#if P_QOS
     dataQos = &(rtpQos->dataQoS);
     ctrlQos = &(rtpQos->ctrlQoS);
 #endif

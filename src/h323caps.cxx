@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.20  2009/02/21 14:12:44  shorne
+ * Added ability to retreive capabilityset
+ *
  * Revision 1.19  2008/06/26 00:01:51  shorne
  * Fix for loading H.239 Capabilities to avoid segfault
  *
@@ -656,7 +659,7 @@ H323RealTimeCapability::H323RealTimeCapability()
 H323RealTimeCapability::H323RealTimeCapability(const H323RealTimeCapability & rtc)
   : H323Capability(rtc)
 {
-#if P_HAS_QOS
+#if P_QOS
   if (rtc.rtpqos != NULL) 
     rtpqos  = new RTP_QOS(*rtc.rtpqos);
   else
@@ -666,14 +669,14 @@ H323RealTimeCapability::H323RealTimeCapability(const H323RealTimeCapability & rt
 
 H323RealTimeCapability::~H323RealTimeCapability()
 {
-#if P_HAS_QOS
+#if P_QOS
   delete rtpqos;
 #endif
 }
 
 void H323RealTimeCapability::AttachQoS(RTP_QOS * _rtpqos)
 {
-#if P_HAS_QOS
+#if P_QOS
   delete rtpqos;
 #endif
     
@@ -1198,7 +1201,7 @@ H323AudioCapability::H323AudioCapability(unsigned rx, unsigned tx)
   rxFramesInPacket = rx;
   txFramesInPacket = tx;
 
-#if P_HAS_QOS
+#if P_QOS
 // Set to G.729 Settings Avg 56kb/s Peek 110 kb/s
 	rtpqos = new RTP_QOS;
 	rtpqos->dataQoS.SetWinServiceType(SERVICETYPE_GUARANTEED);
@@ -1599,7 +1602,7 @@ PBoolean H323NonStandardAudioCapability::IsMatch(const PASN_Choice & subTypePDU)
 int H323VideoCapability::DSCPvalue = PQoS::controlledLoadDSCP;
 H323VideoCapability::H323VideoCapability()
 {
-#if P_HAS_QOS
+#if P_QOS
 // Set to H263CIF Settings
 	rtpqos = new RTP_QOS;
 	rtpqos->dataQoS.SetWinServiceType(SERVICETYPE_CONTROLLEDLOAD);

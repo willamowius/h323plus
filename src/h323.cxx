@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.28  2009/06/28 00:25:23  shorne
+ * H.460.18 disabled by default (removed compile warning)
+ *
  * Revision 1.27  2009/06/28 00:11:03  shorne
  * Added H.460.18/19 Support
  *
@@ -336,6 +339,7 @@
  */
 
 #include <ptlib.h>
+
 
 #ifdef __GNUC__
 #pragma implementation "h323con.h"
@@ -2708,7 +2712,7 @@ if (setup.m_conferenceGoal.GetTag() == H225_Setup_UUIE_conferenceGoal::e_create)
   return NumCallEndReasons;
 }
 
-#if P_STUN
+#ifdef P_STUN
 void H323Connection::OnSetRTPNat(unsigned sessionid, PNatMethod & nat) const
 {
 #ifdef H323_H46018
