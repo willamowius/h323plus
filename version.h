@@ -26,8 +26,8 @@
  */
 
 #define MAJOR_VERSION 1
-#define MINOR_VERSION 21
-#define BUILD_TYPE    ReleaseCode
+#define MINOR_VERSION 22
+#define BUILD_TYPE    BetaCode
 #define BUILD_NUMBER 0
 
 
