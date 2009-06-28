@@ -36,6 +36,9 @@
  * Contributor(s): ______________________________________.
  *
 * $Log$
+* Revision 1.11  2009/03/20 14:18:10  willamowius
+* Add() an item without content
+*
 * Revision 1.10  2009/02/21 14:06:30  shorne
 * Fix Memory leak
 *
@@ -1158,9 +1161,6 @@ class H460_FeatureSet : public PObject
 
 /////////////////////////////////////////////////////////////////////
 
-
-typedef PFactory<H460_Feature, std::string> H460Factory;
-
 template <class className> class H460PluginServiceDescriptor : public PDevicePluginServiceDescriptor
 {
   public:
@@ -1181,22 +1181,7 @@ template <class className> class H460PluginServiceDescriptor : public PDevicePlu
 
 #define H460_FEATURE(name)    \
 static H460PluginServiceDescriptor<H460_Feature##name> H460_Feature##name##_descriptor; \
-PCREATE_PLUGIN_STATIC(H460_Feature##name, H460_Feature, &H460_Feature##name##_descriptor); \
-
-
-/////////////////////////////////////////////////////////////////////
-// Startup/Shutdown loader
-
-class H460FactoryStartup : public PProcessStartup
-{
-  PCLASSINFO(H460FactoryStartup, PProcessStartup)
-  public:
-   // On Shutdown unregister the H.460 factory
-    virtual void OnShutdown() 
-	   {   H460Factory::UnregisterAll();  }
-};
-
-static PProcessStartupFactory::Worker<H460FactoryStartup> H460StartupFactory("H460", true);
+PCREATE_PLUGIN_STATIC(name, H460_Feature, &H460_Feature##name##_descriptor); \
 
 /////////////////////////////////////////////////////////////////////
 

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.17  2009/02/21 14:04:35  shorne
+ * Added OnCapabilitySet Callback, FileTransfer Handlers,baseline H.450 Message warning support
+ *
  * Revision 1.16  2008/11/08 16:56:22  willamowius
  * fixes to compile with video disabled
  *
@@ -436,6 +439,8 @@ class OpalT38Protocol;
 class H323FileTransferHandler;
 class H323FileTransferList;
 #endif
+
+#include <ptlib/pluginmgr.h>
 
 #ifdef P_STUN
 #include <ptclib/pnat.h>
@@ -2191,7 +2196,28 @@ class H323EndPoint : public PObject
 	  */
 	void FeatureSetDisable()  {  disableH460 = TRUE;  }
 
+#ifdef H323_H46018
+
+	/** Disable H.460.18 Feature. (By Default it is enabled)
+	  */	
+	void H46018Enable(PBoolean enable);
+
+	/** Query whether we are using H.460.18
+	  */
+	PBoolean H46018IsEnabled();
+
+    /** Signal that H.460.18 has been received. ie. We are behind a NAT/FW
+	  */
+	void H46018Received() {};
+
+	/** Whether H.460.18 is in Operation for this call
+	  */
+	PBoolean H46018InOperation();
+
 #endif
+
+#endif
+
 
 #ifdef H323_AEC
 	PBoolean AECEnabled()   {  return enableAEC; }
@@ -2699,6 +2725,10 @@ class H323EndPoint : public PObject
 #ifdef H323_H460
 	H460_FeatureSet features;
 	PBoolean disableH460;
+
+#ifdef H323_H46018
+	PBoolean m_h46018enabled;
+#endif
 #endif
 
 #ifdef H323_AEC
@@ -2713,23 +2743,6 @@ class H323EndPoint : public PObject
     PDECLARE_NOTIFIER(PThread, H323EndPoint, RegMethod);
 #endif
 };
-
-#ifdef P_STUN
-
-/////////////////////////////////////////////////////////////////////
-// Startup/Shutdown loader for NATFactory
-
-class NATFactoryStartup : public PProcessStartup
-{
-  PCLASSINFO(NATFactoryStartup, PProcessStartup)
-  public:
-   // On Shutdown unregister the NAT factory
-    virtual void OnShutdown() 
-	   {    NatFactory::UnregisterAll();  }
-};
-static PProcessStartupFactory::Worker<NATFactoryStartup> NATStartupFactory("NAT", true);
-
-#endif
 
 /////////////////////////////////////////////////////////////////////
 

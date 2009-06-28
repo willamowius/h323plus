@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2009/05/30 14:38:47  shorne
+ * Fix for deprecation of PWLIB_STATIC_LOAD_PLUGIN in ptlib
+ *
  * Revision 1.7  2008/09/27 06:11:50  shorne
  * Change from PStringList to PStringArray to compile with PTLIB v2.3
  *
@@ -248,17 +251,11 @@ public:
 
    PBoolean OpenSocket(PUDPSocket & socket, PortInfo & portInfo) const;
 
-   // PNatMethod was changed from PTLib v2.3 onwards 
-   // Need to put this directive in to compile with v2.2.1
-#if PTLIB_MAJOR <= 2 && PTLIB_MINOR < 3
-   static PStringList GetNatMethodName() {  return PStringList("GNUGK"); };
-   virtual PStringList GetName() const
-            { return GetNatMethodName(); }
-#else
-   static PStringArray GetNatMethodName() {  return PStringArray("GNUGK"); };
+
+   static PStringList GetNatMethodName() {  return PStringArray("GNUGK"); };
    virtual PString GetName() const
             { return GetNatMethodName()[0]; }
-#endif
+
 
    // All these are virtual and never used. 
     virtual bool GetServerAddress(

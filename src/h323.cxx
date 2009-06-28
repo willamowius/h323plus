@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.26  2009/02/21 14:11:40  shorne
+ * Added OnCapabilitySet Callback,FileTransfer handlers,basic support for H.450 message warning
+ *
  * Revision 1.25  2008/11/08 16:18:42  willamowius
  * fixes to compile with video disabled
  *
@@ -352,6 +355,11 @@
 #ifdef H323_H460
 #include "h460/h460.h"
 #include "h460/h4601.h"
+
+#ifdef H323_H46018
+#include "h460/h46018_h225.h"
+#include "h460/h46019.h"
+#endif
 #endif
 
 #include "gkclient.h"
@@ -862,6 +870,12 @@ H323Connection::H323Connection(H323EndPoint & ep,
 #ifdef H323_H460
   disableH460 = ep.FeatureSetDisabled();
   features->LoadFeatureSet(H460_Feature::FeatureSignal,this);
+
+#ifdef H323_H46018
+  m_H46019CallReceiver = false;
+  m_H46019enabled = false;
+  m_h245Connect = false;
+#endif
 #endif
 
   nonCallConnection = FALSE;
@@ -2053,7 +2067,7 @@ PBoolean H323Connection::OnReceivedFacility(const H323SignalPDU & pdu)
       PPER_Stream otherBuffer;
       fac.m_h245Address.Encode(otherBuffer);
 
-      if (myBuffer < otherBuffer) {
+      if (myBuffer < otherBuffer || OnH245AddressConflict()) {
         PTRACE(2, "H225\tSimultaneous start of H.245 channel, connecting to remote.");
         controlChannel->CleanUpOnTermination();
         delete controlChannel;
@@ -2694,6 +2708,26 @@ if (setup.m_conferenceGoal.GetTag() == H225_Setup_UUIE_conferenceGoal::e_create)
 #if P_STUN
 void H323Connection::OnSetRTPNat(unsigned sessionid, PNatMethod & nat) const
 {
+#ifdef H323_H46018
+	if (nat.GetName() == "H46019") {
+	   PTRACE(4,"H46019\tSetting RTP NAT info session " << sessionid);
+	   PNatMethod_H46019 & natmethod = (PNatMethod_H46019 &)nat;
+	   natmethod.SetSessionInfo(sessionid, GetCallToken());
+	}
+#endif
+}
+
+void H323Connection::SetRTPNAT(unsigned sessionid, PUDPSocket * _rtp, PUDPSocket * _rtcp)
+{
+#ifdef H323_H46018
+	PTRACE(4,"H46019\tRTP NAT Connection Callback! Session: " << sessionid);
+
+	NAT_Sockets sockets;
+	 sockets.rtp = _rtp;
+	 sockets.rtcp = _rtcp;
+
+	m_NATSockets.insert(pair<unsigned, NAT_Sockets>(sessionid, sockets));
+#endif
 }
 #endif
 
@@ -3034,11 +3068,81 @@ PBoolean H323Connection::StartControlNegotiations(PBoolean renegotiate)
 
 PBoolean H323Connection::OnStartHandleControlChannel()
 {
-  if (controlChannel != NULL) {
-     PTRACE(2, "H245\tHandle control channel");
-     return StartHandleControlChannel();
-  } else 
-     return StartControlNegotiations();
+	 if (fastStartState == FastStartAcknowledged)
+		 return true;
+
+     if (controlChannel == NULL)
+         return StartControlNegotiations();
+#ifndef H323_H46018
+	 else {
+		 PTRACE(2, "H245\tHandle control channel");
+		 return StartHandleControlChannel();
+	 }
+#else
+	if (!m_H46019enabled) {
+		PTRACE(2, "H245\tHandle control channel");
+		return StartHandleControlChannel();
+	}
+
+	// according to H.460.18 cl.11 we have to send a generic Indication on the opening of a
+	// H.245 control channel. Details are specified in H.460.18 cl.16
+	// This must be the first PDU otherwise gatekeeper/proxy will close the channel.
+
+	PTRACE(2, "H46018\tStarted control channel");
+
+		if (endpoint.H46018IsEnabled() && !m_h245Connect) {
+
+		H323ControlPDU pdu;
+		H245_GenericMessage & cap = pdu.Build(H245_IndicationMessage::e_genericIndication);
+
+			H245_CapabilityIdentifier & id = cap.m_messageIdentifier;
+				id.SetTag(H245_CapabilityIdentifier::e_standard);
+				PASN_ObjectId & gid = id;
+				gid.SetValue(H46018OID);
+
+			cap.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
+				PASN_Integer & sub = cap.m_subMessageIdentifier;
+				sub = 1;
+
+			cap.IncludeOptionalField(H245_GenericMessage::e_messageContent);
+			  H245_ArrayOf_GenericParameter & msg = cap.m_messageContent;
+
+			  // callIdentifer
+				H245_GenericParameter call;
+				   H245_ParameterIdentifier & idx = call.m_parameterIdentifier;
+					 idx.SetTag(H245_ParameterIdentifier::e_standard);
+					 PASN_Integer & m = idx;
+					 m =1;
+				   H245_ParameterValue & conx = call.m_parameterValue;
+					 conx.SetTag(H245_ParameterValue::e_octetString);
+					 PASN_OctetString & raw = conx;
+					 raw.SetValue(callIdentifier);
+				msg.SetSize(1);
+				msg[0] = call;
+
+			  // Is receiver
+				if (m_H46019CallReceiver) {
+ 					H245_GenericParameter answer;
+					H245_ParameterIdentifier & an = answer.m_parameterIdentifier;
+						an.SetTag(H245_ParameterIdentifier::e_standard);
+						PASN_Integer & n = an;
+						n =2;
+					H245_ParameterValue & aw = answer.m_parameterValue;
+					aw.SetTag(H245_ParameterValue::e_logical);
+					msg.SetSize(2);
+					msg[1] = answer;
+				}
+			PTRACE(4,"H46018\tSending H.245 Control PDU " << pdu);
+
+			if (!WriteControlPDU(pdu))
+				  return false;
+
+	  		m_h245Connect = true;
+		}
+
+	 return StartHandleControlChannel();
+
+#endif
 }
 
 PBoolean H323Connection::StartHandleControlChannel()
@@ -5143,16 +5247,72 @@ RTP_Session * H323Connection::UseSession(unsigned sessionID,
   return udp_session;
 }
 
-PBoolean H323Connection::OnReceiveRTPAltInformation(H323_RTP_UDP & rtp, 
+PBoolean H323Connection::OnReceiveOLCGenericInformation(H323_RTP_UDP & rtp, 
 	                    const H245_ArrayOf_GenericInformation & alternate) const
 {
-	return FALSE;
-}
 
-PBoolean H323Connection::OnSendingRTPAltInformation(const H323_RTP_UDP & rtp,
-				H245_ArrayOf_GenericInformation & alternate) const
-{
-  return FALSE; 
+	PBoolean success = false;
+
+#ifdef H323_H460
+		for (PINDEX i=0; i<alternate.GetSize(); i++) {
+		  const H245_GenericInformation & info = alternate[i];
+		  const H245_CapabilityIdentifier & id = info.m_messageIdentifier;
+		  if (id.GetTag() != H245_CapabilityIdentifier::e_standard) 
+			  break;
+
+			const PASN_ObjectId & oid = id;	
+
+#ifdef H323_H46018
+			if (m_H46019enabled && (oid.AsString() == H46019OID)) {
+				const H245_ArrayOf_GenericParameter & msg = info.m_messageContent;
+				H245_GenericParameter & val = msg[0];
+				 if (val.m_parameterValue.GetTag() != H245_ParameterValue::e_octetString) 
+					 break;
+
+					PASN_OctetString & raw = val.m_parameterValue;
+					PPER_Stream pdu(raw);
+					H46019_TraversalParameters params;
+					if (!params.Decode(pdu)) {
+						PTRACE(2,"H46019\tError decoding Traversal Parameters!");
+						break;
+					} 
+
+					PTRACE(4,"H46019\tTraversal Parameters:\n" << params);
+					
+					H323TransportAddress address;
+					if (params.HasOptionalField(H46019_TraversalParameters::e_keepAliveChannel)) {
+						H245_TransportAddress & k = params.m_keepAliveChannel;
+						address = H323TransportAddress(k);
+					}
+
+					unsigned payload = 0;
+					if (params.HasOptionalField(H46019_TraversalParameters::e_keepAlivePayloadType)) {
+						PASN_Integer & p = params.m_keepAlivePayloadType;
+						payload = p;
+					}
+
+					unsigned ttl = 0;
+					if (params.HasOptionalField(H46019_TraversalParameters::e_keepAliveInterval)) {
+						H225_TimeToLive & a = params.m_keepAliveInterval;
+						ttl = a;
+					}
+
+					// Need the sessionId
+					unsigned sessionID = rtp.GetSessionID();
+					std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(sessionID);
+						if (sockets_iter != m_NATSockets.end()) {
+							NAT_Sockets sockets = sockets_iter->second;
+							((H46019UDPSocket *)sockets.rtp)->Activate(address,payload,ttl);
+							((H46019UDPSocket *)sockets.rtcp)->Activate(address,payload,ttl);
+							success = true;
+						}
+				break;
+			}
+#endif  // H323_H46018
+		}
+
+#endif  // H323_H460
+	return success;
 }
 
 PBoolean H323Connection::OnSendingOLCGenericInformation(const H323_RTP_UDP & rtp,
@@ -5617,7 +5777,31 @@ void H323Connection::DisableFeatures()
 {
 	 disableH460 = TRUE;
 }
+
+#ifdef H323_H46018
+void H323Connection::H46019SetCallReceiver() 
+{ 
+	PTRACE(4,"H46019\tCall is receiver.");
+	m_H46019CallReceiver = TRUE; 
+}
+
+void H323Connection::H46019Enabled() 
+{ 
+	PTRACE(4,"H46019\tCall is receiver.");
+	m_H46019enabled = TRUE; 
+}
+#endif   // H323_H46018
+#endif   // H323_H460
+
+PBoolean H323Connection::OnH245AddressConflict()
+{
+#ifdef H323_H46018
+	return m_H46019enabled;
+#else
+	return false;
 #endif
+}
+
 
 PBoolean H323Connection::OnSendFeatureSet(unsigned code, H225_FeatureSet & feats) const
 {

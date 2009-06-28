@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.19  2009/02/21 21:19:35  willamowius
+ * fix gcc compile error
+ *
  * Revision 1.18  2009/02/21 14:04:35  shorne
  * Added OnCapabilitySet Callback, FileTransfer Handlers,baseline H.450 Message warning support
  *
@@ -2403,26 +2406,20 @@ class H323Connection : public PObject
       unsigned sessionID
     );
 
-	/**Received RTP alternate Information. This is used to supply alternate RTP 
+	/**Received OLC Generic Information. This is used to supply alternate RTP 
 	   destination information in the generic information field in the OLC for the
 	   purpose of probing for an alternate route to the remote party.
 	  */
-	virtual PBoolean OnReceiveRTPAltInformation(H323_RTP_UDP & rtp, 
+	virtual PBoolean OnReceiveOLCGenericInformation(H323_RTP_UDP & rtp, 
 	                    const H245_ArrayOf_GenericInformation & alternate) const;
 
-	/**Send RTP alternate Information. This is used to supply alternate RTP 
-	   destination information in the generic information field in the OLC for the
-	   purpose of probing for an alternate route to the remote party.
-	  */
-    virtual PBoolean OnSendingRTPAltInformation(const H323_RTP_UDP & rtp,
-				        H245_ArrayOf_GenericInformation & alternate) const;
-
-
-	/**Send Generic Information with the OLC. This is used to include generic
+	/**Send Generic Information in the OLC. This is used to include generic
 	   information in the openlogicalchannel
 	  */
-    virtual PBoolean OnSendingOLCGenericInformation(const H323_RTP_UDP & rtp,
-				        H245_ArrayOf_GenericInformation & generic) const;
+    virtual PBoolean OnSendingOLCGenericInformation(
+						const H323_RTP_UDP & rtp,						///< RTP Information
+				        H245_ArrayOf_GenericInformation & generic		///< Generic OLC/OLCack message
+						) const;
 
     /**Callback from the RTP session for statistics monitoring.
        This is called every so many packets on the transmitter and receiver
@@ -2488,7 +2485,7 @@ class H323Connection : public PObject
 
 	/** Set RTP NAT information callback
 	  */
-	virtual void SetRTPNAT(unsigned /*sessionid*/, PUDPSocket * /*socket*/) {};
+	virtual void SetRTPNAT(unsigned sessionid, PUDPSocket * _rtp, PUDPSocket * _rtcp);
 
 #endif
 	/** Set Endpoint Type Information
@@ -2943,6 +2940,12 @@ class H323Connection : public PObject
       unsigned seconds  ///< max duration of call in seconds
     );
 
+	struct NAT_Sockets 
+	{
+		PUDPSocket * rtp;
+		PUDPSocket * rtcp;
+	};
+
 #ifdef H323_H460
 	/** Disable Feautures on a call by call basis
 	  */
@@ -2952,6 +2955,20 @@ class H323Connection : public PObject
     virtual PBoolean OnSendFeatureSet(unsigned, H225_FeatureSet &) const;
 
     virtual void OnReceiveFeatureSet(unsigned, const H225_FeatureSet &) const;
+
+	/** On resolving H.245 Address conflict
+	  */
+	virtual PBoolean OnH245AddressConflict();
+
+#ifdef H323_H46018
+    /** Call to set the direction of call establishment
+	  */
+	void H46019SetCallReceiver();
+
+	/** Enable H46019 for this call
+	  */
+	void H46019Enabled();
+#endif
 
   //@}
 
@@ -3332,8 +3349,14 @@ class H323Connection : public PObject
 #ifdef H323_H460
 	PBoolean disableH460;
 	H460_FeatureSet       * features;
-#endif
 
+#ifdef H323_H46018
+	PBoolean m_H46019CallReceiver;
+	PBoolean m_H46019enabled;
+	PBoolean m_h245Connect;
+#endif
+#endif
+	std::map<unsigned,NAT_Sockets> m_NATSockets;
 };
 
 

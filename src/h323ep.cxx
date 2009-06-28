@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.23  2009/02/21 14:15:43  shorne
+ * Added more NonCallSuplimentaryService support, fixed FileTransfer and better factory loader cleanup
+ *
  * Revision 1.22  2008/11/08 16:56:22  willamowius
  * fixes to compile with video disabled
  *
@@ -895,7 +898,12 @@
 #ifdef H323_H460
 #include "h460/h460.h"
 #include "h225.h"
-#endif
+
+#ifdef H323_H46018 
+#include "h460/h460_Std18.h"
+#include "h460/h46018_h225.h"
+#endif  // H323_H46018
+#endif  // H323_H460
 
 #include "gkclient.h"
 
@@ -1295,10 +1303,16 @@ H323EndPoint::H323EndPoint()
 
 #ifdef H323_H460
   disableH460 = false;
+
+#ifdef H323_H46018
+  // We must set time to live to 30 to ensure pinhole open
+  registrationTimeToLive = PTimeInterval(0, 30);  
+  m_h46018enabled = true;
+#endif
 #endif
 
 #ifdef H323_AEC 
-  enableAEC = FALSE;
+  enableAEC = false;
 #endif
 
 #ifdef H323_GNUGK
@@ -3866,6 +3880,26 @@ void H323EndPoint::LoadBaseFeatureSet()
 #endif
 
 }
+
+#ifdef H323_H46018
+void H323EndPoint::H46018Enable(PBoolean enable) 
+{ 
+	m_h46018enabled = enable;
+	if (enable) {
+		// Must set reregistrations at between 15 and 45 sec
+		// otherwise the Pinhole in NAT will close
+		registrationTimeToLive = PTimeInterval(0, 30);  
+	} else {
+		// Set timer to whatever gk allocates...
+		registrationTimeToLive = PTimeInterval();       
+	}
+}
+
+PBoolean H323EndPoint::H46018IsEnabled() 
+{ 
+	return m_h46018enabled; 
+}
+#endif  // H323_H46018
 
 PBoolean H323EndPoint::OnFeatureInstance(int instType, const PString & identifer)
 {

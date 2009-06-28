@@ -1,4 +1,10 @@
 
+H323plus 1.22
+
+Added H.460.18/19 support (Disabled by default)
+(fixed) Slow start being accidently activated when FastStart being acknowledged.
+
+
 H323plus 1.20 - 1.21
 
 Updated to compile with Ptlib 2.2.x and 2.3.x (PBoolean etc.)

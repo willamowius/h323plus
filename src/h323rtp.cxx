@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2008/05/23 11:22:09  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.5  2008/02/06 02:52:59  shorne
  * Added support for Standards based NAT Traversal
  *
@@ -257,6 +260,10 @@ H323_RTP_UDP::H323_RTP_UDP(const H323Connection & conn,
   rtp.SetLocalAddress(localAddress);
 }
 
+unsigned H323_RTP_UDP::GetSessionID() const
+{
+	return rtp.GetSessionID();
+}
 
 PBoolean H323_RTP_UDP::OnSendingPDU(const H323_RTPChannel & channel,
                                 H245_H2250LogicalChannelParameters & param) const
@@ -318,9 +325,6 @@ PBoolean H323_RTP_UDP::OnSendingPDU(const H323_RTPChannel & channel,
 PBoolean H323_RTP_UDP::OnSendingAltPDU(const H323_RTPChannel & channel,
 				H245_ArrayOf_GenericInformation & generic) const
 {
-	if (connection.isSameNAT()) 
-        return connection.OnSendingRTPAltInformation(*this,generic);
-	else
 		return connection.OnSendingOLCGenericInformation(*this,generic);
 }
 
@@ -350,7 +354,7 @@ void H323_RTP_UDP::OnSendingAckPDU(const H323_RTPChannel & channel,
 void H323_RTP_UDP::OnSendOpenAckAlt(const H323_RTPChannel & channel, 
 	  H245_ArrayOf_GenericInformation & alternate) const
 {
-   connection.OnSendingRTPAltInformation(*this,alternate);
+   connection.OnSendingOLCGenericInformation(*this,alternate);
 }
 
 PBoolean H323_RTP_UDP::ExtractTransport(const H245_TransportAddress & pdu,
@@ -433,7 +437,7 @@ PBoolean H323_RTP_UDP::OnReceivedPDU(H323_RTPChannel & channel,
 PBoolean H323_RTP_UDP::OnReceivedAltPDU(H323_RTPChannel & channel, 
 	  const H245_ArrayOf_GenericInformation & alternate)
 {
-	return connection.OnReceiveRTPAltInformation(*this,alternate);
+	return connection.OnReceiveOLCGenericInformation(*this,alternate);
 }
 
 PBoolean H323_RTP_UDP::OnReceivedAckPDU(H323_RTPChannel & channel,
@@ -473,7 +477,7 @@ PBoolean H323_RTP_UDP::OnReceivedAckPDU(H323_RTPChannel & channel,
 PBoolean H323_RTP_UDP::OnReceivedAckAltPDU(H323_RTPChannel & channel,
 	  const H245_ArrayOf_GenericInformation & alternate)
 {
-	return connection.OnReceiveRTPAltInformation(*this,alternate);
+	return connection.OnReceiveOLCGenericInformation(*this,alternate);
 }
 
 void H323_RTP_UDP::OnSendRasInfo(H225_RTPSession & info)

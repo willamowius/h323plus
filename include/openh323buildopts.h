@@ -24,9 +24,6 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
- * Revision 1.5  2009/06/02 12:57:40  willamowius
- * detect missing video in PTLib
- *
  * Revision 1.4  2008/01/01 00:16:12  shorne
  * Added GnuGknat and FileTransfer support
  *
@@ -163,21 +160,19 @@
 // Major options
 //
 
-#undef	OPENH323_MAJOR
-#undef	OPENH323_MINOR
-#undef	OPENH323_BUILD
-#undef	OPENH323_VERSION
+#define OPENH323_MAJOR 1
+#define OPENH323_MINOR 22
+#define OPENH323_BUILD 0
+#define OPENH323_VERSION "1.22.0"
 
-#undef H323_AUDIO_CODECS
+#define H323_AUDIO_CODECS 1
 
 #ifndef H323_AUDIO_CODECS
 #define NO_H323_AUDIO_CODECS
 #endif
 
 
-#ifdef P_VIDEO
-#undef H323_VIDEO
-#endif
+#define H323_VIDEO 1
 
 #ifndef H323_VIDEO
 #define NO_H323_VIDEO
@@ -197,23 +192,23 @@
 //
 
 #undef H323_AEC
-#undef H323_T38
-#undef H323_T120
-#undef H323_H224
-#undef H323_H230
-#undef H323_H239
-#undef H323_H248
-#undef H323_H249
-#undef H323_H341
+#define H323_T38 1
+#define H323_T120 1
+#define H323_H224 1
+#define H323_H230 1
+#define H323_H239 1
+#define H323_H248 1
+#define H323_H249 1
+#define H323_H341 1
 #ifdef P_LDAP
-#undef H323_H350
+#define H323_H350 1
 #endif
-#undef H323_H450
-#undef H323_H460
-#define H323_H46018  1
-#undef H323_H501
-#undef H323_GNUGK
-#undef H323_FILE
+#define H323_H450 1
+#define H323_H460 1
+#define H323_H46018 1
+#define H323_H501 1
+#define H323_GNUGK 1
+#define H323_FILE 1
 
 #undef H323_SIGNAL_AGGREGATE
 #undef H323_RTP_AGGREGATE
@@ -221,3 +216,4 @@
 #endif
 
 // End Of File ///////////////////////////////////////////////////////////////
+
