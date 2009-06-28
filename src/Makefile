@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.13  2009/06/28 09:45:46  willamowius
+# add h460_std18.cxx
+#
 # Revision 1.12  2008/11/28 13:06:49  willamowius
 # add new files
 #
@@ -244,6 +247,7 @@ COMMON_SOURCES  += $(OH323_SRCDIR)/h460/h4601.cxx \
                    $(OH323_SRCDIR)/h460/h4609.cxx \
                    $(OH323_SRCDIR)/h460/h46018.cxx \
                    $(OH323_SRCDIR)/h460/h460_std18.cxx \
+                   $(OH323_SRCDIR)/h460/h46018_h225.cxx \
                    $(OH323_SRCDIR)/h460/h46019.cxx
 endif 
 
