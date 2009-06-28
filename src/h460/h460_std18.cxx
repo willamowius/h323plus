@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2009/06/28 09:36:59  willamowius
+ * make sure license infor is also seen on Unix
+ *
  * Revision 1.1  2009/06/28 00:11:03  shorne
  * Added H.460.18/19 Support
  *
@@ -61,7 +64,9 @@
 // H.460.18
 //
 // Must Declare for Factory Loader.
+#ifdef _WIN32
 H460_FEATURE(Std18);
+#endif
 
 H460_FeatureStd18::H460_FeatureStd18()
 : H460_FeatureStd(18)
@@ -159,7 +164,9 @@ void H460_FeatureStd18::OnReceiveServiceControlIndication(const H225_FeatureDesc
 // H.460.19
 //
 // Must Declare for Factory Loader.
+#ifdef _WIN32
 H460_FEATURE(Std19);
+#endif
 
 H460_FeatureStd19::H460_FeatureStd19()
 : H460_FeatureStd(19)
