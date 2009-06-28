@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.30  2009/06/28 04:47:53  shorne
+ * Fixes for H.460.19 NAT Method loading
+ *
  * Revision 1.29  2009/06/28 01:41:52  shorne
  * Replaced P_HAS_QOS with P_QOS (depreciated in PTLib)
  *
@@ -680,7 +683,12 @@ if (connection->GetEndPoint().GetEPSecurityPolicy() != H323EndPoint::SecNone) {
 
    return AuthResult;
 }
+
+#ifdef H323_H46018
+static const char * H46018OID = "0.0.8.460.18.0.1";
+static const char * H46019OID = "0.0.8.460.19.0.1";
 #endif
+#endif  // H323_H460
 
 H323Connection::H323Connection(H323EndPoint & ep,
                                unsigned ref,

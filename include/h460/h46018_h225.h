@@ -37,6 +37,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2009/06/28 00:11:03  shorne
+ * Added H.460.18/19 Support
+ *
  *
  *
  *
@@ -51,9 +54,6 @@
 #endif // _MSC_VER > 1000
 
 #include "h323pdu.h"
-
-static const char * H46018OID = "0.0.8.460.18.0.1";
-static const char * H46019OID = "0.0.8.460.19.0.1";
 
 class H46018SignalPDU  : public H323SignalPDU
 {
