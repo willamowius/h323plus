@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2009/05/15 18:04:39  willamowius
+ * fix printing of NonStd ids
+ *
  * Revision 1.10  2009/05/11 22:33:30  willamowius
  * avoid printing non-printable characters in the trace when printing NonStandard OIDs
  *
@@ -864,6 +867,10 @@ template <> H460_Feature * PDevicePluginFactory<H460_Feature>::Worker::Create(co
 {
   return H460_Feature::CreateFeature(type);
 }
+
+typedef PDevicePluginAdapter<H460_Feature> PDevicePluginH460;
+PFACTORY_CREATE(PFactory<PDevicePluginAdapterBase>, PDevicePluginH460, H460FeaturePluginBaseClass, true);
+
 
 PStringList H460_Feature::GetFeatureNames(PPluginManager * pluginMgr)
 {
