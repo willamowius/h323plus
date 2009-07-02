@@ -37,6 +37,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2009/06/28 04:47:53  shorne
+ * Fixes for H.460.19 NAT Method loading
+ *
  * Revision 1.1  2009/06/28 00:11:03  shorne
  * Added H.460.18/19 Support
  *
@@ -46,8 +49,6 @@
 
 #include "ptlib.h"
 #include "openh323buildopts.h"
-
-#pragma once
 
 #ifdef H323_H46018
 
