@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2008/11/08 16:18:42  willamowius
+ * fixes to compile with video disabled
+ *
  * Revision 1.4  2008/05/23 11:21:11  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -953,9 +956,6 @@ PBoolean H323_RealTimeChannel::OnSendingPDU(H245_OpenLogicalChannel & open) cons
                 H245_OpenLogicalChannel_reverseLogicalChannelParameters_multiplexParameters
                     ::e_h2250LogicalChannelParameters);
 
-	if (OnSendingAltPDU(open.m_genericInformation))
-		open.IncludeOptionalField(H245_OpenLogicalChannel::e_genericInformation);
-
     return OnSendingPDU(open.m_reverseLogicalChannelParameters.m_multiplexParameters);
   }
   else {
@@ -994,10 +994,6 @@ void H323_RealTimeChannel::OnSendOpenAck(const H245_OpenLogicalChannel & open,
   unsigned sessionID = openparam.m_sessionID;
   param.m_sessionID = sessionID;
 
-  if (connection.isSameNAT()) {
-		ack.IncludeOptionalField(H245_OpenLogicalChannelAck::e_genericInformation);
-		OnSendOpenAckAlt(ack.m_genericInformation);
-  }
 
   OnSendOpenAck(param);
 
@@ -1026,9 +1022,6 @@ PBoolean H323_RealTimeChannel::OnReceivedPDU(const H245_OpenLogicalChannel & ope
     errorCode = H245_OpenLogicalChannelReject_cause::e_dataTypeNotSupported;
     return FALSE;
   }
-
-	if (open.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation))
-		            OnReceivedAltPDU(open.m_genericInformation);
 
   // If we have already created a codec, and the new parameters indicate that
   // the capability limits have changed, then kill off the old codec it will
@@ -1220,22 +1213,11 @@ void H323_RTPChannel::OnSendOpenAck(H245_H2250LogicalChannelAckParameters & para
   rtpCallbacks.OnSendingAckPDU(*this, param);
 }
 
-void H323_RTPChannel::OnSendOpenAckAlt(H245_ArrayOf_GenericInformation & alternate) const
-{
-  rtpCallbacks.OnSendOpenAckAlt(*this, alternate);
-}
-
 PBoolean H323_RTPChannel::OnReceivedPDU(const H245_H2250LogicalChannelParameters & param,
                                     unsigned & errorCode)
 {
   return rtpCallbacks.OnReceivedPDU(*this, param, errorCode);
 }
-
-PBoolean H323_RTPChannel::OnReceivedAltPDU(const H245_ArrayOf_GenericInformation & alternate)
-{
-  return rtpCallbacks.OnReceivedAltPDU(*this, alternate);
-}
-
 
 PBoolean H323_RTPChannel::OnReceivedAckPDU(const H245_H2250LogicalChannelAckParameters & param)
 {

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.22  2009/06/28 04:47:53  shorne
+ * Fixes for H.460.19 NAT Method loading
+ *
  * Revision 1.21  2009/06/28 01:41:52  shorne
  * Replaced P_HAS_QOS with P_QOS (depreciated in PTLib)
  *
@@ -1869,9 +1872,10 @@ class H323Connection : public PObject
        The default behaviour simply returns TRUE.
      */
     virtual PBoolean OnOpenLogicalChannel(
-      const H245_OpenLogicalChannel & openPDU,  ///< Received PDU for the channel open
-      H245_OpenLogicalChannelAck & ackPDU,      ///< PDU to send for acknowledgement
-      unsigned & errorCode                      ///< Error to return if refused
+      const H245_OpenLogicalChannel & openPDU,			///< Received PDU for the channel open
+      H245_OpenLogicalChannelAck & ackPDU,				///< PDU to send for acknowledgement
+      unsigned & errorCode,								///< Error to return if refused
+	  const unsigned & channelNumber = 0				///< Channel Number to open
     );
 
     /**Callback for when a logical channel conflict has occurred.
@@ -2416,14 +2420,14 @@ class H323Connection : public PObject
 	   destination information in the generic information field in the OLC for the
 	   purpose of probing for an alternate route to the remote party.
 	  */
-	virtual PBoolean OnReceiveOLCGenericInformation(H323_RTP_UDP & rtp, 
+	virtual PBoolean OnReceiveOLCGenericInformation(unsigned sessionID, 
 	                    const H245_ArrayOf_GenericInformation & alternate) const;
 
 	/**Send Generic Information in the OLC. This is used to include generic
 	   information in the openlogicalchannel
 	  */
     virtual PBoolean OnSendingOLCGenericInformation(
-						const H323_RTP_UDP & rtp,						///< RTP Information
+						const unsigned & sessionID,						///< Session Information
 				        H245_ArrayOf_GenericInformation & generic,		///< Generic OLC/OLCack message
 						PBoolean isAck
 						) const;
@@ -2464,7 +2468,7 @@ class H323Connection : public PObject
     /** Set Remote is behind NAT
     */
 	void SetRemoteNAT()
-	{ remoteIsNAT = TRUE; }
+	{ remoteIsNAT = true; }
 
 	/** Is NAT Support Available
 	  */
@@ -2474,12 +2478,12 @@ class H323Connection : public PObject
 	/** Disable NAT Support for allocation of RTP sockets
 	  */
 	void DisableNATSupport()
-	{ NATsupport = FALSE; remoteIsNAT = FALSE; }
+	{ NATsupport = false; remoteIsNAT = false; }
 	
 	/** Set the information that the call parties are 
 	    behind the same NAT device
 	  */
-	void SetSameNAT() { sameNAT = TRUE; };
+	void SetSameNAT() { sameNAT = true; };
 
 	/** Determine if the two parties are behind the same NAT
 	  */

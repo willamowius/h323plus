@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/05/23 11:19:02  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.2  2008/04/25 01:17:36  shorne
  * Added missing virtual information off H323_ExternalRTPChannel
  *
@@ -649,12 +652,6 @@ class H323_RealTimeChannel : public H323UnidirectionalChannel
       H245_H2250LogicalChannelAckParameters & param ///< Acknowledgement PDU
     ) const = 0;
 
-	/**Alternate RTP port information for Same NAT
-	  */
-	virtual void OnSendOpenAckAlt(
-	  H245_ArrayOf_GenericInformation & alternate  ///< Alternate RTP ports
-	) const = 0;
-
     /**This is called after a request to create a channel occurs from the
        local machine via the H245LogicalChannelDict::Open() function, and
        the request has been acknowledged by the remote endpoint.
@@ -665,12 +662,6 @@ class H323_RealTimeChannel : public H323UnidirectionalChannel
       const H245_H2250LogicalChannelParameters & param, ///< Acknowledgement PDU
       unsigned & errorCode                              ///< Error on failure
     ) = 0;
-
-	/**Alternate RTP port information for Same NAT
-	  */
-	virtual PBoolean OnReceivedAltPDU(
-	  const H245_ArrayOf_GenericInformation & alternate  ///< Alternate RTP ports
-	) = 0;
 
     /**This is called after a request to create a channel occurs from the
        local machine via the H245LogicalChannelDict::Open() function, and
@@ -784,12 +775,6 @@ class H323_RTPChannel : public H323_RealTimeChannel
       H245_H2250LogicalChannelAckParameters & param ///< Acknowledgement PDU
     ) const;
 
-	/**Alternate RTP port information for Same NAT
-	  */
-	virtual void OnSendOpenAckAlt(
-	  H245_ArrayOf_GenericInformation & alternate  ///< Alternate RTP ports
-	) const;
-
     /**This is called after a request to create a channel occurs from the
        local machine via the H245LogicalChannelDict::Open() function, and
        the request has been acknowledged by the remote endpoint.
@@ -800,12 +785,6 @@ class H323_RTPChannel : public H323_RealTimeChannel
       const H245_H2250LogicalChannelParameters & param, ///< Acknowledgement PDU
       unsigned & errorCode                              ///< Error on failure
     );
-
-	/**Alternate RTP port information for Same NAT
-	  */
-	virtual PBoolean OnReceivedAltPDU(
-	  const H245_ArrayOf_GenericInformation & alternate  ///< Alternate RTP ports
-	);
 
     /**This is called after a request to create a channel occurs from the
        local machine via the H245LogicalChannelDict::Open() function, and
@@ -962,26 +941,6 @@ class H323_ExternalRTPChannel : public H323_RealTimeChannel
 	virtual PBoolean OnSendingAltPDU(
 	  H245_ArrayOf_GenericInformation & /*alternate*/  ///< Alternate RTP ports
 	  ) const  {  return FALSE;  }
-
-	/**This is called if the call parties are detected behind the same NAT
-	   Use this to set alternate internal LAN ports
-	  */
-	virtual void OnSendOpenAckAlt(
-	  H245_ArrayOf_GenericInformation & /*alternate*/  ///< Alternate RTP ports
-	) const {}
-
-	/**Alternate RTP port information for Same NAT
-	  */
-	virtual PBoolean OnReceivedAltPDU(
-	  const H245_ArrayOf_GenericInformation & /*alternate*/  ///< Alternate RTP ports
-	)   { return FALSE;  }
-
-	/**Alternate RTP port information for Same NAT
-	  */
-	virtual PBoolean OnReceivedAltPDU(
-	   H323_RTPChannel & /*channel*/,                                       ///< Channel using this session.
-	  const H245_ArrayOf_GenericInformation & /*alternate*/  ///< Alternate RTP ports
-	  )  { return FALSE;  }
 
       /**This is called after a request to create a channel occurs from the
        local machine via the H245LogicalChannelDict::Open() function, and

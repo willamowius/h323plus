@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.18  2009/06/28 00:11:03  shorne
+ * Added H.460.18/19 Support
+ *
  * Revision 1.17  2009/02/21 14:04:35  shorne
  * Added OnCapabilitySet Callback, FileTransfer Handlers,baseline H.450 Message warning support
  *
@@ -768,6 +771,10 @@ class H323EndPoint : public PObject
     PBoolean RemoveGatekeeper(
       int reason = -1    ///< Reason for gatekeeper removal
     );
+
+	/**Force the endpoint to reregister with Gatekeeper
+	  */
+	void ForceGatekeeperReRegistration();
 
     /**Set the H.235 password for the gatekeeper.
       */

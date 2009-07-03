@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.31  2009/06/28 10:10:13  shorne
+ * Fix compile warnings on Linux
+ *
  * Revision 1.30  2009/06/28 04:47:53  shorne
  * Fixes for H.460.19 NAT Method loading
  *
@@ -685,8 +688,10 @@ if (connection->GetEndPoint().GetEPSecurityPolicy() != H323EndPoint::SecNone) {
 }
 
 #ifdef H323_H46018
-static const char * H46018OID = "0.0.8.460.18.0.1";
-static const char * H46019OID = "0.0.8.460.19.0.1";
+const char * H46018OID = "0.0.8.460.18.0.1";
+const char * H46019OID = "0.0.8.460.19.0.1";
+const unsigned defH46019payload = 127;
+const unsigned defH46019TTL = 20;
 #endif
 #endif  // H323_H460
 
@@ -862,7 +867,7 @@ H323Connection::H323Connection(H323EndPoint & ep,
 
   endSync = NULL;
 
-  remoteIsNAT = true;
+  remoteIsNAT = false;
   NATsupport =  true;
   sameNAT = false;
 
@@ -1579,7 +1584,7 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
 		AuthenticationFailed = TRUE;
 		return FALSE;
 	 }
-	 PTRACE(4, "H235EP\tAuthentication Failed but allowed by policy");
+	 PTRACE(6, "H235EP\tAuthentication Failed but allowed by policy");
   } else {
 	 hasAuthentication = TRUE;
   }
@@ -1639,7 +1644,7 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
 		((sigAddr.IsRFC1918() && srcAddr.IsRFC1918()) && (sigAddr != srcAddr)))  // LAN on another LAN
     {
       PTRACE(3, "H225\tSource signal address " << srcAddr << " and TCP peer address " << sigAddr << " indicate remote endpoint is behind NAT");
-      remoteIsNAT = TRUE;
+      remoteIsNAT = true;
     }
   }
 
@@ -2907,6 +2912,8 @@ PBoolean H323Connection::HandleFastStartAcknowledge(const H225_ArrayOf_PASN_Octe
               // localCapability or remoteCapability structures.
               if (OnCreateLogicalChannel(*channelCapability, dir, error)) {
                 if (channelToStart.SetInitialBandwidth()) {
+					if (open.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation))
+						OnReceiveOLCGenericInformation(channelToStart.GetSessionID(),open.m_genericInformation);
                   channelToStart.Start();
                   break;
                 }
@@ -4360,9 +4367,11 @@ PBoolean H323Connection::OpenLogicalChannel(const H323Capability & capability,
 }
 
 
-PBoolean H323Connection::OnOpenLogicalChannel(const H245_OpenLogicalChannel & /*openPDU*/,
-                                          H245_OpenLogicalChannelAck & /*ackPDU*/,
-                                          unsigned & /*errorCode*/)
+PBoolean H323Connection::OnOpenLogicalChannel(const H245_OpenLogicalChannel & openPDU,
+                                          H245_OpenLogicalChannelAck & ackPDU,
+                                          unsigned & /*errorCode*/,
+										  const unsigned & sessionID)
+
 {
   // If get a OLC via H.245 stop trying to do fast start
   fastStartState = FastStartDisabled;
@@ -4370,6 +4379,16 @@ PBoolean H323Connection::OnOpenLogicalChannel(const H245_OpenLogicalChannel & /*
     fastStartChannels.RemoveAll();
     PTRACE(1, "H245\tReceived early start OLC, aborting fast start");
   }
+
+#ifdef H323_H46018
+  PTRACE(4,"H323\tOnOpenLogicalChannel");
+  if (openPDU.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation)) {
+		 OnReceiveOLCGenericInformation(sessionID,openPDU.m_genericInformation);
+		 
+		 if (OnSendingOLCGenericInformation(sessionID,ackPDU.m_genericInformation,true))
+			 ackPDU.IncludeOptionalField(H245_OpenLogicalChannelAck::e_genericInformation);
+  }
+#endif
 
   //errorCode = H245_OpenLogicalChannelReject_cause::e_unspecified;
   return TRUE;
@@ -4538,6 +4557,10 @@ H323Channel * H323Connection::CreateLogicalChannel(const H245_OpenLogicalChannel
     PTRACE(2, "H323\tCreateLogicalChannel - data type not available");
     return NULL;
   }
+
+  if (startingFast && 
+	  open.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation))
+		  OnReceiveOLCGenericInformation(sessionID,open.m_genericInformation);
 
   if (!channel->SetInitialBandwidth())
     errorCode = H245_OpenLogicalChannelReject_cause::e_insufficientBandwidth;
@@ -5265,10 +5288,10 @@ RTP_Session * H323Connection::UseSession(unsigned sessionID,
   return udp_session;
 }
 
-PBoolean H323Connection::OnReceiveOLCGenericInformation(H323_RTP_UDP & rtp, 
+PBoolean H323Connection::OnReceiveOLCGenericInformation(unsigned sessionID,
 	                    const H245_ArrayOf_GenericInformation & alternate) const
 {
-	PTRACE(4,"H323\tReceived OLC Generic Information");
+	PTRACE(4,"H323\tHandling Received OLC Generic Information");
 	PBoolean success = false;
 
 #ifdef H323_H460
@@ -5296,10 +5319,14 @@ PBoolean H323Connection::OnReceiveOLCGenericInformation(H323_RTP_UDP & rtp,
 
 					PTRACE(4,"H46019\tTraversal Parameters:\n" << params);
 					
-					H323TransportAddress address;
+					H323TransportAddress RTPaddress;
+					H323TransportAddress RTCPaddress;
 					if (params.HasOptionalField(H46019_TraversalParameters::e_keepAliveChannel)) {
 						H245_TransportAddress & k = params.m_keepAliveChannel;
-						address = H323TransportAddress(k);
+						RTPaddress = H323TransportAddress(k);
+							PIPSocket::Address add; WORD port;
+							RTPaddress.GetIpAndPort(add,port);
+						RTCPaddress = H323TransportAddress(add,port+1);  // Compute the RTCP Address
 					}
 
 					unsigned payload = 0;
@@ -5314,13 +5341,11 @@ PBoolean H323Connection::OnReceiveOLCGenericInformation(H323_RTP_UDP & rtp,
 						ttl = a;
 					}
 
-					// Need the sessionId
-					unsigned sessionID = rtp.GetSessionID();
 					std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(sessionID);
 						if (sockets_iter != m_NATSockets.end()) {
 							NAT_Sockets sockets = sockets_iter->second;
-							((H46019UDPSocket *)sockets.rtp)->Activate(address,payload,ttl);
-							((H46019UDPSocket *)sockets.rtcp)->Activate(address,payload,ttl);
+							((H46019UDPSocket *)sockets.rtp)->Activate(RTPaddress,payload,ttl);
+							((H46019UDPSocket *)sockets.rtcp)->Activate(RTCPaddress,payload,ttl);
 							success = true;
 						}
 				break;
@@ -5332,15 +5357,67 @@ PBoolean H323Connection::OnReceiveOLCGenericInformation(H323_RTP_UDP & rtp,
 	return success;
 }
 
-PBoolean H323Connection::OnSendingOLCGenericInformation(const H323_RTP_UDP & rtp,
+PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & sessionID,
 				H245_ArrayOf_GenericInformation & generic, PBoolean isAck) const
 {
 #ifdef H323_H46018
 	if (isAck && m_H46019enabled) {
-		// Send an Acknowledgement
+		PTRACE(4,"Generic OLCack");
+		bool h46019ack = false;
+		unsigned payload=0; unsigned ttl=0;
+		std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(sessionID);
+			if (sockets_iter != m_NATSockets.end()) {
+				NAT_Sockets sockets = sockets_iter->second;
+				H46019UDPSocket * rtp = ((H46019UDPSocket *)sockets.rtp);
+				H46019UDPSocket * rtcp = ((H46019UDPSocket *)sockets.rtp);
+				if (rtp->GetPingPayload() == 0) {
+					payload = defH46019payload;
+				    rtp->SetPingPayLoad(payload);
+					h46019ack = true;
+				}
+				if (rtp->GetTTL() == 0) {
+					ttl = 19;
+				    rtp->SetTTL(defH46019TTL);
+					h46019ack = true;
+				}
+				rtp->Activate();  // Start the RTP Channel if not already started
+				rtcp->Activate();  // Start the RTCP Channel if not already started
+			}
+		if (h46019ack) {
+		  H245_GenericInformation info;
+		  H245_CapabilityIdentifier & id = info.m_messageIdentifier;
+		    id.SetTag(H245_CapabilityIdentifier::e_standard); 
+		    PASN_ObjectId & oid = id;
+			oid.SetValue(H46019OID);
+		  H245_ArrayOf_GenericParameter & msg = info.m_messageContent;
+
+		  msg.SetSize(1);
+		  	H245_GenericParameter genericParameter;
+			genericParameter.m_parameterValue.SetTag(H245_ParameterValue::e_octetString);
+			H245_ParameterValue & octetValue = genericParameter.m_parameterValue;
+
+			  H46019_TraversalParameters params;
+			  if (payload > 0) {
+				params.IncludeOptionalField(H46019_TraversalParameters::e_keepAlivePayloadType);
+				PASN_Integer & p = params.m_keepAlivePayloadType;
+				p = payload;
+			  }
+			  if (ttl > 0 ) {
+				params.IncludeOptionalField(H46019_TraversalParameters::e_keepAliveInterval);
+				H225_TimeToLive & a = params.m_keepAliveInterval;
+				a = ttl;
+			  }
+			PASN_OctetString & raw = octetValue;
+			raw.EncodeSubType(params);
+			msg[0] = genericParameter;
+
+		  generic.SetSize(1);
+		  generic[0] = info;
+		  return true;
+		}
 	}
 #endif
-  return FALSE; 
+  return false; 
 }
 
 void H323Connection::ReleaseSession(unsigned sessionID)

@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2009/06/28 04:47:53  shorne
+ * Fixes for H.460.19 NAT Method loading
+ *
  * Revision 1.8  2009/06/28 01:41:52  shorne
  * Replaced P_HAS_QOS with P_QOS (depreciated in PTLib)
  *
@@ -331,7 +334,7 @@ PBoolean H323_RTP_UDP::OnSendingPDU(const H323_RTPChannel & channel,
 PBoolean H323_RTP_UDP::OnSendingAltPDU(const H323_RTPChannel & channel,
 				H245_ArrayOf_GenericInformation & generic) const
 {
-		return connection.OnSendingOLCGenericInformation(*this,generic,false);
+		return connection.OnSendingOLCGenericInformation(channel.GetSessionID(),generic,false);
 }
 
 void H323_RTP_UDP::OnSendingAckPDU(const H323_RTPChannel & channel,
@@ -355,12 +358,6 @@ void H323_RTP_UDP::OnSendingAckPDU(const H323_RTPChannel & channel,
     param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_dynamicRTPPayloadType);
     param.m_dynamicRTPPayloadType = rtpPayloadType;
   }
-}
-
-void H323_RTP_UDP::OnSendOpenAckAlt(const H323_RTPChannel & channel, 
-	  H245_ArrayOf_GenericInformation & alternate) const
-{
-   connection.OnSendingOLCGenericInformation(*this,alternate,true);
 }
 
 PBoolean H323_RTP_UDP::ExtractTransport(const H245_TransportAddress & pdu,
@@ -440,12 +437,6 @@ PBoolean H323_RTP_UDP::OnReceivedPDU(H323_RTPChannel & channel,
   return FALSE;
 }
 
-PBoolean H323_RTP_UDP::OnReceivedAltPDU(H323_RTPChannel & channel, 
-	  const H245_ArrayOf_GenericInformation & alternate)
-{
-	return connection.OnReceiveOLCGenericInformation(*this,alternate);
-}
-
 PBoolean H323_RTP_UDP::OnReceivedAckPDU(H323_RTPChannel & channel,
                                     const H245_H2250LogicalChannelAckParameters & param)
 {
@@ -483,7 +474,7 @@ PBoolean H323_RTP_UDP::OnReceivedAckPDU(H323_RTPChannel & channel,
 PBoolean H323_RTP_UDP::OnReceivedAckAltPDU(H323_RTPChannel & channel,
 	  const H245_ArrayOf_GenericInformation & alternate)
 {
-	return connection.OnReceiveOLCGenericInformation(*this,alternate);
+	return connection.OnReceiveOLCGenericInformation(channel.GetSessionID(),alternate);
 }
 
 void H323_RTP_UDP::OnSendRasInfo(H225_RTPSession & info)

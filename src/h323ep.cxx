@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.26  2009/06/28 09:14:37  willamowius
+ * fix case for include file
+ *
  * Revision 1.25  2009/06/28 04:47:53  shorne
  * Fixes for H.460.19 NAT Method loading
  *
@@ -1725,6 +1728,11 @@ PBoolean H323EndPoint::RemoveGatekeeper(int reason)
   return ok;
 }
 
+void H323EndPoint::ForceGatekeeperReRegistration()
+{
+	if (gatekeeper != NULL)
+		RegInvokeReRegistration();
+}
 
 void H323EndPoint::SetGatekeeperPassword(const PString & password)
 {

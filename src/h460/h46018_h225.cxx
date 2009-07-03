@@ -37,6 +37,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2009/07/02 15:03:48  willamowius
+ * pragma once in cxx causes a warning on Linux
+ *
  * Revision 1.2  2009/06/28 04:47:53  shorne
  * Fixes for H.460.19 NAT Method loading
  *
@@ -56,6 +59,7 @@
 #include <h323pdu.h>
 #include <h460/h46018_h225.h>
 #include <h460/h46018.h>
+#include <ptclib/random.h>
 
 PCREATE_NAT_PLUGIN(H46019);
 
@@ -466,6 +470,16 @@ PBoolean PNatMethod_H46019::GetExternalAddress(PIPSocket::Address & /*externalAd
 	return FALSE;
 }
 
+WORD RandomStartNo(unsigned int start, unsigned int end)
+{
+	WORD num;
+	PRandom rand;
+	num = (WORD)rand.Generate(start,end);
+	if (PString(num).Right(1).FindOneOf("13579") != P_MAX_INDEX) 
+			num++;  // Make sure the number is even
+
+	return num;
+}
 
 PBoolean PNatMethod_H46019::CreateSocketPair(PUDPSocket * & socket1,
 					PUDPSocket * & socket2,
@@ -480,6 +494,9 @@ PBoolean PNatMethod_H46019::CreateSocketPair(PUDPSocket * & socket1,
 		return FALSE;
 	}
 
+	/// Start at a random number in the port range
+	/// This is needed to avoid conflicting ports thro' the NAT
+	pairedPortInfo.currentPort = RandomStartNo(pairedPortInfo.basePort-1,pairedPortInfo.maxPort-2);
 	socket1 = new H46019UDPSocket();  /// Data 
 	socket2 = new H46019UDPSocket();  /// Signal
 
@@ -556,6 +573,8 @@ bool PNatMethod_H46019::IsAvailable(const PIPSocket::Address & /*address*/)
 
 H46019UDPSocket::H46019UDPSocket()
 {
+	keeppayload = 0;
+	keepTTL = 0;
 	keepStartTime = NULL;
 }
 
@@ -565,19 +584,51 @@ H46019UDPSocket::~H46019UDPSocket()
 	delete keepStartTime;
 }
 
+void H46019UDPSocket::Allocate(const H323TransportAddress & keepalive, unsigned _payload, unsigned _ttl)
+{
+
+	keepalive.GetIpAndPort(keepip,keepport);
+	keeppayload = _payload;
+	keepTTL = _ttl;
+
+	PTRACE(4,"H46019UDP\tSetting " << keepip << ":" << keepport << " ping " << keepTTL << " secs.");
+}
+
+void H46019UDPSocket::Activate()
+{
+	InitialiseKeepAlive();
+}
+
 void H46019UDPSocket::Activate(const H323TransportAddress & keepalive, unsigned _payload, unsigned _ttl)
 {
 
 	keepalive.GetIpAndPort(keepip,keepport);
 	keeppayload = _payload;
-	keepseqno = 100;  // Some arbitory number
-	keepStartTime = new PTime();
-		
-	PTRACE(4,"H46019UDP\tStart pinging " << keepip << ":" << keepport << " every " << _ttl << " secs.");
+	keepTTL = _ttl;
+	
+	InitialiseKeepAlive();
+}
 
-	SendPing();
-	Keep.SetNotifier(PCREATE_NOTIFIER(Ping));
-	Keep.RunContinuous(_ttl * 1000); 
+void H46019UDPSocket::InitialiseKeepAlive() 
+{
+	PWaitAndSignal m(PingMutex);
+
+	if (Keep.IsRunning())
+		return;
+
+	if (keeppayload > 0 && keepTTL > 0 && keepip.IsValid()) {
+		keepseqno = 100;  // Some arbitory number
+		keepStartTime = new PTime();
+
+		PTRACE(4,"H46019UDP\tStart pinging " << keepip << ":" << keepport << " every " << keepTTL << " secs.");
+
+		SendPing();
+		Keep.SetNotifier(PCREATE_NOTIFIER(Ping));
+		Keep.RunContinuous(keepTTL * 1000); 
+	} else {
+        PTRACE(6,"H46019UDP\tPing Fail " << keepip << ":" << keepport << " every " << keepTTL << " secs.");
+
+	}
 }
 
 void H46019UDPSocket::Ping(PTimer &, INT)
@@ -626,6 +677,29 @@ PBoolean H46019UDPSocket::GetLocalAddress(Address & addr, WORD & port)
 {
   PIPSocket::Address _addr;
   return PUDPSocket::GetLocalAddress(_addr, port);
+}
+
+unsigned H46019UDPSocket::GetPingPayload()
+{
+	return keeppayload;
+}
+
+void H46019UDPSocket::SetPingPayLoad(unsigned val)
+{
+	keeppayload = val;
+	InitialiseKeepAlive();
+}
+
+unsigned H46019UDPSocket::GetTTL()
+{
+	return keepTTL;
+}
+
+void H46019UDPSocket::SetTTL(unsigned val)
+{
+	keepTTL = val;
+	InitialiseKeepAlive();
+
 }
 
 #endif  // H323_H460

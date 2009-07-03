@@ -37,6 +37,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2009/06/28 10:10:13  shorne
+ * Fix compile warnings on Linux
+ *
  * Revision 1.1  2009/06/28 00:11:03  shorne
  * Added H.460.18/19 Support
  *
@@ -361,20 +364,52 @@ class H46019UDPSocket : public PUDPSocket
 
 	/**@name Functions */
 	//@{
+
+	/** Allocate (FastStart) keep-alive mechanism but don't Activate
+	*/
+    void Allocate(const H323TransportAddress & keepalive, 
+			unsigned _payload, 
+			unsigned _ttl
+			);
+
+	/** Activate (FastStart) keep-alive mechanism.
+	*/
+	void Activate();
+
 	/** Activate keep-alive mechanism.
 	*/
 	void Activate(const H323TransportAddress & keepalive,	///< KeepAlive Address
 			unsigned _payload,			///< RTP Payload type	
 			unsigned _ttl				///< Time interval for keepalive.
 			);
+
+	/** Get the Ping Payload
+	  */
+	unsigned GetPingPayload();
+
+	/** Set the Ping Payload
+	  */
+	void SetPingPayLoad(unsigned val);
+
+	/** Get Ping TTL
+	  */
+	unsigned GetTTL();
+
+	/** Set Ping TTL
+	  */
+	void SetTTL(unsigned val);
+
 	//@}
 
   protected:
+    void InitialiseKeepAlive();	///< Start the keepalive
 	void SendPing();
+	PMutex PingMutex;
 
 	PIPSocket::Address keepip;	///< KeepAlive Address
 	WORD keepport;			///< KeepAlive Port
 	unsigned keeppayload;		///< KeepAlive RTP payload
+	unsigned keepTTL;			///< KeepAlive TTL
 	WORD keepseqno;			///< KeepAlive sequence number
 	PTime * keepStartTime;      	///< KeepAlive start time for TimeStamp.
 
