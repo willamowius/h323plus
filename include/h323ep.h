@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.19  2009/07/03 04:14:59  shorne
+ * more H.460.18/19 support
+ *
  * Revision 1.18  2009/06/28 00:11:03  shorne
  * Added H.460.18/19 Support
  *
@@ -2742,8 +2745,9 @@ class H323EndPoint : public PObject
     PBoolean enableAEC;
 #endif
 
-#ifdef H323_GNUGK
     void RegInvokeReRegistration();
+
+#ifdef H323_GNUGK
 	PMutex reregmutex;
 	GNUGK_Feature * gnugk;
     PThread  *  RegThread;
