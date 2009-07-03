@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.27  2009/07/03 04:15:01  shorne
+ * more H.460.18/19 support
+ *
  * Revision 1.26  2009/06/28 09:14:37  willamowius
  * fix case for include file
  *
@@ -1730,8 +1733,10 @@ PBoolean H323EndPoint::RemoveGatekeeper(int reason)
 
 void H323EndPoint::ForceGatekeeperReRegistration()
 {
+#ifdef H323_GNUGK
 	if (gatekeeper != NULL)
 		RegInvokeReRegistration();
+#endif
 }
 
 void H323EndPoint::SetGatekeeperPassword(const PString & password)

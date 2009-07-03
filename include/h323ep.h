@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.20  2009/07/03 10:33:42  willamowius
+ * RegInvokeReRegistration is also used without the GnuGk ANT feature
+ *
  * Revision 1.19  2009/07/03 04:14:59  shorne
  * more H.460.18/19 support
  *
@@ -2745,9 +2748,8 @@ class H323EndPoint : public PObject
     PBoolean enableAEC;
 #endif
 
-    void RegInvokeReRegistration();
-
 #ifdef H323_GNUGK
+    void RegInvokeReRegistration();
 	PMutex reregmutex;
 	GNUGK_Feature * gnugk;
     PThread  *  RegThread;
