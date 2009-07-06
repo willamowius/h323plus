@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.12  2009/06/29 02:54:59  shorne
+ * Fix to ensure H460 Factory loads under Linux
+ *
  * Revision 1.11  2009/05/15 18:04:39  willamowius
  * fix printing of NonStd ids
  *
@@ -95,7 +98,7 @@ OpalOID::OpalOID(const char * str )
 
 OpalOID & OpalOID::operator+(const char * str)
 { 
-	return *(new OpalOID(AsString() + "." + str)); 
+	return *(new OpalOID(AsString() + "." + str));	// BUG: this creates a memory leak
 }
 
 H460_FeatureID::H460_FeatureID()
@@ -370,7 +373,7 @@ H460_FeatureContent H460_FeatureParameter::operator=( const PString & value )
 {
 
 // Check if url;
-	PURL * url = new PURL();
+	PURL * url = new PURL();	// BUG ?
 	if (url->Parse(value,"http"))   // Parameter is an Http Address
 		m_content = H460_FeatureContent(*url);
 		
@@ -379,7 +382,7 @@ H460_FeatureContent H460_FeatureParameter::operator=( const PString & value )
 		PStringArray Cmd = value.Tokenise(":", FALSE);	
 
 		if (Cmd.GetSize() == 2) {	// Parameter is an Address
-			H323TransportAddress * add = new H323TransportAddress(Cmd[0],(short)Cmd[1].AsUnsigned());
+			H323TransportAddress * add = new H323TransportAddress(Cmd[0],(short)Cmd[1].AsUnsigned());	// BUG: leak ?
 			m_content = H460_FeatureContent(*add);
 		}
 	}
@@ -462,7 +465,7 @@ H460_FeatureParameter::operator PASN_OctetString &()
 H460_FeatureParameter::operator PString &()
 { 
 	PASN_IA5String & content = m_content;
-	PString & con = *(new PString(content));
+	PString & con = *(new PString(content));	// BUG: this creates a memory leak
 	return con;
 };
 
@@ -500,7 +503,7 @@ H460_FeatureParameter::operator H225_AliasAddress &()
 H460_FeatureParameter::operator H323TransportAddress () 
 {
 	H225_TransportAddress & content = m_content;
-	return *(new H323TransportAddress(content));
+	return *(new H323TransportAddress(content));	// BUG: this creates a memory leak
 
 };
 
@@ -516,11 +519,11 @@ H460_FeatureParameter::operator PURL &()
 
 	if (content.GetTag() == H225_AliasAddress::e_url_ID) {
 	     PASN_IA5String & Surl = content;
-		 PURL & url = *(new PURL(Surl));
+		 PURL & url = *(new PURL(Surl));	// BUG: this creates a memory leak
 		 return url;
 	}
 
-	return *(new PURL()); 
+	return *(new PURL()); 	// BUG: this creates a memory leak
 };
 
 H460_FeatureParameter::operator OpalGloballyUniqueID ()
@@ -548,7 +551,7 @@ H460_FeatureParameter & H460_FeatureTable::AddParameter(const H460_FeatureID & i
 {	
 PTRACE(6, "H460\tAdd ID: " << id );
 
-      H460_FeatureParameter * Nparam = new H460_FeatureParameter(id);
+      H460_FeatureParameter * Nparam = new H460_FeatureParameter(id);	// BUG: this creates a memory leak
 	  AddParameter(*Nparam);
 
 	  return *Nparam;
@@ -558,7 +561,7 @@ H460_FeatureParameter & H460_FeatureTable::AddParameter(const H460_FeatureID & i
 {	
 PTRACE(6, "H460\tAdd ID: " << id  << " content " << con);
 
-      H460_FeatureParameter * Nparam = new H460_FeatureParameter(id);
+      H460_FeatureParameter * Nparam = new H460_FeatureParameter(id);	// BUG: this creates a memory leak
 	  Nparam->addContent(con);
 		
 	  AddParameter(*Nparam);
@@ -593,7 +596,7 @@ H460_FeatureParameter & H460_FeatureTable::GetParameter(const H460_FeatureID & i
 	if (num < GetSize())
        return GetParameter(num);
     else
-	   return *(new H460_FeatureParameter());
+	   return *(new H460_FeatureParameter());	// BUG: this creates a memory leak
 }
 
 
@@ -648,7 +651,7 @@ PTRACE(6, "H460\tReplace ID: " << id  << " content " << con);
 
 //	array.RemoveAt(j);
 
-    H460_FeatureParameter * Nparam = new H460_FeatureParameter(id);
+    H460_FeatureParameter * Nparam = new H460_FeatureParameter(id);	// BUG: this creates a memory leak
 	Nparam->addContent(con);
 
 	array.SetAt(j,Nparam);
@@ -815,7 +818,7 @@ H460_FeatureParameter & H460_Feature::Value(const H460_FeatureID & id)
 			return Table.GetParameter(id);
 	}
 
-    return *(new H460_FeatureParameter());
+    return *(new H460_FeatureParameter());	// BUG: this creates a memory leak
 }
 
 H460_FeatureParameter & H460_Feature::operator()(PINDEX id)
