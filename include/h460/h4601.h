@@ -36,6 +36,9 @@
  * Contributor(s): ______________________________________.
  *
 * $Log$
+* Revision 1.13  2009/07/07 12:28:37  shorne
+* Remove redundant code and fix memory leaks
+*
 * Revision 1.12  2009/06/28 00:11:03  shorne
 * Added H.460.18/19 Support
 *
@@ -106,7 +109,7 @@ public:
       const char * str  ///< New string to assign.
     );
 
-	OpalOID & operator+(const char *);
+	OpalOID operator+(const char *);
 
 	unsigned GetLastIdentifier() {
          return (*this)[GetSize()-1];

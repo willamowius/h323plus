@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.14  2009/07/07 12:28:38  shorne
+ * Remove redundant code and fix memory leaks
+ *
  * Revision 1.13  2009/07/06 15:37:10  willamowius
  * annotate memory leaks - not fixed, yet
  *
@@ -99,11 +102,11 @@ OpalOID::OpalOID(const char * str )
 	SetValue(str);	
 }
 
-OpalOID & OpalOID::operator+(const char * str)
+OpalOID OpalOID::operator+(const char * str)
 { 
 	PString nStr = AsString() + "." + str;
-	SetValue(nStr);
-	return *this;
+	OpalOID newVal(nStr);
+	return newVal;
 }
 
 H460_FeatureID::H460_FeatureID()
@@ -733,6 +736,7 @@ H460_FeatureParameter & H460_Feature::AddParameter(H460_FeatureID * id, const H4
 	if (!HasOptionalField(e_parameters)) {	
 	    IncludeOptionalField(e_parameters);
 	    CurrentTable = (H460_FeatureTable*)&m_parameters;
+		CurrentTable->SetSize(0);
 	}
 	return CurrentTable->AddParameter(*id, con);
 }
@@ -742,6 +746,7 @@ H460_FeatureParameter & H460_Feature::AddParameter(H460_FeatureID * id)
 	if (!HasOptionalField(e_parameters)) {	
 	    IncludeOptionalField(e_parameters);
 	    CurrentTable = (H460_FeatureTable*)&m_parameters;
+		CurrentTable->SetSize(0);
 	}
 	return CurrentTable->AddParameter(*id);
 }
@@ -751,6 +756,7 @@ void H460_Feature::AddParameter(H460_FeatureParameter * param)
 	if (!HasOptionalField(e_parameters)) {	
 	    IncludeOptionalField(e_parameters);
 	    CurrentTable = (H460_FeatureTable*)&m_parameters;
+		CurrentTable->SetSize(0);
 	}
 
 	CurrentTable->AddParameter(*param);
