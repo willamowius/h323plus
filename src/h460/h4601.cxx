@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.13  2009/07/06 15:37:10  willamowius
+ * annotate memory leaks - not fixed, yet
+ *
  * Revision 1.12  2009/06/29 02:54:59  shorne
  * Fix to ensure H460 Factory loads under Linux
  *
@@ -98,7 +101,9 @@ OpalOID::OpalOID(const char * str )
 
 OpalOID & OpalOID::operator+(const char * str)
 { 
-	return *(new OpalOID(AsString() + "." + str));	// BUG: this creates a memory leak
+	PString nStr = AsString() + "." + str;
+	SetValue(nStr);
+	return *this;
 }
 
 H460_FeatureID::H460_FeatureID()
@@ -327,7 +332,7 @@ H460_FeatureContent::H460_FeatureContent(H460_Feature * add)
 
 H460_FeatureContent::H460_FeatureContent(const H225_Content & param)
 {
-	OnReceivedPDU(param);
+//	OnReceivedPDU(param);
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -354,7 +359,7 @@ H460_FeatureParameter::H460_FeatureParameter(const OpalOID & Identifier)
 
 H460_FeatureParameter::H460_FeatureParameter(const H225_EnumeratedParameter & param)
 {
-	OnReceivedPDU(param);
+//	OnReceivedPDU(param);
 }
 
 H460_FeatureParameter::H460_FeatureParameter(const H460_FeatureID & ID)
@@ -462,11 +467,10 @@ H460_FeatureParameter::operator PASN_OctetString &()
 	return content;
 };
 
-H460_FeatureParameter::operator PString &()
+H460_FeatureParameter::operator PString ()
 { 
 	PASN_IA5String & content = m_content;
-	PString & con = *(new PString(content));	// BUG: this creates a memory leak
-	return con;
+	return content.GetValue();
 };
 
 H460_FeatureParameter::operator PASN_BMPString &()  
@@ -503,7 +507,7 @@ H460_FeatureParameter::operator H225_AliasAddress &()
 H460_FeatureParameter::operator H323TransportAddress () 
 {
 	H225_TransportAddress & content = m_content;
-	return *(new H323TransportAddress(content));	// BUG: this creates a memory leak
+	return content;
 
 };
 
@@ -513,17 +517,11 @@ H460_FeatureParameter::operator H225_ArrayOf_EnumeratedParameter &()
 	return content; 	
 };
 
-H460_FeatureParameter::operator PURL &() 
+H460_FeatureParameter::operator PURL () 
 { 	     
 	H225_AliasAddress & content = m_content;
-
-	if (content.GetTag() == H225_AliasAddress::e_url_ID) {
-	     PASN_IA5String & Surl = content;
-		 PURL & url = *(new PURL(Surl));	// BUG: this creates a memory leak
-		 return url;
-	}
-
-	return *(new PURL()); 	// BUG: this creates a memory leak
+	PASN_IA5String & Surl = content;
+	return Surl.GetValue();
 };
 
 H460_FeatureParameter::operator OpalGloballyUniqueID ()
@@ -540,42 +538,39 @@ H460_FeatureParameter::operator OpalGloballyUniqueID ()
 
 H460_FeatureTable::H460_FeatureTable()
 {
+	SetSize(0);
 }
 
 H460_FeatureTable::H460_FeatureTable(const H225_ArrayOf_EnumeratedParameter & Xparams)
 {
-	OnReceivedPDU(Xparams);
+//	OnReceivedPDU(Xparams);
 }
 
 H460_FeatureParameter & H460_FeatureTable::AddParameter(const H460_FeatureID & id)
 {	
 PTRACE(6, "H460\tAdd ID: " << id );
 
-      H460_FeatureParameter * Nparam = new H460_FeatureParameter(id);	// BUG: this creates a memory leak
-	  AddParameter(*Nparam);
-
-	  return *Nparam;
+	 H460_FeatureParameter param = H460_FeatureParameter(id);
+	 PINDEX i = GetSize();
+	 SetSize(i+1);
+	 (*this)[i] = param;
+	 return (*this)[i];
 }
 
 H460_FeatureParameter & H460_FeatureTable::AddParameter(const H460_FeatureID & id, const H460_FeatureContent & con)
 {	
 PTRACE(6, "H460\tAdd ID: " << id  << " content " << con);
 
-      H460_FeatureParameter * Nparam = new H460_FeatureParameter(id);	// BUG: this creates a memory leak
-	  Nparam->addContent(con);
-		
-	  AddParameter(*Nparam);
-
-	  return *Nparam;
+      H460_FeatureParameter & Nparam = AddParameter(id);
+	  Nparam.addContent(con);
+	  return Nparam;
 }
 
 void H460_FeatureTable::AddParameter(H225_EnumeratedParameter & Xparam)
 { 
-    if ((GetSize() == 1) && 
-		(!((H225_EnumeratedParameter *)array.GetAt(0))->HasOptionalField(0)))
-	  array.SetAt(0, &Xparam);
-	else
-	  Append(&Xparam);
+	 PINDEX i = GetSize();
+	 SetSize(i+1);
+	 (*this)[i] = Xparam;
 }
 
 //void H460_FeatureTable::SetParameter(H460_FeatureParameter & Nparam, H225_EnumeratedParameter & Xparam) const
@@ -585,18 +580,14 @@ void H460_FeatureTable::AddParameter(H225_EnumeratedParameter & Xparam)
 
 H460_FeatureParameter & H460_FeatureTable::GetParameter(PINDEX id)
 {
-	return (H460_FeatureParameter &)*array.GetAt(id);	
+	return (*this)[id];	
 }
 
 H460_FeatureParameter & H460_FeatureTable::GetParameter(const H460_FeatureID & id)
 {
 
 	PINDEX num = GetParameterIndex(id);
-
-	if (num < GetSize())
-       return GetParameter(num);
-    else
-	   return *(new H460_FeatureParameter());	// BUG: this creates a memory leak
+	return GetParameter(num);
 }
 
 
@@ -605,7 +596,7 @@ PINDEX H460_FeatureTable::GetParameterIndex(const H460_FeatureID & id)
 	PINDEX i;
 
 	for (i = 0; i < GetSize(); i++) {
-		H460_FeatureParameter & fparam = (H460_FeatureParameter &)array[i];
+		H460_FeatureParameter & fparam = (*this)[i];
 		H460_FeatureID param = fparam.ID();
 		if (param == id)
 			return i;
@@ -649,12 +640,9 @@ PTRACE(6, "H460\tReplace ID: " << id  << " content " << con);
 	if (j == GetSize())
 		return;
 
-//	array.RemoveAt(j);
+	RemoveAt(j);
 
-    H460_FeatureParameter * Nparam = new H460_FeatureParameter(id);	// BUG: this creates a memory leak
-	Nparam->addContent(con);
-
-	array.SetAt(j,Nparam);
+	AddParameter(id,con);
 }
 
 
@@ -678,7 +666,7 @@ PBoolean H460_FeatureTable::ParameterIsUnique(const H460_FeatureID & id)
 
 H460_FeatureParameter & H460_FeatureTable::operator[](PINDEX id)
 {
-	return GetParameter(id);
+	return (H460_FeatureParameter &)array[id];
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -730,7 +718,7 @@ H460_Feature::H460_Feature(OpalOID identifier)
 H460_Feature::H460_Feature(const H225_FeatureDescriptor & descriptor)
 {
 	CurrentTable = (H460_FeatureTable *)&m_parameters;
-	OnReceivedPDU(descriptor);
+//	OnReceivedPDU(descriptor);
 	ep = NULL;
 	con = NULL;
 }
@@ -817,8 +805,8 @@ H460_FeatureParameter & H460_Feature::Value(const H460_FeatureID & id)
 		if (Table.HasParameter(id))
 			return Table.GetParameter(id);
 	}
-
-    return *(new H460_FeatureParameter());	// BUG: this creates a memory leak
+	PAssertAlways("LOGIC ERROR: Must call <if (.Contains)> before .Value");
+    return *(new H460_FeatureParameter());	// BUG: memory leak but is never called - SH
 }
 
 H460_FeatureParameter & H460_Feature::operator()(PINDEX id)

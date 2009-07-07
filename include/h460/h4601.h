@@ -36,6 +36,9 @@
  * Contributor(s): ______________________________________.
  *
 * $Log$
+* Revision 1.12  2009/06/28 00:11:03  shorne
+* Added H.460.18/19 Support
+*
 * Revision 1.11  2009/03/20 14:18:10  willamowius
 * Add() an item without content
 *
@@ -93,31 +96,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<class H225>
-class H460 : public H225 {
-public:
-	
- /**@name PDU Handling */
-    /**Handle a received PDU.
-       Update in the internal state from the received PDU.
-       Returns FALSE is PDU is not sutiable for the class type.
-      */
-    virtual void OnReceivedPDU(
-      const H225 & /*id*/
-	  ) {};
-
-    /**Handle a sent PDU.
-       Set the PDU fields from in the internal state.
-       Returns FALSE is PDU cannot be created.
-      */
-    virtual PBoolean OnSendingPDU(
-      H225 & /*id*/
-	  ) const { return FALSE;};
-	
-protected:
-
-};
-
 class OpalOID : public PASN_ObjectId
 {
 public:
@@ -148,7 +126,7 @@ public:
    is used to describe the parameters of a Feature.
   */
 
-class H460_FeatureID : public H460<H225_GenericIdentifier>
+class H460_FeatureID : public H225_GenericIdentifier
 {
 
   public:
@@ -223,7 +201,7 @@ class H460_FeatureID : public H460<H225_GenericIdentifier>
 
 class H460_Feature;
 class H460_FeatureTable;
-class H460_FeatureContent : public H460<H225_Content>
+class H460_FeatureContent : public H225_Content
 {
  
    public:
@@ -335,7 +313,7 @@ class H460_FeatureContent : public H460<H225_Content>
   */
 
 class H460_Feature;
-class H460_FeatureParameter : public H460<H225_EnumeratedParameter>
+class H460_FeatureParameter : public H225_EnumeratedParameter
 {
  
   public:
@@ -396,7 +374,7 @@ class H460_FeatureParameter : public H460<H225_EnumeratedParameter>
   /**@name Parameter Value Operators */
   //@{
 	operator PASN_OctetString &();
-	operator PString &();
+	operator PString ();
 	operator PASN_BMPString &();
 	operator PBoolean ();
 	operator unsigned ();
@@ -404,7 +382,7 @@ class H460_FeatureParameter : public H460<H225_EnumeratedParameter>
 	operator H225_AliasAddress &();
 	operator H323TransportAddress ();
 	operator H225_ArrayOf_EnumeratedParameter &();
-	operator PURL &();
+	operator PURL ();
 	operator OpalGloballyUniqueID ();
 
 
@@ -461,8 +439,7 @@ class H460_FeatureParameter : public H460<H225_EnumeratedParameter>
    This implements the service class session management as per H460 Series.
   */
 
-class H460_FeatureTable : public H460<H225_ArrayOf_EnumeratedParameter>
-
+class H460_FeatureTable : public H225_ArrayOf_EnumeratedParameter
 {
   public:
 
@@ -577,7 +554,7 @@ class H460_FeatureTable : public H460<H225_ArrayOf_EnumeratedParameter>
   */
 class H323EndPoint;
 class H323Connection;
-class H460_Feature : public H460<H225_FeatureDescriptor>
+class H460_Feature : public H225_FeatureDescriptor
 {
   public:
   /**@name Construction */
