@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.21  2009/07/03 10:35:59  willamowius
+ * RegInvokeReRegistration is only available with GnuGk NAT feature
+ *
  * Revision 1.20  2009/07/03 10:33:42  willamowius
  * RegInvokeReRegistration is also used without the GnuGk ANT feature
  *
@@ -1460,7 +1463,7 @@ class H323EndPoint : public PObject
       const H323Channel & channel     ///< Channel being started
     );
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
     /**Open a channel for use by an audio codec.
        The H323AudioCodec class will use this function to open the channel to
        read/write PCM data.
@@ -1476,7 +1479,7 @@ class H323EndPoint : public PObject
     );
 #endif
 
-#ifndef NO_H323_VIDEO
+#ifdef H323_VIDEO
     /**Open a channel for use by an video codec.
        The H323VideoCodec class will use this function to open the channel to
        read/write image data (which is one frame in a video stream - YUV411 format).
@@ -2167,7 +2170,7 @@ class H323EndPoint : public PObject
      */
     void SetInitialBandwidth(unsigned bandwidth) { initialBandwidth = bandwidth; }
 
-#ifndef NO_H323_VIDEO
+#ifdef H323_VIDEO
 	virtual void OnSetInitialBandwidth(H323VideoCodec * codec) {};
 #endif
 
@@ -2178,6 +2181,12 @@ class H323EndPoint : public PObject
     /**Called when an incoming PDU contains a feature set
      */
     virtual void OnReceiveFeatureSet(unsigned, const H225_FeatureSet &);
+
+#ifdef H323_H460
+	/**Get the complete list of Gatekeeper features
+	  */
+	H460_FeatureSet * GetGatekeeperFeatures();
+#endif
 
 	/**Load the Base FeatureSet usually called when you initialise the endpoint prior to 
 	   registering with a gatekeeper.
@@ -2749,12 +2758,14 @@ class H323EndPoint : public PObject
 #endif
 
 #ifdef H323_GNUGK
+	GNUGK_Feature * gnugk;
+#endif
+
     void RegInvokeReRegistration();
 	PMutex reregmutex;
-	GNUGK_Feature * gnugk;
     PThread  *  RegThread;
     PDECLARE_NOTIFIER(PThread, H323EndPoint, RegMethod);
-#endif
+
 };
 
 /////////////////////////////////////////////////////////////////////

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.28  2009/07/03 10:36:00  willamowius
+ * RegInvokeReRegistration is only available with GnuGk NAT feature
+ *
  * Revision 1.27  2009/07/03 04:15:01  shorne
  * more H.460.18/19 support
  *
@@ -1733,10 +1736,8 @@ PBoolean H323EndPoint::RemoveGatekeeper(int reason)
 
 void H323EndPoint::ForceGatekeeperReRegistration()
 {
-#ifdef H323_GNUGK
 	if (gatekeeper != NULL)
 		RegInvokeReRegistration();
-#endif
 }
 
 void H323EndPoint::SetGatekeeperPassword(const PString & password)
@@ -3159,7 +3160,7 @@ PBoolean H323EndPoint::OpenAudioChannel(H323Connection & /*connection*/,
 #endif // H323_AUDIO_CODECS
 
 
-#ifndef NO_H323_VIDEO
+#ifdef H323_VIDEO
 PBoolean H323EndPoint::OpenVideoChannel(H323Connection & /*connection*/,
                                     PBoolean PTRACE_PARAM(isEncoding),
                                     H323VideoCodec & /*codec*/)
@@ -3237,9 +3238,12 @@ void H323EndPoint::OnGatekeeperNATDetect(
 	 if (gnugk->IsOpen()) {
  	     PTRACE(4, "GNUGK\tNat Address " << gkRouteAddress);
 
-		 PNatMethod_GnuGk * natMethod = new PNatMethod_GnuGk();
-		 natMethod->AttachEndPoint(this);
-	     natMethods->AddMethod(natMethod);
+		 PNatMethod_GnuGk * natMethod = (PNatMethod_GnuGk *)natMethods->LoadNatMethod("GnuGk");
+		 if (natMethods) {
+			 natMethod->AttachEndPoint(this);
+			 natMethod->SetAvailable();
+			 natMethods->AddMethod(natMethod);
+		 }
 		 return; 
 	 } 
 
@@ -3886,6 +3890,17 @@ void H323EndPoint::OnReceiveFeatureSet(unsigned pdu, const H225_FeatureSet & fea
 #endif
 }
 
+#ifdef H323_H460
+H460_FeatureSet * H323EndPoint::GetGatekeeperFeatures()
+{
+	if (gatekeeper != NULL) {
+		return &gatekeeper->GetFeatures();
+	}
+
+	return NULL;
+}
+#endif
+
 void H323EndPoint::LoadBaseFeatureSet()
 {
 
@@ -3961,6 +3976,7 @@ void H323EndPoint::NATLostConnection(PBoolean lost)
 	if (!lost)
 		RegInvokeReRegistration();  
 }
+#endif
 
 void H323EndPoint::RegInvokeReRegistration()
 {
@@ -3976,5 +3992,5 @@ void H323EndPoint::RegMethod(PThread &, INT)
 
 	gatekeeper->ReRegisterNow();
 }
-#endif
+
 

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2009/02/22 02:44:41  shorne
+ * Added ability to enable SCI/SCR without needing H248 support
+ *
  * Revision 1.6  2009/02/21 13:59:05  shorne
  * Added Registration Mutex
  *
@@ -317,6 +320,10 @@ class H323Gatekeeper : public H225_RAS
 
     PBoolean OnSendFeatureSet(unsigned, H225_FeatureSet & features) const;
     void OnReceiveFeatureSet(unsigned, const H225_FeatureSet & features) const;
+
+#if H323_H460
+	H460_FeatureSet & GetFeatures();
+#endif
   //@}
 
   /**@name Protocol operations */

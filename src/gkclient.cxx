@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2009/02/22 02:45:47  shorne
+ * Added ability to enable SCI/SCR without needing H248 support
+ *
  * Revision 1.8  2009/02/21 13:58:45  shorne
  * Added Registration Mutex
  *
@@ -2501,5 +2504,12 @@ void H323Gatekeeper::OnReceiveFeatureSet(unsigned pduType, const H225_FeatureSet
     endpoint.OnReceiveFeatureSet(pduType, feats);
 #endif
 }
+
+#ifdef H323_H460
+H460_FeatureSet & H323Gatekeeper::GetFeatures()
+{
+	return *features;
+}
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
