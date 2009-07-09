@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2009/06/28 17:09:50  willamowius
+ * on Linux the factory loaders must be in the application
+ *
  * Revision 1.2  2009/06/28 09:36:59  willamowius
  * make sure license infor is also seen on Unix
  *
@@ -188,8 +191,14 @@ void H460_FeatureStd19::AttachEndPoint(H323EndPoint * _ep)
 {
 	PTRACE(6,"Std19\tEndPoint Attached");
 	EP = _ep; 
-
-	isEnabled = EP->H46018IsEnabled();
+	// We only enable IF the gatekeeper supports H.460.18
+	H460_FeatureSet * gkfeat = EP->GetGatekeeperFeatures();
+	if (gkfeat && gkfeat->HasFeature(18)) {
+		isEnabled = true;
+	} else {
+		PTRACE(4,"Std19\tH.460.19 disabled as GK does not support H.460.18");
+		isEnabled = false;
+	}
 }
 
 void H460_FeatureStd19::AttachConnection(H323Connection * _con)
@@ -202,6 +211,7 @@ PBoolean H460_FeatureStd19::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
 	if (!isEnabled)
 		return FALSE;
 
+	CON->H46019Enabled();
 	H460_FeatureStd feat = H460_FeatureStd(19); 
 	pdu = feat;
 	return TRUE; 

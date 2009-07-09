@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2009/07/03 04:15:01  shorne
+ * more H.460.18/19 support
+ *
  * Revision 1.2  2008/05/23 11:22:03  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -906,8 +909,14 @@ PBoolean H245NegLogicalChannel::HandleOpen(const H245_OpenLogicalChannel & pdu)
   PBoolean ok = FALSE;
 
   unsigned cause = H245_OpenLogicalChannelReject_cause::e_unspecified;
-  if (connection.OnOpenLogicalChannel(pdu, ack, cause, channelNumber))
-    channel = connection.CreateLogicalChannel(pdu, FALSE, cause);
+    
+  channel = connection.CreateLogicalChannel(pdu, FALSE, cause);
+
+  if (!connection.OnOpenLogicalChannel(pdu, ack, cause, channel->GetSessionID())) {
+	  delete channel;
+	  channel = NULL;
+	  ok = false;
+  }
 
   if (channel != NULL) {
     channel->SetNumber(channelNumber);

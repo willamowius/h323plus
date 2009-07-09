@@ -37,6 +37,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2009/07/03 04:15:01  shorne
+ * more H.460.18/19 support
+ *
  * Revision 1.3  2009/07/02 15:03:48  willamowius
  * pragma once in cxx causes a warning on Linux
  *
@@ -419,6 +422,8 @@ PNatMethod_H46019::PNatMethod_H46019()
 	curSession = 0;
 	curToken = PString();
 	handler = NULL;
+	available = false;
+	active = true;
 }
 
 PNatMethod_H46019::~PNatMethod_H46019()
@@ -470,17 +475,6 @@ PBoolean PNatMethod_H46019::GetExternalAddress(PIPSocket::Address & /*externalAd
 	return FALSE;
 }
 
-WORD RandomStartNo(unsigned int start, unsigned int end)
-{
-	WORD num;
-	PRandom rand;
-	num = (WORD)rand.Generate(start,end);
-	if (PString(num).Right(1).FindOneOf("13579") != P_MAX_INDEX) 
-			num++;  // Make sure the number is even
-
-	return num;
-}
-
 PBoolean PNatMethod_H46019::CreateSocketPair(PUDPSocket * & socket1,
 					PUDPSocket * & socket2,
 					const PIPSocket::Address & /*binding*/
@@ -496,9 +490,9 @@ PBoolean PNatMethod_H46019::CreateSocketPair(PUDPSocket * & socket1,
 
 	/// Start at a random number in the port range
 	/// This is needed to avoid conflicting ports thro' the NAT
-	pairedPortInfo.currentPort = RandomStartNo(pairedPortInfo.basePort-1,pairedPortInfo.maxPort-2);
-	socket1 = new H46019UDPSocket();  /// Data 
-	socket2 = new H46019UDPSocket();  /// Signal
+	pairedPortInfo.currentPort = RandomPortPair(pairedPortInfo.basePort-1,pairedPortInfo.maxPort-2);
+	socket1 = new H46019UDPSocket(true);	/// Data 
+	socket2 = new H46019UDPSocket(false);	/// Signal
 
 	/// Make sure we have sequential ports
 	while ((!OpenSocket(*socket1, pairedPortInfo)) ||
@@ -507,11 +501,11 @@ PBoolean PNatMethod_H46019::CreateSocketPair(PUDPSocket * & socket1,
 		{
 			delete socket1;
 			delete socket2;
-			socket1 = new H46019UDPSocket();  /// Data 
-			socket2 = new H46019UDPSocket();  /// Signal
+			socket1 = new H46019UDPSocket(true);	/// Data 
+			socket2 = new H46019UDPSocket(false);	/// Signal
 		}
 
-		PTRACE(5, "H46019\tUDP ports "
+		PTRACE(5, "H46019\tUDP random ports "
 			   << socket1->GetPort() << '-' << socket2->GetPort());
 
 	if (curSession > 0)
@@ -566,13 +560,14 @@ void PNatMethod_H46019::SetConnectionSockets(PUDPSocket * data,PUDPSocket * cont
 
 bool PNatMethod_H46019::IsAvailable(const PIPSocket::Address & /*address*/) 
 { 
-	return handler->IsEnabled();
+	return handler->IsEnabled() && active;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-H46019UDPSocket::H46019UDPSocket()
+H46019UDPSocket::H46019UDPSocket(bool _rtpSocket)
 {
+	rtpSocket = _rtpSocket;
 	keeppayload = 0;
 	keepTTL = 0;
 	keepStartTime = NULL;
@@ -587,9 +582,18 @@ H46019UDPSocket::~H46019UDPSocket()
 void H46019UDPSocket::Allocate(const H323TransportAddress & keepalive, unsigned _payload, unsigned _ttl)
 {
 
-	keepalive.GetIpAndPort(keepip,keepport);
-	keeppayload = _payload;
-	keepTTL = _ttl;
+	PIPSocket::Address ip;  WORD port = 0;
+    keepalive.GetIpAndPort(ip,port);
+    if (ip.IsValid() && !ip.IsLoopback() && port > 0) {
+		keepip = ip;
+		keepport = port;
+	}
+
+	if (_payload > 0)
+		keeppayload = _payload;
+
+	if (_ttl > 0)
+		keepTTL = _ttl;
 
 	PTRACE(4,"H46019UDP\tSetting " << keepip << ":" << keepport << " ping " << keepTTL << " secs.");
 }
@@ -601,11 +605,7 @@ void H46019UDPSocket::Activate()
 
 void H46019UDPSocket::Activate(const H323TransportAddress & keepalive, unsigned _payload, unsigned _ttl)
 {
-
-	keepalive.GetIpAndPort(keepip,keepport);
-	keeppayload = _payload;
-	keepTTL = _ttl;
-	
+	Allocate(keepalive,_payload,_ttl);
 	InitialiseKeepAlive();
 }
 
@@ -613,30 +613,35 @@ void H46019UDPSocket::InitialiseKeepAlive()
 {
 	PWaitAndSignal m(PingMutex);
 
-	if (Keep.IsRunning())
+	if (Keep.IsRunning()) {
+		PTRACE(6,"H46019UDP\t" << (rtpSocket ? "RTP" : "RTCP") << " ping already running.");
 		return;
+	}
 
-	if (keeppayload > 0 && keepTTL > 0 && keepip.IsValid()) {
+	if (keepTTL > 0 && keepip.IsValid() && !keepip.IsLoopback()) {
 		keepseqno = 100;  // Some arbitory number
 		keepStartTime = new PTime();
 
-		PTRACE(4,"H46019UDP\tStart pinging " << keepip << ":" << keepport << " every " << keepTTL << " secs.");
+		PTRACE(4,"H46019UDP\tStart " << (rtpSocket ? "RTP" : "RTCP") << " pinging " 
+						<< keepip << ":" << keepport << " every " << keepTTL << " secs.");
 
-		SendPing();
+		rtpSocket ? SendRTPPing() : SendRTCPPing();
+
 		Keep.SetNotifier(PCREATE_NOTIFIER(Ping));
 		Keep.RunContinuous(keepTTL * 1000); 
 	} else {
-        PTRACE(6,"H46019UDP\tPing Fail " << keepip << ":" << keepport << " every " << keepTTL << " secs.");
+		PTRACE(2,"H46019UDP\t"  << (rtpSocket ? "RTP" : "RTCP") << " PING NOT Ready " 
+						<< keepip << ":" << keepport << " - " << keepTTL << " secs.");
 
 	}
 }
 
 void H46019UDPSocket::Ping(PTimer &, INT)
 { 
-	SendPing();
+	rtpSocket ? SendRTPPing() : SendRTCPPing();
 }
 
-void H46019UDPSocket::SendPing() {
+void H46019UDPSocket::SendRTPPing() {
 
 	RTP_DataFrame rtp;
 
@@ -668,7 +673,34 @@ void H46019UDPSocket::SendPing() {
 				<< GetErrorText(PChannel::LastWriteError));
 		}
 	} else {
-		PTRACE(6, "H46019UDP\tKeepAlive sent: " << keepip << ":" << keepport << " seq: " << keepseqno);	
+		PTRACE(6, "H46019UDP\tRTP KeepAlive sent: " << keepip << ":" << keepport << " seq: " << keepseqno);	
+	    keepseqno++;
+	}
+}
+
+void H46019UDPSocket::SendRTCPPing() {
+
+    RTP_ControlFrame report;
+    report.SetPayloadType(RTP_ControlFrame::e_SenderReport);
+    report.SetPayloadSize(sizeof(RTP_ControlFrame::SenderReport));
+
+
+	 if (!WriteTo(report.GetPointer(),report.GetSize(),
+                 keepip, keepport)) {
+		switch (GetErrorNumber()) {
+			case ECONNRESET :
+			case ECONNREFUSED :
+				PTRACE(2, "H46019UDP\t" << keepip << ":" << keepport << " not ready.");
+				break;
+
+			default:
+				PTRACE(1, "H46019UDP\t" << keepip << ":" << keepport 
+					<< ", Write error on port ("
+					<< GetErrorNumber(PChannel::LastWriteError) << "): "
+					<< GetErrorText(PChannel::LastWriteError));
+		}
+	} else {
+		PTRACE(6, "H46019UDP\tRTCP KeepAlive sent: " << keepip << ":" << keepport << " seq: " << keepseqno);	
 	    keepseqno++;
 	}
 }
@@ -687,7 +719,6 @@ unsigned H46019UDPSocket::GetPingPayload()
 void H46019UDPSocket::SetPingPayLoad(unsigned val)
 {
 	keeppayload = val;
-	InitialiseKeepAlive();
 }
 
 unsigned H46019UDPSocket::GetTTL()
@@ -698,8 +729,6 @@ unsigned H46019UDPSocket::GetTTL()
 void H46019UDPSocket::SetTTL(unsigned val)
 {
 	keepTTL = val;
-	InitialiseKeepAlive();
-
 }
 
 #endif  // H323_H460

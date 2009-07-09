@@ -37,6 +37,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2009/07/03 04:15:01  shorne
+ * more H.460.18/19 support
+ *
  * Revision 1.2  2009/06/28 10:10:13  shorne
  * Fix compile warnings on Linux
  *
@@ -272,6 +275,11 @@ class PNatMethod_H46019  : public PNatMethod
 	*/
 	void SetAvailable() { available = TRUE; };
 
+    /** Activate
+		Active/DeActivate the method on a call by call basis
+	 */
+    virtual void Activate(bool act)  { active = act; }
+
 	/**  OpenSocket
 		Create a single UDP Socket 
 	*/
@@ -328,6 +336,7 @@ class PNatMethod_H46019  : public PNatMethod
 				);
 	
 	PBoolean available;			///< Whether this NAT Method is available for call
+	PBoolean active;			///< Whether the method is active for call
 	H46018Handler * handler;	///< handler
 	unsigned curSession;		///< Current Session ie 1-Audio 2-video
 	PString curToken;		    ///< Current Connection Token
@@ -352,7 +361,7 @@ class H46019UDPSocket : public PUDPSocket
 	/** create a UDP Socket Fully Nat Supported
 		ready for H323plus to Call.
 	*/
-	H46019UDPSocket();
+	H46019UDPSocket(bool _rtpSocket);
 
 	/** Deconstructor to reallocate Socket and remove any exiting
 		allocated NAT ports, 
@@ -403,7 +412,8 @@ class H46019UDPSocket : public PUDPSocket
 
   protected:
     void InitialiseKeepAlive();	///< Start the keepalive
-	void SendPing();
+	void SendRTPPing();
+	void SendRTCPPing();
 	PMutex PingMutex;
 
 	PIPSocket::Address keepip;	///< KeepAlive Address
@@ -415,6 +425,7 @@ class H46019UDPSocket : public PUDPSocket
 
 	PDECLARE_NOTIFIER(PTimer, H46019UDPSocket, Ping);	///< Timer to notify to poll for External IP
 	PTimer	Keep;						///< Polling Timer
+	bool rtpSocket;
 
 };
 
