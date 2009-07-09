@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2009/06/28 00:11:03  shorne
+ * Added H.460.18/19 Support
+ *
  * Revision 1.8  2009/05/30 14:38:47  shorne
  * Fix for deprecation of PWLIB_STATIC_LOAD_PLUGIN in ptlib
  *
@@ -245,14 +248,16 @@ public:
 		The Order of adding to the PNstStrategy determines which method
 		is used
   */
-   virtual bool IsAvailable(const PIPSocket::Address&) { return available; };
+   virtual bool IsAvailable(const PIPSocket::Address&) { return (available && active); }
 
    void SetAvailable() { available = TRUE; };
 
-   PBoolean OpenSocket(PUDPSocket & socket, PortInfo & portInfo) const;
+   virtual void Activate(bool act)  { active = act; }
+
+   PBoolean OpenSocket(PUDPSocket & socket, PortInfo & portInfo, const PIPSocket::Address & binding) const;
 
 
-   static PStringList GetNatMethodName() {  return PStringArray("GNUGK"); };
+   static PStringList GetNatMethodName() {  return PStringArray("GnuGk"); };
    virtual PString GetName() const
             { return GetNatMethodName()[0]; }
 
@@ -280,6 +285,7 @@ public:
 
 protected:
 	PBoolean available;
+	PBoolean active;
 
 };
 

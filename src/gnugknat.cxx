@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2008/05/23 11:21:21  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.8  2008/02/01 09:34:20  shorne
  * Cleaner shutdown of GnuGk NAT support
  *
@@ -470,7 +473,8 @@ PBoolean GNUGK_Feature::ReRegister(const PString & newid)
 	
 PNatMethod_GnuGk::PNatMethod_GnuGk()
 {
-
+	available = false;
+	active = true;
 }
 
 PNatMethod_GnuGk::~PNatMethod_GnuGk()
@@ -525,7 +529,7 @@ PBoolean PNatMethod_GnuGk::GetExternalAddress(
 PBoolean PNatMethod_GnuGk::CreateSocketPair(
 							PUDPSocket * & socket1,
 							PUDPSocket * & socket2,
-							const PIPSocket::Address & /*binding*/
+							const PIPSocket::Address & binding
 							)
 {
 
@@ -540,8 +544,8 @@ PBoolean PNatMethod_GnuGk::CreateSocketPair(
     socket2 = new GNUGKUDPSocket();  /// Signal
 
 /// Make sure we have sequential ports
-	while ((!OpenSocket(*socket1, pairedPortInfo)) ||
-		   (!OpenSocket(*socket2, pairedPortInfo)) ||
+	while ((!OpenSocket(*socket1, pairedPortInfo,binding)) ||
+		   (!OpenSocket(*socket2, pairedPortInfo,binding)) ||
 		   (socket2->GetPort() != socket1->GetPort() + 1) )
 	{
 			delete socket1;
@@ -553,10 +557,12 @@ PBoolean PNatMethod_GnuGk::CreateSocketPair(
 		PTRACE(5, "GNUGK\tUDP ports "
 			   << socket1->GetPort() << '-' << socket2->GetPort());
 
+
+
     return TRUE;
 }
 
-PBoolean PNatMethod_GnuGk::OpenSocket(PUDPSocket & socket, PortInfo & portInfo) const
+PBoolean PNatMethod_GnuGk::OpenSocket(PUDPSocket & socket, PortInfo & portInfo, const PIPSocket::Address & binding) const
 {
   PWaitAndSignal mutex(portInfo.mutex);
 
@@ -567,7 +573,7 @@ PBoolean PNatMethod_GnuGk::OpenSocket(PUDPSocket & socket, PortInfo & portInfo) 
     if (portInfo.currentPort > portInfo.maxPort)
       portInfo.currentPort = portInfo.basePort;
 
-    if (socket.Listen(1, portInfo.currentPort)) {
+    if (socket.Listen(binding,1, portInfo.currentPort)) {
       socket.SetReadTimeout(500);
       return TRUE;
     }
