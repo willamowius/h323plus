@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/05/23 11:19:05  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.2  2007/10/19 19:53:44  shorne
  * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
  *  Robert
@@ -587,7 +590,7 @@ class H323Codec : public PObject
     FilterList filters;
 };
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
 
 
 /**This class defines a codec class that will use the standard platform PCM
@@ -920,7 +923,7 @@ class H323StreamedAudioCodec : public H323FramedAudioCodec
 #endif // NO_H323_AUDIO_CODECS
 
 
-#ifndef NO_H323_VIDEO
+#ifdef H323_VIDEO
 
 /**This class defines a codec class that will use the standard platform image
    output device.
@@ -1164,7 +1167,7 @@ class H323VideoCodec : public H323Codec
 
 #endif // NO_H323_VIDEO
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
 
 ///////////////////////////////////////////////////////////////////////////////
 // The simplest codec is the G.711 PCM codec.

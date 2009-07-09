@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.32  2009/07/03 04:15:01  shorne
+ * more H.460.18/19 support
+ *
  * Revision 1.31  2009/06/28 10:10:13  shorne
  * Fix compile warnings on Linux
  *
@@ -4391,7 +4394,7 @@ PBoolean H323Connection::OnOpenLogicalChannel(const H245_OpenLogicalChannel & op
 #endif
 
   //errorCode = H245_OpenLogicalChannelReject_cause::e_unspecified;
-  return TRUE;
+  return true;
 }
 
 
@@ -4670,7 +4673,7 @@ PBoolean H323Connection::OnStartLogicalChannel(H323Channel & channel)
   return endpoint.OnStartLogicalChannel(*this, channel);
 }
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
 PBoolean H323Connection::OpenAudioChannel(PBoolean isEncoding, unsigned bufferSize, H323AudioCodec & codec)
 {
 #ifdef H323_AEC
@@ -4686,7 +4689,7 @@ PBoolean H323Connection::OpenAudioChannel(PBoolean isEncoding, unsigned bufferSi
 }
 #endif
 
-#ifndef NO_H323_VIDEO
+#ifdef H323_VIDEO
 PBoolean H323Connection::OpenVideoChannel(PBoolean isEncoding, H323VideoCodec & codec)
 {
   return endpoint.OpenVideoChannel(*this, isEncoding, codec);
@@ -4763,7 +4766,7 @@ unsigned H323Connection::GetBandwidthUsed() const
   return used;
 }
 
-#ifndef NO_H323_VIDEO
+#ifdef H323_VIDEO
 void H323Connection::OnSetInitialBandwidth(H323VideoCodec * codec)
 {
 	endpoint.OnSetInitialBandwidth(codec);
@@ -5291,10 +5294,10 @@ RTP_Session * H323Connection::UseSession(unsigned sessionID,
 PBoolean H323Connection::OnReceiveOLCGenericInformation(unsigned sessionID,
 	                    const H245_ArrayOf_GenericInformation & alternate) const
 {
-	PTRACE(4,"H323\tHandling Received OLC Generic Information");
 	PBoolean success = false;
 
 #ifdef H323_H460
+		PTRACE(4,"Handling Generic OLC Session " << sessionID );
 		for (PINDEX i=0; i<alternate.GetSize(); i++) {
 		  const H245_GenericInformation & info = alternate[i];
 		  const H245_CapabilityIdentifier & id = info.m_messageIdentifier;
@@ -5361,9 +5364,8 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
 				H245_ArrayOf_GenericInformation & generic, PBoolean isAck) const
 {
 #ifdef H323_H46018
-	if (isAck && m_H46019enabled) {
-		PTRACE(4,"Generic OLCack");
-		bool h46019ack = false;
+	if (m_H46019enabled) {
+		PTRACE(4,"Set Generic " << (isAck ? "OLCack" : "OLC") << " Session " << sessionID );
 		unsigned payload=0; unsigned ttl=0;
 		std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(sessionID);
 			if (sockets_iter != m_NATSockets.end()) {
@@ -5373,49 +5375,57 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
 				if (rtp->GetPingPayload() == 0) {
 					payload = defH46019payload;
 				    rtp->SetPingPayLoad(payload);
-					h46019ack = true;
 				}
 				if (rtp->GetTTL() == 0) {
 					ttl = 19;
 				    rtp->SetTTL(defH46019TTL);
-					h46019ack = true;
 				}
-				rtp->Activate();  // Start the RTP Channel if not already started
-				rtcp->Activate();  // Start the RTCP Channel if not already started
+				if (isAck) {
+					rtp->Activate();  // Start the RTP Channel if not already started
+					rtcp->Activate();  // Start the RTCP Channel if not already started
+				}
 			}
-		if (h46019ack) {
+
 		  H245_GenericInformation info;
 		  H245_CapabilityIdentifier & id = info.m_messageIdentifier;
 		    id.SetTag(H245_CapabilityIdentifier::e_standard); 
 		    PASN_ObjectId & oid = id;
 			oid.SetValue(H46019OID);
-		  H245_ArrayOf_GenericParameter & msg = info.m_messageContent;
-
-		  msg.SetSize(1);
-		  	H245_GenericParameter genericParameter;
-			genericParameter.m_parameterValue.SetTag(H245_ParameterValue::e_octetString);
-			H245_ParameterValue & octetValue = genericParameter.m_parameterValue;
-
+		 
+			  bool h46019msg = false;
 			  H46019_TraversalParameters params;
-			  if (payload > 0) {
+			  if (!isAck || payload > 0) {
 				params.IncludeOptionalField(H46019_TraversalParameters::e_keepAlivePayloadType);
 				PASN_Integer & p = params.m_keepAlivePayloadType;
-				p = payload;
+				p = defH46019payload;
+				h46019msg = true;
 			  }
-			  if (ttl > 0 ) {
-				params.IncludeOptionalField(H46019_TraversalParameters::e_keepAliveInterval);
-				H225_TimeToLive & a = params.m_keepAliveInterval;
-				a = ttl;
+			  if (isAck && (ttl > 0)) {
+					params.IncludeOptionalField(H46019_TraversalParameters::e_keepAliveInterval);
+					H225_TimeToLive & a = params.m_keepAliveInterval;
+					a = ttl;
+					h46019msg = true;
 			  }
-			PASN_OctetString & raw = octetValue;
-			raw.EncodeSubType(params);
-			msg[0] = genericParameter;
 
+			  if (h46019msg) {
+			    PTRACE(5,"H46019\tTraversal Parameters:\n" << params);
+				info.IncludeOptionalField(H245_GenericMessage::e_messageContent);
+				H245_ArrayOf_GenericParameter & msg = info.m_messageContent;
+				H245_GenericParameter genericParameter;
+				genericParameter.m_parameterValue.SetTag(H245_ParameterValue::e_octetString);
+				H245_ParameterValue & octetValue = genericParameter.m_parameterValue;
+				PASN_OctetString & raw = octetValue;
+				raw.EncodeSubType(params);
+				msg.SetSize(1);
+				msg[0] = genericParameter;
+			  }
 		  generic.SetSize(1);
 		  generic[0] = info;
 		  return true;
-		}
 	}
+#endif
+
+#ifdef H323_H46018
 #endif
   return false; 
 }
@@ -6258,7 +6268,7 @@ H460_FeatureSet * H323Connection::GetFeatureSet()
 }
 #endif
 
-#ifndef NO_H323_VIDEO
+#ifdef H323_VIDEO
 #ifdef H323_H239
 PBoolean H323Connection::OpenExtendedVideoSession(H323ChannelNumber & num)
 {

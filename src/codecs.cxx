@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2008/05/23 11:21:12  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.5  2008/04/25 00:54:12  shorne
  * Added ability to set the video maximum bitrate
  *
@@ -786,7 +789,7 @@ void H323VideoCodec::SendMiscCommand(unsigned command)
 
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
 
 H323AudioCodec::H323AudioCodec(const OpalMediaFormat & fmt, Direction dir)
   : H323Codec(fmt, dir)

@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.22  2009/05/19 11:46:24  willamowius
+ * remove unused class H323DynaLink
+ *
  * Revision 1.21  2009/04/03 13:29:49  willamowius
  * compile fix for newer PTLib versions
  *
@@ -336,7 +339,7 @@
  * Fixed loading of plug ins when multiple plug in class sets used. Especially H.323 codecs.
  *
  * Revision 1.10  2004/04/29 15:04:07  ykiryanov
- * Added #ifndef NO_H323_VIDEO around video codec code
+ * Added #ifdef H323_VIDEO around video codec code
  *
  * Revision 1.9  2004/04/22 22:35:00  csoutheren
  * Fixed mispelling of Guilhem Tardy - my apologies to him
@@ -577,7 +580,7 @@ class OpalPluginCodecFactory : public PFactory<OpalFactoryCodec>
 
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
 
 extern "C" {
   unsigned char linear2ulaw(int pcm_val);
@@ -1126,7 +1129,7 @@ class OpalPluginAudioMediaFormat : public OpalMediaFormat
     PluginCodec_Definition * encoderCodec;
 };
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
 
 static H323Capability * CreateG7231Cap(
   PluginCodec_Definition * encoderCodec, 
@@ -1262,7 +1265,7 @@ class H323CodecPluginCapabilityMapEntry {
     H323Capability * (* createFunc)(PluginCodec_Definition * encoderCodec, PluginCodec_Definition * decoderCodec, int subType);
 };
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
 
 static H323CodecPluginCapabilityMapEntry audioMaps[] = {
   { PluginCodec_H323Codec_nonStandard,              H245_AudioCapability::e_nonStandard,         &CreateNonStandardAudioCap },
@@ -1319,7 +1322,7 @@ static H323CodecPluginCapabilityMapEntry videoMaps[] = {
 // Plugin framed audio codec classes
 //
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
 
 class H323PluginFramedAudioCodec : public H323FramedAudioCodec
 {
@@ -1905,7 +1908,7 @@ class H323AudioPluginCapability : public H323AudioCapability,
         H323PluginCapabilityInfo(_mediaFormat, _baseName),
         pluginSubType(_pluginSubType)
       { 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
         for (PINDEX i = 0; audioMaps[i].pluginCapType >= 0; i++) {
           if (audioMaps[i].pluginCapType == (int)_pluginSubType) { 
             h323subType = audioMaps[i].h323SubType;
@@ -1933,7 +1936,7 @@ class H323AudioPluginCapability : public H323AudioCapability,
     unsigned h323subType;   // only set if using capability without codec
 };
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -2688,7 +2691,7 @@ void H323PluginCodecManager::CreateCapabilityAndMediaFormat(
   H323CodecPluginCapabilityMapEntry * map = NULL;
 
   switch (encoderCodec->flags & PluginCodec_MediaTypeMask) {
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
     case PluginCodec_MediaTypeAudio:
     case PluginCodec_MediaTypeAudioStreamed:
       map = audioMaps;
@@ -2769,7 +2772,7 @@ H323Capability * H323PluginCodecManager::CreateCapability(
 
 
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
 
 H323Capability * CreateNonStandardAudioCap(
   PluginCodec_Definition * encoderCodec,  
@@ -2899,7 +2902,7 @@ H323Codec * H323PluginCapabilityInfo::CreateCodec(const OpalMediaFormat & mediaF
   switch (codec->flags & PluginCodec_MediaTypeMask) {
 
     case PluginCodec_MediaTypeAudio:
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
       PTRACE(3, "H323PLUGIN\tCreating framed audio codec " << mediaFormatName << " from plugin");
       return new H323PluginFramedAudioCodec(mediaFormat, direction, codec);
 #endif  // NO_H323_AUDIO_CODECS
@@ -2966,7 +2969,7 @@ H323PluginCapabilityInfo::H323PluginCapabilityInfo(const PString & _mediaFormat,
 {
 }
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
 
 /////////////////////////////////////////////////////////////////////////////
 

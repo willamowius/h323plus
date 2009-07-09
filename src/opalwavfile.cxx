@@ -22,6 +22,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/10/28 23:06:28  willamowius
+ * fixes to compile with audio disabled
+ *
  * Revision 1.2  2008/05/23 11:22:25  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -160,7 +163,7 @@ PBoolean PWAVFileConverterXLaw::Write(PWAVFile & /*file*/, const void * /*buf*/,
 
 //////////////////////////////////////////////////////////////////////
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
 
 class PWAVFileConverterULaw : public PWAVFileConverterXLaw
 {

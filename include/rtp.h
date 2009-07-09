@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2009/06/28 01:41:52  shorne
+ * Replaced P_HAS_QOS with P_QOS (depreciated in PTLib)
+ *
  * Revision 1.5  2008/05/23 11:20:01  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -911,7 +914,7 @@ class RTP_Session : public PObject
     unsigned           referenceCount;
     RTP_UserData     * userData;
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
     RTP_JitterBuffer * jitter;
 #endif
 

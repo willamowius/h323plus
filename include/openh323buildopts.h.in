@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2009/06/28 01:40:32  shorne
+ * Fix to make sure PTBuildOpts are loaded
+ *
  * Revision 1.7  2009/06/28 00:25:23  shorne
  * H.460.18 disabled by default (removed compile warning)
  *
@@ -178,18 +181,10 @@
 
 #undef H323_AUDIO_CODECS
 
-#ifndef H323_AUDIO_CODECS
-#define NO_H323_AUDIO_CODECS
-#endif
-
-
 #ifdef P_VIDEO
 #undef H323_VIDEO
 #endif
 
-#ifndef H323_VIDEO
-#define NO_H323_VIDEO
-#endif
 
 //////////////////////////////////////////////////
 
@@ -219,6 +214,7 @@
 #undef H323_H450
 #undef H323_H460
 #undef H323_H46018
+#undef H323_H46023
 #undef H323_H501
 #undef H323_GNUGK
 #undef H323_FILE

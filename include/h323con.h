@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.23  2009/07/03 04:14:59  shorne
+ * more H.460.18/19 support
+ *
  * Revision 1.22  2009/06/28 04:47:53  shorne
  * Fixes for H.460.19 NAT Method loading
  *
@@ -1967,7 +1970,7 @@ class H323Connection : public PObject
       H323Channel & channel    ///< Channel that has been started.
     );
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
     /**Open a channel for use by an audio codec.
        The H323AudioCodec class will use this function to open the channel to
        read/write PCM data.
@@ -1981,7 +1984,7 @@ class H323Connection : public PObject
     );
 #endif
 
-#ifndef NO_H323_VIDEO
+#ifdef H323_VIDEO
     /**Open a channel for use by an video codec.
        The H323VideoCodec class will use this function to open the channel to
        read/write image data.
@@ -2141,7 +2144,7 @@ class H323Connection : public PObject
       PBoolean removing           ///< Flag for adding/removing bandwidth usage
     );
 
-#ifndef NO_H323_VIDEO
+#ifdef H323_VIDEO
 	void OnSetInitialBandwidth(H323VideoCodec * codec);
 #endif
 

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.13  2009/02/21 14:00:46  shorne
+ * Added ability to retreive capability set
+ *
  * Revision 1.12  2008/10/28 23:06:27  willamowius
  * fixes to compile with audio disabled
  *
@@ -1249,7 +1252,7 @@ class H323GenericAudioCapability : public H323AudioCapability,
 
 #endif
 
-#ifndef NO_H323_VIDEO
+#ifdef H323_VIDEO
 
 /**This class describes the interface to a video codec used to transfer data
    via the logical channels opened and managed by the H323 control channel.
@@ -1897,7 +1900,7 @@ class H323NonStandardDataCapability : public H323DataCapability,
   //@}
 };
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
 
 ///////////////////////////////////////////////////////////////////////////////
 // The simplest codec is the G.711 PCM codec.

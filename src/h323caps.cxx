@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.21  2009/06/28 01:41:52  shorne
+ * Replaced P_HAS_QOS with P_QOS (depreciated in PTLib)
+ *
  * Revision 1.20  2009/02/21 14:12:44  shorne
  * Added ability to retreive capabilityset
  *
@@ -480,7 +483,7 @@ class cls : public H323_G711Capability { \
 }; \
 H323_REGISTER_CAPABILITY(cls, capName) \
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
 
 DEFINE_G711_CAPABILITY(H323_G711ALaw64Capability, H323_G711Capability::ALaw, "G.711-ALaw-64k{sw}")
 DEFINE_G711_CAPABILITY(H323_G711uLaw64Capability, H323_G711Capability::muLaw, "G.711-uLaw-64k{sw}")
@@ -994,7 +997,7 @@ PBoolean H323GenericCapabilityInfo::OnSendingGenericPDU(H245_GenericCapability &
 {
   pdu.m_capabilityIdentifier = *identifier;
 
-#ifndef NO_H323_VIDEO
+#ifdef H323_VIDEO
   unsigned bitRate = maxBitRate != 0 ? maxBitRate : ((mediaFormat.GetOptionInteger(OpalVideoFormat::MaxBitRateOption)+99)/100);
 #else
   unsigned bitRate = maxBitRate;
@@ -1087,7 +1090,7 @@ PBoolean H323GenericCapabilityInfo::OnReceivedGenericPDU(OpalMediaFormat & media
 
   if (pdu.HasOptionalField(H245_GenericCapability::e_maxBitRate)) {
     maxBitRate = pdu.m_maxBitRate;
-#ifndef NO_H323_VIDEO
+#ifdef H323_VIDEO
     mediaFormat.SetOptionInteger(OpalVideoFormat::MaxBitRateOption, maxBitRate*100);
 #else
     mediaFormat.SetOptionInteger(maxBitRate, maxBitRate*100);
@@ -1194,7 +1197,7 @@ PObject::Comparison H323GenericCapabilityInfo::CompareInfo(const H323GenericCapa
 
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
 int H323AudioCapability::DSCPvalue = PQoS::guaranteedDSCP;
 H323AudioCapability::H323AudioCapability(unsigned rx, unsigned tx)
 {
@@ -1593,12 +1596,12 @@ PBoolean H323NonStandardAudioCapability::IsMatch(const PASN_Choice & subTypePDU)
          H323NonStandardCapabilityInfo::IsMatch((const H245_NonStandardParameter &)subTypePDU.GetObject());
 }
 
-#endif // NO_H323_AUDIO_CODECS
+#endif // H323_AUDIO_CODECS
 
 
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef NO_H323_VIDEO
+#ifdef H323_VIDEO
 int H323VideoCapability::DSCPvalue = PQoS::controlledLoadDSCP;
 H323VideoCapability::H323VideoCapability()
 {
@@ -2506,7 +2509,7 @@ PBoolean H323NonStandardDataCapability::IsMatch(const PASN_Choice & subTypePDU) 
 
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
 
 H323_G711Capability::H323_G711Capability(Mode m, Speed s)
   : H323AudioCapability(240, 30) // 240ms max, 30ms desired

@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2009/07/03 04:15:01  shorne
+ * more H.460.18/19 support
+ *
  * Revision 1.9  2009/06/28 04:47:53  shorne
  * Fixes for H.460.19 NAT Method loading
  *
@@ -298,7 +301,7 @@ PBoolean H323_RTP_UDP::OnSendingPDU(const H323_RTPChannel & channel,
 
   H323Codec * codec = channel.GetCodec();
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
   // Set flag for we are going to stop sending audio on silence
   if (codec != NULL &&
       PIsDescendant(codec, H323AudioCodec) &&

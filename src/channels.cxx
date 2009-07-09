@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2009/07/03 04:15:01  shorne
+ * more H.460.18/19 support
+ *
  * Revision 1.5  2008/11/08 16:18:42  willamowius
  * fixes to compile with video disabled
  *
@@ -811,7 +814,7 @@ PBoolean H323Channel::SetInitialBandwidth()
   if (GetCodec() == NULL)
     return TRUE;
 
-#ifndef NO_H323_VIDEO
+#ifdef H323_VIDEO
   if ((GetDirection() == H323Channel::IsTransmitter) && 
 	  (GetSessionID() == OpalMediaFormat::DefaultVideoSessionID))
 			connection.OnSetInitialBandwidth((H323VideoCodec *)codec);

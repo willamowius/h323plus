@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2009/06/28 01:41:52  shorne
+ * Replaced P_HAS_QOS with P_QOS (depreciated in PTLib)
+ *
  * Revision 1.6  2008/10/28 23:06:28  willamowius
  * fixes to compile with audio disabled
  *
@@ -423,7 +426,7 @@
 #include "rtp.h"
 #include "h323con.h"
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
 #include "jitter.h"
 #endif
 
@@ -763,7 +766,7 @@ RTP_Session::RTP_Session(
   referenceCount = 1;
   userData = data;
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
   jitter = NULL;
 #endif
 
@@ -834,7 +837,7 @@ RTP_Session::~RTP_Session()
             );
   delete userData;
 
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
   delete jitter;
 #endif
 }
@@ -884,19 +887,19 @@ void RTP_Session::SetJitterBufferSize(unsigned minJitterDelay,
                                       PINDEX stackSize)
 {
   if (minJitterDelay == 0 && maxJitterDelay == 0) {
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
     delete jitter;
     jitter = NULL;
 #endif
   }
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
   else if (jitter != NULL) {
     jitter->SetDelay(minJitterDelay, maxJitterDelay);
   }
 #endif
   else {
     SetIgnoreOutOfOrderPackets(FALSE);
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
     jitter = new RTP_JitterBuffer(*this, minJitterDelay, maxJitterDelay, stackSize);
     jitter->Resume(
 #ifdef H323_RTP_AGGREGATE
@@ -911,7 +914,7 @@ void RTP_Session::SetJitterBufferSize(unsigned minJitterDelay,
 unsigned RTP_Session::GetJitterBufferSize() const
 {
   return
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
   jitter != NULL ? jitter->GetJitterTime() :
 #endif
   0;
@@ -920,7 +923,7 @@ unsigned RTP_Session::GetJitterBufferSize() const
 
 PBoolean RTP_Session::ReadBufferedData(DWORD timestamp, RTP_DataFrame & frame)
 {
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
   if (jitter != NULL)
     return jitter->ReadData(timestamp, frame);
   else
@@ -1463,7 +1466,7 @@ void RTP_Session::SourceDescription::PrintOn(ostream & strm) const
 DWORD RTP_Session::GetPacketsTooLate() const
 {
   return
-#ifndef NO_H323_AUDIO_CODECS
+#ifdef H323_AUDIO_CODECS
     jitter != NULL ? jitter->GetPacketsTooLate() :
 #endif
   0;
@@ -1709,7 +1712,7 @@ PBoolean RTP_UDP::Open(PIPSocket::Address _localAddress,
   if (meth != NULL) {
 	connection.OnSetRTPNat(GetSessionID(),*meth);
 
-    if (meth->CreateSocketPair(dataSocket, controlSocket)) {
+    if (meth->CreateSocketPair(dataSocket, controlSocket, localAddress)) {
       dataSocket->GetLocalAddress(localAddress, localDataPort);
       controlSocket->GetLocalAddress(localAddress, localControlPort);
 	  PTRACE(4, "RTP\tNAT Method " << meth->GetName() << " created NAT ports " << localDataPort << " " << localControlPort);
