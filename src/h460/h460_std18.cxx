@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2009/07/09 15:07:34  shorne
+ * More H.460.19 fixes
+ *
  * Revision 1.3  2009/06/28 17:09:50  willamowius
  * on Linux the factory loaders must be in the application
  *
@@ -58,9 +61,9 @@
 #include <h460/h46018_h225.h>
 
 #if _WIN32
-#pragma message("H.460.18/19 Enabled. See Tandberg Patent License. http://www.tandberg.com/collateral/tandberg-ITU-license.pdf")
+#pragma message("H.460.18/.19 Enabled. See Tandberg Patent License. http://www.tandberg.com/collateral/tandberg-ITU-license.pdf")
 #else
-#warning("H.460.18/19 Enabled. See Tandberg Patent License. http://www.tandberg.com/collateral/tandberg-ITU-license.pdf")
+#warning("H.460.18/.19 Enabled. See Tandberg Patent License. http://www.tandberg.com/collateral/tandberg-ITU-license.pdf")
 #endif
 
 ///////////////////////////////////////////////////////
@@ -178,8 +181,9 @@ H460_FeatureStd19::H460_FeatureStd19()
 
 	EP = NULL;
 	CON = NULL;
-	isEnabled = FALSE;
-	remoteSupport = FALSE;
+	isEnabled = false;
+	isAvailable = true;
+	remoteSupport = false;
 	FeatureCategory = FeatureSupported;
 }
 
@@ -208,7 +212,7 @@ void H460_FeatureStd19::AttachConnection(H323Connection * _con)
 
 PBoolean H460_FeatureStd19::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu) 
 { 
-	if (!isEnabled)
+	if (!isEnabled || !isAvailable)
 		return FALSE;
 
 	CON->H46019Enabled();
@@ -219,7 +223,7 @@ PBoolean H460_FeatureStd19::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
 
 void H460_FeatureStd19::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu) 
 {
-	if (isEnabled) {
+	if (isEnabled && isAvailable) {
 		remoteSupport = TRUE;
 		CON->H46019Enabled();
 		CON->H46019SetCallReceiver();
@@ -228,7 +232,7 @@ void H460_FeatureStd19::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
 
 PBoolean H460_FeatureStd19::OnSendCallProceeding_UUIE(H225_FeatureDescriptor & pdu) 
 { 
-	if (!isEnabled || !remoteSupport)
+	if (!isEnabled || !isAvailable || !remoteSupport)
 		return FALSE;
 
 	H460_FeatureStd feat = H460_FeatureStd(19); 
@@ -238,7 +242,7 @@ PBoolean H460_FeatureStd19::OnSendCallProceeding_UUIE(H225_FeatureDescriptor & p
 
 void H460_FeatureStd19::OnReceiveCallProceeding_UUIE(const H225_FeatureDescriptor & pdu) 
 {
-	if (isEnabled) {
+	if (isEnabled && isAvailable) {
 		remoteSupport = TRUE;
 	    CON->H46019Enabled();
 	}
@@ -246,7 +250,7 @@ void H460_FeatureStd19::OnReceiveCallProceeding_UUIE(const H225_FeatureDescripto
 
 PBoolean H460_FeatureStd19::OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu) 
 { 	
-	if (!isEnabled || !remoteSupport)
+	if (!isEnabled || !isAvailable || !remoteSupport)
 		return FALSE;
 
 	H460_FeatureStd feat = H460_FeatureStd(19); 
@@ -256,7 +260,7 @@ PBoolean H460_FeatureStd19::OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu)
 
 void H460_FeatureStd19::OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pdu) 
 {
-	if (isEnabled && !remoteSupport) {
+	if (isEnabled && isAvailable && !remoteSupport) {
 		remoteSupport = TRUE;
 	    CON->H46019Enabled();
 	}
@@ -264,7 +268,7 @@ void H460_FeatureStd19::OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pd
 
 PBoolean H460_FeatureStd19::OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu) 
 { 
-	if (!isEnabled || !remoteSupport)
+	if (!isEnabled || !isAvailable || !remoteSupport)
 		return FALSE;
 
 	H460_FeatureStd feat = H460_FeatureStd(19);
@@ -274,10 +278,15 @@ PBoolean H460_FeatureStd19::OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu)
 
 void H460_FeatureStd19::OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor & pdu) 
 {
-	if (isEnabled && !remoteSupport) {
+	if (isEnabled && isAvailable && !remoteSupport) {
 		remoteSupport = TRUE;
 	    CON->H46019Enabled();
 	}
+}
+
+void H460_FeatureStd19::SetAvailable(bool avail)
+{
+	isAvailable = avail;
 }
 
 #endif

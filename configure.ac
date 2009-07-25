@@ -178,6 +178,8 @@ default_h249=yes
 default_h341=yes
 default_h350=no
 default_h460=yes
+default_h46018=yes
+default_h46023=yes
 default_t120=yes
 default_gnugk=no
 default_file=yes
@@ -197,6 +199,8 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_h341=no
   default_h350=no
   default_h460=no
+  default_h46018=no
+  default_h46023=no
   default_t120=no
   default_gnugk=no
   default_file=no
@@ -451,6 +455,46 @@ else
   AC_MSG_NOTICE(Disabling H.460)
 fi
 AC_SUBST(H323_H460)
+
+dnl ########################################################################
+dnl check for enabling H.460.18/.19
+
+dnl MSWIN_DISPLAY h46018,H.460.18/.19
+dnl MSWIN_DEFINE  h46018,H323_H46018
+
+AC_ARG_ENABLE(h46018,
+       [  --disable-h46018          disable H.460.18/.19])
+if test "${enable_h46018}x" = "x" ; then
+  enable_h46018=$default_h46018
+fi
+if test "$enable_h46018" = "yes" ; then
+  H323_H46018=1
+  AC_DEFINE(H323_H46018, 1)
+else
+  H323_H46018=
+  AC_MSG_NOTICE(Disabling H.460.18/.19)
+fi
+AC_SUBST(H323_H46018)
+
+dnl ########################################################################
+dnl check for disabling H.460.23/.24
+
+dnl MSWIN_DISPLAY h46023,H.460.23/.24
+dnl MSWIN_DEFINE  h46023,H323_H46023
+
+AC_ARG_ENABLE(h46023,
+       [  --disable-h46023          disable H.460.23/.24])
+if test "${enable_h46023}x" = "x" ; then
+  enable_h46023=$default_h46023
+fi
+if test "$enable_h46023" = "yes" ; then
+  H323_H46023=1
+  AC_DEFINE(H323_H46023, 1)
+else
+  H323_H46023=
+  AC_MSG_NOTICE(Disabling H.460.23/.24)
+fi
+AC_SUBST(H323_H46023)
 
 dnl ########################################################################
 dnl check for disabling H.501

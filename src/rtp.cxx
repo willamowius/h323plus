@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2009/07/09 15:11:12  shorne
+ * Simplfied and standardised compiler directives
+ *
  * Revision 1.7  2009/06/28 01:41:52  shorne
  * Replaced P_HAS_QOS with P_QOS (depreciated in PTLib)
  *
@@ -1710,15 +1713,18 @@ PBoolean RTP_UDP::Open(PIPSocket::Address _localAddress,
 
 #ifdef P_STUN
   if (meth != NULL) {
-	connection.OnSetRTPNat(GetSessionID(),*meth);
+	H323Connection::SessionInformation * info = 
+		 connection.BuildSessionInformation(GetSessionID());
 
-    if (meth->CreateSocketPair(dataSocket, controlSocket, localAddress)) {
+    if (meth->CreateSocketPair(dataSocket, controlSocket, localAddress,(void *)info)) {
       dataSocket->GetLocalAddress(localAddress, localDataPort);
       controlSocket->GetLocalAddress(localAddress, localControlPort);
 	  PTRACE(4, "RTP\tNAT Method " << meth->GetName() << " created NAT ports " << localDataPort << " " << localControlPort);
     }
     else
       PTRACE(1, "RTP\tNAT could not create socket pair!");
+
+	delete info;
   }
 #endif
 
@@ -1931,11 +1937,26 @@ RTP_Session::SendReceiveStatus RTP_UDP::ReadDataOrControlPDU(PUDPSocket & socket
 
       if (!remoteTransmitAddress.IsValid())
         remoteTransmitAddress = addr;
-      else if (remoteTransmitAddress != addr) {
-        PTRACE(1, "RTP_UDP\tSession " << sessionID << ", "
-               << channelName << " PDU from incorrect host, "
-                  " is " << addr << " should be " << remoteTransmitAddress);
-        return RTP_Session::e_IgnorePacket;
+#ifdef H323_H46024A
+	  else if (socket.IsAlternateAddress(addr,port)) {
+			remoteTransmitAddress = addr;
+			if (fromDataChannel) {
+				remoteDataPort = port;
+				// Fixes to makes sure sync,stats and jitter don't get screwed up 
+				syncSourceIn = ((RTP_DataFrame &)frame).GetSyncSource();
+				expectedSequenceNumber = ((RTP_DataFrame &)frame).GetSequenceNumber();
+#ifdef H323_AUDIO_CODECS
+				if (jitter != NULL)  jitter->ResetFirstWrite();
+#endif
+			} else
+				remoteControlPort = port;
+	  }
+#endif
+	  else if (remoteTransmitAddress != addr) {
+			PTRACE(1, "RTP_UDP\tSession " << sessionID << ", "
+				   << channelName << " PDU from incorrect host, "
+					  " is " << addr << " should be " << remoteTransmitAddress);
+			return RTP_Session::e_IgnorePacket;
       }
     }
 

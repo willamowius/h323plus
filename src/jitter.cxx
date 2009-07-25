@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/05/23 11:22:17  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.1  2007/08/06 20:51:07  shorne
  * First commit of h323plus
  *
@@ -610,6 +613,10 @@ PBoolean RTP_JitterBuffer::OnRead(RTP_JitterBuffer::Entry * & currentReadFrame, 
   return TRUE;
 }
 
+void RTP_JitterBuffer::ResetFirstWrite()
+{
+	doneFirstWrite = FALSE;
+}
 
 PBoolean RTP_JitterBuffer::ReadData(DWORD timestamp, RTP_DataFrame & frame)
 {

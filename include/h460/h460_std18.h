@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2009/06/28 01:08:51  shorne
+ * Fix so features load properly
+ *
  * Revision 1.1  2009/06/28 00:11:03  shorne
  * Added H.460.18/19 Support
  *
@@ -136,12 +139,16 @@ public:
     virtual PBoolean OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu);
     virtual void OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor & pdu);
 
+	////////////////////
+	// H.460.24 Override
+	void SetAvailable(bool avail);
 
 private:
     H323EndPoint * EP;
     H323Connection * CON;
 
     PBoolean isEnabled;
+	PBoolean isAvailable;
     PBoolean remoteSupport;
 };
 

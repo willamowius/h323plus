@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.33  2009/07/09 15:11:12  shorne
+ * Simplfied and standardised compiler directives
+ *
  * Revision 1.32  2009/07/03 04:15:01  shorne
  * more H.460.18/19 support
  *
@@ -381,6 +384,10 @@
 #endif
 #endif
 
+#ifdef P_STUN
+#include <ptclib/random.h>
+#endif
+
 #include "gkclient.h"
 #include "rfc2833.h"
 
@@ -696,6 +703,10 @@ const char * H46019OID = "0.0.8.460.19.0.1";
 const unsigned defH46019payload = 127;
 const unsigned defH46019TTL = 20;
 #endif
+
+#ifdef H323_H46024A
+const char * H46024AOID = "0.0.8.460.24.1";
+#endif
 #endif  // H323_H460
 
 H323Connection::H323Connection(H323EndPoint & ep,
@@ -901,6 +912,11 @@ H323Connection::H323Connection(H323EndPoint & ep,
   m_H46019CallReceiver = false;
   m_H46019enabled = false;
   m_h245Connect = false;
+#endif
+#ifdef H323_H46024A
+  m_H46024Aenabled = false;
+  m_H46024Ainitator = false;
+  m_H46024Astate = 0;
 #endif
 #endif
 
@@ -1631,6 +1647,10 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
   if (setup.m_sourceAddress.GetSize() > 0)
     remotePartyAddress = H323GetAliasAddressString(setup.m_sourceAddress[0]) + '@' + signallingChannel->GetRemoteAddress();
 
+#ifdef H323_H460
+     ReceiveSetupFeatureSet(this, setup);
+#endif
+
   // compare the source call signalling address
   if (setup.HasOptionalField(H225_Setup_UUIE::e_sourceCallSignalAddress)) {
 
@@ -1647,7 +1667,10 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
 		((sigAddr.IsRFC1918() && srcAddr.IsRFC1918()) && (sigAddr != srcAddr)))  // LAN on another LAN
     {
       PTRACE(3, "H225\tSource signal address " << srcAddr << " and TCP peer address " << sigAddr << " indicate remote endpoint is behind NAT");
-      remoteIsNAT = true;
+#ifdef H323_H46018
+      if (!m_H46019enabled) 
+#endif
+		  remoteIsNAT = true;
     }
   }
 
@@ -1657,10 +1680,6 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
   // Get the local capabilities before fast start or tunnelled TCS is handled
    if (!nonCallConnection)
       OnSetLocalCapabilities();
-
-#ifdef H323_H460
-     ReceiveSetupFeatureSet(this, setup);
-#endif
 
   // Send back a H323 Call Proceeding PDU in case OnIncomingCall() takes a while
   PTRACE(3, "H225\tSending call proceeding PDU");
@@ -2732,16 +2751,6 @@ if (setup.m_conferenceGoal.GetTag() == H225_Setup_UUIE_conferenceGoal::e_create)
 }
 
 #ifdef P_STUN
-void H323Connection::OnSetRTPNat(unsigned sessionid, PNatMethod & nat) const
-{
-#ifdef H323_H46018
-	if (nat.GetName() == "H46019") {
-	   PTRACE(4,"H46019\tSetting RTP NAT info session " << sessionid);
-	   PNatMethod_H46019 & natmethod = (PNatMethod_H46019 &)nat;
-	   natmethod.SetSessionInfo(sessionid, GetCallToken());
-	}
-#endif
-}
 
 void H323Connection::SetRTPNAT(unsigned sessionid, PUDPSocket * _rtp, PUDPSocket * _rtcp)
 {
@@ -5291,6 +5300,223 @@ RTP_Session * H323Connection::UseSession(unsigned sessionID,
   return udp_session;
 }
 
+PBoolean H323Connection::OnHandleH245GenericMessage(h245MessageType type, const H245_GenericMessage & pdu)
+{
+	if (!pdu.HasOptionalField(H245_GenericMessage::e_subMessageIdentifier)) {
+		PTRACE(2,"H323\tUnIdentified Generic Message Received!");
+		return false;
+	}
+
+	PString guid = PString();
+	const H245_CapabilityIdentifier & id = pdu.m_messageIdentifier;
+	
+	if (id.GetTag() == H245_CapabilityIdentifier::e_standard) {
+			  const PASN_ObjectId & gid = id;
+			  guid = gid.AsString();
+	}
+	else if (id.GetTag() == H245_CapabilityIdentifier::e_h221NonStandard) {
+		PTRACE(2,"H323\tUnknown NonStandard Generic Message Received!");
+			  return false;
+	}
+	else if (id.GetTag() == H245_CapabilityIdentifier::e_uuid) {
+			  const PASN_OctetString & gid = id;
+			  guid = gid.AsString();
+	}
+	else if (id.GetTag() == H245_CapabilityIdentifier::e_domainBased) {
+			  const PASN_IA5String & gid = id;
+			  guid = gid;
+	}
+
+	if (pdu.HasOptionalField(H245_GenericMessage::e_messageContent))
+		return OnReceivedGenericMessage(type,guid,pdu.m_messageContent);
+	else
+		return OnReceivedGenericMessage(type,guid);
+}
+
+
+#ifdef H323_H46024A
+
+PBoolean H323Connection::ReceivedH46024AMessage(bool toStart)
+{
+	if (m_H46024Astate < 3) {
+		if (m_H46024Ainitator && !toStart) {
+			PTRACE(4,"H46024A\tCONFLICT: wait for Media initiate Indication");
+			return true;
+		} else {
+		   PTRACE(4,"H46024A\tReceived Indication to " << (toStart ? "initiate" : "wait for") << " direct connection");
+
+		   	if (m_H46024Astate == 0)				// We are the receiver
+				m_H46024Astate = (toStart ? 1 : 2); 
+
+			for (std::map<unsigned,NAT_Sockets>::const_iterator r = m_NATSockets.begin(); r != m_NATSockets.end(); ++r) {
+				NAT_Sockets sockets = r->second;
+				((H46019UDPSocket *)sockets.rtp)->H46024Adirect(toStart);
+				((H46019UDPSocket *)sockets.rtcp)->H46024Adirect(toStart);
+			}
+		}
+
+		if (!toStart) {
+			PTRACE(4,"H46024A\tReply for remote to " << (!toStart ? "initiate" : "wait for") << " direct connection");
+			SendH46024AMessage(!toStart);
+		}
+		m_H46024Astate = 3;
+	}
+	return true;
+}
+
+bool GetUnsignedGenericMessage(unsigned id, const H245_ArrayOf_GenericParameter & params, unsigned & val)
+{
+   for (PINDEX i=0; i < params.GetSize(); i++)
+   {
+      const H245_GenericParameter & param = params[i];
+	  const H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
+	  if (idm.GetTag() == H245_ParameterIdentifier::e_standard) {
+		  const PASN_Integer & idx = idm;
+		  if (idx == id) {
+			 const H245_ParameterValue & genvalue = params[i].m_parameterValue;
+			 if ((genvalue.GetTag() == H245_ParameterValue::e_unsignedMin) ||
+				(genvalue.GetTag() == H245_ParameterValue::e_unsignedMax) ||
+				(genvalue.GetTag() == H245_ParameterValue::e_unsigned32Min) ||
+				(genvalue.GetTag() == H245_ParameterValue::e_unsigned32Max)) {
+					const PASN_Integer & xval = genvalue;
+					val = xval;
+					return true;
+			 }
+		  }
+	  }
+   }
+	PTRACE(4,"H46024A\tError finding Transport parameter " << id);
+	return false;
+}
+
+bool GetStringGenericOctetString(unsigned id, const H245_ArrayOf_GenericParameter & params, PString & str)
+{
+   for (PINDEX i=0; i < params.GetSize(); i++)
+   {
+      const H245_GenericParameter & param = params[i];
+	  const H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
+	  if (idm.GetTag() == H245_ParameterIdentifier::e_standard) {
+		 const PASN_Integer & idx = idm;
+		  if (idx == id) {
+			 const H245_ParameterValue & genvalue = params[i].m_parameterValue;
+			 if (genvalue.GetTag() == H245_ParameterValue::e_octetString) {
+				   const PASN_OctetString & valg = genvalue;
+				   PASN_IA5String data;
+				   valg.DecodeSubType(data);
+				   str = data;
+				   return true;
+			 }
+		 }
+	  }
+   }
+	PTRACE(4,"H46024A\tError finding String parameter " << id);
+	return false;
+}
+
+bool GetTransportGenericOctetString(unsigned id, const H245_ArrayOf_GenericParameter & params, H323TransportAddress & str)
+{
+   for (PINDEX i=0; i < params.GetSize(); i++)
+   {
+      const H245_GenericParameter & param = params[i];
+	  const H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
+	  if (idm.GetTag() == H245_ParameterIdentifier::e_standard) {
+		 const PASN_Integer & idx = idm;
+		  if (idx == id) {
+			 const H245_ParameterValue & genvalue = params[i].m_parameterValue;
+			 if (genvalue.GetTag() == H245_ParameterValue::e_octetString) {
+				   const PASN_OctetString & valg = genvalue;
+				   H245_TransportAddress addr;
+				   valg.DecodeSubType(addr);
+				   str = H323TransportAddress(addr);
+				   return true;
+			 }
+		 }
+	  }
+   }
+   return false;
+}
+
+H245_GenericParameter & BuildGenericOctetString(H245_GenericParameter & param, unsigned id, const PASN_Object & data)
+{
+	 H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
+	     idm.SetTag(H245_ParameterIdentifier::e_standard);
+		 PASN_Integer & idx = idm;
+		 idx = id;
+		 H245_ParameterValue & genvalue = param.m_parameterValue;
+		 genvalue.SetTag(H245_ParameterValue::e_octetString);
+		 PASN_OctetString & valg = genvalue;
+	     valg.EncodeSubType(data);
+	return param;
+}
+
+H245_GenericParameter & BuildGenericOctetString(H245_GenericParameter & param, unsigned id, const H323TransportAddress & transport)
+{
+	H245_TransportAddress data;
+	transport.SetPDU(data);
+	return BuildGenericOctetString(param, id, data);
+}
+
+H245_GenericParameter & BuildGenericInteger(H245_GenericParameter & param, unsigned id, unsigned val)
+{
+	 H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
+	     idm.SetTag(H245_ParameterIdentifier::e_standard);
+		 PASN_Integer & idx = idm;
+		 idx = id;
+		 H245_ParameterValue & genvalue = param.m_parameterValue;
+		 genvalue.SetTag(H245_ParameterValue::e_unsignedMin);
+		 PASN_Integer & xval = genvalue;
+		 xval = val;
+	return param;
+}
+
+void BuildH46024AIndication(H323ControlPDU & pdu, const PString & oid, bool sender)
+{
+	  H245_GenericMessage & cap = pdu.Build(H245_IndicationMessage::e_genericIndication);
+	  cap.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
+	  H245_CapabilityIdentifier & id = cap.m_messageIdentifier;
+	  id.SetTag(H245_CapabilityIdentifier::e_standard);
+	  PASN_ObjectId & gid = id;
+	  gid.SetValue(oid);
+	// Indicate whether remote can start channel.
+	  cap.IncludeOptionalField(H245_GenericMessage::e_messageContent);
+	  H245_ArrayOf_GenericParameter & data = cap.m_messageContent;
+	  data.SetSize(1);
+	  BuildGenericInteger(data[0], 0, (sender ? 1 : 0));
+}
+
+PBoolean H323Connection::SendH46024AMessage(bool sender)
+{
+	if ((sender && m_H46024Astate == 1) ||  // Message already sent
+		(!sender && m_H46024Astate == 2))	// Message already sent
+				return false;
+
+	m_H46024Ainitator = sender;
+	if (m_H46024Astate == 0)				// We are instigator
+	    m_H46024Astate = (sender ? 2 : 1);  
+
+	PTRACE(4,"H46024A\tSending Control DirectMedia " << (sender ? "Initiate" : "Respond"));
+
+	H323ControlPDU pdu;
+	BuildH46024AIndication(pdu,H46024AOID,sender); 
+	return WriteControlPDU(pdu);
+}
+
+#endif
+
+PBoolean H323Connection::OnReceivedGenericMessage(h245MessageType type, const PString & id, const H245_ArrayOf_GenericParameter & content)
+{
+#ifdef H323_H46024A
+	if (id == H46024AOID) {
+		if (type == h245indication) {
+			unsigned start=0;
+			if (GetUnsignedGenericMessage(0,content,start))
+				return ReceivedH46024AMessage((bool)start);
+		}
+	}
+#endif
+	return false;
+}
+
 PBoolean H323Connection::OnReceiveOLCGenericInformation(unsigned sessionID,
 	                    const H245_ArrayOf_GenericInformation & alternate) const
 {
@@ -5306,8 +5532,8 @@ PBoolean H323Connection::OnReceiveOLCGenericInformation(unsigned sessionID,
 
 #ifdef H323_H46018
 		    const PASN_ObjectId & oid = id;	
+			const H245_ArrayOf_GenericParameter & msg = info.m_messageContent;
 			if (m_H46019enabled && (oid.AsString() == H46019OID)) {
-				const H245_ArrayOf_GenericParameter & msg = info.m_messageContent;
 				H245_GenericParameter & val = msg[0];
 				 if (val.m_parameterValue.GetTag() != H245_ParameterValue::e_octetString) 
 					 break;
@@ -5351,8 +5577,27 @@ PBoolean H323Connection::OnReceiveOLCGenericInformation(unsigned sessionID,
 							((H46019UDPSocket *)sockets.rtcp)->Activate(RTCPaddress,payload,ttl);
 							success = true;
 						}
-				break;
 			}
+#ifdef H323_H46024A
+			if (m_H46024Aenabled && (oid.AsString() == H46024AOID)) {
+				PTRACE(4,"H46024A\tAlt Port Info:\n" << msg);
+				PString m_CUI = PString();  H323TransportAddress m_altAddr1, m_altAddr2;
+				bool error = false;
+				if (!GetStringGenericOctetString(0,msg,m_CUI))  error = true;
+				if (!GetTransportGenericOctetString(1,msg,m_altAddr1))  error = true;
+				if (!GetTransportGenericOctetString(2,msg,m_altAddr2))  error = true;
+
+				if (!error) {
+					std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(sessionID);
+						if (sockets_iter != m_NATSockets.end()) {
+							NAT_Sockets sockets = sockets_iter->second;
+							((H46019UDPSocket *)sockets.rtp)->SetAlternateAddresses(m_altAddr1,m_CUI);
+							((H46019UDPSocket *)sockets.rtcp)->SetAlternateAddresses(m_altAddr2,m_CUI);
+							success = true;
+						}
+				}
+			}
+#endif
 #endif  // H323_H46018
 		}
 
@@ -5367,11 +5612,14 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
 	if (m_H46019enabled) {
 		PTRACE(4,"Set Generic " << (isAck ? "OLCack" : "OLC") << " Session " << sessionID );
 		unsigned payload=0; unsigned ttl=0;
+#ifdef H323_H46024A
+		PString m_cui = PString(); H323TransportAddress m_altAddr1, m_altAddr2;
+#endif
 		std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(sessionID);
 			if (sockets_iter != m_NATSockets.end()) {
 				NAT_Sockets sockets = sockets_iter->second;
 				H46019UDPSocket * rtp = ((H46019UDPSocket *)sockets.rtp);
-				H46019UDPSocket * rtcp = ((H46019UDPSocket *)sockets.rtp);
+				H46019UDPSocket * rtcp = ((H46019UDPSocket *)sockets.rtcp);
 				if (rtp->GetPingPayload() == 0) {
 					payload = defH46019payload;
 				    rtp->SetPingPayLoad(payload);
@@ -5384,6 +5632,12 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
 					rtp->Activate();  // Start the RTP Channel if not already started
 					rtcp->Activate();  // Start the RTCP Channel if not already started
 				}
+#ifdef H323_H46024A
+			  if (m_H46024Aenabled) {
+				rtp->GetAlternateAddresses(m_altAddr1,m_cui);
+				rtcp->GetAlternateAddresses(m_altAddr2,m_cui);
+			  }
+#endif
 			}
 
 		  H245_GenericInformation info;
@@ -5419,14 +5673,33 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
 				msg.SetSize(1);
 				msg[0] = genericParameter;
 			  }
-		  generic.SetSize(1);
-		  generic[0] = info;
+		  PINDEX sz = generic.GetSize();
+		  generic.SetSize(sz+1);
+		  generic[sz] = info;
+
+#ifdef H323_H46024A
+		  if (m_H46024Aenabled) {
+			  H245_GenericInformation alt;
+			  H245_CapabilityIdentifier & altid = alt.m_messageIdentifier;
+				id.SetTag(H245_CapabilityIdentifier::e_standard); 
+				PASN_ObjectId & oid = altid;
+				oid.SetValue(H46024AOID);
+				alt.IncludeOptionalField(H245_GenericMessage::e_messageContent);
+				H245_ArrayOf_GenericParameter & msg = alt.m_messageContent;
+				msg.SetSize(3);
+				  BuildGenericOctetString(msg[0],0,(PASN_IA5String)m_cui);
+				  BuildGenericOctetString(msg[1],1,m_altAddr1);
+				  BuildGenericOctetString(msg[2],2,m_altAddr2);
+			   PTRACE(5,"H46024A\tAltInfo:\n" << alt);
+			  PINDEX sz = generic.GetSize();
+			  generic.SetSize(sz+1);
+			  generic[sz] = alt;
+		  }
+#endif
 		  return true;
 	}
 #endif
 
-#ifdef H323_H46018
-#endif
   return false; 
 }
 
@@ -5881,25 +6154,74 @@ void H323Connection::MonitorCallStatus()
   Unlock();
 }
 
+#ifdef P_STUN
+
+H323Connection::SessionInformation::SessionInformation(const OpalGloballyUniqueID & id, const PString & token, unsigned session)
+: m_callID(id), m_sessionID(session), m_callToken(token)
+{
+
+#ifdef H323_H46024A
+	// Some random number bases on the session id (for H.460.24A)
+	int rand = PRandom::Number((session *100),((session+1)*100)-1);
+	m_CUI = PString(rand); 
+	PTRACE(4,"H46024A\tGenerated CUI s: " << session << " value: " << m_CUI);
+#else
+	m_CUI = PString();
+#endif
+}
+
+const PString & H323Connection::SessionInformation::GetCallToken()
+{
+	return m_callToken;
+}
+
+unsigned H323Connection::SessionInformation::GetSessionID() const
+{
+	return m_sessionID;
+}
+
+H323Connection::SessionInformation * H323Connection::BuildSessionInformation(unsigned sessionID) const
+{
+	return new SessionInformation(GetCallIdentifier(),GetCallToken(),sessionID);
+}
+
+const OpalGloballyUniqueID & H323Connection::SessionInformation::GetCallIdentifer()
+{
+	return m_callID;
+}
+
+const PString & H323Connection::SessionInformation::GetCUI()
+{
+	return m_CUI;
+}
+
+#endif
+
 #ifdef H323_H460
 void H323Connection::DisableFeatures()
 {
-	 disableH460 = TRUE;
+	 disableH460 = true;
 }
 
 #ifdef H323_H46018
 void H323Connection::H46019SetCallReceiver() 
 { 
 	PTRACE(4,"H46019\tCall is receiver.");
-	m_H46019CallReceiver = TRUE; 
+	m_H46019CallReceiver = true; 
 }
 
 void H323Connection::H46019Enabled() 
 { 
-	PTRACE(4,"H46019\tCall is receiver.");
-	m_H46019enabled = TRUE; 
+	m_H46019enabled = true; 
 }
 #endif   // H323_H46018
+
+#ifdef H323_H46024A
+void H323Connection::H46024AEnabled() 
+{ 
+	m_H46024Aenabled = true; 
+}
+#endif
 #endif   // H323_H460
 
 PBoolean H323Connection::OnH245AddressConflict()

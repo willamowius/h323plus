@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.15  2009/06/28 10:24:46  willamowius
+# add more headers
+#
 # Revision 1.14  2009/06/28 10:06:04  willamowius
 # add h46018_h225.cxx
 #
@@ -246,14 +249,16 @@ HEADER_FILES    += $(OH323_INCDIR)/h460/h460.h \
                    $(OH323_INCDIR)/h460/h46018.h \
                    $(OH323_INCDIR)/h460/h460_std18.h \
                    $(OH323_INCDIR)/h460/h46018_h225.h \
-                   $(OH323_INCDIR)/h460/h46019.h
+                   $(OH323_INCDIR)/h460/h46019.h \
+                   $(OH323_INCDIR)/h460/h460_std23.h
 
 COMMON_SOURCES  += $(OH323_SRCDIR)/h460/h4601.cxx \
                    $(OH323_SRCDIR)/h460/h4609.cxx \
                    $(OH323_SRCDIR)/h460/h46018.cxx \
                    $(OH323_SRCDIR)/h460/h460_std18.cxx \
                    $(OH323_SRCDIR)/h460/h46018_h225.cxx \
-                   $(OH323_SRCDIR)/h460/h46019.cxx
+                   $(OH323_SRCDIR)/h460/h46019.cxx \
+                   $(OH323_SRCDIR)/h460/h460_std23.cxx
 endif 
 
 ########### H.501

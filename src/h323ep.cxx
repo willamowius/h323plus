@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.29  2009/07/09 15:09:19  shorne
+ * Added ability to access Gatekeeper features
+ *
  * Revision 1.28  2009/07/03 10:36:00  willamowius
  * RegInvokeReRegistration is only available with GnuGk NAT feature
  *
@@ -917,7 +920,12 @@
 #ifdef H323_H46018 
 #include "h460/h460_std18.h"
 #include "h460/h46018_h225.h"
-#endif  // H323_H46018
+#endif  
+
+#ifdef H323_H46023
+#include "h460/h460_std23.h"
+#endif
+
 #endif  // H323_H460
 
 #include "gkclient.h"

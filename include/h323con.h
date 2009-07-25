@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.24  2009/07/09 15:11:12  shorne
+ * Simplfied and standardised compiler directives
+ *
  * Revision 1.23  2009/07/03 04:14:59  shorne
  * more H.460.18/19 support
  *
@@ -2493,10 +2496,6 @@ class H323Connection : public PObject
 	PBoolean isSameNAT() const { return sameNAT; };
 
 #ifdef P_STUN
-	/** On Set RTP information from H.225 & H.245 signalling
-	 */
-	virtual void OnSetRTPNat(unsigned sessionid, PNatMethod & nat) const;
-
 	/** Set RTP NAT information callback
 	  */
 	virtual void SetRTPNAT(unsigned sessionid, PUDPSocket * _rtp, PUDPSocket * _rtcp);
@@ -2954,11 +2953,42 @@ class H323Connection : public PObject
       unsigned seconds  ///< max duration of call in seconds
     );
 
+#ifdef P_STUN
+
+	/**Session Information 
+		This contains session information which is passed to the socket handler
+		when creating RTP socket pairs.
+	  */
+	class SessionInformation : public PObject
+	{
+		public:
+			SessionInformation(const OpalGloballyUniqueID & id, const PString & token, unsigned session);
+
+			const PString & GetCallToken();
+
+			unsigned GetSessionID() const;
+
+			const OpalGloballyUniqueID & GetCallIdentifer();
+
+			const PString & GetCUI();
+
+		protected:
+			OpalGloballyUniqueID m_callID;
+			PString m_callToken;
+			unsigned m_sessionID;
+			PString m_CUI;
+
+	};
+
+	SessionInformation * BuildSessionInformation(unsigned sessionID) const;
+
 	struct NAT_Sockets 
 	{
 		PUDPSocket * rtp;
 		PUDPSocket * rtcp;
 	};
+
+#endif
 
 #ifdef H323_H460
 	/** Disable Feautures on a call by call basis
@@ -2982,6 +3012,21 @@ class H323Connection : public PObject
 	/** Enable H46019 for this call
 	  */
 	void H46019Enabled();
+#endif
+
+#ifdef H323_H46024A
+	/** Enable H46024A for this call
+	  */
+	void H46024AEnabled();
+
+	/** send H46024A notification
+      */
+	PBoolean SendH46024AMessage(bool sender);
+
+	/** received H46024A notification
+	  */
+	PBoolean ReceivedH46024AMessage(bool toStart);
+
 #endif
 
   //@}
@@ -3123,8 +3168,10 @@ class H323Connection : public PObject
 	  h245indication
     };
 
-	virtual PBoolean OnHandleH245GenericMessage(h245MessageType, const H245_GenericMessage &)
-	{ return FALSE; }
+	virtual PBoolean OnHandleH245GenericMessage(h245MessageType type, const H245_GenericMessage & pdu);
+
+	virtual PBoolean OnReceivedGenericMessage(h245MessageType, const PString & ) { return false; }
+	virtual PBoolean OnReceivedGenericMessage(h245MessageType type, const PString & id, const H245_ArrayOf_GenericParameter & content);
 
 #ifdef H323_H230
     /** Open Conference Controls
@@ -3369,6 +3416,13 @@ class H323Connection : public PObject
 	PBoolean m_H46019enabled;
 	PBoolean m_h245Connect;
 #endif
+
+#ifdef H323_H46024A
+	PBoolean m_H46024Aenabled;
+	PBoolean m_H46024Ainitator;
+	PINDEX m_H46024Astate;
+#endif
+
 #endif
 	PMutex NATSocketMutex;
 	std::map<unsigned,NAT_Sockets> m_NATSockets;

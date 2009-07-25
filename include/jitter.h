@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/05/23 11:19:53  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.1  2007/08/06 20:50:50  shorne
  * First commit of h323plus
  *
@@ -123,6 +126,11 @@ class RTP_JitterBuffer : public PObject
     );
 
     void UseImmediateReduction(PBoolean state) { doJitterReductionImmediately = state; }
+
+    /**Reset Firt write
+		This is used when redirecting media flows to ensure Jitter buffer is not exceeded.
+      */
+	void ResetFirstWrite();
 
     /**Read a data frame from the RTP channel.
        Any control frames received are dispatched to callbacks and are not
