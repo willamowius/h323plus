@@ -37,6 +37,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2009/07/25 10:35:51  shorne
+ * First cut of H.460.23/.24 support
+ *
  * Revision 1.5  2009/07/09 15:07:34  shorne
  * More H.460.19 fixes
  *
@@ -942,7 +945,7 @@ PBoolean H46019UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD 
 				}
 				break;
 			case e_wait:
-				if ((addr != m_remAddr) && (port != m_remPort)) {
+				if ((addr != m_remAddr) || (port != m_remPort)) {
 					PTRACE(4, "H46024A\ts:" << m_Session << (rtpSocket ? " RTP " : " RTCP ")  
 						<< "Switching to " << addr << ":" << port);
 					m_detAddr = addr;  m_detPort = port;
