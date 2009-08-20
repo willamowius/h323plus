@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2009/07/09 15:11:12  shorne
+ * Simplfied and standardised compiler directives
+ *
  * Revision 1.6  2008/05/23 11:21:12  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -784,7 +787,7 @@ void H323VideoCodec::SendMiscCommand(unsigned command)
 }
 
 
-#endif // NO_H323_VIDEO
+#endif // H323_VIDEO
 
 
 /////////////////////////////////////////////////////////////////////////////
