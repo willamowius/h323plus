@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/05/23 11:22:23  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.1  2007/08/06 20:51:07  shorne
  * First commit of h323plus
  *
@@ -132,7 +135,7 @@
 
 #endif
 
-#include "codecs.h"
+#include "../include/codecs.h"
 
 #define	G7231_SAMPLES_PER_BLOCK	240
 #define	G7231_BANDWIDTH		      (6300/100)

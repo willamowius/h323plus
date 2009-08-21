@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2009/08/20 21:05:49  willamowius
+ * fix comment
+ *
  * Revision 1.7  2009/07/09 15:11:12  shorne
  * Simplfied and standardised compiler directives
  *
@@ -379,7 +382,7 @@
 #pragma implementation "codecs.h"
 #endif
 
-#include "codecs.h"
+#include "../include/codecs.h"
 
 #include "channels.h"
 #include "h323pdu.h"

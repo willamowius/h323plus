@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.14  2009/07/09 15:11:12  shorne
+ * Simplfied and standardised compiler directives
+ *
  * Revision 1.13  2009/02/21 14:00:46  shorne
  * Added ability to retreive capability set
  *
@@ -271,7 +274,7 @@
 #endif
 
 
-#include "codecs.h"
+#include "../include/codecs.h"
 #include "channels.h"
 #include "mediafmt.h"
 
