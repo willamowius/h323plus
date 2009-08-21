@@ -1,7 +1,9 @@
 
-H323plus 1.22
-
-Added H.460.18/19 support (Disabled by default)
+H323plus 1.21 - 1.22
+Added H.460.9 support
+(fixed) compile issue on windows with Platform SDK and "codecs.h"
+Added H.460.23/.24 support
+Added H.460.18/.19 support (Disabled by default)
 (fixed) Slow start being accidently activated when FastStart being acknowledged.
 
 

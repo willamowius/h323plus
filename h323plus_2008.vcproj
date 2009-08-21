@@ -913,6 +913,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\h460\h460_std9.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\src\h460\h460p.cxx"
 				>
 			</File>
@@ -1590,6 +1594,10 @@
 			</File>
 			<File
 				RelativePath=".\include\h460\h460_std23.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\h460\h460_std9.h"
 				>
 			</File>
 			<File

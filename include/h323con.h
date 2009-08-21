@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.25  2009/07/25 10:35:51  shorne
+ * First cut of H.460.23/.24 support
+ *
  * Revision 1.24  2009/07/09 15:11:12  shorne
  * Simplfied and standardised compiler directives
  *
@@ -2438,6 +2441,47 @@ class H323Connection : public PObject
 						PBoolean isAck
 						) const;
 
+#ifdef H323_H4609
+  /** H.460.9 Call Statistics
+	*/
+	class  H4609Statistics  : public PObject 
+	{
+	 public:
+		H4609Statistics();
+		H323TransportAddress sendRTPaddr;      // Send RTP Address
+		H323TransportAddress recvRTPaddr;      // Receive RTP Address
+		H323TransportAddress sendRTCPaddr;     // Send RTCP Address (not used)
+		H323TransportAddress recvRTCPaddr;     // Receive RTCP Address (not used)
+		unsigned sessionid;
+		unsigned meanEndToEndDelay;			   // EstimatedEndtoEnd...
+		unsigned worstEndToEndDelay;		   // EstimatedEndtoEnd...
+		unsigned packetsReceived;
+		unsigned accumPacketLost;
+		unsigned packetLossRate;
+		unsigned fractionLostRate;
+		unsigned meanJitter;
+		unsigned worstJitter;
+		unsigned bandwidth;
+	};
+
+  /** H.460.9 Queue statistics
+    */
+  void H4609QueueStats(const RTP_Session & session) const;
+
+  /** H.460.9 dequeue statistics
+    */
+  PBoolean H4609DequeueStats(H4609Statistics & stat);
+
+  /** H.460.9 Enable statistics collection
+    */
+  void H4609EnableStats();
+
+  /** H.460.9 Statistics only collected at end of call
+    */
+  void H4609StatsFinal(PBoolean final);
+
+#endif
+
     /**Callback from the RTP session for statistics monitoring.
        This is called every so many packets on the transmitter and receiver
        threads of the RTP session indicating that the statistics have been
@@ -3410,6 +3454,12 @@ class H323Connection : public PObject
 #ifdef H323_H460
 	PBoolean disableH460;
 	H460_FeatureSet       * features;
+
+#ifdef H323_H4609
+	PBoolean m_h4609enabled;
+	PBoolean m_h4609Final;
+	PQueue<H4609Statistics> * m_h4609Stats;
+#endif
 
 #ifdef H323_H46018
 	PBoolean m_H46019CallReceiver;

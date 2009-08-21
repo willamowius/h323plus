@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.34  2009/07/25 10:35:51  shorne
+ * First cut of H.460.23/.24 support
+ *
  * Revision 1.33  2009/07/09 15:11:12  shorne
  * Simplfied and standardised compiler directives
  *
@@ -908,6 +911,11 @@ H323Connection::H323Connection(H323EndPoint & ep,
   disableH460 = ep.FeatureSetDisabled();
   features->LoadFeatureSet(H460_Feature::FeatureSignal,this);
 
+#ifdef H323_H4609
+  m_h4609Stats = NULL;
+  m_h4609enabled = false;
+  m_h4609Final = false;
+#endif
 #ifdef H323_H46018
   m_H46019CallReceiver = false;
   m_H46019enabled = false;
@@ -956,6 +964,9 @@ H323Connection::~H323Connection()
 #endif
 #ifdef H323_H460
   delete features;
+#ifdef H323_H4609
+  delete m_h4609Stats;
+#endif
 #endif
 
   PTRACE(3, "H323\tConnection " << callToken << " deleted.");
@@ -5711,13 +5722,87 @@ void H323Connection::ReleaseSession(unsigned sessionID)
 
 void H323Connection::OnRTPStatistics(const RTP_Session & session) const
 {
+#ifdef H323_H4609
+   	if (!m_h4609Final && session.GetPacketsReceived() > 0) 
+        H4609QueueStats(session);
+#endif
   endpoint.OnRTPStatistics(*this, session);
 }
 
 void H323Connection::OnRTPFinalStatistics(const RTP_Session & session) const
 {
+#ifdef H323_H4609
+   	if (session.GetPacketsReceived() > 0) 
+        H4609QueueStats(session);
+#endif
   endpoint.OnRTPFinalStatistics(*this, session);
 }
+
+#ifdef H323_H4609
+
+H323Connection::H4609Statistics::H4609Statistics()
+{			
+	meanEndToEndDelay =0;				
+    worstEndToEndDelay =0;
+	packetsReceived =0;
+    accumPacketLost =0;
+	packetLossRate =0;
+	fractionLostRate =0;
+	meanJitter =0;
+	worstJitter =0;
+	bandwidth =0;
+	sessionid =1;
+}
+
+void H323Connection::H4609QueueStats(const RTP_Session & session) const
+{
+   if (!m_h4609enabled || (m_h4609Stats == NULL))
+	   return;
+ 
+	H4609Statistics * stat = new H4609Statistics();
+
+	stat->sendRTPaddr  = H323TransportAddress(session.GetLocalTransportAddress());  
+    stat->recvRTPaddr  = H323TransportAddress(session.GetRemoteTransportAddress());    
+//	 stat->sendRTCPaddr = H323TransportAddress();  
+//   stat->recvRTCPaddr = H323TransportAddress(); 
+	stat->sessionid = session.GetSessionID();
+	stat->meanEndToEndDelay = session.GetAverageSendTime();			
+    stat->worstEndToEndDelay = session.GetMaximumSendTime();
+	stat->packetsReceived = session.GetPacketsReceived();
+    stat->accumPacketLost = session.GetPacketsLost();
+	stat->packetLossRate = session.GetPacketsLost() / session.GetPacketsReceived();
+	stat->fractionLostRate = stat->packetLossRate * 100;
+	stat->meanJitter = session.GetAvgJitterTime();
+	stat->worstJitter = session.GetMaxJitterTime();
+	if (session.GetPacketsReceived() > 0 && session.GetAverageReceiveTime() > 0)
+      stat->bandwidth  = (unsigned)((session.GetOctetsReceived()/session.GetPacketsReceived()/session.GetAverageReceiveTime())*1000);
+
+    m_h4609Stats->Enqueue(stat);
+}
+
+	
+PBoolean H323Connection::H4609DequeueStats(H4609Statistics & stat) 
+{   
+	if (m_h4609Stats == NULL)
+		return false;
+
+	H4609Statistics * s = m_h4609Stats->Dequeue(); 
+	if (s != NULL)
+	    stat = *s;
+    return (s != NULL);
+}
+
+void H323Connection::H4609EnableStats() 
+{ 
+	m_h4609enabled = true; 
+	m_h4609Stats = new PQueue<H4609Statistics>;
+}
+	
+void H323Connection::H4609StatsFinal(PBoolean final) 
+{ 
+	m_h4609Final = final;
+}
+#endif
 
 static void AddSessionCodecName(PStringStream & name, H323Channel * channel)
 {

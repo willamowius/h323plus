@@ -6,8 +6,8 @@ AC_HEADER_STDC
 dnl this must be updated for every minor revision, and for
 dnl builds when and as necessary
 REQUIRED_PTLIB_MAJOR=2
-REQUIRED_PTLIB_MINOR=2
-REQUIRED_PTLIB_BUILD=1
+REQUIRED_PTLIB_MINOR=7
+REQUIRED_PTLIB_BUILD=0
 
 dnl ########################################################################
 dnl set the OpenH323 directory to the current directory
@@ -178,6 +178,7 @@ default_h249=yes
 default_h341=yes
 default_h350=no
 default_h460=yes
+default_h4609=yes
 default_h46018=yes
 default_h46023=yes
 default_t120=yes
@@ -199,6 +200,7 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_h341=no
   default_h350=no
   default_h460=no
+  default_h4609=no
   default_h46018=no
   default_h46023=no
   default_t120=no
@@ -455,6 +457,26 @@ else
   AC_MSG_NOTICE(Disabling H.460)
 fi
 AC_SUBST(H323_H460)
+
+dnl ########################################################################
+dnl check for enabling H.460.9
+
+dnl MSWIN_DISPLAY h4609,H.460.9
+dnl MSWIN_DEFINE  h4609,H323_H4609
+
+AC_ARG_ENABLE(h4609,
+       [  --disable-h4609          disable H.460.9])
+if test "${enable_h4609}x" = "x" ; then
+  enable_h4609=$default_h4609
+fi
+if test "$enable_h4609" = "yes" ; then
+  H323_h4609=1
+  AC_DEFINE(H323_h4609, 1)
+else
+  H323_h4609=
+  AC_MSG_NOTICE(Disabling H.460.9)
+fi
+AC_SUBST(H323_H4609)
 
 dnl ########################################################################
 dnl check for enabling H.460.18/.19

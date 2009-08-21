@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.16  2009/07/25 10:35:51  shorne
+# First cut of H.460.23/.24 support
+#
 # Revision 1.15  2009/06/28 10:24:46  willamowius
 # add more headers
 #
@@ -246,6 +249,7 @@ ifdef H323_H460
 HEADER_FILES    += $(OH323_INCDIR)/h460/h460.h \
                    $(OH323_INCDIR)/h460/h4601.h \
                    $(OH323_INCDIR)/h460/h4609.h \
+                   $(OH323_INCDIR)/h460/h460_std9.h \
                    $(OH323_INCDIR)/h460/h46018.h \
                    $(OH323_INCDIR)/h460/h460_std18.h \
                    $(OH323_INCDIR)/h460/h46018_h225.h \
@@ -254,6 +258,7 @@ HEADER_FILES    += $(OH323_INCDIR)/h460/h460.h \
 
 COMMON_SOURCES  += $(OH323_SRCDIR)/h460/h4601.cxx \
                    $(OH323_SRCDIR)/h460/h4609.cxx \
+                   $(OH323_INCDIR)/h460/h460_std9.cxx \
                    $(OH323_SRCDIR)/h460/h46018.cxx \
                    $(OH323_SRCDIR)/h460/h460_std18.cxx \
                    $(OH323_SRCDIR)/h460/h46018_h225.cxx \
