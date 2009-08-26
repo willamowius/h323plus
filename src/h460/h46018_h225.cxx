@@ -37,6 +37,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2009/08/02 03:04:50  shorne
+ * H.460.24A fix when remote and gatekeeper are at same address
+ *
  * Revision 1.6  2009/07/25 10:35:51  shorne
  * First cut of H.460.23/.24 support
  *
@@ -744,8 +747,10 @@ PBoolean H46019UDPSocket::SendRTCPFrame(RTP_ControlFrame & report, const PIPSock
 PBoolean H46019UDPSocket::GetLocalAddress(PIPSocket::Address & addr, WORD & port) 
 {
 	if (PUDPSocket::GetLocalAddress(addr, port)) {
+#ifdef H323_H46024A
 		m_locAddr = addr;
 		m_locPort = port;
+#endif
 		return true;
 	}
 	return false;
