@@ -37,6 +37,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2009/07/25 10:35:51  shorne
+ * First cut of H.460.23/.24 support
+ *
  * Revision 1.4  2009/07/09 15:06:59  shorne
  * More H.460.19 fixes
  *
@@ -358,11 +361,11 @@ class PNatMethod_H46019  : public PNatMethod
 };
 
 #ifndef _WIN32_WCE
-#if defined(PPLUGIN_STATIC_LOAD)
-   PPLUGIN_STATIC_LOAD(H46019,PNatMethod);
-#else
-   PWLIB_STATIC_LOAD_PLUGIN(H46019, PNatMethod);
-#endif
+	#if PTLIB_VER > 260
+	   PPLUGIN_STATIC_LOAD(H46019,PNatMethod);
+	#else
+	   PWLIB_STATIC_LOAD_PLUGIN(H46019, PNatMethod);
+	#endif
 #endif
 
 class H46019UDPSocket : public PUDPSocket

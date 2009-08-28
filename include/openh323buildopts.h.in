@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2009/08/21 07:01:06  shorne
+ * Added H.460.9 Support
+ *
  * Revision 1.10  2009/07/25 10:35:51  shorne
  * First cut of H.460.23/.24 support
  *
@@ -175,6 +178,13 @@
 
 #include <ptbuildopts.h>
 
+#if PTLIB_MAJOR == 2 && PTLIB_MINOR == 6  
+		#define PTLIB_VER 260
+#endif
+#if PTLIB_MAJOR == 2 && PTLIB_MINOR == 7  
+		#define PTLIB_VER 270
+#endif
+
 /////////////////////////////////////////////////
 //
 // Major options
@@ -220,13 +230,17 @@
 #undef H323_H450
 #undef H323_H460
 #undef H323_H4609
-#undef H323_H46018
-#undef H323_H46023
-#if defined(H323_H46018) && defined(H323_H46023) && defined(P_SSL)
-#define H323_H46024A 1
-#endif 
+#if (PTLIB_VER > 260) 
+	#undef H323_H46018
+	#undef H323_H46023
+	#if defined(H323_H46018) && defined(H323_H46023) && defined(P_SSL)
+		#define H323_H46024A 1
+	#endif
+#endif
 #undef H323_H501
-#undef H323_GNUGK
+#if (PTLIB_VER > 260) 
+	#undef H323_GNUGK
+#endif
 #undef H323_FILE
 
 #undef H323_SIGNAL_AGGREGATE

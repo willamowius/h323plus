@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2009/07/25 10:35:51  shorne
+ * First cut of H.460.23/.24 support
+ *
  *
  *
  *
@@ -158,8 +161,12 @@ private:
 };
 
 // Need to declare for Factory Loader
-#if defined(_WIN32) && !defined(_WIN32_WCE)
-   PPLUGIN_STATIC_LOAD(Std23, H460_Feature);
+#if !defined(_WIN32_WCE)
+	#if PTLIB_VER > 260
+	   PPLUGIN_STATIC_LOAD(Std23, H460_Feature);
+	#else
+	   PWLIB_STATIC_LOAD_PLUGIN(Std23, H460_Feature);
+	#endif
 #endif
 
 
@@ -231,8 +238,12 @@ private:
 inline ostream & operator<<(ostream & strm, H460_FeatureStd24::NatInstruct method) { return strm << H460_FeatureStd24::GetNATStrategyString(method); }
 
 // Need to declare for Factory Loader
-#if defined(_WIN32) && !defined(_WIN32_WCE)
-   PPLUGIN_STATIC_LOAD(Std24, H460_Feature);
+#if !defined(_WIN32_WCE)
+	#if PTLIB_VER > 260
+	   PPLUGIN_STATIC_LOAD(Std24, H460_Feature);
+	#else
+	   PWLIB_STATIC_LOAD_PLUGIN(Std24, H460_Feature);
+	#endif
 #endif
 
 #endif 

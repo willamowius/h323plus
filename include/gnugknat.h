@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2009/07/09 15:08:15  shorne
+ * Added ability to enable/disable on  a call by call basis
+ *
  * Revision 1.9  2009/06/28 00:11:03  shorne
  * Added H.460.18/19 Support
  *
@@ -289,11 +292,15 @@ protected:
 
 };
 
-#if defined(PPLUGIN_STATIC_LOAD)
-   PPLUGIN_STATIC_LOAD(GnuGk,PNatMethod);
-#else
-   PWLIB_STATIC_LOAD_PLUGIN(GnuGk, PNatMethod);
+#ifndef _WIN32_WCE
+	#if PTLIB_VER > 260
+	   PPLUGIN_STATIC_LOAD(GnuGk,PNatMethod);
+	#else
+	   PWLIB_STATIC_LOAD_PLUGIN(GnuGk,PNatMethod);
+	#endif
 #endif
+
+
 
 class GNUGKUDPSocket : public PUDPSocket
 {

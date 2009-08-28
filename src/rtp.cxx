@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2009/07/25 10:35:51  shorne
+ * First cut of H.460.23/.24 support
+ *
  * Revision 1.8  2009/07/09 15:11:12  shorne
  * Simplfied and standardised compiler directives
  *
@@ -1716,7 +1719,11 @@ PBoolean RTP_UDP::Open(PIPSocket::Address _localAddress,
 	H323Connection::SessionInformation * info = 
 		 connection.BuildSessionInformation(GetSessionID());
 
+#if PTLIB_VER > 260
     if (meth->CreateSocketPair(dataSocket, controlSocket, localAddress,(void *)info)) {
+#else
+	if (meth->CreateSocketPair(dataSocket, controlSocket, localAddress)) {
+#endif
       dataSocket->GetLocalAddress(localAddress, localDataPort);
       controlSocket->GetLocalAddress(localAddress, localControlPort);
 	  PTRACE(4, "RTP\tNAT Method " << meth->GetName() << " created NAT ports " << localDataPort << " " << localControlPort);

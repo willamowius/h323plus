@@ -30,6 +30,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2009/08/21 07:01:06  shorne
+ * Added H.460.9 Support
+ *
  *
  *
  *
@@ -90,7 +93,11 @@ private:
 
 // Need to declare for Factory Loader
 #ifndef _WIN32_WCE
-   PPLUGIN_STATIC_LOAD(Std9, H460_Feature);
+	#if PTLIB_VER > 260
+	   PPLUGIN_STATIC_LOAD(Std9, H460_Feature);
+	#else
+	   PWLIB_STATIC_LOAD_PLUGIN(Std9, H460_Feature);
+	#endif
 #endif
 
 #endif

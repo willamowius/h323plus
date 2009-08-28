@@ -24,6 +24,9 @@
  * Contributor(s): __________________________________
  *
  * $Log$
+ * Revision 1.3  2009/08/15 15:01:33  willamowius
+ * use SetValueRaw() when creating MD5 crypto hashes to preserve trailing null byte in clear text
+ *
  * Revision 1.2  2008/05/23 11:21:36  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -636,14 +639,14 @@ H225_CryptoH323Token * H235AuthSimpleMD5::CreateCryptoToken()
 
   clearToken.IncludeOptionalField(H235_ClearToken::e_generalID);
 	// use SetValueRaw() starting with PTLib 2.7.x to preserve the trailing null byte
-#if PTLIB_MAJOR == 2 && PTLIB_MINOR < 7
+#if PTLIB_VER < 270
   clearToken.m_generalID = GetUCS2plusNULL(localId);
 #else
   clearToken.m_generalID.SetValueRaw(GetUCS2plusNULL(localId));
 #endif
 
   clearToken.IncludeOptionalField(H235_ClearToken::e_password);
-#if PTLIB_MAJOR == 2 && PTLIB_MINOR < 7
+#if PTLIB_VER < 270
   clearToken.m_password = GetUCS2plusNULL(password);
 #else
   clearToken.m_password.SetValueRaw(GetUCS2plusNULL(password));
@@ -719,14 +722,14 @@ H235Authenticator::ValidationResult H235AuthSimpleMD5::ValidateCryptoToken(
 
   clearToken.IncludeOptionalField(H235_ClearToken::e_generalID);
   // use SetValueRaw() starting with PTLib 2.7.x to preserve the trailing null byte
-#if PTLIB_MAJOR == 2 && PTLIB_MINOR < 7
+#if PTLIB_VER < 270
   clearToken.m_generalID = GetUCS2plusNULL(alias);
 #else
   clearToken.m_generalID.SetValueRaw(GetUCS2plusNULL(alias));
 #endif
 
   clearToken.IncludeOptionalField(H235_ClearToken::e_password);
-#if PTLIB_MAJOR == 2 && PTLIB_MINOR < 7
+#if PTLIB_VER < 270
   clearToken.m_password = GetUCS2plusNULL(password);
 #else
   clearToken.m_password.SetValueRaw(GetUCS2plusNULL(password));
@@ -839,7 +842,7 @@ H235_ClearToken * H235AuthCAT::CreateClearToken()
 
   clearToken->IncludeOptionalField(H235_ClearToken::e_generalID);
   // use SetValueRaw() starting with PTLib 2.7.x to preserve the trailing null byte
-#if PTLIB_MAJOR == 2 && PTLIB_MINOR < 7
+#if PTLIB_VER < 270
   clearToken->m_generalID = GetUCS2plusNULL(localId);
 #else
   clearToken->m_generalID.SetValueRaw(GetUCS2plusNULL(localId));

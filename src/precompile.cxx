@@ -28,8 +28,8 @@
 
 #ifndef PTLIB_VERSION_CHECK
    #define PTLIB_VERSION_CHECK 1
-      #if PTLIB_MAJOR <= 2 && PTLIB_MINOR < 2
-         #error "You require PTLib v2.2.1 or above to compile this version of H323plus")
+      #if PTLIB_MAJOR <= 2 && PTLIB_MINOR < 6
+         #error "You require PTLib v2.6.x or above to compile this version of H323plus")
       #endif
 #endif
 

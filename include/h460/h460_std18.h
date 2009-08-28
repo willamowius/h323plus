@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2009/07/25 10:35:51  shorne
+ * First cut of H.460.23/.24 support
+ *
  * Revision 1.2  2009/06/28 01:08:51  shorne
  * Fix so features load properly
  *
@@ -97,11 +100,11 @@ private:
 
 // Need to declare for Factory Loader
 #ifndef _WIN32_WCE
-#if defined(PPLUGIN_STATIC_LOAD)
-   PPLUGIN_STATIC_LOAD(Std18, H460_Feature);
-#else
-   PWLIB_STATIC_LOAD_PLUGIN(Std18, H460_Feature);
-#endif
+	#if PTLIB_VER > 260
+	   PPLUGIN_STATIC_LOAD(Std18, H460_Feature);
+	#else
+	   PWLIB_STATIC_LOAD_PLUGIN(Std18, H460_Feature);
+	#endif
 #endif
 
 /////////////////////////////////////////////////////////////////
@@ -154,11 +157,11 @@ private:
 
 // Need to declare for Factory Loader
 #ifndef _WIN32_WCE
-#if defined(PPLUGIN_STATIC_LOAD)
-   PPLUGIN_STATIC_LOAD(Std19, H460_Feature);
-#else
-   PWLIB_STATIC_LOAD_PLUGIN(Std19, H460_Feature);
-#endif
+	#if PTLIB_VER > 260
+	   PPLUGIN_STATIC_LOAD(Std19, H460_Feature);
+	#else
+	   PWLIB_STATIC_LOAD_PLUGIN(Std19, H460_Feature);
+	#endif
 #endif
 
 #endif

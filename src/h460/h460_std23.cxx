@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2009/07/25 10:35:51  shorne
+ * First cut of H.460.23/.24 support
+ *
  *
  *
  *
@@ -167,8 +170,10 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
 											 PUDPSocket * & socket2,
 											const PIPSocket::Address & binding)
 {
+#if (PTLIB_VER > 260)
 	pairedPortInfo.currentPort = 
 			RandomPortPair(pairedPortInfo.basePort-1,pairedPortInfo.maxPort-2);
+#endif
 
 	return PSTUNClient::CreateSocketPair(socket1,socket2,binding);
 }
