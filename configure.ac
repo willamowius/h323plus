@@ -6,8 +6,8 @@ AC_HEADER_STDC
 dnl this must be updated for every minor revision, and for
 dnl builds when and as necessary
 REQUIRED_PTLIB_MAJOR=2
-REQUIRED_PTLIB_MINOR=7
-REQUIRED_PTLIB_BUILD=0
+REQUIRED_PTLIB_MINOR=6
+REQUIRED_PTLIB_BUILD=4
 
 dnl ########################################################################
 dnl set the OpenH323 directory to the current directory
