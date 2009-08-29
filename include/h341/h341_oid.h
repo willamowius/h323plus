@@ -542,7 +542,7 @@ typedef PASN_Array   H341_H323GATEKEEPERSTATISTICSTABLE_Table;
  * Type definitions 
  */
 
-struct {
+static struct {
     PString         oid;
     PINDEX          type;
     PINDEX          access;

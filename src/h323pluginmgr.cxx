@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.23  2009/07/09 15:11:12  shorne
+ * Simplfied and standardised compiler directives
+ *
  * Revision 1.22  2009/05/19 11:46:24  willamowius
  * remove unused class H323DynaLink
  *
@@ -3478,14 +3481,14 @@ PBoolean H323CodecPluginGenericVideoCapability::SetMaxFrameSize(CapabilityFrameS
 {
     PString param;
     switch (framesize) {
-        case sqcifMPI  : param = sqcifMPI_tag; break;
-        case  qcifMPI  : param =  qcifMPI_tag; break;
-        case   cifMPI  : param =   cifMPI_tag; break;
-        case   cif4MPI : param =   cif4MPI_tag; break;
-        case   cif16MPI: param =   cif16MPI_tag; break;
-		case  i480MPI  : param =   cif4MPI_tag; break;
-        case  p720MPI  : param =   cif16MPI_tag; break;
-        case i1080MPI  : param =  i1080MPI_tag; break; 
+		case sqcifMPI  : param = sqcifMPI_tag; break;
+		case  qcifMPI  : param =  qcifMPI_tag; break;
+		case   cifMPI  : param =   cifMPI_tag; break;
+		case   cif4MPI : param =   cif4MPI_tag; break;
+		case   cif16MPI: param =   cif16MPI_tag; break;
+		case  i480MPI  : param =   i480MPI_tag; break;
+		case  p720MPI  : param =   p720MPI_tag; break;
+		case i1080MPI  : param =  i1080MPI_tag; break; 
         default: return FALSE;
     }
 

@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.35  2009/08/21 07:01:06  shorne
+ * Added H.460.9 Support
+ *
  * Revision 1.34  2009/07/25 10:35:51  shorne
  * First cut of H.460.23/.24 support
  *
@@ -6242,7 +6245,7 @@ void H323Connection::MonitorCallStatus()
 #ifdef P_STUN
 
 H323Connection::SessionInformation::SessionInformation(const OpalGloballyUniqueID & id, const PString & token, unsigned session)
-: m_callID(id), m_sessionID(session), m_callToken(token)
+: m_callID(id), m_callToken(token), m_sessionID(session)
 {
 
 #ifdef H323_H46024A

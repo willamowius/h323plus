@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.22  2009/07/09 15:11:12  shorne
+ * Simplfied and standardised compiler directives
+ *
  * Revision 1.21  2009/06/28 01:41:52  shorne
  * Replaced P_HAS_QOS with P_QOS (depreciated in PTLib)
  *
@@ -3760,7 +3763,7 @@ PBoolean H323Capabilities::IsAllowed(const unsigned a_capno1, const unsigned a_c
 
 
 struct msNonStandardCodecDef {
-  char * name;
+  const char * name;
   BYTE sig[2];
 };
 

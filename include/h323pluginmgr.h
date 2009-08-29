@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2009/05/19 11:46:23  willamowius
+ * remove unused class H323DynaLink
+ *
  * Revision 1.6  2009/02/21 14:08:58  shorne
  * Added the ability to reread the plugins during program execution
  *
@@ -204,10 +207,7 @@ class H323PluginCodecManager : public PPluginModuleManager
     
 };
 
-// keep compatibility with PTLib v2.2.1
-#if PTLIB_MAJOR == 2 && PTLIB_MINOR >= 3
 static PFactory<PPluginModuleManager>::Worker<H323PluginCodecManager> h323PluginCodecManagerFactory("h323PluginCodecManager", true);
-#endif
 
 //////////////////////////////////////////////////////
 //
