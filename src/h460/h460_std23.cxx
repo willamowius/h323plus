@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2009/08/28 14:36:06  shorne
+ * Fixes to enable compilation with PTLIB 2.6.4
+ *
  * Revision 1.1  2009/07/25 10:35:51  shorne
  * First cut of H.460.23/.24 support
  *
@@ -241,8 +244,9 @@ PBoolean H460_FeatureStd23::OnSendRegistrationRequest(H225_FeatureDescriptor & p
 #endif
 	} else {
 		if (alg) {
-			  // We are disabling H.460.23/.24 support
-				feat.Add(NATTypeOID,H460_FeatureContent(0,8)); 
+			  // We should be disabling H.460.23/.24 support but 
+			  // we will disable H.460.18/.19 instead :) and say we have no NAT..
+				feat.Add(NATTypeOID,H460_FeatureContent(1,8)); 
 				feat.Add(remoteNATOID,H460_FeatureContent(false)); 
 				isavailable = false;
 				alg = false;
@@ -304,8 +308,8 @@ void H460_FeatureStd23::OnNATTypeDetection(PSTUNClient::NatTypes type)
 		PTRACE(4,"Std23\tSTUN Test Result: " << type << " forcing reregistration.");
 		natType = type;  // first time detection
 	} else {
-		PTRACE(2,"Std23\tBAD NAT Detected: Was " << natType << " Now " << type);
-		natType = type;  // Leopard changed it spots (change this to PSTUNClient::UnknownNat if disabling)
+		PTRACE(2,"Std23\tBAD NAT Detected: Was " << natType << " Now " << type << " Disabling H.460.23/.24");
+		natType = PSTUNClient::UnknownNat;  // Leopard changed it spots (disable H.460.23/.24)
 	}
 	
 	natNotify = true;
