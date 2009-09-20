@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.26  2009/08/21 07:01:05  shorne
+ * Added H.460.9 Support
+ *
  * Revision 1.25  2009/07/25 10:35:51  shorne
  * First cut of H.460.23/.24 support
  *
@@ -3474,8 +3477,11 @@ class H323Connection : public PObject
 #endif
 
 #endif
+
+#ifdef P_STUN
 	PMutex NATSocketMutex;
 	std::map<unsigned,NAT_Sockets> m_NATSockets;
+#endif
 };
 
 

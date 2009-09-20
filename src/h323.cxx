@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.36  2009/08/29 13:18:16  shorne
+ * Fix compile warnings on Linux
+ *
  * Revision 1.35  2009/08/21 07:01:06  shorne
  * Added H.460.9 Support
  *
@@ -1711,8 +1714,6 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
         return FALSE;
     }
 
-if (!nonCallConnection) {
-
     /** Here is a spot where we should wait in case of Call Intrusion
 	for CIPL from other endpoints 
 	if (isCallIntrusion) return TRUE;
@@ -1722,6 +1723,10 @@ if (!nonCallConnection) {
     alertingPDU = new H323SignalPDU;
     alertingPDU->BuildAlerting(*this);
 
+if (nonCallConnection) {
+      if (!WriteSignalPDU(*alertingPDU))
+        return FALSE;
+} else {
     /** If we have a case of incoming call intrusion we should not Clear the Call*/
     {
       CallEndReason incomingCallEndReason = EndedByNoAccept;
@@ -1972,7 +1977,11 @@ PBoolean H323Connection::OnReceivedAlerting(const H323SignalPDU & pdu)
       return FALSE;
 
   alertingTime = PTime();
-  return OnAlerting(pdu, remotePartyName);
+
+  if (nonCallConnection) 
+	  return true;
+  else
+	  return OnAlerting(pdu, remotePartyName);
 }
 
 
@@ -2050,6 +2059,9 @@ PBoolean H323Connection::OnReceivedSignalConnect(const H323SignalPDU & pdu)
   if (fastStartState != FastStartAcknowledged) {
     fastStartState = FastStartDisabled;
     fastStartChannels.RemoveAll();
+#ifdef P_STUN
+	m_NATSockets.clear();
+#endif
   }
 
   PTRACE(4, "H225\tFast Start " << (h245Tunneling ? "TRUE" : "FALSE")
@@ -4403,6 +4415,9 @@ PBoolean H323Connection::OnOpenLogicalChannel(const H245_OpenLogicalChannel & op
   fastStartState = FastStartDisabled;
   if (!fastStartChannels.IsEmpty()) {
     fastStartChannels.RemoveAll();
+#ifdef P_STUN
+	m_NATSockets.clear();
+#endif
     PTRACE(1, "H245\tReceived early start OLC, aborting fast start");
   }
 
