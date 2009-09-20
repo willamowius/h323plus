@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2008/05/23 11:20:27  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.5  2008/01/22 01:17:11  shorne
  * Fixes to the H.230 system
  *
@@ -340,7 +343,7 @@ class H230Control_EndPoint   : public H230Control
 
  protected:
 	PMutex requestMutex;
-	PTimedMutex responseMutex;
+	PSyncPoint responseMutex;
 	result * res;
 
 };
