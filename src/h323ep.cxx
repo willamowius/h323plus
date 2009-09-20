@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.31  2009/08/21 07:01:06  shorne
+ * Added H.460.9 Support
+ *
  * Revision 1.30  2009/07/25 10:35:51  shorne
  * First cut of H.460.23/.24 support
  *
@@ -920,10 +923,7 @@
 #include "h460/h460.h"
 #include "h225.h"
 
-#ifdef H323_H4609
-#include "h460/h460_std9.h"
-#endif
-
+// Std18 must be first for interop
 #ifdef H323_H46018 
 #include "h460/h460_std18.h"
 #include "h460/h46018_h225.h"
@@ -931,6 +931,10 @@
 
 #ifdef H323_H46023
 #include "h460/h460_std23.h"
+#endif
+
+#ifdef H323_H4609
+#include "h460/h460_std9.h"
 #endif
 
 #endif  // H323_H460
@@ -958,6 +962,11 @@
 #ifdef H323_FILE
 #include "h323filetransfer.h"
 #endif
+
+#ifdef H323_GNUGK
+#include "gnugknat.h"
+#endif
+
 
 #if defined(H323_RTP_AGGREGATE) || defined(H323_SIGNAL_AGGREGATE)
 #include <ptclib/sockagg.h>

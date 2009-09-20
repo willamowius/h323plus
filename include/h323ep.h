@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.22  2009/07/09 15:09:19  shorne
+ * Added ability to access Gatekeeper features
+ *
  * Revision 1.21  2009/07/03 10:35:59  willamowius
  * RegInvokeReRegistration is only available with GnuGk NAT feature
  *
@@ -412,6 +415,21 @@
 #include "h323.h"
 #include "h323con.h"
 
+#ifdef P_USE_PRAGMA
+#pragma interface
+#endif
+
+// Add Feature Support
+#ifdef H323_H460
+#include "h460/h4601.h"
+#endif
+
+// Add NAT Method Support
+#ifdef P_STUN
+#include <ptclib/pnat.h>
+class PSTUNClient;
+#endif
+
 class PHandleAggregator;
 
 /* The following classes have forward references to avoid including the VERY
@@ -435,10 +453,6 @@ class OpalH224Handler;
 class OpalH281Handler;
 #endif
 
-#ifndef DISABLE_CALLAUTH
-#include "h235auth.h"
-#endif
-
 #ifdef H323_T120
 class OpalT120Protocol;
 #endif
@@ -447,28 +461,14 @@ class OpalT120Protocol;
 class OpalT38Protocol;
 #endif
 
+
+#ifdef H323_GNUGK
+class GNUGK_Feature;
+#endif
+
 #ifdef H323_FILE
 class H323FileTransferHandler;
 class H323FileTransferList;
-#endif
-
-#include <ptlib/pluginmgr.h>
-
-#ifdef P_STUN
-#include <ptclib/pnat.h>
-class PSTUNClient;
-#endif
-
-#ifdef P_USE_PRAGMA
-#pragma interface
-#endif
-
-#ifdef H323_H460
-#include "h460/h4601.h"
-#endif
-
-#ifdef H323_GNUGK
-#include "gnugknat.h"
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
