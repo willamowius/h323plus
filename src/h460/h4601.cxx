@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.15  2009/07/07 13:24:46  shorne
+ * Fix so feature list will start at 0 and OpalOID + operator
+ *
  * Revision 1.14  2009/07/07 12:28:38  shorne
  * Remove redundant code and fix memory leaks
  *
@@ -1131,9 +1134,26 @@ PBoolean H460_FeatureSet::LoadFeatureSet(int inst, H323Connection * con)
   if ((ep) && (ep->FeatureSetDisabled()))
 	 return FALSE;
 
-  PStringList features = H460_Feature::GetFeatureNames();
+  PStringList featurelist = H460_Feature::GetFeatureNames();
 
-      for (PINDEX i = 0; i < features.GetSize(); i++) {
+  // We need to reorder the features so that the std ones are first.
+  // This is needed as some H.323 devices will not recognise the feature
+	  PStringList features;
+	  PINDEX i;
+	  for (i = 0; i < featurelist.GetSize(); i++) {
+		  if (featurelist[i].Left(3) == "Std")
+			  features.AppendString(featurelist[i]);
+	  }
+	  for (i = 0; i < featurelist.GetSize(); i++) {
+		  if (featurelist[i].Left(3) == "OID")
+			  features.AppendString(featurelist[i]);
+	  }
+	  for (i = 0; i < featurelist.GetSize(); i++) {
+		  if (featurelist[i].Left(3) == "Non")
+			  features.AppendString(featurelist[i]);
+	  }
+
+      for (i = 0; i < features.GetSize(); i++) {
   	    if ((ep) && (!ep->OnFeatureInstance(inst,features[i]))) {
 			PTRACE(4,"H460\tFeature " << features[i] << " disabled due to policy.");
 			continue;
@@ -1329,6 +1349,7 @@ PTRACE(6,"H460\tRead FeatureSet " << PTracePDU(MessageID) << " PDU");
      case H460_MessageType::e_registrationConfirm: 
 	 case H460_MessageType::e_setup:
 	 case H460_MessageType::e_callProceeding:
+	 case H460_MessageType::e_alerting:
 		 ProcessFirstPDU(fs);
 		 break;
 	 default:
