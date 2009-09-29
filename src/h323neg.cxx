@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2009/07/09 15:07:34  shorne
+ * More H.460.19 fixes
+ *
  * Revision 1.3  2009/07/03 04:15:01  shorne
  * more H.460.18/19 support
  *
@@ -912,13 +915,13 @@ PBoolean H245NegLogicalChannel::HandleOpen(const H245_OpenLogicalChannel & pdu)
     
   channel = connection.CreateLogicalChannel(pdu, FALSE, cause);
 
-  if (!connection.OnOpenLogicalChannel(pdu, ack, cause, channel->GetSessionID())) {
-	  delete channel;
-	  channel = NULL;
-	  ok = false;
-  }
-
   if (channel != NULL) {
+	  if (!connection.OnOpenLogicalChannel(pdu, ack, cause, channel->GetSessionID())) {
+		  delete channel;
+		  channel = NULL;
+		  ok = false;
+	  }
+
     channel->SetNumber(channelNumber);
     channel->OnSendOpenAck(pdu, ack);
     if (channel->GetDirection() == H323Channel::IsBidirectional) {
