@@ -30,6 +30,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2009/08/28 14:36:06  shorne
+ * Fixes to enable compilation with PTLIB 2.6.4
+ *
  * Revision 1.1  2009/08/21 07:01:06  shorne
  * Added H.460.9 Support
  *
@@ -71,6 +74,8 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("Std9"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("QoS Monitoring-H.460.9"); };
     static int GetPurpose()	{ return FeatureSignal; };
+
+	virtual PBoolean CommonFeature() { return qossupport; }
 
 	// Messages
     virtual PBoolean OnSendAdmissionRequest(H225_FeatureDescriptor & pdu);

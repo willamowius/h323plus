@@ -36,6 +36,9 @@
  * Contributor(s): ______________________________________.
  *
 * $Log$
+* Revision 1.14  2009/07/07 13:24:43  shorne
+* Fix so feature list will start at 0 and OpalOID + operator
+*
 * Revision 1.13  2009/07/07 12:28:37  shorne
 * Remove redundant code and fix memory leaks
 *
@@ -763,6 +766,8 @@ class H460_Feature : public H225_FeatureDescriptor
 	  */
 	virtual void AttachConnection(H323Connection * _con);
 
+	virtual PBoolean CommonFeature() { return false; }
+
   //@}
 
   /**@name H323 RAS Interface */
@@ -1060,6 +1065,11 @@ class H460_FeatureSet : public PObject
 	   */
 	virtual PBoolean LoadFeatureSet(int inst = H460_Feature::FeatureBase,
 		                                  H323Connection * con = NULL);
+
+	/** Remove uncommon features from featureSet
+		This is usually done after receiving the connect message
+	  */
+	PBoolean RemoveUnCommonFeatures();
 
 	/** Process the first PDU, This will combine the features supported by
 	    the remote and local party to derive a common feature set. This will 

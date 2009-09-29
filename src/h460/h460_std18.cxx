@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2009/07/25 10:35:51  shorne
+ * First cut of H.460.23/.24 support
+ *
  * Revision 1.4  2009/07/09 15:07:34  shorne
  * More H.460.19 fixes
  *
@@ -128,7 +131,7 @@ PBoolean H460_FeatureStd18::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu
     
 void H460_FeatureStd18::OnReceiveGatekeeperConfirm(const H225_FeatureDescriptor & pdu) 
 {
-	// We should care whether the remote gatekeeper supports H.460.18 or not but we don't!
+	isEnabled = true;
 }
 
 PBoolean H460_FeatureStd18::OnSendRegistrationRequest(H225_FeatureDescriptor & pdu) 
@@ -143,6 +146,7 @@ PBoolean H460_FeatureStd18::OnSendRegistrationRequest(H225_FeatureDescriptor & p
 
 void H460_FeatureStd18::OnReceiveRegistrationConfirm(const H225_FeatureDescriptor & pdu) 
 {
+	isEnabled = true;
 	handler->Enable();
 	EP->H46018Received();
 }
@@ -247,23 +251,23 @@ void H460_FeatureStd19::OnReceiveCallProceeding_UUIE(const H225_FeatureDescripto
 	    CON->H46019Enabled();
 	}
 }
-
+/*
 PBoolean H460_FeatureStd19::OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu) 
 { 	
 	if (!isEnabled || !isAvailable || !remoteSupport)
 		return FALSE;
 
 	H460_FeatureStd feat = H460_FeatureStd(19); 
-	pdu = feat;
+	pdu = feat; 
 	return TRUE; 
 }
 
 void H460_FeatureStd19::OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pdu) 
-{
+{ 
 	if (isEnabled && isAvailable && !remoteSupport) {
 		remoteSupport = TRUE;
 	    CON->H46019Enabled();
-	}
+	} 
 }
 
 PBoolean H460_FeatureStd19::OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu) 
@@ -283,7 +287,7 @@ void H460_FeatureStd19::OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor &
 	    CON->H46019Enabled();
 	}
 }
-
+*/
 void H460_FeatureStd19::SetAvailable(bool avail)
 {
 	isAvailable = avail;

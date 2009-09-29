@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2009/09/20 00:34:29  shorne
+ * Changed conditions for disabling H.460.23
+ *
  * Revision 1.2  2009/08/28 14:36:06  shorne
  * Fixes to enable compilation with PTLIB 2.6.4
  *
@@ -196,6 +199,7 @@ H460_FeatureStd23::H460_FeatureStd23()
  EP = NULL;
  alg = false;
  isavailable = true;
+ isEnabled = false;
  natType = PSTUNClient::UnknownNat;
  natNotify = false;
 }
@@ -265,11 +269,12 @@ PBoolean H460_FeatureStd23::OnSendRegistrationRequest(H225_FeatureDescriptor & p
 
 void H460_FeatureStd23::OnReceiveGatekeeperConfirm(const H225_FeatureDescriptor & /*pdu*/) 
 {
-
+	isEnabled = true;
 }
 
 void H460_FeatureStd23::OnReceiveRegistrationConfirm(const H225_FeatureDescriptor & pdu)
 {
+	isEnabled = true;
 
    H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
 

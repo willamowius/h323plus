@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2009/08/28 14:36:06  shorne
+ * Fixes to enable compilation with PTLIB 2.6.4
+ *
  * Revision 1.1  2009/07/25 10:35:51  shorne
  * First cut of H.460.23/.24 support
  *
@@ -126,6 +129,8 @@ public:
     static PStringArray GetFeatureFriendlyName() { return PStringArray("P2Pnat Detect-H.460.23"); };
     static int GetPurpose()	{ return FeatureRas; };
 
+	virtual PBoolean CommonFeature() { return isEnabled; }
+
 	// Messages
 	// GK -> EP
     virtual PBoolean OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu);
@@ -153,6 +158,7 @@ private:
     PBoolean				natNotify;
 	PBoolean				alg;
 	PBoolean				isavailable;
+	PBoolean				isEnabled; 
 
 	// Delayed Reregistration
     PThread  *  RegThread;
@@ -190,6 +196,8 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("Std24"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("P2Pnat Media-H.460.24"); };
     static int GetPurpose()	{ return FeatureSignal; };
+
+	virtual PBoolean CommonFeature() { return isEnabled; }
 
 	enum NatInstruct {
 		e_unknown,

@@ -30,6 +30,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2009/08/21 07:01:06  shorne
+ * Added H.460.9 Support
+ *
  *
  *
  *
@@ -84,7 +87,6 @@ void H460_FeatureStd9::AttachConnection(H323Connection * _con)
 {
    CON = _con;
 }
-
 
 PBoolean H460_FeatureStd9::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
 {

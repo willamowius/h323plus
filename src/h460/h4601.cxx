@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.16  2009/09/20 00:32:03  shorne
+ * Added ordering of H.460 features with STD first
+ *
  * Revision 1.15  2009/07/07 13:24:46  shorne
  * Fix so feature list will start at 0 and OpalOID + operator
  *
@@ -1100,6 +1103,22 @@ PTRACE(6,"H460\tCreate Common FeatureSet");
 	return TRUE;
 }
 
+PBoolean H460_FeatureSet::RemoveUnCommonFeatures()
+{
+
+PTRACE(4,"H460\tRemoving UnCommon Features");
+
+ /// Remove the features that have not been negotiated for the call.
+	for (PINDEX i=0; i < Features.GetSize(); i++) {
+	    H460_Feature & feat = Features.GetDataAt(i);
+		H460_FeatureID id = feat.GetFeatureID();
+		if (!feat.CommonFeature())
+			 RemoveFeature(id);
+	}
+
+	return TRUE;
+}
+
 PBoolean H460_FeatureSet::CreateFeatureSet(const H225_FeatureSet & fs)
 {
 	PTRACE(6,"H460\tCreate FeatureSet from FeatureSet PDU");
@@ -1348,8 +1367,6 @@ PTRACE(6,"H460\tRead FeatureSet " << PTracePDU(MessageID) << " PDU");
      case H460_MessageType::e_registrationRequest:
      case H460_MessageType::e_registrationConfirm: 
 	 case H460_MessageType::e_setup:
-	 case H460_MessageType::e_callProceeding:
-	 case H460_MessageType::e_alerting:
 		 ProcessFirstPDU(fs);
 		 break;
 	 default:
@@ -1390,6 +1407,9 @@ PTRACE(6,"H460\tRead FeatureSet " << PTracePDU(MessageID) << " PDU");
 					ReadFeaturePDU(Features[ID],fd,MessageID);
 		  }
 	  }
+
+	  if (MessageID == H460_MessageType::e_connect)
+				RemoveUnCommonFeatures();
 }
 
 PBoolean H460_FeatureSet::SupportNonCallService(const H225_FeatureSet & fs)
