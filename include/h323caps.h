@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.15  2009/08/21 04:35:47  shorne
+ * Expressly reference codecs.h to avoid problems with windows SDK codecs.h
+ *
  * Revision 1.14  2009/07/09 15:11:12  shorne
  * Simplfied and standardised compiler directives
  *
@@ -378,6 +381,11 @@ class H323Capability : public PObject
        main type of the capability.
      */
     virtual unsigned  GetSubType()  const = 0;
+
+	/**Get Generic Identifier 
+		Default returns PString::Empty
+	 */
+    virtual PString GetIdentifier() const;
 
     /**Get the name of the media data format this class represents.
      */
@@ -2086,6 +2094,8 @@ class H323_UserInputCapability : public H323Capability
 		unsigned type,            ///< H245_GenericParameter Type
 		const PString & value     ///< Value of the parameter
 	);
+
+	virtual PString GetIdentifier() const;
 #endif
 
   //@}
@@ -2449,6 +2459,17 @@ class H323Capabilities : public PObject
       const H245_ModeElement & modeElement  ///< H245 data type of codec
     ) const;
 
+    /**Find generic capability.
+
+       Returns:
+       NULL if no capability meeting the criteria was found
+      */
+	H323Capability * FindCapability(
+		H323Capability::MainTypes mainType,		///< Main type to find
+		const PASN_Choice & subTypePDU,			///< Sub-type info
+	    const H245_GenericCapability & gen		///< Generic cap
+	) const;
+
     /**Find the capability given the sub-type info.
 
        Returns:
@@ -2584,10 +2605,21 @@ class H323ExtendedVideoCapability : public H323Capability,
 	 */
     virtual void PrintOn(ostream & strm) const;
 
-	/** Create Codec Not Required
-	 */
-    virtual H323Codec * CreateCodec(H323Codec::Direction /*direction*/) const
-    { return NULL; }
+	/** Create Channel (not used)
+	  */
+    virtual H323Channel * CreateChannel(
+      H323Connection & connection,    ///< Owner connection for channel
+      H323Channel::Directions dir,    ///< Direction of channel
+      unsigned sessionID,             ///< Session ID for RTP channel
+      const H245_H2250LogicalChannelParameters * param
+                                      ///< Parameters for channel
+    ) const;
+
+   /**Create the codec instance, allocating resources as required. Default does nothing
+     */
+    virtual H323Codec * CreateCodec(
+      H323Codec::Direction direction  ///< Direction in which this instance runs
+    ) const;
   //@}
     
 
@@ -2686,16 +2718,6 @@ class H323ExtendedVideoCapability : public H323Capability,
 
   /**@name Operations */
   //@{
-    /**Create the channel instance, allocating resources as required.
-     */
-    virtual H323Channel * CreateChannel(
-      H323Connection & connection,    ///< Owner connection for channel
-      H323Channel::Directions dir,    ///< Direction of channel
-      unsigned sessionID,             ///< Session ID for RTP channel
-      const H245_H2250LogicalChannelParameters * param
-                                      ///< Parameters for channel
-    ) const;
-
 	/** Get matching Capability from List */
     H323Capability & operator[](PINDEX i);
 
@@ -2767,6 +2789,26 @@ class H323CodecExtendedVideoCapability : public H323ExtendedVideoCapability
 
     virtual PBoolean IsMatch(const PASN_Choice & subTypePDU) const;
 
+    virtual H323Codec * CreateCodec(H323Codec::Direction direction ) const;
+
+    virtual H323Channel * CreateChannel(
+      H323Connection & connection,    ///< Owner connection for channel
+      H323Channel::Directions dir,    ///< Direction of channel
+      unsigned sessionID,             ///< Session ID for RTP channel
+      const H245_H2250LogicalChannelParameters * param
+                                      ///< Parameters for channel
+    ) const;
+
+
+    virtual PBoolean OnSendingPDU(
+      H245_DataType & pdu
+    ) const;
+
+    virtual PBoolean OnReceivedPDU(
+      const H245_DataType & pdu,  
+      PBoolean receiver               
+    );
+
     virtual PBoolean OnSendingPDU(
 		H245_Capability & cap
 	) const;
@@ -2776,7 +2818,8 @@ class H323CodecExtendedVideoCapability : public H323ExtendedVideoCapability
 	);
 
     virtual PBoolean OnSendingPDU(
-		H245_VideoCapability & cap
+		H245_VideoCapability & cap,
+		H323Capability::CommandType type
 	) const;
 
     virtual PBoolean OnReceivedPDU(
