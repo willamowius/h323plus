@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.37  2009/09/20 00:38:10  shorne
+ * Fixed bug with H.460.19 when transitioning from fast connect to slow
+ *
  * Revision 1.36  2009/08/29 13:18:16  shorne
  * Fix compile warnings on Linux
  *
@@ -5604,8 +5607,8 @@ PBoolean H323Connection::OnReceiveOLCGenericInformation(unsigned sessionID,
 							NAT_Sockets sockets = sockets_iter->second;
 							((H46019UDPSocket *)sockets.rtp)->Activate(RTPaddress,payload,ttl);
 							((H46019UDPSocket *)sockets.rtcp)->Activate(RTCPaddress,payload,ttl);
-							success = true;
 						}
+				 success = true;
 			}
 #ifdef H323_H46024A
 			if (m_H46024Aenabled && (oid.AsString() == H46024AOID)) {
