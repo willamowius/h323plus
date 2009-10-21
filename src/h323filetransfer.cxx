@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2009/02/21 14:16:32  shorne
+ * Major overhaul of the FileTransfer code
+ *
  * Revision 1.4  2008/05/23 11:22:00  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -64,7 +67,8 @@
 #include <h323pdu.h>
 
 
-static const char * FileTransferOID = "1.3.6.1.4.1.17090.3.1";
+static const char * FileTransferOID = "1.3.6.1.4.1.17090.1.2";
+static const char * FileTransferListOID = "1.3.6.1.4.1.17090.1.2.1";
 
 static struct  {
    int blocksize;
@@ -613,7 +617,7 @@ PBoolean H323FileTransferChannel::RetreiveFileInfo(const H245_GenericInformation
 		  return FALSE;
 
 	  const PASN_ObjectId &object_id = info.m_messageIdentifier;
-      if (object_id != FileTransferOID)   // Indicates File Information
+      if (object_id != FileTransferListOID)   // Indicates File Information
 		   return FALSE;
  
 	  if (!info.HasOptionalField(H245_GenericInformation::e_messageContent))
@@ -708,7 +712,7 @@ void H323FileTransferChannel::SetFileList(H245_OpenLogicalChannel & open, H323Fi
 	  H245_GenericInformation * gcap = new H245_GenericInformation();
 	  gcap->m_messageIdentifier = *(new H245_CapabilityIdentifier(H245_CapabilityIdentifier::e_standard));
 	  PASN_ObjectId &object_id = gcap->m_messageIdentifier;
-      object_id = FileTransferOID;   // Indicates File Information
+      object_id = FileTransferListOID;   // Indicates File Information
 
   	  i++;
 	  gcap->IncludeOptionalField(H245_GenericInformation::e_subMessageIdentifier);
