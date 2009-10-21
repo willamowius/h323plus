@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.38  2009/09/29 07:28:44  shorne
+ * Small fix to H.460.19
+ *
  * Revision 1.37  2009/09/20 00:38:10  shorne
  * Fixed bug with H.460.19 when transitioning from fast connect to slow
  *
@@ -5652,14 +5655,14 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
 				NAT_Sockets sockets = sockets_iter->second;
 				H46019UDPSocket * rtp = ((H46019UDPSocket *)sockets.rtp);
 				H46019UDPSocket * rtcp = ((H46019UDPSocket *)sockets.rtcp);
-				if (rtp->GetPingPayload() == 0) {
-					payload = defH46019payload;
-				    rtp->SetPingPayLoad(payload);
-				}
-				if (rtp->GetTTL() == 0) {
-					ttl = 19;
-				    rtp->SetTTL(defH46019TTL);
-				}
+				if (rtp->GetPingPayload() == 0) 
+				    rtp->SetPingPayLoad(defH46019payload);
+				payload = rtp->GetPingPayload();
+
+				if (rtp->GetTTL() == 0) 
+				    rtp->SetTTL(ttl);
+				ttl = rtp->GetTTL();
+				
 				if (isAck) {
 					rtp->Activate();  // Start the RTP Channel if not already started
 					rtcp->Activate();  // Start the RTCP Channel if not already started
@@ -5680,13 +5683,13 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
 		 
 			  bool h46019msg = false;
 			  H46019_TraversalParameters params;
-			  if (!isAck || payload > 0) {
-				params.IncludeOptionalField(H46019_TraversalParameters::e_keepAlivePayloadType);
-				PASN_Integer & p = params.m_keepAlivePayloadType;
-				p = defH46019payload;
-				h46019msg = true;
+			  if (/*!isAck ||*/ payload > 0) {
+					params.IncludeOptionalField(H46019_TraversalParameters::e_keepAlivePayloadType);
+					PASN_Integer & p = params.m_keepAlivePayloadType;
+					p = payload;
+					h46019msg = true;
 			  }
-			  if (isAck && (ttl > 0)) {
+			  if (/*isAck &&*/ ttl > 0) {
 					params.IncludeOptionalField(H46019_TraversalParameters::e_keepAliveInterval);
 					H225_TimeToLive & a = params.m_keepAliveInterval;
 					a = ttl;
@@ -5698,6 +5701,10 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
 				info.IncludeOptionalField(H245_GenericMessage::e_messageContent);
 				H245_ArrayOf_GenericParameter & msg = info.m_messageContent;
 				H245_GenericParameter genericParameter;
+				H245_ParameterIdentifier & idm = genericParameter.m_parameterIdentifier; 
+					idm.SetTag(H245_ParameterIdentifier::e_standard);
+					PASN_Integer & idx = idm;
+					idx = 1;
 				genericParameter.m_parameterValue.SetTag(H245_ParameterValue::e_octetString);
 				H245_ParameterValue & octetValue = genericParameter.m_parameterValue;
 				PASN_OctetString & raw = octetValue;
