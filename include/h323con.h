@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.27  2009/09/20 00:38:10  shorne
+ * Fixed bug with H.460.19 when transitioning from fast connect to slow
+ *
  * Revision 1.26  2009/08/21 07:01:05  shorne
  * Added H.460.9 Support
  *
@@ -2885,7 +2888,7 @@ class H323Connection : public PObject
 
     /**Set the name/alias of remote end from information in the PDU.
       */
-    void SetRemoteApplication(
+    virtual void SetRemoteApplication(
       const H225_EndpointType & pdu ///< PDU from which to extract application info.
     );
     
