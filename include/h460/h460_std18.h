@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2009/09/29 07:23:03  shorne
+ * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
+ *
  * Revision 1.4  2009/08/28 14:36:06  shorne
  * Fixes to enable compilation with PTLIB 2.6.4
  *
@@ -142,13 +145,13 @@ public:
 
     virtual PBoolean OnSendCallProceeding_UUIE(H225_FeatureDescriptor & pdu);
     virtual void OnReceiveCallProceeding_UUIE(const H225_FeatureDescriptor & pdu);
-/*
-    virtual PBoolean OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu);
+
+ //   virtual PBoolean OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu);
     virtual void OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pdu);
 
-    virtual PBoolean OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu);
+//    virtual PBoolean OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu);
     virtual void OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor & pdu);
-*/
+
 	////////////////////
 	// H.460.24 Override
 	void SetAvailable(bool avail);

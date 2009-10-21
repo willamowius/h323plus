@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2009/09/29 07:23:03  shorne
+ * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
+ *
  * Revision 1.3  2009/09/20 00:34:29  shorne
  * Changed conditions for disabling H.460.23
  *
@@ -53,6 +56,7 @@
 #include "h460/h460_std23.h"
 #include <h323.h>
 #include <ptclib/random.h>
+#include <ptclib/pdns.h>
 #include <h460/h460_std18.h>
 
 #if _WIN32
@@ -154,7 +158,7 @@ void PNatMethod_H46024::Main()
 
 }
 
-bool PNatMethod_H46024::IsAvailable(const PIPSocket::Address & binding)
+bool PNatMethod_H46024::IsAvailable(const PIPSocket::Address & /*binding*/)
 {
 	if (!isActive)
 		return false;
@@ -283,12 +287,11 @@ void H460_FeatureStd23::OnReceiveRegistrationConfirm(const H225_FeatureDescripto
    if (feat.Contains(localNATOID))
        NATdetect = feat.Value(localNATOID);
 
-   if (NATdetect) {  // If we detected as being behind NAT then do test
 	   if (feat.Contains(STUNServOID)) {
           H323TransportAddress addr = feat.Value(STUNServOID);
           StartSTUNTest(addr.Mid(3));
 	   }
-   } else {  // If not being detected see if an ALG is present
+
 	   if (feat.Contains(NATDetRASOID)) {
 		   H323TransportAddress addr = feat.Value(NATDetRASOID);
 		   PIPSocket::Address ip;
@@ -301,7 +304,6 @@ void H460_FeatureStd23::OnReceiveRegistrationConfirm(const H225_FeatureDescripto
 			   DelayedReRegistration();
 		   }
 	   }
-   }
 }
 
 void H460_FeatureStd23::OnNATTypeDetection(PSTUNClient::NatTypes type)
@@ -341,8 +343,17 @@ bool H460_FeatureStd23::DetectALG(const PIPSocket::Address & detectAddress)
 
 void H460_FeatureStd23::StartSTUNTest(const PString & server)
 {
+	PString s;
+	PStringList SRVs;
+	PStringList x = server.Tokenise(":");
+    PString number = "h323:user@" + x[0];
+	if (PDNS::LookupSRV(number,"_stun._udp.",SRVs))
+		s = SRVs[0];
+	else
+		s = server;
+
 	PNatMethod_H46024 * xnat = (PNatMethod_H46024 *)EP->GetNatMethods().LoadNatMethod("H46024");
-	xnat->Start(server,this);
+	xnat->Start(s,this);
 	EP->GetNatMethods().AddMethod(xnat);
 }
 

@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2009/09/29 07:23:03  shorne
+ * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
+ *
  * Revision 1.5  2009/07/25 10:35:51  shorne
  * First cut of H.460.23/.24 support
  *
@@ -251,43 +254,23 @@ void H460_FeatureStd19::OnReceiveCallProceeding_UUIE(const H225_FeatureDescripto
 	    CON->H46019Enabled();
 	}
 }
-/*
-PBoolean H460_FeatureStd19::OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu) 
-{ 	
-	if (!isEnabled || !isAvailable || !remoteSupport)
-		return FALSE;
-
-	H460_FeatureStd feat = H460_FeatureStd(19); 
-	pdu = feat; 
-	return TRUE; 
-}
 
 void H460_FeatureStd19::OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pdu) 
 { 
-	if (isEnabled && isAvailable && !remoteSupport) {
+	if (!remoteSupport) {
 		remoteSupport = TRUE;
 	    CON->H46019Enabled();
 	} 
 }
 
-PBoolean H460_FeatureStd19::OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu) 
-{ 
-	if (!isEnabled || !isAvailable || !remoteSupport)
-		return FALSE;
-
-	H460_FeatureStd feat = H460_FeatureStd(19);
-	pdu = feat;
-	return TRUE; 
-}
-
 void H460_FeatureStd19::OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor & pdu) 
 {
-	if (isEnabled && isAvailable && !remoteSupport) {
+	if (!remoteSupport) {
 		remoteSupport = TRUE;
 	    CON->H46019Enabled();
 	}
 }
-*/
+
 void H460_FeatureStd19::SetAvailable(bool avail)
 {
 	isAvailable = avail;
