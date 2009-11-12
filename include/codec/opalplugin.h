@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2009/02/21 14:07:43  shorne
+ * Updated with changes from Opal
+ *
  * Revision 1.5  2007/11/06 17:45:38  shorne
  * Added h323pluslib definition
  *
@@ -273,9 +276,11 @@ enum PluginCodec_CoderFlags {
 };
 
 enum PluginCodec_ReturnCoderFlags {
-  PluginCodec_ReturnCoderLastFrame     = 1,    // indicates when video codec returns last data for frame
-  PluginCodec_ReturnCoderIFrame        = 2,    // indicates when video returns I frame
-  PluginCodec_ReturnCoderRequestIFrame = 4     // indicates when video decoder request I frame for resync
+  PluginCodec_ReturnCoderLastFrame      = 1,    // indicates when video codec returns last data for frame
+  PluginCodec_ReturnCoderIFrame         = 2,    // indicates when video returns I frame
+  PluginCodec_ReturnCoderRequestIFrame  = 4,    // indicates when video decoder request I frame for resync
+  PluginCodec_ReturnCoderBufferTooSmall = 8     // indicates when output buffer is not large enough to receive
+                                                // the data, another call to get_output_data_size is required
 };
 
 struct PluginCodec_Definition;
@@ -290,6 +295,7 @@ struct PluginCodec_Definition;
 #define PLUGINCODEC_CONTROL_TO_NORMALISED_OPTIONS "to_normalised_options"
 #define PLUGINCODEC_CONTROL_TO_CUSTOMISED_OPTIONS "to_customised_options"
 #define PLUGINCODEC_CONTROL_SET_INSTANCE_ID       "set_instance_id"
+#define PLUGINCODEC_CONTROL_SET_LOG_FUNCTION      "set_log_function"
 
 
 struct PluginCodec_ControlDefn {
@@ -369,6 +375,7 @@ struct PluginCodec_Option {
 #define PLUGINCODEC_OPTION_MAX_RX_FRAME_HEIGHT        "Max Rx Frame Height"
 #define PLUGINCODEC_OPTION_TEMPORAL_SPATIAL_TRADE_OFF "Temporal Spatial Trade Off"
 #define PLUGINCODEC_OPTION_TX_KEY_FRAME_PERIOD        "Tx Key Frame Period"
+
 
 
 // Full definition of the codec
@@ -596,6 +603,10 @@ enum {
 #define OpalPluginCodec_Identifer_AMR_NB          "0.0.8.245.1.1.9"
 #define OpalPluginCodec_Identifer_AMR_WB          "0.0.8.245.1.1.10"
 
+// G.722.1
+#define OpalPluginCodec_Identifer_G7221           "0.0.7.7221.1.0"
+#define OpalPluginCodec_Identifer_G7221ext        "0.0.7.7221.1.1.0"
+
 // G.722.2 (aka AMR-WB)
 #define OpalPluginCodec_Identifer_G7222           "0.0.7.7222.1.0"
 
@@ -629,6 +640,7 @@ enum {
 #define PLUGINCODEC_CIF_MPI       "CIF MPI"
 #define PLUGINCODEC_CIF4_MPI     "CIF4 MPI"
 #define PLUGINCODEC_CIF16_MPI   "CIF16 MPI"
+#define PLUGINCODEC_CUSTOM_MPI "Custom MPI"
 
 #define PLUGINCODEC_MPI_DISABLED 33
 
@@ -664,6 +676,8 @@ enum {
 #define PluginCodec_RTP_SetMarker(ptr, mark)       (((unsigned char*)(ptr))[1] = (((unsigned char*)(ptr))[1] & 0x7f) | (mark != 0 ? 0x80 : 0))
 #define PluginCodec_RTP_GetTimestamp(ptr)         ((((unsigned char*)(ptr))[4] << 24) | (((unsigned char*)(ptr))[5] << 16) | (((unsigned char*)(ptr))[6] << 8) | ((unsigned char*)(ptr))[7])
 #define PluginCodec_RTP_SetTimestamp(ptr, ts)     ((((unsigned char*)(ptr))[4] = ((ts) >> 24)),(((unsigned char*)(ptr))[5] = ((ts) >> 16)),(((unsigned char*)(ptr))[6] = ((ts) >> 8)),(((unsigned char*)(ptr))[7] = (ts)))
+#define PluginCodec_RTP_GetSequenceNumber(ptr)    ((((unsigned char*)(ptr))[2] << 8) | ((unsigned char*)(ptr))[3])
+#define PluginCodec_RTP_SetSequenceNumber(ptr, sn)((((unsigned char*)(ptr))[2] = ((sn) >> 8)),(((unsigned char*)(ptr))[3] = (sn)))
 
 
 /////////////////
