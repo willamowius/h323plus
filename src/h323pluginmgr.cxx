@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.24  2009/08/29 13:18:16  shorne
+ * Fix compile warnings on Linux
+ *
  * Revision 1.23  2009/07/09 15:11:12  shorne
  * Simplfied and standardised compiler directives
  *
@@ -990,7 +993,7 @@ static void SetDefaultVideoOptions(OpalMediaFormat & mediaFormat)
   mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::FrameWidthOption,          true,  OpalMediaOption::MinMerge, CIF_WIDTH, 11, 32767));
   mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::FrameHeightOption,         true,  OpalMediaOption::MinMerge, CIF_HEIGHT, 9, 32767));
   mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::EncodingQualityOption,     false, OpalMediaOption::MinMerge, 15,          1, 31));
-  mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::TargetBitRateOption,       false, OpalMediaOption::MinMerge, 64000,    1000));
+  mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::TargetBitRateOption,       false, OpalMediaOption::MinMerge, mediaFormat.GetBandwidth(), 1000));
   mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::MaxBitRateOption,          false, OpalMediaOption::MinMerge, mediaFormat.GetBandwidth(), 1000));
   mediaFormat.AddOption(new OpalMediaOptionBoolean(OpalVideoFormat::DynamicVideoQualityOption, false, OpalMediaOption::NoMerge,  false));
   mediaFormat.AddOption(new OpalMediaOptionBoolean(OpalVideoFormat::AdaptivePacketDelayOption, false, OpalMediaOption::NoMerge,  false));
@@ -1513,10 +1516,10 @@ class H323PluginVideoCodec : public H323VideoCodec
     { SetCodecControl(codec, context, SET_CODEC_OPTIONS_CONTROL, "set_background_fill", fillLevel); }
 
     unsigned GetMaxBitRate() const
-    { return mediaFormat.GetOptionInteger(OpalVideoFormat::MaxBitRateOption); }
+    { return mediaFormat.GetOptionInteger(OpalVideoFormat::TargetBitRateOption); }
 
     PBoolean SetMaxBitRate(unsigned bitRate) 
-    { return SetCodecControl(codec, context, SET_CODEC_OPTIONS_CONTROL, "Max Bit Rate", bitRate); }
+    { return SetCodecControl(codec, context, SET_CODEC_OPTIONS_CONTROL, "Target Bit Rate", bitRate); }
 
     void SetGeneralCodecOption(const char * opt, int val)
     { SetCodecControl(codec, context, SET_CODEC_OPTIONS_CONTROL, opt, val);}
