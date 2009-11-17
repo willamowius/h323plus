@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2009/07/09 15:09:19  shorne
+ * Added ability to access Gatekeeper features
+ *
  * Revision 1.9  2009/02/22 02:45:47  shorne
  * Added ability to enable SCI/SCR without needing H248 support
  *
@@ -1214,8 +1217,8 @@ void H323Gatekeeper::RegistrationTimeToLive()
   }
 
   if (!RegistrationRequest(autoReregister)) {
-    PTRACE_IF(2, !reregisterNow, "RAS\tTime To Live reregistration failed, retrying in 1 minute");
-    timeToLive = PTimeInterval(0, 0, 1);
+    PTRACE(2,"RAS\tTime To Live reregistration failed, continue retrying.");
+	endpoint.OnRegisterTTLFail();
   }
 }
 
