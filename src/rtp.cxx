@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2009/08/28 14:36:06  shorne
+ * Fixes to enable compilation with PTLIB 2.6.4
+ *
  * Revision 1.9  2009/07/25 10:35:51  shorne
  * First cut of H.460.23/.24 support
  *
@@ -1944,26 +1947,29 @@ RTP_Session::SendReceiveStatus RTP_UDP::ReadDataOrControlPDU(PUDPSocket & socket
 
       if (!remoteTransmitAddress.IsValid())
         remoteTransmitAddress = addr;
-#ifdef H323_H46024A
-	  else if (socket.IsAlternateAddress(addr,port)) {
-			remoteTransmitAddress = addr;
-			if (fromDataChannel) {
-				remoteDataPort = port;
-				// Fixes to makes sure sync,stats and jitter don't get screwed up 
-				syncSourceIn = ((RTP_DataFrame &)frame).GetSyncSource();
-				expectedSequenceNumber = ((RTP_DataFrame &)frame).GetSequenceNumber();
-#ifdef H323_AUDIO_CODECS
-				if (jitter != NULL)  jitter->ResetFirstWrite();
-#endif
-			} else
-				remoteControlPort = port;
-	  }
-#endif
+
 	  else if (remoteTransmitAddress != addr) {
+#ifdef H323_H46024A
+		  if (socket.IsAlternateAddress(addr,port)) {
+				remoteTransmitAddress = addr;
+				if (fromDataChannel) {
+					remoteDataPort = port;
+					// Fixes to makes sure sync,stats and jitter don't get screwed up 
+					syncSourceIn = ((RTP_DataFrame &)frame).GetSyncSource();
+					expectedSequenceNumber = ((RTP_DataFrame &)frame).GetSequenceNumber();
+#ifdef H323_AUDIO_CODECS
+					if (jitter != NULL)  jitter->ResetFirstWrite();
+#endif
+				} else
+					remoteControlPort = port;
+		  } else
+#endif
+		  {
 			PTRACE(1, "RTP_UDP\tSession " << sessionID << ", "
 				   << channelName << " PDU from incorrect host, "
 					  " is " << addr << " should be " << remoteTransmitAddress);
 			return RTP_Session::e_IgnorePacket;
+		  }
       }
     }
 
