@@ -37,6 +37,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2009/08/26 23:22:18  shorne
+ * Fix for compiling without SSL Support (H46024A disabled) thx Marcos Fábio Jardini
+ *
  * Revision 1.7  2009/08/02 03:04:50  shorne
  * H.460.24A fix when remote and gatekeeper are at same address
  *
@@ -343,7 +346,6 @@ H46018Handler::H46018Handler(H323EndPoint * ep)
 
 	if (nat != NULL) {
 	  nat->AttachHandler(this);
-	  nat->SetAvailable();
 	  ep->GetNatMethods().AddMethod(nat);
 	}
 
@@ -417,6 +419,8 @@ void H46018Handler::SocketThread(PThread &, INT)
 void H46018Handler::Enable()
 {
    m_h46018inOperation = true;
+   if (nat)
+	  nat->SetAvailable();
 }
 
 PBoolean H46018Handler::IsEnabled()
@@ -571,6 +575,7 @@ void PNatMethod_H46019::SetConnectionSockets(PUDPSocket * data, PUDPSocket * con
 	H323Connection * connection = handler->GetEndPoint()->FindConnectionWithLock(info->GetCallToken());
 	if (connection != NULL) {
 		connection->SetRTPNAT(info->GetSessionID(),data,control);
+		connection->H46019Enabled();  // make sure H.460.19 is enabled
 		connection->Unlock();
 	}
 	
@@ -579,6 +584,14 @@ void PNatMethod_H46019::SetConnectionSockets(PUDPSocket * data, PUDPSocket * con
 bool PNatMethod_H46019::IsAvailable(const PIPSocket::Address & /*address*/) 
 { 
 	return handler->IsEnabled() && active;
+}
+
+void PNatMethod_H46019::SetAvailable() 
+{ 
+	if (!available) {
+		handler->GetEndPoint()->NATMethodCallBack(GetName(),1,"Available");
+		available = TRUE;
+	}
 }
 
 
@@ -597,6 +610,7 @@ H46019UDPSocket::H46019UDPSocket(H46018Handler & _handler, H323Connection::Sessi
 	m_locAddr = PIPSocket::GetDefaultIpAny();
 	m_remAddr = PIPSocket::GetDefaultIpAny();
 	m_detAddr = PIPSocket::GetDefaultIpAny();
+	m_pendAddr= PIPSocket::GetDefaultIpAny();
 	SetProbeState(e_notRequired);
 	SSRC = PRandom::Number();
 #endif
@@ -800,8 +814,12 @@ void H46019UDPSocket::SetAlternateAddresses(const H323TransportAddress & address
 
 	if (!rtpSocket) {
 		m_CUIrem = cui;
-		SetProbeState(e_idle);
-		StartProbe();
+		if (GetProbeState() < e_idle) {
+			SetProbeState(e_idle);
+			StartProbe();
+        // We Already have a direct connection but we are waiting on the CUI for the reply
+		} else if (GetProbeState() == e_verify_receiver) 
+			ProbeReceived(false,m_pendAddr,m_pendPort);
 	}
 }
 
@@ -905,7 +923,7 @@ void H46019UDPSocket::ProbeReceived(bool probe, const PIPSocket::Address & addr,
 		reply.SetSize(4+sizeof(probe_packet));
 		BuildProbe(reply, false);
 		if (SendRTCPFrame(reply,addr,port)) {
-			PTRACE(4, "H46024A\tRTCP Reply packet sent: " << keepip << ":" << keepport);	
+			PTRACE(4, "H46024A\tRTCP Reply packet sent: " << addr << ":" << port);	
 		}
 	}
 
@@ -920,6 +938,8 @@ void H46019UDPSocket::H46024Adirect(bool starter)
 		SetProbeState(e_direct);
 	} else         // We wait for the remote to start channel
 		SetProbeState(e_wait);
+
+	Keep.Stop();  // Stop the keepAlive Packets
 }
 
 PBoolean H46019UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD & port)
@@ -946,16 +966,30 @@ PBoolean H46019UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD 
 				if (ReceivedProbePacket(frame,probe,success)) {
 					if (success)
 						ProbeReceived(probe,addr,port);
+					else {
+						m_pendAddr = addr; m_pendPort = port;
+					}
 				  continue;  // don't forward on probe packets.
 				}
 				break;
 			case e_wait:
-				if ((addr != m_remAddr) || (port != m_remPort)) {
-					PTRACE(4, "H46024A\ts:" << m_Session << (rtpSocket ? " RTP " : " RTCP ")  
-						<< "Switching to " << addr << ":" << port);
+				if (addr == keepip) {// We got a keepalive ping...
+					 Keep.Stop();  // Stop the keepAlive Packets
+				} else if ((addr == m_altAddr) && (port == m_altPort)) {
+					PTRACE(4, "H46024A\ts:" << m_Session << (rtpSocket ? " RTP " : " RTCP ")  << "Already sending direct!");
 					m_detAddr = addr;  m_detPort = port;
 					SetProbeState(e_direct);
-				} else
+				} else if ((addr == m_pendAddr) && (port == m_pendPort)) {
+					PTRACE(4, "H46024A\ts:" << m_Session << (rtpSocket ? " RTP " : " RTCP ")  
+												<< "Switching to Direct " << addr << ":" << port);
+					m_detAddr = addr;  m_detPort = port;
+					SetProbeState(e_direct);
+				} else if ((addr != m_remAddr) || (port != m_remPort)) {
+					PTRACE(4, "H46024A\ts:" << m_Session << (rtpSocket ? " RTP " : " RTCP ")  
+						<< "Switching to " << addr << ":" << port << " from " << m_remAddr << ":" << m_remPort);
+					m_detAddr = addr;  m_detPort = port;
+					SetProbeState(e_direct);
+				} 
 					break;
 			case e_direct:	
 			default:
@@ -977,7 +1011,7 @@ PBoolean H46019UDPSocket::WriteTo(const void * buf, PINDEX len, const Address & 
 PBoolean H46019UDPSocket::ReceivedProbePacket(const RTP_ControlFrame & frame, bool & probe, bool & success)
 {
 
-   
+   success = false;
   
    //Inspect the probe packet
    if (frame.GetPayloadType() == RTP_ControlFrame::e_ApplDefined) {
@@ -1010,8 +1044,12 @@ PBoolean H46019UDPSocket::ReceivedProbePacket(const RTP_ControlFrame & frame, bo
 			 SetProbeState(e_verify_receiver);
 
 		  m_Probe.Stop();
-		  PTRACE(4, "H46024A\ts" << m_Session <<" RTCP Probe " << (probe ? "Reply" : "Request") << " verified.");	
-		  success = true;
+		  PTRACE(4, "H46024A\ts" << m_Session <<" RTCP Probe " << (probe ? "Reply" : "Request") << " verified.");
+		  if (!m_CUIrem.IsEmpty())
+			success = true;
+		  else {
+			  PTRACE(4, "H46024A\ts" << m_Session <<" Remote not ready.");
+		  }
 		} else {
 		  PTRACE(4, "H46024A\ts" << m_Session <<" RTCP Probe " << (probe ? "Reply" : "Request") << " verify FAILURE");	
 		}

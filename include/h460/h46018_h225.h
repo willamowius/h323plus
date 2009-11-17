@@ -37,6 +37,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2009/08/28 14:36:06  shorne
+ * Fixes to enable compilation with PTLIB 2.6.4
+ *
  * Revision 1.5  2009/07/25 10:35:51  shorne
  * First cut of H.460.23/.24 support
  *
@@ -298,7 +301,7 @@ class PNatMethod_H46019  : public PNatMethod
 		This will enable the natMethod to be enabled when opening the
 		sockets
 	*/
-	void SetAvailable() { available = TRUE; };
+	void SetAvailable();
 
     /** Activate
 		Active/DeActivate the method on a call by call basis
@@ -530,6 +533,7 @@ private:
 	PIPSocket::Address m_remAddr;  WORD m_remPort;			///< Remote Address (address used when starting socket)
 	PIPSocket::Address m_altAddr;  WORD m_altPort;			///< supplied remote Address (as supplied in Generic Information)
 	PIPSocket::Address m_detAddr;  WORD m_detPort;			///< detected remote Address (as detected from actual packets)
+	PIPSocket::Address m_pendAddr;  WORD m_pendPort;		///< detected pending RTCP Probe Address (as detected from actual packets)
 	PDECLARE_NOTIFIER(PTimer, H46019UDPSocket, Probe);		///< Thread to probe for direct connection
 	PTimer m_Probe;											///< Probe Timer
 	PINDEX m_probes;										///< Probe count
