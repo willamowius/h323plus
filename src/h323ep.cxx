@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.32  2009/09/20 00:51:09  shorne
+ * simplified headers and ensure H.460.18 if always first feature for better interop
+ *
  * Revision 1.31  2009/08/21 07:01:06  shorne
  * Added H.460.9 Support
  *
@@ -937,6 +940,10 @@
 #include "h460/h460_std9.h"
 #endif
 
+#ifdef H323_H460P
+#include "h460/h460_oid3.h"
+#endif
+
 #endif  // H323_H460
 
 #include "gkclient.h"
@@ -1348,6 +1355,10 @@ H323EndPoint::H323EndPoint()
   registrationTimeToLive = PTimeInterval(0, 30);  
   m_h46018enabled = true;
 #endif
+
+#ifdef H323_H460P
+  presenceHandler = NULL;
+#endif
 #endif
 
 #ifdef H323_AEC 
@@ -1405,6 +1416,10 @@ H323EndPoint::~H323EndPoint()
 
 #ifdef P_STUN
   delete natMethods;
+#endif
+
+#ifdef H323_H460P
+  delete presenceHandler;
 #endif
 
   PTRACE(3, "H323\tDeleted endpoint.");
@@ -1803,6 +1818,10 @@ void H323EndPoint::OnRegistrationReject()
 }
 
 void H323EndPoint::OnUnRegisterRequest()
+{
+}
+
+void H323EndPoint::OnRegisterTTLFail()
 {
 }
 
@@ -2342,7 +2361,7 @@ PBoolean H323EndPoint::ParsePartyName(const PString & _remoteParty,
 
   // get the various parts of the name
   PString hostOnly = PString();
-  if ((gatekeeper != NULL) && (remoteParty.Find('@') != P_MAX_INDEX)) {
+  if (remoteParty.Find('@') != P_MAX_INDEX) {
 	  alias = "url:" + remoteParty;
   } else {
      alias = url.GetUserName();
@@ -3546,7 +3565,7 @@ PBoolean H323EndPoint::RemoveAliasName(const PString & name)
 
 PBoolean H323EndPoint::SetSoundChannelPlayDevice(const PString & name)
 {
-  if (PSoundChannel::GetDeviceNames(PSoundChannel::Player).GetValuesIndex(name) == P_MAX_INDEX)
+  if (PSoundChannel::GetDeviceNames(soundChannelPlayDriver,PSoundChannel::Player).GetValuesIndex(name) == P_MAX_INDEX)
     return FALSE;
 
   soundChannelPlayDevice = name;
@@ -3556,7 +3575,7 @@ PBoolean H323EndPoint::SetSoundChannelPlayDevice(const PString & name)
 
 PBoolean H323EndPoint::SetSoundChannelRecordDevice(const PString & name)
 {
-  if (PSoundChannel::GetDeviceNames(PSoundChannel::Recorder).GetValuesIndex(name) == P_MAX_INDEX)
+  if (PSoundChannel::GetDeviceNames(soundChannelRecordDriver,PSoundChannel::Recorder).GetValuesIndex(name) == P_MAX_INDEX)
     return FALSE;
 
   soundChannelRecordDevice = name;
@@ -3954,6 +3973,55 @@ PBoolean H323EndPoint::H46018IsEnabled()
 	return m_h46018enabled; 
 }
 #endif  // H323_H46018
+
+#ifdef H323_H460P
+void H323EndPoint::PresenceSetLocalState(const PString & alias, unsigned localstate, const PString & localdisplay)
+{
+	if (presenceHandler == NULL)
+		presenceHandler = new H460PresenceHandler(*this);
+
+	presenceHandler->SetPresenceState(alias,localstate, localdisplay);
+}
+
+void H323EndPoint::PresenceSetInstruction(const PString & epalias, unsigned type, const PStringList & list)
+{
+	if (presenceHandler == NULL)
+		return;
+
+	presenceHandler->AddInstruction(epalias,(H323PresenceHandler::InstType)type,list);
+}
+
+void H323EndPoint::PresenceSendAuthorization(const PString & epalias,PBoolean approved, const PStringList & list)
+{
+	if (presenceHandler == NULL)
+		return;
+
+	presenceHandler->AddAuthorization(epalias,approved,list);
+}
+
+void H323EndPoint::PresenceNotification(const PString & locAlias,
+										const PString & subAlias,
+										unsigned state, 
+										const PString & display)
+{
+	PTRACE(4,"EP\tAlias " << subAlias << " PresenceState now " << state << " - "
+		                  << H323PresenceNotification::GetStateString(state)
+						  << " " << display);
+}
+
+void H323EndPoint::PresenceInstruction(const PString & locAlias, unsigned type, const PString & subAlias)
+{
+	PTRACE(4,"EP\tReceived Gatekeeper Instruction to " 
+				<< H323PresenceInstruction::GetInstructionString(type) 
+				<< " " << subAlias);
+}
+
+void H323EndPoint::PresenceAuthorization(const PString & locAlias,
+									const PString & subAlias)
+{
+	PTRACE(4,"EP\tReceived Presence Authorization from " << subAlias);
+}
+#endif  // H323_H460P
 
 PBoolean H323EndPoint::OnFeatureInstance(int instType, const PString & identifer)
 {

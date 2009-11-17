@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.23  2009/09/20 00:51:09  shorne
+ * simplified headers and ensure H.460.18 if always first feature for better interop
+ *
  * Revision 1.22  2009/07/09 15:09:19  shorne
  * Added ability to access Gatekeeper features
  *
@@ -461,6 +464,9 @@ class OpalT120Protocol;
 class OpalT38Protocol;
 #endif
 
+#ifdef H323_H460P
+class H460PresenceHandler;
+#endif
 
 #ifdef H323_GNUGK
 class GNUGK_Feature;
@@ -828,6 +834,10 @@ class H323EndPoint : public PObject
 	/**Called when Unregistered by Gatekeeper 
 	 */
 	virtual void OnUnRegisterRequest(); 
+
+	/**Called when TTL registration fails 
+	 */
+	virtual void OnRegisterTTLFail();
   //@}
 
   /**@name Connection management */
@@ -2217,6 +2227,13 @@ class H323EndPoint : public PObject
 	/** Disable all FeatureSets. Use this for pre H323v4 interoperability
 	  */
 	void FeatureSetDisable()  {  disableH460 = TRUE;  }
+		
+	/** Feature Callback
+	  */
+	virtual void FeatureCallBack(const PString & FeatID,		///< Feature Identifier
+								PINDEX msgID,					///< Message Identifer
+								const PString & message			///< Message
+								) {};
 
 #ifdef H323_H46018
 
@@ -2236,6 +2253,53 @@ class H323EndPoint : public PObject
 	  */
 	PBoolean H46018InOperation();
 
+#endif
+
+#ifdef H323_H460P
+
+	/** Get the presence handler. By default it returns NULL
+		Implementor must create an instance of the presencehandler
+		to enable presence
+	  */
+	H460PresenceHandler * GetPresenceHandler()  { return presenceHandler; }  
+
+	/** Set the local Presence State. 
+		Calling this will enable Presence in the endpoint
+	  */
+	void PresenceSetLocalState(const PString & alias, unsigned localstate, const PString & localdisplay);
+
+	enum presenceInstruction {
+		e_subscribe,
+		e_unsubscribe,
+		e_block,
+		e_unblock
+	};
+
+	/** Set Presence Instructions. 
+	  */
+	void PresenceSetInstruction(const PString & epalias, unsigned type, const PStringList & list);
+
+	/** Submit Presence Authorizations. 
+	  */
+	void PresenceSendAuthorization(const PString & epalias,PBoolean approved, const PStringList & subscribe);
+
+	/** Received Notifications
+	  */
+	virtual void PresenceNotification(const PString & locAlias,
+									const PString & subAlias,
+									unsigned state, 
+									const PString & display);
+
+	/** Received Instructions
+	  */
+	virtual void PresenceInstruction(const PString & locAlias,
+									unsigned type, 
+									const PString & subAlias);
+
+	/** Received Request for authorization
+	  */
+	virtual void PresenceAuthorization(const PString & locAlias,
+									const PString & subAlias);
 #endif
 
 #endif
@@ -2278,6 +2342,11 @@ class H323EndPoint : public PObject
     /** Get the Nat Methods List
        */
     PNatStrategy & GetNatMethods();
+
+	virtual void NATMethodCallBack(const PString & NatID,		///< Method Identifier
+								PINDEX msgID,					///< Message Identifer
+								const PString & message			///< Message
+								) {};
 
 #endif // P_NONCORE
 
@@ -2751,6 +2820,11 @@ class H323EndPoint : public PObject
 #ifdef H323_H46018
 	PBoolean m_h46018enabled;
 #endif
+
+#ifdef H323_H460P
+	H460PresenceHandler * presenceHandler;
+#endif
+
 #endif
 
 #ifdef H323_AEC
