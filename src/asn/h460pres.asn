@@ -16,6 +16,12 @@ IMPORTS
 -- Presence Base Message
 --
 
+PresenceElement ::= SEQUENCE
+{
+	message		SEQUENCE OF PresenceMessage,
+	...
+}
+
 PresenceMessage ::= CHOICE
 {
 	presenceStatus		PresenceStatus,
@@ -36,6 +42,7 @@ PresenceMessage ::= CHOICE
 
 PresenceStatus ::= SEQUENCE  
 {
+	alias			AliasAddress,
 	notification		SEQUENCE OF PresenceNotification,
 	instruction		SEQUENCE OF PresenceInstruction		OPTIONAL,
 	...
@@ -43,18 +50,21 @@ PresenceStatus ::= SEQUENCE
 
 PresenceInstruct ::= SEQUENCE
 {
+	alias			AliasAddress,
 	instruction		SEQUENCE OF PresenceInstruction,
 	...
 }
 
 PresenceAuthorize ::= SEQUENCE
 {
+	alias			AliasAddress,
 	subscription		SEQUENCE OF PresenceSubscription,
 	...
 }
 
 PresenceNotify ::= SEQUENCE
 {
+	alias			AliasAddress,
 	notification		SEQUENCE OF PresenceNotification,
 	...
 }
@@ -91,6 +101,20 @@ PresenceAlert ::= SEQUENCE
 	notification		SEQUENCE OF PresenceNotification,
 	...
 
+}
+
+
+--
+-- Presence PDU
+--
+
+PresencePDU ::= CHOICE
+{
+	instruction		PresenceInstruction,
+	notification		PresenceNotification,
+	subscription		PresenceSubscription,
+	identifier		PresenceIdentifier,
+	...
 }
 
 --
@@ -134,9 +158,9 @@ PresenceIdentifier ::= SEQUENCE
 
 PresenceNotification ::= SEQUENCE
 {
-	presentity		Presentity,
-	aliasAddress		AliasAddress			OPTIONAL,         
-	subscribers		SEQUENCE OF PresenceIdentifier  OPTIONAL,
+	presentity		Presentity,  
+	aliasAddress		AliasAddress  			OPTIONAL,         
+	subscribers		SEQUENCE OF PresenceIdentifier	OPTIONAL,
 	...	
 }
 

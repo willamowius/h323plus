@@ -114,6 +114,60 @@ class H460P_PresenceMessage : public PASN_Choice
 
 
 //
+// PresencePDU
+//
+
+class H460P_PresenceInstruction;
+class H460P_PresenceNotification;
+class H460P_PresenceSubscription;
+class H460P_PresenceIdentifier;
+
+class H460P_PresencePDU : public PASN_Choice
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_PresencePDU, PASN_Choice);
+#endif
+  public:
+    H460P_PresencePDU(unsigned tag = 0, TagClass tagClass = UniversalTagClass);
+
+    enum Choices {
+      e_instruction,
+      e_notification,
+      e_subscription,
+      e_identifier
+    };
+
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+    operator H460P_PresenceInstruction &() const;
+#else
+    operator H460P_PresenceInstruction &();
+    operator const H460P_PresenceInstruction &() const;
+#endif
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+    operator H460P_PresenceNotification &() const;
+#else
+    operator H460P_PresenceNotification &();
+    operator const H460P_PresenceNotification &() const;
+#endif
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+    operator H460P_PresenceSubscription &() const;
+#else
+    operator H460P_PresenceSubscription &();
+    operator const H460P_PresenceSubscription &() const;
+#endif
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+    operator H460P_PresenceIdentifier &() const;
+#else
+    operator H460P_PresenceIdentifier &();
+    operator const H460P_PresenceIdentifier &() const;
+#endif
+
+    PBoolean CreateObject();
+    PObject * Clone() const;
+};
+
+
+//
 // PresenceInstruction
 //
 
@@ -195,6 +249,26 @@ class H460P_PresenceState : public PASN_Choice
     };
 
     PBoolean CreateObject();
+    PObject * Clone() const;
+};
+
+
+//
+// ArrayOf_PresenceMessage
+//
+
+class H460P_PresenceMessage;
+
+class H460P_ArrayOf_PresenceMessage : public PASN_Array
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_ArrayOf_PresenceMessage, PASN_Array);
+#endif
+  public:
+    H460P_ArrayOf_PresenceMessage(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    PASN_Object * CreateObject() const;
+    H460P_PresenceMessage & operator[](PINDEX i) const;
     PObject * Clone() const;
 };
 
@@ -360,6 +434,31 @@ class H460P_ArrayOf_GenericData : public PASN_Array
 
 
 //
+// PresenceElement
+//
+
+class H460P_PresenceElement : public PASN_Sequence
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_PresenceElement, PASN_Sequence);
+#endif
+  public:
+    H460P_PresenceElement(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    H460P_ArrayOf_PresenceMessage m_message;
+
+    PINDEX GetDataLength() const;
+    PBoolean Decode(PASN_Stream & strm);
+    void Encode(PASN_Stream & strm) const;
+#ifndef PASN_NOPRINTON
+    void PrintOn(ostream & strm) const;
+#endif
+    Comparison Compare(const PObject & obj) const;
+    PObject * Clone() const;
+};
+
+
+//
 // PresenceStatus
 //
 
@@ -375,6 +474,7 @@ class H460P_PresenceStatus : public PASN_Sequence
       e_instruction
     };
 
+    H225_AliasAddress m_alias;
     H460P_ArrayOf_PresenceNotification m_notification;
     H460P_ArrayOf_PresenceInstruction m_instruction;
 
@@ -401,6 +501,7 @@ class H460P_PresenceInstruct : public PASN_Sequence
   public:
     H460P_PresenceInstruct(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
 
+    H225_AliasAddress m_alias;
     H460P_ArrayOf_PresenceInstruction m_instruction;
 
     PINDEX GetDataLength() const;
@@ -426,6 +527,7 @@ class H460P_PresenceAuthorize : public PASN_Sequence
   public:
     H460P_PresenceAuthorize(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
 
+    H225_AliasAddress m_alias;
     H460P_ArrayOf_PresenceSubscription m_subscription;
 
     PINDEX GetDataLength() const;
@@ -451,6 +553,7 @@ class H460P_PresenceNotify : public PASN_Sequence
   public:
     H460P_PresenceNotify(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
 
+    H225_AliasAddress m_alias;
     H460P_ArrayOf_PresenceNotification m_notification;
 
     PINDEX GetDataLength() const;

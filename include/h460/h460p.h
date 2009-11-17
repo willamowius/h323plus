@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/02/21 00:04:33  shorne
+ * fix variable naming issue on linux compile
+ *
  * Revision 1.1  2008/01/29 04:38:12  shorne
  * completed Initial implementation
  *
@@ -48,68 +51,12 @@
 
 #ifdef H323_H460
 
+#include <ptlib.h>
 #include <h460/h460pres.h>
-
-// Derive you implementation from H323PresenceHandler.
-
-class H323PresenceSubscriptions;
-class H323PresenceNotifications;
-class H323PresenceIdentifiers;
-class H323PresenceInstructions;
-class H323PresenceHandler  : public PObject
-{
-    PCLASSINFO(H323PresenceHandler, PObject);
-
-public:
-	bool ReceivedPDU(const H225_EndpointIdentifier * id,const PASN_OctetString & pdu);
-
-    enum MsgType {
-      e_Status,
-      e_Instruct,
-      e_Authorize,
-      e_Notify,
-      e_Request,
-      e_Response,
-      e_Alive,
-      e_Remove,
-      e_Alert
-    };
-
-// Callbacks
-	virtual void OnNotification(MsgType /*tag*/,
-								const H225_EndpointIdentifier * /*id*/, 
-								const H460P_PresenceNotification & /*notify*/) {}
-	virtual void OnSubscription(MsgType /*tag*/,
-								const H225_EndpointIdentifier * /*id*/, 
-								const H460P_PresenceSubscription & /*subscription*/) {}
-	virtual void OnInstructions(MsgType /*tag*/,
-								const H225_EndpointIdentifier * /*id*/, 
-								const H460P_ArrayOf_PresenceInstruction & /*instruction*/) {}
-	virtual void OnIdentifiers(MsgType /*tag*/,
-								const H460P_ArrayOf_PresenceIdentifier & /*identifier*/) {}
-
-// Build Messages
-     H460P_PresenceStatus & BuildStatus(H460P_PresenceMessage & msg, 
-									const H323PresenceNotifications & notify,
-									const H323PresenceInstructions & inst);
-     H460P_PresenceInstruct & BuildInstruct(H460P_PresenceMessage & msg, 
-									const H323PresenceInstructions & inst);
-     H460P_PresenceAuthorize & BuildAuthorize(H460P_PresenceMessage & msg, 
-									const H323PresenceSubscriptions & subs);
-     H460P_PresenceNotify & BuildNotify(H460P_PresenceMessage & msg, 
-									const H323PresenceNotifications & notify);
-     H460P_PresenceRequest & BuildRequest(H460P_PresenceMessage & msg, 
-									const H323PresenceSubscriptions & subs);
-     H460P_PresenceResponse & BuildResponse(H460P_PresenceMessage & msg, 
-									const H323PresenceSubscriptions & subs);
-     H460P_PresenceAlive & BuildAlive(H460P_PresenceMessage & msg, 
-									const H323PresenceIdentifiers & id);
-     H460P_PresenceRemove & BuildRemove(H460P_PresenceMessage & msg, 
-									const H323PresenceIdentifiers & id);
-     H460P_PresenceAlert & BuildAlert(H460P_PresenceMessage & msg, 
-									const H323PresenceNotifications & notify);
-};
-
+#include <guid.h>
+#include <transports.h>
+#include <list>
+#include <map>
 
 class H323PresenceNotification : public H460P_PresenceNotification
 {
@@ -131,22 +78,28 @@ public:
 
     void SetPresenceState(States state, const PString & display = PString());
     void SetGenericState(const PString & state);
-	void GetPresenceState(States & state, PString & display);
+	void GetPresenceState(States & state, PString & display) const;
 
 	void AddSubscriber(const OpalGloballyUniqueID & guid);
 	OpalGloballyUniqueID GetSubscriber(PINDEX i);
 	void RemoveSubscribers();
     void AddAlias(const PString & alias);
-	PString GetAlias();
-
+	PString GetAlias() const;
 
 };
 
-class H323PresenceNotifications : public H460P_ArrayOf_PresenceNotification  
+class H323PresenceNotifications : public H460P_PresenceNotify  
 {
 
   public:
-     void Add(const H323PresenceNotification & notify);
+    void Add(const H323PresenceNotification & notify);
+	H323PresenceNotification & operator[](PINDEX i) const;
+
+	void SetAlias(const PString & alias);
+	void GetAlias(PString & alias);
+
+	void SetSize(PINDEX newSize);
+	PINDEX GetSize() const;
 };
 
 class H323PresenceSubscription : public H460P_PresenceSubscription
@@ -157,7 +110,7 @@ public:
 
  // Sending Gatekeeper
 	void SetSubscriptionDetails(const PString & subscribe, const PStringList & aliases);
-	void GetSubscriberDetails(PStringList & aliases);
+	void GetSubscriberDetails(PStringList & aliases) const;
 	PString GetSubscribed();
 
 	void SetGatekeeperRAS(const H323TransportAddress & address);
@@ -173,15 +126,21 @@ public:
 	void SetSubscription(const OpalGloballyUniqueID & guid);
     OpalGloballyUniqueID GetSubscription();
 
-protected:
 	void SetApproved(bool success);
     
 };
 
-class H323PresenceSubscriptions : public H460P_ArrayOf_PresenceSubscription 
+class H323PresenceSubscriptions : public H460P_PresenceAuthorize
 {
    public:
-	   void Add(const H323PresenceSubscription & sub);
+	void Add(const H323PresenceSubscription & sub);
+	H323PresenceSubscription & operator[](PINDEX i) const;
+
+	void SetAlias(const PString & alias);
+	void GetAlias(PString & alias);
+
+	void SetSize(PINDEX newSize);
+	PINDEX GetSize() const;
 };
 
 class H323PresenceInstruction  :  public H460P_PresenceInstruction
@@ -199,14 +158,20 @@ class H323PresenceInstruction  :  public H460P_PresenceInstruction
  
     H323PresenceInstruction(Instruction instruct, const PString & alias);
 	Instruction GetInstruction();
-	PString GetAlias();
+	PString GetAlias() const;
 };
 
-class H323PresenceInstructions  : public H460P_ArrayOf_PresenceInstruction
+class H323PresenceInstructions  : public H460P_PresenceInstruct
 {
   public:
 	void Add(const H323PresenceInstruction & instruct);
 	H323PresenceInstruction & operator[](PINDEX i) const;
+
+	void SetAlias(const PString & alias);
+	void GetAlias(PString & alias);
+
+	void SetSize(PINDEX newSize);
+	PINDEX GetSize() const;
 };
 
 class H323PresenceIdentifiers   : public H460P_ArrayOf_PresenceIdentifier
@@ -216,6 +181,128 @@ class H323PresenceIdentifiers   : public H460P_ArrayOf_PresenceIdentifier
 	void Add(const OpalGloballyUniqueID & guid);
 	OpalGloballyUniqueID GetIdentifier(PINDEX i);
 };
+
+struct H323PresenceRecord
+{
+	H225_EndpointIdentifier m_identifer;
+	H225_AliasAddress		m_locAlias;
+	H225_AliasAddress		m_subAlias;
+	time_t					m_timeStamp;
+	unsigned				m_ttl;
+};
+
+struct H323PresenceEndpoint
+{
+	H323PresenceSubscriptions	m_Authorize;
+    H323PresenceInstructions	m_Instruction;
+    H323PresenceNotifications	m_Notify;
+	H323PresenceIdentifiers		m_Identifiers;
+};
+
+#define H323PresenceStore		map<H225_AliasAddress,H323PresenceEndpoint>
+
+struct H323PresenceInd	
+{
+	list<H460P_PresencePDU>		m_Indication;
+};
+
+// Gatekeeper functions
+#define H323PresenceAlias		map<H225_AliasAddress,H225_EndpointIdentifier>
+#define H323PresenceLocal		map<H225_EndpointIdentifier, H323PresenceInd>
+
+#define H323PresenceExternal	map<H225_AliasAddress,H225_TransportAddress>
+#define H323PresenceRemote		map<H225_TransportAddress, H323PresenceInd>
+
+// Derive you implementation from H323PresenceHandler.
+
+class H323PresenceHandler  : public PObject
+{
+    PCLASSINFO(H323PresenceHandler, PObject);
+
+public:
+	bool ReceivedPDU(const PASN_OctetString & pdu);
+
+    enum MsgType {
+		e_Status,
+		e_Instruct,
+		e_Authorize,
+		e_Notify,
+		e_Request,
+		e_Response,
+		e_Alive,
+		e_Remove,
+		e_Alert
+    };
+
+	enum InstType {
+		e_subscribe,
+		e_unsubscribe,
+		e_block,
+		e_unblock
+	};
+
+	PBoolean BuildPresenceElement(unsigned msgtag,					///< RAS Message ID
+							PASN_OctetString & pdu					///< Encoded PresenceElement
+							);
+
+	PBoolean BuildPresenceMessage(unsigned id,						///< Presence Message ID
+							H323PresenceStore & store,				///< Presence Store Information
+							H460P_ArrayOf_PresenceMessage & element	///< Presence Message elements
+							);
+
+	virtual H323PresenceStore & GetPresenceStoreLocked(unsigned msgtag =0);
+	virtual void PresenceStoreUnLock(unsigned msgtag = 0);
+
+
+	virtual void OnNotification(MsgType /*tag*/,
+								const H460P_PresenceNotification & /*notify*/,
+								const H225_AliasAddress & /*addr*/
+								) {}
+
+	virtual void OnSubscription(MsgType /*tag*/,
+								const H460P_PresenceSubscription & /*subscription*/,
+								const H225_AliasAddress & /*addr*/
+								) {}
+
+	virtual void OnInstructions(MsgType /*tag*/,
+								const H460P_ArrayOf_PresenceInstruction & /*instruction*/,
+								const H225_AliasAddress & /*addr*/
+								) {}
+
+	virtual void OnSubscription(MsgType /*tag*/,
+								const H460P_PresenceSubscription & /*subscription*/) {}
+
+	virtual void OnIdentifiers(MsgType /*tag*/,
+								const H460P_ArrayOf_PresenceIdentifier & /*identifier*/) {}
+
+
+protected:
+// Build Messages
+     H460P_PresenceStatus & BuildStatus(H460P_PresenceMessage & msg, 
+									const H323PresenceNotifications & notify,
+									const H323PresenceInstructions & inst);
+     H460P_PresenceInstruct & BuildInstruct(H460P_PresenceMessage & msg, 
+									const H323PresenceInstructions & inst);
+     H460P_PresenceAuthorize & BuildAuthorize(H460P_PresenceMessage & msg, 
+									const H323PresenceSubscriptions & subs);
+     H460P_PresenceNotify & BuildNotify(H460P_PresenceMessage & msg, 
+									const H323PresenceNotifications & notify);
+     H460P_PresenceRequest & BuildRequest(H460P_PresenceMessage & msg, 
+									const H323PresenceSubscriptions & subs);
+     H460P_PresenceResponse & BuildResponse(H460P_PresenceMessage & msg, 
+									const H323PresenceSubscriptions & subs);
+     H460P_PresenceAlive & BuildAlive(H460P_PresenceMessage & msg, 
+									const H323PresenceIdentifiers & id);
+     H460P_PresenceRemove & BuildRemove(H460P_PresenceMessage & msg, 
+									const H323PresenceIdentifiers & id);
+     H460P_PresenceAlert & BuildAlert(H460P_PresenceMessage & msg, 
+									const H323PresenceNotifications & notify);
+
+private:
+	 H323PresenceStore m_presenceStore;
+	 PMutex storeMutex;
+};
+
 
 #endif
 
