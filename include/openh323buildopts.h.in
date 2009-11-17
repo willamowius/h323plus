@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.12  2009/08/28 14:36:00  shorne
+ * Fixes to enable compilation with PTLIB 2.6.4
+ *
  * Revision 1.11  2009/08/21 07:01:06  shorne
  * Added H.460.9 Support
  *
@@ -181,7 +184,7 @@
 #if PTLIB_MAJOR == 2 && PTLIB_MINOR == 6  
 		#define PTLIB_VER 260
 #endif
-#if PTLIB_MAJOR == 2 && PTLIB_MINOR == 7  
+#if PTLIB_MAJOR == 2 && PTLIB_MINOR >= 7  
 		#define PTLIB_VER 270
 #endif
 
@@ -236,7 +239,11 @@
 	#if defined(H323_H46018) && defined(H323_H46023) && defined(P_SSL)
 		#define H323_H46024A 1
 	#endif
+	#if defined(H323_H46023) && (WINVER > 0x500)
+		#define H323_UPnP 1
+	#endif
 #endif
+#undef H323_H460P	
 #undef H323_H501
 #if (PTLIB_VER > 260) 
 	#undef H323_GNUGK
