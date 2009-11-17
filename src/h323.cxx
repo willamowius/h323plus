@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.39  2009/10/21 10:02:52  shorne
+ * Fix to ensure H.460.19 keepalive payload is sent
+ *
  * Revision 1.38  2009/09/29 07:28:44  shorne
  * Small fix to H.460.19
  *
@@ -952,6 +955,9 @@ H323Connection::~H323Connection()
   delete logicalChannels;
   delete requestModeProcedure;
   delete roundTripDelayProcedure;
+#ifdef H323_AEC
+  delete aec;
+#endif
 #ifdef H323_H450
   delete h450dispatcher;
 #endif
@@ -5538,9 +5544,21 @@ PBoolean H323Connection::SendH46024AMessage(bool sender)
 
 #endif
 
+PBoolean H323Connection::OnReceivedGenericMessage(h245MessageType type, const PString & id ) 
+{ 
+#ifdef H323_H46024A
+	PTRACE(4,"H46024A\tReceived Generic Message.");
+	if (id == H46024AOID && type == h245indication) {
+		return ReceivedH46024AMessage(true);
+	}
+#endif
+	return false; 
+}
+
 PBoolean H323Connection::OnReceivedGenericMessage(h245MessageType type, const PString & id, const H245_ArrayOf_GenericParameter & content)
 {
 #ifdef H323_H46024A
+	PTRACE(4,"H46024A\tReceived Generic Message.");
 	if (id == H46024AOID) {
 		if (type == h245indication) {
 			unsigned start=0;
@@ -5644,8 +5662,8 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
 				H245_ArrayOf_GenericInformation & generic, PBoolean isAck) const
 {
 #ifdef H323_H46018
+	PTRACE(4,"Set Generic " << (isAck ? "OLCack" : "OLC") << " Session " << sessionID );
 	if (m_H46019enabled) {
-		PTRACE(4,"Set Generic " << (isAck ? "OLCack" : "OLC") << " Session " << sessionID );
 		unsigned payload=0; unsigned ttl=0;
 #ifdef H323_H46024A
 		PString m_cui = PString(); H323TransportAddress m_altAddr1, m_altAddr2;

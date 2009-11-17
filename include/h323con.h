@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.28  2009/10/21 10:04:33  shorne
+ * Added Virtual to SetRemoteApplication
+ *
  * Revision 1.27  2009/09/20 00:38:10  shorne
  * Fixed bug with H.460.19 when transitioning from fast connect to slow
  *
@@ -3220,7 +3223,7 @@ class H323Connection : public PObject
 
 	virtual PBoolean OnHandleH245GenericMessage(h245MessageType type, const H245_GenericMessage & pdu);
 
-	virtual PBoolean OnReceivedGenericMessage(h245MessageType, const PString & ) { return false; }
+	virtual PBoolean OnReceivedGenericMessage(h245MessageType, const PString & );
 	virtual PBoolean OnReceivedGenericMessage(h245MessageType type, const PString & id, const H245_ArrayOf_GenericParameter & content);
 
 #ifdef H323_H230
