@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2009/07/09 15:08:15  shorne
+ * Added ability to enable/disable on  a call by call basis
+ *
  * Revision 1.9  2008/05/23 11:21:21  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -473,6 +476,7 @@ PBoolean GNUGK_Feature::ReRegister(const PString & newid)
 	
 PNatMethod_GnuGk::PNatMethod_GnuGk()
 {
+	EP = NULL;
 	available = false;
 	active = true;
 }
@@ -485,6 +489,8 @@ PNatMethod_GnuGk::~PNatMethod_GnuGk()
 
 void PNatMethod_GnuGk::AttachEndPoint(H323EndPoint * ep)
 {
+
+   EP = ep;
 
    WORD portPairBase = ep->GetRtpIpPortBase();
    WORD portPairMax = ep->GetRtpIpPortMax();
@@ -583,6 +589,12 @@ PBoolean PNatMethod_GnuGk::OpenSocket(PUDPSocket & socket, PortInfo & portInfo, 
   PTRACE(2, "GNUGK\tFailed to bind to local UDP port in range "
          << portInfo.currentPort << '-' << portInfo.maxPort);
   return FALSE;
+}
+
+void PNatMethod_GnuGk::SetAvailable() 
+{ 
+	EP->NATMethodCallBack(GetName(),1,"Available");
+	available = true; 
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////

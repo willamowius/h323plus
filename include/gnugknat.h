@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2009/08/28 14:36:00  shorne
+ * Fixes to enable compilation with PTLIB 2.6.4
+ *
  * Revision 1.10  2009/07/09 15:08:15  shorne
  * Added ability to enable/disable on  a call by call basis
  *
@@ -253,7 +256,7 @@ public:
   */
    virtual bool IsAvailable(const PIPSocket::Address&) { return (available && active); }
 
-   void SetAvailable() { available = TRUE; };
+   void SetAvailable();
 
    virtual void Activate(bool act)  { active = act; }
 
@@ -287,6 +290,7 @@ public:
   //@}
 
 protected:
+	H323EndPoint * EP;
 	PBoolean available;
 	PBoolean active;
 
