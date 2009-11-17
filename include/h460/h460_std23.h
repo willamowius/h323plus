@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2009/09/29 07:23:03  shorne
+ * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
+ *
  * Revision 1.2  2009/08/28 14:36:06  shorne
  * Fixes to enable compilation with PTLIB 2.6.4
  *
@@ -91,7 +94,7 @@ class PNatMethod_H46024  : public PSTUNClient,
 		);
 
 		// Whether the NAT Method is available
-		void SetAvailable() { isAvailable = TRUE; };
+		void SetAvailable();
 
 		// Whether the NAT method is activated for this call
 		virtual void Activate(bool act);
@@ -142,9 +145,16 @@ public:
 	H323EndPoint * GetEndPoint() { return (H323EndPoint *)EP; }
 
 	// Reporting the NAT Type
-	void OnNATTypeDetection(PSTUNClient::NatTypes type);
+	void OnNATTypeDetection(PSTUNClient::NatTypes type, const PIPSocket::Address & ExtIP);
 
 	bool IsAvailable();
+
+	bool AlternateNATMethod();
+	bool UseAlternate();
+
+#ifdef H323_UPnP
+	void InitialiseUPnP();
+#endif
 
 protected:
 	bool DetectALG(const PIPSocket::Address & detectAddress);
@@ -155,10 +165,12 @@ protected:
 private:
     H323EndPoint *			EP;
 	PSTUNClient::NatTypes	natType;
+	PIPSocket::Address		externalIP;
     PBoolean				natNotify;
 	PBoolean				alg;
 	PBoolean				isavailable;
 	PBoolean				isEnabled; 
+	int						useAlternate;
 
 	// Delayed Reregistration
     PThread  *  RegThread;
@@ -223,6 +235,7 @@ public:
 	// Messages
     virtual PBoolean OnSendAdmissionRequest(H225_FeatureDescriptor & pdu);
     virtual void OnReceiveAdmissionConfirm(const H225_FeatureDescriptor & pdu);
+	virtual void OnReceiveAdmissionReject(const H225_FeatureDescriptor & pdu);
 
     virtual PBoolean OnSendSetup_UUIE(H225_FeatureDescriptor & pdu);
     virtual void OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu);
@@ -239,6 +252,7 @@ private:
 	PMutex h460mute;
 	int nattype;
 	bool isEnabled;
+	bool useAlternate;
 
 
 };

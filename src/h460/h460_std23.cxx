@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2009/10/21 10:09:01  shorne
+ * Updates for H.460.18/.19/.23/.24
+ *
  * Revision 1.4  2009/09/29 07:23:03  shorne
  * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
  *
@@ -58,6 +61,10 @@
 #include <ptclib/random.h>
 #include <ptclib/pdns.h>
 #include <h460/h460_std18.h>
+
+#ifdef H323_UPnP
+ #include "h460/upnpcp.h"
+#endif
 
 #if _WIN32
 #pragma message("H.460.23/.24 Enabled. Contact consulting@h323plus.org for licensing terms.")
@@ -145,7 +152,10 @@ void PNatMethod_H46024::Main()
 		PSTUNClient::NatTypes testtype = NATTest();
 		if (natType != testtype) {
 			natType = testtype;
-			feat->OnNATTypeDetection(natType);
+			PIPSocket::Address extIP;
+			GetExternalAddress(extIP);
+			feat->GetEndPoint()->NATMethodCallBack(GetName(),2,natType);
+			feat->OnNATTypeDetection(natType, extIP);
 		}
 
 		if (natType == PSTUNClient::ConeNat) {
@@ -164,6 +174,12 @@ bool PNatMethod_H46024::IsAvailable(const PIPSocket::Address & /*binding*/)
 		return false;
 
 	return isAvailable;
+}
+
+void PNatMethod_H46024::SetAvailable() 
+{ 
+	feat->GetEndPoint()->NATMethodCallBack(GetName(),1,"Available");
+	isAvailable = true; 
 }
 
 void PNatMethod_H46024::Activate(bool act)
@@ -205,6 +221,8 @@ H460_FeatureStd23::H460_FeatureStd23()
  isavailable = true;
  isEnabled = false;
  natType = PSTUNClient::UnknownNat;
+ externalIP = PIPSocket::GetDefaultIpAny();
+ useAlternate = 0;
  natNotify = false;
 }
 
@@ -259,7 +277,7 @@ PBoolean H460_FeatureStd23::OnSendRegistrationRequest(H225_FeatureDescriptor & p
 				isavailable = false;
 				alg = false;
 		} else {
-			if (natNotify) {
+			if (natNotify || AlternateNATMethod()) {
 				feat.Add(NATTypeOID,H460_FeatureContent(natType,8)); 
 				natNotify = false;
 			}
@@ -306,13 +324,32 @@ void H460_FeatureStd23::OnReceiveRegistrationConfirm(const H225_FeatureDescripto
 	   }
 }
 
-void H460_FeatureStd23::OnNATTypeDetection(PSTUNClient::NatTypes type)
+#ifdef H323_UPnP
+void H460_FeatureStd23::InitialiseUPnP()
+{
+	PTRACE(4,"Std23\tStarting Alternate UPnP");
+
+  	PNatMethod_UPnP * natMethod = (PNatMethod_UPnP *)EP->GetNatMethods().LoadNatMethod("UPnP");
+	 if (natMethod) {
+		 natMethod->AttachEndPoint(EP);
+		 EP->GetNatMethods().AddMethod(natMethod);
+	 }
+}
+#endif
+
+void H460_FeatureStd23::OnNATTypeDetection(PSTUNClient::NatTypes type, const PIPSocket::Address & ExtIP)
 {
 	if (natType == type)
 		return;
 
+	externalIP = ExtIP;
+
 	if (natType == PSTUNClient::UnknownNat) {
 		PTRACE(4,"Std23\tSTUN Test Result: " << type << " forcing reregistration.");
+#ifdef H323_UPnP
+		if (type > PSTUNClient::ConeNat)
+			InitialiseUPnP();
+#endif
 		natType = type;  // first time detection
 	} else {
 		PTRACE(2,"Std23\tBAD NAT Detected: Was " << natType << " Now " << type << " Disabling H.460.23/.24");
@@ -338,6 +375,7 @@ bool H460_FeatureStd23::DetectALG(const PIPSocket::Address & detectAddress)
 		}
 	}
 	PTRACE(4, "Std23\tWARNING: Intermediary device detected!");
+	EP->NATMethodCallBack("ALG",1,"Available");
 	return true;
 }
 
@@ -376,6 +414,39 @@ void H460_FeatureStd23::RegMethod(PThread &, INT)
 	EP->ForceGatekeeperReRegistration();  // We have an ALG so notify the gatekeeper   
 }
 
+bool H460_FeatureStd23::AlternateNATMethod()
+{
+#ifdef H323_UPnP
+	if (natType <= PSTUNClient::ConeNat || useAlternate > 0)
+		return false;
+
+    PNatList & natlist = EP->GetNatMethods().GetNATList();
+
+	for (PINDEX i=0; i< natlist.GetSize(); i++) {
+		if (natlist[i].GetName() == "UPnP" && 
+			natlist[i].GetRTPSupport() == PSTUNClient::RTPSupported) {
+			PIPSocket::Address extIP;
+			natlist[i].GetExternalAddress(extIP);
+			if (!extIP.IsValid() || extIP == externalIP) {
+				PTRACE(4,"H46023\tUPnP Change NAT from " << natType << " to " << PSTUNClient::ConeNat);
+				natType = PSTUNClient::ConeNat;
+				useAlternate = 1;
+				EP->NATMethodCallBack(natlist[i].GetName(),1,"Available");
+				return true;
+			} else {
+				PTRACE(4,"H46023\tUPnP Unavailable subNAT STUN: " << externalIP << " UPnP " << extIP);
+				useAlternate = 2;
+			}
+		}
+	}
+#endif
+	return false;
+}
+
+bool H460_FeatureStd23::UseAlternate()
+{
+	return (useAlternate == 1);
+}
 
 ///////////////////////////////////////////////////////////////////
 
@@ -391,6 +462,8 @@ H460_FeatureStd24::H460_FeatureStd24()
  CON = NULL;
  natconfig = H460_FeatureStd24::e_unknown;
  FeatureCategory = FeatureSupported;
+ isEnabled = false;
+ useAlternate = false;
 
 }
 
@@ -403,9 +476,10 @@ void H460_FeatureStd24::AttachEndPoint(H323EndPoint * _ep)
    EP = _ep; 
 	// We only enable IF the gatekeeper supports H.460.23
 	H460_FeatureSet * gkfeat = EP->GetGatekeeperFeatures();
-	if (gkfeat && gkfeat->HasFeature(23) && 
-			((H460_FeatureStd23 *)gkfeat->GetFeature(23))->IsAvailable()) {
-		isEnabled = true;
+	if (gkfeat && gkfeat->HasFeature(23)) {
+	    H460_FeatureStd23 * feat = (H460_FeatureStd23 *)gkfeat->GetFeature(23);
+		isEnabled = feat->IsAvailable();
+		useAlternate = feat->UseAlternate();
 	} else {
 		PTRACE(4,"Std24\tH.460.24 disabled as H.460.23 is disabled!");
 		isEnabled = false;
@@ -447,6 +521,12 @@ void H460_FeatureStd24::OnReceiveAdmissionConfirm(const H225_FeatureDescriptor &
 		natconfig = (NatInstruct)NATinst;
         HandleNATInstruction(natconfig);
 	}
+}
+
+void H460_FeatureStd24::OnReceiveAdmissionReject(const H225_FeatureDescriptor & pdu) 
+{
+     PTRACE(6,"Std24\tARJ Received");
+	 HandleNATInstruction(H460_FeatureStd24::e_natFailure);
 }
 
 PBoolean H460_FeatureStd24::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
@@ -538,6 +618,10 @@ void H460_FeatureStd24::HandleNATInstruction(NatInstruct _config)
 				SetNATMethods(e_AnnexA);
 				break;
 
+			case H460_FeatureStd24::e_natFailure:
+				PTRACE(4,"Std24\tCall Failure Detected");
+				EP->FeatureCallBack(GetFeatureName()[0],1,"Call Failure");
+				break;
 			case H460_FeatureStd24::e_noassist:
 				PTRACE(4,"Std24\tNAT Call direct");
 			default:
@@ -582,7 +666,9 @@ void H460_FeatureStd24::SetNATMethods(H46024NAT state)
 
 				break;
 			case H460_FeatureStd24::e_enable:
-				if (natlist[i].GetName() == "H46024")
+				if (natlist[i].GetName() == "H46024" && !useAlternate)
+					natlist[i].Activate(true);
+				else if (natlist[i].GetName() == "UPnP" && useAlternate)
 					natlist[i].Activate(true);
 				else
 					natlist[i].Activate(false);
