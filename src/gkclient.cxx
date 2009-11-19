@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2009/11/17 10:51:21  shorne
+ * Added TTL failure callback
+ *
  * Revision 1.10  2009/07/09 15:09:19  shorne
  * Added ability to access Gatekeeper features
  *
@@ -979,7 +982,7 @@ PBoolean H323Gatekeeper::RegistrationRequest(PBoolean autoReg)
     rrq.m_gatekeeperIdentifier = gatekeeperIdentifier;
   }
 
-  if (!endpointIdentifier.IsEmpty()) {
+  if (!endpointIdentifier.GetValue().IsEmpty()) {
     rrq.IncludeOptionalField(H225_RegistrationRequest::e_endpointIdentifier);
     rrq.m_endpointIdentifier = endpointIdentifier;
   }
@@ -1163,9 +1166,9 @@ PBoolean H323Gatekeeper::OnReceiveRegistrationConfirm(const H225_RegistrationCon
 	  PString NATaddr = rcf.m_nonStandardData.m_data.AsString();
        if (!NATaddr.IsEmpty())
 		  if (NATaddr.Left(4) == "NAT=")
-		      endpoint.OnGatekeeperNATDetect(NATaddr.Right(NATaddr.GetLength()-4),endpointIdentifier,gkRouteAddress);
+		      endpoint.OnGatekeeperNATDetect(NATaddr.Right(NATaddr.GetLength()-4),endpointIdentifier.GetValue(),gkRouteAddress);
 		  else
-              endpoint.OnGatekeeperOpenNATDetect(endpointIdentifier,gkRouteAddress);
+              endpoint.OnGatekeeperOpenNATDetect(endpointIdentifier.GetValue(),gkRouteAddress);
   }
 #endif
 
@@ -1247,7 +1250,7 @@ PBoolean H323Gatekeeper::UnregistrationRequest(int reason)
     urq.m_gatekeeperIdentifier = gatekeeperIdentifier;
   }
 
-  if (!endpointIdentifier.IsEmpty()) {
+  if (!endpointIdentifier.GetValue().IsEmpty()) {
     urq.IncludeOptionalField(H225_UnregistrationRequest::e_endpointIdentifier);
     urq.m_endpointIdentifier = endpointIdentifier;
   }
@@ -1380,7 +1383,7 @@ PBoolean H323Gatekeeper::LocationRequest(const PStringList & aliases,
 
   H323SetAliasAddresses(aliases, lrq.m_destinationInfo);
 
-  if (!endpointIdentifier.IsEmpty()) {
+  if (!endpointIdentifier.GetValue().IsEmpty()) {
     lrq.IncludeOptionalField(H225_LocationRequest::e_endpointIdentifier);
     lrq.m_endpointIdentifier = endpointIdentifier;
   }

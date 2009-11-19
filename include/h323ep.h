@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.24  2009/11/17 10:50:14  shorne
+ * Added Presence Support, Calling URI (not registered), Correct test of audio device name, Feature,NAT and TTL callback
+ *
  * Revision 1.23  2009/09/20 00:51:09  shorne
  * simplified headers and ensure H.460.18 if always first feature for better interop
  *
@@ -1571,7 +1574,7 @@ class H323EndPoint : public PObject
      */
 	virtual void OnGatekeeperNATDetect(
 		PIPSocket::Address publicAddr,         ///< Public address as returned by the Gatekeeper
-		PString & gkIdentifier,                ///< Identifier at the gatekeeper
+		const PString & gkIdentifier,                ///< Identifier at the gatekeeper
 		H323TransportAddress & gkRouteAddress  ///< Gatekeeper Route Address
 		);
 		
@@ -1580,7 +1583,7 @@ class H323EndPoint : public PObject
 	so they can confirm that it is true.
      */
 	virtual void OnGatekeeperOpenNATDetect(
-		PString & gkIdentifier,                ///< Identifier at the gatekeeper
+		const PString & gkIdentifier,                ///< Identifier at the gatekeeper
 		H323TransportAddress & gkRouteAddress  ///< Gatekeeper Route Address
 		);
 

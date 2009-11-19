@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2009/07/09 15:09:19  shorne
+ * Added ability to access Gatekeeper features
+ *
  * Revision 1.7  2009/02/22 02:44:41  shorne
  * Added ability to enable SCI/SCR without needing H248 support
  *
@@ -488,7 +491,7 @@ class H323Gatekeeper : public H225_RAS
 
     /** Get the endpoint identifier
       */
-    const PString & GetEndpointIdentifier() const { return endpointIdentifier; }
+    const PASN_BMPString & GetEndpointIdentifier() const { return endpointIdentifier; }
 
     /**Set the H.235 password in the gatekeeper.
        If no username is present then it will default to the endpoint local
@@ -553,7 +556,7 @@ class H323Gatekeeper : public H225_RAS
 
     // Gatekeeper registration state variables
     PBoolean     discoveryComplete;
-    PString  endpointIdentifier;
+    PASN_BMPString  endpointIdentifier;
 	PString  localId;
     RegistrationFailReasons registrationFailReason;
 	PMutex RegisterMutex;

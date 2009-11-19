@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.33  2009/11/17 10:50:15  shorne
+ * Added Presence Support, Calling URI (not registered), Correct test of audio device name, Feature,NAT and TTL callback
+ *
  * Revision 1.32  2009/09/20 00:51:09  shorne
  * simplified headers and ensure H.460.18 if always first feature for better interop
  *
@@ -3259,7 +3262,7 @@ void H323EndPoint::OnUserInputTone(H323Connection & connection,
 #ifdef H323_GNUGK
 void H323EndPoint::OnGatekeeperNATDetect(
                                    PIPSocket::Address publicAddr,   
-                                   PString & gkIdentifier,
+                                   const PString & gkIdentifier,
 				           H323TransportAddress & gkRouteAddress
                                    )
 {
@@ -3296,7 +3299,7 @@ void H323EndPoint::OnGatekeeperNATDetect(
 }
 
 void H323EndPoint::OnGatekeeperOpenNATDetect(
-                                   PString & /*gkIdentifier*/,
+                          const PString & /*gkIdentifier*/,
 				   H323TransportAddress & /*gkRouteAddress*/
                                    )
 {
