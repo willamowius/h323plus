@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.12  2009/11/19 03:56:39  shorne
+ * Change the gkIdentifer to be stored as a PASN_BMPString to avoid problems with PString stripping NULL char off end which causes problems registration issues with pre GnuGk 2.3.1 releases.
+ *
  * Revision 1.11  2009/11/17 10:51:21  shorne
  * Added TTL failure callback
  *
@@ -1319,7 +1322,7 @@ PBoolean H323Gatekeeper::OnReceiveUnregistrationRequest(const H225_Unregistratio
   }
 
   if (!urq.HasOptionalField(H225_UnregistrationRequest::e_endpointIdentifier) ||
-       urq.m_endpointIdentifier.GetValue() != endpointIdentifier) {
+       urq.m_endpointIdentifier != endpointIdentifier) {
     PTRACE(1, "RAS\tInconsistent endpointIdentifier!");
     return FALSE;
   }
