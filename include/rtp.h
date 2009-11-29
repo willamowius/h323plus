@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2009/07/09 15:11:12  shorne
+ * Simplfied and standardised compiler directives
+ *
  * Revision 1.6  2009/06/28 01:41:52  shorne
  * Replaced P_HAS_QOS with P_QOS (depreciated in PTLib)
  *
@@ -749,6 +752,10 @@ class RTP_Session : public PObject
     /**Decrement reference count for RTP session.
       */
     PBoolean DecrementReference() { return --referenceCount == 0; }
+
+	/**Get Reference Count
+	  */
+	unsigned GetReferenceCount() const { return referenceCount; }
 
     /**Indicate if will ignore all but first received SSRC value.
       */

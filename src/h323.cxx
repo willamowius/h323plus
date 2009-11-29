@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.40  2009/11/17 10:40:56  shorne
+ * Fix for OnReceiveGeneric Message so H.460.24A gets enabled
+ *
  * Revision 1.39  2009/10/21 10:02:52  shorne
  * Fix to ensure H.460.19 keepalive payload is sent
  *
@@ -656,6 +659,8 @@ static void ReceiveSetupFeatureSet(const H323Connection * connection, const H225
 
 	if (hasFeaturePDU)
 		connection->OnReceiveFeatureSet(H460_MessageType::e_setup, fs);
+	else
+		connection->DisableFeatureSet();
 
 }
 
@@ -5666,7 +5671,8 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
 	if (m_H46019enabled) {
 		unsigned payload=0; unsigned ttl=0;
 #ifdef H323_H46024A
-		PString m_cui = PString(); H323TransportAddress m_altAddr1, m_altAddr2;
+		PString m_cui = PString(); 
+		H323TransportAddress m_altAddr1, m_altAddr2;
 #endif
 		std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(sessionID);
 			if (sockets_iter != m_NATSockets.end()) {
@@ -5762,6 +5768,14 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
 
 void H323Connection::ReleaseSession(unsigned sessionID)
 {
+#ifdef H323_H46024A
+   const RTP_Session * sess = GetSession(sessionID);
+   if (sess && sess->GetReferenceCount() == 1) {  // last session reference
+	  std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(sessionID);
+		if (sockets_iter != m_NATSockets.end()) 
+				m_NATSockets.erase(sockets_iter);
+   }
+#endif
   rtpSessions.ReleaseSession(sessionID);
 }
 
@@ -6388,6 +6402,13 @@ void H323Connection::OnReceiveFeatureSet(unsigned code, const H225_FeatureSet & 
    endpoint.OnReceiveFeatureSet(code, feats);
 #endif
 }
+
+#ifdef H323_H460
+void H323Connection::DisableFeatureSet() const
+{
+	features->DisableAllFeatures();
+}
+#endif
 
 #ifndef DISABLE_CALLAUTH
 void H323Connection::SetAuthenticationConnection()

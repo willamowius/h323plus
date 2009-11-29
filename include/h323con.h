@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.29  2009/11/17 10:40:56  shorne
+ * Fix for OnReceiveGeneric Message so H.460.24A gets enabled
+ *
  * Revision 1.28  2009/10/21 10:04:33  shorne
  * Added Virtual to SetRemoteApplication
  *
@@ -3044,6 +3047,10 @@ class H323Connection : public PObject
 #endif
 
 #ifdef H323_H460
+	/** Disable the feature set as the remote does not support it.
+	  */
+	void DisableFeatureSet() const;
+
 	/** Disable Feautures on a call by call basis
 	  */
 	void DisableFeatures();

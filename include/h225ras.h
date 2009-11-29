@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2009/02/22 02:02:05  shorne
+ * Added ability to enable SCI/SCR without needing H248 support
+ *
  * Revision 1.2  2008/05/23 11:19:23  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -430,6 +433,9 @@ class H225_RAS : public H323Transactor
     { return FALSE; }
 
     virtual void OnReceiveFeatureSet(unsigned, const H225_FeatureSet &) const
+    { }
+
+    virtual void DisableFeatureSet() const
     { }
 
     /**Handle unknown PDU type.

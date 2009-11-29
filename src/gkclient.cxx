@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.13  2009/11/20 04:17:14  shorne
+ * BUGFIX: URQ properly handles endpointIndentifer check.
+ *
  * Revision 1.12  2009/11/19 03:56:39  shorne
  * Change the gkIdentifer to be stored as a PASN_BMPString to avoid problems with PString stripping NULL char off end which causes problems registration issues with pre GnuGk 2.3.1 releases.
  *
@@ -2515,6 +2518,11 @@ void H323Gatekeeper::OnReceiveFeatureSet(unsigned pduType, const H225_FeatureSet
 }
 
 #ifdef H323_H460
+void H323Gatekeeper::DisableFeatureSet() const
+{
+	features->DisableAllFeatures();
+}
+
 H460_FeatureSet & H323Gatekeeper::GetFeatures()
 {
 	return *features;

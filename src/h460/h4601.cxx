@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.17  2009/09/29 07:23:03  shorne
+ * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
+ *
  * Revision 1.16  2009/09/20 00:32:03  shorne
  * Added ordering of H.460 features with STD first
  *
@@ -1706,6 +1709,13 @@ PString H460_FeatureSet::PTracePDU(PINDEX id) const
 	}
 }
 
+void H460_FeatureSet::DisableAllFeatures()
+{
+	if (Features.GetSize() > 0) {
+		PTRACE(4,"H460\tRemoving all Features are remote/Gk does not appear to support H.460");
+		Features.RemoveAll();
+	}
+}
 
 void H460_FeatureSet::ReceiveFeature(unsigned id, const H225_FeatureSet & Message)
 {

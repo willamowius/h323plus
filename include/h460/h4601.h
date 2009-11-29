@@ -36,6 +36,9 @@
  * Contributor(s): ______________________________________.
  *
 * $Log$
+* Revision 1.15  2009/09/29 07:23:03  shorne
+* Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
+*
 * Revision 1.14  2009/07/07 13:24:43  shorne
 * Fix so feature list will start at 0 and OpalOID + operator
 *
@@ -1110,6 +1113,11 @@ class H460_FeatureSet : public PObject
 		 Main PDU & RAS link to OpenH323
 	*/
 	PBoolean SendFeature(unsigned id, H225_FeatureSet & Message);	
+
+	/**Disable all features
+		Remote does not support H.460 so we remove all features
+	  */
+    void DisableAllFeatures();
 
 	/** Attach Endpoint
 	*/

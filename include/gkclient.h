@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2009/11/19 03:56:39  shorne
+ * Change the gkIdentifer to be stored as a PASN_BMPString to avoid problems with PString stripping NULL char off end which causes problems registration issues with pre GnuGk 2.3.1 releases.
+ *
  * Revision 1.8  2009/07/09 15:09:19  shorne
  * Added ability to access Gatekeeper features
  *
@@ -325,6 +328,7 @@ class H323Gatekeeper : public H225_RAS
     void OnReceiveFeatureSet(unsigned, const H225_FeatureSet & features) const;
 
 #if H323_H460
+	void DisableFeatureSet() const;
 	H460_FeatureSet & GetFeatures();
 #endif
   //@}

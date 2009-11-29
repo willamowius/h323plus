@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2009/02/22 02:02:37  shorne
+ * Added ability to enable SCI/SCR without needing H248 support
+ *
  * Revision 1.4  2008/05/23 11:21:29  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -785,7 +788,10 @@ PBoolean H225_RAS::OnReceiveGatekeeperConfirm(const H323RasPDU &, const H225_Gat
   }
 
 #ifdef H323_H460
-  ReceiveFeatureSet<H225_GatekeeperConfirm>(this, H460_MessageType::e_gatekeeperConfirm, gcf);
+  if (gcf.HasOptionalField(H225_GatekeeperConfirm::e_featureSet))
+     ReceiveFeatureSet<H225_GatekeeperConfirm>(this, H460_MessageType::e_gatekeeperConfirm, gcf);
+  else
+     DisableFeatureSet();
 #endif
 
   return OnReceiveGatekeeperConfirm(gcf);
@@ -920,7 +926,10 @@ PBoolean H225_RAS::OnReceiveRegistrationConfirm(const H323RasPDU & pdu, const H2
     return FALSE;
 
 #ifdef H323_H460
-  ReceiveFeatureSet<H225_RegistrationConfirm>(this, H460_MessageType::e_registrationConfirm, rcf);
+  if (rcf.HasOptionalField(H225_RegistrationConfirm::e_featureSet))
+     ReceiveFeatureSet<H225_RegistrationConfirm>(this, H460_MessageType::e_registrationConfirm, rcf);
+  else
+     DisableFeatureSet();
 #endif
 
   return OnReceiveRegistrationConfirm(rcf);
