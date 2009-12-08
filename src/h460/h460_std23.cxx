@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2009/11/17 11:10:28  shorne
+ * Added UPnP Support and NAT Feature Callbacks
+ *
  * Revision 1.5  2009/10/21 10:09:01  shorne
  * Updates for H.460.18/.19/.23/.24
  *
@@ -79,11 +82,12 @@
 
 // H.460.23 NAT Detection Feature
 #define remoteNATOID		1     	// bool if endpoint has remote NAT support
-#define sameNATOID			2		// bool if endpoint supports H.460.24 Annex A
-#define localNATOID			3       // PBoolean if endpoint is NATed
+#define AnnexAOID			2		// bool if endpoint supports H.460.24 Annex A
+#define localNATOID			3       // bool if endpoint is NATed
 #define NATDetRASOID		4       // Detected RAS H225_TransportAddress 
 #define STUNServOID			5       // H225_TransportAddress of STUN Server 
 #define NATTypeOID			6       // integer 8 Endpoint NAT Type
+#define AnnexBOID			7       // bool if endpoint supports H.460.24 Annex B
 
 
 // H.460.24 P2Pnat Feature
@@ -93,8 +97,9 @@
 #define calledIsNatOID		4       // PBoolean if local endpoint is behind a NAT/FW
 #define NatRemoteTypeOID	5		// integer 8 reported NAT type
 #define apparentSourceOID	6       // H225_TransportAddress of apparent source address of endpoint
-#define SupSameNATOID		7   	// PBoolean if local endpoint supports same NAT probe
+#define SupAnnexAOID		7   	// PBoolean if local endpoint supports H.460.24 Annex A
 #define NATInstOID    		8   	// integer 8 Instruction on how NAT is to be Traversed
+#define SupAnnexBOID		9       // bool if endpoint supports H.460.24 Annex B
 
 
 //////////////////////////////////////////////////////////////////////
@@ -266,7 +271,10 @@ PBoolean H460_FeatureStd23::OnSendRegistrationRequest(H225_FeatureDescriptor & p
 		  // We always support remote
 	        feat.Add(remoteNATOID,H460_FeatureContent(true));
 #ifdef H323_H46024A
-			feat.Add(sameNATOID,H460_FeatureContent(true));
+			feat.Add(AnnexAOID,H460_FeatureContent(true));
+#endif
+#ifdef H323_H46024B
+			feat.Add(AnnexBOID,H460_FeatureContent(true));
 #endif
 	} else {
 		if (alg) {
@@ -610,13 +618,21 @@ void H460_FeatureStd24::HandleNATInstruction(NatInstruct _config)
 				SetNATMethods(e_default);
 				break;
 
-			case H460_FeatureStd24::e_natSameNAT:
-				PTRACE(4,"Std24\tSame NAT: H.460.24 AnnexA ENABLED");
 #ifdef H323_H46024A
+			case H460_FeatureStd24::e_natAnnexA:
+				PTRACE(4,"Std24\tSame NAT: H.460.24 AnnexA ENABLED");
 				CON->H46024AEnabled();
-#endif
 				SetNATMethods(e_AnnexA);
 				break;
+#endif
+
+#ifdef H323_H46024B
+			case H460_FeatureStd24::e_natAnnexB:
+				PTRACE(4,"Std24\tSame NAT: H.460.24 AnnexA ENABLED");
+				CON->H46024BEnabled();
+				SetNATMethods(e_AnnexB);
+				break;
+#endif
 
 			case H460_FeatureStd24::e_natFailure:
 				PTRACE(4,"Std24\tCall Failure Detected");
@@ -649,7 +665,8 @@ void H460_FeatureStd24::SetNATMethods(H46024NAT state)
 	PNatList & natlist = EP->GetNatMethods().GetNATList();
 
 	if ((state == H460_FeatureStd24::e_default) ||
-         (state == H460_FeatureStd24::e_AnnexA))
+         (state == H460_FeatureStd24::e_AnnexA) ||
+		 (state == H460_FeatureStd24::e_AnnexB))
 			SetH46019State(true);
 	else
 			SetH46019State(false);
@@ -658,6 +675,7 @@ void H460_FeatureStd24::SetNATMethods(H46024NAT state)
 	{
 		switch (state) {
 			case H460_FeatureStd24::e_AnnexA:   // To do Annex A Implementation.
+			case H460_FeatureStd24::e_AnnexB:   // To do Annex B Implementation.
 			case H460_FeatureStd24::e_default:
 				if (natlist[i].GetName() == "H46024")
 					natlist[i].Activate(false);
@@ -684,7 +702,7 @@ void H460_FeatureStd24::SetNATMethods(H46024NAT state)
 
 PString H460_FeatureStd24::GetNATStrategyString(NatInstruct method)
 {
-  static const char * const Names[9] = {
+  static const char * const Names[10] = {
 		"Unknown Strategy",
 		"No Assistance",
 		"Local Master",
@@ -692,11 +710,12 @@ PString H460_FeatureStd24::GetNATStrategyString(NatInstruct method)
 		"Local Proxy",
 		"Remote Proxy",
 		"Full Proxy",
-		"Same NAT/FW",
+		"AnnexA SameNAT",
+		"AnnexB NAToffload",
 		"Call Failure!"
   };
 
-  if (method < 9)
+  if (method < 10)
     return Names[method];
 
    return psprintf("<NAT Strategy %u>", method);

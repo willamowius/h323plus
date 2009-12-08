@@ -1,0 +1,23 @@
+MEDIA-TRAVERSAL {itu-t(0) recommendation(0) h(8) 460 24 2} DEFINITIONS AUTOMATIC TAGS ::=
+
+BEGIN
+
+IMPORTS
+                TransportAddress
+	FROM MULTIMEDIA-SYSTEM-CONTROL; 
+
+AlternateAddresses ::= SEQUENCE
+{
+	addresses		SEQUENCE OF AlternateAddress,
+	...
+}
+
+AlternateAddress ::= SEQUENCE
+{
+	sessionID	INTEGER(0..255),
+	rtpAddress	TransportAddress	OPTIONAL,
+	rtcpAddress	TransportAddress	OPTIONAL,
+	...	
+}
+
+END

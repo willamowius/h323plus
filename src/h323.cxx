@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.41  2009/11/29 23:31:13  shorne
+ * BUG FIX : completely disable H.460 support if remote does not support it.
+ *
  * Revision 1.40  2009/11/17 10:40:56  shorne
  * Fix for OnReceiveGeneric Message so H.460.24A gets enabled
  *
@@ -403,6 +406,10 @@
 #include "h460/h46018_h225.h"
 #include "h460/h46019.h"
 #endif
+
+#ifdef H323_H46024B
+#include "h460/h46024b.h"
+#endif
 #endif
 
 #ifdef P_STUN
@@ -730,6 +737,9 @@ const unsigned defH46019TTL = 20;
 #ifdef H323_H46024A
 const char * H46024AOID = "0.0.8.460.24.1";
 #endif
+#ifdef H323_H46024B
+const char * H46024BOID = "0.0.8.460.24.2";
+#endif
 #endif  // H323_H460
 
 H323Connection::H323Connection(H323EndPoint & ep,
@@ -945,6 +955,8 @@ H323Connection::H323Connection(H323EndPoint & ep,
   m_H46024Aenabled = false;
   m_H46024Ainitator = false;
   m_H46024Astate = 0;
+  m_H46024Benabled = false;
+  m_H46024Bstate = 0;
 #endif
 #endif
 
@@ -5530,6 +5542,44 @@ void BuildH46024AIndication(H323ControlPDU & pdu, const PString & oid, bool send
 	  BuildGenericInteger(data[0], 0, (sender ? 1 : 0));
 }
 
+#ifdef H323_H46024B
+bool DecodeH46024BRequest(unsigned id, const H245_ArrayOf_GenericParameter & params, H46024B_ArrayOf_AlternateAddress & val)
+{
+   for (PINDEX i=0; i < params.GetSize(); i++)
+   {
+      const H245_GenericParameter & param = params[i];
+	  const H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
+	  if (idm.GetTag() == H245_ParameterIdentifier::e_standard) {
+		  const PASN_Integer & idx = idm;
+		  if (idx == id) {
+			 const H245_ParameterValue & genvalue = params[i].m_parameterValue;
+			 if (genvalue.GetTag() == H245_ParameterValue::e_octetString) {
+					const PASN_OctetString & xval = genvalue;
+					xval.DecodeSubType(val);
+					return true;
+			 }
+		  }
+	  }
+   }
+	PTRACE(4,"H46024A\tError finding H46024BRequest " << id);
+	return false;
+}
+
+void BuildH46024BResponse(H323ControlPDU & pdu)
+{
+	H245_GenericMessage & cap = pdu.Build(H245_ResponseMessage::e_genericResponse);
+	  H245_CapabilityIdentifier & id = cap.m_messageIdentifier;
+	  id.SetTag(H245_CapabilityIdentifier::e_standard);
+	  PASN_ObjectId & gid = id;
+	  gid.SetValue(H46024BOID);
+	
+	  cap.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
+	  PASN_Integer & num = cap.m_subMessageIdentifier;
+	  num = 1;
+
+}
+#endif  // H323_H46024B
+
 PBoolean H323Connection::SendH46024AMessage(bool sender)
 {
 	if ((sender && m_H46024Astate == 1) ||  // Message already sent
@@ -5552,8 +5602,8 @@ PBoolean H323Connection::SendH46024AMessage(bool sender)
 PBoolean H323Connection::OnReceivedGenericMessage(h245MessageType type, const PString & id ) 
 { 
 #ifdef H323_H46024A
-	PTRACE(4,"H46024A\tReceived Generic Message.");
 	if (id == H46024AOID && type == h245indication) {
+		PTRACE(4,"H46024A\tReceived Generic Message.");
 		return ReceivedH46024AMessage(true);
 	}
 #endif
@@ -5563,12 +5613,32 @@ PBoolean H323Connection::OnReceivedGenericMessage(h245MessageType type, const PS
 PBoolean H323Connection::OnReceivedGenericMessage(h245MessageType type, const PString & id, const H245_ArrayOf_GenericParameter & content)
 {
 #ifdef H323_H46024A
-	PTRACE(4,"H46024A\tReceived Generic Message.");
-	if (id == H46024AOID) {
-		if (type == h245indication) {
+	if (id == H46024AOID && type == h245indication) {
+		PTRACE(4,"H46024A\tReceived Generic Indication.");
 			unsigned start=0;
 			if (GetUnsignedGenericMessage(0,content,start))
 				return ReceivedH46024AMessage((bool)start);
+	}
+#endif
+
+#ifdef H323_H46024B
+	if (id == H46024BOID && type == h245request) {
+		H46024B_ArrayOf_AlternateAddress address;
+		if (DecodeH46024BRequest(1, content, address)) {
+			PTRACE(4,"H46024B\tReceived\n" << address);
+			for (PINDEX i=0; i < address.GetSize(); ++i) {
+				map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(address[i].m_sessionID);
+					if (sockets_iter != m_NATSockets.end()) {
+						NAT_Sockets sockets = sockets_iter->second;
+						if (address[i].HasOptionalField(H46024B_AlternateAddress::e_rtpAddress)) { 
+							H323TransportAddress add = H323TransportAddress(address[i].m_rtpAddress); 
+							((H46019UDPSocket *)sockets.rtp)->H46024Bdirect(add);
+						}
+					}
+			}
+			H323ControlPDU pdu;
+			BuildH46024BResponse(pdu); 
+			return WriteControlPDU(pdu);
 		}
 	}
 #endif
@@ -6366,7 +6436,12 @@ void H323Connection::H46024AEnabled()
 { 
 	m_H46024Aenabled = true; 
 }
-#endif
+
+void H323Connection::H46024BEnabled() 
+{ 
+	m_H46024Benabled = true; 
+}
+#endif   // H323_H46024A
 #endif   // H323_H460
 
 PBoolean H323Connection::OnH245AddressConflict()

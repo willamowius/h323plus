@@ -15,7 +15,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>h323plus</ProjectName>
+    <ProjectName>h323plus 2010</ProjectName>
     <ProjectGuid>{71C46EAF-48C9-47BA-9532-27B51744548D}</ProjectGuid>
     <RootNamespace>h323plus</RootNamespace>
   </PropertyGroup>
@@ -50,24 +50,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.21006.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">lib\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">lib\Release\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">lib\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">lib\Debug\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\lib\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\lib\Release\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\lib\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\lib\Debug\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='No Trace|Win32'">.\lib\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='No Trace|Win32'">.\lib\NoTrace\</IntDir>
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='No Trace|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='No Trace|Win32'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='No Trace|Win32'" />
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)include;$(ProjectDir)..\ptlib\include;$(IncludePath)</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='No Trace|Win32'">$(ProjectDir)include;$(ProjectDir)..\ptlib\include;$(IncludePath)</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)include;$(ProjectDir)..\ptlib\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -80,9 +68,9 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ptlib.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>lib\Release/h323plus.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>lib\Release/</AssemblerListingLocation>
-      <ObjectFileName>lib\Release/</ObjectFileName>
+      <PrecompiledHeaderOutputFile>.\lib\Release/h323plus.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>.\lib\Release/</AssemblerListingLocation>
+      <ObjectFileName>.\lib\Release/</ObjectFileName>
       <ProgramDataBaseFileName>lib\h323plus.pdb</ProgramDataBaseFileName>
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -104,9 +92,9 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ptlib.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>lib\Debug/h323plus.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>lib\Debug/</AssemblerListingLocation>
-      <ObjectFileName>lib\Debug/</ObjectFileName>
+      <PrecompiledHeaderOutputFile>.\lib\Debug/h323plus.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>.\lib\Debug/</AssemblerListingLocation>
+      <ObjectFileName>.\lib\Debug/</ObjectFileName>
       <ProgramDataBaseFileName>lib\h323plusd.pdb</ProgramDataBaseFileName>
       <BrowseInformation>true</BrowseInformation>
       <WarningLevel>Level4</WarningLevel>
@@ -341,6 +329,7 @@
     <ClCompile Include="src\h450\h450pdu.cxx" />
     <ClCompile Include="src\h460\h4601.cxx" />
     <ClCompile Include="src\h460\h46018_h225.cxx" />
+    <ClCompile Include="src\h460\h46024b.cxx" />
     <ClCompile Include="src\h460\h460_oid3.cxx" />
     <ClCompile Include="src\h460\h460_std18.cxx" />
     <ClCompile Include="src\h460\h460_std23.cxx" />
@@ -634,6 +623,7 @@
     <ClInclude Include="include\h450\h450pdu.h" />
     <ClInclude Include="include\h460\h4601.h" />
     <ClInclude Include="include\h460\h46018_h225.h" />
+    <ClInclude Include="include\h460\h46024b.h" />
     <ClInclude Include="include\h460\h460_oid3.h" />
     <ClInclude Include="include\h460\h460_std18.h" />
     <ClInclude Include="include\h460\h460_std23.h" />
@@ -703,6 +693,7 @@
     <None Include="src\asn\h4509.asn" />
     <None Include="src\asn\h46018.asn" />
     <None Include="src\asn\h46019.asn" />
+    <None Include="src\asn\h46024b.asn" />
     <None Include="src\asn\h4609.asn" />
     <None Include="src\asn\h460pres.asn" />
     <None Include="src\asn\h501.asn" />

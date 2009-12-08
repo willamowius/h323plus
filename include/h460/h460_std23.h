@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2009/11/17 11:10:28  shorne
+ * Added UPnP Support and NAT Feature Callbacks
+ *
  * Revision 1.3  2009/09/29 07:23:03  shorne
  * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
  *
@@ -219,7 +222,8 @@ public:
 		e_localProxy,
 	    e_remoteProxy,
         e_natFullProxy,
-		e_natSameNAT,
+		e_natAnnexA,				// Same NAT
+		e_natAnnexB,				// NAT Offload
 		e_natFailure = 100
 	};
 
@@ -229,6 +233,7 @@ public:
 		e_default,		// This will use the underlying NAT Method
 		e_enable,		// Use H.460.24 method (STUN)
 		e_AnnexA,       // Disable H.460.24 method but initiate AnnexA
+		e_AnnexB,		// Disable H.460.24 method but initiate AnnexB
 		e_disable		// Disable all and remote will do the NAT help		
 	};
 

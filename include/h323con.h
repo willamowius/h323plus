@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.30  2009/11/29 23:31:05  shorne
+ * BUG FIX : completely disable H.460 support if remote does not support it.
+ *
  * Revision 1.29  2009/11/17 10:40:56  shorne
  * Fix for OnReceiveGeneric Message so H.460.24A gets enabled
  *
@@ -3087,6 +3090,10 @@ class H323Connection : public PObject
 	  */
 	PBoolean ReceivedH46024AMessage(bool toStart);
 
+	/** Enable H46024B for this call
+	  */
+	void H46024BEnabled();
+
 #endif
 
   //@}
@@ -3487,6 +3494,8 @@ class H323Connection : public PObject
 	PBoolean m_H46024Aenabled;
 	PBoolean m_H46024Ainitator;
 	PINDEX m_H46024Astate;
+	PBoolean m_H46024Benabled;
+	PINDEX m_H46024Bstate;
 #endif
 
 #endif

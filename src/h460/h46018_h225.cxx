@@ -37,6 +37,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2009/11/17 11:08:07  shorne
+ * Updates for H.460.18/.19
+ *
  * Revision 1.8  2009/08/26 23:22:18  shorne
  * Fix for compiling without SSL Support (H46024A disabled) thx Marcos Fábio Jardini
  *
@@ -613,6 +616,8 @@ H46019UDPSocket::H46019UDPSocket(H46018Handler & _handler, H323Connection::Sessi
 	m_pendAddr= PIPSocket::GetDefaultIpAny();
 	SetProbeState(e_notRequired);
 	SSRC = PRandom::Number();
+
+	m_h46024b = false;
 #endif
 }
 
@@ -672,7 +677,7 @@ void H46019UDPSocket::InitialiseKeepAlive()
 		PTRACE(4,"H46019UDP\tStart " << (rtpSocket ? "RTP" : "RTCP") << " pinging " 
 						<< keepip << ":" << keepport << " every " << keepTTL << " secs.");
 
-		rtpSocket ? SendRTPPing() : SendRTCPPing();
+		rtpSocket ? SendRTPPing(keepip,keepport) : SendRTCPPing();
 
 		Keep.SetNotifier(PCREATE_NOTIFIER(Ping));
 		Keep.RunContinuous(keepTTL * 1000); 
@@ -685,10 +690,10 @@ void H46019UDPSocket::InitialiseKeepAlive()
 
 void H46019UDPSocket::Ping(PTimer &, INT)
 { 
-	rtpSocket ? SendRTPPing() : SendRTCPPing();
+	rtpSocket ? SendRTPPing(keepip,keepport) : SendRTCPPing();
 }
 
-void H46019UDPSocket::SendRTPPing() {
+void H46019UDPSocket::SendRTPPing(const PIPSocket::Address & ip, const WORD & port) {
 
 	RTP_DataFrame rtp;
 
@@ -706,21 +711,21 @@ void H46019UDPSocket::SendRTPPing() {
 
 	if (!WriteTo(rtp.GetPointer(),
                  rtp.GetHeaderSize()+rtp.GetPayloadSize(),
-                 keepip, keepport)) {
+                 ip, port)) {
 		switch (GetErrorNumber()) {
 		case ECONNRESET :
 		case ECONNREFUSED :
-			PTRACE(2, "H46019UDP\t" << keepip << ":" << keepport << " not ready.");
+			PTRACE(2, "H46019UDP\t" << ip << ":" << port << " not ready.");
 			break;
 
 		default:
-			PTRACE(1, "H46019UDP\t" << keepip << ":" << keepport 
+			PTRACE(1, "H46019UDP\t" << ip << ":" << port 
 				<< ", Write error on port ("
 				<< GetErrorNumber(PChannel::LastWriteError) << "): "
 				<< GetErrorText(PChannel::LastWriteError));
 		}
 	} else {
-		PTRACE(6, "H46019UDP\tRTP KeepAlive sent: " << keepip << ":" << keepport << " seq: " << keepseqno);	
+		PTRACE(6, "H46019UDP\tRTP KeepAlive sent: " << ip << ":" << port << " seq: " << keepseqno);	
 	    keepseqno++;
 	}
 }
@@ -954,7 +959,17 @@ PBoolean H46019UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD 
 			m_remAddr = addr; 
 			m_remPort = port;
 		}
-
+#if H323_H46024B
+		if (m_h46024b && addr == m_altAddr && port == m_altPort) {
+			PTRACE(4, "H46024B\ts:" << m_Session << (rtpSocket ? " RTP " : " RTCP ")  
+				<< "Switching to " << addr << ":" << port << " from " << m_remAddr << ":" << m_remPort);
+			m_detAddr = addr;  m_detPort = port;
+			SetProbeState(e_direct);
+			Keep.Stop();  // Stop the keepAlive Packets
+			m_h46024b = false;
+			continue;
+		}
+#endif
 		/// Check the probe state
 		switch (GetProbeState()) {
 			case e_initialising:						// RTCP only
@@ -1056,6 +1071,19 @@ PBoolean H46019UDPSocket::ReceivedProbePacket(const RTP_ControlFrame & frame, bo
 		return true;
    } else 
       return false;
+}
+
+void H46019UDPSocket::H46024Bdirect(const H323TransportAddress & address)
+{
+	address.GetIpAndPort(m_altAddr,m_altPort);
+	PTRACE(6,"H46024b\ts: " << m_Session << " RTP Remote Alt: " << m_altAddr << ":" << m_altPort);
+
+	m_h46024b = true;
+
+	// Sending an empty RTP frame to the alternate address
+	// will add a mapping to the router to receive RTP from
+	// the remote
+	SendRTPPing(m_altAddr, m_altPort);
 }
 
 #endif  // H323_H46024A
