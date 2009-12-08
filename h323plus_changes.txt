@@ -1,5 +1,7 @@
 
 H323plus 1.21 - 1.22
+Added Major overhaul of presence system
+Added H.460.24 Annex B
 Added H.460.9 support
 (fixed) compile issue on windows with Platform SDK and "codecs.h"
 Added H.460.23/.24 support
