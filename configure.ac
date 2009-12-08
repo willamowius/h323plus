@@ -127,7 +127,7 @@ else
 fi
 
 AC_ARG_ENABLE(versioncheck,
-		[  --disable-versioncheck    disable PTLib version check],
+		[  --disable-versioncheck  disable PTLib version check],
 		PTLIB_VERSION_CHECK=$enableval)
 
 AC_MSG_CHECKING(Checking PTLib version ${PTVERSION})
@@ -467,7 +467,7 @@ dnl MSWIN_DISPLAY h4609,H.460.9
 dnl MSWIN_DEFINE  h4609,H323_H4609
 
 AC_ARG_ENABLE(h4609,
-       [  --disable-h4609          disable H.460.9])
+       [  --disable-h4609         disable H.460.9])
 if test "${enable_h4609}x" = "x" ; then
   enable_h4609=$default_h4609
 fi
@@ -487,7 +487,7 @@ dnl MSWIN_DISPLAY h46018,H.460.18/.19
 dnl MSWIN_DEFINE  h46018,H323_H46018
 
 AC_ARG_ENABLE(h46018,
-       [  --disable-h46018          disable H.460.18/.19])
+       [  --disable-h46018        disable H.460.18/.19])
 if test "${enable_h46018}x" = "x" ; then
   enable_h46018=$default_h46018
 fi
@@ -507,7 +507,7 @@ dnl MSWIN_DISPLAY h46023,H.460.23/.24
 dnl MSWIN_DEFINE  h46023,H323_H46023
 
 AC_ARG_ENABLE(h46023,
-       [  --disable-h46023          disable H.460.23/.24])
+       [  --disable-h46023        disable H.460.23/.24])
 if test "${enable_h46023}x" = "x" ; then
   enable_h46023=$default_h46023
 fi
@@ -527,7 +527,7 @@ dnl MSWIN_DISPLAY h460p,H.460 Presence
 dnl MSWIN_DEFINE  h460p,H323_H460P
 
 AC_ARG_ENABLE(h460p,
-       [  --disable-h460p          disable H.460 Presence])
+       [  --disable-h460p         disable H.460 Presence])
 if test "${enable_h460p}x" = "x" ; then
   enable_h460p=$default_h460p
 fi
@@ -608,7 +608,7 @@ dnl MSWIN_DISPLAY gnugk,GNUGKnat
 dnl MSWIN_DEFINE  gnugk,H323_GNUGK
 
 AC_ARG_ENABLE(gnugk,
-       [  --disable-gnugk          disable GnuGk])
+       [  --disable-gnugk         disable GnuGk])
 if test "${enable_gnugk}x" = "x" ; then
   enable_gnugk=$default_gnugk
 fi
