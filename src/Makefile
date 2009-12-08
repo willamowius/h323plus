@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.17  2009/08/21 07:01:06  shorne
+# Added H.460.9 Support
+#
 # Revision 1.16  2009/07/25 10:35:51  shorne
 # First cut of H.460.23/.24 support
 #
@@ -254,7 +257,11 @@ HEADER_FILES    += $(OH323_INCDIR)/h460/h460.h \
                    $(OH323_INCDIR)/h460/h460_std18.h \
                    $(OH323_INCDIR)/h460/h46018_h225.h \
                    $(OH323_INCDIR)/h460/h46019.h \
-                   $(OH323_INCDIR)/h460/h460_std23.h
+                   $(OH323_INCDIR)/h460/h460_std23.h \
+                   $(OH323_INCDIR)/h460/h46024b.h \
+                   $(OH323_INCDIR)/h460/h460_oid3.h \
+                   $(OH323_INCDIR)/h460/h460p.h \
+                   $(OH323_INCDIR)/h460/h460pres.h
 
 COMMON_SOURCES  += $(OH323_SRCDIR)/h460/h4601.cxx \
                    $(OH323_SRCDIR)/h460/h4609.cxx \
@@ -263,7 +270,11 @@ COMMON_SOURCES  += $(OH323_SRCDIR)/h460/h4601.cxx \
                    $(OH323_SRCDIR)/h460/h460_std18.cxx \
                    $(OH323_SRCDIR)/h460/h46018_h225.cxx \
                    $(OH323_SRCDIR)/h460/h46019.cxx \
-                   $(OH323_SRCDIR)/h460/h460_std23.cxx
+                   $(OH323_SRCDIR)/h460/h460_std23.cxx \
+                   $(OH323_INCDIR)/h460/h46024b.cxx \
+                   $(OH323_INCDIR)/h460/h460_oid3.cxx \
+                   $(OH323_INCDIR)/h460/h460p.cxx \
+                   $(OH323_INCDIR)/h460/h460pres.cxx
 endif 
 
 ########### H.501
