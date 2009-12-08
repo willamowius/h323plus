@@ -37,6 +37,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2009/11/17 11:08:07  shorne
+ * Updates for H.460.18/.19
+ *
  * Revision 1.6  2009/08/28 14:36:06  shorne
  * Fixes to enable compilation with PTLIB 2.6.4
  *
@@ -484,6 +487,10 @@ class H46019UDPSocket : public PUDPSocket
 	/** Start sending media/control to alternate address
 	  */
 	void H46024Adirect(bool starter);
+
+	/** Start Probing to alternate address
+	  */
+	void H46024Bdirect(const H323TransportAddress & address);
 #endif
 	//@}
 
@@ -491,7 +498,7 @@ class H46019UDPSocket : public PUDPSocket
 
  // H.460.19 Keepalives
     void InitialiseKeepAlive();	///< Start the keepalive
-	void SendRTPPing();
+	void SendRTPPing(const PIPSocket::Address & ip, const WORD & port);
 	void SendRTCPPing();
 	PBoolean SendRTCPFrame(RTP_ControlFrame & report, const PIPSocket::Address & ip, WORD port);
 	PMutex PingMutex;
@@ -538,6 +545,9 @@ private:
 	PTimer m_Probe;											///< Probe Timer
 	PINDEX m_probes;										///< Probe count
 	DWORD SSRC;												///< Random number
+
+	// H46024 Annex B support
+	PBoolean	m_h46024b;
 #endif
 
 	bool rtpSocket;
