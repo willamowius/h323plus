@@ -226,8 +226,40 @@ class H460P_PresenceIdentifier : public PASN_Sequence
 
 
 //
+// PresenceDisplay
+//
+
+class H460P_PresenceDisplay : public PASN_Sequence
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_PresenceDisplay, PASN_Sequence);
+#endif
+  public:
+    H460P_PresenceDisplay(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    enum OptionalFields {
+      e_language
+    };
+
+    PASN_IA5String m_language;
+    PASN_BMPString m_display;
+
+    PINDEX GetDataLength() const;
+    PBoolean Decode(PASN_Stream & strm);
+    void Encode(PASN_Stream & strm) const;
+#ifndef PASN_NOPRINTON
+    void PrintOn(ostream & strm) const;
+#endif
+    Comparison Compare(const PObject & obj) const;
+    PObject * Clone() const;
+};
+
+
+//
 // PresenceState
 //
+
+class H460P_ArrayOf_PresenceDisplay;
 
 class H460P_PresenceState : public PASN_Choice
 {
@@ -245,10 +277,123 @@ class H460P_PresenceState : public PASN_Choice
       e_onCall,
       e_voiceMail,
       e_notAvailable,
+      e_away,
       e_generic
     };
 
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+    operator H460P_ArrayOf_PresenceDisplay &() const;
+#else
+    operator H460P_ArrayOf_PresenceDisplay &();
+    operator const H460P_ArrayOf_PresenceDisplay &() const;
+#endif
+
     PBoolean CreateObject();
+    PObject * Clone() const;
+};
+
+
+//
+// PresenceFeatureGeneric
+//
+
+class H460P_PresenceFeatureGeneric : public PASN_Sequence
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_PresenceFeatureGeneric, PASN_Sequence);
+#endif
+  public:
+    H460P_PresenceFeatureGeneric(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    enum OptionalFields {
+      e_display
+    };
+
+    H225_GenericIdentifier m_identifier;
+    PASN_IA5String m_display;
+
+    PINDEX GetDataLength() const;
+    PBoolean Decode(PASN_Stream & strm);
+    void Encode(PASN_Stream & strm) const;
+#ifndef PASN_NOPRINTON
+    void PrintOn(ostream & strm) const;
+#endif
+    Comparison Compare(const PObject & obj) const;
+    PObject * Clone() const;
+};
+
+
+//
+// PresenceFeature
+//
+
+class H460P_PresenceFeatureGeneric;
+
+class H460P_PresenceFeature : public PASN_Choice
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_PresenceFeature, PASN_Choice);
+#endif
+  public:
+    H460P_PresenceFeature(unsigned tag = 0, TagClass tagClass = UniversalTagClass);
+
+    enum Choices {
+      e_audio,
+      e_video,
+      e_data,
+      e_extVideo,
+      e_generic
+    };
+
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+    operator H460P_PresenceFeatureGeneric &() const;
+#else
+    operator H460P_PresenceFeatureGeneric &();
+    operator const H460P_PresenceFeatureGeneric &() const;
+#endif
+
+    PBoolean CreateObject();
+    PObject * Clone() const;
+};
+
+
+//
+// PresenceGeoLocation
+//
+
+class H460P_PresenceGeoLocation : public PASN_Sequence
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_PresenceGeoLocation, PASN_Sequence);
+#endif
+  public:
+    H460P_PresenceGeoLocation(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    enum OptionalFields {
+      e_locale,
+      e_region,
+      e_country,
+      e_countryCode,
+      e_latitude,
+      e_longitude,
+      e_elevation
+    };
+
+    PASN_IA5String m_locale;
+    PASN_IA5String m_region;
+    PASN_IA5String m_country;
+    PASN_IA5String m_countryCode;
+    PASN_IA5String m_latitude;
+    PASN_IA5String m_longitude;
+    PASN_IA5String m_elevation;
+
+    PINDEX GetDataLength() const;
+    PBoolean Decode(PASN_Stream & strm);
+    void Encode(PASN_Stream & strm) const;
+#ifndef PASN_NOPRINTON
+    void PrintOn(ostream & strm) const;
+#endif
+    Comparison Compare(const PObject & obj) const;
     PObject * Clone() const;
 };
 
@@ -269,6 +414,26 @@ class H460P_ArrayOf_PresenceMessage : public PASN_Array
 
     PASN_Object * CreateObject() const;
     H460P_PresenceMessage & operator[](PINDEX i) const;
+    PObject * Clone() const;
+};
+
+
+//
+// ArrayOf_AliasAddress
+//
+
+class H225_AliasAddress;
+
+class H460P_ArrayOf_AliasAddress : public PASN_Array
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_ArrayOf_AliasAddress, PASN_Array);
+#endif
+  public:
+    H460P_ArrayOf_AliasAddress(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    PASN_Object * CreateObject() const;
+    H225_AliasAddress & operator[](PINDEX i) const;
     PObject * Clone() const;
 };
 
@@ -394,26 +559,6 @@ class H460P_ArrayOf_PresenceIdentifier : public PASN_Array
 
 
 //
-// ArrayOf_AliasAddress
-//
-
-class H225_AliasAddress;
-
-class H460P_ArrayOf_AliasAddress : public PASN_Array
-{
-#ifndef PASN_LEANANDMEAN
-    PCLASSINFO(H460P_ArrayOf_AliasAddress, PASN_Array);
-#endif
-  public:
-    H460P_ArrayOf_AliasAddress(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
-
-    PASN_Object * CreateObject() const;
-    H225_AliasAddress & operator[](PINDEX i) const;
-    PObject * Clone() const;
-};
-
-
-//
 // ArrayOf_GenericData
 //
 
@@ -429,6 +574,46 @@ class H460P_ArrayOf_GenericData : public PASN_Array
 
     PASN_Object * CreateObject() const;
     H225_GenericData & operator[](PINDEX i) const;
+    PObject * Clone() const;
+};
+
+
+//
+// ArrayOf_PresenceDisplay
+//
+
+class H460P_PresenceDisplay;
+
+class H460P_ArrayOf_PresenceDisplay : public PASN_Array
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_ArrayOf_PresenceDisplay, PASN_Array);
+#endif
+  public:
+    H460P_ArrayOf_PresenceDisplay(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    PASN_Object * CreateObject() const;
+    H460P_PresenceDisplay & operator[](PINDEX i) const;
+    PObject * Clone() const;
+};
+
+
+//
+// ArrayOf_PresenceFeature
+//
+
+class H460P_PresenceFeature;
+
+class H460P_ArrayOf_PresenceFeature : public PASN_Array
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_ArrayOf_PresenceFeature, PASN_Array);
+#endif
+  public:
+    H460P_ArrayOf_PresenceFeature(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    PASN_Object * CreateObject() const;
+    H460P_PresenceFeature & operator[](PINDEX i) const;
     PObject * Clone() const;
 };
 
@@ -474,7 +659,7 @@ class H460P_PresenceStatus : public PASN_Sequence
       e_instruction
     };
 
-    H225_AliasAddress m_alias;
+    H460P_ArrayOf_AliasAddress m_alias;
     H460P_ArrayOf_PresenceNotification m_notification;
     H460P_ArrayOf_PresenceInstruction m_instruction;
 
@@ -758,14 +943,16 @@ class H460P_Presentity : public PASN_Sequence
     H460P_Presentity(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
 
     enum OptionalFields {
-      e_display,
+      e_supportedFeatures,
       e_geolocation,
+      e_display,
       e_genericData
     };
 
     H460P_PresenceState m_state;
-    PASN_BMPString m_display;
-    PASN_OctetString m_geolocation;
+    H460P_ArrayOf_PresenceFeature m_supportedFeatures;
+    H460P_PresenceGeoLocation m_geolocation;
+    H460P_ArrayOf_PresenceDisplay m_display;
     H460P_ArrayOf_GenericData m_genericData;
 
     PINDEX GetDataLength() const;

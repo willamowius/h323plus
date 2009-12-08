@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2009/11/17 11:01:28  shorne
+ * Presence Support Update
+ *
  * Revision 1.2  2008/02/21 00:04:33  shorne
  * fix variable naming issue on linux compile
  *
@@ -80,6 +83,9 @@ public:
     void SetGenericState(const PString & state);
 	void GetPresenceState(States & state, PString & display) const;
 
+	void AddSupportedFeature(int id);
+	void AddEndpointLocale(const H460P_PresenceGeoLocation & loc);
+
 	void AddSubscriber(const OpalGloballyUniqueID & guid);
 	OpalGloballyUniqueID GetSubscriber(PINDEX i);
 	void RemoveSubscribers();
@@ -98,8 +104,14 @@ class H323PresenceNotifications : public H460P_PresenceNotify
 	void SetAlias(const PString & alias);
 	void GetAlias(PString & alias);
 
+	void SetAliasList(const PStringList & alias);
+	void GetAliasList(PStringList & alias) const;
+
 	void SetSize(PINDEX newSize);
 	PINDEX GetSize() const;
+
+ private:
+	PStringList m_aliasList;
 };
 
 class H323PresenceSubscription : public H460P_PresenceSubscription
@@ -201,16 +213,24 @@ struct H323PresenceEndpoint
 
 #define H323PresenceStore		map<H225_AliasAddress,H323PresenceEndpoint>
 
-struct H323PresenceInd	
-{
-	list<H460P_PresencePDU>		m_Indication;
+
+template<class Msg>
+struct Order {
+  bool operator()(Msg s1, Msg s2) const
+  {
+    return s1.Compare(s2) < 0;
+  }
 };
 
-// Gatekeeper functions
-#define H323PresenceAlias		map<H225_AliasAddress,H225_EndpointIdentifier>
-#define H323PresenceLocal		map<H225_EndpointIdentifier, H323PresenceInd>
+// Indicia
+#define H323PresenceInd			map<H225_AliasAddress,list<H460P_PresencePDU>,Order<H225_AliasAddress>>
 
-#define H323PresenceExternal	map<H225_AliasAddress,H225_TransportAddress>
+
+// Gatekeeper functions
+#define H323PresenceAlias		map<H225_AliasAddress,H225_EndpointIdentifier,Order<H225_AliasAddress>>
+#define H323PresenceLocal		map<H225_EndpointIdentifier, H323PresenceInd,Order<H225_EndpointIdentifier>>
+
+#define H323PresenceExternal	map<H225_AliasAddress,H225_TransportAddress,Order<H225_AliasAddress>>
 #define H323PresenceRemote		map<H225_TransportAddress, H323PresenceInd>
 
 // Derive you implementation from H323PresenceHandler.
@@ -241,13 +261,37 @@ public:
 		e_unblock
 	};
 
+	class localeInfo {
+		public:
+			localeInfo();
+			bool BuildLocalePDU(H460P_PresenceGeoLocation & pdu);
+
+			PString		m_locale;
+			PString		m_region;
+			PString		m_country;
+			PString		m_countryCode;
+			PString		m_latitude;
+			PString		m_longitude;
+			PString		m_elevation;
+	};
+
 	PBoolean BuildPresenceElement(unsigned msgtag,					///< RAS Message ID
 							PASN_OctetString & pdu					///< Encoded PresenceElement
+							);
+
+	PBoolean BuildPresenceElement(unsigned msgtag,					///< Presence Message ID
+							const H225_EndpointIdentifier & ep,		///< Endpoint Identifier
+							PASN_OctetString & pdu					///< Presence Message elements
 							);
 
 	PBoolean BuildPresenceMessage(unsigned id,						///< Presence Message ID
 							H323PresenceStore & store,				///< Presence Store Information
 							H460P_ArrayOf_PresenceMessage & element	///< Presence Message elements
+							);
+
+	PBoolean BuildPresenceMessage(unsigned id,						///< Presence Message ID 
+							const H225_EndpointIdentifier & ep, 	///< Endpoint Identifier
+							H460P_ArrayOf_PresenceMessage & msgs	///< Presence Message elements
 							);
 
 	virtual H323PresenceStore & GetPresenceStoreLocked(unsigned msgtag =0);
@@ -264,16 +308,35 @@ public:
 								const H225_AliasAddress & /*addr*/
 								) {}
 
+	virtual void OnSubscription(MsgType /*tag*/,
+								const H460P_PresenceSubscription & /*subscription*/
+								) {}
+
 	virtual void OnInstructions(MsgType /*tag*/,
 								const H460P_ArrayOf_PresenceInstruction & /*instruction*/,
 								const H225_AliasAddress & /*addr*/
 								) {}
 
-	virtual void OnSubscription(MsgType /*tag*/,
-								const H460P_PresenceSubscription & /*subscription*/) {}
+	virtual void OnInstructions(MsgType /*tag*/,
+								const H460P_ArrayOf_PresenceInstruction & /*instruction*/
+								) {}
 
-	virtual void OnIdentifiers(MsgType /*tag*/,
-								const H460P_ArrayOf_PresenceIdentifier & /*identifier*/) {}
+	virtual void OnIdentifiers(MsgType /*tag*/, 
+								const H460P_ArrayOf_PresenceIdentifier & /*identifier*/
+								) {}
+
+  // Build Endpoint Callbacks
+	virtual PBoolean BuildSubscription(const H225_EndpointIdentifier & /*ep*/,
+								H323PresenceStore & /*subscription*/
+								) { return false; }
+
+	virtual PBoolean BuildNotification(const H225_EndpointIdentifier & /*ep*/,
+								H323PresenceStore & /*notify*/
+								) { return false; }
+
+	virtual PBoolean BuildInstructions(const H225_EndpointIdentifier & /*ep*/,
+								H323PresenceStore & /*instruction*/
+								) { return false; }
 
 
 protected:

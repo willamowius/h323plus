@@ -7,6 +7,7 @@ IMPORTS
 		TransportAddress,
 		TimeToLive,
 		GenericData,
+		GenericIdentifier,
 		CryptoH323Token
 	FROM MULTIMEDIA-SYSTEM-CONTROL
 		ClearToken
@@ -22,6 +23,11 @@ PresenceElement ::= SEQUENCE
 	...
 }
 
+
+--
+-- Presence Message
+--
+
 PresenceMessage ::= CHOICE
 {
 	presenceStatus		PresenceStatus,
@@ -36,14 +42,11 @@ PresenceMessage ::= CHOICE
 	...
 }
 
---
--- Presence Message
---
 
 PresenceStatus ::= SEQUENCE  
 {
-	alias			AliasAddress,
-	notification		SEQUENCE OF PresenceNotification,
+	alias			SEQUENCE OF AliasAddress,
+	notification	SEQUENCE OF PresenceNotification,
 	instruction		SEQUENCE OF PresenceInstruction		OPTIONAL,
 	...
 }
@@ -117,6 +120,7 @@ PresencePDU ::= CHOICE
 	...
 }
 
+
 --
 -- Presence Instruction
 --
@@ -129,6 +133,7 @@ PresenceInstruction ::= CHOICE
 	unblock			AliasAddress,
 	...
 }
+
 
 --
 -- Presence Subscription
@@ -146,11 +151,17 @@ PresenceSubscription ::= SEQUENCE
 	...
 }
 
+
+--
+-- Presence Identifer
+--
+
 PresenceIdentifier ::= SEQUENCE
 {
 	guid			OCTET STRING (SIZE(16)),
 	...
 }
+
 
 --
 -- Presence Notification
@@ -164,6 +175,18 @@ PresenceNotification ::= SEQUENCE
 	...	
 }
 
+
+--
+-- Presentity
+--
+
+PresenceDisplay ::= SEQUENCE
+{
+        language                IA5String 			OPTIONAL,	-- RFC4646 language tag
+        display                 BMPString(SIZE(1..128))
+}
+
+
 PresenceState ::= CHOICE
 {
 	hidden           NULL,
@@ -173,15 +196,50 @@ PresenceState ::= CHOICE
 	onCall           NULL,
 	voiceMail        NULL,
 	notAvailable     NULL,
-	generic          BMPString (SIZE (1..256)),
+	away		 NULL,
+	...,
+	generic          SEQUENCE OF PresenceDisplay
+
+}
+
+PresenceFeatureGeneric ::= SEQUENCE
+{
+	identifier	GenericIdentifier,
+	display		IA5String		OPTIONAL,
+	...	
+}
+
+PresenceFeature ::= CHOICE
+{
+	audio		NULL,
+	video		NULL,
+	data		NULL,
+	extVideo	NULL,
+	...,
+	generic		PresenceFeatureGeneric
+
+}
+
+
+PresenceGeoLocation ::= SEQUENCE
+{
+	locale		IA5String	OPTIONAL,
+	region		IA5String	OPTIONAL,
+	country		IA5String	OPTIONAL,
+	countryCode	IA5String	OPTIONAL,
+	latitude	IA5String	OPTIONAL,
+	longitude	IA5String	OPTIONAL,
+	elevation	IA5String	OPTIONAL,
 	...
 }
+
 
 Presentity ::= SEQUENCE
 {
 	state			PresenceState,                     		-- Presence State 
-	display			BMPString (SIZE (1..256))	OPTIONAL, 	-- Basic ISO/IEC 10646-1 (Unicode)
-	geolocation		OCTET STRING			OPTIONAL, 	-- Geographic Location
+	supportedFeatures	SEQUENCE OF PresenceFeature	OPTIONAL,	-- Features Supported by Endpoint
+	geolocation		PresenceGeoLocation		OPTIONAL, 	-- Geographic Location
+	display			SEQUENCE OF PresenceDisplay	OPTIONAL, 	-- Basic ISO/IEC 10646-1 (Unicode)
 	genericData		SEQUENCE OF GenericData   	OPTIONAL,	-- Generic Presence Information                
 	...
 }

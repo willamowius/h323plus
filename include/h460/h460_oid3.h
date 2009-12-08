@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2009/11/17 11:12:39  shorne
+ * First Cut of Presence Feature
+ *
  *
  *
  *
@@ -64,7 +67,7 @@ class H460PresenceHandler : public H323PresenceHandler
 
    void AttachFeature(H460_FeatureOID3 * _feat);
 
-   void SetPresenceState(const PString & epalias, 
+   void SetPresenceState(const PStringList & epalias, 
 						unsigned localstate, 
 						const PString & localdisplay);
 
@@ -99,10 +102,16 @@ class H460PresenceHandler : public H323PresenceHandler
 	void PresenceRcvAuthorization(const H225_AliasAddress & addr, const H323PresenceSubscription & subscript);
 	void PresenceRcvInstruction(const H225_AliasAddress & addr, const H323PresenceInstruction & instruct);
 
+	void AddEndpointFeature(int feat);
+
+	localeInfo & GetLocationInfo() { return EndpointLocale; }
+
  private:
  	// Lists
 	PStringList PresenceSubscriptions;
 	PStringList PresenceBlockList;
+	list<int>   EndpointFeatures;
+	localeInfo  EndpointLocale;
 
 	PBoolean presenceRegistration;
 

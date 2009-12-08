@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2009/11/17 11:01:28  shorne
+ * Presence Support Update
+ *
  * Revision 1.3  2008/02/21 00:04:33  shorne
  * fix variable naming issue on linux compile
  *
@@ -69,7 +72,7 @@ static struct {
 			{ H225_RasMessage::e_gatekeeperConfirm,0,0,0,0,0,0,0,0,0},
 			{ H225_RasMessage::e_gatekeeperReject,0,0,0,0,0,0,0,0,0},
 	{ H225_RasMessage::e_registrationRequest		,1	,0	,0	,0	,0	,0	,0	,0	,0	 },
-	{ H225_RasMessage::e_registrationConfirm		,1	,0	,0	,0	,0	,0	,0	,0	,0	 },
+	{ H225_RasMessage::e_registrationConfirm		,0	,1	,0	,0	,0	,0	,0	,0	,0	 },
 			{ H225_RasMessage::e_registrationReject,0,0,0,0,0,0,0,0,0},
 			{ H225_RasMessage::e_unregistrationRequest,0,0,0,0,0,0,0,0,0},
 			{ H225_RasMessage::e_unregistrationConfirm,0,0,0,0,0,0,0,0,0},
@@ -83,7 +86,7 @@ static struct {
 			{ H225_RasMessage::e_disengageRequest,0,0,0,0,0,0,0,0,0},
 			{ H225_RasMessage::e_disengageConfirm,0,0,0,0,0,0,0,0,0},
 			{ H225_RasMessage::e_disengageReject,0,0,0,0,0,0,0,0,0},
-	{ H225_RasMessage::e_locationRequest			,0	,0	,1	,0	,1	,1	,1	,1	,1	 },
+	{ H225_RasMessage::e_locationRequest			,0	,0	,0	,0	,1	,1	,1	,1	,1	 },
 	{ H225_RasMessage::e_locationConfirm			,0	,0	,0	,0	,0	,2	,0	,2	,0	 },
 			{ H225_RasMessage::e_locationReject,0,0,0,0,0,0,0,0,0},
 			{ H225_RasMessage::e_infoRequest,0,0,0,0,0,0,0,0,0},
@@ -95,7 +98,7 @@ static struct {
 			{ H225_RasMessage::e_resourcesAvailableConfirm,0,0,0,0,0,0,0,0,0},
 			{ H225_RasMessage::e_infoRequestAck,0,0,0,0,0,0,0,0,0},
 			{ H225_RasMessage::e_infoRequestNak,0,0,0,0,0,0,0,0,0},
-	{ H225_RasMessage::e_serviceControlIndication	,1	,1	,0	,1	,0	,0	,0	,0	,0	 },
+	{ H225_RasMessage::e_serviceControlIndication	,1	,1	,1	,1	,0	,0	,0	,0	,0	 },
 			{ H225_RasMessage::e_serviceControlResponse,0,0,0,0,0,0,0,0,0}
 };
 
@@ -163,7 +166,7 @@ class H323PresenceBase
 	H323PresenceBase();
 	virtual ~H323PresenceBase() {};
 
-	bool Process();
+	virtual bool Process();
 
  protected:
 
@@ -203,23 +206,24 @@ bool H323PresenceBase::Process()
 	 return false;
   }
 
+  bool success = false;
+
   if (PresenceMessage_attributes[tag].notification > 0)
-	  HandleNotification((PresenceMessage_attributes[tag].notification >1));
+	  success |= HandleNotification((PresenceMessage_attributes[tag].notification >1));
 
   if (PresenceMessage_attributes[tag].subscription > 0)
-	  HandleSubscription((PresenceMessage_attributes[tag].subscription >1));
+	  success |= HandleSubscription((PresenceMessage_attributes[tag].subscription >1));
 
   if (PresenceMessage_attributes[tag].instruction > 0)
-	  HandleInstruction((PresenceMessage_attributes[tag].instruction >1));
+	  success |= HandleInstruction((PresenceMessage_attributes[tag].instruction >1));
 
   if (PresenceMessage_attributes[tag].identifier > 0)
-	  HandleIdentifier((PresenceMessage_attributes[tag].identifier >1));
+	  success |= HandleIdentifier((PresenceMessage_attributes[tag].identifier >1));
 
   if (PresenceMessage_attributes[tag].cryptoTokens > 0)
-	  HandleCryptoTokens((PresenceMessage_attributes[tag].cryptoTokens >1));
+	  success |= HandleCryptoTokens((PresenceMessage_attributes[tag].cryptoTokens >1));
 
-  return true;
-
+  return success;
 }
 
 bool H323PresenceBase::ReadNotification(const H460P_ArrayOf_PresenceNotification & notify, const H225_AliasAddress & addr)
@@ -270,6 +274,8 @@ class H323PresencePDU : public H323PresenceBase {
 
 	operator Msg & () { return request; }
 	operator const Msg & () const { return request; }
+
+	virtual bool Process() { return H323PresenceBase::Process(); }
 
   protected:
 	Msg request;
@@ -374,6 +380,8 @@ bool H323PresenceHandler::ReceivedPDU(const PASN_OctetString & pdu)
 		return false;
 	}
 
+	PTRACE(5,"PRES\tReceived PDU\n" << element); 
+
 	for (PINDEX i=0; i < element.m_message.GetSize(); i++) {
 		H323PresenceMessage m;
 		m.m_recvPDU = element.m_message[i];
@@ -383,41 +391,37 @@ bool H323PresenceHandler::ReceivedPDU(const PASN_OctetString & pdu)
 		switch (m.GetTag())
 		{
 			case H460P_PresenceMessage::e_presenceStatus:
-				handler = H323PresenceStatus(m);
-				break;
+				return H323PresenceStatus(m).Process();
+
 			case H460P_PresenceMessage::e_presenceInstruct:
-				handler = H323PresenceInstruct(m);
-				break;
+				return H323PresenceInstruct(m).Process();
+
 			case H460P_PresenceMessage::e_presenceAuthorize:
-				handler = H323PresenceAuthorize(m);
-				break;
+				return H323PresenceAuthorize(m).Process();
+
 			case H460P_PresenceMessage::e_presenceNotify:
-				handler = H323PresenceNotify(m);
-				break;
+				return H323PresenceNotify(m).Process();
+
 			case H460P_PresenceMessage::e_presenceRequest:
-				handler = H323PresenceRequest(m);
-				break;
+				return H323PresenceRequest(m).Process();
+
 			case H460P_PresenceMessage::e_presenceResponse:
-				handler = H323PresenceResponse(m);
-				break;
+				return H323PresenceResponse(m).Process();
+
 			case H460P_PresenceMessage::e_presenceAlive:
-				handler = H323PresenceAlive(m);
-				break;
+				return H323PresenceAlive(m).Process();
+
 			case H460P_PresenceMessage::e_presenceRemove:
-				handler = H323PresenceRemove(m);
-				break;
+				return H323PresenceRemove(m).Process();
+
 			case H460P_PresenceMessage::e_presenceAlert:
-				handler = H323PresenceAlert(m);
-				break;
+				return H323PresenceAlert(m).Process();
+
 			default:
 				break;
 		}
-
-		if (!handler.Process()) {
-			   PTRACE(2,"PRES\tUnable to handle Message." << m.GetTagName()); 
-		}	
 	}
-	return true;
+	return false;
 }
 
 
@@ -529,6 +533,93 @@ void H323PresenceHandler::PresenceStoreUnLock(unsigned /*msgtag*/)
 	storeMutex.Signal();
 }
 
+PBoolean H323PresenceHandler::BuildPresenceMessage(unsigned id, const H225_EndpointIdentifier & ep, H460P_ArrayOf_PresenceMessage & msgs)
+{
+
+	bool dataToSend = false;
+	int sz = 0;
+
+	H323PresenceStore Pep;
+	H323PresenceStore::iterator i;
+
+	switch (id) {
+		case H460P_PresenceMessage::e_presenceStatus:
+			if (BuildNotification(ep,Pep) || BuildInstructions(ep,Pep))  {   	
+				for(i= Pep.begin(); i != Pep.end(); ++i) {
+					sz = msgs.GetSize();
+					msgs.SetSize(sz+1);
+					H460P_PresenceStatus & xm = BuildStatus(msgs[sz], i->second.m_Notify, i->second.m_Instruction);
+					if (xm.m_alias.GetSize() == 0) {
+						xm.m_alias.SetSize(1);
+						xm.m_alias[0] = i->first;
+					}
+				}
+				dataToSend = true;
+			}
+			break;
+		case H460P_PresenceMessage::e_presenceInstruct:
+			if (BuildInstructions(ep,Pep)) {
+				for(i= Pep.begin(); i != Pep.end(); ++i) {
+					sz = msgs.GetSize();
+					msgs.SetSize(sz+1);
+					H460P_PresenceInstruct & xm = BuildInstruct(msgs[sz], i->second.m_Instruction);
+					xm.m_alias = i->first;
+				}
+				dataToSend = true;
+			}
+			break;
+		case H460P_PresenceMessage::e_presenceAuthorize:
+			if (BuildSubscription(ep,Pep)) {
+				for(i= Pep.begin(); i != Pep.end(); ++i) {
+					sz = msgs.GetSize();
+					msgs.SetSize(sz+1);
+					H460P_PresenceAuthorize & xm = BuildAuthorize(msgs[sz], i->second.m_Authorize);
+					xm.m_alias = i->first;
+				}
+				dataToSend = true;
+			}
+			break;
+		case H460P_PresenceMessage::e_presenceNotify:
+			if (BuildNotification(ep,Pep)) {
+				for(i= Pep.begin(); i != Pep.end(); ++i) {
+					sz = msgs.GetSize();
+					msgs.SetSize(sz+1);
+					H460P_PresenceNotify & xm = BuildNotify(msgs[sz], i->second.m_Notify);
+					xm.m_alias = i->first;
+				}
+				dataToSend = true;
+			}
+			break;
+		default:
+			break;
+	}
+	return dataToSend;
+}
+
+PBoolean H323PresenceHandler::BuildPresenceElement(unsigned msgtag,const H225_EndpointIdentifier & ep, PASN_OctetString & pdu)
+{
+	bool success = false;
+	H460P_PresenceElement element;
+	H460P_ArrayOf_PresenceMessage & msgs = element.m_message;
+	
+	if (RASMessage_attributes[msgtag].preStatus >0)
+		BuildPresenceMessage(H460P_PresenceMessage::e_presenceStatus,ep,msgs);
+	if (RASMessage_attributes[msgtag].preInstruct >0)
+		BuildPresenceMessage(H460P_PresenceMessage::e_presenceInstruct,ep,msgs);
+	if (RASMessage_attributes[msgtag].preAuthorize >0)
+		BuildPresenceMessage(H460P_PresenceMessage::e_presenceAuthorize,ep,msgs);
+	if (RASMessage_attributes[msgtag].preNotify >0)
+		BuildPresenceMessage(H460P_PresenceMessage::e_presenceNotify,ep,msgs);
+
+    success = (msgs.GetSize() > 0);
+	if (success) {
+		PTRACE(6,"PRES\tPDU to send to " << ep << "\n" << element);
+		pdu.EncodeSubType(element);
+	}
+
+	return success;
+}
+
 ///////////////////////////////////////////////////////////////////////
 
 template<class Msg>
@@ -551,7 +642,13 @@ H460P_PresenceStatus &  H323PresenceHandler::BuildStatus(H460P_PresenceMessage &
 	H323PresenceMsg<H460P_PresenceStatus> m;
 	H460P_PresenceStatus & pdu = m.Build(H460P_PresenceMessage::e_presenceStatus);
 	pdu.m_notification = notify.m_notification;
-	pdu.m_alias = notify.m_alias;
+	PStringList aliases;
+	notify.GetAliasList(aliases);
+	for (PINDEX i=0; i<aliases.GetSize(); ++i) {
+		int sz = pdu.m_alias.GetSize();
+		pdu.m_alias.SetSize(sz+1);
+		H323SetAliasAddress(aliases[i],pdu.m_alias[sz]);
+	}
 
 	if (inst.GetSize() > 0) {
 		pdu.IncludeOptionalField(H460P_PresenceStatus::e_instruction);
@@ -642,14 +739,66 @@ H460P_PresenceAlert &  H323PresenceHandler::BuildAlert(H460P_PresenceMessage & m
 	return msg;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+
+ H323PresenceHandler::localeInfo::localeInfo()
+:  m_locale(""), m_region(""),m_country(""), m_countryCode(""),
+   m_latitude(""), m_longitude(""), m_elevation("")
+{
+}
+	
+bool H323PresenceHandler::localeInfo::BuildLocalePDU(H460P_PresenceGeoLocation & pdu)
+{
+	bool contents = false;
+	if (!m_locale) {
+		pdu.IncludeOptionalField(H460P_PresenceGeoLocation::e_locale);
+		pdu.m_locale.SetValue(m_locale);
+		contents = true;
+	}
+	if (!m_region) {
+		pdu.IncludeOptionalField(H460P_PresenceGeoLocation::e_region);
+		pdu.m_region.SetValue(m_region);
+		contents = true;
+	}
+	if (!m_country) {
+		pdu.IncludeOptionalField(H460P_PresenceGeoLocation::e_country);
+		pdu.m_country.SetValue(m_country);
+		contents = true;
+	}
+	if (!m_countryCode) {
+		pdu.IncludeOptionalField(H460P_PresenceGeoLocation::e_countryCode);
+		pdu.m_countryCode.SetValue(m_countryCode);
+		contents = true;
+	}
+	if (!m_latitude) {
+		pdu.IncludeOptionalField(H460P_PresenceGeoLocation::e_latitude);
+		pdu.m_latitude.SetValue(m_latitude);
+		contents = true;
+	}
+	if (!m_longitude) {
+		pdu.IncludeOptionalField(H460P_PresenceGeoLocation::e_longitude);
+		pdu.m_longitude.SetValue(m_longitude);
+		contents = true;
+	}
+	if (!m_elevation) {
+		pdu.IncludeOptionalField(H460P_PresenceGeoLocation::e_elevation);
+		pdu.m_elevation.SetValue(m_elevation);
+		contents = true;
+	}
+	return contents;
+}
+
 ////////////////////////////////////////////////////////////////////////
 
 bool H323PresenceStatus::HandleNotification(bool opt)
 {
-	if (!opt)
-		return ReadNotification(request.m_notification,request.m_alias);
-
-    return false;
+	bool success = false;
+	if (!opt) {
+		for (PINDEX i=0; i<request.GetSize(); ++i) {
+		  success |= ReadNotification(request.m_notification,request.m_alias[i]);
+		}
+	}
+    return success;
 }
 
 bool H323PresenceNotify::HandleNotification(bool opt)
@@ -695,10 +844,13 @@ bool H323PresenceResponse::HandleSubscription(bool opt)
 
 bool H323PresenceStatus::HandleInstruction(bool opt) 
 { 
-	if (!opt || request.HasOptionalField(H460P_PresenceStatus::e_instruction))
-	    return ReadInstruction(request.m_instruction,request.m_alias);
-
-    return false; 
+	bool success = false;
+	if (!opt || request.HasOptionalField(H460P_PresenceStatus::e_instruction)) {
+		for (PINDEX i=0; i<request.GetSize(); ++i) {
+		  success |= ReadInstruction(request.m_instruction,request.m_alias[i]);
+		}
+	}
+    return success;
 }
 
 bool H323PresenceInstruct::HandleInstruction(bool opt) 
@@ -839,6 +991,20 @@ void H323PresenceNotifications::SetSize(PINDEX newSize)
 {
 	m_notification.SetSize(newSize);
 }
+
+void H323PresenceNotifications::SetAliasList(const PStringList & alias)
+{
+	for (PINDEX i=0; i<alias.GetSize(); ++i) {
+		m_aliasList.AppendString(alias[i]);
+	}
+}
+	
+void H323PresenceNotifications::GetAliasList(PStringList & alias) const
+{
+	for (PINDEX i=0; i< m_aliasList.GetSize(); ++i) {
+		alias.AppendString(m_aliasList[i]);
+	}
+}
 	
 PINDEX H323PresenceNotifications::GetSize() const
 {
@@ -852,9 +1018,35 @@ void H323PresenceNotification::SetPresenceState(H323PresenceNotification::States
 	e.m_state.SetTag((unsigned)state);
 
 	if (display.GetLength() > 0) {
+		H460P_PresenceDisplay disp;
+		disp.IncludeOptionalField(H460P_PresenceDisplay::e_language);
+		disp.m_language = "en-US";
+		disp.m_display = display;
 		e.IncludeOptionalField(H460P_Presentity::e_display);
-		e.m_display = display;
+		e.m_display.SetSize(1);
+		e.m_display[0] = disp;
 	}
+}
+
+void H323PresenceNotification::AddSupportedFeature(int id)
+{
+	H460P_Presentity & e = m_presentity;
+	e.IncludeOptionalField(H460P_Presentity::e_supportedFeatures);
+	H460P_ArrayOf_PresenceFeature & f = e.m_supportedFeatures;
+
+	H460P_PresenceFeature pf;
+	pf.SetTag(id);
+
+	int sz = f.GetSize();
+	f.SetSize(sz+1);
+	f[sz] = pf;
+}
+
+void H323PresenceNotification::AddEndpointLocale(const H460P_PresenceGeoLocation & loc)
+{
+	H460P_Presentity & e = m_presentity;
+	e.IncludeOptionalField(H460P_Presentity::e_geolocation);
+	e.m_geolocation = loc;
 }
 
 void H323PresenceNotification::GetPresenceState(H323PresenceNotification::States & state, 
@@ -862,10 +1054,11 @@ void H323PresenceNotification::GetPresenceState(H323PresenceNotification::States
 {
 	const H460P_Presentity & e = m_presentity;
 	state = (H323PresenceNotification::States)e.m_state.GetTag();
+	display = PString();
 
 	if (state != e_generic) {
-	   if (e.HasOptionalField(H460P_Presentity::e_display))
-		   display = e.m_display;
+	   if (e.HasOptionalField(H460P_Presentity::e_display) && e.m_display.GetSize() > 0)
+		   display = e.m_display[0].m_display;
 	} else {
 	   const PASN_BMPString & m = e.m_state;
        display = m;

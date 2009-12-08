@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.34  2009/11/19 03:56:39  shorne
+ * Change the gkIdentifer to be stored as a PASN_BMPString to avoid problems with PString stripping NULL char off end which causes problems registration issues with pre GnuGk 2.3.1 releases.
+ *
  * Revision 1.33  2009/11/17 10:50:15  shorne
  * Added Presence Support, Calling URI (not registered), Correct test of audio device name, Feature,NAT and TTL callback
  *
@@ -3978,12 +3981,36 @@ PBoolean H323EndPoint::H46018IsEnabled()
 #endif  // H323_H46018
 
 #ifdef H323_H460P
-void H323EndPoint::PresenceSetLocalState(const PString & alias, unsigned localstate, const PString & localdisplay)
+void H323EndPoint::PresenceSetLocalState(const PStringList & alias, unsigned localstate, const PString & localdisplay)
 {
 	if (presenceHandler == NULL)
 		presenceHandler = new H460PresenceHandler(*this);
 
 	presenceHandler->SetPresenceState(alias,localstate, localdisplay);
+}
+
+void H323EndPoint::PresenceAddFeature(presenceFeature feat)
+{
+	if (presenceHandler == NULL)
+		presenceHandler = new H460PresenceHandler(*this);
+
+	presenceHandler->AddEndpointFeature(feat);
+}
+
+void H323EndPoint::PresenceSetLocale(const presenceLocale & info)
+{
+	if (presenceHandler == NULL)
+		presenceHandler = new H460PresenceHandler(*this);
+
+	H460PresenceHandler::localeInfo & loc = presenceHandler->GetLocationInfo();
+
+	loc.m_region = info.m_region;
+	loc.m_country = info.m_country;
+	loc.m_locale = info.m_locale;
+	loc.m_countryCode = info.m_countryCode;
+	loc.m_latitude = info.m_latitude;
+	loc.m_longitude = info.m_longitude;
+	loc.m_elevation = info.m_elevation;
 }
 
 void H323EndPoint::PresenceSetInstruction(const PString & epalias, unsigned type, const PStringList & list)

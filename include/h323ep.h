@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.25  2009/11/19 03:56:39  shorne
+ * Change the gkIdentifer to be stored as a PASN_BMPString to avoid problems with PString stripping NULL char off end which causes problems registration issues with pre GnuGk 2.3.1 releases.
+ *
  * Revision 1.24  2009/11/17 10:50:14  shorne
  * Added Presence Support, Calling URI (not registered), Correct test of audio device name, Feature,NAT and TTL callback
  *
@@ -2269,7 +2272,7 @@ class H323EndPoint : public PObject
 	/** Set the local Presence State. 
 		Calling this will enable Presence in the endpoint
 	  */
-	void PresenceSetLocalState(const PString & alias, unsigned localstate, const PString & localdisplay);
+	void PresenceSetLocalState(const PStringList & alias, unsigned localstate, const PString & localdisplay);
 
 	enum presenceInstruction {
 		e_subscribe,
@@ -2277,6 +2280,27 @@ class H323EndPoint : public PObject
 		e_block,
 		e_unblock
 	};
+
+	enum presenceFeature {
+		e_preAudio,
+		e_preVideo,
+		e_preExtVideo,
+		e_preData
+	};
+
+	struct presenceLocale {
+		PString		m_locale;
+		PString		m_region;
+		PString		m_country;
+		PString		m_countryCode;
+		PString		m_latitude;
+		PString		m_longitude;
+		PString		m_elevation;
+	};
+
+	void PresenceAddFeature(presenceFeature feat);
+
+	void PresenceSetLocale(const presenceLocale & info);
 
 	/** Set Presence Instructions. 
 	  */

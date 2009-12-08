@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2009/11/17 11:12:39  shorne
+ * First Cut of Presence Feature
+ *
  *
  *
  *
@@ -112,6 +115,10 @@ void PostNotification(H323PresenceStore & gw, const H323PresenceNotifications & 
 	 if (inf == gw.end()) {
 		H323PresenceEndpoint epRecord;
 		 epRecord.m_Notify.m_alias = list.m_alias;
+		 PStringList aliases;
+		 list.GetAliasList(aliases);
+		 if (aliases.GetSize() > 0)
+			epRecord.m_Notify.SetAliasList(aliases);
 		 for (PINDEX i=0; i<list.m_notification.GetSize(); i++) {
 			 epRecord.m_Notify.Add(list[i]);
 		 }
@@ -124,14 +131,26 @@ void PostNotification(H323PresenceStore & gw, const H323PresenceNotifications & 
 	 }
 }
 
-void H460PresenceHandler::SetPresenceState(const PString & alias, unsigned localstate, const PString & localdisplay)
+void H460PresenceHandler::SetPresenceState(const PStringList & alias, unsigned localstate, const PString & localdisplay)
 {
 	H323PresenceNotification not;
 	not.SetPresenceState((H323PresenceNotification::States)localstate,localdisplay);
 
+	H460P_PresenceGeoLocation loc;
+	if (EndpointLocale.BuildLocalePDU(loc))
+		not.AddEndpointLocale(loc);
+
+
+	list<int>::iterator i = EndpointFeatures.begin();
+	while (i != EndpointFeatures.end()) {
+		not.AddSupportedFeature(*i);
+		i++;
+	}
+
 	H323PresenceNotifications notify;
 	notify.Add(not);
-	notify.SetAlias(alias);
+	notify.SetAlias(alias[0]);
+	notify.SetAliasList(alias);
 
 	H323PresenceStore & store = GetPresenceStoreLocked();
 	PostNotification(store,notify);
@@ -259,6 +278,10 @@ void H460PresenceHandler::PresenceRcvInstruction(const H225_AliasAddress & addr,
     ep.PresenceInstruction(H323GetAliasAddressString(addr),i, alias);
 }
 
+void H460PresenceHandler::AddEndpointFeature(int feat)
+{
+	EndpointFeatures.push_back(feat);
+}
 
 ///////////////////////////////////////////////////////////////////////
 
