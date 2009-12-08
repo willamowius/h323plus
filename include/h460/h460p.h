@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2009/12/08 04:05:14  shorne
+ * Major update of presence system
+ *
  * Revision 1.3  2009/11/17 11:01:28  shorne
  * Presence Support Update
  *
@@ -223,14 +226,14 @@ struct Order {
 };
 
 // Indicia
-#define H323PresenceInd			map<H225_AliasAddress,list<H460P_PresencePDU>,Order<H225_AliasAddress>>
+#define H323PresenceInd			map<H225_AliasAddress,list<H460P_PresencePDU>,Order<H225_AliasAddress> >
 
 
 // Gatekeeper functions
-#define H323PresenceAlias		map<H225_AliasAddress,H225_EndpointIdentifier,Order<H225_AliasAddress>>
-#define H323PresenceLocal		map<H225_EndpointIdentifier, H323PresenceInd,Order<H225_EndpointIdentifier>>
+#define H323PresenceAlias		map<H225_AliasAddress,H225_EndpointIdentifier,Order<H225_AliasAddress> >
+#define H323PresenceLocal		map<H225_EndpointIdentifier, H323PresenceInd,Order<H225_EndpointIdentifier> >
 
-#define H323PresenceExternal	map<H225_AliasAddress,H225_TransportAddress,Order<H225_AliasAddress>>
+#define H323PresenceExternal	map<H225_AliasAddress,H225_TransportAddress,Order<H225_AliasAddress> >
 #define H323PresenceRemote		map<H225_TransportAddress, H323PresenceInd>
 
 // Derive you implementation from H323PresenceHandler.

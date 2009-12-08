@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2009/12/08 03:55:28  shorne
+ * First cut support for H.460.24 Annex B
+ *
  * Revision 1.6  2009/11/17 11:10:28  shorne
  * Added UPnP Support and NAT Feature Callbacks
  *
@@ -263,7 +266,7 @@ PBoolean H460_FeatureStd23::OnSendRegistrationRequest(H225_FeatureDescriptor & p
 			return FALSE;
 
     // Build Message
-    H460_FeatureStd & feat = H460_FeatureStd(23); 
+    H460_FeatureStd feat = H460_FeatureStd(23); 
 
     if ((EP->GetGatekeeper() == NULL) ||
 		(!EP->GetGatekeeper()->IsRegistered())) {
@@ -509,7 +512,7 @@ PBoolean H460_FeatureStd24::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
 
     // Build Message
     PTRACE(6,"Std24\tSending ARQ ");
-    H460_FeatureStd & feat = H460_FeatureStd(24);
+    H460_FeatureStd feat = H460_FeatureStd(24);
 
 	if (natconfig != e_unknown) {
        feat.Add(NATInstOID,H460_FeatureContent((unsigned)natconfig,8));
@@ -547,7 +550,7 @@ PBoolean H460_FeatureStd24::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
 	if (natconfig == H460_FeatureStd24::e_unknown)
 		return FALSE;
 
-    H460_FeatureStd & feat = H460_FeatureStd(24);
+    H460_FeatureStd feat = H460_FeatureStd(24);
     
 	int remoteconfig;
 	switch (natconfig) {

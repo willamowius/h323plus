@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2009/12/08 04:05:14  shorne
+ * Major update of presence system
+ *
  * Revision 1.1  2009/11/17 11:12:39  shorne
  * First Cut of Presence Feature
  *
@@ -133,22 +136,22 @@ void PostNotification(H323PresenceStore & gw, const H323PresenceNotifications & 
 
 void H460PresenceHandler::SetPresenceState(const PStringList & alias, unsigned localstate, const PString & localdisplay)
 {
-	H323PresenceNotification not;
-	not.SetPresenceState((H323PresenceNotification::States)localstate,localdisplay);
+	H323PresenceNotification notification;
+	notification.SetPresenceState((H323PresenceNotification::States)localstate,localdisplay);
 
 	H460P_PresenceGeoLocation loc;
 	if (EndpointLocale.BuildLocalePDU(loc))
-		not.AddEndpointLocale(loc);
+		notification.AddEndpointLocale(loc);
 
 
 	list<int>::iterator i = EndpointFeatures.begin();
 	while (i != EndpointFeatures.end()) {
-		not.AddSupportedFeature(*i);
+		notification.AddSupportedFeature(*i);
 		i++;
 	}
 
 	H323PresenceNotifications notify;
-	notify.Add(not);
+	notify.Add(notification);
 	notify.SetAlias(alias[0]);
 	notify.SetAliasList(alias);
 

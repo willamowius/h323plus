@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.42  2009/12/08 03:55:28  shorne
+ * First cut support for H.460.24 Annex B
+ *
  * Revision 1.41  2009/11/29 23:31:13  shorne
  * BUG FIX : completely disable H.460 support if remote does not support it.
  *
@@ -5841,9 +5844,9 @@ void H323Connection::ReleaseSession(unsigned sessionID)
 #ifdef H323_H46024A
    const RTP_Session * sess = GetSession(sessionID);
    if (sess && sess->GetReferenceCount() == 1) {  // last session reference
-	  std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(sessionID);
-		if (sockets_iter != m_NATSockets.end()) 
-				m_NATSockets.erase(sockets_iter);
+	  std::map<unsigned,NAT_Sockets>::iterator sockets_iter = m_NATSockets.find(sessionID);
+      if (sockets_iter != m_NATSockets.end()) 
+         m_NATSockets.erase(sockets_iter);
    }
 #endif
   rtpSessions.ReleaseSession(sessionID);
