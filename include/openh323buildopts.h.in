@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.14  2009/12/08 03:55:28  shorne
+ * First cut support for H.460.24 Annex B
+ *
  * Revision 1.13  2009/11/17 10:53:02  shorne
  * Added Presence and UPnP switches
  *
@@ -241,6 +244,8 @@
 	#undef H323_H46023
 	#if defined(H323_H46018) && defined(H323_H46023) && defined(P_SSL)
 		#define H323_H46024A 1
+	#endif
+	#if defined(H323_H46018) && defined(H323_H46023)
 		#define H323_H46024B 1
 	#endif
 	#if defined(H323_H46023) && (WINVER > 0x500)
