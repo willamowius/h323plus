@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.43  2009/12/08 08:25:47  willamowius
+ * gcc fixes for presence
+ *
  * Revision 1.42  2009/12/08 03:55:28  shorne
  * First cut support for H.460.24 Annex B
  *
@@ -5770,6 +5773,9 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
 				rtcp->GetAlternateAddresses(m_altAddr2,m_cui);
 			  }
 #endif
+			} else {
+				PTRACE(4,"H46019\tERROR NAT Socket not found for " << sessionID << " ABORTING!" );
+				return false;
 			}
 
 		  H245_GenericInformation info;
@@ -5832,7 +5838,8 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
 			  generic[sz] = alt;
 		  }
 #endif
-		  return true;
+		  if (generic.GetSize() > 0)
+				return true;
 	}
 #endif
 
