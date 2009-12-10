@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.44  2009/12/08 13:05:32  shorne
+ * Fix to ensure H.460.19 generic Parameter does not get sent if the NAT Method fails to create socket.
+ *
  * Revision 1.43  2009/12/08 08:25:47  willamowius
  * gcc fixes for presence
  *
@@ -5611,6 +5614,12 @@ PBoolean H323Connection::OnReceivedGenericMessage(h245MessageType type, const PS
 	if (id == H46024AOID && type == h245indication) {
 		PTRACE(4,"H46024A\tReceived Generic Message.");
 		return ReceivedH46024AMessage(true);
+	}
+#endif
+#ifdef H323_H46024B
+	if (id == H46024BOID && type == h245response) {
+		PTRACE(4,"H46024B\tReceived Generic Response.");
+		return true;
 	}
 #endif
 	return false; 
