@@ -185,7 +185,8 @@ class H460P_PresenceInstruction : public PASN_Choice
       e_subscribe,
       e_unsubscribe,
       e_block,
-      e_unblock
+      e_unblock,
+      e_pending
     };
 
 #if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
@@ -212,7 +213,12 @@ class H460P_PresenceIdentifier : public PASN_Sequence
   public:
     H460P_PresenceIdentifier(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
 
-    PASN_OctetString m_guid;
+    enum OptionalFields {
+      e_remove
+    };
+
+    H225_GloballyUniqueID m_guid;
+    PASN_Boolean m_remove;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);
@@ -499,46 +505,6 @@ class H460P_ArrayOf_PresenceSubscription : public PASN_Array
 
 
 //
-// ArrayOf_ClearToken
-//
-
-class H235_ClearToken;
-
-class H460P_ArrayOf_ClearToken : public PASN_Array
-{
-#ifndef PASN_LEANANDMEAN
-    PCLASSINFO(H460P_ArrayOf_ClearToken, PASN_Array);
-#endif
-  public:
-    H460P_ArrayOf_ClearToken(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
-
-    PASN_Object * CreateObject() const;
-    H235_ClearToken & operator[](PINDEX i) const;
-    PObject * Clone() const;
-};
-
-
-//
-// ArrayOf_CryptoH323Token
-//
-
-class H225_CryptoH323Token;
-
-class H460P_ArrayOf_CryptoH323Token : public PASN_Array
-{
-#ifndef PASN_LEANANDMEAN
-    PCLASSINFO(H460P_ArrayOf_CryptoH323Token, PASN_Array);
-#endif
-  public:
-    H460P_ArrayOf_CryptoH323Token(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
-
-    PASN_Object * CreateObject() const;
-    H225_CryptoH323Token & operator[](PINDEX i) const;
-    PObject * Clone() const;
-};
-
-
-//
 // ArrayOf_PresenceIdentifier
 //
 
@@ -764,14 +730,7 @@ class H460P_PresenceRequest : public PASN_Sequence
   public:
     H460P_PresenceRequest(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
 
-    enum OptionalFields {
-      e_tokens,
-      e_cryptoTokens
-    };
-
     H460P_ArrayOf_PresenceSubscription m_subscription;
-    H460P_ArrayOf_ClearToken m_tokens;
-    H460P_ArrayOf_CryptoH323Token m_cryptoTokens;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);
@@ -796,14 +755,7 @@ class H460P_PresenceResponse : public PASN_Sequence
   public:
     H460P_PresenceResponse(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
 
-    enum OptionalFields {
-      e_tokens,
-      e_cryptoTokens
-    };
-
     H460P_ArrayOf_PresenceSubscription m_subscription;
-    H460P_ArrayOf_ClearToken m_tokens;
-    H460P_ArrayOf_CryptoH323Token m_cryptoTokens;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);
@@ -907,16 +859,15 @@ class H460P_PresenceSubscription : public PASN_Sequence
       e_approved,
       e_rasAddress,
       e_timeToLive,
-      e_identifier,
       e_genericData
     };
 
+    H460P_PresenceIdentifier m_identifier;
     H225_AliasAddress m_subscribe;
     H460P_ArrayOf_AliasAddress m_aliases;
     PASN_Boolean m_approved;
     H225_TransportAddress m_rasAddress;
     H225_TimeToLive m_timeToLive;
-    H460P_PresenceIdentifier m_identifier;
     H460P_ArrayOf_GenericData m_genericData;
 
     PINDEX GetDataLength() const;
@@ -983,9 +934,9 @@ class H460P_PresenceNotification : public PASN_Sequence
       e_subscribers
     };
 
-    H460P_Presentity m_presentity;
     H225_AliasAddress m_aliasAddress;
     H460P_ArrayOf_PresenceIdentifier m_subscribers;
+    H460P_Presentity m_presentity;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);

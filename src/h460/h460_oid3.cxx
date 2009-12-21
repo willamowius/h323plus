@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2009/12/08 08:25:47  willamowius
+ * gcc fixes for presence
+ *
  * Revision 1.2  2009/12/08 04:05:14  shorne
  * Major update of presence system
  *
@@ -57,22 +60,34 @@
 #include <h323pdu.h>
 
 ///////////////////////////////////////////////////////////////////////
+int PRETIME = 2;
 
 H460PresenceHandler::H460PresenceHandler(H323EndPoint & _ep)
 : ep(_ep)
 {
      PTRACE(4,"OID3\tPresence Handler created!");
 
- 	gatekeeper = NULL;
     feat = NULL;
 	presenceRegistration = false;
+	pendingMessages = false;
+
+    QueueTimer.SetNotifier(PCREATE_NOTIFIER(dequeue));
+    QueueTimer.RunContinuous(PRETIME * 1000); 
+}
+
+void H460PresenceHandler::dequeue(PTimer &, INT)
+{ 
+	if (pendingMessages) {
+		if (ep.GetGatekeeper() && ep.GetGatekeeper()->IsRegistered()) 
+			 ep.GetGatekeeper()->SendServiceControlIndication();
+		pendingMessages = false;
+	}
 }
 
 void H460PresenceHandler::AttachFeature(H460_FeatureOID3 * _feat)
 {
 	feat = _feat;
-	gatekeeper = ep.GetGatekeeper();
-	if (gatekeeper != NULL)
+	if (ep.GetGatekeeper())
 		presenceRegistration = true;
 }
 
@@ -88,6 +103,7 @@ void PostSubscription(H323PresenceStore & gw, const H323PresenceSubscriptions & 
 		gw.insert(pair<H225_AliasAddress, H323PresenceEndpoint>(list.m_alias, epRecord));
 	 } else {
 		 H323PresenceEndpoint & epRecord = inf->second;
+		 epRecord.m_Authorize.m_alias = list.m_alias;
 		 for (PINDEX i=0; i<list.m_subscription.GetSize(); i++) {
 			 epRecord.m_Authorize.Add(list[i]);
 		 }
@@ -159,8 +175,8 @@ void H460PresenceHandler::SetPresenceState(const PStringList & alias, unsigned l
 	PostNotification(store,notify);
 	PresenceStoreUnLock();
 
-	if (gatekeeper != NULL && gatekeeper->IsRegistered()) 
-         gatekeeper->SendServiceControlIndication();
+	if (ep.GetGatekeeper() && ep.GetGatekeeper()->IsRegistered()) 
+		pendingMessages = true;
 }
 
 void H460PresenceHandler::AddInstruction(const PString & epalias, 
@@ -180,11 +196,12 @@ void H460PresenceHandler::AddInstruction(const PString & epalias,
 	PostInstruction(store,instruct);
 	PresenceStoreUnLock();
 
-	if (gatekeeper != NULL && gatekeeper->IsRegistered()) 
-      gatekeeper->SendServiceControlIndication();
+	if (ep.GetGatekeeper() && ep.GetGatekeeper()->IsRegistered()) 
+		pendingMessages = true;
 }
 
-void H460PresenceHandler::AddAuthorization(const PString & epalias,
+void H460PresenceHandler::AddAuthorization(const OpalGloballyUniqueID id,
+											const PString & epalias,
 											PBoolean approved,
 											const PStringList & subscribe)
 {
@@ -192,7 +209,7 @@ void H460PresenceHandler::AddAuthorization(const PString & epalias,
 	sub.SetAlias(epalias);
 	for (PINDEX i=0; i< subscribe.GetSize(); i++) 
 	{
-		H323PresenceSubscription subs;
+		H323PresenceSubscription subs(id);
 		subs.SetSubscriptionDetails(epalias,subscribe);
 		subs.SetApproved(approved);
 		sub.Add(subs);
@@ -202,8 +219,8 @@ void H460PresenceHandler::AddAuthorization(const PString & epalias,
 	PostSubscription(store,sub);
 	PresenceStoreUnLock();
 
-	if (gatekeeper != NULL && gatekeeper->IsRegistered()) 
-      gatekeeper->SendServiceControlIndication();
+	if (ep.GetGatekeeper() && ep.GetGatekeeper()->IsRegistered()) 
+		pendingMessages = true;
 }
 
 PStringList & H460PresenceHandler::GetSubscriptionList()
@@ -267,10 +284,10 @@ void H460PresenceHandler::PresenceRcvAuthorization(const H225_AliasAddress & add
 {
 	PStringList aliases;
 	subscript.GetSubscriberDetails(aliases);
+	OpalGloballyUniqueID id = subscript.GetSubscription();
 
-	for (PINDEX i=0; i < aliases.GetSize(); i++) {
-		ep.PresenceAuthorization(H323GetAliasAddressString(addr),aliases[i]);
-	}
+	ep.PresenceAuthorization(id,H323GetAliasAddressString(addr),aliases);
+
 }
 	
 void H460PresenceHandler::PresenceRcvInstruction(const H225_AliasAddress & addr, const H323PresenceInstruction & instruct)
@@ -335,13 +352,11 @@ PBoolean H460_FeatureOID3::OnSendRegistrationRequest(H225_FeatureDescriptor & pd
     H460_FeatureOID feat = H460_FeatureOID(OID_3); 
 
     PASN_OctetString raw;
-	if (handler->BuildPresenceElement(H225_RasMessage::e_registrationRequest, raw)) {
+	if (handler->BuildPresenceElement(H225_RasMessage::e_registrationRequest, raw)) 
 	   feat.Add(OID3_ID,H460_FeatureContent(raw));
-	   pdu = feat;
-	   return true;
-	}
 
-    return false;
+	pdu = feat;
+    return true;
 }
 
 

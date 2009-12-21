@@ -8,10 +8,8 @@ IMPORTS
 		TimeToLive,
 		GenericData,
 		GenericIdentifier,
-		CryptoH323Token
-	FROM MULTIMEDIA-SYSTEM-CONTROL
-		ClearToken
-	FROM H235-SECURITY-MESSAGES;
+		GloballyUniqueID
+	FROM MULTIMEDIA-SYSTEM-CONTROL;
 
 --
 -- Presence Base Message
@@ -75,16 +73,12 @@ PresenceNotify ::= SEQUENCE
 PresenceRequest ::= SEQUENCE
 {
 	subscription		SEQUENCE OF PresenceSubscription,
-	tokens			SEQUENCE OF ClearToken			OPTIONAL,
-	cryptoTokens		SEQUENCE OF CryptoH323Token		OPTIONAL,
 	...
 }
 
 PresenceResponse ::= SEQUENCE
 {
 	subscription		SEQUENCE OF PresenceSubscription,
-	tokens			SEQUENCE OF ClearToken			OPTIONAL,
-	cryptoTokens		SEQUENCE OF CryptoH323Token		OPTIONAL,
 	...
 }
 
@@ -131,6 +125,7 @@ PresenceInstruction ::= CHOICE
 	unsubscribe		AliasAddress,
 	block			AliasAddress,
 	unblock			AliasAddress,
+	pending			AliasAddress,
 	...
 }
 
@@ -141,24 +136,25 @@ PresenceInstruction ::= CHOICE
 
 PresenceSubscription ::= SEQUENCE
 {
+	identifier		PresenceIdentifier,
 	subscribe		AliasAddress,    
 	aliases			SEQUENCE OF AliasAddress,
 	approved		BOOLEAN				OPTIONAL,
 	rasAddress		TransportAddress		OPTIONAL,  
 	timeToLive		TimeToLive			OPTIONAL,
-	identifier		PresenceIdentifier		OPTIONAL,
 	genericData		SEQUENCE OF GenericData		OPTIONAL,
 	...
 }
 
 
 --
--- Presence Identifer
+-- Presence Identifier
 --
 
 PresenceIdentifier ::= SEQUENCE
 {
-	guid			OCTET STRING (SIZE(16)),
+	guid			GloballyUniqueID,
+	remove			BOOLEAN				OPTIONAL,
 	...
 }
 
@@ -169,9 +165,9 @@ PresenceIdentifier ::= SEQUENCE
 
 PresenceNotification ::= SEQUENCE
 {
-	presentity		Presentity,  
-	aliasAddress		AliasAddress  			OPTIONAL,         
+	aliasAddress	AliasAddress  					OPTIONAL,         
 	subscribers		SEQUENCE OF PresenceIdentifier	OPTIONAL,
+	presentity		Presentity,  
 	...	
 }
 
@@ -196,7 +192,7 @@ PresenceState ::= CHOICE
 	onCall           NULL,
 	voiceMail        NULL,
 	notAvailable     NULL,
-	away		 NULL,
+	away			 NULL,
 	...,
 	generic          SEQUENCE OF PresenceDisplay
 

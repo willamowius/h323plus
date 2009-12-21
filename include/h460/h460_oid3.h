@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2009/12/08 04:05:14  shorne
+ * Major update of presence system
+ *
  * Revision 1.1  2009/11/17 11:12:39  shorne
  * First Cut of Presence Feature
  *
@@ -67,6 +70,8 @@ class H460PresenceHandler : public H323PresenceHandler
 
    void AttachFeature(H460_FeatureOID3 * _feat);
 
+   void SetRegistered(bool registered);
+
    void SetPresenceState(const PStringList & epalias, 
 						unsigned localstate, 
 						const PString & localdisplay);
@@ -75,7 +80,8 @@ class H460PresenceHandler : public H323PresenceHandler
 						H323PresenceHandler::InstType instType, 
 						const PStringList & subscribe);
 
-   void AddAuthorization(const PString & epalias,
+   void AddAuthorization(const OpalGloballyUniqueID id,
+						const PString & epalias,
 						PBoolean approved,
 						const PStringList & subscribe);
 						
@@ -114,9 +120,11 @@ class H460PresenceHandler : public H323PresenceHandler
 	localeInfo  EndpointLocale;
 
 	PBoolean presenceRegistration;
+	PBoolean pendingMessages;
+	PDECLARE_NOTIFIER(PTimer, H460PresenceHandler, dequeue);
+	PTimer	QueueTimer;	
 
     H323EndPoint & ep;
-	H323Gatekeeper * gatekeeper;
     H460_FeatureOID3 * feat;
 };
 

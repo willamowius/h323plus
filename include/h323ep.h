@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.26  2009/12/08 04:05:14  shorne
+ * Major update of presence system
+ *
  * Revision 1.25  2009/11/19 03:56:39  shorne
  * Change the gkIdentifer to be stored as a PASN_BMPString to avoid problems with PString stripping NULL char off end which causes problems registration issues with pre GnuGk 2.3.1 releases.
  *
@@ -2304,11 +2307,16 @@ class H323EndPoint : public PObject
 
 	/** Set Presence Instructions. 
 	  */
-	void PresenceSetInstruction(const PString & epalias, unsigned type, const PStringList & list);
+	void PresenceSetInstruction(const PString & epalias, 
+								unsigned type, 
+								const PStringList & list);
 
 	/** Submit Presence Authorizations. 
 	  */
-	void PresenceSendAuthorization(const PString & epalias,PBoolean approved, const PStringList & subscribe);
+	void PresenceSendAuthorization(const OpalGloballyUniqueID & id, 
+									const PString & epalias,
+									PBoolean approved, 
+									const PStringList & subscribe);
 
 	/** Received Notifications
 	  */
@@ -2325,8 +2333,9 @@ class H323EndPoint : public PObject
 
 	/** Received Request for authorization
 	  */
-	virtual void PresenceAuthorization(const PString & locAlias,
-									const PString & subAlias);
+	virtual void PresenceAuthorization(const OpalGloballyUniqueID id,
+									const PString & locAlias,
+									const PStringList & Aliases);
 #endif
 
 #endif

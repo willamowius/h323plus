@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.35  2009/12/08 04:05:14  shorne
+ * Major update of presence system
+ *
  * Revision 1.34  2009/11/19 03:56:39  shorne
  * Change the gkIdentifer to be stored as a PASN_BMPString to avoid problems with PString stripping NULL char off end which causes problems registration issues with pre GnuGk 2.3.1 releases.
  *
@@ -4021,12 +4024,12 @@ void H323EndPoint::PresenceSetInstruction(const PString & epalias, unsigned type
 	presenceHandler->AddInstruction(epalias,(H323PresenceHandler::InstType)type,list);
 }
 
-void H323EndPoint::PresenceSendAuthorization(const PString & epalias,PBoolean approved, const PStringList & list)
+void H323EndPoint::PresenceSendAuthorization(const OpalGloballyUniqueID & id, const PString & epalias,PBoolean approved, const PStringList & list)
 {
 	if (presenceHandler == NULL)
 		return;
 
-	presenceHandler->AddAuthorization(epalias,approved,list);
+	presenceHandler->AddAuthorization(id,epalias,approved,list);
 }
 
 void H323EndPoint::PresenceNotification(const PString & locAlias,
@@ -4046,10 +4049,11 @@ void H323EndPoint::PresenceInstruction(const PString & locAlias, unsigned type, 
 				<< " " << subAlias);
 }
 
-void H323EndPoint::PresenceAuthorization(const PString & locAlias,
-									const PString & subAlias)
+void H323EndPoint::PresenceAuthorization(const OpalGloballyUniqueID id,
+									const PString & locAlias,
+									const PStringList & Aliases)
 {
-	PTRACE(4,"EP\tReceived Presence Authorization from " << subAlias);
+	PTRACE(4,"EP\tReceived Presence Authorization " << id.AsString() << " from " << Aliases);
 }
 #endif  // H323_H460P
 

@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2009/12/08 08:25:47  willamowius
+ * gcc fixes for presence
+ *
  * Revision 1.4  2009/12/08 04:05:14  shorne
  * Major update of presence system
  *
@@ -77,6 +80,7 @@ public:
       e_onCall,
       e_voiceMail,
       e_notAvailable,
+	  e_away,
 	  e_generic
 	};
 
@@ -122,9 +126,11 @@ class H323PresenceSubscription : public H460P_PresenceSubscription
 
 public:
 	H323PresenceSubscription();
+	H323PresenceSubscription(const OpalGloballyUniqueID & guid);
 
  // Sending Gatekeeper
 	void SetSubscriptionDetails(const PString & subscribe, const PStringList & aliases);
+	void SetSubscriptionDetails(const H225_AliasAddress & subscribe, const H225_AliasAddress & subscriber);
 	void GetSubscriberDetails(PStringList & aliases) const;
 	PString GetSubscribed();
 
@@ -139,7 +145,7 @@ public:
 	int GetTimeToLive();
 
 	void SetSubscription(const OpalGloballyUniqueID & guid);
-    OpalGloballyUniqueID GetSubscription();
+    OpalGloballyUniqueID GetSubscription() const;
 
 	void SetApproved(bool success);
     
@@ -166,7 +172,8 @@ class H323PresenceInstruction  :  public H460P_PresenceInstruction
 	  e_subscribe,
       e_unsubscribe,
       e_block,
-      e_unblock
+      e_unblock,
+	  e_pending
 	};
 
 	static PString GetInstructionString(unsigned instruct);
@@ -193,7 +200,7 @@ class H323PresenceIdentifiers   : public H460P_ArrayOf_PresenceIdentifier
 {
 
   public:
-	void Add(const OpalGloballyUniqueID & guid);
+	void Add(const OpalGloballyUniqueID & guid, PBoolean todelete = false);
 	OpalGloballyUniqueID GetIdentifier(PINDEX i);
 };
 
@@ -206,6 +213,16 @@ struct H323PresenceRecord
 	unsigned				m_ttl;
 };
 
+struct H323PresenceID
+{
+	PBoolean								m_isSubscriber;
+	H225_AliasAddress						m_subscriber;
+	H225_AliasAddress						m_Alias;
+	H323PresenceInstruction::Instruction	m_Status;
+	PBoolean								m_Active;
+	PTime									m_Updated;
+};
+
 struct H323PresenceEndpoint
 {
 	H323PresenceSubscriptions	m_Authorize;
@@ -215,7 +232,7 @@ struct H323PresenceEndpoint
 };
 
 #define H323PresenceStore		map<H225_AliasAddress,H323PresenceEndpoint>
-
+#define H323PresenceGkStore		map<H225_TransportAddress,H323PresenceEndpoint>
 
 template<class Msg>
 struct Order {
@@ -235,6 +252,12 @@ struct Order {
 
 #define H323PresenceExternal	map<H225_AliasAddress,H225_TransportAddress,Order<H225_AliasAddress> >
 #define H323PresenceRemote		map<H225_TransportAddress, H323PresenceInd>
+#define H323PresenceLRQRelay	map<H460P_PresenceIdentifier,H225_TransportAddress,Order<H460P_PresenceIdentifier> >
+
+#define H323PresenceIds			map<H460P_PresenceIdentifier,H323PresenceID,Order<H460P_PresenceIdentifier> >
+#define H323PresencePending		map<H225_AliasAddress,H460P_PresenceIdentifier, Order<H225_AliasAddress> >
+#define H323PresenceIdMap		map<H225_AliasAddress,H323PresencePending, Order<H225_AliasAddress> >
+
 
 // Derive you implementation from H323PresenceHandler.
 
@@ -243,7 +266,7 @@ class H323PresenceHandler  : public PObject
     PCLASSINFO(H323PresenceHandler, PObject);
 
 public:
-	bool ReceivedPDU(const PASN_OctetString & pdu);
+	bool ReceivedPDU(const PASN_OctetString & pdu, H225_TransportAddress * ip = NULL);
 
     enum MsgType {
 		e_Status,
@@ -261,7 +284,8 @@ public:
 		e_subscribe,
 		e_unsubscribe,
 		e_block,
-		e_unblock
+		e_unblock,
+		e_pending
 	};
 
 	class localeInfo {
@@ -287,6 +311,11 @@ public:
 							PASN_OctetString & pdu					///< Presence Message elements
 							);
 
+	PBoolean BuildPresenceElement(unsigned msgtag,					///< Presence Message ID
+							const H225_TransportAddress & ip,		///< Transport Address
+							PASN_OctetString & pdu					///< Presence Message elements
+							);
+
 	PBoolean BuildPresenceMessage(unsigned id,						///< Presence Message ID
 							H323PresenceStore & store,				///< Presence Store Information
 							H460P_ArrayOf_PresenceMessage & element	///< Presence Message elements
@@ -297,10 +326,15 @@ public:
 							H460P_ArrayOf_PresenceMessage & msgs	///< Presence Message elements
 							);
 
+	PBoolean BuildPresenceMessage(unsigned id,						///< Presence Message ID 
+							const H225_TransportAddress & ip, 		///< Transport Address
+							H460P_ArrayOf_PresenceMessage & msgs	///< Presence Message elements
+							);
+
 	virtual H323PresenceStore & GetPresenceStoreLocked(unsigned msgtag =0);
 	virtual void PresenceStoreUnLock(unsigned msgtag = 0);
 
-
+  // Events Endpoints
 	virtual void OnNotification(MsgType /*tag*/,
 								const H460P_PresenceNotification & /*notify*/,
 								const H225_AliasAddress & /*addr*/
@@ -311,22 +345,27 @@ public:
 								const H225_AliasAddress & /*addr*/
 								) {}
 
-	virtual void OnSubscription(MsgType /*tag*/,
-								const H460P_PresenceSubscription & /*subscription*/
-								) {}
-
 	virtual void OnInstructions(MsgType /*tag*/,
 								const H460P_ArrayOf_PresenceInstruction & /*instruction*/,
 								const H225_AliasAddress & /*addr*/
 								) {}
 
-	virtual void OnInstructions(MsgType /*tag*/,
-								const H460P_ArrayOf_PresenceInstruction & /*instruction*/
+  // Events Gatekeepers
+	virtual void OnNotification(MsgType /*tag*/,
+								const H460P_PresenceNotification & /*notify*/,
+								const H225_TransportAddress & /*ip*/
+								) {}
+
+	virtual void OnSubscription(MsgType /*tag*/,
+								const H460P_PresenceSubscription & /*subscription*/,
+								const H225_TransportAddress & /*ip*/
 								) {}
 
 	virtual void OnIdentifiers(MsgType /*tag*/, 
-								const H460P_ArrayOf_PresenceIdentifier & /*identifier*/
+								const H460P_PresenceIdentifier & /*identifier*/,
+								const H225_TransportAddress & /*ip*/
 								) {}
+
 
   // Build Endpoint Callbacks
 	virtual PBoolean BuildSubscription(const H225_EndpointIdentifier & /*ep*/,
@@ -341,6 +380,21 @@ public:
 								H323PresenceStore & /*instruction*/
 								) { return false; }
 
+  // Build Gatekeeper Callbacks
+	virtual PBoolean BuildSubscription(bool /*request*/,
+								const H225_TransportAddress & /*ip*/,
+								H323PresenceGkStore & /*subscription*/
+								) { return false; }
+
+	virtual PBoolean BuildNotification(
+								const H225_TransportAddress & /*ip*/,
+								H323PresenceGkStore & /*notify*/
+								) { return false; }
+
+	virtual PBoolean BuildIdentifiers(bool /*alive*/,
+								const H225_TransportAddress & /*ip*/,
+								H323PresenceGkStore & /*identifiers*/
+								) { return false; }
 
 protected:
 // Build Messages
