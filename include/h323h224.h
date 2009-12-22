@@ -20,6 +20,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/05/23 11:19:39  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.1  2007/08/06 20:50:49  shorne
  * First commit of h323plus
  *
@@ -45,6 +48,7 @@
 
 #include <h224.h>
 #include <h224handler.h>
+#include <h323caps.h>
 
 #define H323_H224_CAPABILITY_NAME "H.224"
 
