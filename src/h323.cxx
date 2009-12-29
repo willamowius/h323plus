@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.45  2009/12/10 03:11:30  shorne
+ * Correctly handle H.460.24 Annex B response
+ *
  * Revision 1.44  2009/12/08 13:05:32  shorne
  * Fix to ensure H.460.19 generic Parameter does not get sent if the NAT Method fails to create socket.
  *
@@ -4359,7 +4362,7 @@ PBoolean H323Connection::MergeCapabilities(unsigned sessionID, const H323Capabil
 	if (sessionID != RTP_Session::DefaultVideoSessionID)
 			return FALSE;
 #if H323_VIDEO
-   OpalVideoFormat & remoteFormat = (OpalVideoFormat &)(remote->GetWritableMediaFormat());
+   OpalVideoFormat & remoteFormat = (OpalVideoFormat &)remote->GetWritableMediaFormat();
    const OpalMediaFormat & localFormat = local.GetMediaFormat();
 
    if (remoteFormat.Merge(localFormat)) {
@@ -5340,6 +5343,10 @@ RTP_Session * H323Connection::UseSession(unsigned sessionID,
   if (taddr.GetTag() != H245_TransportAddress::e_unicastAddress) {
     return NULL;
   }
+
+  // We must have a valid sessionID 
+  if (sessionID < 1 || sessionID > 255) 
+	  return NULL;
 
   const H245_UnicastAddress & uaddr = taddr;
   if (uaddr.GetTag() != H245_UnicastAddress::e_iPAddress

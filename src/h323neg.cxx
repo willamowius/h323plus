@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2009/09/29 07:30:17  shorne
+ * Fix bug to ensure the channel is created before calling it.
+ *
  * Revision 1.4  2009/07/09 15:07:34  shorne
  * More H.460.19 fixes
  *
@@ -936,7 +939,8 @@ PBoolean H245NegLogicalChannel::HandleOpen(const H245_OpenLogicalChannel & pdu)
         // the master. However NetMeeting will not then reopen a channel, so
         // we act like we are a slave and close our end instead.
         if (connection.IsH245Master() &&
-            connection.GetRemoteApplication().Find("NetMeeting") == P_MAX_INDEX)
+            ((connection.GetRemoteApplication().Find("NetMeeting") == P_MAX_INDEX) ||
+			(connection.GetRemoteApplication().Find("Tandberg	27") == P_MAX_INDEX)))   // T1000
           cause = H245_OpenLogicalChannelReject_cause::e_masterSlaveConflict;
         else {
           connection.OnConflictingLogicalChannel(*channel);
