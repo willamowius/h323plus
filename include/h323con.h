@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.31  2009/12/08 03:55:28  shorne
+ * First cut support for H.460.24 Annex B
+ *
  * Revision 1.30  2009/11/29 23:31:05  shorne
  * BUG FIX : completely disable H.460 support if remote does not support it.
  *
@@ -1733,9 +1736,6 @@ class H323Connection : public PObject
     /**This function is called from the HandleControlPDU() function when
        it is about to send the Capabilities Set to the remote endpoint. This
        gives the application an oppurtunity to alter the PDU to be sent.
-
-       The default behaviour will make "adjustments" for compatibility with
-       some broken remote endpoints.
      */
     virtual void OnSendCapabilitySet(
       H245_TerminalCapabilitySet & pdu  ///< PDU to send
