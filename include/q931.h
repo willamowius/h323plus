@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/05/23 11:19:59  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.1  2007/08/06 20:50:50  shorne
  * First commit of h323plus
  *
@@ -301,7 +304,9 @@ class Q931 : public PObject
       SignalIE                = 0x34,
       ConnectedNumberIE       = 0x4c,
       CallingPartyNumberIE    = 0x6c,
+	  CallingPartySubAddressIE= 0x6d,
       CalledPartyNumberIE     = 0x70,
+	  CalledPartySubAddressIE = 0x71,
       RedirectingNumberIE     = 0x74,
       UserUserIE              = 0x7e
     };
@@ -541,6 +546,17 @@ class Q931 : public PObject
       unsigned defScreening = 0       ///<  Default value if octet3a not present
     ) const;
 
+    void SetCallingPartySubAddress(
+      const PString & number, ///<  Number string
+      unsigned plan = 1,      ///<  1 = ISDN/Telephony numbering system
+      unsigned type = 0       ///<  0 = Unknown number type
+    );
+    PBoolean GetCallingPartySubAddress(
+      PString & number,               ///<  Number string
+      unsigned * plan = NULL,         ///<  ISDN/Telephony numbering system
+      unsigned * type = NULL          ///<  Number type
+    ) const;
+
     void SetCalledPartyNumber(
       const PString & number, ///<  Number string
       unsigned plan = 1,      ///<  1 = ISDN/Telephony numbering system
@@ -550,6 +566,17 @@ class Q931 : public PObject
       PString & number,       ///<  Number string
       unsigned * plan = NULL, ///<  ISDN/Telephony numbering system
       unsigned * type = NULL  ///<  Number type
+    ) const;
+
+    void SetCalledPartySubAddress(
+      const PString & number, ///<  Number string
+      unsigned plan = 1,      ///<  1 = ISDN/Telephony numbering system
+      unsigned type = 0       ///<  0 = Unknown number type
+    );
+    PBoolean GetCalledPartySubAddress(
+      PString & number,               ///<  Number string
+      unsigned * plan = NULL,         ///<  ISDN/Telephony numbering system
+      unsigned * type = NULL          ///<  Number type
     ) const;
 
     void SetRedirectingNumber(

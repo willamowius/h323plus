@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/05/27 03:15:20  shorne
+ * Updated Windows compilation to compile with latest ptlib SVN
+ *
  * Revision 1.2  2008/05/23 11:22:32  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -1216,6 +1219,17 @@ PBoolean Q931::GetCallingPartyNumber(PString  & number,
                      defPresentation, defScreening, 0);
 }
 
+void Q931::SetCallingPartySubAddress(const PString & number, unsigned plan, unsigned type)
+{
+  SetIE(CallingPartySubAddressIE,
+        SetNumberIE(number, plan, type, -1, -1, -1));
+}
+
+PBoolean Q931::GetCallingPartySubAddress(PString & number, unsigned * plan, unsigned * type) const
+{
+  return GetNumberIE(GetIE(CallingPartySubAddressIE),
+                     number, plan, type, NULL, NULL, NULL, 0, 0, 0);
+}
 
 void Q931::SetCalledPartyNumber(const PString & number, unsigned plan, unsigned type)
 {
@@ -1230,6 +1244,17 @@ PBoolean Q931::GetCalledPartyNumber(PString & number, unsigned * plan, unsigned 
                      number, plan, type, NULL, NULL, NULL, 0, 0, 0);
 }
 
+void Q931::SetCalledPartySubAddress(const PString & number, unsigned plan, unsigned type)
+{
+  SetIE(CalledPartySubAddressIE,
+        SetNumberIE(number, plan, type, -1, -1, -1));
+}
+
+PBoolean Q931::GetCalledPartySubAddress(PString & number, unsigned * plan, unsigned * type) const
+{
+  return GetNumberIE(GetIE(CalledPartySubAddressIE),
+                     number, plan, type, NULL, NULL, NULL, 0, 0, 0);
+}
 
 void Q931::SetRedirectingNumber(const PString & number,
                                 unsigned plan,
