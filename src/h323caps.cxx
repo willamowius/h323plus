@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.24  2009/09/29 07:35:04  shorne
+ * Fix to ensure H.239 and H.249 capabilities are properly negotiationed.
+ *
  * Revision 1.23  2009/08/29 13:18:16  shorne
  * Fix compile warnings on Linux
  *
@@ -3591,6 +3594,8 @@ PBoolean H323Capabilities::RemoveCapability(H323Capability::MainTypes capability
 PBoolean H323Capabilities::SetVideoFrameSize(H323Capability::CapabilityFrameSize frameSize, int frameUnits) 
 { 
     // Remove the unmatching capabilities
+	if (frameSize != H323Capability::cif16MPI) Remove("*-16CIF*");
+	if (frameSize != H323Capability::cif4MPI) Remove("*-4CIF*");
 	if (frameSize != H323Capability::cifMPI) Remove("*-CIF*");
     if (frameSize != H323Capability::qcifMPI) Remove("*-QCIF*");
 	if (frameSize != H323Capability::sqcifMPI) Remove("*-SQCIF*");
