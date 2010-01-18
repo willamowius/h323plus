@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2009/10/21 10:04:02  shorne
+ * Update OID value to bring into line with OCS
+ *
  * Revision 1.5  2009/02/21 14:16:32  shorne
  * Major overhaul of the FileTransfer code
  *
@@ -1006,7 +1009,7 @@ PBoolean H323FileTransferHandler::TransmitFrame(H323FilePacket & buffer, PBoolea
   transmitFrame.SetPayloadSize(buffer.GetSize());
   memmove(transmitFrame.GetPayloadPtr(),buffer.GetPointer(), buffer.GetSize());
 	
-  return session->WriteData(transmitFrame);
+  return (session && session->WriteData(transmitFrame));
 }
 
 PBoolean H323FileTransferHandler::ReceiveFrame(H323FilePacket & buffer, PBoolean & final)
@@ -1375,7 +1378,9 @@ void H323FileTransferHandler::Receive(PThread &, INT)
 				   int size = packet.GetFileSize();
 				   if (size > 0) {
                         curFileSize = size;
-					    p = filelist.GetSaveDirectory() + PDIR_SEPARATOR + curFileName;
+						PStringList saveFile;
+						saveFile = curFileName.Tokenise(PDIR_SEPARATOR);
+					    p = filelist.GetSaveDirectory() + PDIR_SEPARATOR + saveFile[saveFile.GetSize()-1];
 						delete curFile;
 						curFile = new H323FileIOChannel(p,false);
 						if (curFile->IsError(ioerr)) {
@@ -1494,7 +1499,9 @@ void H323FilePacket::BuildPROB()
 
 void H323FilePacket::BuildRequest(opcodes code, const PString & filename, int filesize, int blocksize)
 {
-   PString header = opStr[code] + filename + "0octet0blksize0" + PString(blocksize) 
+   PString fn = filename;
+   fn.Replace("0","*",true);
+   PString header = opStr[code] + fn + "0octet0blksize0" + PString(blocksize) 
 	                    + "0tsize0" + PString(filesize) + "0";
    attach(header);
 
@@ -1551,6 +1558,7 @@ PString H323FilePacket::GetFileName() const
 
   PStringArray ar = (data.Mid(2)).Tokenise('0');
 
+  ar[0].Replace("*","0",true);
   return ar[0];
 }
 
