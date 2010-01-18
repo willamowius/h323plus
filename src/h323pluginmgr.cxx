@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.25  2009/11/17 10:55:53  shorne
+ * Added ability to set the target bitrate in the plugin codec
+ *
  * Revision 1.24  2009/08/29 13:18:16  shorne
  * Fix compile warnings on Linux
  *
@@ -742,8 +745,12 @@ static PBoolean SetCodecControl(const PluginCodec_Definition * codec,
   if (codecControls == NULL)
     return FALSE;
 
-  char const * options[2] = { parm, value };
-  unsigned optionsLen = 2;
+    PStringArray list;
+    list += parm;
+    list += value;
+    char ** options = list.ToCharArray();
+    unsigned int optionsLen = sizeof(options);
+
   return (*codecControls->control)(codec, context, SET_CODEC_OPTIONS_CONTROL, options, &optionsLen);
 }
 
