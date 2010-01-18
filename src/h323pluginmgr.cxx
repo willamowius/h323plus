@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.26  2010/01/18 21:14:08  shorne
+ * Fix for encoder_set_options thx Carlos Haj
+ *
  * Revision 1.25  2009/11/17 10:55:53  shorne
  * Added ability to set the target bitrate in the plugin codec
  *
@@ -3324,6 +3327,76 @@ PBoolean H323H263PluginCapability::OnSendingPDU(H245_VideoCapability & cap) cons
   return TRUE;
 }
 
+PBoolean SetH263Options(const OpalMediaFormat & fmt, H245_H263Options & options)
+{
+  PString mediaPacketization = fmt.GetOptionString("Media Packetization");
+  if (mediaPacketization.IsEmpty() || mediaPacketization != "RFC2429")
+	return false;
+
+    options.m_advancedIntraCodingMode = false;
+    options.m_deblockingFilterMode = false;
+    options.m_improvedPBFramesMode = false;
+    options.m_unlimitedMotionVectors = false;
+    options.m_fullPictureFreeze = false;
+    options.m_partialPictureFreezeAndRelease = false;
+    options.m_resizingPartPicFreezeAndRelease = false;
+    options.m_fullPictureSnapshot = false;
+    options.m_partialPictureSnapshot = false;
+    options.m_videoSegmentTagging = false;
+    options.m_progressiveRefinement = false;
+    options.m_dynamicPictureResizingByFour = false;
+    options.m_dynamicPictureResizingSixteenthPel = false;
+    options.m_dynamicWarpingHalfPel = false;
+    options.m_dynamicWarpingSixteenthPel = false;
+    options.m_independentSegmentDecoding = false;
+    options.m_slicesInOrder_NonRect = false;
+    options.m_slicesInOrder_Rect = false;
+    options.m_slicesNoOrder_NonRect = false;
+    options.m_slicesNoOrder_Rect = false;
+    options.m_alternateInterVLCMode = false;
+    options.m_modifiedQuantizationMode = false;
+    options.m_reducedResolutionUpdate = false;
+    options.m_separateVideoBackChannel = false;
+
+    H245_ArrayOf_CustomPictureFormat & customFormats = options.m_customPictureFormat;
+	for (PINDEX i = 0; fmt.GetOptionCount(); i++) {
+		PString optionName = fmt.GetOption(i).GetName();
+		if (optionName.NumCompare("CustomFmt") == PObject::EqualTo) {	
+			PStringList custom = fmt.GetOptionString(optionName).Tokenise(",");
+			H245_CustomPictureFormat customFormat;
+			customFormat.m_maxCustomPictureHeight = custom[0].AsInteger();
+			customFormat.m_minCustomPictureHeight = custom[0].AsInteger();
+			customFormat.m_maxCustomPictureWidth = custom[1].AsInteger();
+			customFormat.m_minCustomPictureWidth = custom[1].AsInteger();
+			H245_CustomPictureFormat_mPI & mpi = customFormat.m_mPI;
+				mpi.IncludeOptionalField(H245_CustomPictureFormat_mPI::e_standardMPI);
+				mpi.m_standardMPI = custom[2].AsInteger();
+			customFormat.m_pixelAspectInformation.SetTag(H245_CustomPictureFormat_pixelAspectInformation::e_pixelAspectCode);
+			H245_CustomPictureFormat_pixelAspectInformation_pixelAspectCode & pixel = 
+												customFormat.m_pixelAspectInformation;
+				pixel.SetSize(1);
+				pixel[0] = custom[3].AsInteger();
+
+		  int sz = customFormats.GetSize();
+		  customFormats.SetSize(sz+1);
+		  customFormats[sz] = customFormat;
+		}
+	}
+	if (customFormats.GetSize() > 0)
+		options.IncludeOptionalField(H245_H263Options::e_customPictureFormat);
+
+	options.IncludeOptionalField(H245_H263Options::e_h263Version3Options);  
+	options.m_h263Version3Options.m_dataPartitionedSlices = false;
+	options.m_h263Version3Options.m_fixedPointIDCT0 = false;
+	options.m_h263Version3Options.m_interlacedFields = false;
+	options.m_h263Version3Options.m_currentPictureHeaderRepetition = false;
+	options.m_h263Version3Options.m_previousPictureHeaderRepetition = false;
+	options.m_h263Version3Options.m_nextPictureHeaderRepetition = false;
+	options.m_h263Version3Options.m_pictureNumber = false;
+	options.m_h263Version3Options.m_spareReferencePictures = false;
+
+	return true;
+}
 
 PBoolean H323H263PluginCapability::OnSendingPDU(H245_VideoMode & pdu) const
 {
@@ -3349,6 +3422,10 @@ PBoolean H323H263PluginCapability::OnSendingPDU(H245_VideoMode & pdu) const
   mode.m_advancedPrediction   = fmt.GetOptionBoolean(h323_advancedPrediction_tag, FALSE);
   mode.m_pbFrames             = fmt.GetOptionBoolean(h323_pbFrames_tag, FALSE);
   mode.m_errorCompensation    = fmt.GetOptionBoolean(h323_errorCompensation_tag, FALSE);
+
+  if (SetH263Options(fmt,mode.m_h263Options))
+	  mode.IncludeOptionalField(H245_H263VideoMode::e_h263Options);
+
 
   return TRUE;
 }
