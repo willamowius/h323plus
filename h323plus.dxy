@@ -1,4 +1,4 @@
-/*! \mainpage OpenH323
+/*! \mainpage H323Plus
 
 \section contents Table of Contents
 
@@ -9,16 +9,17 @@
 
 \section intro Introduction
 
-OpenH323 is an Open Source class library for the development of applications
+H323Plus is an Open Source class library for the development of applications
 using the H.323 protocol for multi-media communications over
-packet based networks. It uses the PWLib library to provide platform independence, and
+packet based networks. It continues the development of OpenH323 under the old API.
+It uses the PWLib library to provide platform independence, and
 makes extensive use of the C++ techniques of inheritance and polymorphism.
 
 This document is intended as reference guide, not a tutorial. For examples
-of using OpenH323, see the sample programs provided in the samples directory.
-A tutorial on using PWLib and OpenH323 is also available at http://toncar.cz/openh323/tut.
+of using H323Plus, see the sample programs provided in the samples directory.
+A tutorial on using PWLib and OpenH323/H323Plus is also available at http://toncar.cz/openh323/tut/ .
 
-Last updated 17 May, 2004
+Last updated 19 January, 2010
 
 Copyright (C) 1999-2003 Equivalence Pty Ltd, All right reserved 
 
@@ -75,7 +76,7 @@ negotiations.
 
 \section classes Class hierarchy
 
-OpenH323 provides a rich class hierarchy that allows access to most of the functions
+H323Plus provides a rich class hierarchy that allows access to most of the functions
 requires for H.323 endponts. The list below is not intended an exhaustive list of the
 classes available (which is available here) but is good starting point for finding out
 more information on the various functions available
@@ -220,5 +221,6 @@ These classes are created from the H.245 ASN definitions
 \subsection history History
 
 \li 17 May 2004 - Converted from Doc++ to Doxygen format by Craig Southeren
+\li 19 January 2010 - Minor updates for H323Plus by Jan Willamowius
 
 */
