@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.46  2009/12/29 00:08:42  shorne
+ * fix for Tandberg T1000 to handle Master/Slave conflict and a small bug fix to ensure video merge correctly
+ *
  * Revision 1.45  2009/12/10 03:11:30  shorne
  * Correctly handle H.460.24 Annex B response
  *
@@ -5291,7 +5294,7 @@ void H323Connection::OnUserInputInBandDTMF(H323Codec::FilterInfo & info, INT)
     PTRACE(1, "DTMF detected. " << tones);
     PINDEX i;
     for (i = 0; i < tones.GetLength(); i++) {
-      OnUserInputTone(tones[i], 0, 0, 0);
+      OnUserInputTone(tones[i], 0, 0, PDTMFDecoder::DetectTime);
     }
   }
 #endif
