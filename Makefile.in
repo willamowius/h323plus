@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.4  2009/04/08 14:37:56  willamowius
+# PWLIBDIR -> PTLIBDIR
+#
 # Revision 1.3  2007/12/26 23:32:47  shorne
 # Fix for Install
 #
@@ -339,7 +342,7 @@ notrace::
 	$(MAKE) NOTRACE=1
 
 docs: 
-	doxygen openh323_cfg.dxy
+	doxygen h323plus_cfg.dxy
 
 install:
 	mkdir -p $(DESTDIR)$(LIBDIR)
