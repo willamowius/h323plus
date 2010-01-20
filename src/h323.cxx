@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.47  2010/01/19 23:16:30  willamowius
+ * use timestamp from dtmf decoder
+ *
  * Revision 1.46  2009/12/29 00:08:42  shorne
  * fix for Tandberg T1000 to handle Master/Slave conflict and a small bug fix to ensure video merge correctly
  *
@@ -1877,6 +1880,7 @@ void H323Connection::SetLocalPartyName(const PString & name)
 
   if (!name.IsEmpty()) {
     localAliasNames.RemoveAll();
+	localAliasNames.SetSize(0);
     localAliasNames.AppendString(name);
   }
 }
@@ -6294,7 +6298,7 @@ H323FileTransferHandler * H323Connection::CreateFileTransferHandler(unsigned ses
   if (!filelist.IsMaster() && !OpenFileTransferChannel(dir == H323Channel::IsTransmitter, filelist)) 
 	    return NULL;
 
-  return OnCreateFileTransferHandler(sessionID,dir,filelist);;
+  return OnCreateFileTransferHandler(sessionID,dir,filelist);
 }
 
 H323FileTransferHandler * H323Connection::OnCreateFileTransferHandler(unsigned sessionID,	
