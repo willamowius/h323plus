@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2009/11/29 23:31:04  shorne
+ * BUG FIX : completely disable H.460 support if remote does not support it.
+ *
  * Revision 1.9  2009/11/19 03:56:39  shorne
  * Change the gkIdentifer to be stored as a PASN_BMPString to avoid problems with PString stripping NULL char off end which causes problems registration issues with pre GnuGk 2.3.1 releases.
  *
@@ -476,6 +479,7 @@ class H323Gatekeeper : public H225_RAS
       DuplicateAlias,
       SecurityDenied,
       TransportError,
+	  NeededFeatureNotSupported,
       NumRegistrationFailReasons,
       RegistrationRejectReasonMask = 0x8000
     };

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.14  2009/11/29 23:31:13  shorne
+ * BUG FIX : completely disable H.460 support if remote does not support it.
+ *
  * Revision 1.13  2009/11/20 04:17:14  shorne
  * BUGFIX: URQ properly handles endpointIndentifer check.
  *
@@ -1058,6 +1061,10 @@ PBoolean H323Gatekeeper::RegistrationRequest(PBoolean autoReg)
           registrationFailReason = SecurityDenied;
           break;
 
+		case H225_RegistrationRejectReason::e_neededFeatureNotSupported :
+          registrationFailReason = NeededFeatureNotSupported;
+          break;
+
         default :
           registrationFailReason = (RegistrationFailReasons)(request.rejectReason|RegistrationRejectReasonMask);
           break;
@@ -1334,7 +1341,7 @@ PBoolean H323Gatekeeper::OnReceiveUnregistrationRequest(const H225_Unregistratio
 
   PTRACE(3, "RAS\tUnregistered, calls cleared");
   registrationFailReason = UnregisteredByGatekeeper;
-  timeToLive = 0; // zero disables lightweight RRQ
+//  timeToLive = 0; // zero disables lightweight RRQ
 
   if (urq.HasOptionalField(H225_UnregistrationRequest::e_alternateGatekeeper))
     SetAlternates(urq.m_alternateGatekeeper, FALSE);
@@ -1347,7 +1354,8 @@ PBoolean H323Gatekeeper::OnReceiveUnregistrationRequest(const H225_Unregistratio
     PTRACE(3, "RAS\tReregistering by setting timeToLive");
     reregisterNow = TRUE;
     monitorTickle.Signal();
-  }
+  } else 
+	timeToLive = 0; // zero disables lightweight RRQ
 
   endpoint.OnUnRegisterRequest();
 
@@ -2249,7 +2257,7 @@ void H323Gatekeeper::MonitorMain(PThread &, INT)
     monitorTickle.Wait();
     if (monitorStop)
       break;
-
+PTRACE(1,"TEST\tReregister " << reregisterNow << " TTL: " << timeToLive.IsRunning() << " Reset: " << timeToLive.GetResetTime());
     if (reregisterNow || 
                 (!timeToLive.IsRunning() && timeToLive.GetResetTime() > 0)) {
       RegistrationTimeToLive();
