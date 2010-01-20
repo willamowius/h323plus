@@ -1,5 +1,10 @@
 
 H323plus 1.21 - 1.22
+(fixed) Attempt reregistration after being unregistered
+(fixed) Sending and receiving different framesizes
+Added Called/CallingpartySubAddress Q.931
+(Fixed) Tandberg MXP issue with video size
+(Fixed) Tandberg T1000 master/slave issue
 Added Major overhaul of presence system
 Added H.460.24 Annex B
 Added H.460.9 support
