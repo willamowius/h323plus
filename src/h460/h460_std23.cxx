@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2009/12/08 08:25:47  willamowius
+ * gcc fixes for presence
+ *
  * Revision 1.7  2009/12/08 03:55:28  shorne
  * First cut support for H.460.24 Annex B
  *
@@ -400,6 +403,10 @@ void H460_FeatureStd23::StartSTUNTest(const PString & server)
 		s = SRVs[0];
 	else
 		s = server;
+
+	// Remove any previous NAT methods.
+	EP->GetNatMethods().RemoveMethod("H46024");
+	natType = PSTUNClient::UnknownNat;
 
 	PNatMethod_H46024 * xnat = (PNatMethod_H46024 *)EP->GetNatMethods().LoadNatMethod("H46024");
 	xnat->Start(s,this);
