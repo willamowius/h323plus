@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.27  2009/12/21 01:15:08  shorne
+ * Further Presence Development
+ *
  * Revision 1.26  2009/12/08 04:05:14  shorne
  * Major update of presence system
  *
@@ -2275,7 +2278,7 @@ class H323EndPoint : public PObject
 	/** Set the local Presence State. 
 		Calling this will enable Presence in the endpoint
 	  */
-	void PresenceSetLocalState(const PStringList & alias, unsigned localstate, const PString & localdisplay);
+	void PresenceSetLocalState(const PStringList & alias, unsigned localstate, const PString & localdisplay = PString());
 
 	enum presenceInstruction {
 		e_subscribe,
@@ -2302,6 +2305,8 @@ class H323EndPoint : public PObject
 	};
 
 	void PresenceAddFeature(presenceFeature feat);
+
+	void PresenceAddFeatureH460();
 
 	void PresenceSetLocale(const presenceLocale & info);
 

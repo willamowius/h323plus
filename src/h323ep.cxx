@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.36  2009/12/21 01:15:09  shorne
+ * Further Presence Development
+ *
  * Revision 1.35  2009/12/08 04:05:14  shorne
  * Major update of presence system
  *
@@ -3538,6 +3541,7 @@ void H323EndPoint::SetLocalUserName(const PString & name)
     return;
 
   localAliasNames.RemoveAll();
+  localAliasNames.SetSize(0);
   localAliasNames.AppendString(name);
 }
 
@@ -3998,6 +4002,35 @@ void H323EndPoint::PresenceAddFeature(presenceFeature feat)
 		presenceHandler = new H460PresenceHandler(*this);
 
 	presenceHandler->AddEndpointFeature(feat);
+}
+
+template <class PAIR>
+class deletepair { // PAIR::second_type is a pointer type
+public:
+	void operator()(const PAIR & p) { delete p.second; }
+};
+
+template <class M>
+inline void DeleteMap(const M & m)
+{
+	typedef typename M::value_type PAIR;
+	std::for_each(m.begin(), m.end(), deletepair<PAIR>());
+}
+
+void H323EndPoint::PresenceAddFeatureH460()
+{
+	if (presenceHandler == NULL)
+		presenceHandler = new H460PresenceHandler(*this);
+
+	map<PString,H460_FeatureID*> plist;
+	if (H460_Feature::PresenceFeatureList(plist,this)) {
+		map<PString,H460_FeatureID*>::const_iterator it = plist.begin();
+		while (it != plist.end()) {
+			presenceHandler->AddEndpointH460Feature(*(it->second), it->first);
+			it++;
+		}
+	}
+	DeleteMap(plist);
 }
 
 void H323EndPoint::PresenceSetLocale(const presenceLocale & info)
