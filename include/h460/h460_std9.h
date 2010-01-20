@@ -30,6 +30,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2009/09/29 07:23:03  shorne
+ * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
+ *
  * Revision 1.2  2009/08/28 14:36:06  shorne
  * Fixes to enable compilation with PTLIB 2.6.4
  *
@@ -74,6 +77,7 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("Std9"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("QoS Monitoring-H.460.9"); };
     static int GetPurpose()	{ return FeatureSignal; };
+	static PStringArray GetIdentifier() { return PStringArray("9"); };
 
 	virtual PBoolean CommonFeature() { return qossupport; }
 

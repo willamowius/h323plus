@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2009/12/21 01:15:09  shorne
+ * Further Presence Development
+ *
  * Revision 1.5  2009/12/08 04:05:14  shorne
  * Major update of presence system
  *
@@ -1175,6 +1178,19 @@ void H323PresenceNotification::AddSupportedFeature(int id)
 	int sz = f.GetSize();
 	f.SetSize(sz+1);
 	f[sz] = pf;
+}
+
+void H323PresenceNotification::AddSupportedFeature(const H460P_PresenceFeature & id)
+{
+	H460P_Presentity & e = m_presentity;
+	if (!e.HasOptionalField(H460P_Presentity::e_supportedFeatures))
+		e.IncludeOptionalField(H460P_Presentity::e_supportedFeatures);
+
+	H460P_ArrayOf_PresenceFeature & f = e.m_supportedFeatures;
+
+	int sz = f.GetSize();
+	f.SetSize(sz+1);
+	f[sz] = id;
 }
 
 void H323PresenceNotification::AddEndpointLocale(const H460P_PresenceGeoLocation & loc)

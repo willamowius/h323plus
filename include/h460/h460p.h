@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2009/12/21 01:15:09  shorne
+ * Further Presence Development
+ *
  * Revision 1.5  2009/12/08 08:25:47  willamowius
  * gcc fixes for presence
  *
@@ -91,6 +94,7 @@ public:
 	void GetPresenceState(States & state, PString & display) const;
 
 	void AddSupportedFeature(int id);
+	void AddSupportedFeature(const H460P_PresenceFeature & id);
 	void AddEndpointLocale(const H460P_PresenceGeoLocation & loc);
 
 	void AddSubscriber(const OpalGloballyUniqueID & guid);

@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2009/12/21 01:15:09  shorne
+ * Further Presence Development
+ *
  * Revision 1.3  2009/12/08 08:25:47  willamowius
  * gcc fixes for presence
  *
@@ -160,7 +163,7 @@ void H460PresenceHandler::SetPresenceState(const PStringList & alias, unsigned l
 		notification.AddEndpointLocale(loc);
 
 
-	list<int>::iterator i = EndpointFeatures.begin();
+	list<H460P_PresenceFeature>::iterator i = EndpointFeatures.begin();
 	while (i != EndpointFeatures.end()) {
 		notification.AddSupportedFeature(*i);
 		i++;
@@ -300,7 +303,21 @@ void H460PresenceHandler::PresenceRcvInstruction(const H225_AliasAddress & addr,
 
 void H460PresenceHandler::AddEndpointFeature(int feat)
 {
-	EndpointFeatures.push_back(feat);
+	H460P_PresenceFeature f;
+	f.SetTag(feat);
+	EndpointFeatures.push_back(f);
+}
+
+void H460PresenceHandler::AddEndpointH460Feature(const H225_GenericIdentifier & featid, const PString & display)
+{
+	H460P_PresenceFeature f;
+	f.SetTag(H460P_PresenceFeature::e_generic);
+	H460P_PresenceFeatureGeneric & g = f;
+	g.m_identifier = featid;
+	g.IncludeOptionalField(H460P_PresenceFeatureGeneric::e_display);
+	g.m_display.SetValue(display);
+
+	EndpointFeatures.push_back(f);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -326,6 +343,11 @@ H460_FeatureOID3::~H460_FeatureOID3()
 {
 }
 
+PStringArray H460_FeatureOID3::GetIdentifier()
+{
+	return PStringArray(OID_3);
+}
+
 void H460_FeatureOID3::AttachEndPoint(H323EndPoint * _ep)
 {
     handler = _ep->GetPresenceHandler();
@@ -349,14 +371,14 @@ PBoolean H460_FeatureOID3::OnSendRegistrationRequest(H225_FeatureDescriptor & pd
 	if (handler == NULL)
 		return false;
 
-    H460_FeatureOID feat = H460_FeatureOID(OID_3); 
-
     PASN_OctetString raw;
-	if (handler->BuildPresenceElement(H225_RasMessage::e_registrationRequest, raw)) 
-	   feat.Add(OID3_ID,H460_FeatureContent(raw));
-
-	pdu = feat;
-    return true;
+	if (handler->BuildPresenceElement(H225_RasMessage::e_registrationRequest, raw)) {
+		H460_FeatureOID feat = H460_FeatureOID(OID_3); 
+		feat.Add(OID3_ID,H460_FeatureContent(raw));
+		pdu = feat;
+		return true;
+	} else 
+		return false;
 }
 
 

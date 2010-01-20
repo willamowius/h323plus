@@ -32,6 +32,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2009/12/08 03:55:27  shorne
+ * First cut support for H.460.24 Annex B
+ *
  * Revision 1.4  2009/11/17 11:10:28  shorne
  * Added UPnP Support and NAT Feature Callbacks
  *
@@ -134,6 +137,7 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("Std23"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("P2Pnat Detect-H.460.23"); };
     static int GetPurpose()	{ return FeatureRas; };
+	static PStringArray GetIdentifier() { return PStringArray("23"); };
 
 	virtual PBoolean CommonFeature() { return isEnabled; }
 
@@ -211,6 +215,7 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("Std24"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("P2Pnat Media-H.460.24"); };
     static int GetPurpose()	{ return FeatureSignal; };
+	static PStringArray GetIdentifier() { return PStringArray("24"); };
 
 	virtual PBoolean CommonFeature() { return isEnabled; }
 

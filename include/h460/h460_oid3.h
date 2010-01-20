@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2009/12/21 01:15:09  shorne
+ * Further Presence Development
+ *
  * Revision 1.2  2009/12/08 04:05:14  shorne
  * Major update of presence system
  *
@@ -109,6 +112,7 @@ class H460PresenceHandler : public H323PresenceHandler
 	void PresenceRcvInstruction(const H225_AliasAddress & addr, const H323PresenceInstruction & instruct);
 
 	void AddEndpointFeature(int feat);
+	void AddEndpointH460Feature(const H225_GenericIdentifier & featid, const PString & display);
 
 	localeInfo & GetLocationInfo() { return EndpointLocale; }
 
@@ -116,7 +120,7 @@ class H460PresenceHandler : public H323PresenceHandler
  	// Lists
 	PStringList PresenceSubscriptions;
 	PStringList PresenceBlockList;
-	list<int>   EndpointFeatures;
+	list<H460P_PresenceFeature>   EndpointFeatures;
 	localeInfo  EndpointLocale;
 
 	PBoolean presenceRegistration;
@@ -145,6 +149,7 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("OID3"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("Presence"); };
     static int GetPurpose()	{ return FeatureRas; };
+	static PStringArray GetIdentifier();
 
 	virtual PBoolean CommonFeature() { return remoteSupport; }
 

@@ -36,6 +36,9 @@
  * Contributor(s): ______________________________________.
  *
 * $Log$
+* Revision 1.16  2009/11/29 23:31:13  shorne
+* BUG FIX : completely disable H.460 support if remote does not support it.
+*
 * Revision 1.15  2009/09/29 07:23:03  shorne
 * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
 *
@@ -97,6 +100,7 @@
 #include "guid.h"
 #include <ptlib/pluginmgr.h>
 #include <ptclib/url.h>
+#include <map>
 
 
 #ifdef _MSC_VER
@@ -607,7 +611,8 @@ class H460_Feature : public H225_FeatureDescriptor
 	  FeatureBaseRas   =6,        ///< Create Startup use RAS
 	  FeatureBaseSignal=7,	      ///< Create Base use Signal
       FeatureRas       =8,        ///< Create Registering GK
-	  FeatureSignal    =16        ///< Create Call Setup
+	  FeatureSignal    =16,       ///< Create Call Setup
+	  FeaturePresence  =24        ///< Create Call Setup/Advertise in Presence
 	} FeatureInstance;
 
   //@}
@@ -750,16 +755,24 @@ class H460_Feature : public H225_FeatureDescriptor
                                         );
 	/** Get Feature Name. This is usually the Derived Class Name
 	  */
-    static PStringList GetFeatureName() { return PStringList("empty"); };
+    static PStringArray GetFeatureName() { return PStringArray("empty"); };
 
 	/** Get Feature Friendly Name This usually the user friendly description
 	  */
-    static PStringList GetFeatureFriendlyName() { return PStringList("empty"); };
+    static PStringArray GetFeatureFriendlyName() { return PStringArray("empty"); };
 
     /** Get the purpose of the the Feature whether for Signalling,RAS or both. This determines
 	    when the class is instantized
 	  */
 	static int GetPurpose()	{ return FeatureBase; };
+
+	/** Get the Feature Identifier
+	  */
+	static PStringArray GetIdentifier() { return PStringArray("empty"); }
+
+    /** Get the Feature list to be advertised for presence
+	  */
+	static PBoolean PresenceFeatureList(map<PString,H460_FeatureID*> & plist, H323EndPoint * ep, PPluginManager * pluginMgr = NULL);
 
 	/** Attach the endpoint. Override this to link your own Endpoint Instance.
 	  */
@@ -1163,7 +1176,13 @@ template <class className> class H460PluginServiceDescriptor : public PDevicePlu
 {
   public:
     virtual PObject *   CreateInstance(int /*userData*/) const { return new className; }
-    virtual PStringArray GetDeviceNames(int /*userData*/) const { return className::GetFeatureFriendlyName(); }
+    virtual PStringArray GetDeviceNames(int userData) const 
+	{ 
+		if (userData == 24)  // Presence Identifer
+			return className::GetIdentifier(); 
+		else
+			return className::GetFeatureFriendlyName(); 
+	}
     virtual bool  ValidateDeviceName(const PString & deviceName, int userData) const 
 	{ 
 	     PStringArray devices = className::GetFeatureName(); 

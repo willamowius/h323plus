@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.18  2009/11/29 23:31:13  shorne
+ * BUG FIX : completely disable H.460 support if remote does not support it.
+ *
  * Revision 1.17  2009/09/29 07:23:03  shorne
  * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
  *
@@ -100,6 +103,8 @@
 #include "h460/h4601.h"
 
 #include <h323.h>
+
+///////////////////////////////////////////////////////////////////////
 
 OpalOID::OpalOID()
 {
@@ -902,6 +907,37 @@ H460_Feature * H460_Feature::CreateFeature(const PString & featurename, int pduT
   return (H460_Feature *)pluginMgr->CreatePluginsDeviceByName(featurename, H460FeaturePluginBaseClass,pduType);
 }
 
+PBoolean H460_Feature::PresenceFeatureList(map<PString,H460_FeatureID*> & plist, H323EndPoint * ep, PPluginManager * pluginMgr)
+{
+  if (pluginMgr == NULL)
+    pluginMgr = &PPluginManager::GetPluginManager();
+
+   PStringList featurelist = H460_Feature::GetFeatureNames(pluginMgr);
+
+   int count = 0;
+   for (PINDEX i=0; i<featurelist.GetSize(); i++) {
+	 if (ep && !ep->OnFeatureInstance(H460_Feature::FeaturePresence,featurelist[i]))
+		   continue;
+
+	 PDevicePluginServiceDescriptor * desc = 
+			(PDevicePluginServiceDescriptor *)pluginMgr->GetServiceDescriptor(featurelist[i], H460FeaturePluginBaseClass);
+
+	 if (desc != NULL && desc->ValidateDeviceName(featurelist[i], H460_Feature::FeaturePresence)) {
+		 PStringArray id = desc->GetDeviceNames(H460_Feature::FeaturePresence);
+		 PStringArray display = desc->GetDeviceNames(0);
+		 if (featurelist[i].Left(3) == "Std") {			// Std feature
+				plist.insert(pair<PString,H460_FeatureID*>(*(PString*)display[0].Clone(),new H460_FeatureID(id[0].AsInteger())));
+		 } else if (featurelist[i].Left(3) == "OID") {		// OID feature
+				OpalOID feat(id[0]);
+				plist.insert(pair<PString,H460_FeatureID*>(*(PString*)display[0].Clone(), new H460_FeatureID(feat)));
+		 } else	{   // NonStd Feature
+				plist.insert(pair<PString,H460_FeatureID*>(*(PString*)display[0].Clone(),new H460_FeatureID(id[0])));
+		 }
+		 count++;
+	 }  
+   }
+   return (count > 0);
+}
 
 /////////////////////////////////////////////////////////////////////
 

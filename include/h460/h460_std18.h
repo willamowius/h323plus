@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2009/10/21 10:09:01  shorne
+ * Updates for H.460.18/.19/.23/.24
+ *
  * Revision 1.5  2009/09/29 07:23:03  shorne
  * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
  *
@@ -85,6 +88,7 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("Std18"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("NatTraversal-H.460.18"); };
     static int GetPurpose()	{ return FeatureRas; };
+	static PStringArray GetIdentifier() { return PStringArray("18"); };
 
 	virtual PBoolean CommonFeature() { return isEnabled; }
 
@@ -135,6 +139,7 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("Std19"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("NatTraversal-H.460.19"); };
     static int GetPurpose()	{ return FeatureSignal; };
+	static PStringArray GetIdentifier() { return PStringArray("19"); };
 
 	virtual PBoolean CommonFeature() { return remoteSupport; }
 
