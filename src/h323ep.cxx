@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.37  2010/01/20 04:11:09  shorne
+ * Add ability to advertise supported H.460 features in presence
+ *
  * Revision 1.36  2009/12/21 01:15:09  shorne
  * Further Presence Development
  *
@@ -1000,6 +1003,7 @@
 #endif
 
 #include "opalglobalstatics.cxx"
+#include <algorithm>
 
 //////////////////////////////////////////////////////////////////////////////////////
 
