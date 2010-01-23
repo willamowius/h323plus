@@ -1,5 +1,7 @@
 
 H323plus 1.21 - 1.22
+Added support for 16CIF
+Provide timestamp with DTMF tones
 (fixed) Attempt reregistration after being unregistered
 (fixed) Sending and receiving different framesizes
 Added Called/CallingpartySubAddress Q.931
