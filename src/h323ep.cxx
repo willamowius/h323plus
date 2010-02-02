@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.38  2010/01/23 15:54:46  willamowius
+ * fix Linux compile
+ *
  * Revision 1.37  2010/01/20 04:11:09  shorne
  * Add ability to advertise supported H.460 features in presence
  *
@@ -2378,7 +2381,8 @@ PBoolean H323EndPoint::ParsePartyName(const PString & _remoteParty,
   // get the various parts of the name
   PString hostOnly = PString();
   if (remoteParty.Find('@') != P_MAX_INDEX) {
-	  alias = "url:" + remoteParty;
+	  alias = remoteParty.Left(remoteParty.Find('@'));
+	  hostOnly = remoteParty.Mid(remoteParty.Find('@')+1);
   } else {
      alias = url.GetUserName();
      hostOnly = url.GetHostName();
