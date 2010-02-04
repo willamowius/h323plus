@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.33  2010/02/04 07:40:08  shorne
+ * Added Support to compile H.460 Annex B without Annex A support
+ *
  * Revision 1.32  2010/01/01 00:04:39  willamowius
  * correct comment
  *
@@ -2169,7 +2172,7 @@ class H323Connection : public PObject
     );
 
 #ifdef H323_VIDEO
-	void OnSetInitialBandwidth(H323VideoCodec * codec);
+	virtual void OnSetInitialBandwidth(H323VideoCodec * codec);
 #endif
 
     /**Get the available bandwidth in 100's of bits/sec.
