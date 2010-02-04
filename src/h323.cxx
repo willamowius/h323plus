@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.48  2010/01/20 04:07:54  shorne
+ * Small fix to ensure PStringArray is empty
+ *
  * Revision 1.47  2010/01/19 23:16:30  willamowius
  * use timestamp from dtmf decoder
  *
@@ -5564,6 +5567,7 @@ void BuildH46024AIndication(H323ControlPDU & pdu, const PString & oid, bool send
 	  data.SetSize(1);
 	  BuildGenericInteger(data[0], 0, (sender ? 1 : 0));
 }
+#endif // H323_H46024A
 
 #ifdef H323_H46024B
 bool DecodeH46024BRequest(unsigned id, const H245_ArrayOf_GenericParameter & params, H46024B_ArrayOf_AlternateAddress & val)
@@ -5603,6 +5607,7 @@ void BuildH46024BResponse(H323ControlPDU & pdu)
 }
 #endif  // H323_H46024B
 
+#ifdef H323_H46024A
 PBoolean H323Connection::SendH46024AMessage(bool sender)
 {
 	if ((sender && m_H46024Astate == 1) ||  // Message already sent
@@ -6469,7 +6474,9 @@ void H323Connection::H46024AEnabled()
 { 
 	m_H46024Aenabled = true; 
 }
+#endif   // H323_H46024A
 
+#ifdef H323_H46024B
 void H323Connection::H46024BEnabled() 
 { 
 	m_H46024Benabled = true; 

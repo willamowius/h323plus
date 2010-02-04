@@ -37,6 +37,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2009/12/08 04:03:47  shorne
+ * First cut support for H.460.24 Annex B
+ *
  * Revision 1.7  2009/11/17 11:08:07  shorne
  * Updates for H.460.18/.19
  *
@@ -487,7 +490,9 @@ class H46019UDPSocket : public PUDPSocket
 	/** Start sending media/control to alternate address
 	  */
 	void H46024Adirect(bool starter);
+#endif
 
+#ifdef H323_H46024B
 	/** Start Probing to alternate address
 	  */
 	void H46024Bdirect(const H323TransportAddress & address);
@@ -538,14 +543,15 @@ private:
 	PString m_CUIrem;										///< Remote CUI
 	PIPSocket::Address m_locAddr;  WORD m_locPort;			///< local Address (address used when starting socket)
 	PIPSocket::Address m_remAddr;  WORD m_remPort;			///< Remote Address (address used when starting socket)
-	PIPSocket::Address m_altAddr;  WORD m_altPort;			///< supplied remote Address (as supplied in Generic Information)
 	PIPSocket::Address m_detAddr;  WORD m_detPort;			///< detected remote Address (as detected from actual packets)
 	PIPSocket::Address m_pendAddr;  WORD m_pendPort;		///< detected pending RTCP Probe Address (as detected from actual packets)
 	PDECLARE_NOTIFIER(PTimer, H46019UDPSocket, Probe);		///< Thread to probe for direct connection
 	PTimer m_Probe;											///< Probe Timer
 	PINDEX m_probes;										///< Probe count
 	DWORD SSRC;												///< Random number
-
+#endif
+	PIPSocket::Address m_altAddr;  WORD m_altPort;			///< supplied remote Address (as supplied in Generic Information)
+#ifdef H323_H46024B
 	// H46024 Annex B support
 	PBoolean	m_h46024b;
 #endif

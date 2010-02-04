@@ -37,6 +37,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2009/12/08 03:55:28  shorne
+ * First cut support for H.460.24 Annex B
+ *
  * Revision 1.9  2009/11/17 11:08:07  shorne
  * Updates for H.460.18/.19
  *
@@ -1073,6 +1076,9 @@ PBoolean H46019UDPSocket::ReceivedProbePacket(const RTP_ControlFrame & frame, bo
       return false;
 }
 
+#endif
+
+#ifdef H323_H46024B
 void H46019UDPSocket::H46024Bdirect(const H323TransportAddress & address)
 {
 	address.GetIpAndPort(m_altAddr,m_altPort);
@@ -1086,7 +1092,7 @@ void H46019UDPSocket::H46024Bdirect(const H323TransportAddress & address)
 	SendRTPPing(m_altAddr, m_altPort);
 }
 
-#endif  // H323_H46024A
+#endif  // H323_H46024B
 
 #endif  // H323_H460
 

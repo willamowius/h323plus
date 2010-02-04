@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.32  2010/01/01 00:04:39  willamowius
+ * correct comment
+ *
  * Revision 1.31  2009/12/08 03:55:28  shorne
  * First cut support for H.460.24 Annex B
  *
@@ -3092,8 +3095,10 @@ class H323Connection : public PObject
 
 	/** Enable H46024B for this call
 	  */
-	void H46024BEnabled();
+#endif
 
+#ifdef H323_H46024B
+	void H46024BEnabled();
 #endif
 
   //@}
@@ -3494,6 +3499,9 @@ class H323Connection : public PObject
 	PBoolean m_H46024Aenabled;
 	PBoolean m_H46024Ainitator;
 	PINDEX m_H46024Astate;
+#endif
+
+#ifdef H323_H46024B
 	PBoolean m_H46024Benabled;
 	PINDEX m_H46024Bstate;
 #endif
