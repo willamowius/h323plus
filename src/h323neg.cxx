@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2009/12/29 00:08:42  shorne
+ * fix for Tandberg T1000 to handle Master/Slave conflict and a small bug fix to ensure video merge correctly
+ *
  * Revision 1.5  2009/09/29 07:30:17  shorne
  * Fix bug to ensure the channel is created before calling it.
  *
@@ -617,6 +620,9 @@ PBoolean H245NegTerminalCapabilitySet::HandleIncoming(const H245_TerminalCapabil
   inSequenceNumber = pdu.m_sequenceNumber;
 
   mutex.Signal();
+
+  // give application a chance to inspect / modify received H.245 capabilities
+  connection.OnReceivedCapabilitySet(pdu);
 
   H323Capabilities remoteCapabilities(connection, pdu);
 

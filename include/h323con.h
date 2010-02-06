@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.34  2010/02/04 14:07:15  willamowius
+ * OnSetInitialBandwidth() wasn't declared virtual, so overloaded methods would not be called
+ *
  * Revision 1.33  2010/02/04 07:40:08  shorne
  * Added Support to compile H.460 Annex B without Annex A support
  *
@@ -1748,10 +1751,20 @@ class H323Connection : public PObject
     );
 
     /**This function is called when the remote endpoint sends its capability
+       set. This gives the application an opportunity to inspect the
+       incoming H.245 capability set, before the framework handles it.
+       It is called before the other OnReceivedCapabilitySet().
+       The default implementation does nothing.
+    */
+    virtual void OnReceivedCapabilitySet(
+      const H245_TerminalCapabilitySet & pdu  ///< received PDU
+    );
+
+    /**This function is called when the remote endpoint sends its capability
        set. This gives the application an opportunity to determine what codecs
        are available and if it supports any of the combinations of codecs.
 
-       Note any codec types that are the remote system supports that are not in
+       Note any codec types that the remote system supports that are not in
        the codecs list member variable for the endpoint are ignored and not
        included in the remoteCodecs list.
 

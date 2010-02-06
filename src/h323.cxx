@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.49  2010/02/04 07:41:43  shorne
+ * Added Support to compile H.460 Annex B without Annex A support
+ *
  * Revision 1.48  2010/01/20 04:07:54  shorne
  * Small fix to ensure PStringArray is empty
  *
@@ -4072,6 +4075,11 @@ void H323Connection::OnSendCapabilitySet(H245_TerminalCapabilitySet & /*pdu*/)
     SetRFC2833PayloadType(localCapabilities, *rfc2833handler);
 }
 
+
+void H323Connection::OnReceivedCapabilitySet(const H245_TerminalCapabilitySet & /*pdu*/)
+{
+	// do nothing
+}
 
 PBoolean H323Connection::OnReceivedCapabilitySet(const H323Capabilities & remoteCaps,
                                              const H245_MultiplexCapability * muxCap,
