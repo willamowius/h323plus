@@ -793,7 +793,8 @@ INCLUDE_FILE_PATTERNS  =
 # or name=definition (no spaces). If the definition and the = are 
 # omitted =1 is assumed.
 
-PREDEFINED             = DOCPLUSLUS DOC_PLUS_PLUS
+PREDEFINED             = DOCPLUSLUS DOC_PLUS_PLUS \
+						 P_VIDEO H323_VIDEO H323_AUDIO_CODECS H323_AEC H323_T38 H323_T120 H323_H224 H323_H230 H323_H239 H323_H248 H323_H249 H323_H341 H323_H350 H323_H450 H323_H460 H323_H4609 H323_H46018 H323_H46023 H323_H460P H323_H501 H323_GNUGK H323_FILE
 
 # If the MACRO_EXPANSION and EXPAND_PREDEF_ONLY tags are set to YES then 
 # this tag can be used to specify a list of macro names that should be expanded. 
