@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.25  2010/01/04 21:01:35  willamowius
+ * extend SetVideoFrameSize for 4CIF and 16CIF
+ *
  * Revision 1.24  2009/09/29 07:35:04  shorne
  * Fix to ensure H.239 and H.249 capabilities are properly negotiationed.
  *
@@ -579,6 +582,22 @@ H323Capability * H323Capability::Create(const PString & name)
   return (H323Capability *)cap->Clone();
 }
 
+OpalFactoryCodec * H323Capability::CreateCodec(MainTypes type, PBoolean isEncoder, const PString & name)
+{
+	// Build the conversion
+	PString base;
+	switch (type) {
+		case e_Audio: base = "L16"; break;
+		case e_Video: base = "YUV420P"; break;
+		default: base = PString();
+	}
+
+	PString conv;
+	if (isEncoder) conv = base + "|" + name;
+	else conv = base + "|" + name;
+
+	return H323PluginCodecManager::CreateCodec(conv);
+}
 
 unsigned H323Capability::GetDefaultSessionID() const
 {

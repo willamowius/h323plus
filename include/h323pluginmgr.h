@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2009/08/29 13:18:12  shorne
+ * Fix compile warnings on Linux
+ *
  * Revision 1.7  2009/05/19 11:46:23  willamowius
  * remove unused class H323DynaLink
  *
@@ -152,7 +155,7 @@
 #include <h323caps.h>
 
 class H323Capability;
-
+class OpalFactoryCodec;
 class H323PluginCodecManager : public PPluginModuleManager
 {
   PCLASSINFO(H323PluginCodecManager, PPluginModuleManager);
@@ -169,6 +172,8 @@ class H323PluginCodecManager : public PPluginModuleManager
     static OpalMediaFormat::List GetMediaFormats();
     static void AddFormat(const OpalMediaFormat & fmt);
     static void AddFormat(OpalMediaFormat * fmt);
+
+	static OpalFactoryCodec * CreateCodec(const PString & name);
 
     virtual void OnShutdown();
 

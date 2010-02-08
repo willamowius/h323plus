@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.27  2010/01/18 21:17:36  shorne
+ * Added support for H263v3
+ *
  * Revision 1.26  2010/01/18 21:14:08  shorne
  * Fix for encoder_set_options thx Carlos Haj
  *
@@ -3628,6 +3631,19 @@ void H323PluginCodecManager::Reboot()
 
     bootStrapCount--;
 	Bootstrap();
+}
+
+OpalFactoryCodec * H323PluginCodecManager::CreateCodec(const PString & name)
+{
+    PFactory<OpalFactoryCodec>::KeyList_T keyList = PFactory<OpalFactoryCodec>::GetKeyList();
+    PFactory<OpalFactoryCodec>::KeyList_T::const_iterator r;
+    for (r = keyList.begin(); r != keyList.end(); ++r) {
+		PString codec = *r;
+		if (codec == name)
+			return OpalPluginCodecFactory::CreateInstance(name);
+	}
+
+	return NULL;
 }
 
 /////////////////////////////////////////////////////////////////////////////

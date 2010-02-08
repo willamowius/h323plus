@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.16  2009/09/29 07:35:03  shorne
+ * Fix to ensure H.239 and H.249 capabilities are properly negotiationed.
+ *
  * Revision 1.15  2009/08/21 04:35:47  shorne
  * Expressly reference codecs.h to avoid problems with windows SDK codecs.h
  *
@@ -325,6 +328,7 @@ class H323Capabilities;
    An application may create a descendent off this class and override
    functions as required for describing a codec that it implements.
  */
+class OpalFactoryCodec;
 class H323Capability : public PObject
 {
   PCLASSINFO(H323Capability, PObject);
@@ -409,6 +413,11 @@ class H323Capability : public PObject
       const PString & name    ///< Name of capability
     )
     { return Create(name); }
+
+	/** 
+	  *Create a factory codec instance based on the codec name
+	  */
+	static OpalFactoryCodec * CreateCodec(MainTypes type, PBoolean isEncoder, const PString & name);
 
     /**Get the default RTP session.
        This function gets the default RTP session ID for the capability
