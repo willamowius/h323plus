@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.28  2010/02/08 05:26:20  shorne
+ * Added ability to create instance of plugin codec
+ *
  * Revision 1.27  2010/01/18 21:17:36  shorne
  * Added support for H263v3
  *
@@ -514,6 +517,8 @@ inline static bool IsValidMPI(int mpi) {
 
 #endif // H323_VIDEO
 
+typedef PFactory<OpalFactoryCodec, PString> OpalPluginCodecFactory;
+
 class OpalPluginCodec : public OpalFactoryCodec {
   PCLASSINFO(OpalPluginCodec, PObject)
   public:
@@ -573,24 +578,6 @@ class OpalPluginCodec : public OpalFactoryCodec {
   protected:
     PluginCodec_Definition * codecDefn;
     void * context;
-};
-
-class OpalPluginCodecFactory : public PFactory<OpalFactoryCodec>
-{
-  public:
-    class Worker : public PFactory<OpalFactoryCodec>::WorkerBase 
-    {
-      public:
-        Worker(const PString & key, PluginCodec_Definition * _codecDefn)
-          : PFactory<OpalFactoryCodec>::WorkerBase(TRUE), codecDefn(_codecDefn)
-        { PFactory<OpalFactoryCodec>::Register(key, this); }
-
-      protected:
-        virtual OpalFactoryCodec * Create(const PString &) const
-        { return new OpalPluginCodec(codecDefn); }
-
-        PluginCodec_Definition * codecDefn;
-    };
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1073,24 +1060,6 @@ static void PopulateMediaFormatFromGenericData(OpalMediaFormat & mediaFormat, co
     }
   }
 }
-
-template <typename CodecClass>
-class OpalFixedCodecFactory : public PFactory<OpalFactoryCodec>
-{
-  public:
-    class Worker : public PFactory<OpalFactoryCodec>::WorkerBase 
-    {
-      public:
-        Worker(const PString & key)
-          : PFactory<OpalFactoryCodec>::WorkerBase()
-        { PFactory<OpalFactoryCodec>::Register(key, this); }
-
-      protected:
-        virtual OpalFactoryCodec * Create(const PString &) const
-        { return new CodecClass(); }
-    };
-};
-
 
 static PString CreateCodecName(PluginCodec_Definition * codec, PBoolean addSW)
 {
@@ -2771,22 +2740,11 @@ void H323PluginCodecManager::CreateCapabilityAndMediaFormat(
   }
 
   // create the factories for the codecs 
-  new OpalPluginCodecFactory::Worker(PString(encoderCodec->sourceFormat) + "|" + encoderCodec->destFormat, encoderCodec);
-  new OpalPluginCodecFactory::Worker(PString(decoderCodec->sourceFormat) + "|" + decoderCodec->destFormat, decoderCodec);
+  OpalPluginCodecFactory::Register(PString(encoderCodec->sourceFormat) + "|" + encoderCodec->destFormat, new OpalPluginCodec(encoderCodec));
+  OpalPluginCodecFactory::Register(PString(decoderCodec->sourceFormat) + "|" + decoderCodec->destFormat, new OpalPluginCodec(decoderCodec));
+
 }
-/*
-H323Capability * H323PluginCodecManager::CreateCapability(
-          const PString & _mediaFormat, 
-          const PString & _baseName,
-                 unsigned maxFramesPerPacket, 
-                 unsigned recommendedFramesPerPacket,
-                 unsigned _pluginSubType
-  )
-{
-  return new H323PluginCapability(_mediaFormat, _baseName,
-                                  maxFramesPerPacket, recommendedFramesPerPacket, _pluginSubType);
-}
-*/
+
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -3608,11 +3566,10 @@ void H323PluginCodecManager::Bootstrap()
   mediaFormatList.Append(new OpalMediaFormat(OpalG711uLaw));
   mediaFormatList.Append(new OpalMediaFormat(OpalG711ALaw));
 
-  new OpalFixedCodecFactory<OpalG711ALaw64k_Encoder>::Worker(OpalG711ALaw64k_Encoder::GetFactoryName());
-  new OpalFixedCodecFactory<OpalG711ALaw64k_Decoder>::Worker(OpalG711ALaw64k_Decoder::GetFactoryName());
-
-  new OpalFixedCodecFactory<OpalG711uLaw64k_Encoder>::Worker(OpalG711uLaw64k_Encoder::GetFactoryName());
-  new OpalFixedCodecFactory<OpalG711uLaw64k_Decoder>::Worker(OpalG711uLaw64k_Decoder::GetFactoryName());
+  OpalPluginCodecFactory::Register("L16|OpalG711ALaw64k", new OpalG711ALaw64k_Encoder());
+  OpalPluginCodecFactory::Register("OpalG711ALaw64k|L16", new OpalG711ALaw64k_Decoder());
+  OpalPluginCodecFactory::Register("L16|G.711-uLaw-64k", new OpalG711uLaw64k_Encoder());
+  OpalPluginCodecFactory::Register("G.711-uLaw-64k|L16", new OpalG711uLaw64k_Decoder());
 #endif
 
 }
@@ -3635,14 +3592,19 @@ void H323PluginCodecManager::Reboot()
 
 OpalFactoryCodec * H323PluginCodecManager::CreateCodec(const PString & name)
 {
-    PFactory<OpalFactoryCodec>::KeyList_T keyList = PFactory<OpalFactoryCodec>::GetKeyList();
-    PFactory<OpalFactoryCodec>::KeyList_T::const_iterator r;
+  // OpalPluginCodecFactory is not being loaded from Bootstrap 
+  // This needs to be fixed - SH
+  if (name =="L16|OpalG711ALaw64k") return new OpalG711ALaw64k_Encoder();
+  if (name =="OpalG711ALaw64k|L16") return new OpalG711ALaw64k_Decoder();
+  if (name =="L16|G.711-uLaw-64k") return new OpalG711uLaw64k_Encoder();
+  if (name =="G.711-uLaw-64k|L16") return new OpalG711uLaw64k_Decoder();
+			
+    OpalPluginCodecFactory::KeyList_T keyList = OpalPluginCodecFactory::GetKeyList();
+    OpalPluginCodecFactory::KeyList_T::const_iterator r;
     for (r = keyList.begin(); r != keyList.end(); ++r) {
-		PString codec = *r;
-		if (codec == name)
-			return OpalPluginCodecFactory::CreateInstance(name);
+		if (*r == name)
+			return OpalPluginCodecFactory::CreateInstance(*r);
 	}
-
 	return NULL;
 }
 
