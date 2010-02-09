@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.29  2010/02/08 12:28:03  shorne
+ * OpalPluginCodecFactory now loads all codecs
+ *
  * Revision 1.28  2010/02/08 05:26:20  shorne
  * Added ability to create instance of plugin codec
  *
@@ -2396,6 +2399,10 @@ void H323PluginCodecManager::OnShutdown()
 {
   // unregister the plugin media formats
   OpalMediaFormatFactory::UnregisterAll();
+
+  // Unregister the codec factory
+  OpalPluginCodecFactory::UnregisterAll();
+
 #ifdef H323_VIDEO
 #ifdef H323_H239
   H323ExtendedVideoFactory::UnregisterAll();
@@ -3578,6 +3585,10 @@ void H323PluginCodecManager::Reboot()
 {
 	  // unregister the plugin media formats
 	  OpalMediaFormatFactory::UnregisterAll();
+
+	  // Unregister the codec factory
+	  OpalPluginCodecFactory::UnregisterAll();
+
 #ifdef H323_VIDEO
 #ifdef H323_H239
 	  H323ExtendedVideoFactory::UnregisterAll();
