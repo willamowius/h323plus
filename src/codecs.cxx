@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2009/08/21 04:35:47  shorne
+ * Expressly reference codecs.h to avoid problems with windows SDK codecs.h
+ *
  * Revision 1.8  2009/08/20 21:05:49  willamowius
  * fix comment
  *
@@ -1027,6 +1030,7 @@ H323FramedAudioCodec::H323FramedAudioCodec(const OpalMediaFormat & fmt, Directio
     sampleBuffer(samplesPerFrame)
 {
   bytesPerFrame = mediaFormat.GetFrameSize();
+  aec = NULL;
 }
 
 
