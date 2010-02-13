@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.26  2010/02/08 05:26:20  shorne
+ * Added ability to create instance of plugin codec
+ *
  * Revision 1.25  2010/01/04 21:01:35  willamowius
  * extend SetVideoFrameSize for 4CIF and 16CIF
  *
@@ -594,7 +597,7 @@ OpalFactoryCodec * H323Capability::CreateCodec(MainTypes type, PBoolean isEncode
 
 	PString conv;
 	if (isEncoder) conv = base + "|" + name;
-	else conv = base + "|" + name;
+	else conv = name + "|" + base;
 
 	return H323PluginCodecManager::CreateCodec(conv);
 }
