@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2009/07/09 15:11:12  shorne
+ * Simplfied and standardised compiler directives
+ *
  * Revision 1.6  2009/07/03 04:15:01  shorne
  * more H.460.18/19 support
  *
@@ -959,6 +962,7 @@ PBoolean H323_RealTimeChannel::OnSendingPDU(H245_OpenLogicalChannel & open) cons
                 H245_OpenLogicalChannel_reverseLogicalChannelParameters_multiplexParameters
                     ::e_h2250LogicalChannelParameters);
 
+    connection.OnSendH245_OpenLogicalChannel(open, PFalse);
     return OnSendingPDU(open.m_reverseLogicalChannelParameters.m_multiplexParameters);
   }
   else {
@@ -970,6 +974,7 @@ PBoolean H323_RealTimeChannel::OnSendingPDU(H245_OpenLogicalChannel & open) cons
 	if (OnSendingAltPDU(open.m_genericInformation))
 		open.IncludeOptionalField(H245_OpenLogicalChannel::e_genericInformation);
 
+    connection.OnSendH245_OpenLogicalChannel(open, PTrue);
     return OnSendingPDU(open.m_forwardLogicalChannelParameters.m_multiplexParameters);
   }
 }

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.35  2010/02/06 20:08:15  willamowius
+ * give application access to the received H.245 TCS
+ *
  * Revision 1.34  2010/02/04 14:07:15  willamowius
  * OnSetInitialBandwidth() wasn't declared virtual, so overloaded methods would not be called
  *
@@ -1802,6 +1805,13 @@ class H323Connection : public PObject
        The default behaviour does nothing.
       */
     virtual void OnSetLocalCapabilities();
+
+    /**Callback to modify the outgoing H245_OpenLogicalChannel.
+       The default behaviour does nothing.
+      */
+    virtual void OnSendH245_OpenLogicalChannel(
+        H245_OpenLogicalChannel & open, PBoolean forward
+    ) { }
 
     /**Return if this H245 connection is a master or slave
      */
