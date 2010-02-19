@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2010/02/15 20:44:21  willamowius
+ * add method OnSendH245_OpenLogicalChannel() to give application access to the outgoing OLC, the default implementation does nothing
+ *
  * Revision 1.7  2009/07/09 15:11:12  shorne
  * Simplfied and standardised compiler directives
  *
@@ -538,7 +541,7 @@
 #include "h323pdu.h"
 #include "h323ep.h"
 #include "h323rtp.h"
-
+#include <ptclib/delaychan.h>
 
 
 #define	MAX_PAYLOAD_TYPE_MISMATCHES 8
@@ -1279,7 +1282,7 @@ class CodecReadAnalyser
 #endif
 
 
-  void H323_RTPChannel::Transmit()
+void H323_RTPChannel::Transmit()
 {
   if (terminating) {
     PTRACE(3, "H323RTP\tTransmit thread terminated on start up");
@@ -1316,6 +1319,7 @@ class CodecReadAnalyser
   unsigned frameCount = 0;
   DWORD rtpTimestamp = 0;
   frame.SetPayloadSize(0);
+  PAdaptiveDelay pacing;
 
 #if PTRACING
   DWORD lastDisplayedTimestamp = 0;
@@ -1332,6 +1336,7 @@ class CodecReadAnalyser
   while (codec->Read(frame.GetPayloadPtr()+frameOffset, length, frame)) {
     // Calculate the timestamp and real time to take in processing
     rtpTimestamp += codec->GetFrameRate();
+//if (!isAudio) { PTRACE(0, "JW Channel: codec video read: length=" << length << " rtpTimestamp=" << rtpTimestamp << " marker=" << frame.GetMarker()); }
 
 #if PTRACING
     if (rtpTimestamp - lastDisplayedTimestamp > RTP_TRACE_DISPLAY_RATE) {
@@ -1414,6 +1419,12 @@ class CodecReadAnalyser
       // Send the frame of coded data we have so far to RTP transport
       if (!rtpSession.WriteData(frame))
          break;
+
+      // video frames produce many packets per frame especially at
+      // higher resolutions and can easily overload the link if sent
+      // without delay
+      if (!isAudio)
+         pacing.Delay(4);
 
       // Reset flag for in talk burst
       if (isAudio)
