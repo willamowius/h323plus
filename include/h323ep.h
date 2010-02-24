@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.28  2010/01/20 04:11:09  shorne
+ * Add ability to advertise supported H.460 features in presence
+ *
  * Revision 1.27  2009/12/21 01:15:08  shorne
  * Further Presence Development
  *
@@ -611,6 +614,13 @@ class H323EndPoint : public PObject
 	PBoolean SetVideoFrameSize(H323Capability::CapabilityFrameSize frameSize, 
 		                  int frameUnits = 1
 	);
+
+	/**Set the Video Encoder size and rate. 
+		This is used for generic Video Capabilities to set the appropriate level for a given encoder 
+		frame size and rate.
+	  */
+    PBoolean SetVideoEncoder(unsigned frameWidth, unsigned frameHeight, unsigned frameRate);
+
 #endif
 
     /**Add all matching capabilities in list.
@@ -2193,7 +2203,7 @@ class H323EndPoint : public PObject
     void SetInitialBandwidth(unsigned bandwidth) { initialBandwidth = bandwidth; }
 
 #ifdef H323_VIDEO
-	virtual void OnSetInitialBandwidth(H323VideoCodec * codec) {};
+	virtual void OnSetInitialBandwidth(H323VideoCodec * /*codec*/) {};
 #endif
 
     /**Called when an outgoing PDU requires a feature set
@@ -2371,7 +2381,7 @@ class H323EndPoint : public PObject
 
     /**Type of NAT detected (if available) when initialing STUN Client
 	  */
-	virtual PBoolean STUNNatType(int type) { return FALSE; };
+	virtual PBoolean STUNNatType(int /*type*/) { return FALSE; };
 
     /** Retrieve the first available 
         NAT Traversal Techniques
@@ -2384,14 +2394,14 @@ class H323EndPoint : public PObject
        */
     PNatStrategy & GetNatMethods();
 
-	virtual void NATMethodCallBack(const PString & NatID,		///< Method Identifier
-								PINDEX msgID,					///< Message Identifer
-								const PString & message			///< Message
+	virtual void NATMethodCallBack(const PString & /*NatID*/,	///< Method Identifier
+								PINDEX /*msgID*/,				///< Message Identifer
+								const PString & /*message*/		///< Message
 								) {};
 
 #endif // P_NONCORE
 
-    virtual PBoolean OnUnsolicitedInformation(const H323SignalPDU & pdu)
+    virtual PBoolean OnUnsolicitedInformation(const H323SignalPDU & /*pdu*/)
     { return FALSE; }
 
     /**Determine if the address is "local", ie does not need STUN

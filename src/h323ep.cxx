@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.39  2010/02/02 14:20:51  willamowius
+ * fix dialing alias@ip, when not registered to a gatekeeper
+ *
  * Revision 1.38  2010/01/23 15:54:46  willamowius
  * fix Linux compile
  *
@@ -1506,7 +1509,7 @@ PBoolean H323EndPoint::SetGatewaySupportedProtocol(H225_ArrayOf_SupportedProtoco
 	return FALSE;
 }
 
-PBoolean H323EndPoint::OnSetGatewayPrefixes(PStringList & prefixes) const
+PBoolean H323EndPoint::OnSetGatewayPrefixes(PStringList & /*prefixes*/) const
 {
 	return FALSE;
 }
@@ -1571,6 +1574,11 @@ PBoolean H323EndPoint::RemoveCapability(H323Capability::MainTypes capabilityType
 }
 
 #ifdef H323_VIDEO
+PBoolean H323EndPoint::SetVideoEncoder(unsigned frameWidth, unsigned frameHeight, unsigned frameRate)
+{
+    return capabilities.SetVideoEncoder(frameWidth, frameHeight, frameRate);
+}
+
 PBoolean H323EndPoint::SetVideoFrameSize(H323Capability::CapabilityFrameSize frameSize, 
 		                  int frameUnits)
 {
@@ -1816,7 +1824,7 @@ PBoolean H323EndPoint::GatekeeperCheckIP(const H323TransportAddress & /*oldAddr*
 	return FALSE;
 }
 
-void H323EndPoint::OnAdmissionRequest(H323Connection & connection)
+void H323EndPoint::OnAdmissionRequest(H323Connection & /*connection*/)
 {
 }
 
@@ -2325,6 +2333,7 @@ PBoolean H323EndPoint::ResolveCallParty(const PString & _remoteParty, PStringLis
 		  PTRACE(4, "H323\tENUM converted remote party " << _remoteParty << " to " << remoteParty);
         } else {
           PTRACE(4, "H323\tENUM Cannot resolve remote party " << _remoteParty);
+		  return false;
         }
       }
 	}
@@ -2341,11 +2350,31 @@ PBoolean H323EndPoint::ResolveCallParty(const PString & _remoteParty, PStringLis
 	   if (!found) str.RemoveAll();
 	   if (!found && (PDNS::LookupSRV(number,"_h323cs._tcp.",str))) {
 		   for (PINDEX i=0; i<str.GetSize(); i++) {
-	         PTRACE(4, "H323\tDNS SRV CS converted remote party " << _remoteParty << " to " << str[i]);
+		     PString a = str[i].Mid(str[i].Find('@')+1);
+	         PTRACE(4, "H323\tDNS SRV CS located remote party " << _remoteParty << " at " << a);
              addresses.AppendString(str[i]);
 			 found = TRUE;
 		   }
-       } 
+       }
+/*
+	   if (!found) str.RemoveAll();
+	   if (!found && (PDNS::LookupSRV(number,"_h323ls._udp.",str))) {
+		   for (PINDEX j=0; j<str.GetSize(); j++) {
+			PString a = str[j].Mid(str[j].Find('@')+1);
+				H323TransportAddress newAddr, gkAddr(a);
+				H323Gatekeeper * gk = CreateGatekeeper(new H323TransportUDP(*this));
+				PBoolean ok = gk->DiscoverByAddress(gkAddr);
+				if (ok) 
+				  ok = gk->LocationRequest(remoteParty, newAddr);
+				delete gk;
+				if (ok) {
+				  PTRACE(3, "H323\tDNS SRV LR of \"" << remoteParty << "\" on gk " << gkAddr << " found " << newAddr);
+				  addresses.AppendString(newAddr);
+				  found = TRUE;
+				}
+		   }
+	   }
+*/
 	   if (!found) {
            PTRACE(4, "H323\tDNS SRV Cannot resolve remote party " << remoteParty);
 		   addresses = PStringList(remoteParty);
@@ -4098,7 +4127,7 @@ void H323EndPoint::PresenceAuthorization(const OpalGloballyUniqueID id,
 }
 #endif  // H323_H460P
 
-PBoolean H323EndPoint::OnFeatureInstance(int instType, const PString & identifer)
+PBoolean H323EndPoint::OnFeatureInstance(int /*instType*/, const PString & /*identifer*/)
 {
 	return TRUE;
 }
