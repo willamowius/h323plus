@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2010/01/20 04:23:09  shorne
+ * Add ability to advertise supported H.460 features in presence
+ *
  * Revision 1.4  2009/12/21 01:15:09  shorne
  * Further Presence Development
  *
@@ -73,6 +76,7 @@ H460PresenceHandler::H460PresenceHandler(H323EndPoint & _ep)
     feat = NULL;
 	presenceRegistration = false;
 	pendingMessages = false;
+	genericData.SetSize(0);
 
     QueueTimer.SetNotifier(PCREATE_NOTIFIER(dequeue));
     QueueTimer.RunContinuous(PRETIME * 1000); 
@@ -158,16 +162,20 @@ void H460PresenceHandler::SetPresenceState(const PStringList & alias, unsigned l
 	H323PresenceNotification notification;
 	notification.SetPresenceState((H323PresenceNotification::States)localstate,localdisplay);
 
+	// Add Geoloation Information
 	H460P_PresenceGeoLocation loc;
 	if (EndpointLocale.BuildLocalePDU(loc))
 		notification.AddEndpointLocale(loc);
 
-
+    // Add the features the endpoint supports
 	list<H460P_PresenceFeature>::iterator i = EndpointFeatures.begin();
 	while (i != EndpointFeatures.end()) {
 		notification.AddSupportedFeature(*i);
 		i++;
 	}
+
+	// Add any generic data 
+	notification.AddGenericData(genericData);
 
 	H323PresenceNotifications notify;
 	notify.Add(notification);
@@ -318,6 +326,13 @@ void H460PresenceHandler::AddEndpointH460Feature(const H225_GenericIdentifier & 
 	g.m_display.SetValue(display);
 
 	EndpointFeatures.push_back(f);
+}
+
+void H460PresenceHandler::AddEndpointGenericData(const H225_GenericData & data)
+{
+	int sz = genericData.GetSize();
+	genericData.SetSize(sz+1);
+	genericData[sz] = data;
 }
 
 ///////////////////////////////////////////////////////////////////////

@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2010/01/20 04:23:08  shorne
+ * Add ability to advertise supported H.460 features in presence
+ *
  * Revision 1.3  2009/12/21 01:15:09  shorne
  * Further Presence Development
  *
@@ -113,6 +116,7 @@ class H460PresenceHandler : public H323PresenceHandler
 
 	void AddEndpointFeature(int feat);
 	void AddEndpointH460Feature(const H225_GenericIdentifier & featid, const PString & display);
+	void AddEndpointGenericData(const H225_GenericData & data);
 
 	localeInfo & GetLocationInfo() { return EndpointLocale; }
 
@@ -122,6 +126,8 @@ class H460PresenceHandler : public H323PresenceHandler
 	PStringList PresenceBlockList;
 	list<H460P_PresenceFeature>   EndpointFeatures;
 	localeInfo  EndpointLocale;
+
+	H225_ArrayOf_GenericData genericData;
 
 	PBoolean presenceRegistration;
 	PBoolean pendingMessages;

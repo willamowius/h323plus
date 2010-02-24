@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2010/01/20 04:23:09  shorne
+ * Add ability to advertise supported H.460 features in presence
+ *
  * Revision 1.6  2009/12/21 01:15:09  shorne
  * Further Presence Development
  *
@@ -1200,6 +1203,20 @@ void H323PresenceNotification::AddEndpointLocale(const H460P_PresenceGeoLocation
 	e.m_geolocation = loc;
 }
 
+void H323PresenceNotification::AddGenericData(const H225_ArrayOf_GenericData & data)
+{
+	int sz = data.GetSize();
+	if (sz == 0)
+		return;
+
+	H460P_Presentity & e = m_presentity;
+	e.IncludeOptionalField(H460P_Presentity::e_genericData);
+	e.m_genericData.SetSize(sz);
+	for (PINDEX i=0; i < sz; ++i) {
+		e.m_genericData[i] = data[i];
+	}
+}
+
 void H323PresenceNotification::GetPresenceState(H323PresenceNotification::States & state, 
 						PString & display) const
 {
@@ -1421,6 +1438,19 @@ void H323PresenceSubscription::MakeDecision(bool approve)
 bool H323PresenceSubscription::IsDecisionMade() 
 { 
 	return HasOptionalField(H460P_PresenceSubscription::e_approved); 
+}
+
+void H323PresenceSubscription::AddGenericData(const H225_ArrayOf_GenericData & data)
+{
+	int sz = data.GetSize();
+	if (sz >0) 
+		return;
+
+	IncludeOptionalField(H460P_PresenceSubscription::e_genericData);
+	m_genericData.SetSize(sz);
+	for (PINDEX i=0; i<sz; i++) {
+		m_genericData[i] = data[i];
+	}
 }
 
 #endif

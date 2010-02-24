@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2010/01/20 04:23:08  shorne
+ * Add ability to advertise supported H.460 features in presence
+ *
  * Revision 1.6  2009/12/21 01:15:09  shorne
  * Further Presence Development
  *
@@ -96,6 +99,7 @@ public:
 	void AddSupportedFeature(int id);
 	void AddSupportedFeature(const H460P_PresenceFeature & id);
 	void AddEndpointLocale(const H460P_PresenceGeoLocation & loc);
+	void AddGenericData(const H225_ArrayOf_GenericData & data);
 
 	void AddSubscriber(const OpalGloballyUniqueID & guid);
 	OpalGloballyUniqueID GetSubscriber(PINDEX i);
@@ -152,6 +156,7 @@ public:
     OpalGloballyUniqueID GetSubscription() const;
 
 	void SetApproved(bool success);
+	void AddGenericData(const H225_ArrayOf_GenericData & data);
     
 };
 
