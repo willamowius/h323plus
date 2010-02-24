@@ -1,0 +1,94 @@
+#
+# Makefile for GSM 06.10
+#
+# Copyright (C) 2004 Post Increment, All Rights Reserved
+#
+# The contents of this file are subject to the Mozilla Public License
+# Version 1.0 (the "License"); you may not use this file except in
+# compliance with the License. You may obtain a copy of the License at
+# http://www.mozilla.org/MPL/
+#
+# Software distributed under the License is distributed on an "AS IS"
+# basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See
+# the License for the specific language governing rights and limitations
+# under the License.
+#
+# The Original Code is Open H323 library.
+#
+# The Initial Developer of the Original Code is Post Increment
+#
+# Contributor(s): ______________________________________.
+#
+# $Log$
+# Revision 1.4  2007/04/19 06:09:04  csoutheren
+# Fixed plugin build system to use better detection for OSX
+# Resolved 1636262 - Fix for audio plugins for OSX
+#
+# Revision 1.3  2006/09/06 23:09:21  csoutheren
+# Add Makefile and more implementation for Linux H.263
+#
+# Revision 1.3  2006/08/20 00:32:25  csoutheren
+# Added missing files to Makefile
+#
+# Revision 1.2  2006/08/12 10:59:14  rjongbloed
+# Added Linux build for H.261 plug-in.
+#
+
+VC_PLUGIN_DIR=opal-3.5.2/codecs/video
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+target_os=mingw32
+
+BASENAME= h263-ffmpeg
+SONAME	=$(BASENAME)
+PLUGINDIR=../..
+
+COMMONDIR	= ../common
+
+CC	 	=gcc
+CFLAGS	 	= -Os 
+CXX	 	=cl.exe
+LDSO	 	=-module -avoid-version -shared
+PLUGINEXT	=dll
+STDCCFLAGS	=
+LDFLAGS		=
+
+EXTRACCFLAGS    += -I$(COMMONDIR) -I$(PLUGINDIR)
+
+vpath	%.cxx $(SHAREDDIR)
+vpath	%.cxx $(COMMONDIR)
+vpath	%.o   $(OBJDIR)
+
+SRCS	+= h263ffmpeg.cxx \
+           $(COMMONDIR)/trace.cxx
+
+OBJDIR = ./obj
+
+$(OBJDIR)/%.o : %.cxx
+	@mkdir -p $(OBJDIR) >/dev/null 2>&1
+	$(CXX) -I../../../include $(EXTRACCFLAGS) $(STDCCFLAGS) $(OPTCCFLAGS) $(CFLAGS) -c $< -o $@
+
+PLUGIN	= ./$(BASENAME)_video_pwplugin.$(PLUGINEXT)
+STATIC	= ./lib$(BASENAME)_video_s.a
+
+OBJECTS = $(addprefix $(OBJDIR)/,$(patsubst %.c,%.o,$(patsubst %.cxx,%.o,$(notdir $(SRCS)))))
+
+$(PLUGIN): $(OBJECTS)
+ifeq (,$(findstring solaris,$(target_os)))
+	$(CXX) $(LDSO) -o $@ $^
+else
+	$(CXX) $(LDSO) $@ -o $@ $^
+endif
+
+install:
+	mkdir -p $(DESTDIR)$(libdir)/$(VC_PLUGIN_DIR)
+	install $(PLUGIN) $(DESTDIR)$(libdir)/$(VC_PLUGIN_DIR)
+
+uninstall:
+	rm -f $(DESTDIR)$(libdir)/$(VC_PLUGIN_DIR)/$(PLUGIN)
+
+clean:
+	rm -f $(OBJECTS) $(PLUGIN)
+
+###########################################

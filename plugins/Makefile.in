@@ -1,0 +1,82 @@
+SUBDIRS = audio/G722 \
+          audio/GSM0610 \
+          audio/Speex \
+          audio/iLBC \
+	  audio/LPC_10 \
+	  audio/G726 \
+	  audio/IMA_ADPCM \
+	  audio/gsm-amr \
+	  video/H.261-vic
+
+HAVE_SBC=@HAVE_SBC@
+ifeq ($(HAVE_SBC),yes)
+SUBDIRS += audio/SBC
+endif
+
+HAVE_CELT=@HAVE_CELT@
+ifeq ($(HAVE_CELT),yes)
+SUBDIRS += audio/celt
+endif
+
+HAVE_H263=@HAVE_H263@
+ifeq ($(HAVE_H263),yes)
+SUBDIRS += video/H.263-ffmpeg
+endif
+
+HAVE_H264=@HAVE_H264@
+ifeq ($(HAVE_H264),yes)
+SUBDIRS += video/H.264 
+endif
+
+HAVE_H263P=@HAVE_H263P@
+ifeq ($(HAVE_H263P),yes)
+SUBDIRS += video/H.263-1998
+endif
+
+HAVE_MPEG4=@HAVE_MPEG4@
+ifeq ($(HAVE_MPEG4),yes)
+SUBDIRS += video/MPEG4-ffmpeg
+endif
+
+HAVE_THEORA=@HAVE_THEORA@
+ifeq ($(HAVE_THEORA),yes)
+SUBDIRS += video/THEORA
+endif
+
+HAVE_IXJ=@HAVE_IXJ@
+ifeq ($(HAVE_IXJ),yes)
+SUBDIRS += LID/IxJ
+endif
+
+HAVE_VPB=@HAVE_VPB@
+ifeq ($(HAVE_VPB),yes)
+SUBDIRS += LID/VPB
+endif
+
+HAVE_CAPI=@HAVE_CAPI@
+ifeq ($(HAVE_CAPI),yes)
+SUBDIRS += LID/CAPI
+endif
+
+HAVE_SPANDSP=@HAVE_SPANDSP@
+ifeq ($(HAVE_SPANDSP),yes)
+ifneq (,$(wildcard fax/fax_spandsp))
+ifneq (,$(wildcard fax/fax_spandsp/spandsp_util))
+SUBDIRS += fax/fax_spandsp
+endif
+endif
+endif
+
+all debug opt both \
+optshared debugshared bothshared \
+optnoshared debugnoshared bothnoshared:
+	@set -e; $(foreach dir,$(SUBDIRS),if test -d ${dir} ; then $(MAKE) -C $(dir); fi ; )
+
+clean optclean debugclean:
+	@set -e; $(foreach dir,$(SUBDIRS),if test -d ${dir} ; then $(MAKE) -C $(dir) clean; fi ; )
+
+install uninstall:
+	@set -e; $(foreach dir,$(SUBDIRS),if test -d ${dir} ; then $(MAKE) -C $(dir) $@; fi ; )
+
+depend optdepend debugdepend bothdepend release tagbuild:
+	@echo

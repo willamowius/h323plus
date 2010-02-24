@@ -1,0 +1,136 @@
+#
+# Makefile for GSM 06.10
+#
+# Copyright (C) 2004 Post Increment, All Rights Reserved
+#
+# The contents of this file are subject to the Mozilla Public License
+# Version 1.0 (the "License"); you may not use this file except in
+# compliance with the License. You may obtain a copy of the License at
+# http://www.mozilla.org/MPL/
+#
+# Software distributed under the License is distributed on an "AS IS"
+# basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See
+# the License for the specific language governing rights and limitations
+# under the License.
+#
+# The Original Code is Open H323 library.
+#
+# The Initial Developer of the Original Code is Post Increment
+#
+# Contributor(s): ______________________________________.
+#
+# $Revision$
+# $Author$
+# $Date$
+
+AC_PLUGIN_DIR=@AC_PLUGIN_DIR@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+target_os=@target_os@
+
+GSM_SYSTEM=@GSM_SYSTEM@
+GSM_LIBS=@GSM_LIBS@
+GSM_CFLAGS=@GSM_CFLAGS@
+SONAME	= gsm0610
+H323_EMBEDDED_GSM=@H323_EMBEDDED_GSM@
+
+SRCDIR		= ./src
+OBJDIR		= ./obj
+PLUGINDIR       =../..
+
+CC	 	=@CC@
+CFLAGS	 	=@CFLAGS@
+CXX	 	=@CXX@
+LDSO	 	=@LDSO@
+PLUGINEXT	=@PLUGINEXT@
+STDCCFLAGS	=@STDCCFLAGS@
+LDFLAGS		=@LDFLAGS@
+EXTRACFLAGS     =-I$(PLUGINDIR)
+
+SRCS	+= gsm06_10_codec.c
+
+
+ifeq ($(GSM_SYSTEM),no)
+
+SRCS	+= $(SRCDIR)/gsm_create.c \
+           $(SRCDIR)/gsm_destroy.c \
+	   $(SRCDIR)/gsm_decode.c \
+           $(SRCDIR)/gsm_encode.c \
+           $(SRCDIR)/gsm_option.c \
+	   $(SRCDIR)/code.c \
+           $(SRCDIR)/decode.c \
+           $(SRCDIR)/add.c \
+	   $(SRCDIR)/gsm_lpc.c \
+           $(SRCDIR)/rpe.c \
+           $(SRCDIR)/preprocess.c \
+           $(SRCDIR)/long_term.c \
+           $(SRCDIR)/short_term.c \
+           $(SRCDIR)/table.c
+
+EXTRALIBS = 
+GSM_CFLAGS = -I./inc -DWAV49 -DNeedFunctionPrototypes=1
+
+else
+
+EXTRALIBS = $(GSM_LIBS)
+
+endif
+
+
+vpath	%.o $(OBJDIR)
+vpath	%.c $(SRCDIR)
+
+ifeq ($(H323_EMBEDDED_GSM),1)
+EXTRACCFLAGS=-DOPAL_STATIC_CODEC
+endif
+
+ifeq ($(VERBOSE),)
+Q_CC = @echo [CC] `echo $< | sed s^@OPALDIR@/^^` ;
+Q_LD = @echo [LD] `echo $(PLUGIN) | sed s^@OPALDIR@/^^` ;
+endif
+
+
+$(OBJDIR)/%.o : %.c
+	@mkdir -p $(OBJDIR) >/dev/null 2>&1
+	$(Q_CC)$(CC) -I../../../include  $(EXTRACCFLAGS) $(STDCCFLAGS) $(OPTCCFLAGS) $(GSM_CFLAGS) $(EXTRACFLAGS) $(CFLAGS) -c $< -o $@
+
+PLUGIN	= ./gsm0610_audio_pwplugin.$(PLUGINEXT)
+STATIC	= ./libgsm0610_audio_s.a
+
+OBJECTS = $(addprefix $(OBJDIR)/,$(patsubst %.c,%.o,$(notdir $(SRCS))))
+
+ifeq ($(H323_EMBEDDED_GSM),1)
+
+$(STATIC): $(OBJECTS)
+	$(AR) rcs $@ $^ 
+
+install:
+
+uninstall:
+
+else
+
+$(PLUGIN): $(OBJECTS)
+
+ifeq (solaris,$(findstring solaris,$(target_os)))
+
+	$(Q_LD)$(CC) $(LDSO) $@ -o $@ $^ $(EXTRALIBS)
+else 
+	$(Q_LD)$(CC) $(LDSO) -o $@ $^ $(EXTRALIBS)
+
+endif
+
+endif
+
+install:
+	mkdir -p $(DESTDIR)$(libdir)/$(AC_PLUGIN_DIR)
+	install $(PLUGIN) $(DESTDIR)$(libdir)/$(AC_PLUGIN_DIR)
+
+uninstall:
+	rm -f $(DESTDIR)$(libdir)/$(AC_PLUGIN_DIR)/$(PLUGIN)
+
+clean:
+	rm -f $(OBJECTS) $(PLUGIN)
+
+###########################################
