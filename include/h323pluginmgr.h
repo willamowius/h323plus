@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2010/02/08 05:26:19  shorne
+ * Added ability to create instance of plugin codec
+ *
  * Revision 1.8  2009/08/29 13:18:12  shorne
  * Fix compile warnings on Linux
  *
@@ -273,6 +276,10 @@ class OpalFactoryCodec : public PObject {
 
     /** Return the  sampleRate field of PluginCodec_Definition for this codec*/
     virtual PString      GetSDPFormat() const = 0;
+
+	/** Set a Custom format for the codec */
+	virtual bool SetCustomFormat(unsigned /*width*/, unsigned /*height*/, unsigned /*frameRate*/) { return false; }
+
 };
 
 #endif

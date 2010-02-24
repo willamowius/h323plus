@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.30  2010/02/09 02:48:57  shorne
+ * Ensure OpalPluginCodecFactory is emptied when closing H323PluginCodecManager
+ *
  * Revision 1.29  2010/02/08 12:28:03  shorne
  * OpalPluginCodecFactory now loads all codecs
  *
@@ -454,11 +457,12 @@
 #include <mediafmt.h>
 
 #define H323CAP_TAG_PREFIX    "h323"
-static const char GET_CODEC_OPTIONS_CONTROL[]    = "get_codec_options";
-static const char FREE_CODEC_OPTIONS_CONTROL[]   = "free_codec_options";
-static const char GET_OUTPUT_DATA_SIZE_CONTROL[] = "get_output_data_size";
-static const char SET_CODEC_OPTIONS_CONTROL[]    = "set_codec_options";
-static const char EVENT_CODEC_CONTROL[]          = "event_codec";
+static const char GET_CODEC_OPTIONS_CONTROL[]		= "get_codec_options";
+static const char FREE_CODEC_OPTIONS_CONTROL[]		= "free_codec_options";
+static const char GET_OUTPUT_DATA_SIZE_CONTROL[]	= "get_output_data_size";
+static const char SET_CODEC_OPTIONS_CONTROL[]		= "set_codec_options";
+static const char SET_CODEC_CUSTOMISED_OPTIONS[]	= "to_customised_options";
+static const char EVENT_CODEC_CONTROL[]				= "event_codec";
 
 #ifdef H323_VIDEO
 
@@ -577,6 +581,8 @@ class OpalPluginCodec : public OpalFactoryCodec {
 
     PString GetSDPFormat() const 
     { return codecDefn->sampleRate; }
+
+	bool SetCustomFormat(unsigned frameWidth, unsigned frameHeight, unsigned frameRate);
 
   protected:
     PluginCodec_Definition * codecDefn;
@@ -731,6 +737,39 @@ static PluginCodec_ControlDefn * GetCodecControl(const PluginCodec_Definition * 
   return NULL;
 }
 
+static bool SetCustomisedOptions(const PluginCodec_Definition * codec, 
+								 void * context, 
+								 unsigned frameWidth, 
+								 unsigned frameHeight, 
+								 unsigned frameRate)
+{
+	if (context == NULL)
+		return false;
+
+	PStringArray list;
+	list.AppendString(PLUGINCODEC_OPTION_FRAME_WIDTH);
+	list.AppendString(frameWidth);
+	list.AppendString(PLUGINCODEC_OPTION_FRAME_HEIGHT);
+	list.AppendString(frameHeight);
+	list.AppendString(PLUGINCODEC_OPTION_FRAME_TIME);
+	list.AppendString(OpalMediaFormat::VideoTimeUnits * 1000 * 100 * frameRate / 2997);
+
+	char ** _options = list.ToCharArray();
+	unsigned int optionsLen = sizeof(_options);
+	PluginCodec_ControlDefn * ctl = GetCodecControl(codec, SET_CODEC_CUSTOMISED_OPTIONS);
+	if (ctl != NULL) {
+		(*ctl->control)(codec, context ,SET_CODEC_CUSTOMISED_OPTIONS, _options, &optionsLen);
+		return true;
+	}
+	return false;
+}
+
+
+bool OpalPluginCodec::SetCustomFormat(unsigned frameWidth, unsigned frameHeight, unsigned frameRate)
+{
+	return SetCustomisedOptions(codecDefn, context, frameWidth, frameHeight, frameRate);
+}
+
 static PBoolean SetCodecControl(const PluginCodec_Definition * codec, 
                                                     void * context,
                                               const char * name,
@@ -762,9 +801,9 @@ static PBoolean SetCodecControl(const PluginCodec_Definition * codec,
 #ifdef H323_VIDEO
 
 static PBoolean EventCodecControl(PluginCodec_Definition * codec, 
-                                               void * context,
-                                         const char * name,
-                                         const char * parm )
+                                               void * /*context*/,
+                                         const char * /*name*/,
+                                         const char * /*parm*/ )
 {
   PluginCodec_ControlDefn * codecControls = codec->codecControls;
   if (codecControls == NULL)
@@ -1543,6 +1582,81 @@ class H323PluginVideoCodec : public H323VideoCodec
 };
 
 
+static bool UpdateVideoOptions(const PluginCodec_Definition * codec, void * context, OpalMediaFormat & mediaFormat) {
+
+    PluginCodec_ControlDefn * ctl = GetCodecControl(codec, SET_CODEC_OPTIONS_CONTROL);
+    if (ctl != NULL) {
+      PStringArray list;
+      for (PINDEX i = 0; i < mediaFormat.GetOptionCount(); i++) {
+        const OpalMediaOption & option = mediaFormat.GetOption(i);
+        list += option.GetName();
+        list += option.AsString();
+      }
+      char ** _options = list.ToCharArray();
+      unsigned int optionsLen = sizeof(_options);
+      (*ctl->control)(codec, context, SET_CODEC_OPTIONS_CONTROL, _options, &optionsLen);
+		  while (_options[0] != NULL && _options[1] != NULL) {
+			const char * key = _options[0];
+			int val = atoi(_options[1]);
+			if (strcasecmp(key, OpalVideoFormat::FrameWidthOption) == 0)
+			    mediaFormat.SetOptionInteger(OpalVideoFormat::FrameWidthOption,val); 
+			else if (strcasecmp(key, OpalVideoFormat::FrameHeightOption) == 0)
+				mediaFormat.SetOptionInteger(OpalVideoFormat::FrameHeightOption,val); 
+			else if (strcasecmp(key, OpalVideoFormat::TargetBitRateOption) == 0) {
+				mediaFormat.SetOptionInteger(OpalVideoFormat::TargetBitRateOption,val); 
+				mediaFormat.SetOptionInteger(OpalVideoFormat::MaxBitRateOption,val); 
+			} else if (strcasecmp(key, OpalVideoFormat::FrameTimeOption) == 0)
+				mediaFormat.SetOptionInteger(OpalVideoFormat::FrameTimeOption,val);
+
+			_options += 2;
+		  }
+      //free(_options);
+	  return true;
+    }
+	return false;
+}
+
+static bool SetCustomLevel(const PluginCodec_Definition * codec, OpalMediaFormat & mediaFormat, unsigned width, unsigned height, unsigned rate)
+{
+
+	mediaFormat.SetOptionInteger(OpalVideoFormat::FrameWidthOption,width); 
+	mediaFormat.SetOptionInteger(OpalVideoFormat::FrameHeightOption,height); 
+	mediaFormat.SetOptionInteger(OpalVideoFormat::FrameTimeOption, (int)(OpalMediaFormat::VideoTimeUnits * 1000 * 100 * rate / 2997));
+
+    PluginCodec_ControlDefn * ctl = GetCodecControl(codec, SET_CODEC_CUSTOMISED_OPTIONS);
+    if (ctl != NULL) {
+      PStringArray list;
+      for (PINDEX i = 0; i < mediaFormat.GetOptionCount(); i++) {
+        const OpalMediaOption & option = mediaFormat.GetOption(i);
+        list += option.GetName();
+        list += option.AsString();
+      }
+      char ** _options = list.ToCharArray();
+      unsigned int optionsLen = sizeof(_options);
+      (*ctl->control)(codec, NULL,SET_CODEC_CUSTOMISED_OPTIONS, _options, &optionsLen);
+		  while (_options[0] != NULL && _options[1] != NULL) {
+			const char * key = _options[0];
+			int val = atoi(_options[1]);
+			if (strcasecmp(key, OpalVideoFormat::TargetBitRateOption) == 0) {
+				mediaFormat.SetOptionInteger(OpalVideoFormat::TargetBitRateOption,val); 
+				mediaFormat.SetOptionInteger(OpalVideoFormat::MaxBitRateOption,val); 
+			} else if (strcasecmp(key, "Generic Parameter 42") == 0)
+				mediaFormat.SetOptionInteger("Generic Parameter 42",val);
+		    else if (strcasecmp(key, "Generic Parameter 10") == 0)
+				mediaFormat.SetOptionInteger("Generic Parameter 10",13);  // 16:9 Ratio
+
+			_options += 2;
+		  }
+      //free(_options);
+#if PTRACING
+	  PTRACE(6, "H323\tCustom Video Format: "); 
+	  OpalMediaFormat::DebugOptionList(mediaFormat);
+#endif
+	  return true;
+    }
+	return false;
+}
+
 H323PluginVideoCodec::H323PluginVideoCodec(const OpalMediaFormat & fmt, Direction direction, PluginCodec_Definition * _codec)
       : H323VideoCodec(fmt, direction), codec(_codec) 
 { 
@@ -1550,6 +1664,8 @@ H323PluginVideoCodec::H323PluginVideoCodec(const OpalMediaFormat & fmt, Directio
         context = (*codec->createCodec)(codec); 
     else 
         context = NULL; 
+
+	UpdateVideoOptions(codec,context,GetWritableMediaFormat());
 
     sendIntra = TRUE;
     lastPacketSent = TRUE;
@@ -1567,23 +1683,8 @@ H323PluginVideoCodec::H323PluginVideoCodec(const OpalMediaFormat & fmt, Directio
     bytesPerFrame = (maxHeight * maxWidth * 3)/2;
     bufferRTP = RTP_DataFrame(sizeof(PluginCodec_Video_FrameHeader) + bytesPerFrame, TRUE);
 
-    PluginCodec_ControlDefn * ctl = GetCodecControl(codec, SET_CODEC_OPTIONS_CONTROL);
-    if (ctl != NULL) {
-      PStringArray list;
-      for (PINDEX i = 0; i < mediaFormat.GetOptionCount(); i++) {
-        const OpalMediaOption & option = mediaFormat.GetOption(i);
-        list += option.GetName();
-        list += option.AsString();
-        PTRACE(5, "OpalPlugin\tSetting codec option '" << option.GetName() << "'=" << option.AsString());
-      }
-      char ** _options = list.ToCharArray();
-      unsigned int optionsLen = sizeof(_options);
-      (*ctl->control)(codec, context, SET_CODEC_OPTIONS_CONTROL, _options, &optionsLen);
-      free(_options);
-    }
-
 #if PTRACING
-   PTRACE(6,"Codec Options");
+   PTRACE(6,"Agreed Codec Options");
      OpalMediaFormat::DebugOptionList(mediaFormat);
 #endif
 }
@@ -1600,7 +1701,7 @@ H323PluginVideoCodec::~H323PluginVideoCodec()
 		(*codec->destroyCodec)(codec, context);
 }
 
-PBoolean H323PluginVideoCodec::Read(BYTE * buffer, unsigned & length, RTP_DataFrame & dst)
+PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_DataFrame & dst)
 {
     PWaitAndSignal mutex(videoHandlerActive);
 
@@ -1704,7 +1805,7 @@ PBoolean H323PluginVideoCodec::Read(BYTE * buffer, unsigned & length, RTP_DataFr
     return TRUE;
 }
 
-PBoolean H323PluginVideoCodec::Write(const BYTE * buffer, unsigned length, const RTP_DataFrame & src, unsigned & written)
+PBoolean H323PluginVideoCodec::Write(const BYTE * /*buffer*/, unsigned length, const RTP_DataFrame & src, unsigned & written)
 {
   PWaitAndSignal mutex(videoHandlerActive);
 
@@ -2111,7 +2212,7 @@ class H323VideoPluginCapability : public H323VideoCapability,
            H323PluginCapabilityInfo(_encoderCodec, _decoderCodec),
         pluginSubType(_pluginSubType)
       { 
-        SetCommonOptions(GetWritableMediaFormat(),encoderCodec->parm.video.maxFrameWidth, encoderCodec->parm.video.maxFrameHeight, encoderCodec->parm.video.recommendedFrameRate);
+        SetCommonOptions(GetWritableMediaFormat(),encoderCodec->parm.video.maxFrameWidth,encoderCodec->parm.video.maxFrameHeight, encoderCodec->parm.video.recommendedFrameRate);
         PopulateMediaFormatOptions(encoderCodec,GetWritableMediaFormat());
 
         rtpPayloadType = (RTP_DataFrame::PayloadTypes)(((_encoderCodec->flags & PluginCodec_RTPTypeMask) == PluginCodec_RTPTypeDynamic) ? RTP_DataFrame::DynamicBase : _encoderCodec->rtpPayload);
@@ -2266,11 +2367,16 @@ class H323CodecPluginGenericVideoCapability : public H323GenericVideoCapability,
     { return H323PluginCapabilityInfo::GetFormatName();}
     
     virtual H323Codec * CreateCodec(H323Codec::Direction direction) const
-    { return H323PluginCapabilityInfo::CreateCodec(GetMediaFormat(), direction); }
+	{ return H323PluginCapabilityInfo::CreateCodec(GetMediaFormat(), direction); }
 
     virtual void LoadGenericData(const PluginCodec_H323GenericCodecData *ptr);
 
     virtual PBoolean SetMaxFrameSize(CapabilityFrameSize framesize, int frameunits = 1);
+
+	virtual PBoolean SetCustomEncode(unsigned width, unsigned height, unsigned rate);
+
+  protected:
+     OpalMediaFormat encoderMediaFormat;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -3475,7 +3581,7 @@ PBoolean H323H263PluginCapability::OnReceivedPDU(const H245_VideoCapability & ca
 H323CodecPluginNonStandardVideoCapability::H323CodecPluginNonStandardVideoCapability(
     PluginCodec_Definition * _encoderCodec,
     PluginCodec_Definition * _decoderCodec,
-    H323NonStandardCapabilityInfo::CompareFuncType compareFunc,
+    H323NonStandardCapabilityInfo::CompareFuncType /*compareFunc*/,
     const unsigned char * data, unsigned dataLen)
  : H323NonStandardVideoCapability(data, dataLen), 
    H323PluginCapabilityInfo(_encoderCodec, _decoderCodec)
@@ -3521,6 +3627,8 @@ H323CodecPluginGenericVideoCapability::H323CodecPluginGenericVideoCapability(
     : H323GenericVideoCapability(data -> standardIdentifier, data -> maxBitRate),
       H323PluginCapabilityInfo((PluginCodec_Definition *)_encoderCodec, (PluginCodec_Definition *) _decoderCodec)
 {
+  H323VideoPluginCapability::SetCommonOptions(GetWritableMediaFormat(),encoderCodec->parm.video.maxFrameWidth, 
+									encoderCodec->parm.video.maxFrameHeight, encoderCodec->parm.video.recommendedFrameRate);
   LoadGenericData(data);
   rtpPayloadType = (RTP_DataFrame::PayloadTypes)(((_encoderCodec->flags & PluginCodec_RTPTypeMask) == PluginCodec_RTPTypeDynamic) ? RTP_DataFrame::DynamicBase : _encoderCodec->rtpPayload);
 }
@@ -3541,9 +3649,6 @@ PBoolean H323CodecPluginGenericVideoCapability::SetMaxFrameSize(CapabilityFrameS
 		case   cifMPI  : param =   cifMPI_tag; break;
 		case   cif4MPI : param =   cif4MPI_tag; break;
 		case   cif16MPI: param =   cif16MPI_tag; break;
-		case  i480MPI  : param =   i480MPI_tag; break;
-		case  p720MPI  : param =   p720MPI_tag; break;
-		case i1080MPI  : param =  i1080MPI_tag; break; 
         default: return FALSE;
     }
 
@@ -3553,6 +3658,10 @@ PBoolean H323CodecPluginGenericVideoCapability::SetMaxFrameSize(CapabilityFrameS
     return TRUE;
 }
 
+PBoolean H323CodecPluginGenericVideoCapability::SetCustomEncode(unsigned width, unsigned height, unsigned rate)
+{
+   return SetCustomLevel(encoderCodec, GetWritableMediaFormat(), width, height, rate);
+}
 
 /////////////////////////////////////////////////////////////////////////////
 

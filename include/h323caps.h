@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.17  2010/02/08 05:26:19  shorne
+ * Added ability to create instance of plugin codec
+ *
  * Revision 1.16  2009/09/29 07:35:03  shorne
  * Fix to ensure H.239 and H.249 capabilities are properly negotiationed.
  *
@@ -472,6 +475,17 @@ class H323Capability : public PObject
 		   CapabilityFrameSize /*framesize*/, 
 		   int /*frameUnits*/) 
 	 { return FALSE; };
+
+    /**Set the custom encoder size.
+	   This is used to set the level and bitrate for a given width/Height/frameRate.
+       The default behaviour returns False.
+     */
+	 virtual PBoolean SetCustomEncode(
+		 unsigned /*width*/, 
+		 unsigned /*height*/, 
+		 unsigned /*rate*/)
+	 { return FALSE; };
+
 
      /**Set the MPI value.
          This is used to set the individual MPI values for a capability.
@@ -2387,6 +2401,12 @@ class H323Capabilities : public PObject
 	PBoolean SetVideoFrameSize(H323Capability::CapabilityFrameSize frameSize, 
 		                  int frameUnits
 	);
+
+	/**Set the Video Encoder size and rate. 
+		This is used for generic Video Capabilities to set the appropriate level for a given encoder 
+		frame size and rate.
+	  */
+    PBoolean SetVideoEncoder(unsigned frameWidth, unsigned frameHeight, unsigned frameRate);
 #endif
 
     /**Find the capability given the capability number. This number is

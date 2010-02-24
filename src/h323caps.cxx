@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.27  2010/02/13 00:59:27  shorne
+ * fix typo
+ *
  * Revision 1.26  2010/02/08 05:26:20  shorne
  * Added ability to create instance of plugin codec
  *
@@ -1070,6 +1073,10 @@ PBoolean H323GenericCapabilityInfo::OnSendingGenericPDU(H245_GenericCapability &
 
     param->m_parameterIdentifier.SetTag(H245_ParameterIdentifier::e_standard);
     (PASN_Integer &)param->m_parameterIdentifier = genericInfo.ordinal;
+	unsigned parameterValue = ((const OpalMediaOptionUnsigned &)option).GetValue();
+
+	if (PIsDescendant(&option, OpalMediaOptionUnsigned) && parameterValue == 0)
+		continue;
 
     if (PIsDescendant(&option, OpalMediaOptionBoolean)) {
       if (!((const OpalMediaOptionBoolean &)option).GetValue()) {
@@ -1096,7 +1103,7 @@ PBoolean H323GenericCapabilityInfo::OnSendingGenericPDU(H245_GenericCapability &
       }
 
       param->m_parameterValue.SetTag(tag);
-      (PASN_Integer &)param->m_parameterValue = ((const OpalMediaOptionUnsigned &)option).GetValue();
+      (PASN_Integer &)param->m_parameterValue = parameterValue;
     }
     else {
       param->m_parameterValue.SetTag(H245_ParameterValue::e_octetString);
@@ -1687,7 +1694,7 @@ PBoolean H323VideoCapability::OnSendingPDU(H245_DataType & dataType) const
 }
 
 
-PBoolean H323VideoCapability::OnSendingPDU(H245_VideoCapability & pdu) const
+PBoolean H323VideoCapability::OnSendingPDU(H245_VideoCapability & /*pdu*/) const
 {
   return FALSE;
 }
@@ -1979,7 +1986,7 @@ PBoolean H323ExtendedVideoCapability::OnSendingPDU(H245_ModeElement & pdu) const
 	 return FALSE;
 }
 
-PBoolean H323ExtendedVideoCapability::OnReceivedPDU(const H245_DataType & pdu, PBoolean receiver)
+PBoolean H323ExtendedVideoCapability::OnReceivedPDU(const H245_DataType & /*pdu*/, PBoolean /*receiver*/)
 {
 	 return FALSE;
 }
@@ -2071,7 +2078,7 @@ unsigned H323CodecExtendedVideoCapability::GetSubType() const
 }
 
 H323Channel * H323CodecExtendedVideoCapability::CreateChannel(H323Connection & connection,   
-      H323Channel::Directions dir,unsigned sessionID,const H245_H2250LogicalChannelParameters * param
+      H323Channel::Directions dir,unsigned sessionID,const H245_H2250LogicalChannelParameters * /*param*/
 ) const
 {
    if (table.GetSize() == 0)
@@ -2126,7 +2133,7 @@ PBoolean H323CodecExtendedVideoCapability::OnSendingPDU(H245_DataType & pdu) con
 	 return FALSE;
 }
 
-PBoolean H323CodecExtendedVideoCapability::OnReceivedPDU(const H245_DataType & pdu, PBoolean receiver)
+PBoolean H323CodecExtendedVideoCapability::OnReceivedPDU(const H245_DataType & pdu, PBoolean /*receiver*/)
 {
 	if (table.GetSize() > 0 && pdu.GetTag() == H245_DataType::e_videoData)
 	 return OnReceivedPDU((const H245_VideoCapability &)pdu);
@@ -2134,7 +2141,7 @@ PBoolean H323CodecExtendedVideoCapability::OnReceivedPDU(const H245_DataType & p
 	 return FALSE;
 }
 
-PBoolean H323CodecExtendedVideoCapability::OnSendingPDU(H245_VideoCapability & pdu, CommandType type) const 
+PBoolean H323CodecExtendedVideoCapability::OnSendingPDU(H245_VideoCapability & pdu, CommandType /*type*/) const 
 { 
 	if (extCapabilities.GetSize() == 0)
 		return FALSE;
@@ -2260,7 +2267,7 @@ PBoolean H323CodecExtendedVideoCapability::IsMatch(const PASN_Choice & subTypePD
    return (subTypePDU.GetTag() == GetSubType() && table.GetSize() > 0);
 }
 
-PBoolean H323CodecExtendedVideoCapability::OnReceivedGenericPDU(const H245_GenericCapability &pdu)
+PBoolean H323CodecExtendedVideoCapability::OnReceivedGenericPDU(const H245_GenericCapability & /*pdu*/)
 {
 	return TRUE;
 }
@@ -3613,6 +3620,16 @@ PBoolean H323Capabilities::RemoveCapability(H323Capability::MainTypes capability
 }
 
 #ifdef H323_VIDEO
+PBoolean H323Capabilities::SetVideoEncoder(unsigned frameWidth, unsigned frameHeight, unsigned frameRate)
+{
+   	for (PINDEX i = 0; i < table.GetSize(); i++) {
+     H323Capability & capability = table[i];
+	  if (capability.GetMainType() == H323Capability::e_Video) 
+		 capability.SetCustomEncode(frameWidth,frameHeight,frameRate);
+    }
+	return true;
+}
+
 PBoolean H323Capabilities::SetVideoFrameSize(H323Capability::CapabilityFrameSize frameSize, int frameUnits) 
 { 
     // Remove the unmatching capabilities
