@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.19  2010/01/20 04:23:08  shorne
+ * Add ability to advertise supported H.460 features in presence
+ *
  * Revision 1.18  2009/11/29 23:31:13  shorne
  * BUG FIX : completely disable H.460 support if remote does not support it.
  *
@@ -93,6 +96,9 @@
 */
 
 #include <ptlib.h>
+
+#include "openh323buildopts.h"
+#ifdef H323_H460
 
 #ifdef __GNUC__
 #pragma implementation "h4601.h"
@@ -1800,3 +1806,7 @@ H460_Feature * H460_FeatureSet::GetFeature(const H460_FeatureID & id)
 {
 	return &Features[id];
 }
+
+#endif // H323_H460
+
+
