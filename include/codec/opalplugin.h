@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2009/11/12 06:27:15  shorne
+ * Updated definitions
+ *
  * Revision 1.6  2009/02/21 14:07:43  shorne
  * Updated with changes from Opal
  *
@@ -296,6 +299,20 @@ struct PluginCodec_Definition;
 #define PLUGINCODEC_CONTROL_TO_CUSTOMISED_OPTIONS "to_customised_options"
 #define PLUGINCODEC_CONTROL_SET_INSTANCE_ID       "set_instance_id"
 #define PLUGINCODEC_CONTROL_SET_LOG_FUNCTION      "set_log_function"
+#define PLUGINCODEC_CONTROL_GET_STATISTICS        "get_statistics"
+#define PLUGINCODEC_CONTROL_TERMINATE_CODEC       "terminate_codec"
+
+
+/* Log function, plug in gets a pointer to this function which allows
+   it to use the standard OPAL logging system. The function returns 0 if
+   no logging was performed due to the log level. Note if log == NULL
+   then this return state is all that happens, so this may be executed
+   first to prevent lengthy logs that would not result in any output. */
+typedef int (*PluginCodec_LogFunction)(unsigned level,
+                                       const char * file,
+                                       unsigned line,
+                                       const char * section,
+                                       const char * log);
 
 
 struct PluginCodec_ControlDefn {
@@ -640,6 +657,10 @@ enum {
 #define PLUGINCODEC_CIF_MPI       "CIF MPI"
 #define PLUGINCODEC_CIF4_MPI     "CIF4 MPI"
 #define PLUGINCODEC_CIF16_MPI   "CIF16 MPI"
+#define PLUGINCODEC_480P_MPI	 "480 MPI"
+#define PLUGINCODEC_n720P_MPI    "n720 MPI"
+#define PLUGINCODEC_w720P_MPI	 "w720 MPI"
+#define PLUGINCODEC_w1080P_MPI   "w1080 MPI"
 #define PLUGINCODEC_CUSTOM_MPI "Custom MPI"
 
 #define PLUGINCODEC_MPI_DISABLED 33
