@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libx264.a"
+				AdditionalDependencies="libx264.dll.a"
 				OutputFile="$(OutDir)/x264plugin_helper.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
