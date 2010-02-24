@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.36  2010/02/15 20:44:03  willamowius
+ * add method OnSendH245_OpenLogicalChannel() to give application access to the outgoing OLC, the default implementation does nothing
+ *
  * Revision 1.35  2010/02/06 20:08:15  willamowius
  * give application access to the received H.245 TCS
  *
@@ -924,6 +927,12 @@ class H323Connection : public PObject
       PBoolean answeringCall        ///< Flag for if incoming/outgoing call.
     );
 
+    /**Change the transport (signalling channel) for this connection.
+      */
+	virtual void ChangeSignalChannel(
+		H323Transport * channel  ///< New Transport for PDU's
+		);
+
     /**Write a PDU to the signalling channel.
       */
     PBoolean WriteSignalPDU(
@@ -934,6 +943,11 @@ class H323Connection : public PObject
        This is an internal function and is unlikely to be used by applications.
      */
     virtual void HandleSignallingChannel();
+
+	/**Handle the situation where the call signalling channel fails
+		return TRUE to keep the call alive / False to drop the call
+	  */
+	virtual PBoolean HandleSignalChannelFailure()  { return FALSE; }
 
     /**Handle a single received PDU from the signalling channel.
        This is an internal function and is unlikely to be used by applications.
@@ -1810,8 +1824,9 @@ class H323Connection : public PObject
        The default behaviour does nothing.
       */
     virtual void OnSendH245_OpenLogicalChannel(
-        H245_OpenLogicalChannel & open, PBoolean forward
-    ) { }
+        H245_OpenLogicalChannel & /*open*/, 
+		PBoolean /*forward*/
+		) { }
 
     /**Return if this H245 connection is a master or slave
      */
@@ -3331,7 +3346,9 @@ class H323Connection : public PObject
     SendUserInputModes sendUserInputMode;
 
     H323Transport * signallingChannel;
+	PMutex			signallingMutex;
     H323Transport * controlChannel;
+	PMutex			controlMutex;
     PBoolean            h245Tunneling;
     H323SignalPDU * h245TunnelRxPDU;
     H323SignalPDU * h245TunnelTxPDU;

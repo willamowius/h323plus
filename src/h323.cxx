@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.50  2010/02/06 20:08:18  willamowius
+ * give application access to the received H.245 TCS
+ *
  * Revision 1.49  2010/02/04 07:41:43  shorne
  * Added Support to compile H.460 Annex B without Annex A support
  *
@@ -1237,10 +1240,34 @@ void H323Connection::AttachSignalChannel(const PString & token,
 #endif
 }
 
+void H323Connection::ChangeSignalChannel(H323Transport * channel)
+{
+  if (signallingChannel == NULL || controlChannel == NULL || !h245Tunneling) {
+    PAssertAlways(PLogicError);
+    return;
+  }
+
+  signallingMutex.Wait();
+	H323Transport * oldTransport = signallingChannel;
+	signallingChannel = channel;
+	  controlMutex.Wait();
+		H323Transport * oldControl = controlChannel;
+		StartControlChannel();
+	  controlMutex.Signal();
+  signallingMutex.Signal();
+
+  oldControl->CleanUpOnTermination();
+  delete oldControl;
+
+  oldTransport->CleanUpOnTermination();
+  delete oldTransport;
+  
+}
+
 
 PBoolean H323Connection::WriteSignalPDU(H323SignalPDU & pdu)
 {
-  PAssert(signallingChannel != NULL, PLogicError);
+  PWaitAndSignal m(signallingMutex);
 
   lastPDUWasH245inSETUP = FALSE;
 
@@ -1251,8 +1278,12 @@ PBoolean H323Connection::WriteSignalPDU(H323SignalPDU & pdu)
     if (gk != NULL)
       gk->InfoRequestResponse(*this, pdu.m_h323_uu_pdu, TRUE);
 
-    if (pdu.Write(*signallingChannel,this))
-      return TRUE;
+	// We don't have to take down the call if the signalling channel fails.
+	// We may want to wait until the media fails or the local hangs up.
+	if (!pdu.Write(*signallingChannel,this)) {
+		PTRACE(2,"H225\tERROR: Signalling Channel Failure: PDU was not sent!");
+		return HandleSignalChannelFailure();
+	}
   }
 
   ClearCall(EndedByTransportFail);
@@ -3116,6 +3147,8 @@ PBoolean H323Connection::OnUnknownSignalPDU(const H323SignalPDU & PTRACE_PARAM(p
 
 PBoolean H323Connection::WriteControlPDU(const H323ControlPDU & pdu)
 {
+  PWaitAndSignal m(controlMutex);
+
   PPER_Stream strm;
   pdu.Encode(strm);
   strm.CompleteEncoding();
