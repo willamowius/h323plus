@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.51  2010/02/24 03:36:35  shorne
+ * Added ability to swap out the signalling channel and support to allow an implementor to continue a call if the signalling channel where to go down.
+ *
  * Revision 1.50  2010/02/06 20:08:18  willamowius
  * give application access to the received H.245 TCS
  *
@@ -1283,7 +1286,8 @@ PBoolean H323Connection::WriteSignalPDU(H323SignalPDU & pdu)
 	if (!pdu.Write(*signallingChannel,this)) {
 		PTRACE(2,"H225\tERROR: Signalling Channel Failure: PDU was not sent!");
 		return HandleSignalChannelFailure();
-	}
+	} 
+	return TRUE;
   }
 
   ClearCall(EndedByTransportFail);
