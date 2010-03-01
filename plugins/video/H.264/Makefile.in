@@ -20,6 +20,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.1  2010/02/24 02:19:43  shorne
+# First commit of h323plus mirror
+#
 # Revision 1.4  2007/09/02 12:03:19  dominance
 # * dynamically load libx264 at runtime on *nix
 # * Improved error handling
@@ -68,7 +71,7 @@
 # Added Linux build for H.261 plug-in.
 #
 
-VC_PLUGIN_DIR=@VC_PLUGIN_DIR@
+VC_PLUGIN_DIR=codecs/video
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
