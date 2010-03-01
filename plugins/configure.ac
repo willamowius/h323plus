@@ -497,8 +497,8 @@ fi
 if test -d video/H.261-vic ; then
   AC_CONFIG_FILES(video/H.261-vic/Makefile)
 fi
-if test -d video/H.263-1998 ; then
-  AC_CONFIG_FILES(video/H.263-1998/Makefile)
+if test -d video/H.263-ffmpeg ; then
+  AC_CONFIG_FILES(video/H.263-ffmpeg/Makefile)
 fi
 if test -d video/MPEG4-ffmpeg ; then
   AC_CONFIG_FILES(video/MPEG4-ffmpeg/Makefile)

@@ -12051,8 +12051,8 @@ if test -d video/H.261-vic ; then
   ac_config_files="$ac_config_files video/H.261-vic/Makefile"
 
 fi
-if test -d video/H.263-1998 ; then
-  ac_config_files="$ac_config_files video/H.263-1998/Makefile"
+if test -d video/H.263-ffmpeg ; then
+  ac_config_files="$ac_config_files video/H.263-ffmpeg/Makefile"
 
 fi
 if test -d video/MPEG4-ffmpeg ; then
@@ -12715,7 +12715,7 @@ do
     "audio/SBC/Makefile") CONFIG_FILES="$CONFIG_FILES audio/SBC/Makefile" ;;
     "audio/celt/Makefile") CONFIG_FILES="$CONFIG_FILES audio/celt/Makefile" ;;
     "video/H.261-vic/Makefile") CONFIG_FILES="$CONFIG_FILES video/H.261-vic/Makefile" ;;
-    "video/H.263-1998/Makefile") CONFIG_FILES="$CONFIG_FILES video/H.263-1998/Makefile" ;;
+    "video/H.263-ffmpeg/Makefile") CONFIG_FILES="$CONFIG_FILES video/H.263-ffmpeg/Makefile" ;;
     "video/MPEG4-ffmpeg/Makefile") CONFIG_FILES="$CONFIG_FILES video/MPEG4-ffmpeg/Makefile" ;;
     "video/H.264/Makefile") CONFIG_FILES="$CONFIG_FILES video/H.264/Makefile" ;;
     "video/H.264/gpl/Makefile") CONFIG_FILES="$CONFIG_FILES video/H.264/gpl/Makefile" ;;
@@ -12777,8 +12777,7 @@ $debug ||
 if test -n "$CONFIG_FILES"; then
 
 
-ac_cr='
-'
+ac_cr=''
 ac_cs_awk_cr=`$AWK 'BEGIN { print "a\rb" }' </dev/null 2>/dev/null`
 if test "$ac_cs_awk_cr" = "a${ac_cr}b"; then
   ac_cs_awk_cr='\\r'
@@ -13840,7 +13839,7 @@ do
     "audio/SBC/Makefile") CONFIG_FILES="$CONFIG_FILES audio/SBC/Makefile" ;;
     "audio/celt/Makefile") CONFIG_FILES="$CONFIG_FILES audio/celt/Makefile" ;;
     "video/H.261-vic/Makefile") CONFIG_FILES="$CONFIG_FILES video/H.261-vic/Makefile" ;;
-    "video/H.263-1998/Makefile") CONFIG_FILES="$CONFIG_FILES video/H.263-1998/Makefile" ;;
+    "video/H.263-ffmpeg/Makefile") CONFIG_FILES="$CONFIG_FILES video/H.263-ffmpeg/Makefile" ;;
     "video/MPEG4-ffmpeg/Makefile") CONFIG_FILES="$CONFIG_FILES video/MPEG4-ffmpeg/Makefile" ;;
     "video/H.264/Makefile") CONFIG_FILES="$CONFIG_FILES video/H.264/Makefile" ;;
     "video/H.264/gpl/Makefile") CONFIG_FILES="$CONFIG_FILES video/H.264/gpl/Makefile" ;;
@@ -13904,8 +13903,7 @@ $debug ||
 if test -n "$CONFIG_FILES"; then
 
 
-ac_cr='
-'
+ac_cr=''
 ac_cs_awk_cr=`$AWK 'BEGIN { print "a\rb" }' </dev/null 2>/dev/null`
 if test "$ac_cs_awk_cr" = "a${ac_cr}b"; then
   ac_cs_awk_cr='\\r'
