@@ -72,6 +72,9 @@ H264EncCtx::Load()
   if (!findGplProcess()) { 
 
     TRACE(1, "H264\tIPC\tPP: Couldn't find GPL process executable: " << GPL_PROCESS_FILENAME)
+#ifndef _WIN32
+	fprintf(stderr, "H.264 plugin couldn't find GPL process executable: " GPL_PROCESS_FILENAME "\n");
+#endif
     closeAndRemovePipes(); 
     return false;
   }
