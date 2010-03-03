@@ -31,7 +31,9 @@
 #ifndef X264_LINK_STATIC
 #include "x264loader_unix.h"
 #endif
-#define MAX_FRAME_SIZE 608286
+// TODO: we should dynamically adjust this buffer size to the max frame size used
+//#define MAX_FRAME_SIZE 608286	// 4CIF
+#define MAX_FRAME_SIZE 3110430	// 1080p
 
 std::ifstream dlStream;
 std::ofstream ulStream;
