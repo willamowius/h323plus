@@ -33,7 +33,9 @@
 #include <windows.h>
 #include <stdio.h>
 
-#define MAX_FRAME_SIZE 608286
+// TODO: we should dynamically adjust this buffer size to the max frame size used
+//#define MAX_FRAME_SIZE 608286	// 4CIF
+#define MAX_FRAME_SIZE 3110430	// 1080p
 
 HANDLE stream;
 unsigned msg;
