@@ -276,7 +276,8 @@ static struct PluginCodec_Option const * const optionTable[] = {
 };
 
 #define H323_H264_TEST	1
-//#define H323_H264_HD	1
+#define H323_H264_HD	1
+
 #ifdef H323_H264_TEST
 ///////////////////////////////////////////////////////////////////////////
 // H.323 Definitions
@@ -296,7 +297,7 @@ static struct PluginCodec_Option const * const optionTable[] = {
 #define PLUGINCODEC_OPTION_LEVEL			"Generic Parameter 42"
 #define PLUGINCODEC_OPTION_ASPECT			"Generic Parameter 10"
 
-#define H264_H323_RFC3984	"0.0.8.241.0.0.0"
+#define H264_H323_RFC3984	"0.0.8.241.0.0.0.0"   // Single NAL packetization H.241 Annex A
 #define H264_ASPECT_43			2
 #define H264_ASPECT_HD			1
 
