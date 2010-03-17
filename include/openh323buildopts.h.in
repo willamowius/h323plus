@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.15  2009/12/08 13:02:26  shorne
+ * Adjust H323_H46024B compiler directive
+ *
  * Revision 1.14  2009/12/08 03:55:28  shorne
  * First cut support for H.460.24 Annex B
  *
@@ -237,7 +240,9 @@
 #undef H323_H350
 #endif
 #undef H323_H450
+
 #undef H323_H460
+#ifdef H323_H460
 #undef H323_H4609
 #if (PTLIB_VER > 260) 
 	#undef H323_H46018
@@ -253,6 +258,8 @@
 	#endif
 #endif
 #undef H323_H460P	
+#endif
+
 #undef H323_H501
 #if (PTLIB_VER > 260) 
 	#undef H323_GNUGK
