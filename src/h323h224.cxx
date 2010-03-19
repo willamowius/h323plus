@@ -1,5 +1,5 @@
 /*
- * h323h224.h
+ * h323h224.cxx
  *
  * H.323 H.224 logical channel establishment implementation for the 
  * OpenH323 Project.
@@ -20,6 +20,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2008/05/23 11:22:02  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.5  2008/01/24 08:09:48  shorne
  * Fix for H224 capability exchange Thx mohammad alam
  *
@@ -57,6 +60,7 @@
 
 #include <ptlib.h>
 #include <h323.h>
+#include <h245.h>
 
 #ifdef H323_H224
 
