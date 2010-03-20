@@ -1,7 +1,7 @@
 AC_INIT(configure.ac)
 
 if test \! -e ./aclocal.m4 ; then
-  echo "ERROR: you must run 'aclocal' before 'autoconf'"
+  echo "ERROR: you must first run 'aclocal' in $PWD"
   exit
 fi
 
