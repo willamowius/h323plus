@@ -37,6 +37,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2010/02/04 07:41:43  shorne
+ * Added Support to compile H.460 Annex B without Annex A support
+ *
  * Revision 1.10  2009/12/08 03:55:28  shorne
  * First cut support for H.460.24 Annex B
  *
@@ -604,8 +607,8 @@ void PNatMethod_H46019::SetAvailable()
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 H46019UDPSocket::H46019UDPSocket(H46018Handler & _handler, H323Connection::SessionInformation * info, bool _rtpSocket)
-: m_Handler(_handler), rtpSocket(_rtpSocket), m_CallId(info->GetCallIdentifer()), 
-  m_Session(info->GetSessionID()), m_Token(info->GetCallToken()), m_CUI(info->GetCUI())
+: m_Handler(_handler), m_Session(info->GetSessionID()), m_Token(info->GetCallToken()),
+  m_CallId(info->GetCallIdentifer()), m_CUI(info->GetCUI()), rtpSocket(_rtpSocket)
 {
 	keeppayload = 0;
 	keepTTL = 0;
