@@ -124,7 +124,7 @@ int x264_nal_encode(uint8_t *p_data, int *pi_data, int b_annexeb, x264_nal_t *na
 #endif
 
 void H264Frame::SetFromFrame (x264_nal_t *NALs, int numberOfNALs) {
-  int vopBufferLen;
+  //int vopBufferLen;
   int currentNAL = 0;
 
   uint8_t* currentPositionInFrame=(uint8_t*) _encodedFrame;

@@ -115,6 +115,21 @@ X264EncoderContext::X264EncoderContext()
   SetTSTO             (H264_TSTO);
   SetMaxKeyFramePeriod(H264_KEY_FRAME_INTERVAL);
 
+//_context.i_maxframes = 0;
+  //_context.rc.b_stat_write = 0;
+  //_context.analyse.inter = 0;
+  _context.analyse.b_psnr = 0;
+ 
+  _context.rc.i_lookahead = 0;
+  _context.i_sync_lookahead = 0;
+//  _context.analyse.b_weighted_bipred = 0;
+  _context.analyse.b_transform_8x8 = 0;
+//  _context.rc.i_vbv_max_bitrate = 5000;
+//  _context.rc.i_vbv_buffer_size = 200;
+//  _context.i_cqm_preset == X264_CQM_FLAT;
+//  _context.b_interlaced = 0;
+  _context.analyse.i_weighted_pred = 0;
+
   //_context.i_maxframes = 0;
   //_context.rc.b_stat_write = 0;
   //_context.analyse.inter = 0;

@@ -1,7 +1,7 @@
 #
-# Makefile for GSM 06.10
+# Makefile for H.264
 #
-# Copyright (C) 2004 Post Increment, All Rights Reserved
+# Copyright (C) 2010 Post Increment, All Rights Reserved
 #
 # The contents of this file are subject to the Mozilla Public License
 # Version 1.0 (the "License"); you may not use this file except in
@@ -12,30 +12,6 @@
 # basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See
 # the License for the specific language governing rights and limitations
 # under the License.
-#
-# The Original Code is Open H323 library.
-#
-# The Initial Developer of the Original Code is Post Increment
-#
-# Contributor(s): ______________________________________.
-#
-# $Log$
-# Revision 1.4  2007/09/02 12:03:19  dominance
-# * dynamically load libx264 at runtime on *nix
-# * Improved error handling
-#
-# Patch received from and thus thanks goes to Matthias Schneider.
-#
-# Revision 1.3  2007/08/23 19:20:14  dominance
-# fix compilation of H.264 if CFLAGS is present from make
-#
-# Revision 1.2  2007/08/22 21:51:26  dsandras
-# Applied patch from Matthias Schneider <ma30002000 yahoo de> to share
-# things between codecs. Huge thanks!
-#
-# Revision 1.1  2007/06/16 21:36:59  dsandras
-# Added H.264 support thanks to Matthias Schneider <ma30002000 yahoo de>.
-# Thanks a lot !
 #
 # Baseline Profile:
 # no B-frames
@@ -53,22 +29,19 @@
 #
 # It requires x264 and ffmpeg.
 #
-# Revision 1.5  2007/04/19 06:09:04  csoutheren
-# Fixed plugin build system to use better detection for OSX
-# Resolved 1636262 - Fix for audio plugins for OSX
 #
-# Revision 1.4  2006/10/10 01:42:55  csoutheren
-# Applied patches from Ekiga bug 360869 - fix OpenSolaris build problems
-# Thanks to Boying Lu
+# The Original Code is Open H323 library.
 #
-# Revision 1.3  2006/08/20 00:32:25  csoutheren
-# Added missing files to Makefile
+# The Initial Developer of the Original Code is Post Increment
 #
-# Revision 1.2  2006/08/12 10:59:14  rjongbloed
-# Added Linux build for H.261 plug-in.
+# Contributor(s): ______________________________________.
+#
+# $Log$
+# Revision 1.1  2010/02/24 02:19:43  shorne
+# First commit of h323plus mirror
 #
 
-VC_PLUGIN_DIR=opal-3.5.2/codecs/video
+VC_PLUGIN_DIR=h323plus/plugins/video
 prefix=/usr/local
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib

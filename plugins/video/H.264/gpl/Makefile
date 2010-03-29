@@ -19,23 +19,6 @@
 #
 # Contributor(s): ______________________________________.
 #
-# $Log$
-# Revision 1.4  2007/09/02 12:03:19  dominance
-# * dynamically load libx264 at runtime on *nix
-# * Improved error handling
-#
-# Patch received from and thus thanks goes to Matthias Schneider.
-#
-# Revision 1.3  2007/08/23 19:20:15  dominance
-# fix compilation of H.264 if CFLAGS is present from make
-#
-# Revision 1.2  2007/08/22 21:51:26  dsandras
-# Applied patch from Matthias Schneider <ma30002000 yahoo de> to share
-# things between codecs. Huge thanks!
-#
-# Revision 1.1  2007/06/16 21:37:00  dsandras
-# Added H.264 support thanks to Matthias Schneider <ma30002000 yahoo de>.
-# Thanks a lot !
 #
 # Baseline Profile:
 # no B-frames
@@ -52,23 +35,13 @@
 # like described in RFC3984
 #
 # It requires x264 and ffmpeg.
+# $Log$
 #
-# Revision 1.5  2007/04/19 06:09:04  csoutheren
-# Fixed plugin build system to use better detection for OSX
-# Resolved 1636262 - Fix for audio plugins for OSX
-#
-# Revision 1.4  2006/10/10 01:42:55  csoutheren
-# Applied patches from Ekiga bug 360869 - fix OpenSolaris build problems
-# Thanks to Boying Lu
-#
-# Revision 1.3  2006/08/20 00:32:25  csoutheren
-# Added missing files to Makefile
-#
-# Revision 1.2  2006/08/12 10:59:14  rjongbloed
-# Added Linux build for H.261 plug-in.
+# Revision 1.1  2010/02/24 02:19:43  shorne
+# First commit of h323plus mirror
 #
 
-VC_PLUGIN_DIR=opal-3.5.2/codecs/video
+VC_PLUGIN_DIR=h323plus/plugins/video
 prefix=/usr/local
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
