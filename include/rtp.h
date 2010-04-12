@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2009/11/29 23:31:05  shorne
+ * BUG FIX : completely disable H.460 support if remote does not support it.
+ *
  * Revision 1.7  2009/07/09 15:11:12  shorne
  * Simplfied and standardised compiler directives
  *
@@ -536,6 +539,16 @@ class RTP_UserData : public PObject
     virtual void OnFinalStatistics(
       const RTP_Session & session   ///<  Session with statistics
     ) const;
+
+    /**Callback from the RTP session for statistics monitoring.
+       This is called when a RTPSenderReport is received
+
+       The default behaviour does nothing.
+      */
+    virtual void OnRxSenderReport(
+      DWORD SRsourceIdentifier, PTime SRrealTimestamp, DWORD SRrtpTimestamp, DWORD SRpacketsSent, DWORD SRoctetsSent,
+      DWORD RRsourceIdentifier, DWORD RRfractionLost, DWORD RRtotalLost, DWORD RRlastSequenceNumber, DWORD RRjitter, PTimeInterval RRlastTimestamp, PTimeInterval RRdelay) const;
+
 };
 
 

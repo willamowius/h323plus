@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.37  2010/02/24 03:36:35  shorne
+ * Added ability to swap out the signalling channel and support to allow an implementor to continue a call if the signalling channel where to go down.
+ *
  * Revision 1.36  2010/02/15 20:44:03  willamowius
  * add method OnSendH245_OpenLogicalChannel() to give application access to the outgoing OLC, the default implementation does nothing
  *
@@ -2561,6 +2564,15 @@ class H323Connection : public PObject
     virtual void OnRTPFinalStatistics(
       const RTP_Session & session   ///< Session with statistics
     ) const;
+
+    /**Callback from the RTP session for statistics monitoring.
+       This is called when a SenderReport is received
+
+       The default behaviour does nothing.
+      */
+    virtual void OnRxSenderReport(
+      DWORD SRsourceIdentifier, PTime SRrealTimestamp, DWORD SRrtpTimestamp, DWORD SRpacketsSent, DWORD SRoctetsSent,
+      DWORD RRsourceIdentifier, DWORD RRfractionLost, DWORD RRtotalLost, DWORD RRlastSequenceNumber, DWORD RRjitter, PTimeInterval RRlastTimestamp, PTimeInterval RRdelay) const { }
 
     /**Get the names of the codecs in use for the RTP session.
        If there is no session of the specified ID, an empty string is returned.

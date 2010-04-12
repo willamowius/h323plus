@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2009/07/03 04:14:59  shorne
+ * more H.460.18/19 support
+ *
  * Revision 1.4  2009/06/28 01:41:52  shorne
  * Replaced P_HAS_QOS with P_QOS (depreciated in PTLib)
  *
@@ -152,6 +155,15 @@ class H323_RTP_Session : public RTP_UserData
       const RTP_Session & session   ///< Session with statistics
     ) const;
   //@}
+
+    /**Callback from the RTP session for statistics monitoring.
+       This is called when a RTPSenderReport is received
+
+       The default behaviour calls H323Connection::OnRxSenderReport().
+      */
+    virtual void OnRxSenderReport(
+      DWORD SRsourceIdentifier, PTime SRrealTimestamp, DWORD SRrtpTimestamp, DWORD SRpacketsSent, DWORD SRoctetsSent,
+      DWORD RRsourceIdentifier, DWORD RRfractionLost, DWORD RRtotalLost, DWORD RRlastSequenceNumber, DWORD RRjitter, PTimeInterval RRlastTimestamp, PTimeInterval RRdelay) const;
 
   /**@name Operations */
   //@{
