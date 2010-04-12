@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2009/11/17 10:58:01  shorne
+ * Small Fix for H.460.24 A
+ *
  * Revision 1.10  2009/08/28 14:36:06  shorne
  * Fixes to enable compilation with PTLIB 2.6.4
  *
@@ -752,6 +755,12 @@ void RTP_UserData::OnFinalStatistics(const RTP_Session & /*session*/ ) const
 {
 }
 
+void RTP_UserData::OnRxSenderReport(
+      DWORD SRsourceIdentifier, PTime SRrealTimestamp, DWORD SRrtpTimestamp, DWORD SRpacketsSent, DWORD SRoctetsSent,
+      DWORD RRsourceIdentifier, DWORD RRfractionLost, DWORD RRtotalLost, DWORD RRlastSequenceNumber, DWORD RRjitter, PTimeInterval RRlastTimestamp, PTimeInterval RRdelay) const
+{
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 RTP_Session::RTP_Session(
@@ -1308,8 +1317,16 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveControl(RTP_ControlFrame & 
           sender.rtpTimestamp = sr.rtp_ts;
           sender.packetsSent = sr.psent;
           sender.octetsSent = sr.osent;
-          OnRxSenderReport(sender,
-                BuildReceiverReportArray(frame, sizeof(RTP_ControlFrame::SenderReport)));
+          // trace the report
+          ReceiverReportArray RRs = BuildReceiverReportArray(frame, sizeof(RTP_ControlFrame::SenderReport));
+          OnRxSenderReport(sender, RRs);
+          // give application access
+          for (PINDEX i=0; i < RRs.GetSize(); i++) {
+            userData->OnRxSenderReport(
+              sender.sourceIdentifier, sender.realTimestamp, sender.rtpTimestamp, sender.packetsSent, sender.octetsSent,
+              RRs[i].sourceIdentifier, RRs[i].fractionLost, RRs[i].totalLost, RRs[i].lastSequenceNumber, RRs[i].jitter, RRs[i].lastTimestamp, RRs[i].delay
+            );
+          }
         }
         else {
           PTRACE(2, "RTP\tSenderReport packet truncated");

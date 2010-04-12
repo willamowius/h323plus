@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2009/07/09 15:11:12  shorne
+ * Simplfied and standardised compiler directives
+ *
  * Revision 1.10  2009/07/03 04:15:01  shorne
  * more H.460.18/19 support
  *
@@ -222,6 +225,14 @@ void H323_RTP_Session::OnFinalStatistics(const RTP_Session & session) const
   connection.OnRTPFinalStatistics(session);
 }
 
+void H323_RTP_Session::OnRxSenderReport(
+      DWORD SRsourceIdentifier, PTime SRrealTimestamp, DWORD SRrtpTimestamp, DWORD SRpacketsSent, DWORD SRoctetsSent,
+      DWORD RRsourceIdentifier, DWORD RRfractionLost, DWORD RRtotalLost, DWORD RRlastSequenceNumber, DWORD RRjitter, PTimeInterval RRlastTimestamp, PTimeInterval RRdelay) const
+{
+  connection.OnRxSenderReport(
+      SRsourceIdentifier, SRrealTimestamp, SRrtpTimestamp, SRpacketsSent, SRoctetsSent,
+      RRsourceIdentifier, RRfractionLost, RRtotalLost, RRlastSequenceNumber, RRjitter, RRlastTimestamp, RRdelay);
+}
 
 /////////////////////////////////////////////////////////////////////////////
 
