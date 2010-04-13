@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.12  2010/04/12 21:40:12  willamowius
+ * give application access to RTP sender report
+ *
  * Revision 1.11  2009/11/17 10:58:01  shorne
  * Small Fix for H.460.24 A
  *
@@ -2001,6 +2004,11 @@ RTP_Session::SendReceiveStatus RTP_UDP::ReadDataOrControlPDU(PUDPSocket & socket
     case ECONNREFUSED :
       PTRACE(2, "RTP_UDP\tSession " << sessionID << ", "
              << channelName << " port on remote not ready.");
+      return RTP_Session::e_IgnorePacket;
+
+    case EMSGSIZE :
+      PTRACE(2, "RTP_UDP\tSession " << sessionID << ", " << channelName
+             << " read packet too large");
       return RTP_Session::e_IgnorePacket;
 
     case EAGAIN :
