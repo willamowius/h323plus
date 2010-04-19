@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.38  2010/04/12 21:39:54  willamowius
+ * give application access to RTP sender reports
+ *
  * Revision 1.37  2010/02/24 03:36:35  shorne
  * Added ability to swap out the signalling channel and support to allow an implementor to continue a call if the signalling channel where to go down.
  *
@@ -540,6 +543,7 @@
 #include "guid.h"
 #include "openh323buildopts.h"
 #include "h235auth.h"
+#include "h225.h"
 
 #ifdef H323_SIGNAL_AGGREGATE
 #include <ptclib/sockagg.h>
@@ -1144,7 +1148,14 @@ class H323Connection : public PObject
        cleared with the ended call code of EndedByCallForwarded.
       */
     virtual PBoolean ForwardCall(
-      const PString & forwardParty   ///< Party to forward call to.
+      const PString & forwardParty   ///< Party to forward call to
+    );
+
+    /**Forward call to MC.
+      */
+    virtual PBoolean RouteCallToMC(
+      const PString & forwardParty,   ///< Party to forward call to
+      const H225_ConferenceIdentifier & confID	/// conference to join
     );
 
 #ifdef H323_H450

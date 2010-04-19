@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.52  2010/02/26 15:22:41  shorne
+ * Bug fix for channel shutting down
+ *
  * Revision 1.51  2010/02/24 03:36:35  shorne
  * Added ability to swap out the signalling channel and support to allow an implementor to continue a call if the signalling channel where to go down.
  *
@@ -2406,6 +2409,44 @@ PBoolean H323Connection::ForwardCall(const PString & forwardParty)
     fac->m_alternativeAliasAddress.SetSize(1);
     H323SetAliasAddress(alias, fac->m_alternativeAliasAddress[0]);
   }
+
+  return WriteSignalPDU(redirectPDU);
+}
+
+
+PBoolean H323Connection::RouteCallToMC(const PString & forwardParty, const H225_ConferenceIdentifier & confID)
+{
+  if (forwardParty.IsEmpty())
+    return FALSE;
+
+  PString alias;
+  H323TransportAddress address;
+
+  PStringList Addresses;
+  if (!endpoint.ResolveCallParty(forwardParty, Addresses)) 
+	  return FALSE;
+
+  if (!endpoint.ParsePartyName(Addresses[0], alias, address)) {
+	  PTRACE(2, "H323\tCould not parse forward party \"" << forwardParty << '"');
+	  return FALSE;
+  }
+
+  H323SignalPDU redirectPDU;
+  H225_Facility_UUIE * fac = redirectPDU.BuildFacility(*this, FALSE, H225_FacilityReason::e_routeCallToMC);
+
+  if (!address) {
+    fac->IncludeOptionalField(H225_Facility_UUIE::e_alternativeAddress);
+    address.SetPDU(fac->m_alternativeAddress);
+  }
+
+  if (!alias) {
+    fac->IncludeOptionalField(H225_Facility_UUIE::e_alternativeAliasAddress);
+    fac->m_alternativeAliasAddress.SetSize(1);
+    H323SetAliasAddress(alias, fac->m_alternativeAliasAddress[0]);
+  }
+
+  fac->IncludeOptionalField(H225_Facility_UUIE::e_conferenceID);
+  fac->m_conferenceID = confID;
 
   return WriteSignalPDU(redirectPDU);
 }
