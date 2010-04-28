@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.31  2010/02/24 03:39:07  shorne
+ * Add ability to pass to the video plugin a custom frame size and rate to encode/decode
+ *
  * Revision 1.30  2010/02/09 02:48:57  shorne
  * Ensure OpalPluginCodecFactory is emptied when closing H323PluginCodecManager
  *
@@ -1890,7 +1893,7 @@ PBoolean H323PluginVideoCodec::SetFrameSize(int _width, int _height)
         return FALSE;
         
     if ((_width > maxWidth) || (_height > maxHeight)) {
-        PTRACE(3, "PLUGIN\tERROR: Frame Size " << _width << "x" << _height  << " exceeds codec limits"); 
+        PTRACE(3, "PLUGIN\tERROR: Frame Size " << _width << "x" << _height  << " exceeds codec limits (" << maxWidth << "x" << maxHeight); 
         return FALSE;
     }
 
