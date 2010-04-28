@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2010/02/19 09:14:40  willamowius
+ * impose a small delay between sending RTP video packets
+ *
  * Revision 1.8  2010/02/15 20:44:21  willamowius
  * add method OnSendH245_OpenLogicalChannel() to give application access to the outgoing OLC, the default implementation does nothing
  *
@@ -1319,7 +1322,6 @@ void H323_RTPChannel::Transmit()
   unsigned frameCount = 0;
   DWORD rtpTimestamp = 0;
   frame.SetPayloadSize(0);
-  PAdaptiveDelay pacing;
 
 #if PTRACING
   DWORD lastDisplayedTimestamp = 0;
@@ -1424,7 +1426,7 @@ void H323_RTPChannel::Transmit()
       // higher resolutions and can easily overload the link if sent
       // without delay
       if (!isAudio)
-         pacing.Delay(4);
+         PThread::Sleep(5);
 
       // Reset flag for in talk burst
       if (isAudio)
