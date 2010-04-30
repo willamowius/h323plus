@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2010/01/04 05:54:47  shorne
+ * Added SetCallingSubAddressIE and SetCalledSubAddressIE support
+ *
  * Revision 1.3  2008/05/27 03:15:20  shorne
  * Updated Windows compilation to compile with latest ptlib SVN
  *
@@ -578,16 +581,20 @@ PBoolean Q931::Decode(const PBYTEArray & data)
         // we also have a protocol discriminator, which we ignore
         offset++;
 
-	// before decrementing the length, make sure it is not zero
-	if (len == 0)
+        // before decrementing the length, make sure it is not zero
+        if (len == 0) {
+          delete item;
           return FALSE;
+        }
 
         // adjust for protocol discriminator
         len--;
       }
 
-      if (offset + len > data.GetSize())
+      if (offset + len > data.GetSize()) {
+        delete item;
         return FALSE;
+      }
 
       memcpy(item->GetPointer(len), (const BYTE *)data+offset, len);
       offset += len;
