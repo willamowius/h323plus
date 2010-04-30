@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.39  2010/04/19 06:12:15  willamowius
+ * implement Facility(routeCallToMC)
+ *
  * Revision 1.38  2010/04/12 21:39:54  willamowius
  * give application access to RTP sender reports
  *
@@ -2582,8 +2585,8 @@ class H323Connection : public PObject
        The default behaviour does nothing.
       */
     virtual void OnRxSenderReport(
-      DWORD SRsourceIdentifier, PTime SRrealTimestamp, DWORD SRrtpTimestamp, DWORD SRpacketsSent, DWORD SRoctetsSent,
-      DWORD RRsourceIdentifier, DWORD RRfractionLost, DWORD RRtotalLost, DWORD RRlastSequenceNumber, DWORD RRjitter, PTimeInterval RRlastTimestamp, PTimeInterval RRdelay) const { }
+      DWORD /*SRsourceIdentifier*/, PTime /*SRrealTimestamp*/, DWORD /*SRrtpTimestamp*/, DWORD /*SRpacketsSent*/, DWORD /*SRoctetsSent*/,
+      DWORD /*RRsourceIdentifier*/, DWORD /*RRfractionLost*/, DWORD /*RRtotalLost*/, DWORD /*RRlastSequenceNumber*/, DWORD /*RRjitter*/, PTimeInterval /*RRlastTimestamp*/, PTimeInterval /*RRdelay*/) const { }
 
     /**Get the names of the codecs in use for the RTP session.
        If there is no session of the specified ID, an empty string is returned.
