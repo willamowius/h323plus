@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.40  2010/04/30 13:29:13  willamowius
+ * avoid warnings about unused parameters
+ *
  * Revision 1.39  2010/04/19 06:12:15  willamowius
  * implement Facility(routeCallToMC)
  *
@@ -2625,6 +2628,12 @@ class H323Connection : public PObject
 	PBoolean isSameNAT() const { return sameNAT; };
 
 #ifdef P_STUN
+	/** GetPreferedNatMethod
+        returns the NATMethod to use for a call 
+        by default calls the H323Endpoint function of the same name
+	  */
+    virtual PNatMethod * GetPreferedNatMethod(const PIPSocket::Address & ip) const;
+
 	/** Set RTP NAT information callback
 	  */
 	virtual void SetRTPNAT(unsigned sessionid, PUDPSocket * _rtp, PUDPSocket * _rtcp);

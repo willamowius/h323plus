@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2008/09/27 06:18:57  shorne
+ * BUG FIX: H323SignalPDU::Write to correctly handle NULL H323Connection Thx Nir Soffer
+ *
  * Revision 1.6  2008/05/23 11:22:05  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -1545,7 +1548,7 @@ void H323SignalPDU::BuildQ931()
 
 void H323SignalPDU::PrintOn(ostream & strm) const
 {
-  int indent = strm.precision() + 2;
+  int indent = (int)strm.precision() + 2;
   strm << "{\n"
        << setw(indent+10) << "q931pdu = " << setprecision(indent) << q931pdu << '\n'
        << setw(indent+10) << "h225pdu = " << setprecision(indent);

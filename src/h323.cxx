@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.53  2010/04/19 06:12:15  willamowius
+ * implement Facility(routeCallToMC)
+ *
  * Revision 1.52  2010/02/26 15:22:41  shorne
  * Bug fix for channel shutting down
  *
@@ -2907,6 +2910,11 @@ if (setup.m_conferenceGoal.GetTag() == H225_Setup_UUIE_conferenceGoal::e_create)
 }
 
 #ifdef P_STUN
+
+PNatMethod * H323Connection::GetPreferedNatMethod(const PIPSocket::Address & ip) const
+{
+    return endpoint.GetPreferedNatMethod(ip);
+}
 
 void H323Connection::SetRTPNAT(unsigned sessionid, PUDPSocket * _rtp, PUDPSocket * _rtcp)
 {
