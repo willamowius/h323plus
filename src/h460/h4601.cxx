@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.20  2010/02/24 02:58:51  shorne
+ * Added ability to compile without H.460 support on windows
+ *
  * Revision 1.19  2010/01/20 04:23:08  shorne
  * Add ability to advertise supported H.460 features in presence
  *
@@ -1804,7 +1807,10 @@ PBoolean H460_FeatureSet::SupportNonCallService(const H460_FeatureID & id)
 
 H460_Feature * H460_FeatureSet::GetFeature(const H460_FeatureID & id)
 {
-	return &Features[id];
+    if (HasFeature(id))
+	   return &Features[id];
+    else
+       return NULL;
 }
 
 #endif // H323_H460
