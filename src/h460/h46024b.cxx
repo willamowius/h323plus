@@ -32,7 +32,7 @@ H46024B_AlternateAddress::H46024B_AlternateAddress(unsigned tag, PASN_Object::Ta
 #ifndef PASN_NOPRINTON
 void H46024B_AlternateAddress::PrintOn(ostream & strm) const
 {
-  int indent = strm.precision() + 2;
+  int indent = (int)strm.precision() + 2;
   strm << "{\n";
   strm << setw(indent+12) << "sessionID = " << setprecision(indent) << m_sessionID << '\n';
   if (HasOptionalField(e_rtpAddress))
@@ -159,7 +159,7 @@ H46024B_AlternateAddresses::H46024B_AlternateAddresses(unsigned tag, PASN_Object
 #ifndef PASN_NOPRINTON
 void H46024B_AlternateAddresses::PrintOn(ostream & strm) const
 {
-  int indent = strm.precision() + 2;
+  int indent = (int)strm.precision() + 2;
   strm << "{\n";
   strm << setw(indent+12) << "addresses = " << setprecision(indent) << m_addresses << '\n';
   strm << setw(indent-1) << setprecision(indent-2) << "}";

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2010/04/30 19:17:18  willamowius
+ * fix memory leak when q931 decoding fails
+ *
  * Revision 1.4  2010/01/04 05:54:47  shorne
  * Added SetCallingSubAddressIE and SetCalledSubAddressIE support
  *
@@ -671,7 +674,7 @@ PBoolean Q931::Encode(PBYTEArray & data) const
 
 void Q931::PrintOn(ostream & strm) const
 {
-  int indent = strm.precision() + 2;
+  int indent = (int)strm.precision() + 2;
   _Ios_Fmtflags flags = strm.flags();
 
   strm << "{\n"
