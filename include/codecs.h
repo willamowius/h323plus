@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2009/07/09 15:11:12  shorne
+ * Simplfied and standardised compiler directives
+ *
  * Revision 1.3  2008/05/23 11:19:05  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -360,12 +363,19 @@ class H323Connection;
    An application may create a descendent off this class and override
    functions as required for descibing a codec.
  */
-class PAec;
+
 class H323Codec : public PObject
 {
   PCLASSINFO(H323Codec, PObject);
 
   public:
+
+	struct H323_RTPInformation
+	{
+		int m_sessionID;
+		const RTP_DataFrame * m_frame;
+	};
+
     enum Direction {
       Encoder,
       Decoder
@@ -521,7 +531,8 @@ class H323Codec : public PObject
       */
     PBoolean WriteRaw(
       void * data,
-      PINDEX length
+      PINDEX length,
+	  void * mark
     );
 
     /**Attach the logical channel, for use by the codec.
@@ -585,6 +596,8 @@ class H323Codec : public PObject
     PMutex     rawChannelMutex;
 
     PINDEX     lastSequenceNumber;  // Detects lost RTP packets in the video codec.
+
+	H323_RTPInformation  rtpInformation;
 
     PLIST(FilterList, PNotifier);
     FilterList filters;

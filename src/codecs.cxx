@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2010/02/10 01:03:06  shorne
+ * Ensure AEC is initialized
+ *
  * Revision 1.9  2009/08/21 04:35:47  shorne
  * Expressly reference codecs.h to avoid problems with windows SDK codecs.h
  *
@@ -394,12 +397,14 @@
 #ifdef H323_AEC
 #include <ptclib/paec.h>
 
-#if _DEBUG
-  #pragma comment(lib,"paecd.lib")
-#elif PTRACING
-  #pragma comment(lib,"paec.lib")
-#else
-  #pragma comment(lib,"paecn.lib")
+#if _WIN32
+	#if _DEBUG
+	  #pragma comment(lib,"paecd.lib")
+	#elif PTRACING
+	  #pragma comment(lib,"paec.lib")
+	#else
+	  #pragma comment(lib,"paecn.lib")
+	#endif
 #endif
 #endif // H323_AEC
 
@@ -426,6 +431,10 @@ H323Codec::H323Codec(const OpalMediaFormat & fmt, Direction dir)
   lastSequenceNumber = 1;
   rawDataChannel = NULL;
   deleteChannel  = FALSE;
+
+  rtpInformation.m_sessionID=0;
+  rtpInformation.m_frame=NULL;
+
 }
 
 
@@ -433,7 +442,6 @@ PBoolean H323Codec::Open(H323Connection & /*connection*/)
 {
   return TRUE;
 }
-
 
 unsigned H323Codec::GetFrameRate() const
 {
@@ -534,8 +542,7 @@ PBoolean H323Codec::ReadRaw(void * data, PINDEX size, PINDEX & length)
   return TRUE;
 }
 
-
-PBoolean H323Codec::WriteRaw(void * data, PINDEX length)
+PBoolean H323Codec::WriteRaw(void * data, PINDEX length, void * mark)
 {
   if (rawDataChannel == NULL) {
     PTRACE(1, "Codec\tNo audio channel for write");
@@ -548,7 +555,11 @@ PBoolean H323Codec::WriteRaw(void * data, PINDEX length)
     length = info.bufferLength;
   }
 
+#if PTLIB_VER < 290
   if (rawDataChannel->Write(data, length))
+#else
+  if (rawDataChannel->Write(data, length, mark))
+#endif
     return TRUE;
 
   PTRACE(1, "Codec\tWrite failed: " << rawDataChannel->GetErrorText(PChannel::LastWriteError));
@@ -559,6 +570,7 @@ PBoolean H323Codec::WriteRaw(void * data, PINDEX length)
 PBoolean H323Codec::AttachLogicalChannel(H323Channel *channel)
 {
   logicalChannel = channel;
+  rtpInformation.m_sessionID=logicalChannel->GetSessionID();
 
   return TRUE;
 }
@@ -602,7 +614,7 @@ H323VideoCodec::~H323VideoCodec()
 PBoolean H323VideoCodec::Open(H323Connection & connection)
 {
 #ifdef H323_H239
-  if (logicalChannel->GetSessionID() == OpalMediaFormat::DefaultExtVideoSessionID)
+  if (rtpInformation.m_sessionID == OpalMediaFormat::DefaultExtVideoSessionID)
     return connection.OpenExtendedVideoChannel(direction == Encoder, *this);
   else 
 #endif
@@ -1084,8 +1096,9 @@ PBoolean H323FramedAudioCodec::Read(BYTE * buffer, unsigned & length, RTP_DataFr
 
 PBoolean H323FramedAudioCodec::Write(const BYTE * buffer,
                                  unsigned length,
-                                 const RTP_DataFrame & /*rtpFrame*/,
-                                 unsigned & written)
+                                 const RTP_DataFrame & rtpFrame,
+                                 unsigned & written
+								 )
 {
   PWaitAndSignal mutex(rawChannelMutex);
 
@@ -1096,6 +1109,7 @@ PBoolean H323FramedAudioCodec::Write(const BYTE * buffer,
 
   // If length is zero then it indicates silence, do nothing.
   written = 0;
+  rtpInformation.m_frame = &rtpFrame;
 
   unsigned bytesDecoded = samplesPerFrame*2;
 
@@ -1126,7 +1140,7 @@ PBoolean H323FramedAudioCodec::Write(const BYTE * buffer,
 		  aec->Receive((BYTE *)sampleBuffer.GetPointer(), bytesDecoded);
 	  }
 #endif
-      if (!WriteRaw(sampleBuffer.GetPointer(), bytesDecoded)) 
+      if (!WriteRaw(sampleBuffer.GetPointer(), bytesDecoded, &rtpInformation)) 
 		  return FALSE;
   }
 	  return TRUE;
