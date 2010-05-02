@@ -72,7 +72,7 @@ static struct PluginCodec_information licenseInfo =
 /////////////////////////////////////////////////////////////////////////////
 
 
-#include "G722-1\defs.h"
+#include "G722-1/defs.h"
 
 #define FORMAT_NAME_G722_1_24K  "G.722.1-24k"   // text decription and mediaformat name
 #define FORMAT_NAME_G722_1_32K  "G.722.1-32k"
@@ -359,7 +359,7 @@ static struct PluginCodec_Definition G7221CodecDefn[] =
     PluginCodec_RTPTypeShared,              // RTP type shared with other codecs in this definition
     
     FORMAT_NAME_G722_1_24K,                 // text decription
-    "PCM-16-16kHz",                         // source format
+    "L16",                                  // source format
     FORMAT_NAME_G722_1_24K,                 // destination format
     
     NULL,                                   // user data
@@ -396,7 +396,7 @@ static struct PluginCodec_Definition G7221CodecDefn[] =
 
     FORMAT_NAME_G722_1_24K,                 // text decription
     FORMAT_NAME_G722_1_24K,                 // source format
-    "PCM-16-16kHz",                         // destination format
+    "L16",                                  // destination format
 
     NULL,                                   // user data
 
@@ -430,7 +430,7 @@ static struct PluginCodec_Definition G7221CodecDefn[] =
     PluginCodec_RTPTypeShared,              // RTP type shared with other codecs in this definition
     
     FORMAT_NAME_G722_1_32K,                 // text decription
-    "PCM-16-16kHz",                         // source format
+    "L16",                                  // source format
     FORMAT_NAME_G722_1_32K,                 // destination format
     
     NULL,                                   // user data
@@ -467,7 +467,7 @@ static struct PluginCodec_Definition G7221CodecDefn[] =
 
     FORMAT_NAME_G722_1_32K,                 // text decription
     FORMAT_NAME_G722_1_32K,                 // source format
-    "PCM-16-16kHz",                         // destination format
+    "L16",                                  // destination format
 
     NULL,                                   // user data
 
