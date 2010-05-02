@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2010/02/24 03:39:07  shorne
+ * Add ability to pass to the video plugin a custom frame size and rate to encode/decode
+ *
  * Revision 1.9  2010/02/08 05:26:19  shorne
  * Added ability to create instance of plugin codec
  *
@@ -277,8 +280,17 @@ class OpalFactoryCodec : public PObject {
     /** Return the  sampleRate field of PluginCodec_Definition for this codec*/
     virtual PString      GetSDPFormat() const = 0;
 
+    /** Set Media Format */
+    virtual bool SetMediaFormat(OpalMediaFormat & /*fmt*/) { return false; }
+
+    /** Update Media Options */
+    virtual bool UpdateMediaOptions(OpalMediaFormat & /*fmt*/)  { return false; }
+
 	/** Set a Custom format for the codec */
 	virtual bool SetCustomFormat(unsigned /*width*/, unsigned /*height*/, unsigned /*frameRate*/) { return false; }
+
+    /** Codec Control */
+    virtual bool CodecControl(const char * /*name*/, void * /*parm*/, unsigned int * /*parmLen*/, int & /*retVal*/) { return false; }
 
 };
 

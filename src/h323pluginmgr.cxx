@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.32  2010/04/28 10:25:17  willamowius
+ * slighly better debug message
+ *
  * Revision 1.31  2010/02/24 03:39:07  shorne
  * Add ability to pass to the video plugin a custom frame size and rate to encode/decode
  *
@@ -587,6 +590,15 @@ class OpalPluginCodec : public OpalFactoryCodec {
 
 	bool SetCustomFormat(unsigned frameWidth, unsigned frameHeight, unsigned frameRate);
 
+    /** Set Media Format */
+    bool SetMediaFormat(OpalMediaFormat & fmt);
+
+    /** Update Media Options */
+    bool UpdateMediaOptions(OpalMediaFormat & fmt);
+
+    /** codec control */
+    bool CodecControl(const char * name, void * parm, unsigned int * parmLen, int & retVal);
+
   protected:
     PluginCodec_Definition * codecDefn;
     void * context;
@@ -682,6 +694,42 @@ int OpalG711ALaw64k_Decoder::Encode(const void * _from, unsigned * fromLen, void
   return 1;
 }
 
+DECLARE_FIXED_CODEC(OpalG711ALaw64k20, OpalG711ALaw64k20, 64000, 20000, 160, 160, 20, 20, RTP_DataFrame::PCMU, "PCMA")
+
+int OpalG711ALaw64k20_Encoder::Encode(const void * _from, unsigned * fromLen, void * _to,   unsigned * toLen, unsigned int * )
+{
+  if (*fromLen/2 > *toLen)
+    return 0;
+
+  const short * from = (short *)_from;
+  BYTE * to          = (BYTE *)_to;
+
+  unsigned count = *fromLen / 2;
+  *toLen         = count;
+
+  while (count-- > 0)
+    *to++ = linear2alaw(*from++);
+
+  return 1;
+}
+
+int OpalG711ALaw64k20_Decoder::Encode(const void * _from, unsigned * fromLen, void * _to,   unsigned * toLen, unsigned int * )
+{
+  if (*fromLen*2 > *toLen)
+    return 0;
+
+  const BYTE * from = (BYTE *)_from;
+  short * to        = (short *)_to;
+
+  unsigned count = *fromLen;
+  *toLen         = count * 2;
+
+  while (count-- > 0)
+    *to++ = (short)alaw2linear(*from++);
+
+  return 1;
+}
+
 DECLARE_FIXED_CODEC(OpalG711uLaw64k, OpalG711uLaw64k, 64000, 30000, 240, 240, 30, 30, RTP_DataFrame::PCMU, "PCMU")
 
 int OpalG711uLaw64k_Encoder::Encode(const void * _from, unsigned * fromLen, void * _to,   unsigned * toLen, unsigned int * )
@@ -717,6 +765,43 @@ int OpalG711uLaw64k_Decoder::Encode(const void * _from, unsigned * fromLen, void
 
   return 1;
 }
+
+DECLARE_FIXED_CODEC(OpalG711uLaw64k20, OpalG711uLaw64k20, 64000, 20000, 160, 160, 20, 20, RTP_DataFrame::PCMU, "PCMU")
+
+int OpalG711uLaw64k20_Encoder::Encode(const void * _from, unsigned * fromLen, void * _to,   unsigned * toLen, unsigned int * )
+{
+  if (*fromLen/2 > *toLen)
+    return 0;
+
+  const short * from = (short *)_from;
+  BYTE * to          = (BYTE *)_to;
+
+  unsigned count = *fromLen / 2;
+  *toLen         = count;
+
+  while (count-- > 0)
+    *to++ = linear2ulaw(*from++);
+
+  return 1;
+}
+
+int OpalG711uLaw64k20_Decoder::Encode(const void * _from, unsigned * fromLen, void * _to,   unsigned * toLen, unsigned int * )
+{
+  if (*fromLen*2 > *toLen)
+    return 0;
+
+  const BYTE * from = (BYTE *)_from;
+  short * to        = (short *)_to;
+
+  unsigned count = *fromLen;
+  *toLen         = count * 2;
+
+  while (count-- > 0)
+    *to++ = (short)ulaw2linear(*from++);
+
+  return 1;
+}
+
 
 #endif // NO_H323_AUDIO_CODECS
 
@@ -803,21 +888,6 @@ static PBoolean SetCodecControl(const PluginCodec_Definition * codec,
 
 #ifdef H323_VIDEO
 
-static PBoolean EventCodecControl(PluginCodec_Definition * codec, 
-                                               void * /*context*/,
-                                         const char * /*name*/,
-                                         const char * /*parm*/ )
-{
-  PluginCodec_ControlDefn * codecControls = codec->codecControls;
-  if (codecControls == NULL)
-    return FALSE;
-
-  // Still to be finalised how to write back an event to the plugin codec 
-  // in a meaningful way
-
-  return FALSE;
-}
-
 static PBoolean CallCodecControl(PluginCodec_Definition * codec, 
                                                void * context,
                                          const char * name,
@@ -838,6 +908,22 @@ static PBoolean CallCodecControl(PluginCodec_Definition * codec,
   }
 
   return FALSE;
+}
+
+static PBoolean EventCodecControl(PluginCodec_Definition * codec, 
+                                               void * context,
+                                         const char * name,
+                                         const char * parm )
+{
+   PStringArray list;
+   list += name;
+   list += parm;
+
+   char ** parms = list.ToCharArray();
+   unsigned int parmsLen = sizeof(parms);
+   int retVal=0;
+
+   return CallCodecControl(codec,context,EVENT_CODEC_CONTROL, parms, &parmsLen, retVal);
 }
 
 static void PopulateMediaFormatOptions(PluginCodec_Definition * _encoderCodec, OpalMediaFormat & format)
@@ -1519,7 +1605,8 @@ class H323PluginVideoCodec : public H323VideoCodec
     );
 
     PBoolean RenderFrame(
-      const BYTE * buffer         ///< Buffer of data to render
+      const BYTE * buffer,        ///< Buffer of data to render
+	  void * mark				  ///< WaterMark
     );
  
     virtual unsigned GetFrameRate() const 
@@ -1556,17 +1643,19 @@ class H323PluginVideoCodec : public H323VideoCodec
     void SetVideoMode(int mode);
     
     // The following require implementation in the plugin codec
-    virtual void OnFastUpdatePicture()
-    {
-      EventCodecControl(codec, context, EVENT_CODEC_CONTROL, "on_fast_update");
+    virtual void OnFastUpdatePicture() {
+      EventCodecControl(codec, context, "on_fast_update", "");
       sendIntra = true;
     }
 
+    virtual void OnFlowControl(long bitRateRestriction)
+    { EventCodecControl(codec, context, "on_flow_control", PString(bitRateRestriction));                                                          }
+
     virtual void OnLostPartialPicture()
-    { EventCodecControl(codec, context, EVENT_CODEC_CONTROL, "on_lost_partial"); }
+    { EventCodecControl(codec, context, "on_lost_partial", ""); }
 
     virtual void OnLostPicture()
-    { EventCodecControl(codec, context, EVENT_CODEC_CONTROL, "on_lost_picture"); } 
+    { EventCodecControl(codec, context, "on_lost_picture", ""); } 
 
   protected:
     void *       context;
@@ -1659,6 +1748,46 @@ static bool SetCustomLevel(const PluginCodec_Definition * codec, OpalMediaFormat
     }
 	return false;
 }
+
+bool OpalPluginCodec::SetMediaFormat(OpalMediaFormat & fmt)
+{
+  switch (codecDefn->flags & PluginCodec_MediaTypeMask) {
+      case PluginCodec_MediaTypeVideo:
+          SetDefaultVideoOptions(fmt);
+          break;
+      case PluginCodec_MediaTypeAudio:
+      case PluginCodec_MediaTypeAudioStreamed:
+      default:
+          return false;
+  }
+
+    PopulateMediaFormatOptions(codecDefn, fmt);
+    PopulateMediaFormatFromGenericData(fmt, 
+          (PluginCodec_H323GenericCodecData *)codecDefn->h323CapabilityData);
+    OpalMediaFormat::DebugOptionList(fmt);
+    return true;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+bool OpalPluginCodec::UpdateMediaOptions(OpalMediaFormat & fmt)
+{
+  switch (codecDefn->flags & PluginCodec_MediaTypeMask) {
+      case PluginCodec_MediaTypeVideo:
+           return UpdateVideoOptions(codecDefn, context, fmt);
+      case PluginCodec_MediaTypeAudio:
+      case PluginCodec_MediaTypeAudioStreamed:
+      default:
+          return false;
+  }      
+}
+
+bool OpalPluginCodec::CodecControl(const char * name, void * parm, unsigned int * parmLen, int & retVal)
+{
+    return CallCodecControl(codecDefn, context, name, parm, parmLen, retVal);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
 
 H323PluginVideoCodec::H323PluginVideoCodec(const OpalMediaFormat & fmt, Direction direction, PluginCodec_Definition * _codec)
       : H323VideoCodec(fmt, direction), codec(_codec) 
@@ -1760,7 +1889,7 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
 
         videoIn->EnableAccess();
 
-        RenderFrame(data);
+        RenderFrame(data, &rtpInformation);
 
         PTimeInterval now = PTimer::Tick();
         if (lastFrameTick != 0)
@@ -1822,6 +1951,13 @@ PBoolean H323PluginVideoCodec::Write(const BYTE * /*buffer*/, unsigned length, c
     return FALSE;
   }
 
+#if PTLIB_VER >= 290
+  if (((PVideoChannel *)rawDataChannel)->DisableDecode()) {
+    PTRACE(5,"Output device not ready or paused. Decode aborted.");
+	return TRUE;
+  }
+#endif
+
   // get the size of the output buffer
   int outputDataSize;
   if (!CallCodecControl(codec, context, GET_OUTPUT_DATA_SIZE_CONTROL, NULL, NULL, outputDataSize))
@@ -1862,7 +1998,7 @@ PBoolean H323PluginVideoCodec::Write(const BYTE * /*buffer*/, unsigned length, c
   if (flags & PluginCodec_ReturnCoderLastFrame) {
     PluginCodec_Video_FrameHeader * header = (PluginCodec_Video_FrameHeader *)(bufferRTP.GetPayloadPtr());
     SetFrameSize(header->width,header->height);
-    RenderFrame(OPAL_VIDEO_FRAME_DATA_PTR(header));
+    RenderFrame(OPAL_VIDEO_FRAME_DATA_PTR(header), &rtpInformation);
   }
 
   written = length;
@@ -1871,7 +2007,7 @@ PBoolean H323PluginVideoCodec::Write(const BYTE * /*buffer*/, unsigned length, c
 }
 
 
-PBoolean H323PluginVideoCodec::RenderFrame(const BYTE * buffer)
+PBoolean H323PluginVideoCodec::RenderFrame(const BYTE * buffer, void * mark)
 {
     PVideoChannel *videoOut = (PVideoChannel *)rawDataChannel; // guaranteed to be non-NULL when called from Read() or Write()
 
@@ -1881,7 +2017,11 @@ PBoolean H323PluginVideoCodec::RenderFrame(const BYTE * buffer)
     videoOut->SetRenderFrameSize(frameWidth, frameHeight);
 
     PTRACE(6, "PLUGIN\tWrite data to video renderer");
-    return videoOut->Write(buffer, 0 /*unused parameter*/);
+#if PTLIB_VER < 290
+    return videoOut->Write(buffer, 0);
+#else
+    return videoOut->Write(buffer, 0, mark);
+#endif
 }
 
 PBoolean H323PluginVideoCodec::SetFrameSize(int _width, int _height)
@@ -3689,6 +3829,12 @@ void H323PluginCodecManager::Bootstrap()
   OpalPluginCodecFactory::Register("OpalG711ALaw64k|L16", new OpalG711ALaw64k_Decoder());
   OpalPluginCodecFactory::Register("L16|G.711-uLaw-64k", new OpalG711uLaw64k_Encoder());
   OpalPluginCodecFactory::Register("G.711-uLaw-64k|L16", new OpalG711uLaw64k_Decoder());
+/*
+  OpalPluginCodecFactory::Register("L16|OpalG711ALaw64k20", new OpalG711ALaw64k20_Encoder());
+  OpalPluginCodecFactory::Register("OpalG711ALaw64k20|L16", new OpalG711ALaw64k20_Decoder());
+  OpalPluginCodecFactory::Register("L16|G.711-uLaw-64k-20", new OpalG711uLaw64k20_Encoder());
+  OpalPluginCodecFactory::Register("G.711-uLaw-64k-20|L16", new OpalG711uLaw64k20_Decoder());
+*/
 #endif
 
 }
@@ -3721,6 +3867,11 @@ OpalFactoryCodec * H323PluginCodecManager::CreateCodec(const PString & name)
   if (name =="OpalG711ALaw64k|L16") return new OpalG711ALaw64k_Decoder();
   if (name =="L16|G.711-uLaw-64k") return new OpalG711uLaw64k_Encoder();
   if (name =="G.711-uLaw-64k|L16") return new OpalG711uLaw64k_Decoder();
+
+  if (name =="L16|OpalG711ALaw64k20") return new OpalG711ALaw64k20_Encoder();
+  if (name =="OpalG711ALaw64k20|L16") return new OpalG711ALaw64k20_Decoder();
+  if (name =="L16|G.711-uLaw-64k-20") return new OpalG711uLaw64k20_Encoder();
+  if (name =="G.711-uLaw-64k-20|L16") return new OpalG711uLaw64k20_Decoder();
 			
     OpalPluginCodecFactory::KeyList_T keyList = OpalPluginCodecFactory::GetKeyList();
     OpalPluginCodecFactory::KeyList_T::const_iterator r;
