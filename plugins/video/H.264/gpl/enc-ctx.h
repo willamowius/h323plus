@@ -23,7 +23,7 @@
 #define __ENC_CTX_H__ 1
 
 #include <stdarg.h>
-#ifdef MSC_VER
+#if defined(_WIN32) && _MSC_VER < 1600
 #include "../../common/vs-stdint.h"
 #else
 #include <stdint.h>
@@ -58,8 +58,8 @@ extern "C" {
 #define H264_BITRATE         768000
 #define H264_PAYLOAD_SIZE      1400
 #define H264_SINGLE_NAL_SIZE   1200
-#define H264_FRAME_RATE          25
-#define H264_KEY_FRAME_INTERVAL 125
+#define H264_FRAME_RATE          30
+#define H264_KEY_FRAME_INTERVAL  (30*120) // Send a key frame no more than once every two minutes (unless requested through fast update)
 #define H264_PROFILE_LEVEL       ((66 << 16) + (0xC0 << 8) +  30)
 #define H264_TSTO                31
 #define H264_MIN_QUANT           10
@@ -97,6 +97,8 @@ class X264EncoderContext
 
     int EncodeFrames (const unsigned char * src, unsigned & srcLen, unsigned char * dst, unsigned & dstLen, unsigned int & flags);
 
+    void fastUpdateRequested(void);
+    
     void SetMaxRTPFrameSize (unsigned size);
     void SetMaxKeyFramePeriod (unsigned period);
     void SetTargetBitrate (unsigned rate);
@@ -118,6 +120,7 @@ class X264EncoderContext
     uint32_t _PFramesSinceLastIFrame; // counts frames since last keyframe
     uint32_t _IFrameInterval; // confd frames between keyframes
     int _frameCounter;
+    bool _fastUpdateRequested;
 } ;
 
 

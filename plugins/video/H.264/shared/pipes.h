@@ -46,6 +46,7 @@
 #define SET_MAX_KEY_FRAME_PERIOD  11
 #define SET_TSTO                  12
 #define SET_PROFILE_LEVEL         13
+#define FASTUPDATE_REQUESTED	  14
 
 
 #endif /* __PIPE_H__ */

@@ -72,71 +72,77 @@ X264EncoderContext::X264EncoderContext()
 {
   _frameCounter=0;
   _PFramesSinceLastIFrame = 0;
+  _fastUpdateRequested = false;
 
   _txH264Frame = new H264Frame();
   _txH264Frame->SetMaxPayloadSize(H264_PAYLOAD_SIZE);
 
-  _inputFrame.i_type = X264_TYPE_AUTO;
-  _inputFrame.i_qpplus1 = 0;
-  _inputFrame.img.i_csp = X264_CSP_I420;
+  _inputFrame.i_type 			= X264_TYPE_AUTO;
+  _inputFrame.i_qpplus1 		= 0;
+  _inputFrame.img.i_csp 		= X264_CSP_I420;
  
    X264_PARAM_DEFAULT(&_context);
 
-  // Default
-  // ABR with bit rate tolerance = 1 is CBR...
-  _context.rc.i_rc_method = X264_RC_ABR;
-  _context.rc.f_rate_tolerance = 1;
-
-  // No aspect ratio correction
-  _context.vui.i_sar_width = 0;
-  _context.vui.i_sar_height = 0;
+   // No multicore support
+   _context.i_threads           = 1;
+   _context.b_sliced_threads    = 1;  
+   _context.b_deterministic		= 1;
+   _context.i_sync_lookahead    = 0;
+   _context.i_frame_reference   = 1;
+   _context.i_bframe            = 0;
+    
+ 
+  // No aspect ratio correction TODO
+  _context.vui.i_sar_width      = 0;
+  _context.vui.i_sar_height     = 0;
 
   // Enable logging
-  _context.pf_log = logCallbackX264;
-  _context.i_log_level = X264_LOG_DEBUG;
-  _context.p_log_private = NULL;
+  _context.pf_log               = logCallbackX264;
+  _context.i_log_level          = X264_LOG_WARNING; //X264_LOG_DEBUG;
+  _context.p_log_private        = NULL;
 
   // Single NAL Mode
 #if X264_BUILD > 79
-  //_context.b_repeat_headers = 0;
-  _context.i_slice_max_size = H264_SINGLE_NAL_SIZE;
-  _context.b_repeat_headers = 1;     // repeat SPS/PPS before each key frame
-  _context.b_annexb = 1;             // place start codes (4 bytes) before NAL units
+  _context.i_slice_max_size     = H264_SINGLE_NAL_SIZE; // TODO: need to be provided.
+  _context.b_repeat_headers     = 1;     // repeat SPS/PPS before each key frame
+  _context.b_annexb             = 1;             // place start codes (4 bytes) before NAL units
 #endif
-
-  // Auto detect number of CPUs
-  _context.i_threads = 0;  
 
   SetFrameWidth       (CIF_WIDTH);
   SetFrameHeight      (CIF_HEIGHT);
   SetFrameRate        (H264_FRAME_RATE);
-  SetTargetBitrate    ((unsigned)(H264_BITRATE / 1000));
   SetProfileLevel     (H264_PROFILE_LEVEL);
-  SetTSTO             (H264_TSTO);
+  SetTSTO             (H264_TSTO); // TODO: is this really functional
   SetMaxKeyFramePeriod(H264_KEY_FRAME_INTERVAL);
 
-//_context.i_maxframes = 0;
-  //_context.rc.b_stat_write = 0;
-  //_context.analyse.inter = 0;
-  _context.analyse.b_psnr = 0;
- 
-  _context.rc.i_lookahead = 0;
-  _context.i_sync_lookahead = 0;
-//  _context.analyse.b_weighted_bipred = 0;
-  _context.analyse.b_transform_8x8 = 0;
-//  _context.rc.i_vbv_max_bitrate = 5000;
-//  _context.rc.i_vbv_buffer_size = 200;
-//  _context.i_cqm_preset == X264_CQM_FLAT;
-//  _context.b_interlaced = 0;
-  _context.analyse.i_weighted_pred = 0;
-
-  //_context.i_maxframes = 0;
-  //_context.rc.b_stat_write = 0;
-  //_context.analyse.inter = 0;
-  _context.analyse.b_psnr = 0;
-
-  _codec = X264_ENCODER_OPEN(&_context);
+   // Rate control set to CBR mode
+  _context.rc.i_rc_method       	= X264_RC_ABR;
+  _context.rc.i_qp_min              = 25;
+  _context.rc.i_qp_max              = 51;
+  _context.rc.f_rate_tolerance  	= 1;
+  _context.rc.i_vbv_max_bitrate 	= 0;
+  _context.rc.i_vbv_buffer_size 	= 0;
+  _context.rc.i_lookahead       	= 0;
+  SetTargetBitrate    ((unsigned)(H264_BITRATE / 1000));
+   
+  // Analysis support
+  _context.analyse.intra     		= 3;
+  _context.analyse.inter     		= 0;
+  _context.analyse.b_transform_8x8 	= 0;
+  _context.analyse.i_weighted_pred  = 0;
+  _context.analyse.i_direct_mv_pred = 1;
+  _context.analyse.i_me_method      = 0;
+  _context.analyse.i_me_range       = 16;
+  _context.analyse.i_subpel_refine  = 1;
+  _context.analyse.i_trellis        = 0;
+  _context.analyse.b_psnr           = 0;
+  _context.analyse.b_fast_pskip     = 1;
+  _context.analyse.b_dct_decimate   = 1;
+  _context.analyse.i_noise_reduction= 0;
+  _context.analyse.b_ssim           = 0;
   
+  
+  _codec = X264_ENCODER_OPEN(&_context);
   if (_codec == NULL) {
     TRACE(1, "H264\tEncoder\tCouldn't init x264 encoder");
   } 
@@ -166,37 +172,42 @@ void X264EncoderContext::SetMaxRTPFrameSize(unsigned size)
 
 void X264EncoderContext::SetMaxKeyFramePeriod (unsigned period)
 {
-  _IFrameInterval = _context.i_keyint_max = period;
-  _PFramesSinceLastIFrame = _IFrameInterval + 1; // force a keyframe on the first frame
+    _IFrameInterval = _context.i_keyint_max = period;
+    _PFramesSinceLastIFrame = _IFrameInterval + 1; // force a keyframe on the first frame
+    TRACE(4, "H264\tEncoder\tx264 encoder key frame period set to " << period);
 }
 
 void X264EncoderContext::SetTargetBitrate(unsigned rate)
 {
-  _context.rc.i_vbv_max_bitrate = rate;
-  _context.rc.i_bitrate = rate;
+    _context.rc.i_bitrate = rate;
+    TRACE(4, "H264\tEncoder\tx264 encoder bitrate set to " << rate);
 }
 
 void X264EncoderContext::SetFrameWidth(unsigned width)
 {
-  _context.i_width = width;
+    _context.i_width = width;
+    TRACE(4, "H264\tEncoder\tx264 encoder width set to " << width);
 }
 
 void X264EncoderContext::SetFrameHeight(unsigned height)
 {
-  _context.i_height = height;
+    _context.i_height = height;
+    TRACE(4, "H264\tEncoder\tx264 encoder height set to " << height);
 }
 
 void X264EncoderContext::SetFrameRate(unsigned rate)
 {
-  _context.i_fps_num = (int)((rate + .5) * 1000);
-  _context.i_fps_den = 1000;
+    _context.i_fps_num = rate; 
+    _context.i_fps_den = 1;
+    TRACE(4, "H264\tEncoder\tx264 encoder frame rate set to " << (_context.i_fps_num/_context.i_fps_den));
 }
 
 void X264EncoderContext::SetTSTO (unsigned tsto)
 {
     _context.rc.i_qp_min = H264_MIN_QUANT;
     _context.rc.i_qp_max =  (int)((51 - H264_MIN_QUANT) / 31 * tsto + H264_MIN_QUANT);
-    _context.rc.i_qp_step = 4;	    
+    _context.rc.i_qp_step = 4;	
+    TRACE(4, "H264\tEncoder\tx264 encoder QP range rate set to [" << _context.rc.i_qp_min << "-" << _context.rc.i_qp_max << "] with a step of " << _context.rc.i_qp_step);
 }
 
 void X264EncoderContext::SetProfileLevel (unsigned profileLevel)
@@ -230,9 +241,7 @@ void X264EncoderContext::SetProfileLevel (unsigned profileLevel)
   // Level:
   _context.i_level_idc = level;
   
-  // DPB from Level by default
-  _context.rc.i_vbv_buffer_size = h264_levels[i].cpb;
-  // MV Range from Level by default  
+  TRACE(4, "H264\tEncoder\tx264 encoder level set to " << _context.i_level_idc);
 }
 
 void X264EncoderContext::ApplyOptions()
@@ -249,6 +258,11 @@ void X264EncoderContext::ApplyOptions()
 //	  X264_ENCODER_HEADERS(_codec, &NALs, &numberOfNALs);
 //	  TRACE(4, "H264\tEncoder\tx264 encoder successfully opened with headers");
   }
+}
+
+void X264EncoderContext::fastUpdateRequested(void)
+{
+  _fastUpdateRequested = true; 
 }
 
 int X264EncoderContext::EncodeFrames(const unsigned char * src, unsigned & srcLen, unsigned char * dst, unsigned & dstLen, unsigned int & flags)
@@ -303,7 +317,9 @@ int X264EncoderContext::EncodeFrames(const unsigned char * src, unsigned & srcLe
 //	numberOfNALs=0;
   } 
 
-  bool wantIFrame = false;
+  bool wantIFrame = _fastUpdateRequested;
+  _fastUpdateRequested = false;
+  
   x264_picture_t dummyOutput;
 
   // Check whether to insert a keyframe 

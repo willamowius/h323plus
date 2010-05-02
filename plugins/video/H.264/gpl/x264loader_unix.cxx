@@ -23,8 +23,7 @@
 #include "trace.h"
 #include <dlfcn.h>
 #include <string.h>
-#include <stdio.h>
- 
+
 X264Library::X264Library()
 {
   _dynamicLibrary = NULL;
@@ -55,15 +54,8 @@ bool X264Library::Load()
   }
 
   if (!GetFunction("x264_encoder_open", (Function &)Xx264_encoder_open)) {
-    // try function name with appended build number before failing
-    char fktname[128];
-	sprintf(fktname, "x264_encoder_open_%d", X264_BUILD);
-    if (GetFunction(fktname, (Function &)Xx264_encoder_open)) {
-      TRACE (2, "H264\tDYNA\tLoaded " << fktname);
-    } else {
-      TRACE (1, "H264\tDYNA\tFailed to load x264_encoder_open");
-      return false;
-    }
+    TRACE (1, "H264\tDYNA\tFailed to load x264_encoder_open");
+    return false;
   }
   if (!GetFunction("x264_param_default", (Function &)Xx264_param_default)) {
     TRACE (1, "H264\tDYNA\tFailed to load x264_param_default");

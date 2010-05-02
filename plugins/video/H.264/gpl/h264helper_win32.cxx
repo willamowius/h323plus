@@ -35,7 +35,8 @@
 
 // TODO: we should dynamically adjust this buffer size to the max frame size used
 //#define MAX_FRAME_SIZE 608286	// 4CIF
-#define MAX_FRAME_SIZE 3110430	// 1080p
+#define MAX_FRAME_SIZE 1382400  // 720p 
+//#define MAX_FRAME_SIZE 3110430	// 1080p
 
 HANDLE stream;
 unsigned msg;
@@ -281,6 +282,11 @@ int main(int argc, char *argv[])
       case SET_MAX_FRAME_SIZE:
           readStream(stream, (LPVOID)&val, sizeof(val));
           x264->SetMaxRTPFrameSize (val);
+          writeStream(stream,(LPCVOID)&msg, sizeof(msg)); 
+          flushStream(stream);
+        break;
+      case FASTUPDATE_REQUESTED:
+          x264->fastUpdateRequested();
           writeStream(stream,(LPCVOID)&msg, sizeof(msg)); 
           flushStream(stream);
         break;
