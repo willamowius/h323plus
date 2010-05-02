@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.12  2010/04/12 21:40:12  willamowius
+ * give application access to RTP sender report
+ *
  * Revision 1.11  2009/07/09 15:11:12  shorne
  * Simplfied and standardised compiler directives
  *
@@ -254,7 +257,7 @@ H323_RTP_UDP::H323_RTP_UDP(const H323Connection & conn,
 #ifdef P_STUN
   PNatMethod * meth = NULL;
   if (conn.HasNATSupport()) {
-      meth = endpoint.GetPreferedNatMethod(remoteAddress);
+      meth = conn.GetPreferedNatMethod(remoteAddress);
 	  if (meth != NULL) {
 	     PTRACE(4, "RTP\tNAT Method " << meth->GetName() << " selected for call.");
 	  }
