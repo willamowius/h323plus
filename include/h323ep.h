@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.29  2010/02/24 03:44:40  shorne
+ * Add ability to pass to the video plugin a custom frame size and rate to encode/decode
+ *
  * Revision 1.28  2010/01/20 04:11:09  shorne
  * Add ability to advertise supported H.460 features in presence
  *
@@ -2650,6 +2653,10 @@ class H323EndPoint : public PObject
 
     /**Get the default stack size of jitter buffer threads.
      */
+    PBoolean UseJitterBuffer() const { return useJitterBuffer; }
+
+    /**Get the default stack size of jitter buffer threads.
+     */
     PINDEX GetJitterThreadStackSize() const { return jitterThreadStackSize; }
 
     /** Get the priority at which channel threads run
@@ -2828,6 +2835,7 @@ class H323EndPoint : public PObject
     PINDEX logicalThreadStackSize;
     PINDEX rasThreadStackSize;
     PINDEX jitterThreadStackSize;
+	PBoolean useJitterBuffer;
 
 #ifdef H323_RTP_AGGREGATE
     PINDEX rtpAggregationSize;

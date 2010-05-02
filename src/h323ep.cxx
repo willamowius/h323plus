@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.40  2010/02/24 03:44:40  shorne
+ * Add ability to pass to the video plugin a custom frame size and rate to encode/decode
+ *
  * Revision 1.39  2010/02/02 14:20:51  willamowius
  * fix dialing alias@ip, when not registered to a gatekeeper
  *
@@ -1338,6 +1341,7 @@ H323EndPoint::H323EndPoint()
   logicalThreadStackSize    = 30000;
   rasThreadStackSize        = 30000;
   jitterThreadStackSize     = 30000;
+  useJitterBuffer			= true;
 
 #ifdef H323_SIGNAL_AGGREGATE
   signallingAggregationSize = 25;
