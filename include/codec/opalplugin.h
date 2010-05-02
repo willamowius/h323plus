@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2010/02/24 02:56:15  shorne
+ * Update to match latest Opal SVN
+ *
  * Revision 1.7  2009/11/12 06:27:15  shorne
  * Updated definitions
  *
@@ -301,6 +304,7 @@ struct PluginCodec_Definition;
 #define PLUGINCODEC_CONTROL_SET_LOG_FUNCTION      "set_log_function"
 #define PLUGINCODEC_CONTROL_GET_STATISTICS        "get_statistics"
 #define PLUGINCODEC_CONTROL_TERMINATE_CODEC       "terminate_codec"
+#define PLUGINCODEC_CONTROL_CODEC_EVENT           "event_codec"
 
 
 /* Log function, plug in gets a pointer to this function which allows
@@ -393,7 +397,11 @@ struct PluginCodec_Option {
 #define PLUGINCODEC_OPTION_TEMPORAL_SPATIAL_TRADE_OFF "Temporal Spatial Trade Off"
 #define PLUGINCODEC_OPTION_TX_KEY_FRAME_PERIOD        "Tx Key Frame Period"
 
-
+// Events
+#define PLUGINCODEC_EVENT_FASTUPDATE             "on_fast_update"
+#define PLUGINCODEC_EVENT_FLOWCONTROL            "on_flow_control"
+#define PLUGINCODEC_EVENT_LOSTPARTIAL            "on_lost_partial"
+#define PLUGINCODEC_EVENT_LOSTPICTURE            "on_lost_picture"
 
 // Full definition of the codec
 
