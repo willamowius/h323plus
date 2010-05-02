@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.28  2010/02/24 03:39:07  shorne
+ * Add ability to pass to the video plugin a custom frame size and rate to encode/decode
+ *
  * Revision 1.27  2010/02/13 00:59:27  shorne
  * fix typo
  *
@@ -1011,6 +1014,46 @@ PObject::Comparison H323NonStandardCapabilityInfo::CompareData(const PBYTEArray 
 
 /////////////////////////////////////////////////////////////////////////////
 
+struct GenericVideoOptionOrder {
+	PString name;
+	PString order;
+} videoOptionOrder[] = {
+   { "h264", "41,42,3,6,4,5,7,10" },
+   { "", "" }
+};
+
+static void capabilityReorder(const PString & capName, H245_ArrayOf_GenericParameter & gen)
+{
+	PStringArray list;
+	list.SetSize(0);
+	H245_ArrayOf_GenericParameter localGen;
+        int j = 0, k = 0;
+	
+	int i = -1;
+        while (!videoOptionOrder[++i].name) {
+            list = videoOptionOrder[i].order.Tokenise(",");
+	}
+
+       localGen.SetSize(gen.GetSize());
+	if (list.GetSize() > 0) {
+	for (i=0; i < list.GetSize(); i++) {
+            for (j=0; j < gen.GetSize(); j++) {
+                H245_ParameterIdentifier & id = gen[j].m_parameterIdentifier;
+                if (id.GetTag() == H245_ParameterIdentifier::e_standard) {
+                    PASN_Integer & val = id;
+                    unsigned x = val.GetValue();
+                    if ((list[i].AsInteger() == (int)x)) {
+                        localGen[k++] = gen[j];
+                    }
+                }
+            }
+	}
+	}
+	for (j=0; j < gen.GetSize(); j++) {
+	        gen[j] = localGen[j];
+	}
+}
+
 H323GenericCapabilityInfo::H323GenericCapabilityInfo(const PString & standardId, PINDEX bitRate)
 	: maxBitRate(bitRate)
 {
@@ -1123,6 +1166,8 @@ PBoolean H323GenericCapabilityInfo::OnSendingGenericPDU(H245_GenericCapability &
       pdu.m_nonCollapsing.Append(param);
     }
   }
+    if (pdu.m_collapsing.GetSize() > 0) 
+        capabilityReorder(mediaFormat,pdu.m_collapsing);
 
     return TRUE;
 }
@@ -1966,7 +2011,7 @@ void H323ExtendedVideoCapability::PrintOn(ostream & strm) const
     strm << " <" << assignedCapabilityNumber << '>';
 
 	if (extCapabilities.GetSize() > 0) {
-	  int indent = strm.precision() + 2;
+	  int indent = (int)strm.precision() + 2;
       for (PINDEX i=0; i< extCapabilities.GetSize(); i++) {
          strm << '\n' << setw(indent+16) << extCapabilities[i];
 	  }
@@ -2624,9 +2669,11 @@ unsigned H323_G711Capability::GetSubType() const
 
 PString H323_G711Capability::GetFormatName() const
 {
-  static const char * const G711Name[2][2] = {
+  static const char * const G711Name[4][2] = {
     { OPAL_G711_ALAW_64K, OPAL_G711_ALAW_56K },
     { OPAL_G711_ULAW_64K, OPAL_G711_ULAW_56K },
+    { OPAL_G711_ALAW_64K_20, OPAL_G711_ALAW_56K_20 },
+    { OPAL_G711_ULAW_64K_20, OPAL_G711_ULAW_56K_20 }
   };
   return G711Name[mode][speed];
 }
@@ -3062,7 +3109,7 @@ H323Capabilities & H323Capabilities::operator=(const H323Capabilities & original
 
 void H323Capabilities::PrintOn(ostream & strm) const
 {
-  int indent = strm.precision()-1;
+  int indent = (int)strm.precision()-1;
   strm << setw(indent) << " " << "Table:\n";
   for (PINDEX i = 0; i < table.GetSize(); i++)
     strm << setw(indent+2) << " " << table[i] << '\n';
@@ -3638,6 +3685,8 @@ PBoolean H323Capabilities::SetVideoFrameSize(H323Capability::CapabilityFrameSize
 	if (frameSize != H323Capability::cifMPI) Remove("*-CIF*");
     if (frameSize != H323Capability::qcifMPI) Remove("*-QCIF*");
 	if (frameSize != H323Capability::sqcifMPI) Remove("*-SQCIF*");
+	if (frameSize != H323Capability::p720MPI) Remove("*-720*");
+	if (frameSize != H323Capability::i1080MPI) Remove("*-1080*");
 
 	// Remove Generic size Capabilities
 	PStringList genericCaps;

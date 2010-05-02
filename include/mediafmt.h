@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2008/05/23 11:19:54  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.5  2008/04/25 01:16:36  shorne
  * Added ability to set the video maximum bitrate
  *
@@ -314,7 +317,7 @@ class OpalMediaOptionValue : public OpalMediaOption
       const OpalMediaOptionValue * otherOption = PDownCast(const OpalMediaOptionValue, &option);
       if (otherOption == NULL)
         return GreaterThan;
-      if (m_value < otherOption->m_value)
+      if (m_value < otherOption->m_value || otherOption->m_value == 0)
         return LessThan;
       if (m_value > otherOption->m_value)
         return GreaterThan;
@@ -823,9 +826,13 @@ class OpalVideoFormat : public OpalMediaFormat
 
 #define OPAL_PCM16         "PCM-16"
 #define OPAL_G711_ULAW_64K "G.711-uLaw-64k"
+#define OPAL_G711_ULAW_64K_20 "G.711-uLaw-64k-20"
 #define OPAL_G711_ALAW_64K "G.711-ALaw-64k"
+#define OPAL_G711_ALAW_64K_20 "G.711-ALaw-64k-20"
 #define OPAL_G711_ULAW_56K "G.711-uLaw-56k"
+#define OPAL_G711_ULAW_56K_20 "G.711-uLaw-56k-20"
 #define OPAL_G711_ALAW_56K "G.711-ALaw-56k"
+#define OPAL_G711_ALAW_56K_20 "G.711-ALaw-56k-20"
 #define OPAL_G728          "G.728"
 #define OPAL_G729          "G.729"
 #define OPAL_G729A         "G.729A"
@@ -840,7 +847,9 @@ class OpalVideoFormat : public OpalMediaFormat
 
 extern char OpalPCM16[];
 extern char OpalG711uLaw64k[];
+extern char OpalG711uLaw64k20[];
 extern char OpalG711ALaw64k[];
+extern char OpalG711ALaw64k20[];
 extern char OpalG728[];
 extern char OpalG729[];
 extern char OpalG729A[];

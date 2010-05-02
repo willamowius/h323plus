@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2008/05/27 03:15:20  shorne
+ * Updated Windows compilation to compile with latest ptlib SVN
+ *
  * Revision 1.4  2008/05/23 11:22:21  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -205,6 +208,7 @@ OPAL_MEDIA_FORMAT_DECLARE(OpalPCM16Format,
 /////////////////////////////////////////////////////////////////////////////
 
 char OpalG711uLaw64k[] = OPAL_G711_ULAW_64K;
+char OpalG711uLaw64k20[] = OPAL_G711_ULAW_64K_20;
 
 OPAL_MEDIA_FORMAT_DECLARE(OpalG711uLaw64kFormat,
           OpalG711uLaw64k,
@@ -220,6 +224,7 @@ OPAL_MEDIA_FORMAT_DECLARE(OpalG711uLaw64kFormat,
 /////////////////////////////////////////////////////////////////////////////
 
 char OpalG711ALaw64k[] = OPAL_G711_ALAW_64K;
+char OpalG711ALaw64k20[] = OPAL_G711_ALAW_64K_20;
 
 OPAL_MEDIA_FORMAT_DECLARE(OpalG711ALaw64kFormat,
           OpalG711ALaw64k,
