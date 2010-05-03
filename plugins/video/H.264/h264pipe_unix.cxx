@@ -143,7 +143,6 @@ void H264EncCtx::call(unsigned msg, unsigned value)
   switch (msg) {
     case SET_FRAME_WIDTH:  width  = value; size = (unsigned) (width * height * 1.5) + sizeof(frameHeader) + 40; break;
     case SET_FRAME_HEIGHT: height = value; size = (unsigned) (width * height * 1.5) + sizeof(frameHeader) + 40; break;
-    default: return;
    }
   
   writeStream((char*) &msg, sizeof(msg));
