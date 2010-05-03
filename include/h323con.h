@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.42  2010/05/03 03:56:34  shorne
+ * Improved collection of sender reports including identifying session they originated from
+ *
  * Revision 1.41  2010/05/02 22:44:31  shorne
  * Added support to be able to set NAT Method on a call by call basis
  *
@@ -2588,22 +2591,13 @@ class H323Connection : public PObject
     /**Callback from the RTP session for statistics monitoring.
        This is called when a SenderReport is received
 
-       The default behaviour calls the decomposed function of the same name.
+       The default behaviour does nothing.
       */
     virtual void OnRxSenderReport(
         unsigned sessionID,
         const RTP_Session::SenderReport & send,
         const RTP_Session::ReceiverReportArray & recv
-       ) const; 
-
-   /**Callback from the RTP session for statistics monitoring.
-       This is called when a SenderReport is received
-
-       The default behaviour does nothing.
-      */
-    virtual void OnRxSenderReport(
-      DWORD /*SRsourceIdentifier*/, PTime /*SRrealTimestamp*/, DWORD /*SRrtpTimestamp*/, DWORD /*SRpacketsSent*/, DWORD /*SRoctetsSent*/,
-      DWORD /*RRsourceIdentifier*/, DWORD /*RRfractionLost*/, DWORD /*RRtotalLost*/, DWORD /*RRlastSequenceNumber*/, DWORD /*RRjitter*/, PTimeInterval /*RRlastTimestamp*/, PTimeInterval /*RRdelay*/) const { }
+       ) const { }
 
     /**Get the names of the codecs in use for the RTP session.
        If there is no session of the specified ID, an empty string is returned.

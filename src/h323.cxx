@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.55  2010/05/03 03:56:34  shorne
+ * Improved collection of sender reports including identifying session they originated from
+ *
  * Revision 1.54  2010/05/02 22:44:31  shorne
  * Added support to be able to set NAT Method on a call by call basis
  *
@@ -6001,20 +6004,6 @@ void H323Connection::OnRTPFinalStatistics(const RTP_Session & session) const
         H4609QueueStats(session);
 #endif
   endpoint.OnRTPFinalStatistics(*this, session);
-}
-
-void H323Connection::OnRxSenderReport(unsigned /*sessionID*/,
-                                      const RTP_Session::SenderReport & send,
-                                      const RTP_Session::ReceiverReportArray & recv
-                                      ) const
-{
-  for (PINDEX i=0; i < recv.GetSize(); i++) {
-    OnRxSenderReport(
-      send.sourceIdentifier, send.realTimestamp, send.rtpTimestamp, send.packetsSent, send.octetsSent,
-      recv[i].sourceIdentifier, recv[i].fractionLost, recv[i].totalLost, 
-      recv[i].lastSequenceNumber, recv[i].jitter, recv[i].lastTimestamp, recv[i].delay
-    );
-  }
 }
 
 #ifdef H323_H4609
