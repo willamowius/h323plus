@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2010/04/12 21:39:54  willamowius
+ * give application access to RTP sender reports
+ *
  * Revision 1.8  2009/11/29 23:31:05  shorne
  * BUG FIX : completely disable H.460 support if remote does not support it.
  *
@@ -499,62 +502,10 @@ class RTP_ControlFrame : public PBYTEArray
 };
 
 
-class RTP_Session;
-
-/**This class is the base for user data that may be attached to the RTP_session
-   allowing callbacks for statistics and progress monitoring to be passed to an
-   arbitrary object that an RTP consumer may require.
-  */
-class RTP_UserData : public PObject
-{
-  PCLASSINFO(RTP_UserData, PObject);
-
-  public:
-    /**Callback from the RTP session for transmit statistics monitoring.
-       This is called every RTP_Session::txStatisticsInterval packets on the
-       transmitter indicating that the statistics have been updated.
-
-       The default behaviour does nothing.
-      */
-    virtual void OnTxStatistics(
-      const RTP_Session & session   ///<  Session with statistics
-    ) const;
-
-    /**Callback from the RTP session for receive statistics monitoring.
-       This is called every RTP_Session::receiverReportInterval packets on the
-       receiver indicating that the statistics have been updated.
-
-       The default behaviour does nothing.
-      */
-    virtual void OnRxStatistics(
-      const RTP_Session & session   ///<  Session with statistics
-    ) const;
-
-    /**Callback from the RTP session for statistics monitoring.
-       This is called at the end of a call to indicating 
-	   that the statistics of the call.
-
-       The default behaviour does nothing.
-      */
-    virtual void OnFinalStatistics(
-      const RTP_Session & session   ///<  Session with statistics
-    ) const;
-
-    /**Callback from the RTP session for statistics monitoring.
-       This is called when a RTPSenderReport is received
-
-       The default behaviour does nothing.
-      */
-    virtual void OnRxSenderReport(
-      DWORD SRsourceIdentifier, PTime SRrealTimestamp, DWORD SRrtpTimestamp, DWORD SRpacketsSent, DWORD SRoctetsSent,
-      DWORD RRsourceIdentifier, DWORD RRfractionLost, DWORD RRtotalLost, DWORD RRlastSequenceNumber, DWORD RRjitter, PTimeInterval RRlastTimestamp, PTimeInterval RRdelay) const;
-
-};
-
-
 /**This class is for encpsulating the IETF Real Time Protocol interface.
  */
 class RTP_UDP;
+class RTP_UserData;
 class RTP_Session : public PObject
 {
   PCLASSINFO(RTP_Session, PObject);
@@ -993,6 +944,60 @@ class RTP_Session : public PObject
     PHandleAggregator * aggregator;
 #endif
 };
+
+
+/**This class is the base for user data that may be attached to the RTP_session
+   allowing callbacks for statistics and progress monitoring to be passed to an
+   arbitrary object that an RTP consumer may require.
+  */
+class RTP_UserData : public PObject
+{
+  PCLASSINFO(RTP_UserData, PObject);
+
+  public:
+    /**Callback from the RTP session for transmit statistics monitoring.
+       This is called every RTP_Session::txStatisticsInterval packets on the
+       transmitter indicating that the statistics have been updated.
+
+       The default behaviour does nothing.
+      */
+    virtual void OnTxStatistics(
+      const RTP_Session & session   ///<  Session with statistics
+    ) const;
+
+    /**Callback from the RTP session for receive statistics monitoring.
+       This is called every RTP_Session::receiverReportInterval packets on the
+       receiver indicating that the statistics have been updated.
+
+       The default behaviour does nothing.
+      */
+    virtual void OnRxStatistics(
+      const RTP_Session & session   ///<  Session with statistics
+    ) const;
+
+    /**Callback from the RTP session for statistics monitoring.
+       This is called at the end of a call to indicating 
+	   that the statistics of the call.
+
+       The default behaviour does nothing.
+      */
+    virtual void OnFinalStatistics(
+      const RTP_Session & session   ///<  Session with statistics
+    ) const;
+
+    /**Callback from the RTP session for statistics monitoring.
+       This is called when a RTPSenderReport is received
+
+       The default behaviour does nothing.
+      */
+    virtual void OnRxSenderReport(
+        unsigned sessionID,
+        const RTP_Session::SenderReport & send,
+        const RTP_Session::ReceiverReportArray & recv
+        ) const;
+
+};
+
 
 
 /**This class is for encpsulating the IETF Real Time Protocol interface.

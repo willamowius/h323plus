@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.41  2010/05/02 22:44:31  shorne
+ * Added support to be able to set NAT Method on a call by call basis
+ *
  * Revision 1.40  2010/04/30 13:29:13  willamowius
  * avoid warnings about unused parameters
  *
@@ -2583,6 +2586,17 @@ class H323Connection : public PObject
     ) const;
 
     /**Callback from the RTP session for statistics monitoring.
+       This is called when a SenderReport is received
+
+       The default behaviour calls the decomposed function of the same name.
+      */
+    virtual void OnRxSenderReport(
+        unsigned sessionID,
+        const RTP_Session::SenderReport & send,
+        const RTP_Session::ReceiverReportArray & recv
+       ) const; 
+
+   /**Callback from the RTP session for statistics monitoring.
        This is called when a SenderReport is received
 
        The default behaviour does nothing.

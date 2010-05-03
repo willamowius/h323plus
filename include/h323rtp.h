@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2010/04/12 21:39:54  willamowius
+ * give application access to RTP sender reports
+ *
  * Revision 1.5  2009/07/03 04:14:59  shorne
  * more H.460.18/19 support
  *
@@ -162,8 +165,10 @@ class H323_RTP_Session : public RTP_UserData
        The default behaviour calls H323Connection::OnRxSenderReport().
       */
     virtual void OnRxSenderReport(
-      DWORD SRsourceIdentifier, PTime SRrealTimestamp, DWORD SRrtpTimestamp, DWORD SRpacketsSent, DWORD SRoctetsSent,
-      DWORD RRsourceIdentifier, DWORD RRfractionLost, DWORD RRtotalLost, DWORD RRlastSequenceNumber, DWORD RRjitter, PTimeInterval RRlastTimestamp, PTimeInterval RRdelay) const;
+        unsigned sessionID,
+        const RTP_Session::SenderReport & send,
+        const RTP_Session::ReceiverReportArray & recv
+        ) const;
 
   /**@name Operations */
   //@{

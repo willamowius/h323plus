@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.13  2010/05/02 22:55:07  shorne
+ * Added support to be able to set NAT Method on a call by call basis
+ *
  * Revision 1.12  2010/04/12 21:40:12  willamowius
  * give application access to RTP sender report
  *
@@ -228,13 +231,12 @@ void H323_RTP_Session::OnFinalStatistics(const RTP_Session & session) const
   connection.OnRTPFinalStatistics(session);
 }
 
-void H323_RTP_Session::OnRxSenderReport(
-      DWORD SRsourceIdentifier, PTime SRrealTimestamp, DWORD SRrtpTimestamp, DWORD SRpacketsSent, DWORD SRoctetsSent,
-      DWORD RRsourceIdentifier, DWORD RRfractionLost, DWORD RRtotalLost, DWORD RRlastSequenceNumber, DWORD RRjitter, PTimeInterval RRlastTimestamp, PTimeInterval RRdelay) const
+void H323_RTP_Session::OnRxSenderReport(unsigned sessionID,
+                                        const RTP_Session::SenderReport & send,
+                                        const RTP_Session::ReceiverReportArray & recv
+                                        ) const
 {
-  connection.OnRxSenderReport(
-      SRsourceIdentifier, SRrealTimestamp, SRrtpTimestamp, SRpacketsSent, SRoctetsSent,
-      RRsourceIdentifier, RRfractionLost, RRtotalLost, RRlastSequenceNumber, RRjitter, RRlastTimestamp, RRdelay);
+  connection.OnRxSenderReport(sessionID,send,recv);
 }
 
 /////////////////////////////////////////////////////////////////////////////

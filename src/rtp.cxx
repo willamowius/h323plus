@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.13  2010/04/13 11:30:54  willamowius
+ * don't disconnect on too large RTP packet, just ignore the packet
+ *
  * Revision 1.12  2010/04/12 21:40:12  willamowius
  * give application access to RTP sender report
  *
@@ -758,9 +761,10 @@ void RTP_UserData::OnFinalStatistics(const RTP_Session & /*session*/ ) const
 {
 }
 
-void RTP_UserData::OnRxSenderReport(
-      DWORD SRsourceIdentifier, PTime SRrealTimestamp, DWORD SRrtpTimestamp, DWORD SRpacketsSent, DWORD SRoctetsSent,
-      DWORD RRsourceIdentifier, DWORD RRfractionLost, DWORD RRtotalLost, DWORD RRlastSequenceNumber, DWORD RRjitter, PTimeInterval RRlastTimestamp, PTimeInterval RRdelay) const
+void RTP_UserData::OnRxSenderReport(unsigned /*sessionID*/,
+                                    const RTP_Session::SenderReport & /*send*/,
+                                    const RTP_Session::ReceiverReportArray & /*recv*/
+                                    ) const
 {
 }
 
@@ -1323,13 +1327,6 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveControl(RTP_ControlFrame & 
           // trace the report
           ReceiverReportArray RRs = BuildReceiverReportArray(frame, sizeof(RTP_ControlFrame::SenderReport));
           OnRxSenderReport(sender, RRs);
-          // give application access
-          for (PINDEX i=0; i < RRs.GetSize(); i++) {
-            userData->OnRxSenderReport(
-              sender.sourceIdentifier, sender.realTimestamp, sender.rtpTimestamp, sender.packetsSent, sender.octetsSent,
-              RRs[i].sourceIdentifier, RRs[i].fractionLost, RRs[i].totalLost, RRs[i].lastSequenceNumber, RRs[i].jitter, RRs[i].lastTimestamp, RRs[i].delay
-            );
-          }
         }
         else {
           PTRACE(2, "RTP\tSenderReport packet truncated");
@@ -1404,6 +1401,8 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveControl(RTP_ControlFrame & 
 void RTP_Session::OnRxSenderReport(const SenderReport & PTRACE_PARAM(sender),
                                    const ReceiverReportArray & PTRACE_PARAM(reports))
 {
+   userData->OnRxSenderReport(sessionID,sender,reports);
+
 #if PTRACING
   PTRACE(3, "RTP\tOnRxSenderReport: " << sender);
   for (PINDEX i = 0; i < reports.GetSize(); i++)
