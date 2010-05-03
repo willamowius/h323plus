@@ -73,7 +73,7 @@ H264EncCtx::Load()
 
     TRACE(1, "H264\tIPC\tPP: Couldn't find GPL process executable: " << GPL_PROCESS_FILENAME)
 #ifndef _WIN32
-	fprintf(stderr, "H.264 plugin couldn't find GPL process executable: " GPL_PROCESS_FILENAME "\n");
+	fprintf(stderr, "ERROR: H.264 plugin couldn't find GPL process executable: " GPL_PROCESS_FILENAME "\n");
 #endif
     closeAndRemovePipes(); 
     return false;
@@ -117,6 +117,9 @@ H264EncCtx::Load()
 
   if (status == 0) {
     TRACE(1, "H264\tIPC\tPP: GPL Process returned failure on initialization - plugin disabled")
+#ifndef _WIN32
+	fprintf(stderr, "ERROR: H.264 plugin failure on initialization - plugin disabled");
+#endif
     closeAndRemovePipes(); 
     return false;
   }
@@ -140,6 +143,7 @@ void H264EncCtx::call(unsigned msg, unsigned value)
   switch (msg) {
     case SET_FRAME_WIDTH:  width  = value; size = (unsigned) (width * height * 1.5) + sizeof(frameHeader) + 40; break;
     case SET_FRAME_HEIGHT: height = value; size = (unsigned) (width * height * 1.5) + sizeof(frameHeader) + 40; break;
+    default: return;
    }
   
   writeStream((char*) &msg, sizeof(msg));
