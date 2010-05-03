@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.17  2010/05/02 22:41:41  shorne
+ * Added ptlib 2.9 check
+ *
  * Revision 1.16  2010/03/17 07:29:40  willamowius
  * disable all H.460 features when H.460 is disabled
  *
@@ -194,13 +197,13 @@
 #include <ptbuildopts.h>
 
 #if PTLIB_MAJOR == 2 && PTLIB_MINOR == 6  
-		#define PTLIB_VER 260
+     #define PTLIB_VER 260
 #endif
 #if PTLIB_MAJOR == 2 && PTLIB_MINOR == 8  
-		#define PTLIB_VER 280
+     #define PTLIB_VER 280
 #endif
 #if PTLIB_MAJOR == 2 && PTLIB_MINOR >= 9  
-//		#define PTLIB_VER 290
+     #define PTLIB_VER 280 //290
 #endif
 
 /////////////////////////////////////////////////
