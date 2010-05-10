@@ -1,5 +1,6 @@
 
 H323plus 1.21 - 1.22
+Added support for call transfer with routeCallToMC
 Added application access to the received H.245 TCS
 Added support for 16CIF
 Provide timestamp with DTMF tones

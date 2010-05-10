@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.56  2010/05/03 06:33:06  willamowius
+ * remove old version of OnRxSenderReport(), new interafce is better
+ *
  * Revision 1.55  2010/05/03 03:56:34  shorne
  * Improved collection of sender reports including identifying session they originated from
  *
@@ -2254,7 +2257,8 @@ PBoolean H323Connection::OnReceivedFacility(const H323SignalPDU & pdu)
       return FALSE;
   }
 
-  if (fac.m_reason.GetTag() != H225_FacilityReason::e_callForwarded)
+  if ((fac.m_reason.GetTag() != H225_FacilityReason::e_callForwarded)
+      && (fac.m_reason.GetTag() != H225_FacilityReason::e_routeCallToMC))
     return TRUE;
 
   PString address;
