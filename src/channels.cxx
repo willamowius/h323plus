@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2010/04/28 10:24:55  willamowius
+ * make sure we have a very short sleep after each video packet, so it gets sent out immediately
+ *
  * Revision 1.9  2010/02/19 09:14:40  willamowius
  * impose a small delay between sending RTP video packets
  *
@@ -1338,7 +1341,6 @@ void H323_RTPChannel::Transmit()
   while (codec->Read(frame.GetPayloadPtr()+frameOffset, length, frame)) {
     // Calculate the timestamp and real time to take in processing
     rtpTimestamp += codec->GetFrameRate();
-//if (!isAudio) { PTRACE(0, "JW Channel: codec video read: length=" << length << " rtpTimestamp=" << rtpTimestamp << " marker=" << frame.GetMarker()); }
 
 #if PTRACING
     if (rtpTimestamp - lastDisplayedTimestamp > RTP_TRACE_DISPLAY_RATE) {
