@@ -30,6 +30,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2009/09/29 07:23:03  shorne
+ * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
+ *
  * Revision 1.1  2009/08/21 07:01:06  shorne
  * Added H.460.9 Support
  *
@@ -262,3 +265,4 @@ PBoolean H460_FeatureStd9::OnSendDisengagementRequestMessage(H225_FeatureDescrip
 #endif
 
 #endif
+
