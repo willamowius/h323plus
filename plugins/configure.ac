@@ -109,6 +109,7 @@ dnl ########################################################################
 HAVE_VPB=yes
 HAVE_CAPI=yes
 HAVE_IXJ=no
+HAVE_H263=yes
 HAVE_H264=yes
 HAVE_CELT=yes
 HAVE_SPANDSP=yes
@@ -225,6 +226,7 @@ AC_ARG_ENABLE([libavcodec],
 
 if test "x$HAVE_LIBAVCODEC" = "xno" ; then
   AC_MSG_RESULT(Manually disabled libavcodec support)
+  HAVE_H263=no
   HAVE_H263P=no
   HAVE_MPEG4=no
   HAVE_H264_DECODER=no
@@ -241,22 +243,26 @@ else
                      case "$target_os" in
                         cygwin* | mingw* ) 
                                            LIBAVCODEC_LIB_NAME="avcodec.dll"
+                                           HAVE_H263=yes
                                            HAVE_H263P=yes
                                            HAVE_MPEG4=yes
                                            HAVE_H264_DECODER=yes
                                            ;;
                                        * ) 
+                                           AC_CHECK_LIB(avcodec, h263p_encoder, [HAVE_H263=yes], [HAVE_H263=no])
                                            AC_CHECK_LIB(avcodec, h263p_encoder, [HAVE_H263P=yes], [HAVE_H263P=no])
                                            AC_CHECK_LIB(avcodec, mpeg4_encoder, [HAVE_MPEG4=yes], [HAVE_MPEG4=no])
                                            AC_CHECK_LIB(avcodec, h264_decoder, [HAVE_H264_DECODER=yes], [HAVE_H264_DECODER=no])
                                            ;;
                      esac
+                     AC_SUBST(HAVE_H263)
                      AC_SUBST(HAVE_H263P)
                      AC_SUBST(HAVE_MPEG4)
                      OPAL_LIBAVCODEC_HEADER
                     ],
                     [
                      HAVE_LIBAVCODEC=no
+                     HAVE_H263=no
                      HAVE_H263P=no
                      HAVE_MPEG4=no
                      HAVE_H264_DECODER=no
@@ -582,7 +588,8 @@ fi
 echo ""
 
 echo "                           H.261  :  yes"
-echo "                     H.263/H.263+ :  ${HAVE_H263P}"
+echo "                           H.263  :  ${HAVE_H263} (ffmpeg version)"
+dnl echo "                     H.263/H.263+ :  ${HAVE_H263P}"
 echo "                           H.264  :  ${HAVE_H264}"
 echo "                          THEORA  :  ${HAVE_THEORA}"
 
