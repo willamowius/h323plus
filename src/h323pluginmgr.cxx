@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.33  2010/05/02 22:52:41  shorne
+ * Expose OpalMediaFormat without the need to create a H323Capability. G.711 20ms codec, plugin event handler including passing fastUpdate and flowControl. Ability to disable video decoding if it not required.
+ *
  * Revision 1.32  2010/04/28 10:25:17  willamowius
  * slighly better debug message
  *
@@ -1954,6 +1957,7 @@ PBoolean H323PluginVideoCodec::Write(const BYTE * /*buffer*/, unsigned length, c
 #if PTLIB_VER >= 290
   if (((PVideoChannel *)rawDataChannel)->DisableDecode()) {
     PTRACE(5,"Output device not ready or paused. Decode aborted.");
+    written = length; // pretend we wrote the data, to avoid error message
 	return TRUE;
   }
 #endif
