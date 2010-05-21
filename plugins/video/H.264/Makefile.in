@@ -20,6 +20,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.2  2010/03/01 23:56:18  willamowius
+# don't include an OPAL version into the search path for the plugin
+#
 # Revision 1.1  2010/02/24 02:19:43  shorne
 # First commit of h323plus mirror
 #
@@ -89,7 +92,7 @@ BASENAME=h264
 SONAME	=$(BASENAME)
 
 CC	 	=@CC@
-CFLAGS	 	=@CFLAGS@
+CFLAGS 	=@CFLAGS@	-D__STDC_CONSTANT_MACROS
 CXX	 	=@CXX@
 LDSO	 	=@LDSO@
 PLUGINEXT	=@PLUGINEXT@
@@ -147,4 +150,4 @@ clean:
 	@set -e; $(foreach dir,$(SUBDIRS),if test -d ${dir} ; then $(MAKE) -C $(dir) clean; fi ; )
 
 ###########################################
-                        
+
