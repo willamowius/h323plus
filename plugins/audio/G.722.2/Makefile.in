@@ -1,0 +1,89 @@
+#
+# Makefile for G.722 codec plugin
+#
+# $Revision$
+# $Author$
+# $Date$
+#
+
+AC_PLUGIN_DIR=@AC_PLUGIN_DIR@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+target_os=@target_os@
+
+SONAME	= g7222
+STDCCFLAGS += @STDCCFLAGS@ -fPIC
+
+SRCDIR	= ./AMR-WB
+OBJDIR	= ./obj
+PLUGINDIR=../..
+
+CC		=@CC@
+CXX		=@CXX@
+LDSO		=@LDSO@
+PLUGINEXT	=@PLUGINEXT@
+STDCCFLAGS	=@STDCCFLAGS@
+LDFLAGS		=@LDFLAGS@
+EXTRACFLAGS     =-I$(PLUGINDIR)
+
+SRCS	= G7222Codec.cpp \
+	   $(SRCDIR)/dec_acelp.c \
+	   $(SRCDIR)/dec_dtx.c \
+	   $(SRCDIR)/dec_gain.c \
+	   $(SRCDIR)/dec_if.c \
+	   $(SRCDIR)/dec_lpc.c \
+	   $(SRCDIR)/dec_main.c \
+	   $(SRCDIR)/dec_rom.c \
+	   $(SRCDIR)/dec_util.c \
+	   $(SRCDIR)/enc_acelp.c \
+	   $(SRCDIR)/enc_dtx.c \
+	   $(SRCDIR)/enc_gain.c \
+	   $(SRCDIR)/enc_if.c \
+	   $(SRCDIR)/enc_lpc.c \
+	   $(SRCDIR)/enc_main.c \
+	   $(SRCDIR)/enc_rom.c \
+	   $(SRCDIR)/enc_util.c \
+	   $(SRCDIR)/if_rom.c
+
+vpath	%.o $(OBJDIR)
+vpath	%.c $(SRCDIR)
+
+ifeq ($(VERBOSE),)
+Q_CC = @echo [CC] `echo $< | sed s^@OPALDIR@/^^` ;
+Q_LD = @echo [LD] `echo $(PLUGIN) | sed s^@OPALDIR@/^^` ;
+endif
+
+
+$(OBJDIR)/%.o : %.c
+	@mkdir -p $(OBJDIR) >/dev/null 2>&1
+	$(Q_CC)$(CC) -I../../../include $(STDCCFLAGS) $(OPTCCFLAGS) $(EXTRACFLAGS) $(CFLAGS) -c $< -o $@
+
+$(OBJDIR)/%.o : %.cpp
+	@mkdir -p $(OBJDIR) >/dev/null 2>&1
+	$(Q_CC)$(CC) -I../../../include $(STDCCFLAGS) $(OPTCCFLAGS) $(EXTRACFLAGS) $(CFLAGS) -c $< -o $@
+
+PLUGIN	= ./g7222_audio_pwplugin.$(PLUGINEXT)
+
+OBJECTS	= $(addprefix $(OBJDIR)/,$(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(notdir $(SRCS)))))
+
+all: $(PLUGIN)
+
+$(PLUGIN): $(OBJECTS)
+ifeq (solaris,$(findstring solaris,$(target_os)))
+	$(Q_LD)$(CC) $(LDSO) $@ -o $@ $^ $(EXTRALIBS)
+else
+	$(Q_LD)$(CC) $(LDSO) -o $@ $^ $(EXTRALIBS)
+
+endif	
+
+install:
+	mkdir -p $(DESTDIR)$(libdir)/$(AC_PLUGIN_DIR)
+	install $(PLUGIN) $(DESTDIR)$(libdir)/$(AC_PLUGIN_DIR)
+
+uninstall:
+	rm -f $(DESTDIR)$(libdir)/$(AC_PLUGIN_DIR)/$(PLUGIN)
+
+clean:
+	rm -f $(OBJECTS) $(PLUGIN)
+

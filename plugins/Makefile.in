@@ -1,5 +1,6 @@
 SUBDIRS = audio/G722 \
           audio/G.722.1 \
+          audio/G.722.2 \
           audio/GSM0610 \
           audio/Speex \
           audio/iLBC \
