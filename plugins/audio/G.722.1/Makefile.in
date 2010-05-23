@@ -12,7 +12,7 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 target_os=@target_os@
 
-SONAME	= G722-1
+SONAME	= g7221
 STDCCFLAGS += @STDCCFLAGS@ -fPIC
 
 SRCDIR	= ./G722-1
@@ -53,7 +53,7 @@ $(OBJDIR)/%.o : %.c
 	@mkdir -p $(OBJDIR) >/dev/null 2>&1
 	$(Q_CC)$(CXX) -I../../../include $(STDCCFLAGS) $(OPTCCFLAGS) $(EXTRACFLAGS) $(CFLAGS) -c $< -o $@
 
-PLUGIN	= ./g722-1_audio_pwplugin.$(PLUGINEXT)
+PLUGIN	= ./g7221_audio_pwplugin.$(PLUGINEXT)
 
 OBJECTS = $(addprefix $(OBJDIR)/,$(patsubst %.c,%.o,$(notdir $(SRCS))))
 
