@@ -48,6 +48,7 @@
 #define MAX_FRAMES_PER_PACKET   90    // 90 milliseconds, which means RTP packets smaller than 1500 bytes typical LAN maximum
 #define PREF_FRAMES_PER_PACKET  20    // 20 milliseconds
 
+// TODO: will never be loaded by H323Plus with this description!
 static const char L16Desc[]  = "PCM-16-16kHz"; // Cannot use "L16" as usual, force 16kHz PCM
 static const char g722[]     = "G.722-64k";
 static const char sdpG722[]  = "G722";
