@@ -1,0 +1,79 @@
+#
+# Makefile for G.722.1 codec plugin
+#
+# $Revision$
+# $Author$
+# $Date$
+#
+
+AC_PLUGIN_DIR=@AC_PLUGIN_DIR@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+target_os=@target_os@
+
+SONAME	= G722-1
+STDCCFLAGS += @STDCCFLAGS@ -fPIC
+
+SRCDIR	= ./G722-1
+OBJDIR	= ./obj
+PLUGINDIR=../..
+
+CC		=@CC@
+CXX		=@CXX@
+LDSO		=@LDSO@
+PLUGINEXT	=@PLUGINEXT@
+STDCCFLAGS	=@STDCCFLAGS@
+LDFLAGS		=@LDFLAGS@
+EXTRACFLAGS     =-I$(PLUGINDIR)
+
+SRCS	+= G7221Codec.c \
+	   $(SRCDIR)/basop32.c \
+	   $(SRCDIR)/coef2sam.c \
+	   $(SRCDIR)/common.c \
+	   $(SRCDIR)/count.c \
+	   $(SRCDIR)/dct4_a.c \
+	   $(SRCDIR)/dct4_s.c \
+	   $(SRCDIR)/decoder.c \
+	   $(SRCDIR)/encoder.c \
+	   $(SRCDIR)/huff_tab.c \
+	   $(SRCDIR)/sam2coef.c \
+	   $(SRCDIR)/tables.c
+
+vpath	%.o $(OBJDIR)
+vpath	%.c $(SRCDIR)
+
+ifeq ($(VERBOSE),)
+Q_CC = @echo [CC] `echo $< | sed s^@OPALDIR@/^^` ;
+Q_LD = @echo [LD] `echo $(PLUGIN) | sed s^@OPALDIR@/^^` ;
+endif
+
+
+$(OBJDIR)/%.o : %.c
+	@mkdir -p $(OBJDIR) >/dev/null 2>&1
+	$(Q_CC)$(CXX) -I../../../include $(STDCCFLAGS) $(OPTCCFLAGS) $(EXTRACFLAGS) $(CFLAGS) -c $< -o $@
+
+PLUGIN	= ./g722-1_audio_pwplugin.$(PLUGINEXT)
+
+OBJECTS = $(addprefix $(OBJDIR)/,$(patsubst %.c,%.o,$(notdir $(SRCS))))
+
+all: $(PLUGIN)
+
+$(PLUGIN): $(OBJECTS)
+ifeq (solaris,$(findstring solaris,$(target_os)))
+	$(Q_LD)$(CC) $(LDSO) $@ -o $@ $^ $(EXTRALIBS)
+else
+	$(Q_LD)$(CC) $(LDSO) -o $@ $^ $(EXTRALIBS)
+
+endif	
+
+install:
+	mkdir -p $(DESTDIR)$(libdir)/$(AC_PLUGIN_DIR)
+	install $(PLUGIN) $(DESTDIR)$(libdir)/$(AC_PLUGIN_DIR)
+
+uninstall:
+	rm -f $(DESTDIR)$(libdir)/$(AC_PLUGIN_DIR)/$(PLUGIN)
+
+clean:
+	rm -f $(OBJECTS) $(PLUGIN)
+

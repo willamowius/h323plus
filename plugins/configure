@@ -12089,6 +12089,10 @@ if test -d audio/G722 ; then
   ac_config_files="$ac_config_files audio/G722/Makefile"
 
 fi
+if test -d audio/G.722.1 ; then
+  ac_config_files="$ac_config_files audio/G.722.1/Makefile"
+
+fi
 if test -d audio/GSM0610 ; then
   ac_config_files="$ac_config_files audio/GSM0610/Makefile"
 
@@ -12783,6 +12787,7 @@ for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
     "audio/G722/Makefile") CONFIG_FILES="$CONFIG_FILES audio/G722/Makefile" ;;
+    "audio/G.722.1/Makefile") CONFIG_FILES="$CONFIG_FILES audio/G.722.1/Makefile" ;;
     "audio/GSM0610/Makefile") CONFIG_FILES="$CONFIG_FILES audio/GSM0610/Makefile" ;;
     "audio/gsm-amr/Makefile") CONFIG_FILES="$CONFIG_FILES audio/gsm-amr/Makefile" ;;
     "audio/iLBC/Makefile") CONFIG_FILES="$CONFIG_FILES audio/iLBC/Makefile" ;;
@@ -13907,6 +13912,7 @@ for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
     "audio/G722/Makefile") CONFIG_FILES="$CONFIG_FILES audio/G722/Makefile" ;;
+    "audio/G.722.1/Makefile") CONFIG_FILES="$CONFIG_FILES audio/G.722.1/Makefile" ;;
     "audio/GSM0610/Makefile") CONFIG_FILES="$CONFIG_FILES audio/GSM0610/Makefile" ;;
     "audio/gsm-amr/Makefile") CONFIG_FILES="$CONFIG_FILES audio/gsm-amr/Makefile" ;;
     "audio/iLBC/Makefile") CONFIG_FILES="$CONFIG_FILES audio/iLBC/Makefile" ;;
