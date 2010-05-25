@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.34  2010/05/20 12:24:07  willamowius
+ * pretend data was written, when DisableDecode is set, to avoid error messages
+ *
  * Revision 1.33  2010/05/02 22:52:41  shorne
  * Expose OpalMediaFormat without the need to create a H323Capability. G.711 20ms codec, plugin event handler including passing fastUpdate and flowControl. Ability to disable video decoding if it not required.
  *
@@ -593,6 +596,7 @@ class OpalPluginCodec : public OpalFactoryCodec {
 
 	bool SetCustomFormat(unsigned frameWidth, unsigned frameHeight, unsigned frameRate);
 
+#ifdef H323_VIDEO
     /** Set Media Format */
     bool SetMediaFormat(OpalMediaFormat & fmt);
 
@@ -601,6 +605,7 @@ class OpalPluginCodec : public OpalFactoryCodec {
 
     /** codec control */
     bool CodecControl(const char * name, void * parm, unsigned int * parmLen, int & retVal);
+#endif // H323_VIDEO
 
   protected:
     PluginCodec_Definition * codecDefn;
