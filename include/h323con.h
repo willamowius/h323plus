@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.43  2010/05/03 06:33:06  willamowius
+ * remove old version of OnRxSenderReport(), new interafce is better
+ *
  * Revision 1.42  2010/05/03 03:56:34  shorne
  * Improved collection of sender reports including identifying session they originated from
  *
@@ -2594,9 +2597,9 @@ class H323Connection : public PObject
        The default behaviour does nothing.
       */
     virtual void OnRxSenderReport(
-        unsigned sessionID,
-        const RTP_Session::SenderReport & send,
-        const RTP_Session::ReceiverReportArray & recv
+        unsigned /*sessionID*/,
+        const RTP_Session::SenderReport & /*send*/,
+        const RTP_Session::ReceiverReportArray & /*recv*/
        ) const { }
 
     /**Get the names of the codecs in use for the RTP session.
