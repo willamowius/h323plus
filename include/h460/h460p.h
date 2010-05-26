@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2010/02/24 03:00:00  shorne
+ * Added generic data support to presence feature
+ *
  * Revision 1.7  2010/01/20 04:23:08  shorne
  * Add ability to advertise supported H.460 features in presence
  *
@@ -240,8 +243,8 @@ struct H323PresenceEndpoint
 	H323PresenceIdentifiers		m_Identifiers;
 };
 
-#define H323PresenceStore		map<H225_AliasAddress,H323PresenceEndpoint>
-#define H323PresenceGkStore		map<H225_TransportAddress,H323PresenceEndpoint>
+#define H323PresenceStore		std::map<H225_AliasAddress,H323PresenceEndpoint>
+#define H323PresenceGkStore		std::map<H225_TransportAddress,H323PresenceEndpoint>
 
 template<class Msg>
 struct Order {
@@ -252,20 +255,20 @@ struct Order {
 };
 
 // Indicia
-#define H323PresenceInd			map<H225_AliasAddress,list<H460P_PresencePDU>,Order<H225_AliasAddress> >
+#define H323PresenceInd			std::map<H225_AliasAddress,list<H460P_PresencePDU>,Order<H225_AliasAddress> >
 
 
 // Gatekeeper functions
-#define H323PresenceAlias		map<H225_AliasAddress,H225_EndpointIdentifier,Order<H225_AliasAddress> >
-#define H323PresenceLocal		map<H225_EndpointIdentifier, H323PresenceInd,Order<H225_EndpointIdentifier> >
+#define H323PresenceAlias		std::map<H225_AliasAddress,H225_EndpointIdentifier,Order<H225_AliasAddress> >
+#define H323PresenceLocal		std::map<H225_EndpointIdentifier, H323PresenceInd,Order<H225_EndpointIdentifier> >
 
-#define H323PresenceExternal	map<H225_AliasAddress,H225_TransportAddress,Order<H225_AliasAddress> >
-#define H323PresenceRemote		map<H225_TransportAddress, H323PresenceInd>
-#define H323PresenceLRQRelay	map<H460P_PresenceIdentifier,H225_TransportAddress,Order<H460P_PresenceIdentifier> >
+#define H323PresenceExternal	std::map<H225_AliasAddress,H225_TransportAddress,Order<H225_AliasAddress> >
+#define H323PresenceRemote		std::map<H225_TransportAddress, H323PresenceInd>
+#define H323PresenceLRQRelay	std::map<H460P_PresenceIdentifier,H225_TransportAddress,Order<H460P_PresenceIdentifier> >
 
-#define H323PresenceIds			map<H460P_PresenceIdentifier,H323PresenceID,Order<H460P_PresenceIdentifier> >
-#define H323PresencePending		map<H225_AliasAddress,H460P_PresenceIdentifier, Order<H225_AliasAddress> >
-#define H323PresenceIdMap		map<H225_AliasAddress,H323PresencePending, Order<H225_AliasAddress> >
+#define H323PresenceIds			std::map<H460P_PresenceIdentifier,H323PresenceID,Order<H460P_PresenceIdentifier> >
+#define H323PresencePending		std::map<H225_AliasAddress,H460P_PresenceIdentifier, Order<H225_AliasAddress> >
+#define H323PresenceIdMap		std::map<H225_AliasAddress,H323PresencePending, Order<H225_AliasAddress> >
 
 
 // Derive you implementation from H323PresenceHandler.

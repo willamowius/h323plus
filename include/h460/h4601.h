@@ -36,6 +36,9 @@
  * Contributor(s): ______________________________________.
  *
 * $Log$
+* Revision 1.17  2010/01/20 04:23:08  shorne
+* Add ability to advertise supported H.460 features in presence
+*
 * Revision 1.16  2009/11/29 23:31:13  shorne
 * BUG FIX : completely disable H.460 support if remote does not support it.
 *
@@ -772,7 +775,7 @@ class H460_Feature : public H225_FeatureDescriptor
 
     /** Get the Feature list to be advertised for presence
 	  */
-	static PBoolean PresenceFeatureList(map<PString,H460_FeatureID*> & plist, H323EndPoint * ep, PPluginManager * pluginMgr = NULL);
+	static PBoolean PresenceFeatureList(std::map<PString,H460_FeatureID*> & plist, H323EndPoint * ep, PPluginManager * pluginMgr = NULL);
 
 	/** Attach the endpoint. Override this to link your own Endpoint Instance.
 	  */
