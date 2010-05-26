@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.57  2010/05/10 11:59:22  willamowius
+ * support call transfer with routeCallToMC
+ *
  * Revision 1.56  2010/05/03 06:33:06  willamowius
  * remove old version of OnRxSenderReport(), new interafce is better
  *
@@ -5765,7 +5768,7 @@ PBoolean H323Connection::OnReceivedGenericMessage(h245MessageType type, const PS
 		if (DecodeH46024BRequest(1, content, address)) {
 			PTRACE(4,"H46024B\tReceived\n" << address);
 			for (PINDEX i=0; i < address.GetSize(); ++i) {
-				map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(address[i].m_sessionID);
+				std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(address[i].m_sessionID);
 					if (sockets_iter != m_NATSockets.end()) {
 						NAT_Sockets sockets = sockets_iter->second;
 						if (address[i].HasOptionalField(H46024B_AlternateAddress::e_rtpAddress)) { 

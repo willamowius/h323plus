@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.21  2010/05/02 22:49:41  shorne
+ * BUG FIX: Ensure no segfault when getting feature that does not exist
+ *
  * Revision 1.20  2010/02/24 02:58:51  shorne
  * Added ability to compile without H.460 support on windows
  *
@@ -916,7 +919,7 @@ H460_Feature * H460_Feature::CreateFeature(const PString & featurename, int pduT
   return (H460_Feature *)pluginMgr->CreatePluginsDeviceByName(featurename, H460FeaturePluginBaseClass,pduType);
 }
 
-PBoolean H460_Feature::PresenceFeatureList(map<PString,H460_FeatureID*> & plist, H323EndPoint * ep, PPluginManager * pluginMgr)
+PBoolean H460_Feature::PresenceFeatureList(std::map<PString,H460_FeatureID*> & plist, H323EndPoint * ep, PPluginManager * pluginMgr)
 {
   if (pluginMgr == NULL)
     pluginMgr = &PPluginManager::GetPluginManager();

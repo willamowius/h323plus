@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.41  2010/05/02 22:45:58  shorne
+ * Added ability to disable the internal jitter buffer
+ *
  * Revision 1.40  2010/02/24 03:44:40  shorne
  * Add ability to pass to the video plugin a custom frame size and rate to encode/decode
  *
@@ -4063,9 +4066,9 @@ void H323EndPoint::PresenceAddFeatureH460()
 	if (presenceHandler == NULL)
 		presenceHandler = new H460PresenceHandler(*this);
 
-	map<PString,H460_FeatureID*> plist;
+	std::map<PString,H460_FeatureID*> plist;
 	if (H460_Feature::PresenceFeatureList(plist,this)) {
-		map<PString,H460_FeatureID*>::const_iterator it = plist.begin();
+		std::map<PString,H460_FeatureID*>::const_iterator it = plist.begin();
 		while (it != plist.end()) {
 			presenceHandler->AddEndpointH460Feature(*(it->second), it->first);
 			it++;
