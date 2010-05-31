@@ -85,12 +85,10 @@ X264EncoderContext::X264EncoderContext()
 
    // No multicore support
    _context.i_threads           = 1;
-   _context.b_sliced_threads    = 1;  
-   _context.b_deterministic		= 1;
+   _context.b_deterministic     = 1;
    _context.i_sync_lookahead    = 0;
    _context.i_frame_reference   = 1;
    _context.i_bframe            = 0;
-    
  
   // No aspect ratio correction TODO
   _context.vui.i_sar_width      = 0;
@@ -115,7 +113,12 @@ X264EncoderContext::X264EncoderContext()
   SetTSTO             (H264_TSTO); // TODO: is this really functional
   SetMaxKeyFramePeriod(H264_KEY_FRAME_INTERVAL);
 
-   // Rate control set to CBR mode
+#ifdef H264_OPTIMAL_QUALITY
+   // Rate control set to CRF mode (ignoring bitrate restrictions)
+  _context.rc.i_rc_method       	= X264_RC_CRF;
+  _context.rc.f_rf_constant       	= 16.0;	// great quality
+#else
+   // Rate control set to ABR mode
   _context.rc.i_rc_method       	= X264_RC_ABR;
   _context.rc.i_qp_min              = 25;
   _context.rc.i_qp_max              = 51;
@@ -124,7 +127,8 @@ X264EncoderContext::X264EncoderContext()
   _context.rc.i_vbv_buffer_size 	= 0;
   _context.rc.i_lookahead       	= 0;
   SetTargetBitrate    ((unsigned)(H264_BITRATE / 1000));
-   
+#endif
+
   // Analysis support
   _context.analyse.intra     		= 3;
   _context.analyse.inter     		= 0;
@@ -140,8 +144,8 @@ X264EncoderContext::X264EncoderContext()
   _context.analyse.b_dct_decimate   = 1;
   _context.analyse.i_noise_reduction= 0;
   _context.analyse.b_ssim           = 0;
-  
-  
+
+
   _codec = X264_ENCODER_OPEN(&_context);
   if (_codec == NULL) {
     TRACE(1, "H264\tEncoder\tCouldn't init x264 encoder");
