@@ -70,7 +70,7 @@ static void logCallbackX264 (void * /*priv*/, int level, const char *fmt, va_lis
 
 X264EncoderContext::X264EncoderContext()
 {
-  _frameCounter=0;
+  _frameCounter = 0;
   _PFramesSinceLastIFrame = 0;
   _fastUpdateRequested = false;
 
@@ -306,7 +306,7 @@ int X264EncoderContext::EncodeFrames(const unsigned char * src, unsigned & srcLe
     return 0;
   }
 
-   x264_nal_t* NALs;
+  x264_nal_t* NALs;
   int numberOfNALs = 0;
 
   // do a validation of size
@@ -343,6 +343,7 @@ int X264EncoderContext::EncodeFrames(const unsigned char * src, unsigned & srcLe
   _inputFrame.img.i_stride[2] = (int) ( header->width / 2 );
   _inputFrame.img.plane[2] = (uint8_t *)(_inputFrame.img.plane[1] + (int)(_inputFrame.img.i_stride[1] *header->height/2));
   _inputFrame.i_type = (wantIFrame || (flags && forceIFrame)) ? X264_TYPE_IDR : X264_TYPE_AUTO;
+  _inputFrame.i_pts = _frameCounter;	// x264 needs a time reference
 
 #if X264_BUILD > 79
   _inputFrame.param = NULL; // &_context;
@@ -357,7 +358,7 @@ int X264EncoderContext::EncodeFrames(const unsigned char * src, unsigned & srcLe
   
   _txH264Frame->BeginNewFrame();
   _txH264Frame->SetFromFrame(NALs, numberOfNALs);
-  _txH264Frame->SetTimestamp(srcRTP.GetTimestamp());
+  _txH264Frame->SetTimestamp(srcRTP.GetTimestamp());	// BUG: not set in srcRTP
   _frameCounter++; 
 
   if (_txH264Frame->HasRTPFrames())
@@ -368,4 +369,3 @@ int X264EncoderContext::EncodeFrames(const unsigned char * src, unsigned & srcLe
   }
   return 1;
 }
-
