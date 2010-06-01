@@ -463,7 +463,9 @@ static int setFrameSizeAndRate(unsigned _level, bool stdaspect, unsigned & w, un
 		if (h264_resolutions[j].macroblocks <= maxMB && stdaspect == h264_resolutions[j].stdaspect) {
 			h = h264_resolutions[j].height;
 			w = h264_resolutions[j].width;
-			r = (int)maxMBsec/(h * w / 256);
+			unsigned max_rate = (int)maxMBsec / (h * w / 256);
+			if (r > max_rate)	// don't force frame rate to maximum possible if application set a lower value
+				r = max_rate;
 			if (r > 30) r = 30;    // We limit the frame rate to 30 fps regardless of the max negotiated.
 			break;
 		}
@@ -759,7 +761,7 @@ static int encoder_set_options(
   unsigned orgframeRate = codec->parm.video.maxFrameRate;
   unsigned frameRate = orgframeRate;
   unsigned targetBitrate = codec->bitsPerSec;
-  unsigned h264level = 36;
+  unsigned h264level = 51;
   unsigned cusMBPS = 0;   // Custom maximum MBPS
   unsigned cusMFS = 0;    // Custom maximum FrameSize
   unsigned staticMBPS = 0;  /// static macroblocks per sec
@@ -769,6 +771,7 @@ static int encoder_set_options(
     const char ** options = (const char **)parm;
     int i;
     for (i = 0; options[i] != NULL; i += 2) {
+	  // fprintf(stderr, "%s = %s\n", options[i], options[i+1]);
       if (STRCMPI(options[i], "CAP RFC3894 Profile Level") == 0) {
         profile_level_from_string (options[i+1], profile, constraints, h264level);
       }
@@ -800,8 +803,10 @@ static int encoder_set_options(
   }
 
     if (cusMBPS > 0 && SetLevelMBPS(level,cusMBPS) && SetLevelMFS(level,cusMFS)) {
-        frameRate = cusMBPS/cusMFS;
-	TRACE(4, "H264\tCap\tCustom level : " << level << " rate " << frameRate);
+        unsigned max_rate = cusMBPS / cusMFS;
+        if (frameRate > max_rate) // don't force frame rate to maximum possible, if application set a lower value
+	        frameRate = max_rate;
+		TRACE(4, "H264\tCap\tCustom level : " << level << " rate " << frameRate);
     }
 
     if (level > 0) {
@@ -814,8 +819,8 @@ static int encoder_set_options(
 
 	// adjust the image to the frame limits
 	if ((frameHeight > orgframeHeight) || (frameWidth > orgframeWidth)) {
-	  if (setLevel(orgframeWidth,orgframeHeight,orgframeRate, level,h264level)) {
-	    if (!setFrameSizeAndRate(level,stdAspect,frameWidth,frameHeight,frameRate,h264level) || !adjust_bitrate_to_level(targetBitrate, h264level)) {
+	  if (setLevel(orgframeWidth, orgframeHeight, orgframeRate, level, h264level)) {
+	    if (!setFrameSizeAndRate(level, stdAspect, frameWidth, frameHeight, frameRate, h264level) || !adjust_bitrate_to_level(targetBitrate, h264level)) {
 	       context->Unlock();
 	       return 0;
 	    }
