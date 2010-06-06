@@ -599,6 +599,64 @@ static int adjust_to_level (unsigned & width, unsigned & height, unsigned & fram
   return 1;
 }
 
+static int adjust_to_BitRate (unsigned & width, unsigned & height, unsigned & frameRate, unsigned h241Level, 
+                              unsigned cusMBPS, unsigned cusMFS, 
+                              double targetBitrate, bool stdaspect)
+{
+    // Find the level matching the targetBitrate
+    double maxBitRate=0.0;
+    double maxmbs=0.0;
+    double maxmbps=0.0;
+    double calcMFS=0.0;
+    double calcMPBS=0.0;
+
+    // Settings
+    double minFPS=10.0;          // Minimum FPS allowed
+    double MbtoMBPS = .015625;   // Conversion factor from kb/s to MBPS
+
+    int i = 0;
+    while (h264_levels[i].level_idc) {
+      if (h264_levels[i].h241_level == h241Level) {
+        h241Level  = h264_levels[i].h241_level;
+        // For Framesize and rate calculations
+        if (cusMBPS > h264_levels[i].mbps) maxmbps = cusMBPS;
+        else maxmbps = h264_levels[i].mbps;
+        if (cusMFS > h264_levels[i].frame_size) maxmbs = cusMFS;
+        else maxmbs = h264_levels[i].frame_size;
+        maxBitRate = h264_levels[i].bitrate;
+        break;
+      }
+    i++; 
+    }
+
+    calcMPBS = targetBitrate * MbtoMBPS;
+    calcMFS = calcMPBS/minFPS;
+    if (calcMFS > maxmbs) calcMFS = maxmbs;
+
+    // find the maximum size with aspect ratio
+    double as;
+    if (stdaspect) as = 1.2222;
+    else as = 1.7777;
+    unsigned expWidth =  (unsigned)sqrt((calcMFS * 256.0)/as)*as;
+
+    // find the matching supported size to get width/height
+    i=0;
+    while (h264_resolutions[i].width) {
+      if  (h264_resolutions[i].stdaspect == stdaspect &&
+                           expWidth >= h264_resolutions[i].width) {
+          width = h264_resolutions[i].width;
+          height = h264_resolutions[i].height;
+          break;
+      }
+      i++; 
+    }
+
+    // Workout the frame rate
+    frameRate =  (unsigned)calcMPBS/((width * height)/256.0);
+
+    return 1;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 static void * create_encoder(const struct PluginCodec_Definition * /*codec*/)
@@ -736,6 +794,73 @@ static int to_customised_options(const struct PluginCodec_Definition * codec, vo
 	}
 
   return 1;
+}
+
+int encoder_flowcontrol(
+    const struct PluginCodec_Definition * codec, 
+    void * _context, 
+    const char *, 
+    void * parm, 
+    unsigned * parmLen)
+{
+  if (_context == NULL || parm == NULL || *parmLen != sizeof(char ***))
+    return 0;
+
+  H264EncoderContext * context = (H264EncoderContext *)_context;
+
+  unsigned targetBitrate = 0;
+  unsigned frameWidth = 0;
+  unsigned frameHeight = 0;
+  unsigned frameRate = 0;
+  unsigned h241Level = 0;
+  unsigned cusMBPS = 0;
+  unsigned cusMFS = 0;
+  bool stdAspect = true;
+
+	char ** options = (char **)parm;
+	if (options == NULL) return 0;
+	for (int i = 0; options[i] != NULL; i += 2) {
+	  if (STRCMPI(options[i], PLUGINCODEC_OPTION_TARGET_BIT_RATE) == 0)
+		 targetBitrate = atoi(options[i+1]);
+      if (STRCMPI(options[i], PLUGINCODEC_OPTION_ASPECT) == 0)
+		 stdAspect = (STRCMPI(options[i+1],"2") == 0);  // 2 is scale to stdSize
+      if (STRCMPI(options[i], PLUGINCODEC_OPTION_LEVEL) == 0)
+         h241Level = atoi(options[i+1]);
+      if (STRCMPI(options[i], PLUGINCODEC_OPTION_CUSMBPS) == 0)
+         cusMBPS = atoi(options[i+1]);
+      if (STRCMPI(options[i], PLUGINCODEC_OPTION_CUSMFS) == 0)
+         cusMFS = atoi(options[i+1]);
+	}
+
+    // do the matching of frame width/height/rate to bitrate 
+    if (adjust_to_BitRate (frameWidth, frameHeight, frameRate, h241Level, cusMBPS, cusMFS, targetBitrate, stdAspect)) {
+        // initiating the codec to the new framerate/size
+        context->Lock();
+        context->SetTargetBitrate((unsigned) (targetBitrate / 1000) );
+	    context->SetFrameHeight(frameHeight);
+	    context->SetFrameWidth(frameWidth);
+	    context->SetFrameRate(frameRate); 
+        context->ApplyOptions();
+        context->Unlock();
+
+
+	    // Write back the option list the changed information.
+	    if (parm != NULL) {
+		    char ** options = (char **)parm;
+	        if (options == NULL) return 0;
+	        for (int i = 0; options[i] != NULL; i += 2) {
+		      if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_TIME) == 0)
+			     options[i+1] = num2str(H264_CLOCKRATE/frameRate);
+		      if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_HEIGHT) == 0)
+			     options[i+1] = num2str(frameHeight);
+		      if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_WIDTH) == 0)
+			     options[i+1] = num2str(frameWidth);
+		    }
+	    }
+      return 1;
+    }
+
+    return 0;
 }
 
 static int encoder_set_options(

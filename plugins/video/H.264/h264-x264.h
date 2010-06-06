@@ -158,6 +158,8 @@ static int encoder_set_options   ( const struct PluginCodec_Definition *, void *
                                    void * parm, unsigned * parmLen);
 static int encoder_event_handler(const struct PluginCodec_Definition * codec, void * _context, const char *, 
                                    void * parm, unsigned * parmLen);
+static int encoder_flowcontrol   ( const struct PluginCodec_Definition *, void *, const char *, 
+                                   void * parm, unsigned * parmLen);
 static int encoder_get_output_data_size ( const PluginCodec_Definition *, void *, const char *,
                                    void *, unsigned *);
 
@@ -210,6 +212,7 @@ static PluginCodec_ControlDefn EncoderControls[] = {
   { PLUGINCODEC_CONTROL_TO_CUSTOMISED_OPTIONS, to_customised_options },
   { PLUGINCODEC_CONTROL_SET_CODEC_OPTIONS,     encoder_set_options },
   { PLUGINCODEC_CONTROL_CODEC_EVENT,           encoder_event_handler },
+  { PLUGINCODEC_CONTROL_FLOW_OPTIONS,	       encoder_flowcontrol },
   { PLUGINCODEC_CONTROL_GET_OUTPUT_DATA_SIZE,  encoder_get_output_data_size },
   { NULL }
 };
