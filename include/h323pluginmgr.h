@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2010/05/02 22:52:41  shorne
+ * Expose OpalMediaFormat without the need to create a H323Capability. G.711 20ms codec, plugin event handler including passing fastUpdate and flowControl. Ability to disable video decoding if it not required.
+ *
  * Revision 1.10  2010/02/24 03:39:07  shorne
  * Add ability to pass to the video plugin a custom frame size and rate to encode/decode
  *
@@ -181,6 +184,8 @@ class H323PluginCodecManager : public PPluginModuleManager
 
 	static OpalFactoryCodec * CreateCodec(const PString & name);
 
+    static void CodecListing(const PString & matchStr, PStringList & listing);
+
     virtual void OnShutdown();
 
     static void Bootstrap();
@@ -286,8 +291,11 @@ class OpalFactoryCodec : public PObject {
     /** Update Media Options */
     virtual bool UpdateMediaOptions(OpalMediaFormat & /*fmt*/)  { return false; }
 
-	/** Set a Custom format for the codec */
+	/** Set a Custom format for the codec (video) */
 	virtual bool SetCustomFormat(unsigned /*width*/, unsigned /*height*/, unsigned /*frameRate*/) { return false; }
+
+	/** Set a Custom format for the codec (audio) */
+	virtual bool SetCustomFormat(unsigned /*bitrate*/, unsigned /*samplerate*/) { return false; }
 
     /** Codec Control */
     virtual bool CodecControl(const char * /*name*/, void * /*parm*/, unsigned int * /*parmLen*/, int & /*retVal*/) { return false; }

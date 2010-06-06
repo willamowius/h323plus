@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.18  2010/02/24 03:39:07  shorne
+ * Add ability to pass to the video plugin a custom frame size and rate to encode/decode
+ *
  * Revision 1.17  2010/02/08 05:26:19  shorne
  * Added ability to create instance of plugin codec
  *
@@ -420,7 +423,12 @@ class H323Capability : public PObject
 	/** 
 	  *Create a factory codec instance based on the codec name
 	  */
-	static OpalFactoryCodec * CreateCodec(MainTypes type, PBoolean isEncoder, const PString & name);
+	static OpalFactoryCodec * CreateCodec(MainTypes ctype, PBoolean isEncoder, const PString & name);
+
+	/** 
+	  *List all the codecs loaded in the plugin factory
+	  */
+    static void CodecListing(MainTypes ctype, PBoolean isEncoder, PStringList & listing);
 
     /**Get the default RTP session.
        This function gets the default RTP session ID for the capability
@@ -1232,6 +1240,12 @@ class H323GenericAudioCapability : public H323AudioCapability,
        This returns H245_AudioCapability::e_genericCapability.
      */
     virtual unsigned GetSubType() const;
+
+    /**Get the OID of the capability. 
+
+       This returns a string representation of the capability OID.
+     */
+    virtual PString GetIdentifier() const;
   //@}
 
   /**@name Protocol manipulation */
@@ -1608,6 +1622,12 @@ class H323GenericVideoCapability : public H323VideoCapability,
        This returns H245_VideoCapability::e_genericCapability.
      */
     virtual unsigned GetSubType() const;
+
+    /**Get the OID of the capability. 
+
+       This returns a string representation of the capability OID.
+     */
+    virtual PString GetIdentifier() const;
   //@}
 
   /**@name Protocol manipulation */

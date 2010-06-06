@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.29  2010/05/02 22:48:12  shorne
+ * Added support to order generic parameters in capablity exchange. Added G.711 20ms codec
+ *
  * Revision 1.28  2010/02/24 03:39:07  shorne
  * Add ability to pass to the video plugin a custom frame size and rate to encode/decode
  *
@@ -591,11 +594,11 @@ H323Capability * H323Capability::Create(const PString & name)
   return (H323Capability *)cap->Clone();
 }
 
-OpalFactoryCodec * H323Capability::CreateCodec(MainTypes type, PBoolean isEncoder, const PString & name)
+OpalFactoryCodec * H323Capability::CreateCodec(MainTypes ctype, PBoolean isEncoder, const PString & name)
 {
 	// Build the conversion
 	PString base;
-	switch (type) {
+	switch (ctype) {
 		case e_Audio: base = "L16"; break;
 		case e_Video: base = "YUV420P"; break;
 		default: base = PString();
@@ -606,6 +609,23 @@ OpalFactoryCodec * H323Capability::CreateCodec(MainTypes type, PBoolean isEncode
 	else conv = name + "|" + base;
 
 	return H323PluginCodecManager::CreateCodec(conv);
+}
+
+void H323Capability::CodecListing(MainTypes ctype, PBoolean isEncoder, PStringList & listing)
+{
+	// Build the conversion
+	PString base;
+	switch (ctype) {
+		case e_Audio: base = "L16"; break;
+		case e_Video: base = "YUV420P"; break;
+		default: base = PString();
+	}
+
+	PString match;
+	if (isEncoder) match = base + "|";
+	else match = "|" + base;
+
+    H323PluginCodecManager::CodecListing(match,listing);
 }
 
 unsigned H323Capability::GetDefaultSessionID() const
@@ -1014,11 +1034,11 @@ PObject::Comparison H323NonStandardCapabilityInfo::CompareData(const PBYTEArray 
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct GenericVideoOptionOrder {
+struct GenericOptionOrder {
 	PString name;
 	PString order;
-} videoOptionOrder[] = {
-   { "h264", "41,42,3,6,4,5,7,10" },
+} OptionOrder[] = {
+   { "h.264", "41,42,3,6,4,5,7,10" },
    { "", "" }
 };
 
@@ -1027,31 +1047,37 @@ static void capabilityReorder(const PString & capName, H245_ArrayOf_GenericParam
 	PStringArray list;
 	list.SetSize(0);
 	H245_ArrayOf_GenericParameter localGen;
-        int j = 0, k = 0;
+    localGen.SetSize(0);
+    int j = 0, k = 0;
 	
 	int i = -1;
-        while (!videoOptionOrder[++i].name) {
-            list = videoOptionOrder[i].order.Tokenise(",");
-	}
+    while (!OptionOrder[++i].name) {
+        if (capName.Find(OptionOrder[i].name) == P_MAX_INDEX)
+            continue;
 
-       localGen.SetSize(gen.GetSize());
-	if (list.GetSize() > 0) {
-	for (i=0; i < list.GetSize(); i++) {
-            for (j=0; j < gen.GetSize(); j++) {
-                H245_ParameterIdentifier & id = gen[j].m_parameterIdentifier;
-                if (id.GetTag() == H245_ParameterIdentifier::e_standard) {
-                    PASN_Integer & val = id;
-                    unsigned x = val.GetValue();
-                    if ((list[i].AsInteger() == (int)x)) {
-                        localGen[k++] = gen[j];
+        list = OptionOrder[i].order.Tokenise(",");
+        localGen.SetSize(gen.GetSize());
+	    if (list.GetSize() > 0) {
+	        for (i=0; i < list.GetSize(); i++) {
+                for (j=0; j < gen.GetSize(); j++) {
+                    H245_ParameterIdentifier & id = gen[j].m_parameterIdentifier;
+                    if (id.GetTag() == H245_ParameterIdentifier::e_standard) {
+                        PASN_Integer & val = id;
+                        unsigned x = val.GetValue();
+                        if ((list[i].AsInteger() == (int)x)) {
+                            localGen[k++] = gen[j];
+                        }
                     }
                 }
-            }
-	}
-	}
-	for (j=0; j < gen.GetSize(); j++) {
-	        gen[j] = localGen[j];
-	}
+	        }
+            break;
+	    }
+    }
+    if (localGen.GetSize() > 0) {
+	    for (j=0; j < gen.GetSize(); j++) {
+	            gen[j] = localGen[j];
+	    }
+    }
 }
 
 H323GenericCapabilityInfo::H323GenericCapabilityInfo(const PString & standardId, PINDEX bitRate)
@@ -1541,6 +1567,11 @@ unsigned H323GenericAudioCapability::GetSubType() const
   return H245_AudioCapability::e_genericAudioCapability;
 }
 
+PString H323GenericAudioCapability::GetIdentifier() const
+{
+  PASN_ObjectId & oid = *identifier;
+  return oid.AsString();
+}
 
 PBoolean H323GenericAudioCapability::OnSendingPDU(H245_AudioCapability & pdu, unsigned, CommandType type) const
 {
@@ -1911,6 +1942,11 @@ unsigned H323GenericVideoCapability::GetSubType() const
   return H245_VideoCapability::e_genericVideoCapability;
 }
 
+PString H323GenericVideoCapability::GetIdentifier() const
+{
+  PASN_ObjectId & oid = *identifier;
+  return oid.AsString();
+}
 
 PBoolean H323GenericVideoCapability::OnSendingPDU(H245_VideoCapability & pdu, CommandType type) const
 {
@@ -2186,7 +2222,7 @@ PBoolean H323CodecExtendedVideoCapability::OnReceivedPDU(const H245_DataType & p
 	 return FALSE;
 }
 
-PBoolean H323CodecExtendedVideoCapability::OnSendingPDU(H245_VideoCapability & pdu, CommandType /*type*/) const 
+PBoolean H323CodecExtendedVideoCapability::OnSendingPDU(H245_VideoCapability & pdu, CommandType ctype) const 
 { 
 	if (extCapabilities.GetSize() == 0)
 		return FALSE;
@@ -2220,14 +2256,14 @@ PBoolean H323CodecExtendedVideoCapability::OnSendingPDU(H245_VideoCapability & p
 	  caps.SetSize(table.GetSize());
       for (PINDEX i=0; i< table.GetSize(); i++) {
 	     H245_VideoCapability vidcap;
-        ((H323VideoCapability &)table[i]).OnSendingPDU(vidcap);
+        ((H323VideoCapability &)table[i]).OnSendingPDU(vidcap,ctype);
         caps[i] = vidcap;
 	  }
 	} else {
 	  caps.SetSize(extCapabilities.GetSize());
       for (PINDEX i=0; i< extCapabilities.GetSize(); i++) {
 	     H245_VideoCapability vidcap;
-         ((H323VideoCapability &)extCapabilities[i]).OnSendingPDU(vidcap);
+         ((H323VideoCapability &)extCapabilities[i]).OnSendingPDU(vidcap,ctype);
          caps[i] = vidcap;
       }
 	}
@@ -2644,7 +2680,7 @@ PBoolean H323NonStandardDataCapability::IsMatch(const PASN_Choice & subTypePDU) 
 #ifdef H323_AUDIO_CODECS
 
 H323_G711Capability::H323_G711Capability(Mode m, Speed s)
-  : H323AudioCapability(240, 30) // 240ms max, 30ms desired
+    : H323AudioCapability(20, 20) // 20ms recv, 20ms transmit
 {
   mode = m;
   speed = s;
@@ -3396,7 +3432,10 @@ H323Capability * H323Capabilities::FindCapability(const H245_Capability & cap) c
     case H245_Capability::e_receiveAndTransmitAudioCapability :
     {
       const H245_AudioCapability & audio = cap;
-      return FindCapability(H323Capability::e_Audio, audio, NULL);
+      if (audio.GetTag() == H245_AudioCapability::e_genericAudioCapability)
+          return FindCapability(H323Capability::e_Audio, audio, audio);
+      else
+          return FindCapability(H323Capability::e_Audio, audio, NULL);
     }
 
     case H245_Capability::e_receiveVideoCapability :
@@ -3680,34 +3719,34 @@ PBoolean H323Capabilities::SetVideoEncoder(unsigned frameWidth, unsigned frameHe
 PBoolean H323Capabilities::SetVideoFrameSize(H323Capability::CapabilityFrameSize frameSize, int frameUnits) 
 { 
     // Remove the unmatching capabilities
-	if (frameSize != H323Capability::cif16MPI) Remove("*-16CIF*");
-	if (frameSize != H323Capability::cif4MPI) Remove("*-4CIF*");
-	if (frameSize != H323Capability::cifMPI) Remove("*-CIF*");
+    if (frameSize != H323Capability::cif16MPI) Remove("*-16CIF*");
+    if (frameSize != H323Capability::cif4MPI) Remove("*-4CIF*");
+    if (frameSize != H323Capability::cifMPI) Remove("*-CIF*");
     if (frameSize != H323Capability::qcifMPI) Remove("*-QCIF*");
-	if (frameSize != H323Capability::sqcifMPI) Remove("*-SQCIF*");
-	if (frameSize != H323Capability::p720MPI) Remove("*-720*");
+    if (frameSize != H323Capability::sqcifMPI) Remove("*-SQCIF*");
+    if (frameSize != H323Capability::p720MPI) Remove("*-720*");
 	if (frameSize != H323Capability::i1080MPI) Remove("*-1080*");
 
-	// Remove Generic size Capabilities
-	PStringList genericCaps;
-	if ((frameSize != H323Capability::i1080MPI) &&
-	    (frameSize != H323Capability::p720MPI) &&
-	    (frameSize != H323Capability::i480MPI) &&
-		(frameSize != H323Capability::cif16MPI) &&
+    // Remove Generic size Capabilities
+    PStringList genericCaps;
+    if ((frameSize != H323Capability::i1080MPI) &&
+        (frameSize != H323Capability::p720MPI) &&
+        (frameSize != H323Capability::i480MPI) &&
+        (frameSize != H323Capability::cif16MPI) &&
         (frameSize != H323Capability::cif4MPI)) {
-       	for (PINDEX i = 0; i < table.GetSize(); i++) {
-	     H323Capability & capability = table[i];
-		  if ((capability.GetMainType() == H323Capability::e_Video) &&
-		   (capability.GetSubType() != H245_VideoCapability::e_extendedVideoCapability)) {
-			 PCaselessString str = table[i].GetFormatName();
-		     PString formatName = "*-*";
-		     PStringArray wildcard = formatName.Tokenise('*', FALSE);
-             if (!MatchWildcard(str, wildcard))
-			    genericCaps.AppendString(str);
-	      }
-	    }
-		Remove(genericCaps);
-	}
+            for (PINDEX i = 0; i < table.GetSize(); i++) {
+                H323Capability & capability = table[i];
+                if ((capability.GetMainType() == H323Capability::e_Video) &&
+                    (capability.GetSubType() != H245_VideoCapability::e_extendedVideoCapability)) {
+                        PCaselessString str = table[i].GetFormatName();
+                        PString formatName = "*-*";
+                        PStringArray wildcard = formatName.Tokenise('*', FALSE);
+                        if (!MatchWildcard(str, wildcard))
+                            genericCaps.AppendString(str);
+                }
+            }
+            Remove(genericCaps);
+    }
 
 	// Instruct remaining Video Capabilities to set Frame Size to new Value
 	for (PINDEX i = 0; i < table.GetSize(); i++) {
