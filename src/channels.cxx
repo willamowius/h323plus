@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.12  2010/06/06 14:53:26  shorne
+ * Added AVSync support, Aspect Ratio management, flow Control, Video 90k clock, fixes for wideband codecs and generic audio capabilities
+ *
  * Revision 1.11  2010/05/11 10:38:03  willamowius
  * cleanup
  *
@@ -1328,7 +1331,6 @@ void H323_RTPChannel::Transmit()
   unsigned frameCount = 0;
   DWORD rtpTimestamp = 0;
   frame.SetPayloadSize(0);
-  PAdaptiveDelay pacing;
 
 #if PTRACING
   DWORD lastDisplayedTimestamp = 0;
@@ -1356,7 +1358,6 @@ void H323_RTPChannel::Transmit()
           rtpTimestamp += 90000/codec->GetFrameRate(); 
        }
     }
-//if (!isAudio) { PTRACE(0, "JW Channel: codec video read: length=" << length << " rtpTimestamp=" << rtpTimestamp << " marker=" << frame.GetMarker()); }
 
 #if PTRACING
     if (rtpTimestamp - lastDisplayedTimestamp > RTP_TRACE_DISPLAY_RATE) {
@@ -1444,7 +1445,7 @@ void H323_RTPChannel::Transmit()
       // higher resolutions and can easily overload the link if sent
       // without delay
       if (!isAudio)
-         pacing.Delay(4);
+         PThread::Sleep(5);
 
       // Reset flag for in talk burst
       if (isAudio)
