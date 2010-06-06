@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.18  2010/05/03 00:45:50  shorne
+ * Temporarily lock the ptlib version to 2.8.x until the commits are made to ptlib
+ *
  * Revision 1.17  2010/05/02 22:41:41  shorne
  * Added ptlib 2.9 check
  *
@@ -203,7 +206,7 @@
      #define PTLIB_VER 280
 #endif
 #if PTLIB_MAJOR == 2 && PTLIB_MINOR >= 9  
-     #define PTLIB_VER 280 //290
+     #define PTLIB_VER 290
 #endif
 
 /////////////////////////////////////////////////
