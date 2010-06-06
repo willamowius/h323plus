@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2010/05/02 22:48:12  shorne
+ * Added support to order generic parameters in capablity exchange. Added G.711 20ms codec
+ *
  * Revision 1.6  2008/05/23 11:19:54  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -248,7 +251,7 @@ class OpalMediaOption : public PObject
     };
 
     const H245GenericInfo & GetH245Generic() const { return m_H245Generic; }
-    void SetH245Generic(const H245GenericInfo & generic) { m_H245Generic = generic; }
+    void SetH245Generic(const H245GenericInfo & gen) { m_H245Generic = gen; }
 
   protected:
     PCaselessString m_name;

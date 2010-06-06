@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2010/05/02 22:48:12  shorne
+ * Added support to order generic parameters in capablity exchange. Added G.711 20ms codec
+ *
  * Revision 1.5  2008/05/27 03:15:20  shorne
  * Updated Windows compilation to compile with latest ptlib SVN
  *
@@ -210,14 +213,14 @@ OPAL_MEDIA_FORMAT_DECLARE(OpalPCM16Format,
 char OpalG711uLaw64k[] = OPAL_G711_ULAW_64K;
 char OpalG711uLaw64k20[] = OPAL_G711_ULAW_64K_20;
 
-OPAL_MEDIA_FORMAT_DECLARE(OpalG711uLaw64kFormat,
+OPAL_MEDIA_FORMAT_DECLARE(OpalG711uLaw64kFormat20,
           OpalG711uLaw64k,
           OpalMediaFormat::DefaultAudioSessionID,
           RTP_DataFrame::PCMU,
           TRUE,   // Needs jitter
           64000, // bits/sec
           8, // bytes/frame
-          8, // 1 millisecond/frame
+          20, // 1 millisecond/frame
           OpalMediaFormat::AudioTimeUnits,
           0)
 
@@ -226,14 +229,14 @@ OPAL_MEDIA_FORMAT_DECLARE(OpalG711uLaw64kFormat,
 char OpalG711ALaw64k[] = OPAL_G711_ALAW_64K;
 char OpalG711ALaw64k20[] = OPAL_G711_ALAW_64K_20;
 
-OPAL_MEDIA_FORMAT_DECLARE(OpalG711ALaw64kFormat,
+OPAL_MEDIA_FORMAT_DECLARE(OpalG711ALaw64kFormat20,
           OpalG711ALaw64k,
           OpalMediaFormat::DefaultAudioSessionID,
           RTP_DataFrame::PCMA,
           TRUE,   // Needs jitter
           64000, // bits/sec
           8, // bytes/frame
-          8, // 1 millisecond/frame
+          20, // 1 millisecond/frame
           OpalMediaFormat::AudioTimeUnits,
           0)
 
