@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2010/05/02 22:36:40  shorne
+ * Added Event controller interface
+ *
  * Revision 1.8  2010/02/24 02:56:15  shorne
  * Update to match latest Opal SVN
  *
@@ -149,7 +152,8 @@ extern "C" {
 
 // indicator the this is h323plus version of the plugin codec
 // Most unfortunate!
-#define h323pluslib    1  
+#define h323pluslib          1 
+#define PLUS_FRAMEHEADER     1
 
 #ifdef _MSC_VER
 #pragma warning(disable:4201)
@@ -285,8 +289,9 @@ enum PluginCodec_ReturnCoderFlags {
   PluginCodec_ReturnCoderLastFrame      = 1,    // indicates when video codec returns last data for frame
   PluginCodec_ReturnCoderIFrame         = 2,    // indicates when video returns I frame
   PluginCodec_ReturnCoderRequestIFrame  = 4,    // indicates when video decoder request I frame for resync
-  PluginCodec_ReturnCoderBufferTooSmall = 8     // indicates when output buffer is not large enough to receive
+  PluginCodec_ReturnCoderBufferTooSmall = 8,    // indicates when output buffer is not large enough to receive
                                                 // the data, another call to get_output_data_size is required
+  PluginCodec_ReturnCoderMoreFrame      = 16    // indicates that the decoder need to output more frame
 };
 
 struct PluginCodec_Definition;
@@ -305,6 +310,7 @@ struct PluginCodec_Definition;
 #define PLUGINCODEC_CONTROL_GET_STATISTICS        "get_statistics"
 #define PLUGINCODEC_CONTROL_TERMINATE_CODEC       "terminate_codec"
 #define PLUGINCODEC_CONTROL_CODEC_EVENT           "event_codec"
+#define PLUGINCODEC_CONTROL_FLOW_OPTIONS          "to_flowcontrol_options"
 
 
 /* Log function, plug in gets a pointer to this function which allows
@@ -719,6 +725,10 @@ struct PluginCodec_Video_FrameHeader {
   unsigned int  y;
   unsigned int  width;
   unsigned int  height;
+#ifdef PLUS_FRAMEHEADER
+  unsigned int  aspect_width;
+  unsigned int  aspect_height;
+#endif
 };
 
 #ifdef __cplusplus
