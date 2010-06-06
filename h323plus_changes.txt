@@ -1,5 +1,15 @@
 
 H323plus 1.21 - 1.22
+G.711 now 20ms sample rate by default
+Added H.264 support (tested with polycom,lifesize,tandberg)
+(fixed) Video frames now on fixed 90k clock timestamp
+Added Video decoder can handle mutiple frames to decode
+Added A/V sync support
+Added Audio Packet Loss detection
+Added Video Flow Control signalling
+(fixed) Generic Audio Capability processing
+(fixed) Support for Wideband codecs
+(fixed) H.239 fields not populated in TCS causing error with Tandberg
 Added support for call transfer with routeCallToMC
 Added application access to the received H.245 TCS
 Added support for 16CIF
