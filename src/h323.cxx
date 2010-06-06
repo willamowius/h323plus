@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.59  2010/06/06 14:53:26  shorne
+ * Added AVSync support, Aspect Ratio management, flow Control, Video 90k clock, fixes for wideband codecs and generic audio capabilities
+ *
  * Revision 1.58  2010/05/26 13:09:28  willamowius
  * Solaris 10 compile fix
  *
@@ -4894,6 +4897,7 @@ PBoolean H323Connection::OnStartLogicalChannel(H323Channel & channel)
 
 PBoolean H323Connection::OnInitialFlowRestriction(H323Channel & channel)
 {
+#if H323_VIDEO
     if (channel.GetSessionID() == OpalMediaFormat::DefaultAudioSessionID)
          return true;
 
@@ -4910,6 +4914,7 @@ PBoolean H323Connection::OnInitialFlowRestriction(H323Channel & channel)
     if (targetBitRate < maxBitRate) {
         return SendLogicalChannelFlowControl(channel,targetBitRate);
     }
+#endif
     return true;
 }
 
