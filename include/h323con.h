@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.44  2010/05/26 10:42:44  willamowius
+ * avoid compiler warnings on Windows
+ *
  * Revision 1.43  2010/05/03 06:33:06  willamowius
  * remove old version of OnRxSenderReport(), new interafce is better
  *
@@ -2064,6 +2067,15 @@ class H323Connection : public PObject
       H323Channel & channel    ///< Channel that has been started.
     );
 
+    /** Initial Flow Restrictions
+       
+       This is called when the channel has been openAck and allows the receiver
+       to specify flow control restrictions.
+      */
+    virtual PBoolean OnInitialFlowRestriction(
+       H323Channel & channel  ///< Channel that may require Flow Restriction
+    );
+
 #ifdef H323_AUDIO_CODECS
     /**Open a channel for use by an audio codec.
        The H323AudioCodec class will use this function to open the channel to
@@ -2177,6 +2189,19 @@ class H323Connection : public PObject
     virtual void OnLogicalChannelFlowControl(
       H323Channel * channel,   ///< Channel that is to be limited
       long bitRateRestriction  ///< Limit for channel
+    );
+
+
+    /**This function is called when the local endpoint wishes to limit the
+       bit rate being sent on a channel.
+
+       If channel is NULL, then the bit rate limit applies to all channels.
+
+       Return true if the FlowControl Command is sent
+     */
+    virtual PBoolean SendLogicalChannelFlowControl(
+        const H323Channel & channel,     ///< Channel that is to be limited
+        long restriction                 ///< Limit for channel
     );
 
     /**This function is called when the remote endpoint indicates the level
@@ -2525,7 +2550,7 @@ class H323Connection : public PObject
 	  */
     virtual PBoolean OnSendingOLCGenericInformation(
 						const unsigned & sessionID,						///< Session Information
-				        H245_ArrayOf_GenericInformation & generic,		///< Generic OLC/OLCack message
+				        H245_ArrayOf_GenericInformation & gen,		    ///< Generic OLC/OLCack message
 						PBoolean isAck
 						) const;
 
@@ -2597,10 +2622,10 @@ class H323Connection : public PObject
        The default behaviour does nothing.
       */
     virtual void OnRxSenderReport(
-        unsigned /*sessionID*/,
-        const RTP_Session::SenderReport & /*send*/,
-        const RTP_Session::ReceiverReportArray & /*recv*/
-       ) const { }
+        unsigned sessionID,
+        const RTP_Session::SenderReport & send,
+        const RTP_Session::ReceiverReportArray & recv
+       ) const;
 
     /**Get the names of the codecs in use for the RTP session.
        If there is no session of the specified ID, an empty string is returned.
@@ -2608,6 +2633,11 @@ class H323Connection : public PObject
     virtual PString GetSessionCodecNames(
       unsigned sessionID
     ) const;
+
+    /** Fires when a NAT may of been detected. Return true to activate NAT media
+        mechanism
+    */
+    virtual PBoolean OnNatDetected();
 
     /** Return TRUE if the remote appears to be behind a NAT firewall
     */
@@ -2644,6 +2674,8 @@ class H323Connection : public PObject
         by default calls the H323Endpoint function of the same name
 	  */
     virtual PNatMethod * GetPreferedNatMethod(const PIPSocket::Address & ip) const;
+
+    virtual PUDPSocket * GetNatSocket(unsigned session, PBoolean rtp);
 
 	/** Set RTP NAT information callback
 	  */

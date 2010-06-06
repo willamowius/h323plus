@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2010/05/11 10:38:03  willamowius
+ * cleanup
+ *
  * Revision 1.10  2010/04/28 10:24:55  willamowius
  * make sure we have a very short sleep after each video packet, so it gets sent out immediately
  *
@@ -1325,6 +1328,7 @@ void H323_RTPChannel::Transmit()
   unsigned frameCount = 0;
   DWORD rtpTimestamp = 0;
   frame.SetPayloadSize(0);
+  PAdaptiveDelay pacing;
 
 #if PTRACING
   DWORD lastDisplayedTimestamp = 0;
@@ -1340,7 +1344,19 @@ void H323_RTPChannel::Transmit()
    */
   while (codec->Read(frame.GetPayloadPtr()+frameOffset, length, frame)) {
     // Calculate the timestamp and real time to take in processing
-    rtpTimestamp += codec->GetFrameRate();
+    if(isAudio)
+    {
+        rtpTimestamp += codec->GetFrameRate();
+    } 
+    else
+    { 
+       if(frame.GetMarker())
+       {
+          // Video uses a 90khz clock. Note that framerate should really be a float.
+          rtpTimestamp += 90000/codec->GetFrameRate(); 
+       }
+    }
+//if (!isAudio) { PTRACE(0, "JW Channel: codec video read: length=" << length << " rtpTimestamp=" << rtpTimestamp << " marker=" << frame.GetMarker()); }
 
 #if PTRACING
     if (rtpTimestamp - lastDisplayedTimestamp > RTP_TRACE_DISPLAY_RATE) {
@@ -1428,7 +1444,7 @@ void H323_RTPChannel::Transmit()
       // higher resolutions and can easily overload the link if sent
       // without delay
       if (!isAudio)
-         PThread::Sleep(5);
+         pacing.Delay(4);
 
       // Reset flag for in talk burst
       if (isAudio)
@@ -1467,7 +1483,7 @@ void H323_RTPChannel::Receive()
   PTRACE(2, "H323RTP\tReceive " << mediaFormat << " thread started.");
 
   // if jitter buffer required, start the thread that is on the other end of it
-  if (mediaFormat.NeedsJitterBuffer())
+  if (mediaFormat.NeedsJitterBuffer() && endpoint.UseJitterBuffer())
     rtpSession.SetJitterBufferSize(connection.GetMinAudioJitterDelay()*mediaFormat.GetTimeUnits(),
                                    connection.GetMaxAudioJitterDelay()*mediaFormat.GetTimeUnits(),
                                    endpoint.GetJitterThreadStackSize());
@@ -1500,6 +1516,10 @@ void H323_RTPChannel::Receive()
 
     int size = frame.GetPayloadSize();
     rtpTimestamp = frame.GetTimestamp();
+
+    RTP_Session::SenderReport avData;
+    if (rtpSession.AVSyncData(avData))
+        codec->OnRxSenderReport(avData.rtpTimestamp, avData.realTimestamp);
 
 #if PTRACING
     if (rtpTimestamp - lastDisplayedTimestamp > RTP_TRACE_DISPLAY_RATE) {

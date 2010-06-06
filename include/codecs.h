@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2010/05/02 22:43:05  shorne
+ * Added RTP Information structure to be able to support A/V sync
+ *
  * Revision 1.4  2009/07/09 15:11:12  shorne
  * Simplfied and standardised compiler directives
  *
@@ -342,7 +345,6 @@
 #include <channels.h>
 #include "openh323buildopts.h"
 
-
 /* The following classes have forward references to avoid including the VERY
    large header files for H225 and H245. If an application requires access
    to the protocol classes they can include them, but for simple usage their
@@ -351,8 +353,6 @@
 class H245_MiscellaneousCommand_type;
 class H245_MiscellaneousIndication_type;
 class H323Connection;
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -363,22 +363,30 @@ class H323Connection;
    An application may create a descendent off this class and override
    functions as required for descibing a codec.
  */
-
 class H323Codec : public PObject
 {
   PCLASSINFO(H323Codec, PObject);
 
   public:
 
-	struct H323_RTPInformation
-	{
-		int m_sessionID;
-		const RTP_DataFrame * m_frame;
-	};
-
     enum Direction {
       Encoder,
       Decoder
+    };
+
+	struct H323_RTPInformation
+	{
+		int                   m_sessionID;
+        int                   m_frameLost;
+        PTime                 m_sendTime;
+        PTime                 m_recvTime;
+		const RTP_DataFrame * m_frame;
+	};
+
+    struct AVSync
+    {
+        DWORD m_rtpTimeStamp;
+        PTime m_realTimeStamp;
     };
 
     H323Codec(
@@ -585,6 +593,15 @@ class H323Codec : public PObject
     */
     virtual PBoolean SetRawDataHeld(PBoolean hold );
 
+   /**On Receive sender report.
+        Use this for AV Synchronisation
+    */
+    virtual PBoolean OnRxSenderReport(DWORD rtpTimeStamp, const PTime & realTimeStamp);
+
+   /**Calculate the remote send time
+    */
+    virtual PTime CalculateRTPSendTime(DWORD timeStamp, unsigned rate) const;
+
   protected:
     Direction direction;
     OpalMediaFormat mediaFormat;
@@ -598,6 +615,7 @@ class H323Codec : public PObject
     PINDEX     lastSequenceNumber;  // Detects lost RTP packets in the video codec.
 
 	H323_RTPInformation  rtpInformation;
+    AVSync  rtpSync;
 
     PLIST(FilterList, PNotifier);
     FilterList filters;
@@ -654,6 +672,10 @@ class H323AudioCodec : public H323Codec
     /**Get the frame rate in RTP timestamp units.
       */
     virtual unsigned GetFrameRate() const;
+
+    /**Get the frame time.
+      */
+    virtual unsigned GetFrameTime() const;
 
     enum SilenceDetectionMode {
       NoSilenceDetection,
@@ -1067,6 +1089,14 @@ class H323VideoCodec : public H323Codec
      */ 
     virtual unsigned GetHeight() const { return frameHeight; }
 
+    /** Get width of sample aspect ratio
+     */
+    virtual unsigned GetSarWidth() const { return sarWidth; }
+
+    /** Get height of sample aspect ratio
+     */
+    virtual unsigned GetSarHeight() const { return sarHeight; }
+
     /**Quality of the transmitted video. 1 is good, 31 is poor.
      */
     virtual void SetTxQualityLevel(int qlevel) {videoQuality = qlevel; }
@@ -1155,6 +1185,8 @@ class H323VideoCodec : public H323Codec
     int frameWidth;
     int frameHeight;
     int fillLevel;
+    int sarWidth;
+    int sarHeight;
 
     // used in h261codec.cxx
     unsigned videoBitRateControlModes;

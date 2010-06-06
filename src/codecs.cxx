@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2010/05/02 22:43:05  shorne
+ * Added RTP Information structure to be able to support A/V sync
+ *
  * Revision 1.10  2010/02/10 01:03:06  shorne
  * Ensure AEC is initialized
  *
@@ -388,7 +391,11 @@
 #pragma implementation "codecs.h"
 #endif
 
+#ifdef _MSC_VER
 #include "../include/codecs.h"
+#else
+#include "codecs.h"
+#endif
 
 #include "channels.h"
 #include "h323pdu.h"
@@ -433,8 +440,13 @@ H323Codec::H323Codec(const OpalMediaFormat & fmt, Direction dir)
   deleteChannel  = FALSE;
 
   rtpInformation.m_sessionID=0;
+  rtpInformation.m_sendTime = 0;
+  rtpInformation.m_frameLost = 0;
+  rtpInformation.m_recvTime = PTime();
   rtpInformation.m_frame=NULL;
 
+  rtpSync.m_realTimeStamp = 0;
+  rtpSync.m_rtpTimeStamp = 0;
 }
 
 
@@ -588,6 +600,24 @@ PBoolean H323Codec::SetRawDataHeld(PBoolean /*hold*/)
 	return FALSE;
 }
 
+PBoolean H323Codec::OnRxSenderReport(DWORD rtpTimeStamp, const PTime & realTimeStamp)
+{
+    rtpSync.m_rtpTimeStamp = rtpTimeStamp;
+    rtpSync.m_realTimeStamp = realTimeStamp;
+    return true;
+}
+
+PTime H323Codec::CalculateRTPSendTime(DWORD timeStamp, unsigned rate) const
+{
+    if (rtpSync.m_rtpTimeStamp == 0)
+        return 0;
+// Need to review this
+    DWORD timeDiff = (timeStamp - rtpSync.m_rtpTimeStamp)/rate;
+
+    return rtpSync.m_realTimeStamp + timeDiff;
+
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef H323_VIDEO
@@ -596,6 +626,7 @@ H323VideoCodec::H323VideoCodec(const OpalMediaFormat & fmt, Direction dir)
   : H323Codec(fmt, dir)
 {
   frameWidth = frameHeight = 0;
+  sarWidth = sarHeight = 1;
   targetFrameTimeMs = 0;
   videoBitRateControlModes = None;
 
@@ -816,7 +847,7 @@ H323AudioCodec::H323AudioCodec(const OpalMediaFormat & fmt, Direction dir)
   : H323Codec(fmt, dir)
 {
   framesReceived = 0;
-  samplesPerFrame = (mediaFormat.GetFrameTime() * mediaFormat.GetTimeUnits()) / 8;
+  samplesPerFrame = mediaFormat.GetFrameTime() * mediaFormat.GetTimeUnits();
   if (samplesPerFrame == 0)
     samplesPerFrame = 8; // Default for non-frame based codecs.
 
@@ -858,6 +889,10 @@ unsigned H323AudioCodec::GetFrameRate() const
   return samplesPerFrame;
 }
 
+unsigned H323AudioCodec::GetFrameTime() const
+{
+    return mediaFormat.GetFrameTime();
+}
 
 H323AudioCodec::SilenceDetectionMode H323AudioCodec::GetSilenceDetectionMode(
                                 PBoolean * isInTalkBurst, unsigned * currentThreshold) const
@@ -1093,7 +1128,7 @@ PBoolean H323FramedAudioCodec::Read(BYTE * buffer, unsigned & length, RTP_DataFr
   return EncodeFrame(buffer, length);
 }
 
-
+WORD lastSequence=0;
 PBoolean H323FramedAudioCodec::Write(const BYTE * buffer,
                                  unsigned length,
                                  const RTP_DataFrame & rtpFrame,
@@ -1109,6 +1144,12 @@ PBoolean H323FramedAudioCodec::Write(const BYTE * buffer,
 
   // If length is zero then it indicates silence, do nothing.
   written = 0;
+
+  // Prepare AVSync Information
+  rtpInformation.m_frameLost = (lastSequence > 0) ? rtpFrame.GetSequenceNumber() -lastSequence-1 : 0; 
+        lastSequence = rtpFrame.GetSequenceNumber();
+  rtpInformation.m_recvTime = PTime();
+  rtpInformation.m_sendTime = CalculateRTPSendTime(rtpFrame.GetTimestamp(),GetFrameRate());
   rtpInformation.m_frame = &rtpFrame;
 
   unsigned bytesDecoded = samplesPerFrame*2;

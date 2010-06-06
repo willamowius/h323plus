@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.14  2010/05/03 03:56:34  shorne
+ * Improved collection of sender reports including identifying session they originated from
+ *
  * Revision 1.13  2010/04/13 11:30:54  willamowius
  * don't disconnect on too large RTP packet, just ignore the packet
  *
@@ -835,6 +838,7 @@ RTP_Session::RTP_Session(
   localAddress = PString();
   remoteAddress = PString(); 
 
+  avSyncData = false;
 }
 
 
@@ -956,6 +960,20 @@ PBoolean RTP_Session::ReadBufferedData(DWORD timestamp, RTP_DataFrame & frame)
     return ReadData(frame, TRUE);
 }
 
+PBoolean RTP_Session::PseudoRead(int & /*selectStatus*/)
+{
+    return false;
+}
+
+bool RTP_Session::AVSyncData(SenderReport & sender)
+{
+    if (avSyncData) {
+        sender = rtpSync;
+        avSyncData = false;
+        return true;
+    }
+    return false;
+}
 
 void RTP_Session::SetTxStatisticsInterval(unsigned packets)
 {
@@ -1870,6 +1888,15 @@ PBoolean RTP_UDP::SetRemoteSocketInfo(PIPSocket::Address address, WORD port, PBo
   return remoteAddress != 0 && port != 0;
 }
 
+PBoolean RTP_UDP::PseudoRead(int & selectStatus)
+{
+#if PTLIB_VER >= 290
+    return (controlSocket->DoPseudoRead(selectStatus) || 
+            dataSocket->DoPseudoRead(selectStatus));
+#else
+    return false;
+#endif
+}
 
 PBoolean RTP_UDP::ReadData(RTP_DataFrame & frame, PBoolean loop)
 {
@@ -1877,7 +1904,10 @@ PBoolean RTP_UDP::ReadData(RTP_DataFrame & frame, PBoolean loop)
 #ifdef H323_RTP_AGGREGATE
     PTime start;
 #endif
-    int selectStatus = PSocket::Select(*dataSocket, *controlSocket, reportTimer);
+    int selectStatus = 0;
+
+    if (!PseudoRead(selectStatus))
+       selectStatus = PSocket::Select(*dataSocket, *controlSocket, reportTimer);
 #ifdef H323_RTP_AGGREGATE
     unsigned duration = (unsigned)(PTime() - start).GetMilliSeconds();
     if (duration > 50) {

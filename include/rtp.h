@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2010/05/03 03:56:34  shorne
+ * Improved collection of sender reports including identifying session they originated from
+ *
  * Revision 1.9  2010/04/12 21:39:54  willamowius
  * give application access to RTP sender reports
  *
@@ -585,6 +588,13 @@ class RTP_Session : public PObject
       PBoolean loop                ///<  If TRUE, loop as long as data is available, if FALSE, only process once
     ) = 0;
 
+    /**Read a data frame from the RTP channel that did not orginate
+       from the UDPSocket
+      */
+    virtual PBoolean PseudoRead(
+        int & selectStatus
+     );
+
     /**Write a data frame from the RTP channel.
       */
     virtual PBoolean WriteData(
@@ -653,6 +663,7 @@ class RTP_Session : public PObject
                                   const ReceiverReportArray & reports);
     virtual void OnRxReceiverReport(DWORD src,
                                     const ReceiverReportArray & reports);
+    virtual bool AVSyncData(SenderReport & sender);
 
     class SourceDescription : public PObject  {
         PCLASSINFO(SourceDescription, PObject);
@@ -940,6 +951,10 @@ class RTP_Session : public PObject
     PMutex reportMutex;
     PTimer reportTimer;
 
+    // Sync Information
+    PBoolean avSyncData;
+    SenderReport  rtpSync;
+
 #ifdef H323_RTP_AGGREGATE
     PHandleAggregator * aggregator;
 #endif
@@ -1137,6 +1152,11 @@ class RTP_UDP : public RTP_Session
        available or an error occurs.
       */
     virtual PBoolean ReadData(RTP_DataFrame & frame, PBoolean loop);
+
+    /**Read a data frame from the RTP channel that did not orginate
+       from the UDPSocket
+      */
+    virtual PBoolean PseudoRead(int & selectStatus);
 
     /**Write a data frame from the RTP channel.
       */

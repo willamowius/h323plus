@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.58  2010/05/26 13:09:28  willamowius
+ * Solaris 10 compile fix
+ *
  * Revision 1.57  2010/05/10 11:59:22  willamowius
  * support call transfer with routeCallToMC
  *
@@ -1790,9 +1793,7 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
 		((sigAddr.IsRFC1918() && srcAddr.IsRFC1918()) && (sigAddr != srcAddr)))  // LAN on another LAN
     {
       PTRACE(3, "H225\tSource signal address " << srcAddr << " and TCP peer address " << sigAddr << " indicate remote endpoint is behind NAT");
-#ifdef H323_H46018
-      if (!m_H46019enabled) 
-#endif
+      if (OnNatDetected())
 		  remoteIsNAT = true;
     }
   }
@@ -2922,11 +2923,33 @@ if (setup.m_conferenceGoal.GetTag() == H225_Setup_UUIE_conferenceGoal::e_create)
   return NumCallEndReasons;
 }
 
+PBoolean H323Connection::OnNatDetected()
+{
+#ifdef H323_H46018
+    if (m_H46019enabled) 
+       return false;
+#endif
+    return true;
+}
+
 #ifdef P_STUN
 
 PNatMethod * H323Connection::GetPreferedNatMethod(const PIPSocket::Address & ip) const
 {
     return endpoint.GetPreferedNatMethod(ip);
+}
+
+PUDPSocket * H323Connection::GetNatSocket(unsigned session, PBoolean rtp) 
+{
+	std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(session);
+	if (sockets_iter != m_NATSockets.end()) {
+		NAT_Sockets sockets = sockets_iter->second;
+        if (rtp)
+            return sockets.rtp;
+        else
+            return sockets.rtcp;
+    }
+    return NULL;
 }
 
 void H323Connection::SetRTPNAT(unsigned sessionid, PUDPSocket * _rtp, PUDPSocket * _rtcp)
@@ -4869,6 +4892,27 @@ PBoolean H323Connection::OnStartLogicalChannel(H323Channel & channel)
   return endpoint.OnStartLogicalChannel(*this, channel);
 }
 
+PBoolean H323Connection::OnInitialFlowRestriction(H323Channel & channel)
+{
+    if (channel.GetSessionID() == OpalMediaFormat::DefaultAudioSessionID)
+         return true;
+
+    if (!channel.GetNumber().IsFromRemote()) 
+         return true;
+        
+    H323Codec * codec = channel.GetCodec();
+    if (codec == NULL) return true;
+
+    const OpalMediaFormat & fmt = codec->GetMediaFormat();
+    unsigned maxBitRate = fmt.GetOptionInteger(OpalVideoFormat::MaxBitRateOption);
+    unsigned targetBitRate = fmt.GetOptionInteger(OpalVideoFormat::TargetBitRateOption);
+
+    if (targetBitRate < maxBitRate) {
+        return SendLogicalChannelFlowControl(channel,targetBitRate);
+    }
+    return true;
+}
+
 #ifdef H323_AUDIO_CODECS
 PBoolean H323Connection::OpenAudioChannel(PBoolean isEncoding, unsigned bufferSize, H323AudioCodec & codec)
 {
@@ -4936,6 +4980,25 @@ void H323Connection::OnLogicalChannelFlowControl(H323Channel * channel,
     channel->OnFlowControl(bitRateRestriction);
 }
 
+PBoolean H323Connection::SendLogicalChannelFlowControl(const H323Channel & channel,
+                                                       long restriction)
+{
+    H323ControlPDU pdu;
+    H245_CommandMessage & command = pdu.Build(H245_CommandMessage::e_flowControlCommand);
+    H245_FlowControlCommand & flowCommand = command;
+
+    H245_FlowControlCommand_scope & scope = flowCommand.m_scope; 
+    scope.SetTag(H245_FlowControlCommand_scope::e_logicalChannelNumber);
+    H245_LogicalChannelNumber & lc = scope;
+    lc = channel.GetNumber();
+
+    H245_FlowControlCommand_restriction & restrict = flowCommand.m_restriction;
+    restrict.SetTag(H245_FlowControlCommand_restriction::e_maximumBitRate);
+    PASN_Integer & bitRate = restrict;
+    bitRate = restriction;
+
+    return WriteControlPDU(pdu);
+}
 
 void H323Connection::OnLogicalChannelJitter(H323Channel * channel,
                                             DWORD jitter,
@@ -6011,6 +6074,11 @@ void H323Connection::OnRTPFinalStatistics(const RTP_Session & session) const
         H4609QueueStats(session);
 #endif
   endpoint.OnRTPFinalStatistics(*this, session);
+}
+
+void H323Connection::OnRxSenderReport(unsigned sessionID, const RTP_Session::SenderReport & send,
+        const RTP_Session::ReceiverReportArray & recv) const
+{
 }
 
 #ifdef H323_H4609

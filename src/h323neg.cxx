@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2010/02/06 20:08:18  willamowius
+ * give application access to the received H.245 TCS
+ *
  * Revision 1.6  2009/12/29 00:08:42  shorne
  * fix for Tandberg T1000 to handle Master/Slave conflict and a small bug fix to ensure video merge correctly
  *
@@ -966,7 +969,10 @@ PBoolean H245NegLogicalChannel::HandleOpen(const H245_OpenLogicalChannel & pdu)
     Release();
   }
 
-  return connection.WriteControlPDU(reply);
+  if (!connection.WriteControlPDU(reply))
+      return false;
+
+  return connection.OnInitialFlowRestriction(*channel);
 }
 
 
