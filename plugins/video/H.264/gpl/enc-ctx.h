@@ -84,7 +84,6 @@ extern "C" {
   #define X264_ENCODER_RECONFIG X264Lib.Xx264_encoder_reconfig
   #define X264_ENCODER_HEADERS X264Lib.Xx264_encoder_headers
   #define X264_ENCODER_CLOSE X264Lib.Xx264_encoder_close
-  #define X264_PICTURE_CLEAN X264Lib.Xx264_picture_clean
   #if X264_BUILD >= 98
   #define X264_PICTURE_INIT X264Lib.Xx264_picture_init
   #endif
