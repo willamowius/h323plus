@@ -54,16 +54,35 @@ bool X264Library::Load()
     return false;
   }
 
-  if (!GetFunction("x264_encoder_open", (Function &)Xx264_encoder_open)) {
+  bool open_found = false;
+  if (GetFunction("x264_encoder_open", (Function &)Xx264_encoder_open)) {
+    open_found = true;
+  }
+  if (!open_found) {
     // try function name with appended build number before failing
     char fktname[128];
 	sprintf(fktname, "x264_encoder_open_%d", X264_BUILD);
+    TRACE (1, "H264\tDYNA\tTry " << fktname);
     if (GetFunction(fktname, (Function &)Xx264_encoder_open)) {
       TRACE (2, "H264\tDYNA\tLoaded " << fktname);
-    } else {
-      TRACE (1, "H264\tDYNA\tFailed to load x264_encoder_open");
-      return false;
+      open_found = true;
     }
+  }
+  if (!open_found) {
+    // try range of possible version numbers
+    for (unsigned ver = 80; ver < 100; ++ver) {
+      char fktname[128];
+	  sprintf(fktname, "x264_encoder_open_%d", ver);
+      TRACE (1, "H264\tDYNA\tTry " << fktname);
+      if (GetFunction(fktname, (Function &)Xx264_encoder_open)) {
+        TRACE (2, "H264\tDYNA\tLoaded " << fktname);
+        open_found = true;
+      }
+    }
+  }
+  if (!open_found) {
+    TRACE (1, "H264\tDYNA\tFailed to load x264_encoder_open");
+    return false;
   }
   if (!GetFunction("x264_param_default", (Function &)Xx264_param_default)) {
     TRACE (1, "H264\tDYNA\tFailed to load x264_param_default");
