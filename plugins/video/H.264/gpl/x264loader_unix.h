@@ -41,13 +41,14 @@ class X264Library
 
     x264_t *(*Xx264_encoder_open)(x264_param_t *);
     void (*Xx264_param_default)(x264_param_t *);
-    int (*Xx264_encoder_encode)( x264_t *, x264_nal_t **, int *, x264_picture_t *, x264_picture_t *);
+    int (*Xx264_encoder_encode)(x264_t *, x264_nal_t **, int *, x264_picture_t *, x264_picture_t *);
     int (*Xx264_nal_encode)(void *, int *, int b_annexb, x264_nal_t *nal);
     int (*Xx264_encoder_reconfig)(x264_t *, x264_param_t *);
-    int (*Xx264_encoder_headers)( x264_t *, x264_nal_t **, int *);
-    void (*Xx264_encoder_close)( x264_t *);
-    void (*Xx264_picture_alloc)( x264_picture_t *pic, int i_csp, int i_width, int i_height);
-    void (*Xx264_picture_clean)( x264_picture_t *pic);
+    int (*Xx264_encoder_headers)(x264_t *, x264_nal_t **, int *);
+    void (*Xx264_encoder_close)(x264_t *);
+#if X264_BUILD >= 98
+    void (*Xx264_picture_init)(x264_picture_t *pic);
+#endif
 
   protected:
     bool Open(const char *name);

@@ -112,15 +112,12 @@ bool X264Library::Load()
     return false;
   }
 
-  if (!GetFunction("x264_picture_alloc", (Function &)Xx264_picture_alloc)) {
-    TRACE (1, "H264\tDYNA\tFailed to load x264_picture_alloc");
+#if X264_BUILD >= 98
+  if (!GetFunction("x264_picture_init", (Function &)Xx264_picture_init)) {
+    TRACE (1, "H264\tDYNA\tFailed to load x264_picture_init");
     return false;
   }
-
-  if (!GetFunction("x264_picture_clean", (Function &)Xx264_picture_clean)) {
-    TRACE (1, "H264\tDYNA\tFailed to load x264_picture_clean");
-    return false;
-  }
+#endif
 
   if (!GetFunction("x264_encoder_close", (Function &)Xx264_encoder_close)) {
     TRACE (1, "H264\tDYNA\tFailed to load x264_encoder_close");

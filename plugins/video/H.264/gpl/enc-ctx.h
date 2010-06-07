@@ -72,9 +72,9 @@ extern "C" {
   #define X264_ENCODER_RECONFIG x264_encoder_reconfig
   #define X264_ENCODER_HEADERS x264_encoder_headers
   #define X264_ENCODER_CLOSE x264_encoder_close
-  #define X264_PICTURE_ALLOC x264_picture_alloc
-  #define X264_PICTURE_CLEAN x264_picture_clean
-  #define X264_ENCODER_CLOSE x264_encoder_close
+  #if X264_BUILD >= 98
+  #define X264_PICTURE_INIT x264_picture_init
+  #endif
 #else
   #include "x264loader_unix.h"
   #define X264_ENCODER_OPEN  X264Lib.Xx264_encoder_open
@@ -84,9 +84,10 @@ extern "C" {
   #define X264_ENCODER_RECONFIG X264Lib.Xx264_encoder_reconfig
   #define X264_ENCODER_HEADERS X264Lib.Xx264_encoder_headers
   #define X264_ENCODER_CLOSE X264Lib.Xx264_encoder_close
-  #define X264_PICTURE_ALLOC X264Lib.Xx264_picture_alloc
   #define X264_PICTURE_CLEAN X264Lib.Xx264_picture_clean
-  #define X264_ENCODER_CLOSE X264Lib.Xx264_encoder_close
+  #if X264_BUILD >= 98
+  #define X264_PICTURE_INIT X264Lib.Xx264_picture_init
+  #endif
 #endif
 
 class X264EncoderContext 

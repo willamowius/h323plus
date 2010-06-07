@@ -325,6 +325,10 @@ int X264EncoderContext::EncodeFrames(const unsigned char * src, unsigned & srcLe
   _fastUpdateRequested = false;
   
   x264_picture_t dummyOutput;
+#if X264_BUILD >= 98
+  // starting with build 98 applications who allocate a x264_picture_t themselves have to call x264_picture_init()
+  X264_PICTURE_INIT(&dummyOutput);
+#endif
 
   // Check whether to insert a keyframe 
   // (On the first frame and every_IFrameInterval)
