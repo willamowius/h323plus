@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/05/23 11:23:11  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.1  2007/08/06 20:51:39  shorne
  * First commit of h323plus
  *
@@ -1396,7 +1399,10 @@ void H4502Handler::TransferCall(const PString & remoteParty,
 
   PStringList Addresses;
   endpoint.ResolveCallParty(remoteParty, Addresses);
-  endpoint.ParsePartyName(Addresses[0], alias, address);
+  if (Addresses.GetSize() > 0)
+    endpoint.ParsePartyName(Addresses[0], alias, address);
+  else
+    PTRACE(1, "H4502\tCould not resolve transfer destination " << remoteParty);
 
   serviceAPDU.BuildCallTransferInitiate(currentInvokeId, callIdentity, alias, address);
   serviceAPDU.WriteFacilityPDU(connection);
