@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2009/02/17 09:54:38  willamowius
+ * fix 64bit issue
+ *
  * Revision 1.2  2008/05/23 11:21:20  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -3795,6 +3798,8 @@ H323GatekeeperRequest::Response H323GatekeeperServer::OnAdmission(H323Gatekeeper
       mutex.Signal();
 
       AddCall(oldCall);
+    } else {
+      delete newCall;
     }
   }
 
