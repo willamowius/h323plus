@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.19  2010/06/06 15:08:21  shorne
+ * Added Codec Listing, generic Capability OID exposure and custom format management
+ *
  * Revision 1.18  2010/02/24 03:39:07  shorne
  * Add ability to pass to the video plugin a custom frame size and rate to encode/decode
  *
@@ -286,7 +289,11 @@
 #endif
 
 
+#ifdef _MSC_VER
 #include "../include/codecs.h"
+#else
+#include "codecs.h"
+#endif
 #include "channels.h"
 #include "mediafmt.h"
 
