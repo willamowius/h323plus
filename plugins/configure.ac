@@ -1,8 +1,18 @@
 AC_INIT(configure.ac)
 
 if test \! -e ./aclocal.m4 ; then
-  echo "ERROR: you must first run 'aclocal' in $PWD"
-  exit
+  echo "aclocal.m4 not found in $PWD, running aclocal to make it."
+  if aclocal ; then
+    if test -e ./aclocal.m4 ; then
+      echo "aclocal.m4 generated."
+    else
+      echo "aclocal ran in $PWD but failed to generate aclocal.m4"
+      exit
+    fi
+  else
+    echo "ERROR running 'aclocal' in $PWD"
+    exit
+  fi
 fi
 
 PKG_PROG_PKG_CONFIG()
