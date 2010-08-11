@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2010/06/24 14:13:05  willamowius
+ * fix crash if H.450.2 transfer destination can't be resolved
+ *
  * Revision 1.2  2008/05/23 11:23:11  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -227,7 +230,7 @@ void H450ServiceAPDU::BuildCallTransferInitiate(int invokeId,
     aliasAddress.SetSize(2);
 
     // Set the alias
-    aliasAddress[1].SetTag(H225_AliasAddress::e_dialedDigits);
+    aliasAddress[1].SetTag(H225_AliasAddress::e_dialedDigits);	// TODO: can't this also be another alias type ???
     H323SetAliasAddress(alias, aliasAddress[1]);
 
     // Set the transport
