@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2009/08/21 04:35:47  shorne
+ * Expressly reference codecs.h to avoid problems with windows SDK codecs.h
+ *
  * Revision 1.2  2008/05/23 11:22:23  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -135,7 +138,11 @@
 
 #endif
 
+#ifdef _MSC_VER
 #include "../include/codecs.h"
+#else
+#include "codecs.h"
+#endif
 
 #define	G7231_SAMPLES_PER_BLOCK	240
 #define	G7231_BANDWIDTH		      (6300/100)

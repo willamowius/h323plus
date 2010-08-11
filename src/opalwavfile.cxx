@@ -22,6 +22,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2009/07/09 15:11:12  shorne
+ * Simplfied and standardised compiler directives
+ *
  * Revision 1.3  2008/10/28 23:06:28  willamowius
  * fixes to compile with audio disabled
  *
@@ -67,7 +70,11 @@
 
 #include "opalwavfile.h"
 
+#ifdef _MSC_VER
 #include "../include/codecs.h"
+#else
+#include "codecs.h"
+#endif
 
 
 
