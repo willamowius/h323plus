@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.36  2010/06/06 15:08:21  shorne
+ * Added Codec Listing, generic Capability OID exposure and custom format management
+ *
  * Revision 1.35  2010/05/25 12:54:59  willamowius
  * fix compilation with video disabled
  *
@@ -1929,8 +1932,9 @@ void H323PluginVideoCodec::OnFlowControl(long bitRateRestriction)
     return;
   }
 #if PTLIB_VER >= 290
-  if (SetFlowControl(codec,context,mediaFormat,bitRateRestriction) && rawDataChannel != NULL)
-             rawDataChannel->FlowControl(&mediaFormat);
+// TODO: this is buggy and causes at least low frame rate video to freeze - Jan
+//  if (SetFlowControl(codec,context,mediaFormat,bitRateRestriction) && rawDataChannel != NULL)
+//             rawDataChannel->FlowControl(&mediaFormat);
 #endif
 }
 
@@ -2149,7 +2153,7 @@ PBoolean H323PluginVideoCodec::RenderFrame(const BYTE * buffer, void * mark)
     if (!videoOut->IsRenderOpen())
         return TRUE;
 
-#if PTLIB_VER >=290
+#if PTLIB_VER >= 290
     videoOut->SetRenderFrameSize(frameWidth, frameHeight,sarWidth,sarHeight);
 #else
     videoOut->SetRenderFrameSize(frameWidth, frameHeight);
