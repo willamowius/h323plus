@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.60  2010/06/06 19:31:06  willamowius
+ * fix compile without video support
+ *
  * Revision 1.59  2010/06/06 14:53:26  shorne
  * Added AVSync support, Aspect Ratio management, flow Control, Video 90k clock, fixes for wideband codecs and generic audio capabilities
  *
@@ -1788,17 +1791,7 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
     sourceAddress.GetIpAddress(srcAddr);
     signallingChannel->GetRemoteAddress().GetIpAddress(sigAddr);
 
-    // if the peer address is a public address, but the advertised source address is a private address
-    // then there is a good chance the remote endpoint is behind a NAT but does not know it.
-    // in this case, we active the NAT mode and wait for incoming RTP to provide the media address before 
-    // sending anything to the remote endpoint
-    if ((!sigAddr.IsRFC1918() && srcAddr.IsRFC1918()) ||    // Internet Address
-		((sigAddr.IsRFC1918() && srcAddr.IsRFC1918()) && (sigAddr != srcAddr)))  // LAN on another LAN
-    {
-      PTRACE(3, "H225\tSource signal address " << srcAddr << " and TCP peer address " << sigAddr << " indicate remote endpoint is behind NAT");
-      if (OnNatDetected())
-		  remoteIsNAT = true;
-    }
+    NatDetection(srcAddr, sigAddr);
   }
 
   // Anything else we need from setup PDU
@@ -1899,7 +1892,8 @@ if (nonCallConnection) {
             return TRUE;
 
   // See if remote endpoint wants to start fast
-  if (setup.HasOptionalField(H225_Setup_UUIE::e_fastStart) &&
+  if (fastStartState != FastStartDisabled &&
+	   setup.HasOptionalField(H225_Setup_UUIE::e_fastStart) &&
        localCapabilities.GetSize() > 0) {
 
     DecodeFastStartCaps(setup.m_fastStart);
@@ -2926,6 +2920,21 @@ if (setup.m_conferenceGoal.GetTag() == H225_Setup_UUIE_conferenceGoal::e_create)
   return NumCallEndReasons;
 }
 
+void H323Connection::NatDetection(const PIPSocket::Address & srcAddress, const PIPSocket::Address & sigAddress)
+{
+    // if the peer address is a public address, but the advertised source address is a private address
+    // then there is a good chance the remote endpoint is behind a NAT but does not know it.
+    // in this case, we active the NAT mode and wait for incoming RTP to provide the media address before 
+    // sending anything to the remote endpoint
+    if ((!sigAddress.IsRFC1918() && srcAddress.IsRFC1918()) ||    // Internet Address
+		((sigAddress.IsRFC1918() && srcAddress.IsRFC1918()) && (sigAddress != srcAddress)))  // LAN on another LAN
+    {
+      PTRACE(3, "H225\tSource signal address " << srcAddress << " and TCP peer address " << sigAddress << " indicate remote endpoint is behind NAT");
+      if (OnNatDetected())
+		  remoteIsNAT = true;
+    }
+}
+
 PBoolean H323Connection::OnNatDetected()
 {
 #ifdef H323_H46018
@@ -3744,6 +3753,11 @@ PBoolean H323Connection::OnH245Indication(const H323ControlPDU & pdu)
         return TRUE;
       break;
 
+    case H245_IndicationMessage::e_flowControlIndication :
+	    PTRACE(3,"H245\tFlow Indication received NOT HANDLED!");
+        return TRUE;
+      break;
+
 	case H245_IndicationMessage::e_genericIndication :
       if (OnHandleH245GenericMessage(h245indication,indication))
 	    return TRUE;
@@ -4501,16 +4515,13 @@ void H323Connection::SelectDefaultLogicalChannel(unsigned sessionID)
 PBoolean H323Connection::MergeCapabilities(unsigned sessionID, const H323Capability & local, H323Capability * remote)
 {
 
-	// Only the Video Capabilities require merging
-	if (sessionID != RTP_Session::DefaultVideoSessionID)
-			return FALSE;
 #if H323_VIDEO
    OpalVideoFormat & remoteFormat = (OpalVideoFormat &)remote->GetWritableMediaFormat();
    const OpalMediaFormat & localFormat = local.GetMediaFormat();
 
    if (remoteFormat.Merge(localFormat)) {
 #if PTRACING
-	  PTRACE(6, "H323\t" << ((remote->GetMainType() != H323Capability::e_Video) ? "Ext " : "") << "Video Capability Merge: "); 
+	  PTRACE(6, "H323\tCapability Merge: ");
 	  OpalMediaFormat::DebugOptionList(remoteFormat);
 #endif
       return TRUE;
@@ -4912,7 +4923,7 @@ PBoolean H323Connection::OnInitialFlowRestriction(H323Channel & channel)
     unsigned targetBitRate = fmt.GetOptionInteger(OpalVideoFormat::TargetBitRateOption);
 
     if (targetBitRate < maxBitRate) {
-        return SendLogicalChannelFlowControl(channel,targetBitRate);
+        return SendLogicalChannelFlowControl(channel,targetBitRate/100);
     }
 #endif
     return true;
@@ -5529,8 +5540,8 @@ RTP_Session * H323Connection::UseSession(unsigned sessionID,
     return NULL;
   }
 
-  // We must have a valid sessionID 
-  if (sessionID < 1 || sessionID > 255) 
+  // We must have a valid sessionID  H.239 sometimes negotiates 0
+  if (sessionID < 0 || sessionID > 255) 
 	  return NULL;
 
   const H245_UnicastAddress & uaddr = taddr;
@@ -5782,6 +5793,108 @@ void BuildH46024BResponse(H323ControlPDU & pdu)
 }
 #endif  // H323_H46024B
 
+#ifdef H323_H239
+void BuildH239GenericRequest(H323ControlPDU & pdu)
+{
+    H245_GenericMessage & cap = pdu.Build(H245_RequestMessage::e_genericRequest);
+    H245_CapabilityIdentifier & id = cap.m_messageIdentifier;
+      id.SetTag(H245_CapabilityIdentifier::e_standard);
+      PASN_ObjectId & gid = id;
+	  gid.SetValue(OpalPluginCodec_Identifer_H239_Generic);
+
+    cap.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
+      PASN_Integer & num = cap.m_subMessageIdentifier;
+      num = 3;
+
+    cap.IncludeOptionalField(H245_GenericMessage::e_messageContent);
+    H245_ArrayOf_GenericParameter & msg = cap.m_messageContent;
+
+    H245_GenericParameter ask;
+    H245_ParameterIdentifier & an = ask.m_parameterIdentifier;
+        an.SetTag(H245_ParameterIdentifier::e_standard);
+	PASN_Integer & n = an;
+	n =44;
+    H245_ParameterValue & aw = ask.m_parameterValue;
+	aw.SetTag(H245_ParameterValue::e_unsignedMin);
+        PASN_Integer & k = aw;
+        k =0;
+	msg.SetSize(1);
+	msg[1] = ask;
+
+    H245_GenericParameter ask1;
+    H245_ParameterIdentifier & an1 = ask1.m_parameterIdentifier;
+        an1.SetTag(H245_ParameterIdentifier::e_standard);
+        PASN_Integer & k1 = an1;
+        k1 =42;
+    H245_ParameterValue & aw1 = ask1.m_parameterValue;
+	aw1.SetTag(H245_ParameterValue::e_unsignedMin);
+        PASN_Integer & k2 = aw1;
+        k2 = OpalMediaFormat::DefaultExtVideoSessionID;
+	msg.SetSize(2);
+	msg[2] = ask1;
+}
+
+void BuildH239GenericResponse(H323ControlPDU & pdu, bool accept)
+{
+    H245_GenericMessage & cap = pdu.Build(H245_ResponseMessage::e_genericResponse);
+    H245_CapabilityIdentifier & id = cap.m_messageIdentifier;
+      id.SetTag(H245_CapabilityIdentifier::e_standard);
+      PASN_ObjectId & gid = id;
+	  gid.SetValue(OpalPluginCodec_Identifer_H239_Generic);
+
+    cap.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
+      PASN_Integer & num = cap.m_subMessageIdentifier;
+      num = 4;
+
+    cap.IncludeOptionalField(H245_GenericMessage::e_messageContent);
+    H245_ArrayOf_GenericParameter & msg = cap.m_messageContent;
+      // callIdentifer
+    H245_GenericParameter call;
+    
+    if (!accept) {
+       H245_ParameterIdentifier & idx = call.m_parameterIdentifier;
+	 idx.SetTag(H245_ParameterIdentifier::e_standard);
+	 PASN_Integer & m = idx;
+         m =127;
+    	 msg.SetSize(1);
+         msg[0] = call;
+       return;
+    } 
+  
+    H245_ParameterIdentifier & idx = call.m_parameterIdentifier;
+	 idx.SetTag(H245_ParameterIdentifier::e_standard);
+	 PASN_Integer & m = idx;
+         m =126;
+    	 msg.SetSize(1);
+         msg[0] = call;
+
+    H245_GenericParameter answer;
+    H245_ParameterIdentifier & an = answer.m_parameterIdentifier;
+        an.SetTag(H245_ParameterIdentifier::e_standard);
+	PASN_Integer & n = an;
+	n =44;
+    H245_ParameterValue & aw = answer.m_parameterValue;
+	aw.SetTag(H245_ParameterValue::e_unsignedMin);
+        PASN_Integer & k = aw;
+        k =0;
+	msg.SetSize(2);
+	msg[1] = answer;
+
+    H245_GenericParameter answer1;
+    H245_ParameterIdentifier & an1 = answer1.m_parameterIdentifier;
+        an1.SetTag(H245_ParameterIdentifier::e_standard);
+        PASN_Integer & k1 = an1;
+        k1 =42;
+    H245_ParameterValue & aw1 = answer1.m_parameterValue;
+	aw1.SetTag(H245_ParameterValue::e_unsignedMin);
+        PASN_Integer & k2 = aw1;
+        k2 = OpalMediaFormat::DefaultExtVideoSessionID;
+	msg.SetSize(3);
+	msg[2] = answer1;
+}
+#endif
+
+
 #ifdef H323_H46024A
 PBoolean H323Connection::SendH46024AMessage(bool sender)
 {
@@ -5850,6 +5963,20 @@ PBoolean H323Connection::OnReceivedGenericMessage(h245MessageType type, const PS
 			return WriteControlPDU(pdu);
 		}
 	}
+#endif
+
+#ifdef H323_H239
+    if (id == OpalPluginCodec_Identifer_H239_Generic && type == h245response)
+		  return true; //TODO  handle response message
+
+    if (id == OpalPluginCodec_Identifer_H239_Generic && type == h245request) {
+       H323ControlPDU pdu;
+       BuildH239GenericResponse(pdu,OnH239ControlRequest());
+       return WriteControlPDU(pdu);
+    }
+
+    if (id == OpalPluginCodec_Identifer_H239_Generic && type == h245command)
+       return true; //TODO  handle command message
 #endif
 	return false;
 }
@@ -7039,9 +7166,18 @@ H460_FeatureSet * H323Connection::GetFeatureSet()
 
 #ifdef H323_VIDEO
 #ifdef H323_H239
+PBoolean H323Connection::OnH239ControlRequest()
+{
+  return true;
+}
+
 PBoolean H323Connection::OpenExtendedVideoSession(H323ChannelNumber & num)
 {
   PBoolean applicationOpen = FALSE;
+
+   H323ControlPDU pdu;
+   BuildH239GenericRequest(pdu);
+   WriteControlPDU(pdu);
 
   for (PINDEX i = 0; i < localCapabilities.GetSize(); i++) {
     H323Capability & localCapability = localCapabilities[i];

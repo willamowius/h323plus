@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.45  2010/06/06 14:53:26  shorne
+ * Added AVSync support, Aspect Ratio management, flow Control, Video 90k clock, fixes for wideband codecs and generic audio capabilities
+ *
  * Revision 1.44  2010/05/26 10:42:44  willamowius
  * avoid compiler warnings on Windows
  *
@@ -2103,6 +2106,11 @@ class H323Connection : public PObject
     );
 
 #ifdef H323_H239
+	/** On Receiving a H.239 Control Request
+	    Return False to reject the request to open channel.
+	*/
+    PBoolean H323Connection::OnH239ControlRequest();
+
 	/** Open an Extended Video Session
 	    This will open an Extended Video session.
 	*/
@@ -2633,6 +2641,12 @@ class H323Connection : public PObject
     virtual PString GetSessionCodecNames(
       unsigned sessionID
     ) const;
+
+    /** NAT Detection algorithm
+    */
+    virtual void NatDetection(const PIPSocket::Address & srcAddress,  ///< TCP socket source address
+                              const PIPSocket::Address & sigAddress   ///< H.225 Signalling Address
+                              );
 
     /** Fires when a NAT may of been detected. Return true to activate NAT media
         mechanism
