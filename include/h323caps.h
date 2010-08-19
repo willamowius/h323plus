@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.20  2010/08/10 22:35:46  willamowius
+ * Simon's fix for codecs.h include
+ *
  * Revision 1.19  2010/06/06 15:08:21  shorne
  * Added Codec Listing, generic Capability OID exposure and custom format management
  *
@@ -2882,6 +2885,8 @@ class H323CodecExtendedVideoCapability : public H323ExtendedVideoCapability
       const H245_VideoCapability & pdu  /// PDU to get information from
 	);
 
+    const OpalMediaFormat & GetMediaFormat() const;
+    OpalMediaFormat & GetWritableMediaFormat();
 };
 
 typedef PFactory<H323VideoCapability, std::string> H323ExtendedVideoFactory;

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.30  2010/06/06 15:08:21  shorne
+ * Added Codec Listing, generic Capability OID exposure and custom format management
+ *
  * Revision 1.29  2010/05/02 22:48:12  shorne
  * Added support to order generic parameters in capablity exchange. Added G.711 20ms codec
  *
@@ -1109,13 +1112,15 @@ PBoolean H323GenericCapabilityInfo::OnSendingGenericPDU(H245_GenericCapability &
   pdu.m_capabilityIdentifier = *identifier;
 
 #ifdef H323_VIDEO
-  unsigned bitRate = maxBitRate != 0 ? maxBitRate : ((mediaFormat.GetOptionInteger(OpalVideoFormat::MaxBitRateOption)+99)/100);
+  unsigned pbitRate = mediaFormat.GetOptionInteger(OpalVideoFormat::MaxBitRateOption);
+  unsigned bitRate = maxBitRate != 0 ? maxBitRate : pbitRate;
+  if (pbitRate < maxBitRate) bitRate = pbitRate;
 #else
   unsigned bitRate = maxBitRate;
 #endif
   if (bitRate != 0) {
     pdu.IncludeOptionalField(H245_GenericCapability::e_maxBitRate);
-    pdu.m_maxBitRate = bitRate;
+    pdu.m_maxBitRate = bitRate/100;
   }
 
   for (PINDEX i = 0; i < mediaFormat.GetOptionCount(); i++) {
@@ -1247,7 +1252,9 @@ PBoolean H323GenericCapabilityInfo::OnReceivedGenericPDU(OpalMediaFormat & media
     }
 
     if (PIsDescendant(&option, OpalMediaOptionBoolean))
-      ((OpalMediaOptionBoolean &)option).SetValue(false);
+      ((OpalMediaOptionBoolean &)option).SetValue(false); 
+    else if (PIsDescendant(&option, OpalMediaOptionUnsigned) && option.GetMerge() == OpalMediaOption::MinMerge)
+      ((OpalMediaOptionUnsigned &)option).SetValue(0);
 
     for (PINDEX j = 0; j < params->GetSize(); j++) {
       const H245_GenericParameter & param = (*params)[j];
@@ -1504,15 +1511,16 @@ PBoolean H323AudioCapability::OnReceivedPDU(const H245_DataType & dataType, PBoo
   if (!OnReceivedPDU((const H245_AudioCapability &)dataType, packetSize, e_OLC))
     return FALSE;
 
-  // Clamp our transmit size to maximum allowed
+  // Clamp our transmit size to that of the remote
   if (xFramesInPacket > packetSize) {
     PTRACE(4, "H323\tCapability " << (receiver ? 'r' : 't') << "x frames reduced from "
            << xFramesInPacket << " to " << packetSize);
     xFramesInPacket = packetSize;
   }
-  else {
-    PTRACE(4, "H323\tCapability " << (receiver ? 'r' : 't') << "x frames left at "
-           << xFramesInPacket << " as remote allows " << packetSize);
+  else if (xFramesInPacket < packetSize) {
+    PTRACE(4, "H323\tCapability " << (receiver ? 'r' : 't') << "x frames increased from "
+           << xFramesInPacket << " to " << packetSize);
+    xFramesInPacket = packetSize;
   }
 
   return TRUE;
@@ -2159,18 +2167,13 @@ unsigned H323CodecExtendedVideoCapability::GetSubType() const
 }
 
 H323Channel * H323CodecExtendedVideoCapability::CreateChannel(H323Connection & connection,   
-      H323Channel::Directions dir,unsigned sessionID,const H245_H2250LogicalChannelParameters * /*param*/
+      H323Channel::Directions dir,unsigned sessionID,const H245_H2250LogicalChannelParameters * param
 ) const
 {
    if (table.GetSize() == 0)
 	   return NULL;
-
-   	RTP_Session *session;
-	H245_TransportAddress addr;
-	connection.GetControlChannel().SetUpTransportPDU(addr, H323Transport::UseLocalTSAP);
-	session = connection.UseSession(sessionID, addr, dir);
-    
-	return new H323_RTPChannel(connection, *this, dir, *session);
+   
+   return connection.CreateRealTimeLogicalChannel(*this, dir, sessionID, param);
 }
 
 H323Codec * H323CodecExtendedVideoCapability::CreateCodec(H323Codec::Direction direction ) const
@@ -2183,7 +2186,7 @@ H323Codec * H323CodecExtendedVideoCapability::CreateCodec(H323Codec::Direction d
 
 PBoolean H323CodecExtendedVideoCapability::OnSendingPDU(H245_Capability & cap) const
 {
-   cap.SetTag(H245_Capability::e_transmitVideoCapability);
+   cap.SetTag(H245_Capability::e_receiveVideoCapability);
    return OnSendingPDU((H245_VideoCapability &)cap, e_TCS);
 }
 
@@ -2193,9 +2196,6 @@ PBoolean H323CodecExtendedVideoCapability::OnReceivedPDU(const H245_Capability &
 
   if (extCapabilities.GetSize() == 0)
 		return FALSE;
-
-  if (cap.GetTag()!= H245_Capability::e_transmitVideoCapability)
-    return FALSE;
 
   const H245_VideoCapability & vidcap = (const H245_VideoCapability &)cap;
   if (vidcap.GetTag() != H245_VideoCapability::e_extendedVideoCapability)
@@ -2242,10 +2242,11 @@ PBoolean H323CodecExtendedVideoCapability::OnSendingPDU(H245_VideoCapability & p
       param->m_parameterIdentifier.SetTag(H245_ParameterIdentifier::e_standard);
       (PASN_Integer &)param->m_parameterIdentifier = 1;
 	  param->m_parameterValue.SetTag(H245_ParameterValue::e_booleanArray);
-      (PASN_Integer &)param->m_parameterValue = 2;  // Live presentation
+      (PASN_Integer &)param->m_parameterValue = 1;  // Live presentation
 
-      gcap.IncludeOptionalField(H245_GenericCapability::e_nonCollapsing);
-      gcap.m_nonCollapsing.Append(param);
+      gcap.IncludeOptionalField(H245_GenericCapability::e_collapsing);
+	  gcap.m_collapsing.SetSize(1);
+      gcap.m_collapsing[0] = *param;
       cape.SetSize(1);
       cape[0] = gcap;
 
@@ -2301,20 +2302,20 @@ PBoolean H323CodecExtendedVideoCapability::OnReceivedPDU(const H245_VideoCapabil
 		return FALSE;
 	}
 
-	if (!cap.HasOptionalField(H245_GenericCapability::e_nonCollapsing)) {
-		PTRACE(4,"H239\tERROR: No nonCollapsing field");
+	if (!cap.HasOptionalField(H245_GenericCapability::e_collapsing)) {
+		PTRACE(4,"H239\tERROR: No collapsing field");
 		return FALSE;
 	}
 
-	for (PINDEX c =0; c < cap.m_nonCollapsing.GetSize(); c++) {
-		const H245_GenericParameter & param = cap.m_nonCollapsing[c];
+	for (PINDEX c =0; c < cap.m_collapsing.GetSize(); c++) {
+		const H245_GenericParameter & param = cap.m_collapsing[c];
 		const PASN_Integer & id = param.m_parameterIdentifier;
 		if (id.GetValue() != 1) {
 	        PTRACE(4,"H239\tERROR: Unknown Role Identifer");
 			return FALSE;
 		}
 		const PASN_Integer & role = param.m_parameterValue;
-		if (role.GetValue() != 2) {
+		if (role.GetValue() != 1) {
 	        PTRACE(4,"H239\tERROR: Unsupported Role mode " << param.m_parameterValue );
 			return FALSE;
 		}
@@ -2333,7 +2334,7 @@ PBoolean H323CodecExtendedVideoCapability::OnReceivedPDU(const H245_VideoCapabil
 			H323Capability * capability = allCapabilities.FindCapability(H323Capability::e_Video, caps[i], NULL);
 			if (capability != NULL) {
 			  H323VideoCapability * copy = (H323VideoCapability *)capability->Clone();
-			  if (copy->OnReceivedPDU(caps[i]))
+			  if (copy->OnReceivedPDU(caps[i],e_TCS))
 				table.Append(copy);
 			  else
 				delete copy;
@@ -2351,6 +2352,22 @@ PBoolean H323CodecExtendedVideoCapability::IsMatch(const PASN_Choice & subTypePD
 PBoolean H323CodecExtendedVideoCapability::OnReceivedGenericPDU(const H245_GenericCapability & /*pdu*/)
 {
 	return TRUE;
+}
+
+const OpalMediaFormat & H323CodecExtendedVideoCapability::GetMediaFormat() const
+{ 
+  if (table.GetSize() > 0)
+    return ((H323VideoCapability &)table[0]).GetMediaFormat();
+  else
+	return H323Capability::GetMediaFormat();
+}
+
+OpalMediaFormat & H323CodecExtendedVideoCapability::GetWritableMediaFormat()
+{
+  if (table.GetSize() > 0)
+    return ((H323VideoCapability &)table[0]).GetWritableMediaFormat();  
+  else
+    return H323Capability::GetWritableMediaFormat();
 }
 
 #endif // H323_H239
@@ -3488,26 +3505,32 @@ H323Capability * H323Capabilities::FindCapability(const H245_DataType & dataType
 
   for (PINDEX i = 0; i < table.GetSize(); i++) {
     H323Capability & capability = table[i];
-    PBoolean checkExact;
+    PBoolean checkExact=false;
     switch (dataType.GetTag()) {
       case H245_DataType::e_audioData :
       {
+  	   if (capability.GetMainType() == H323Capability::e_Audio) { 
         const H245_AudioCapability & audio = dataType;
         checkExact = capability.IsMatch(audio);
+	   }
         break;
       }
 
       case H245_DataType::e_videoData :
       {
+	   if (capability.GetMainType() == H323Capability::e_Video) { 
         const H245_VideoCapability & video = dataType;
         checkExact = capability.IsMatch(video);
+	   }
         break;
       }
 
       case H245_DataType::e_data :
       {
+	   if (capability.GetMainType() == H323Capability::e_Data) { 
         const H245_DataApplicationCapability & data = dataType;
         checkExact = capability.IsMatch(data.m_application);
+	   }
         break;
       }
 
