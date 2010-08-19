@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2010/06/21 17:30:00  willamowius
+ * check for NULL pointer, avoid crash
+ *
  * Revision 1.8  2010/06/06 14:53:26  shorne
  * Added AVSync support, Aspect Ratio management, flow Control, Video 90k clock, fixes for wideband codecs and generic audio capabilities
  *
@@ -834,36 +837,36 @@ PBoolean H245NegLogicalChannel::OpenWhileLocked(const H323Capability & capabilit
       open.m_forwardLogicalChannelParameters.m_replacementFor = replacementFor;
     }
   }
-
+/*
 #ifdef H323_H239
   if (sessionID == OpalMediaFormat::DefaultExtVideoSessionID) {  // extended Video Session
 	open.IncludeOptionalField(H245_OpenLogicalChannel::e_genericInformation);
     H245_ArrayOf_GenericInformation & cape = open.m_genericInformation;
 
-	  H245_GenericMessage * gcap = new H245_GenericMessage();
-	  gcap->m_messageIdentifier = *(new H245_CapabilityIdentifier(H245_CapabilityIdentifier::e_standard));
-	  PASN_ObjectId &object_id = gcap->m_messageIdentifier;
+	  H245_GenericInformation gcap;
+	  gcap.m_messageIdentifier = *(new H245_CapabilityIdentifier(H245_CapabilityIdentifier::e_standard));
+	  PASN_ObjectId &object_id = gcap.m_messageIdentifier;
       object_id = OpalPluginCodec_Identifer_H239_Video;   // Indicates H239 (Extended Video)
 
-	  gcap->IncludeOptionalField(H245_GenericMessage::e_messageContent);
-		H245_ArrayOf_GenericParameter & params = gcap->m_messageContent;
-			H245_GenericParameter * content = new H245_GenericParameter();
-			H245_ParameterIdentifier & paramid = content->m_parameterIdentifier;
+	  gcap.IncludeOptionalField(H245_GenericMessage::e_messageContent);
+		H245_ArrayOf_GenericParameter & params = gcap.m_messageContent;
+		    params.SetSize(1);
+			H245_GenericParameter & content = params[0];
+			H245_ParameterIdentifier & paramid = content.m_parameterIdentifier;
 				paramid.SetTag(H245_ParameterIdentifier::e_standard);
 				PASN_Integer & pid = paramid;
 				pid.SetValue(1);
 
-				H245_ParameterValue & paramval = content->m_parameterValue;
+				H245_ParameterValue & paramval = content.m_parameterValue;
 				paramval.SetTag(H245_ParameterValue::e_booleanArray);
 				PASN_Integer & val = paramval;
 				val.SetValue(roleLabel);
-		params.Append(content);
-		params.SetSize(params.GetSize()+1);
-      cape.Append(gcap);
-      cape.SetSize(cape.GetSize()+1);
+	  PINDEX sz = cape.GetSize();
+	  cape.SetSize(sz+1);
+      cape[sz] = gcap; 
   }
 #endif
-
+*/
   if (!channel->Open())
     return FALSE;
 
@@ -975,7 +978,10 @@ PBoolean H245NegLogicalChannel::HandleOpen(const H245_OpenLogicalChannel & pdu)
   if (!connection.WriteControlPDU(reply))
       return false;
 
-  return (channel != NULL ) ? connection.OnInitialFlowRestriction(*channel) : true;
+  if(ok)
+      return connection.OnInitialFlowRestriction(*channel);
+
+  return true;
 }
 
 
