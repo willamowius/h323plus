@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2010/06/06 14:27:25  shorne
+ * added support for multiple frame decoding, Flow control,aspect ratio management
+ *
  * Revision 1.9  2010/05/02 22:36:40  shorne
  * Added Event controller interface
  *
@@ -239,6 +242,7 @@ enum PluginCodec_Flags {
   PluginCodec_MediaTypeVideo         = 0x0001,
   PluginCodec_MediaTypeAudioStreamed = 0x0002,
   PluginCodec_MediaTypeFax           = 0x0003,
+  PluginCodec_MediaTypeExtended      = 0x0005,
 
   PluginCodec_InputTypeMask          = 0x0010,
   PluginCodec_InputTypeRaw           = 0x0000,
@@ -266,6 +270,7 @@ enum PluginCodec_Flags {
 
   PluginCodec_MediaExtensionMask     = 0x0400,
   PluginCodec_MediaTypeExtVideo      = 0x0400,
+  PluginCodec_MediaTypeH239          = 0x0401,
 
   PluginCodec_ComfortNoiseMask       = 0x0800,
   PluginCodec_ComfortNoise           = 0x0800,
@@ -657,9 +662,9 @@ enum {
 #define OpalPluginCodec_Identifer_MPEG4           "0.0.8.245.1.0.0"
 
 // Extended Video Capability (as defined in H.239)
-#define OpalPluginCodec_Identifer_H239            "0.0.8.239.1"
-#define OpalPluginCodec_Identifer_H239_Video      "0.0.8.239.2"
-#define OpalPluginCodec_Identifer_H239_Generic    "0.0.8.239.3"
+#define OpalPluginCodec_Identifer_H239            "0.0.8.239.1.1"
+#define OpalPluginCodec_Identifer_H239_Video      "0.0.8.239.1.2"
+#define OpalPluginCodec_Identifer_H239_Generic    "0.0.8.239.2"
 
 /////////////////
 //
