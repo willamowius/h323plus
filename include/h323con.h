@@ -27,6 +27,13 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.46  2010/08/19 12:41:32  shorne
+ * Allow implementers to change the NAT detection mechanism
+ * if we disable Fast start don't accept fast start
+ * Support merging audio capabilities ie G.722.1c
+ * Support Channel id =0 (bug in H.239 Mirial)
+ * Improved H.239 Support
+ *
  * Revision 1.45  2010/06/06 14:53:26  shorne
  * Added AVSync support, Aspect Ratio management, flow Control, Video 90k clock, fixes for wideband codecs and generic audio capabilities
  *
@@ -2109,7 +2116,7 @@ class H323Connection : public PObject
 	/** On Receiving a H.239 Control Request
 	    Return False to reject the request to open channel.
 	*/
-    PBoolean H323Connection::OnH239ControlRequest();
+    PBoolean OnH239ControlRequest();
 
 	/** Open an Extended Video Session
 	    This will open an Extended Video session.
