@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.15  2010/06/06 14:53:26  shorne
+ * Added AVSync support, Aspect Ratio management, flow Control, Video 90k clock, fixes for wideband codecs and generic audio capabilities
+ *
  * Revision 1.14  2010/05/03 03:56:34  shorne
  * Improved collection of sender reports including identifying session they originated from
  *
@@ -788,7 +791,7 @@ RTP_Session::RTP_Session(
     ,aggregator(_aggregator)
 #endif
 {
-  PAssert(id > 0 && id < 256, PInvalidParameter);
+  PAssert(id >= 0 && id < 256, PInvalidParameter);
   sessionID = (BYTE)id;
 
   referenceCount = 1;
