@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.13  2010/06/06 19:56:40  willamowius
+ * restore accicently reveertd patch to add a small delay after video frames
+ *
  * Revision 1.12  2010/06/06 14:53:26  shorne
  * Added AVSync support, Aspect Ratio management, flow Control, Video 90k clock, fixes for wideband codecs and generic audio capabilities
  *
@@ -896,6 +899,11 @@ void H323Channel::SendMiscCommand(unsigned command)
   connection.SendLogicalChannelMiscCommand(*this, command); 
 }
 
+void H323Channel::SendFlowControlRequest(long restriction)
+{ 
+  connection.SendLogicalChannelFlowControl(*this, restriction); 
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -978,7 +986,8 @@ PBoolean H323_RealTimeChannel::OnSendingPDU(H245_OpenLogicalChannel & open) cons
                     ::e_h2250LogicalChannelParameters);
 
     connection.OnSendH245_OpenLogicalChannel(open, PFalse);
-    return OnSendingPDU(open.m_reverseLogicalChannelParameters.m_multiplexParameters);
+    return OnSendingPDU(open.m_reverseLogicalChannelParameters.m_dataType,
+                        open.m_reverseLogicalChannelParameters.m_multiplexParameters);
   }
   else {
     // Set the communications information for unicast IPv4
@@ -990,7 +999,8 @@ PBoolean H323_RealTimeChannel::OnSendingPDU(H245_OpenLogicalChannel & open) cons
 		open.IncludeOptionalField(H245_OpenLogicalChannel::e_genericInformation);
 
     connection.OnSendH245_OpenLogicalChannel(open, PTrue);
-    return OnSendingPDU(open.m_forwardLogicalChannelParameters.m_multiplexParameters);
+    return OnSendingPDU(open.m_forwardLogicalChannelParameters.m_dataType,
+                        open.m_forwardLogicalChannelParameters.m_multiplexParameters);
   }
 }
 
@@ -1060,12 +1070,12 @@ PBoolean H323_RealTimeChannel::OnReceivedPDU(const H245_OpenLogicalChannel & ope
   if (reverse) {
     if (open.m_reverseLogicalChannelParameters.m_multiplexParameters.GetTag() ==
              H245_OpenLogicalChannel_reverseLogicalChannelParameters_multiplexParameters::e_h2250LogicalChannelParameters)
-      return OnReceivedPDU(open.m_reverseLogicalChannelParameters.m_multiplexParameters, errorCode);
+      return OnReceivedPDU(dataType, open.m_reverseLogicalChannelParameters.m_multiplexParameters, errorCode);
   }
   else {
     if (open.m_forwardLogicalChannelParameters.m_multiplexParameters.GetTag() ==
              H245_OpenLogicalChannel_forwardLogicalChannelParameters_multiplexParameters::e_h2250LogicalChannelParameters)
-      return OnReceivedPDU(open.m_forwardLogicalChannelParameters.m_multiplexParameters, errorCode);
+      return OnReceivedPDU(dataType, open.m_forwardLogicalChannelParameters.m_multiplexParameters, errorCode);
   }
 
   PTRACE(1, "H323RTP\tOnly H.225.0 multiplex supported");

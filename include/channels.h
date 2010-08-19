@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2009/07/03 04:14:58  shorne
+ * more H.460.18/19 support
+ *
  * Revision 1.3  2008/05/23 11:19:02  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -408,6 +411,11 @@ class H323Channel : public PObject
        Typically, used to indicate a problem in the received video stream.
     */
     void SendMiscCommand(unsigned command);
+    
+    /**
+       Send a flow control request to the remote
+    */
+    void SendFlowControlRequest(long restriction);
   //@}
 
   /**@name Member variable access */
@@ -575,6 +583,7 @@ class H323BidirectionalChannel : public H323Channel
 
 /**This class is for encpsulating the IETF Real Time Protocol interface.
  */
+class H245_DataType;
 class H323_RealTimeChannel : public H323UnidirectionalChannel
 {
   PCLASSINFO(H323_RealTimeChannel, H323UnidirectionalChannel);
@@ -639,6 +648,13 @@ class H323_RealTimeChannel : public H323UnidirectionalChannel
       H245_H2250LogicalChannelParameters & param  ///< Open PDU to send.
     ) const = 0;
 
+    /**Fill out the OpenLogicalChannel PDU for the particular channel type.
+     */
+    virtual PBoolean OnSendingPDU(
+      H245_DataType & /*dataType*/,                 ///< DataType Information
+      H245_H2250LogicalChannelParameters & param    ///< Open PDU to send.
+    ) const { return OnSendingPDU(param); }
+    
 	/**Alternate RTP port information for Same NAT
 	  */
 	virtual PBoolean OnSendingAltPDU(
@@ -662,6 +678,12 @@ class H323_RealTimeChannel : public H323UnidirectionalChannel
       const H245_H2250LogicalChannelParameters & param, ///< Acknowledgement PDU
       unsigned & errorCode                              ///< Error on failure
     ) = 0;
+
+    virtual PBoolean OnReceivedPDU(
+      const H245_DataType & /*dataType*/,               ///< DataType Information
+      const H245_H2250LogicalChannelParameters & param, ///< Acknowledgement PDU
+      unsigned & errorCode                              ///< Error on failure
+     ) { return OnReceivedPDU(param, errorCode); }
 
     /**This is called after a request to create a channel occurs from the
        local machine via the H245LogicalChannelDict::Open() function, and
