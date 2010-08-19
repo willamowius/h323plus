@@ -1,5 +1,6 @@
 
 H323plus 1.21 - 1.22
+Fixed H.239 Support and now support H.239 only plugins
 G.711 now 20ms sample rate by default
 Added H.264 support (tested with polycom,lifesize,tandberg)
 (fixed) Video frames now on fixed 90k clock timestamp
