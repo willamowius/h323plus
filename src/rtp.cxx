@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.16  2010/08/19 12:46:28  shorne
+ * Allow Channel id =0 (Bug in Mirial H.239)
+ *
  * Revision 1.15  2010/06/06 14:53:26  shorne
  * Added AVSync support, Aspect Ratio management, flow Control, Video 90k clock, fixes for wideband codecs and generic audio capabilities
  *
@@ -791,8 +794,12 @@ RTP_Session::RTP_Session(
     ,aggregator(_aggregator)
 #endif
 {
-  PAssert(id >= 0 && id < 256, PInvalidParameter);
   sessionID = (BYTE)id;
+  if (sessionID <= 0) {
+	  PTRACE(2,"RTP\tWARNING: Session ID <= 0 Invalid SessionID.");
+  } else if (sessionID > 256) {
+      PTRACE(2,"RTP\tWARNING: Session ID " << sessionID << " Invalid SessionID.");
+  }
 
   referenceCount = 1;
   userData = data;
