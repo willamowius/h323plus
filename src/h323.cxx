@@ -24,6 +24,13 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.61  2010/08/19 12:41:32  shorne
+ * Allow implementers to change the NAT detection mechanism
+ * if we disable Fast start don't accept fast start
+ * Support merging audio capabilities ie G.722.1c
+ * Support Channel id =0 (bug in H.239 Mirial)
+ * Improved H.239 Support
+ *
  * Revision 1.60  2010/06/06 19:31:06  willamowius
  * fix compile without video support
  *
@@ -1015,6 +1022,10 @@ H323Connection::H323Connection(H323EndPoint & ep,
   m_H46024Benabled = false;
   m_H46024Bstate = 0;
 #endif
+#endif
+
+#ifdef H323_H239
+  m_H239ChanId = H323ChannelNumber(0, FALSE);
 #endif
 
   nonCallConnection = FALSE;
@@ -5819,7 +5830,7 @@ void BuildH239GenericRequest(H323ControlPDU & pdu)
         PASN_Integer & k = aw;
         k =0;
 	msg.SetSize(1);
-	msg[1] = ask;
+	msg[0] = ask;
 
     H245_GenericParameter ask1;
     H245_ParameterIdentifier & an1 = ask1.m_parameterIdentifier;
@@ -5831,7 +5842,7 @@ void BuildH239GenericRequest(H323ControlPDU & pdu)
         PASN_Integer & k2 = aw1;
         k2 = OpalMediaFormat::DefaultExtVideoSessionID;
 	msg.SetSize(2);
-	msg[2] = ask1;
+	msg[1] = ask1;
 }
 
 void BuildH239GenericResponse(H323ControlPDU & pdu, bool accept)
@@ -5892,6 +5903,70 @@ void BuildH239GenericResponse(H323ControlPDU & pdu, bool accept)
 	msg.SetSize(3);
 	msg[2] = answer1;
 }
+
+void BuildH239GenericCommand(H323ControlPDU & pdu)
+{
+    H245_GenericMessage & cap = pdu.Build(H245_ResponseMessage::e_genericResponse);
+    H245_CapabilityIdentifier & id = cap.m_messageIdentifier;
+      id.SetTag(H245_CapabilityIdentifier::e_standard);
+      PASN_ObjectId & gid = id;
+	  gid.SetValue(OpalPluginCodec_Identifer_H239_Generic);
+
+    cap.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
+      PASN_Integer & num = cap.m_subMessageIdentifier;
+      num = 5;
+
+    cap.IncludeOptionalField(H245_GenericMessage::e_messageContent);
+    H245_ArrayOf_GenericParameter & msg = cap.m_messageContent;
+
+    H245_GenericParameter answer;
+    H245_ParameterIdentifier & an = answer.m_parameterIdentifier;
+        an.SetTag(H245_ParameterIdentifier::e_standard);
+	PASN_Integer & n = an;
+	n =44;
+    H245_ParameterValue & aw = answer.m_parameterValue;
+	aw.SetTag(H245_ParameterValue::e_unsignedMin);
+        PASN_Integer & k = aw;
+        k =0;
+	msg.SetSize(1);
+	msg[0] = answer;
+
+    H245_GenericParameter answer1;
+    H245_ParameterIdentifier & an1 = answer1.m_parameterIdentifier;
+        an1.SetTag(H245_ParameterIdentifier::e_standard);
+        PASN_Integer & k1 = an1;
+        k1 =42;
+    H245_ParameterValue & aw1 = answer1.m_parameterValue;
+	aw1.SetTag(H245_ParameterValue::e_unsignedMin);
+        PASN_Integer & k2 = aw1;
+        k2 = OpalMediaFormat::DefaultExtVideoSessionID;
+	msg.SetSize(2);
+	msg[1] = answer1;
+}
+
+
+PBoolean H323Connection::DecodeH239GenericResponse(const H245_ArrayOf_GenericParameter & params)
+{
+   bool recvdDecision = false;
+   for (PINDEX i=0; i < params.GetSize(); i++) {
+      const H245_GenericParameter & param = params[i];
+      const H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
+        if (idm.GetTag() == H245_ParameterIdentifier::e_standard) {
+             const PASN_Integer & idx = idm;
+             if (idx == 126) {        // Successful request
+                 OpenExtendedVideoSession(m_H239ChanId);
+                 recvdDecision = true;
+                 break;
+             } else if (idx == 127) { // Unsuccessful request
+                 OpenExtendedVideoSessionDenied();
+                 recvdDecision = true;
+                 break;
+             }
+         }
+   }
+   return recvdDecision;
+}
+
 #endif
 
 
@@ -5967,19 +6042,25 @@ PBoolean H323Connection::OnReceivedGenericMessage(h245MessageType type, const PS
 
 #ifdef H323_H239
     if (id == OpalPluginCodec_Identifer_H239_Generic && type == h245response)
-		  return true; //TODO  handle response message
+		 return DecodeH239GenericResponse(content); 
 
-    if (id == OpalPluginCodec_Identifer_H239_Generic && type == h245request) {
-       H323ControlPDU pdu;
-       BuildH239GenericResponse(pdu,OnH239ControlRequest());
-       return WriteControlPDU(pdu);
-    }
+    if (id == OpalPluginCodec_Identifer_H239_Generic && type == h245request)
+        return OnH239ControlRequest();
 
     if (id == OpalPluginCodec_Identifer_H239_Generic && type == h245command)
        return true; //TODO  handle command message
 #endif
 	return false;
 }
+
+#ifdef H323_H239
+PBoolean H323Connection::SendH239GenericResponse(PBoolean response)
+{
+    H323ControlPDU pdu;
+    BuildH239GenericResponse(pdu,response);
+    return WriteControlPDU(pdu);
+}
+#endif
 
 PBoolean H323Connection::OnReceiveOLCGenericInformation(unsigned sessionID,
 	                    const H245_ArrayOf_GenericInformation & alternate) const
@@ -7168,16 +7249,51 @@ H460_FeatureSet * H323Connection::GetFeatureSet()
 #ifdef H323_H239
 PBoolean H323Connection::OnH239ControlRequest()
 {
+    return SendH239GenericResponse(true);
+}
+
+PBoolean H323Connection::OpenH239Channel()
+{
+   if (callToken.IsEmpty()) {
+      PTRACE(2,"H239\tERROR Open Channel. Not in a call");
+	  return false;
+   }
+
+   if (!remoteCapabilities.FindCapability("H.239 Control")) {
+      PTRACE(2,"H239\tERROR Open Channel. No Remote Support");
+	  return false;
+   }
+
+   H323ControlPDU pdu;
+   BuildH239GenericRequest(pdu);
+   WriteControlPDU(pdu);
+   return true;
+}
+
+PBoolean H323Connection::CloseH239Channel()
+{
+  if (m_H239ChanId == 0) {
+	  PTRACE(2,"H239\tClose Request denied: No Channel to close");
+	  return false;
+  }
+
+  H323ControlPDU pdu;
+  BuildH239GenericCommand(pdu);
+  WriteControlPDU(pdu);
+
+  CloseExtendedVideoSession(m_H239ChanId);
+  m_H239ChanId = H323ChannelNumber(0,false);
   return true;
+}
+
+void H323Connection::OpenExtendedVideoSessionDenied()
+{
+    PTRACE(2,"H239\tOpen Request denied from remote");
 }
 
 PBoolean H323Connection::OpenExtendedVideoSession(H323ChannelNumber & num)
 {
   PBoolean applicationOpen = FALSE;
-
-   H323ControlPDU pdu;
-   BuildH239GenericRequest(pdu);
-   WriteControlPDU(pdu);
 
   for (PINDEX i = 0; i < localCapabilities.GetSize(); i++) {
     H323Capability & localCapability = localCapabilities[i];

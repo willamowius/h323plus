@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.47  2010/08/19 20:20:18  willamowius
+ * fix Linux compile
+ *
  * Revision 1.46  2010/08/19 12:41:32  shorne
  * Allow implementers to change the NAT detection mechanism
  * if we disable Fast start don't accept fast start
@@ -2113,10 +2116,22 @@ class H323Connection : public PObject
     );
 
 #ifdef H323_H239
+    /** Open a H.239 Channel
+      */
+    PBoolean OpenH239Channel();
+
+    /** Close a H.239 Channel
+     */
+    PBoolean CloseH239Channel();
+
+    /** Request to open session denied event
+      */
+    virtual void OpenExtendedVideoSessionDenied();
+
 	/** On Receiving a H.239 Control Request
 	    Return False to reject the request to open channel.
 	*/
-    PBoolean OnH239ControlRequest();
+    virtual PBoolean OnH239ControlRequest();
 
 	/** Open an Extended Video Session
 	    This will open an Extended Video session.
@@ -2148,6 +2163,8 @@ class H323Connection : public PObject
       PBoolean isEncoding,       ///< Direction of data flow
       H323VideoCodec & codec ///< codec doing the opening
     );
+
+	virtual PBoolean SendH239GenericResponse(PBoolean response);
 
 #endif // H323_H239
 
@@ -3653,6 +3670,11 @@ class H323Connection : public PObject
 #ifdef P_STUN
 	PMutex NATSocketMutex;
 	std::map<unsigned,NAT_Sockets> m_NATSockets;
+#endif
+
+#ifdef H323_H239
+	PBoolean DecodeH239GenericResponse(const H245_ArrayOf_GenericParameter & params);
+    H323ChannelNumber m_H239ChanId;
 #endif
 };
 
