@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2010/08/19 12:42:37  shorne
+ * Improved H.239 Support
+ *
  * Revision 1.10  2010/06/06 14:27:25  shorne
  * added support for multiple frame decoding, Flow control,aspect ratio management
  *
@@ -156,7 +159,8 @@ extern "C" {
 // indicator the this is h323plus version of the plugin codec
 // Most unfortunate!
 #define h323pluslib          1 
-#define PLUS_FRAMEHEADER     1
+// disable PLUS_FRAMEHEADER for now, it seriously degrades video quality - Jan
+//#define PLUS_FRAMEHEADER     1
 
 #ifdef _MSC_VER
 #pragma warning(disable:4201)
