@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2010/08/19 12:35:49  shorne
+ * Pass DataType to ExternalRTP Channel / Send FlowControl Requests
+ *
  * Revision 1.4  2009/07/03 04:14:58  shorne
  * more H.460.18/19 support
  *
@@ -295,6 +298,10 @@ class H323Channel : public PObject
        meaningfull, the default simply returns 0.
      */
     virtual unsigned GetSessionID() const;
+
+    /**Set the session number of the Channel
+     */
+    virtual void SetSessionID(unsigned id);
 
     /**Set the initial bandwidth for the channel.
        This calculates the initial bandwidth required by the channel and
@@ -754,6 +761,10 @@ class H323_RTPChannel : public H323_RealTimeChannel
        RTP_Session member variable.
      */
     virtual unsigned GetSessionID() const;
+
+    /**Set the session number of the Channel
+     */
+    virtual void SetSessionID(unsigned id);
 
     /**Open the channel.
       */

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.30  2010/05/02 22:45:58  shorne
+ * Added ability to disable the internal jitter buffer
+ *
  * Revision 1.29  2010/02/24 03:44:40  shorne
  * Add ability to pass to the video plugin a custom frame size and rate to encode/decode
  *
@@ -648,13 +651,23 @@ class H323EndPoint : public PObject
     /** Open Extended Video Session
 	  */
 	PBoolean OpenExtendedVideoSession(
-		const PString & token,   ///< Connection Token
-		H323ChannelNumber & num  ///< Opened Channel number
+		const PString & token        ///< Connection Token
+	);
+
+    /** Open Extended Video Session
+	  */
+	PBoolean OpenExtendedVideoSession(
+		const PString & token,       ///< Connection Token
+		H323ChannelNumber & num      ///< Opened Channel number
 	);
 
     PBoolean CloseExtendedVideoSession(
-		const PString & token,         ///< Connection Token
-		const H323ChannelNumber & num  ///< channel number
+		const PString & token        ///< Connection Token
+	);
+
+    PBoolean CloseExtendedVideoSession(
+		const PString & token,             ///< Connection Token
+		const H323ChannelNumber & num      ///< channel number
 	);
 
     /**Add all Extended Video capabilities to this endpoints capability table.
@@ -859,6 +872,10 @@ class H323EndPoint : public PObject
 	/**Called when Unregistered by Gatekeeper 
 	 */
 	virtual void OnUnRegisterRequest(); 
+
+	/**Called when reply Unregister to Gatekeeper 
+	 */
+	virtual void OnUnRegisterConfirm(); 
 
 	/**Called when TTL registration fails 
 	 */

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2008/09/27 06:15:38  shorne
+ * BUG FIX: H323SignalPDU::Write to correctly handle NULL H323Connection Thx Nir Soffer
+ *
  * Revision 1.4  2008/05/23 11:19:43  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -602,6 +605,9 @@ class H323ControlPDU : public H245_MultimediaSystemControlMessage
       unsigned cause
     );
     H245_OpenLogicalChannelConfirm & BuildOpenLogicalChannelConfirm(
+      unsigned channelNumber
+    );
+    H245_IndicationMessage & BuildLogicalChannelActive(
       unsigned channelNumber
     );
     H245_CloseLogicalChannelAck & BuildCloseLogicalChannelAck(

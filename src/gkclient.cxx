@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.15  2010/01/20 04:12:29  shorne
+ * Added RRJ reason NeededFeature
+ *
  * Revision 1.14  2009/11/29 23:31:13  shorne
  * BUG FIX : completely disable H.460 support if remote does not support it.
  *
@@ -1315,6 +1318,7 @@ PBoolean H323Gatekeeper::OnReceiveUnregistrationConfirm(const H225_Unregistratio
   registrationFailReason = UnregisteredLocally;
   timeToLive = 0; // zero disables lightweight RRQ
 
+  endpoint.OnUnRegisterConfirm();
   return TRUE;
 }
 

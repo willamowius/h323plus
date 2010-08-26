@@ -27,6 +27,10 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2010/08/19 12:44:13  shorne
+ * Improved h.239 Support
+ * Send Flow Restriction only if the channel is successfully opened
+ *
  * Revision 1.9  2010/06/21 17:30:00  willamowius
  * check for NULL pointer, avoid crash
  *
@@ -1002,6 +1006,15 @@ PBoolean H245NegLogicalChannel::HandleOpenAck(const H245_OpenLogicalChannelAck &
 
       if (!channel->OnReceivedAckPDU(pdu))
         return CloseWhileLocked();
+      
+      // If extended Video channel, then send Channel Active
+      if (channel->GetCapability().GetMainType() == H323Capability::e_Video && 
+		 channel->GetCapability().GetSubType() == H245_VideoCapability::e_extendedVideoCapability) {
+         H323ControlPDU reply;
+         reply.BuildLogicalChannelActive(channelNumber);
+         if (!connection.WriteControlPDU(reply))
+                 return FALSE;
+      }
 
       if (channel->GetDirection() == H323Channel::IsBidirectional) {
         H323ControlPDU reply;

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.42  2010/05/26 13:09:28  willamowius
+ * Solaris 10 compile fix
+ *
  * Revision 1.41  2010/05/02 22:45:58  shorne
  * Added ability to disable the internal jitter buffer
  *
@@ -1616,33 +1619,43 @@ void H323EndPoint::AddAllUserInputCapabilities(PINDEX descriptorNum,
 
 #ifdef H323_VIDEO
 #ifdef H323_H239
-PBoolean H323EndPoint::OpenExtendedVideoSession(const PString & token,H323ChannelNumber & num)
+PBoolean H323EndPoint::OpenExtendedVideoSession(const PString & token)
 {
   H323Connection * connection = FindConnectionWithLock(token);
  
   PBoolean success = FALSE;
   if (connection != NULL) {
-    success = connection->OpenExtendedVideoSession(num);
+    success = connection->OpenH239Channel();
     connection->Unlock();
   }
-
   return success;
 }
 
+PBoolean H323EndPoint::OpenExtendedVideoSession(const PString & token,H323ChannelNumber & /*num*/)
+{
+  return OpenExtendedVideoSession(token);
+}
+
 PBoolean H323EndPoint::CloseExtendedVideoSession(
-		                       const PString & token,         
-		                       const H323ChannelNumber & num  
+		                       const PString & token         
 	                           )
 {
   H323Connection * connection = FindConnectionWithLock(token);
  
   PBoolean success = FALSE;
   if (connection != NULL) {
-    success = connection->CloseExtendedVideoSession(num);
+    success = connection->CloseH239Channel();
     connection->Unlock();
   }
-
   return success;
+}
+
+PBoolean H323EndPoint::CloseExtendedVideoSession(
+		                       const PString & token,         
+		                       const H323ChannelNumber & /*num*/  
+	                           )
+{
+  return CloseExtendedVideoSession(token);
 }
 
 void H323EndPoint::AddAllExtendedVideoCapabilities(PINDEX descriptorNum,
@@ -1852,6 +1865,10 @@ void H323EndPoint::OnRegistrationReject()
 }
 
 void H323EndPoint::OnUnRegisterRequest()
+{
+}
+
+void H323EndPoint::OnUnRegisterConfirm()
 {
 }
 

@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.14  2010/05/03 03:56:34  shorne
+ * Improved collection of sender reports including identifying session they originated from
+ *
  * Revision 1.13  2010/05/02 22:55:07  shorne
  * Added support to be able to set NAT Method on a call by call basis
  *
@@ -464,7 +467,14 @@ PBoolean H323_RTP_UDP::OnReceivedAckPDU(H323_RTPChannel & channel,
   }
 
   if (param.m_sessionID != rtp.GetSessionID()) {
-    PTRACE(1, "RTP_UDP\tAck for invalid session: " << param.m_sessionID);
+    if (rtp.GetSessionID() == 0) {
+       //update SessionID of the channel with the new one
+       //fix for Tandberg as it allows open only with SessioID=0, but then in OLC ACK sends Session ID 32 up
+       PTRACE(2, "RTP_UDP\tAck for invalid session: " << param.m_sessionID << "  Change the LC SessionID: "<< rtp.GetSessionID() << "  to the new one.");
+       rtp.SetSessionID(param.m_sessionID);
+    } else {
+       PTRACE(1, "RTP_UDP\tAck for invalid session: " << param.m_sessionID);
+    }
   }
 
   if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaControlChannel)) {

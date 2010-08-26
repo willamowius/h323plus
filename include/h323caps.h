@@ -27,6 +27,12 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.21  2010/08/19 12:38:25  shorne
+ * Initialise mediaOptions with default value
+ * Support merging audio capabilities
+ * Improved h239 support
+ * Correct capability matching behaviour
+ *
  * Revision 1.20  2010/08/10 22:35:46  willamowius
  * Simon's fix for codecs.h include
  *
@@ -313,6 +319,7 @@ class H245_ModeElement;
 class H245_AudioCapability;
 class H245_AudioMode;
 class H245_VideoCapability;
+class H245_ExtendedVideoCapability;
 class H245_VideoMode;
 class H245_DataApplicationCapability;
 class H245_DataMode;
@@ -2529,6 +2536,16 @@ class H323Capabilities : public PObject
 	    const H245_GenericCapability & gen		///< Generic cap
 	) const;
 
+    /**Find extended video capability.
+
+       Returns:
+       NULL if no capability meeting the criteria was found
+      */
+    H323Capability * FindCapability(
+        bool,                                         ///< PlaceHolder             
+        const H245_ExtendedVideoCapability & gen      ///< extVideo cap
+    ) const;
+
     /**Find the capability given the sub-type info.
 
        Returns:
@@ -2790,6 +2807,10 @@ class H323ExtendedVideoCapability : public H323Capability,
       PINDEX descriptorNum,   ///< The member of the capabilityDescriptor to add
       PINDEX simultaneous     ///< The member of the SimultaneousCapabilitySet to add
     );
+
+	/**Get the capabilities
+	  */
+    const H323Capabilities & GetCapabilities() const;
   //@}
 
 protected:
@@ -2801,12 +2822,49 @@ protected:
 //////////////////////////////////////////////////////////////////////////////
 //
 // Class for Handling extended video control
-
+class H245_ArrayOf_GenericParameter;
 class H323ControlExtendedVideoCapability : public H323ExtendedVideoCapability
 {
   PCLASSINFO(H323ControlExtendedVideoCapability, H323ExtendedVideoCapability);
   public:
 	H323ControlExtendedVideoCapability();
+
+  /**@name Enumerators */
+  //@{
+    /**Generic Messaging.
+      */
+    enum h245MessageType {
+      e_h245request,
+      e_h245response,
+      e_h245command,
+	  e_h245indication
+    };
+
+    /**SubMessaging Messaging.
+      */
+	enum H239SubMessages
+	{
+		e_flowControlReleaseRequest = 1,
+		e_flowControlReleaseResponse,
+		e_presentationTokenRequest,
+		e_presentationTokenResponse,
+		e_presentationTokenRelease,
+		e_presentationTokenIndicateOwner
+	};
+
+    /**Generic Paramenters.
+      */
+    enum H239GenericParameters
+    {
+	    h239pReserved			= 0,	// Type of val - unsigned min
+	    h239gpBitRate			= 41,	// Type of val - unsigned min
+	    h239gpChannelId			= 42,	// Type of val - unsigned min
+	    h239gpSymmetryBreaking	= 43,	// Type of val - unsigned min
+	    h239gpTerminalLabel		= 44,	// Type of val - unsigned min
+	    h239gpAcknowledge		= 126,	// Type of val - boolean
+	    h239gpReject			= 127	// Type of val - boolean
+    };
+  //@}
 
    virtual PString GetFormatName() const
     { return "H.239 Control"; }
@@ -2815,7 +2873,25 @@ class H323ControlExtendedVideoCapability : public H323ExtendedVideoCapability
     {
       return new H323ControlExtendedVideoCapability(*this);
     }
+
+   PBoolean SendGenericMessage(h245MessageType msgtype, 
+                           H323Connection * connection, 
+                           PBoolean approved=false);
+
+   PBoolean HandleGenericMessage(h245MessageType msgtype, 
+                             H323Connection * connection, 
+                       const H245_ArrayOf_GenericParameter * pdu);
+
+   H323ChannelNumber & GetChannelNum(H323Capability::CapabilityDirection dir);
+   void SetChannelNum(unsigned num, H323Capability::CapabilityDirection dir);
+
+ protected:
+   H323ChannelNumber	m_outgoingChanNum;
+   H323ChannelNumber	m_incomingChanNum;
+
 };
+
+typedef H323ControlExtendedVideoCapability H239Control;
 
 
 //////////////////////////////////////////////////////////////////////////////

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2010/05/02 22:44:31  shorne
+ * Added support to be able to set NAT Method on a call by call basis
+ *
  * Revision 1.7  2008/09/27 06:18:57  shorne
  * BUG FIX: H323SignalPDU::Write to correctly handle NULL H323Connection Thx Nir Soffer
  *
@@ -2005,7 +2008,6 @@ H245_TerminalCapabilitySet &
   return cap;
 }
 
-
 H245_TerminalCapabilitySetAck &
       H323ControlPDU::BuildTerminalCapabilitySetAck(unsigned sequenceNumber)
 {
@@ -2084,6 +2086,16 @@ H245_OpenLogicalChannelConfirm &
   H245_OpenLogicalChannelConfirm & chan = Build(H245_IndicationMessage::e_openLogicalChannelConfirm);
   chan.m_forwardLogicalChannelNumber = channelNumber;
   return chan;
+}
+
+H245_IndicationMessage &
+     H323ControlPDU::BuildLogicalChannelActive(unsigned channelNumber)
+{
+   H245_IndicationMessage & lca = Build(H245_IndicationMessage::e_miscellaneousIndication);
+   H245_MiscellaneousIndication & miscIndication = lca;
+   miscIndication.m_logicalChannelNumber = channelNumber;
+   miscIndication.m_type.SetTag(H245_MiscellaneousIndication_type::e_logicalChannelActive);
+   return lca;
 }
 
 

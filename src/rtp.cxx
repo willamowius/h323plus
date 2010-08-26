@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.17  2010/08/22 04:11:03  shorne
+ * Removed session id range PASSERT
+ *
  * Revision 1.16  2010/08/19 12:46:28  shorne
  * Allow Channel id =0 (Bug in Mirial H.239)
  *
@@ -881,6 +884,10 @@ RTP_Session::~RTP_Session()
 #endif
 }
 
+void RTP_Session::SetSessionID(unsigned id)
+{
+    sessionID = id;
+}
 
 PString RTP_Session::GetCanonicalName() const
 {

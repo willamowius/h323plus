@@ -27,6 +27,12 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.31  2010/08/19 12:38:25  shorne
+ * Initialise mediaOptions with default value
+ * Support merging audio capabilities
+ * Improved h239 support
+ * Correct capability matching behaviour
+ *
  * Revision 1.30  2010/06/06 15:08:21  shorne
  * Added Codec Listing, generic Capability OID exposure and custom format management
  *
@@ -498,6 +504,7 @@
 #include "h323caps.h"
 #include "h323ep.h"
 #include "h323pdu.h"
+#include "h323neg.h"
 #include "codec/opalplugin.h"
 #include "mediafmt.h"
 
@@ -1958,7 +1965,7 @@ PString H323GenericVideoCapability::GetIdentifier() const
 
 PBoolean H323GenericVideoCapability::OnSendingPDU(H245_VideoCapability & pdu, CommandType type) const
 {
-    pdu.SetTag(H245_VideoCapability::e_genericVideoCapability);
+  pdu.SetTag(H245_VideoCapability::e_genericVideoCapability);
   return OnSendingGenericPDU(pdu, GetMediaFormat(), type);
 }
 
@@ -2092,17 +2099,14 @@ void H323ExtendedVideoCapability::AddAllCapabilities(
   H323ExtendedVideoFactory::KeyList_T extCaps = H323ExtendedVideoFactory::GetKeyList();
   if (extCaps.size() > 0) {
 	basecapabilities.SetCapability(descriptorNum, simultaneous,new H323ControlExtendedVideoCapability());
-    basecapabilities.SetCapability(descriptorNum, simultaneous,new H323CodecExtendedVideoCapability());
-    H323CodecExtendedVideoCapability * extCapability = 
-		     (H323CodecExtendedVideoCapability *)basecapabilities.FindCapability(H323Capability::e_Video, 
-			                                                H245_VideoCapability::e_extendedVideoCapability);
-	 if (extCapability != NULL) {
-		// Add all the extended Video Capabilities to the capability list
-		H323ExtendedVideoFactory::KeyList_T::const_iterator r;
+    H323CodecExtendedVideoCapability * capability = new H323CodecExtendedVideoCapability();
+    H323ExtendedVideoFactory::KeyList_T::const_iterator r;
 		for (r = extCaps.begin(); r != extCaps.end(); ++r) {
+           H323CodecExtendedVideoCapability * extCapability = (H323CodecExtendedVideoCapability *)capability->Clone();
 		   extCapability->AddCapability(*r);
+           basecapabilities.SetCapability(descriptorNum, simultaneous,extCapability);
 		}
-	 }
+    delete capability;
   } else {
 	  PTRACE(4,"EXT\tNo Extended Capabilities found to load");
   }
@@ -2130,12 +2134,257 @@ H323Codec * H323ExtendedVideoCapability::CreateCodec(
 	return NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+const H323Capabilities & H323ExtendedVideoCapability::GetCapabilities() const
+{
+	return extCapabilities;
+}
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// H.239 Control
+
+// These H.245 functions need to be spun off into a common utilities class
+
+H245_GenericParameter & buildGenericInteger(H245_GenericParameter & param, unsigned id, unsigned val)
+{
+	 H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
+	     idm.SetTag(H245_ParameterIdentifier::e_standard);
+		 PASN_Integer & idx = idm;
+		 idx = id;
+		 H245_ParameterValue & genvalue = param.m_parameterValue;
+		 genvalue.SetTag(H245_ParameterValue::e_unsignedMin);
+		 PASN_Integer & xval = genvalue;
+		 xval = val;
+	return param;
+}
+
+H245_GenericParameter & buildGenericLogical(H245_GenericParameter & param, unsigned id)
+{
+	H245_ParameterIdentifier & paramId = param.m_parameterIdentifier;
+	paramId.SetTag(H245_ParameterIdentifier::e_standard);
+	PASN_Integer & idx = paramId;
+	idx = id;
+
+	H245_ParameterValue & val = param.m_parameterValue;
+	val.SetTag(H245_ParameterValue::e_logical);
+
+	return param;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void BuildH239GenericMessageIndication(H239Control & ctrl, H323Connection & connection, H323ControlPDU& pdu, H239Control::H239SubMessages submesId)
+{       
+        PTRACE(4,"H239\tSending Generic Message Indication.");
+        
+	H245_GenericMessage & cap = pdu.Build(H245_IndicationMessage::e_genericIndication);
+
+	H245_CapabilityIdentifier & id = cap.m_messageIdentifier;
+	id.SetTag(H245_CapabilityIdentifier::e_standard);
+	PASN_ObjectId & gid = id;
+        gid.SetValue(OpalPluginCodec_Identifer_H239_GenericMessage);
+
+	cap.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
+	PASN_Integer & subMesID = cap.m_subMessageIdentifier;
+	subMesID = submesId;
+
+	cap.IncludeOptionalField(H245_GenericMessage::e_messageContent);
+	H245_ArrayOf_GenericParameter & msg = cap.m_messageContent;
+	msg.SetSize(2);
+	buildGenericInteger(msg[0], H239Control::h239gpTerminalLabel, 0);
+	buildGenericInteger(msg[1], H239Control::h239gpChannelId, connection.GetLogicalChannels()->GetNextChannelNumber());
+}
+
+void BuildH239GenericMessageResponse(H239Control & ctrl, H323Connection & connection, 
+                                     H323ControlPDU& pdu, H239Control::H239SubMessages submesId,
+                                     PBoolean approved)
+{
+	H245_GenericMessage & cap = pdu.Build(H245_ResponseMessage::e_genericResponse);
+
+	H245_CapabilityIdentifier & id = cap.m_messageIdentifier;
+	id.SetTag(H245_CapabilityIdentifier::e_standard);
+	PASN_ObjectId & gid = id;
+	gid.SetValue(OpalPluginCodec_Identifer_H239_GenericMessage);
+
+	cap.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
+	PASN_Integer & subMesID = cap.m_subMessageIdentifier;
+	subMesID = submesId;
+
+	cap.IncludeOptionalField(H245_GenericMessage::e_messageContent);
+	H245_ArrayOf_GenericParameter & msg = cap.m_messageContent;
+
+   if (!approved) {
+    msg.SetSize(1);
+    buildGenericLogical(msg[0], H239Control::h239gpReject);
+   } else {
+    msg.SetSize(3);
+	buildGenericLogical(msg[0], H239Control::h239gpAcknowledge);
+	buildGenericInteger(msg[1], H239Control::h239gpTerminalLabel, 0);
+	buildGenericInteger(msg[2], H239Control::h239gpChannelId, connection.GetLogicalChannels()->GetNextChannelNumber());
+   }
+}
+
+void BuildH239GenericMessageRequest(H239Control & ctrl, H323Connection & connection, H323ControlPDU& pdu, H239Control::H239SubMessages submesId)
+{
+	H245_GenericMessage & cap = pdu.Build(H245_RequestMessage::e_genericRequest);
+
+	H245_CapabilityIdentifier & id = cap.m_messageIdentifier;
+	id.SetTag(H245_CapabilityIdentifier::e_standard);
+	PASN_ObjectId & gid = id;
+	gid.SetValue(OpalPluginCodec_Identifer_H239_GenericMessage);
+
+	cap.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
+	PASN_Integer & subMesID = cap.m_subMessageIdentifier;
+	subMesID = submesId;
+
+	cap.IncludeOptionalField(H245_GenericMessage::e_messageContent);
+        H245_ArrayOf_GenericParameter & msg = cap.m_messageContent;
+	msg.SetSize(3);
+	buildGenericInteger(msg[0], H239Control::h239gpTerminalLabel, 0);
+	buildGenericInteger(msg[1], H239Control::h239gpChannelId, connection.GetLogicalChannels()->GetNextChannelNumber());
+	buildGenericInteger(msg[2], H239Control::h239gpSymmetryBreaking, 4);
+}
+
+void BuildH239GenericMessageCommand(H239Control & ctrl, H323Connection & connection, H323ControlPDU& pdu, H239Control::H239SubMessages submesId, PBoolean option)
+{
+    H245_GenericMessage & cap = pdu.Build(H245_CommandMessage::e_genericCommand);
+
+    H245_CapabilityIdentifier & id = cap.m_messageIdentifier;
+    id.SetTag(H245_CapabilityIdentifier::e_standard);
+    PASN_ObjectId & gid = id;
+	gid.SetValue(OpalPluginCodec_Identifer_H239_GenericMessage);
+
+    cap.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
+    PASN_Integer & num = cap.m_subMessageIdentifier;
+    num = submesId;
+
+    cap.IncludeOptionalField(H245_GenericMessage::e_messageContent);
+    H245_ArrayOf_GenericParameter & msg = cap.m_messageContent;
+    msg.SetSize(2);
+	buildGenericInteger(msg[0], H239Control::h239gpTerminalLabel, 0);
+    buildGenericInteger(msg[1], H239Control::h239gpChannelId, ctrl.GetChannelNum(option ? H323Capability::e_Transmit : H323Capability::e_Receive));
+}
+
+
+bool OnH239GenericMessageRequest(H239Control & ctrl, H323Connection & connection, const H245_ArrayOf_GenericParameter & content)
+ {
+	PTRACE(4,"H239\tReceived Generic Request.");
+	for (int i = 0; i < content.GetSize(); ++i)
+	{
+		H245_GenericParameter& param = content[i];
+		switch ((PASN_Integer)param.m_parameterIdentifier) {
+		  case H239Control::h239gpBitRate:
+			break;
+		  case H239Control::h239gpChannelId:					
+            ctrl.SetChannelNum((PASN_Integer)param.m_parameterValue, H323Capability::e_Receive);
+			break;
+		  case H239Control::h239gpSymmetryBreaking:
+		  case H239Control::h239gpTerminalLabel:
+		  default:
+			break;
+		}
+	}
+
+    // We send back to the connection to allow the implementor to delay the reply message till it is ready.-SH
+    return connection.OnH239ControlRequest(&ctrl);
+}
+
+PBoolean OnH239GenericMessageResponse(H239Control & ctrl, H323Connection & connection, const H245_ArrayOf_GenericParameter & content)
+{
+	PTRACE(4,"H239\tReceived Generic Response.");
+
+    bool m_allowOutgoingExtVideo=false;
+	for (int i = 0; i < content.GetSize(); ++i)
+	{
+		H245_GenericParameter& param = content[i];
+		switch ((PASN_Integer)param.m_parameterIdentifier)
+		{
+		case H239Control::h239gpChannelId:					
+            ctrl.SetChannelNum((PASN_Integer)param.m_parameterValue, H323Capability::e_Transmit);
+			break;
+		case H239Control::h239gpAcknowledge:						
+			m_allowOutgoingExtVideo = true;
+            connection.OpenExtendedVideoSession(ctrl.GetChannelNum(H323Capability::e_Transmit));
+			break;
+		case H239Control::h239gpReject:
+			m_allowOutgoingExtVideo = false;
+            connection.OpenExtendedVideoSessionDenied();
+			break;
+		case H239Control::h239gpBitRate:
+		case H239Control::h239gpSymmetryBreaking:
+		case H239Control::h239gpTerminalLabel:
+		default:
+			break;
+		}
+	}
+    return m_allowOutgoingExtVideo;   // Should be responding false if remote rejects? - SH
+}
+
+///////////////////////////////////////////
 
 H323ControlExtendedVideoCapability::H323ControlExtendedVideoCapability()
   : H323ExtendedVideoCapability(OpalPluginCodec_Identifer_H239)
+  , m_outgoingChanNum(0, false), m_incomingChanNum(0,false)
 { 
+}
+
+PBoolean H323ControlExtendedVideoCapability::SendGenericMessage(h245MessageType msgtype, H323Connection * connection, PBoolean option)
+{
+   H323ControlPDU pdu;
+     switch (msgtype) {
+	    case e_h245request:
+		    BuildH239GenericMessageRequest(*this,*connection,pdu,H239Control::e_presentationTokenRequest);
+            break;
+	    case e_h245response:
+		    BuildH239GenericMessageResponse(*this,*connection,pdu,H239Control::e_presentationTokenResponse,option);
+            break;
+	    case e_h245command:
+            BuildH239GenericMessageCommand(*this, *connection, pdu, H239Control::e_presentationTokenRelease,option);
+            break;
+	    case e_h245indication:
+        default:
+            return true;
+     }
+   return connection->WriteControlPDU(pdu);
+}
+
+PBoolean H323ControlExtendedVideoCapability::HandleGenericMessage(h245MessageType type,
+                                              H323Connection * con,
+                                              const H245_ArrayOf_GenericParameter * pdu)
+{
+	 switch (type) {
+		case e_h245request:
+			return OnH239GenericMessageRequest(*this,*con,*pdu);
+		case e_h245response:
+			return OnH239GenericMessageResponse(*this,*con,*pdu);
+		case e_h245command:  //TODO  handle command message
+		case e_h245indication:
+        default:
+            return true;
+	 }
+}
+
+H323ChannelNumber & H323ControlExtendedVideoCapability::GetChannelNum(H323Capability::CapabilityDirection dir) 
+{ 
+    switch (dir) {   
+      case e_Transmit:
+          return m_outgoingChanNum;
+      case e_Receive:
+      default:
+          return m_incomingChanNum;
+    }
+}
+
+void H323ControlExtendedVideoCapability::SetChannelNum(unsigned num, H323Capability::CapabilityDirection dir) 
+{ 
+    switch (dir) {
+      case e_Transmit:
+          m_outgoingChanNum = H323ChannelNumber(num, false);
+          break;
+      case e_Receive:
+      default:
+          m_incomingChanNum = H323ChannelNumber(num, true);
+          break;
+    } 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2171,7 +2420,7 @@ H323Channel * H323CodecExtendedVideoCapability::CreateChannel(H323Connection & c
 ) const
 {
    if (table.GetSize() == 0)
-	   return NULL;
+ 	   return NULL;
    
    return connection.CreateRealTimeLogicalChannel(*this, dir, sessionID, param);
 }
@@ -2216,7 +2465,7 @@ PBoolean H323CodecExtendedVideoCapability::OnSendingPDU(H245_DataType & pdu) con
 
 PBoolean H323CodecExtendedVideoCapability::OnReceivedPDU(const H245_DataType & pdu, PBoolean /*receiver*/)
 {
-	if (table.GetSize() > 0 && pdu.GetTag() == H245_DataType::e_videoData)
+   if (pdu.GetTag() == H245_DataType::e_videoData)
 	 return OnReceivedPDU((const H245_VideoCapability &)pdu);
    else
 	 return FALSE;
@@ -2341,12 +2590,18 @@ PBoolean H323CodecExtendedVideoCapability::OnReceivedPDU(const H245_VideoCapabil
 			}
 		}
    }
-	return TRUE; 
+   return TRUE; 
 }
 
 PBoolean H323CodecExtendedVideoCapability::IsMatch(const PASN_Choice & subTypePDU) const
 {
-   return (subTypePDU.GetTag() == GetSubType() && table.GetSize() > 0);
+   if (subTypePDU.GetTag() != GetSubType())
+        return false;
+
+   const H245_ExtendedVideoCapability & gen = (const H245_ExtendedVideoCapability &)subTypePDU.GetObject();
+   const H245_VideoCapability & vid = (const H245_VideoCapability &)gen.m_videoCapability[0];
+   return extCapabilities[0].IsMatch(vid);
+
 }
 
 PBoolean H323CodecExtendedVideoCapability::OnReceivedGenericPDU(const H245_GenericCapability & /*pdu*/)
@@ -3460,7 +3715,12 @@ H323Capability * H323Capabilities::FindCapability(const H245_Capability & cap) c
     case H245_Capability::e_receiveAndTransmitVideoCapability :
     {
       const H245_VideoCapability & video = cap;
-      return FindCapability(H323Capability::e_Video, video, NULL);
+      if (video.GetTag() == H245_VideoCapability::e_genericVideoCapability)
+        return FindCapability(H323Capability::e_Video, video, video);
+      else if (video.GetTag() == H245_VideoCapability::e_extendedVideoCapability)
+        return FindCapability(true,video);
+      else
+        return FindCapability(H323Capability::e_Video, video, NULL);
     }
 
     case H245_Capability::e_receiveDataApplicationCapability :
@@ -3658,6 +3918,27 @@ H323Capability * H323Capabilities::FindCapability(H323Capability::MainTypes main
 	return NULL;
 }
 
+H323Capability * H323Capabilities::FindCapability(bool, const H245_ExtendedVideoCapability & gen) const
+{
+  H323Capability * newCap = NULL;
+  for (PINDEX j=0; j < gen.m_videoCapability.GetSize(); ++j) {
+    const H245_VideoCapability & vidCap = gen.m_videoCapability[j];
+	for (PINDEX i = 0; i < table.GetSize(); i++) {
+		H323Capability & capability = table[i];
+		if (capability.GetMainType() == H323Capability::e_Video &&
+            capability.GetSubType() == H245_VideoCapability::e_extendedVideoCapability) {
+            if (vidCap.GetTag() == H245_VideoCapability::e_genericVideoCapability)
+               newCap = ((H323ExtendedVideoCapability &)capability).GetCapabilities().FindCapability(H323Capability::e_Video, vidCap, vidCap);
+            else  
+               newCap = ((H323ExtendedVideoCapability &)capability).GetCapabilities().FindCapability(H323Capability::e_Video, vidCap, NULL);
+
+            if (newCap)
+                return &capability;
+        }
+    }
+  }
+  return NULL;
+}
 
 H323Capability * H323Capabilities::FindCapability(H323Capability::MainTypes mainType,
                                                   const PASN_Choice & subTypePDU,

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.48  2010/08/22 04:21:22  shorne
+ * More H.239 GenericRequest/Response/Command support
+ *
  * Revision 1.47  2010/08/19 20:20:18  willamowius
  * fix Linux compile
  *
@@ -2122,7 +2125,7 @@ class H323Connection : public PObject
 
     /** Close a H.239 Channel
      */
-    PBoolean CloseH239Channel();
+    PBoolean CloseH239Channel(H323Channel::Directions dir =  H323Channel::IsTransmitter);
 
     /** Request to open session denied event
       */
@@ -2130,8 +2133,15 @@ class H323Connection : public PObject
 
 	/** On Receiving a H.239 Control Request
 	    Return False to reject the request to open channel.
+        Set Delay to delay opening the channel. 
+        Calling OnH239ControlRequest() will invoke
 	*/
-    virtual PBoolean OnH239ControlRequest();
+    virtual PBoolean AcceptH239ControlRequest(PBoolean & delay);
+
+	/** On Receiving a H.239 Control Request
+	    Return False to reject the request to open channel.
+	*/
+    PBoolean OnH239ControlRequest(H239Control * ctrl = NULL);
 
 	/** Open an Extended Video Session
 	    This will open an Extended Video session.
@@ -2166,6 +2176,8 @@ class H323Connection : public PObject
 
 	virtual PBoolean SendH239GenericResponse(PBoolean response);
 
+    H245NegLogicalChannels * GetLogicalChannels();
+        
 #endif // H323_H239
 
 #endif // NO_H323_VIDEO
@@ -2275,6 +2287,12 @@ class H323Connection : public PObject
       unsigned sessionId,   ///< Session ID to search for.
       PBoolean fromRemote       ///< Indicates the direction of RTP data.
     ) const;
+
+#ifdef H323_H239
+    /**Get H.239 Channel Number.
+      */
+    H323ChannelNumber  GeExtendedChannelNum() const;
+#endif
   //@}
 
   /**@name Bandwidth Management */

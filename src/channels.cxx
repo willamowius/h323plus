@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.14  2010/08/19 12:35:49  shorne
+ * Pass DataType to ExternalRTP Channel / Send FlowControl Requests
+ *
  * Revision 1.13  2010/06/06 19:56:40  willamowius
  * restore accicently reveertd patch to add a small delay after video frames
  *
@@ -721,6 +724,9 @@ unsigned H323Channel::GetSessionID() const
   return 0;
 }
 
+void H323Channel::SetSessionID(unsigned /*id*/) 
+{
+}
 
 void H323Channel::CleanUpOnTermination()
 {
@@ -1186,6 +1192,12 @@ void H323_RTPChannel::CleanUpOnTermination()
 unsigned H323_RTPChannel::GetSessionID() const
 {
   return rtpSession.GetSessionID();
+}
+
+
+void H323_RTPChannel::SetSessionID(unsigned id)
+{
+  rtpSession.SetSessionID(id);
 }
 
 

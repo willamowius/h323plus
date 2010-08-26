@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.12  2010/08/23 08:26:55  willamowius
+ * disable PLUS_FRAMEHEADER for now, it seriously degrades video quality
+ *
  * Revision 1.11  2010/08/19 12:42:37  shorne
  * Improved H.239 Support
  *
@@ -666,9 +669,9 @@ enum {
 #define OpalPluginCodec_Identifer_MPEG4           "0.0.8.245.1.0.0"
 
 // Extended Video Capability (as defined in H.239)
-#define OpalPluginCodec_Identifer_H239            "0.0.8.239.1.1"
-#define OpalPluginCodec_Identifer_H239_Video      "0.0.8.239.1.2"
-#define OpalPluginCodec_Identifer_H239_Generic    "0.0.8.239.2"
+#define OpalPluginCodec_Identifer_H239                   "0.0.8.239.1.1"
+#define OpalPluginCodec_Identifer_H239_Video             "0.0.8.239.1.2"
+#define OpalPluginCodec_Identifer_H239_GenericMessage    "0.0.8.239.2"
 
 /////////////////
 //

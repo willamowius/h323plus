@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2010/06/06 14:53:26  shorne
+ * Added AVSync support, Aspect Ratio management, flow Control, Video 90k clock, fixes for wideband codecs and generic audio capabilities
+ *
  * Revision 1.10  2010/05/03 03:56:34  shorne
  * Improved collection of sender reports including identifying session they originated from
  *
@@ -689,6 +692,10 @@ class RTP_Session : public PObject
     /**Get the ID for the RTP session.
       */
     unsigned GetSessionID() const { return sessionID; }
+
+    /**Set the ID for the RTP session.
+      */
+    void SetSessionID(unsigned id);
 
     /**Get the canonical name for the RTP session.
       */
