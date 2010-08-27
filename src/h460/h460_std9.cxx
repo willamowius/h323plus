@@ -30,6 +30,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2010/05/18 07:44:39  willamowius
+ * add newline at end of file
+ *
  * Revision 1.2  2009/09/29 07:23:03  shorne
  * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
  *
@@ -94,7 +97,7 @@ void H460_FeatureStd9::AttachConnection(H323Connection * _con)
 PBoolean H460_FeatureStd9::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
 {
 	// Build Message
-    H460_FeatureStd & feat = H460_FeatureStd(9); 
+    H460_FeatureStd feat = H460_FeatureStd(9); 
     
     pdu = feat;
 
@@ -235,7 +238,7 @@ PBoolean H460_FeatureStd9::OnSendInfoRequestResponseMessage(H225_FeatureDescript
    if (!qossupport)
 	   return false;
 
-    H460_FeatureStd & feat = H460_FeatureStd(9); 
+    H460_FeatureStd feat = H460_FeatureStd(9); 
 
 	if (WriteStatisticsReport(feat,finalonly)) {
         pdu = feat;
@@ -250,7 +253,7 @@ PBoolean H460_FeatureStd9::OnSendDisengagementRequestMessage(H225_FeatureDescrip
    if (!qossupport)
  	 return false;
 
-   H460_FeatureStd & feat = H460_FeatureStd(9); 
+   H460_FeatureStd feat = H460_FeatureStd(9); 
 
    if (WriteStatisticsReport(feat,finalonly)) {
         pdu = feat;
