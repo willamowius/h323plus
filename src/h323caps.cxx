@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.32  2010/08/26 15:12:39  shorne
+ * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
+ *
  * Revision 1.31  2010/08/19 12:38:25  shorne
  * Initialise mediaOptions with default value
  * Support merging audio capabilities
@@ -1119,15 +1122,16 @@ PBoolean H323GenericCapabilityInfo::OnSendingGenericPDU(H245_GenericCapability &
   pdu.m_capabilityIdentifier = *identifier;
 
 #ifdef H323_VIDEO
-  unsigned pbitRate = mediaFormat.GetOptionInteger(OpalVideoFormat::MaxBitRateOption);
+  unsigned pbitRate = mediaFormat.GetOptionInteger(OpalVideoFormat::MaxBitRateOption)/100;
   unsigned bitRate = maxBitRate != 0 ? maxBitRate : pbitRate;
-  if (pbitRate < maxBitRate) bitRate = pbitRate;
+  if (pbitRate < bitRate)
+        bitRate = pbitRate;
 #else
   unsigned bitRate = maxBitRate;
 #endif
   if (bitRate != 0) {
     pdu.IncludeOptionalField(H245_GenericCapability::e_maxBitRate);
-    pdu.m_maxBitRate = bitRate/100;
+    pdu.m_maxBitRate = bitRate;
   }
 
   for (PINDEX i = 0; i < mediaFormat.GetOptionCount(); i++) {
