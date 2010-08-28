@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.49  2010/08/26 15:12:39  shorne
+ * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
+ *
  * Revision 1.48  2010/08/22 04:21:22  shorne
  * More H.239 GenericRequest/Response/Command support
  *
@@ -2125,7 +2128,7 @@ class H323Connection : public PObject
 
     /** Close a H.239 Channel
      */
-    PBoolean CloseH239Channel(H323Channel::Directions dir =  H323Channel::IsTransmitter);
+    PBoolean CloseH239Channel(H323Capability::CapabilityDirection dir =  H323Capability::e_Transmit);
 
     /** Request to open session denied event
       */

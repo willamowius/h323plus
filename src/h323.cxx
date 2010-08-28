@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.63  2010/08/26 15:12:39  shorne
+ * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
+ *
  * Revision 1.62  2010/08/22 04:21:22  shorne
  * More H.239 GenericRequest/Response/Command support
  *
@@ -7128,11 +7131,11 @@ PBoolean H323Connection::OpenH239Channel()
    return false;
 }
 
-PBoolean H323Connection::CloseH239Channel(H323Channel::Directions dir)
+PBoolean H323Connection::CloseH239Channel(H323Capability::CapabilityDirection dir)
 {
   H239Control * ctrl = (H239Control *)remoteCapabilities.FindCapability("H.239 Control");
-  if (ctrl) 
-     return ctrl->SendGenericMessage(H239Control::e_h245command, this, dir);
+  if (ctrl)
+     return ctrl->CloseChannel(this, dir);
 
   return false;
 }

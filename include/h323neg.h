@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/05/23 11:19:40  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.1  2007/08/06 20:50:49  shorne
  * First commit of h323plus
  *
@@ -370,6 +373,7 @@ class H245NegLogicalChannels : public H245Negotiator
     virtual PBoolean HandleRequestCloseRelease(const H245_RequestChannelCloseRelease & pdu);
 
     H323ChannelNumber GetNextChannelNumber();
+    H323ChannelNumber GetLastChannelNumber();
     PINDEX GetSize() const { return channels.GetSize(); }
     H323Channel * GetChannelAt(PINDEX i);
     H323Channel * FindChannel(unsigned channelNumber, PBoolean fromRemote);

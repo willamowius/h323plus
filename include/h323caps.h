@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.22  2010/08/26 15:12:39  shorne
+ * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
+ *
  * Revision 1.21  2010/08/19 12:38:25  shorne
  * Initialise mediaOptions with default value
  * Support merging audio capabilities
@@ -2677,10 +2680,6 @@ class H323ExtendedVideoCapability : public H323Capability,
       */
     virtual unsigned GetDefaultSessionID() const;
 
-    /**Print Extended Capabilities list
-	 */
-    virtual void PrintOn(ostream & strm) const;
-
 	/** Create Channel (not used)
 	  */
     virtual H323Channel * CreateChannel(
@@ -2874,6 +2873,8 @@ class H323ControlExtendedVideoCapability : public H323ExtendedVideoCapability
       return new H323ControlExtendedVideoCapability(*this);
     }
 
+   PBoolean CloseChannel(H323Connection * connection, H323Capability::CapabilityDirection dir);
+
    PBoolean SendGenericMessage(h245MessageType msgtype, 
                            H323Connection * connection, 
                            PBoolean approved=false);
@@ -2919,8 +2920,7 @@ class H323CodecExtendedVideoCapability : public H323ExtendedVideoCapability
 		const H245_GenericCapability &pdu
 	);
 
-	virtual PString GetFormatName() const
-    { return "H.239 Capabilities";}
+	virtual PString GetFormatName() const;
 
     virtual PBoolean IsMatch(const PASN_Choice & subTypePDU) const;
 

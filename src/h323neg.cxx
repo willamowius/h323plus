@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2010/08/26 15:12:39  shorne
+ * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
+ *
  * Revision 1.10  2010/08/19 12:44:13  shorne
  * Improved h.239 Support
  * Send Flow Restriction only if the channel is successfully opened
@@ -1474,6 +1477,13 @@ H323ChannelNumber H245NegLogicalChannels::GetNextChannelNumber()
 {
   PWaitAndSignal wait(mutex);
   lastChannelNumber++;
+  return lastChannelNumber;
+}
+
+
+H323ChannelNumber H245NegLogicalChannels::GetLastChannelNumber()
+{
+  PWaitAndSignal wait(mutex);
   return lastChannelNumber;
 }
 

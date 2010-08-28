@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.33  2010/08/27 00:31:56  shorne
+ * Small fix for correcting bug with bitRate
+ *
  * Revision 1.32  2010/08/26 15:12:39  shorne
  * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
  *
@@ -2054,25 +2057,6 @@ unsigned H323ExtendedVideoCapability::GetDefaultSessionID() const
 	return OpalMediaFormat::DefaultExtVideoSessionID;
 }
 
-void H323ExtendedVideoCapability::PrintOn(ostream & strm) const
-{
-  if (table.GetSize() > 0) {
-	  strm << "H239<" << table[0] << ">";
-	  return;
-  }
-
-  strm << GetFormatName();
-  if (assignedCapabilityNumber != 0)
-    strm << " <" << assignedCapabilityNumber << '>';
-
-	if (extCapabilities.GetSize() > 0) {
-	  int indent = (int)strm.precision() + 2;
-      for (PINDEX i=0; i< extCapabilities.GetSize(); i++) {
-         strm << '\n' << setw(indent+16) << extCapabilities[i];
-	  }
-	}
-}
-
 PBoolean H323ExtendedVideoCapability::OnSendingPDU(H245_DataType & /*pdu*/) const
 {
 	 return FALSE;
@@ -2102,14 +2086,17 @@ void H323ExtendedVideoCapability::AddAllCapabilities(
 {
   H323ExtendedVideoFactory::KeyList_T extCaps = H323ExtendedVideoFactory::GetKeyList();
   if (extCaps.size() > 0) {
-	basecapabilities.SetCapability(descriptorNum, simultaneous,new H323ControlExtendedVideoCapability());
     H323CodecExtendedVideoCapability * capability = new H323CodecExtendedVideoCapability();
     H323ExtendedVideoFactory::KeyList_T::const_iterator r;
+        PINDEX num = P_MAX_INDEX;
 		for (r = extCaps.begin(); r != extCaps.end(); ++r) {
            H323CodecExtendedVideoCapability * extCapability = (H323CodecExtendedVideoCapability *)capability->Clone();
 		   extCapability->AddCapability(*r);
-           basecapabilities.SetCapability(descriptorNum, simultaneous,extCapability);
+           num = basecapabilities.SetCapability(descriptorNum, simultaneous,extCapability);
+           simultaneous = num;
 		}
+    simultaneous = P_MAX_INDEX;
+	basecapabilities.SetCapability(descriptorNum, simultaneous,new H323ControlExtendedVideoCapability());
     delete capability;
   } else {
 	  PTRACE(4,"EXT\tNo Extended Capabilities found to load");
@@ -2195,7 +2182,7 @@ void BuildH239GenericMessageIndication(H239Control & ctrl, H323Connection & conn
 	H245_ArrayOf_GenericParameter & msg = cap.m_messageContent;
 	msg.SetSize(2);
 	buildGenericInteger(msg[0], H239Control::h239gpTerminalLabel, 0);
-	buildGenericInteger(msg[1], H239Control::h239gpChannelId, connection.GetLogicalChannels()->GetNextChannelNumber());
+	buildGenericInteger(msg[1], H239Control::h239gpChannelId, connection.GetLogicalChannels()->GetLastChannelNumber());
 }
 
 void BuildH239GenericMessageResponse(H239Control & ctrl, H323Connection & connection, 
@@ -2223,7 +2210,8 @@ void BuildH239GenericMessageResponse(H239Control & ctrl, H323Connection & connec
     msg.SetSize(3);
 	buildGenericLogical(msg[0], H239Control::h239gpAcknowledge);
 	buildGenericInteger(msg[1], H239Control::h239gpTerminalLabel, 0);
-	buildGenericInteger(msg[2], H239Control::h239gpChannelId, connection.GetLogicalChannels()->GetNextChannelNumber());
+    // TODO: what if the channel is already open just not started -SH
+	buildGenericInteger(msg[2], H239Control::h239gpChannelId, connection.GetLogicalChannels()->GetLastChannelNumber()+1);
    }
 }
 
@@ -2244,7 +2232,8 @@ void BuildH239GenericMessageRequest(H239Control & ctrl, H323Connection & connect
         H245_ArrayOf_GenericParameter & msg = cap.m_messageContent;
 	msg.SetSize(3);
 	buildGenericInteger(msg[0], H239Control::h239gpTerminalLabel, 0);
-	buildGenericInteger(msg[1], H239Control::h239gpChannelId, connection.GetLogicalChannels()->GetNextChannelNumber());
+    // TODO: what if the channel is already open just not started -SH
+	buildGenericInteger(msg[1], H239Control::h239gpChannelId, connection.GetLogicalChannels()->GetLastChannelNumber()+1);
 	buildGenericInteger(msg[2], H239Control::h239gpSymmetryBreaking, 4);
 }
 
@@ -2331,6 +2320,12 @@ H323ControlExtendedVideoCapability::H323ControlExtendedVideoCapability()
 { 
 }
 
+PBoolean H323ControlExtendedVideoCapability::CloseChannel(H323Connection * connection, H323Capability::CapabilityDirection dir)
+{
+   SendGenericMessage(H239Control::e_h245command, connection, dir);
+   return connection->CloseExtendedVideoSession(GetChannelNum(dir));
+}
+
 PBoolean H323ControlExtendedVideoCapability::SendGenericMessage(h245MessageType msgtype, H323Connection * connection, PBoolean option)
 {
    H323ControlPDU pdu;
@@ -2407,6 +2402,18 @@ H323CodecExtendedVideoCapability::~H323CodecExtendedVideoCapability()
 void H323CodecExtendedVideoCapability::AddCapability(const PString & cap)
 {
 	extCapabilities.Add(H323ExtendedVideoFactory::CreateInstance(cap));
+}
+
+PString H323CodecExtendedVideoCapability::GetFormatName() const
+{ 
+  PStringStream strm;
+  strm << "H.239";
+  if (extCapabilities.GetSize() > 0) {
+    for (PINDEX i=0; i< extCapabilities.GetSize(); i++) {
+        strm << '(' << extCapabilities[i] << ')';
+	}
+  }
+  return strm;
 }
 
 H323Capability::MainTypes H323CodecExtendedVideoCapability::GetMainType() const
