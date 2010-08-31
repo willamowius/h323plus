@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2010/08/26 15:12:39  shorne
+ * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
+ *
  * Revision 1.8  2010/05/02 22:44:31  shorne
  * Added support to be able to set NAT Method on a call by call basis
  *
@@ -912,7 +915,7 @@ PBoolean H323SetRTPPacketization(H245_RTPPayloadType & rtpPacketization,
                              const OpalMediaFormat & mediaFormat,
                              RTP_DataFrame::PayloadTypes payloadType)
 {
-  PString mediaPacketization = mediaFormat.GetOptionString("Media Packetization");
+  PString mediaPacketization = mediaFormat.GetOptionString(PLUGINCODEC_MEDIA_PACKETIZATION);
   if (mediaPacketization.IsEmpty())
     return FALSE;
 
@@ -974,7 +977,7 @@ PBoolean H323GetRTPPacketization(OpalMediaFormat & mediaFormat, const H245_RTPPa
       return FALSE;
   }
   
-  mediaFormat.SetOptionString("Media Packetization", mediaPacketization);
+  mediaFormat.SetOptionString(PLUGINCODEC_MEDIA_PACKETIZATION, mediaPacketization);
   return TRUE;
 }
 

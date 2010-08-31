@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.13  2010/08/26 15:12:39  shorne
+ * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
+ *
  * Revision 1.12  2010/08/23 08:26:55  willamowius
  * disable PLUS_FRAMEHEADER for now, it seriously degrades video quality
  *
@@ -699,6 +702,8 @@ enum {
 #define H263_ANNEX_I "Annex I - Advanced INTRA Coding"
 #define H263_ANNEX_J "Annex J - Deblocking Filter"
 #define H263_ANNEX_T "Annex T - Modified Quantization"
+
+#define H263_EXPLICIT_MATCH "H263 Exact"
 
 #ifndef STRINGIZE
 #define __INTERNAL_STRINGIZE__(v) #v

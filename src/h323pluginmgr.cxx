@@ -24,6 +24,13 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.38  2010/08/19 12:53:32  shorne
+ * Support Merging Audio codec capabilities
+ * Improved SetMaxFrameSize
+ * Improved H.239 Support
+ * Improved H.261 cap matching
+ * Improved H.263+ support
+ *
  * Revision 1.37  2010/08/15 22:20:59  willamowius
  * disable flow control as it freezes low frate rate video
  *
@@ -2773,6 +2780,8 @@ class H323H263PluginCapability : public H323VideoPluginCapability
     virtual PObject * Clone() const
     { return new H323H263PluginCapability(*this); }
 
+    virtual PBoolean IsMatch(const PASN_Choice & subTypePDU) const;
+
     virtual PBoolean OnSendingPDU(
       H245_VideoCapability & pdu  /// PDU to set information on
     ) const;
@@ -3714,6 +3723,29 @@ PObject::Comparison H323H263PluginCapability::Compare(const PObject & obj) const
   return GreaterThan;
 }
 
+PBoolean H323H263PluginCapability::IsMatch(const PASN_Choice & subTypePDU) const
+{
+  if (!H323Capability::IsMatch(subTypePDU))
+      return false;
+
+  const H245_H263VideoCapability & cap = (const H245_H263VideoCapability &)subTypePDU.GetObject();
+  const OpalMediaFormat & format = GetMediaFormat();
+  PString packetization = format.GetOptionString(PLUGINCODEC_MEDIA_PACKETIZATION);
+  PBoolean explicitMatch = format.GetOptionBoolean(H263_EXPLICIT_MATCH);
+
+  // By the standard the method to distinguish H.263 and H.263+ is by the packetization element
+  // however some endpoints do not include the packetization element so the common practise indicator
+  // is the inclusion of the the h263Options field.
+  if (packetization == "RFC2429" && cap.HasOptionalField(H245_H263VideoCapability::e_h263Options))
+      return true;
+
+  // H.263 Exact Match..
+  if (packetization == "RFC2190" && !cap.HasOptionalField(H245_H263VideoCapability::e_h263Options))
+      return true;
+
+  return !explicitMatch;
+}
+
 static void SetTransmittedCap(const OpalMediaFormat & mediaFormat,
                               H245_H263VideoCapability & h263,
                               const char * mpiTag,
@@ -3735,7 +3767,7 @@ static void SetTransmittedCap(const OpalMediaFormat & mediaFormat,
 
 PBoolean SetH263Options(const OpalMediaFormat & fmt, H245_H263Options & options)
 {
-    PString mediaPacketization = fmt.GetOptionString("Media Packetization");
+    PString mediaPacketization = fmt.GetOptionString(PLUGINCODEC_MEDIA_PACKETIZATION);
     if (mediaPacketization.IsEmpty() || mediaPacketization != "RFC2429")
       return false;
  
@@ -3917,6 +3949,76 @@ static PBoolean SetReceivedH263Cap(OpalMediaFormat & mediaFormat,
   return TRUE;
 }
 
+PBoolean GetH263Options(OpalMediaFormat & fmt, const H245_H263Options & options)
+{
+    fmt.SetOptionBoolean(h323_advancedIntra_tag, options.m_advancedIntraCodingMode);
+    fmt.SetOptionBoolean(h323_modifiedQuantization_tag, options.m_modifiedQuantizationMode);
+
+    if (options.HasOptionalField(H245_H263Options::e_customPictureFormat)) {
+        int opts[3];
+        for (PINDEX j = 0; j < options.m_customPictureFormat.GetSize(); ++j) {
+            opts[2] = 1;  opts[3] = 0;
+            const H245_CustomPictureFormat & customFormat = options.m_customPictureFormat[j];
+            opts[0] = customFormat.m_maxCustomPictureHeight;
+            opts[1] = customFormat.m_maxCustomPictureWidth;
+
+            const H245_CustomPictureFormat_mPI & mpi = customFormat.m_mPI;
+            if (mpi.HasOptionalField(H245_CustomPictureFormat_mPI::e_standardMPI))
+                   opts[2] = mpi.m_standardMPI;
+
+            if (customFormat.m_pixelAspectInformation.GetTag() == H245_CustomPictureFormat_pixelAspectInformation::e_pixelAspectCode) {
+               const H245_CustomPictureFormat_pixelAspectInformation_pixelAspectCode & pixel = customFormat.m_pixelAspectInformation;
+                  if (pixel.GetSize() > 0) opts[3] = pixel[0];
+            }
+
+            PString val = PString(opts[0]) + ',' + PString(opts[1]) + ',' + PString(opts[2]) + ',' + PString(opts[3]);
+            PString key = "CustomFmt"+ PString((j+1));
+            if (fmt.HasOption(key))
+              fmt.SetOptionString(key,val);
+            else
+              fmt.AddOption(new OpalMediaOptionString(key,false,val));
+        }
+    }
+
+/*  Not Supported
+    options.m_deblockingFilterMode;
+    options.m_improvedPBFramesMode;
+    options.m_unlimitedMotionVectors;
+    options.m_fullPictureFreeze;
+    options.m_partialPictureFreezeAndRelease;
+    options.m_resizingPartPicFreezeAndRelease;
+    options.m_fullPictureSnapshot;
+    options.m_partialPictureSnapshot;
+    options.m_videoSegmentTagging;
+    options.m_progressiveRefinement;
+    options.m_dynamicPictureResizingByFour;
+    options.m_dynamicPictureResizingSixteenthPel;
+    options.m_dynamicWarpingHalfPel;
+    options.m_dynamicWarpingSixteenthPel;
+    options.m_independentSegmentDecoding;
+    options.m_slicesInOrder_NonRect;
+    options.m_slicesInOrder_Rect;
+    options.m_slicesNoOrder_NonRect;
+    options.m_slicesNoOrder_Rect;
+    options.m_alternateInterVLCMode;
+    options.m_reducedResolutionUpdate;
+    options.m_separateVideoBackChannel; 
+
+    if (options.HasOptionalField(H245_H263Options::e_h263Version3Options)) {
+        options.m_h263Version3Options.m_dataPartitionedSlices;
+        options.m_h263Version3Options.m_fixedPointIDCT0;
+        options.m_h263Version3Options.m_interlacedFields;
+        options.m_h263Version3Options.m_currentPictureHeaderRepetition;
+        options.m_h263Version3Options.m_previousPictureHeaderRepetition;
+        options.m_h263Version3Options.m_nextPictureHeaderRepetition;
+        options.m_h263Version3Options.m_pictureNumber;
+        options.m_h263Version3Options.m_spareReferencePictures; 
+    }
+*/
+    return true;
+}
+
+
 
 PBoolean H323H263PluginCapability::OnReceivedPDU(const H245_VideoCapability & cap)
 {
@@ -3958,6 +4060,20 @@ PBoolean H323H263PluginCapability::OnReceivedPDU(const H245_VideoCapability & ca
 
   if (h263.HasOptionalField(H245_H263VideoCapability::e_bppMaxKb))
     fmt.SetOptionInteger(h323_bppMaxKb_tag, h263.m_bppMaxKb);
+
+  // zero out all (if any) custom formats
+  for (PINDEX i = 0; i<fmt.GetOptionCount(); i++) {
+        PString optionName = fmt.GetOption(i).GetName();
+        if (optionName.NumCompare("CustomFmt") == PObject::EqualTo)
+            fmt.SetOptionString(optionName,"0,0,1,0");
+  }
+
+  PString packetization = fmt.GetOptionString(PLUGINCODEC_MEDIA_PACKETIZATION);
+  if (packetization == "RFC2429" && h263.HasOptionalField(H245_H263VideoCapability::e_h263Options)) {
+     GetH263Options(fmt, h263.m_h263Options);                           // H.263+
+  } else {
+     fmt.SetOptionString(PLUGINCODEC_MEDIA_PACKETIZATION, "RFC2190");   // force to H.263
+  }
 
   return TRUE;
 }
