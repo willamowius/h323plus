@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.39  2010/08/31 04:00:49  shorne
+ * Improved H.263/H.263+ interworking
+ *
  * Revision 1.38  2010/08/19 12:53:32  shorne
  * Support Merging Audio codec capabilities
  * Improved SetMaxFrameSize
@@ -3955,7 +3958,7 @@ PBoolean GetH263Options(OpalMediaFormat & fmt, const H245_H263Options & options)
     fmt.SetOptionBoolean(h323_modifiedQuantization_tag, options.m_modifiedQuantizationMode);
 
     if (options.HasOptionalField(H245_H263Options::e_customPictureFormat)) {
-        int opts[3];
+        int opts[4];
         for (PINDEX j = 0; j < options.m_customPictureFormat.GetSize(); ++j) {
             opts[2] = 1;  opts[3] = 0;
             const H245_CustomPictureFormat & customFormat = options.m_customPictureFormat[j];
