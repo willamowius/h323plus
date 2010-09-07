@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.18  2009/12/08 04:21:29  shorne
+# Added H.460.24 Annex B and Presence
+#
 # Revision 1.17  2009/08/21 07:01:06  shorne
 # Added H.460.9 Support
 #
@@ -99,6 +102,8 @@ LIBRARY_MAKEFILE:=1
 
 include $(OPENH323DIR)/openh323u.mak
 
+# turn off strict-aliasing optimization, because it breaks the PDynaLink code
+STDCCFLAGS += -fno-strict-aliasing
 
 OH323_OBJDIR = $(OH323_LIBDIR)/$(PT_OBJBASE)
 ifdef NOTRACE
