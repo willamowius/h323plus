@@ -20,6 +20,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.1  2010/02/24 02:19:43  shorne
+# First commit of h323plus mirror
+#
 # Revision 1.4  2007/09/02 12:03:19  dominance
 # * dynamically load libx264 at runtime on *nix
 # * Improved error handling
@@ -95,6 +98,8 @@ X264_LINK_STATIC=@X264_LINK_STATIC@
 DL_LIBS	=@DL_LIBS@
 
 EXTRACCFLAGS	+= $(X264_CFLAGS) -I$(COMMONDIR) -I$(PLUGINDIR)
+
+STDCCFLAGS += -Wall -Wformat -Wformat-security -Wreorder -fno-strict-aliasing
 
 vpath	%.cxx $(SHAREDDIR)
 vpath	%.cxx $(COMMONDIR)
