@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.34  2010/08/28 03:58:20  shorne
+ * More H.239 Support. Added ability to close channel, remove and reorder codecs and correctly load capabilities into simult cap listing
+ *
  * Revision 1.33  2010/08/27 00:31:56  shorne
  * Small fix for correcting bug with bitRate
  *
@@ -3931,6 +3934,7 @@ H323Capability * H323Capabilities::FindCapability(H323Capability::MainTypes main
 
 H323Capability * H323Capabilities::FindCapability(bool, const H245_ExtendedVideoCapability & gen) const
 {
+#ifdef H323_VIDEO
   H323Capability * newCap = NULL;
   for (PINDEX j=0; j < gen.m_videoCapability.GetSize(); ++j) {
     const H245_VideoCapability & vidCap = gen.m_videoCapability[j];
@@ -3948,6 +3952,7 @@ H323Capability * H323Capabilities::FindCapability(bool, const H245_ExtendedVideo
         }
     }
   }
+#endif
   return NULL;
 }
 

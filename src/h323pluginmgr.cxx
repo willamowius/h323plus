@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.40  2010/08/31 08:43:47  willamowius
+ * fix array size
+ *
  * Revision 1.39  2010/08/31 04:00:49  shorne
  * Improved H.263/H.263+ interworking
  *
@@ -1276,7 +1279,9 @@ static PString CreateCodecName(const PString & baseName, PBoolean addSW)
 
 static void SetDefaultAudioOptions(OpalMediaFormat & mediaFormat)
 {
+#ifdef H323_VIDEO
    mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::MaxBitRateOption, false, OpalMediaOption::MinMerge, mediaFormat.GetBandwidth()*100, 1000));
+#endif
 }
 
 class OpalPluginAudioMediaFormat : public OpalMediaFormat
@@ -1523,7 +1528,9 @@ static bool UpdatePluginOptions(const PluginCodec_Definition * codec, void * con
             if (mediaFormat.HasOption(key))
                 mediaFormat.SetOptionInteger(key,val); 
 		  }
+#ifdef H323_VIDEO
           mediaFormat.SetBandwidth(mediaFormat.GetOptionInteger(OpalVideoFormat::MaxBitRateOption));
+#endif
 
       //free(_options);
 	  return true;
