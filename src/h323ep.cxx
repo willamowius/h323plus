@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.43  2010/08/26 15:12:39  shorne
+ * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
+ *
  * Revision 1.42  2010/05/26 13:09:28  willamowius
  * Solaris 10 compile fix
  *
@@ -2418,6 +2421,13 @@ PBoolean H323EndPoint::ParsePartyName(const PString & _remoteParty,
                                   H323TransportAddress & address)
 {
   PString remoteParty = _remoteParty;
+
+  // Support [address]##[Alias] dialing
+  PINDEX hash = _remoteParty.Find("##");
+  if (hash != P_MAX_INDEX) {
+    remoteParty = "h323:" + _remoteParty.Mid(hash+2) + "@" + _remoteParty.Left(hash);
+    PTRACE(4, "H323\tConverted " << _remoteParty << " to " << remoteParty);
+  }
 
   // convert the remote party string to a URL, with a default URL of "h323:"
   PURL url(remoteParty, "h323");
