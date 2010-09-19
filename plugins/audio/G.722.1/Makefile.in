@@ -27,7 +27,7 @@ STDCCFLAGS	=@STDCCFLAGS@
 LDFLAGS		=@LDFLAGS@
 EXTRACFLAGS     =-I$(PLUGINDIR)
 
-SRCS	+= G7221Codec.c \
+SRCS	+= G7221Codec.cxx \
 	   $(SRCDIR)/basop32.c \
 	   $(SRCDIR)/coef2sam.c \
 	   $(SRCDIR)/common.c \
