@@ -42,6 +42,7 @@
 #include "plugin-config.h"
 
 #include <stdarg.h>
+#define PLUGIN_CODEC_DLL_EXPORTS  1
 #include <codec/opalplugin.h>
 
 #if defined(_WIN32) && _MSC_VER < 1600
@@ -60,6 +61,7 @@
 #include "h264pipe_unix.h"
 #endif
 
+#include <list>
 
 
 extern "C" {
@@ -89,6 +91,19 @@ typedef unsigned char u_char;
 
 static void logCallbackFFMPEG (void* v, int level, const char* fmt , va_list arg);
 
+// Input formats from the input device.
+struct inputFormats 
+{
+  unsigned mb;   
+  unsigned w;
+  unsigned h;
+  unsigned r;
+};
+
+    // Settings
+static double minFPS   = 9.0;       // Minimum FPS allowed
+static double kbtoMBPS = 12.2963;   // Magical Conversion factor from kb/s to MBPS
+
 class H264EncoderContext 
 {
   public:
@@ -111,9 +126,21 @@ class H264EncoderContext
     void Lock ();
     void Unlock ();
 
+    void AddInputFormat(inputFormats & fmt);
+    int GetInputFormat(inputFormats & fmt);
+
+    void SetMaxMB(unsigned mb);
+    unsigned GetMaxMB();
+    void SetMaxMBPS(unsigned mbps);
+    unsigned GetMaxMBPS();
+
   protected:
     CriticalSection _mutex;
     H264EncCtx H264EncCtxInstance;
+
+    unsigned maxMBPS;
+    unsigned maxMB;
+    std::list<inputFormats> videoInputFormats;
 };
 
 class H264DecoderContext
@@ -159,6 +186,8 @@ static int encoder_set_options   ( const struct PluginCodec_Definition *, void *
 static int encoder_event_handler(const struct PluginCodec_Definition * codec, void * _context, const char *, 
                                    void * parm, unsigned * parmLen);
 static int encoder_flowcontrol   ( const struct PluginCodec_Definition *, void *, const char *, 
+                                   void * parm, unsigned * parmLen);
+static int encoder_formats       ( const struct PluginCodec_Definition *, void *, const char *, 
                                    void * parm, unsigned * parmLen);
 static int encoder_get_output_data_size ( const PluginCodec_Definition *, void *, const char *,
                                    void *, unsigned *);
@@ -213,6 +242,7 @@ static PluginCodec_ControlDefn EncoderControls[] = {
   { PLUGINCODEC_CONTROL_SET_CODEC_OPTIONS,     encoder_set_options },
   { PLUGINCODEC_CONTROL_CODEC_EVENT,           encoder_event_handler },
   { PLUGINCODEC_CONTROL_FLOW_OPTIONS,	       encoder_flowcontrol },
+  { PLUGINCODEC_CONTROL_SET_FORMAT_OPTIONS,    encoder_formats },
   { PLUGINCODEC_CONTROL_GET_OUTPUT_DATA_SIZE,  encoder_get_output_data_size },
   { NULL }
 };
@@ -335,7 +365,7 @@ static unsigned int   H264QCIF_FrameHeight     = QCIF_HEIGHT;
 static unsigned int   H264QCIF_FrameWidth      = QCIF_WIDTH;
 static unsigned int   H264QCIF_Profile         = H264_PROFILE_BASE; 
 static unsigned int   H264QCIF_Level           = H264_LEVEL1_1;
-static unsigned int   H264QCIF_MaxBitRate      = H264_LEVEL1_1_MBPS;
+static unsigned int   H264QCIF_MaxBitRate      = H264_LEVEL1_1_MBPS*100;
 static const char	  H264QCIF_TargetBitRate[]=  { "192000" }; 
 static unsigned int   H264QCIF_VideoType       = PluginCodec_MediaTypeVideo;
 static unsigned int   H264QCIF_Generic3        = 0;        
@@ -352,7 +382,7 @@ static unsigned int   H264CIF_FrameHeight     = CIF_HEIGHT;
 static unsigned int   H264CIF_FrameWidth      = CIF_WIDTH; 
 static unsigned int   H264CIF_Profile         = H264_PROFILE_BASE; 
 static unsigned int   H264CIF_Level           = H264_LEVEL1_3;
-static unsigned int   H264CIF_MaxBitRate      = H264_LEVEL1_3_MBPS;
+static unsigned int   H264CIF_MaxBitRate      = H264_LEVEL1_3_MBPS*100;
 static const char	  H264CIF_TargetBitRate[] =  { "768000" }; 
 static unsigned int   H264CIF_VideoType       = PluginCodec_MediaTypeVideo; 
 static unsigned int   H264CIF_Generic3        = 0;        
@@ -370,7 +400,7 @@ static unsigned int   H264CIF4_FrameHeight     = CIF4_HEIGHT;
 static unsigned int   H264CIF4_FrameWidth      = CIF4_WIDTH;
 static unsigned int   H264CIF4_Profile         = H264_PROFILE_BASE; //+ H264_PROFILE_MAIN;
 static unsigned int   H264CIF4_Level           = H264_LEVEL3;
-static unsigned int   H264CIF4_MaxBitRate      = H264_LEVEL3_MBPS;
+static unsigned int   H264CIF4_MaxBitRate      = H264_LEVEL3_MBPS*100;
 static const char	  H264CIF4_TargetBitRate[]=  { "10000000" }; 
 static unsigned int   H264CIF4_VideoType       = PluginCodec_MediaTypeVideo; // | PluginCodec_MediaTypeExtVideo;
 static unsigned int   H264CIF4_Generic3        = 0;        
@@ -387,9 +417,9 @@ static unsigned int   H264720P_FrameHeight     = P720_HEIGHT;
 static unsigned int   H264720P_FrameWidth      = P720_WIDTH;
 static unsigned int   H264720P_Profile         = H264_PROFILE_BASE; 
 static unsigned int   H264720P_Level           = H264_LEVEL3_1;
-static unsigned int   H264720P_MaxBitRate      = H264_LEVEL3_1_MBPS;
+static unsigned int   H264720P_MaxBitRate      = H264_LEVEL3_1_MBPS*100;
 static const char	  H264720P_TargetBitRate[] =  { "1400000" }; 
-static unsigned int   H264720P_VideoType       = PluginCodec_MediaTypeVideo| PluginCodec_MediaTypeExtVideo;
+static unsigned int   H264720P_VideoType       = PluginCodec_MediaTypeVideo;
 static unsigned int   H264720P_Generic3        = 217;
 static unsigned int   H264720P_Generic4        = 15;
 static unsigned int   H264720P_Generic5        = 0;
@@ -397,15 +427,34 @@ static unsigned int   H264720P_Generic6        = 205;
 static unsigned int   H264720P_Generic7        = 0;
 static unsigned int   H264720P_Generic10       = H264_ASPECT_HD;
 
+// HD H.239 1920 x 1152 
+static const char     H264H239_Desc[]           = { "H.264" };
+static const char     H264H239_MediaFmt[]       = { "H.264" };
+static unsigned int   H264H239_FrameHeight      = 1152;
+static unsigned int   H264H239_FrameWidth       = 1920;
+static unsigned int   H264H239_Profile          = H264_PROFILE_BASE;
+static unsigned int   H264H239_Level            = H264_LEVEL4;
+static unsigned int   H264H239_MaxBitRate       = 540000;
+static const char     H264H239_TargetBitRate[]  = { "540000" };
+static unsigned int   H264H239_VideoType        = PluginCodec_MediaTypeExtended | PluginCodec_MediaTypeH239;
+static unsigned int   H264H239_Generic3         = 492; 
+static unsigned int   H264H239_Generic4         = 34; 
+static unsigned int   H264H239_Generic5         = 0;
+static unsigned int   H264H239_Generic6         = 0;
+static unsigned int   H264H239_Generic7         = 0;
+static unsigned int   H264H239_Generic9         = 0;
+static unsigned int   H264H239_Generic10        = H264_ASPECT_HD;
+
+
 static const char     H2641080P_Desc[]          = { "H.264-1080" };
 static const char     H2641080P_MediaFmt[]      = { "H.264-1080" };                             
 static unsigned int   H2641080P_FrameHeight     = P1080_HEIGHT;               
 static unsigned int   H2641080P_FrameWidth      = P1080_WIDTH;
 static unsigned int   H2641080P_Profile         = H264_PROFILE_BASE; 
 static unsigned int   H2641080P_Level           = H264_LEVEL4;
-static unsigned int   H2641080P_MaxBitRate      = H264_LEVEL4_MBPS;
+static unsigned int   H2641080P_MaxBitRate      = H264_LEVEL4_MBPS*100;
 static const char	  H2641080P_TargetBitRate[] =  { "2000000" }; 
-static unsigned int   H2641080P_VideoType       = PluginCodec_MediaTypeVideo| PluginCodec_MediaTypeExtVideo;
+static unsigned int   H2641080P_VideoType       = PluginCodec_MediaTypeVideo;
 static unsigned int   H2641080P_Generic3        = 0;
 static unsigned int   H2641080P_Generic4        = 0;
 static unsigned int   H2641080P_Generic5        = 0;
@@ -448,6 +497,7 @@ DECLARE_GENERIC_OPTIONS(H264CIF)
 DECLARE_GENERIC_OPTIONS(H264CIF4)
 #ifdef H323_H264_HD
 DECLARE_GENERIC_OPTIONS(H264720P)
+DECLARE_GENERIC_OPTIONS(H264H239)
 DECLARE_GENERIC_OPTIONS(H2641080P)
 #endif
 
@@ -464,7 +514,7 @@ DECLARE_GENERIC_OPTIONS(H2641080P)
   prefix##_MediaFmt,                  /* destination format */ \
   prefix##_OptionTable,			      /* user data */ \
   H264_CLOCKRATE,                     /* samples per second */ \
-  H264_BITRATE,				          /* raw bits per second */ \
+  prefix##_MaxBitRate,				  /* raw bits per second */ \
   20000,                              /* nanoseconds per frame */ \
   prefix##_FrameWidth,               /* samples per frame */ \
   prefix##_FrameHeight,			      /* bytes per frame */ \
@@ -483,7 +533,7 @@ DECLARE_GENERIC_OPTIONS(H2641080P)
   /* decoder */ \
   PLUGIN_CODEC_VERSION_OPTIONS,	      /* codec API version */ \
   &licenseInfo,                       /* license information */ \
-  PluginCodec_MediaTypeVideo |        /* audio codec */ \
+  prefix##_VideoType |                /* video codec */ \
   PluginCodec_RTPTypeShared |         /* specified RTP type */ \
   PluginCodec_RTPTypeDynamic,         /* specified RTP type */ \
   prefix##_Desc,                      /* text decription */ \
@@ -491,7 +541,7 @@ DECLARE_GENERIC_OPTIONS(H2641080P)
   YUV420PDesc,                        /* destination format */ \
   prefix##_OptionTable,			      /* user data */ \
   H264_CLOCKRATE,                     /* samples per second */ \
-  H264_BITRATE,				          /* raw bits per second */ \
+  prefix##_MaxBitRate,				  /* raw bits per second */ \
   20000,                              /* nanoseconds per frame */ \
   prefix##_FrameWidth,               /* samples per frame */ \
   prefix##_FrameHeight,			      /* bytes per frame */ \
@@ -513,8 +563,7 @@ DECLARE_GENERIC_OPTIONS(H2641080P)
 /////////////////////////////////////////////////////////////////////////////
 
 static struct PluginCodec_Definition h264CodecDefn[] = {
-{ 
-
+/*{ 
   PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
   &licenseInfo,                       // license information
 
@@ -585,13 +634,14 @@ static struct PluginCodec_Definition h264CodecDefn[] = {
 
   PluginCodec_H323Codec_NoH323,       // h323CapabilityType 
   NULL                                // h323CapabilityData
-},
+},*/
 #ifdef H323_H264_TEST
-  DECLARE_H323PARAM(H264QCIF),
-  DECLARE_H323PARAM(H264CIF),
-  DECLARE_H323PARAM(H264CIF4)
+ // DECLARE_H323PARAM(H264QCIF),
+ //   DECLARE_H323PARAM(H264CIF),
+ // DECLARE_H323PARAM(H264CIF4)
 #ifdef H323_H264_HD
-  ,DECLARE_H323PARAM(H264720P)
+  DECLARE_H323PARAM(H264720P),
+  DECLARE_H323PARAM(H264H239)
 //  ,DECLARE_H323PARAM(H2641080P)
 #endif
 #endif

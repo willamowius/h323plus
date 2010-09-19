@@ -53,11 +53,13 @@
 #include <stdlib.h>
 #if defined(_WIN32) || defined(_WIN32_WCE)
   #include <malloc.h>
+  #include <string.h>
   #define STRCMPI  _strcmpi
-  #define strdup   _strdup
+  #define STRNCMPI strncmp
 #else
   #include <semaphore.h>
   #define STRCMPI  strcasecmp
+  #define STRNCMPI strncasecmp
 #endif
 #include <string.h>
 
@@ -188,6 +190,48 @@ void H264EncoderContext::Unlock ()
 {
   _mutex.Signal();
 }
+
+
+void H264EncoderContext::AddInputFormat(inputFormats & fmt)
+{
+    videoInputFormats.push_back(fmt);
+}
+    
+int H264EncoderContext::GetInputFormat(inputFormats & fmt)
+{
+ TRACE(1,"TEST\tMB " << maxMB << " MBPS " << maxMBPS);
+    for (std::list<inputFormats>::const_iterator r=videoInputFormats.begin(); r!=videoInputFormats.end(); ++r) {
+        if (r->mb <= maxMB && maxMBPS/r->mb > minFPS) {
+           fmt = *r;
+           unsigned r = maxMBPS/fmt.mb + 1;
+           if (fmt.r > r) fmt.r = r;
+           return 1;
+        }
+    }
+    return 0;
+}
+
+void H264EncoderContext::SetMaxMB(unsigned mb)
+{
+    maxMB = mb;
+}
+
+unsigned H264EncoderContext::GetMaxMB()
+{
+    return maxMB;
+}
+   
+void H264EncoderContext::SetMaxMBPS(unsigned mbps)
+{
+    maxMBPS = mbps;
+}
+    
+unsigned H264EncoderContext::GetMaxMBPS()
+{
+    return maxMBPS;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
 
 H264DecoderContext::H264DecoderContext()
 {
@@ -438,35 +482,42 @@ static int valid_for_protocol (const struct PluginCodec_Definition * codec,
     return (STRCMPI((const char *)parm, "sip") == 0) ? 1 : 0;
 }
 
-static int setFrameSizeAndRate(unsigned _level, bool stdaspect, unsigned & w, unsigned & h, unsigned & r, unsigned & h264level)
+static int GetLevelLimits(unsigned _level, unsigned & maxMB, unsigned & maxMBPS, unsigned & h264level)
 {
-	unsigned j=0;
-	unsigned maxMB = 0;
-	unsigned maxMBsec = 0;
-
 	if (_level == 0) return 0;
 
 	// Get the Max Frame Size and rate (Macroblocks)
+    unsigned j=0;
     while (h264_levels[j].level_idc) {
 		if (h264_levels[j].h241_level == _level) {
 			maxMB = h264_levels[j].frame_size;
-			maxMBsec = h264_levels[j].mbps;
+			maxMBPS = h264_levels[j].mbps;
 			h264level = h264_levels[j].level_idc;
-			break;
+			return 1;
 		}
       j++; 
     }
+    return 0;
+}
+
+static int setFrameSizeAndRate(unsigned _level, bool stdaspect, unsigned & w, unsigned & h, unsigned & r, unsigned & h264level)
+{
+	
+	unsigned maxMB = 0;
+	unsigned maxMBsec = 0;
+    GetLevelLimits(_level, maxMB, maxMBsec, h264level);
 	if (!maxMB) return 0;
 
-	j=0;
+	int j=0;
     while (h264_resolutions[j].width) {
 		if (h264_resolutions[j].macroblocks <= maxMB && stdaspect == h264_resolutions[j].stdaspect) {
 			h = h264_resolutions[j].height;
 			w = h264_resolutions[j].width;
-			unsigned max_rate = (int)maxMBsec / (h * w / 256);
-			if (r > max_rate)	// don't force frame rate to maximum possible if application set a lower value
-				r = max_rate;
-			if (r > 30) r = 30;    // We limit the frame rate to 30 fps regardless of the max negotiated.
+			r = (int)(maxMBsec / (h * w / 256));
+            if (r > 30) {
+              TRACE(4, "H264\tLimiting Frame rate to 30fps"); 
+              r = 30;    // We limit the frame rate to 30 fps regardless of the max negotiated.
+            }
 			break;
 		}
       j++; 
@@ -479,9 +530,9 @@ static int SetLevelMBPS(unsigned & level, unsigned maxMB)
 	int j=0;
     while (h264_levels[j].level_idc) {
 	if (h264_levels[j].mbps > 500*maxMB) {
-            unsigned int nlevel = h264_levels[j-1].h241_level;
-            if (level == 0 || nlevel < level)
-                level = nlevel;
+        unsigned int nlevel = h264_levels[j].h241_level;
+        if (level == 0 || nlevel > level) 
+            level = nlevel;
 		break;
 	}
       j++; 
@@ -494,7 +545,9 @@ static int SetLevelMFS(unsigned & level, unsigned mfs)
     int j=0;
     while (h264_levels[j].level_idc) {
 	if ((h264_levels[j].frame_size >> 8) > mfs) {
-            level = h264_levels[j-1].h241_level;
+        unsigned int nlevel = h264_levels[j].h241_level;
+        if (level == 0 || nlevel > level)
+            level = nlevel;
 	    break;
 	}
       j++; 
@@ -610,10 +663,6 @@ static int adjust_to_BitRate (unsigned & width, unsigned & height, unsigned & fr
     double calcMFS=0.0;
     double calcMPBS=0.0;
 
-    // Settings
-    double minFPS=10.0;          // Minimum FPS allowed
-    double MbtoMBPS = .015625;   // Conversion factor from kb/s to MBPS
-
     int i = 0;
     while (h264_levels[i].level_idc) {
       if (h264_levels[i].h241_level == h241Level) {
@@ -629,15 +678,15 @@ static int adjust_to_BitRate (unsigned & width, unsigned & height, unsigned & fr
     i++; 
     }
 
-    calcMPBS = targetBitrate * MbtoMBPS;
+    calcMPBS = targetBitrate / kbtoMBPS;
     calcMFS = calcMPBS/minFPS;
     if (calcMFS > maxmbs) calcMFS = maxmbs;
 
     // find the maximum size with aspect ratio
     double as;
-    if (stdaspect) as = 1.2222;
-    else as = 1.7777;
-    unsigned expWidth =  (unsigned)sqrt((calcMFS * 256.0)/as)*as;
+    if (stdaspect) as = 1.222222;
+    else as = 1.777777;
+    unsigned expWidth =  (unsigned)(sqrt((calcMFS * 256.0)/as)*as) + 1;
 
     // find the matching supported size to get width/height
     i=0;
@@ -796,6 +845,67 @@ static int to_customised_options(const struct PluginCodec_Definition * codec, vo
   return 1;
 }
 
+
+int encoder_formats( 
+     const struct PluginCodec_Definition * codec, 
+     void * _context, 
+     const char *, 
+     void * parm, 
+     unsigned * parmLen)
+{
+  TRACE(4,"Supported Formats");
+  if (_context == NULL || parm == NULL || *parmLen != sizeof(char ***))
+    return 0;
+
+  H264EncoderContext * context = (H264EncoderContext *)_context;
+
+	char ** options = (char **)parm;
+	if (options == NULL) return 0;
+
+	for (int i = 0; options[i] != NULL; i += 2) {
+       if(STRNCMPI(options[i], PLUGINCODEC_OPTION_INPUT_FORMAT, strlen(PLUGINCODEC_OPTION_INPUT_FORMAT)) == 0) {
+           inputFormats f; f.w=0; f.h=0; f.r=0;
+           char* token = strtok(options[i+1],",");
+           int j=0;
+           while (token) {
+             switch (j) {
+               case 0: f.w = atoi(token);
+               case 1: f.h = atoi(token);
+               case 2: f.r = atoi(token);
+             }
+             token = strtok(NULL,",");
+             j++;
+           }
+           f.mb = (f.w * f.h)/256;  
+           TRACE(4,"Frame Size w " << f.w << " h " << f.h << " r " << f.r << " mb " << f.mb); 
+           context->AddInputFormat(f);
+       }
+    }
+
+    inputFormats fmt;
+    context->GetInputFormat(fmt);
+
+    TRACE(2,"Adjusted w " << fmt.w << " h " << fmt.h << " r " << fmt.r); 
+
+	context->Lock();
+	context->SetFrameWidth(fmt.w);
+	context->SetFrameHeight(fmt.h);
+	context->SetFrameRate(fmt.r); 
+	context->ApplyOptions();
+	context->Unlock();
+
+	for (int i = 0; options[i] != NULL; i += 2) {
+      if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_TIME) == 0)
+	     options[i+1] = num2str(H264_CLOCKRATE/fmt.r);
+      if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_HEIGHT) == 0)
+	     options[i+1] = num2str(fmt.h);
+      if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_WIDTH) == 0)
+	     options[i+1] = num2str(fmt.w);
+	}
+
+  return 1;
+}
+
 int encoder_flowcontrol(
     const struct PluginCodec_Definition * codec, 
     void * _context, 
@@ -832,8 +942,21 @@ int encoder_flowcontrol(
          cusMFS = atoi(options[i+1]);
 	}
 
+TRACE(4, "H264\tFLOW\tAdjust to bitrate: " << targetBitrate);
+
     // do the matching of frame width/height/rate to bitrate 
-    if (adjust_to_BitRate (frameWidth, frameHeight, frameRate, h241Level, cusMBPS, cusMFS, targetBitrate, stdAspect)) {
+    bool matchedtoInput = false;
+    context->SetMaxMBPS(targetBitrate/kbtoMBPS);
+    inputFormats fmt;
+    if (context->GetInputFormat(fmt)) {
+        frameWidth = fmt.w; 
+        frameHeight = fmt.h;
+        frameRate = fmt.r;
+        matchedtoInput = true;
+        TRACE(2, "H264\tFLOW\tAdjust to size W: " << frameWidth << " H: " << frameHeight << " R: " << frameRate);
+    }
+
+    if (matchedtoInput || adjust_to_BitRate (frameWidth, frameHeight, frameRate, h241Level, cusMBPS, cusMFS, targetBitrate, stdAspect)) {
         // initiating the codec to the new framerate/size
         context->Lock();
         context->SetTargetBitrate((unsigned) (targetBitrate / 1000) );
@@ -926,16 +1049,28 @@ static int encoder_set_options(
 		 stdAspect = (STRCMPI(options[i+1],"2") == 0);  // 2 is scale to stdSize
 	}
   }
+    
 
     if (cusMBPS > 0 && SetLevelMBPS(level,cusMBPS) && SetLevelMFS(level,cusMFS)) {
-        unsigned max_rate = cusMBPS / cusMFS;
+        unsigned max_rate = (cusMBPS * 500) / (cusMFS * 256);
         if (frameRate > max_rate) // don't force frame rate to maximum possible, if application set a lower value
 	        frameRate = max_rate;
 		TRACE(4, "H264\tCap\tCustom level : " << level << " rate " << frameRate);
-    }
+    } 
 
     if (level > 0) {
 	TRACE(1, "H264\tCap\tProfile and Level: " << profile << ";" << constraints << ";" << level);
+
+    unsigned maxMB =0; unsigned maxMBPS = 0;
+    if (cusMBPS > 0 && cusMFS > 0) {
+       maxMB = cusMFS * 256;
+       maxMBPS = cusMBPS * 500;
+    } else
+       GetLevelLimits(level,maxMB,maxMBPS,h264level);
+
+    context->SetMaxMB(maxMB);
+    context->SetMaxMBPS(maxMBPS);
+
 	// Adjust to level sent in the signalling
 	if (!setFrameSizeAndRate(level,stdAspect,frameWidth,frameHeight,frameRate,h264level) || !adjust_bitrate_to_level(targetBitrate, h264level)) {
 	     context->Unlock();
@@ -972,6 +1107,7 @@ static int encoder_set_options(
 
 	// Set the Values in the codec
         context->SetTargetBitrate((unsigned) (targetBitrate / 1000) );
+        context->SetMaxMBPS(targetBitrate/kbtoMBPS);
         context->SetProfileLevel(profile, constraints, h264level); 
 	    context->SetFrameHeight(frameHeight);
 	    context->SetFrameWidth(frameWidth);
@@ -1002,7 +1138,7 @@ static int encoder_event_handler(const struct PluginCodec_Definition * codec,
 	 if (parms == NULL) return 0;
 	    for (int i = 0; parms[i] != NULL; i += 2) {
 		  if (STRCMPI(parms[i], PLUGINCODEC_EVENT_FASTUPDATE) == 0) {
-                     TRACE(4, "H264\tEvt\tFAST PICTURE UPDATE:");
+             TRACE(4, "H264\tEvt\tFAST PICTURE UPDATE:");
 			 context->FastUpdateRequested();
                   }	
 		  if (STRCMPI(parms[i], PLUGINCODEC_EVENT_FLOWCONTROL) == 0) {
