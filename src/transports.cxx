@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/09/27 06:18:57  shorne
+ * BUG FIX: H323SignalPDU::Write to correctly handle NULL H323Connection Thx Nir Soffer
+ *
  * Revision 1.2  2008/05/23 11:22:41  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -596,6 +599,9 @@
  #endif
 #endif
 
+// TCP KeepAlive 
+static int KeepAliveInterval = 19;
+
 class H225TransportThread : public PThread
 {
   PCLASSINFO(H225TransportThread, PThread)
@@ -603,10 +609,15 @@ class H225TransportThread : public PThread
   public:
     H225TransportThread(H323EndPoint & endpoint, H323Transport * transport);
 
+    ~H225TransportThread();
+
   protected:
     void Main();
 
     H323Transport * transport;
+
+	PDECLARE_NOTIFIER(PTimer, H225TransportThread, KeepAlive);
+	PTimer	m_keepAlive;								
 };
 
 
@@ -619,6 +630,8 @@ class H245TransportThread : public PThread
                         H323Connection & connection,
                         H323Transport & transport);
 
+    ~H245TransportThread();
+
   protected:
     void Main();
 
@@ -627,6 +640,9 @@ class H245TransportThread : public PThread
 #ifdef H323_SIGNAL_AGGREGATE
     PBoolean useAggregator;
 #endif
+
+	PDECLARE_NOTIFIER(PTimer, H245TransportThread, KeepAlive);
+	PTimer	m_keepAlive;			
 };
 
 
@@ -646,12 +662,38 @@ H225TransportThread::H225TransportThread(H323EndPoint & ep, H323Transport * t)
 }
 
 
+H225TransportThread::~H225TransportThread()
+{
+  m_keepAlive.Stop();
+}
+
+
 void H225TransportThread::Main()
 {
   PTRACE(3, "H225\tStarted incoming call thread");
 
+  m_keepAlive.SetNotifier(PCREATE_NOTIFIER(KeepAlive));
+  m_keepAlive.RunContinuous(KeepAliveInterval * 1000);
+
   if (!transport->HandleFirstSignallingChannelPDU())
     delete transport;
+}
+
+
+void H225TransportThread::KeepAlive(PTimer &, INT)
+{
+  // Send empty RFC1006 TPKT
+  int packetLength = 4;
+  PBYTEArray tpkt(packetLength);
+  tpkt[0] = 3;
+  tpkt[1] = 0;
+  tpkt[2] = 0;
+  tpkt[3] = (BYTE)packetLength;
+
+  PTRACE(6, "H225\tSending KeepAlive TPKT packet");
+
+  if (transport)
+     transport->Write((const BYTE *)tpkt, packetLength);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -672,8 +714,16 @@ H245TransportThread::H245TransportThread(H323EndPoint & endpoint,
 #endif
   {
     transport.AttachThread(this);
+    m_keepAlive.SetNotifier(PCREATE_NOTIFIER(KeepAlive));
+    m_keepAlive.RunContinuous(KeepAliveInterval * 1000);
   }
   Resume();
+}
+
+
+H245TransportThread::~H245TransportThread()
+{
+  m_keepAlive.Stop();
 }
 
 
@@ -694,6 +744,22 @@ void H245TransportThread::Main()
 
     connection.HandleControlChannel();
   }
+}
+
+
+void H245TransportThread::KeepAlive(PTimer &, INT)
+{
+  // Send empty RFC1006 TPKT
+  int packetLength = 4;
+  PBYTEArray tpkt(packetLength);
+  tpkt[0] = 3;
+  tpkt[1] = 0;
+  tpkt[2] = 0;
+  tpkt[3] = (BYTE)packetLength;
+
+  PTRACE(6, "H245\tSending KeepAlive TPKT packet");
+
+  transport.Write((const BYTE *)tpkt, packetLength);
 }
 
 
