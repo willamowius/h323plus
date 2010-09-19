@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.64  2010/08/28 03:58:20  shorne
+ * More H.239 Support. Added ability to close channel, remove and reorder codecs and correctly load capabilities into simult cap listing
+ *
  * Revision 1.63  2010/08/26 15:12:39  shorne
  * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
  *
@@ -3282,7 +3285,7 @@ PBoolean H323Connection::WriteControlPDU(const H323ControlPDU & pdu)
       return TRUE;
 
     PTRACE(1, "H245\tWrite PDU fail: " << controlChannel->GetErrorText(PChannel::LastWriteError));
-    return FALSE;
+    return HandleControlChannelFailure();
   }
 
   // If have a pending signalling PDU, use it rather than separate write
@@ -4301,6 +4304,18 @@ void H323Connection::SendCapabilitySet(PBoolean empty)
 }
 
 
+void H323Connection::SetInitialBandwidth(H323Capability::MainTypes & captype, int bitRate)
+{
+  for (PINDEX i=0; i< localCapabilities.GetSize(); ++i) {
+    if (localCapabilities[i].GetMainType() == captype) {
+      OpalMediaFormat & fmt = localCapabilities[i].GetWritableMediaFormat();
+      if (fmt.GetOptionInteger(OpalVideoFormat::MaxBitRateOption) > bitRate)
+             fmt.SetOptionInteger(OpalVideoFormat::MaxBitRateOption,bitRate);
+    }
+  }
+}
+
+
 void H323Connection::OnSetLocalCapabilities()
 {
 }
@@ -4915,6 +4930,14 @@ PBoolean H323Connection::OnStartLogicalChannel(H323Channel & channel)
     else
       rtp.AddFilter(rfc2833handler->GetTransmitHandler());
   }
+
+#ifdef H323_H239
+  if ((channel.GetCapability().GetMainType() == H323Capability::e_Video) && 
+      (channel.GetCapability().GetSubType() == H245_VideoCapability::e_extendedVideoCapability)) {
+          OnH239SessionStarted(channel.GetSessionID(), 
+                channel.GetNumber().IsFromRemote() ? H323Capability::e_Receive : H323Capability::e_Transmit);
+  }
+#endif
 
   return endpoint.OnStartLogicalChannel(*this, channel);
 }
@@ -7138,6 +7161,13 @@ PBoolean H323Connection::CloseH239Channel(H323Capability::CapabilityDirection di
      return ctrl->CloseChannel(this, dir);
 
   return false;
+}
+
+void H323Connection::OnH239SessionStarted(int sessionNum, H323Capability::CapabilityDirection dir) 
+{
+  H239Control * ctrl = (H239Control *)remoteCapabilities.FindCapability("H.239 Control");
+  if (ctrl)
+     return ctrl->SetChannelNum(sessionNum,dir);
 }
 
 void H323Connection::OpenExtendedVideoSessionDenied()

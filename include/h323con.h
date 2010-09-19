@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.50  2010/08/28 03:58:20  shorne
+ * More H.239 Support. Added ability to close channel, remove and reorder codecs and correctly load capabilities into simult cap listing
+ *
  * Revision 1.49  2010/08/26 15:12:39  shorne
  * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
  *
@@ -993,6 +996,11 @@ class H323Connection : public PObject
 	  */
 	virtual PBoolean HandleSignalChannelFailure()  { return FALSE; }
 
+	/**Handle the situation where the media channel fails
+		return TRUE to keep the call alive / False to drop the call
+	  */
+	virtual PBoolean HandleControlChannelFailure()  { return FALSE; }
+
     /**Handle a single received PDU from the signalling channel.
        This is an internal function and is unlikely to be used by applications.
     */
@@ -1871,6 +1879,17 @@ class H323Connection : public PObject
       */
     virtual void OnSetLocalCapabilities();
 
+    /**Set the initial Capability Bandwidth for the TCS
+       This will set the bandwidth limit for the given capability type that
+       will be negotiated in the TCS. This fuinction sets the Maximum bitRate
+       for the capability. The bandwidth in the OLC and any Flow Control values
+       received will not exceed this set maximum value.
+      */
+    void SetInitialBandwidth(
+         H323Capability::MainTypes & captype,   ///< Capability Type
+         int bitRate                            ///< BitRate (in bytes)
+    );
+
     /**Callback to modify the outgoing H245_OpenLogicalChannel.
        The default behaviour does nothing.
       */
@@ -2129,6 +2148,15 @@ class H323Connection : public PObject
     /** Close a H.239 Channel
      */
     PBoolean CloseH239Channel(H323Capability::CapabilityDirection dir =  H323Capability::e_Transmit);
+
+    /** Callback when a H239 Session
+        has been started
+      */
+    virtual void OnH239SessionStarted(
+       int sessionNum,   ///< Channel Number opened
+       H323Capability::CapabilityDirection dir ///< Direction of Channel
+    );
+
 
     /** Request to open session denied event
       */
