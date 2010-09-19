@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.41  2010/09/15 14:40:20  willamowius
+ * fix build with video disabled
+ *
  * Revision 1.40  2010/08/31 08:43:47  willamowius
  * fix array size
  *
@@ -498,6 +501,7 @@ static const char SET_CODEC_OPTIONS_CONTROL[]		= "set_codec_options";
 static const char SET_CODEC_CUSTOMISED_OPTIONS[]	= "to_customised_options";
 static const char SET_CODEC_FLOWCONTROL_OPTIONS[]	= "to_flowcontrol_options";
 static const char EVENT_CODEC_CONTROL[]				= "event_codec";
+static const char SET_CODEC_FORMAT_OPTIONS[]        = "set_format_options";
 
 #ifdef H323_VIDEO
 
@@ -1762,6 +1766,8 @@ class H323PluginVideoCodec : public H323VideoCodec
 
     virtual void OnFlowControl(long bitRateRestriction);
 
+    virtual void SetSupportedFormats(std::list<PVideoFrameInfo> & info);
+
     virtual void OnLostPartialPicture()
     { EventCodecControl(codec, context, "on_lost_partial", ""); }
 
@@ -1964,17 +1970,73 @@ PBoolean H323PluginVideoCodec::SetMaxBitRate(unsigned bitRate)
     return false;
 }
 
+PStringArray LoadInputDeviceOptions(const OpalMediaFormat & fmt)
+{
+     PStringArray list;
+     list += OpalVideoFormat::FrameHeightOption;
+     list += PString(fmt.GetOptionInteger(OpalVideoFormat::FrameHeightOption));
+     list += OpalVideoFormat::FrameWidthOption;
+     list += PString(fmt.GetOptionInteger(OpalVideoFormat::FrameWidthOption));
+     list += OpalVideoFormat::FrameTimeOption;
+     list += PString(fmt.GetOptionInteger(OpalVideoFormat::FrameTimeOption));
+     return list;
+}
+
 void H323PluginVideoCodec::OnFlowControl(long bitRateRestriction)
 { 
   if (direction != Encoder) {
     PTRACE(1, "PLUGIN\tAttempt to flowControl the decoder!");
     return;
   }
-#if PTLIB_VER >= 290
-// TODO: this is buggy and causes at least low frame rate video to freeze - Jan
-//  if (rawDataChannel != NULL && SetFlowControl(codec,context,mediaFormat,bitRateRestriction))
-//             rawDataChannel->FlowControl(&mediaFormat);
+#if 0 //PTLIB_VER >= 290 - Remove when updated video plugins -SH
+  if (rawDataChannel != NULL && SetFlowControl(codec,context,mediaFormat,bitRateRestriction)) {
+      PStringArray options = LoadInputDeviceOptions(mediaFormat); 
+      rawDataChannel->FlowControl((void *)&options);
+  }
 #endif
+}
+
+void H323PluginVideoCodec::SetSupportedFormats(std::list<PVideoFrameInfo> & info)
+{
+    PluginCodec_ControlDefn * ctl = GetCodecControl(codec, SET_CODEC_FORMAT_OPTIONS);
+    int i=0;
+    if (ctl != NULL && info.size() > 0) {
+      PStringArray list;
+      for (std::list<PVideoFrameInfo>::const_iterator r = info.begin(); r != info.end(); ++r) {
+        PString option(PString(r->GetFrameWidth()) + "," + PString(r->GetFrameHeight()) + "," + PString(r->GetFrameRate()));
+        list += PString("InputFmt"+ PString(i+1));
+        list += option;
+        i++;
+      }
+      for (i = 0; i < mediaFormat.GetOptionCount(); i++) {
+        const OpalMediaOption & option = mediaFormat.GetOption(i);
+        list += option.GetName();
+        list += option.AsString();
+      }
+
+      int nw = frameWidth;
+      int nh = frameHeight;
+
+      char ** _options = list.ToCharArray();
+      unsigned int optionsLen = sizeof(_options);
+      (*ctl->control)(codec, context ,SET_CODEC_FORMAT_OPTIONS, _options, &optionsLen);
+          for (i = 0; _options[i] != NULL; i += 2) {
+			const char * key = _options[i];
+			int val = atoi(_options[i+1]);;
+            if (mediaFormat.HasOption(key)) {
+                mediaFormat.SetOptionInteger(key,val);
+                if (strcmp(key, OpalVideoFormat::FrameWidthOption) == 0)
+                     nw = val; 
+                else if (strcmp(key, OpalVideoFormat::FrameHeightOption) == 0)
+                     nh = val;
+                else if (strcmp(key, OpalVideoFormat::FrameTimeOption) == 0)
+                     targetFrameTimeMs = val;
+            }
+		  }
+          SetFrameSize(nw,nh);
+    } else {
+       PTRACE(4,"PLUGIN\tUnable to set format options in codec");
+    }
 }
 
 PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_DataFrame & dst)
@@ -2005,11 +2067,7 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
     frameHeader->y = 0;
     frameHeader->width        = videoIn->GetGrabWidth();
     frameHeader->height       = videoIn->GetGrabHeight();
-#if PLUS_FRAMEHEADER && PTLIB_VER >= 290
-    // TODO: assume square pixel for now
-    frameHeader->aspect_width = 1; //videoIn->GetRenderSarWidth();
-    frameHeader->aspect_height= 1; //videoIn->GetRenderSarHeight();
-#endif
+
     if (frameHeader->width == 0 || frameHeader->height == 0) {
         PTRACE(1,"PLUGIN\tVideo grab dimension is 0, close down video transmission thread");
         videoIn->EnableAccess();
@@ -2026,11 +2084,7 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
             return FALSE;
         }
 
-#ifdef PLUS_FRAMEHEADER
-        if (!SetFrameSize(frameHeader->width, frameHeader->height,frameHeader->aspect_width,frameHeader->aspect_height)) {
-#else
         if (!SetFrameSize(frameHeader->width, frameHeader->height)) {
-#endif
             PTRACE(1, "PLUGIN\tFailed to resize, close down video transmission thread");
             videoIn->EnableAccess();
             return FALSE;
@@ -2167,11 +2221,8 @@ PBoolean H323PluginVideoCodec::Write(const BYTE * /*buffer*/, unsigned length, c
 
       if(flags & PluginCodec_ReturnCoderLastFrame) {
         PluginCodec_Video_FrameHeader * header = (PluginCodec_Video_FrameHeader *)(bufferRTP.GetPayloadPtr());
-#ifdef PLUS_FRAMEHEADER
-        SetFrameSize(header->width,header->height,header->aspect_width,header->aspect_height);
-#else
+
         SetFrameSize(header->width,header->height);
-#endif
         if (!RenderFrame(OPAL_VIDEO_FRAME_DATA_PTR(header), &rtpInformation)) 
 	       return false;
 
@@ -2254,10 +2305,6 @@ PBoolean H323PluginVideoCodec::SetFrameSize(int _width, int _height,int _sar_wid
         header->x = header->y = 0;
         header->width         = frameWidth;
         header->height        = frameHeight;
-#ifdef PLUS_FRAMEHEADER
-        header->aspect_width  = sarWidth;
-        header->aspect_height = sarHeight;
-#endif
     }
 
     return TRUE;

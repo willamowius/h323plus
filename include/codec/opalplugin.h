@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.14  2010/08/31 04:00:49  shorne
+ * Improved H.263/H.263+ interworking
+ *
  * Revision 1.13  2010/08/26 15:12:39  shorne
  * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
  *
@@ -163,10 +166,7 @@ extern "C" {
 #include <time.h>
 
 // indicator the this is h323plus version of the plugin codec
-// Most unfortunate!
 #define h323pluslib          1 
-// disable PLUS_FRAMEHEADER for now, it seriously degrades video quality - Jan
-//#define PLUS_FRAMEHEADER     1
 
 #ifdef _MSC_VER
 #pragma warning(disable:4201)
@@ -326,6 +326,7 @@ struct PluginCodec_Definition;
 #define PLUGINCODEC_CONTROL_TERMINATE_CODEC       "terminate_codec"
 #define PLUGINCODEC_CONTROL_CODEC_EVENT           "event_codec"
 #define PLUGINCODEC_CONTROL_FLOW_OPTIONS          "to_flowcontrol_options"
+#define PLUGINCODEC_CONTROL_SET_FORMAT_OPTIONS    "set_format_options"
 
 
 /* Log function, plug in gets a pointer to this function which allows
@@ -417,6 +418,8 @@ struct PluginCodec_Option {
 #define PLUGINCODEC_OPTION_MAX_RX_FRAME_HEIGHT        "Max Rx Frame Height"
 #define PLUGINCODEC_OPTION_TEMPORAL_SPATIAL_TRADE_OFF "Temporal Spatial Trade Off"
 #define PLUGINCODEC_OPTION_TX_KEY_FRAME_PERIOD        "Tx Key Frame Period"
+#define PLUGINCODEC_OPTION_CUSTOM_FORMAT              "CustomFmt"
+#define PLUGINCODEC_OPTION_INPUT_FORMAT               "InputFmt"
 
 // Events
 #define PLUGINCODEC_EVENT_FASTUPDATE             "on_fast_update"
@@ -742,10 +745,6 @@ struct PluginCodec_Video_FrameHeader {
   unsigned int  y;
   unsigned int  width;
   unsigned int  height;
-#ifdef PLUS_FRAMEHEADER
-  unsigned int  aspect_width;
-  unsigned int  aspect_height;
-#endif
 };
 
 #ifdef __cplusplus
