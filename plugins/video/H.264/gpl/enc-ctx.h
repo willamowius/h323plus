@@ -57,9 +57,9 @@ extern "C" {
 
 #define H264_BITRATE         768000
 #define H264_PAYLOAD_SIZE      1400
-#define H264_SINGLE_NAL_SIZE   1200
+#define H264_SINGLE_NAL_SIZE   1400
 #define H264_FRAME_RATE          30
-#define H264_KEY_FRAME_INTERVAL  (30*120) // Send a key frame no more than once every two minutes (unless requested through fast update)
+#define H264_KEY_FRAME_INTERVAL  (30*60) // Send a key frame no more than once every minute (unless requested through fast update)
 #define H264_PROFILE_LEVEL       ((66 << 16) + (0xC0 << 8) +  30)
 #define H264_TSTO                31
 #define H264_MIN_QUANT           10
@@ -76,7 +76,11 @@ extern "C" {
   #define X264_PICTURE_INIT x264_picture_init
   #endif
 #else
+#if defined(_WIN32) 
+  #include "x264loader_win32.h"
+#else
   #include "x264loader_unix.h"
+#endif
   #define X264_ENCODER_OPEN  X264Lib.Xx264_encoder_open
   #define X264_PARAM_DEFAULT X264Lib.Xx264_param_default
   #define X264_ENCODER_ENCODE X264Lib.Xx264_encoder_encode

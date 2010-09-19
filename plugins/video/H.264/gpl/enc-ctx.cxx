@@ -80,19 +80,31 @@ X264EncoderContext::X264EncoderContext()
   _inputFrame.i_type 			= X264_TYPE_AUTO;
   _inputFrame.i_qpplus1 		= 0;
   _inputFrame.img.i_csp 		= X264_CSP_I420;
+
+#if X264_BUILD > 101
+  _inputFrame.prop.quant_offsets = NULL;
+  _inputFrame.prop.quant_offsets_free = NULL;
+#endif
  
    X264_PARAM_DEFAULT(&_context);
 
    // No multicore support
    _context.i_threads           = 1;
+  // _context.b_sliced_threads    = 1;
    _context.b_deterministic     = 1;
    _context.i_sync_lookahead    = 0;
    _context.i_frame_reference   = 1;
    _context.i_bframe            = 0;
+ //  _context.b_vfr_input         = 0;
+   _context.rc.b_mb_tree        = 0;
  
-  // No aspect ratio correction TODO
+  // No aspect ratio correction 
   _context.vui.i_sar_width      = 0;
   _context.vui.i_sar_height     = 0;
+
+  // No automatic keyframe generation
+  _context.i_keyint_max               = X264_KEYINT_MAX_INFINITE;
+  _context.i_keyint_min               = X264_KEYINT_MAX_INFINITE;
 
   // Enable logging
   _context.pf_log               = logCallbackX264;
@@ -103,7 +115,7 @@ X264EncoderContext::X264EncoderContext()
 #if X264_BUILD > 79
   _context.i_slice_max_size     = H264_SINGLE_NAL_SIZE; // TODO: need to be provided.
   _context.b_repeat_headers     = 1;     // repeat SPS/PPS before each key frame
-  _context.b_annexb             = 1;             // place start codes (4 bytes) before NAL units
+  _context.b_annexb             = 1;     // place start codes (4 bytes) before NAL units   
 #endif
 
   SetFrameWidth       (CIF_WIDTH);
@@ -119,13 +131,14 @@ X264EncoderContext::X264EncoderContext()
   _context.rc.f_rf_constant       	= 16.0;	// great quality
 #else
    // Rate control set to ABR mode
-  _context.rc.i_rc_method       	= X264_RC_ABR;
-  _context.rc.i_qp_min              = 25;
-  _context.rc.i_qp_max              = 51;
-  _context.rc.f_rate_tolerance  	= 1;
-  _context.rc.i_vbv_max_bitrate 	= 0;
-  _context.rc.i_vbv_buffer_size 	= 0;
-  _context.rc.i_lookahead       	= 0;
+   _context.rc.i_rc_method            = X264_RC_ABR;
+   _context.rc.f_rate_tolerance       = 25;
+   _context.rc.i_lookahead            = 51;
+   _context.rc.i_qp_step              = 1;
+   _context.rc.psz_stat_out           = 0;
+   _context.rc.psz_stat_in            = 0;
+   _context.rc.f_vbv_buffer_init      = 0;
+   _context.i_scenecut_threshold      = 0;
   SetTargetBitrate    ((unsigned)(H264_BITRATE / 1000));
 #endif
 
