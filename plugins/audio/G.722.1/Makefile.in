@@ -42,6 +42,7 @@ SRCS	+= G7221Codec.cxx \
 
 vpath	%.o $(OBJDIR)
 vpath	%.c $(SRCDIR)
+vpath	%.cxx $(SRCDIR)
 
 ifeq ($(VERBOSE),)
 Q_CC = @echo [CC] `echo $< | sed s^@OPALDIR@/^^` ;
@@ -53,9 +54,13 @@ $(OBJDIR)/%.o : %.c
 	@mkdir -p $(OBJDIR) >/dev/null 2>&1
 	$(Q_CC)$(CXX) -I../../../include $(STDCCFLAGS) $(OPTCCFLAGS) $(EXTRACFLAGS) $(CFLAGS) -c $< -o $@
 
+$(OBJDIR)/%.o : %.cxx
+	@mkdir -p $(OBJDIR) >/dev/null 2>&1
+	$(Q_CC)$(CXX) -I../../../include $(STDCCFLAGS) $(OPTCCFLAGS) $(EXTRACFLAGS) $(CFLAGS) -c $< -o $@
+
 PLUGIN	= ./g7221_audio_pwplugin.$(PLUGINEXT)
 
-OBJECTS = $(addprefix $(OBJDIR)/,$(patsubst %.c,%.o,$(notdir $(SRCS))))
+OBJECTS	= $(addprefix $(OBJDIR)/,$(patsubst %.cxx,%.o,$(patsubst %.c,%.o,$(notdir $(SRCS)))))
 
 all: $(PLUGIN)
 
