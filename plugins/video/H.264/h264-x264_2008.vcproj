@@ -51,7 +51,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="../../../include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;PLUGIN_CODEC_DLL_EXPORTS;_CRT_SECURE_NO_WARNINGS;LICENCE_MPL;MSWIN_SUPPORT"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;PLUGIN_CODEC_DLL_EXPORTS;__STDC_CONSTANT_MACROS;_CRT_SECURE_NO_WARNINGS;LICENCE_MPL;MSWIN_SUPPORT"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -142,7 +142,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../../../include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;PLUGIN_CODEC_DLL_EXPORTS;_CRT_SECURE_NO_WARNINGS;LICENCE_MPL"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;PLUGIN_CODEC_DLL_EXPORTS;__STDC_CONSTANT_MACROS;_CRT_SECURE_NO_WARNINGS;LICENCE_MPL"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="true"
@@ -218,7 +218,15 @@
 			Name="header"
 			>
 			<File
+				RelativePath="..\common\dyna.h"
+				>
+			</File>
+			<File
 				RelativePath=".\h264-x264.h"
+				>
+			</File>
+			<File
+				RelativePath=".\h264pipe_win32.h"
 				>
 			</File>
 		</Filter>
