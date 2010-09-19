@@ -36,7 +36,7 @@
 // GVX 3000 does not like STAP packets... So we waste 40 bytes per connection...
 //#define SEND_STAP_PACKETS 1
 
-#if _MSC_VER < 1600
+#if defined(_WIN32) && _MSC_VER < 1600
 #include "../../common/vs-stdint.h"
 #else
 #include <stdint.h>
