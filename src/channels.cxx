@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.15  2010/08/26 15:12:39  shorne
+ * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
+ *
  * Revision 1.14  2010/08/19 12:35:49  shorne
  * Pass DataType to ExternalRTP Channel / Send FlowControl Requests
  *
@@ -559,6 +562,7 @@
 #include "h323pdu.h"
 #include "h323ep.h"
 #include "h323rtp.h"
+#include <ptclib/random.h>
 #include <ptclib/delaychan.h>
 
 
@@ -1351,7 +1355,8 @@ void H323_RTPChannel::Transmit()
   unsigned length;
   unsigned frameOffset = 0;
   unsigned frameCount = 0;
-  DWORD rtpTimestamp = 0;
+  DWORD rtpTimestamp = PRandom();
+  DWORD nextTimestamp = 0;
   frame.SetPayloadSize(0);
 
 #if PTRACING
@@ -1374,10 +1379,9 @@ void H323_RTPChannel::Transmit()
     } 
     else
     { 
-       if(frame.GetMarker())
-       {
+       if(frame.GetMarker()) {
           // Video uses a 90khz clock. Note that framerate should really be a float.
-          rtpTimestamp += 90000/codec->GetFrameRate(); 
+          nextTimestamp = rtpTimestamp + 90000/codec->GetFrameRate(); 
        }
     }
 
@@ -1466,8 +1470,11 @@ void H323_RTPChannel::Transmit()
       // video frames produce many packets per frame especially at
       // higher resolutions and can easily overload the link if sent
       // without delay
-      if (!isAudio)
+      if (!isAudio) {
          PThread::Sleep(5);
+         if (frame.GetMarker()) 
+             rtpTimestamp = nextTimestamp;
+      }
 
       // Reset flag for in talk burst
       if (isAudio)
@@ -1491,6 +1498,35 @@ void H323_RTPChannel::Transmit()
     connection.CloseLogicalChannelNumber(number);
 
   PTRACE(2, "H323RTP\tTransmit " << mediaFormat << " thread ended");
+}
+
+void H323_RTPChannel::SendUniChannelBackProbe()
+{
+  // When we are receiving media on a unidirectional Channel
+  // we need to send media on the backchannel to ensure that
+  // we open any necessary pinholes in NAT. 
+   if (capability->GetCapabilityDirection() != H323Capability::e_Transmit)
+        return;
+   
+    RTP_DataFrame frame;
+    frame.SetPayloadSize(0);
+    frame.SetPayloadType(rtpPayloadType);
+    frame.SetTimestamp(PRandom());
+    frame.SetMarker(false);
+
+    WORD sequenceNumber = (WORD)PRandom::Number();
+    int packetCount = 4;
+  
+    for (PINDEX i= 0; i < packetCount; ++i) {
+      frame.SetSequenceNumber(++sequenceNumber);
+      if (i == packetCount-1) frame.SetMarker(true);
+
+      if (!rtpSession.WriteData(frame)) {
+         PTRACE(2, "H323RTP\tERROR: BackChannel Probe Failed.");
+         return;
+      }
+    }
+    PTRACE(4, "H323RTP\tReceiving Unidirectional Channel: NAT Support Packets sent.");
 }
 
 
@@ -1526,6 +1562,9 @@ void H323_RTPChannel::Receive()
      PTRACE(1, "H323RTP\tTransmit " << mediaFormat << " thread ended (illegal payload type)");
      return;
   }
+
+  // UniDirectional Channel NAT support
+  SendUniChannelBackProbe();
 
   PBoolean allowRtpPayloadChange = codec->GetMediaFormat().GetDefaultSessionID() == OpalMediaFormat::DefaultAudioSessionID;
 

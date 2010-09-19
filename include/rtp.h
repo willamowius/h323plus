@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.12  2010/08/26 15:12:39  shorne
+ * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
+ *
  * Revision 1.11  2010/06/06 14:53:26  shorne
  * Added AVSync support, Aspect Ratio management, flow Control, Video 90k clock, fixes for wideband codecs and generic audio capabilities
  *
@@ -1278,6 +1281,10 @@ class RTP_UDP : public RTP_Session
     void ApplyQOS(
       const PIPSocket::Address & addr
     );
+
+    /**Whether the remote has been detected as being behind NAT.
+      */
+    PBoolean IsRemoteNAT()  { return remoteIsNAT; }
   //@}
 
     int GetDataSocketHandle() const

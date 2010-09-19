@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2010/08/26 15:12:39  shorne
+ * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
+ *
  * Revision 1.5  2010/08/19 12:35:49  shorne
  * Pass DataType to ExternalRTP Channel / Send FlowControl Requests
  *
@@ -785,6 +788,14 @@ class H323_RTPChannel : public H323_RealTimeChannel
        (eg an RTP_session).
       */
     virtual void Transmit();
+
+    /**Handle UniChannel Back Probe.
+
+       When receiving a Unidirectional media stream send back to the
+       originator empty RTPFrames to open necessary pinholes in NAT.
+      */
+    virtual void SendUniChannelBackProbe();
+
   //@}
 
   /**@name Overrides from class H323_RealTimeChannel */
