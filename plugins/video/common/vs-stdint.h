@@ -35,6 +35,7 @@
 
 #ifndef _MSC_STDINT_H_ // [
 #define _MSC_STDINT_H_
+#define _STDINT_H
 
 #if _MSC_VER > 1000
 #pragma once
