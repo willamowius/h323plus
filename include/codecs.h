@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2010/06/06 14:53:26  shorne
+ * Added AVSync support, Aspect Ratio management, flow Control, Video 90k clock, fixes for wideband codecs and generic audio capabilities
+ *
  * Revision 1.5  2010/05/02 22:43:05  shorne
  * Added RTP Information structure to be able to support A/V sync
  *
@@ -344,6 +347,7 @@
 #include <rtp.h>
 #include <channels.h>
 #include "openh323buildopts.h"
+#include <ptlib/video.h>
 
 /* The following classes have forward references to avoid including the VERY
    large header files for H225 and H245. If an application requires access
@@ -1177,8 +1181,12 @@ class H323VideoCodec : public H323Codec
    /** 
        Returns the number of frames transmitted or received so far. 
    */
-   virtual int GetFrameNum() { return frameNum; }
+    virtual int GetFrameNum() { return frameNum; }
 
+   /**
+      Set the supported Formats the codec is to support
+    */
+    virtual void SetSupportedFormats(std::list<PVideoFrameInfo> & info);
 
   protected:
 

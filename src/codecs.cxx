@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.12  2010/06/06 14:53:26  shorne
+ * Added AVSync support, Aspect Ratio management, flow Control, Video 90k clock, fixes for wideband codecs and generic audio capabilities
+ *
  * Revision 1.11  2010/05/02 22:43:05  shorne
  * Added RTP Information structure to be able to support A/V sync
  *
@@ -645,7 +648,7 @@ H323VideoCodec::~H323VideoCodec()
 PBoolean H323VideoCodec::Open(H323Connection & connection)
 {
 #ifdef H323_H239
-  if (rtpInformation.m_sessionID == OpalMediaFormat::DefaultExtVideoSessionID)
+  if (rtpInformation.m_sessionID != OpalMediaFormat::DefaultVideoSessionID)
     return connection.OpenExtendedVideoChannel(direction == Encoder, *this);
   else 
 #endif
@@ -835,6 +838,9 @@ void H323VideoCodec::SendMiscCommand(unsigned command)
     logicalChannel->SendMiscCommand(command);
 }
 
+void H323VideoCodec::SetSupportedFormats(std::list<PVideoFrameInfo> & /*info*/)
+{
+}
 
 #endif // H323_VIDEO
 
