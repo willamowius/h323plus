@@ -77,7 +77,7 @@ H264EncCtx::~H264EncCtx()
 
 bool H264EncCtx::Load()
 {
-  snprintf(pipeName, sizeof(pipeName), "\\\\.\\pipe\\x264-%d-%u", GetCurrentProcessId(),GetInstanceNumber());
+  snprintf(pipeName, sizeof(pipeName), "\\\\.\\pipe\\x264-%u", GetInstanceNumber());
 
   if (!createPipes()) {
   
@@ -188,11 +188,24 @@ bool H264EncCtx::createPipes()
            NULL
   );
 
-  if (stream == INVALID_HANDLE_VALUE) {
+	// Break if the pipe handle is valid.
+	if (stream != INVALID_HANDLE_VALUE)
+		return true;
 
-    TRACE(1, "H264\tIPC\tPP: Failure on creating Pipe - terminating (" << ErrorMessage() << ")");
-    return false;
-  }
+	// Exit if an error other than ERROR_PIPE_BUSY occurs.
+	if (GetLastError() != ERROR_PIPE_BUSY)
+	{
+		TRACE(1, "H264\tIPC\tPP: Failure on creating Pipe - terminating (" << ErrorMessage() << ")");
+		return false;
+	}
+
+	// All pipe instances are busy, so wait for 5 seconds.
+	if (!WaitNamedPipe(pipeName, 5000))
+	{
+		TRACE(1, "H264\tIPC\tPP: TimeOut on creating Pipe - terminating (" << ErrorMessage() << ")");
+		return false;
+	}
+
   return true;
 }
 
