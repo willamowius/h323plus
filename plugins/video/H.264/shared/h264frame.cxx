@@ -46,10 +46,13 @@
     #include "../gpl/x264loader_unix.h"
     extern X264Library X264Lib;
   #else
-    #define X264_NAL_ENCODE x264_nal_encode 
+    #include "../gpl/x264loader_win32.h"
+    extern X264Library X264Lib;
   #endif
 #endif
-#define MAX_FRAME_SIZE 128 * 1024
+
+#define MAX_NAL_BUFFER 150;
+#define MAX_FRAME_SIZE 150 * 1400 + 12 // 150 Complete NAL Units plus header
 
 H264Frame::H264Frame ()
 {
@@ -127,18 +130,24 @@ void H264Frame::SetFromFrame (x264_nal_t *NALs, int numberOfNALs) {
   //int vopBufferLen;
   int currentNAL = 0;
 
+  int encodedNALS = numberOfNALs;
+  if (numberOfNALs > 150) {
+      TRACE(1, "H264\tENC\tNAL Buffer Exceeded (" << numberOfNALs << ") Truncating..");
+      encodedNALS = 150;
+  }
+
   uint8_t* currentPositionInFrame=(uint8_t*) _encodedFrame;
   if (_NALs) free(_NALs);
-  _NALs = (h264_nal_t *)malloc(numberOfNALs * sizeof(h264_nal_t));
+  _NALs = (h264_nal_t *)malloc(encodedNALS * sizeof(h264_nal_t));
 
   _encodedFrameLen = 0;
   _numberOfNALsInFrame = 0;
   _currentNAL=0;
 
-  //TRACE (4, "H264\tEncap\tEncoded " << numberOfNALs << " NALs");
+  //TRACE (4, "H264\tEncap\tEncoded " << encodedNALS << " NALs");
 
   // read the nals out of the encoder and create meta data about their location and size in the frame
-  for (currentNAL = 0; currentNAL < numberOfNALs; currentNAL++) {
+  for (currentNAL = 0; currentNAL < encodedNALS; currentNAL++) {
     int currentNALLen;
 //   currentNALLen = X264_NAL_ENCODE(currentPositionInFrame, &vopBufferLen, 1, &NALs[currentNAL]);
     currentNALLen = NALs[currentNAL].i_payload;
@@ -178,7 +187,7 @@ void H264Frame::SetFromFrame (x264_nal_t *NALs, int numberOfNALs) {
       TRACE_UP(4,"[enc] Need to increase vop buffer size by  " << -currentNALLen);
     }
   }
-  TRACE_UP(4, "H264\tEncap\tLoaded an encoded frame of " << _encodedFrameLen << " bytes consisiting of " << numberOfNALs << " NAL units");
+  TRACE_UP(4, "H264\tEncap\tLoaded an encoded frame of " << _encodedFrameLen << " bytes consisiting of " <<  _numberOfNALsInFrame << " NAL units");
 }
 #endif
 
