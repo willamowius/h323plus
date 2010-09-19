@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.35  2010/09/15 14:40:20  willamowius
+ * fix build with video disabled
+ *
  * Revision 1.34  2010/08/28 03:58:20  shorne
  * More H.239 Support. Added ability to close channel, remove and reorder codecs and correctly load capabilities into simult cap listing
  *
@@ -2213,8 +2216,7 @@ void BuildH239GenericMessageResponse(H239Control & ctrl, H323Connection & connec
     msg.SetSize(3);
 	buildGenericLogical(msg[0], H239Control::h239gpAcknowledge);
 	buildGenericInteger(msg[1], H239Control::h239gpTerminalLabel, 0);
-    // TODO: what if the channel is already open just not started -SH
-	buildGenericInteger(msg[2], H239Control::h239gpChannelId, connection.GetLogicalChannels()->GetLastChannelNumber()+1);
+	buildGenericInteger(msg[2], H239Control::h239gpChannelId, ctrl.GetChannelNum(H323Capability::e_Receive));
    }
 }
 
@@ -2627,7 +2629,9 @@ const OpalMediaFormat & H323CodecExtendedVideoCapability::GetMediaFormat() const
 { 
   if (table.GetSize() > 0)
     return ((H323VideoCapability &)table[0]).GetMediaFormat();
-  else
+  else if (extCapabilities.GetSize() > 0)
+    return ((H323VideoCapability &)extCapabilities[0]).GetMediaFormat();
+  else 
 	return H323Capability::GetMediaFormat();
 }
 
@@ -2635,6 +2639,8 @@ OpalMediaFormat & H323CodecExtendedVideoCapability::GetWritableMediaFormat()
 {
   if (table.GetSize() > 0)
     return ((H323VideoCapability &)table[0]).GetWritableMediaFormat();  
+  else if (extCapabilities.GetSize() > 0)
+    return ((H323VideoCapability &)extCapabilities[0]).GetWritableMediaFormat();
   else
     return H323Capability::GetWritableMediaFormat();
 }
@@ -3485,7 +3491,7 @@ static PBoolean MatchWildcard(const PCaselessString & str, const PStringArray & 
       last = str.GetLength();
     else {
       PINDEX next = str.Find(wildcard[i], last);
-      if (next == P_MAX_INDEX)
+      if (next == P_MAX_INDEX || next > 5)  // take into account Extended Video Caps
         return FALSE;
       last = next + wildcard[i].GetLength();
     }
