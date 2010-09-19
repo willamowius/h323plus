@@ -39,7 +39,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef _MSC_VER
+
 #include <winsock2.h>
 #else
 #include <netinet/in.h>
@@ -51,9 +51,13 @@
 
 #include <codec/opalplugin.h>
 
+#ifdef _MSC_VER
 extern "C" {
+#endif
 #include "G722-1/defs.h"
+#ifdef _MSC_VER
 }
+#endif
 
 static struct PluginCodec_information licenseInfo =
 {
