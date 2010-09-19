@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2010/08/19 12:45:13  shorne
+ * Improved Generic Capability merge
+ *
  * Revision 1.7  2010/06/06 14:49:44  shorne
  * G.711 codec now 20ms (was 30ms) sample size
  *
@@ -428,13 +431,12 @@ PObject::Comparison OpalMediaOption::Compare(const PObject & obj) const
 
 bool OpalMediaOption::Merge(const OpalMediaOption & option)
 {
-  // Generic Parameters that are default zero are place holders and you merge
-  // to the value of the other party
+  // Local Generic Parameters that are default zero are place holders and you merge
+  // to the value of the other party (option is local, this is remote)
   if ((option.GetH245Generic().mode != OpalMediaOption::H245GenericInfo::None) &&
       PIsDescendant(&option, OpalMediaOptionUnsigned)) {
-       if (((OpalMediaOptionUnsigned *)this)->GetValue() == 0) {
-          Assign(option); return true;
-       } 
+      if (((const OpalMediaOptionUnsigned &)option).GetValue() == 0) 
+             return true;
   }
 
   switch (m_merge) {
