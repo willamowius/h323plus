@@ -34,9 +34,10 @@
 #include <stdio.h>
 
 // TODO: we should dynamically adjust this buffer size to the max frame size used
-//#define MAX_FRAME_SIZE 608286	// 4CIF
-#define MAX_FRAME_SIZE 1382400  // 720p 
-//#define MAX_FRAME_SIZE 3110430	// 1080p
+//#define MAX_FRAME_SIZE 1382412  // 720p 
+//#define MAX_FRAME_SIZE 1474572  // 1280x768 H.239 
+//#define MAX_FRAME_SIZE 3110412	// 1080p
+#define MAX_FRAME_SIZE 3317772	// 1920 x 1152 H.239
 
 HANDLE stream;
 unsigned msg;
