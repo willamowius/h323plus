@@ -101,10 +101,12 @@ X264EncoderContext::X264EncoderContext()
   // No aspect ratio correction 
   _context.vui.i_sar_width      = 0;
   _context.vui.i_sar_height     = 0;
-
+  
+#if X264_BUILD > 101
   // No automatic keyframe generation
   _context.i_keyint_max               = X264_KEYINT_MAX_INFINITE;
   _context.i_keyint_min               = X264_KEYINT_MAX_INFINITE;
+#endif
 
   // Enable logging
   _context.pf_log               = logCallbackX264;
