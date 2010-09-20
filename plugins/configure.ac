@@ -120,6 +120,7 @@ HAVE_VPB=yes
 HAVE_CAPI=yes
 HAVE_IXJ=no
 HAVE_H263=yes
+HAVE_H263P=yes
 HAVE_H264=yes
 HAVE_CELT=yes
 HAVE_SPANDSP=yes
@@ -522,6 +523,9 @@ fi
 if test -d video/H.263-ffmpeg ; then
   AC_CONFIG_FILES(video/H.263-ffmpeg/Makefile)
 fi
+if test -d video/H.263-1998; then
+  AC_CONFIG_FILES(video/H.263-1998/Makefile)
+fi
 if test -d video/MPEG4-ffmpeg ; then
   AC_CONFIG_FILES(video/MPEG4-ffmpeg/Makefile)
 fi
@@ -605,7 +609,7 @@ echo ""
 
 echo "                           H.261  :  yes"
 echo "                           H.263  :  ${HAVE_H263} (ffmpeg version)"
-dnl echo "                     H.263/H.263+ :  ${HAVE_H263P}"
+echo "                     H.263/H.263+ :  ${HAVE_H263P}"
 echo "                           H.264  :  ${HAVE_H264}"
 echo "                          THEORA  :  ${HAVE_THEORA}"
 

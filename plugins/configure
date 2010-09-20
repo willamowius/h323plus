@@ -7199,6 +7199,7 @@ HAVE_VPB=yes
 HAVE_CAPI=yes
 HAVE_IXJ=no
 HAVE_H263=yes
+HAVE_H263P=yes
 HAVE_H264=yes
 HAVE_CELT=yes
 HAVE_SPANDSP=yes
@@ -12151,6 +12152,10 @@ if test -d video/H.263-ffmpeg ; then
   ac_config_files="$ac_config_files video/H.263-ffmpeg/Makefile"
 
 fi
+if test -d video/H.263-1998; then
+  ac_config_files="$ac_config_files video/H.263-1998/Makefile"
+
+fi
 if test -d video/MPEG4-ffmpeg ; then
   ac_config_files="$ac_config_files video/MPEG4-ffmpeg/Makefile"
 
@@ -12814,6 +12819,7 @@ do
     "audio/celt/Makefile") CONFIG_FILES="$CONFIG_FILES audio/celt/Makefile" ;;
     "video/H.261-vic/Makefile") CONFIG_FILES="$CONFIG_FILES video/H.261-vic/Makefile" ;;
     "video/H.263-ffmpeg/Makefile") CONFIG_FILES="$CONFIG_FILES video/H.263-ffmpeg/Makefile" ;;
+    "video/H.263-1998/Makefile") CONFIG_FILES="$CONFIG_FILES video/H.263-1998/Makefile" ;;
     "video/MPEG4-ffmpeg/Makefile") CONFIG_FILES="$CONFIG_FILES video/MPEG4-ffmpeg/Makefile" ;;
     "video/H.264/Makefile") CONFIG_FILES="$CONFIG_FILES video/H.264/Makefile" ;;
     "video/H.264/gpl/Makefile") CONFIG_FILES="$CONFIG_FILES video/H.264/gpl/Makefile" ;;
@@ -13940,6 +13946,7 @@ do
     "audio/celt/Makefile") CONFIG_FILES="$CONFIG_FILES audio/celt/Makefile" ;;
     "video/H.261-vic/Makefile") CONFIG_FILES="$CONFIG_FILES video/H.261-vic/Makefile" ;;
     "video/H.263-ffmpeg/Makefile") CONFIG_FILES="$CONFIG_FILES video/H.263-ffmpeg/Makefile" ;;
+    "video/H.263-1998/Makefile") CONFIG_FILES="$CONFIG_FILES video/H.263-1998/Makefile" ;;
     "video/MPEG4-ffmpeg/Makefile") CONFIG_FILES="$CONFIG_FILES video/MPEG4-ffmpeg/Makefile" ;;
     "video/H.264/Makefile") CONFIG_FILES="$CONFIG_FILES video/H.264/Makefile" ;;
     "video/H.264/gpl/Makefile") CONFIG_FILES="$CONFIG_FILES video/H.264/gpl/Makefile" ;;
@@ -14643,6 +14650,7 @@ echo ""
 
 echo "                           H.261  :  yes"
 echo "                           H.263  :  ${HAVE_H263} (ffmpeg version)"
+echo "                     H.263/H.263+ :  ${HAVE_H263P}"
 echo "                           H.264  :  ${HAVE_H264}"
 echo "                          THEORA  :  ${HAVE_THEORA}"
 
