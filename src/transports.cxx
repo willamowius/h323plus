@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2010/09/19 05:55:10  shorne
+ * Added NAT KeepAlive (empty TPKT) to standard H.225 and H.245 Channels
+ *
  * Revision 1.3  2008/09/27 06:18:57  shorne
  * BUG FIX: H323SignalPDU::Write to correctly handle NULL H323Connection Thx Nir Soffer
  *
@@ -618,6 +621,7 @@ class H225TransportThread : public PThread
 
 	PDECLARE_NOTIFIER(PTimer, H225TransportThread, KeepAlive);
 	PTimer	m_keepAlive;								
+	PBoolean useKeepAlive;
 };
 
 
@@ -658,6 +662,7 @@ H225TransportThread::H225TransportThread(H323EndPoint & ep, H323Transport * t)
             "H225 Answer:%0x"),
     transport(t)
 {
+  useKeepAlive = ep.EnableH225KeepAlive();
   Resume();
 }
 
@@ -672,8 +677,10 @@ void H225TransportThread::Main()
 {
   PTRACE(3, "H225\tStarted incoming call thread");
 
-  m_keepAlive.SetNotifier(PCREATE_NOTIFIER(KeepAlive));
-  m_keepAlive.RunContinuous(KeepAliveInterval * 1000);
+  if (useKeepAlive) {
+    m_keepAlive.SetNotifier(PCREATE_NOTIFIER(KeepAlive));
+    m_keepAlive.RunContinuous(KeepAliveInterval * 1000);
+  }
 
   if (!transport->HandleFirstSignallingChannelPDU())
     delete transport;
@@ -714,8 +721,10 @@ H245TransportThread::H245TransportThread(H323EndPoint & endpoint,
 #endif
   {
     transport.AttachThread(this);
-    m_keepAlive.SetNotifier(PCREATE_NOTIFIER(KeepAlive));
-    m_keepAlive.RunContinuous(KeepAliveInterval * 1000);
+    if (endpoint.EnableH245KeepAlive()) {
+      m_keepAlive.SetNotifier(PCREATE_NOTIFIER(KeepAlive));
+      m_keepAlive.RunContinuous(KeepAliveInterval * 1000);
+    }
   }
   Resume();
 }

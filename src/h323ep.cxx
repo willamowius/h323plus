@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.44  2010/09/19 05:38:56  shorne
+ * Added support for address##alias dialing which is common on polycom and lifesize systems
+ *
  * Revision 1.43  2010/08/26 15:12:39  shorne
  * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
  *
@@ -1403,6 +1406,9 @@ H323EndPoint::H323EndPoint()
 #ifdef H323_GNUGK
   gnugk = NULL;
 #endif
+
+  m_useH225KeepAlive = PFalse;
+  m_useH245KeepAlive = PFalse;
 
   PTRACE(3, "H323\tCreated endpoint.");
 }

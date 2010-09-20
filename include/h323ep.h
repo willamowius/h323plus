@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.31  2010/08/26 15:12:39  shorne
+ * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
+ *
  * Revision 1.30  2010/05/02 22:45:58  shorne
  * Added ability to disable the internal jitter buffer
  *
@@ -2682,6 +2685,8 @@ class H323EndPoint : public PObject
 
     H323ConnectionDict GetConnections() { return connectionsActive; };
 
+    PBoolean EnableH225KeepAlive() const { return m_useH225KeepAlive; }
+    PBoolean EnableH245KeepAlive() const { return m_useH245KeepAlive; }
   //@}
 
     /**
@@ -2916,6 +2921,8 @@ class H323EndPoint : public PObject
     PThread  *  RegThread;
     PDECLARE_NOTIFIER(PThread, H323EndPoint, RegMethod);
 
+	PBoolean m_useH225KeepAlive;
+	PBoolean m_useH245KeepAlive;
 };
 
 /////////////////////////////////////////////////////////////////////
