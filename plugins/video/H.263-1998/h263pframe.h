@@ -26,6 +26,7 @@
 
 #include <vector>
 #include <string.h>
+#include <stdint.h>
 #include "rtpframe.h"
 
 #include "../common/ffmpeg.h"
