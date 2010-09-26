@@ -409,10 +409,11 @@ uint32_t H263PFrame::parseHeader(uint8_t* headerPtr, uint32_t headerMaxLen)
 
     if (UFEP == 1) {
       if (UMV)  {
-         if (headerBits.GetBits(1) == 1)
+         if (headerBits.GetBits(1) == 1) {
            TRACE_UP(4, "H263+\tHeader\tUUI: 1")
-          else
+		 } else {
            TRACE_UP(4, "H263+\tHeader\tUUI: 0" << headerBits.GetBits(1));
+		 }
       }
       if (SS) {
         TRACE_UP(4, "H263+\tHeader\tSSS:" << headerBits.GetBits(2));
