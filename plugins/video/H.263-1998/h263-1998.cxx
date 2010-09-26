@@ -221,11 +221,11 @@ tracer.Start(); tracer.GetStream() << text; func(tracer, rtp); tracer.End()
 /////////////////////////////////////////////////////////////////////////////
       
 H263_Base_EncoderContext::H263_Base_EncoderContext(const char * _prefix)
-  : prefix(_prefix)
+  : _context(NULL)
+  , prefix(_prefix)
 #if TRACE_FILE
   , tracer(_prefix, true)
 #endif
-  , _context(NULL)
 { 
   _inputFrameBuffer = NULL;
 
@@ -1644,36 +1644,48 @@ static int encoder_set_options(const PluginCodec_Definition *,
     if (STRCMPI(option[0], PLUGINCODEC_OPTION_TEMPORAL_SPATIAL_TRADE_OFF) == 0)
        context->SetTSTO (atoi(option[1]));
 
-    if (STRCMPI(option[0], "Annex D") == 0)
-      if (atoi(option[1]) == 1)
+    if (STRCMPI(option[0], "Annex D") == 0) {
+      if (atoi(option[1]) == 1) {
         context->EnableAnnex (D);
-       else
+	  } else {
         context->DisableAnnex (D);
-    if (STRCMPI(option[0], "Annex F") == 0)
-      if (atoi(option[1]) == 1)
+	  }
+	}
+    if (STRCMPI(option[0], "Annex F") == 0) {
+      if (atoi(option[1]) == 1) {
         context->EnableAnnex (F);
-       else
+       } else {
         context->DisableAnnex (F);
-    if (STRCMPI(option[0], "Annex I") == 0)
-      if (atoi(option[1]) == 1)
+	  }
+	}
+    if (STRCMPI(option[0], "Annex I") == 0) {
+      if (atoi(option[1]) == 1) {
         context->EnableAnnex (I);
-       else
+	  } else {
         context->DisableAnnex (I);
-    if (STRCMPI(option[0], "Annex K") == 0)
-      if (atoi(option[1]) == 1)
+	  }
+	}
+    if (STRCMPI(option[0], "Annex K") == 0) {
+      if (atoi(option[1]) == 1) {
         context->EnableAnnex (K);
-       else
+	  } else {
         context->DisableAnnex (K);
-    if (STRCMPI(option[0], "Annex J") == 0)
-      if (atoi(option[1]) == 1)
+	  }
+	}
+    if (STRCMPI(option[0], "Annex J") == 0) {
+      if (atoi(option[1]) == 1) {
         context->EnableAnnex (J);
-       else
+	  } else {
         context->DisableAnnex (J);
-    if (STRCMPI(option[0], "Annex S") == 0)
-      if (atoi(option[1]) == 1)
+	  }
+	}
+    if (STRCMPI(option[0], "Annex S") == 0) {
+      if (atoi(option[1]) == 1) {
         context->EnableAnnex (S);
-       else
+	  } else {
         context->DisableAnnex (S);
+	  }
+	}
   }
 
   context->OpenCodec();
