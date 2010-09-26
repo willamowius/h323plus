@@ -314,10 +314,7 @@ static struct PluginCodec_Option const * const optionTable[] = {
   NULL
 };
 
-#define H323_H264_TEST	1
-#define H323_H264_HD	1
 
-#ifdef H323_H264_TEST
 ///////////////////////////////////////////////////////////////////////////
 // H.323 Definitions
 
@@ -495,11 +492,9 @@ static struct PluginCodec_H323GenericCodecData prefix##_h323GenericData[] = { \
 DECLARE_GENERIC_OPTIONS(H264QCIF) 
 DECLARE_GENERIC_OPTIONS(H264CIF)
 DECLARE_GENERIC_OPTIONS(H264CIF4)
-#ifdef H323_H264_HD
 DECLARE_GENERIC_OPTIONS(H264720P)
 DECLARE_GENERIC_OPTIONS(H264H239)
 DECLARE_GENERIC_OPTIONS(H2641080P)
-#endif
 
 #define DECLARE_H323PARAM(prefix) \
 { \
@@ -556,8 +551,6 @@ DECLARE_GENERIC_OPTIONS(H2641080P)
   PluginCodec_H323Codec_generic,      /* h323CapabilityType */ \
   (struct PluginCodec_H323GenericCodecData *)&prefix##_h323GenericData /* h323CapabilityData */ \
 } \
-
-#endif
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -635,16 +628,12 @@ static struct PluginCodec_Definition h264CodecDefn[] = {
   PluginCodec_H323Codec_NoH323,       // h323CapabilityType 
   NULL                                // h323CapabilityData
 },*/
-#ifdef H323_H264_TEST
  // DECLARE_H323PARAM(H264QCIF),
  //   DECLARE_H323PARAM(H264CIF),
  // DECLARE_H323PARAM(H264CIF4)
-#ifdef H323_H264_HD
   DECLARE_H323PARAM(H264720P),
   DECLARE_H323PARAM(H264H239)
 //  ,DECLARE_H323PARAM(H2641080P)
-#endif
-#endif
 };
 
 #endif /* __H264-X264_H__ */
