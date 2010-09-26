@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.36  2010/09/19 05:41:43  shorne
+ * More Fixes for finding H.239 Capabilities
+ *
  * Revision 1.35  2010/09/15 14:40:20  willamowius
  * fix build with video disabled
  *
@@ -3491,7 +3494,9 @@ static PBoolean MatchWildcard(const PCaselessString & str, const PStringArray & 
       last = str.GetLength();
     else {
       PINDEX next = str.Find(wildcard[i], last);
-      if (next == P_MAX_INDEX || next > 5)  // take into account Extended Video Caps
+      // BUG: this change broke capabilities.Remove("16CIF") and similar since the match happens afetr position 5
+      // if (next == P_MAX_INDEX || next > 5)  // take into account Extended Video Caps
+      if (next == P_MAX_INDEX)
         return FALSE;
       last = next + wildcard[i].GetLength();
     }
