@@ -20,6 +20,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.2  2010/09/09 09:51:16  willamowius
+# enable warnings, disable strict-aliasing optimization, because of conflict with PDynaLink
+#
 # Revision 1.1  2010/02/24 02:19:43  shorne
 # First commit of h323plus mirror
 #
@@ -97,7 +100,9 @@ X264_LIBS	=@X264_LIBS@
 X264_LINK_STATIC=@X264_LINK_STATIC@
 DL_LIBS	=@DL_LIBS@
 
-EXTRACCFLAGS	+= $(X264_CFLAGS) -I$(COMMONDIR) -I$(PLUGINDIR)
+EXTRACCFLAGS += $(X264_CFLAGS) -I$(COMMONDIR) -I$(PLUGINDIR)
+# for best quality, regardless of bandwith usage
+#EXTRACCFLAGS += -DH264_OPTIMAL_QUALITY=1
 
 STDCCFLAGS += -Wall -Wformat -Wformat-security -Wreorder -fno-strict-aliasing
 
