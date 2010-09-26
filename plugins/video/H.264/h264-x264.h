@@ -472,14 +472,14 @@ static struct PluginCodec_Option const * const prefix##_OptionTable[] = { \
 }; \
 static const struct PluginCodec_H323GenericParameterDefinition prefix##_h323params[] = \
 { \
-	{1,0,0,0,0,3, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, prefix##_Generic3}, \
-	{1,0,0,0,0,4, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, prefix##_Generic4}, \
-	{1,0,0,0,0,5, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, prefix##_Generic5}, \
-	{1,0,0,0,0,6, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, prefix##_Generic6}, \
-	{1,0,0,0,0,7, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, prefix##_Generic7}, \
-	{1,0,0,0,0,10, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, prefix##_Generic10}, \
-	{1,0,0,0,0,41, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_BooleanArray,prefix##_Profile}, \
-	{1,0,0,0,0,42, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, prefix##_Level}, \
+	{{1,0,0,0,0},3, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, {prefix##_Generic3}}, \
+	{{1,0,0,0,0},4, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, {prefix##_Generic4}}, \
+	{{1,0,0,0,0},5, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, {prefix##_Generic5}}, \
+	{{1,0,0,0,0},6, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, {prefix##_Generic6}}, \
+	{{1,0,0,0,0},7, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, {prefix##_Generic7}}, \
+	{{1,0,0,0,0},10, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, {prefix##_Generic10}}, \
+	{{1,0,0,0,0},41, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_BooleanArray,{prefix##_Profile}}, \
+	{{1,0,0,0,0},42, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, {prefix##_Level}}, \
 	NULL \
 }; \
 static struct PluginCodec_H323GenericCodecData prefix##_h323GenericData[] = { \
@@ -489,7 +489,7 @@ static struct PluginCodec_H323GenericCodecData prefix##_h323GenericData[] = { \
 	prefix##_h323params \
 }; \
 
-DECLARE_GENERIC_OPTIONS(H264QCIF) 
+DECLARE_GENERIC_OPTIONS(H264QCIF)
 DECLARE_GENERIC_OPTIONS(H264CIF)
 DECLARE_GENERIC_OPTIONS(H264CIF4)
 DECLARE_GENERIC_OPTIONS(H264720P)
@@ -511,10 +511,10 @@ DECLARE_GENERIC_OPTIONS(H2641080P)
   H264_CLOCKRATE,                     /* samples per second */ \
   prefix##_MaxBitRate,				  /* raw bits per second */ \
   20000,                              /* nanoseconds per frame */ \
-  prefix##_FrameWidth,               /* samples per frame */ \
+  {{ prefix##_FrameWidth,             /* samples per frame */ \
   prefix##_FrameHeight,			      /* bytes per frame */ \
   10,                                 /* recommended number of frames per packet */ \
-  60,                                 /* maximum number of frames per packet  */ \
+  60, }},                             /* maximum number of frames per packet  */ \
   0,                                  /* IANA RTP payload code */ \
   sdpH264,                            /* RTP payload name */ \
   create_encoder,                     /* create codec function */ \
@@ -538,16 +538,16 @@ DECLARE_GENERIC_OPTIONS(H2641080P)
   H264_CLOCKRATE,                     /* samples per second */ \
   prefix##_MaxBitRate,				  /* raw bits per second */ \
   20000,                              /* nanoseconds per frame */ \
-  prefix##_FrameWidth,               /* samples per frame */ \
+  {{ prefix##_FrameWidth,             /* samples per frame */ \
   prefix##_FrameHeight,			      /* bytes per frame */ \
   10,                                 /* recommended number of frames per packet */ \
-  60,                                 /* maximum number of frames per packet  */ \
+  60, }},                             /* maximum number of frames per packet  */ \
   0,                                  /* IANA RTP payload code */ \
   sdpH264,                            /* RTP payload name */ \
   create_decoder,                     /* create codec function */ \
   destroy_decoder,                    /* destroy codec */ \
   codec_decoder,                      /* encode/decode */ \
-  DecoderControls,                  /* codec controls */ \
+  DecoderControls,                    /* codec controls */ \
   PluginCodec_H323Codec_generic,      /* h323CapabilityType */ \
   (struct PluginCodec_H323GenericCodecData *)&prefix##_h323GenericData /* h323CapabilityData */ \
 } \
