@@ -1,5 +1,5 @@
 #
-# Makefile for GSM 06.10
+# Makefile for H.264
 #
 # Copyright (C) 2004 Post Increment, All Rights Reserved
 #
@@ -20,6 +20,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.4  2010/09/09 09:51:16  willamowius
+# enable warnings, disable strict-aliasing optimization, because of conflict with PDynaLink
+#
 # Revision 1.3  2010/05/21 11:08:26  willamowius
 # add compiler flag needed for x264 >= 0.94
 #
