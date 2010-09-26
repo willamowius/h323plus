@@ -20,6 +20,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.5  2010/09/26 13:24:46  willamowius
+# fix comment
+#
 # Revision 1.4  2010/09/09 09:51:16  willamowius
 # enable warnings, disable strict-aliasing optimization, because of conflict with PDynaLink
 #
@@ -108,7 +111,7 @@ LIBAVCODEC_CFLAGS=@LIBAVCODEC_CFLAGS@
 
 EXTRACCFLAGS    +=  $(LIBAVCODEC_CFLAGS) -I$(COMMONDIR) -I$(PLUGINDIR) -DLIB_DIR='"$(libdir)"' -DVC_PLUGIN_DIR='"$(VC_PLUGIN_DIR)"' -DLICENCE_MPL
 
-STDCCFLAGS += -Wall -Wformat -Wformat-security -Wreorder -fno-strict-aliasing
+STDCCFLAGS += -Wall -Wno-unused -Wformat -Wformat-security -Wreorder -fno-strict-aliasing
 
 vpath	%.cxx $(SHAREDDIR)
 vpath	%.cxx $(COMMONDIR)
