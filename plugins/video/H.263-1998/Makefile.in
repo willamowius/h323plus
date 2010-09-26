@@ -57,6 +57,8 @@ endif
 
 EXTRACCFLAGS    += $(LIBAVCODEC_CFLAGS) -I$(COMMONDIR) -I$(PLUGINDIR)
 
+STDCCFLAGS += -Wall -Wno-unused -Wformat -Wformat-security -Wreorder -fno-strict-aliasing
+
 vpath   %.cxx $(COMMONDIR)
 vpath   %.o   $(OBJDIR)
 
