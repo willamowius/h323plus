@@ -20,6 +20,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.1  2010/02/24 02:19:43  shorne
+# First commit of h323plus mirror
+#
 # Revision 1.4  2007/04/19 06:09:04  csoutheren
 # Fixed plugin build system to use better detection for OSX
 # Resolved 1636262 - Fix for audio plugins for OSX
@@ -55,6 +58,8 @@ STDCCFLAGS	=@STDCCFLAGS@
 LDFLAGS		=@LDFLAGS@
 
 EXTRACCFLAGS    += -I$(COMMONDIR) -I$(PLUGINDIR)
+
+STDCCFLAGS += -Wall -Wno-unused -Wformat -Wformat-security -Wreorder -fno-strict-aliasing
 
 vpath	%.cxx $(SHAREDDIR)
 vpath	%.cxx $(COMMONDIR)
