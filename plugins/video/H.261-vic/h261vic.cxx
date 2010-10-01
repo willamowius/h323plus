@@ -183,6 +183,12 @@ class H261EncoderContext
       videoEncoder->SetSize(frameWidth, frameHeight);
     }
 
+    void GetFrameSize(int & w, int & h)
+    {
+      w = frameWidth;
+      h = frameHeight;
+    }
+
     /* The only way to influence the amount of data that the H.261 codec produces is 
     to change the "quality" variable that specifies the static quantisation level for
     BACKGROUND blocks. This "quality" value divided by 2 is used as quantisation level
@@ -194,7 +200,7 @@ class H261EncoderContext
     At QCIF resolution, TSTO values 0..31 will be mapped to quality values 1..31 at
     bitrates <=128kbit/s. At higher bitrates, the same TSTO values will be 
     mapped to lower quality values, e.g. to 1..19 at 256kbit/s and 1..5 at 512kbit/s. Above 
-    approx. 656kbit/s, all TSTO values will be mapped to a quality of 1. 
+    approx. 656kbit/s, all TSTO values will be mapped to a quality of 1.
       
     At CIF, TSTO values 0..31 will be mapped to quality values 1..31 at up to 224kbit/s, to 1..11 
     at 512kbit/s and to 1 at bitrates >=912kbit/s. 
@@ -369,6 +375,7 @@ static int encoder_set_options(const PluginCodec_Definition *,
   if (parmLen == NULL || *parmLen != sizeof(const char **))
     return 0;
   
+  context->GetFrameSize (width, height);	// fetch old value, needed for quality computation
   if (parm != NULL) {
     const char ** options = (const char **)parm;
     int i;
