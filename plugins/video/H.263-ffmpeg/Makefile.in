@@ -20,6 +20,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.2  2010/10/01 13:38:52  willamowius
+# enable warnings, diable strict-alias optimizations because of DynLib issues
+#
 # Revision 1.1  2010/02/24 02:19:43  shorne
 # First commit of h323plus mirror
 #
@@ -59,7 +62,7 @@ LDFLAGS		=@LDFLAGS@
 
 EXTRACCFLAGS    += -I$(COMMONDIR) -I$(PLUGINDIR)
 
-STDCCFLAGS += -Wall -Wno-unused -Wformat -Wformat-security -Wreorder -fno-strict-aliasing
+STDCCFLAGS += -Wall -Wno-unused -Wformat -Wformat-security -Wreorder -fno-strict-aliasing -Wno-write-strings
 
 vpath	%.cxx $(SHAREDDIR)
 vpath	%.cxx $(COMMONDIR)
