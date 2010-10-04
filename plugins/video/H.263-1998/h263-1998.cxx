@@ -133,13 +133,10 @@ static void logCallbackFFMPEG (void* v, int level, const char* fmt , va_list arg
     vsprintf(buffer + strlen(buffer), fmt, arg);
     if (strlen(buffer) > 0)
       buffer[strlen(buffer)-1] = 0;
-printf("%s\n", buffer);
-/*
-    if (severity = 4) 
+    if (severity == 4) 
       { TRACE_UP (severity, buffer); }
     else
       { TRACE (severity, buffer); }
-*/
   }
 }
 
