@@ -131,8 +131,14 @@ H263PFrame::H263PFrame (uint32_t maxFrameSize)
 
 H263PFrame::~H263PFrame ()
 {
-  if (_encodedFrame.ptr) free (_encodedFrame.ptr);
-  if (_picHeader.ptr) free (_picHeader.ptr);
+  if (_encodedFrame.ptr) {
+	free(_encodedFrame.ptr);
+	_encodedFrame.ptr = NULL;
+  }
+  if (_picHeader.ptr) {
+	free(_picHeader.ptr);
+	_picHeader.ptr = NULL;
+  }
 }
 
 void H263PFrame::BeginNewFrame ()

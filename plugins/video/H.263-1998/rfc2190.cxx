@@ -118,6 +118,7 @@ RFC2190Packetizer::RFC2190Packetizer()
 RFC2190Packetizer::~RFC2190Packetizer()
 {
   free(m_buffer);
+  m_buffer = NULL;
 }
 
 int RFC2190Packetizer::Open(unsigned long _timestamp, unsigned long /*maxLen*/)
