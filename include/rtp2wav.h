@@ -1,5 +1,5 @@
 /*
- * rfc28rtp2wav33.h
+ * rtp2wav.h
  *
  * Open Phone Abstraction Library (OPAL)
  * Formally known as the Open H323 project.
@@ -23,6 +23,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/05/23 11:20:02  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.1  2007/08/06 20:50:50  shorne
  * First commit of h323plus
  *
@@ -58,7 +61,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 /**This class encapsulates a WAV file that can be used to intercept RTP data
-   in the standard H323RTPChannel class.
+   in the standard H323_RTPChannel class.
   */
 class OpalRtpToWavFile : public PWAVFile
 {
