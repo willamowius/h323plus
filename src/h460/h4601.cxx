@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.22  2010/05/26 13:09:28  willamowius
+ * Solaris 10 compile fix
+ *
  * Revision 1.21  2010/05/02 22:49:41  shorne
  * BUG FIX: Ensure no segfault when getting feature that does not exist
  *
@@ -746,10 +749,16 @@ H460_Feature::H460_Feature(OpalOID identifier)
 
 H460_Feature::H460_Feature(const H225_FeatureDescriptor & descriptor)
 {
-	CurrentTable = (H460_FeatureTable *)&m_parameters;
-//	OnReceivedPDU(descriptor);
+    SetFeatureID(descriptor.m_id);
+    if (descriptor.HasOptionalField(H225_FeatureDescriptor::e_parameters)) {
+        IncludeOptionalField(H225_FeatureDescriptor::e_parameters);
+	    m_parameters = descriptor.m_parameters;
+    }  
+
+    CurrentTable = (H460_FeatureTable *)&m_parameters;
 	ep = NULL;
 	con = NULL;
+    FeatureCategory = FeatureSupported;
 }
 
 PString H460_Feature::GetFeatureIDAsString()
