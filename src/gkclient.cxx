@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.16  2010/08/26 15:12:39  shorne
+ * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
+ *
  * Revision 1.15  2010/01/20 04:12:29  shorne
  * Added RRJ reason NeededFeature
  *
@@ -2261,7 +2264,6 @@ void H323Gatekeeper::MonitorMain(PThread &, INT)
     monitorTickle.Wait();
     if (monitorStop)
       break;
-PTRACE(1,"TEST\tReregister " << reregisterNow << " TTL: " << timeToLive.IsRunning() << " Reset: " << timeToLive.GetResetTime());
     if (reregisterNow || 
                 (!timeToLive.IsRunning() && timeToLive.GetResetTime() > 0)) {
       RegistrationTimeToLive();
