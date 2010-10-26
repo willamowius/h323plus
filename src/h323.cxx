@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.65  2010/09/19 05:46:29  shorne
+ * Added Handling H.245 Control Channel failure, Setting initial Bandwidth by codec type. Setting H.239 Channel number callback
+ *
  * Revision 1.64  2010/08/28 03:58:20  shorne
  * More H.239 Support. Added ability to close channel, remove and reorder codecs and correctly load capabilities into simult cap listing
  *
@@ -4306,6 +4309,7 @@ void H323Connection::SendCapabilitySet(PBoolean empty)
 
 void H323Connection::SetInitialBandwidth(H323Capability::MainTypes & captype, int bitRate)
 {
+#ifdef H323_VIDEO
   for (PINDEX i=0; i< localCapabilities.GetSize(); ++i) {
     if (localCapabilities[i].GetMainType() == captype) {
       OpalMediaFormat & fmt = localCapabilities[i].GetWritableMediaFormat();
@@ -4313,6 +4317,7 @@ void H323Connection::SetInitialBandwidth(H323Capability::MainTypes & captype, in
              fmt.SetOptionInteger(OpalVideoFormat::MaxBitRateOption,bitRate);
     }
   }
+#endif
 }
 
 
