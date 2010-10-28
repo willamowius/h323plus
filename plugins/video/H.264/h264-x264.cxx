@@ -97,6 +97,7 @@ static char * num2str(int num)
 
 H264EncoderContext::H264EncoderContext()
 {
+  TRACE(1, "JW H264EncoderContext c'tor");
   if (!H264EncCtxInstance.isLoaded()) {
     if (!H264EncCtxInstance.Load()) {
       TRACE(1, "H264\tCodec\tDisabled");
@@ -106,6 +107,15 @@ H264EncoderContext::H264EncoderContext()
   }
 
   H264EncCtxInstance.call(H264ENCODERCONTEXT_CREATE);
+  // add default list of supported formats
+  inputFormats fmt1080p = {8100, 1920, 1080, 4};
+  inputFormats fmt720p = {3600, 1280, 720, 4};
+  inputFormats fmt4cif = {1584, 704, 576, 4};
+  inputFormats fmtcif = {396, 352, 288, 4};
+  AddInputFormat(fmt1080p);
+  AddInputFormat(fmt720p);
+  AddInputFormat(fmt4cif);
+  AddInputFormat(fmtcif);
 }
 
 H264EncoderContext::~H264EncoderContext()
@@ -1009,7 +1019,7 @@ static int encoder_set_options(
   unsigned orgframeRate = codec->parm.video.maxFrameRate;
   unsigned frameRate = orgframeRate;
   unsigned targetBitrate = codec->bitsPerSec;
-  unsigned h264level = 51;
+  unsigned h264level = 36;
   unsigned cusMBPS = 0;   // Custom maximum MBPS
   unsigned cusMFS = 0;    // Custom maximum FrameSize
   unsigned staticMBPS = 0;  /// static macroblocks per sec
@@ -1020,6 +1030,9 @@ static int encoder_set_options(
     int i;
     for (i = 0; options[i] != NULL; i += 2) {
 	  // fprintf(stderr, "%s = %s\n", options[i], options[i+1]);
+      char msg[1024];
+	  snprintf(msg, sizeof(msg), "H.264 encoder_set_options: %s = %s", options[i], options[i+1]);
+	  TRACE(1, msg);
       if (STRCMPI(options[i], "CAP RFC3894 Profile Level") == 0) {
         profile_level_from_string (options[i+1], profile, constraints, h264level);
       }
