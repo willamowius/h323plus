@@ -70,7 +70,7 @@ bool X264Library::Load()
   }
   if (!open_found) {
     // try range of possible version numbers
-    for (unsigned ver = 80; ver < 100; ++ver) {
+    for (unsigned ver = 80; ver < 200; ++ver) {
       char fktname[128];
 	  sprintf(fktname, "x264_encoder_open_%d", ver);
       TRACE (1, "H264\tDYNA\tTry " << fktname);
