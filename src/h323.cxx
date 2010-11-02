@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.66  2010/10/26 13:26:27  willamowius
+ * fix compile with video disabled
+ *
  * Revision 1.65  2010/09/19 05:46:29  shorne
  * Added Handling H.245 Control Channel failure, Setting initial Bandwidth by codec type. Setting H.239 Channel number callback
  *
@@ -4850,7 +4853,7 @@ H323Channel * H323Connection::CreateRealTimeLogicalChannel(const H323Capability 
 {
   RTP_Session * session = NULL;
 
-  if (param != NULL)
+  if (param != NULL && param->HasOptionalField(H245_H2250LogicalChannelParameters::e_mediaControlChannel))
     session = UseSession(param->m_sessionID, param->m_mediaControlChannel, dir, rtpqos);
   else {
     // Make a fake transmprt address from the connection so gets initialised with
