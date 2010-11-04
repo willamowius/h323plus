@@ -4,10 +4,10 @@ Fixed H.239 Support and now support H.239 only plugins
 G.711 now 20ms sample rate by default
 Added H.264 support (tested with polycom,lifesize,tandberg)
 (fixed) Video frames now on fixed 90k clock timestamp
-Added Video decoder can handle mutiple frames to decode
+Added Video decoder can handle multiple frames to decode
 Added A/V sync support
 Added Audio Packet Loss detection
-Added Video Flow Control signalling
+Added Video Flow Control signaling
 (fixed) Generic Audio Capability processing
 (fixed) Support for Wideband codecs
 (fixed) H.239 fields not populated in TCS causing error with Tandberg
@@ -38,5 +38,5 @@ Updated to compile with Ptlib 2.2.x and 2.3.x (PBoolean etc.)
 Added callback for the ability to set the Maximum bandwidth for Video Call H323Connection::OnSetInitialBandwidth()
 Corrected FileTransfer Capability OID to avoid conflict with other OID usage
 Added Callback for H.460 Instancing so can disable/remove H.460 Features at runtime.
-Added support for H.450 Non-call supplimentary services (like H.450.7)
+Added support for H.450 Non-call supplementary services (like H.450.7)
 (Fixed) Typos with H323_GnuGK directive
