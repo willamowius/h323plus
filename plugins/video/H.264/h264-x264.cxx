@@ -893,7 +893,7 @@ int encoder_formats(
     }
 
     inputFormats fmt;
-    context->GetInputFormat(fmt);
+    context->GetInputFormat(fmt);	// TODO: check return value
 
     TRACE(2,"Adjusted w " << fmt.w << " h " << fmt.h << " r " << fmt.r); 
 
