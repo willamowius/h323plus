@@ -117,6 +117,7 @@ static struct StdSizes {
 
 static FFMPEGLibrary FFMPEGLibraryInstance(CODEC_ID_H263P);
 
+// this callback may receive log data from all FFMPEG based codecs
 static void logCallbackFFMPEG (void* v, int level, const char* fmt , va_list arg)
 {
   char buffer[512];
@@ -129,7 +130,7 @@ static void logCallbackFFMPEG (void* v, int level, const char* fmt , va_list arg
       case AV_LOG_INFO:  severity = 4; break;
       case AV_LOG_DEBUG: severity = 4; break;
     }
-    sprintf(buffer, "H.263\tFFMPEG\t");
+    sprintf(buffer, "FFMPEG\t");
     vsprintf(buffer + strlen(buffer), fmt, arg);
     if (strlen(buffer) > 0)
       buffer[strlen(buffer)-1] = 0;
@@ -2353,7 +2354,7 @@ extern "C" {
 
   if (!FFMPEGLibraryInstance.Load()) {
     *count = 0;
-    TRACE(1, "MPEG4\tCodec\tDisabled");
+    TRACE(1, "H.263\tCodec\tDisabled");
     return NULL;
   }
 
