@@ -97,7 +97,6 @@ static char * num2str(int num)
 
 H264EncoderContext::H264EncoderContext()
 {
-  TRACE(1, "JW H264EncoderContext c'tor");
   if (!H264EncCtxInstance.isLoaded()) {
     if (!H264EncCtxInstance.Load()) {
       TRACE(1, "H264\tCodec\tDisabled");
