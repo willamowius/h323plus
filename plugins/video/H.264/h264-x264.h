@@ -480,13 +480,9 @@ static const struct PluginCodec_H323GenericParameterDefinition prefix##_h323para
 	{{1,0,0,0,0},10, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, {prefix##_Generic10}}, \
 	{{1,0,0,0,0},41, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_BooleanArray,{prefix##_Profile}}, \
 	{{1,0,0,0,0},42, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, {prefix##_Level}}, \
-	NULL \
 }; \
 static struct PluginCodec_H323GenericCodecData prefix##_h323GenericData[] = { \
-    OpalPluginCodec_Identifer_H264_Generic, \
-	prefix##_MaxBitRate, \
-    8, \
-	prefix##_h323params \
+    { OpalPluginCodec_Identifer_H264_Generic, prefix##_MaxBitRate, 8, prefix##_h323params } \
 }; \
 
 DECLARE_GENERIC_OPTIONS(H264QCIF)
