@@ -12,6 +12,9 @@
 /************ Change log
  *
  * $Log$
+ * Revision 1.1  2010/02/24 02:19:22  shorne
+ * First commit of h323plus mirror
+ *
  * Revision 1.3  2006/08/01 13:02:40  rjongbloed
  * Merged changes from OpenH323 on removing need to winsock (ntohl function reference)
  *
@@ -117,7 +120,7 @@ void P64Encoder::ProcessOneFrame() {
 
 void P64Encoder::PreProcessOneFrame() {
   pre_vid->ProcessFrame(vid_frame);
-  h261_edr->PreIncEncodeSetup(vid_frame);
+  //h261_edr->PreIncEncodeSetup(vid_frame); <-- Fix Compatibility Polycom - S.H
 } 
 
 void P64Encoder::IncEncodeAndGetPacket(
