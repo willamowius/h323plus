@@ -51,6 +51,15 @@
 
 #include <codec/opalplugin.h>
 
+#if defined(_WIN32) || defined(_WIN32_WCE)
+  #include <malloc.h>
+  #include <string.h>
+  #define STRCMPI  _strcmpi
+#else
+  #include <semaphore.h>
+  #define STRCMPI  strcasecmp
+#endif
+
 #ifdef _MSC_VER
 extern "C" {
 #endif
@@ -58,6 +67,13 @@ extern "C" {
 #ifdef _MSC_VER
 }
 #endif
+
+static char * num2str(int num)
+{
+  char buf[20];
+  sprintf(buf, "%i", num);
+  return strdup(buf);
+}
 
 static struct PluginCodec_information licenseInfo =
 {
@@ -86,7 +102,7 @@ static struct PluginCodec_information licenseInfo =
 
 #define FORMAT_NAME_G722_1_16_24K  "G.722.1-24k"   // text decription and mediaformat name
 #define FORMAT_NAME_G722_1_16_32K  "G.722.1-32k"   // text decription and mediaformat name
-#define FORMAT_NAME_G722_1c_32K  "G.722.1c-32k"
+#define FORMAT_NAME_G722_1c        "G.722.1c"
 #define RTP_NAME_G722_1  "G7221"                // MIME name rfc's 3047, 5577
 
 #define G722_1_16K_FRAME_SAMPLES  320
@@ -95,8 +111,7 @@ static struct PluginCodec_information licenseInfo =
 // required bandwidth options in bits per second
 #define G722_1_16_24_BIT_RATE 24000
 #define G722_1_16_32_BIT_RATE 32000
-
-#define G722_1_32K_BIT_RATE 48000
+#define G722_1c_BIT_RATE      48000
 
 // required bandwidth options in bits per second
 #define G722_1_16K_SAMPLING_RATE 16000
@@ -113,10 +128,69 @@ static struct PluginCodec_information licenseInfo =
 typedef struct
 {
   unsigned bitsPerSec;                  // can be changed between frames
+  unsigned sampleRate;                  // whether G.722.1 ot G.722.1c
   Word16 history [G722_1_32K_FRAME_SAMPLES];
   Word16 mlt_coefs [G722_1_32K_FRAME_SAMPLES];
   Word16 mag_shift;
 } G7221EncoderContext;
+
+
+#define PLUGINCODEC_OPTION_SUPPORTMODE			"Generic Parameter 2"
+
+static int encoder_set_options(
+      const struct PluginCodec_Definition * codec, 
+      void * _context, 
+      const char *, 
+      void * parm, 
+      unsigned * parmLen)
+{
+  if (_context == NULL || parmLen == NULL || *parmLen != sizeof(const char **)) 
+    return 0;
+
+  G7221EncoderContext * context = (G7221EncoderContext *)_context;
+  if (context == NULL)
+    return 0;
+
+  unsigned bitRate = 0;
+  unsigned maxBitRate = 0;
+
+  if (parm != NULL) {
+    const char ** options = (const char **)parm;
+    int i;
+    for (i = 0; options[i] != NULL; i += 2) {
+      if (STRCMPI(options[i], PLUGINCODEC_OPTION_MAX_BIT_RATE) == 0)
+         maxBitRate = (unsigned)(atoi(options[i+1]));
+      if (STRCMPI(options[i], PLUGINCODEC_OPTION_SUPPORTMODE) == 0)
+         bitRate = (unsigned)(atoi(options[i+1]));
+	}
+  }
+
+    if (context->sampleRate == 16000) {
+       maxBitRate /= 100;  // Hack as G.722.1 send act bitrate not act/100
+    } else if (bitRate > 0) {
+      switch (bitRate) {
+          case 16: maxBitRate = 48000; break;
+          case 32: maxBitRate = 32000; break;
+          case 64: maxBitRate = 16000; break;
+          default:
+                   maxBitRate = 16000; break;
+      }
+      context->bitsPerSec = maxBitRate;
+    }
+
+    // Write back the option list the changed information
+    if (parm != NULL) {
+	    char ** options = (char **)parm;
+        if (options == NULL) return 0;
+        for (int i = 0; options[i] != NULL; i += 2) {
+	      if (STRCMPI(options[i], PLUGINCODEC_OPTION_MAX_BIT_RATE) == 0)
+		     options[i+1] = num2str(maxBitRate);	
+	    }
+    }
+
+
+  return 1;
+}
 
 
 static void * G7221EncoderCreate (const struct PluginCodec_Definition * codec)
@@ -126,11 +200,8 @@ static void * G7221EncoderCreate (const struct PluginCodec_Definition * codec)
   if (Context == NULL)
     return NULL;
 
+  Context->sampleRate = codec->sampleRate;
   Context->bitsPerSec = codec->bitsPerSec;
-  if(codec->sampleRate==32000)
-      printf("\nG.722.1c Encoder Created\n");
-  else
-      printf("\nG.722.1 Encoder Created\n");
   
   // initialize the mlt history buffer
   for (i = 0; i < codec->parm.audio.samplesPerFrame; i++)
@@ -188,6 +259,7 @@ static int G7221Encode (const struct PluginCodec_Definition * codec,
 typedef struct
 {
   unsigned bitsPerSec;                  // can be changed between frames
+  unsigned sampleRate;
   Bit_Obj bitobj;
   Rand_Obj randobj;
   Word16 decoder_mlt_coefs [G722_1_32K_FRAME_SAMPLES];
@@ -206,6 +278,7 @@ static void * G7221DecoderCreate (const struct PluginCodec_Definition * codec)
   if (Context == NULL)
     return NULL;
 
+  Context->sampleRate = codec->sampleRate;
   Context->bitsPerSec = codec->bitsPerSec;
 
   Context->old_mag_shift = 0;
@@ -382,6 +455,7 @@ static int get_codec_options (const struct PluginCodec_Definition * defn,
 static struct PluginCodec_ControlDefn G7221Controls[] =
 {
   { PLUGINCODEC_CONTROL_GET_CODEC_OPTIONS, get_codec_options },
+  { PLUGINCODEC_CONTROL_SET_CODEC_OPTIONS, encoder_set_options },
   { NULL }
 };
 
@@ -564,9 +638,9 @@ static struct PluginCodec_Definition G7221CodecDefn[] =
         G7221Controls,                          // codec controls
         PluginCodec_H323Codec_generic,          // h323CapabilityType
         &G7221_24_Cap                           // h323CapabilityData
-    }
+    },
 #if 0
-{
+    { 
         // G.722.1 32kHz encoder
         PLUGIN_CODEC_VERSION_OPTIONS,           // codec API version
         &licenseInfo,                           // license information
@@ -575,18 +649,18 @@ static struct PluginCodec_Definition G7221CodecDefn[] =
         PluginCodec_OutputTypeRaw |             // raw output data
         PluginCodec_RTPTypeDynamic |            // dynamic RTP type
         PluginCodec_RTPTypeShared,              // RTP type shared with other codecs in this definition
-        FORMAT_NAME_G722_1c_32K,                 // text decription
+        FORMAT_NAME_G722_1c,                    // text decription
         "L16",                                  // source format
-        FORMAT_NAME_G722_1c_32K,                // destination format
+        FORMAT_NAME_G722_1c,                    // destination format
         NULL,                                   // user data
-        32000,                                  // samples per second
-        G722_1_32K_BIT_RATE,                    // raw bits per second
+        G722_1_32K_SAMPLING_RATE,               // samples per second
+        G722_1c_BIT_RATE,                       // raw bits per second
         20000,                                  // microseconds per frame
         {{
-            G722_1_32K_FRAME_SAMPLES,                   // samples per frame
-            G722_1_32K_BIT_RATE/400,            // bytes per frame
-            1,                                      // recommended number of frames per packet
-            1,                                      // maximum number of frames per packet
+            G722_1_32K_FRAME_SAMPLES,           // samples per frame
+            G722_1c_BIT_RATE/400,               // bytes per frame
+            1,                                  // recommended number of frames per packet
+            1,                                  // maximum number of frames per packet
         }},
         122,                                      // IANA RTP payload code
         RTP_NAME_G722_1,                        // RTP payload name
@@ -606,16 +680,16 @@ static struct PluginCodec_Definition G7221CodecDefn[] =
         PluginCodec_OutputTypeRaw |             // raw output data
         PluginCodec_RTPTypeDynamic |            // dynamic RTP type
         PluginCodec_RTPTypeShared,              // RTP type shared with other codecs in this definition
-        FORMAT_NAME_G722_1c_32K,                 // text decription
-        FORMAT_NAME_G722_1c_32K,                 // source format
+        FORMAT_NAME_G722_1c,                    // text decription
+        FORMAT_NAME_G722_1c,                    // source format
         "L16",                                  // destination format
         NULL,                                   // user data
-        32000,                                  // samples per second
-        G722_1_32K_BIT_RATE,                    // raw bits per second
+        G722_1_32K_SAMPLING_RATE,               // samples per second
+        G722_1c_BIT_RATE,                       // raw bits per second
         20000,                                  // microseconds per frame
         {{
             G722_1_32K_FRAME_SAMPLES,           // samples per frame
-            G722_1_32K_BIT_RATE/400,            // bytes per frame
+            G722_1c_BIT_RATE/400,               // bytes per frame
             1,                                  // recommended number of frames per packet
             1,                                  // maximum number of frames per packet
         }},
@@ -628,7 +702,7 @@ static struct PluginCodec_Definition G7221CodecDefn[] =
         PluginCodec_H323Codec_generic,          // h323CapabilityType
         &G7221c_Cap                             // h323CapabilityData
       }
- #endif
+#endif
 };
 
 extern "C" {
