@@ -12,6 +12,9 @@
 /************ Change log
  *
  * $Log$
+ * Revision 1.2  2011/01/09 10:06:56  shorne
+ * Fix for polycom interop.. Alessandro Angeli
+ *
  * Revision 1.1  2010/02/24 02:19:22  shorne
  * First commit of h323plus mirror
  *
@@ -120,7 +123,7 @@ void P64Encoder::ProcessOneFrame() {
 
 void P64Encoder::PreProcessOneFrame() {
   pre_vid->ProcessFrame(vid_frame);
-  //h261_edr->PreIncEncodeSetup(vid_frame); <-- Fix Compatibility Polycom - S.H
+  h261_edr->PreIncEncodeSetup(vid_frame);
 } 
 
 void P64Encoder::IncEncodeAndGetPacket(
