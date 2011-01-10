@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2010/01/18 21:24:06  shorne
+ * Fixes to send complete filie paths & filenames with '0' in the name
+ *
  * Revision 1.6  2009/10/21 10:04:02  shorne
  * Update OID value to bring into line with OCS
  *
@@ -124,14 +127,14 @@ PBoolean H323FileTransferCapability::OnReceivedPDU(const H245_DataApplicationCap
   if (pdu.m_application.GetTag() != H245_DataApplicationCapability_application::e_genericDataCapability)
         return FALSE;
 
-  maxBitRate = pdu.m_maxBitRate;
+  //maxBitRate = pdu.m_maxBitRate*100;
   const H245_GenericCapability & genCapability = (const H245_GenericCapability &)pdu.m_application;
   return OnReceivedPDU(genCapability);
 }
 
 PBoolean H323FileTransferCapability::OnSendingPDU(H245_DataApplicationCapability & pdu) const
 {
-  pdu.m_maxBitRate = maxBitRate;
+  pdu.m_maxBitRate = maxBitRate/100;
   pdu.m_application.SetTag(H245_DataApplicationCapability_application::e_genericDataCapability);
 	
   H245_GenericCapability & genCapability = (H245_GenericCapability &)pdu.m_application;
@@ -171,7 +174,7 @@ PBoolean H323FileTransferCapability::OnReceivedPDU(const H245_GenericCapability 
 
    if (pdu.HasOptionalField(H245_GenericCapability::e_maxBitRate)) {
       const PASN_Integer & bitRate = pdu.m_maxBitRate;
-      maxBitRate = bitRate;
+      maxBitRate = bitRate*100;
    }
 
    if (!pdu.HasOptionalField(H245_GenericCapability::e_collapsing)) 
@@ -212,7 +215,7 @@ PBoolean H323FileTransferCapability::OnSendingPDU(H245_GenericCapability & pdu) 
 
    pdu.IncludeOptionalField(H245_GenericCapability::e_maxBitRate);
    PASN_Integer & bitRate = pdu.m_maxBitRate;
-   bitRate = maxBitRate;
+   bitRate = maxBitRate/100;
 
    // Add the Block size parameter
    H245_GenericParameter * blockparam = new H245_GenericParameter;
