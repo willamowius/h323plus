@@ -41,6 +41,9 @@
 /************ Change log
  *
  * $Log$
+ * Revision 1.1  2010/02/24 02:19:22  shorne
+ * First commit of h323plus mirror
+ *
  * Revision 1.6  2006/12/19 03:11:55  dereksmithies
  * Add excellent fixes from Ben Weekes to suppress valgrind error messages.
  * This will help memory management - many thanks.
@@ -125,7 +128,7 @@
 
 
 H261Encoder::H261Encoder(Transmitter *T) : Encoder(T),
-        bs_(0), bc_(0), ngob_(12),
+        bs_(0), bc_(0), ngob_(12), sbit_(0),
         gDone(true) // must initialize to true
 {
  	for (int q = 0; q < 32; ++q) {
@@ -798,7 +801,7 @@ int H261PixelEncoder::PreIncEncodeSetup(const VideoFrame *vf)
   bc_ = gData; //where to put encoded bits
   gStep = cif_ ? 1 : 2; //Macro Block step size
   gGobMax = cif_ ? 12 : 5; //how many GOB per frame
-  sbit_ = 0;
+  sbit_ = 0;	// TODO: comment out for Polycom compatibility ???
   gSendGOBhdr = true; //must send GOB hdr before sending MB
   gGOBhdrNxt = true; //will start out with GOB header
   //because gGOBhdrNxt == true, no need to initialize the following 2 header variables:
