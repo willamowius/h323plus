@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2010/02/24 03:00:00  shorne
+ * Added generic data support to presence feature
+ *
  * Revision 1.5  2010/01/20 04:23:09  shorne
  * Add ability to advertise supported H.460 features in presence
  *
@@ -159,6 +162,9 @@ void PostNotification(H323PresenceStore & gw, const H323PresenceNotifications & 
 
 void H460PresenceHandler::SetPresenceState(const PStringList & alias, unsigned localstate, const PString & localdisplay)
 {
+    if (!feat || !feat->CommonFeature())
+          return;
+
 	H323PresenceNotification notification;
 	notification.SetPresenceState((H323PresenceNotification::States)localstate,localdisplay);
 
