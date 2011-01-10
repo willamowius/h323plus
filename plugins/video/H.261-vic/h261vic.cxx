@@ -576,7 +576,6 @@ static const char YUV420PDesc[]  = { "YUV420P" };
 
 static const char h261QCIFDesc[]  = { "H.261-QCIF" };
 static const char h261CIFDesc[]   = { "H.261-CIF" };
-static const char h261720Desc[]   = { "H.261-720" };
 static const char h261Desc[]      = { "H.261" };
 
 static const char sdpH261[]   = { "h261" };
@@ -1144,56 +1143,54 @@ static struct PluginCodec_Definition h261CodecDefn[] =
   },
 
   { 
-    // 720p only encoder (only CIF)
+    // Both QCIF and CIF (dynamic) encoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
 
-    PluginCodec_MediaTypeVideo |        // video codec
-    PluginCodec_MediaTypeExtVideo |     // content
+    PluginCodec_MediaTypeVideo |        // audio codec
     PluginCodec_RTPTypeExplicit,        // specified RTP type
 
-    h261720Desc,                        // text decription
+    h261Desc,                           // text decription
     YUV420PDesc,                        // source format
-    h261720Desc,                        // destination format
+    h261Desc,                           // destination format
 
-    cifOptionTable,                     // user data 
+    xcifOptionTable,                    // user data 
 
     H261_CLOCKRATE,                     // samples per second
     H261_BITRATE,                       // raw bits per second
     20000,                              // nanoseconds per frame
 
     {{
-      CIF_WIDTH,                          // frame width
-      CIF_HEIGHT,                         // frame height
-      10,                                 // recommended frame rate
-      60,                                 // maximum frame rate
+      CIF_WIDTH,                        // frame width
+      CIF_HEIGHT,                       // frame height
+      10,                               // recommended frame rate
+      60,                               // maximum frame rate
     }},
-    
+
     RTP_RFC2032_PAYLOAD,                // IANA RTP payload code
     sdpH261,                            // RTP payload name
 
     create_encoder,                     // create codec function
     destroy_encoder,                    // destroy codec
     codec_encoder,                      // encode/decode
-    h323EncoderControls,                // codec controls
+    EncoderControls,                    // codec controls
 
     PluginCodec_H323VideoCodec_h261,    // h323CapabilityType 
     NULL                                // h323CapabilityData
   },
   { 
-    // 720p only decoder
+    // Both QCIF and CIF (dynamic) decoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
 
     PluginCodec_MediaTypeVideo |        // audio codec
-    PluginCodec_MediaTypeExtVideo |     // content
     PluginCodec_RTPTypeExplicit,        // specified RTP type
 
-    h261720Desc,                        // text decription
-    h261720Desc,                        // source format
+    h261Desc,                           // text decription
+    h261Desc,                           // source format
     YUV420PDesc,                        // destination format
 
-    cifOptionTable,                     // user data 
+    xcifOptionTable,                    // user data 
 
     H261_CLOCKRATE,                     // samples per second
     H261_BITRATE,                       // raw bits per second
@@ -1212,12 +1209,11 @@ static struct PluginCodec_Definition h261CodecDefn[] =
     create_decoder,                     // create codec function
     destroy_decoder,                    // destroy codec
     codec_decoder,                      // encode/decode
-    h323DecoderControls,                // codec controls
+    DecoderControls,                    // codec controls
 
     PluginCodec_H323VideoCodec_h261,    // h323CapabilityType 
     NULL                                // h323CapabilityData
   }
-
 };
 
 
