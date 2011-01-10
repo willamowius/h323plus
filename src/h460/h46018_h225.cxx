@@ -37,6 +37,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.12  2010/03/20 20:04:25  willamowius
+ * fix gcc warning about initialization order
+ *
  * Revision 1.11  2010/02/04 07:41:43  shorne
  * Added Support to compile H.460 Annex B without Annex A support
  *
@@ -546,8 +549,7 @@ PBoolean PNatMethod_H46019::CreateSocketPair(PUDPSocket * & socket1,
 		PTRACE(5, "H46019\tUDP ports "
 			   << socket1->GetPort() << '-' << socket2->GetPort());
 
-	if (info->GetSessionID() > 0)
-		SetConnectionSockets(socket1,socket2,info);
+	  SetConnectionSockets(socket1,socket2,info);
 
 	return TRUE;
 }
