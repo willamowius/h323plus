@@ -47,6 +47,7 @@
 #define SET_TSTO                  12
 #define SET_PROFILE_LEVEL         13
 #define FASTUPDATE_REQUESTED	  14
+#define SET_MAX_NALSIZE           15
 
 
 #endif /* __PIPE_H__ */

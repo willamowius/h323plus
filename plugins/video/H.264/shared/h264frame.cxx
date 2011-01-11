@@ -51,8 +51,8 @@
   #endif
 #endif
 
-#define MAX_NAL_BUFFER 150;
-#define MAX_FRAME_SIZE 150 * 1400 + 12 // 150 Complete NAL Units plus header
+#define MAX_NAL_BUFFER 150  // Max NAL Buffer at 1400 byte NAL Units
+#define MAX_FRAME_SIZE (MAX_NAL_BUFFER * 1400) + 12 // 150 Complete NAL Units plus header
 
 H264Frame::H264Frame ()
 {
@@ -61,6 +61,7 @@ H264Frame::H264Frame ()
   _encodedFrame = (uint8_t*)malloc(MAX_FRAME_SIZE);
   _NALs = NULL;
   _numberOfNALsReserved = 0;
+  _nalBuffer = MAX_NAL_BUFFER;
 
   BeginNewFrame();
 }
@@ -126,14 +127,21 @@ int x264_nal_encode(uint8_t *p_data, int *pi_data, int b_annexeb, x264_nal_t *na
  }
 #endif
 
+void H264Frame::SetMaxPayloadSize (uint16_t maxPayloadSize) {
+
+   _maxPayloadSize = maxPayloadSize;
+   _nalBuffer = (MAX_FRAME_SIZE-12)/maxPayloadSize;
+
+}
+
 void H264Frame::SetFromFrame (x264_nal_t *NALs, int numberOfNALs) {
   //int vopBufferLen;
   int currentNAL = 0;
 
   int encodedNALS = numberOfNALs;
-  if (numberOfNALs > 150) {
+  if (numberOfNALs > _nalBuffer) {
       TRACE(1, "H264\tENC\tNAL Buffer Exceeded (" << numberOfNALs << ") Truncating..");
-      encodedNALS = 150;
+      encodedNALS = _nalBuffer;
   }
 
   uint8_t* currentPositionInFrame=(uint8_t*) _encodedFrame;

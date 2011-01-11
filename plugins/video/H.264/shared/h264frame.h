@@ -185,10 +185,7 @@ public:
 #ifndef LICENCE_MPL
   void SetFromFrame (x264_nal_t *NALs, int numberOfNALs);
 #endif
-  void SetMaxPayloadSize (uint16_t maxPayloadSize) 
-  {
-    _maxPayloadSize = maxPayloadSize;
-  }
+  void SetMaxPayloadSize (uint16_t maxPayloadSize);
   void SetTimestamp (uint64_t timestamp) 
   {
     _timestamp = timestamp;
@@ -227,6 +224,7 @@ private:
   uint32_t _numberOfNALsInFrame;
   uint32_t _currentNAL; 
   uint32_t _numberOfNALsReserved;
+  int      _nalBuffer;
   
   // for encapsulation
   uint32_t _currentNALFURemainingLen;
