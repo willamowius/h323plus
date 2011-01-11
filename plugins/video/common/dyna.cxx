@@ -60,6 +60,7 @@ bool DynaLink::Open(const char *name)
 
   // try directories specified in PTLIBPLUGINDIR
   char ptlibPath[1024];
+  memset(ptlibPath, 0, sizeof(ptlibPath));
   char * env = ::getenv("PTLIBPLUGINDIR");
   if (env != NULL) 
     strcpy(ptlibPath, env);
