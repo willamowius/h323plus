@@ -240,6 +240,13 @@ unsigned H264EncoderContext::GetMaxMBPS()
     return maxMBPS;
 }
 
+void H264EncoderContext::SetMaxNALSize(unsigned size)
+{  
+#ifdef _MSC_VER  // Currently only in Windows pipe
+    H264EncCtxInstance.call(SET_MAX_NALSIZE, size);
+#endif
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 
 H264DecoderContext::H264DecoderContext()
@@ -247,7 +254,7 @@ H264DecoderContext::H264DecoderContext()
   if (!FFMPEGLibraryInstance.IsLoaded()) return;
 
   _gotIFrame = false;
-  _gotAGoodFrame = false;
+  _gotAGoodFrame = true; // false; //Force FastPictureUpdate on first frame
   _frameCounter = 0; 
   _skippedFrameCounter = 0;
   _rxH264Frame = new H264Frame();
@@ -868,6 +875,10 @@ int encoder_formats(
 
   H264EncoderContext * context = (H264EncoderContext *)_context;
 
+  // Get Codec Limits
+  unsigned limitWidth = codec->parm.video.maxFrameWidth;
+  unsigned limitHeight = codec->parm.video.maxFrameHeight;
+
 	char ** options = (char **)parm;
 	if (options == NULL) return 0;
 
@@ -885,9 +896,12 @@ int encoder_formats(
              token = strtok(NULL,",");
              j++;
            }
-           f.mb = (f.w * f.h)/256;  
-           TRACE(4,"Frame Size w " << f.w << " h " << f.h << " r " << f.r << " mb " << f.mb); 
-           context->AddInputFormat(f);
+           f.mb = (f.w * f.h)/256; 
+
+           if ((f.w <= limitWidth) && (f.h <= limitHeight)) {
+              TRACE(4,"Frame Size w " << f.w << " h " << f.h << " r " << f.r << " mb " << f.mb); 
+              context->AddInputFormat(f);
+           }
        }
     }
 
@@ -1022,6 +1036,7 @@ static int encoder_set_options(
   unsigned cusMBPS = 0;   // Custom maximum MBPS
   unsigned cusMFS = 0;    // Custom maximum FrameSize
   unsigned staticMBPS = 0;  /// static macroblocks per sec
+  unsigned maxNALSize = 0;  /// max NAL Size
   bool stdAspect = true;
 
   if (parm != NULL) {
@@ -1057,6 +1072,8 @@ static int encoder_set_options(
          cusMFS = atoi(options[i+1]);
       if (STRCMPI(options[i], PLUGINCODEC_OPTION_STATICMBPS) == 0)
          staticMBPS = atoi(options[i+1]);
+      if (STRCMPI(options[i], PLUGINCODEC_OPTION_MAXNALSIZE) == 0)
+         maxNALSize = atoi(options[i+1]);
       if (STRCMPI(options[i], PLUGINCODEC_OPTION_ASPECT) == 0)
 		 stdAspect = (STRCMPI(options[i+1],"2") == 0);  // 2 is scale to stdSize
 	}
@@ -1098,6 +1115,10 @@ static int encoder_set_options(
 	    }
 	  }
 	}
+
+    // If a custom max NAL size
+    if (maxNALSize > 500 && maxNALSize < 1400) 
+         context->SetMaxNALSize(maxNALSize);
 
 	// Write back the option list the changed information to the level
 	if (parm != NULL) {

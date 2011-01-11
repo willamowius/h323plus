@@ -122,6 +122,7 @@ class H264EncoderContext
     void SetFrameRate (unsigned rate);
     void SetTSTO (unsigned tsto);
     void SetProfileLevel (unsigned profile, unsigned constraints, unsigned level);
+    void SetMaxNALSize (unsigned size);
     void ApplyOptions ();
     void Lock ();
     void Unlock ();
@@ -335,6 +336,7 @@ static struct PluginCodec_Option const * const optionTable[] = {
 #define PLUGINCODEC_OPTION_CUSMBPS			"Generic Parameter 3"
 #define PLUGINCODEC_OPTION_CUSMFS			"Generic Parameter 4"
 #define PLUGINCODEC_OPTION_STATICMBPS	    "Generic Parameter 7"
+#define PLUGINCODEC_OPTION_MAXNALSIZE	    "Generic Parameter 9"
 
 #define H264_H323_RFC3984	"0.0.8.241.0.0.0.0"   // Single NAL packetization H.241 Annex A
 #define H264_ASPECT_43			2
@@ -352,7 +354,7 @@ static struct PluginCodec_Option const * const optionTable[] = {
 #define H264_LEVEL3_1         71      // 720p 30fps
 #define H264_LEVEL3_1_MBPS    14000
 #define H264_LEVEL4           85      // 1080p 30fps 
-#define H264_LEVEL4_MBPS      200000
+#define H264_LEVEL4_MBPS      20000
 
 
 // H.264 QCIF
@@ -370,6 +372,7 @@ static unsigned int   H264QCIF_Generic4        = 0;
 static unsigned int   H264QCIF_Generic5        = 0;
 static unsigned int   H264QCIF_Generic6        = 0;
 static unsigned int   H264QCIF_Generic7        = 0;
+static unsigned int   H264QCIF_Generic9        = 0;
 static unsigned int   H264QCIF_Generic10       = H264_ASPECT_43;
 
 // H.264 CIF
@@ -387,6 +390,7 @@ static unsigned int   H264CIF_Generic4        = 0;
 static unsigned int   H264CIF_Generic5        = 0;
 static unsigned int   H264CIF_Generic6        = 0;
 static unsigned int   H264CIF_Generic7        = 0;
+static unsigned int   H264CIF_Generic9        = 0;
 static unsigned int   H264CIF_Generic10       = H264_ASPECT_43;
 
 
@@ -405,6 +409,7 @@ static unsigned int   H264CIF4_Generic4        = 0;
 static unsigned int   H264CIF4_Generic5        = 0;
 static unsigned int   H264CIF4_Generic6        = 0;
 static unsigned int   H264CIF4_Generic7        = 0;
+static unsigned int   H264CIF4_Generic9        = 0;
 static unsigned int   H264CIF4_Generic10       = H264_ASPECT_43;
 
 // HD 720P
@@ -422,6 +427,7 @@ static unsigned int   H264720P_Generic4        = 15;
 static unsigned int   H264720P_Generic5        = 0;
 static unsigned int   H264720P_Generic6        = 205;
 static unsigned int   H264720P_Generic7        = 0;
+static unsigned int   H264720P_Generic9        = 0;
 static unsigned int   H264720P_Generic10       = H264_ASPECT_HD;
 
 // HD H.239 1920 x 1152 
@@ -452,11 +458,12 @@ static unsigned int   H2641080P_Level           = H264_LEVEL4;
 static unsigned int   H2641080P_MaxBitRate      = H264_LEVEL4_MBPS*100;
 static const char	  H2641080P_TargetBitRate[] =  { "2000000" }; 
 static unsigned int   H2641080P_VideoType       = PluginCodec_MediaTypeVideo;
-static unsigned int   H2641080P_Generic3        = 0;
-static unsigned int   H2641080P_Generic4        = 0;
+static unsigned int   H2641080P_Generic3        = 492;
+static unsigned int   H2641080P_Generic4        = 32;
 static unsigned int   H2641080P_Generic5        = 0;
-static unsigned int   H2641080P_Generic6        = 0;
+static unsigned int   H2641080P_Generic6        = 205;
 static unsigned int   H2641080P_Generic7        = 0;
+static unsigned int   H2641080P_Generic9        = 0;
 static unsigned int   H2641080P_Generic10       = H264_ASPECT_HD;
 
 // MEGA MACRO to set options
@@ -624,8 +631,8 @@ static struct PluginCodec_Definition h264CodecDefn[] = {
   PluginCodec_H323Codec_NoH323,       // h323CapabilityType 
   NULL                                // h323CapabilityData
 },*/
- // DECLARE_H323PARAM(H264QCIF),
- //   DECLARE_H323PARAM(H264CIF),
+  DECLARE_H323PARAM(H264QCIF),
+  DECLARE_H323PARAM(H264CIF),
  // DECLARE_H323PARAM(H264CIF4)
   DECLARE_H323PARAM(H264720P),
   DECLARE_H323PARAM(H264H239)
