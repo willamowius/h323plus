@@ -115,7 +115,7 @@ X264EncoderContext::X264EncoderContext()
 
   // Single NAL Mode
 #if X264_BUILD > 79
-  _context.i_slice_max_size     = H264_SINGLE_NAL_SIZE; // TODO: need to be provided.
+  _context.i_slice_max_size     = H264_SINGLE_NAL_SIZE;   // Default NAL Size
   _context.b_repeat_headers     = 1;     // repeat SPS/PPS before each key frame
   _context.b_annexb             = 1;     // place start codes (4 bytes) before NAL units   
 #endif
@@ -133,14 +133,17 @@ X264EncoderContext::X264EncoderContext()
   _context.rc.f_rf_constant       	= 16.0;	// great quality
 #else
    // Rate control set to ABR mode
-   _context.rc.i_rc_method            = X264_RC_ABR;
-   _context.rc.f_rate_tolerance       = 25;
-   _context.rc.i_lookahead            = 51;
-   _context.rc.i_qp_step              = 1;
-   _context.rc.psz_stat_out           = 0;
-   _context.rc.psz_stat_in            = 0;
-   _context.rc.f_vbv_buffer_init      = 0;
-   _context.i_scenecut_threshold      = 0;
+  _context.rc.i_rc_method            = X264_RC_ABR;
+  _context.rc.i_qp_min              = 25;
+  _context.rc.i_qp_max              = 51;
+  _context.rc.f_rate_tolerance  	= 1;
+  _context.rc.i_vbv_max_bitrate 	= 0;
+  _context.rc.psz_stat_out          = 0;
+  _context.rc.psz_stat_in           = 0;
+  _context.rc.f_vbv_buffer_init     = 0;
+  _context.rc.i_vbv_buffer_size 	= 0;
+  _context.rc.i_lookahead       	= 0;
+  _context.i_scenecut_threshold     = 0;
   SetTargetBitrate    ((unsigned)(H264_BITRATE / 1000));
 #endif
 
@@ -282,6 +285,12 @@ void X264EncoderContext::ApplyOptions()
 void X264EncoderContext::fastUpdateRequested(void)
 {
   _fastUpdateRequested = true; 
+}
+
+void X264EncoderContext::SetMaxNALSize (unsigned size)
+{
+  _txH264Frame->SetMaxPayloadSize(size);
+  _context.i_slice_max_size  = size;
 }
 
 int X264EncoderContext::EncodeFrames(const unsigned char * src, unsigned & srcLen, unsigned char * dst, unsigned & dstLen, unsigned int & flags)

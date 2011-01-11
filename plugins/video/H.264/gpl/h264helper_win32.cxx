@@ -291,6 +291,12 @@ int main(int argc, char *argv[])
           writeStream(stream,(LPCVOID)&msg, sizeof(msg)); 
           flushStream(stream);
         break;
+      case SET_MAX_NALSIZE:
+          readStream(stream, (LPVOID)&val, sizeof(val));
+          x264->SetMaxNALSize (val);
+          writeStream(stream,(LPCVOID)&msg, sizeof(msg)); 
+          flushStream(stream);
+        break;
       default:
         break;
     }
