@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.37  2010/09/26 16:49:47  willamowius
+ * fix capabilities.Remove("CIF") and similar
+ *
  * Revision 1.36  2010/09/19 05:41:43  shorne
  * More Fixes for finding H.239 Capabilities
  *
@@ -2320,6 +2323,14 @@ PBoolean OnH239GenericMessageResponse(H239Control & ctrl, H323Connection & conne
     return m_allowOutgoingExtVideo;   // Should be responding false if remote rejects? - SH
 }
 
+
+PBoolean OnH239GenericMessageCommand(H239Control & ctrl, H323Connection & connection, const H245_ArrayOf_GenericParameter & content)
+{
+	PTRACE(4,"H239\tReceived Generic Command.");
+
+    return connection.OnH239ControlCommand(&ctrl);   
+}
+
 ///////////////////////////////////////////
 
 H323ControlExtendedVideoCapability::H323ControlExtendedVideoCapability()
@@ -2363,7 +2374,8 @@ PBoolean H323ControlExtendedVideoCapability::HandleGenericMessage(h245MessageTyp
 			return OnH239GenericMessageRequest(*this,*con,*pdu);
 		case e_h245response:
 			return OnH239GenericMessageResponse(*this,*con,*pdu);
-		case e_h245command:  //TODO  handle command message
+		case e_h245command:  
+            return OnH239GenericMessageCommand(*this,*con,*pdu);
 		case e_h245indication:
         default:
             return true;
@@ -3494,10 +3506,13 @@ static PBoolean MatchWildcard(const PCaselessString & str, const PStringArray & 
       last = str.GetLength();
     else {
       PINDEX next = str.Find(wildcard[i], last);
-      // BUG: this change broke capabilities.Remove("16CIF") and similar since the match happens afetr position 5
-      // if (next == P_MAX_INDEX || next > 5)  // take into account Extended Video Caps
+      
       if (next == P_MAX_INDEX)
         return FALSE;
+      // Hack to avoid accidentally deleting H.239 cap as the codec is after position 5  -SH
+      if (next > 5 && str.Left(5) == "H.239")
+        return FALSE;
+
       last = next + wildcard[i].GetLength();
     }
   }
