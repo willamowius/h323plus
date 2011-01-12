@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.10  2010/08/31 04:00:49  shorne
+ * Improved H.263/H.263+ interworking
+ *
  * Revision 1.9  2010/08/26 15:12:39  shorne
  * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
  *
@@ -1579,6 +1582,11 @@ PBoolean H323SignalPDU::Read(H323Transport & transport)
 
 PBoolean H323SignalPDU::ProcessReadData(H323Transport & transport, const PBYTEArray & rawData)
 {
+  if (rawData.GetSize() < 5) {
+     PTRACE(4,"H225\tSignalling Channel KeepAlive Rec'vd");
+     return TRUE;
+  }
+
   if (!q931pdu.Decode(rawData)) {
     PTRACE(1, "H225\tParse error of Q931 PDU:\n" << hex << setfill('0')
                                                  << setprecision(2) << rawData
