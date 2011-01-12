@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.18  2010/08/26 15:12:39  shorne
+ * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
+ *
  * Revision 1.17  2010/08/22 04:11:03  shorne
  * Removed session id range PASSERT
  *
@@ -815,8 +818,8 @@ RTP_Session::RTP_Session(
   ignoreOutOfOrderPackets = TRUE;
   syncSourceOut = PRandom::Number();
   syncSourceIn = 0;
-  txStatisticsInterval = 100;  // Number of data packets between tx reports
-  rxStatisticsInterval = 100;  // Number of data packets between rx reports
+  txStatisticsInterval = 50; //100;  // Number of data packets between tx reports
+  rxStatisticsInterval = 50; //100;  // Number of data packets between rx reports
   lastSentSequenceNumber = (WORD)PRandom::Number();
   expectedSequenceNumber = 0;
   lastRRSequenceNumber = 0;
@@ -1587,6 +1590,20 @@ void RTP_SessionManager::AddSession(RTP_Session * session)
   mutex.Signal();
 }
 
+void RTP_SessionManager::MoveSession(unsigned oldSessionID, unsigned newSessionID)
+{
+  PTRACE(2, "RTP\tMoving session " << oldSessionID << " to " << newSessionID);
+
+  mutex.Wait();
+
+  if (sessions.Contains(oldSessionID)) {
+      RTP_Session & session = sessions[oldSessionID];
+      sessions.SetAt(newSessionID, &session);
+      //sessions.RemoveAt(oldSessionID);
+  }
+
+  mutex.Signal();
+}
 
 void RTP_SessionManager::ReleaseSession(unsigned sessionID)
 {
