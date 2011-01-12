@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2010/09/20 08:02:26  willamowius
+ * make H225 and H245 keepAlive optional
+ *
  * Revision 1.4  2010/09/19 05:55:10  shorne
  * Added NAT KeepAlive (empty TPKT) to standard H.225 and H.245 Channels
  *
@@ -614,6 +617,8 @@ class H225TransportThread : public PThread
 
     ~H225TransportThread();
 
+    void ConnectionEstablished();
+
   protected:
     void Main();
 
@@ -669,7 +674,17 @@ H225TransportThread::H225TransportThread(H323EndPoint & ep, H323Transport * t)
 
 H225TransportThread::~H225TransportThread()
 {
-  m_keepAlive.Stop();
+    if (useKeepAlive)
+       m_keepAlive.Stop();
+}
+
+void H225TransportThread::ConnectionEstablished()
+{
+  if (useKeepAlive) {
+     PTRACE(3, "H225\tStarted KeepAlive");
+     m_keepAlive.SetNotifier(PCREATE_NOTIFIER(KeepAlive));
+     m_keepAlive.RunContinuous(KeepAliveInterval * 1000);
+  }
 }
 
 
@@ -677,12 +692,7 @@ void H225TransportThread::Main()
 {
   PTRACE(3, "H225\tStarted incoming call thread");
 
-  if (useKeepAlive) {
-    m_keepAlive.SetNotifier(PCREATE_NOTIFIER(KeepAlive));
-    m_keepAlive.RunContinuous(KeepAliveInterval * 1000);
-  }
-
-  if (!transport->HandleFirstSignallingChannelPDU())
+  if (!transport->HandleFirstSignallingChannelPDU(this))
     delete transport;
 }
 
@@ -692,9 +702,11 @@ void H225TransportThread::KeepAlive(PTimer &, INT)
   // Send empty RFC1006 TPKT
   int packetLength = 4;
   PBYTEArray tpkt(packetLength);
+  memset(tpkt.GetPointer(),0 , packetLength);
+
   tpkt[0] = 3;
   tpkt[1] = 0;
-  tpkt[2] = 0;
+  tpkt[2] = (BYTE)(packetLength >> 8);
   tpkt[3] = (BYTE)packetLength;
 
   PTRACE(6, "H225\tSending KeepAlive TPKT packet");
@@ -1326,7 +1338,7 @@ PBoolean H323Transport::HandleSignallingSocket(H323SignalPDU & pdu)
   return FALSE;
 }
 
-PBoolean H323Transport::HandleFirstSignallingChannelPDU()
+PBoolean H323Transport::HandleFirstSignallingChannelPDU(PThread * thread)
 {
   PTRACE(3, "H225\tAwaiting first PDU");
   SetReadTimeout(15000); // Await 15 seconds after connect for first byte
@@ -1387,7 +1399,8 @@ PBoolean H323Transport::HandleFirstSignallingChannelPDU()
     // which is in turn attached to the connection so everything from gets cleaned up by the 
     // H323 cleaner thread from now on. So thread must not auto delete and the "transport" 
     // variable is not deleted either
-    PThread * thread = PThread::Current();
+    PAssert(PIsDescendant(thread, H225TransportThread), PInvalidCast);
+    ((H225TransportThread *)thread)->ConnectionEstablished();
     AttachThread(thread);
     thread->SetNoAutoDelete();
 
@@ -2303,8 +2316,10 @@ PBoolean H323TransportUDP::DiscoverGatekeeper(H323Gatekeeper & gk,
       socket = new PUDPSocket;
       sockets.Append(socket);
 
-      if (!ListenUDP(*socket, endpoint, localAddress, 0))
+	  if (!ListenUDP(*socket, endpoint, localAddress, 0)) {
+	    writeChannel = NULL;
         return FALSE;
+	  }
 
       localPort = socket->GetPort();
 
