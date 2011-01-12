@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.67  2010/11/02 15:28:35  willamowius
+ * avoid crash on OLC without mediaControlChannel
+ *
  * Revision 1.66  2010/10/26 13:26:27  willamowius
  * fix compile with video disabled
  *
@@ -986,11 +989,6 @@ H323Connection::H323Connection(H323EndPoint & ep,
   t38handler = NULL;
 #endif
 
-#ifdef H323_H224
-  h224handler = NULL;
-  h281handler = NULL;
-#endif
-
   endSync = NULL;
 
   remoteIsNAT = false;
@@ -1064,10 +1062,6 @@ H323Connection::~H323Connection()
 #ifdef H323_T38
   delete t38handler;
 #endif
-#ifdef H323_H224
-  delete h224handler;
-  delete h281handler;
-#endif
   delete signallingChannel;
   delete controlChannel;
   delete alertingPDU;
@@ -1081,6 +1075,9 @@ H323Connection::~H323Connection()
 #ifdef H323_H4609
   delete m_h4609Stats;
 #endif
+#endif
+#ifdef P_STUN
+	m_NATSockets.clear();
 #endif
 
   PTRACE(3, "H323\tConnection " << callToken << " deleted.");
@@ -2281,6 +2278,7 @@ PBoolean H323Connection::OnReceivedFacility(const H323SignalPDU & pdu)
   }
 
   if ((fac.m_reason.GetTag() != H225_FacilityReason::e_callForwarded)
+	  && (fac.m_reason.GetTag() != H225_FacilityReason::e_routeCallToGatekeeper)
       && (fac.m_reason.GetTag() != H225_FacilityReason::e_routeCallToMC))
     return TRUE;
 
@@ -4031,12 +4029,13 @@ void H323Connection::RetrieveCall()
 
 void H323Connection::SetHoldMedia(PChannel * audioChannel)
 {
-  holdAudioMediaChannel = PAssertNULL(audioChannel);
+  
+  holdAudioMediaChannel = audioChannel;
 }
 
 void H323Connection::SetVideoHoldMedia(PChannel * videoChannel)
 {
-  holdVideoMediaChannel = PAssertNULL(videoChannel);
+  holdVideoMediaChannel = videoChannel;
 }
 
 PBoolean H323Connection::IsMediaOnHold() const
@@ -4310,7 +4309,7 @@ void H323Connection::SendCapabilitySet(PBoolean empty)
 }
 
 
-void H323Connection::SetInitialBandwidth(H323Capability::MainTypes & captype, int bitRate)
+void H323Connection::SetInitialBandwidth(H323Capability::MainTypes captype, int bitRate)
 {
 #ifdef H323_VIDEO
   for (PINDEX i=0; i< localCapabilities.GetSize(); ++i) {
@@ -4551,18 +4550,20 @@ void H323Connection::SelectDefaultLogicalChannel(unsigned sessionID)
 PBoolean H323Connection::MergeCapabilities(unsigned sessionID, const H323Capability & local, H323Capability * remote)
 {
 
-#if H323_VIDEO
-   OpalVideoFormat & remoteFormat = (OpalVideoFormat &)remote->GetWritableMediaFormat();
+   OpalMediaFormat & remoteFormat = remote->GetWritableMediaFormat();
    const OpalMediaFormat & localFormat = local.GetMediaFormat();
 
    if (remoteFormat.Merge(localFormat)) {
+       unsigned maxBitRate = remoteFormat.GetOptionInteger(OpalVideoFormat::MaxBitRateOption);
+       unsigned targetBitRate = remoteFormat.GetOptionInteger(OpalVideoFormat::TargetBitRateOption);
+       if (targetBitRate > maxBitRate)
+          remoteFormat.SetOptionInteger(OpalVideoFormat::TargetBitRateOption, maxBitRate);
 #if PTRACING
 	  PTRACE(6, "H323\tCapability Merge: ");
 	  OpalMediaFormat::DebugOptionList(remoteFormat);
 #endif
       return TRUE;
    }
-#endif
    return FALSE;
 }
 
@@ -6140,15 +6141,29 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
 
 void H323Connection::ReleaseSession(unsigned sessionID)
 {
+    // Clunge for H.239 which opens with a sessionID of 0
+    if ((rtpSessions.GetSession(sessionID) == NULL) && (sessionID > 3)) 
+               sessionID = 0;
+
 #ifdef H323_H46024A
    const RTP_Session * sess = GetSession(sessionID);
    if (sess && sess->GetReferenceCount() == 1) {  // last session reference
 	  std::map<unsigned,NAT_Sockets>::iterator sockets_iter = m_NATSockets.find(sessionID);
       if (sockets_iter != m_NATSockets.end()) 
          m_NATSockets.erase(sockets_iter);
+      else {
+         sockets_iter = m_NATSockets.find(0);
+         if (sockets_iter != m_NATSockets.end()) 
+              m_NATSockets.erase(sockets_iter);
+      }
    }
 #endif
   rtpSessions.ReleaseSession(sessionID);
+}
+
+void H323Connection::UpdateSession(unsigned oldSessionID, unsigned newSessionID)
+{
+    rtpSessions.MoveSession(oldSessionID,newSessionID);
 }
 
 
@@ -6518,12 +6533,9 @@ PBoolean H323Connection::RequestModeChangeT38(const char * capabilityNames)
 #endif // H323_T38
 
 #ifdef H323_H224
-OpalH224Handler * H323Connection::CreateH224ProtocolHandler(unsigned sessionID)
+OpalH224Handler * H323Connection::CreateH224ProtocolHandler(H323Channel::Directions dir, unsigned sessionID)
 {
-  if (h224handler == NULL)
-    h224handler = endpoint.CreateH224ProtocolHandler(*this, sessionID);
-	
-  return h224handler;
+  return endpoint.CreateH224ProtocolHandler(dir, *this, sessionID);
 }
 
 OpalH281Handler * H323Connection::CreateH281ProtocolHandler(OpalH224Handler & h224Handler)
@@ -7145,6 +7157,11 @@ PBoolean H323Connection::OnH239ControlRequest(H239Control * ctrl)
       return ctrl->SendGenericMessage(H239Control::e_h245response, this, true);
     }  else 
       return ctrl->SendGenericMessage(H239Control::e_h245response, this, false);
+}
+
+PBoolean H323Connection::OnH239ControlCommand(H239Control * ctrl)
+{
+    return true;
 }
 
 PBoolean H323Connection::OpenH239Channel()
