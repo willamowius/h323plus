@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.51  2010/09/19 05:46:29  shorne
+ * Added Handling H.245 Control Channel failure, Setting initial Bandwidth by codec type. Setting H.239 Channel number callback
+ *
  * Revision 1.50  2010/08/28 03:58:20  shorne
  * More H.239 Support. Added ability to close channel, remove and reorder codecs and correctly load capabilities into simult cap listing
  *
@@ -1886,7 +1889,7 @@ class H323Connection : public PObject
        received will not exceed this set maximum value.
       */
     void SetInitialBandwidth(
-         H323Capability::MainTypes & captype,   ///< Capability Type
+         H323Capability::MainTypes  captype,    ///< Capability Type
          int bitRate                            ///< BitRate (in bytes)
     );
 
@@ -2173,6 +2176,11 @@ class H323Connection : public PObject
 	    Return False to reject the request to open channel.
 	*/
     PBoolean OnH239ControlRequest(H239Control * ctrl = NULL);
+
+	/** On Receiving a H.239 Control Command
+        This usually means the closing of the H.239 Channel
+	*/
+    virtual PBoolean OnH239ControlCommand(H239Control * ctrl = NULL);
 
 	/** Open an Extended Video Session
 	    This will open an Extended Video session.
@@ -2619,6 +2627,11 @@ class H323Connection : public PObject
       unsigned sessionID
     );
 
+    virtual void UpdateSession(
+        unsigned oldSessionID, 
+        unsigned newSessionID
+    );
+
 	/**Received OLC Generic Information. This is used to supply alternate RTP 
 	   destination information in the generic information field in the OLC for the
 	   purpose of probing for an alternate route to the remote party.
@@ -2899,7 +2912,7 @@ class H323Connection : public PObject
         there is not already a H.224 handler associated with this connection. If there
         is already such a H.224 handler associated, this instance is returned instead.
     */
-    virtual OpalH224Handler *CreateH224ProtocolHandler(unsigned sessionID);
+    virtual OpalH224Handler *CreateH224ProtocolHandler(H323Channel::Directions dir, unsigned sessionID);
   	
     /** Create an instance of the H.281 protocol handler.
         This is called when the subsystem requires that a H.224 channel be established.
@@ -3630,7 +3643,6 @@ class H323Connection : public PObject
 #endif
 
 #ifdef H323_H224
-    OpalH224Handler                  * h224handler;
     OpalH281Handler                  * h281handler;
 #endif
 

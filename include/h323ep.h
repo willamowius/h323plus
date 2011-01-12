@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.32  2010/09/20 08:02:26  willamowius
+ * make H225 and H245 keepAlive optional
+ *
  * Revision 1.31  2010/08/26 15:12:39  shorne
  * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
  *
@@ -1762,6 +1765,7 @@ class H323EndPoint : public PObject
         The default behaviour creates a new OpalH224Handler.
       */
     virtual OpalH224Handler * CreateH224ProtocolHandler(
+      H323Channel::Directions dir,
       H323Connection & connection, 
       unsigned sessionID
     ) const;
