@@ -19,6 +19,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/05/23 11:19:21  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.1  2007/08/06 20:50:48  shorne
  * First commit of h323plus
  *
@@ -41,10 +44,9 @@
 #endif
 
 #include <ptlib.h>
-//#include <opal/connection.h>
-//#include <transports.h>
 #include <rtp.h>
 #include <h281handler.h>
+#include <channels.h>
 
 #define H281_CLIENT_ID 0x01
 
@@ -82,7 +84,7 @@ class OpalH224Handler : public PObject
 	
 public:
 	
-  OpalH224Handler(H323Connection & connection, unsigned sessionID);
+  OpalH224Handler(H323Channel::Directions dir, H323Connection & connection, unsigned sessionID);
   ~OpalH224Handler();
 	
   virtual void StartTransmit();
@@ -113,6 +115,8 @@ public:
   virtual OpalH224ReceiverThread * CreateH224ReceiverThread();
 	
   OpalH281Handler *GetH281Handler() { return h281Handler; }
+
+  H323Channel::Directions GetDirection() { return sessionDirection; }
 	
 protected:
 
@@ -127,6 +131,7 @@ protected:
   OpalH224ReceiverThread *receiverThread;
 	
   OpalH281Handler *h281Handler;
+  H323Channel::Directions sessionDirection;
 	
 private:
 		

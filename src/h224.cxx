@@ -19,6 +19,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2008/05/23 11:21:25  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.2  2007/11/01 14:35:52  willamowius
  * add newline at end of file
  *
@@ -254,13 +257,12 @@ PBoolean H224_Frame::Decode(const BYTE *data,
 
 ////////////////////////////////////
 
-OpalH224Handler::OpalH224Handler(H323Connection & connection,
+OpalH224Handler::OpalH224Handler(H323Channel::Directions dir,
+                                 H323Connection & connection,
 								 unsigned sessionID)
-: transmitMutex()
+: transmitMutex(), sessionDirection(dir)
 {
-  // Really need to check this?
 
-  RTP_Session *session;
   H245_TransportAddress addr;
   connection.GetControlChannel().SetUpTransportPDU(addr, H323Transport::UseLocalTSAP);
   session = connection.UseSession(sessionID,addr,H323Channel::IsBidirectional);
@@ -489,6 +491,10 @@ PBoolean OpalH224Handler::SendExtraCapabilitiesMessage(BYTE clientID,
 PBoolean OpalH224Handler::TransmitClientFrame(BYTE clientID, H224_Frame & frame)
 {
   PWaitAndSignal m(transmitMutex);
+
+  if(canTransmit == FALSE) {
+    return FALSE;
+  }
 	
   // only H.281 is supported at the moment
   if(clientID != H281_CLIENT_ID) {

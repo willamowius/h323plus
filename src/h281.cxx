@@ -19,6 +19,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/05/23 11:21:52  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.1  2007/08/06 20:51:05  shorne
  * First commit of h323plus
  *
@@ -465,6 +468,7 @@ OpalH281Handler::OpalH281Handler(OpalH224Handler & theH224Handler)
   remoteHasH281 = FALSE;
   localNumberOfPresets = 0;
   remoteNumberOfPresets = 0;
+  shutDown = false;
 	
   // set correct video source numbers
   for(BYTE srcnum = 0; srcnum < 6; srcnum++) {	  
@@ -496,7 +500,8 @@ OpalH281Handler::OpalH281Handler(OpalH224Handler & theH224Handler)
 OpalH281Handler::~OpalH281Handler()
 {
   PWaitAndSignal m(h224Handler.GetTransmitMutex());
-	
+
+  shutDown = true;
   transmitTimer.Stop();
   receiveTimer.Stop();
 }
@@ -779,6 +784,9 @@ void OpalH281Handler::OnActivatePreset(BYTE /*presetNumber*/)
 void OpalH281Handler::ContinueAction(PTimer &, INT)
 {
   PWaitAndSignal(h224Handler.GetTransmitMutex());
+
+  if (shutDown)
+      return;
 	
   transmitFrame.SetRequestType(H281_Frame::ContinueAction);
 	

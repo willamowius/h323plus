@@ -20,6 +20,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2010/03/19 22:40:30  willamowius
+ * fix compile with H.460 disabled
+ *
  * Revision 1.6  2008/05/23 11:22:02  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -213,7 +216,7 @@ PBoolean H323_H224Channel::Start()
   }
 	
   if(h224Handler == NULL) {
-	  h224Handler = connection.CreateH224ProtocolHandler(sessionID);
+	  h224Handler = connection.CreateH224ProtocolHandler(direction,sessionID);
   }
 	
   if(direction == H323Channel::IsReceiver) {
