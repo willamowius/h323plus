@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.13  2010/09/19 05:43:39  shorne
+ * Added SetSupportedFormats
+ *
  * Revision 1.12  2010/06/06 14:53:26  shorne
  * Added AVSync support, Aspect Ratio management, flow Control, Video 90k clock, fixes for wideband codecs and generic audio capabilities
  *
@@ -799,6 +802,8 @@ void H323VideoCodec::Close()
   PWaitAndSignal mutex1(videoHandlerActive);  
 
   CloseRawDataChannel();
+
+  mediaFormat.RemoveAllOptions();
 }
 
 
@@ -887,6 +892,8 @@ void H323AudioCodec::Close()
 
   if (rawDataChannel != NULL)
     rawDataChannel->Close();
+
+  mediaFormat.RemoveAllOptions();
 }
 
 

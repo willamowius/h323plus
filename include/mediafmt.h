@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2010/06/06 14:49:44  shorne
+ * G.711 codec now 20ms (was 30ms) sample size
+ *
  * Revision 1.7  2010/05/02 22:48:12  shorne
  * Added support to order generic parameters in capablity exchange. Added G.711 20ms codec
  *
@@ -751,6 +754,13 @@ class OpalMediaFormat : public PCaselessString
       OpalMediaOption * option,
       PBoolean overwrite = FALSE
     );
+
+    
+    /** 
+      * Remove all options
+      */
+    void RemoveAllOptions() 
+    { options.RemoveAll(); }
     
     /**
       * Determine if media format has the specified option.
