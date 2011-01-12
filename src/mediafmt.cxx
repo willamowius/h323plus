@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2010/09/19 05:35:25  shorne
+ * Correct merging logic for generic capabilities
+ *
  * Revision 1.8  2010/08/19 12:45:13  shorne
  * Improved Generic Capability merge
  *
@@ -272,7 +275,7 @@ OPAL_MEDIA_FORMAT_DECLARE(OpalG729Format,
           TRUE, // Needs jitter
           8000, // bits/sec
           10,   // bytes
-          80,   // 10 milliseconds
+          10,   // 10 milliseconds
           OpalMediaFormat::AudioTimeUnits,
           0)
 
@@ -287,7 +290,7 @@ OPAL_MEDIA_FORMAT_DECLARE(OpalG729AFormat,
           TRUE, // Needs jitter
           8000, // bits/sec
           10,   // bytes
-          80,   // 10 milliseconds
+          10,   // 10 milliseconds
           OpalMediaFormat::AudioTimeUnits,
           0)
 
@@ -302,7 +305,7 @@ OPAL_MEDIA_FORMAT_DECLARE(OpalG729BFormat,
           TRUE, // Needs jitter
           8000, // bits/sec
           10,   // bytes
-          80,   // 10 milliseconds
+          10,   // 10 milliseconds
           OpalMediaFormat::AudioTimeUnits,
           0)
 
@@ -317,7 +320,7 @@ OPAL_MEDIA_FORMAT_DECLARE(OpalG729ABFormat,
           TRUE, // Needs jitter
           8000, // bits/sec
           10,   // bytes
-          80,   // 10 milliseconds
+          10,   // 10 milliseconds
           OpalMediaFormat::AudioTimeUnits,
           0)
 
@@ -332,7 +335,7 @@ OPAL_MEDIA_FORMAT_DECLARE(OpalG7231_6k3Format,
           TRUE, // Needs jitter
           6400, // bits/sec
           24,   // bytes
-          240,  // 30 milliseconds
+          30,  // 30 milliseconds
           OpalMediaFormat::AudioTimeUnits,
           0)
 
@@ -347,7 +350,7 @@ OPAL_MEDIA_FORMAT_DECLARE(OpalG7231_5k3Format,
           TRUE, // Needs jitter
           5300, // bits/sec
           24,   // bytes
-          240,  // 30 milliseconds
+          30,  // 30 milliseconds
           OpalMediaFormat::AudioTimeUnits,
           0)
 
@@ -362,7 +365,7 @@ OPAL_MEDIA_FORMAT_DECLARE(OpalG7231A_6k3Format,
           TRUE, // Needs jitter
           6400, // bits/sec
           24,   // bytes
-          240,  // 30 milliseconds
+          30,  // 30 milliseconds
           OpalMediaFormat::AudioTimeUnits,
           0)
 
@@ -377,7 +380,7 @@ OPAL_MEDIA_FORMAT_DECLARE(OpalG7231A_5k3Format,
           TRUE, // Needs jitter
           5300, // bits/sec
           24,   // bytes
-          240,  // 30 milliseconds
+          30,  // 30 milliseconds
           OpalMediaFormat::AudioTimeUnits,
           0)
 
@@ -392,7 +395,7 @@ OPAL_MEDIA_FORMAT_DECLARE(OpalGSM0610Format,
           TRUE,  // Needs jitter
           13200, // bits/sec
           33,    // bytes
-          160,   // 20 milliseconds
+          20,   // 20 milliseconds
           OpalMediaFormat::AudioTimeUnits,
           0)
 
@@ -1201,15 +1204,7 @@ PObject * OpalVideoFormat::Clone() const
 
 bool OpalVideoFormat::Merge(const OpalMediaFormat & mediaFormat)
 {
-  if (!OpalMediaFormat::Merge(mediaFormat))
-    return false;
-
-  unsigned maxBitRate = GetOptionInteger(MaxBitRateOption);
-  unsigned targetBitRate = GetOptionInteger(TargetBitRateOption);
-  if (targetBitRate > maxBitRate)
-    SetOptionInteger(TargetBitRateOption, maxBitRate);
-
-  return true;
+    return OpalMediaFormat::Merge(mediaFormat);
 }
 
 #endif // H323_VIDEO
