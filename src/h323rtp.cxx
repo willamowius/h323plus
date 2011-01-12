@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.15  2010/08/26 15:12:39  shorne
+ * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
+ *
  * Revision 1.14  2010/05/03 03:56:34  shorne
  * Improved collection of sender reports including identifying session they originated from
  *
@@ -220,7 +223,7 @@ H323_RTP_Session::H323_RTP_Session(const H323Connection & conn)
 
 void H323_RTP_Session::OnTxStatistics(const RTP_Session & session) const
 {
-  connection.OnRTPStatistics(session);
+  //connection.OnRTPStatistics(session);
 }
 
 
@@ -468,10 +471,12 @@ PBoolean H323_RTP_UDP::OnReceivedAckPDU(H323_RTPChannel & channel,
 
   if (param.m_sessionID != rtp.GetSessionID()) {
     if (rtp.GetSessionID() == 0) {
+     if (param.m_sessionID > 3) {
        //update SessionID of the channel with the new one
        //fix for Tandberg as it allows open only with SessioID=0, but then in OLC ACK sends Session ID 32 up
-       PTRACE(2, "RTP_UDP\tAck for invalid session: " << param.m_sessionID << "  Change the LC SessionID: "<< rtp.GetSessionID() << "  to the new one.");
+       PTRACE(2, "RTP_UDP\tAck for invalid session: " << param.m_sessionID << "  Change the LC SessionID: "<< rtp.GetSessionID() << "  to " << param.m_sessionID);
        rtp.SetSessionID(param.m_sessionID);
+     }
     } else {
        PTRACE(1, "RTP_UDP\tAck for invalid session: " << param.m_sessionID);
     }

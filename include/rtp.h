@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.13  2010/09/19 05:53:28  shorne
+ * Added NAT Support for Unidirection media channels (H.239) fix to set random timestamp rather than  zero. Fix the timestamp on the marker frame.
+ *
  * Revision 1.12  2010/08/26 15:12:39  shorne
  * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
  *
@@ -1074,6 +1077,13 @@ class RTP_SessionManager : public PObject
      */
     void ReleaseSession(
       unsigned sessionID    ///<  Session ID to release.
+    );
+
+    /**Move the session. 
+     */
+    void MoveSession(
+      unsigned oldSessionID,    ///<  Session ID from.
+      unsigned newSessionID     ///<  Session ID to.
     );
 
     /**Get a session for the specified ID.
