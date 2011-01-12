@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.45  2010/09/20 08:02:26  willamowius
+ * make H225 and H245 keepAlive optional
+ *
  * Revision 1.44  2010/09/19 05:38:56  shorne
  * Added support for address##alias dialing which is common on polycom and lifesize systems
  *
@@ -2435,6 +2438,16 @@ PBoolean H323EndPoint::ParsePartyName(const PString & _remoteParty,
     PTRACE(4, "H323\tConverted " << _remoteParty << " to " << remoteParty);
   }
 
+  //check if IPv6 address
+  PINDEX ipv6 = remoteParty.Find("::");
+  if (ipv6 != P_MAX_INDEX) {
+      PINDEX at = remoteParty.Find('@');
+      if (at != P_MAX_INDEX) {
+          remoteParty = remoteParty.Left(at+1) + "[" + remoteParty.Mid(at+1) + "]";
+      } else
+          remoteParty = "[" + remoteParty + "]";
+  }
+
   // convert the remote party string to a URL, with a default URL of "h323:"
   PURL url(remoteParty, "h323");
 
@@ -3570,10 +3583,10 @@ OpalT38Protocol * H323EndPoint::CreateT38ProtocolHandler(const H323Connection &)
 
 #ifdef H323_H224
 
-OpalH224Handler * H323EndPoint::CreateH224ProtocolHandler(H323Connection & connection, 
+OpalH224Handler * H323EndPoint::CreateH224ProtocolHandler(H323Channel::Directions dir, H323Connection & connection, 
 														  unsigned sessionID) const
 {
-  return new OpalH224Handler(connection, sessionID);
+  return new OpalH224Handler(dir, connection, sessionID);
 }
 
 
