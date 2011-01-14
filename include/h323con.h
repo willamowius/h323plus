@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.52  2011/01/12 12:55:14  shorne
+ * H.224 Bi-directional support added. Calback added for h239 Generic Command to close channel
+ *
  * Revision 1.51  2010/09/19 05:46:29  shorne
  * Added Handling H.245 Control Channel failure, Setting initial Bandwidth by codec type. Setting H.239 Channel number callback
  *
@@ -2359,6 +2362,10 @@ class H323Connection : public PObject
     /**Get the available bandwidth in 100's of bits/sec.
       */
     unsigned GetBandwidthAvailable() const { return bandwidthAvailable; }
+
+    /**Get the Bandwidth requirement for the call in 100's of bits/sec.
+      */
+    virtual unsigned GetBandwidthRequired() const { return bandwidthAvailable; }
 
     /**Set the available bandwidth in 100's of bits/sec.
        Note if the force parameter is TRUE this function will close down

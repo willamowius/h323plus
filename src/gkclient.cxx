@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.17  2010/10/25 13:33:02  willamowius
+ * remove debug trace
+ *
  * Revision 1.16  2010/08/26 15:12:39  shorne
  * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
  *
@@ -1535,7 +1538,7 @@ PBoolean H323Gatekeeper::AdmissionRequest(H323Connection & connection,
     }
   }
 
-  arq.m_bandWidth = connection.GetBandwidthAvailable();
+  arq.m_bandWidth = connection.GetBandwidthRequired();
   arq.m_callReferenceValue = connection.GetCallReference();
   arq.m_conferenceID = connection.GetConferenceIdentifier();
   arq.m_callIdentifier.m_guid = connection.GetCallIdentifier();

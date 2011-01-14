@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.16  2010/09/19 05:53:28  shorne
+ * Added NAT Support for Unidirection media channels (H.239) fix to set random timestamp rather than  zero. Fix the timestamp on the marker frame.
+ *
  * Revision 1.15  2010/08/26 15:12:39  shorne
  * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
  *
@@ -846,12 +849,17 @@ PBoolean H323Channel::SetInitialBandwidth()
     return TRUE;
 
 #ifdef H323_VIDEO
-  if ((GetDirection() == H323Channel::IsTransmitter) && 
-	  (GetSessionID() == OpalMediaFormat::DefaultVideoSessionID))
-			connection.OnSetInitialBandwidth((H323VideoCodec *)codec);
-#endif
+  if (GetSessionID() == OpalMediaFormat::DefaultVideoSessionID) { 
+     if (GetDirection() == H323Channel::IsTransmitter)
+		connection.OnSetInitialBandwidth((H323VideoCodec *)codec);
 
-  return SetBandwidthUsed(codec->GetMediaFormat().GetBandwidth()/100);
+     return SetBandwidthUsed(
+        codec->GetMediaFormat().GetOptionInteger(OpalVideoFormat::MaxBitRateOption)/100);
+  } else
+#endif
+  {
+     return SetBandwidthUsed(codec->GetMediaFormat().GetBandwidth()/100);
+  }
 }
 
 
