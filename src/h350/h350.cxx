@@ -35,6 +35,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2008/06/26 13:00:50  shorne
+ * Fixed change from PList to PArray in PTlib
+ *
  * Revision 1.6  2008/05/23 11:22:47  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -57,6 +60,9 @@
  *
  */
 
+#ifndef _WIN32
+#define P_FORCE_STATIC_PLUGIN	1
+#endif
 #include <ptlib.h>
 
 #include "openh323buildopts.h"

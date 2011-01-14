@@ -1,4 +1,3 @@
-
 /*
  * h350.h
  *
@@ -35,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2008/06/26 13:00:50  shorne
+ * Fixed change from PList to PArray in PTlib
+ *
  * Revision 1.6  2008/05/23 11:20:34  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -64,10 +66,15 @@
 #ifndef _H323_H350
 #define _H323_H350
 
+#ifndef _WIN32
+#define P_FORCE_STATIC_PLUGIN   1
+#endif
+
+#include <ptclib/pldap.h>
 #include <map>
 #include <list>
 
-class H350_Session   : public PLDAPSession
+class H350_Session : public PLDAPSession
 {
   public:
      typedef std::list<PLDAPSchema> LDAP_Record;
@@ -98,7 +105,7 @@ class H350_Session   : public PLDAPSession
 };
 
 #define H350_Schema(cname)  \
-class cname##_schema  : public PLDAPSchema \
+class cname##_schema : public PLDAPSchema \
 {   \
   public: static PStringList SchemaName() { return PStringList(cname##_SchemaName); } \
   void AttributeList(attributeList & attrib) { \
