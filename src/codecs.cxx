@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.14  2011/01/12 13:11:41  shorne
+ * Added ability to remove all mediaformat options
+ *
  * Revision 1.13  2010/09/19 05:43:39  shorne
  * Added SetSupportedFormats
  *
@@ -645,6 +648,8 @@ H323VideoCodec::H323VideoCodec(const OpalMediaFormat & fmt, Direction dir)
 H323VideoCodec::~H323VideoCodec()
 {
   Close();    //The close operation may delete the rawDataChannel.
+
+  mediaFormat.RemoveAllOptions();
 }
 
 
@@ -802,8 +807,6 @@ void H323VideoCodec::Close()
   PWaitAndSignal mutex1(videoHandlerActive);  
 
   CloseRawDataChannel();
-
-  mediaFormat.RemoveAllOptions();
 }
 
 
@@ -877,6 +880,8 @@ H323AudioCodec::~H323AudioCodec()
   Close();
 
   CloseRawDataChannel();
+
+  mediaFormat.RemoveAllOptions();
 }
 
 
@@ -893,7 +898,6 @@ void H323AudioCodec::Close()
   if (rawDataChannel != NULL)
     rawDataChannel->Close();
 
-  mediaFormat.RemoveAllOptions();
 }
 
 
