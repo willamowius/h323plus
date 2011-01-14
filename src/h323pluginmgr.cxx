@@ -24,6 +24,12 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.43  2011/01/12 13:30:56  shorne
+ * change optionlist list size to size once at the start rather than incrementally to improve performance
+ * Correct GetMaxBitRate to get max bit rate rather then target bitrate
+ * Change how flow control requests are handled,
+ * Ability to handle SetFrameSize failures in  Pluginvideocodec::Write
+ *
  * Revision 1.42  2010/09/19 05:50:50  shorne
  * Remove PLUS_FRAMEHEADER switch, added support for passing input device capabilities to the video plugin
  *
@@ -2028,7 +2034,7 @@ void H323PluginVideoCodec::SetSupportedFormats(std::list<PVideoFrameInfo> & info
 
       char ** _options = list.ToCharArray();
       unsigned int optionsLen = sizeof(_options);
-      (*ctl->control)(codec, context ,SET_CODEC_FORMAT_OPTIONS, _options, &optionsLen);
+      (*ctl->control)(codec, context, SET_CODEC_FORMAT_OPTIONS, _options, &optionsLen);
           for (i = 0; _options[i] != NULL; i += 2) {
 			const char * key = _options[i];
 			int val = atoi(_options[i+1]);;
