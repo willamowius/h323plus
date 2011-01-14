@@ -241,10 +241,8 @@ unsigned H264EncoderContext::GetMaxMBPS()
 }
 
 void H264EncoderContext::SetMaxNALSize(unsigned size)
-{  
-#ifdef _MSC_VER  // Currently only in Windows pipe
+{
     H264EncCtxInstance.call(SET_MAX_NALSIZE, size);
-#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

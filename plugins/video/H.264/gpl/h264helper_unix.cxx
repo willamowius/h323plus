@@ -219,7 +219,12 @@ int main(int argc, char *argv[])
         writeStream(ulStream,(char*)&msg, sizeof(msg)); 
         flushStream(ulStream);
       break;
-    default:
+	case SET_MAX_NALSIZE:
+        readStream(dlStream, (char*)&val, sizeof(val));
+        x264->SetMaxNALSize (val);
+        writeStream(ulStream,(char*)&msg, sizeof(msg)); 
+        flushStream(ulStream);
+	default:
       break;
     }
   }
