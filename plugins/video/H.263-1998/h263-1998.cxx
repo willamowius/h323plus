@@ -555,10 +555,14 @@ H263_RFC2190_EncoderContext::~H263_RFC2190_EncoderContext()
 
   CloseCodec();
 
-  FFMPEGLibraryInstance.AvcodecFree(_context);
-  _context = NULL;
-  FFMPEGLibraryInstance.AvcodecFree(_inputFrame);
-  _inputFrame = NULL;
+  if (_context != NULL) {
+    FFMPEGLibraryInstance.AvcodecFree(_context);
+    _context = NULL;
+  }
+  if (_inputFrame != NULL) {
+    FFMPEGLibraryInstance.AvcodecFree(_inputFrame);
+    _inputFrame = NULL;
+  }
 
   TRACE_AND_LOG(tracer, 3, "encoder closed");
 }
@@ -806,10 +810,14 @@ H263_RFC2429_EncoderContext::~H263_RFC2429_EncoderContext()
   if (_txH263PFrame)
     delete _txH263PFrame;
 
-  FFMPEGLibraryInstance.AvcodecFree(_context);
-  _context = NULL;
-  FFMPEGLibraryInstance.AvcodecFree(_inputFrame);
-  _inputFrame = NULL;
+  if (_context != NULL) {
+    FFMPEGLibraryInstance.AvcodecFree(_context);
+    _context = NULL;
+  }
+  if (_inputFrame != NULL) {
+    FFMPEGLibraryInstance.AvcodecFree(_inputFrame);
+    _inputFrame = NULL;
+  }
 
   TRACE_AND_LOG(tracer, 3, "encoder closed");
 }
@@ -991,10 +999,14 @@ H263_Base_DecoderContext::~H263_Base_DecoderContext()
 {
   CloseCodec();
 
-  FFMPEGLibraryInstance.AvcodecFree(_context);
-  _context = NULL;
-  FFMPEGLibraryInstance.AvcodecFree(_outputFrame);
-  _outputFrame = NULL;
+  if (_context != NULL) {
+    FFMPEGLibraryInstance.AvcodecFree(_context);
+    _context = NULL;
+  }
+  if (_outputFrame != NULL) {
+    FFMPEGLibraryInstance.AvcodecFree(_outputFrame);
+    _outputFrame = NULL;
+  }
 }
 
 bool H263_Base_DecoderContext::OpenCodec()
