@@ -24,6 +24,15 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.68  2011/01/12 13:03:53  shorne
+ * H.224 bi-directional support added
+ * H.239 Generic Command to close channel callback
+ * Remove NatMethods on connection destructor
+ * Add RouteCalltoGatekeeper facility support
+ * Remove ASSERT on set hold media and allow lower functions to return
+ * Added Capability merge support for audio capabilities
+ * H.239 Clunge for channelID=0 and set Channelid in OLCack
+ *
  * Revision 1.67  2010/11/02 15:28:35  willamowius
  * avoid crash on OLC without mediaControlChannel
  *
@@ -2283,6 +2292,12 @@ PBoolean H323Connection::OnReceivedFacility(const H323SignalPDU & pdu)
     return TRUE;
 
   PString address;
+  if (fac.m_reason.GetTag() == H225_FacilityReason::e_routeCallToGatekeeper) {
+      PIPSocket::Address add;
+      H323TransportAddress(remotePartyAddress).GetIpAddress(add);
+      address = add.AsString();
+  }
+
   if (fac.HasOptionalField(H225_Facility_UUIE::e_alternativeAliasAddress) &&
       fac.m_alternativeAliasAddress.GetSize() > 0)
     address = H323GetAliasAddressString(fac.m_alternativeAliasAddress[0]);
