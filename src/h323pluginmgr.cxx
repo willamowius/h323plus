@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.44  2011/01/14 09:45:22  willamowius
+ * formatting
+ *
  * Revision 1.43  2011/01/12 13:30:56  shorne
  * change optionlist list size to size once at the start rather than incrementally to improve performance
  * Correct GetMaxBitRate to get max bit rate rather then target bitrate
@@ -1734,7 +1737,7 @@ class H323PluginVideoCodec : public H323VideoCodec
     );
  
     virtual unsigned GetFrameRate() const 
-    {  return 90000/targetFrameTimeMs;  }
+    {  return targetFrameTimeMs ? 90000/targetFrameTimeMs : 30;  }
 
     PBoolean SetTargetFrameTimeMs(unsigned ms)  // Requires implementing
     {  targetFrameTimeMs = ms; return TRUE; }
@@ -2171,6 +2174,13 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
         length = 0;
 
     lastPacketSent = (flags & PluginCodec_ReturnCoderLastFrame);
+
+    // fix a nasty rare bug where the codec never returns ReturnCoderLastFrame
+    // and just keeps looping forever
+    if (!lastPacketSent && length == 0) {
+        PTRACE(4,"PLUGIN\tCodec Loop detected!");
+        lastPacketSent = true;
+    }
 
     return TRUE;
 }
