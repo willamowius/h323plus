@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.15  2011/01/14 14:59:58  shorne
+ * Moved RemoveAllOptions to the class destructor to resolve issue with transitioning from fast connect to slow connect
+ *
  * Revision 1.14  2011/01/12 13:11:41  shorne
  * Added ability to remove all mediaformat options
  *
@@ -649,7 +652,7 @@ H323VideoCodec::~H323VideoCodec()
 {
   Close();    //The close operation may delete the rawDataChannel.
 
-  mediaFormat.RemoveAllOptions();
+  //mediaFormat.RemoveAllOptions();
 }
 
 
@@ -881,7 +884,7 @@ H323AudioCodec::~H323AudioCodec()
 
   CloseRawDataChannel();
 
-  mediaFormat.RemoveAllOptions();
+  //mediaFormat.RemoveAllOptions();
 }
 
 
