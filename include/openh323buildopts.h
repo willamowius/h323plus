@@ -1,3 +1,4 @@
+/* include/openh323buildopts.h.  Generated from openh323buildopts.h.in by configure.  */
 /*
  * openh323buildopts.h
  *
@@ -24,6 +25,21 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.20  2010/09/15 14:40:20  willamowius
+ * fix build with video disabled
+ *
+ * Revision 1.19  2010/06/06 14:33:03  shorne
+ * reverted out ptlb version clunge
+ *
+ * Revision 1.18  2010/05/03 00:45:50  shorne
+ * Temporarily lock the ptlib version to 2.8.x until the commits are made to ptlib
+ *
+ * Revision 1.17  2010/05/02 22:41:41  shorne
+ * Added ptlib 2.9 check
+ *
+ * Revision 1.16  2010/03/17 07:29:40  willamowius
+ * disable all H.460 features when H.460 is disabled
+ *
  * Revision 1.15  2009/12/08 13:02:26  shorne
  * Adjust H323_H46024B compiler directive
  *
@@ -191,10 +207,13 @@
 #include <ptbuildopts.h>
 
 #if PTLIB_MAJOR == 2 && PTLIB_MINOR == 6  
-		#define PTLIB_VER 260
+     #define PTLIB_VER 260
 #endif
-#if PTLIB_MAJOR == 2 && PTLIB_MINOR >= 7  
-		#define PTLIB_VER 270
+#if PTLIB_MAJOR == 2 && PTLIB_MINOR == 8  
+     #define PTLIB_VER 280
+#endif
+#if PTLIB_MAJOR == 2 && PTLIB_MINOR >= 9  
+     #define PTLIB_VER 290
 #endif
 
 /////////////////////////////////////////////////
@@ -204,8 +223,8 @@
 
 #define OPENH323_MAJOR 1
 #define OPENH323_MINOR 22
-#define OPENH323_BUILD 0
-#define OPENH323_VERSION "1.22.0"
+#define OPENH323_BUILD 1
+#define OPENH323_VERSION "1.22.1"
 
 #define H323_AUDIO_CODECS 1
 
@@ -218,7 +237,7 @@
 
 #ifdef H323_AUDIO_CODECS
 
-#undef H323_EMBEDDED_GSM
+/* #undef H323_EMBEDDED_GSM */
 
 #endif // H323_AUDIO_CODECS
 
@@ -227,12 +246,14 @@
 // Various item support
 //
 
-#define H323_AEC  1
+/* #undef H323_AEC */
 #define H323_T38 1
 #define H323_T120 1
 #define H323_H224 1
 #define H323_H230 1
+#ifdef P_VIDEO
 #define H323_H239 1
+#endif
 #define H323_H248 1
 #define H323_H249 1
 #define H323_H341 1
@@ -240,8 +261,10 @@
 #define H323_H350 1
 #endif
 #define H323_H450 1
+
 #define H323_H460 1
-#define H323_H4609 1
+#ifdef H323_H460
+/* #undef H323_H4609 */
 #if (PTLIB_VER > 260) 
 	#define H323_H46018 1
 	#define H323_H46023 1
@@ -256,16 +279,17 @@
 	#endif
 #endif
 #define H323_H460P 1
+#endif
+
 #define H323_H501 1
 #if (PTLIB_VER > 260) 
-	#define H323_GNUGK 1
+/* 	#undef H323_GNUGK */
 #endif
 #define H323_FILE 1
 
-#undef H323_SIGNAL_AGGREGATE
-#undef H323_RTP_AGGREGATE
+/* #undef H323_SIGNAL_AGGREGATE */
+/* #undef H323_RTP_AGGREGATE */
 
 #endif
 
 // End Of File ///////////////////////////////////////////////////////////////
-

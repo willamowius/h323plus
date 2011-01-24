@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2009/10/21 10:09:01  shorne
+ * Updates for H.460.18/.19/.23/.24
+ *
  * Revision 1.6  2009/09/29 07:23:03  shorne
  * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
  *
@@ -76,9 +79,7 @@
 // H.460.18
 //
 // Must Declare for Factory Loader.
-#ifdef _WIN32
 H460_FEATURE(Std18);
-#endif
 
 H460_FeatureStd18::H460_FeatureStd18()
 : H460_FeatureStd(18)
@@ -177,9 +178,7 @@ void H460_FeatureStd18::OnReceiveServiceControlIndication(const H225_FeatureDesc
 // H.460.19
 //
 // Must Declare for Factory Loader.
-#ifdef _WIN32
 H460_FEATURE(Std19);
-#endif
 
 H460_FeatureStd19::H460_FeatureStd19()
 : H460_FeatureStd(19)

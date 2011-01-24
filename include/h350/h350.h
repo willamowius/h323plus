@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2011/01/14 11:57:26  willamowius
+ * fix H.350 compile on Linux
+ *
  * Revision 1.7  2008/06/26 13:00:50  shorne
  * Fixed change from PList to PArray in PTlib
  *
@@ -65,10 +68,6 @@
 
 #ifndef _H323_H350
 #define _H323_H350
-
-#ifndef _WIN32
-#define P_FORCE_STATIC_PLUGIN   1
-#endif
 
 #include <ptclib/pldap.h>
 #include <map>
