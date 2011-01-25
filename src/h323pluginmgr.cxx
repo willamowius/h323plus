@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.45  2011/01/23 06:22:07  shorne
+ * Fix rare conditions where the targetbitrate is not set and the plugin codec does not return lastFrame and keeps looping.
+ *
  * Revision 1.44  2011/01/14 09:45:22  willamowius
  * formatting
  *
@@ -2174,13 +2177,6 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
         length = 0;
 
     lastPacketSent = (flags & PluginCodec_ReturnCoderLastFrame);
-
-    // fix a nasty rare bug where the codec never returns ReturnCoderLastFrame
-    // and just keeps looping forever
-    if (!lastPacketSent && length == 0) {
-        PTRACE(4,"PLUGIN\tCodec Loop detected!");
-        lastPacketSent = true;
-    }
 
     return TRUE;
 }
