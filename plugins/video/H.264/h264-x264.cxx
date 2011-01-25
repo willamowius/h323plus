@@ -56,6 +56,7 @@
   #include <string.h>
   #define STRCMPI  _strcmpi
   #define STRNCMPI strncmp
+  #define snprintf _snprintf
 #else
   #include <semaphore.h>
   #define STRCMPI  strcasecmp
@@ -200,6 +201,10 @@ void H264EncoderContext::Unlock ()
   _mutex.Signal();
 }
 
+void H264EncoderContext::ClearInputFormat()
+{
+    videoInputFormats.clear();
+}
 
 void H264EncoderContext::AddInputFormat(inputFormats & fmt)
 {
@@ -208,9 +213,8 @@ void H264EncoderContext::AddInputFormat(inputFormats & fmt)
     
 int H264EncoderContext::GetInputFormat(inputFormats & fmt)
 {
- TRACE(1,"TEST\tMB " << maxMB << " MBPS " << maxMBPS);
     for (std::list<inputFormats>::const_iterator r=videoInputFormats.begin(); r!=videoInputFormats.end(); ++r) {
-        if (r->mb <= maxMB && maxMBPS/r->mb > minFPS) {
+        if (r->mb <= maxMB && maxMBPS/r->mb >= minFPS) {
            fmt = *r;
            unsigned r = maxMBPS/fmt.mb + 1;
            if (fmt.r > r) fmt.r = r;
@@ -880,6 +884,8 @@ int encoder_formats(
 	char ** options = (char **)parm;
 	if (options == NULL) return 0;
 
+    // Clear default values...
+    context->ClearInputFormat();
 	for (int i = 0; options[i] != NULL; i += 2) {
        if(STRNCMPI(options[i], PLUGINCODEC_OPTION_INPUT_FORMAT, strlen(PLUGINCODEC_OPTION_INPUT_FORMAT)) == 0) {
            inputFormats f; f.w=0; f.h=0; f.r=0;

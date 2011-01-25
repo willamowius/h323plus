@@ -129,6 +129,7 @@ class H264EncoderContext
 
     void AddInputFormat(inputFormats & fmt);
     int GetInputFormat(inputFormats & fmt);
+    void ClearInputFormat();
 
     void SetMaxMB(unsigned mb);
     unsigned GetMaxMB();
