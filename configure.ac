@@ -473,7 +473,7 @@ if test "${enable_h4609}x" = "x" ; then
 fi
 if test "$enable_h4609" = "yes" ; then
   H323_h4609=1
-  AC_DEFINE(H323_h4609, 1)
+  AC_DEFINE(H323_H4609, 1)
 else
   H323_h4609=
   AC_MSG_NOTICE(Disabling H.460.9)
