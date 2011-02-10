@@ -214,7 +214,7 @@ void H264EncoderContext::AddInputFormat(inputFormats & fmt)
 int H264EncoderContext::GetInputFormat(inputFormats & fmt)
 {
     for (std::list<inputFormats>::const_iterator r=videoInputFormats.begin(); r!=videoInputFormats.end(); ++r) {
-        if (r->mb <= maxMB && maxMBPS/r->mb >= minFPS) {
+        if (r->mb <= maxMB && maxMBPS/r->mb > minFPS) {
            fmt = *r;
            unsigned r = maxMBPS/fmt.mb + 1;
            if (fmt.r > r) fmt.r = r;
@@ -277,6 +277,19 @@ H264DecoderContext::H264DecoderContext()
     TRACE(1, "H264\tDecoder\tFailed to allocate frame for encoder");
     return;
   }
+
+    _context->pix_fmt             = PIX_FMT_YUV420P;
+    _context->skip_frame          = AVDISCARD_DEFAULT;
+    _context->error_concealment   = FF_EC_GUESS_MVS; // | FF_EC_DEBLOCK;
+    _context->error_recognition   = FF_ER_CAREFUL;
+    _context->skip_loop_filter    = AVDISCARD_NONREF;
+    _context->workaround_bugs     = FF_BUG_AUTODETECT;
+    _context->codec_type          = CODEC_TYPE_VIDEO;
+    _context->codec_id            = CODEC_ID_H264;
+    _context->thread_count        = 4;
+    _context->keyint_min          = 8;
+    _context->flags               += CODEC_FLAG_EMU_EDGE; //CODEC_FLAG_LOW_DELAY;
+    _context->flags2              += CODEC_FLAG2_FAST;
 
   if (FFMPEGLibraryInstance.AvcodecOpen(_context, _codec) < 0) {
     TRACE(1, "H264\tDecoder\tFailed to open H.264 decoder");
