@@ -27,6 +27,10 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.19  2011/01/12 13:09:49  shorne
+ * H.239 Clunge for channelID=0 and set Channelid in OLCack
+ * Increase statistics interval
+ *
  * Revision 1.18  2010/08/26 15:12:39  shorne
  * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
  *
@@ -1354,7 +1358,7 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveControl(RTP_ControlFrame & 
 
     switch (frame.GetPayloadType()) {
       case RTP_ControlFrame::e_SenderReport :
-        if (size >= sizeof(RTP_ControlFrame::SenderReport)) {
+        if (size >= (sizeof(PUInt32b)+sizeof(RTP_ControlFrame::SenderReport)+frame.GetCount()*sizeof(RTP_ControlFrame::ReceiverReport))) {
           SenderReport sender;
           const RTP_ControlFrame::SenderReport & sr = *(const RTP_ControlFrame::SenderReport *)payload;
           sender.sourceIdentifier = sr.ssrc;
@@ -1372,7 +1376,7 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveControl(RTP_ControlFrame & 
         break;
 
       case RTP_ControlFrame::e_ReceiverReport :
-        if (size >= 4)
+        if (size >= (sizeof(PUInt32b)+frame.GetCount()*sizeof(RTP_ControlFrame::ReceiverReport)))
           OnRxReceiverReport(*(const PUInt32b *)payload,
                                       BuildReceiverReportArray(frame, sizeof(PUInt32b)));
         else {
