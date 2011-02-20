@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.46  2011/01/25 02:10:07  shorne
+ * Resolved issue with codec not returning an completed Frame. Was due to h24_helper being incorrectly compiled with X264.
+ *
  * Revision 1.45  2011/01/23 06:22:07  shorne
  * Fix rare conditions where the targetbitrate is not set and the plugin codec does not return lastFrame and keeps looping.
  *
@@ -1970,7 +1973,7 @@ H323PluginVideoCodec::H323PluginVideoCodec(const OpalMediaFormat & fmt, Directio
 
 H323PluginVideoCodec::~H323PluginVideoCodec()
 {
-    PWaitAndSignal mutex(videoHandlerActive);
+    //PWaitAndSignal mutex(videoHandlerActive);
 
     // Set the buffer memory to zero to prevent
     // memory leak
