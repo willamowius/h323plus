@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.23  2010/08/28 03:58:20  shorne
+ * More H.239 Support. Added ability to close channel, remove and reorder codecs and correctly load capabilities into simult cap listing
+ *
  * Revision 1.22  2010/08/26 15:12:39  shorne
  * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
  *
@@ -2796,8 +2799,10 @@ class H323ExtendedVideoCapability : public H323Capability,
 	/** Get matching Capability from List */
     H323Capability & operator[](PINDEX i);
 
+    H323Capability * GetAt(PINDEX i) const;
+
 	/** Get Number of matching Capabilities */
-	PINDEX GetSize() { return table.GetSize(); }
+	PINDEX GetSize() const; 
 
 	/**Add All Capabilities
 	  */
@@ -2911,8 +2916,7 @@ class H323CodecExtendedVideoCapability : public H323ExtendedVideoCapability
 
 	virtual unsigned GetSubType() const;
 
-    virtual PObject * Clone() const
-    { return new H323CodecExtendedVideoCapability(*this); }
+    virtual PObject * Clone() const;
 
 	virtual void AddCapability(const PString & cap);
 
@@ -2921,6 +2925,8 @@ class H323CodecExtendedVideoCapability : public H323ExtendedVideoCapability
 	);
 
 	virtual PString GetFormatName() const;
+
+    Comparison Compare(const PObject & obj) const;
 
     virtual PBoolean IsMatch(const PASN_Choice & subTypePDU) const;
 

@@ -27,6 +27,10 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.38  2011/01/12 13:07:22  shorne
+ * H.239 Clunge for channelID=0 and set Channelid in OLCack
+ * Fix for wildcard matches of H.239
+ *
  * Revision 1.37  2010/09/26 16:49:47  willamowius
  * fix capabilities.Remove("CIF") and similar
  *
@@ -2016,6 +2020,7 @@ H323ExtendedVideoCapability::H323ExtendedVideoCapability(
         : H323Capability(),
           H323GenericCapabilityInfo(capabilityId, 0)
 {
+	table.SetSize(0);
 	SetCapabilityDirection(H323Capability::e_NoDirection);
 }
 
@@ -2119,6 +2124,30 @@ H323Capability & H323ExtendedVideoCapability::operator[](PINDEX i)
 {
   return table[i];
 }
+
+H323Capability * H323ExtendedVideoCapability::GetAt(PINDEX i) const
+{
+    if (extCapabilities.GetSize() > 0) 
+      return &extCapabilities[i];
+	
+	if (table.GetSize() > 0) 
+      return &table[i];
+
+    return NULL;
+}
+
+
+PINDEX H323ExtendedVideoCapability::GetSize() const
+{ 
+    if (extCapabilities.GetSize() > 0) 
+         return extCapabilities.GetSize();
+
+    if (table.GetSize() > 0) 
+         return table.GetSize(); 
+
+    return 0;
+}
+
 
 H323Channel * H323ExtendedVideoCapability::CreateChannel(
 					  H323Connection & /*connection*/,    
@@ -2446,6 +2475,11 @@ unsigned H323CodecExtendedVideoCapability::GetSubType() const
 	return H245_VideoCapability::e_extendedVideoCapability;  
 }
 
+PObject * H323CodecExtendedVideoCapability::Clone() const
+{ 
+    return new H323CodecExtendedVideoCapability(*this); 
+}
+
 H323Channel * H323CodecExtendedVideoCapability::CreateChannel(H323Connection & connection,   
       H323Channel::Directions dir,unsigned sessionID,const H245_H2250LogicalChannelParameters * param
 ) const
@@ -2458,10 +2492,10 @@ H323Channel * H323CodecExtendedVideoCapability::CreateChannel(H323Connection & c
 
 H323Codec * H323CodecExtendedVideoCapability::CreateCodec(H323Codec::Direction direction ) const
 { 
-   if (table.GetSize() == 0)
+   if (extCapabilities.GetSize() == 0)
 	   return NULL;
 
-	return table[0].CreateCodec(direction); 
+	return extCapabilities[0].CreateCodec(direction); 
 }
 
 PBoolean H323CodecExtendedVideoCapability::OnSendingPDU(H245_Capability & cap) const
@@ -2533,20 +2567,20 @@ PBoolean H323CodecExtendedVideoCapability::OnSendingPDU(H245_VideoCapability & p
 
     H245_ArrayOf_VideoCapability & caps = extend.m_videoCapability;
     
-	if (table.GetSize() > 0) {
-	  caps.SetSize(table.GetSize());
-      for (PINDEX i=0; i< table.GetSize(); i++) {
-	     H245_VideoCapability vidcap;
-        ((H323VideoCapability &)table[i]).OnSendingPDU(vidcap,ctype);
-        caps[i] = vidcap;
-	  }
-	} else {
+	if (extCapabilities.GetSize() > 0) {
 	  caps.SetSize(extCapabilities.GetSize());
       for (PINDEX i=0; i< extCapabilities.GetSize(); i++) {
 	     H245_VideoCapability vidcap;
          ((H323VideoCapability &)extCapabilities[i]).OnSendingPDU(vidcap,ctype);
          caps[i] = vidcap;
       }
+	} else {
+	  caps.SetSize(table.GetSize());
+      for (PINDEX i=0; i< table.GetSize(); i++) {
+	     H245_VideoCapability vidcap;
+        ((H323VideoCapability &)table[i]).OnSendingPDU(vidcap,ctype);
+        caps[i] = vidcap;
+	  }
 	}
 
   return TRUE;
@@ -2622,6 +2656,28 @@ PBoolean H323CodecExtendedVideoCapability::OnReceivedPDU(const H245_VideoCapabil
 		}
    }
    return TRUE; 
+}
+
+PObject::Comparison H323CodecExtendedVideoCapability::Compare(const PObject & obj) const
+{
+  if (!PIsDescendant(&obj, H323CodecExtendedVideoCapability))
+    return LessThan;
+
+  const H323CodecExtendedVideoCapability & cap = (const H323CodecExtendedVideoCapability &)obj;
+
+  for (PINDEX i= 0; i< GetSize(); ++i) {
+      for (PINDEX j=0; j< GetSize(); ++j) {
+         H323Capability * local = GetAt(i);
+         H323Capability * remote = cap.GetAt(j);
+
+         if (!local || !remote) continue;
+
+         PObject::Comparison equal = local->Compare(*remote);
+         if (equal == EqualTo) 
+             return EqualTo;
+      }
+  }
+  return LessThan;
 }
 
 PBoolean H323CodecExtendedVideoCapability::IsMatch(const PASN_Choice & subTypePDU) const
