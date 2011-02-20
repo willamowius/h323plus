@@ -257,7 +257,10 @@ H264DecoderContext::H264DecoderContext()
 
   _gotIFrame = false;
   _gotAGoodFrame = true; // false; //Force FastPictureUpdate on first frame
+  _lastTimeStamp = 0;
   _frameCounter = 0; 
+  _frameAutoFPU = 0;
+  _frameFPUInt = 300;  // Auto request IFrame every 10 secs - SH
   _skippedFrameCounter = 0;
   _rxH264Frame = new H264Frame();
 
@@ -340,8 +343,15 @@ int H264DecoderContext::DecodeFrames(const u_char * src, unsigned & srcLen, u_ch
 
   if (srcRTP.GetMarker()==0)
   {
+	  // Check if we have a change in TimeStamp without Marker ie lost Frame! -SH
+	  if ( _lastTimeStamp > 0 && _lastTimeStamp != srcRTP.GetTimestamp()) {
+		flags = (_gotAGoodFrame ? requestIFrame : 0);
+		_gotAGoodFrame = false;
+	  }
+    _lastTimeStamp = srcRTP.GetTimestamp();
     return 1;
-  } 
+  } else 
+    _lastTimeStamp = 0;
 
   if (_rxH264Frame->GetFrameSize()==0)
   {
@@ -382,6 +392,15 @@ int H264DecoderContext::DecodeFrames(const u_char * src, unsigned & srcLen, u_ch
     _gotAGoodFrame = false;
     return 1;
   }
+
+  // Auto Fast Update Request. Don't trust the decoder. - SH
+  if (_frameAutoFPU == _frameFPUInt) {
+     TRACE(4, "H264\tDecoder\tAuto Request Fast Picture Update");
+     flags = requestIFrame;
+     _frameAutoFPU = 0;
+  } else
+     _frameAutoFPU++;
+
 
   TRACE_UP(4, "H264\tDecoder\tDecoded " << bytesDecoded << " bytes"<< ", Resolution: " << _context->width << "x" << _context->height);
   int frameBytes = (_context->width * _context->height * 3) / 2;
@@ -428,7 +447,7 @@ int H264DecoderContext::DecodeFrames(const u_char * src, unsigned & srcLen, u_ch
   dstRTP.SetMarker(1);
   dstLen = dstRTP.GetFrameLen();
 
-  flags = PluginCodec_ReturnCoderLastFrame;
+  flags |= PluginCodec_ReturnCoderLastFrame;
   if (_outputFrame->key_frame)
      flags |= PluginCodec_ReturnCoderIFrame;
 

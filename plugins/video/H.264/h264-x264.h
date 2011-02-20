@@ -162,7 +162,10 @@ class H264DecoderContext
 
     bool _gotIFrame;
     bool _gotAGoodFrame;
+	unsigned _lastTimeStamp;
     int _frameCounter;
+    int _frameFPUInt;
+    int _frameAutoFPU;
     int _skippedFrameCounter;
 };
 
@@ -450,8 +453,8 @@ static unsigned int   H264H239_Generic9         = 0;
 static unsigned int   H264H239_Generic10        = H264_ASPECT_HD;
 
 
-static const char     H2641080P_Desc[]          = { "H.264-1080" };
-static const char     H2641080P_MediaFmt[]      = { "H.264-1080" };                             
+static const char     H2641080P_Desc[]          = { "H.264-720" };
+static const char     H2641080P_MediaFmt[]      = { "H.264-720" };                             
 static unsigned int   H2641080P_FrameHeight     = P1080_HEIGHT;               
 static unsigned int   H2641080P_FrameWidth      = P1080_WIDTH;
 static unsigned int   H2641080P_Profile         = H264_PROFILE_BASE; 
@@ -632,12 +635,12 @@ static struct PluginCodec_Definition h264CodecDefn[] = {
   PluginCodec_H323Codec_NoH323,       // h323CapabilityType 
   NULL                                // h323CapabilityData
 },*/
-  DECLARE_H323PARAM(H264QCIF),
+ // DECLARE_H323PARAM(H264QCIF),
   DECLARE_H323PARAM(H264CIF),
  // DECLARE_H323PARAM(H264CIF4)
-  DECLARE_H323PARAM(H264720P),
-  DECLARE_H323PARAM(H264H239)
-//  ,DECLARE_H323PARAM(H2641080P)
+ // DECLARE_H323PARAM(H264720P),
+  DECLARE_H323PARAM(H264H239),
+  DECLARE_H323PARAM(H2641080P)
 };
 
 #endif /* __H264-X264_H__ */
