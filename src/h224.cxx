@@ -19,6 +19,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2011/02/20 07:03:00  shorne
+ * Improving H.224 stability by ensuring correct initialization and removing nested mutexes.
+ *
  * Revision 1.4  2011/01/12 12:51:52  shorne
  * H.224 bi-directional support added
  *
@@ -263,7 +266,7 @@ PBoolean H224_Frame::Decode(const BYTE *data,
 OpalH224Handler::OpalH224Handler(H323Channel::Directions dir,
                                  H323Connection & connection,
 								 unsigned sessionID)
-: transmitMutex(), canTransmit(FALSE), sessionDirection(dir)
+: canTransmit(FALSE), transmitMutex(), sessionDirection(dir)
 {
 
   H245_TransportAddress addr;
