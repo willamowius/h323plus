@@ -19,6 +19,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2011/01/12 12:51:52  shorne
+ * H.224 bi-directional support added
+ *
  * Revision 1.3  2008/05/23 11:21:25  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -260,7 +263,7 @@ PBoolean H224_Frame::Decode(const BYTE *data,
 OpalH224Handler::OpalH224Handler(H323Channel::Directions dir,
                                  H323Connection & connection,
 								 unsigned sessionID)
-: transmitMutex(), sessionDirection(dir)
+: transmitMutex(), canTransmit(FALSE), sessionDirection(dir)
 {
 
   H245_TransportAddress addr;
@@ -328,7 +331,7 @@ void OpalH224Handler::StopReceive()
 
 PBoolean OpalH224Handler::SendClientList()
 {
-  PWaitAndSignal m(transmitMutex);
+ // PWaitAndSignal m(transmitMutex);
 	
   if(canTransmit == FALSE) {
     return FALSE;
@@ -363,7 +366,7 @@ PBoolean OpalH224Handler::SendClientList()
 
 PBoolean OpalH224Handler::SendExtraCapabilities()
 {
-  PWaitAndSignal m(transmitMutex);
+ // PWaitAndSignal m(transmitMutex);
 	
   if(canTransmit == FALSE) {
     return FALSE;
@@ -490,12 +493,13 @@ PBoolean OpalH224Handler::SendExtraCapabilitiesMessage(BYTE clientID,
 
 PBoolean OpalH224Handler::TransmitClientFrame(BYTE clientID, H224_Frame & frame)
 {
-  PWaitAndSignal m(transmitMutex);
 
   if(canTransmit == FALSE) {
     return FALSE;
   }
-	
+
+  PWaitAndSignal m(transmitMutex);
+
   // only H.281 is supported at the moment
   if(clientID != H281_CLIENT_ID) {
     return FALSE;
@@ -623,7 +627,7 @@ void OpalH224Handler::TransmitFrame(H224_Frame & frame)
   PINDEX size = frame.GetEncodedSize();
 	
   if(!frame.Encode(transmitFrame->GetPayloadPtr(), size, transmitBitIndex)) {
-    PTRACE(3, "Failed to encode H.224 frame");
+    PTRACE(3, "H224\tFailed to encode H.224 frame");
     return;
   }
 	
@@ -636,7 +640,9 @@ void OpalH224Handler::TransmitFrame(H224_Frame & frame)
   transmitFrame->SetMarker(TRUE);
 	
   if(!session->WriteData(*transmitFrame)) {
-    PTRACE(3, "Failed to write encoded H.224 frame");
+    PTRACE(3, "H224\tFailed to write encoded H.224 frame");
+  } else {
+    PTRACE(3, "H224\tEncoded H.224 frame sent");
   }
 }
 

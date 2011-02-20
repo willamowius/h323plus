@@ -20,6 +20,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2011/01/12 12:51:52  shorne
+ * H.224 bi-directional support added
+ *
  * Revision 1.7  2010/03/19 22:40:30  willamowius
  * fix compile with H.460 disabled
  *
@@ -218,6 +221,11 @@ PBoolean H323_H224Channel::Start()
   if(h224Handler == NULL) {
 	  h224Handler = connection.CreateH224ProtocolHandler(direction,sessionID);
   }
+
+  if (!h224Handler) {
+      PTRACE(4,"H224\tError starting " << (direction == H323Channel::IsTransmitter ? "Transmitter" : "Receiver"));
+      return false;
+  }
 	
   if(direction == H323Channel::IsReceiver) {
     h224Handler->StartReceive();
@@ -241,6 +249,8 @@ void H323_H224Channel::Close()
     } else {
       h224Handler->StopTransmit();
     }
+
+    delete h224Handler;
   }
 	
  // H323Channel::Close();

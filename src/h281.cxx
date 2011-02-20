@@ -19,6 +19,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2011/01/12 12:51:52  shorne
+ * H.224 bi-directional support added
+ *
  * Revision 1.2  2008/05/23 11:21:52  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -499,7 +502,7 @@ OpalH281Handler::OpalH281Handler(OpalH224Handler & theH224Handler)
 
 OpalH281Handler::~OpalH281Handler()
 {
-  PWaitAndSignal m(h224Handler.GetTransmitMutex());
+ // PWaitAndSignal m(h224Handler.GetTransmitMutex());
 
   shutDown = true;
   transmitTimer.Stop();
@@ -521,7 +524,7 @@ void OpalH281Handler::StartAction(H281_Frame::PanDirection panDirection,
                                   H281_Frame::ZoomDirection zoomDirection,
                                   H281_Frame::FocusDirection focusDirection)
 {
-  PWaitAndSignal m(h224Handler.GetTransmitMutex());
+  //PWaitAndSignal m(h224Handler.GetTransmitMutex());
 
   if(transmitFrame.GetRequestType() != H281_Frame::IllegalRequest) {
 
@@ -552,7 +555,7 @@ void OpalH281Handler::StartAction(H281_Frame::PanDirection panDirection,
 
 void OpalH281Handler::StopAction()
 {
-  PWaitAndSignal m(h224Handler.GetTransmitMutex());
+  //PWaitAndSignal m(h224Handler.GetTransmitMutex());
 	
   transmitFrame.SetRequestType(H281_Frame::StopAction);
 	
@@ -564,7 +567,7 @@ void OpalH281Handler::StopAction()
 
 void OpalH281Handler::SelectVideoSource(BYTE videoSourceNumber, H281_Frame::VideoMode videoMode)
 {
-  PWaitAndSignal m(h224Handler.GetTransmitMutex());
+  //PWaitAndSignal m(h224Handler.GetTransmitMutex());
 	
   if(transmitFrame.GetRequestType() != H281_Frame::IllegalRequest) {
     StopAction();
@@ -581,7 +584,7 @@ void OpalH281Handler::SelectVideoSource(BYTE videoSourceNumber, H281_Frame::Vide
 
 void OpalH281Handler::StoreAsPreset(BYTE presetNumber)
 {
-  PWaitAndSignal m(h224Handler.GetTransmitMutex());
+  //PWaitAndSignal m(h224Handler.GetTransmitMutex());
 	
   if(transmitFrame.GetRequestType() != H281_Frame::IllegalRequest) {
     StopAction();
@@ -597,7 +600,7 @@ void OpalH281Handler::StoreAsPreset(BYTE presetNumber)
 
 void OpalH281Handler::ActivatePreset(BYTE presetNumber)
 {
-  PWaitAndSignal m(h224Handler.GetTransmitMutex());
+  //PWaitAndSignal m(h224Handler.GetTransmitMutex());
 	
   if(transmitFrame.GetRequestType() != H281_Frame::IllegalRequest) {
     StopAction();
@@ -783,7 +786,7 @@ void OpalH281Handler::OnActivatePreset(BYTE /*presetNumber*/)
 
 void OpalH281Handler::ContinueAction(PTimer &, INT)
 {
-  PWaitAndSignal(h224Handler.GetTransmitMutex());
+  //PWaitAndSignal(h224Handler.GetTransmitMutex());
 
   if (shutDown)
       return;
