@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2010/01/20 04:12:29  shorne
+ * Added RRJ reason NeededFeature
+ *
  * Revision 1.10  2009/11/29 23:31:04  shorne
  * BUG FIX : completely disable H.460 support if remote does not support it.
  *
@@ -327,7 +330,7 @@ class H323Gatekeeper : public H225_RAS
     void OnSendGatekeeperRequest(H225_GatekeeperRequest & grq);
     void OnSendAdmissionRequest(H225_AdmissionRequest & arq);
 
-    PBoolean OnSendFeatureSet(unsigned, H225_FeatureSet & features) const;
+    PBoolean OnSendFeatureSet(unsigned, H225_FeatureSet & features, PBoolean) const;
     void OnReceiveFeatureSet(unsigned, const H225_FeatureSet & features) const;
 
 #if H323_H460

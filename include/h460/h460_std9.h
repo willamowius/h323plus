@@ -30,6 +30,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2010/01/20 04:23:08  shorne
+ * Add ability to advertise supported H.460 features in presence
+ *
  * Revision 1.3  2009/09/29 07:23:03  shorne
  * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
  *
@@ -79,6 +82,7 @@ public:
     static int GetPurpose()	{ return FeatureSignal; };
 	static PStringArray GetIdentifier() { return PStringArray("9"); };
 
+    virtual PBoolean FeatureAdvertised(int mtype);
 	virtual PBoolean CommonFeature() { return qossupport; }
 
 	// Messages

@@ -27,6 +27,10 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.46  2011/01/12 12:56:59  shorne
+ * H.224 bi-directional support added
+ * H.239 Generic Command to close channel callback
+ *
  * Revision 1.45  2010/09/20 08:02:26  willamowius
  * make H225 and H245 keepAlive optional
  *
@@ -4020,10 +4024,10 @@ PBoolean H323EndPoint::SetNoMediaTimeout(PTimeInterval newInterval)
   return TRUE; 
 }
 
-PBoolean H323EndPoint::OnSendFeatureSet(unsigned pdu, H225_FeatureSet & feats)
+PBoolean H323EndPoint::OnSendFeatureSet(unsigned pdu, H225_FeatureSet & feats, PBoolean advertise)
 {
 #ifdef H323_H460
-    return features.SendFeature(pdu,feats);
+    return features.SendFeature(pdu,feats,advertise);
 #else
     return FALSE;
 #endif

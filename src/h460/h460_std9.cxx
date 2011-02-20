@@ -30,6 +30,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2010/08/27 03:07:26  shorne
+ * Fix compile warning of GCC 4.4
+ *
  * Revision 1.3  2010/05/18 07:44:39  willamowius
  * add newline at end of file
  *
@@ -53,6 +56,7 @@
 #include <h323con.h>
 #include <h460/h460_std9.h>
 #include <h460/h4609.h>
+#include <h460/h460.h>
 
 
 #ifdef _MSC_VER
@@ -92,6 +96,18 @@ void H460_FeatureStd9::AttachEndPoint(H323EndPoint * _ep)
 void H460_FeatureStd9::AttachConnection(H323Connection * _con)
 {
    CON = _con;
+}
+
+PBoolean H460_FeatureStd9::FeatureAdvertised(int mtype)
+{
+     switch (mtype) {
+        case H460_MessageType::e_admissionRequest:
+        case H460_MessageType::e_admissionConfirm:
+        case H460_MessageType::e_admissionReject:
+            return true;
+        default:
+            return false;
+     }
 }
 
 PBoolean H460_FeatureStd9::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)

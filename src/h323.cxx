@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.69  2011/01/23 06:17:05  shorne
+ * Include the orginal called address with routeCalltoGatekeeper so the gatekeeper might be able to route the call.
+ *
  * Revision 1.68  2011/01/12 13:03:53  shorne
  * H.224 bi-directional support added
  * H.239 Generic Command to close channel callback
@@ -6410,8 +6413,11 @@ void H323Connection::OnRefusedModeChange(const H245_RequestModeReject * /*pdu*/)
 void H323Connection::OnSendARQ(H225_AdmissionRequest & arq)
 {
 #ifdef H323_H460
+    if (OnSendFeatureSet(H460_MessageType::e_admissionRequest, arq.m_featureSet, true))
+        arq.IncludeOptionalField(H225_AdmissionRequest::e_featureSet);
+
     H225_FeatureSet fs;
-    if (OnSendFeatureSet(H460_MessageType::e_admissionRequest, fs)) {
+    if (OnSendFeatureSet(H460_MessageType::e_admissionRequest, fs, false)) {
 		  if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
 			arq.IncludeOptionalField(H225_AdmissionRequest::e_genericData);
 
@@ -6432,6 +6438,9 @@ void H323Connection::OnSendARQ(H225_AdmissionRequest & arq)
 void H323Connection::OnReceivedACF(const H225_AdmissionConfirm & acf)
 {
 #ifdef H323_H460
+    if (acf.HasOptionalField(H225_AdmissionConfirm::e_featureSet))
+        OnReceiveFeatureSet(H460_MessageType::e_admissionConfirm, acf.m_featureSet);
+
 	if (acf.HasOptionalField(H225_AdmissionConfirm::e_genericData)) {
 		const H225_ArrayOf_GenericData & data = acf.m_genericData;
 
@@ -6453,6 +6462,9 @@ void H323Connection::OnReceivedACF(const H225_AdmissionConfirm & acf)
 void H323Connection::OnReceivedARJ(const H225_AdmissionReject & arj)
 {
 #ifdef H323_H460
+    if (arj.HasOptionalField(H225_AdmissionReject::e_featureSet))
+        OnReceiveFeatureSet(H460_MessageType::e_admissionConfirm, arj.m_featureSet);
+
 	if (arj.HasOptionalField(H225_AdmissionReject::e_genericData)) {
 		const H225_ArrayOf_GenericData & data = arj.m_genericData;
 
@@ -6475,7 +6487,7 @@ void H323Connection::OnSendIRR(H225_InfoRequestResponse & irr) const
 {
 #ifdef H323_H460
     H225_FeatureSet fs;
-	if (OnSendFeatureSet(H460_MessageType::e_inforequestresponse, fs)) {
+	if (OnSendFeatureSet(H460_MessageType::e_inforequestresponse, fs, false)) {
 		if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
 			irr.IncludeOptionalField(H225_InfoRequestResponse::e_genericData);
 
@@ -6496,7 +6508,7 @@ void H323Connection::OnSendDRQ(H225_DisengageRequest & drq) const
 {
 #ifdef H323_H460
     H225_FeatureSet fs;
-	if (OnSendFeatureSet(H460_MessageType::e_disengagerequest, fs)) {
+	if (OnSendFeatureSet(H460_MessageType::e_disengagerequest, fs, false)) {
 		  if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
 			drq.IncludeOptionalField(H225_DisengageRequest::e_genericData);
 
@@ -6790,15 +6802,15 @@ PBoolean H323Connection::OnH245AddressConflict()
 }
 
 
-PBoolean H323Connection::OnSendFeatureSet(unsigned code, H225_FeatureSet & feats) const
+PBoolean H323Connection::OnSendFeatureSet(unsigned code, H225_FeatureSet & feats, PBoolean advertise) const
 {
 #ifdef H323_H460
    if (disableH460)
 	   return FALSE;
 
-   return features->SendFeature(code, feats);
+   return features->SendFeature(code, feats, advertise);
 #else
-   return endpoint.OnSendFeatureSet(code, feats);
+   return endpoint.OnSendFeatureSet(code, feats, advertise);
 #endif
 }
 

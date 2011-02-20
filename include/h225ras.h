@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2009/11/29 23:31:05  shorne
+ * BUG FIX : completely disable H.460 support if remote does not support it.
+ *
  * Revision 1.3  2009/02/22 02:02:05  shorne
  * Added ability to enable SCI/SCR without needing H248 support
  *
@@ -429,7 +432,7 @@ class H225_RAS : public H323Transactor
     virtual PBoolean OnReceiveRequestInProgress(const H323RasPDU &, const H225_RequestInProgress &);
     virtual PBoolean OnReceiveRequestInProgress(const H225_RequestInProgress &);
 
-    virtual PBoolean OnSendFeatureSet(unsigned, H225_FeatureSet &) const
+    virtual PBoolean OnSendFeatureSet(unsigned, H225_FeatureSet &, PBoolean) const
     { return FALSE; }
 
     virtual void OnReceiveFeatureSet(unsigned, const H225_FeatureSet &) const

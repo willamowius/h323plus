@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.23  2010/10/22 00:27:02  shorne
+ * Added missing information in H460_Feature constructor
+ *
  * Revision 1.22  2010/05/26 13:09:28  willamowius
  * Solaris 10 compile fix
  *
@@ -766,6 +769,23 @@ PString H460_Feature::GetFeatureIDAsString()
    return  ((H460_FeatureID)m_id).IDString();
 }
 
+PBoolean H460_Feature::FeatureAdvertised(int mtype)
+{
+     switch (mtype) {
+        case H460_MessageType::e_gatekeeperRequest:
+        case H460_MessageType::e_gatekeeperConfirm:
+        case H460_MessageType::e_gatekeeperReject:
+        case H460_MessageType::e_registrationRequest:
+        case H460_MessageType::e_registrationConfirm: 
+        case H460_MessageType::e_registrationReject:
+        case H460_MessageType::e_setup:					
+        case H460_MessageType::e_callProceeding:
+            return true;
+        default:
+            return false;
+     }
+}
+
 H460_FeatureParameter & H460_Feature::AddParameter(H460_FeatureID * id, const H460_FeatureContent & con)
 {
 	if (!HasOptionalField(e_parameters)) {	
@@ -1322,7 +1342,7 @@ PString featureType(PINDEX id)
 }
 #endif
 
-PBoolean H460_FeatureSet::CreateFeatureSetPDU(H225_FeatureSet & fs, unsigned MessageID)
+PBoolean H460_FeatureSet::CreateFeatureSetPDU(H225_FeatureSet & fs, unsigned MessageID, PBoolean advertise)
 {
 	PTRACE(6,"H460\tCreate FeatureSet " << PTracePDU(MessageID) << " PDU");
 	
@@ -1330,8 +1350,11 @@ PBoolean H460_FeatureSet::CreateFeatureSetPDU(H225_FeatureSet & fs, unsigned Mes
 
 	for (PINDEX i = 0; i < Features.GetSize(); i++) {    // Iterate thro the features
 	   H460_Feature & feat = Features.GetDataAt(i);
-        PTRACE(6,"H460\tExamining " << feat.GetFeatureIDAsString());
 
+        if (advertise != feat.FeatureAdvertised(MessageID))
+             continue;
+
+        PTRACE(6,"H460\tExamining " << feat.GetFeatureIDAsString());
 		PINDEX lastPos;
 		H225_FeatureDescriptor featdesc;
 		if (CreateFeaturePDU(feat,featdesc,MessageID)) {
@@ -1346,66 +1369,57 @@ PBoolean H460_FeatureSet::CreateFeatureSetPDU(H225_FeatureSet & fs, unsigned Mes
 /// for some messages it is included in the messsage body FeatureSet (to Advertise it) and others 
 /// in the genericData field (as actual information). Even though a Feature is generic data. It is beyond
 /// me to determine Why it is so. Anyway if a message is to be carried in the genericData field it is given
-/// the default category of supported. 
+/// the default category of supported.
 
      PINDEX cat;
-     switch (MessageID) {
-        case H460_MessageType::e_gatekeeperRequest:
-        case H460_MessageType::e_gatekeeperConfirm:
-        case H460_MessageType::e_gatekeeperReject:
-        case H460_MessageType::e_registrationRequest:
-        case H460_MessageType::e_registrationConfirm: 
-        case H460_MessageType::e_registrationReject:
-        case H460_MessageType::e_setup:					
-        case H460_MessageType::e_callProceeding:
-            cat = feat.FeatureCategory;
-            break;
-        default:
-            cat = H460_Feature::FeatureSupported;
-	 }
+     if (advertise)
+         cat = feat.FeatureCategory;
+     else
+         cat = H460_Feature::FeatureSupported;
 
-          buildPDU = TRUE;
-		   switch (cat) {			// Add it to the correct feature list
-			   case H460_Feature::FeatureNeeded:
 
-				  if (featdesc.GetDataLength() > 0) {
-					if (!fs.HasOptionalField(H225_FeatureSet::e_neededFeatures))
-					    fs.IncludeOptionalField(H225_FeatureSet::e_neededFeatures);
+      buildPDU = TRUE;
+	   switch (cat) {			// Add it to the correct feature list
+		   case H460_Feature::FeatureNeeded:
 
-	                     H225_ArrayOf_FeatureDescriptor & fsn = fs.m_neededFeatures;
-							lastPos = fsn.GetSize();
-							fsn.SetSize(lastPos+1);
-							fsn[lastPos] = featdesc;
-				  } 
-				 break;
+			  if (featdesc.GetDataLength() > 0) {
+				if (!fs.HasOptionalField(H225_FeatureSet::e_neededFeatures))
+				    fs.IncludeOptionalField(H225_FeatureSet::e_neededFeatures);
 
-			   case H460_Feature::FeatureDesired:
+                     H225_ArrayOf_FeatureDescriptor & fsn = fs.m_neededFeatures;
+						lastPos = fsn.GetSize();
+						fsn.SetSize(lastPos+1);
+						fsn[lastPos] = featdesc;
+			  } 
+			 break;
 
-				  if (featdesc.GetDataLength() > 0) {
-					if (!fs.HasOptionalField(H225_FeatureSet::e_desiredFeatures))
-					  fs.IncludeOptionalField(H225_FeatureSet::e_desiredFeatures);
+		   case H460_Feature::FeatureDesired:
 
-	                     H225_ArrayOf_FeatureDescriptor & fsd = fs.m_desiredFeatures;
-							lastPos = fsd.GetSize();
-							fsd.SetSize(lastPos+1);
-							fsd[lastPos] = featdesc;
-				  }
-				 break;
+			  if (featdesc.GetDataLength() > 0) {
+				if (!fs.HasOptionalField(H225_FeatureSet::e_desiredFeatures))
+				  fs.IncludeOptionalField(H225_FeatureSet::e_desiredFeatures);
 
-			   case H460_Feature::FeatureSupported:
+                     H225_ArrayOf_FeatureDescriptor & fsd = fs.m_desiredFeatures;
+						lastPos = fsd.GetSize();
+						fsd.SetSize(lastPos+1);
+						fsd[lastPos] = featdesc;
+			  }
+			 break;
 
-				  if (featdesc.GetDataLength() > 0) {
-					 if (!fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures))
-					   fs.IncludeOptionalField(H225_FeatureSet::e_supportedFeatures);
-					 
-						 H225_ArrayOf_FeatureDescriptor & fss = fs.m_supportedFeatures; 
-							lastPos = fss.GetSize();
-							fss.SetSize(lastPos+1);
-							fss[lastPos] = featdesc;
-				  }
-				 break;
-		   }
-		}
+		   case H460_Feature::FeatureSupported:
+
+			  if (featdesc.GetDataLength() > 0) {
+				 if (!fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures))
+				   fs.IncludeOptionalField(H225_FeatureSet::e_supportedFeatures);
+				 
+					 H225_ArrayOf_FeatureDescriptor & fss = fs.m_supportedFeatures; 
+						lastPos = fss.GetSize();
+						fss.SetSize(lastPos+1);
+						fss[lastPos] = featdesc;
+			  }
+			 break;
+		  }
+       }
 	}
 
 #if PTRACING
@@ -1779,9 +1793,9 @@ void H460_FeatureSet::ReceiveFeature(unsigned id, const H225_FeatureSet & Messag
 	ReadFeatureSetPDU(Message,id);
 }
 
-PBoolean H460_FeatureSet::SendFeature(unsigned id, H225_FeatureSet & Message)
+PBoolean H460_FeatureSet::SendFeature(unsigned id, H225_FeatureSet & Message, PBoolean advertise)
 {
-	return CreateFeatureSetPDU(Message,id);
+	return CreateFeatureSetPDU(Message,id, advertise);
 }
 
 void H460_FeatureSet::AttachEndPoint(H323EndPoint * _ep) 

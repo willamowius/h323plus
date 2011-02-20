@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2009/11/29 23:31:13  shorne
+ * BUG FIX : completely disable H.460 support if remote does not support it.
+ *
  * Revision 1.5  2009/02/22 02:02:37  shorne
  * Added ability to enable SCI/SCR without needing H248 support
  *
@@ -604,23 +607,21 @@ PBoolean H225_RAS::OnReceiveRequestInProgress(const H225_RequestInProgress & /*r
 template <typename PDUType>
 static void SendGenericData(const H225_RAS * ras, unsigned code, PDUType & pdu)
 {
-
  H225_FeatureSet fs;
-    if (!ras->OnSendFeatureSet(code,fs))
-		return;
+     if (ras->OnSendFeatureSet(code,fs,false)) {
+	    if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
+	    pdu.IncludeOptionalField(PDUType::e_genericData);
 
-	if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
-	pdu.IncludeOptionalField(PDUType::e_genericData);
+	    H225_ArrayOf_FeatureDescriptor & fsn = fs.m_supportedFeatures;
+	    H225_ArrayOf_GenericData & data = pdu.m_genericData;
 
-	H225_ArrayOf_FeatureDescriptor & fsn = fs.m_supportedFeatures;
-	H225_ArrayOf_GenericData & data = pdu.m_genericData;
-
-		for (PINDEX i=0; i < fsn.GetSize(); i++) {
-				PINDEX lastPos = data.GetSize();
-				data.SetSize(lastPos+1);
-				data[lastPos] = fsn[i];
-		}
-	}
+		    for (PINDEX i=0; i < fsn.GetSize(); i++) {
+				    PINDEX lastPos = data.GetSize();
+				    data.SetSize(lastPos+1);
+				    data[lastPos] = fsn[i];
+		    }
+	    }
+     }
 }
 
 template <typename PDUType>
@@ -628,38 +629,25 @@ static void SendFeatureSet(const H225_RAS * ras, unsigned code, PDUType & pdu)
 {
 
  H225_FeatureSet fs;
-    if (!ras->OnSendFeatureSet(code,fs))
-		return;
+   if (ras->OnSendFeatureSet(code,fs,true)) {
+        pdu.IncludeOptionalField(PDUType::e_featureSet);
+		pdu.m_featureSet = fs;
+   }
 
-     switch (code) {
-#ifdef H323_H460
-        case H460_MessageType::e_gatekeeperRequest:
-        case H460_MessageType::e_gatekeeperConfirm:
-        case H460_MessageType::e_gatekeeperReject:
-        case H460_MessageType::e_registrationRequest:
-        case H460_MessageType::e_registrationConfirm: 
-        case H460_MessageType::e_registrationReject:
-        case H460_MessageType::e_setup:					
-        case H460_MessageType::e_callProceeding:
-            pdu.IncludeOptionalField(PDUType::e_featureSet);
-			pdu.m_featureSet = fs;
-            break;
-#endif
-        default:
-		  if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
-			pdu.IncludeOptionalField(PDUType::e_genericData);
+   if (ras->OnSendFeatureSet(code,fs,false)) {
+	  if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
+		pdu.IncludeOptionalField(PDUType::e_genericData);
 
-			H225_ArrayOf_FeatureDescriptor & fsn = fs.m_supportedFeatures;
-		    H225_ArrayOf_GenericData & data = pdu.m_genericData;
+		H225_ArrayOf_FeatureDescriptor & fsn = fs.m_supportedFeatures;
+	    H225_ArrayOf_GenericData & data = pdu.m_genericData;
 
-			for (PINDEX i=0; i < fsn.GetSize(); i++) {
-				 PINDEX lastPos = data.GetSize();
-				 data.SetSize(lastPos+1);
-				 data[lastPos] = fsn[i];
-			}
-		  }
-		  break;
-	 }
+		for (PINDEX i=0; i < fsn.GetSize(); i++) {
+			 PINDEX lastPos = data.GetSize();
+			 data.SetSize(lastPos+1);
+			 data[lastPos] = fsn[i];
+		}
+	  }
+    }
 }
 
 

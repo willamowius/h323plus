@@ -36,6 +36,9 @@
  * Contributor(s): ______________________________________.
  *
 * $Log$
+* Revision 1.18  2010/05/26 13:07:51  willamowius
+* SOlaris 10 compile fix
+*
 * Revision 1.17  2010/01/20 04:23:08  shorne
 * Add ability to advertise supported H.460 features in presence
 *
@@ -650,6 +653,10 @@ class H460_Feature : public H225_FeatureDescriptor
 	*/
 	   unsigned GetFeatureType() { return ((H460_FeatureID)m_id).GetFeatureType(); };
 
+    /** Whether the current message is advertised.
+      */
+      virtual PBoolean FeatureAdvertised(int mtype);
+
     /** Whether Supports Non-Call Supplimentary Service
 	 */
 	   virtual PBoolean SupportNonCallService() { return false; };
@@ -1128,7 +1135,7 @@ class H460_FeatureSet : public PObject
 	/** New Processing Paradigm
 		 Main PDU & RAS link to OpenH323
 	*/
-	PBoolean SendFeature(unsigned id, H225_FeatureSet & Message);	
+	PBoolean SendFeature(unsigned id, H225_FeatureSet & Message, PBoolean advertise);	
 
 	/**Disable all features
 		Remote does not support H.460 so we remove all features
@@ -1154,7 +1161,7 @@ class H460_FeatureSet : public PObject
 
   protected:
 
-   PBoolean CreateFeatureSetPDU(H225_FeatureSet & fs, unsigned MessageID);
+   PBoolean CreateFeatureSetPDU(H225_FeatureSet & fs, unsigned MessageID, PBoolean advertise);
 
    void ReadFeatureSetPDU(const H225_FeatureSet & fs, unsigned MessageID);
 

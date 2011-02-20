@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2010/08/05 13:31:21  willamowius
+ * fix memory leak (thanks Francisco Olarte)
+ *
  * Revision 1.3  2009/02/17 09:54:38  willamowius
  * fix 64bit issue
  *
@@ -3229,9 +3232,9 @@ PBoolean H323GatekeeperListener::OnReceiveResourcesAvailableConfirm(const H225_R
   return TRUE;
 }
 
-PBoolean H323GatekeeperListener::OnSendFeatureSet(unsigned pduType, H225_FeatureSet & set) const
+PBoolean H323GatekeeperListener::OnSendFeatureSet(unsigned pduType, H225_FeatureSet & set, PBoolean advertise) const
 {
-  return gatekeeper.OnSendFeatureSet(pduType, set);
+  return gatekeeper.OnSendFeatureSet(pduType, set, advertise);
 }
 
 void H323GatekeeperListener::OnReceiveFeatureSet(unsigned pduType, const H225_FeatureSet & set) const
@@ -4199,7 +4202,7 @@ void H323GatekeeperServer::MonitorMain(PThread &, INT)
   }
 }
 
-PBoolean H323GatekeeperServer::OnSendFeatureSet(unsigned, H225_FeatureSet &) const
+PBoolean H323GatekeeperServer::OnSendFeatureSet(unsigned, H225_FeatureSet &, PBoolean) const
 {
   return FALSE;
 }

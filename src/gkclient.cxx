@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.18  2011/01/14 15:03:49  shorne
+ * Corrected Bandwidth advertised in the ARQ to the request bandwidth of the call rather than the bandwidth the endpoint supports.
+ *
  * Revision 1.17  2010/10/25 13:33:02  willamowius
  * remove debug trace
  *
@@ -2516,12 +2519,12 @@ void H323Gatekeeper::AlternateInfo::PrintOn(ostream & strm) const
     strm << ";priority=" << priority;
 }
 
-PBoolean H323Gatekeeper::OnSendFeatureSet(unsigned pduType, H225_FeatureSet & feats) const
+PBoolean H323Gatekeeper::OnSendFeatureSet(unsigned pduType, H225_FeatureSet & feats, PBoolean advertise) const
 {
 #ifdef H323_H460
-    return features->SendFeature(pduType, feats);
+    return features->SendFeature(pduType, feats, advertise);
 #else
-    return endpoint.OnSendFeatureSet(pduType, feats);
+    return endpoint.OnSendFeatureSet(pduType, feats, advertise);
 #endif
 }
 

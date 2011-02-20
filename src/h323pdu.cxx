@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.11  2011/01/12 13:05:04  shorne
+ * Added detection of keep-alive packets in signalling channel
+ *
  * Revision 1.10  2010/08/31 04:00:49  shorne
  * Improved H.263/H.263+ interworking
  *
@@ -992,7 +995,7 @@ static void SendSetupFeatureSet(const H323Connection * connection, H225_Setup_UU
    
   H225_FeatureSet fs;
 
-    if (!connection->OnSendFeatureSet(H460_MessageType::e_setup, fs)) 
+    if (!connection->OnSendFeatureSet(H460_MessageType::e_setup, fs, true)) 
 	      return;
 
 	if (fs.HasOptionalField(H225_FeatureSet::e_neededFeatures)) {
@@ -1019,13 +1022,13 @@ template <typename PDUType>
 static void SendFeatureSet(const H323Connection * connection, unsigned code, H225_H323_UU_PDU & msg, PDUType & pdu)
 {
  H225_FeatureSet fs;
-    if (!connection->OnSendFeatureSet(code,fs))
-		return;
 
-	if (code == H460_MessageType::e_callProceeding) {
+    if (connection->OnSendFeatureSet(code,fs,true)) {
         pdu.IncludeOptionalField(PDUType::e_featureSet);
 	    pdu.m_featureSet = fs; 
-    } else {
+    }
+
+    if (connection->OnSendFeatureSet(code,fs,false)) {
 		if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
 			msg.IncludeOptionalField(H225_H323_UU_PDU::e_genericData);
 

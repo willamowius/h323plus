@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.33  2011/01/12 12:55:14  shorne
+ * H.224 Bi-directional support added. Calback added for h239 Generic Command to close channel
+ *
  * Revision 1.32  2010/09/20 08:02:26  willamowius
  * make H225 and H245 keepAlive optional
  *
@@ -2235,7 +2238,7 @@ class H323EndPoint : public PObject
 
     /**Called when an outgoing PDU requires a feature set
      */
-    virtual PBoolean OnSendFeatureSet(unsigned, H225_FeatureSet &);
+    virtual PBoolean OnSendFeatureSet(unsigned, H225_FeatureSet &, PBoolean);
 
     /**Called when an incoming PDU contains a feature set
      */

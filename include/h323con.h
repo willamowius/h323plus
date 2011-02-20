@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.53  2011/01/14 15:03:49  shorne
+ * Corrected Bandwidth advertised in the ARQ to the request bandwidth of the call rather than the bandwidth the endpoint supports.
+ *
  * Revision 1.52  2011/01/12 12:55:14  shorne
  * H.224 Bi-directional support added. Calback added for h239 Generic Command to close channel
  *
@@ -3288,7 +3291,7 @@ class H323Connection : public PObject
 	void DisableFeatures();
 #endif
 
-    virtual PBoolean OnSendFeatureSet(unsigned, H225_FeatureSet &) const;
+    virtual PBoolean OnSendFeatureSet(unsigned, H225_FeatureSet &, PBoolean) const;
 
     virtual void OnReceiveFeatureSet(unsigned, const H225_FeatureSet &) const;
 
