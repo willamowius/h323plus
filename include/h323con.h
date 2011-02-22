@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.54  2011/02/20 06:55:46  shorne
+ * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
+ *
  * Revision 1.53  2011/01/14 15:03:49  shorne
  * Corrected Bandwidth advertised in the ARQ to the request bandwidth of the call rather than the bandwidth the endpoint supports.
  *
@@ -3284,7 +3287,7 @@ class H323Connection : public PObject
 #ifdef H323_H460
 	/** Disable the feature set as the remote does not support it.
 	  */
-	void DisableFeatureSet() const;
+	void DisableFeatureSet(int) const;
 
 	/** Disable Feautures on a call by call basis
 	  */

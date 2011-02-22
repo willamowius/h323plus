@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.24  2011/02/20 06:55:46  shorne
+ * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
+ *
  * Revision 1.23  2010/10/22 00:27:02  shorne
  * Added missing information in H460_Feature constructor
  *
@@ -1780,11 +1783,25 @@ PString H460_FeatureSet::PTracePDU(PINDEX id) const
 	}
 }
 
-void H460_FeatureSet::DisableAllFeatures()
+void H460_FeatureSet::DisableAllFeatures(int msgtype)
 {
 	if (Features.GetSize() > 0) {
-		PTRACE(4,"H460\tRemoving all Features are remote/Gk does not appear to support H.460");
-		Features.RemoveAll();
+		PTRACE(4,"H460\tRemoving all H.460 Features remote/Gk expected to advertise " << PTracePDU(msgtype));
+        std::list<H460_FeatureID> removelist;
+	    for (PINDEX i =0; i < Features.GetSize(); i++) {
+	       H460_Feature & feat = Features.GetDataAt(i);
+           if (feat.FeatureAdvertised(msgtype)) {
+               PTRACE(4,"H460\tRemoving " << feat.GetFeatureIDAsString());
+               removelist.push_back(feat.GetFeatureID());
+           } else {
+               PTRACE(4,"H460\tPreserving " << feat.GetFeatureIDAsString());
+           }
+	    }
+
+        while (!removelist.empty()) {
+			Features.RemoveAt(removelist.front());
+			removelist.pop_front();
+        }
 	}
 }
 

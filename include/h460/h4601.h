@@ -36,6 +36,9 @@
  * Contributor(s): ______________________________________.
  *
 * $Log$
+* Revision 1.19  2011/02/20 06:55:46  shorne
+* Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
+*
 * Revision 1.18  2010/05/26 13:07:51  willamowius
 * SOlaris 10 compile fix
 *
@@ -1140,7 +1143,7 @@ class H460_FeatureSet : public PObject
 	/**Disable all features
 		Remote does not support H.460 so we remove all features
 	  */
-    void DisableAllFeatures();
+    void DisableAllFeatures(int msgtype);
 
 	/** Attach Endpoint
 	*/

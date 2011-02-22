@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.12  2011/02/20 06:55:46  shorne
+ * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
+ *
  * Revision 1.11  2010/01/20 04:12:29  shorne
  * Added RRJ reason NeededFeature
  *
@@ -334,7 +337,7 @@ class H323Gatekeeper : public H225_RAS
     void OnReceiveFeatureSet(unsigned, const H225_FeatureSet & features) const;
 
 #if H323_H460
-	void DisableFeatureSet() const;
+	void DisableFeatureSet(int msgtype) const;
 	H460_FeatureSet & GetFeatures();
 #endif
   //@}

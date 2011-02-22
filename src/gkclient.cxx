@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.19  2011/02/20 06:55:46  shorne
+ * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
+ *
  * Revision 1.18  2011/01/14 15:03:49  shorne
  * Corrected Bandwidth advertised in the ARQ to the request bandwidth of the call rather than the bandwidth the endpoint supports.
  *
@@ -2538,9 +2541,9 @@ void H323Gatekeeper::OnReceiveFeatureSet(unsigned pduType, const H225_FeatureSet
 }
 
 #ifdef H323_H460
-void H323Gatekeeper::DisableFeatureSet() const
+void H323Gatekeeper::DisableFeatureSet(int msgtype) const
 {
-	features->DisableAllFeatures();
+	features->DisableAllFeatures(msgtype);
 }
 
 H460_FeatureSet & H323Gatekeeper::GetFeatures()

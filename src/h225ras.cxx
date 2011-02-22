@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2011/02/20 06:55:46  shorne
+ * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
+ *
  * Revision 1.6  2009/11/29 23:31:13  shorne
  * BUG FIX : completely disable H.460 support if remote does not support it.
  *
@@ -779,7 +782,7 @@ PBoolean H225_RAS::OnReceiveGatekeeperConfirm(const H323RasPDU &, const H225_Gat
   if (gcf.HasOptionalField(H225_GatekeeperConfirm::e_featureSet))
      ReceiveFeatureSet<H225_GatekeeperConfirm>(this, H460_MessageType::e_gatekeeperConfirm, gcf);
   else
-     DisableFeatureSet();
+     DisableFeatureSet(H460_MessageType::e_gatekeeperConfirm);
 #endif
 
   return OnReceiveGatekeeperConfirm(gcf);
@@ -917,7 +920,7 @@ PBoolean H225_RAS::OnReceiveRegistrationConfirm(const H323RasPDU & pdu, const H2
   if (rcf.HasOptionalField(H225_RegistrationConfirm::e_featureSet))
      ReceiveFeatureSet<H225_RegistrationConfirm>(this, H460_MessageType::e_registrationConfirm, rcf);
   else
-     DisableFeatureSet();
+     DisableFeatureSet(H460_MessageType::e_registrationConfirm);
 #endif
 
   return OnReceiveRegistrationConfirm(rcf);

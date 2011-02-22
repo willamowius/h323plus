@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2011/02/20 06:55:46  shorne
+ * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
+ *
  * Revision 1.4  2009/11/29 23:31:05  shorne
  * BUG FIX : completely disable H.460 support if remote does not support it.
  *
@@ -438,7 +441,7 @@ class H225_RAS : public H323Transactor
     virtual void OnReceiveFeatureSet(unsigned, const H225_FeatureSet &) const
     { }
 
-    virtual void DisableFeatureSet() const
+    virtual void DisableFeatureSet(int) const
     { }
 
     /**Handle unknown PDU type.

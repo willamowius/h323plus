@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.70  2011/02/20 06:55:46  shorne
+ * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
+ *
  * Revision 1.69  2011/01/23 06:17:05  shorne
  * Include the orginal called address with routeCalltoGatekeeper so the gatekeeper might be able to route the call.
  *
@@ -761,7 +764,7 @@ static void ReceiveSetupFeatureSet(const H323Connection * connection, const H225
 	if (hasFeaturePDU)
 		connection->OnReceiveFeatureSet(H460_MessageType::e_setup, fs);
 	else
-		connection->DisableFeatureSet();
+		connection->DisableFeatureSet(H460_MessageType::e_setup);
 
 }
 
@@ -6827,9 +6830,9 @@ void H323Connection::OnReceiveFeatureSet(unsigned code, const H225_FeatureSet & 
 }
 
 #ifdef H323_H460
-void H323Connection::DisableFeatureSet() const
+void H323Connection::DisableFeatureSet(int msgtype) const
 {
-	features->DisableAllFeatures();
+	features->DisableAllFeatures(msgtype);
 }
 #endif
 
