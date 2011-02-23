@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.72  2011/02/22 07:46:22  shorne
+ * Added receive side routecallToGatekeeer support.
+ *
  * Revision 1.71  2011/02/22 05:04:57  shorne
  * Enable selectively removing capabilities based on the features PDU's advertising feature. H.460.9 now advertises in ARQ when receiving call.
  *
@@ -6218,16 +6221,16 @@ void H323Connection::OnRxSenderReport(unsigned sessionID, const RTP_Session::Sen
 
 H323Connection::H4609Statistics::H4609Statistics()
 {			
-	meanEndToEndDelay =0;				
-    worstEndToEndDelay =0;
-	packetsReceived =0;
-    accumPacketLost =0;
-	packetLossRate =0;
-	fractionLostRate =0;
-	meanJitter =0;
-	worstJitter =0;
-	bandwidth =0;
-	sessionid =1;
+	meanEndToEndDelay = 0;				
+    worstEndToEndDelay = 0;
+	packetsReceived = 0;
+    accumPacketLost = 0;
+	packetLossRate = 0;
+	fractionLostRate = 0;
+	meanJitter = 0;
+	worstJitter = 0;
+	bandwidth = 0;
+	sessionid = 1;
 }
 
 void H323Connection::H4609QueueStats(const RTP_Session & session) const
