@@ -30,6 +30,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2011/02/20 06:55:46  shorne
+ * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
+ *
  * Revision 1.4  2010/08/27 03:07:26  shorne
  * Fix compile warning of GCC 4.4
  *
@@ -139,9 +142,8 @@ PBoolean H460_FeatureStd9::GenerateReport(H4609_ArrayOf_RTCPMeasures & report)
     PBoolean hasStats = CON->H4609DequeueStats(stat);
 
 	while (hasStats) {
-	   PINDEX size = report.GetSize();
-	   report.SetSize(size+1);
-	   H4609_RTCPMeasures & info = report[size];
+
+	   H4609_RTCPMeasures info;
 
 	   // RTP Information
 	   H225_TransportChannelInfo & rtp = info.m_rtpAddress;
@@ -160,7 +162,7 @@ PBoolean H460_FeatureStd9::GenerateReport(H4609_ArrayOf_RTCPMeasures & report)
 	   // Session ID
 	   info.m_sessionId.SetValue(stat.sessionid);
 
-		  if (stat.meanEndToEndDelay > 0) {
+	   if (stat.meanEndToEndDelay > 0) {
 			info.IncludeOptionalField(H4609_RTCPMeasures::e_mediaSenderMeasures);
 			H4609_RTCPMeasures_mediaSenderMeasures & send = info.m_mediaSenderMeasures;
 
@@ -211,6 +213,10 @@ PBoolean H460_FeatureStd9::GenerateReport(H4609_ArrayOf_RTCPMeasures & report)
 		  }
 		}
 
+	   PINDEX size = report.GetSize();
+	   report.SetSize(size+1);
+       report[size] = info;
+
 	  // Get next call statistics record
       hasStats = CON->H4609DequeueStats(stat);
 	}
@@ -232,7 +238,10 @@ PBoolean H460_FeatureStd9::WriteStatisticsReport(H460_FeatureStd & msg, PBoolean
 		period.m_callReferenceValue = CON->GetCallReference();
 		period.m_conferenceID = CON->GetConferenceIdentifier();
 		period.m_callIdentifier.m_guid = CON->GetCallIdentifier();
-        success = GenerateReport(period.m_mediaChannelsQoS); 
+        if (GenerateReport(period.m_mediaChannelsQoS)) {
+          period.IncludeOptionalField(H4609_PerCallQoSReport::e_mediaChannelsQoS);
+          success = true;
+        }
 	} else {
 		qosdata.SetTag(H4609_QosMonitoringReportData::e_final);
 		H4609_FinalQosMonReport & rep = qosdata;
@@ -240,6 +249,7 @@ PBoolean H460_FeatureStd9::WriteStatisticsReport(H460_FeatureStd & msg, PBoolean
 	}
 
 	if (success) {
+       PTRACE(6,"Std9\tStatistics Report\n" << qosdata);
 	   PASN_OctetString rawstats;
 	   rawstats.EncodeSubType(qosdata);
 	   msg.Add(1,H460_FeatureContent(rawstats));

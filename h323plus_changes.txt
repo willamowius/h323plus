@@ -1,3 +1,10 @@
+H323plus 1.22 - 1.23
+Added Receive side RouteCallToGatekeeper
+Fixed H.460.9 support and fine tune where H.460 messages go in PDU
+Fixed H.239 support so the correct capability is selected in OLC
+Fixed H.224 Stability by fixing initialisation and removing nested mutexes
+Improved H.264 decoder with better initialisation and support for send FPU's
+
 
 H323plus 1.21 - 1.22
 Fixed H.239 Support and now support H.239 only plugins
