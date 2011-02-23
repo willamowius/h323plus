@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.73  2011/02/23 09:17:27  willamowius
+ * whitespace
+ *
  * Revision 1.72  2011/02/22 07:46:22  shorne
  * Added receive side routecallToGatekeeer support.
  *
@@ -2920,9 +2923,6 @@ if (setup.m_conferenceGoal.GetTag() == H225_Setup_UUIE_conferenceGoal::e_create)
   if (!OnSendSignalSetup(setupPDU))
     return EndedByNoAccept;
 
-  // Do this again (was done when PDU was constructed) in case
-  // OnSendSignalSetup() changed something.
-  setupPDU.SetQ931Fields(*this, TRUE);
   setupPDU.GetQ931().GetCalledPartyNumber(remotePartyNumber);
 
   //fastStartState = FastStartDisabled;
