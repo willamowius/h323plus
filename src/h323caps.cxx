@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.39  2011/02/20 06:57:53  shorne
+ * Fix to ensure correct selection of H.239 capability in OLC
+ *
  * Revision 1.38  2011/01/12 13:07:22  shorne
  * H.239 Clunge for channelID=0 and set Channelid in OLCack
  * Fix for wildcard matches of H.239
@@ -2325,7 +2328,7 @@ PBoolean OnH239GenericMessageResponse(H239Control & ctrl, H323Connection & conne
 {
 	PTRACE(4,"H239\tReceived Generic Response.");
 
-    bool m_allowOutgoingExtVideo=false;
+    bool m_allowOutgoingExtVideo = false;
 	for (int i = 0; i < content.GetSize(); ++i)
 	{
 		H245_GenericParameter& param = content[i];
@@ -2336,6 +2339,7 @@ PBoolean OnH239GenericMessageResponse(H239Control & ctrl, H323Connection & conne
 			break;
 		case H239Control::h239gpAcknowledge:						
 			m_allowOutgoingExtVideo = true;
+			// TODO: only call OpenExtendedVideoSession() if this channel isn't already open
             connection.OpenExtendedVideoSession(ctrl.GetChannelNum(H323Capability::e_Transmit));
 			break;
 		case H239Control::h239gpReject:
