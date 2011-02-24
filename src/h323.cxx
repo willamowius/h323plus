@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.74  2011/02/23 17:11:21  willamowius
+ * trust the application when it changes Q931 fields in OnSendSignalSetup() and don't overwrite those changes
+ *
  * Revision 1.73  2011/02/23 09:17:27  willamowius
  * whitespace
  *
@@ -7262,7 +7265,7 @@ PBoolean H323Connection::OpenExtendedVideoSession(H323ChannelNumber & num)
         PTRACE(3, "H323\tApplication Available " << *remoteCapability);
          
 		for (PINDEX j = 0; j < remoteCapability->GetSize(); j++) {
-          // SessionID must be 0 becouse otherwise Tandberg will reject the OLC.
+          // SessionID must be 0 because otherwise Tandberg will reject the OLC.
 		  if (logicalChannels->Open(remoteCapability[j], 0,num)) {
 		     applicationOpen = TRUE;
              break;
