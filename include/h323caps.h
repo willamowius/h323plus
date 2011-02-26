@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.24  2011/02/20 06:57:53  shorne
+ * Fix to ensure correct selection of H.239 capability in OLC
+ *
  * Revision 1.23  2010/08/28 03:58:20  shorne
  * More H.239 Support. Added ability to close channel, remove and reorder codecs and correctly load capabilities into simult cap listing
  *
@@ -2891,9 +2894,13 @@ class H323ControlExtendedVideoCapability : public H323ExtendedVideoCapability
    H323ChannelNumber & GetChannelNum(H323Capability::CapabilityDirection dir);
    void SetChannelNum(unsigned num, H323Capability::CapabilityDirection dir);
 
+   void SetRequestedChanNum(int num);
+   int GetRequestedChanNum();
+
  protected:
    H323ChannelNumber	m_outgoingChanNum;
    H323ChannelNumber	m_incomingChanNum;
+   int                  m_requestedChanNum;
 
 };
 

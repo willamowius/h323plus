@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.75  2011/02/24 11:05:50  willamowius
+ * typo in comment
+ *
  * Revision 1.74  2011/02/23 17:11:21  willamowius
  * trust the application when it changes Q931 fields in OnSendSignalSetup() and don't overwrite those changes
  *
@@ -4973,7 +4976,7 @@ PBoolean H323Connection::OnStartLogicalChannel(H323Channel & channel)
 #ifdef H323_H239
   if ((channel.GetCapability().GetMainType() == H323Capability::e_Video) && 
       (channel.GetCapability().GetSubType() == H245_VideoCapability::e_extendedVideoCapability)) {
-          OnH239SessionStarted(channel.GetSessionID(), 
+          OnH239SessionStarted(channel.GetNumber(), 
                 channel.GetNumber().IsFromRemote() ? H323Capability::e_Receive : H323Capability::e_Transmit);
   }
 #endif
@@ -5060,6 +5063,14 @@ PBoolean H323Connection::OnClosingLogicalChannel(H323Channel & /*channel*/)
 
 void H323Connection::OnClosedLogicalChannel(const H323Channel & channel)
 {
+#ifdef H323_H239
+  if ((channel.GetCapability().GetMainType() == H323Capability::e_Video) && 
+      (channel.GetCapability().GetSubType() == H245_VideoCapability::e_extendedVideoCapability)) {
+          OnH239SessionEnded(channel.GetNumber(), 
+                channel.GetNumber().IsFromRemote() ? H323Capability::e_Receive : H323Capability::e_Transmit);
+  }
+#endif
+
   endpoint.OnClosedLogicalChannel(*this, channel);
 }
 
@@ -7243,9 +7254,22 @@ PBoolean H323Connection::CloseH239Channel(H323Capability::CapabilityDirection di
 
 void H323Connection::OnH239SessionStarted(int sessionNum, H323Capability::CapabilityDirection dir) 
 {
+  if (!sessionNum)
+      return;
+
   H239Control * ctrl = (H239Control *)remoteCapabilities.FindCapability("H.239 Control");
   if (ctrl)
      return ctrl->SetChannelNum(sessionNum,dir);
+}
+
+void H323Connection::OnH239SessionEnded(int sessionNum, H323Capability::CapabilityDirection dir) 
+{
+  if (!sessionNum)
+      return;
+
+  H239Control * ctrl = (H239Control *)remoteCapabilities.FindCapability("H.239 Control");
+  if (ctrl)
+     return ctrl->SetChannelNum(0,dir);
 }
 
 void H323Connection::OpenExtendedVideoSessionDenied()
@@ -7253,7 +7277,7 @@ void H323Connection::OpenExtendedVideoSessionDenied()
     PTRACE(2,"H239\tOpen Request denied from remote");
 }
 
-PBoolean H323Connection::OpenExtendedVideoSession(H323ChannelNumber & num)
+PBoolean H323Connection::OpenExtendedVideoSession(H323ChannelNumber & num, int defaultSession)
 {
   PBoolean applicationOpen = false;
   for (PINDEX i = 0; i < localCapabilities.GetSize(); i++) {
@@ -7265,8 +7289,8 @@ PBoolean H323Connection::OpenExtendedVideoSession(H323ChannelNumber & num)
         PTRACE(3, "H323\tApplication Available " << *remoteCapability);
          
 		for (PINDEX j = 0; j < remoteCapability->GetSize(); j++) {
-          // SessionID must be 0 because otherwise Tandberg will reject the OLC.
-		  if (logicalChannels->Open(remoteCapability[j], 0,num)) {
+          // SessionID must be 0 becouse otherwise Tandberg will reject the OLC.
+		  if (logicalChannels->Open(remoteCapability[j], defaultSession ,num)) {
 		     applicationOpen = TRUE;
              break;
           } else {

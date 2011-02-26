@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.40  2011/02/24 12:55:31  willamowius
+ * TODO: don't open the same H.239 channel twice
+ *
  * Revision 1.39  2011/02/20 06:57:53  shorne
  * Fix to ensure correct selection of H.239 capability in OLC
  *
@@ -2275,8 +2278,9 @@ void BuildH239GenericMessageRequest(H239Control & ctrl, H323Connection & connect
         H245_ArrayOf_GenericParameter & msg = cap.m_messageContent;
 	msg.SetSize(3);
 	buildGenericInteger(msg[0], H239Control::h239gpTerminalLabel, 0);
-    // TODO: what if the channel is already open just not started -SH
-	buildGenericInteger(msg[1], H239Control::h239gpChannelId, connection.GetLogicalChannels()->GetLastChannelNumber()+1);
+    int channelID = connection.GetLogicalChannels()->GetLastChannelNumber()+1;
+    ctrl.SetRequestedChanNum(channelID);
+	buildGenericInteger(msg[1], H239Control::h239gpChannelId,channelID); 
 	buildGenericInteger(msg[2], H239Control::h239gpSymmetryBreaking, 4);
 }
 
@@ -2328,32 +2332,48 @@ PBoolean OnH239GenericMessageResponse(H239Control & ctrl, H323Connection & conne
 {
 	PTRACE(4,"H239\tReceived Generic Response.");
 
-    bool m_allowOutgoingExtVideo = false;
+    bool m_allowOutgoingExtVideo=true;
+    unsigned channelID=0;
+    int defaultSession=0;
 	for (int i = 0; i < content.GetSize(); ++i)
 	{
 		H245_GenericParameter& param = content[i];
 		switch ((PASN_Integer)param.m_parameterIdentifier)
 		{
-		case H239Control::h239gpChannelId:					
-            ctrl.SetChannelNum((PASN_Integer)param.m_parameterValue, H323Capability::e_Transmit);
+		case H239Control::h239gpChannelId:
+            channelID = (PASN_Integer)param.m_parameterValue;
+            if (channelID == ctrl.GetChannelNum(H323Capability::e_Receive)) {
+               PTRACE(4,"H239\tRec'd Response for Receive side. Close Receive Channel!");
+               ctrl.SendGenericMessage(H239Control::e_h245command, &connection, false);
+               defaultSession = ctrl.GetRequestedChanNum();
+            } else 
+               ctrl.SetChannelNum(channelID, H323Capability::e_Transmit);
 			break;
-		case H239Control::h239gpAcknowledge:						
-			m_allowOutgoingExtVideo = true;
-			// TODO: only call OpenExtendedVideoSession() if this channel isn't already open
-            connection.OpenExtendedVideoSession(ctrl.GetChannelNum(H323Capability::e_Transmit));
+		case H239Control::h239gpAcknowledge:
 			break;
 		case H239Control::h239gpReject:
-			m_allowOutgoingExtVideo = false;
             connection.OpenExtendedVideoSessionDenied();
+            m_allowOutgoingExtVideo = false;
 			break;
 		case H239Control::h239gpBitRate:
 		case H239Control::h239gpSymmetryBreaking:
 		case H239Control::h239gpTerminalLabel:
+            break;
 		default:
+            m_allowOutgoingExtVideo = false;
 			break;
 		}
 	}
-    return m_allowOutgoingExtVideo;   // Should be responding false if remote rejects? - SH
+
+    if (channelID > 0 && channelID == ctrl.GetChannelNum(H323Capability::e_Transmit)) {
+       PTRACE(4,"H239\tLate Acknowledge IGNORE");
+       m_allowOutgoingExtVideo = false;
+    }
+
+    if (m_allowOutgoingExtVideo)
+        return connection.OpenExtendedVideoSession(ctrl.GetChannelNum(H323Capability::e_Transmit), defaultSession);
+
+    return true;
 }
 
 
@@ -2368,13 +2388,13 @@ PBoolean OnH239GenericMessageCommand(H239Control & ctrl, H323Connection & connec
 
 H323ControlExtendedVideoCapability::H323ControlExtendedVideoCapability()
   : H323ExtendedVideoCapability(OpalPluginCodec_Identifer_H239)
-  , m_outgoingChanNum(0, false), m_incomingChanNum(0,false)
+  , m_outgoingChanNum(0, false), m_incomingChanNum(0,false), m_requestedChanNum(0)
 { 
 }
 
 PBoolean H323ControlExtendedVideoCapability::CloseChannel(H323Connection * connection, H323Capability::CapabilityDirection dir)
 {
-   SendGenericMessage(H239Control::e_h245command, connection, dir);
+   SendGenericMessage(H239Control::e_h245command, connection, dir == H323Capability::e_Transmit);
    return connection->CloseExtendedVideoSession(GetChannelNum(dir));
 }
 
@@ -2437,6 +2457,16 @@ void H323ControlExtendedVideoCapability::SetChannelNum(unsigned num, H323Capabil
           m_incomingChanNum = H323ChannelNumber(num, true);
           break;
     } 
+}
+
+void H323ControlExtendedVideoCapability::SetRequestedChanNum(int num) 
+{
+    m_requestedChanNum = num; 
+}
+
+int H323ControlExtendedVideoCapability::GetRequestedChanNum() 
+{ 
+    return m_requestedChanNum; 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
