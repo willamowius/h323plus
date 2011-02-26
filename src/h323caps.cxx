@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.41  2011/02/26 09:34:07  shorne
+ * FIX: Originating H.239 to PVX
+ *
  * Revision 1.40  2011/02/24 12:55:31  willamowius
  * TODO: don't open the same H.239 channel twice
  *
@@ -2346,8 +2349,7 @@ PBoolean OnH239GenericMessageResponse(H239Control & ctrl, H323Connection & conne
                PTRACE(4,"H239\tRec'd Response for Receive side. Close Receive Channel!");
                ctrl.SendGenericMessage(H239Control::e_h245command, &connection, false);
                defaultSession = ctrl.GetRequestedChanNum();
-            } else 
-               ctrl.SetChannelNum(channelID, H323Capability::e_Transmit);
+            } 
 			break;
 		case H239Control::h239gpAcknowledge:
 			break;
