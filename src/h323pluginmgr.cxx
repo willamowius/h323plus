@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.47  2011/02/20 07:04:32  shorne
+ * Commented out mutex on videocodec destructor to avoid occasional segfault with the plugin codec already being destroyed.
+ *
  * Revision 1.46  2011/01/25 02:10:07  shorne
  * Resolved issue with codec not returning an completed Frame. Was due to h24_helper being incorrectly compiled with X264.
  *
@@ -2109,11 +2112,13 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
         }
 
         if (flowRequest && lastFrameTimeRTP && SetFlowControl(codec,context,mediaFormat, flowRequest)) {
+#if PTLIB_VER >= 290
              PTRACE(4, "PLUGIN\tApplying Flow Control " << flowRequest);
             PStringArray options = LoadInputDeviceOptions(mediaFormat); 
             videoIn->FlowControl((void *)&options);
             frameHeader->width  = videoIn->GetGrabWidth();
             frameHeader->height = videoIn->GetGrabHeight();
+#endif
             flowRequest = 0;
         }
 
