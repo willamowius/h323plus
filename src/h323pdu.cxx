@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.12  2011/02/20 06:55:46  shorne
+ * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
+ *
  * Revision 1.11  2011/01/12 13:05:04  shorne
  * Added detection of keep-alive packets in signalling channel
  *
@@ -695,7 +698,7 @@ void H323SetAliasAddresses(const PStringList & names,
 
 static PBoolean IsE164(const PString & str)
 {
-  return !str && strspn(str, "1234567890*#,") == strlen(str);
+  return !str.IsEmpty() && (str.FindSpan("1234567890*#,") == P_MAX_INDEX);
 }
 
 static PBoolean IsURL(const PString & str)
