@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.49  2011/03/25 12:22:08  willamowius
+ * disable flow control, breaks LifeSize compatibility
+ *
  * Revision 1.48  2011/03/02 10:44:36  shorne
  * BUG FIX: PTLIB version compatibility for FlowControl Thx: Vladimir Fekete
  *
@@ -2119,9 +2122,11 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
 #if PTLIB_VER >= 290
              PTRACE(4, "PLUGIN\tApplying Flow Control " << flowRequest);
             PStringArray options = LoadInputDeviceOptions(mediaFormat); 
-            videoIn->FlowControl((void *)&options);
-            frameHeader->width  = videoIn->GetGrabWidth();
-            frameHeader->height = videoIn->GetGrabHeight();
+            if (videoIn->FlowControl((void *)&options)) {  
+                frameHeader->width  = videoIn->GetGrabWidth();
+                frameHeader->height = videoIn->GetGrabHeight();
+                sendIntra = true;  // Send a FPU when setting flow control.
+            }
 #endif
             flowRequest = 0;
         }
