@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.48  2011/03/02 10:44:36  shorne
+ * BUG FIX: PTLIB version compatibility for FlowControl Thx: Vladimir Fekete
+ *
  * Revision 1.47  2011/02/20 07:04:32  shorne
  * Commented out mutex on videocodec destructor to avoid occasional segfault with the plugin codec already being destroyed.
  *
@@ -2017,7 +2020,8 @@ void H323PluginVideoCodec::OnFlowControl(long bitRateRestriction)
     return;
   }
 
-  flowRequest = bitRateRestriction;
+  // disable: breaks LifeSize compatibility
+  //flowRequest = bitRateRestriction;
 
 }
 
