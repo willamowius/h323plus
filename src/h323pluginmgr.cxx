@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.51  2011/03/27 20:55:47  willamowius
+ * disable flow control for PTLib < 2.9.0
+ *
  * Revision 1.50  2011/03/25 23:36:16  shorne
  * FlowControl: Only set the FrameSize if the videoInputDevice::SetFlow return true. Added FPU so fresh image is sent. FlowControl still disabled.
  *
@@ -2026,8 +2029,7 @@ void H323PluginVideoCodec::OnFlowControl(long bitRateRestriction)
     return;
   }
 
-  // disable: breaks LifeSize compatibility
-  //flowRequest = bitRateRestriction;
+  flowRequest = bitRateRestriction;
 
 }
 
@@ -2122,9 +2124,12 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
         }
 
 #if PTLIB_VER >= 290
-        if (flowRequest && lastFrameTimeRTP && SetFlowControl(codec,context,mediaFormat, flowRequest)) {
+        PStringArray options; 
+        if (flowRequest && lastFrameTimeRTP
+			&& videoIn->FlowControl((void *)&options)	// test if implemented with empty options
+            && SetFlowControl(codec,context,mediaFormat, flowRequest)) {
             PTRACE(4, "PLUGIN\tApplying Flow Control " << flowRequest);
-            PStringArray options = LoadInputDeviceOptions(mediaFormat); 
+            options = LoadInputDeviceOptions(mediaFormat); 
             if (videoIn->FlowControl((void *)&options)) {  
                 frameHeader->width  = videoIn->GetGrabWidth();
                 frameHeader->height = videoIn->GetGrabHeight();
