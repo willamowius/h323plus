@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.50  2011/03/25 23:36:16  shorne
+ * FlowControl: Only set the FrameSize if the videoInputDevice::SetFlow return true. Added FPU so fresh image is sent. FlowControl still disabled.
+ *
  * Revision 1.49  2011/03/25 12:22:08  willamowius
  * disable flow control, breaks LifeSize compatibility
  *
@@ -2118,18 +2121,20 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
             return FALSE;
         }
 
-        if (flowRequest && lastFrameTimeRTP && SetFlowControl(codec,context,mediaFormat, flowRequest)) {
 #if PTLIB_VER >= 290
-             PTRACE(4, "PLUGIN\tApplying Flow Control " << flowRequest);
+        if (flowRequest && lastFrameTimeRTP && SetFlowControl(codec,context,mediaFormat, flowRequest)) {
+            PTRACE(4, "PLUGIN\tApplying Flow Control " << flowRequest);
             PStringArray options = LoadInputDeviceOptions(mediaFormat); 
             if (videoIn->FlowControl((void *)&options)) {  
                 frameHeader->width  = videoIn->GetGrabWidth();
                 frameHeader->height = videoIn->GetGrabHeight();
                 sendIntra = true;  // Send a FPU when setting flow control.
             }
-#endif
             flowRequest = 0;
         }
+#else
+        flowRequest = 0;
+#endif
 
         if (!SetFrameSize(frameHeader->width, frameHeader->height)) {
             PTRACE(1, "PLUGIN\tFailed to resize, close down video transmission thread");
