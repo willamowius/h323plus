@@ -183,7 +183,7 @@ default_h46018=yes
 default_h46023=yes
 default_h460p=yes
 default_t120=yes
-default_gnugk=no
+default_gnugk=yes
 default_file=yes
 
 if test "${enable_minsize}x" = "yesx" ; then
@@ -608,7 +608,7 @@ dnl MSWIN_DISPLAY gnugk,GNUGKnat
 dnl MSWIN_DEFINE  gnugk,H323_GNUGK
 
 AC_ARG_ENABLE(gnugk,
-       [  --disable-gnugk         disable GnuGk])
+       [  --disable-gnugk         disable GnuGk NAT])
 if test "${enable_gnugk}x" = "x" ; then
   enable_gnugk=$default_gnugk
 fi
@@ -617,7 +617,7 @@ if test "$enable_gnugk" = "yes" ; then
   AC_DEFINE(H323_GNUGK, 1)
 else
   H323_GNUGK=
-  AC_MSG_NOTICE(Disabling GnuGk)
+  AC_MSG_NOTICE(Disabling GnuGk NAT)
 fi
 AC_SUBST(H323_GNUGK)
 
