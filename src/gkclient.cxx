@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.20  2011/02/22 05:04:57  shorne
+ * Enable selectively removing capabilities based on the features PDU's advertising feature. H.460.9 now advertises in ARQ when receiving call.
+ *
  * Revision 1.19  2011/02/20 06:55:46  shorne
  * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
  *
@@ -1191,12 +1194,14 @@ PBoolean H323Gatekeeper::OnReceiveRegistrationConfirm(const H225_RegistrationCon
 #ifdef H323_GNUGK
   if (rcf.HasOptionalField(H225_RegistrationConfirm::e_nonStandardData))
   {
-	  PString NATaddr = rcf.m_nonStandardData.m_data.AsString();
-       if (!NATaddr.IsEmpty())
-		  if (NATaddr.Left(4) == "NAT=")
-		      endpoint.OnGatekeeperNATDetect(NATaddr.Right(NATaddr.GetLength()-4),endpointIdentifier.GetValue(),gkRouteAddress);
-		  else
-              endpoint.OnGatekeeperOpenNATDetect(endpointIdentifier.GetValue(),gkRouteAddress);
+    PString NATaddr = rcf.m_nonStandardData.m_data.AsString();
+    if (!NATaddr.IsEmpty()) {
+      if (NATaddr.Left(4) == "NAT=") {
+        endpoint.OnGatekeeperNATDetect(NATaddr.Right(NATaddr.GetLength()-4),endpointIdentifier.GetValue(),gkRouteAddress);
+      } else {
+        endpoint.OnGatekeeperOpenNATDetect(endpointIdentifier.GetValue(),gkRouteAddress);
+      }
+    }
   }
 #endif
 
