@@ -260,7 +260,7 @@ H264DecoderContext::H264DecoderContext()
   _lastTimeStamp = 0;
   _frameCounter = 0; 
   _frameAutoFPU = 0;
-  _frameFPUInt = 300;  // Auto request IFrame every 10 secs - SH
+  _frameFPUInt = 300;  // Auto request IFrame every 300 frames (every 10 secs at 30 fps)
   _skippedFrameCounter = 0;
   _rxH264Frame = new H264Frame();
 
@@ -289,7 +289,7 @@ H264DecoderContext::H264DecoderContext()
     _context->workaround_bugs     = FF_BUG_AUTODETECT;
     _context->codec_type          = CODEC_TYPE_VIDEO;
     _context->codec_id            = CODEC_ID_H264;
-    _context->thread_count        = 4;
+    _context->thread_count        = 1; // using more than 1 thread causes race conditions
     _context->keyint_min          = 8;
     _context->flags               += CODEC_FLAG_EMU_EDGE; //CODEC_FLAG_LOW_DELAY;
     _context->flags2              += CODEC_FLAG2_FAST;
