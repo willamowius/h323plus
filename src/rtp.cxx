@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.21  2011/02/15 10:39:00  willamowius
+ * fix RTCP size check
+ *
  * Revision 1.20  2011/02/14 16:25:54  willamowius
  * better size checks on RTCP packets
  *
@@ -1637,7 +1640,7 @@ RTP_Session * RTP_SessionManager::GetSession(unsigned sessionID) const
     return NULL;
 
   PTRACE(3, "RTP\tFound existing session " << sessionID);
-  return &sessions[sessionID];
+  return &sessions.GetDataAt(sessionID);
 }
 
 
