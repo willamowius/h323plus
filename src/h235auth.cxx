@@ -24,6 +24,9 @@
  * Contributor(s): __________________________________
  *
  * $Log$
+ * Revision 1.4  2009/08/28 14:36:06  shorne
+ * Fixes to enable compilation with PTLIB 2.6.4
+ *
  * Revision 1.3  2009/08/15 15:01:33  willamowius
  * use SetValueRaw() when creating MD5 crypto hashes to preserve trailing null byte in clear text
  *
@@ -552,13 +555,13 @@ void H235AuthenticatorList::Add(PString username, PString password, PBoolean isH
 PString H235AuthenticatorList::PasswordEncrypt(const PString &clear) const
 {
 
-int keyFilled = 0;
+	int keyFilled = 0;
 
-const PString key = AuthenticatorListHashKey;
+	const PString key = AuthenticatorListHashKey;
 	
 	PTEACypher::Key thekey;
 	memset(&thekey, keyFilled, sizeof(PTEACypher::Key));
-	memcpy(&thekey, const_cast<PString &>(key).GetPointer(), min(sizeof(PTEACypher::Key), size_t(key.GetLength())));
+	memcpy(&thekey, (const char *)key, min(sizeof(PTEACypher::Key), size_t(key.GetLength())));
 	PTEACypher cypher(thekey);
 	return cypher.Encode(clear);	
 }
@@ -566,13 +569,13 @@ const PString key = AuthenticatorListHashKey;
 PString H235AuthenticatorList::PasswordDecrypt(const PString &encrypt) const
 {
 
-int keyFilled = 0;
+	int keyFilled = 0;
 
-const PString key = AuthenticatorListHashKey;
+	const PString key = AuthenticatorListHashKey;
 
 	PTEACypher::Key thekey;
 	memset(&thekey, keyFilled, sizeof(PTEACypher::Key));
-	memcpy(&thekey, const_cast<PString &>(key).GetPointer(), min(sizeof(PTEACypher::Key), size_t(key.GetLength())));
+	memcpy(&thekey, (const char *)key, min(sizeof(PTEACypher::Key), size_t(key.GetLength())));
 	PTEACypher cypher(thekey);
 	return cypher.Decode(encrypt);	
 }
