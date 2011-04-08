@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.8  2009/07/25 10:35:51  shorne
+# First cut of H.460.23/.24 support
+#
 # Revision 1.7  2008/07/19 01:12:28  willamowius
 # enable building og H.341 on Linux
 #
@@ -248,8 +251,10 @@ ifeq ($(NOTRACE), 1)
 STDCCFLAGS += -DPASN_NOPRINTON -DPASN_LEANANDMEAN
 OH323_SUFFIX = n
 else
+ifeq (,$(findstring PTRACING,$(STDCCFLAGS)))
 STDCCFLAGS += -DPTRACING
 RCFLAGS	   += -DPTRACING
+endif
 OH323_SUFFIX = $(OBJ_SUFFIX)
 endif # NOTRACE
 
