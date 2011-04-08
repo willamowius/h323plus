@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.20  2010/09/15 14:40:20  willamowius
+ * fix build with video disabled
+ *
  * Revision 1.19  2010/06/06 14:33:03  shorne
  * reverted out ptlb version clunge
  *
@@ -202,14 +205,17 @@
 
 #include <ptbuildopts.h>
 
-#if PTLIB_MAJOR == 2 && PTLIB_MINOR == 6  
+#if PTLIB_MAJOR == 2 && PTLIB_MINOR == 6
      #define PTLIB_VER 260
 #endif
-#if PTLIB_MAJOR == 2 && PTLIB_MINOR == 8  
+#if PTLIB_MAJOR == 2 && PTLIB_MINOR == 8
      #define PTLIB_VER 280
 #endif
-#if PTLIB_MAJOR == 2 && PTLIB_MINOR >= 9  
+#if PTLIB_MAJOR == 2 && PTLIB_MINOR == 9
      #define PTLIB_VER 290
+#endif
+#if PTLIB_MAJOR == 2 && PTLIB_MINOR >= 11
+     #define PTLIB_VER 2110
 #endif
 
 /////////////////////////////////////////////////

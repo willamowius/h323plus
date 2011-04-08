@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2010/05/02 22:53:52  shorne
+ * Fix warning on vs2010
+ *
  * Revision 1.5  2010/04/30 19:17:18  willamowius
  * fix memory leak when q931 decoding fails
  *
@@ -262,6 +265,7 @@
 #endif
 
 #include "q931.h"
+#include "openh323buildopts.h"
 
 #include <ptclib/random.h>
 
@@ -1199,7 +1203,11 @@ static PBoolean GetNumberIE(const PBYTEArray & bytes,
   PINDEX len = bytes.GetSize()-offset;
 
   if (len > 0)
+#if PTLIB_VER >= 2110
+    memcpy(number.GetPointerAndSetLength(len), ((const BYTE *)bytes)+offset, len);
+#else
     memcpy(number.GetPointer(len+1), ((const BYTE *)bytes)+offset, len);
+#endif
 
   return !number;
 }
