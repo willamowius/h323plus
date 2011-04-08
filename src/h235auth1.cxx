@@ -24,6 +24,9 @@
  * Contributor(s): Fürbass Franz <franz.fuerbass@infonova.at>
  *
  * $Log$
+ * Revision 1.4  2008/05/23 11:21:38  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.3  2008/01/01 00:12:11  shorne
  * Remove warning on VS2005
  *
@@ -363,7 +366,7 @@ PBoolean H2351_Authenticator::Finalise(PBYTEArray & rawPDU)
   /** make a SHA1 hash before send to the hmac_sha1 */
   unsigned char secretkey[20];
   
-  SHA1((unsigned char *)password.GetPointer(), password.GetSize()-1, secretkey);
+  SHA1(password, password.GetLength(), secretkey);
 
   hmac_sha(secretkey, 20, rawPDU.GetPointer(), rawPDU.GetSize(), key, HASH_SIZE);
   
@@ -515,7 +518,7 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
   memcpy(RV, data, HASH_SIZE);
   
   unsigned char secretkey[20];
-  SHA1((unsigned char *)password.GetPointer(), password.GetSize()-1, secretkey);
+  SHA1(password, password.GetLength(), secretkey);
    
   
   /****
