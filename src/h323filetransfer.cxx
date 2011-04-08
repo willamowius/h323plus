@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2011/01/10 10:31:16  shorne
+ * fixed bug wth maxBitRate values in the TCS
+ *
  * Revision 1.7  2010/01/18 21:24:06  shorne
  * Fixes to send complete filie paths & filenames with '0' in the name
  *
@@ -1491,7 +1494,7 @@ static PString opStr[] = {
 void H323FilePacket::attach(PString & data)
 {
 	SetSize(data.GetSize());
-	memcpy(theArray, data.GetPointer(), data.GetSize());
+	memcpy(theArray, (const char *)data, data.GetSize());
 }
 
 void H323FilePacket::BuildPROB()
@@ -1521,7 +1524,7 @@ void H323FilePacket::BuildData(int blockid, int size)
    PString data = opStr[e_DATA] + blkstr;
 
    SetSize(size+4);
-   memcpy(theArray, data.GetPointer(), data.GetSize()); 
+   memcpy(theArray, (const char *)data, data.GetSize()); 
 }
 
 void H323FilePacket::BuildACK(int blockid, int filesize)
