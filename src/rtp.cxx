@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.23  2011/04/13 08:36:36  willamowius
+ * fix the fix for new PTLib
+ *
  * Revision 1.22  2011/04/07 00:35:55  shorne
  * Fix Compile error due to changes in PTLIB
  *
@@ -1644,11 +1647,10 @@ RTP_Session * RTP_SessionManager::GetSession(unsigned sessionID) const
 
   PTRACE(3, "RTP\tFound existing session " << sessionID);
 #if PTLIB_VER >= 2110
-  RTP_Session * s = (RTP_Session)&sessions.GetRefAt(POrdinalKey(sessionID));
+  return const_cast<RTP_Session *>(&sessions[sessionID]);
 #else
-  RTP_Session * s = &sessions[sessionID];
+  return &sessions[sessionID];
 #endif
-  return s;
 }
 
 
