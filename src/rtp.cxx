@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.22  2011/04/07 00:35:55  shorne
+ * Fix Compile error due to changes in PTLIB
+ *
  * Revision 1.21  2011/02/15 10:39:00  willamowius
  * fix RTCP size check
  *
@@ -1640,7 +1643,12 @@ RTP_Session * RTP_SessionManager::GetSession(unsigned sessionID) const
     return NULL;
 
   PTRACE(3, "RTP\tFound existing session " << sessionID);
-  return &sessions.GetDataAt(sessionID);
+#if PTLIB_VER >= 2110
+  RTP_Session * s = (RTP_Session)&sessions.GetRefAt(POrdinalKey(sessionID));
+#else
+  RTP_Session * s = &sessions[sessionID];
+#endif
+  return s;
 }
 
 
