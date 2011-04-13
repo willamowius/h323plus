@@ -524,20 +524,20 @@ static struct PluginCodec_Definition G7221CodecDefn[] =
         PluginCodec_OutputTypeRaw |             // raw output data
         PluginCodec_RTPTypeDynamic |            // dynamic RTP type
         PluginCodec_RTPTypeShared,              // RTP type shared with other codecs in this definition
-        FORMAT_NAME_G722_1_16_32K,                 // text decription
+        FORMAT_NAME_G722_1_16_32K,              // text decription
         "L16",                                  // source format
-        FORMAT_NAME_G722_1_16_32K,                 // destination format
+        FORMAT_NAME_G722_1_16_32K,              // destination format
         NULL,                                   // user data
-        16000,                                  // samples per second
+        G722_1_16K_SAMPLING_RATE,               // samples per second
         G722_1_16_32_BIT_RATE,                  // raw bits per second
         20000,                                  // microseconds per frame
         {{
-            G722_1_16K_FRAME_SAMPLES,                   // samples per frame
-            G722_1_16_32_BIT_RATE/400,            // bytes per frame
-            1,                                      // recommended number of frames per packet
-            1,                                      // maximum number of frames per packet
+            G722_1_16K_FRAME_SAMPLES,           // samples per frame
+            G722_1_16_32_BIT_RATE/400,          // bytes per frame
+            1,                                  // recommended number of frames per packet
+            1,                                  // maximum number of frames per packet
         }},
-        121,                                      // IANA RTP payload code
+        121,                                    // IANA RTP payload code
         RTP_NAME_G722_1,                        // RTP payload name
         G7221EncoderCreate,                     // create codec function
         G7221EncoderDestroy,                    // destroy codec
@@ -555,20 +555,20 @@ static struct PluginCodec_Definition G7221CodecDefn[] =
         PluginCodec_OutputTypeRaw |             // raw output data
         PluginCodec_RTPTypeDynamic |            // dynamic RTP type
         PluginCodec_RTPTypeShared,              // RTP type shared with other codecs in this definition
-        FORMAT_NAME_G722_1_16_32K,                 // text decription
-        FORMAT_NAME_G722_1_16_32K,                 // source format
+        FORMAT_NAME_G722_1_16_32K,              // text decription
+        FORMAT_NAME_G722_1_16_32K,              // source format
         "L16",                                  // destination format
         NULL,                                   // user data
-        16000,                                  // samples per second
+        G722_1_16K_SAMPLING_RATE,               // samples per second
         G722_1_16_32_BIT_RATE,                  // raw bits per second
         20000,                                  // microseconds per frame
         {{
-            G722_1_16K_FRAME_SAMPLES,                   // samples per frame
-            G722_1_16_32_BIT_RATE/400,            // bytes per frame
-            1,                                      // recommended number of frames per packet
-            1,                                      // maximum number of frames per packet
+            G722_1_16K_FRAME_SAMPLES,           // samples per frame
+            G722_1_16_32_BIT_RATE/400,          // bytes per frame
+            1,                                  // recommended number of frames per packet
+            1,                                  // maximum number of frames per packet
         }},
-        121,                                      // IANA RTP payload code
+        121,                                    // IANA RTP payload code
         RTP_NAME_G722_1,                        // RTP payload name
         G7221DecoderCreate,                     // create codec function
         G7221DecoderDestroy,                    // destroy codec
@@ -586,20 +586,20 @@ static struct PluginCodec_Definition G7221CodecDefn[] =
         PluginCodec_OutputTypeRaw |             // raw output data
         PluginCodec_RTPTypeDynamic |            // dynamic RTP type
         PluginCodec_RTPTypeShared,              // RTP type shared with other codecs in this definition
-        FORMAT_NAME_G722_1_16_24K,                 // text decription
+        FORMAT_NAME_G722_1_16_24K,              // text decription
         "L16",                                  // source format
-        FORMAT_NAME_G722_1_16_24K,                 // destination format
+        FORMAT_NAME_G722_1_16_24K,              // destination format
         NULL,                                   // user data
-        16000,                                  // samples per second
+        G722_1_16K_SAMPLING_RATE,               // samples per second
         G722_1_16_24_BIT_RATE,                  // raw bits per second
         20000,                                  // microseconds per frame
         {{
-            G722_1_16K_FRAME_SAMPLES,                   // samples per frame
-            G722_1_16_24_BIT_RATE/400,            // bytes per frame
-            1,                                      // recommended number of frames per packet
-            1,                                      // maximum number of frames per packet
+            G722_1_16K_FRAME_SAMPLES,           // samples per frame
+            G722_1_16_24_BIT_RATE/400,          // bytes per frame
+            1,                                  // recommended number of frames per packet
+            1,                                  // maximum number of frames per packet
         }},
-        121,                                      // IANA RTP payload code
+        121,                                    // IANA RTP payload code
         RTP_NAME_G722_1,                        // RTP payload name
         G7221EncoderCreate,                     // create codec function
         G7221EncoderDestroy,                    // destroy codec
@@ -617,20 +617,20 @@ static struct PluginCodec_Definition G7221CodecDefn[] =
         PluginCodec_OutputTypeRaw |             // raw output data
         PluginCodec_RTPTypeDynamic |            // dynamic RTP type
         PluginCodec_RTPTypeShared,              // RTP type shared with other codecs in this definition
-        FORMAT_NAME_G722_1_16_24K,                 // text decription
-        FORMAT_NAME_G722_1_16_24K,                 // source format
+        FORMAT_NAME_G722_1_16_24K,              // text decription
+        FORMAT_NAME_G722_1_16_24K,              // source format
         "L16",                                  // destination format
         NULL,                                   // user data
-        16000,                                  // samples per second
+        G722_1_16K_SAMPLING_RATE,               // samples per second
         G722_1_16_24_BIT_RATE,                  // raw bits per second
         20000,                                  // microseconds per frame
         {{
-            G722_1_16K_FRAME_SAMPLES,                   // samples per frame
-            G722_1_16_24_BIT_RATE/400,            // bytes per frame
-            1,                                      // recommended number of frames per packet
-            1,                                      // maximum number of frames per packet
+            G722_1_16K_FRAME_SAMPLES,           // samples per frame
+            G722_1_16_24_BIT_RATE/400,          // bytes per frame
+            1,                                  // recommended number of frames per packet
+            1,                                  // maximum number of frames per packet
         }},
-        121,                                      // IANA RTP payload code
+        121,                                    // IANA RTP payload code
         RTP_NAME_G722_1,                        // RTP payload name
         G7221DecoderCreate,                     // create codec function
         G7221DecoderDestroy,                    // destroy codec
