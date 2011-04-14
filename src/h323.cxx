@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.76  2011/02/26 09:34:07  shorne
+ * FIX: Originating H.239 to PVX
+ *
  * Revision 1.75  2011/02/24 11:05:50  willamowius
  * typo in comment
  *
@@ -4587,10 +4590,12 @@ PBoolean H323Connection::MergeCapabilities(unsigned sessionID, const H323Capabil
    const OpalMediaFormat & localFormat = local.GetMediaFormat();
 
    if (remoteFormat.Merge(localFormat)) {
+#ifdef H323_VIDEO
        unsigned maxBitRate = remoteFormat.GetOptionInteger(OpalVideoFormat::MaxBitRateOption);
        unsigned targetBitRate = remoteFormat.GetOptionInteger(OpalVideoFormat::TargetBitRateOption);
        if (targetBitRate > maxBitRate)
           remoteFormat.SetOptionInteger(OpalVideoFormat::TargetBitRateOption, maxBitRate);
+#endif
 #if PTRACING
 	  PTRACE(6, "H323\tCapability Merge: ");
 	  OpalMediaFormat::DebugOptionList(remoteFormat);
@@ -5573,7 +5578,11 @@ void H323Connection::OnUserInputInBandDTMF(H323Codec::FilterInfo & info, INT)
     PTRACE(1, "DTMF detected. " << tones);
     PINDEX i;
     for (i = 0; i < tones.GetLength(); i++) {
+#if PTLIB_VER < 270
+      OnUserInputTone(tones[i], 0, 0, 0);
+#else
       OnUserInputTone(tones[i], 0, 0, PDTMFDecoder::DetectTime);
+#endif
     }
   }
 #endif
