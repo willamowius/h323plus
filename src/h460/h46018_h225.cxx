@@ -36,43 +36,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.12  2010/03/20 20:04:25  willamowius
- * fix gcc warning about initialization order
- *
- * Revision 1.11  2010/02/04 07:41:43  shorne
- * Added Support to compile H.460 Annex B without Annex A support
- *
- * Revision 1.10  2009/12/08 03:55:28  shorne
- * First cut support for H.460.24 Annex B
- *
- * Revision 1.9  2009/11/17 11:08:07  shorne
- * Updates for H.460.18/.19
- *
- * Revision 1.8  2009/08/26 23:22:18  shorne
- * Fix for compiling without SSL Support (H46024A disabled) thx Marcos Fábio Jardini
- *
- * Revision 1.7  2009/08/02 03:04:50  shorne
- * H.460.24A fix when remote and gatekeeper are at same address
- *
- * Revision 1.6  2009/07/25 10:35:51  shorne
- * First cut of H.460.23/.24 support
- *
- * Revision 1.5  2009/07/09 15:07:34  shorne
- * More H.460.19 fixes
- *
- * Revision 1.4  2009/07/03 04:15:01  shorne
- * more H.460.18/19 support
- *
- * Revision 1.3  2009/07/02 15:03:48  willamowius
- * pragma once in cxx causes a warning on Linux
- *
- * Revision 1.2  2009/06/28 04:47:53  shorne
- * Fixes for H.460.19 NAT Method loading
- *
- * Revision 1.1  2009/06/28 00:11:03  shorne
- * Added H.460.18/19 Support
- *
+ * $Id$
  *
  *
  */
@@ -88,6 +52,9 @@
 #include <h460/h46018.h>
 #include <ptclib/random.h>
 #include <ptclib/cypher.h>
+
+#define H46024A_MAX_PROBE_COUNT  10
+#define H46024A_PROBE_INTERVAL  150
 
 PCREATE_NAT_PLUGIN(H46019);
 
@@ -866,7 +833,7 @@ void H46019UDPSocket::StartProbe()
 	SetProbeState(e_probing);
 	m_probes = 0;
 	m_Probe.SetNotifier(PCREATE_NOTIFIER(Probe));
-	m_Probe.RunContinuous(100); 
+	m_Probe.RunContinuous(H46024A_PROBE_INTERVAL); 
 }
 
 void H46019UDPSocket::BuildProbe(RTP_ControlFrame & report, bool probing)
@@ -895,7 +862,7 @@ void H46019UDPSocket::Probe(PTimer &, INT)
 { 
     m_probes++;
 
-	if (m_probes >= 5) {
+	if (m_probes > H46024A_MAX_PROBE_COUNT) {
 		m_Probe.Stop();
 		return;
 	}
