@@ -267,11 +267,17 @@ template <class K, class D> class PSTLDictionary : public PObject,
           return i->second.first;   
       }
 
-      void InternalRemoveResort(int pos) {
+      D * InternalRemoveResort(int pos) {
           unsigned newpos = pos;
+          D * dataPtr = NULL;
           std::map< unsigned, std::pair<K, D*>, PSTLDictionaryOrder >::iterator it = find(pos);
+          if (it == end()) return NULL;
+          if (disallowDeleteObjects)
+            dataPtr = it->second.second;
+          else
+            delete it->second.second;  
           erase(it);
-
+          
           for (unsigned i = pos+1; i < size(); ++i) {
              std::map< unsigned, std::pair<K, D*>, PSTLDictionaryOrder >::iterator j = find(i);
              DictionaryEntry entry = j->second;
@@ -279,6 +285,8 @@ template <class K, class D> class PSTLDictionary : public PObject,
              newpos++;
              erase(j);
           }
+
+          return dataPtr;
       };
 
       D * InternalRemoveKey(
@@ -289,8 +297,7 @@ template <class K, class D> class PSTLDictionary : public PObject,
 
           unsigned pos = 0;
           InternalFindKey(key,pos);
-          InternalRemoveResort(pos);
-          return NULL;
+          return InternalRemoveResort(pos);
       }
 
       PBoolean InternalAddKey(
