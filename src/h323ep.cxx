@@ -2469,6 +2469,7 @@ void H323EndPoint::OnGatekeeperNATDetect(
 
 	gnugk = new GNUGK_Feature(*this,gkRouteAddress,gkIdentifier);
 
+#ifdef P_STUN
 	 if (gnugk->IsOpen()) {
  	     PTRACE(4, "GNUGK\tNat Address " << gkRouteAddress);
 
@@ -2480,6 +2481,7 @@ void H323EndPoint::OnGatekeeperNATDetect(
 		 }
 		 return; 
 	 } 
+#endif
 
 	  PTRACE(4, "GNUGK\tConnection failed. Disabling support.");
 	  delete gnugk;
@@ -2950,9 +2952,14 @@ void H323EndPoint::SetSTUNServer(const PString & server)
   if (server.IsEmpty())
     stun = NULL;
   else {
+#if PTLIB_VER >= 2110
+    stun = new PSTUNClient();
+    stun->SetServer(server);
+#else
     stun = new PSTUNClient(server,
                            GetUDPPortBase(), GetUDPPortMax(),
                            GetRtpIpPortBase(), GetRtpIpPortMax());
+#endif
 
     natMethods->AddMethod(stun);
 

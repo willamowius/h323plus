@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.21  2011/04/08 17:10:18  willamowius
+ * fix compilation with PTLib 2.11.x
+ *
  * Revision 1.20  2010/09/15 14:40:20  willamowius
  * fix build with video disabled
  *
@@ -267,7 +270,7 @@
 #undef H323_H460
 #ifdef H323_H460
 #undef H323_H4609
-#if (PTLIB_VER > 260) 
+#if (PTLIB_VER > 260) && (P_STUN)
 	#undef H323_H46018
 	#undef H323_H46023
 	#if defined(H323_H46018) && defined(H323_H46023) && defined(P_SSL)
