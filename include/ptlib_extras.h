@@ -51,6 +51,7 @@
 #else
 
 #include <map>
+#include <algorithm>
 
 template <class PAIR>
 class deleteDictionaryEntry {
