@@ -27,6 +27,8 @@
  * Contributor(s): ______________________________________.
  *
  * $Id $
+ *
+ */
 
 #ifndef _H323_H
 #define _H323_H
@@ -45,5 +47,8 @@ unsigned OpalGetMajorVersion();
 unsigned OpalGetMinorVersion();
 unsigned OpalGetBuildNumber();
 
+#endif // _H323_H
 
 /////////////////////////////////////////////////////////////////////////////
+
+
