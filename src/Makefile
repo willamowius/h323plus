@@ -21,76 +21,7 @@
 #
 # Contributor(s): ______________________________________.
 #
-# $Log$
-# Revision 1.18  2009/12/08 04:21:29  shorne
-# Added H.460.24 Annex B and Presence
-#
-# Revision 1.17  2009/08/21 07:01:06  shorne
-# Added H.460.9 Support
-#
-# Revision 1.16  2009/07/25 10:35:51  shorne
-# First cut of H.460.23/.24 support
-#
-# Revision 1.15  2009/06/28 10:24:46  willamowius
-# add more headers
-#
-# Revision 1.14  2009/06/28 10:06:04  willamowius
-# add h46018_h225.cxx
-#
-# Revision 1.13  2009/06/28 09:45:46  willamowius
-# add h460_std18.cxx
-#
-# Revision 1.12  2008/11/28 13:06:49  willamowius
-# add new files
-#
-# Revision 1.11  2008/07/19 01:12:29  willamowius
-# enable building og H.341 on Linux
-#
-# Revision 1.10  2008/02/13 15:45:29  willamowius
-# fix for PTLib 2.0.x: PW_LIBDIR is no longer provided
-#
-# Revision 1.9  2008/01/02 18:48:37  willamowius
-# add file transfer files
-#
-# Revision 1.8  2008/01/01 00:16:12  shorne
-# Added GnuGknat and FileTransfer support
-#
-# Revision 1.7  2007/11/11 03:02:46  shorne
-# Added GCCPDU references for H230 implementation
-#
-# Revision 1.6  2007/11/07 14:47:47  shorne
-# h230 fix again!
-#
-# Revision 1.5  2007/11/07 10:03:54  shorne
-# fix h230 compile error
-#
-# Revision 1.4  2007/11/01 19:44:24  shorne
-# *** empty log message ***
-#
-# Revision 1.3  2007/10/31 09:52:35  shorne
-# added missing reference to H460.9
-#
-# Revision 1.2  2007/10/31 08:37:01  shorne
-# removed unused reference
-#
-# Revision 1.1  2007/08/06 20:51:02  shorne
-# First commit of h323plus
-#
-# Revision 1.136.2.5  2007/08/02 20:11:57  shorne
-# Added H.341 Support
-#
-# Revision 1.136.2.4  2007/08/01 18:46:35  shorne
-# fixed typo
-#
-# Revision 1.136.2.3  2007/07/20 22:03:26  shorne
-# Initial H.350 Support
-#
-# Revision 1.136.2.2  2007/01/30 09:03:31  shorne
-# Fixed H450 error and removed missed VIC files
-#
-# Revision 1.136.2.1  2006/12/23 19:08:02  shorne
-# Plugin video codecs & sundry
-#
+# $Id$
 #
 #
 
@@ -258,6 +189,7 @@ HEADER_FILES    += $(OH323_INCDIR)/h460/h460.h \
                    $(OH323_INCDIR)/h460/h4601.h \
                    $(OH323_INCDIR)/h460/h4609.h \
                    $(OH323_INCDIR)/h460/h460_std9.h \
+                   $(OH323_INCDIR)/h460/h46015.h \
                    $(OH323_INCDIR)/h460/h46018.h \
                    $(OH323_INCDIR)/h460/h460_std18.h \
                    $(OH323_INCDIR)/h460/h46018_h225.h \
@@ -271,6 +203,7 @@ HEADER_FILES    += $(OH323_INCDIR)/h460/h460.h \
 COMMON_SOURCES  += $(OH323_SRCDIR)/h460/h4601.cxx \
                    $(OH323_SRCDIR)/h460/h4609.cxx \
                    $(OH323_INCDIR)/h460/h460_std9.cxx \
+                   $(OH323_INCDIR)/h460/h46015.cxx \
                    $(OH323_SRCDIR)/h460/h46018.cxx \
                    $(OH323_SRCDIR)/h460/h460_std18.cxx \
                    $(OH323_SRCDIR)/h460/h46018_h225.cxx \

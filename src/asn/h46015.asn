@@ -1,0 +1,60 @@
+SIGNALLING-CHANNEL-SUSPEND-REDIRECT DEFINITIONS AUTOMATIC TAGS ::= 
+
+BEGIN
+
+IMPORTS
+	TransportAddress FROM H323-MESSAGES;
+
+
+SignallingChannelData ::= SEQUENCE
+{	
+signallingChannelData	CHOICE {
+channelSuspendRequest	ChannelSuspendRequest,
+channelSuspendResponse	ChannelSuspendResponse,
+channelSuspendConfirm	ChannelSuspendConfirm,
+channelSuspendCancel	ChannelSuspendCancel,
+channelResumeRequest	ChannelResumeRequest,
+channelResumeResponse	ChannelResumeResponse,
+...
+},
+	...
+}
+
+ChannelSuspendRequest ::= SEQUENCE
+{
+	channelResumeAddress	SEQUENCE OF TransportAddress,
+	immediateResume		BOOLEAN,
+	resetH245	        NULL	OPTIONAL,
+	...
+}
+
+ChannelSuspendResponse ::= SEQUENCE
+{
+	okToSuspend		BOOLEAN,
+	channelResumeAddress	SEQUENCE OF TransportAddress,
+	...
+}
+
+ChannelSuspendConfirm ::= SEQUENCE
+{
+	...
+}
+
+ChannelSuspendCancel ::= SEQUENCE
+{
+	...
+}
+
+ChannelResumeRequest ::= SEQUENCE
+{
+	randomNumber	INTEGER(0..4294967295),
+	resetH245	NULL	OPTIONAL,
+...
+}
+
+ChannelResumeResponse ::= SEQUENCE
+{
+	...
+}
+
+END		-- of ASN.1
