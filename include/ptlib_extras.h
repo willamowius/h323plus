@@ -206,7 +206,7 @@ template <class K, class D> class PSTLDictionary : public PObject,
     ) const
       { return InternalGetAt(pos); }
 
-    PINDEX GetSize() const { return size(); }
+    PINDEX GetSize() const { return this->size(); }
 
    /**Remove all of the elements in the collection. This operates by
        continually calling <code>RemoveAt()</code> until there are no objects left.
@@ -220,7 +220,7 @@ template <class K, class D> class PSTLDictionary : public PObject,
 
           if (!disallowDeleteObjects)
                 deleteDictionaryEntries(*this);  
-          clear();
+          this->clear();
       }
 
     PINLINE void AllowDeleteObjects(
@@ -245,7 +245,8 @@ template <class K, class D> class PSTLDictionary : public PObject,
           unsigned & ref        ///< Returned index
           ) const
       {
-          for (std::map< unsigned, std::pair<K, D*>,PSTLDictionaryOrder>::const_iterator i = begin(); i != end(); ++i) {
+          typename std::map< unsigned, std::pair<K, D*>,PSTLDictionaryOrder>::const_iterator i;
+          for (i = begin(); i != end(); ++i) {
             if (i->second.first == key) {
                ref = i->first;
                return i->second.second;
@@ -260,8 +261,8 @@ template <class K, class D> class PSTLDictionary : public PObject,
       {
           PWaitAndSignal m(dictMutex);
 
-          PAssert(ref < size(), psprintf("Index out of Bounds ref: %u sz: %u",ref,size()));
-          std::map< unsigned, std::pair<K, D*>,PSTLDictionaryOrder>::const_iterator i = find(ref);
+          PAssert(ref < this->size(), psprintf("Index out of Bounds ref: %u sz: %u",ref,this->size()));
+          typename std::map< unsigned, std::pair<K, D*>,PSTLDictionaryOrder>::const_iterator i = find(ref);
           return *(i->second.second);   
       };
 
@@ -271,29 +272,30 @@ template <class K, class D> class PSTLDictionary : public PObject,
       {
           PWaitAndSignal m(dictMutex);
 
-          PAssert(ref < size(), psprintf("Index out of Bounds ref: %u sz: %u",ref,size()));
-          std::map< unsigned, std::pair<K, D*>,PSTLDictionaryOrder>::const_iterator i = find(ref);
+          PAssert(ref < this->size(), psprintf("Index out of Bounds ref: %u sz: %u",ref,this->size()));
+          typename std::map< unsigned, std::pair<K, D*>,PSTLDictionaryOrder>::const_iterator i = find(ref);
           return i->second.first;   
       }
 
       D * InternalRemoveResort(unsigned pos) {
           unsigned newpos = pos;
-          unsigned sz = size();
+          unsigned sz = this->size();
           D * dataPtr = NULL;
-          std::map< unsigned, std::pair<K, D*>, PSTLDictionaryOrder >::iterator it = find(pos);
+          typename std::map< unsigned, std::pair<K, D*>, PSTLDictionaryOrder >::iterator it;
+          it = find(pos);
           if (it == end()) return NULL;
           if (disallowDeleteObjects)
             dataPtr = it->second.second;
           else
             delete it->second.second;  
-          erase(it);
+          this->erase(it);
           
           for (unsigned i = pos+1; i < sz; ++i) {
-             std::map< unsigned, std::pair<K, D*>, PSTLDictionaryOrder >::iterator j = find(i);
+             typename std::map< unsigned, std::pair<K, D*>, PSTLDictionaryOrder >::iterator j = find(i);
              DictionaryEntry entry =  make_pair(j->second.first,j->second.second) ;
              insert(pair<unsigned, std::pair<K, D*> >(newpos,entry));
              newpos++;
-             erase(j);
+             this->erase(j);
           }
 
           return dataPtr;
@@ -317,7 +319,7 @@ template <class K, class D> class PSTLDictionary : public PObject,
       { 
           PWaitAndSignal m(dictMutex);
 
-          unsigned pos = size();
+          unsigned pos = this->size();
           DictionaryEntry entry = make_pair(key,obj);
           insert(pair<unsigned, std::pair<K, D*> >(pos,entry));
           return true;
