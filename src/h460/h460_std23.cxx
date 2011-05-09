@@ -105,10 +105,11 @@ void PNatMethod_H46024::Start(const PString & server,H460_FeatureStd23 * _feat)
 {
 	feat = _feat;
 
-#if PTLIB_VER >= 2110
-   // Need to Fix!!! - SH
-#else
    H323EndPoint * ep = feat->GetEndPoint();
+#if PTLIB_VER >= 2110
+   SetServer(server);
+   SetPortRanges(ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax(), ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax());
+#else
    Initialise(server,ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax(), ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax());
 #endif
 
