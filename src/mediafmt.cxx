@@ -3,7 +3,7 @@
  *
  * Media Format descriptions
  *
- * Open H323 Library
+ * H323Plus Library
  *
  * Copyright (c) 1999-2000 Equivalence Pty. Ltd.
  *
@@ -23,152 +23,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.9  2010/09/19 05:35:25  shorne
- * Correct merging logic for generic capabilities
- *
- * Revision 1.8  2010/08/19 12:45:13  shorne
- * Improved Generic Capability merge
- *
- * Revision 1.7  2010/06/06 14:49:44  shorne
- * G.711 codec now 20ms (was 30ms) sample size
- *
- * Revision 1.6  2010/05/02 22:48:12  shorne
- * Added support to order generic parameters in capablity exchange. Added G.711 20ms codec
- *
- * Revision 1.5  2008/05/27 03:15:20  shorne
- * Updated Windows compilation to compile with latest ptlib SVN
- *
- * Revision 1.4  2008/05/23 11:22:21  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.3  2007/10/19 19:54:18  shorne
- * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
- *  Robert
- *
- * Revision 1.2  2007/08/20 19:13:29  shorne
- * Added Generic Capability support. Fixed Linux compile errors
- *
- * Revision 1.1  2007/08/06 20:51:07  shorne
- * First commit of h323plus
- *
- * Revision 1.30.2.5  2007/10/03 13:10:00  rjongbloed
- * Removed duplicate OpalMediaFormat list caused by merge clash from OPAL
- *
- * Revision 1.30.2.4  2007/08/31 05:30:21  rjongbloed
- * Fixed missing part of back port from OPAL, allow signed/unsigned integer media options.
- *
- * Revision 1.30.2.3  2007/08/17 08:38:23  rjongbloed
- * Back ported OPAL meda options based plug ins and H.323 generic capabilties.
- *
- * Revision 1.30.2.2  2007/02/11 00:29:35  shorne
- * Fix for broken Audio
- *
- * Revision 1.30.2.1  2006/12/23 19:08:03  shorne
- * Plugin video codecs & sundry
- *
- * Revision 1.30  2006/09/05 23:56:57  csoutheren
- * Convert media format and capability factories to use std::string
- *
- * Revision 1.29  2005/01/11 07:12:13  csoutheren
- * Fixed namespace collisions with plugin starup factories
- *
- * Revision 1.28  2005/01/04 12:20:12  csoutheren
- * Fixed more problems with global statics
- *
- * Revision 1.27  2004/06/30 12:31:16  rjongbloed
- * Rewrite of plug in system to use single global variable for all factories to avoid all sorts
- *   of issues with startup orders and Windows DLL multiple instances.
- *
- * Revision 1.26  2004/06/18 03:06:00  csoutheren
- * Changed dynamic payload type allocation code to avoid needless renumbering of
- * media formats when new formats are created
- *
- * Revision 1.25  2004/06/18 02:24:46  csoutheren
- * Fixed allocation of dynamic RTP payload types as suggested by Guilhem Tardy
- *
- * Revision 1.24  2004/06/03 13:32:01  csoutheren
- * Renamed INSTANTIATE_FACTORY
- *
- * Revision 1.23  2004/06/03 12:48:35  csoutheren
- * Decomposed PFactory declarations to hopefully avoid problems with DLLs
- *
- * Revision 1.22  2004/06/01 05:50:32  csoutheren
- * Increased usage of typedef'ed factory rather than redefining
- *
- * Revision 1.21  2004/05/23 12:49:34  rjongbloed
- * Tidied some of the OpalMediaFormat usage after abandoning some previous
- *   code due to MSVC6 compiler bug.
- *
- * Revision 1.20  2004/05/20 02:07:29  csoutheren
- * Use macro to work around MSVC internal compiler errors
- *
- * Revision 1.19  2004/05/19 09:48:35  csoutheren
- * Fixed problem with non-RTP media formats causing endless loops
- *
- * Revision 1.18  2004/05/19 07:38:24  csoutheren
- * Changed OpalMediaFormat handling to use abstract factory method functions
- *
- * Revision 1.17  2004/05/05 09:40:05  csoutheren
- * OpalMediaFormat.Clone() does not exist - use copy constructor instead
- *
- * Revision 1.16  2004/05/03 00:52:24  csoutheren
- * Fixed problem with OpalMediaFormat::GetMediaFormatsList
- * Added new version of OpalMediaFormat::GetMediaFormatsList that minimses copying
- *
- * Revision 1.15  2004/04/03 10:38:25  csoutheren
- * Added in initial cut at codec plugin code. Branches are for wimps :)
- *
- * Revision 1.14.2.1  2004/03/31 11:11:59  csoutheren
- * Initial public release of plugin codec code
- *
- * Revision 1.14  2004/02/26 23:41:22  csoutheren
- * Fixed multi-threading problem
- *
- * Revision 1.13  2004/02/26 11:45:44  csoutheren
- * Fixed problem with OpalMediaFormat failing incorrect reason
- *
- * Revision 1.12  2004/02/26 08:19:32  csoutheren
- * Fixed threading problem with GetMediaFormatList
- *
- * Revision 1.11  2002/12/03 09:20:01  craigs
- * Fixed problem with RFC2833 and a dynamic RTP type using the same RTP payload number
- *
- * Revision 1.10  2002/12/02 03:06:26  robertj
- * Fixed over zealous removal of code when NO_AUDIO_CODECS set.
- *
- * Revision 1.9  2002/10/30 05:54:17  craigs
- * Fixed compatibilty problems with G.723.1 6k3 and 5k3
- *
- * Revision 1.8  2002/08/05 10:03:48  robertj
- * Cosmetic changes to normalise the usage of pragma interface/implementation.
- *
- * Revision 1.7  2002/06/25 08:30:13  robertj
- * Changes to differentiate between stright G.723.1 and G.723.1 Annex A using
- *   the OLC dataType silenceSuppression field so does not send SID frames
- *   to receiver codecs that do not understand them.
- *
- * Revision 1.6  2002/01/22 07:08:26  robertj
- * Added IllegalPayloadType enum as need marker for none set
- *   and MaxPayloadType is a legal value.
- *
- * Revision 1.5  2001/12/11 04:27:28  craigs
- * Added support for 5.3kbps G723.1
- *
- * Revision 1.4  2001/09/21 02:51:45  robertj
- * Implemented static object for all "known" media formats.
- * Added default session ID to media format description.
- *
- * Revision 1.3  2001/05/11 04:43:43  robertj
- * Added variable names for standard PCM-16 media format name.
- *
- * Revision 1.2  2001/02/09 05:13:56  craigs
- * Added pragma implementation to (hopefully) reduce the executable image size
- * under Linux
- *
- * Revision 1.1  2001/01/25 07:27:16  robertj
- * Major changes to add more flexible OpalMediaFormat class to normalise
- *   all information about media types, especially codecs.
+ * $Id$
  *
  */
 
@@ -189,18 +44,6 @@
   #define _Ios_Fmtflags ios::fmtflags
 #endif
 #endif
-
-namespace PWLibStupidLinkerHacks {
-  extern int h323Loader;
-};
-
-static class PMediaFormatInstantiateMe
-{
-  public:
-    PMediaFormatInstantiateMe()
-    { PWLibStupidLinkerHacks::h323Loader = 1; }
-} instance;
-
 
 /////////////////////////////////////////////////////////////////////////////
 

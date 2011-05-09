@@ -33,21 +33,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.4  2010/01/20 04:23:08  shorne
- * Add ability to advertise supported H.460 features in presence
- *
- * Revision 1.3  2009/12/21 01:15:09  shorne
- * Further Presence Development
- *
- * Revision 1.2  2009/12/08 04:05:14  shorne
- * Major update of presence system
- *
- * Revision 1.1  2009/11/17 11:12:39  shorne
- * First Cut of Presence Feature
- *
- *
- *
+ * $Id $
  *
  *
  */
@@ -80,11 +66,14 @@ class H460PresenceHandler : public H323PresenceHandler
 
    void SetPresenceState(const PStringList & epalias, 
 						unsigned localstate, 
-						const PString & localdisplay);
+						const PString & localdisplay,
+                        PBoolean updateOnly = false
+                        );
 
    void AddInstruction(const PString & epalias, 
 						H323PresenceHandler::InstType instType, 
-						const PStringList & subscribe);
+						const PStringList & subscribe,
+                        PBoolean autoSend = true);
 
    void AddAuthorization(const OpalGloballyUniqueID id,
 						const PString & epalias,

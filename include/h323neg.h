@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2010/08/28 03:58:20  shorne
+ * More H.239 Support. Added ability to close channel, remove and reorder codecs and correctly load capabilities into simult cap listing
+ *
  * Revision 1.2  2008/05/23 11:19:40  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -333,7 +336,7 @@ class H245NegLogicalChannel : public H245Negotiator
 };
 
 
-PDICTIONARY(H245LogicalChannelDict, H323ChannelNumber, H245NegLogicalChannel);
+H323DICTIONARY(H245LogicalChannelDict, H323ChannelNumber, H245NegLogicalChannel);
 
 /**Dictionary of all Logical Channels
  */

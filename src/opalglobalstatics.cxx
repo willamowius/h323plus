@@ -23,22 +23,8 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.4.6.2  2007/04/19 12:17:05  shorne
- * removed duplicate H.235 factory definitions
- *
- * Revision 1.4.6.1  2006/12/23 19:08:03  shorne
- * Plugin video codecs & sundry
- *
- * Revision 1.4  2005/05/06 04:00:51  shorne
- * fixed --disable-plugins compile directive errors - Thanks Chih-Wei Huang
- *
- * Revision 1.3  2005/01/11 07:12:24  csoutheren
- * Fixed namespace collisions with plugin starup factories
- *
- * Revision 1.2  2005/01/11 07:02:48  csoutheren
- * Fixed namespace collisions with plugin starup factories
- *
+ * $Id$
+
  */
 
 #ifndef _OPALGLOBALSTATIC_CXX
@@ -54,16 +40,6 @@ class PluginLoader : public PProcessStartup
 };
 #endif
 
-namespace PWLibStupidLinkerHacks {
-
-int h323Loader;
-
-#ifdef P_WAVFILE
-extern int opalwavfileLoader;
-#endif
-
-} // namespace PWLibStupidLinkerHacks
-
 //////////////////////////////////
 
 #if defined(P_HAS_PLUGINS)
@@ -73,27 +49,6 @@ static PFactory<PProcessStartup>::Worker<PluginLoader> h323pluginStartupFactory(
 
 //////////////////////////////////
 
-//
-// declare a simple class to execute on startup
-//
-static class OpalInstantiateMe
-{
-  public:
-    OpalInstantiateMe();
-} initialiser;
 
-
-OpalInstantiateMe::OpalInstantiateMe()
-{
-#ifdef P_WAVFILE
-  PWLibStupidLinkerHacks::opalwavfileLoader = 1;
-#endif
-
-  PWLibStupidLinkerHacks::h235AuthLoader = 1;
-
-#if P_SSL
-  PWLibStupidLinkerHacks::h235AuthProcedure1Loader = 1;
-#endif
-}
 
 #endif

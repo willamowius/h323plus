@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/05/23 11:20:49  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.1  2007/08/06 20:50:51  shorne
  * First commit of h323plus
  *
@@ -87,6 +90,7 @@
 
 
 #include "x880.h"
+#include "ptlib_extras.h"
 
 
 class H323EndPoint;
@@ -216,7 +220,7 @@ class H450xHandler : public PObject
 };
 
 PLIST(H450xHandlerList, H450xHandler);
-PDICTIONARY(H450xHandlerDict, POrdinalKey, H450xHandler);
+H323DICTIONARY(H450xHandlerDict, POrdinalKey, H450xHandler);
 
 
 class H450xDispatcher : public PObject

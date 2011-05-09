@@ -3,7 +3,7 @@
  *
  * H.235 security PDU's
  *
- * Open H323 Library
+ * H323Plus Library
  *
  * Copyright (c) 1998-2001 Equivalence Pty. Ltd.
  *
@@ -23,131 +23,7 @@
  *
  * Contributor(s): __________________________________
  *
- * $Log$
- * Revision 1.4  2009/08/28 14:36:06  shorne
- * Fixes to enable compilation with PTLIB 2.6.4
- *
- * Revision 1.3  2009/08/15 15:01:33  willamowius
- * use SetValueRaw() when creating MD5 crypto hashes to preserve trailing null byte in clear text
- *
- * Revision 1.2  2008/05/23 11:21:36  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.1  2007/08/06 20:51:05  shorne
- * First commit of h323plus
- *
- * Revision 1.31.2.3  2007/07/19 19:56:10  shorne
- * added missiing secure signal PDU check
- *
- * Revision 1.31.2.2  2007/05/23 07:02:38  shorne
- * Removed VS 2005 compile warning
- *
- * Revision 1.31.2.1  2006/12/23 19:08:02  shorne
- * Plugin video codecs & sundry
- *
- * Revision 1.31  2006/02/13 11:24:23  csoutheren
- * Fixed problem with H235 authenticator factory not being populated
- *
- * Revision 1.30  2006/01/26 03:25:55  shorne
- * Caller Authentication added
- *
- * Revision 1.29  2005/02/03 02:46:07  csoutheren
- * Altered authentication functions to only update state information if authentication
- *  is correct. Thanks to Michal Zygmuntowicz
- *
- * Revision 1.28  2005/01/04 08:08:45  csoutheren
- * More changes to implement the new configuration methodology, and also to
- * attack the global static problem
- *
- * Revision 1.27  2004/11/21 12:59:07  csoutheren
- * Fixed cut and paste error affecting H235 authentication
- *
- * Revision 1.26  2004/11/20 22:00:49  csoutheren
- * Added hacks for linker problem
- *
- * Revision 1.25  2004/11/12 06:04:44  csoutheren
- * Changed H235Authentiators to use PFactory
- *
- * Revision 1.24  2003/04/30 00:28:54  robertj
- * Redesigned the alternate credentials in ARQ system as old implementation
- *   was fraught with concurrency issues, most importantly it can cause false
- *   detection of replay attacks taking out an endpoint completely.
- *
- * Revision 1.23  2003/04/01 04:47:55  robertj
- * Abstracted H.225 RAS transaction processing (RIP and secondary thread) in
- *   server environment for use by H.501 peer elements.
- *
- * Revision 1.22  2003/02/25 06:48:19  robertj
- * More work on PDU transaction abstraction.
- *
- * Revision 1.21  2003/02/12 07:40:36  robertj
- * Added more logging for authentication errors in validation.
- * Fixed problem with possible negative numbers in CAT random field.
- *
- * Revision 1.20  2003/02/11 04:44:13  robertj
- * Fixed use of asymmetrical authentication schemes such as MD5.
- *
- * Revision 1.19  2003/02/03 02:55:08  robertj
- * Fixed problem with pasing through other tokens transparently.
- *
- * Revision 1.18  2003/02/02 11:46:32  robertj
- * Fixed CAT selection in GRQ authentication mechanisms.
- *
- * Revision 1.17  2003/02/01 13:31:22  robertj
- * Changes to support CAT authentication in RAS.
- *
- * Revision 1.16  2003/01/08 04:40:34  robertj
- * Added more debug tracing for H.235 authenticators.
- *
- * Revision 1.15  2002/11/11 07:04:22  robertj
- * Fixed typo in trace.
- *
- * Revision 1.14  2002/11/05 00:04:21  robertj
- * Returned code back to including trailing NULL in BMPString after
- *   PString::AsUCS2() implementation changes.
- *
- * Revision 1.13  2002/10/31 07:11:16  robertj
- * Added UTF-8/UCS-2 conversion functions to PString.
- *
- * Revision 1.12  2002/08/13 05:11:03  robertj
- * Removed redundent code.
- *
- * Revision 1.11  2002/08/05 10:03:47  robertj
- * Cosmetic changes to normalise the usage of pragma interface/implementation.
- *
- * Revision 1.10  2002/08/05 05:17:41  robertj
- * Fairly major modifications to support different authentication credentials
- *   in ARQ to the logged in ones on RRQ. For both client and server.
- * Various other H.235 authentication bugs and anomalies fixed on the way.
- *
- * Revision 1.9  2002/06/24 00:11:21  robertj
- * Clarified error message during GRQ authentication.
- *
- * Revision 1.8  2002/05/17 03:40:09  robertj
- * Fixed problems with H.235 authentication on RAS for server and client.
- *
- * Revision 1.7  2001/09/21 04:55:27  robertj
- * Removed redundant code, thanks Chih-Wei Huang
- *
- * Revision 1.6  2001/09/14 00:13:39  robertj
- * Fixed problem with some athenticators needing extra conditions to be
- *   "active", so make IsActive() virtual and add localId to H235AuthSimpleMD5
- *
- * Revision 1.5  2001/09/13 01:15:20  robertj
- * Added flag to H235Authenticator to determine if gkid and epid is to be
- *   automatically set as the crypto token remote id and local id.
- *
- * Revision 1.4  2001/08/14 04:26:46  robertj
- * Completed the Cisco compatible MD5 authentications, thanks Wolfgang Platzer.
- *
- * Revision 1.3  2001/08/13 10:03:54  robertj
- * Fixed problem if do not have a localId when doing MD5 authentication.
- *
- * Revision 1.2  2001/08/10 13:49:35  robertj
- * Fixed alpha Linux warning.
- *
- * Revision 1.1  2001/08/10 11:03:52  robertj
- * Major changes to H.235 support in RAS to support server.
+ * $Id$
  *
  */
 
@@ -169,10 +45,6 @@
 
 
 #define new PNEW
-
-namespace PWLibStupidLinkerHacks {
-  int h235AuthLoader;
-};
 
 /////////////////////////////////////////////////////////////////////////////
 

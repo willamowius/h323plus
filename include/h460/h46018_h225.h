@@ -36,33 +36,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.8  2009/12/08 04:03:47  shorne
- * First cut support for H.460.24 Annex B
- *
- * Revision 1.7  2009/11/17 11:08:07  shorne
- * Updates for H.460.18/.19
- *
- * Revision 1.6  2009/08/28 14:36:06  shorne
- * Fixes to enable compilation with PTLIB 2.6.4
- *
- * Revision 1.5  2009/07/25 10:35:51  shorne
- * First cut of H.460.23/.24 support
- *
- * Revision 1.4  2009/07/09 15:06:59  shorne
- * More H.460.19 fixes
- *
- * Revision 1.3  2009/07/03 04:15:01  shorne
- * more H.460.18/19 support
- *
- * Revision 1.2  2009/06/28 10:10:13  shorne
- * Fix compile warnings on Linux
- *
- * Revision 1.1  2009/06/28 00:11:03  shorne
- * Added H.460.18/19 Support
- *
- *
- *
+ * $Id$
  *
  */
 
@@ -140,7 +114,7 @@ class H46018Transport  : public H323TransportTCP
 	/**HandleH46018SignallingChannelPDU
 		Handle the H46018 Signalling channel
 	  */
-	PBoolean HandleH46018SignallingChannelPDU();
+	PBoolean HandleH46018SignallingChannelPDU(PThread * thread);
 
 	/**HandleH46018SignallingSocket
 		Handle the H46018 Signalling socket
@@ -348,6 +322,19 @@ class PNatMethod_H46019  : public PNatMethod
 	  )  { return RTPSupported; }
 
 	//@}
+
+#if PTLIB_VER >= 2110
+    virtual PString GetServer() const { return PString(); }
+    virtual bool GetServerAddress(PIPSocketAddressAndPort & ) const { return false; }
+    virtual NatTypes GetNatType(bool) { return UnknownNat; }
+    virtual NatTypes GetNatType(const PTimeInterval &) { return UnknownNat; }
+    virtual bool SetServer(const PString &) { return false; }
+    virtual bool Open(const PIPSocket::Address &) { return false; }
+    virtual bool CreateSocket(BYTE component,PUDPSocket * & socket,
+            const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny(),WORD localPort = 0)  { return false; }
+    virtual void SetCredentials(const PString &, const PString &, const PString &) {}
+#endif
+
 
   protected:
 

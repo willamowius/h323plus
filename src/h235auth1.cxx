@@ -3,7 +3,7 @@
  *
  * H.235 security PDU's
  *
- * Open H323 Library
+ * H323Plus Library
  *
  * Copyright (c) 1998-2001 Equivalence Pty. Ltd.
  *
@@ -23,93 +23,7 @@
  *
  * Contributor(s): Fürbass Franz <franz.fuerbass@infonova.at>
  *
- * $Log$
- * Revision 1.4  2008/05/23 11:21:38  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.3  2008/01/01 00:12:11  shorne
- * Remove warning on VS2005
- *
- * Revision 1.2  2007/08/20 19:13:28  shorne
- * Added Generic Capability support. Fixed Linux compile errors
- *
- * Revision 1.1  2007/08/06 20:51:05  shorne
- * First commit of h323plus
- *
- * Revision 1.20.2.3  2007/07/19 19:57:36  shorne
- * added missiing secure signal PDU check
- *
- * Revision 1.20.2.2  2007/05/23 07:03:37  shorne
- * Renamed Authenticator just to H.235.1
- *
- * Revision 1.20.2.1  2007/04/19 15:01:36  shorne
- * Added missing IsSecurePDU to H235.1 authenticator
- *
- * Revision 1.20  2006/06/23 03:15:58  shorne
- * Updated H.235 class name
- *
- * Revision 1.19  2006/02/13 11:24:23  csoutheren
- * Fixed problem with H235 authenticator factory not being populated
- *
- * Revision 1.18  2006/01/26 03:25:55  shorne
- * Caller Authentication added
- *
- * Revision 1.17  2005/02/03 02:46:07  csoutheren
- * Altered authentication functions to only update state information if authentication
- *  is correct. Thanks to Michal Zygmuntowicz
- *
- * Revision 1.16  2005/01/04 08:08:45  csoutheren
- * More changes to implement the new configuration methodology, and also to
- * attack the global static problem
- *
- * Revision 1.15  2004/11/12 06:04:44  csoutheren
- * Changed H235Authentiators to use PFactory
- *
- * Revision 1.14  2003/04/17 12:19:15  robertj
- * Added windows automatic library inclusion for openssl.
- *
- * Revision 1.13  2003/02/01 13:31:22  robertj
- * Changes to support CAT authentication in RAS.
- *
- * Revision 1.12  2003/01/27 23:15:44  robertj
- * Added more trace logs
- *
- * Revision 1.11  2003/01/08 04:40:34  robertj
- * Added more debug tracing for H.235 authenticators.
- *
- * Revision 1.10  2002/08/13 05:10:29  robertj
- * Fixed bug where incorrect PIN caused infinite loop.
- *
- * Revision 1.9  2002/08/05 05:17:41  robertj
- * Fairly major modifications to support different authentication credentials
- *   in ARQ to the logged in ones on RRQ. For both client and server.
- * Various other H.235 authentication bugs and anomalies fixed on the way.
- *
- * Revision 1.8  2002/07/25 00:56:23  robertj
- * Added logging of timestamps used if authorisation declined for that reason.
- *
- * Revision 1.7  2002/07/24 06:38:57  robertj
- * Fixed GNU compatibility
- *
- * Revision 1.6  2002/07/24 06:35:53  robertj
- * Fixed timestamp check in PDU to assure use of UTC and banded grace time.
- *
- * Revision 1.5  2002/05/17 03:40:25  robertj
- * Fixed problems with H.235 authentication on RAS for server and client.
- *
- * Revision 1.4  2001/12/06 06:44:42  robertj
- * Removed "Win32 SSL xxx" build configurations in favour of system
- *   environment variables to select optional libraries.
- *
- * Revision 1.3  2001/09/13 01:15:20  robertj
- * Added flag to H235Authenticator to determine if gkid and epid is to be
- *   automatically set as the crypto token remote id and local id.
- *
- * Revision 1.2  2001/08/14 05:24:41  robertj
- * Added support for H.235v1 and H.235v2 specifications.
- *
- * Revision 1.1  2001/08/10 11:03:52  robertj
- * Major changes to H.235 support in RAS to support server.
+ * $Id$
  *
  */
 
@@ -121,10 +35,6 @@
 
 #include "h235auth.h"
 #include "h323pdu.h"
-
-namespace PWLibStupidLinkerHacks {
-  int h235AuthProcedure1Loader;
-};
 
 #ifdef _MSC_VER
 #pragma comment(lib, P_SSL_LIB1)

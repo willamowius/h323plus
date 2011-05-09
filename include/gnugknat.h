@@ -33,40 +33,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.11  2009/08/28 14:36:00  shorne
- * Fixes to enable compilation with PTLIB 2.6.4
- *
- * Revision 1.10  2009/07/09 15:08:15  shorne
- * Added ability to enable/disable on  a call by call basis
- *
- * Revision 1.9  2009/06/28 00:11:03  shorne
- * Added H.460.18/19 Support
- *
- * Revision 1.8  2009/05/30 14:38:47  shorne
- * Fix for deprecation of PWLIB_STATIC_LOAD_PLUGIN in ptlib
- *
- * Revision 1.7  2008/09/27 06:11:50  shorne
- * Change from PStringList to PStringArray to compile with PTLIB v2.3
- *
- * Revision 1.6  2008/06/18 21:21:19  shorne
- * Fix for changes in ptlib v2.3.0
- *
- * Revision 1.5  2008/05/23 11:19:18  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.4  2008/02/01 07:50:17  shorne
- * added shutdown mutex to fix occasion shutdown timing errors.
- *
- * Revision 1.3  2008/01/18 01:36:42  shorne
- * Fix blocking and timeout on call ending
- *
- * Revision 1.2  2008/01/02 18:35:40  willamowius
- * make SetAvailable() return void
- *
- * Revision 1.1  2008/01/01 00:16:12  shorne
- * Added GnuGknat and FileTransfer support
- *
+ * $Id$
  *
  *
  */
@@ -106,7 +73,7 @@ class GNUGKTransport  : public H323TransportTCP
 
 	/**Handle the GNUGK Signalling
 	  */
-	PBoolean HandleGNUGKSignallingChannelPDU();
+	PBoolean HandleGNUGKSignallingChannelPDU(PThread * thread);
 
 	/**Handle the GNUGK Signalling
 	  */
@@ -288,6 +255,19 @@ public:
       PBoolean force = PFalse    ///< Force a new check
 	  )  { return RTPSupported; }
   //@}
+
+#if PTLIB_VER >= 2110
+    virtual PString GetServer() const { return PString(); }
+    virtual bool GetServerAddress(PIPSocketAddressAndPort & ) const { return false; }
+    virtual NatTypes GetNatType(bool) { return UnknownNat; }
+    virtual NatTypes GetNatType(const PTimeInterval &) { return UnknownNat; }
+    virtual bool SetServer(const PString &) { return false; }
+    virtual bool Open(const PIPSocket::Address &) { return false; }
+    virtual bool CreateSocket(BYTE component,PUDPSocket * & socket,
+            const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny(),WORD localPort = 0)  { return false; }
+    virtual void SetCredentials(const PString &, const PString &, const PString &) {}
+#endif
+
 
 protected:
 	H323EndPoint * EP;

@@ -35,63 +35,7 @@
  *
  * Contributor(s): ______________________________________.
  *
-* $Log$
-* Revision 1.19  2011/02/20 06:55:46  shorne
-* Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
-*
-* Revision 1.18  2010/05/26 13:07:51  willamowius
-* SOlaris 10 compile fix
-*
-* Revision 1.17  2010/01/20 04:23:08  shorne
-* Add ability to advertise supported H.460 features in presence
-*
-* Revision 1.16  2009/11/29 23:31:13  shorne
-* BUG FIX : completely disable H.460 support if remote does not support it.
-*
-* Revision 1.15  2009/09/29 07:23:03  shorne
-* Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
-*
-* Revision 1.14  2009/07/07 13:24:43  shorne
-* Fix so feature list will start at 0 and OpalOID + operator
-*
-* Revision 1.13  2009/07/07 12:28:37  shorne
-* Remove redundant code and fix memory leaks
-*
-* Revision 1.12  2009/06/28 00:11:03  shorne
-* Added H.460.18/19 Support
-*
-* Revision 1.11  2009/03/20 14:18:10  willamowius
-* Add() an item without content
-*
-* Revision 1.10  2009/02/21 14:06:30  shorne
-* Fix Memory leak
-*
-* Revision 1.9  2008/11/28 14:39:52  willamowius
-* use static plugins for H.460 features
-*
-* Revision 1.8  2008/11/28 13:07:04  willamowius
-* fix token concatenation for gcc
-*
-* Revision 1.7  2008/09/27 06:17:30  shorne
-* Moved H.460 Factory loader to ensure correct loading of H.460 features
-*
-* Revision 1.6  2008/06/25 10:49:13  shorne
-* Change to PStringArray to bring in line with changes in ptlib
-*
-* Revision 1.5  2008/05/27 15:39:07  shorne
-* Replace PStringList with PStringArray with latest ptlib SVN
-*
-* Revision 1.4  2008/05/23 11:20:51  willamowius
-* switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
-*
-* Revision 1.3  2008/01/02 17:50:59  shorne
-* Fix for memory leak in H.460 module
-*
-* Revision 1.2  2007/10/30 09:38:48  shorne
-* Better Linux interoperability and fix for small memory leak
-*
-* Revision 1.1  2007/08/06 20:50:51  shorne
-* First commit of h323plus
+* $Id $
 *
 *
 */
@@ -110,6 +54,7 @@
 #include <ptlib/pluginmgr.h>
 #include <ptclib/url.h>
 #include <map>
+#include "ptlib_extras.h"
 
 
 #ifdef _MSC_VER
@@ -1060,7 +1005,7 @@ class H460_FeatureOID : public H460_Feature
 ///////////////////////////////////////////////////////////////////////////////
 // Dictionary/List of Features
 
-PDICTIONARY(H460_Features, H460_FeatureID , H460_Feature);
+H323DICTIONARY(H460_Features, H460_FeatureID , H460_Feature);
 
 //////////////////////////////////////////////////////////////////////////////
 // FeatureSet Main Calling Class

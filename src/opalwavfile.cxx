@@ -21,44 +21,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.4  2009/07/09 15:11:12  shorne
- * Simplfied and standardised compiler directives
- *
- * Revision 1.3  2008/10/28 23:06:28  willamowius
- * fixes to compile with audio disabled
- *
- * Revision 1.2  2008/05/23 11:22:25  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.1  2007/08/06 20:51:07  shorne
- * First commit of h323plus
- *
- * Revision 1.7  2004/08/26 08:05:04  csoutheren
- * Codecs now appear in abstract factory system
- * Fixed Windows factory bootstrap system (again)
- *
- * Revision 1.6  2004/08/09 11:11:33  csoutheren
- * Added stupid windows hack to force opalwavfile factories to register
- *
- * Revision 1.5  2004/07/15 11:14:25  rjongbloed
- * Added missing purity to G.711 decoder function
- *
- * Revision 1.4  2004/07/15 03:18:00  csoutheren
- * Migrated changes from crs_vxnml_devel branch into main trunk
- *
- * Revision 1.3.6.1  2004/07/07 07:10:11  csoutheren
- * Changed to use new factory based PWAVFile
- * Removed redundant blocking/unblocking when using G.723.1
- *
- * Revision 1.3  2003/12/28 00:07:56  csoutheren
- * Added support for 8-bit PCM WAV files
- *
- * Revision 1.2  2002/08/05 10:03:48  robertj
- * Cosmetic changes to normalise the usage of pragma interface/implementation.
- *
- * Revision 1.1  2002/06/20 01:21:32  craigs
- * Initial version
+ * $Id$
  *
  */
 
@@ -194,10 +157,6 @@ class PWAVFileConverterALaw : public PWAVFileConverterXLaw
 
 PWAVFileConverterFactory::Worker<PWAVFileConverterULaw> uLawConverter(PWAVFile::fmt_uLaw, true);
 PWAVFileConverterFactory::Worker<PWAVFileConverterALaw> ALawConverter(PWAVFile::fmt_ALaw, true);
-
-namespace PWLibStupidLinkerHacks {
-  int opalwavfileLoader;
-};
 
 #endif
 

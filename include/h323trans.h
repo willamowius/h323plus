@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/05/23 11:19:51  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.1  2007/08/06 20:50:49  shorne
  * First commit of h323plus
  *
@@ -261,17 +264,6 @@ class H323Transactor : public PObject
       */
     PBoolean GetCheckResponseCryptoTokens() { return checkResponseCryptoTokens; }
   //@}
-
-  protected:
-    void Construct();
-
-    unsigned GetNextSequenceNumber();
-    PBoolean SetUpCallSignalAddresses(
-      H225_ArrayOf_TransportAddress & addresses
-    );
-
-    //Background thread handler.
-    PDECLARE_NOTIFIER(PThread, H323Transactor, HandleTransactions);
 	
     class Request : public PObject
     {
@@ -313,6 +305,17 @@ class H323Transactor : public PObject
           NoResponseReceived
         } responseResult;
     };
+
+  protected:
+    void Construct();
+
+    unsigned GetNextSequenceNumber();
+    PBoolean SetUpCallSignalAddresses(
+      H225_ArrayOf_TransportAddress & addresses
+    );
+
+    //Background thread handler.
+    PDECLARE_NOTIFIER(PThread, H323Transactor, HandleTransactions);
 
     virtual PBoolean MakeRequest(
       Request & request
@@ -364,7 +367,7 @@ class H323Transactor : public PObject
     unsigned  nextSequenceNumber;
     PMutex    nextSequenceNumberMutex;
 
-    PDictionary<POrdinalKey, Request> requests;
+    H323Dictionary<POrdinalKey, Request> requests;
     PMutex                            requestsMutex;
     Request                         * lastRequest;
 

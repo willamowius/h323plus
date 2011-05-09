@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.34  2011/02/20 06:55:46  shorne
+ * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
+ *
  * Revision 1.33  2011/01/12 12:55:14  shorne
  * H.224 Bi-directional support added. Calback added for h239 Generic Command to close channel
  *
@@ -2318,7 +2321,7 @@ class H323EndPoint : public PObject
 	/** Set the local Presence State. 
 		Calling this will enable Presence in the endpoint
 	  */
-	void PresenceSetLocalState(const PStringList & alias, unsigned localstate, const PString & localdisplay = PString());
+	void PresenceSetLocalState(const PStringList & alias, unsigned localstate, const PString & localdisplay = PString(), PBoolean updateOnly = false);
 
 	enum presenceInstruction {
 		e_subscribe,
@@ -2354,7 +2357,8 @@ class H323EndPoint : public PObject
 	  */
 	void PresenceSetInstruction(const PString & epalias, 
 								unsigned type, 
-								const PStringList & list);
+								const PStringList & list,
+                                 PBoolean autoSend = true);
 
 	/** Submit Presence Authorizations. 
 	  */
