@@ -6,7 +6,7 @@
  * Copyright (c) 2011 ISVO (Asia) Pte Ltd. All Rights Reserved.
  *
  * The contents of this file are subject to the Mozilla Public License
- * Version 1.0 (the "License"); you may not use this file except in
+ * Version 1.1 (the "License"); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -68,7 +68,7 @@ inline void deleteDictionaryEntries(const E & e)
 
 
 struct PSTLDictionaryOrder {
-     int operator() ( unsigned p1, unsigned p2 ) {
+     int operator() ( unsigned p1, unsigned p2 ) const {
            return (p1 > p2);
      }
 };
@@ -215,6 +215,8 @@ template <class K, class D> class PSTLDictionary : public PObject,
      */
     virtual void RemoveAll()
       {  
+          PWaitAndSignal m(dictMutex);
+
           if (!disallowDeleteObjects)
                 deleteDictionaryEntries(*this);  
           clear();
@@ -255,20 +257,27 @@ template <class K, class D> class PSTLDictionary : public PObject,
           unsigned ref        ///< Returned index
           ) const
       {
+          PWaitAndSignal m(dictMutex);
+
+          PAssert(ref < size(), psprintf("Index out of Bounds ref: %u sz: %u",ref,size()));
           std::map< unsigned, std::pair<K, D*>,PSTLDictionaryOrder>::const_iterator i = find(ref);
           return *(i->second.second);   
       };
 
        const K & InternalGetKeyAt(
-           int & ref      ///< Ordinal position in dictionary for key.
+           unsigned ref      ///< Ordinal position in dictionary for key.
            ) const
-      { 
+      {
+          PWaitAndSignal m(dictMutex);
+
+          PAssert(ref < size(), psprintf("Index out of Bounds ref: %u sz: %u",ref,size()));
           std::map< unsigned, std::pair<K, D*>,PSTLDictionaryOrder>::const_iterator i = find(ref);
           return i->second.first;   
       }
 
-      D * InternalRemoveResort(int pos) {
+      D * InternalRemoveResort(unsigned pos) {
           unsigned newpos = pos;
+          unsigned sz = size();
           D * dataPtr = NULL;
           std::map< unsigned, std::pair<K, D*>, PSTLDictionaryOrder >::iterator it = find(pos);
           if (it == end()) return NULL;
@@ -278,9 +287,9 @@ template <class K, class D> class PSTLDictionary : public PObject,
             delete it->second.second;  
           erase(it);
           
-          for (unsigned i = pos+1; i < size(); ++i) {
+          for (unsigned i = pos+1; i < sz; ++i) {
              std::map< unsigned, std::pair<K, D*>, PSTLDictionaryOrder >::iterator j = find(i);
-             DictionaryEntry entry = j->second;
+             DictionaryEntry entry =  make_pair(j->second.first,j->second.second) ;
              insert(pair<unsigned, std::pair<K, D*> >(newpos,entry));
              newpos++;
              erase(j);
