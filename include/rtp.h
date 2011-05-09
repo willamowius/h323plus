@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.14  2011/01/12 13:08:38  shorne
+ * H.239 Clunge for channelID=0 and set Channelid in OLCack
+ *
  * Revision 1.13  2010/09/19 05:53:28  shorne
  * Added NAT Support for Unidirection media channels (H.239) fix to set random timestamp rather than  zero. Fix the timestamp on the marker frame.
  *
@@ -285,6 +288,8 @@
 
 #include <openh323buildopts.h>
 #include <ptlib/sockets.h>
+
+#include "ptlib_extras.h"
 
 class RTP_JitterBuffer;
 class PHandleAggregator;
@@ -1132,7 +1137,7 @@ class RTP_SessionManager : public PObject
 
 
   protected:
-    PDICTIONARY(SessionDict, POrdinalKey, RTP_Session);
+    H323DICTIONARY(SessionDict, POrdinalKey, RTP_Session);
     SessionDict sessions;
     PMutex      mutex;
     PINDEX      enumerationIndex;

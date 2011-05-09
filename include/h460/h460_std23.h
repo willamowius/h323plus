@@ -31,24 +31,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.5  2009/12/08 03:55:27  shorne
- * First cut support for H.460.24 Annex B
- *
- * Revision 1.4  2009/11/17 11:10:28  shorne
- * Added UPnP Support and NAT Feature Callbacks
- *
- * Revision 1.3  2009/09/29 07:23:03  shorne
- * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
- *
- * Revision 1.2  2009/08/28 14:36:06  shorne
- * Fixes to enable compilation with PTLIB 2.6.4
- *
- * Revision 1.1  2009/07/25 10:35:51  shorne
- * First cut of H.460.23/.24 support
- *
- *
- *
+ * $Id $
  *
  */
 
@@ -107,6 +90,17 @@ class PNatMethod_H46024  : public PSTUNClient,
 
 		// Reportable NAT Type
 		PSTUNClient::NatTypes GetNATType();
+
+#if PTLIB_VER >= 2110
+    virtual PString GetServer() const { return PString(); }
+    virtual bool GetServerAddress(PIPSocketAddressAndPort & ) const { return false; }
+    virtual NatTypes GetNatType(bool) { return UnknownNat; }
+    virtual NatTypes GetNatType(const PTimeInterval &) { return UnknownNat; }
+    virtual bool SetServer(const PString &) { return false; }
+    virtual bool Open(const PIPSocket::Address &) { return false; }
+    virtual bool CreateSocket(BYTE,PUDPSocket * &, const PIPSocket::Address,WORD)  { return false; }
+    virtual void SetCredentials(const PString &, const PString &, const PString &) {}
+#endif
 
 
 protected:

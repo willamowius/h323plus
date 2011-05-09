@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.16  2011/01/12 13:08:38  shorne
+ * H.239 Clunge for channelID=0 and set Channelid in OLCack
+ *
  * Revision 1.15  2010/08/26 15:12:39  shorne
  * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
  *
@@ -229,12 +232,12 @@ void H323_RTP_Session::OnTxStatistics(const RTP_Session & session) const
 
 void H323_RTP_Session::OnRxStatistics(const RTP_Session & session) const
 {
-  connection.OnRTPStatistics(session);
+   connection.OnRTPStatistics(session);
 }
 
 void H323_RTP_Session::OnFinalStatistics(const RTP_Session & session) const
 {
-  connection.OnRTPFinalStatistics(session);
+   connection.OnRTPFinalStatistics(session);
 }
 
 void H323_RTP_Session::OnRxSenderReport(unsigned sessionID,

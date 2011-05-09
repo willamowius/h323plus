@@ -3,7 +3,7 @@
  *
  * H.235 authorisation PDU's
  *
- * Open H323 Library
+ * H323Plus Library
  *
  * Copyright (c) 1998-2001 Equivalence Pty. Ltd.
  *
@@ -23,94 +23,7 @@
  *
  * Contributor(s): Fürbass Franz <franz.fuerbass@infonova.at>
  *
- * $Log$
- * Revision 1.1  2007/08/06 20:50:49  shorne
- * First commit of h323plus
- *
- * Revision 1.22.2.3  2007/07/19 19:57:36  shorne
- * added missiing secure signal PDU check
- *
- * Revision 1.22.2.2  2007/04/19 15:07:13  shorne
- * Added missing IsSecurePDU to H235.1 authenticator
- *
- * Revision 1.22.2.1  2006/12/23 19:08:02  shorne
- * Plugin video codecs & sundry
- *
- * Revision 1.22  2006/06/23 03:15:58  shorne
- * Updated H.235 class name
- *
- * Revision 1.21  2006/01/26 03:25:55  shorne
- * Caller Authentication added
- *
- * Revision 1.20  2005/11/30 13:05:01  csoutheren
- * Changed tags for Doxygen
- *
- * Revision 1.19  2005/02/13 23:54:48  csoutheren
- * Allow access to H.235 timestamp grace period
- * Thanks to Jan Willamowius
- *
- * Revision 1.18  2004/11/20 22:00:48  csoutheren
- * Added hacks for linker problem
- *
- * Revision 1.17  2004/11/12 06:04:42  csoutheren
- * Changed H235Authentiators to use PFactory
- *
- * Revision 1.16  2004/05/13 02:26:13  dereksmithies
- * Fixes so make docs does not generate warning messages about brackets.
- *
- * Revision 1.15  2003/04/30 00:28:50  robertj
- * Redesigned the alternate credentials in ARQ system as old implementation
- *   was fraught with concurrency issues, most importantly it can cause false
- *   detection of replay attacks taking out an endpoint completely.
- *
- * Revision 1.14  2003/04/01 04:47:48  robertj
- * Abstracted H.225 RAS transaction processing (RIP and secondary thread) in
- *   server environment for use by H.501 peer elements.
- *
- * Revision 1.13  2003/02/25 06:48:14  robertj
- * More work on PDU transaction abstraction.
- *
- * Revision 1.12  2003/02/11 04:43:22  robertj
- * Fixed use of asymmetrical authentication schemes such as MD5.
- *
- * Revision 1.11  2003/02/01 13:31:14  robertj
- * Changes to support CAT authentication in RAS.
- *
- * Revision 1.10  2003/01/08 04:40:31  robertj
- * Added more debug tracing for H.235 authenticators.
- *
- * Revision 1.9  2002/09/16 01:14:15  robertj
- * Added #define so can select if #pragma interface/implementation is used on
- *   platform basis (eg MacOS) rather than compiler, thanks Robert Monaghan.
- *
- * Revision 1.8  2002/09/03 06:19:36  robertj
- * Normalised the multi-include header prevention ifdef/define symbol.
- *
- * Revision 1.7  2002/08/05 10:03:47  robertj
- * Cosmetic changes to normalise the usage of pragma interface/implementation.
- *
- * Revision 1.6  2002/08/05 05:17:37  robertj
- * Fairly major modifications to support different authentication credentials
- *   in ARQ to the logged in ones on RRQ. For both client and server.
- * Various other H.235 authentication bugs and anomalies fixed on the way.
- *
- * Revision 1.5  2002/05/17 03:39:28  robertj
- * Fixed problems with H.235 authentication on RAS for server and client.
- *
- * Revision 1.4  2001/12/06 06:44:42  robertj
- * Removed "Win32 SSL xxx" build configurations in favour of system
- *   environment variables to select optional libraries.
- *
- * Revision 1.3  2001/09/14 00:13:37  robertj
- * Fixed problem with some athenticators needing extra conditions to be
- *   "active", so make IsActive() virtual and add localId to H235AuthSimpleMD5
- *
- * Revision 1.2  2001/09/13 01:15:18  robertj
- * Added flag to H235Authenticator to determine if gkid and epid is to be
- *   automatically set as the crypto token remote id and local id.
- *
- * Revision 1.1  2001/08/10 11:03:49  robertj
- * Major changes to H.235 support in RAS to support server.
+ * $Id$
  *
  */
 
@@ -135,9 +48,7 @@ class H323SignalPDU;
 class H323Connection;
 class PSSLCertificate;
 
-namespace PWLibStupidLinkerHacks {
-extern int h235AuthLoader;
-};
+#include "ptlib_extras.h"
 
 /** This abtract class embodies an H.235 authentication mechanism.
     NOTE: descendants must have a Clone() function for correct operation.
@@ -331,7 +242,7 @@ PDECLARE_LIST(H235AuthenticatorList, H235AuthenticatorInfo)
 };
 
 /** Dictionary of Addresses and Associated Security Info  */
-PDICTIONARY(H235AuthenticatorDict,PString,H235AuthenticatorInfo); 
+H323DICTIONARY(H235AuthenticatorDict,PString,H235AuthenticatorInfo); 
 
 /** This class embodies a simple MD5 based authentication.
     The users password is concatenated with the 4 byte timestamp and 4 byte
@@ -416,10 +327,6 @@ class H235AuthCAT : public H235Authenticator
 
 
 #if P_SSL
-
-namespace PWLibStupidLinkerHacks {
-extern int h235AuthProcedure1Loader;
-};
 
 /** This class embodies the H.235 "base line" from H235.1.
 */

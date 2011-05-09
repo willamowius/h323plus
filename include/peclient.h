@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/05/23 11:19:56  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.1  2007/08/06 20:50:50  shorne
  * First commit of h323plus
  *
@@ -617,7 +620,7 @@ class H323PeerElement : public H323_AnnexG
     PMutex remotePeerListMutex;
     PSafeSortedList<H323PeerElementServiceRelationship> remoteServiceRelationships;
     PStringToString remotePeerAddrToServiceID;
-    PDICTIONARY(StringToOrdinalKey, PString, POrdinalKey);
+    H323DICTIONARY(StringToOrdinalKey, PString, POrdinalKey);
     StringToOrdinalKey remotePeerAddrToOrdinalKey;
 
     PSafeSortedList<H323PeerElementDescriptor> descriptors;

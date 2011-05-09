@@ -33,82 +33,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.25  2011/02/22 05:04:57  shorne
- * Enable selectively removing capabilities based on the features PDU's advertising feature. H.460.9 now advertises in ARQ when receiving call.
- *
- * Revision 1.24  2011/02/20 06:55:46  shorne
- * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
- *
- * Revision 1.23  2010/10/22 00:27:02  shorne
- * Added missing information in H460_Feature constructor
- *
- * Revision 1.22  2010/05/26 13:09:28  willamowius
- * Solaris 10 compile fix
- *
- * Revision 1.21  2010/05/02 22:49:41  shorne
- * BUG FIX: Ensure no segfault when getting feature that does not exist
- *
- * Revision 1.20  2010/02/24 02:58:51  shorne
- * Added ability to compile without H.460 support on windows
- *
- * Revision 1.19  2010/01/20 04:23:08  shorne
- * Add ability to advertise supported H.460 features in presence
- *
- * Revision 1.18  2009/11/29 23:31:13  shorne
- * BUG FIX : completely disable H.460 support if remote does not support it.
- *
- * Revision 1.17  2009/09/29 07:23:03  shorne
- * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
- *
- * Revision 1.16  2009/09/20 00:32:03  shorne
- * Added ordering of H.460 features with STD first
- *
- * Revision 1.15  2009/07/07 13:24:46  shorne
- * Fix so feature list will start at 0 and OpalOID + operator
- *
- * Revision 1.14  2009/07/07 12:28:38  shorne
- * Remove redundant code and fix memory leaks
- *
- * Revision 1.13  2009/07/06 15:37:10  willamowius
- * annotate memory leaks - not fixed, yet
- *
- * Revision 1.12  2009/06/29 02:54:59  shorne
- * Fix to ensure H460 Factory loads under Linux
- *
- * Revision 1.11  2009/05/15 18:04:39  willamowius
- * fix printing of NonStd ids
- *
- * Revision 1.10  2009/05/11 22:33:30  willamowius
- * avoid printing non-printable characters in the trace when printing NonStandard OIDs
- *
- * Revision 1.9  2009/03/20 14:18:10  willamowius
- * Add() an item without content
- *
- * Revision 1.8  2009/02/27 13:47:15  willamowius
- * fix memory leaks
- *
- * Revision 1.7  2009/02/21 14:22:22  shorne
- * Fixed Memory leak. Added NonCallSupplimentaryService support
- *
- * Revision 1.6  2009/02/19 15:06:33  willamowius
- * note memory leaks - not fixed, yet
- *
- * Revision 1.5  2008/05/23 11:23:12  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.4  2008/04/25 01:22:47  shorne
- * Added callback to enable developers to disable features when instancing
- *
- * Revision 1.3  2008/01/02 17:50:59  shorne
- * Fix for memory leak in H.460 module
- *
- * Revision 1.2  2007/10/30 09:38:48  shorne
- * Better Linux interoperability and fix for small memory leak
- *
- * Revision 1.1  2007/08/06 20:51:52  shorne
- * First commit of h323plus
- *
+ * $Id $
  *
  *
 */
@@ -922,7 +847,11 @@ void H460_Feature::AttachConnection(H323Connection * _con)
 
 static const char H460FeaturePluginBaseClass[] = "H460_Feature";
 
+#if PTLIB_VER >= 2110
+template <> H460_Feature * PDevicePluginFactory<H460_Feature>::Worker::Create(const PDefaultPFactoryKey & type) const
+#else
 template <> H460_Feature * PDevicePluginFactory<H460_Feature>::Worker::Create(const PString & type) const
+#endif
 {
   return H460_Feature::CreateFeature(type);
 }
@@ -1177,7 +1106,7 @@ PTRACE(6,"H460\tCreate Common FeatureSet");
     H460_FeatureSet remote = H460_FeatureSet(fs);
 
  /// Remove the features the remote does not support.
-	for (PINDEX i=0; i < Features.GetSize(); i++) {
+	for (PINDEX i=Features.GetSize()-1;  i > -1;  i--) {
 	    H460_Feature & feat = Features.GetDataAt(i);
 		H460_FeatureID id = feat.GetFeatureID();
 		if (!remote.HasFeature(id))
@@ -1196,7 +1125,7 @@ PBoolean H460_FeatureSet::RemoveUnCommonFeatures()
 PTRACE(4,"H460\tRemoving UnCommon Features");
 
  /// Remove the features that have not been negotiated for the call.
-	for (PINDEX i=0; i < Features.GetSize(); i++) {
+	for (PINDEX i=Features.GetSize()-1; i > -1;  i--) {
 	    H460_Feature & feat = Features.GetDataAt(i);
 		H460_FeatureID id = feat.GetFeatureID();
 		if (!feat.CommonFeature())

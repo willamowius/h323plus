@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.13  2011/03/24 13:17:51  willamowius
+ * avoid uninitialized memory access and minor speedup
+ *
  * Revision 1.12  2011/02/20 06:55:46  shorne
  * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
  *
@@ -731,20 +734,19 @@ void H323SetAliasAddress(const PString & _name, H225_AliasAddress & alias, int t
   PString name = _name;
   // See if alias type was explicitly specified
   if (tag < 0) {
-    PINDEX colon = name.Find(':');
-    if (colon != P_MAX_INDEX && colon > 0) {
-      PString type = name.Left(colon);
-      for (PINDEX i = 0; tag < 0 && i < 5; i++) {
-        if (type == aliasAddressTypes[i].name) {
-          tag = aliasAddressTypes[i].tag;
-          name = name.Mid(colon+1);
+      PINDEX colon = name.Find(':');
+      if (colon != P_MAX_INDEX && colon > 0) {
+        PString type = name.Left(colon);
+        for (PINDEX i = 0; tag < 0 && i < 5; i++) {
+          if (type == aliasAddressTypes[i].name) {
+            tag = aliasAddressTypes[i].tag;
+            name = name.Mid(colon+1);
+          }
         }
       }
-    }
   }
-  
-  // otherwise guess it from the string: if all digits then assume an e164 address, @ URL else H323_ID.
-  if (tag < 0) {
+
+  if (tag < 0 || tag == 1) {
 	if (IsE164(name)) 
 		tag = H225_AliasAddress::e_dialedDigits;
 	else if (IsURL(name)) 

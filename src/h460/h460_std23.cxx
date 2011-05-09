@@ -31,33 +31,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.8  2009/12/08 08:25:47  willamowius
- * gcc fixes for presence
- *
- * Revision 1.7  2009/12/08 03:55:28  shorne
- * First cut support for H.460.24 Annex B
- *
- * Revision 1.6  2009/11/17 11:10:28  shorne
- * Added UPnP Support and NAT Feature Callbacks
- *
- * Revision 1.5  2009/10/21 10:09:01  shorne
- * Updates for H.460.18/.19/.23/.24
- *
- * Revision 1.4  2009/09/29 07:23:03  shorne
- * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
- *
- * Revision 1.3  2009/09/20 00:34:29  shorne
- * Changed conditions for disabling H.460.23
- *
- * Revision 1.2  2009/08/28 14:36:06  shorne
- * Fixes to enable compilation with PTLIB 2.6.4
- *
- * Revision 1.1  2009/07/25 10:35:51  shorne
- * First cut of H.460.23/.24 support
- *
- *
- *
+ * $Id $
  *
  */
 #include <ptlib.h>
@@ -130,8 +104,13 @@ PNatMethod_H46024::~PNatMethod_H46024()
 void PNatMethod_H46024::Start(const PString & server,H460_FeatureStd23 * _feat)
 {
 	feat = _feat;
-	H323EndPoint * ep = feat->GetEndPoint();
-    Initialise(server,ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax(), ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax());
+
+#if PTLIB_VER >= 2110
+   // Need to Fix!!! - SH
+#else
+   H323EndPoint * ep = feat->GetEndPoint();
+   Initialise(server,ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax(), ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax());
+#endif
 
 	Resume();
 }

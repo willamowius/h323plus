@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2011/01/10 10:32:59  shorne
+ * Don't set presence state if not a common feature
+ *
  * Revision 1.6  2010/02/24 03:00:00  shorne
  * Added generic data support to presence feature
  *
@@ -160,7 +163,7 @@ void PostNotification(H323PresenceStore & gw, const H323PresenceNotifications & 
 	 }
 }
 
-void H460PresenceHandler::SetPresenceState(const PStringList & alias, unsigned localstate, const PString & localdisplay)
+void H460PresenceHandler::SetPresenceState(const PStringList & alias, unsigned localstate, const PString & localdisplay, PBoolean updateOnly)
 {
     if (!feat || !feat->CommonFeature())
           return;
@@ -168,29 +171,33 @@ void H460PresenceHandler::SetPresenceState(const PStringList & alias, unsigned l
 	H323PresenceNotification notification;
 	notification.SetPresenceState((H323PresenceNotification::States)localstate,localdisplay);
 
-	// Add Geoloation Information
-	H460P_PresenceGeoLocation loc;
-	if (EndpointLocale.BuildLocalePDU(loc))
-		notification.AddEndpointLocale(loc);
+    if (!updateOnly) {
+	    // Add Geoloation Information
+	    H460P_PresenceGeoLocation loc;
+	    if (EndpointLocale.BuildLocalePDU(loc))
+		    notification.AddEndpointLocale(loc);
 
-    // Add the features the endpoint supports
-	list<H460P_PresenceFeature>::iterator i = EndpointFeatures.begin();
-	while (i != EndpointFeatures.end()) {
-		notification.AddSupportedFeature(*i);
-		i++;
-	}
+        // Add the features the endpoint supports
+	    list<H460P_PresenceFeature>::iterator i = EndpointFeatures.begin();
+	    while (i != EndpointFeatures.end()) {
+		    notification.AddSupportedFeature(*i);
+		    i++;
+	    }
 
-	// Add any generic data 
-	notification.AddGenericData(genericData);
+	    // Add any generic data 
+	    notification.AddGenericData(genericData);
+    }
 
-	H323PresenceNotifications notify;
-	notify.Add(notification);
-	notify.SetAlias(alias[0]);
-	notify.SetAliasList(alias);
+    for (PINDEX i = 0; i< alias.GetSize(); ++i) {
+	    H323PresenceNotifications notify;
+	    notify.Add(notification);
+	    notify.SetAlias(alias[i]);
+	    notify.SetAliasList(alias);
 
-	H323PresenceStore & store = GetPresenceStoreLocked();
-	PostNotification(store,notify);
-	PresenceStoreUnLock();
+	    H323PresenceStore & store = GetPresenceStoreLocked();
+	    PostNotification(store,notify);
+	    PresenceStoreUnLock();
+    }
 
 	if (ep.GetGatekeeper() && ep.GetGatekeeper()->IsRegistered()) 
 		pendingMessages = true;
@@ -198,7 +205,8 @@ void H460PresenceHandler::SetPresenceState(const PStringList & alias, unsigned l
 
 void H460PresenceHandler::AddInstruction(const PString & epalias, 
 						H323PresenceHandler::InstType instType, 
-						const PStringList & subscribe)
+						const PStringList & subscribe,
+                        PBoolean autoSend)
 {
     H323PresenceInstructions instruct;
 	instruct.SetAlias(epalias);
@@ -213,7 +221,7 @@ void H460PresenceHandler::AddInstruction(const PString & epalias,
 	PostInstruction(store,instruct);
 	PresenceStoreUnLock();
 
-	if (ep.GetGatekeeper() && ep.GetGatekeeper()->IsRegistered()) 
+	if (ep.GetGatekeeper() && ep.GetGatekeeper()->IsRegistered() && autoSend) 
 		pendingMessages = true;
 }
 
@@ -392,14 +400,13 @@ PBoolean H460_FeatureOID3::OnSendRegistrationRequest(H225_FeatureDescriptor & pd
 	if (handler == NULL)
 		return false;
 
+    H460_FeatureOID feat = H460_FeatureOID(OID_3); 
     PASN_OctetString raw;
-	if (handler->BuildPresenceElement(H225_RasMessage::e_registrationRequest, raw)) {
-		H460_FeatureOID feat = H460_FeatureOID(OID_3); 
+	if (handler->BuildPresenceElement(H225_RasMessage::e_registrationRequest, raw))  
 		feat.Add(OID3_ID,H460_FeatureContent(raw));
-		pdu = feat;
-		return true;
-	} else 
-		return false;
+
+    pdu = feat;
+	return true;
 }
 
 

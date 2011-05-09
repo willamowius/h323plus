@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2010/01/04 05:57:22  shorne
+ * Added SetCallingSubAddressIE and SetCalledSubAddressIE support
+ *
  * Revision 1.2  2008/05/23 11:19:59  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -218,6 +221,7 @@
 #pragma interface
 #endif
 
+#include "ptlib_extras.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -645,7 +649,7 @@ class Q931 : public PObject
     unsigned protocolDiscriminator;
     MsgTypes messageType;
 
-    PDICTIONARY(InternalInformationElements, POrdinalKey, PBYTEArray);
+    H323DICTIONARY(InternalInformationElements, POrdinalKey, PBYTEArray);
     InternalInformationElements informationElements;
 };
 

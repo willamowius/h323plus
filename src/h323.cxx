@@ -3,7 +3,7 @@
  *
  * H.323 protocol handler
  *
- * Open H323 Library
+ * H323plus Library
  *
  * Copyright (c) 1998-2000 Equivalence Pty. Ltd.
  *
@@ -23,473 +23,8 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.76  2011/02/26 09:34:07  shorne
- * FIX: Originating H.239 to PVX
- *
- * Revision 1.75  2011/02/24 11:05:50  willamowius
- * typo in comment
- *
- * Revision 1.74  2011/02/23 17:11:21  willamowius
- * trust the application when it changes Q931 fields in OnSendSignalSetup() and don't overwrite those changes
- *
- * Revision 1.73  2011/02/23 09:17:27  willamowius
- * whitespace
- *
- * Revision 1.72  2011/02/22 07:46:22  shorne
- * Added receive side routecallToGatekeeer support.
- *
- * Revision 1.71  2011/02/22 05:04:57  shorne
- * Enable selectively removing capabilities based on the features PDU's advertising feature. H.460.9 now advertises in ARQ when receiving call.
- *
- * Revision 1.70  2011/02/20 06:55:46  shorne
- * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
- *
- * Revision 1.69  2011/01/23 06:17:05  shorne
- * Include the orginal called address with routeCalltoGatekeeper so the gatekeeper might be able to route the call.
- *
- * Revision 1.68  2011/01/12 13:03:53  shorne
- * H.224 bi-directional support added
- * H.239 Generic Command to close channel callback
- * Remove NatMethods on connection destructor
- * Add RouteCalltoGatekeeper facility support
- * Remove ASSERT on set hold media and allow lower functions to return
- * Added Capability merge support for audio capabilities
- * H.239 Clunge for channelID=0 and set Channelid in OLCack
- *
- * Revision 1.67  2010/11/02 15:28:35  willamowius
- * avoid crash on OLC without mediaControlChannel
- *
- * Revision 1.66  2010/10/26 13:26:27  willamowius
- * fix compile with video disabled
- *
- * Revision 1.65  2010/09/19 05:46:29  shorne
- * Added Handling H.245 Control Channel failure, Setting initial Bandwidth by codec type. Setting H.239 Channel number callback
- *
- * Revision 1.64  2010/08/28 03:58:20  shorne
- * More H.239 Support. Added ability to close channel, remove and reorder codecs and correctly load capabilities into simult cap listing
- *
- * Revision 1.63  2010/08/26 15:12:39  shorne
- * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
- *
- * Revision 1.62  2010/08/22 04:21:22  shorne
- * More H.239 GenericRequest/Response/Command support
- *
- * Revision 1.61  2010/08/19 12:41:32  shorne
- * Allow implementers to change the NAT detection mechanism
- * if we disable Fast start don't accept fast start
- * Support merging audio capabilities ie G.722.1c
- * Support Channel id =0 (bug in H.239 Mirial)
- * Improved H.239 Support
- *
- * Revision 1.60  2010/06/06 19:31:06  willamowius
- * fix compile without video support
- *
- * Revision 1.59  2010/06/06 14:53:26  shorne
- * Added AVSync support, Aspect Ratio management, flow Control, Video 90k clock, fixes for wideband codecs and generic audio capabilities
- *
- * Revision 1.58  2010/05/26 13:09:28  willamowius
- * Solaris 10 compile fix
- *
- * Revision 1.57  2010/05/10 11:59:22  willamowius
- * support call transfer with routeCallToMC
- *
- * Revision 1.56  2010/05/03 06:33:06  willamowius
- * remove old version of OnRxSenderReport(), new interafce is better
- *
- * Revision 1.55  2010/05/03 03:56:34  shorne
- * Improved collection of sender reports including identifying session they originated from
- *
- * Revision 1.54  2010/05/02 22:44:31  shorne
- * Added support to be able to set NAT Method on a call by call basis
- *
- * Revision 1.53  2010/04/19 06:12:15  willamowius
- * implement Facility(routeCallToMC)
- *
- * Revision 1.52  2010/02/26 15:22:41  shorne
- * Bug fix for channel shutting down
- *
- * Revision 1.51  2010/02/24 03:36:35  shorne
- * Added ability to swap out the signalling channel and support to allow an implementor to continue a call if the signalling channel where to go down.
- *
- * Revision 1.50  2010/02/06 20:08:18  willamowius
- * give application access to the received H.245 TCS
- *
- * Revision 1.49  2010/02/04 07:41:43  shorne
- * Added Support to compile H.460 Annex B without Annex A support
- *
- * Revision 1.48  2010/01/20 04:07:54  shorne
- * Small fix to ensure PStringArray is empty
- *
- * Revision 1.47  2010/01/19 23:16:30  willamowius
- * use timestamp from dtmf decoder
- *
- * Revision 1.46  2009/12/29 00:08:42  shorne
- * fix for Tandberg T1000 to handle Master/Slave conflict and a small bug fix to ensure video merge correctly
- *
- * Revision 1.45  2009/12/10 03:11:30  shorne
- * Correctly handle H.460.24 Annex B response
- *
- * Revision 1.44  2009/12/08 13:05:32  shorne
- * Fix to ensure H.460.19 generic Parameter does not get sent if the NAT Method fails to create socket.
- *
- * Revision 1.43  2009/12/08 08:25:47  willamowius
- * gcc fixes for presence
- *
- * Revision 1.42  2009/12/08 03:55:28  shorne
- * First cut support for H.460.24 Annex B
- *
- * Revision 1.41  2009/11/29 23:31:13  shorne
- * BUG FIX : completely disable H.460 support if remote does not support it.
- *
- * Revision 1.40  2009/11/17 10:40:56  shorne
- * Fix for OnReceiveGeneric Message so H.460.24A gets enabled
- *
- * Revision 1.39  2009/10/21 10:02:52  shorne
- * Fix to ensure H.460.19 keepalive payload is sent
- *
- * Revision 1.38  2009/09/29 07:28:44  shorne
- * Small fix to H.460.19
- *
- * Revision 1.37  2009/09/20 00:38:10  shorne
- * Fixed bug with H.460.19 when transitioning from fast connect to slow
- *
- * Revision 1.36  2009/08/29 13:18:16  shorne
- * Fix compile warnings on Linux
- *
- * Revision 1.35  2009/08/21 07:01:06  shorne
- * Added H.460.9 Support
- *
- * Revision 1.34  2009/07/25 10:35:51  shorne
- * First cut of H.460.23/.24 support
- *
- * Revision 1.33  2009/07/09 15:11:12  shorne
- * Simplfied and standardised compiler directives
- *
- * Revision 1.32  2009/07/03 04:15:01  shorne
- * more H.460.18/19 support
- *
- * Revision 1.31  2009/06/28 10:10:13  shorne
- * Fix compile warnings on Linux
- *
- * Revision 1.30  2009/06/28 04:47:53  shorne
- * Fixes for H.460.19 NAT Method loading
- *
- * Revision 1.29  2009/06/28 01:41:52  shorne
- * Replaced P_HAS_QOS with P_QOS (depreciated in PTLib)
- *
- * Revision 1.28  2009/06/28 00:25:23  shorne
- * H.460.18 disabled by default (removed compile warning)
- *
- * Revision 1.27  2009/06/28 00:11:03  shorne
- * Added H.460.18/19 Support
- *
- * Revision 1.26  2009/02/21 14:11:40  shorne
- * Added OnCapabilitySet Callback,FileTransfer handlers,basic support for H.450 message warning
- *
- * Revision 1.25  2008/11/08 16:18:42  willamowius
- * fixes to compile with video disabled
- *
- * Revision 1.24  2008/09/27 06:22:53  shorne
- * BUG FIX: H323SignalPDU::Write to correctly handle NULL H323Connection Thx Nir Soffer, Remove buggy code in handling Fast Connect in Call Proceeding, Added checks for Fast Connect negotiation before processing Slow Connect messages
- *
- * Revision 1.23  2008/06/22 02:28:53  shorne
- * Fixes for bad equipment that send both H.245 Address and FastStart in Setup
- *
- * Revision 1.22  2008/05/27 15:37:56  shorne
- * Fixes for early media and addition of AnswerCallNowWithAlert
- *
- * Revision 1.21  2008/05/23 11:21:53  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.20  2008/04/25 01:19:52  shorne
- * Added callback to set maximum video bandwidth
- *
- * Revision 1.19  2008/03/31 11:23:06  shorne
- * Fix for Fast Connect and Early Media
- *
- * Revision 1.18  2008/02/14 07:02:10  shorne
- * Fixed small bug with what capability gets merged.
- *
- * Revision 1.17  2008/02/13 09:26:48  shorne
- * Fix Bug for Fast Start from last commit
- *
- * Revision 1.16  2008/02/10 23:11:33  shorne
- * Fix to compile H323plus without Video
- *
- * Revision 1.15  2008/02/06 02:52:59  shorne
- * Added support for Standards based NAT Traversal
- *
- * Revision 1.14  2008/01/30 18:51:36  shorne
- * fix for duplicate h224handler definition
- *
- * Revision 1.13  2008/01/22 01:10:33  shorne
- * Fix H.224 opening unidirectional channel
- *
- * Revision 1.12  2008/01/04 06:23:09  shorne
- * Cleaner setup and teardown of h460 module
- *
- * Revision 1.11  2008/01/01 00:16:12  shorne
- * Added GnuGknat and FileTransfer support
- *
- * Revision 1.10  2007/11/29 14:19:42  willamowius
- * use seionID to test session type when doig capability merge
- *
- * Revision 1.9  2007/11/28 15:30:38  willamowius
- * fix capability type detection for merging
- *
- * Revision 1.8  2007/11/28 06:03:37  shorne
- * Video capability merge. Thx again Jan Willamowius
- *
- * Revision 1.7  2007/11/17 00:14:47  shorne
- * Fix to make disabling function calls consistent
- *
- * Revision 1.6  2007/11/16 22:09:43  shorne
- * Added ability to disable H.245 QoS for NetMeeting Interop
- *
- * Revision 1.5  2007/11/01 20:17:33  shorne
- * updates for H.239 support
- *
- * Revision 1.4  2007/10/19 19:54:17  shorne
- * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
- *  Robert
- *
- * Revision 1.3  2007/10/16 17:01:33  shorne
- * Various little fixes
- *
- * Revision 1.2  2007/08/20 19:13:28  shorne
- * Added Generic Capability support. Fixed Linux compile errors
- *
- * Revision 1.1  2007/08/06 20:51:06  shorne
- * First commit of h323plus
- *
- *
- * Revision 1.385.2.14  2007/09/22 04:34:55  rjongbloed
- * Fixed in-band tone decoder, incorrect number of samples used.
- *
- * Revision 1.385.2.13  2007/08/20 09:47:13  shorne
- * Added OnEPAuthenticationFail callback
- *
- * Revision 1.385.2.12  2007/07/23 21:47:11  shorne
- * Added QoS GK Reporting
- *
- * Revision 1.385.2.11  2007/07/20 22:03:27  shorne
- * Initial H.350 Support
- *
- * Revision 1.385.2.10  2007/07/19 20:10:28  shorne
- * Changed HAS_AEC to H323_AEC
- *
- * Revision 1.385.2.9  2007/05/23 06:58:02  shorne
- * Nat Support for EP's nested behind same NAT
- *
- * Revision 1.385.2.8  2007/03/27 18:13:21  shorne
- * small bug fix from previous commit
- *
- * Revision 1.385.2.7  2007/03/24 23:39:43  shorne
- * More H.239 work
- *
- * Revision 1.385.2.6  2007/03/18 06:21:38  shorne
- * More tweaks with Multimedia OnHold
- *
- * Revision 1.385.2.5  2007/03/14 08:53:38  shorne
- * Added Video on Hold
- *
- * Revision 1.385.2.4  2007/03/06 00:18:38  shorne
- * Added Wideband AEC support
- *
- * Revision 1.385.2.3  2007/02/18 17:11:23  shorne
- * Added H.249 Extended UserInput Support
- *
- * Revision 1.385.2.2  2007/02/11 00:45:20  shorne
- * Added ability to disable NAT method on a call by call basis
- *
- * Revision 1.385.2.1  2006/12/23 19:08:02  shorne
- * Plugin video codecs & sundry
- *
- * Revision 1.385  2006/10/30 20:45:02  shorne
- * Fix for changes in pwlib
- *
- * Revision 1.384  2006/07/21 10:31:03  shorne
- * Add ability for H.460 connection feature to access ARQ message
- *
- * Revision 1.383  2006/06/27 12:35:03  csoutheren
- * Patch 1366328 - Support for H.450.3 divertingLegInformation2
- * Thanks to Norbert Bartalsky
- *
- * Revision 1.382  2006/06/27 04:16:23  shorne
- * Updated H460 directive
- *
- * Revision 1.381  2006/06/23 20:01:29  shorne
- * More H460 support
- *
- * Revision 1.380  2006/06/23 07:06:04  csoutheren
- * Fixed linux compile
- *
- * Revision 1.379  2006/06/23 06:02:44  csoutheren
- * Added missing declarations for H.224 backport
- *
- * Revision 1.378  2006/06/21 04:53:32  csoutheren
- * Tweaked H.245 version 13 updates
- *
- * Revision 1.377  2006/06/20 05:24:40  csoutheren
- * Additional tweaks for H.225v6
- *
- * Revision 1.376  2006/06/09 06:30:12  csoutheren
- * Remove compile warning and errors with gcc
- *
- * Revision 1.375  2006/05/30 11:14:56  hfriederich
- * Switch from DISABLE_H460 to H323_H460
- *
- * Revision 1.374  2006/05/17 03:36:52  shorne
- * DISABLE_H460 default under linux
- *
- * Revision 1.373  2006/05/16 11:21:53  shorne
- * Call Credit support / H460 FeatureSet added
- *
- * Revision 1.372  2006/04/11 03:40:55  csoutheren
- * Fix for seperate H.245 channels timing out
- *
- * Revision 1.371  2006/04/06 08:22:17  csoutheren
- * Added support for conference commands
- *
- * Revision 1.370  2006/03/21 10:44:48  csoutheren
- * Extra bulletproofing for aggregation
- *
- * Revision 1.369  2006/03/02 07:52:51  csoutheren
- * Ensure prompt close of channels when using aggregation
- * Ensure MonitorCallStatus called when using aggregation
- *
- * Revision 1.368  2006/02/24 04:52:17  csoutheren
- * Fixd problem with H.245 aggregation
- *
- * Revision 1.367  2006/01/27 07:53:38  csoutheren
- * Fixed for signalling aggregation
- *
- * Revision 1.366  2006/01/26 07:25:40  shorne
- * oops try that again! Fix typo  :)
- *
- * Revision 1.365  2006/01/26 04:20:02  shorne
- * Fix typo from last commit
- *
- * Revision 1.364  2006/01/26 03:48:14  shorne
- * more PBX support, Caller Authentication
- *
- * Revision 1.363  2006/01/24 08:15:24  csoutheren
- * Implement outgoing H.225 aggregation, and H.245 aggregation (disabled by default)
- * More testing to do, but this looks good :)
- *
- * Revision 1.362  2006/01/23 05:58:26  csoutheren
- * Working outgoing H.225 aggregation (disabled by default)
- *
- * Revision 1.361  2006/01/20 00:32:24  csoutheren
- * First check-in of signalling aggregation code - incomplete and disabled by default
- *
- * Revision 1.360  2006/01/18 07:46:08  csoutheren
- * Initial version of RTP aggregation (disabled by default)
- *
- * Revision 1.359  2005/11/25 02:25:27  csoutheren
- * Applied patch #1351556 from Louis R. Marascio
- * Fix for endSession not being sent properly by remote EP
- *
- * Revision 1.358  2005/09/23 05:46:41  csoutheren
- * Fixed bug #1296199, where call limits were not enforced for incoming calls
- *
- * Revision 1.357  2005/09/16 08:14:34  csoutheren
- * Added override to control cleanup of OSP connections
- * Added new function to allow control of deferred fastStart connections
- *
- * Revision 1.356  2005/08/27 02:14:21  csoutheren
- * Capture time that reverse fast start acknowledge is received
- * Capture time that connect is sent/received
- *
- * Revision 1.355  2005/07/15 13:13:56  csoutheren
- * Fixed compile problem with gcc 2.95.3 compiler
- * Thanks to Roger Hardiman
- *
- * Revision 1.354  2005/03/08 03:45:00  csoutheren
- * Fixed debug problem in fastStart mode
- *
- * Revision 1.353  2005/03/04 03:21:20  csoutheren
- * Added local and remote addresses to all PDU logs to assist in debugging
- *
- * Revision 1.352  2005/01/03 14:03:21  csoutheren
- * Added new configure options and ability to disable/enable modules
- *
- * Revision 1.351  2005/01/03 06:25:55  csoutheren
- * Added extensive support for disabling code modules at compile time
- *
- * Revision 1.350  2004/12/21 23:33:47  csoutheren
- * Fixed #defines for H.460, thanks to Simon Horne
- *
- * Revision 1.349  2004/12/16 00:34:35  csoutheren
- * Fixed reporting of call end time and code
- * Added GetNextDestination
- *
- * Revision 1.348  2004/12/14 06:22:21  csoutheren
- * More OSP implementation
- *
- * Revision 1.347  2004/12/09 23:38:40  csoutheren
- * More OSP implementation
- *
- * Revision 1.346  2004/12/08 01:59:23  csoutheren
- * initial support for Transnexus OSP toolkit
- *
- * Revision 1.345  2004/11/22 11:31:02  rjongbloed
- * Added ability to restart H.245 negotiations, thanks Norbert Bartalsky
- *
- * Revision 1.344  2004/09/07 22:50:56  rjongbloed
- * Changed usage of template function as MSVC6 will not compile it.
- *
- * Revision 1.343  2004/09/03 01:06:10  csoutheren
- * Added initial hooks for H.460 GEF
- * Thanks to Simon Horne and ISVO (Asia) Pte Ltd. for this contribution
- *
- * Revision 1.342  2004/08/14 07:44:20  rjongbloed
- * Fixed compatibility with early start on Cisco CCM systems, thanks Portela Fernando
- *
- * Revision 1.341  2004/08/01 11:35:49  rjongbloed
- * Fixed possible issue with merging real TCS and the "fake" TCS we build from
- *   the fast start parameters. Should not merge but overwrite.
- *
- * Revision 1.340  2004/08/01 10:53:45  rjongbloed
- * Allowed greater flexibility with checking capability types in setting Q931 bearer caps
- *   on call setup, thanks Simon Horne
- *
- * Revision 1.339  2004/07/30 05:28:16  csoutheren
- * Fixed problem when inteoperating with some endpoints behind a firewall
- * Thanks to Derek Smithies for patiently hitting the author over the head until this problem was fixed
- *
- * Revision 1.338  2004/07/20 09:32:33  csoutheren
- * Ensured that TCS and MSD timers are stopped when a call is shut down
- * Thanks to Joegen Baclor
- *
- * Revision 1.337  2004/07/03 06:51:37  rjongbloed
- * Added PTRACE_PARAM() macro to fix warnings on parameters used in PTRACE
- *  macros only.
- *
- * Revision 1.336  2004/06/15 03:30:00  csoutheren
- * Added OnSendARQ to allow access to the ARQ message before sent by connection
- *
- * Revision 1.335  2004/06/09 23:48:41  csoutheren
- * Improved resolution of remote party name
- *
- * Revision 1.334  2004/06/09 23:31:08  csoutheren
- * Ensure correct call failure code is returned when call ends due to facility deflect
- *
- * Revision 1.333  2004/06/09 23:28:34  csoutheren
- * Ensured that Alerting that is not associated with media startup does
- * not prematurely send back a refusal of fastConnect
- *
- * Revision 1.332  2004/05/17 12:14:24  csoutheren
- * Added support for different SETUP PDU types
- *
- * Revision 1.331  2004/04/24 23:58:05  rjongbloed
- * Fixed GCC 3.4 warning about PAssertNULL
- *
- * Revision 1.330  2004/04/20 07:53:13  csoutheren
- * Fixed problems with NAT detection
- *
- * history trimmed CRS 23 Jan 2005
+ * $Id$
+
  */
 
 #include <ptlib.h>
@@ -1107,6 +642,7 @@ H323Connection::~H323Connection()
   delete features;
 #ifdef H323_H4609
   delete m_h4609Stats;
+  m_h4609Stats = NULL;
 #endif
 #endif
 #ifdef P_STUN
@@ -2883,7 +2419,8 @@ H323Connection::CallEndReason H323Connection::SendSignalSetup(const PString & al
 #endif
 
 #ifdef H323_H460
-  setupPDU.InsertH460Setup(*this,setup);
+   if (!disableH460)
+     setupPDU.InsertH460Setup(*this,setup);
 #endif
 
   // Put in all the signalling addresses for link
@@ -5869,7 +5406,7 @@ bool DecodeH46024BRequest(unsigned id, const H245_ArrayOf_GenericParameter & par
 		  }
 	  }
    }
-	PTRACE(4,"H46024A\tError finding H46024BRequest " << id);
+	PTRACE(4,"H46024B\tError finding H46024BRequest " << id);
 	return false;
 }
 
@@ -6279,7 +5816,8 @@ void H323Connection::H4609QueueStats(const RTP_Session & session) const
 	if (session.GetPacketsReceived() > 0 && session.GetAverageReceiveTime() > 0)
       stat->bandwidth  = (unsigned)((session.GetOctetsReceived()/session.GetPacketsReceived()/session.GetAverageReceiveTime())*1000);
 
-    m_h4609Stats->Enqueue(stat);
+    if (m_h4609Stats)
+        m_h4609Stats->Enqueue(stat);
 }
 
 	
@@ -6805,9 +6343,9 @@ const PString & H323Connection::SessionInformation::GetCUI()
 #endif
 
 #ifdef H323_H460
-void H323Connection::DisableFeatures()
+void H323Connection::DisableFeatures(PBoolean disable)
 {
-	 disableH460 = true;
+	 disableH460 = disable;
 }
 
 #ifdef H323_H46018
@@ -7062,7 +6600,7 @@ PBoolean H323Connection::OnSendServiceControlSessions(
 						(serviceControlSessions.GetSize() == 0))
 		return FALSE;
 
-	PDictionary<POrdinalKey, H323ServiceControlSession> SCS = serviceControlSessions;
+	H323Dictionary<POrdinalKey, H323ServiceControlSession> SCS = serviceControlSessions;
    
     if (!amount) {
         H323CallCreditServiceControl * csc = 

@@ -33,37 +33,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.10  2009/07/09 15:08:15  shorne
- * Added ability to enable/disable on  a call by call basis
- *
- * Revision 1.9  2008/05/23 11:21:21  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.8  2008/02/01 09:34:20  shorne
- * Cleaner shutdown of GnuGk NAT support
- *
- * Revision 1.7  2008/02/01 07:50:17  shorne
- * added shutdown mutex to fix occasion shutdown timing errors.
- *
- * Revision 1.6  2008/01/30 02:53:42  shorne
- * code format tidy up
- *
- * Revision 1.5  2008/01/18 01:36:43  shorne
- * Fix blocking and timeout on call ending
- *
- * Revision 1.4  2008/01/15 02:25:34  shorne
- * readbuffer not being emptied after each read.
- *
- * Revision 1.3  2008/01/02 20:43:05  shorne
- * Fix compile warning on Linux
- *
- * Revision 1.2  2008/01/02 20:10:28  willamowius
- * fix initialization order for gcc
- *
- * Revision 1.1  2008/01/01 00:16:12  shorne
- * Added GnuGknat and FileTransfer support
- *
+ * $Id$
  *
  *
  */
@@ -164,7 +134,7 @@ void GNUGKTransportThread::Main()
 	(!isConnected) &&			// Does not have a call connection 
 	(ret) &&	                        // is not a Failed connection
 	(!transport->CloseTransport())) {	// not close due to shutdown
-	  ret = transport->HandleGNUGKSignallingChannelPDU();
+	  ret = transport->HandleGNUGKSignallingChannelPDU(this);
 
 	  if (!ret && transport->CloseTransport()) {  // Closing down Instruction
             PTRACE(3, "GNUGK\tShutting down GnuGk Thread");
@@ -242,7 +212,7 @@ PBoolean GNUGKTransport::HandleGNUGKSignallingSocket(H323SignalPDU & pdu)
   }
 }
 
-PBoolean GNUGKTransport::HandleGNUGKSignallingChannelPDU()
+PBoolean GNUGKTransport::HandleGNUGKSignallingChannelPDU(PThread * thread)
 {
 
   H323SignalPDU pdu;
@@ -282,7 +252,6 @@ PBoolean GNUGKTransport::HandleGNUGKSignallingChannelPDU()
 
 		connection->AttachSignalChannel(token, this, TRUE);
  
-		 PThread * thread = PThread::Current();
 		 AttachThread(thread);
 		 thread->SetNoAutoDelete();
 
@@ -610,9 +579,8 @@ GNUGKUDPSocket::~GNUGKUDPSocket()
 
 void GNUGKUDPSocket::SetSendAddress(const Address & address,WORD port)
 {
+     PUDPSocket::SetSendAddress(address,port);
 
-  sendAddress = address;
-  sendPort    = port;
 /*
 	    PString ping = "ping";
 		PBYTEArray bytes(ping,ping.GetLength(), false); 

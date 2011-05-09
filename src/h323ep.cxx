@@ -50,7 +50,14 @@
 #include "h460/h460.h"
 #include "h225.h"
 
-// Std18 must be first for interop
+#ifdef H323_H4609
+#include "h460/h460_std9.h"
+#endif
+
+#ifdef H323_H46017
+#include "h460/h460_std17.h"
+#endif
+
 #ifdef H323_H46018 
 #include "h460/h460_std18.h"
 #include "h460/h46018_h225.h"
@@ -58,10 +65,6 @@
 
 #ifdef H323_H46023
 #include "h460/h460_std23.h"
-#endif
-
-#ifdef H323_H4609
-#include "h460/h460_std9.h"
 #endif
 
 #ifdef H323_H460P
@@ -3176,12 +3179,12 @@ PBoolean H323EndPoint::H46018IsEnabled()
 #endif  // H323_H46018
 
 #ifdef H323_H460P
-void H323EndPoint::PresenceSetLocalState(const PStringList & alias, unsigned localstate, const PString & localdisplay)
+void H323EndPoint::PresenceSetLocalState(const PStringList & alias, unsigned localstate, const PString & localdisplay, PBoolean updateOnly)
 {
-	if (presenceHandler == NULL)
+    if (presenceHandler == NULL)
 		presenceHandler = new H460PresenceHandler(*this);
 
-	presenceHandler->SetPresenceState(alias,localstate, localdisplay);
+	presenceHandler->SetPresenceState(alias,localstate, localdisplay, updateOnly);
 }
 
 void H323EndPoint::PresenceAddFeature(presenceFeature feat)
@@ -3237,12 +3240,12 @@ void H323EndPoint::PresenceSetLocale(const presenceLocale & info)
 	loc.m_elevation = info.m_elevation;
 }
 
-void H323EndPoint::PresenceSetInstruction(const PString & epalias, unsigned type, const PStringList & list)
+void H323EndPoint::PresenceSetInstruction(const PString & epalias, unsigned type, const PStringList & list, PBoolean autoSend)
 {
 	if (presenceHandler == NULL)
 		return;
 
-	presenceHandler->AddInstruction(epalias,(H323PresenceHandler::InstType)type,list);
+	presenceHandler->AddInstruction(epalias,(H323PresenceHandler::InstType)type,list,autoSend);
 }
 
 void H323EndPoint::PresenceSendAuthorization(const OpalGloballyUniqueID & id, const PString & epalias,PBoolean approved, const PStringList & list)

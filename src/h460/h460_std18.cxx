@@ -33,28 +33,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.7  2009/10/21 10:09:01  shorne
- * Updates for H.460.18/.19/.23/.24
- *
- * Revision 1.6  2009/09/29 07:23:03  shorne
- * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
- *
- * Revision 1.5  2009/07/25 10:35:51  shorne
- * First cut of H.460.23/.24 support
- *
- * Revision 1.4  2009/07/09 15:07:34  shorne
- * More H.460.19 fixes
- *
- * Revision 1.3  2009/06/28 17:09:50  willamowius
- * on Linux the factory loaders must be in the application
- *
- * Revision 1.2  2009/06/28 09:36:59  willamowius
- * make sure license infor is also seen on Unix
- *
- * Revision 1.1  2009/06/28 00:11:03  shorne
- * Added H.460.18/19 Support
- *
+ * $Id $
  *
  *
  */
@@ -122,7 +101,7 @@ PBoolean H460_FeatureStd18::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu
     const PNatList & list = natMethods.GetNATList();
     if (list.GetSize() > 0) {
       for (PINDEX i=0; i < list.GetSize(); i++) {  
-        if (list[i].GetName() == "STUN" && list[i].IsAvailable()) {
+          if (list[i].GetName() == "STUN" && list[i].IsAvailable(PIPSocket::GetDefaultIpAny())) {
              return false;
         }
       }

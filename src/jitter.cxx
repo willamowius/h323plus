@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2009/07/25 10:35:51  shorne
+ * First cut of H.460.23/.24 support
+ *
  * Revision 1.2  2008/05/23 11:22:17  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -362,7 +365,8 @@ RTP_JitterBuffer::~RTP_JitterBuffer()
 #endif
   {
     PTRACE(3, "RTP\tRemoving jitter buffer " << this << ' ' << jitterThread->GetThreadName());
-    PAssert(jitterThread->WaitForTermination(10000), "Jitter buffer thread did not terminate");
+   // PAssert(jitterThread->WaitForTermination(10000), "Jitter buffer thread did not terminate");
+	jitterThread->WaitForTermination(5000);
     delete jitterThread;
     jitterThread = NULL;
   }

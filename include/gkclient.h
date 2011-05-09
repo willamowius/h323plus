@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.13  2011/02/22 05:04:57  shorne
+ * Enable selectively removing capabilities based on the features PDU's advertising feature. H.460.9 now advertises in ARQ when receiving call.
+ *
  * Revision 1.12  2011/02/20 06:55:46  shorne
  * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
  *
@@ -625,7 +628,7 @@ class H323Gatekeeper : public H225_RAS
     PSyncPoint monitorTickle;
 
 #ifdef H323_H248
-    PDictionary<POrdinalKey, H323ServiceControlSession> serviceControlSessions;
+    H323Dictionary<POrdinalKey, H323ServiceControlSession> serviceControlSessions;
 #endif
 
 #ifdef H323_H460
