@@ -2955,6 +2955,8 @@ void H323EndPoint::SetSTUNServer(const PString & server)
 #if PTLIB_VER >= 2110
     stun = new PSTUNClient();
     stun->SetServer(server);
+    stun->SetPortRanges(GetUDPPortBase(), GetUDPPortMax(),
+                           GetRtpIpPortBase(), GetRtpIpPortMax());
 #else
     stun = new PSTUNClient(server,
                            GetUDPPortBase(), GetUDPPortMax(),
