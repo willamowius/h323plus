@@ -34,34 +34,13 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.8  2011/01/14 11:57:26  willamowius
- * fix H.350 compile on Linux
- *
- * Revision 1.7  2008/06/26 13:00:50  shorne
- * Fixed change from PList to PArray in PTlib
- *
- * Revision 1.6  2008/05/23 11:22:47  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.5  2008/01/05 11:36:02  shorne
- * More Fixes for Linux
- *
- * Revision 1.4  2008/01/05 07:09:53  shorne
- * added reference to buildopts to ensure if enabled everything gets compiled
- *
- * Revision 1.3  2008/01/02 16:19:25  willamowius
- * add newline at end-of-file
- *
- * Revision 1.2  2008/01/01 00:16:14  shorne
- * Fix compile warning on VS2005
- *
- * Revision 1.1  2007/08/06 20:51:38  shorne
- * First commit of h323plus
- *
- *
+ * $Id $
  *
  */
+
+#ifndef _WIN32	 
+ #define P_FORCE_STATIC_PLUGIN   1	 
+#endif
 
 #include <ptlib.h>
 #include "openh323buildopts.h"
