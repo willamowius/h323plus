@@ -26,138 +26,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.3  2009/07/25 10:35:51  shorne
- * First cut of H.460.23/.24 support
- *
- * Revision 1.2  2008/05/23 11:22:17  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.1  2007/08/06 20:51:07  shorne
- * First commit of h323plus
- *
- * Revision 1.38  2006/01/18 07:46:08  csoutheren
- * Initial version of RTP aggregation (disabled by default)
- *
- * Revision 1.37  2005/08/27 06:39:56  csoutheren
- * Extended scope of mutex to avoid race conditions
- * Thanks to Anton Antonov
- *
- * Revision 1.36  2004/04/16 04:00:14  csoutheren
- * Prevent lots of "all packets have marker bits set" message from cluttering the logs
- *
- * Revision 1.35  2003/11/08 02:03:46  rjongbloed
- * Removed warning on no logging build.
- *
- * Revision 1.34  2003/10/28 22:38:31  dereksmithies
- * Rework of jitter buffer. Many thanks to Henry Harrison of Alice Street.
- *
- * Revision 1.33ACC1.0 6th October 2003 henryh
- * Complete change to adaptive algorithm
- *
- * Revision 1.33  2002/11/26 03:00:06  robertj
- * Added logging to help find logical channel thread stop failures.
- *
- * Revision 1.32  2002/11/05 04:06:48  robertj
- * Better tracing
- *
- * Revision 1.31  2002/10/31 00:46:30  robertj
- * Enhanced jitter buffer system so operates dynamically between minimum and
- *   maximum values. Altered API to assure app writers note the change!
- *
- * Revision 1.30  2002/10/30 05:56:12  craigs
- * Added more bulletproofing thanks to Alex Kovatch
- *
- * Revision 1.29  2002/09/03 07:31:35  robertj
- * Added buffer reset on excess buffer overruns.
- *
- * Revision 1.28  2002/08/05 10:03:47  robertj
- * Cosmetic changes to normalise the usage of pragma interface/implementation.
- *
- * Revision 1.27  2002/01/17 07:01:28  robertj
- * Fixed jitter buffer failing to deliver a talk burst shorted than the size of
- *    the buffer, this is particularly noticable with RFC2833.
- *
- * Revision 1.26  2001/09/11 00:21:23  robertj
- * Fixed missing stack sizes in endpoint for cleaner thread and jitter thread.
- *
- * Revision 1.25  2001/09/10 08:18:11  robertj
- * Added define to remove jitter buffer analyser, thanks Nick Hoath.
- *
- * Revision 1.24  2001/07/05 05:55:17  robertj
- * Added thread name.
- *
- * Revision 1.23  2001/04/04 03:13:31  robertj
- * Added PTRACE for when have packets too late.
- *
- * Revision 1.22  2001/02/09 05:13:56  craigs
- * Added pragma implementation to (hopefully) reduce the executable image size
- * under Linux
- *
- * Revision 1.21  2000/12/17 22:45:36  robertj
- * Set media stream threads to highest unprivileged priority.
- *
- * Revision 1.20  2000/09/14 23:03:45  robertj
- * Increased timeout on asserting because of driver lockup
- *
- * Revision 1.19  2000/09/05 22:21:02  robertj
- * Fixed bug in jitter buffer list changes if get out of order packet within jitter time.
- *
- * Revision 1.18  2000/08/25 01:10:28  robertj
- * Added assert if various thrads ever fail to terminate.
- *
- * Revision 1.17  2000/05/30 06:53:04  robertj
- * Fixed bug where jitter buffer needs to be restarted, eg Cisco double use of session.
- *
- * Revision 1.16  2000/05/25 02:26:12  robertj
- * Added ignore of marker bits on broken clients that sets it on every RTP packet.
- *
- * Revision 1.15  2000/05/25 00:35:37  robertj
- * Fixed rare crashing bug in jitter buffer caused by our of order packet.
- *
- * Revision 1.14  2000/05/16 07:37:41  robertj
- * Initialised preBuffering flag just in case sender does not set RTP marker bit.
- *
- * Revision 1.13  2000/05/08 14:05:58  robertj
- * Increased log level of big jitter debug output to level 5.
- *
- * Revision 1.12  2000/05/05 02:54:15  robertj
- * Fixed memory leak just introduced in jitter buffer.
- *
- * Revision 1.11  2000/05/04 11:52:35  robertj
- * Added Packets Too Late statistics, requiring major rearrangement of jitter
- *    buffer code, not also changes semantics of codec Write() function slightly.
- *
- * Revision 1.10  2000/05/02 04:32:27  robertj
- * Fixed copyright notice comment.
- *
- * Revision 1.9  2000/05/01 09:11:04  robertj
- * Fixed removal of analysis code on No Trace version.
- *
- * Revision 1.8  2000/05/01 06:04:33  robertj
- * More jitter buffer debugging.
- *
- * Revision 1.7  2000/04/10 18:55:46  robertj
- * Changed RTP data receive tp be more forgiving, will process packet even if payload type is wrong.
- *
- * Revision 1.6  2000/03/31 20:10:43  robertj
- * Fixed problem with insufficient jitter buffer frames being allocated.
- * Fixed "center in frame" change in previous version.
- *
- * Revision 1.5  2000/03/23 03:08:52  robertj
- * Changed jitter buffer so asumes output double buffering and centers output in time frames.
- *
- * Revision 1.4  2000/03/21 03:06:50  robertj
- * Changes to make RTP TX of exact numbers of frames in some codecs.
- *
- * Revision 1.3  2000/03/20 20:51:47  robertj
- * Fixed possible buffer overrun problem in RTP_DataFrames
- *
- * Revision 1.2  1999/12/29 01:18:07  craigs
- * Fixed problem with codecs other than G.711 not working after reorganisation
- *
- * Revision 1.1  1999/12/23 23:02:36  robertj
- * File reorganision for separating RTP from H.323 and creation of LID for VPB support.
+ * $Id $
  *
  */
 
@@ -365,8 +234,7 @@ RTP_JitterBuffer::~RTP_JitterBuffer()
 #endif
   {
     PTRACE(3, "RTP\tRemoving jitter buffer " << this << ' ' << jitterThread->GetThreadName());
-   // PAssert(jitterThread->WaitForTermination(10000), "Jitter buffer thread did not terminate");
-	jitterThread->WaitForTermination(5000);
+    PAssert(jitterThread->WaitForTermination(10000), "Jitter buffer thread did not terminate");
     delete jitterThread;
     jitterThread = NULL;
   }
