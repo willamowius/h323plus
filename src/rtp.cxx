@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.24  2011/04/13 09:16:20  willamowius
+ * cast away const from pointer for new PTLib
+ *
  * Revision 1.23  2011/04/13 08:36:36  willamowius
  * fix the fix for new PTLib
  *
@@ -1780,10 +1783,11 @@ PQoS & RTP_UDP::GetQOS()
 PBoolean RTP_UDP::Open(PIPSocket::Address _localAddress,
                    WORD portBase, WORD portMax,
                    BYTE tos,
-				   const H323Connection & connection,
 #ifdef P_STUN
+                   const H323Connection & connection,
                    PNatMethod * meth,
 #else
+                   const H323Connection &,
                    void *,
 #endif
                    RTP_QOS * rtpQos)
