@@ -994,6 +994,7 @@ bool OpalMediaFormat::SetRegisteredMediaFormat(const OpalMediaFormat & mediaForm
 #if PTRACING
 void OpalMediaFormat::DebugOptionList(const OpalMediaFormat & fmt)
 {
+#if PTLIB_VER < 2110
   PStringStream traceStream;
   traceStream << "         " << fmt.GetOptionCount() << " options found:\n";
   for (PINDEX i = 0; i < fmt.GetOptionCount(); i++) {
@@ -1001,6 +1002,7 @@ void OpalMediaFormat::DebugOptionList(const OpalMediaFormat & fmt)
     traceStream << "         " << option.GetName() << " = " << option.AsString() << '\n';
   }
   PTRACE(6,traceStream);
+#endif
 }
 #endif
 
