@@ -31,7 +31,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Id $
+ * $Id$
  *
  */
 #include <ptlib.h>
@@ -128,7 +128,7 @@ PSTUNClient::NatTypes PNatMethod_H46024::NATTest()
 	singlePortInfo.currentPort = testport;
 	testtype = GetNatType(true);
 
-    PTRACE(4,"Std23\tSTUN Test Port " << singlePortInfo.currentPort << " result: " << testtype);
+    //PTRACE(4,"Std23\tSTUN Test Port " << singlePortInfo.currentPort << " result: " << testtype);  -BUG in PTLIB v2.11  SH
 
 	return testtype;
 }
