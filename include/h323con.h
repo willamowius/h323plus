@@ -3038,6 +3038,7 @@ class H323Connection : public PObject
     PBoolean transmitterSidePaused;
     PBoolean earlyStart;
     PBoolean doH245QoS;
+    PBoolean enableMERAHack;
 
 #ifdef H323_T120
     PBoolean startT120;

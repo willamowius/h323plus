@@ -483,6 +483,7 @@ H323Connection::H323Connection(H323EndPoint & ep,
 
   mustSendDRQ = FALSE;
   earlyStart = FALSE;
+  enableMERAHack = FALSE;
 
 #ifdef H323_T120
   startT120 = TRUE;
@@ -1593,12 +1594,12 @@ PBoolean H323Connection::OnReceivedCallProceeding(const H323SignalPDU & pdu)
 #endif
 
   // Check for fastStart data and start fast
-/*  Commented out as MIRA gatekeepers send fast start in call proceeding then
+/*  MERA gatekeepers send fast start in call proceeding then
     decide to send a different one in either Alert,Progress or Connect and has assumed
 	you have ignored the one in the CallProceeding.. Very Frustrating - S.H.
- if (call.HasOptionalField(H225_CallProceeding_UUIE::e_fastStart))
-    HandleFastStartAcknowledge(call.m_fastStart);
 */
+ if (!enableMERAHack && call.HasOptionalField(H225_CallProceeding_UUIE::e_fastStart))
+    HandleFastStartAcknowledge(call.m_fastStart);
   if (fastStartState == FastStartAcknowledged) {
         lastPDUWasH245inSETUP = FALSE;
         masterSlaveDeterminationProcedure->Stop();

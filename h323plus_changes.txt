@@ -1,4 +1,5 @@
 H323plus 1.22 - 1.23
+Use fastStart element in CallProceeding again, set enableMERAHack in H323Connection to disable
 Added Receive side RouteCallToGatekeeper
 Fixed H.460.9 support and fine tune where H.460 messages go in PDU
 Fixed H.239 support so the correct capability is selected in OLC
