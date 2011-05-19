@@ -1500,8 +1500,11 @@ H323TransportUDP::H323TransportUDP(H323EndPoint & ep,
 
   PTRACE(3, "H323UDP\tBinding to interface: " << binding << ':' << localPort);
 
+#if PTLIB_VER >= 2110
+  canGetInterface = binding.IsAny();
+#else
   canGetInterface = (binding.IsAny()) && udp->SetCaptureReceiveToAddress();
-
+#endif
 }
 
 
@@ -1579,8 +1582,16 @@ PBoolean H323TransportUDP::ReadPDU(PBYTEArray & pdu)
 
     PUDPSocket * socket = (PUDPSocket *)GetReadChannel();
 
+#if PTLIB_VER >= 2110
+    if (canGetInterface) {
+      WORD notused;
+      // TODO: verify that this actually does the same as the pre 2.11.x version
+      socket->GetLastReceiveAddress(lastReceivedInterface, notused);
+    }
+#else
     if (canGetInterface)
       lastReceivedInterface = socket->GetLastReceiveToAddress();
+#endif
 
     PIPSocket::Address address;
     WORD port;
