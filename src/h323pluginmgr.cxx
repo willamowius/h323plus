@@ -1122,6 +1122,7 @@ class H323PluginFramedAudioCodec : public H323FramedAudioCodec
     {
       if (codec == NULL || direction != Encoder)
         return FALSE;
+
       unsigned int fromLen = codec->parm.audio.samplesPerFrame*2;
       toLen                = codec->parm.audio.bytesPerFrame;
       unsigned flags = 0;
@@ -1610,10 +1611,17 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
 
     PVideoChannel *videoIn = (PVideoChannel *)rawDataChannel;
 
-#if 0 //PTLIB_VER >= 290
-    if (videoIn->InputEncoded()) {
-	   length= bufferRTP.GetHeaderSize() + bufferRTP.GetPayloadSize(); // pretend we encoded the data
-	   return TRUE;
+
+#if 0 //PTLIB_VER >= 2110
+    if (videoIn->SourceEncoded(lastPacketSent,length)) {
+        int maxDataSize = 1518-14-4-8-20-16; // Max Ethernet packet (1518 bytes) minus 802.3/CRC, 802.3, IP, UDP headers
+        dst.SetMinSize(maxDataSize);
+
+        if (rawDataChannel->Read(dst.GetPayloadPtr(), length)) {
+           dst.SetMarker(lastPacketSent);
+           return true;
+        } else
+           return false;
     }
 #endif
 
@@ -1651,11 +1659,10 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
                 frameHeader->height = videoIn->GetGrabHeight();
                 sendIntra = true;  // Send a FPU when setting flow control.
             }
-            flowRequest = 0;
         }
-#else
-        flowRequest = 0;
 #endif
+        flowRequest = 0;
+
 
         if (!SetFrameSize(frameHeader->width, frameHeader->height)) {
             PTRACE(1, "PLUGIN\tFailed to resize, close down video transmission thread");
@@ -1738,17 +1745,20 @@ PBoolean H323PluginVideoCodec::Write(const BYTE * /*buffer*/, unsigned length, c
     return FALSE;
   }
 
-#if PTLIB_VER >= 290
-  if (((PVideoChannel *)rawDataChannel)->DisableDecode()) {
-    written = length; // pretend we wrote the data, to avoid error message
-	return TRUE;
-  }
-#endif
-
   // Prepare AVSync Information
   rtpInformation.m_recvTime = PTime();
   rtpInformation.m_sendTime = CalculateRTPSendTime(src.GetTimestamp(),90000/GetFrameRate());
   rtpInformation.m_frame = &src;
+
+#if PTLIB_VER >= 290
+  if (((PVideoChannel *)rawDataChannel)->DisableDecode()) {
+      if (RenderFrame(src.GetPayloadPtr(), &rtpInformation)) {
+         written = length; // pretend we wrote the data, to avoid error message
+	     return TRUE;
+      } else
+         return FALSE;
+  }
+#endif
 
   // get the size of the output buffer
   int outputDataSize;
