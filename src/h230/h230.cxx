@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2008/05/23 11:22:45  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.5  2008/01/22 01:17:11  shorne
  * Fixes to the H.230 system
  *
@@ -570,7 +573,7 @@ PBoolean H230Control::OnHandleGenericPDU(const H245_GenericMessage & msg)
 	 if ((oid != h230OID) && 
 		 (oid != T124OID) && 
 		 (oid != PACKOID)) {
-	   PTRACE(5,"H230\tRecieved unknown Identifier " << oid);
+	   PTRACE(5,"H230\tReceived unknown Identifier " << oid);
 	   return FALSE;
 	}
 

@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2010/02/24 03:40:07  shorne
+ * Added ability to compile without t.38/t.120 support on windows
+ *
  * Revision 1.2  2008/05/23 11:22:13  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -256,7 +259,7 @@ PBoolean H323_T38Capability::OnSendingPDU(H245_DataProtocolCapability & proto,
 
 PBoolean H323_T38Capability::OnReceivedPDU(const H245_DataApplicationCapability & cap)
 {
-  PTRACE(3, "H323T38\tOnRecievedPDU for capability");
+  PTRACE(3, "H323T38\tOnReceivedPDU for capability");
 
   if (cap.m_application.GetTag() != H245_DataApplicationCapability_application::e_t38fax)
     return FALSE;

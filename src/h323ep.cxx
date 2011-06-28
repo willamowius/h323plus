@@ -1643,12 +1643,12 @@ PBoolean H323EndPoint::ParsePartyName(const PString & _remoteParty,
   // User explicitly asked to use a GK for lookup
   if (gatekeeperSpecified) {
     if (alias.IsEmpty()) {
-      PTRACE(1, "H323\tAttempt to use explict gatekeeper without alias!");
+      PTRACE(1, "H323\tAttempt to use explicit gatekeeper without alias!");
       return FALSE;
     }
 
     if (address.IsEmpty()) {
-      PTRACE(1, "H323\tAttempt to use explict gatekeeper without address!");
+      PTRACE(1, "H323\tAttempt to use explicit gatekeeper without address!");
       return FALSE;
     }
 
