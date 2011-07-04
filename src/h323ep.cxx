@@ -484,6 +484,9 @@ H323EndPoint::H323EndPoint()
   registrationTimeToLive = PTimeInterval(0, 30);  
   m_h46018enabled = true;
 #endif
+#ifdef H323_H46023
+  m_h46023enabled = true;
+#endif
 
 #ifdef H323_H460P
   presenceHandler = NULL;
@@ -3175,6 +3178,18 @@ void H323EndPoint::H46018Enable(PBoolean enable)
 PBoolean H323EndPoint::H46018IsEnabled() 
 { 
 	return m_h46018enabled; 
+}
+#endif  // H323_H46018
+
+#ifdef H323_H46023
+void H323EndPoint::H46023Enable(PBoolean enable) 
+{ 
+	m_h46023enabled = enable;
+}
+
+PBoolean H323EndPoint::H46023IsEnabled() 
+{ 
+	return m_h46023enabled; 
 }
 #endif  // H323_H46018
 

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.35  2011/05/09 07:14:03  shorne
+ * Remove redundent PTLIB Linking code
+ *
  * Revision 1.34  2011/02/20 06:55:46  shorne
  * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
  *
@@ -2310,6 +2313,16 @@ class H323EndPoint : public PObject
 
 #endif
 
+#ifdef H323_H46023
+	/** Disable H.460.23 Feature. (By Default it is enabled)
+	  */	
+	void H46023Enable(PBoolean enable);
+
+	/** Query whether we are using H.460.23
+	  */
+	PBoolean H46023IsEnabled();
+#endif
+
 #ifdef H323_H460P
 
 	/** Get the presence handler. By default it returns NULL
@@ -2911,6 +2924,10 @@ class H323EndPoint : public PObject
 
 #ifdef H323_H46018
 	PBoolean m_h46018enabled;
+#endif
+
+#ifdef H323_H46023
+	PBoolean m_h46023enabled;
 #endif
 
 #ifdef H323_H460P

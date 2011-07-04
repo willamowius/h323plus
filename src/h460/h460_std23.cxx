@@ -223,11 +223,14 @@ H460_FeatureStd23::~H460_FeatureStd23()
 
 void H460_FeatureStd23::AttachEndPoint(H323EndPoint * _ep)
 {
-    EP = _ep; 
+    EP = _ep;
+    isEnabled = EP->H46023IsEnabled();
 }
 
 PBoolean H460_FeatureStd23::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu) 
 { 
+    if (!isEnabled)
+        return false;
 	// Ignore if already manually using STUN
 	isavailable = (EP->GetSTUN() == NULL);	
 	if (!isavailable)
@@ -240,6 +243,8 @@ PBoolean H460_FeatureStd23::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu
 
 PBoolean H460_FeatureStd23::OnSendRegistrationRequest(H225_FeatureDescriptor & pdu) 
 { 
+    if (!isEnabled)
+        return false;
 
 	// Ignore if already manually using STUN
 	if (isavailable) 
