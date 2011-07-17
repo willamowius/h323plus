@@ -66,42 +66,40 @@ dnl look for ptlib, use a preference order of explicit PTLIBDIR, directory
 dnl at same level, home directory, /usr/local or /usr.
 
 if test "${PTLIBDIR:-unset}" != "unset" ; then 	 
-   AC_CHECK_FILE(${PTLIBDIR}/version.h, HAS_PTLIB=1) 	 
+  AC_CHECK_FILE(${PTLIBDIR}/version.h, HAS_PTLIB=1) 	 
 fi
 
 if test "${HAS_PTLIB:-unset}" = "unset" ; then
+  AC_CHECK_FILE(${OPENH323DIR}/../ptlib/version.h, HAS_PTLIB=1) 	 
   if test "${HAS_PTLIB:-unset}" != "unset" ; then
     PTLIBDIR="${OPENH323DIR}/../ptlib"
   else
+    AC_CHECK_FILE(${HOME}/ptlib/version.h, HAS_PTLIB=1) 	 
     if test "${HAS_PTLIB:-unset}" != "unset" ; then
       PTLIBDIR="${HOME}/ptlib"
     else
-      if test "${HAS_PTLIB:-unset}" != "unset" ; then
+      if test "${HAS_PTLIB:-unset}" = "unset" ; then
         AC_PATH_PROG(PTLIB_CONFIG, ptlib-config, , /usr/local/bin)
       else
-        if test "${HAS_PTLIB:-unset}" != "unset" ; then
+        if test "${PTLIB_CONFIG:-unset}" = "unset" ; then
           AC_PATH_PROG(PTLIB_CONFIG, ptlib-config, , /usr/share/ptlib/make/)
         else
-           if test "${HAS_PTLIB:-unset}" != "unset" ; then
-             AC_PATH_PROG(PTLIB_CONFIG, ptlib-config, , /usr/share/ptlib/make/)
-           fi
+          if test "${PTLIB_CONFIG:-unset}" = "unset" ; then
+            AC_PATH_PROG(PTLIB_CONFIG, ptlib-config, , /usr/share/ptlib/make/)
+          fi
         fi
       fi
     fi
   fi
 fi
+if test "${PTLIB_CONFIG:-unset}" != "unset" ; then
+  PTLIBDIR=`$PTLIB_CONFIG --prefix`
+  HAS_PTLIB=1
+fi
 
 if test "${HAS_PTLIB:-unset}" = "unset" ; then
   echo "Cannot find ptlib - please install or set PTLIBDIR and try again"
   exit
-fi
-
-if test "${PTLIBDIR:-unset}" = "unset" ; then
-  if test "${PTLIB_CONFIG:-unset}" = "unset" ; then
-    echo "Cannot find ptlib-config - please install and try again"
-    exit
-  fi
-  PTLIBDIR=`$PTLIB_CONFIG --prefix`
 fi
 
 if test "x$PTLIBDIR" = "x/usr" -o "x$PTLIBDIR" = "x/usr/"; then
@@ -113,7 +111,7 @@ fi
 
 echo "PTLib prefix set to.... $PTLIBDIR"
 
-if test "${PTLIBDIR:-unset}" = "unset" ; then
+if test "${PTLIB_CONFIG:-unset}" != "unset" ; then
   PTVERSION=`$PTLIB_CONFIG --version`
   PT_MAJOR_VERSION=`echo $PTVERSION | cut -d'.' -f1`
   PT_MINOR_VERSION=`echo $PTVERSION | cut -d'.' -f2`
