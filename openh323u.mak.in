@@ -22,6 +22,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.9  2011/04/08 08:30:07  willamowius
+# avoid warning about redefining PTRACING with PTLib 2.11.x
+#
 # Revision 1.8  2009/07/25 10:35:51  shorne
 # First cut of H.460.23/.24 support
 #
@@ -196,7 +199,9 @@
 #
 
 PTLIBDIR	= @PTLIBDIR@
+ifndef OPENH323DIR
 OPENH323DIR	= @OPENH323DIR@
+endif
 STDCCFLAGS	+= @STDCCFLAGS@
 LDFLAGS		+= @LDFLAGS@
 LDLIBS		+= @LDLIBS@
