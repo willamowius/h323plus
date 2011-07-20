@@ -3462,7 +3462,7 @@ _ACEOF
 
 
 if test "${PTLIBDIR:-unset}" != "unset" ; then
-   as_ac_File=`$as_echo "ac_cv_file_${PTLIBDIR}/version.h" | $as_tr_sh`
+  as_ac_File=`$as_echo "ac_cv_file_${PTLIBDIR}/version.h" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${PTLIBDIR}/version.h" >&5
 $as_echo_n "checking for ${PTLIBDIR}/version.h... " >&6; }
 if eval \${$as_ac_File+:} false; then :
@@ -3486,13 +3486,55 @@ fi
 fi
 
 if test "${HAS_PTLIB:-unset}" = "unset" ; then
+  as_ac_File=`$as_echo "ac_cv_file_${OPENH323DIR}/../ptlib/version.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${OPENH323DIR}/../ptlib/version.h" >&5
+$as_echo_n "checking for ${OPENH323DIR}/../ptlib/version.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${OPENH323DIR}/../ptlib/version.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  HAS_PTLIB=1
+fi
+
   if test "${HAS_PTLIB:-unset}" != "unset" ; then
     PTLIBDIR="${OPENH323DIR}/../ptlib"
   else
+    as_ac_File=`$as_echo "ac_cv_file_${HOME}/ptlib/version.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HOME}/ptlib/version.h" >&5
+$as_echo_n "checking for ${HOME}/ptlib/version.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HOME}/ptlib/version.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  HAS_PTLIB=1
+fi
+
     if test "${HAS_PTLIB:-unset}" != "unset" ; then
       PTLIBDIR="${HOME}/ptlib"
     else
-      if test "${HAS_PTLIB:-unset}" != "unset" ; then
+      if test "${HAS_PTLIB:-unset}" = "unset" ; then
         # Extract the first word of "ptlib-config", so it can be a program name with args.
 set dummy ptlib-config; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -3534,7 +3576,7 @@ fi
 
 
       else
-        if test "${HAS_PTLIB:-unset}" != "unset" ; then
+        if test "${PTLIB_CONFIG:-unset}" = "unset" ; then
           # Extract the first word of "ptlib-config", so it can be a program name with args.
 set dummy ptlib-config; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -3576,8 +3618,8 @@ fi
 
 
         else
-           if test "${HAS_PTLIB:-unset}" != "unset" ; then
-             # Extract the first word of "ptlib-config", so it can be a program name with args.
+          if test "${PTLIB_CONFIG:-unset}" = "unset" ; then
+            # Extract the first word of "ptlib-config", so it can be a program name with args.
 set dummy ptlib-config; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
@@ -3617,24 +3659,20 @@ $as_echo "no" >&6; }
 fi
 
 
-           fi
+          fi
         fi
       fi
     fi
   fi
 fi
+if test "${PTLIB_CONFIG:-unset}" != "unset" ; then
+  PTLIBDIR=`$PTLIB_CONFIG --prefix`
+  HAS_PTLIB=1
+fi
 
 if test "${HAS_PTLIB:-unset}" = "unset" ; then
   echo "Cannot find ptlib - please install or set PTLIBDIR and try again"
   exit
-fi
-
-if test "${PTLIBDIR:-unset}" = "unset" ; then
-  if test "${PTLIB_CONFIG:-unset}" = "unset" ; then
-    echo "Cannot find ptlib-config - please install and try again"
-    exit
-  fi
-  PTLIBDIR=`$PTLIB_CONFIG --prefix`
 fi
 
 if test "x$PTLIBDIR" = "x/usr" -o "x$PTLIBDIR" = "x/usr/"; then
@@ -3646,7 +3684,7 @@ fi
 
 echo "PTLib prefix set to.... $PTLIBDIR"
 
-if test "${PTLIBDIR:-unset}" = "unset" ; then
+if test "${PTLIB_CONFIG:-unset}" != "unset" ; then
   PTVERSION=`$PTLIB_CONFIG --version`
   PT_MAJOR_VERSION=`echo $PTVERSION | cut -d'.' -f1`
   PT_MINOR_VERSION=`echo $PTVERSION | cut -d'.' -f2`
