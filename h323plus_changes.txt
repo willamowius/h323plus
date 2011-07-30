@@ -1,9 +1,13 @@
 H323plus 1.22 - 1.23
+(Fixed) Deadlock in NAT Method when locking H323Connection
+(Fixed) Encoded audio/Video input and output support
+Added H.460.17 support
+(Fixed) PNatMethod changes in ptlib 2.11
+Added of H323Dictionary/H323List for depreciation warnings with ptlib 2.11
 Use fastStart element in CallProceeding again, set enableMERAHack in H323Connection to disable
-Added Receive side RouteCallToGatekeeper
-Fixed H.460.9 support and fine tune where H.460 messages go in PDU
-Fixed H.239 support so the correct capability is selected in OLC
-Fixed H.224 Stability by fixing initialisation and removing nested mutexes
+(Fixed) H.460.9 support and fine tune where H.460 messages go in PDU
+(Fixed) H.239 support so the correct capability is selected in OLC
+(Fixed) H.224 Stability by fixing initialisation and removing nested mutexes
 Improved H.264 decoder with better initialisation and support for send FPU's
 
 
