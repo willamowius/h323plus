@@ -122,7 +122,7 @@
 #endif
 
 #undef H323_H501
-#if (PTLIB_VER > 260) 
+#if (PTLIB_VER > 260) && (P_STUN)
 	#undef H323_GNUGK
 #endif
 #undef H323_FILE
