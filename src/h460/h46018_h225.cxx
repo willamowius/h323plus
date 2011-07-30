@@ -549,13 +549,11 @@ void PNatMethod_H46019::SetConnectionSockets(PUDPSocket * data, PUDPSocket * con
 	if (handler->GetEndPoint() == NULL)
 		return;
 
-	H323Connection * connection = handler->GetEndPoint()->FindConnectionWithLock(info->GetCallToken());
-	if (connection != NULL) {
-		connection->SetRTPNAT(info->GetSessionID(),data,control);
-		connection->H46019Enabled();  // make sure H.460.19 is enabled
-		connection->Unlock();
-	}
-	
+	H323Connection * connection = PRemoveConst(H323Connection, info->GetConnection());
+    if (connection != NULL) {
+        connection->SetRTPNAT(info->GetSessionID(),data,control);
+	    connection->H46019Enabled();  // make sure H.460.19 is enabled
+    }
 }
 
 bool PNatMethod_H46019::IsAvailable(const PIPSocket::Address & /*address*/) 
@@ -588,7 +586,7 @@ H46019UDPSocket::H46019UDPSocket(H46018Handler & _handler, H323Connection::Sessi
 	m_remAddr = PIPSocket::GetDefaultIpAny();
 	m_detAddr = PIPSocket::GetDefaultIpAny();
 	m_pendAddr= PIPSocket::GetDefaultIpAny();
-	SetProbeState(e_notRequired);
+	m_state = e_notRequired;
 	SSRC = PRandom::Number();
 
 	m_h46024b = false;
@@ -597,6 +595,7 @@ H46019UDPSocket::H46019UDPSocket(H46018Handler & _handler, H323Connection::Sessi
 
 H46019UDPSocket::~H46019UDPSocket()
 {
+    Close();
 	Keep.Stop();
 	delete keepStartTime;
 
@@ -773,6 +772,8 @@ void H46019UDPSocket::SetTTL(unsigned val)
 void H46019UDPSocket::SetProbeState(probe_state newstate)
 {
 	PWaitAndSignal m(probeMutex);
+
+	PTRACE(4,"H46024\tChanging state for " << m_Session << " from " << m_state << " to " << newstate);
 
 	m_state = newstate;
 }

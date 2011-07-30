@@ -2567,8 +2567,28 @@ void H323Connection::SetRTPNAT(unsigned sessionid, PUDPSocket * _rtp, PUDPSocket
 	NAT_Sockets sockets;
 	 sockets.rtp = _rtp;
 	 sockets.rtcp = _rtcp;
+     sockets.isActive = false;
 
 	m_NATSockets.insert(pair<unsigned, NAT_Sockets>(sessionid, sockets));
+}
+
+void H323Connection::SetNATChannelActive(unsigned sessionid)
+{
+	std::map<unsigned,NAT_Sockets>::iterator sockets_iter = m_NATSockets.find(sessionid);
+	if (sockets_iter != m_NATSockets.end()) {
+		NAT_Sockets socket = sockets_iter->second;
+        socket.isActive = true;
+	}
+}
+
+PBoolean H323Connection::IsNATMethodActive(unsigned sessionid)
+{
+	for (std::map<unsigned,NAT_Sockets>::const_iterator r = m_NATSockets.begin(); r != m_NATSockets.end(); ++r) {
+	    NAT_Sockets socket = r->second; 
+        if (!socket.isActive)
+            return false;
+    } 
+    return true;
 }
 #endif
 
@@ -5424,6 +5444,16 @@ void BuildH46024BResponse(H323ControlPDU & pdu)
 	  num = 1;
 
 }
+
+void BuildH46024BIndication(H323ControlPDU & pdu)
+{
+	H245_GenericMessage & cap = pdu.Build(H245_IndicationMessage::e_genericIndication);
+	  H245_CapabilityIdentifier & id = cap.m_messageIdentifier;
+	  id.SetTag(H245_CapabilityIdentifier::e_standard);
+	  PASN_ObjectId & gid = id;
+	  gid.SetValue(H46024BOID);
+}
+
 #endif  // H323_H46024B
 
 #ifdef H323_H46024A
@@ -6302,8 +6332,8 @@ void H323Connection::MonitorCallStatus()
 
 #ifdef P_STUN
 
-H323Connection::SessionInformation::SessionInformation(const OpalGloballyUniqueID & id, const PString & token, unsigned session)
-: m_callID(id), m_callToken(token), m_sessionID(session)
+H323Connection::SessionInformation::SessionInformation(const OpalGloballyUniqueID & id, const PString & token, unsigned session, const H323Connection * conn)
+: m_callID(id), m_callToken(token), m_sessionID(session), m_connection(conn)
 {
 
 #ifdef H323_H46024A
@@ -6328,7 +6358,7 @@ unsigned H323Connection::SessionInformation::GetSessionID() const
 
 H323Connection::SessionInformation * H323Connection::BuildSessionInformation(unsigned sessionID) const
 {
-	return new SessionInformation(GetCallIdentifier(),GetCallToken(),sessionID);
+	return new SessionInformation(GetCallIdentifier(),GetCallToken(),sessionID, this);
 }
 
 const OpalGloballyUniqueID & H323Connection::SessionInformation::GetCallIdentifer()
@@ -6339,6 +6369,11 @@ const OpalGloballyUniqueID & H323Connection::SessionInformation::GetCallIdentife
 const PString & H323Connection::SessionInformation::GetCUI()
 {
 	return m_CUI;
+}
+
+const H323Connection * H323Connection::SessionInformation::GetConnection()
+{
+    return m_connection;
 }
 
 #endif

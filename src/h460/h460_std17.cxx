@@ -1010,11 +1010,10 @@ void PNatMethod_H46017::SetInformationHeader(PUDPSocket & data, PUDPSocket & con
 
     const H323Transport * transport = NULL;
     H323SignalPDU informationMsg;
-	H323Connection * connection = handler->GetEndPoint()->FindConnectionWithLock(info->GetCallToken());
-	if (connection != NULL) {
+	H323Connection * connection = PRemoveConst(H323Connection, info->GetConnection());
+    if (connection != NULL) {
         informationMsg.BuildInformation(*connection);
         transport = connection->GetSignallingChannel();
-		connection->Unlock();
 	}
 
     ((H46017UDPSocket &)data).SetInformationHeader(informationMsg, transport);

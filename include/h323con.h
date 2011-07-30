@@ -2254,6 +2254,14 @@ class H323Connection : public PObject
 	  */
 	virtual void SetRTPNAT(unsigned sessionid, PUDPSocket * _rtp, PUDPSocket * _rtcp);
 
+	/** Set NAT Channel in effect 
+	  */
+    void SetNATChannelActive(unsigned sessionid);
+
+	/** Is NAT Method Active
+	  */
+    PBoolean IsNATMethodActive(unsigned sessionid);
+
 #endif
 	/** Set Endpoint Type Information
 	  Override this to advertise the Endpoint type on a Call by Call basis
@@ -2716,7 +2724,7 @@ class H323Connection : public PObject
 	class SessionInformation : public PObject
 	{
 		public:
-			SessionInformation(const OpalGloballyUniqueID & id, const PString & token, unsigned session);
+            SessionInformation(const OpalGloballyUniqueID & id, const PString & token, unsigned session, const H323Connection * connection);
 
 			const PString & GetCallToken();
 
@@ -2726,11 +2734,14 @@ class H323Connection : public PObject
 
 			const PString & GetCUI();
 
+            const H323Connection * GetConnection(); 
+
 		protected:
 			OpalGloballyUniqueID m_callID;
 			PString m_callToken;
 			unsigned m_sessionID;
 			PString m_CUI;
+            const H323Connection * m_connection;
 
 	};
 
@@ -2740,6 +2751,7 @@ class H323Connection : public PObject
 	{
 		PUDPSocket * rtp;
 		PUDPSocket * rtcp;
+        PBoolean     isActive;
 	};
 
 #endif
