@@ -48,6 +48,9 @@
 #define H323Dictionary  PDictionary
 #define H323DICTIONARY  PDICTIONARY
 
+#define H323List  PList
+#define H323LIST  PLIST
+
 #else
 
 #include <map>
@@ -68,14 +71,14 @@ inline void deleteDictionaryEntries(const E & e)
 }
 
 
-struct PSTLDictionaryOrder {
+struct PSTLSortOrder {
      int operator() ( unsigned p1, unsigned p2 ) const {
            return (p1 > p2);
      }
 };
 
 template <class K, class D> class PSTLDictionary : public PObject, 
-                                                  public std::map< unsigned, std::pair<K, D*>, PSTLDictionaryOrder >
+                                                  public std::map< unsigned, std::pair<K, D*>, PSTLSortOrder >
 {
   public:
      PCLASSINFO(PSTLDictionary, PObject);
@@ -245,7 +248,7 @@ template <class K, class D> class PSTLDictionary : public PObject,
           unsigned & ref        ///< Returned index
           ) const
       {
-          typename std::map< unsigned, std::pair<K, D*>,PSTLDictionaryOrder>::const_iterator i;
+          typename std::map< unsigned, std::pair<K, D*>,PSTLSortOrder>::const_iterator i;
           for (i = this->begin(); i != this->end(); ++i) {
             if (i->second.first == key) {
                ref = i->first;
@@ -262,7 +265,7 @@ template <class K, class D> class PSTLDictionary : public PObject,
           PWaitAndSignal m(dictMutex);
 
           PAssert(ref < this->size(), psprintf("Index out of Bounds ref: %u sz: %u",ref,this->size()));
-          typename std::map< unsigned, std::pair<K, D*>,PSTLDictionaryOrder>::const_iterator i = this->find(ref);
+          typename std::map< unsigned, std::pair<K, D*>,PSTLSortOrder>::const_iterator i = this->find(ref);
           return *(i->second.second);   
       };
 
@@ -273,7 +276,7 @@ template <class K, class D> class PSTLDictionary : public PObject,
           PWaitAndSignal m(dictMutex);
 
           PAssert(ref < this->size(), psprintf("Index out of Bounds ref: %u sz: %u",ref,this->size()));
-          typename std::map< unsigned, std::pair<K, D*>,PSTLDictionaryOrder>::const_iterator i = this->find(ref);
+          typename std::map< unsigned, std::pair<K, D*>,PSTLSortOrder>::const_iterator i = this->find(ref);
           return i->second.first;   
       }
 
@@ -281,7 +284,7 @@ template <class K, class D> class PSTLDictionary : public PObject,
           unsigned newpos = pos;
           unsigned sz = this->size();
           D * dataPtr = NULL;
-          typename std::map< unsigned, std::pair<K, D*>, PSTLDictionaryOrder >::iterator it = this->find(pos);
+          typename std::map< unsigned, std::pair<K, D*>, PSTLSortOrder >::iterator it = this->find(pos);
           if (it == this->end()) return NULL;
           if (disallowDeleteObjects)
             dataPtr = it->second.second;
@@ -290,7 +293,7 @@ template <class K, class D> class PSTLDictionary : public PObject,
           this->erase(it);
           
           for (unsigned i = pos+1; i < sz; ++i) {
-             typename std::map< unsigned, std::pair<K, D*>, PSTLDictionaryOrder >::iterator j = this->find(i);
+             typename std::map< unsigned, std::pair<K, D*>, PSTLSortOrder >::iterator j = this->find(i);
              DictionaryEntry entry =  make_pair(j->second.first,j->second.second) ;
              insert(pair<unsigned, std::pair<K, D*> >(newpos,entry));
              newpos++;
@@ -339,6 +342,353 @@ template <class K, class D> class PSTLDictionary : public PObject,
 
 #define H323Dictionary  PSTLDictionary
 #define H323DICTIONARY  PSTLDICTIONARY
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+template <class PAIR>
+class deleteListEntry {
+public:
+	void operator()(const PAIR & p) { delete p.second; }
+};
+
+template <class E>
+inline void deleteListEntries(const E & e)
+{
+	typedef typename E::value_type PT;
+	std::for_each(e.begin(), e.end(), deleteListEntry<PT>() );
+}
+
+
+template <class D> class PSTLList : public PObject, 
+                                    public std::map< unsigned, D* , PSTLSortOrder >
+{
+  public:
+     PCLASSINFO(PSTLList, PObject);
+  /**@name Construction */
+  //@{
+    /**Create a new, empty, dictionary.
+
+       Note that by default, objects placed into the dictionary will be
+       deleted when removed or when all references to the dictionary are
+       destroyed.
+     */
+     PSTLList() :disallowDeleteObjects(false) {}
+
+     ~PSTLList() {  RemoveAll(); }
+  //@}
+
+  /**@name Overrides from class PObject */
+  //@{
+    /**Make a complete duplicate of the dictionary. Note that all objects in
+       the array are also cloned, so this will make a complete copy of the
+       dictionary.
+     */
+    virtual PObject * Clone() const
+      { return PNEW PSTLList(*this); }
+  //@}
+
+    virtual PINDEX Append(
+      D * obj   ///< New object to place into the collection.
+      ) {  return InternalAddKey(obj);  }
+
+    /**Insert a new object at the specified ordinal index. If the index is
+       greater than the number of objects in the collection then the
+       equivalent of the <code>Append()</code> function is performed.
+       If not greater it will insert at the ordinal index and shuffle down ordinal values.
+
+       @return
+       index of the newly inserted object.
+     */
+    virtual PINDEX InsertAt(
+      PINDEX index,   ///< Index position in collection to place the object.
+      D * obj         ///< New object to place into the collection.
+      ) { return InternalSetAt(index,obj,false,true); }
+
+    /**Remove the object at the specified ordinal index from the collection.
+       If the AllowDeleteObjects option is set then the object is also deleted.
+
+       Note if the index is beyond the size of the collection then the
+       function will assert.
+
+       @return
+       pointer to the object being removed, or NULL if it was deleted.
+     */
+    virtual D * RemoveAt(
+      PINDEX index   ///< Index position in collection to place the object.
+      ) { return InternalRemoveKey(index); }
+
+
+    PBoolean Remove(
+       D * obj   ///< Index position in collection to place the object.
+       ) { unsigned index=0;
+           if (!InternalFindIndex(index,obj))
+              return false;
+           return (InternalRemoveResort(index) != NULL);    
+       }
+          
+
+    /**Set the object at the specified ordinal position to the new value. This
+       will overwrite the existing entry. 
+       This method will NOT delete the old object independently of the 
+       AllowDeleteObjects option. Use <code>ReplaceAt()</code> instead.
+
+       Note if the index is beyond the size of the collection then the
+       function will assert.
+
+       @return
+       true if the object was successfully added.
+     */
+    virtual PBoolean SetAt(
+      PINDEX index,   ///< Index position in collection to set.
+      D * obj         ///< New value to place into the collection.
+      ) {  return InternalSetAt(index,obj);  }
+    
+    /**Set the object at the specified ordinal position to the new value. This
+       will overwrite the existing entry. If the AllowDeleteObjects option is
+       set then the old object is also deleted.
+    
+       Note if the index is beyond the size of the collection then the
+       function will assert.
+       
+       @return
+       true if the object was successfully replaced.
+     */   
+    virtual PBoolean ReplaceAt(
+      PINDEX index,   ///< Index position in collection to set.
+      D * obj         ///< New value to place into the collection.
+      ) {  return InternalSetAt(index,obj, true);  }
+
+    /**Get the object at the specified ordinal position. If the index was
+       greater than the size of the collection then NULL is returned.
+
+       The object accessed in this way is remembered by the class and further
+       access will be fast. Access to elements one either side of that saved
+       element, and the head and tail of the list, will always be fast.
+
+       @return
+       pointer to object at the specified index.
+     */
+    virtual D * GetAt(
+      PINDEX index  ///< Index position in the collection of the object.
+    ) const { return InternalAt(index); }
+
+
+    D & operator[](PINDEX i) const { return InternalGetAt(i); }
+
+    /**Search the collection for the specific instance of the object. The
+       object pointers are compared, not the values. A simple linear search
+       from "head" of the list is performed.
+
+       @return
+       ordinal index position of the object, or P_MAX_INDEX.
+     */
+    virtual PINDEX GetObjectsIndex(
+      const D * obj  ///< Object to find.
+      ) const  { 
+           unsigned index=0;
+           if (InternalFindIndex(index,obj))
+              return index;
+           else 
+              return P_MAX_INDEX;
+    }
+
+    /**Search the collection for the specified value of the object. The object
+       values are compared, not the pointers.  So the objects in the
+       collection must correctly implement the <code>PObject::Compare()</code>
+       function. A simple linear search from "head" of the list is performed.
+
+       @return
+       ordinal index position of the object, or P_MAX_INDEX.
+     */
+    virtual PINDEX GetValuesIndex(
+      const D & obj  ///< Object to find value of.
+      ) const { 
+          unsigned index=0;
+           if (InternalIndex(index,obj))
+              return index;
+           else 
+              return P_MAX_INDEX;
+     }
+  //@}
+
+
+    PINDEX GetSize() const { return this->size(); }
+
+    PBoolean IsEmpty() const { return (this->size() == 0); }
+
+   /**Remove all of the elements in the collection. This operates by
+       continually calling <code>RemoveAt()</code> until there are no objects left.
+
+       The objects are removed from the last, at index
+       (GetSize()-1) toward the first at index zero.
+     */
+    virtual void RemoveAll()
+      {  
+          PWaitAndSignal m(dictMutex);
+
+          if (!disallowDeleteObjects)
+                deleteListEntries(*this);  
+          this->clear();
+      }
+
+    void SetSize(PINDEX i)
+      {  if (i == 0) RemoveAll();  }
+
+    PINLINE void AllowDeleteObjects(
+      PBoolean yes = true   ///< New value for flag for deleting objects
+      ) { disallowDeleteObjects = !yes; }
+
+    /**Disallow the deletion of the objects contained in the collection. See
+       the <code>AllowDeleteObjects()</code> function for more details.
+     */
+    void DisallowDeleteObjects() { disallowDeleteObjects = true; }
+  //@}
+
+  protected:
+
+      PBoolean  disallowDeleteObjects;
+      PMutex    dictMutex;
+
+      PBoolean InternalFindIndex(
+          unsigned & ref,       ///< Returned index
+          const D * data        ///< Data to match
+          ) const
+      {
+          PWaitAndSignal m(dictMutex);
+
+          typename std::map< unsigned, D* , PSTLSortOrder>::const_iterator i;
+          for (i = this->begin(); i != this->end(); ++i) {
+            if (i->second == data) {
+               ref = i->first;
+               return true;
+            }
+          }
+          return false;
+      };
+
+      PBoolean InternalIndex(
+          unsigned & ref,       ///< Returned index
+          const D & data        ///< Data to match
+          ) const
+      {
+          PWaitAndSignal m(dictMutex);
+
+          typename std::map< unsigned, D* , PSTLSortOrder>::const_iterator i;
+          for (i = this->begin(); i != this->end(); ++i) {
+            if (*(i->second) == data) {
+               ref = i->first;
+               return true;
+            }
+          }
+          return false;
+      };
+
+
+       D & InternalGetAt(
+          unsigned ref        ///< Returned index
+          ) const
+      {
+          PWaitAndSignal m(dictMutex);
+
+          PAssert(ref < this->size(), psprintf("Index out of Bounds ref: %u sz: %u",ref,this->size()));
+          typename std::map< unsigned, D*, PSTLSortOrder>::const_iterator i = this->find(ref);
+          return *(i->second);   
+      };
+
+      D * InternalAt(
+          unsigned ref        ///< Returned index
+          ) const
+      {
+          PWaitAndSignal m(dictMutex);
+
+          PAssert(ref < this->size(), psprintf("Index out of Bounds ref: %u sz: %u",ref,this->size()));
+          typename std::map< unsigned, D*, PSTLSortOrder>::const_iterator i = this->find(ref);
+          return i->second;   
+      };
+
+
+      D * InternalRemoveResort(unsigned pos) {
+          unsigned newpos = pos;
+          unsigned sz = this->size();
+          D * dataPtr = NULL;
+          typename std::map< unsigned, D*, PSTLSortOrder >::iterator it = this->find(pos);
+          if (it == this->end()) return NULL;
+          if (disallowDeleteObjects)
+            dataPtr = it->second;
+          else
+            delete it->second;  
+          this->erase(it);
+          
+          for (unsigned i = pos+1; i < sz; ++i) {
+             typename std::map< unsigned, D*, PSTLSortOrder >::iterator j = this->find(i);
+             D* entry =  j->second;
+             insert(std::pair<unsigned, D*>(newpos,entry));
+             newpos++;
+             this->erase(j);
+          }
+
+          return dataPtr;
+      };
+
+      D * InternalRemoveKey(
+            PINDEX pos   ///< Key to look for in the dictionary.
+            )
+      {
+          PWaitAndSignal m(dictMutex);
+
+          return InternalRemoveResort(pos);
+      }
+
+      PINDEX InternalAddKey(
+         D * obj         // New object to put into list.
+         ) 
+      { 
+          PWaitAndSignal m(dictMutex);
+
+          unsigned pos = this->size();
+          insert(std::pair<unsigned, D*>(pos,obj));
+          return pos;
+      }
+
+      PINDEX InternalSetAt(
+          PINDEX ref,                  ///< Index position in collection to set.
+          D * obj,                     ///< New value to place into the collection.
+          PBoolean replace = false,
+          PBoolean reorder = false
+          ) 
+      {         
+          if (ref >= GetSize())
+              return InternalAddKey(obj);
+
+          PWaitAndSignal m(dictMutex);
+
+          if (!reorder) {
+              typename std::map< unsigned, D*, PSTLSortOrder>::const_iterator it = this->find(ref);
+              if (replace)
+                delete it->second;  
+              this->erase(it);
+          } else {
+              int sz = this->size();
+              int newpos = sz;
+              for (int i = sz-1; i > ref; --i) {
+                 typename std::map< unsigned, D*, PSTLSortOrder >::iterator it = this->find(i);
+                 D* entry =  it->second;
+                 insert(std::pair<unsigned, D*>(newpos,entry));
+                 newpos--;
+                 this->erase(it);
+              }
+          }
+          insert(std::pair<unsigned, D*>(ref,obj));
+          return ref;        
+      }
+
+};
+
+#define PSTLLIST(cls, D) typedef PSTLList<D> cls;
+
+#define H323List  PSTLList
+#define H323LIST  PSTLLIST
 
 #endif  // PTLIB_VER < 2110
 

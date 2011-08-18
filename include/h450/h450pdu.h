@@ -23,61 +23,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.2  2008/05/23 11:20:49  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.1  2007/08/06 20:50:51  shorne
- * First commit of h323plus
- *
- * Revision 1.1.2.1  2006/12/23 19:02:56  shorne
- * File restructuring
- *
- * Revision 1.13  2006/06/27 12:35:03  csoutheren
- * Patch 1366328 - Support for H.450.3 divertingLegInformation2
- * Thanks to Norbert Bartalsky
- *
- * Revision 1.12  2005/11/30 13:05:01  csoutheren
- * Changed tags for Doxygen
- *
- * Revision 1.11  2005/03/10 07:01:29  csoutheren
- * Fixed problem with H.450 call identifiers not being unique across all calls on an
- *  endpoint. Thanks to Thien Nguyen
- *
- * Revision 1.10  2002/11/21 22:37:24  robertj
- * Fixed problems with unrecognized invoke APDU, thanks Andrea Bondavalli
- *
- * Revision 1.9  2002/09/16 01:14:15  robertj
- * Added #define so can select if #pragma interface/implementation is used on
- *   platform basis (eg MacOS) rather than compiler, thanks Robert Monaghan.
- *
- * Revision 1.8  2002/09/03 06:19:37  robertj
- * Normalised the multi-include header prevention ifdef/define symbol.
- *
- * Revision 1.7  2002/08/05 10:03:47  robertj
- * Cosmetic changes to normalise the usage of pragma interface/implementation.
- *
- * Revision 1.6  2002/07/04 00:40:31  robertj
- * More H.450.11 call intrusion implementation, thanks Aleksandar Todorovic
- *
- * Revision 1.5  2002/06/22 05:48:38  robertj
- * Added partial implementation for H.450.11 Call Intrusion
- *
- * Revision 1.4  2002/02/04 07:17:52  robertj
- * Added H.450.2 Consultation Transfer, thanks Norwood Systems.
- *
- * Revision 1.3  2002/01/14 00:02:40  robertj
- * Added H.450.6
- * Added extra "failure mode" parts of H.250.2.
- * Various other bug fixes.
- *   Thanks Ben Madsen of Norwood Systems
- *
- * Revision 1.2  2001/08/16 07:49:16  robertj
- * Changed the H.450 support to be more extensible. Protocol handlers
- *   are now in separate classes instead of all in H323Connection.
- *
- * Revision 1.1  2001/04/11 03:01:27  robertj
- * Added H.450.2 (call transfer), thanks a LOT to Graeme Reid & Norwood Systems
+ * $ Id $
  *
  */
 
@@ -219,7 +165,7 @@ class H450xHandler : public PObject
     unsigned          currentInvokeId;
 };
 
-PLIST(H450xHandlerList, H450xHandler);
+H323LIST(H450xHandlerList, H450xHandler);
 H323DICTIONARY(H450xHandlerDict, POrdinalKey, H450xHandler);
 
 

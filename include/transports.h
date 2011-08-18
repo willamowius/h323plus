@@ -26,186 +26,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.2  2008/05/23 11:20:14  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.1  2007/08/06 20:50:50  shorne
- * First commit of h323plus
- *
- * Revision 1.51.2.1  2007/02/11 00:45:20  shorne
- * Added ability to disable NAT method on a call by call basis
- *
- * Revision 1.51  2006/07/05 04:37:44  csoutheren
- * Applied 1488904 - SetPromiscuous(AcceptFromLastReceivedOnly) for T.38
- * Thanks to Vyacheslav Frolov
- *
- * Revision 1.50  2006/06/23 03:21:03  shorne
- * Added unsolicited Information support
- *
- * Revision 1.49  2006/01/20 00:32:24  csoutheren
- * First check-in of signalling aggregation code - incomplete and disabled by default
- *
- * Revision 1.48  2005/11/30 13:05:01  csoutheren
- * Changed tags for Doxygen
- *
- * Revision 1.47  2005/11/21 21:07:41  shorne
- * Added GnuGK Nat support
- *
- * Revision 1.46  2005/01/16 20:39:43  csoutheren
- * Fixed problem with IPv6 INADDR_ANY
- *
- * Revision 1.45  2004/08/24 08:11:25  csoutheren
- * Added initial support for receiving broadcasts on Linux
- *
- * Revision 1.44  2004/05/13 02:26:13  dereksmithies
- * Fixes so make docs does not generate warning messages about brackets.
- *
- * Revision 1.43  2003/12/29 13:28:45  dominance
- * fixed docbook syntax trying to generate LaTeX formula with ip$10.x.x.x.
- *
- * Revision 1.42  2003/04/10 09:44:55  robertj
- * Added associated transport to new GetInterfaceAddresses() function so
- *   interfaces can be ordered according to active transport links. Improves
- *   interoperability.
- * Replaced old listener GetTransportPDU() with GetInterfaceAddresses()
- *   and H323SetTransportAddresses() functions.
- *
- * Revision 1.41  2003/04/10 01:03:25  craigs
- * Added functions to access to lists of interfaces
- *
- * Revision 1.40  2003/03/21 05:24:02  robertj
- * Added setting of remote port in UDP transport constructor.
- *
- * Revision 1.39  2003/02/06 04:29:23  robertj
- * Added more support for adding things to H323TransportAddressArrays
- *
- * Revision 1.38  2002/11/21 06:39:56  robertj
- * Changed promiscuous mode to be three way. Fixes race condition in gkserver
- *   which can cause crashes or more PDUs to be sent to the wrong place.
- *
- * Revision 1.37  2002/11/10 08:10:43  robertj
- * Moved constants for "well known" ports to better place (OPAL change).
- *
- * Revision 1.36  2002/09/16 01:14:15  robertj
- * Added #define so can select if #pragma interface/implementation is used on
- *   platform basis (eg MacOS) rather than compiler, thanks Robert Monaghan.
- *
- * Revision 1.35  2002/07/22 09:40:15  robertj
- * Added ability to automatically convert string arrays, lists sorted lists
- *   directly to H323TransportAddressArray.
- *
- * Revision 1.34  2002/07/02 10:02:29  robertj
- * Added H323TransportAddress::GetIpAddress() so don't have to provide port
- *   when you don't need it as in GetIpAndPort(),.
- *
- * Revision 1.33  2002/06/28 03:34:25  robertj
- * Fixed issues with address translation on gatekeeper RAS channel.
- *
- * Revision 1.32  2002/06/12 03:51:59  robertj
- * Added function to compare two transport addresses in a more intelligent
- *   way that strict string comparison. Takes into account wildcarding.
- *
- * Revision 1.31  2002/02/11 04:20:25  robertj
- * Fixed documentation errors, thanks Horacio J. Peña
- *
- * Revision 1.30  2002/02/05 23:29:23  robertj
- * Changed default for H.323 listener to reuse addresses.
- *
- * Revision 1.29  2001/12/22 01:48:12  robertj
- * Added ability to use local and remote port from transport channel as well
- *   as explicit port in H.245 address PDU setting routine.
- * Added PrintOn() to listener and transport for tracing purposes.
- *
- * Revision 1.28  2001/07/17 04:44:29  robertj
- * Partial implementation of T.120 and T.38 logical channels.
- *
- * Revision 1.27  2001/06/25 02:30:46  robertj
- * Allowed TCP listener socket to be opened in non-exclusive mode
- *   (ie SO_REUSEADDR) to avoid daemon restart problems.
- *
- * Revision 1.26  2001/06/22 00:14:14  robertj
- * Added ConnectTo() function to conencto specific address.
- * Added promiscuous mode for UDP channel.
- *
- * Revision 1.25  2001/05/17 06:37:02  robertj
- * Added multicast gatekeeper discovery support.
- *
- * Revision 1.24  2001/04/09 08:43:39  robertj
- * Added ability to get transport address for a listener.
- *
- * Revision 1.23  2001/03/02 06:59:57  robertj
- * Enhanced the globally unique identifier class.
- *
- * Revision 1.22  2001/02/09 05:16:24  robertj
- * Added #pragma interface for GNU C++.
- *
- * Revision 1.21  2001/01/23 05:08:04  robertj
- * Fixed bug when trying to clear call while waiting on H.245 channel connect, thanks Yura Aksyonov.
- *
- * Revision 1.20  2000/10/20 06:18:58  robertj
- * Fixed very small race condition on creating new connectionon incoming call.
- * Fixed memory/socket leak if do TCP connect and don't send valid setup PDU.
- *
- * Revision 1.19  2000/10/04 05:59:09  robertj
- * Minor reorganisation of the H.245 secondary channel start up to make it simpler
- *    to override its behaviour.
- *
- * Revision 1.18  2000/09/25 12:59:16  robertj
- * Added StartListener() function that takes a H323TransportAddress to start
- *     listeners bound to specific interfaces.
- *
- * Revision 1.17  2000/09/22 01:35:03  robertj
- * Added support for handling LID's that only do symmetric codecs.
- *
- * Revision 1.16  2000/06/07 05:47:55  robertj
- * Added call forwarding.
- *
- * Revision 1.15  2000/05/22 05:21:36  robertj
- * Fixed race condition where controlChannel variable could be used before set.
- *
- * Revision 1.14  2000/05/18 11:53:34  robertj
- * Changes to support doc++ documentation generation.
- *
- * Revision 1.13  2000/05/08 14:07:26  robertj
- * Improved the provision and detection of calling and caller numbers, aliases and hostnames.
- *
- * Revision 1.12  2000/05/02 04:32:25  robertj
- * Fixed copyright notice comment.
- *
- * Revision 1.11  1999/11/06 05:37:44  robertj
- * Complete rewrite of termination of connection to avoid numerous race conditions.
- *
- * Revision 1.10  1999/10/16 03:47:57  robertj
- * Fixed termination of gatekeeper RAS thread problem
- *
- * Revision 1.9  1999/10/10 08:59:47  robertj
- * Fixed race condition in connection shutdown
- *
- * Revision 1.8  1999/09/14 06:52:54  robertj
- * Added better support for multi-homed client hosts.
- *
- * Revision 1.7  1999/09/10 09:43:59  robertj
- * Removed attempt at determining local interface for gatekeeper, so still has problem on multi-homed hosts.
- *
- * Revision 1.6  1999/08/31 12:34:18  robertj
- * Added gatekeeper support.
- *
- * Revision 1.5  1999/08/25 05:14:21  robertj
- * Fixed problem with calling modal dialog from a background thread.
- *
- * Revision 1.4  1999/07/14 06:06:14  robertj
- * Fixed termination problems (race conditions) with deleting connection object.
- *
- * Revision 1.3  1999/07/09 06:09:49  robertj
- * Major implementation. An ENORMOUS amount of stuff added everywhere.
- *
- * Revision 1.2  1999/06/13 12:41:14  robertj
- * Implement logical channel transmitter.
- * Fixed H245 connect on receiving call.
- *
- * Revision 1.1  1999/06/09 05:26:20  robertj
- * Major restructuring of classes.
+ * $ Id $
  *
  */
 
@@ -218,6 +39,7 @@
 
 
 #include <ptlib/sockets.h>
+#include "ptlib_extras.h"
 
 
 class H225_Setup_UUIE;
@@ -422,7 +244,7 @@ class H323Listener : public PThread
 };
 
 
-PLIST(H323ListenerList, H323Listener);
+H323LIST(H323ListenerList, H323Listener);
 
 
 /** Return a list of transport addresses corresponding to a listener list

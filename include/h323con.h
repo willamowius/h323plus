@@ -3226,7 +3226,7 @@ class H323Connection : public PObject
 };
 
 
-PLIST(H323ConnectionList, H323Connection);
+H323LIST(H323ConnectionList, H323Connection);
 H323DICTIONARY(H323ConnectionDict, PString, H323Connection);
 H323DICTIONARY(H323CallIdentityDict, PString, H323Connection);
 

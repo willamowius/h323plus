@@ -2755,7 +2755,11 @@ PBoolean H323EndPoint::RemoveAliasName(const PString & name)
   if (localAliasNames.GetSize() < 2)
     return FALSE;
 
+#if PTLIB_VER >= 2110
+  localAliasNames.Remove(&name);
+#else
   localAliasNames.RemoveAt(pos);
+#endif
   return TRUE;
 }
 

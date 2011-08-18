@@ -23,70 +23,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.2  2008/05/23 11:19:51  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.1  2007/08/06 20:50:49  shorne
- * First commit of h323plus
- *
- * Revision 1.17  2005/11/30 13:05:01  csoutheren
- * Changed tags for Doxygen
- *
- * Revision 1.16  2004/08/24 08:11:24  csoutheren
- * Added initial support for receiving broadcasts on Linux
- *
- * Revision 1.15  2003/12/11 05:39:04  csoutheren
- * Added storage of H.225 version in endpoint structure
- * Disabled sending RIPs to endpoints that cannot handle them
- *
- * Revision 1.14  2003/04/30 07:50:58  robertj
- * Redesigned the alternate credentials in ARQ system as old implementation
- *   was fraught with concurrency issues, most importantly it can cause false
- *   detection of replay attacks taking out an endpoint completely.
- *
- * Revision 1.13  2003/04/10 09:40:05  robertj
- * Added associated transport to new GetInterfaceAddresses() function so
- *   interfaces can be ordered according to active transport links. Improves
- *   interoperability.
- *
- * Revision 1.12  2003/04/10 01:03:58  craigs
- * Added functions to access to lists of interfaces
- *
- * Revision 1.11  2003/04/09 03:08:06  robertj
- * Fixed race condition in shutting down transactor (pure virtual call)
- *
- * Revision 1.10  2003/04/01 05:59:30  robertj
- * Fixed H.501 transaction code setting members for m_common PDU part.
- *
- * Revision 1.9  2003/04/01 04:47:48  robertj
- * Abstracted H.225 RAS transaction processing (RIP and secondary thread) in
- *   server environment for use by H.501 peer elements.
- *
- * Revision 1.8  2003/03/26 00:46:25  robertj
- * Had another go at making H323Transactor being able to be created
- *   without having a listener running.
- *
- * Revision 1.7  2003/03/25 04:56:17  robertj
- * Fixed issues to do with multiple inheritence in transaction reply cache.
- *
- * Revision 1.6  2003/03/21 05:26:45  robertj
- * Added setting of remote port in UDP transport constructor.
- *
- * Revision 1.5  2003/03/20 01:51:07  robertj
- * More abstraction of H.225 RAS and H.501 protocols transaction handling.
- *
- * Revision 1.4  2003/03/01 00:23:42  craigs
- * New PeerElement implementation
- *
- * Revision 1.3  2003/02/25 06:48:15  robertj
- * More work on PDU transaction abstraction.
- *
- * Revision 1.2  2003/02/25 03:14:58  robertj
- * Added missing virtual destructor.
- *
- * Revision 1.1  2003/02/21 05:28:39  craigs
- * Factored out code for user with peer elements
+ * $ Id $
  *
  */
 
@@ -552,7 +489,7 @@ class H323TransactionServer : public PObject
     PSyncPoint     monitorExit;
 
     PMutex         mutex;
-    PLIST(ListenerList, H323Transactor);
+    H323LIST(ListenerList, H323Transactor);
     ListenerList listeners;
     PBoolean usingAllInterfaces;
 };
