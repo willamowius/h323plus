@@ -758,9 +758,9 @@ void H460_Feature::RemoveParameter(PINDEX id)
 	}
 }
 
-void H460_Feature::ReplaceParameter(const H460_FeatureID id, const H460_FeatureContent & con)
+void H460_Feature::ReplaceParameter(const H460_FeatureID & id, const H460_FeatureContent & con)
 {
-	CurrentTable->ReplaceParameter(id,con);
+	CurrentTable->ReplaceParameter(id, con);
 }
 
 H460_FeatureParameter & H460_Feature::GetFeatureParameter(PINDEX id)
@@ -965,14 +965,14 @@ H460_FeatureNonStd::H460_FeatureNonStd(PString Identifier)
 {
 }
 	
-void H460_FeatureNonStd::Add(const PString id)
+void H460_FeatureNonStd::Add(const PString & id)
 {
 	H460_FeatureID * feat_id = new H460_FeatureID(id);
 	AddParameter(feat_id);
 	delete feat_id;
 }
 
-void H460_FeatureNonStd::Add(const PString id, const H460_FeatureContent & con)
+void H460_FeatureNonStd::Add(const PString & id, const H460_FeatureContent & con)
 {
 	H460_FeatureID * feat_id = new H460_FeatureID(id);
 	AddParameter(feat_id, con);

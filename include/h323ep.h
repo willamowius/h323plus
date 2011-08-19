@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.36  2011/07/04 11:16:09  willamowius
+ * add switch to disable H.460.23
+ *
  * Revision 1.35  2011/05/09 07:14:03  shorne
  * Remove redundent PTLIB Linking code
  *
@@ -2395,7 +2398,7 @@ class H323EndPoint : public PObject
 
 	/** Received Request for authorization
 	  */
-	virtual void PresenceAuthorization(const OpalGloballyUniqueID id,
+	virtual void PresenceAuthorization(const OpalGloballyUniqueID & id,
 									const PString & locAlias,
 									const PStringList & Aliases);
 #endif

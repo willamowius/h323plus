@@ -630,7 +630,7 @@ class H460_Feature : public H225_FeatureDescriptor
 
 	/** Replace Parameter
 	*/
-	virtual void ReplaceParameter(const H460_FeatureID id, const H460_FeatureContent & con);
+	virtual void ReplaceParameter(const H460_FeatureID & id, const H460_FeatureContent & con);
 
 	/** Get Parameter at index id
 	*/
@@ -914,8 +914,8 @@ class H460_FeatureNonStd : public H460_Feature
   //@{
 	/** Add item 
 	*/
-	void Add(const PString id);
-	void Add(const PString id, const H460_FeatureContent & con);
+	void Add(const PString & id);
+	void Add(const PString & id, const H460_FeatureContent & con);
 
 	/** Delete item 
 	*/
@@ -923,7 +923,7 @@ class H460_FeatureNonStd : public H460_Feature
 
 	/** Replace item 
 	*/
-	void Replace( const PString & id, const H460_FeatureContent & con);
+	void Replace(const PString & id, const H460_FeatureContent & con);
 
 	/** Has Parameter
 	  */

@@ -3292,7 +3292,7 @@ void H323EndPoint::PresenceInstruction(const PString & locAlias, unsigned type, 
 				<< " " << subAlias);
 }
 
-void H323EndPoint::PresenceAuthorization(const OpalGloballyUniqueID id,
+void H323EndPoint::PresenceAuthorization(const OpalGloballyUniqueID & id,
 									const PString & locAlias,
 									const PStringList & Aliases)
 {
