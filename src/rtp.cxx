@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.25  2011/05/10 09:48:48  shorne
+ * Fix warning on Linux when P_STUN not enabled
+ *
  * Revision 1.24  2011/04/13 09:16:20  willamowius
  * cast away const from pointer for new PTLib
  *
@@ -674,6 +677,46 @@ ostream & operator<<(ostream & o, RTP_DataFrame::PayloadTypes t)
 
 #endif
 
+/////////////////////////////////////////////////////////////////////////////
+
+RTP_MultiDataFrame::RTP_MultiDataFrame(BYTE const * buffer, PINDEX length)
+: PBYTEArray(buffer,length)
+{
+}
+
+RTP_MultiDataFrame::RTP_MultiDataFrame(PINDEX rtplen)
+: PBYTEArray(rtplen+4)
+{
+}
+
+int  RTP_MultiDataFrame::GetMultiHeaderSize() const
+{
+    return 4;
+}
+
+WORD RTP_MultiDataFrame::GetMultiplexID() const
+{
+   return *(PUInt16b *)&theArray[0];
+}
+
+void RTP_MultiDataFrame::SetMulitplexID(WORD id)
+{
+   *(PUInt16b *)&theArray[0] = id;
+}
+
+void RTP_MultiDataFrame::GetRTPPayload(RTP_DataFrame & frame) const
+{
+     int sz = GetSize()- GetMultiHeaderSize();
+     frame.SetPayloadSize(sz - frame.GetHeaderSize());
+     memcpy(theArray+GetMultiHeaderSize(), frame.GetPointer(), sz);
+}
+
+void RTP_MultiDataFrame::SetRTPPayload(RTP_DataFrame & frame)
+{
+    int sz = frame.GetPayloadSize() + frame.GetHeaderSize();
+    SetSize(sz+ GetMultiHeaderSize());
+    memcpy(theArray+GetMultiHeaderSize(), (void *)frame.GetPointer(), sz);
+}
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -777,6 +820,47 @@ void RTP_ControlFrame::ReceiverReport::SetLostPackets(unsigned packets)
   lost[0] = (BYTE)(packets >> 16);
   lost[1] = (BYTE)(packets >> 8);
   lost[2] = (BYTE)packets;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+RTP_MultiControlFrame::RTP_MultiControlFrame(BYTE const * buffer, PINDEX length)
+: PBYTEArray(buffer,length)
+{
+}
+
+RTP_MultiControlFrame::RTP_MultiControlFrame(PINDEX rtplen)
+: PBYTEArray(rtplen+4)
+{
+}
+
+int  RTP_MultiControlFrame::GetMultiHeaderSize() const
+{
+    return 4;
+}
+
+WORD RTP_MultiControlFrame::GetMultiplexID() const
+{
+   return *(PUInt16b *)&theArray[0];
+}
+
+void RTP_MultiControlFrame::SetMulitplexID(WORD id)
+{
+   *(PUInt16b *)&theArray[0] = id;
+}
+
+void RTP_MultiControlFrame::GetRTCPPayload(RTP_ControlFrame & frame) const
+{
+     int sz = GetSize()- GetMultiHeaderSize();
+     frame.SetPayloadSize(sz);
+     memcpy(theArray+GetMultiHeaderSize(), frame.GetPointer(), sz);
+}
+
+void RTP_MultiControlFrame::SetRTCPPayload(RTP_ControlFrame & frame)
+{
+    int sz = frame.GetSize();
+    SetSize(sz+ GetMultiHeaderSize());
+    memcpy(theArray+GetMultiHeaderSize(), (void *)frame.GetPointer(), sz);
 }
 
 

@@ -170,6 +170,35 @@ class RTP_DataFrame : public PBYTEArray
 H323LIST(RTP_DataFrameList, RTP_DataFrame);
 
 
+/**This class is for encapsulating the Multiplexing of RTP Data.
+ */
+
+class RTP_MultiDataFrame : public PBYTEArray
+{
+  PCLASSINFO(RTP_MultiDataFrame, PBYTEArray);
+
+ public:
+
+  RTP_MultiDataFrame(
+      BYTE const * buffer,   ///< Pointer to an array of BYTEs.
+      PINDEX length          ///< Number of elements pointed to by \p buffer.
+  );
+
+  RTP_MultiDataFrame(
+      PINDEX rtplen          ///< Length of RTP Frame
+  );
+
+  int  GetMultiHeaderSize() const;
+  WORD GetMultiplexID() const;
+  void SetMulitplexID(WORD id);
+  void GetRTPPayload(RTP_DataFrame & frame) const;
+  void SetRTPPayload(RTP_DataFrame & frame);
+
+};
+
+H323LIST(RTP_MultiDataFrameList, RTP_MultiDataFrame);
+
+
 /**An RTP control frame encapsulation.
   */
 class RTP_ControlFrame : public PBYTEArray
@@ -267,6 +296,32 @@ class RTP_ControlFrame : public PBYTEArray
   protected:
     PINDEX compoundOffset;
     PINDEX compoundSize;
+};
+
+/**This class is for encapsulating the Multiplexing of RTCP.
+ */
+
+class RTP_MultiControlFrame : public PBYTEArray
+{
+  PCLASSINFO(RTP_MultiControlFrame, PBYTEArray);
+
+ public:
+
+  RTP_MultiControlFrame(
+      BYTE const * buffer,   ///< Pointer to an array of BYTEs.
+      PINDEX length          ///< Number of elements pointed to by \p buffer.
+  );
+
+  RTP_MultiControlFrame(
+      PINDEX rtplen          ///< Length of RTP Frame
+  );
+
+  int  GetMultiHeaderSize() const;
+  WORD GetMultiplexID() const;
+  void SetMulitplexID(WORD id);
+  void GetRTCPPayload(RTP_ControlFrame & frame) const;
+  void SetRTCPPayload(RTP_ControlFrame & frame);
+
 };
 
 
