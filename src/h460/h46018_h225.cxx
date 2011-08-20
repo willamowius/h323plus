@@ -768,6 +768,23 @@ void H46019UDPSocket::SetTTL(unsigned val)
 	keepTTL = val;
 }
 
+#ifdef H323_H46019M
+void H46019UDPSocket::SetMultiplexAddress(const H323TransportAddress & address, const unsigned & multiID)
+{
+
+}
+
+void H46019UDPSocket::GetMultiplexAddress(H323TransportAddress & address, unsigned & multiID)
+{
+
+}
+
+void H46019UDPSocket::Activate(const H323TransportAddress & multiAddress, unsigned _multiID, unsigned _payload, unsigned _ttl)
+{
+
+}
+#endif
+
 #ifdef H323_H46024A
 void H46019UDPSocket::SetProbeState(probe_state newstate)
 {

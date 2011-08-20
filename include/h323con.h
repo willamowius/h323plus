@@ -2782,6 +2782,10 @@ class H323Connection : public PObject
 	/** Enable H46019 for this call
 	  */
 	void H46019Enabled();
+
+	/** Enable H46019 Multiplexing for this call
+	  */
+	void H46019MultiEnabled();
 #endif
 
 #ifdef H323_H46024A
@@ -3198,6 +3202,7 @@ class H323Connection : public PObject
 #ifdef H323_H46018
 	PBoolean m_H46019CallReceiver;
 	PBoolean m_H46019enabled;
+    PBoolean m_H46019multiplex;
 	PBoolean m_h245Connect;
 #endif
 

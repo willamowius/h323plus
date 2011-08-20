@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.37  2011/08/19 18:01:25  willamowius
+ * pass parameters by reference instead of copy
+ *
  * Revision 1.36  2011/07/04 11:16:09  willamowius
  * add switch to disable H.460.23
  *
@@ -2527,6 +2530,16 @@ class H323EndPoint : public PObject
      */
     WORD GetRtpIpPortPair();
 
+#ifdef H323_H46019M
+   /**Set the UDP port number base for Multiplex RTP/RTCP channels.
+     */
+    void SetMultiplexPort(unsigned rtpPort);
+
+   /**Get the UDP port number base for Multiplex RTP/RTCP channels.
+     */
+    WORD GetMultiplexPort();
+#endif
+
     /**Get the IP Type Of Service byte for RTP channels.
      */
     BYTE GetRtpIpTypeofService() const { return rtpIpTypeofService; }
@@ -2839,6 +2852,10 @@ class H323EndPoint : public PObject
     PNatStrategy * natMethods;
     PSTUNClient * stun;
 	PBoolean disableSTUNTranslate;
+#endif
+
+#ifdef H323_H46019M
+    WORD defaultMultiRTPPort;
 #endif
 
     BYTE t35CountryCode;

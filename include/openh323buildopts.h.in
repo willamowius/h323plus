@@ -51,7 +51,7 @@
 #endif
 
 
-#if 0 // PTLIB_VER >= 2110
+#if PTLIB_VER >= 2110
 #define H323_STLDICTIONARY  1
 #endif
 
@@ -107,11 +107,10 @@
 #if (PTLIB_VER > 260) && (P_STUN)
     #undef H323_H46017
 	#undef H323_H46018
+	#undef H323_H46019M
 	#undef H323_H46023
 	#if defined(H323_H46018) && defined(H323_H46023) && defined(P_SSL)
 		#define H323_H46024A 1
-	#endif
-	#if defined(H323_H46018) && defined(H323_H46023)
 		#define H323_H46024B 1
 	#endif
 	#if defined(H323_H46023) && (WINVER > 0x500)

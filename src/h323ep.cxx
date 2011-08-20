@@ -406,6 +406,10 @@ H323EndPoint::H323EndPoint()
   disableSTUNTranslate = FALSE;
 #endif
 
+#ifdef H323_H46019M
+  defaultMultiRTPPort = 2776;
+#endif
+
 #ifdef _WIN32
 
 #  if defined(H323_AUDIO_CODECS) && defined(P_AUDIO)
@@ -3109,6 +3113,18 @@ WORD H323EndPoint::GetRtpIpPortPair()
 {
   return rtpIpPorts.GetNext(2);
 }
+
+#ifdef H323_H46019M
+void H323EndPoint::SetMultiplexPort(unsigned rtpPort)
+{
+    defaultMultiRTPPort = rtpPort;
+}
+
+WORD H323EndPoint::GetMultiplexPort()
+{
+    return defaultMultiRTPPort;
+}
+#endif
 
 const PTimeInterval & H323EndPoint::GetNoMediaTimeout() const
 {

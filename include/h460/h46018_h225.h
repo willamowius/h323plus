@@ -420,6 +420,28 @@ class H46019UDPSocket : public PUDPSocket
 	  */
 	void SetTTL(unsigned val);
 
+#ifdef H323_H46019M
+	/** Set Multiplex Address
+	  */
+    void SetMultiplexAddress(const H323TransportAddress & address,  ///< Multiplex Address
+                             const unsigned & multiID               ///< Multiplex ID
+                             );
+
+	/** Get Multiplex Address
+	  */
+    void GetMultiplexAddress(H323TransportAddress & address,       ///< Multiplex Address
+                             unsigned & multiID                    ///< Multiplex ID
+                             );
+
+    /** Activate Multiplexing
+      */
+    void Activate(const H323TransportAddress & multiAddress,	///< Multiplex Address
+            unsigned _multiID,                                  ///< Multiplex ID
+			unsigned _payload,			                        ///< RTP Payload type	
+			unsigned _ttl				                        ///< Time interval for keepalive.
+			);
+#endif
+
 #ifdef H323_H46024A
      /**Read a datagram from a remote computer
        @return PTrue if any bytes were sucessfully read.

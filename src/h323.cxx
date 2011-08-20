@@ -595,6 +595,7 @@ H323Connection::H323Connection(H323EndPoint & ep,
 #ifdef H323_H46018
   m_H46019CallReceiver = false;
   m_H46019enabled = false;
+  m_H46019multiplex = false;
   m_h245Connect = false;
 #endif
 #ifdef H323_H46024A
@@ -5592,6 +5593,28 @@ PBoolean H323Connection::OnReceiveOLCGenericInformation(unsigned sessionID,
 					} 
 
 					PTRACE(4,"H46019\tTraversal Parameters:\n" << params);
+#ifdef H323_H46019M
+				  H323TransportAddress multiRTPaddress;
+				  H323TransportAddress multiRTCPaddress;
+                  unsigned             multiID=0;
+
+                  if (m_H46019multiplex) {
+                    if (params.HasOptionalField(H46019_TraversalParameters::e_multiplexedMediaChannel)) {
+						H245_TransportAddress & mRTP = params.m_multiplexedMediaChannel;
+						multiRTPaddress = H323TransportAddress(mRTP);
+					}
+
+                    if (params.HasOptionalField(H46019_TraversalParameters::e_multiplexedMediaControlChannel)) {
+						H245_TransportAddress & mRTCP = params.m_multiplexedMediaControlChannel;
+						multiRTCPaddress = H323TransportAddress(mRTCP);
+					}
+
+                    if (params.HasOptionalField(H46019_TraversalParameters::e_multiplexID)) {
+						PASN_Integer & mID = params.m_multiplexID;
+						multiID = mID;
+					}
+                  }
+#endif 
 					
 					H323TransportAddress RTPaddress;
 					H323TransportAddress RTCPaddress;
@@ -5618,8 +5641,16 @@ PBoolean H323Connection::OnReceiveOLCGenericInformation(unsigned sessionID,
 					std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(sessionID);
 						if (sockets_iter != m_NATSockets.end()) {
 							NAT_Sockets sockets = sockets_iter->second;
-							((H46019UDPSocket *)sockets.rtp)->Activate(RTPaddress,payload,ttl);
-							((H46019UDPSocket *)sockets.rtcp)->Activate(RTCPaddress,payload,ttl);
+#ifdef H323_H46019M
+                            if (m_H46019multiplex) {
+							  ((H46019UDPSocket *)sockets.rtp)->Activate(multiRTPaddress,multiID,payload,ttl);
+							  ((H46019UDPSocket *)sockets.rtcp)->Activate(multiRTCPaddress,multiID,payload,ttl);
+                            } else
+#endif
+                            {
+							  ((H46019UDPSocket *)sockets.rtp)->Activate(RTPaddress,payload,ttl);
+							  ((H46019UDPSocket *)sockets.rtcp)->Activate(RTCPaddress,payload,ttl);
+                            }
 						}
 				 success = true;
 			}
@@ -5657,6 +5688,10 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
 	PTRACE(4,"Set Generic " << (isAck ? "OLCack" : "OLC") << " Session " << sessionID );
 	if (m_H46019enabled) {
 		unsigned payload=0; unsigned ttl=0;
+#ifdef H323_H46019M
+        H323TransportAddress m_multiRTPAddress, m_multiRTCPAddress;
+        unsigned multiID=0;
+#endif
 #ifdef H323_H46024A
 		PString m_cui = PString(); 
 		H323TransportAddress m_altAddr1, m_altAddr2;
@@ -5673,7 +5708,12 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
 				if (rtp->GetTTL() == 0) 
 				    rtp->SetTTL(ttl);
 				ttl = rtp->GetTTL();
-				
+#ifdef H323_H46019M
+                if (!isAck && m_H46019multiplex) {
+                   rtp->GetMultiplexAddress(m_multiRTPAddress,multiID);
+                   rtcp->GetMultiplexAddress(m_multiRTCPAddress,multiID);
+                }
+#endif			
 				if (isAck) {
 					rtp->Activate();  // Start the RTP Channel if not already started
 					rtcp->Activate();  // Start the RTCP Channel if not already started
@@ -5697,6 +5737,22 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
 		 
 			  bool h46019msg = false;
 			  H46019_TraversalParameters params;
+#ifdef H323_H46019M
+              if (!isAck && m_H46019multiplex) {
+                    params.IncludeOptionalField(H46019_TraversalParameters::e_multiplexedMediaChannel);
+                    H245_TransportAddress & mRTP = params.m_multiplexedMediaChannel;
+					m_multiRTPAddress.SetPDU(mRTP);
+
+                    params.IncludeOptionalField(H46019_TraversalParameters::e_multiplexedMediaControlChannel);
+				    H245_TransportAddress & mRTCP = params.m_multiplexedMediaControlChannel;
+					m_multiRTCPAddress.SetPDU(mRTCP);
+
+                    params.IncludeOptionalField(H46019_TraversalParameters::e_multiplexID);
+				    PASN_Integer & mID = params.m_multiplexID;
+					mID = multiID;
+                    h46019msg = true;
+              }
+#endif
 			  if (/*!isAck ||*/ payload > 0) {
 					params.IncludeOptionalField(H46019_TraversalParameters::e_keepAlivePayloadType);
 					PASN_Integer & p = params.m_keepAlivePayloadType;
@@ -6394,6 +6450,11 @@ void H323Connection::H46019SetCallReceiver()
 void H323Connection::H46019Enabled() 
 { 
 	m_H46019enabled = true; 
+}
+
+void H323Connection::H46019MultiEnabled()
+{
+    m_H46019multiplex = true;
 }
 #endif   // H323_H46018
 
