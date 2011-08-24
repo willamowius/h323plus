@@ -258,14 +258,14 @@ int  RTP_MultiDataFrame::GetMultiHeaderSize() const
     return 4;
 }
 
-WORD RTP_MultiDataFrame::GetMultiplexID() const
+DWORD RTP_MultiDataFrame::GetMultiplexID() const
 {
-   return *(PUInt16b *)&theArray[0];
+   return *(PUInt32b *)&theArray[0];
 }
 
-void RTP_MultiDataFrame::SetMulitplexID(WORD id)
+void RTP_MultiDataFrame::SetMulitplexID(DWORD id)
 {
-   *(PUInt16b *)&theArray[0] = id;
+   *(PUInt32b *)&theArray[0] = id;
 }
 
 void RTP_MultiDataFrame::GetRTPPayload(RTP_DataFrame & frame) const

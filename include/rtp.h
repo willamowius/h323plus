@@ -188,9 +188,9 @@ class RTP_MultiDataFrame : public PBYTEArray
       PINDEX rtplen          ///< Length of RTP Frame
   );
 
-  int  GetMultiHeaderSize() const;
-  WORD GetMultiplexID() const;
-  void SetMulitplexID(WORD id);
+  int    GetMultiHeaderSize() const;
+  DWORD GetMultiplexID() const;
+  void SetMulitplexID(DWORD id);
   void GetRTPPayload(RTP_DataFrame & frame) const;
   void SetRTPPayload(RTP_DataFrame & frame);
 
