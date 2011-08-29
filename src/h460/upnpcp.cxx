@@ -434,7 +434,7 @@ bool UPnPThread::CreateMap(bool pair, const PString & protocol,
 		umap.Protocol = protocol;
 		umap.InternalClient = localIP.AsString();
 		umap.InternalPort = locPort + i;
-		umap.Description = "PacPhone";
+		umap.Description = "h323plus";
 		umap.ExternalPort = port + i;
 
 		if (AddMapping(umap)) {
