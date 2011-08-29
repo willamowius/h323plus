@@ -499,23 +499,13 @@ class H46017UDPSocket : public PUDPSocket
     );
 
     PBoolean WriteBuffer(const void * buf, PINDEX len);
+    PBoolean DoPseudoRead(int & selectStatus);
     PBoolean BuildTunnelMediaPacket(const void * buf, PINDEX len);
 
     void GetLocalAddress(H245_TransportAddress & add);
     void SetRemoteAddress(const H245_TransportAddress & add);
 
    //@}
-
-#if PTLIB_VER >= 2110
-    virtual PString GetServer() const { return PString(); }
-    virtual bool GetServerAddress(PIPSocketAddressAndPort & ) const { return false; }
-    virtual NatTypes GetNatType(bool) { return UnknownNat; }
-    virtual NatTypes GetNatType(const PTimeInterval &) { return UnknownNat; }
-    virtual bool SetServer(const PString &) { return false; }
-    virtual bool Open(const PIPSocket::Address &) { return false; }
-    virtual bool CreateSocket(BYTE,PUDPSocket * &, const PIPSocket::Address,WORD)  { return false; }
-    virtual void SetCredentials(const PString &, const PString &, const PString &) {}
-#endif
 
 
 private:

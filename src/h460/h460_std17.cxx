@@ -1136,6 +1136,18 @@ PBoolean H46017UDPSocket::WriteBuffer(const void * buf, PINDEX len)
          return false;
 }
 
+PBoolean H46017UDPSocket::DoPseudoRead(int & selectStatus)
+{
+   PAdaptiveDelay selectBlock;
+   while (rtpSocket && rtpQueue.size() == 0) {
+       selectBlock.Delay(2);
+       if (m_shutDown) break;
+   }
+
+   selectStatus += ((rtpQueue.size() > 0) ? (rtpSocket ? -1 : -2) : 0);
+   return rtpSocket;
+}
+
 PBoolean H46017UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD & port)
 {
     addr = "0.0.0.0";
