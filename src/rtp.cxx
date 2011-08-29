@@ -243,9 +243,16 @@ ostream & operator<<(ostream & o, RTP_DataFrame::PayloadTypes t)
 
 /////////////////////////////////////////////////////////////////////////////
 
-RTP_MultiDataFrame::RTP_MultiDataFrame(BYTE const * buffer, PINDEX length)
+RTP_MultiDataFrame::RTP_MultiDataFrame(const BYTE * buffer, PINDEX length)
 : PBYTEArray(buffer,length)
 {
+}
+
+RTP_MultiDataFrame::RTP_MultiDataFrame(DWORD id, const BYTE * buffer, PINDEX rtplen)
+: PBYTEArray(rtplen+4)
+{
+   memcpy(theArray+4,buffer,rtplen);
+   *(PUInt32b *)&theArray[0] = id;
 }
 
 RTP_MultiDataFrame::RTP_MultiDataFrame(PINDEX rtplen)

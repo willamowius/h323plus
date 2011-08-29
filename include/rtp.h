@@ -185,6 +185,12 @@ class RTP_MultiDataFrame : public PBYTEArray
   );
 
   RTP_MultiDataFrame(
+      DWORD id,              ///< Mulitplex ID
+      const BYTE * buffer,   ///< Pointer to an array of BYTEs.
+      PINDEX rtplen          ///< Number of elements pointed to by \p buffer.
+  );
+
+  RTP_MultiDataFrame(
       PINDEX rtplen          ///< Length of RTP Frame
   );
 
