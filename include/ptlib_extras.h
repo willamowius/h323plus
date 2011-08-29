@@ -593,6 +593,7 @@ template <class D> class PSTLList : public PObject,
 
           PAssert(ref < this->size(), psprintf("Index out of Bounds ref: %u sz: %u",ref,this->size()));
           typename std::map< unsigned, D*, PSTLSortOrder>::const_iterator i = this->find(ref);
+          PAssert(i != this->end() , psprintf("Index not found: %u sz: %u",ref,this->size()));
           return *(i->second);   
       };
 
@@ -622,6 +623,7 @@ template <class D> class PSTLList : public PObject,
           
           for (unsigned i = pos+1; i < sz; ++i) {
              typename std::map< unsigned, D*, PSTLSortOrder >::iterator j = this->find(i);
+             PAssert(j != this->end() , psprintf("Index not found: %u sz: %u",i,this->size()));
              D* entry =  j->second;
              insert(std::pair<unsigned, D*>(newpos,entry));
              newpos++;
@@ -669,14 +671,22 @@ template <class D> class PSTLList : public PObject,
                 delete it->second;  
               this->erase(it);
           } else {
+              for (std::map< unsigned, D*, PSTLSortOrder >::const_iterator r = this->begin(); r != this->end(); ++r) {
+                   if (*obj == *(r->second)) {
+                      InternalRemoveResort(r->first);
+                      break;
+                   }
+              }
               int sz = this->size();
-              int newpos = sz;
-              for (int i = sz-1; i > ref; --i) {
-                 typename std::map< unsigned, D*, PSTLSortOrder >::iterator it = this->find(i);
-                 D* entry =  it->second;
-                 insert(std::pair<unsigned, D*>(newpos,entry));
-                 newpos--;
-                 this->erase(it);
+              if (sz > 0) {
+                  int newpos = sz;
+                  for (int i = sz-1; i >= ref; --i) {
+                     typename std::map< unsigned, D*, PSTLSortOrder >::iterator it = this->find(i);
+                     D* entry =  it->second;
+                     insert(std::pair<unsigned, D*>(newpos,entry));
+                     this->erase(it);
+                     newpos--;
+                  }
               }
           }
           insert(std::pair<unsigned, D*>(ref,obj));
