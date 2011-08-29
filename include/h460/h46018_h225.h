@@ -193,6 +193,10 @@ class H46018Handler : public PObject
 
 	PBoolean CreateH225Transport(const PASN_OctetString & information);
 
+#ifdef H323_H46019M
+	void EnableMultiplex();
+#endif
+
 #ifdef H323_H46024A
 	void H46024ADirect(bool reply, const PString & token);
 #endif
@@ -288,6 +292,18 @@ class PNatMethod_H46019  : public PNatMethod
 	 */
     virtual void Activate(bool act)  { active = act; }
 
+#ifdef H323_H46019M
+    /** EnableMultiplex
+		Enable Multiplexing for this call
+	 */
+	void EnableMultiplex();
+
+    /** IsMultiplex
+		Is Multiplexing media
+	 */
+    PBoolean IsMultiplexed();
+#endif
+
 	/**  OpenSocket
 		Create a single UDP Socket 
 	*/
@@ -354,6 +370,12 @@ class PNatMethod_H46019  : public PNatMethod
 	PBoolean active;					///< Whether the method is active for call
 	H46018Handler * handler;			///< handler
 
+#ifdef H323_H46019M
+    PBoolean                      multiplex;
+    PortInfo                      muxPortInfo;
+    H323Connection::NAT_Sockets   muxSockets;
+#endif
+
 };
 
 #ifndef _WIN32_WCE
@@ -362,6 +384,59 @@ class PNatMethod_H46019  : public PNatMethod
 	#else
 	   PWLIB_STATIC_LOAD_PLUGIN(H46019, PNatMethod);
 	#endif
+#endif
+
+#ifdef H323_H46019M
+
+struct  H46019MultiPacket {
+  PIPSocket::Address fromAddr;
+  WORD               fromPort;
+  PBYTEArray       * frame;
+};
+
+typedef std::queue<H46019MultiPacket> H46019MultiQueue;
+
+class H46019MultiplexSocket : public PUDPSocket,
+                              public PThread
+{
+  PCLASSINFO(H46019MultiplexSocket, PUDPSocket);
+
+  public:
+    H46019MultiplexSocket();
+
+    ~H46019MultiplexSocket();
+
+    void Main();
+
+     /**Read a datagram from a remote computer
+       @return PTrue if any bytes were sucessfully read.
+	   */
+    virtual PBoolean ReadFrom(
+      void * buf,     ///< Data to be written as URGENT TCP data.
+      PINDEX len,     ///< Number of bytes pointed to by #buf#.
+      Address & addr, ///< Address from which the datagram was received.
+      WORD & port     ///< Port from which the datagram was received.
+    );
+
+    /**Write a datagram to a remote computer.
+       @return PTrue if all the bytes were sucessfully written.
+     */
+    virtual PBoolean WriteTo(
+      const void * buf,   ///< Data to be written as URGENT TCP data.
+      PINDEX len,         ///< Number of bytes pointed to by #buf#.
+      const Address & addr, ///< Address to which the datagram is sent.
+      WORD port           ///< Port to which the datagram is sent.
+    );
+
+    void RegisterSocket(unsigned id, PUDPSocket * socket);
+    void UnregisterSocket(unsigned id);
+
+  private:
+    
+    PMutex                     m_mutex;
+    map<unsigned, PUDPSocket*> m_socketMap;
+
+};
 #endif
 
 class H46019UDPSocket : public PUDPSocket
@@ -421,11 +496,10 @@ class H46019UDPSocket : public PUDPSocket
 	void SetTTL(unsigned val);
 
 #ifdef H323_H46019M
-	/** Set Multiplex Address
-	  */
-    void SetMultiplexAddress(const H323TransportAddress & address,  ///< Multiplex Address
-                             const unsigned & multiID               ///< Multiplex ID
-                             );
+
+    /** Attach Mutiplex socket
+      */
+    void AttachMultiplexSocket(PUDPSocket * multi);
 
 	/** Get Multiplex Address
 	  */
@@ -433,13 +507,40 @@ class H46019UDPSocket : public PUDPSocket
                              unsigned & multiID                    ///< Multiplex ID
                              );
 
-    /** Activate Multiplexing
-      */
-    void Activate(const H323TransportAddress & multiAddress,	///< Multiplex Address
-            unsigned _multiID,                                  ///< Multiplex ID
-			unsigned _payload,			                        ///< RTP Payload type	
-			unsigned _ttl				                        ///< Time interval for keepalive.
-			);
+    unsigned GetRecvMultiplexID() const;
+    void SetSendMultiplexID(unsigned id);
+
+    PBoolean WriteMultiplexBuffer(
+              const void * buf,     ///< Data to be written.
+              PINDEX len,           ///< Number of bytes pointed to by #buf#.
+              const Address & addr, ///< Address to which the datagram is sent.
+              WORD port             ///< Port to which the datagram is sent.
+           );
+
+    PBoolean ReadMultiplexBuffer(
+              void * buf,     ///< Data to be written.
+              PINDEX & len,   ///< Number of bytes pointed to by #buf#.
+              Address & addr, ///< Address from which the datagram was received.
+              WORD & port     ///< Port from which the datagram was received.
+           );
+
+    void ClearMultiplexBuffer();
+
+    virtual PBoolean DoPseudoRead(int & selectStatus);
+
+    PBoolean ReadSocket(
+              void * buf,     ///< Data to be written.
+              PINDEX & len,   ///< Number of bytes pointed to by #buf#.
+              Address & addr, ///< Address from which the datagram was received.
+              WORD & port     ///< Port from which the datagram was received.
+            );
+
+    PBoolean WriteSocket(
+      const void * buf,   ///< Data to be written as URGENT TCP data.
+      PINDEX len,         ///< Number of bytes pointed to by #buf#.
+      const Address & addr, ///< Address to which the datagram is sent.
+      WORD port           ///< Port to which the datagram is sent.
+    );
 #endif
 
 #ifdef H323_H46024A
@@ -546,6 +647,16 @@ private:
 
 	PDECLARE_NOTIFIER(PTimer, H46019UDPSocket, Ping);	///< Timer to notify to poll for External IP
 	PTimer	Keep;										///< Polling Timer
+
+#ifdef H323_H46019M
+    unsigned         m_recvMultiplexID;             ///< Multiplex ID
+    unsigned         m_sendMultiplexID;             ///< Multiplex ID
+    H46019MultiQueue m_multQueue;                   ///< Incoming frame Queue
+    unsigned         m_multiBuffer;                 ///< Multiplex BufferSize
+    PMutex           m_multiMutex;                  ///< MultiQueue mutex
+    PUDPSocket *     m_multiplexSocket;             ///< Multiplex Socket
+    PBoolean         m_shutDown;                    ///< Shutdown
+#endif
 
 #ifdef H323_H46024A
 	// H46024 Annex A support

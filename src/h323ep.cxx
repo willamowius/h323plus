@@ -408,6 +408,8 @@ H323EndPoint::H323EndPoint()
 
 #ifdef H323_H46019M
   defaultMultiRTPPort = 2776;
+  rtpMuxID.current = rtpMuxID.base = (unsigned)900000;
+  rtpMuxID.max   = (unsigned)1000000;
 #endif
 
 #ifdef _WIN32
@@ -3070,6 +3072,20 @@ WORD H323EndPoint::PortInfo::GetNext(unsigned increment)
   return p;
 }
 
+unsigned H323EndPoint::MuxIDInfo::GetNext(unsigned increment)
+{
+  PWaitAndSignal m(mutex);
+
+  if (current < base || current > (max-increment))
+    current = base;
+
+  if (current == 0)
+    return 0;
+
+  current = current + increment;
+  return current;
+}
+
 
 void H323EndPoint::SetTCPPorts(unsigned tcpBase, unsigned tcpMax)
 {
@@ -3123,6 +3139,11 @@ void H323EndPoint::SetMultiplexPort(unsigned rtpPort)
 WORD H323EndPoint::GetMultiplexPort()
 {
     return defaultMultiRTPPort;
+}
+
+unsigned H323EndPoint::GetMultiplexID()
+{
+   return rtpMuxID.GetNext(1);
 }
 #endif
 

@@ -2732,6 +2732,10 @@ class H323Connection : public PObject
 
 			const OpalGloballyUniqueID & GetCallIdentifer();
 
+            void SetSendMultiplexID(unsigned id);
+
+            unsigned GetRecvMultiplexID() const;
+
 			const PString & GetCUI();
 
             const H323Connection * GetConnection(); 
@@ -2740,6 +2744,8 @@ class H323Connection : public PObject
 			OpalGloballyUniqueID m_callID;
 			PString m_callToken;
 			unsigned m_sessionID;
+            unsigned m_recvMultiID;
+            unsigned m_sendMultiID;
 			PString m_CUI;
             const H323Connection * m_connection;
 
@@ -2786,6 +2792,10 @@ class H323Connection : public PObject
 	/** Enable H46019 Multiplexing for this call
 	  */
 	void H46019MultiEnabled();
+
+	/** Is H46019 Multiplexing enabled for this call
+	  */
+    PBoolean IsH46019Multiplexed() const;
 #endif
 
 #ifdef H323_H46024A

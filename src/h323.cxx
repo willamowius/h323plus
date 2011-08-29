@@ -5641,15 +5641,17 @@ PBoolean H323Connection::OnReceiveOLCGenericInformation(unsigned sessionID,
 					std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(sessionID);
 						if (sockets_iter != m_NATSockets.end()) {
 							NAT_Sockets sockets = sockets_iter->second;
-#ifdef H323_H46019M
-                            if (m_H46019multiplex) {
-							  ((H46019UDPSocket *)sockets.rtp)->Activate(multiRTPaddress,multiID,payload,ttl);
-							  ((H46019UDPSocket *)sockets.rtcp)->Activate(multiRTCPaddress,multiID,payload,ttl);
-                            } else
+#if H323_H46019M
+                            if (multiID > 0) {
+                               ((H46019UDPSocket *)sockets.rtp)->SetSendMultiplexID(multiID);
+							   ((H46019UDPSocket *)sockets.rtp)->Activate(multiRTPaddress,payload,ttl);
+                               ((H46019UDPSocket *)sockets.rtcp)->SetSendMultiplexID(multiID);
+							   ((H46019UDPSocket *)sockets.rtcp)->Activate(multiRTCPaddress,payload,ttl);
+                            } else 
 #endif
                             {
-							  ((H46019UDPSocket *)sockets.rtp)->Activate(RTPaddress,payload,ttl);
-							  ((H46019UDPSocket *)sockets.rtcp)->Activate(RTCPaddress,payload,ttl);
+							   ((H46019UDPSocket *)sockets.rtp)->Activate(RTPaddress,payload,ttl);
+							   ((H46019UDPSocket *)sockets.rtcp)->Activate(RTCPaddress,payload,ttl);
                             }
 						}
 				 success = true;
@@ -6389,8 +6391,13 @@ void H323Connection::MonitorCallStatus()
 #ifdef P_STUN
 
 H323Connection::SessionInformation::SessionInformation(const OpalGloballyUniqueID & id, const PString & token, unsigned session, const H323Connection * conn)
-: m_callID(id), m_callToken(token), m_sessionID(session), m_connection(conn)
+: m_callID(id), m_callToken(token), m_sessionID(session), m_recvMultiID(0), m_sendMultiID(0), m_connection(conn)
 {
+
+#ifdef H323_H46019M
+    if (conn->IsH46019Multiplexed())
+        m_recvMultiID = conn->GetEndPoint().GetMultiplexID();
+#endif
 
 #ifdef H323_H46024A
 	// Some random number bases on the session id (for H.460.24A)
@@ -6410,6 +6417,16 @@ const PString & H323Connection::SessionInformation::GetCallToken()
 unsigned H323Connection::SessionInformation::GetSessionID() const
 {
 	return m_sessionID;
+}
+
+void H323Connection::SessionInformation::SetSendMultiplexID(unsigned id)
+{
+    m_sendMultiID = id;
+}
+
+unsigned H323Connection::SessionInformation::GetRecvMultiplexID() const
+{
+    return m_recvMultiID;
 }
 
 H323Connection::SessionInformation * H323Connection::BuildSessionInformation(unsigned sessionID) const
@@ -6455,6 +6472,11 @@ void H323Connection::H46019Enabled()
 void H323Connection::H46019MultiEnabled()
 {
     m_H46019multiplex = true;
+}
+
+PBoolean H323Connection::IsH46019Multiplexed() const
+{
+    return m_H46019multiplex;
 }
 #endif   // H323_H46018
 

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.38  2011/08/20 09:56:56  shorne
+ * H.460.19 Multiplex Signalling Support. Media to do. Added H323_H46019M Switch disabled by default.
+ *
  * Revision 1.37  2011/08/19 18:01:25  willamowius
  * pass parameters by reference instead of copy
  *
@@ -2538,6 +2541,11 @@ class H323EndPoint : public PObject
    /**Get the UDP port number base for Multiplex RTP/RTCP channels.
      */
     WORD GetMultiplexPort();
+
+   /**Get next Multiplex RTP/RTCP channel ID.
+      Each call indexes the counter by 1;
+     */
+    unsigned GetMultiplexID();
 #endif
 
     /**Get the IP Type Of Service byte for RTP channels.
@@ -2855,6 +2863,15 @@ class H323EndPoint : public PObject
 #endif
 
 #ifdef H323_H46019M
+    struct MuxIDInfo {
+       PMutex mutex;
+         unsigned   base;
+         unsigned   max;
+         unsigned   current;
+       unsigned GetNext(
+          unsigned increment
+       );
+    } rtpMuxID;
     WORD defaultMultiRTPPort;
 #endif
 

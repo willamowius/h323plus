@@ -159,7 +159,8 @@ void H460_FeatureStd18::OnReceiveServiceControlIndication(const H225_FeatureDesc
 // Must Declare for Factory Loader.
 H460_FEATURE(Std19);
 
-#define H46019_Multiplex    1
+#define H46019_Multiplex      1
+#define H46019_MultiServer    1
 
 H460_FeatureStd19::H460_FeatureStd19()
 : H460_FeatureStd(19)
@@ -221,6 +222,10 @@ void H460_FeatureStd19::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
         H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
         if (feat.Contains(H46019_Multiplex)) 
              CON->H46019MultiEnabled();
+        
+        /// MultiServer?
+        // if (feat.Contains(H46019_MultiServer))
+        //    Do we need to do anything? - SH
 #endif
 	}
 }
