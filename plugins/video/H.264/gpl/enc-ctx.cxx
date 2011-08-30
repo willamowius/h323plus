@@ -227,7 +227,8 @@ void X264EncoderContext::SetFrameRate(unsigned rate)
 void X264EncoderContext::SetTSTO (unsigned tsto)
 {
     _context.rc.i_qp_min = H264_MIN_QUANT;
-    _context.rc.i_qp_max =  (int)((51 - H264_MIN_QUANT) / 31 * tsto + H264_MIN_QUANT);
+    if (tsto > 0)
+      _context.rc.i_qp_max =  (int)((51 - H264_MIN_QUANT) / 31 * tsto + H264_MIN_QUANT);
     _context.rc.i_qp_step = 4;	
     TRACE(4, "H264\tEncoder\tx264 encoder QP range rate set to [" << _context.rc.i_qp_min << "-" << _context.rc.i_qp_max << "] with a step of " << _context.rc.i_qp_step);
 }
