@@ -224,6 +224,7 @@ int main(int argc, char *argv[])
         x264->SetMaxNALSize (val);
         writeStream(ulStream,(char*)&msg, sizeof(msg)); 
         flushStream(ulStream);
+      break;
 	default:
       break;
     }
