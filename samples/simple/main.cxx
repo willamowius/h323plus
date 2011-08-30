@@ -415,6 +415,20 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
   if (listenPort.IsEmpty())
     listenPort = "1720";
 
+#ifdef PTLIB_VER >= 2110
+  if (iface.IsEmpty()) {
+      PIPSocket::InterfaceTable interfaceTable;
+      if (PIPSocket::GetInterfaceTable(interfaceTable)) {
+          for (PINDEX j=0; j < interfaceTable.GetSize(); ++j) {
+              if (interfaceTable[j].GetAddress().GetVersion() == 4) {
+                 iface = interfaceTable[j].GetAddress().AsString();
+                 break;
+              }
+          }
+      }
+  }
+#endif
+
   PIPSocket::Address interfaceAddress(iface);
   WORD interfacePort = (WORD)listenPort.AsInteger();
 
