@@ -3072,6 +3072,7 @@ WORD H323EndPoint::PortInfo::GetNext(unsigned increment)
   return p;
 }
 
+#ifdef H323_H46019M
 unsigned H323EndPoint::MuxIDInfo::GetNext(unsigned increment)
 {
   PWaitAndSignal m(mutex);
@@ -3085,7 +3086,7 @@ unsigned H323EndPoint::MuxIDInfo::GetNext(unsigned increment)
   current = current + increment;
   return current;
 }
-
+#endif
 
 void H323EndPoint::SetTCPPorts(unsigned tcpBase, unsigned tcpMax)
 {
