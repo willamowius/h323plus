@@ -792,7 +792,7 @@ void H46019UDPSocket::InitialiseKeepAlive()
 	}
 
 	if (keepTTL > 0 && keepip.IsValid() && !keepip.IsLoopback()) {
-		keepseqno = 100;  // Some arbitory number
+		keepseqno = 100;  // Some arbitrary number
 		keepStartTime = new PTime();
 
 		PTRACE(4,"H46019UDP\tStart " << (rtpSocket ? "RTP" : "RTCP") << " pinging " 
