@@ -1141,7 +1141,7 @@ PBoolean H46017UDPSocket::DoPseudoRead(int & selectStatus)
    PAdaptiveDelay selectBlock;
    while (rtpSocket && rtpQueue.size() == 0) {
        selectBlock.Delay(2);
-       //if (m_shutDown) break;
+       if (shutDown) break;
    }
 
    selectStatus += ((rtpQueue.size() > 0) ? (rtpSocket ? -1 : -2) : 0);
