@@ -369,7 +369,7 @@ void H46017TransportThread::Main()
 H46017Transport::H46017Transport(H323EndPoint & endpoint,
 				                 H46017Handler * feat
 				)	
-   : H323TransportTCP(endpoint), Feature(feat), con(NULL)
+   : H323TransportTCP(endpoint), con(NULL), Feature(feat)
 {
 	ReadTimeOut = PMaxTimeInterval;
 	isConnected = FALSE;
@@ -1141,7 +1141,7 @@ PBoolean H46017UDPSocket::DoPseudoRead(int & selectStatus)
    PAdaptiveDelay selectBlock;
    while (rtpSocket && rtpQueue.size() == 0) {
        selectBlock.Delay(2);
-       if (m_shutDown) break;
+       //if (m_shutDown) break;
    }
 
    selectStatus += ((rtpQueue.size() > 0) ? (rtpSocket ? -1 : -2) : 0);
@@ -1180,7 +1180,7 @@ PBoolean H46017UDPSocket::WriteTo(const void * buf, PINDEX len, const Address & 
 
 void H46017UDPSocket::GetLocalAddress(H245_TransportAddress & add)
 {
-    PIPSocket::Address m_locAddr = "0.0.0.0";
+    PIPSocket::Address m_locAddr = PIPSocket::GetDefaultIpAny();
     WORD m_locPort = 0;
     H323TransportAddress ladd(m_locAddr,m_locPort);
     ladd.SetPDU(add);
