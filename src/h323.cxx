@@ -5641,7 +5641,7 @@ PBoolean H323Connection::OnReceiveOLCGenericInformation(unsigned sessionID,
 					std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(sessionID);
 						if (sockets_iter != m_NATSockets.end()) {
 							NAT_Sockets sockets = sockets_iter->second;
-#if H323_H46019M
+#ifdef H323_H46019M
                             if (multiID > 0) {
                                ((H46019UDPSocket *)sockets.rtp)->SetSendMultiplexID(multiID);
 							   ((H46019UDPSocket *)sockets.rtp)->Activate(multiRTPaddress,payload,ttl);
