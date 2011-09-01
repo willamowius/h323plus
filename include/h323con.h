@@ -47,6 +47,9 @@
 #include "guid.h"
 #include "openh323buildopts.h"
 #include "h235auth.h"
+#ifdef H323_H235
+#include "h235/h2356.h"
+#endif
 #include "h225.h"
 
 #ifdef H323_SIGNAL_AGGREGATE

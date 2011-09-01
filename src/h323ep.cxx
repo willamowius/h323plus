@@ -1009,23 +1009,21 @@ H235Authenticators H323EndPoint::CreateEPAuthenticators()
   PString username;
   PString password;
 
-  if ((GetEPSecurityPolicy() != SecNone) || (isSecureCall)) {
-	  if (GetEPCredentials(password, username)) {
-             PFactory<H235Authenticator>::KeyList_T keyList = PFactory<H235Authenticator>::GetKeyList();
-             PFactory<H235Authenticator>::KeyList_T::const_iterator r;
-              for (r = keyList.begin(); r != keyList.end(); ++r) {
-                H235Authenticator * Auth = PFactory<H235Authenticator>::CreateInstance(*r);
-                if ((Auth->GetApplication() == H235Authenticator::EPAuthentication) ||
-                     (Auth->GetApplication() == H235Authenticator::AnyApplication)) {
-                        Auth->SetLocalId(username);
-                        Auth->SetPassword(password);
-                        authenticators.Append(Auth);
-                }
-              }
-	    SetEPCredentials(PString(),PString());
-	  }
-	  isSecureCall = FALSE;
-  }
+     PFactory<H235Authenticator>::KeyList_T keyList = PFactory<H235Authenticator>::GetKeyList();
+     PFactory<H235Authenticator>::KeyList_T::const_iterator r;
+      for (r = keyList.begin(); r != keyList.end(); ++r) {
+        H235Authenticator * Auth = PFactory<H235Authenticator>::CreateInstance(*r);
+        if ((Auth->GetApplication() == H235Authenticator::EPAuthentication ||
+             Auth->GetApplication() == H235Authenticator::AnyApplication)) {
+             if (GetEPCredentials(password, username)) {
+                Auth->SetLocalId(username);
+                Auth->SetPassword(password);
+                authenticators.Append(Auth);
+             }
+        } else
+            authenticators.Append(Auth);
+      }
+     SetEPCredentials(PString(),PString());    
 
   return authenticators;
 }

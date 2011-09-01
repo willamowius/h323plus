@@ -136,6 +136,21 @@ COMMON_SOURCES	+= $(OH323_SRCDIR)/gccpdu.cxx \
                    $(OH323_INCDIR)/h230/OID2.cxx
 endif
 
+########### H.235
+
+ifndef OH323_SUPPRESS_H235
+SOURCES		+= $(OH323_SRCDIR)/h235.cxx 
+endif
+
+ifdef HAS_OPENSSL
+COMMON_SOURCES	+= $(OH323_SRCDIR)/h235auth1.cxx
+endif
+
+ifdef H323_H235
+HEADER_FILES	+= $(OH323_INCDIR)/h235/h2356.h 
+COMMON_SOURCES	+= $(OH323_SRCDIR)/h235/h2356.cxx 
+endif
+
 ########### H.248
 
 ifdef H323_H248
@@ -250,16 +265,6 @@ HEADER_FILES	+= $(OH323_INCDIR)/h323filetransfer.h
 COMMON_SOURCES	+= $(OH323_SRCDIR)/h323filetransfer.cxx
 endif
 
-########## H.235
-
-ifndef OH323_SUPPRESS_H235
-SOURCES		+= $(OH323_SRCDIR)/h235.cxx 
-endif
-
-ifdef HAS_OPENSSL
-COMMON_SOURCES	+= $(OH323_SRCDIR)/h235auth1.cxx
-endif
-
 ########### FAX
 
 ifdef H323_T38
@@ -296,6 +301,7 @@ endif
 
 VPATH_CXX := $(OH323_SRCDIR) \
              $(OH323_SRCDIR)/h230 \
+             $(OH323_SRCDIR)/h235 \
              $(OH323_SRCDIR)/h341 \
              $(OH323_SRCDIR)/h350 \
              $(OH323_SRCDIR)/h450 \

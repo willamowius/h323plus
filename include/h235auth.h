@@ -147,6 +147,7 @@ class H235Authenticator : public PObject
         GKAdmission,		///< To Be Used for GK Admission
         EPAuthentication,	///< To Be Used for EP Authentication
         LRQOnly,            ///< To Be Used for Location Request Authentication
+        MediaEncryption,    ///< To Be Used for MediaEncryption
         AnyApplication,		///< To Be Used for Any Application
     };
 

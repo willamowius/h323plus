@@ -51,7 +51,7 @@
 #endif
 
 
-#if PTLIB_VER >= 2110
+#if 0 // PTLIB_VER >= 2110 // Disable for Time Being -SH
 #define H323_STLDICTIONARY  1
 #endif
 
@@ -90,6 +90,9 @@
 #undef H323_T120
 #undef H323_H224
 #undef H323_H230
+#ifdef P_SSL
+#undef H323_H235
+#endif
 #ifdef P_VIDEO
 #undef H323_H239
 #endif

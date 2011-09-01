@@ -1,5 +1,7 @@
 H323plus 1.23.0 - 1.23.1
-Add RTP multiplexing (with H.460.19)
+Added H.235.6 Support
+Updated H323List for depreciation warnings with ptlib 2.11
+Added RTP multiplexing (with H.460.19)
 
 H323plus 1.22 - 1.23
 (Fixed) Deadlock in NAT Method when locking H323Connection
