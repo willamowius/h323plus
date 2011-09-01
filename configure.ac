@@ -170,6 +170,7 @@ default_h501=yes
 default_t38=yes
 default_h224=yes
 default_h230=yes
+default_h235=no
 default_h239=yes
 default_h248=yes
 default_h249=yes
@@ -177,7 +178,9 @@ default_h341=yes
 default_h350=yes
 default_h460=yes
 default_h4609=yes
+default_h46018=no
 default_h46018=yes
+default_h46019m=no
 default_h46023=yes
 default_h460p=yes
 default_t120=yes
@@ -193,6 +196,7 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_t38=no
   default_h224=no
   default_h230=no
+  default_h235=no
   default_h239=no
   default_h248=no
   default_h249=no
@@ -200,7 +204,9 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_h350=no
   default_h460=no
   default_h4609=no
+  default_h46017=no
   default_h46018=no
+  default_h46019m=no
   default_h46023=no
   default_hh460p=no
   default_t120=no
@@ -317,6 +323,26 @@ else
   AC_MSG_NOTICE(Disabling H.230)
 fi
 AC_SUBST(H323_H230)
+
+dnl ########################################################################
+dnl check for en/disabling H.235
+
+dnl MSWIN_DISPLAY h235,H.235.6
+dnl MSWIN_DEFINE  h235,H323_H235
+
+AC_ARG_ENABLE(h235,
+       [  --disable-h235          disable H.235.6])
+if test "${enable_h235}x" = "x" ; then
+  enable_h230=$default_h235
+fi
+if test "$enable_h235" = "yes" ; then
+  H323_H235=1
+  AC_DEFINE(H323_H235, 1)
+else
+  H323_H235=
+  AC_MSG_NOTICE(Disabling H.235.6)
+fi
+AC_SUBST(H323_H235)
 
 dnl ########################################################################
 dnl check for disabling H.239
@@ -479,6 +505,26 @@ fi
 AC_SUBST(H323_H4609)
 
 dnl ########################################################################
+dnl check for enabling H.460.17
+
+dnl MSWIN_DISPLAY h46017,H.460.17
+dnl MSWIN_DEFINE  h46017,H323_H46017
+
+AC_ARG_ENABLE(h46017,
+       [  --disable-h46017        disable H.460.17])
+if test "${enable_h46017}x" = "x" ; then
+  enable_h46017=$default_h46017
+fi
+if test "$enable_h46017" = "yes" ; then
+  H323_H46017=1
+  AC_DEFINE(H323_H46017, 1)
+else
+  H323_H46017=
+  AC_MSG_NOTICE(Disabling H.460.17)
+fi
+AC_SUBST(H323_H46017)
+
+dnl ########################################################################
 dnl check for enabling H.460.18/.19
 
 dnl MSWIN_DISPLAY h46018,H.460.18/.19
@@ -497,6 +543,26 @@ else
   AC_MSG_NOTICE(Disabling H.460.18/.19)
 fi
 AC_SUBST(H323_H46018)
+
+dnl ########################################################################
+dnl check for enabling H.460.19 RTP multiplexing
+
+dnl MSWIN_DISPLAY h46018,H.460.19 RTP multiplexing
+dnl MSWIN_DEFINE  h46018,H323_H46019M
+
+AC_ARG_ENABLE(h46019m,
+       [  --disable-h46019m       disable H.460.19 RTP multiplexing])
+if test "${enable_h46019m}x" = "x" ; then
+  enable_h46019m=$default_h46019m
+fi
+if test "$enable_h46019m" = "yes" ; then
+  H323_H46019M=1
+  AC_DEFINE(H323_H46019M, 1)
+else
+  H323_H46019M=
+  AC_MSG_NOTICE(Disabling H.460.9 RTP multiplexing)
+fi
+AC_SUBST(H323_H46019M)
 
 dnl ########################################################################
 dnl check for disabling H.460.23/.24

@@ -580,7 +580,9 @@ H323_T38
 H323_H501
 H323_H460P
 H323_H46023
+H323_H46019M
 H323_H46018
+H323_H46017
 H323_H4609
 H323_H460
 H323_H450
@@ -589,6 +591,7 @@ H323_H341
 H323_H249
 H323_H248
 H323_H239
+H323_H235
 H323_H230
 H323_H224
 NOVIDEO
@@ -665,6 +668,7 @@ enable_embeddedgsm
 enable_video
 enable_h224
 enable_h230
+enable_h235
 enable_h239
 enable_h248
 enable_h249
@@ -673,7 +677,9 @@ enable_h350
 enable_h450
 enable_h460
 enable_h4609
+enable_h46017
 enable_h46018
+enable_h46019m
 enable_h46023
 enable_h460p
 enable_h501
@@ -1311,6 +1317,7 @@ Optional Features:
   --disable-video         disable video functions
   --disable-h224          disable H.224
   --disable-h230          disable H.230
+  --disable-h235          disable H.235.6
   --disable-h239          disable H.239
   --disable-h248          enable H.248
   --disable-h249          disable H.249
@@ -1319,7 +1326,9 @@ Optional Features:
   --disable-h450          disable H.450
   --disable-h460          disable H.460
   --disable-h4609         disable H.460.9
+  --disable-h46017        disable H.460.17
   --disable-h46018        disable H.460.18/.19
+  --disable-h46019m       disable H.460.19 RTP multiplexing
   --disable-h46023        disable H.460.23/.24
   --disable-h460p         disable H.460 Presence
   --disable-h501          disable H.501
@@ -3751,6 +3760,7 @@ default_h501=yes
 default_t38=yes
 default_h224=yes
 default_h230=yes
+default_h235=no
 default_h239=yes
 default_h248=yes
 default_h249=yes
@@ -3758,7 +3768,9 @@ default_h341=yes
 default_h350=yes
 default_h460=yes
 default_h4609=yes
+default_h46018=no
 default_h46018=yes
+default_h46019m=no
 default_h46023=yes
 default_h460p=yes
 default_t120=yes
@@ -3774,6 +3786,7 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_t38=no
   default_h224=no
   default_h230=no
+  default_h235=no
   default_h239=no
   default_h248=no
   default_h249=no
@@ -3781,7 +3794,9 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_h350=no
   default_h460=no
   default_h4609=no
+  default_h46017=no
   default_h46018=no
+  default_h46019m=no
   default_h46023=no
   default_hh460p=no
   default_t120=no
@@ -3948,6 +3963,27 @@ else
   H323_H230=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.230" >&5
 $as_echo "$as_me: Disabling H.230" >&6;}
+fi
+
+
+
+
+# Check whether --enable-h235 was given.
+if test "${enable_h235+set}" = set; then :
+  enableval=$enable_h235;
+fi
+
+if test "${enable_h235}x" = "x" ; then
+  enable_h230=$default_h235
+fi
+if test "$enable_h235" = "yes" ; then
+  H323_H235=1
+  $as_echo "#define H323_H235 1" >>confdefs.h
+
+else
+  H323_H235=
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.235.6" >&5
+$as_echo "$as_me: Disabling H.235.6" >&6;}
 fi
 
 
@@ -4121,6 +4157,27 @@ fi
 
 
 
+# Check whether --enable-h46017 was given.
+if test "${enable_h46017+set}" = set; then :
+  enableval=$enable_h46017;
+fi
+
+if test "${enable_h46017}x" = "x" ; then
+  enable_h46017=$default_h46017
+fi
+if test "$enable_h46017" = "yes" ; then
+  H323_H46017=1
+  $as_echo "#define H323_H46017 1" >>confdefs.h
+
+else
+  H323_H46017=
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460.17" >&5
+$as_echo "$as_me: Disabling H.460.17" >&6;}
+fi
+
+
+
+
 # Check whether --enable-h46018 was given.
 if test "${enable_h46018+set}" = set; then :
   enableval=$enable_h46018;
@@ -4137,6 +4194,27 @@ else
   H323_H46018=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460.18/.19" >&5
 $as_echo "$as_me: Disabling H.460.18/.19" >&6;}
+fi
+
+
+
+
+# Check whether --enable-h46019m was given.
+if test "${enable_h46019m+set}" = set; then :
+  enableval=$enable_h46019m;
+fi
+
+if test "${enable_h46019m}x" = "x" ; then
+  enable_h46019m=$default_h46019m
+fi
+if test "$enable_h46019m" = "yes" ; then
+  H323_H46019M=1
+  $as_echo "#define H323_H46019M 1" >>confdefs.h
+
+else
+  H323_H46019M=
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460.9 RTP multiplexing" >&5
+$as_echo "$as_me: Disabling H.460.9 RTP multiplexing" >&6;}
 fi
 
 
