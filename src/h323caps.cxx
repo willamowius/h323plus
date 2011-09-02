@@ -3916,6 +3916,10 @@ PBoolean H323Capabilities::IsAllowed(const unsigned a_capno1, const unsigned a_c
   return FALSE;
 }
 
+const H323CapabilitiesSet & H323Capabilities::GetSet() const
+{
+    return this->set;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 

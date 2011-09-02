@@ -133,6 +133,8 @@ class H323Capability : public PObject
 	  e_GenericControl,
       /// Conference Control
 	  e_ConferenceControl,
+      /// Security Capability
+      e_Security,
       /// Count of main types
       e_NumMainTypes
     };
@@ -2359,6 +2361,10 @@ class H323Capabilities : public PObject
       unsigned capabilityNumber1,
       unsigned capabilityNumber2
     );
+
+    /**Access to Capabilities Set
+      */
+    const H323CapabilitiesSet & GetSet() const;
   //@}
 
   protected:
