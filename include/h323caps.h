@@ -2104,7 +2104,7 @@ class H323Capabilities : public PObject
        All capabilities that match the specified name are added as in the other
        form of the SetCapability() function.
       */
-    PINDEX AddAllCapabilities(
+    virtual PINDEX AddAllCapabilities(
       PINDEX descriptorNum, ///< The member of the capabilityDescriptor to add
       PINDEX simultaneous,  ///< The member of the SimultaneousCapabilitySet to add
       const PString & name  ///< New capabilities name, if using "known" one.
