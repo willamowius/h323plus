@@ -102,6 +102,16 @@ class H235SecurityCapability  : public H323Capability
       H323Codec::Direction direction  ///< Direction in which this instance runs
     ) const;
 
+    /**Get the default RTP session.
+       This function gets the default RTP session ID for the capability
+       type. For example audio capabilities return the value
+       RTP_Session::DefaultAudioSessionID etc.
+
+       The default behaviour returns zero, indicating it is not an RTP
+       based capability.
+      */
+    unsigned GetDefaultSessionID() const;
+
   //@}
 
   /**@name Protocol manipulation */
@@ -164,10 +174,28 @@ class H235SecurityCapability  : public H323Capability
       const H245_DataType & pdu,  ///< PDU to get information from
       PBoolean receiver               ///< Is receiver OLC
     );
+
+    /**This function is called whenever and incoming OpenLogicalChannel
+       PDU has been used to construct the control channel. It allows the
+       capability to set from the PDU fields, information in members specific
+       to the class.
+
+       The default behaviour is pure.
+     */
+    PBoolean OnSendingPDU(
+       H245_EncryptionAuthenticationAndIntegrity & encAuth,  ///< Encryption Algorithms
+       H323Capability::CommandType type = e_TCS              ///< Message Type
+    ) const;
+
+    /**Get the number of Algorithms in the list
+      */
+    PINDEX GetAlgorithmCount();
+
   //@}
 
   protected:
       unsigned m_capNumber;
+      PStringList m_capList;
 };
 
 
@@ -179,13 +207,12 @@ class H235SecurityCapability  : public H323Capability
    functions as required for descibing the codec.
  */
 
-enum PTLSChType {
-	PTLSChNew,			/// New Channel (Template)
-	PTLSChClone,		/// Clone Channel (Primary)
-	PTLSChannel,		/// Connection Channel
+enum H235ChType {
+	H235ChNew,			/// New Channel (Template)
+	H235ChClone,		/// Clone Channel (Primary)
+	H235Channel,		/// Connection Channel
 };
 
-class PAec;
 class H323SecureRealTimeCapability  : public H323Capability
 {
 public:
@@ -223,269 +250,44 @@ public:
     ) const;
 
     /// Get unique capability number.
-    virtual unsigned GetCapabilityNumber() const 
-		{ return ChildCapability.GetCapabilityNumber(); };
+    virtual unsigned GetCapabilityNumber() const;
 
     /// Set unique capability number.
-    virtual void SetCapabilityNumber(unsigned num) 
-		{ 
-			assignedCapabilityNumber = num;
-			ChildCapability.SetCapabilityNumber(num); 
-		};
+    virtual void SetCapabilityNumber(unsigned num);
 
+    /// Attach QoS
 	void AttachQoS(RTP_QOS * _rtpqos);
 
-#ifdef H323_AEC
-	void AttachAEC(PAec * _ARC);
-#endif
+    /// Attach Associated Security Capability
+    void SetSecurityCapabilityNumber(unsigned _secNo);
+
+    /// Set the Capability List
+    void SetCapabilityList(H323Capabilities * capabilities);
 
   //@}
 
 protected:
-	H323Capability & ChildCapability;  /// Child Capability
-	PTLSChType chtype;				  /// Channel Type
-	RTP_QOS * nrtpqos;				  /// RTP QOS
-
-#ifdef H323_AEC
-	PAec * aec;						  /// Acoustic Echo Cancellation
-#endif
-};
-
-
-/**This class describes the secure interface to an audio codec used to transfer data
-   via the logical channels opened and managed by the H323 control channel.
-
-   An application may create a descendent off this class and override
-   functions as required for descibing the codec.
- */
-
-class H323SecureAudioCapability : public H323SecureRealTimeCapability 
-{
-
-  PCLASSINFO(H323SecureAudioCapability, H323SecureRealTimeCapability);
-
-  public:
-  /**@name Construction */
-  //@{
-
-    /**Create an encrypted audio based capability 
-      */
-    H323SecureAudioCapability(			 
-        H323Capability & childCapability,           /// ChildAudio Capability
-		enum PTLSChType Ch = PTLSChNew			    /// ChannelType
-    );
-
-    /**Create an encrypted audio based capability 
-		with QoS Support
-      */
-	H323SecureAudioCapability(
-		H323Capability & childCapability,			/// ChildAudio Capability
-		RTP_QOS * _rtpqos,							/// Quality of Service Setting
-		enum PTLSChType Ch = PTLSChNew				/// Channel Type
-	);
-
-  //@}
-
-  /**@name Deconstruction */
-  //@{   
-
-	~H323SecureAudioCapability();
-  //@}
-
-  /**@name Overrides from class PObject */
-  //@{
-    /**Create a copy of the object.
-      */
-    virtual PObject * Clone() const;
-
-	/**Compare objects
-	  */
-//	PObject::Comparison Compare(const PObject & obj) const;
-  //@}
-
-  /**@name Identification functions */
-  //@{
-    /**Get the main type of the capability.
-       Always returns e_Audio.
-     */
-    virtual MainTypes GetMainType() const;
-
-    /**Get the sub-type of the capability. This is a code dependent on the
-       main type of the capability.
-
-       This returns one of the four possible combinations of mode and speed
-       using the enum values of the protocol ASN H245_AudioCapability class.
-     */
-    virtual unsigned GetSubType() const;
-
-    /**Get the name of the media data format this class represents.
-     */
-    virtual PString GetFormatName() const;
-  
-   /**Create the Codec */
-    H323Codec * CreateCodec(H323Codec::Direction direction) const;
-  //@}
-
-  /**@name Operations */
-  //@{
-    /**Get the default RTP session.
-       This function gets the default RTP session ID for the capability
-       type. For example audio capabilities return the value
-       RTP_Session::DefaultAudioSessionID etc.
-
-       The default behaviour returns zero, indicating it is not an RTP
-       based capability.
-      */
-    virtual unsigned GetDefaultSessionID() const;
-
-    /**Set the maximum size (in frames) of data that will be transmitted in a
-       single PDU.
-
-       This will also be the desired number that will be sent by most codec
-       implemetations.
-
-       The default behaviour sets the txFramesInPacket variable.
-     */
-    virtual void SetTxFramesInPacket(
-      unsigned frames   /// Number of frames per packet
-    );
-
-    /**Get the maximum size (in frames) of data that will be transmitted in a
-       single PDU.
-
-       The default behaviour sends the txFramesInPacket variable.
-     */
-    virtual unsigned GetTxFramesInPacket() const;
-
-    /**Get the maximum size (in frames) of data that can be received in a
-       single PDU.
-
-       The default behaviour sends the rxFramesInPacket variable.
-     */
-    virtual unsigned GetRxFramesInPacket() const;
-  //@}
-
-  /**@name Protocol manipulation */
-  //@{
-    /**This function is called whenever and outgoing TerminalCapabilitySet
-       PDU is being constructed for the control channel. It allows the
-       capability to set the PDU fields from information in members specific
-       to the class.
-
-       The default behaviour calls the OnSendingPDU() function with a more
-       specific PDU type.
-     */
-    virtual PBoolean OnSendingPDU(
-      H245_Capability & pdu  /// PDU to set information on
-    ) const;
-
-    /**This function is called whenever and outgoing OpenLogicalChannel
-       PDU is being constructed for the control channel. It allows the
-       capability to set the PDU fields from information in members specific
-       to the class.
-
-       The default behaviour calls the OnSendingPDU() function with a more
-       specific PDU type.
-     */
-    virtual PBoolean OnSendingPDU(
-      H245_DataType & pdu  /// PDU to set information on
-    ) const;
-
-    /**This function is called whenever and outgoing RequestMode
-       PDU is being constructed for the control channel. It allows the
-       capability to set the PDU fields from information in members specific
-       to the class.
-
-       The default behaviour calls the OnSendingPDU() function with a more
-       specific PDU type.
-     */
-    virtual PBoolean OnSendingPDU(
-      H245_ModeElement & pdu  /// PDU to set information on
-    ) const;
-
-    /**This function is called whenever and incoming TerminalCapabilitySet
-       PDU is received on the control channel, and a new H323Capability
-       descendent was created. This completes reading fields from the PDU
-       into the classes members.
-
-       If the function returns FALSE then the received PDU codec description
-       is not supported, so will be ignored.
-       
-       The default behaviour calls the OnReceivedPDU() that takes a
-       H245_AudioCapability and clamps the txFramesInPacket.
-     */
-
-    virtual PBoolean OnReceivedPDU(
-      const H245_Capability & pdu  /// PDU to get information from
-    );
-
-    /**This function is called whenever and incoming OpenLogicalChannel
-       PDU has been used to construct the control channel. It allows the
-       capability to set from the PDU fields, information in members specific
-       to the class.
-       
-       The default behaviour calls the OnReceivedPDU() that takes a
-       H245_AudioCapability and clamps the txFramesInPacket or
-       rxFramesInPacket.
-     */
-    virtual PBoolean OnReceivedPDU(
-      const H245_DataType & pdu,  /// PDU to get information from
-      PBoolean receiver               /// Is receiver OLC
-    );
-
-	/**Get Child Capability
-	  */
-	H323Capability & GetChildCapability() { return ChildCapability; };
-  //@}
-
-    /**Validate that the capability is usable given the connection.
-       This checks agains the negotiated protocol version number and remote
-       application to determine if this capability should be used in TCS or
-       OLC pdus.
-
-       The default behaviour returns TRUE.
-      */
-    virtual PBoolean IsUsable(
-      const H323Connection & connection
-	  ) const { return ChildCapability.IsUsable(connection); };
-  
-
-    /**Get the direction for this capability.
-      */ 
-    CapabilityDirection GetCapabilityDirection() const 
-		{ return ChildCapability.GetCapabilityDirection(); };
-
-    /**Set the direction for this capability.
-      */
-    void SetCapabilityDirection(
-      CapabilityDirection dir   /// New direction code
-    ) { ChildCapability.SetCapabilityDirection(dir); };
-
-
-    /// Get the payload type for the capaibility
-    RTP_DataFrame::PayloadTypes GetPayloadType() const 
-		{ return ChildCapability.GetPayloadType(); };
-
-  //@}
-
-protected:
-
-    unsigned rxFramesInPacket;
-    unsigned txFramesInPacket;
+	H323Capability & ChildCapability;    /// Child Capability
+	H235ChType chtype;				     /// Channel Type
+    PBoolean  m_active;                  /// Whether encryption is active
+    H323Capabilities * m_capabilities;   /// Capabilities list
+    unsigned  m_secNo;                   /// Security Capability
+	RTP_QOS * nrtpqos;				     /// RTP QOS
 
 };
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-/**This class describes the interface to a video codec used to transfer data
+/**This class describes the interface to a secure codec used to transfer data
    via the logical channels opened and managed by the H323 control channel.
 
    An application may create a descendent off this class and override
    functions as required for descibing a codec.
  */
-class H323SecureVideoCapability : public H323SecureRealTimeCapability
+class H323SecureCapability : public H323SecureRealTimeCapability
 {
-  PCLASSINFO(H323SecureVideoCapability, H323SecureRealTimeCapability);
+  PCLASSINFO(H323SecureCapability, H323SecureRealTimeCapability);
 
   public:
   /**@name Construction */
@@ -493,9 +295,9 @@ class H323SecureVideoCapability : public H323SecureRealTimeCapability
 
     /**Create an encrypted audio based capability 
       */
-    H323SecureVideoCapability(				 
+    H323SecureCapability(	
         H323Capability & childCapability,          /// ChildAudio Capability
-		enum PTLSChType Ch = PTLSChNew			   /// ChannelType
+		enum H235ChType Ch = H235ChNew			   /// ChannelType
     );
 
   //@}
@@ -615,40 +417,6 @@ class H323SecureVideoCapability : public H323SecureRealTimeCapability
 	  PBoolean receiver				  /// is receiver OLC
     );
 
-    /**This function is called whenever and outgoing TerminalCapabilitySet
-       or OpenLogicalChannel PDU is being constructed for the control channel.
-       It allows the capability to set the PDU fields from information in
-       members specific to the class.
-
-       The default behaviour is pure.
-     */
-    virtual PBoolean OnSendingPDU(
-      H245_VideoCapability & pdu  /// PDU to set information on
-    ) const;
-
-    /**This function is called whenever and outgoing RequestMode
-       PDU is being constructed for the control channel. It allows the
-       capability to set the PDU fields from information in members specific
-       to the class.
-
-       The default behaviour sets the PDUs tag according to the GetSubType()
-       function (translated to different enum).
-     */
-    virtual PBoolean OnSendingPDU(
-      H245_VideoMode & pdu  /// PDU to set information on
-    ) const;
-
-    /**This function is called whenever and incoming TerminalCapabilitySet
-       or OpenLogicalChannel PDU has been used to construct the control
-       channel. It allows the capability to set from the PDU fields,
-       information in members specific to the class.
-
-       The default behaviour is pure.
-     */
-    virtual PBoolean OnReceivedPDU(
-      const H245_VideoCapability & pdu  /// PDU to set information on
-    );
-
 	/**Get Child Capability
 	  */
 	H323Capability & GetChildCapability() const { return ChildCapability; }
@@ -684,6 +452,8 @@ class H323SecureVideoCapability : public H323SecureRealTimeCapability
 
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
 class H235Capabilities : public H323Capabilities
 {
      PCLASSINFO(H235Capabilities, H323Capabilities);
@@ -702,8 +472,21 @@ public:
       const H245_TerminalCapabilitySet & pdu  ///< PDU to convert to a capability set.
     );
 
-    void WrapCapability(H323Capability & Cap);
+    void WrapCapability(H323Capability & capability);
 
+    void AddSecure(H323Capability * capability);
+
+    H323Capability * CopySecure(const H323Capability & capability);
+
+    /**Add all matching capabilities to descriptor lists.
+       All capabilities that match the specified name are added as in the other
+       form of the SetCapability() function.
+      */
+    virtual PINDEX AddAllCapabilities(
+      PINDEX descriptorNum, ///< The member of the capabilityDescriptor to add
+      PINDEX simultaneous,  ///< The member of the SimultaneousCapabilitySet to add
+      const PString & name  ///< New capabilities name, if using "known" one.
+    );
 };
 
 #endif  // H323_H235

@@ -56,6 +56,9 @@ const char * ALG_AES256 = "2.16.840.1.101.3.4.1.42";
 H235SecurityCapability::H235SecurityCapability(unsigned capabilityNo)
 : m_capNumber(capabilityNo)
 {
+    // In Preference order
+    //m_capList.AppendString(ALG_AES256);
+    m_capList.AppendString(ALG_AES128);
 }
 
 PObject * H235SecurityCapability::Clone() const
@@ -93,22 +96,50 @@ H323Codec * H235SecurityCapability::CreateCodec(H323Codec::Direction) const
   return NULL;
 }
 
+PINDEX H235SecurityCapability::GetAlgorithmCount()
+{
+   return m_capList.GetSize();
+}
+
+PBoolean H235SecurityCapability::OnSendingPDU(H245_EncryptionAuthenticationAndIntegrity & encAuth, H323Capability::CommandType type) const
+{
+  if (m_capList.GetSize() == 0)
+      return false;
+
+  encAuth.IncludeOptionalField(H245_EncryptionAuthenticationAndIntegrity::e_encryptionCapability);
+
+  H245_EncryptionCapability & enc = encAuth.m_encryptionCapability;
+    
+  if (type == e_OLC) {  // only the 1st (preferred) Algorithm.
+      enc.SetSize(1);
+      H245_MediaEncryptionAlgorithm & alg = enc[0];
+      alg.SetTag(H245_MediaEncryptionAlgorithm::e_algorithm);
+      PASN_ObjectId & id = alg;
+      id.SetValue(m_capList[0]);
+      return true;
+  } else if (type == e_TCS) {  // all the supported Algorithms
+      enc.SetSize(m_capList.GetSize());
+      for (PINDEX i=0; i < m_capList.GetSize(); ++i) {
+          H245_MediaEncryptionAlgorithm & alg = enc[i];
+          alg.SetTag(H245_MediaEncryptionAlgorithm::e_algorithm);
+          PASN_ObjectId & id = alg;
+          id.SetValue(m_capList[i]);
+      }
+      return true;
+  } else
+      return false;
+}
+
 PBoolean H235SecurityCapability::OnSendingPDU(H245_Capability & pdu) const
 {
+  if (m_capList.GetSize() == 0)
+      return false;
 
   pdu.SetTag(H245_Capability::e_h235SecurityCapability);
   H245_H235SecurityCapability & sec = pdu;
 
-  H245_EncryptionAuthenticationAndIntegrity & encAuth = sec.m_encryptionAuthenticationAndIntegrity;
-  encAuth.IncludeOptionalField(H245_EncryptionAuthenticationAndIntegrity::e_encryptionCapability);
-
-  H245_EncryptionCapability & enc = encAuth.m_encryptionCapability;
-
-  enc.SetSize(1);
-  H245_MediaEncryptionAlgorithm & alg128 = enc[0];
-  alg128.SetTag(H245_MediaEncryptionAlgorithm::e_algorithm);
-  PASN_ObjectId & id = alg128;
-  id.SetValue(ALG_AES128);
+  if (!OnSendingPDU(sec.m_encryptionAuthenticationAndIntegrity))
+      return false;
 
   H245_CapabilityTableEntryNumber & capNo = sec.m_mediaCapability;
   capNo = m_capNumber;
@@ -142,16 +173,23 @@ PBoolean H235SecurityCapability::OnReceivedPDU(const H245_DataType &, PBoolean)
   return FALSE;
 }
 
+unsigned H235SecurityCapability::GetDefaultSessionID() const
+{
+  return OpalMediaFormat::NonRTPSessionID;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 H323SecureRealTimeCapability::H323SecureRealTimeCapability(H323Capability & childCapability)
-				: ChildCapability(childCapability), nrtpqos(NULL)
+				: ChildCapability(*(H323Capability *)childCapability.Clone()), m_active(false), 
+                  m_capabilities(NULL), m_secNo(0),  nrtpqos(NULL)
 {
 }
 
 
 H323SecureRealTimeCapability::H323SecureRealTimeCapability(RTP_QOS * _rtpqos,H323Capability & childCapability)
-				: ChildCapability(childCapability), nrtpqos(_rtpqos)
+				: ChildCapability(*(H323Capability *)childCapability.Clone()), m_active(false), 
+                  m_capabilities(NULL), m_secNo(0), nrtpqos(_rtpqos)
 {
 }
 
@@ -166,14 +204,10 @@ void H323SecureRealTimeCapability::AttachQoS(RTP_QOS * _rtpqos)
 	  nrtpqos = _rtpqos;
 }
 
-
-#ifdef H323_AEC
-void H323SecureRealTimeCapability::AttachAEC(PAec * _AEC)
+void H323SecureRealTimeCapability::SetSecurityCapabilityNumber(unsigned _secNo)
 {
-	  aec = _AEC;
+    m_secNo = _secNo;
 }
-#endif
-
 
 H323Channel * H323SecureRealTimeCapability::CreateChannel(H323Connection & connection,
                                                     H323Channel::Directions dir,
@@ -216,258 +250,153 @@ H323Channel * H323SecureRealTimeCapability::CreateChannel(H323Connection & conne
    return connection.CreateRealTimeLogicalChannel(*this, dir, sessionID, param, nrtpqos);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+unsigned H323SecureRealTimeCapability::GetCapabilityNumber() const 
+{ 
+    return ChildCapability.GetCapabilityNumber(); 
+};
 
-H323SecureAudioCapability::H323SecureAudioCapability(H323Capability & childCapability,
-													 PTLSChType Ch
-													 )
-   : H323SecureRealTimeCapability(childCapability)
-{
-	rxFramesInPacket = GetRxFramesInPacket();
-	txFramesInPacket = GetTxFramesInPacket();
-	chtype = Ch;
-
-#ifdef H323_AEC
-        aec = NULL;
-#endif
+void H323SecureRealTimeCapability::SetCapabilityNumber(unsigned num) 
+{ 
+	ChildCapability.SetCapabilityNumber(num); 
 }
 
-H323SecureAudioCapability::H323SecureAudioCapability(H323Capability & childCapability,
-													 RTP_QOS * _rtpqos,
-													 PTLSChType Ch
-													 )
-   : H323SecureRealTimeCapability(_rtpqos,childCapability)
+void H323SecureRealTimeCapability::SetCapabilityList(H323Capabilities * capabilities)
 {
-	rxFramesInPacket = GetRxFramesInPacket();
-	txFramesInPacket = GetTxFramesInPacket();
-	nrtpqos = _rtpqos;
-	chtype = Ch;
-
-#ifdef H323_AEC
-    aec = NULL;
-#endif
-}
-
-H323SecureAudioCapability::~H323SecureAudioCapability()
-{
-}
-
-H323Capability::MainTypes H323SecureAudioCapability::GetMainType() const
-{
-  return e_Audio;
-}
-
-
-PObject * H323SecureAudioCapability::Clone() const
-{
-
- PTRACE(4, "H235RTP\tCloning Capability: " << GetFormatName());
-
-	PBoolean IsClone = FALSE;
-	PTLSChType ch = PTLSChNew;
-
-	switch (chtype) {
-	case PTLSChNew:	
-		   ch = PTLSChClone;
-		   IsClone = TRUE;
-		break;
-	case PTLSChClone:
-		   ch = PTLSChannel;
-		break;
-	case PTLSChannel:
-		   ch = PTLSChannel;
-		break;
-	}
-
-    H323Capability * Ccap = (H323Capability *)ChildCapability.Clone();
-
-	H323SecureAudioCapability * child = 
-        new H323SecureAudioCapability(*Ccap, nrtpqos, ch);
-
-#ifdef H323_AEC
-	child->AttachAEC(aec);
-#endif
-
-    return child;
-}
-
-PString H323SecureAudioCapability::GetFormatName() const
-{
-  return ChildCapability.GetFormatName() + " #";
-}
-
-
-unsigned H323SecureAudioCapability::GetSubType() const
-{
-  return ChildCapability.GetSubType();
-}
-
-unsigned H323SecureAudioCapability::GetDefaultSessionID() const
-{
-  return RTP_Session::DefaultAudioSessionID;
-}
-
-void H323SecureAudioCapability::SetTxFramesInPacket(unsigned frames)
-{
-
-	txFramesInPacket = frames;
-    ChildCapability.SetTxFramesInPacket(frames);
-}
-
-
-unsigned H323SecureAudioCapability::GetTxFramesInPacket() const
-{
-
-  return ChildCapability.GetTxFramesInPacket();
-}
-
-
-unsigned H323SecureAudioCapability::GetRxFramesInPacket() const
-{
-
-  return ChildCapability.GetRxFramesInPacket();
-}
-
-
-PBoolean H323SecureAudioCapability::OnSendingPDU(H245_Capability & cap) const
-{
- 	return ChildCapability.OnSendingPDU(cap);
-
-}
-
-
-PBoolean H323SecureAudioCapability::OnSendingPDU(H245_DataType & dataType) const
-{
-		return ChildCapability.OnSendingPDU(dataType);
-}
-
-
-PBoolean H323SecureAudioCapability::OnSendingPDU(H245_ModeElement & mode) const
-{
-		return ChildCapability.OnSendingPDU(mode);
-}
-
-
-PBoolean H323SecureAudioCapability::OnReceivedPDU(const H245_Capability & cap)
-{
-	return ChildCapability.OnReceivedPDU(cap);
-}
-
-
-PBoolean H323SecureAudioCapability::OnReceivedPDU(const H245_DataType & dataType, PBoolean receiver)
-{
-	return ChildCapability.OnReceivedPDU(dataType,receiver);
-}
-
-
-H323Codec * H323SecureAudioCapability::CreateCodec(H323Codec::Direction direction) const
-{
- PTRACE(4, "H235RTP\tCodec creation:");
-/*
- H323SecureAudioCodec * child = 
-			(H323SecureAudioCodec *)ChildCapability.CreateCodec(direction);
-
-#ifdef H323_AEC
-  if (aec != NULL)
-    child->AttachAEC(aec);
-#endif
-
-    return child;
-*/
-    return ChildCapability.CreateCodec(direction);
+    m_capabilities = capabilities;
 }
 
 ///////////////////////////////////////////////////////////////////////////// 
 
-H323SecureVideoCapability::H323SecureVideoCapability(H323Capability & childCapability,
-													 PTLSChType Ch
+H323SecureCapability::H323SecureCapability(H323Capability & childCapability,
+													 H235ChType Ch
 													 )
    : H323SecureRealTimeCapability(childCapability)
 {
 	chtype = Ch;
 }
 
-H323Capability::MainTypes H323SecureVideoCapability::GetMainType() const
+H323Capability::MainTypes H323SecureCapability::GetMainType() const
 { 
-    return e_Video;
+    return ChildCapability.GetMainType();
 }
 
 
-PObject * H323SecureVideoCapability::Clone() const
+PObject * H323SecureCapability::Clone() const
 {
 	PTRACE(4, "H235RTP\tCloning Capability: " << GetFormatName());
 
 	PBoolean IsClone = FALSE;
-	PTLSChType ch = PTLSChNew;
+	H235ChType ch = H235ChNew;
 
 	switch (chtype) {
-	case PTLSChNew:	
+	case H235ChNew:	
 //cout << "New Clone." << "\n";
-		   ch = PTLSChClone;
+		   ch = H235ChClone;
 		   IsClone = TRUE;
 		break;
-	case PTLSChClone:
-		   ch = PTLSChannel;
+	case H235ChClone:
+		   ch = H235Channel;
 		break;
-	case PTLSChannel:
-		   ch = PTLSChannel;
+	case H235Channel:
+		   ch = H235Channel;
 		break;
 	}
 
   H323VideoCapability * Ccap = (H323VideoCapability *)ChildCapability.Clone();
 
-  return new H323SecureVideoCapability(*Ccap,ch);
+  return new H323SecureCapability(*Ccap,ch);
 }
 
-PObject::Comparison H323SecureVideoCapability::Compare(const PObject & obj) const
+PObject::Comparison H323SecureCapability::Compare(const PObject & obj) const
 {
-  if (!PIsDescendant(&obj, H323SecureVideoCapability))
+  if (!PIsDescendant(&obj, H323SecureCapability))
     return LessThan;
 
   Comparison result = H323Capability::Compare(obj);
   if (result != EqualTo) 
     return result;
 
-  const H323SecureVideoCapability & other = (const H323SecureVideoCapability &)obj;
+  const H323SecureCapability & other = (const H323SecureCapability &)obj;
 
   return ChildCapability.Compare(other.GetChildCapability());
 }
 
-unsigned H323SecureVideoCapability::GetDefaultSessionID() const
+unsigned H323SecureCapability::GetDefaultSessionID() const
 {
-  return RTP_Session::DefaultVideoSessionID;
+    return ChildCapability.GetDefaultSessionID();
 }
-
-
 
 ////////////////////////////////////////////////////////////////////////
 // PDU Sending
 
-PBoolean H323SecureVideoCapability::OnSendingPDU(H245_Capability & cap) const
+PBoolean H323SecureCapability::OnSendingPDU(H245_ModeElement & mode) const
 {
-	return ChildCapability.OnSendingPDU(cap);
+    switch (ChildCapability.GetMainType()) {
+        case H323Capability::e_Audio:
+            return ((H323AudioCapability &)ChildCapability).OnSendingPDU(mode);
+        case H323Capability::e_Video:
+            return ((H323VideoCapability &)ChildCapability).OnSendingPDU(mode);
+        case H323Capability::e_Data:
+        default:
+            return false;
+    }
 }
 
-
-PBoolean H323SecureVideoCapability::OnSendingPDU(H245_DataType & dataType) const
+PBoolean H323SecureCapability::OnSendingPDU(H245_DataType & dataType) const
 {
-	return ChildCapability.OnSendingPDU(dataType);
+    // find the matching H235SecurityCapability to get the agreed algorithms
+    // if not found or no matching algorithm then assume no encryption.
+    H235SecurityCapability * secCap = NULL;
+    PBoolean secActive = false;
+    if (m_capabilities && m_active) {
+        secCap = (H235SecurityCapability *)m_capabilities->FindCapability(m_secNo);
+        if (secCap && secCap->GetAlgorithmCount() > 0)
+             secActive = true;
+    }
+
+    if (!secActive) {
+        unsigned txFramesInPacket =0;
+        switch (ChildCapability.GetMainType()) {
+            case H323Capability::e_Audio:
+                dataType.SetTag(H245_DataType::e_audioData);
+                txFramesInPacket = ((H323AudioCapability &)ChildCapability).GetTxFramesInPacket();
+                return ((H323AudioCapability &)ChildCapability).OnSendingPDU((H245_AudioCapability &)dataType, txFramesInPacket, e_OLC);
+            case H323Capability::e_Video:
+                dataType.SetTag(H245_DataType::e_videoData); 
+                return ((H323VideoCapability &)ChildCapability).OnSendingPDU((H245_VideoCapability &)dataType, e_OLC);
+            case H323Capability::e_Data:
+                return ((H323DataCapability &)ChildCapability).OnSendingPDU(dataType, e_OLC);
+            default:
+                break;
+        }
+        return false;
+    }
+
+    dataType.SetTag(H245_DataType::e_h235Media);
+    H245_H235Media & h235Media = dataType;
+    // Load the algorithms
+    secCap->OnSendingPDU(h235Media.m_encryptionAuthenticationAndIntegrity);
+   
+    H245_H235Media_mediaType & cType = h235Media.m_mediaType;
+    unsigned txFramesInPacket =0;
+    switch (ChildCapability.GetMainType()) {
+        case H323Capability::e_Audio: 
+            cType.SetTag(H245_H235Media_mediaType::e_audioData); 
+            txFramesInPacket = ((H323AudioCapability &)ChildCapability).GetTxFramesInPacket();
+            return ((H323AudioCapability &)ChildCapability).OnSendingPDU((H245_AudioCapability &)cType, txFramesInPacket, e_OLC);
+        case H323Capability::e_Video: 
+            cType.SetTag(H245_H235Media_mediaType::e_videoData); 
+            return ((H323VideoCapability &)ChildCapability).OnSendingPDU((H245_VideoCapability &)cType, e_OLC);
+        case H323Capability::e_Data: 
+            cType.SetTag(H245_H235Media_mediaType::e_data);
+            return ((H323DataCapability &)ChildCapability).OnSendingPDU((H245_DataApplicationCapability &)cType, e_OLC);
+        default:
+            break;
+    }
+    return false;
 }
 
-
-PBoolean H323SecureVideoCapability::OnSendingPDU(H245_ModeElement & mode) const
-{
-    return ChildCapability.OnSendingPDU(mode);
-}
-
-
-PBoolean H323SecureVideoCapability::OnReceivedPDU(const H245_Capability & cap)
-{
-	return ChildCapability.OnReceivedPDU(cap);
-}
-
-
-PBoolean H323SecureVideoCapability::OnReceivedPDU(const H245_DataType & dataType,PBoolean receiver)
+PBoolean H323SecureCapability::OnReceivedPDU(const H245_DataType & dataType,PBoolean receiver)
 {
 	return ChildCapability.OnReceivedPDU(dataType,receiver);
 }
@@ -475,35 +404,50 @@ PBoolean H323SecureVideoCapability::OnReceivedPDU(const H245_DataType & dataType
 //////////////////////////////////////////////////////////////////////////////
 // Child Capability Intercept
 
-PBoolean H323SecureVideoCapability::OnSendingPDU(H245_VideoCapability & pdu) const
+PBoolean H323SecureCapability::OnSendingPDU(H245_Capability & pdu) const
 {
-	return ((H323VideoCapability &)ChildCapability).OnSendingPDU(pdu);
+    switch (ChildCapability.GetMainType()) {
+        case H323Capability::e_Audio:
+            return ((H323AudioCapability &)ChildCapability).OnSendingPDU(pdu);
+        case H323Capability::e_Video:
+            return ((H323VideoCapability &)ChildCapability).OnSendingPDU(pdu);
+        case H323Capability::e_Data:
+        case H323Capability::e_UserInput:
+        case H323Capability::e_ExtendVideo:
+        default:
+            return false;
+    }
 }
 
-PBoolean H323SecureVideoCapability::OnSendingPDU(H245_VideoMode & pdu) const
+PBoolean H323SecureCapability::OnReceivedPDU(const H245_Capability & pdu)
 {
-	return ((H323VideoCapability &)ChildCapability).OnSendingPDU(pdu);
+    switch (ChildCapability.GetMainType()) {
+        case H323Capability::e_Audio:
+            return ((H323AudioCapability &)ChildCapability).OnReceivedPDU(pdu);
+        case H323Capability::e_Video:
+            return ((H323VideoCapability &)ChildCapability).OnReceivedPDU(pdu);
+        case H323Capability::e_Data:
+        case H323Capability::e_UserInput:
+        case H323Capability::e_ExtendVideo:
+        default:
+            return false;
+    }
 }
 
-PBoolean H323SecureVideoCapability::OnReceivedPDU(const H245_VideoCapability & pdu)
-{
-	return ((H323VideoCapability &)ChildCapability).OnReceivedPDU(pdu);
-}
 
-
-PString H323SecureVideoCapability::GetFormatName() const
+PString H323SecureCapability::GetFormatName() const
 {
   return ChildCapability.GetFormatName() + " #";
 }
 
 
-unsigned H323SecureVideoCapability::GetSubType() const
+unsigned H323SecureCapability::GetSubType() const
 {
   return ChildCapability.GetSubType();
 }
 
 
-H323Codec * H323SecureVideoCapability::CreateCodec(H323Codec::Direction direction) const
+H323Codec * H323SecureCapability::CreateCodec(H323Codec::Direction direction) const
 {
     return ChildCapability.CreateCodec(direction);
 }
@@ -540,21 +484,169 @@ H235Capabilities::H235Capabilities(const H323Connection & /*connection*/, const 
 
 }
 
-void H235Capabilities::WrapCapability(H323Capability & Cap)
+static unsigned SetCapabilityNumber(const H323CapabilitiesList & table,
+                                      unsigned newCapabilityNumber)
 {
-    switch (Cap.GetMainType()) {
-        case H323Capability::e_Audio:
-            
-            break;
-        case H323Capability::e_Video:
+  // Assign a unique number to the codec, check if the user wants a specific
+  // value and start with that.
+  if (newCapabilityNumber == 0)
+    newCapabilityNumber = 1;
 
+  PINDEX i = 0;
+  while (i < table.GetSize()) {
+    if (table[i].GetCapabilityNumber() != newCapabilityNumber)
+      i++;
+    else {
+      // If it already in use, increment it
+      newCapabilityNumber++;
+      i = 0;
+    }
+  }
+
+  return newCapabilityNumber;
+}
+
+void H235Capabilities::AddSecure(H323Capability * capability)
+{
+  if (capability == NULL)
+    return;
+
+  if (!PIsDescendant(capability,H323SecureCapability) &&
+      !PIsDescendant(capability,H235SecurityCapability))
+      return;
+
+  // See if already added, confuses things if you add the same instance twice
+  if (table.GetObjectsIndex(capability) != P_MAX_INDEX)
+    return;
+
+  capability->SetCapabilityNumber(SetCapabilityNumber(table, 1));
+  ((H323SecureCapability *)capability)->SetCapabilityList(this);
+
+  H235SecurityCapability * secCap = new H235SecurityCapability(capability->GetCapabilityNumber());
+  secCap->SetCapabilityNumber(SetCapabilityNumber(table, 100));
+  ((H323SecureCapability *)capability)->SetSecurityCapabilityNumber(secCap->GetCapabilityNumber());
+  table.Append(capability);
+  table.Append(secCap);
+
+  PTRACE(3, "H323\tAdded Secure Capability: " << *capability);
+}
+
+H323Capability * H235Capabilities::CopySecure(const H323Capability & capability)
+{
+  if (!PIsDescendant(&capability,H323SecureCapability) &&
+      !PIsDescendant(&capability,H235SecurityCapability))
+      return NULL;
+
+  if (PIsDescendant(&capability,H235SecurityCapability)) {
+     H235SecurityCapability * newCapability = (H235SecurityCapability *)capability.Clone();
+     newCapability->SetCapabilityNumber(capability.GetCapabilityNumber());  // Do not change number - TODO -SH
+     table.Append(newCapability);
+     return newCapability;
+  } else {
+     H323SecureCapability * newCapability = (H323SecureCapability *)capability.Clone();
+     newCapability->SetCapabilityNumber(SetCapabilityNumber(table, capability.GetCapabilityNumber()));
+     newCapability->SetCapabilityList(this);
+     table.Append(newCapability);
+
+     PTRACE(3, "H323\tCopied Secure Capability: " << *newCapability);
+     return newCapability;
+  }
+}
+
+void H235Capabilities::WrapCapability(H323Capability & capability)
+{
+
+    if (PIsDescendant(&capability,H323SecureCapability) ||
+        PIsDescendant(&capability,H235SecurityCapability)) {
+          CopySecure(capability);
+          return;
+    }
+
+    switch (capability.GetDefaultSessionID()) {
+        case OpalMediaFormat::DefaultAudioSessionID:
+        case OpalMediaFormat::DefaultVideoSessionID:
+            AddSecure(new H323SecureCapability(capability));
             break;
-        case H323Capability::e_Data:
-        case H323Capability::e_UserInput:
-        case H323Capability::e_ExtendVideo:
+        case OpalMediaFormat::NonRTPSessionID:
+        case OpalMediaFormat::DefaultDataSessionID:
+        case OpalMediaFormat::DefaultH224SessionID:
+        case OpalMediaFormat::DefaultExtVideoSessionID:
         default:
+            Copy(capability);
             break;
     }
+}
+
+static PBoolean MatchWildcard(const PCaselessString & str, const PStringArray & wildcard)
+{
+  PINDEX last = 0;
+  for (PINDEX i = 0; i < wildcard.GetSize(); i++) {
+    if (wildcard[i].IsEmpty())
+      last = str.GetLength();
+    else {
+      PINDEX next = str.Find(wildcard[i], last);
+      if (next == P_MAX_INDEX)
+        return FALSE;
+      last = next + wildcard[i].GetLength();
+    }
+  }
+
+  return TRUE;
+}
+
+PINDEX H235Capabilities::AddAllCapabilities(PINDEX descriptorNum,
+                                            PINDEX simultaneous,
+                                            const PString & name)
+{
+  PINDEX reply = descriptorNum == P_MAX_INDEX ? P_MAX_INDEX : simultaneous;
+
+  PStringArray wildcard = name.Tokenise('*', FALSE);
+
+  H323CapabilityFactory::KeyList_T stdCaps = H323CapabilityFactory::GetKeyList();
+
+  for (unsigned session = OpalMediaFormat::FirstSessionID; session <= OpalMediaFormat::LastSessionID; session++) {
+    for (H323CapabilityFactory::KeyList_T::const_iterator r = stdCaps.begin(); r != stdCaps.end(); ++r) {
+      PString capName(*r);
+      if (MatchWildcard(capName, wildcard) && (FindCapability(capName) == NULL)) {
+        OpalMediaFormat mediaFormat(capName);
+        if (!mediaFormat.IsValid() && (capName.Right(4) == "{sw}") && capName.GetLength() > 4)
+          mediaFormat = OpalMediaFormat(capName.Left(capName.GetLength()-4));
+        if (mediaFormat.IsValid() && mediaFormat.GetDefaultSessionID() == session) {
+          // add the capability
+          H323Capability * capability = H323Capability::Create(capName);
+          PINDEX num=0;
+            switch (session) {
+                case OpalMediaFormat::DefaultAudioSessionID:
+                case OpalMediaFormat::DefaultVideoSessionID:
+                    num = SetCapability(descriptorNum, simultaneous, new H323SecureCapability(*capability));
+                    AddSecure(new H235SecurityCapability(num));
+                    delete capability;
+                    break;
+                case OpalMediaFormat::DefaultDataSessionID:
+                case OpalMediaFormat::DefaultH224SessionID:
+                case OpalMediaFormat::DefaultExtVideoSessionID:
+                default:
+                    num = SetCapability(descriptorNum, simultaneous, capability);
+                    break;
+            }
+          
+            if (descriptorNum == P_MAX_INDEX) {
+                reply = num;
+                descriptorNum = num;
+                simultaneous = P_MAX_INDEX;
+            }
+            else if (simultaneous == P_MAX_INDEX) {
+                if (reply == P_MAX_INDEX)
+                  reply = num;
+                simultaneous = num;
+            }
+        }
+      }
+    }
+    simultaneous = P_MAX_INDEX;
+  }
+
+  return reply;
 }
 
 #endif
