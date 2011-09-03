@@ -628,7 +628,7 @@ OpalMediaFormat::OpalMediaFormat()
   frameTime = 0;
   timeUnits = 0;
   codecBaseTime = 0;
-  defaultSessionID = 0;
+  defaultSessionID = NonRTPSessionID;
 }
 
 
@@ -642,7 +642,7 @@ OpalMediaFormat::OpalMediaFormat(const char * search, PBoolean exact)
   frameTime = 0;
   timeUnits = 0;
   codecBaseTime = 0;
-  defaultSessionID = 0; 
+  defaultSessionID = NonRTPSessionID; 
 
   // look for the media type in the factory. 
   // Don't make a copy of the list - lock the list and use the raw data

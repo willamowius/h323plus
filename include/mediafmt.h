@@ -391,6 +391,7 @@ class OpalMediaFormat : public PCaselessString
 
     void SetPayloadType(RTP_DataFrame::PayloadTypes type) { rtpPayloadType = type; }
     enum {
+      NonRTPSessionID           = 0,
       FirstSessionID            = 1,
       DefaultAudioSessionID     = 1,
       DefaultVideoSessionID     = 2,
