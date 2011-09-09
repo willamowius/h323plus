@@ -41,11 +41,16 @@
 #include <ptclib/dtmf.h>
 #endif
 
+#include "openh323buildopts.h"
+#if H323_H235
+#include "h235/h235caps.h"
+#else
 #include "h323caps.h"
+#endif
 #include "transports.h"
 #include "channels.h"
 #include "guid.h"
-#include "openh323buildopts.h"
+
 #include "h235auth.h"
 #ifdef H323_H235
 #include "h235/h2356.h"
@@ -2607,9 +2612,13 @@ class H323Connection : public PObject
       const H225_EndpointType & pdu ///< PDU from which to extract application info.
     );
     
-    /**Get the remotes capability table for this connection.
+    /**Get the local capability table for this connection.
      */
     const H323Capabilities & GetLocalCapabilities() const { return localCapabilities; }
+
+    /**Get the local capability table for this connection.
+     */
+    H323Capabilities * GetLocalCapabilitiesRef()  { return &localCapabilities; }
 
     /**Get the remotes capability table for this connection.
      */
@@ -3006,7 +3015,11 @@ class H323Connection : public PObject
     PStringList        localAliasNames;
     PString            localPartyName;
     PString            localDisplayName;
+#if H323_H235
+    H235Capabilities   localCapabilities; // Capabilities local system supports
+#else
     H323Capabilities   localCapabilities; // Capabilities local system supports
+#endif
     PString            remotePartyName;
     PString            remotePartyNumber;
     PString            remotePartyAddress;

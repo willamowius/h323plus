@@ -46,19 +46,13 @@
 #ifdef H323_H235
 
 #include "h235/h235caps.h"
-
-
-const char * ALG_AES128 = "2.16.840.1.101.3.4.1.2";
-const char * ALG_AES256 = "2.16.840.1.101.3.4.1.42";
+#include "h323.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
 H235SecurityCapability::H235SecurityCapability(unsigned capabilityNo)
 : m_capNumber(capabilityNo)
 {
-    // In Preference order
-    //m_capList.AppendString(ALG_AES256);
-    m_capList.AppendString(ALG_AES128);
 }
 
 PObject * H235SecurityCapability::Clone() const
@@ -173,16 +167,28 @@ PBoolean H235SecurityCapability::OnReceivedPDU(const H245_DataType &, PBoolean)
   return FALSE;
 }
 
+PBoolean H235SecurityCapability::OnReceivedPDU(const H245_EncryptionAuthenticationAndIntegrity & encAuth, 
+                                               H323Capability::CommandType type) const
+{
+   return true;
+}
+
 unsigned H235SecurityCapability::GetDefaultSessionID() const
 {
   return OpalMediaFormat::NonRTPSessionID;
 }
 
+PBoolean H235SecurityCapability::IsUsable(const H323Connection & connection) const
+{
+   const H235Capabilities & caps = (const H235Capabilities &)connection.GetLocalCapabilities();
+   return caps.GetAlgorithnms(m_capList);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
-H323SecureRealTimeCapability::H323SecureRealTimeCapability(H323Capability & childCapability)
+H323SecureRealTimeCapability::H323SecureRealTimeCapability(H323Capability & childCapability, H323Capabilities * capabilities, unsigned secNo)
 				: ChildCapability(*(H323Capability *)childCapability.Clone()), m_active(false), 
-                  m_capabilities(NULL), m_secNo(0),  nrtpqos(NULL)
+                  m_capabilities(capabilities), m_secNo(secNo),  nrtpqos(NULL)
 {
 }
 
@@ -214,40 +220,8 @@ H323Channel * H323SecureRealTimeCapability::CreateChannel(H323Connection & conne
                                                     unsigned sessionID,
                                  const H245_H2250LogicalChannelParameters * param) const
 {
-
-  RTP_Session * session;			  // Session
-
-  if (param != NULL) {
-	session = connection.UseSession(param->m_sessionID, param->m_mediaControlChannel, dir, nrtpqos);
-  } else {
-    // Make a fake transport address from the connection so gets initialised with
-    // the transport type (IP, IPX, multicast etc).
-    H245_TransportAddress addr;
-    connection.GetControlChannel().SetUpTransportPDU(addr, H323Transport::UseLocalTSAP);
-
-    session = connection.UseSession(sessionID, addr, dir, nrtpqos);
-  }
-
-  if (session == NULL)
-    return NULL;
-/*
-  // If Successful Key Exchange done on in H225 replace tls session
-	  if (Ptls.con.CallSA.Contains(connection.GetCallToken())) {
-		  PTLSsession & authSession = *(PTLSsession *)Ptls.con.CallSA.GetAt(connection.GetCallToken());
-
-		     if (dir == H323Channel::IsReceiver) 
-			    Ptls.CloseSession();
-
-		//	 if (authSession.vsState == PTLSsession::vsNoAuthentication) 
-		//		 authSession.vsState = PTLSsession::vsWaiting;
-
-			 return new H323SecureRTPChannel(connection, *this, dir, *session, authSession);  
-	  } else 
-		  Ptls.StartSession(); 
-
-	return new H323SecureRTPChannel(connection, *this, dir, *session, Ptls); 
-*/
-   return connection.CreateRealTimeLogicalChannel(*this, dir, sessionID, param, nrtpqos);
+   // work to be done here.
+   return ChildCapability.CreateChannel(connection,dir,sessionID,param);
 }
 
 unsigned H323SecureRealTimeCapability::GetCapabilityNumber() const 
@@ -265,12 +239,19 @@ void H323SecureRealTimeCapability::SetCapabilityList(H323Capabilities * capabili
     m_capabilities = capabilities;
 }
 
+void H323SecureRealTimeCapability::SetActive(PBoolean active)
+{
+    m_active = active;
+}
+
 ///////////////////////////////////////////////////////////////////////////// 
 
 H323SecureCapability::H323SecureCapability(H323Capability & childCapability,
-													 H235ChType Ch
+													 H235ChType Ch,
+                                                     H323Capabilities * capabilities,
+                                                     unsigned secNo
 													 )
-   : H323SecureRealTimeCapability(childCapability)
+   : H323SecureRealTimeCapability(childCapability, capabilities, secNo)
 {
 	chtype = Ch;
 }
@@ -290,7 +271,6 @@ PObject * H323SecureCapability::Clone() const
 
 	switch (chtype) {
 	case H235ChNew:	
-//cout << "New Clone." << "\n";
 		   ch = H235ChClone;
 		   IsClone = TRUE;
 		break;
@@ -302,9 +282,31 @@ PObject * H323SecureCapability::Clone() const
 		break;
 	}
 
-  H323VideoCapability * Ccap = (H323VideoCapability *)ChildCapability.Clone();
+  return new H323SecureCapability(*(H323Capability *)ChildCapability.Clone(),ch, m_capabilities, m_secNo);
+}
 
-  return new H323SecureCapability(*Ccap,ch);
+PBoolean H323SecureCapability::IsMatch(const PASN_Choice & subTypePDU) const
+{
+    const H245_H235Media_mediaType & dataType = (const H245_H235Media_mediaType &)subTypePDU;
+
+    if (dataType.GetTag() == H245_H235Media_mediaType::e_audioData &&
+       ChildCapability.GetMainType() == H323Capability::e_Audio) { 
+          const H245_AudioCapability & audio = dataType;
+          return ChildCapability.IsMatch(audio);
+    }
+
+    if (dataType.GetTag() == H245_H235Media_mediaType::e_videoData &&
+       ChildCapability.GetMainType() == H323Capability::e_Video) { 
+          const H245_VideoCapability & video = dataType;
+          return ChildCapability.IsMatch(video);
+    }
+
+    if (dataType.GetTag() == H245_H235Media_mediaType::e_data &&
+       ChildCapability.GetMainType() == H323Capability::e_Data) { 
+          const H245_DataApplicationCapability & data = dataType;
+          return ChildCapability.IsMatch(data.m_application);
+    }
+    return false;
 }
 
 PObject::Comparison H323SecureCapability::Compare(const PObject & obj) const
@@ -348,10 +350,10 @@ PBoolean H323SecureCapability::OnSendingPDU(H245_DataType & dataType) const
     // if not found or no matching algorithm then assume no encryption.
     H235SecurityCapability * secCap = NULL;
     PBoolean secActive = false;
-    if (m_capabilities && m_active) {
+    if (m_capabilities) {
         secCap = (H235SecurityCapability *)m_capabilities->FindCapability(m_secNo);
         if (secCap && secCap->GetAlgorithmCount() > 0)
-             secActive = true;
+            secActive = true;
     }
 
     if (!secActive) {
@@ -374,8 +376,8 @@ PBoolean H323SecureCapability::OnSendingPDU(H245_DataType & dataType) const
 
     dataType.SetTag(H245_DataType::e_h235Media);
     H245_H235Media & h235Media = dataType;
-    // Load the algorithms
-    secCap->OnSendingPDU(h235Media.m_encryptionAuthenticationAndIntegrity);
+    // Load the algorithm
+    secCap->OnSendingPDU(h235Media.m_encryptionAuthenticationAndIntegrity, e_OLC);
    
     H245_H235Media_mediaType & cType = h235Media.m_mediaType;
     unsigned txFramesInPacket =0;
@@ -398,7 +400,42 @@ PBoolean H323SecureCapability::OnSendingPDU(H245_DataType & dataType) const
 
 PBoolean H323SecureCapability::OnReceivedPDU(const H245_DataType & dataType,PBoolean receiver)
 {
-	return ChildCapability.OnReceivedPDU(dataType,receiver);
+    if (dataType.GetTag() != H245_DataType::e_h235Media)
+        return false;
+
+    const H245_H235Media & h235Media = dataType;
+
+    if (m_capabilities) {
+        const H235SecurityCapability * secCap = (const H235SecurityCapability *)m_capabilities->FindCapability(m_secNo);
+        if (!secCap->OnReceivedPDU(h235Media.m_encryptionAuthenticationAndIntegrity, e_OLC))
+            return false;
+    }
+
+
+    const H245_H235Media_mediaType & mediaType = h235Media.m_mediaType;
+    unsigned packetSize = 0; 
+
+
+    switch (ChildCapability.GetMainType()) {
+        case H323Capability::e_Audio: 
+            if (mediaType.GetTag() == H245_H235Media_mediaType::e_audioData) {
+               packetSize = (receiver) ?
+                   ChildCapability.GetRxFramesInPacket() : ChildCapability.GetTxFramesInPacket();
+               return ((H323AudioCapability &)ChildCapability).OnReceivedPDU((const H245_AudioCapability &)mediaType, packetSize, e_OLC);
+            }
+        case H323Capability::e_Video: 
+            if (mediaType.GetTag() == H245_H235Media_mediaType::e_videoData) 
+               return ((H323VideoCapability &)ChildCapability).OnReceivedPDU((const H245_VideoCapability &)mediaType, e_OLC);
+
+        case H323Capability::e_Data:
+            if (mediaType.GetTag() == H245_H235Media_mediaType::e_data) 
+               return ((H323DataCapability &)ChildCapability).OnReceivedPDU((const H245_DataApplicationCapability &)mediaType, e_OLC);
+ 
+        default:
+            break;
+    }
+
+	return false;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -456,11 +493,15 @@ H323Codec * H323SecureCapability::CreateCodec(H323Codec::Direction direction) co
 /////////////////////////////////////////////////////////////////////////////
 
 H235Capabilities::H235Capabilities()
+:  m_DHkey(NULL), m_h245Master(false)
 {
+    m_algorithms.SetSize(0);
 }
 
 H235Capabilities::H235Capabilities(const H323Capabilities & original)
+:  m_DHkey(NULL), m_h245Master(false)
 {
+  m_algorithms.SetSize(0);
 
   for (PINDEX i = 0; i < original.GetSize(); i++)
     WrapCapability(original[i]);
@@ -477,6 +518,8 @@ H235Capabilities::H235Capabilities(const H323Capabilities & original)
         set[outer][middle].Append(FindCapability(origSet[outer][middle][inner].GetCapabilityNumber()));
     }
   }
+
+
 }
 
 H235Capabilities::H235Capabilities(const H323Connection & /*connection*/, const H245_TerminalCapabilitySet & /*pdu*/)
@@ -522,8 +565,9 @@ void H235Capabilities::AddSecure(H323Capability * capability)
   capability->SetCapabilityNumber(SetCapabilityNumber(table, 1));
   ((H323SecureCapability *)capability)->SetCapabilityList(this);
 
-  H235SecurityCapability * secCap = new H235SecurityCapability(capability->GetCapabilityNumber());
-  secCap->SetCapabilityNumber(SetCapabilityNumber(table, 100));
+  unsigned capNumber = capability->GetCapabilityNumber();
+  H235SecurityCapability * secCap = new H235SecurityCapability(capNumber);
+  secCap->SetCapabilityNumber(SetCapabilityNumber(table, 100+capNumber));
   ((H323SecureCapability *)capability)->SetSecurityCapabilityNumber(secCap->GetCapabilityNumber());
   table.Append(capability);
   table.Append(secCap);
@@ -565,7 +609,7 @@ void H235Capabilities::WrapCapability(H323Capability & capability)
     switch (capability.GetDefaultSessionID()) {
         case OpalMediaFormat::DefaultAudioSessionID:
         case OpalMediaFormat::DefaultVideoSessionID:
-            AddSecure(new H323SecureCapability(capability));
+            AddSecure(new H323SecureCapability(capability, H235ChNew,this));
             break;
         case OpalMediaFormat::NonRTPSessionID:
         case OpalMediaFormat::DefaultDataSessionID:
@@ -614,12 +658,15 @@ PINDEX H235Capabilities::AddAllCapabilities(PINDEX descriptorNum,
         if (mediaFormat.IsValid() && mediaFormat.GetDefaultSessionID() == session) {
           // add the capability
           H323Capability * capability = H323Capability::Create(capName);
+          H323SecureCapability * newCapability = NULL;
           PINDEX num=0;
             switch (session) {
                 case OpalMediaFormat::DefaultAudioSessionID:
                 case OpalMediaFormat::DefaultVideoSessionID:
-                    num = SetCapability(descriptorNum, simultaneous, new H323SecureCapability(*capability));
-                    AddSecure(new H235SecurityCapability(num));
+                    newCapability = new H323SecureCapability(*capability, H235ChNew, this);
+                    num = SetCapability(descriptorNum, simultaneous, newCapability);
+                    num = SetCapability(descriptorNum, simultaneous, 
+                                        new H235SecurityCapability(newCapability->GetCapabilityNumber()));
                     delete capability;
                     break;
                 case OpalMediaFormat::DefaultDataSessionID:
@@ -647,6 +694,23 @@ PINDEX H235Capabilities::AddAllCapabilities(PINDEX descriptorNum,
   }
 
   return reply;
+}
+
+void H235Capabilities::SetDHKeyPair(const PStringList & keyOIDs, H235_DiffieHellman * key, PBoolean isMaster)
+{
+     m_algorithms = keyOIDs;
+     m_DHkey = key;
+     m_h245Master = isMaster;
+
+     PTRACE(2,"H235\tDiffieHellman selected. Key " << (isMaster ? "Master" : "Slave"));
+
+}
+
+PBoolean H235Capabilities::GetAlgorithnms(const PStringList & algorithms) const
+{
+    PStringList * m_localAlgorithms = PRemoveConst(PStringList,&algorithms);
+    *m_localAlgorithms = m_algorithms;
+    return (m_algorithms.GetSize() > 0);
 }
 
 #endif

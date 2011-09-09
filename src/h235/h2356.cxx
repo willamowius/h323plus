@@ -46,7 +46,8 @@
 #ifdef H323_H235
 
 #include "h235/h2356.h"
-#include <h225.h>
+#include "h235/h2351.h"
+#include "h323con.h"
 
 extern "C" {
 #include <openssl/ssl.h>
@@ -54,43 +55,20 @@ extern "C" {
 #include <openssl/rand.h>
 };
 
-
-
-////////////////////////////////////////////////////////////////////////////////////
-
-unsigned char DH1024_P[128] = {
-0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xC9, 0x0F, 0xDA, 0xA2, 0x21, 0x68, 0xC2, 0x34, 0xC4, 0xC6, 0x62, 0x8B, 0x80, 0xDC, 0x1C, 0xD1,
-0x29, 0x02, 0x4E, 0x08, 0x8A, 0x67, 0xCC, 0x74, 0x02, 0x0B, 0xBE, 0xA6, 0x3B, 0x13, 0x9B, 0x22, 0x51, 0x4A, 0x08, 0x79, 0x8E, 0x34, 0x04, 0xDD,
-0xEF, 0x95, 0x19, 0xB3, 0xCD, 0x3A, 0x43, 0x1B, 0x30, 0x2B, 0x0A, 0x6D, 0xF2, 0x5F, 0x14, 0x37, 0x4F, 0xE1, 0x35, 0x6D, 0x6D, 0x51, 0xC2, 0x45,
-0xE4, 0x85, 0xB5, 0x76, 0x62, 0x5E, 0x7E, 0xC6, 0xF4, 0x4C, 0x42, 0xE9, 0xA6, 0x37, 0xED, 0x6B, 0x0B, 0xFF, 0x5C, 0xB6, 0xF4, 0x06, 0xB7, 0xED, 
-0xEE, 0x38, 0x6B, 0xFB, 0x5A, 0x89, 0x9F, 0xA5, 0xAE, 0x9F, 0x24, 0x11, 0x7C, 0x4B, 0x1F, 0xE6, 0x49, 0x28, 0x66, 0x51, 0xEC, 0xE6, 0x53, 0x81, 
-0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
-
-
-unsigned char DH1024_G[128] = {
-0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02 };
-
-const char OID_H2351A[] = "0.0.8.235.0.1.5";
-const char OID_H235V3[] = "0.0.8.235.0.3.24";
-const char OID_DH1024[] = "0.0.8.235.0.3.43";	// AlgorithmOID
-
 ////////////////////////////////////////////////////////////////////////////////////
 
 // Diffie Hellman
 
 
 H235_DiffieHellman::H235_DiffieHellman()
-: dh(NULL)
+: m_remKey(NULL), dh(NULL), m_toSend(true), m_keySize(0)
 {
 }
 
 H235_DiffieHellman::H235_DiffieHellman(const BYTE * pData, PINDEX pSize,
-                                     const BYTE * gData, PINDEX gSize)
+                                     const BYTE * gData, PINDEX gSize, 
+                                     PBoolean send)
+: m_remKey(NULL), m_toSend(send), m_keySize(pSize)
 {
   dh = DH_new();
   if (dh == NULL)
@@ -169,12 +147,12 @@ PBoolean H235_DiffieHellman::CreateParams()
 
  vbMutex.Wait();
 		memcpy(seedbuf, seed[i], 20);
-		dsaparams = DSA_generate_parameters(ParamSize, seedbuf, 20, NULL, NULL, 0, NULL);
+		dsaparams = DSA_generate_parameters(m_keySize, seedbuf, 20, NULL, NULL, 0, NULL);
  vbMutex.Signal();
 
 	} else {
 		 /* Random Parameters (may take awhile) You should never get here ever!!!*/
-		dsaparams = DSA_generate_parameters(ParamSize, NULL, 0, NULL, NULL, 0, NULL);
+		dsaparams = DSA_generate_parameters(m_keySize, NULL, 0, NULL, NULL, 0, NULL);
 	}
     
     if (dsaparams == NULL) {
@@ -221,6 +199,9 @@ void H235_DiffieHellman::Encode_P(PASN_BitString & p)
 {
 	PWaitAndSignal m(vbMutex);
 
+    if (!m_toSend)
+        return;
+
 	unsigned char *data;
 	int l,len,bits_p;
 
@@ -238,9 +219,12 @@ void H235_DiffieHellman::Encode_P(PASN_BitString & p)
 
 }
 
-void H235_DiffieHellman::Decode_P(PASN_BitString & p)
+void H235_DiffieHellman::Decode_P(const PASN_BitString & p)
 {
 	PWaitAndSignal m(vbMutex);
+
+    if (p.GetSize() == 0)
+        return;
 
 	const unsigned char *data = p.GetDataPointer();
 	dh->p=BN_bin2bn(data,sizeof(data),NULL);
@@ -249,6 +233,9 @@ void H235_DiffieHellman::Decode_P(PASN_BitString & p)
 void H235_DiffieHellman::Encode_G(PASN_BitString & g)
 {
     PWaitAndSignal m(vbMutex);
+
+    if (!m_toSend)
+        return;
 
 	unsigned char *data;
 	int l,len_p,len_g,bits_p;
@@ -269,9 +256,12 @@ void H235_DiffieHellman::Encode_G(PASN_BitString & g)
 	OPENSSL_free(data);
 }
 
-void H235_DiffieHellman::Decode_G(PASN_BitString & g)
+void H235_DiffieHellman::Decode_G(const PASN_BitString & g)
 {
 	PWaitAndSignal m(vbMutex);
+
+    if (g.GetSize() == 0)
+        return;
 
     const unsigned char *data;
     if (g.GetSize() > 0) {
@@ -301,7 +291,7 @@ void H235_DiffieHellman::Encode_HalfKey(PASN_BitString & hk)
 
 }
 
-void H235_DiffieHellman::Decode_HalfKey(PASN_BitString & hk)
+void H235_DiffieHellman::Decode_HalfKey(const PASN_BitString & hk)
 {
 	PWaitAndSignal m(vbMutex);
 
@@ -309,6 +299,10 @@ void H235_DiffieHellman::Decode_HalfKey(PASN_BitString & hk)
 	dh->pub_key = BN_bin2bn(data,sizeof(data),NULL);   
 }
 
+void H235_DiffieHellman::SetRemoteKey(bignum_st * remKey)
+{
+    m_remKey = remKey;
+}
 
 PBoolean H235_DiffieHellman::GenerateHalfKey()
 {
@@ -328,17 +322,86 @@ PBoolean H235_DiffieHellman::GenerateHalfKey()
     return TRUE;
 }
 
+PBoolean H235_DiffieHellman::ComputeSessionKey(PBYTEArray & SessionKey)
+{
+
+    if (!m_remKey)
+        return false;
+
+	int len, out;
+	unsigned char *buf=NULL;
+
+	len=DH_size(dh);
+	buf=(unsigned char *)OPENSSL_malloc(len);
+
+	out=DH_compute_key(buf, m_remKey, dh);
+
+	if (out <= 0) {
+		PTRACE(2,"H235_DH\tERROR Generating Shared DH!");
+	    return false;
+	}
+
+    SessionKey.SetSize(out);
+    memcpy(SessionKey.GetPointer(),(void *)buf,out);
+
+	OPENSSL_free(buf);
+
+    return true;
+}
+
+bignum_st * H235_DiffieHellman::GetPublicKey()
+{
+    return dh->pub_key;
+}
+
+int H235_DiffieHellman::GetKeyLength()
+{
+    return m_keySize;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////
+// Helper functions
+
+template <class PAIR>
+class deletepair { // PAIR::second_type is a pointer type
+public:
+	void operator()(const PAIR & p) { if (p.second) delete p.second; }
+};
+
+template <class M>
+inline void DeleteObjectsInMap(const M & m)
+{
+	typedef typename M::value_type PAIR;
+	std::for_each(m.begin(), m.end(), deletepair<PAIR>());
+}
+
+void LoadDiffieHellmanMap(std::map<PString, H235_DiffieHellman*> & dhmap)
+{
+    for (PINDEX i = 0; i < PARRAYSIZE(H235_DHParameters); ++i) {
+        if (H235_DHParameters[i].sz > 0) {
+           dhmap.insert(pair<PString, H235_DiffieHellman*>(H235_DHParameters[i].parameterOID,
+                  new H235_DiffieHellman(H235_DHParameters[i].dh_p, H235_DHParameters[i].sz,
+                                         H235_DHParameters[i].dh_g, H235_DHParameters[i].sz,
+                                         H235_DHParameters[i].send)) );
+        } else {
+           dhmap.insert(pair<PString, H235_DiffieHellman*>(H235_DHParameters[i].parameterOID,NULL));
+        }
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
 
 H2356_Authenticator::H2356_Authenticator()
-: m_dh(NULL), m_enabled(true), m_active(true)
+: m_enabled(true), m_active(true), m_tokenState(e_clearNone)
 {
     usage = MediaEncryption;
+    LoadDiffieHellmanMap(m_dhLocalMap);
 }
 
 H2356_Authenticator::~H2356_Authenticator()
 {
-
+    DeleteObjectsInMap(m_dhLocalMap);
+    DeleteObjectsInMap(m_dhRemoteMap);
 }
 
 const char * H2356_Authenticator::GetName() const
@@ -349,58 +412,95 @@ const char * H2356_Authenticator::GetName() const
 PBoolean H2356_Authenticator::PrepareTokens(PASN_Array & clearTokens,
                                       PASN_Array & /*cryptoTokens*/)
 {
-  if (!IsActive())
+  if (!IsActive() || (m_tokenState == e_clearDisable))
     return FALSE;
 
-  if (!m_dh) {
-     m_dh = new H235_DiffieHellman(DH1024_P,128,DH1024_G,128);
-     if (!m_dh->GenerateHalfKey())
-         return false;
+  H225_ArrayOf_ClearToken & tokens = (H225_ArrayOf_ClearToken &)clearTokens;
+  int sz = 0;
+
+  std::map<PString, H235_DiffieHellman*>::iterator i = m_dhLocalMap.begin();
+  while (i != m_dhLocalMap.end()) {
+      sz = tokens.GetSize();
+      tokens.SetSize(sz+1);
+      H235_ClearToken & clearToken = tokens[sz];
+      clearToken.m_tokenOID = i->first;
+      H235_DiffieHellman * m_dh = i->second;
+      if (m_dh && m_dh->GenerateHalfKey()) {
+          clearToken.IncludeOptionalField(H235_ClearToken::e_dhkey);
+          H235_DHset & dh = clearToken.m_dhkey;
+               m_dh->Encode_HalfKey(dh.m_halfkey);
+               m_dh->Encode_P(dh.m_modSize);
+               m_dh->Encode_G(dh.m_generator);
+      }
+      i++;
   }
 
-  H225_ArrayOf_ClearToken & tokens = (H225_ArrayOf_ClearToken &)clearTokens;
-  int sz = tokens.GetSize();
-  tokens.SetSize(sz+3);
+  if (m_tokenState == e_clearNone) {
+	  m_tokenState = e_clearSent;
+      return true;
+  }
 
-  // Procedure 1A (H.235v3)
-  H235_ClearToken & clearToken1 = tokens[sz];
-  clearToken1.m_tokenOID = OID_H2351A;
-      clearToken1.IncludeOptionalField(H235_ClearToken::e_dhkey);
-      H235_DHset & dh1 = clearToken1.m_dhkey;
-           m_dh->Encode_HalfKey(dh1.m_halfkey);
-           m_dh->Encode_P(dh1.m_modSize);
-           m_dh->Encode_G(dh1.m_generator);
+  if (m_tokenState == e_clearReceived) {
+      m_tokenState = e_clearComplete;
+      InitialiseSecurity();
+  }
 
-  // DH1024 (H.235v4)
-  H235_ClearToken & clearToken2 = tokens[sz+1];
-      clearToken2.m_tokenOID = OID_DH1024;
-      clearToken2.IncludeOptionalField(H235_ClearToken::e_dhkey);
-      H235_DHset & dh2 = clearToken2.m_dhkey;
-           m_dh->Encode_HalfKey(dh2.m_halfkey);
-           m_dh->Encode_P(dh2.m_modSize);
-           m_dh->Encode_G(dh2.m_generator);
-
-  // Backwards Compatibility with H.235v3
-  tokens[sz+2].m_tokenOID = OID_H235V3;
-
-  return TRUE;
+  return true;
 }
 
 H235Authenticator::ValidationResult H2356_Authenticator::ValidateTokens(const PASN_Array & clearTokens,
                                    const PASN_Array & /*cryptoTokens*/, const PBYTEArray & /*rawPDU*/)
 {
-   if (!IsActive())
+   if (!IsActive() || (m_tokenState == e_clearDisable))
        return e_Disabled;
 
    const H225_ArrayOf_ClearToken & tokens = (const H225_ArrayOf_ClearToken &)clearTokens;
-
-   for (PINDEX i = 0; i < tokens.GetSize(); ++i) {
-      const H235_ClearToken & token = tokens[i];
-
-      if (token.m_tokenOID.AsString() == PString(OID_DH1024)) {
-          break;
-      }
+   if (tokens.GetSize() == 0) {
+      DeleteObjectsInMap(m_dhLocalMap);
+      m_tokenState = e_clearDisable;
+      return e_Disabled; 
    }
+  
+  std::map<PString, H235_DiffieHellman*>::const_iterator it = m_dhLocalMap.begin();
+  while (it != m_dhLocalMap.end()) {
+      PBoolean found = false;
+       for (PINDEX i = 0; i < tokens.GetSize(); ++i) {
+          const H235_ClearToken & token = tokens[i];
+          PString tokenOID = token.m_tokenOID.AsString();
+          if (it->first == tokenOID && it->second != NULL ) {
+              H235_DiffieHellman* m_dh = new H235_DiffieHellman(*it->second);
+               const H235_DHset & dh = token.m_dhkey;
+               m_dh->Decode_HalfKey(dh.m_halfkey);
+               if (dh.m_modSize.GetSize() > 0) {
+                   m_dh->Decode_P(dh.m_modSize);
+                   m_dh->Decode_G(dh.m_generator);
+               }
+              m_dhRemoteMap.insert(pair<PString, H235_DiffieHellman*>(tokenOID,m_dh));
+              found = true;
+              break;
+          }
+       }
+       if (!found) {
+          delete it->second;
+          m_dhLocalMap.erase(it++);
+       } else
+          it++;
+  }
+
+  if (m_dhLocalMap.size() == 0) {
+      m_tokenState = e_clearDisable;
+      return e_Disabled;
+  }
+  
+  if (m_tokenState == e_clearNone) {
+	  m_tokenState = e_clearReceived;
+      return e_OK;
+  }
+
+  if (m_tokenState == e_clearSent) {
+      m_tokenState = e_clearComplete;
+      InitialiseSecurity();
+  }
 
    return e_OK;
 }
@@ -435,6 +535,41 @@ void H2356_Authenticator::Disable()
 { 
     m_enabled = false;
     m_active = false;
+}
+
+void H2356_Authenticator::InitialiseSecurity()
+{
+  
+  PString dhOID         = PString();
+  int     lastKeyLength = 0;
+  std::map<PString, H235_DiffieHellman*>::iterator i = m_dhLocalMap.begin();
+  while (i != m_dhLocalMap.end()) {
+      if (i->second->GetKeyLength() > lastKeyLength) {
+          dhOID = i->first;
+          lastKeyLength = i->second->GetKeyLength();
+      }
+    i++;
+  }
+
+  if (dhOID.IsEmpty())
+      return;
+
+  std::map<PString, H235_DiffieHellman*>::iterator l = m_dhLocalMap.find(dhOID);
+  std::map<PString, H235_DiffieHellman*>::iterator r = m_dhRemoteMap.find(dhOID);
+
+  l->second->SetRemoteKey(r->second->GetPublicKey());
+
+  PStringList algOIDs;
+  algOIDs.SetSize(0);
+  for (PINDEX i=0; i<PARRAYSIZE(H235_Algorithms); ++i) {
+      if (PString(H235_Algorithms[i].DHparameters) == dhOID)
+           algOIDs.AppendString(H235_Algorithms[i].algorithm);
+  }
+
+  if (connection && (algOIDs.GetSize() > 0)) {
+      H235Capabilities * localCaps = (H235Capabilities *)connection->GetLocalCapabilitiesRef();
+      localCaps->SetDHKeyPair(algOIDs,l->second,connection->IsH245Master());
+  }
 }
 
 

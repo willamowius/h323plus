@@ -39,18 +39,20 @@
  *
  */
 
-#include "h323ep.h"
-#include "h245.h"
-
 #include "h323caps.h"
 
 #ifdef H323_H235
+
+#pragma once
+
+#include "h245.h"
 
 class H235SecurityCapability  : public H323Capability
 {
   PCLASSINFO(H235SecurityCapability, H323Capability);
 
   public:
+
   /**@name Construction */
 
     /**Create the Conference capability
@@ -79,6 +81,16 @@ class H235SecurityCapability  : public H323Capability
     /**Get the name of the media data format this class represents.
      */
     virtual PString GetFormatName() const;
+
+    /**Validate that the capability is usable given the connection.
+       This checks agains the negotiated protocol version number and remote
+       application to determine if this capability should be used in TCS or
+       OLC pdus.
+
+       The default behaviour returns TRUE.
+      */
+    virtual PBoolean IsUsable(
+      const H323Connection & connection) const;
   //@}
 
   /**@name Operations */
@@ -179,12 +191,21 @@ class H235SecurityCapability  : public H323Capability
        PDU has been used to construct the control channel. It allows the
        capability to set from the PDU fields, information in members specific
        to the class.
-
-       The default behaviour is pure.
      */
     PBoolean OnSendingPDU(
        H245_EncryptionAuthenticationAndIntegrity & encAuth,  ///< Encryption Algorithms
        H323Capability::CommandType type = e_TCS              ///< Message Type
+    ) const;
+
+
+    /**This function is called whenever and incoming OpenLogicalChannel
+       PDU has been used to construct the control channel. It allows the
+       capability to set from the PDU fields, information in members specific
+       to the class.
+     */
+    PBoolean OnReceivedPDU(
+       const H245_EncryptionAuthenticationAndIntegrity & encAuth,  ///< Encryption Algorithms
+       H323Capability::CommandType type = e_TCS                    ///< Message Type
     ) const;
 
     /**Get the number of Algorithms in the list
@@ -224,7 +245,9 @@ public:
     /**Constructor
       */
 	  H323SecureRealTimeCapability(
-		  H323Capability & childCapability
+		  H323Capability & childCapability,          ///< Child Capability
+          H323Capabilities * capabilities = NULL,    ///< Capabilities reference
+          unsigned secNo = 0                         ///< Security Capability No
 		  );
 
 	  H323SecureRealTimeCapability(
@@ -264,6 +287,9 @@ public:
     /// Set the Capability List
     void SetCapabilityList(H323Capabilities * capabilities);
 
+    /// Set the encryption active
+    void SetActive(PBoolean active);
+
   //@}
 
 protected:
@@ -297,7 +323,9 @@ class H323SecureCapability : public H323SecureRealTimeCapability
       */
     H323SecureCapability(	
         H323Capability & childCapability,          /// ChildAudio Capability
-		enum H235ChType Ch = H235ChNew			   /// ChannelType
+		enum H235ChType Ch = H235ChNew,			   /// ChannelType
+        H323Capabilities * capabilities = NULL,    /// Capabilities reference
+        unsigned secNo = 0                         ///< Security Capability No
     );
 
   //@}
@@ -417,6 +445,12 @@ class H323SecureCapability : public H323SecureRealTimeCapability
 	  PBoolean receiver				  /// is receiver OLC
     );
 
+    /**Compare the security part of the capability, if applicable.
+      */
+    virtual PBoolean IsMatch(
+      const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
+    ) const;
+
 	/**Get Child Capability
 	  */
 	H323Capability & GetChildCapability() const { return ChildCapability; }
@@ -430,7 +464,7 @@ class H323SecureCapability : public H323SecureRealTimeCapability
       */
     virtual PBoolean IsUsable(
       const H323Connection & connection
-	  ) { return ChildCapability.IsUsable(connection); }
+	  ) const { return ChildCapability.IsUsable(connection); }
   //@}
 
     /**Get the direction for this capability.
@@ -454,6 +488,7 @@ class H323SecureCapability : public H323SecureRealTimeCapability
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
+class H235_DiffieHellman;
 class H235Capabilities : public H323Capabilities
 {
      PCLASSINFO(H235Capabilities, H323Capabilities);
@@ -487,6 +522,21 @@ public:
       PINDEX simultaneous,  ///< The member of the SimultaneousCapabilitySet to add
       const PString & name  ///< New capabilities name, if using "known" one.
     );
+
+    /**Add the DH KeyPair
+      */
+    void SetDHKeyPair(const PStringList & keyOIDs, H235_DiffieHellman * key, PBoolean isMaster);
+
+    /**Get the Algorithms
+         return false if no algorithms.
+      */
+    PBoolean GetAlgorithnms(const PStringList & algorithms) const;
+
+protected:
+    H235_DiffieHellman * m_DHkey; 
+    PStringList          m_algorithms;
+    PBoolean             m_h245Master;
+
 };
 
 #endif  // H323_H235

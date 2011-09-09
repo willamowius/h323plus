@@ -356,9 +356,7 @@ PBoolean AuthResult = FALSE;
 H235Authenticators authenticators = connection->GetEPAuthenticators();
 PBYTEArray strm;
 
-if (connection->GetEndPoint().GetEPSecurityPolicy() != H323EndPoint::SecNone) {
-
-  if (!pdu.HasOptionalField(PDUType::e_cryptoTokens)) {
+  if (!pdu.HasOptionalField(PDUType::e_tokens) && !pdu.HasOptionalField(PDUType::e_cryptoTokens)) {
 		PTRACE(2, "H235EP\tReceived unsecured EPAuthentication message (no crypto tokens),"
 			" expected one of:\n" << setfill(',') << connection->GetEPAuthenticators() << setfill(' '));
        return connection->OnEPAuthenticationFailed(H235Authenticator::e_Absent);
@@ -372,7 +370,6 @@ if (connection->GetEndPoint().GetEPSecurityPolicy() != H323EndPoint::SecNone) {
 	  }
 	  return AuthResult ? TRUE : connection->OnEPAuthenticationFailed(result);
   }
-}
 
    return AuthResult;
 }

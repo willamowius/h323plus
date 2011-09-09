@@ -58,6 +58,14 @@ class H2356_Authenticator : public H235Authenticator
 
 	~H2356_Authenticator();
 
+    enum h235TokenState { 
+      e_clearNone,             // No Token Sent 
+	  e_clearSent,			   // ClearToken Sent
+	  e_clearReceived,		   // ClearToken Received
+      e_clearComplete,         // Both Sent and received.
+      e_clearDisable           // Disable Exchange
+    };
+
     virtual const char * GetName() const;
 
     virtual PBoolean PrepareTokens(
@@ -90,10 +98,16 @@ class H2356_Authenticator : public H235Authenticator
     virtual void Disable();
 
 protected:
-    H235_DiffieHellman * m_dh;
+    void InitialiseSecurity();
 
-    PBoolean m_enabled;
-    PBoolean m_active;
+private:
+
+    std::map<PString, H235_DiffieHellman*> m_dhLocalMap;
+    std::map<PString, H235_DiffieHellman*> m_dhRemoteMap;
+
+    PBoolean                               m_enabled;
+    PBoolean                               m_active;
+    h235TokenState                         m_tokenState;
 	  
 };
 
@@ -108,6 +122,7 @@ static PFactory<H235Authenticator>::Worker<H2356_Authenticator> H2356_Authentica
    PTLSContext and Secure Socket classes.
   */
 struct dh_st;
+struct bignum_st;
 class H235_DiffieHellman : public PObject
 {
   PCLASSINFO(H235_DiffieHellman, PObject);
@@ -126,7 +141,8 @@ public:
       const BYTE * pData, /// P data
       PINDEX pSize,       /// Size of P data
       const BYTE * gData, /// G data
-      PINDEX gSize        /// Size of G data
+      PINDEX gSize,       /// Size of G data
+      PBoolean send       /// Whether to send P & G values in Tokens
     );
 
     /**Create a copy of the Diffie-Hellman parameters. from 
@@ -153,14 +169,23 @@ public:
       */
     operator dh_st *() const { return dh; }
 
-	/** Last Error Buffer*/
-	PString GetLastError() { return LastError; }
-
    /** Check Parameters */
 	PBoolean CheckParams();
 
+   /** SetRemotePublicKey */
+    void SetRemoteKey(bignum_st * remKey);
+
    /** Generate Half Key */
 	PBoolean GenerateHalfKey();
+
+   /** Compute Session key */
+    PBoolean ComputeSessionKey(PBYTEArray & SessionKey);
+
+   /** Get the Public Key */
+    bignum_st * GetPublicKey();
+
+   /** Get the Key Length */
+    int GetKeyLength();
 
 //@}
 
@@ -169,15 +194,15 @@ public:
 	/** Encode Prime */
 	  void Encode_P(PASN_BitString & p);
 	/** Decode Prime */
-	  void Decode_P(PASN_BitString & p);
+	  void Decode_P(const PASN_BitString & p);
 	/** Encode Generator */
 	  void Encode_G(PASN_BitString & g);
 	/** Decode Generator */
-	  void Decode_G(PASN_BitString & g);
+	  void Decode_G(const PASN_BitString & g);
 	/** Encode Public Half Key */
 	  void Encode_HalfKey(PASN_BitString & hk);
 	/** decode Public Half Key */
-	  void Decode_HalfKey(PASN_BitString & hk);
+	  void Decode_HalfKey(const PASN_BitString & hk);
 
 //@}
 
@@ -192,11 +217,12 @@ public:
 	PBoolean CreateParams();
 //@}
 
-    PMutex vbMutex;				/// Mute
+    PMutex vbMutex;				      /// Mutex
 
-    dh_st * dh;
-	int ParamSize;					  /// Key Size
-	PString LastError;				  /// Last Error String;
+    dh_st * dh;                       /// Local DiffieHellman
+    bignum_st * m_remKey;             /// Remote Public Key
+    PBoolean m_toSend;                /// Whether P & G are transmitted.
+	int m_keySize;					  /// Key Size
 };
 
 #endif // H323_H235
