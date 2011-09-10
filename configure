@@ -1317,7 +1317,7 @@ Optional Features:
   --disable-video         disable video functions
   --disable-h224          disable H.224
   --disable-h230          disable H.230
-  --disable-h235          disable H.235.6
+  --enable-h235           enable H.235.6
   --disable-h239          disable H.239
   --disable-h248          enable H.248
   --disable-h249          disable H.249
@@ -3769,7 +3769,6 @@ default_h350=yes
 default_h460=yes
 default_h4609=yes
 default_h46018=no
-default_h46018=yes
 default_h46019m=no
 default_h46023=yes
 default_h460p=yes
@@ -3974,7 +3973,7 @@ if test "${enable_h235+set}" = set; then :
 fi
 
 if test "${enable_h235}x" = "x" ; then
-  enable_h230=$default_h235
+  enable_h235=$default_h235
 fi
 if test "$enable_h235" = "yes" ; then
   H323_H235=1
@@ -3982,8 +3981,8 @@ if test "$enable_h235" = "yes" ; then
 
 else
   H323_H235=
-  { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.235.6" >&5
-$as_echo "$as_me: Disabling H.235.6" >&6;}
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.235.6 Media Encryption" >&5
+$as_echo "$as_me: Disabling H.235.6 Media Encryption" >&6;}
 fi
 
 
@@ -4213,8 +4212,8 @@ if test "$enable_h46019m" = "yes" ; then
 
 else
   H323_H46019M=
-  { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460.9 RTP multiplexing" >&5
-$as_echo "$as_me: Disabling H.460.9 RTP multiplexing" >&6;}
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460.19 RTP multiplexing" >&5
+$as_echo "$as_me: Disabling H.460.19 RTP multiplexing" >&6;}
 fi
 
 
