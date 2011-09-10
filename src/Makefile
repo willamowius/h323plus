@@ -129,11 +129,12 @@ endif
 
 ifdef H323_H230
 HEADER_FILES	+= $(OH323_INCDIR)/gccpdu.h \
-                   $(OH323_INCDIR)/h230/h230.h \
-                   $(OH323_INCDIR)/h230/OID2.h
-COMMON_SOURCES	+= $(OH323_SRCDIR)/gccpdu.cxx \
-                   $(OH323_SRCDIR)/h230/h230.cxx \
+                   $(OH323_INCDIR)/h230/h230.h 
+
+SOURCES		    += $(OH323_SRCDIR)/gccpdu.cxx \
                    $(OH323_INCDIR)/h230/OID2.cxx
+
+COMMON_SOURCES	+= $(OH323_SRCDIR)/h230/h230.cxx
 endif
 
 ########### H.235
@@ -177,8 +178,8 @@ ifdef H323_H350
 HEADER_FILES    += $(OH323_INCDIR)/h350/h350.h \
                    $(OH323_INCDIR)/h350/h350_service.h
 
-COMMON_SOURCES  += $(OH323_SRCDIR)/h350/h350.cxx \
-                   $(OH323_INCDIR)/h350/h350_service.cxx
+SOURCES		    += $(OH323_INCDIR)/h350/h350_service.cxx
+COMMON_SOURCES  += $(OH323_SRCDIR)/h350/h350.cxx
 endif
 
 ########### H.450
@@ -222,21 +223,24 @@ HEADER_FILES    += $(OH323_INCDIR)/h460/h460.h \
                    $(OH323_INCDIR)/h460/h460p.h \
                    $(OH323_INCDIR)/h460/h460pres.h
 
-COMMON_SOURCES  += $(OH323_SRCDIR)/h460/h4601.cxx \
+SOURCES         += \
                    $(OH323_SRCDIR)/h460/h4609.cxx \
-                   $(OH323_INCDIR)/h460/h460_std9.cxx \
                    $(OH323_INCDIR)/h460/h46015.cxx \
                    $(OH323_SRCDIR)/h460/h46017a.cxx \
+                   $(OH323_SRCDIR)/h460/h46019.cxx \
+                   $(OH323_INCDIR)/h460/h46024b.cxx \
+                   $(OH323_INCDIR)/h460/h460pres.cxx
+
+COMMON_SOURCES  += \
+                   $(OH323_SRCDIR)/h460/h4601.cxx \
+                   $(OH323_INCDIR)/h460/h460_std9.cxx \
                    $(OH323_SRCDIR)/h460/h460_std17.cxx \
                    $(OH323_SRCDIR)/h460/h46018.cxx \
                    $(OH323_SRCDIR)/h460/h460_std18.cxx \
                    $(OH323_SRCDIR)/h460/h46018_h225.cxx \
-                   $(OH323_SRCDIR)/h460/h46019.cxx \
                    $(OH323_SRCDIR)/h460/h460_std23.cxx \
-                   $(OH323_INCDIR)/h460/h46024b.cxx \
                    $(OH323_INCDIR)/h460/h460_oid3.cxx \
-                   $(OH323_INCDIR)/h460/h460p.cxx \
-                   $(OH323_INCDIR)/h460/h460pres.cxx
+                   $(OH323_INCDIR)/h460/h460p.cxx
 endif 
 
 ########### H.501
