@@ -147,8 +147,13 @@ COMMON_SOURCES	+= $(OH323_SRCDIR)/h235auth1.cxx
 endif
 
 ifdef H323_H235
-HEADER_FILES	+= $(OH323_INCDIR)/h235/h2356.h 
-COMMON_SOURCES	+= $(OH323_SRCDIR)/h235/h2356.cxx 
+HEADER_FILES	+= $(OH323_INCDIR)/h235/h2351.h \
+                   $(OH323_INCDIR)/h235/h2356.h \
+                   $(OH323_INCDIR)/h235/h235caps.h \
+                   $(OH323_INCDIR)/h235/h2356con.h
+COMMON_SOURCES	+= $(OH323_SRCDIR)/h235/h2356.cxx \
+                   $(OH323_SRCDIR)/h235/h235caps.cxx \
+                   $(OH323_INCDIR)/h235/h235con.cxx
 endif
 
 ########### H.248
