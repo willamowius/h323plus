@@ -62,7 +62,7 @@ extern "C" {
 
 
 H235_DiffieHellman::H235_DiffieHellman()
-: m_remKey(NULL), dh(NULL), m_toSend(true), m_keySize(0)
+: dh(NULL), m_remKey(NULL), m_toSend(true), m_keySize(0)
 {
 }
 
@@ -462,7 +462,7 @@ H235Authenticator::ValidationResult H2356_Authenticator::ValidateTokens(const PA
       return e_Disabled; 
    }
   
-  std::map<PString, H235_DiffieHellman*>::const_iterator it = m_dhLocalMap.begin();
+  std::map<PString, H235_DiffieHellman*>::iterator it = m_dhLocalMap.begin();
   while (it != m_dhLocalMap.end()) {
       PBoolean found = false;
        for (PINDEX i = 0; i < tokens.GetSize(); ++i) {
