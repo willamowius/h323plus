@@ -156,7 +156,7 @@ const char * OID_DH1024 = "0.0.8.235.0.3.43";
 const char * OID_DH2048 = "0.0.8.235.0.3.45";
 const char * OID_DH4096 = "0.0.8.235.0.3.47";
 
-struct {
+static struct {
     const char * parameterOID;
     const BYTE * dh_p;
     const BYTE * dh_g;
@@ -179,7 +179,7 @@ const char * SSL_AES256 = "DHE-RSA-AES256-SHA";
 const char * OID_AES128 = "2.16.840.1.101.3.4.1.2";
 const char * SSL_AES128 = "DHE-RSA-AES128-SHA";
 
-struct {
+static struct {
     const char * algorithm;
     const char * DHparameters;
 } H235_Algorithms[] = {
