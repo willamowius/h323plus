@@ -560,7 +560,7 @@ if test "$enable_h46019m" = "yes" ; then
   AC_DEFINE(H323_H46019M, 1)
 else
   H323_H46019M=
-  AC_MSG_NOTICE(Disabling H.460.9 RTP multiplexing)
+  AC_MSG_NOTICE(Disabling H.460.19 RTP multiplexing)
 fi
 AC_SUBST(H323_H46019M)
 
