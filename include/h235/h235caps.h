@@ -229,9 +229,9 @@ class H235SecurityCapability  : public H323Capability
  */
 
 enum H235ChType {
-	H235ChNew,			/// New Channel (Template)
-	H235ChClone,		/// Clone Channel (Primary)
-	H235Channel,		/// Connection Channel
+    H235ChNew,          /// New Channel (Template)
+    H235ChClone,        /// Clone Channel (Primary)
+    H235Channel,        /// Connection Channel
 };
 
 class H323SecureRealTimeCapability  : public H323Capability
@@ -244,20 +244,20 @@ public:
   //@{  
     /**Constructor
       */
-	  H323SecureRealTimeCapability(
-		  H323Capability & childCapability,          ///< Child Capability
+         H323SecureRealTimeCapability(
+          H323Capability & childCapability,          ///< Child Capability
           H323Capabilities * capabilities = NULL,    ///< Capabilities reference
           unsigned secNo = 0                         ///< Security Capability No
-		  );
+          );
 
-	  H323SecureRealTimeCapability(
-		  RTP_QOS * _rtpqos,
-		  H323Capability & childCapability
-		  );
+      H323SecureRealTimeCapability(
+          RTP_QOS * _rtpqos,
+          H323Capability & childCapability
+          );
 
     /**Deconstructor
       */
-	  ~H323SecureRealTimeCapability();
+      ~H323SecureRealTimeCapability();
   //@}
 
   /**@name Operations */
@@ -293,12 +293,12 @@ public:
   //@}
 
 protected:
-	H323Capability & ChildCapability;    /// Child Capability
-	H235ChType chtype;				     /// Channel Type
+    H323Capability & ChildCapability;    /// Child Capability
+    H235ChType chtype;                   /// Channel Type
     PBoolean  m_active;                  /// Whether encryption is active
     H323Capabilities * m_capabilities;   /// Capabilities list
     unsigned  m_secNo;                   /// Security Capability
-	RTP_QOS * nrtpqos;				     /// RTP QOS
+    RTP_QOS * nrtpqos;                   /// RTP QOS
 
 };
 
@@ -323,7 +323,7 @@ class H323SecureCapability : public H323SecureRealTimeCapability
       */
     H323SecureCapability(	
         H323Capability & childCapability,          /// ChildAudio Capability
-		enum H235ChType Ch = H235ChNew,			   /// ChannelType
+        enum H235ChType Ch = H235ChNew,			   /// ChannelType
         H323Capabilities * capabilities = NULL,    /// Capabilities reference
         unsigned secNo = 0                         ///< Security Capability No
     );
@@ -336,9 +336,9 @@ class H323SecureCapability : public H323SecureRealTimeCapability
       */
     virtual PObject * Clone() const;
 
-	/**Compare
-	  */
-	PObject::Comparison Compare(const PObject & obj) const;
+    /**Compare
+      */
+    PObject::Comparison Compare(const PObject & obj) const;
   //@}
 
   /**@name Identification functions */
@@ -464,13 +464,13 @@ class H323SecureCapability : public H323SecureRealTimeCapability
       */
     virtual PBoolean IsUsable(
       const H323Connection & connection
-	  ) const { return ChildCapability.IsUsable(connection); }
+      ) const { return ChildCapability.IsUsable(connection); }
   //@}
 
     /**Get the direction for this capability.
       */ 
     CapabilityDirection GetCapabilityDirection() const 
-		{ return ChildCapability.GetCapabilityDirection(); }
+        { return ChildCapability.GetCapabilityDirection(); }
 
     /**Set the direction for this capability.
       */
@@ -480,7 +480,7 @@ class H323SecureCapability : public H323SecureRealTimeCapability
 
     /// Get the payload type for the capaibility
     RTP_DataFrame::PayloadTypes GetPayloadType() const 
-		{ return ChildCapability.GetPayloadType(); }
+        { return ChildCapability.GetPayloadType(); }
 
   //@}
 
