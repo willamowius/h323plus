@@ -110,7 +110,9 @@
 #if (PTLIB_VER > 260) && (P_STUN)
     #undef H323_H46017
 	#undef H323_H46018
-	#undef H323_H46019M
+	#if defined(H323_H46018)
+	    #define H323_H46019M 1
+	#endif
 	#undef H323_H46023
 	#if defined(H323_H46018) && defined(H323_H46023) && defined(P_SSL)
 		#define H323_H46024A 1
