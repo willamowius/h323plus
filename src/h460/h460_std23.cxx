@@ -43,7 +43,9 @@
 #include <h323.h>
 #include <ptclib/random.h>
 #include <ptclib/pdns.h>
+#ifdef H323_H46018
 #include <h460/h460_std18.h>
+#endif
 
 #ifdef H323_UPnP
  #include "h460/upnpcp.h"
@@ -645,13 +647,14 @@ void H460_FeatureStd24::HandleNATInstruction(NatInstruct _config)
 
 void H460_FeatureStd24::SetH46019State(bool state)
 {
-
+#ifdef H323_H46018
 	if (CON->GetFeatureSet()->HasFeature(19)) {
 		H460_Feature * feat = CON->GetFeatureSet()->GetFeature(19);
 
 		PTRACE(4,"H46024\t" << (state ? "En" : "Dis") << "abling H.460.19 support for call");
 		((H460_FeatureStd19 *)feat)->SetAvailable(state);
 	}
+#endif
 }
 
 void H460_FeatureStd24::SetNATMethods(H46024NAT state)
