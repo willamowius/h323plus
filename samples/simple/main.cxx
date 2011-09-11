@@ -389,10 +389,12 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
 	  }
 	  cout << endl;
 
+#ifdef H323_H46018
   if (args.HasOption("h46018disable")) {
 	  cout << "H.460.18 is Disabled" << endl << endl;
 	  H46018Enable(PFalse);
   }
+#endif
 
 #endif
 /////////////////////////////////////////
