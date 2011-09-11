@@ -60,10 +60,10 @@
 // Major options
 //
 
-#undef	OPENH323_MAJOR
-#undef	OPENH323_MINOR
-#undef	OPENH323_BUILD
-#undef	OPENH323_VERSION
+#undef  OPENH323_MAJOR
+#undef  OPENH323_MINOR
+#undef  OPENH323_BUILD
+#undef  OPENH323_VERSION
 
 #undef H323_AUDIO_CODECS
 
@@ -109,25 +109,25 @@
 #undef H323_H4609
 #if (PTLIB_VER > 260) && (P_STUN)
     #undef H323_H46017
-	#undef H323_H46018
-	#if defined(H323_H46018)
-	    #define H323_H46019M 1
-	#endif
-	#undef H323_H46023
-	#if defined(H323_H46018) && defined(H323_H46023) && defined(P_SSL)
-		#define H323_H46024A 1
-		#define H323_H46024B 1
-	#endif
-	#if defined(H323_H46023) && (WINVER > 0x500)
-		#define H323_UPnP 1
-	#endif
+    #undef H323_H46018
+    #if defined(H323_H46018)
+        #undef H323_H323_H46019M
+    #endif
+    #undef H323_H46023
+    #if defined(H323_H46018) && defined(H323_H46023) && defined(P_SSL)
+        #define H323_H46024A 1
+        #define H323_H46024B 1
+    #endif
+    #if defined(H323_H46023) && (WINVER > 0x500)
+        #define H323_UPnP 1
+    #endif
 #endif
 #undef H323_H460P	
 #endif
 
 #undef H323_H501
 #if (PTLIB_VER > 260) && (P_STUN)
-	#undef H323_GNUGK
+    #undef H323_GNUGK
 #endif
 #undef H323_FILE
 
