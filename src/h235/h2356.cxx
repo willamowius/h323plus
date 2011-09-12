@@ -34,7 +34,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Id $
+ * $Id$
  *
  *
  */
@@ -48,7 +48,6 @@
 #include "h235/h2356.h"
 #include "h235/h2351.h"
 #include "h323con.h"
-#include <algorithm>
 
 extern "C" {
 #include <openssl/ssl.h>

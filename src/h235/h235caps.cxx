@@ -34,7 +34,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Id $
+ * $Id$
  *
  *
  */
@@ -46,6 +46,7 @@
 #ifdef H323_H235
 
 #include "h235/h235caps.h"
+#include "h235/h235chan.h"
 #include "h323.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -220,8 +221,22 @@ H323Channel * H323SecureRealTimeCapability::CreateChannel(H323Connection & conne
                                                     unsigned sessionID,
                                  const H245_H2250LogicalChannelParameters * param) const
 {
-   // work to be done here.
-   return ChildCapability.CreateChannel(connection,dir,sessionID,param);
+
+  RTP_Session * session = NULL;			  // Session
+
+  if (param != NULL) {
+	session = connection.UseSession(param->m_sessionID, param->m_mediaControlChannel, dir, nrtpqos);
+  } else {
+    // Make a fake transport address from the connection so gets initialised with
+    // the transport type (IP, IPX, multicast etc).
+    H245_TransportAddress addr;
+    connection.GetControlChannel().SetUpTransportPDU(addr, H323Transport::UseLocalTSAP);
+    session = connection.UseSession(sessionID, addr, dir, nrtpqos);
+  }
+  if (!session)
+    return NULL;
+
+  return new H323SecureRTPChannel(connection, *this, dir, *session); 
 }
 
 unsigned H323SecureRealTimeCapability::GetCapabilityNumber() const 
@@ -286,6 +301,37 @@ PObject * H323SecureCapability::Clone() const
 }
 
 PBoolean H323SecureCapability::IsMatch(const PASN_Choice & subTypePDU) const
+{
+
+    if (PIsDescendant(&subTypePDU, H245_AudioCapability) &&
+       ChildCapability.GetMainType() == H323Capability::e_Audio) { 
+          const H245_AudioCapability & audio = (const H245_AudioCapability &)subTypePDU;
+          return ChildCapability.IsMatch(audio);
+    }
+
+    if (PIsDescendant(&subTypePDU, H245_VideoCapability) &&
+       ChildCapability.GetMainType() == H323Capability::e_Video) { 
+          const H245_VideoCapability & video = (const H245_VideoCapability &)subTypePDU;
+          return ChildCapability.IsMatch(video);
+    }
+
+    if (PIsDescendant(&subTypePDU, H245_DataApplicationCapability_application) &&
+       ChildCapability.GetMainType() == H323Capability::e_Data) { 
+          const H245_DataApplicationCapability_application & data = 
+                         (const H245_DataApplicationCapability_application &)subTypePDU;
+          return ChildCapability.IsMatch(data);
+    }
+
+    if (PIsDescendant(&subTypePDU, H245_H235Media_mediaType)) { 
+          const H245_H235Media_mediaType & data = 
+                          (const H245_H235Media_mediaType &)subTypePDU;
+          return IsSubMatch(data);
+    }
+    return false;
+}
+
+
+PBoolean H323SecureCapability::IsSubMatch(const PASN_Choice & subTypePDU) const
 {
     const H245_H235Media_mediaType & dataType = (const H245_H235Media_mediaType &)subTypePDU;
 
@@ -401,7 +447,7 @@ PBoolean H323SecureCapability::OnSendingPDU(H245_DataType & dataType) const
 PBoolean H323SecureCapability::OnReceivedPDU(const H245_DataType & dataType,PBoolean receiver)
 {
     if (dataType.GetTag() != H245_DataType::e_h235Media)
-        return false;
+        return ChildCapability.OnReceivedPDU(dataType, receiver);
 
     const H245_H235Media & h235Media = dataType;
 

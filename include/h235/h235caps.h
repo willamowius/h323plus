@@ -45,8 +45,9 @@
 
 #pragma once
 
-#include "h245.h"
+//#include "h245.h"
 
+class H245_EncryptionAuthenticationAndIntegrity;
 class H235SecurityCapability  : public H323Capability
 {
   PCLASSINFO(H235SecurityCapability, H323Capability);
@@ -445,9 +446,15 @@ class H323SecureCapability : public H323SecureRealTimeCapability
 	  PBoolean receiver				  /// is receiver OLC
     );
 
-    /**Compare the security part of the capability, if applicable.
+    /**Compare the sub capability.
       */
     virtual PBoolean IsMatch(
+      const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
+    ) const;
+
+    /**Compare the security part of the capability, if applicable.
+      */
+    virtual PBoolean IsSubMatch(
       const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
     ) const;
 

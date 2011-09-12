@@ -34,7 +34,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Id $
+ * $Id$
  *
  *
  */
@@ -54,14 +54,14 @@ class H2356_Authenticator : public H235Authenticator
     PCLASSINFO(H2356_Authenticator, H235Authenticator);
   public:
 
-    H2356_Authenticator();
+	H2356_Authenticator();
 
-    ~H2356_Authenticator();
+	~H2356_Authenticator();
 
     enum h235TokenState { 
       e_clearNone,             // No Token Sent 
-      e_clearSent,			   // ClearToken Sent
-      e_clearReceived,		   // ClearToken Received
+	  e_clearSent,			   // ClearToken Sent
+	  e_clearReceived,		   // ClearToken Received
       e_clearComplete,         // Both Sent and received.
       e_clearDisable           // Disable Exchange
     };
@@ -108,7 +108,7 @@ private:
     PBoolean                               m_enabled;
     PBoolean                               m_active;
     h235TokenState                         m_tokenState;
-      
+	  
 };
 
 ////////////////////////////////////////////////////
@@ -146,7 +146,7 @@ public:
     );
 
     /**Create a copy of the Diffie-Hellman parameters. from 
-       H235_DiffieHellman structure
+	   H235_DiffieHellman structure
       */
     H235_DiffieHellman(
       const H235_DiffieHellman & dh
@@ -191,18 +191,18 @@ public:
 
 /**@name Encoding for the H245 Stream */
 //@{
-    /** Encode Prime */
-      void Encode_P(PASN_BitString & p);
-    /** Decode Prime */
-      void Decode_P(const PASN_BitString & p);
-    /** Encode Generator */
-      void Encode_G(PASN_BitString & g);
-    /** Decode Generator */
-      void Decode_G(const PASN_BitString & g);
-    /** Encode Public Half Key */
-      void Encode_HalfKey(PASN_BitString & hk);
-    /** decode Public Half Key */
-      void Decode_HalfKey(const PASN_BitString & hk);
+	/** Encode Prime */
+	  void Encode_P(PASN_BitString & p);
+	/** Decode Prime */
+	  void Decode_P(const PASN_BitString & p);
+	/** Encode Generator */
+	  void Encode_G(PASN_BitString & g);
+	/** Decode Generator */
+	  void Decode_G(const PASN_BitString & g);
+	/** Encode Public Half Key */
+	  void Encode_HalfKey(PASN_BitString & hk);
+	/** decode Public Half Key */
+	  void Decode_HalfKey(const PASN_BitString & hk);
 
 //@}
 
@@ -212,9 +212,9 @@ public:
 /**@name Protected Functions */
 //@{
     /**Create Diffie-Hellman parameters from Scratch.
-    Note: This function was built from the easy-tls example of the OpenSSL source code.
+	Note: This function was built from the easy-tls example of the OpenSSL source code.
       */
-    PBoolean CreateParams();
+	PBoolean CreateParams();
 //@}
 
     PMutex vbMutex;                   /// Mutex
