@@ -26,7 +26,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Id $
+ * $Id$
  *
  */
 
@@ -510,11 +510,11 @@ class H323_RealTimeChannel : public H323UnidirectionalChannel
       H245_H2250LogicalChannelParameters & param    ///< Open PDU to send.
     ) const { return OnSendingPDU(param); }
     
-	/**Alternate RTP port information for Same NAT
-	  */
-	virtual PBoolean OnSendingAltPDU(
-	  H245_ArrayOf_GenericInformation & alternate  ///< Alternate RTP ports
-	) const = 0;
+    /**Alternate RTP port information for Same NAT
+      */
+    virtual PBoolean OnSendingAltPDU(
+      H245_ArrayOf_GenericInformation & alternate  ///< Alternate RTP ports
+    ) const = 0;
 
     /**This is called when request to create a channel is received from a
        remote machine and is about to be acknowledged.
@@ -550,11 +550,11 @@ class H323_RealTimeChannel : public H323UnidirectionalChannel
       const H245_H2250LogicalChannelAckParameters & param ///< Acknowledgement PDU
     ) = 0;
 
-	/**Alternate RTP port information for Same NAT
-	  */
-	virtual PBoolean OnReceivedAckAltPDU(
-	  const H245_ArrayOf_GenericInformation & alternate  ///< Alternate RTP ports
-	) = 0;
+    /**Alternate RTP port information for Same NAT
+      */
+    virtual PBoolean OnReceivedAckAltPDU(
+      const H245_ArrayOf_GenericInformation & alternate  ///< Alternate RTP ports
+    ) = 0;
 
     /**Get the active payload type used by this channel.
        This will use the dynamic payload type configured for the channel, or
@@ -641,6 +641,17 @@ class H323_RTPChannel : public H323_RealTimeChannel
       */
     virtual void SendUniChannelBackProbe();
 
+    /** Read a DataFrame 
+      */
+    virtual PBoolean ReadFrame(DWORD & rtpTimestamp,     ///< TimeStamp
+                               RTP_DataFrame & frame     ///< RTP data frame
+        );
+
+    /** Write a DataFrame 
+      */
+    virtual PBoolean WriteFrame(RTP_DataFrame & frame     ///< RTP data frame
+        );
+
   //@}
 
   /**@name Overrides from class H323_RealTimeChannel */
@@ -651,11 +662,11 @@ class H323_RTPChannel : public H323_RealTimeChannel
       H245_H2250LogicalChannelParameters & param  ///< Open PDU to send.
     ) const;
 
-	/**Alternate RTP port information for Same NAT
-	  */
-	virtual PBoolean OnSendingAltPDU(
-	  H245_ArrayOf_GenericInformation & alternate  ///< Alternate RTP ports
-	) const;
+    /**Alternate RTP port information for Same NAT
+      */
+    virtual PBoolean OnSendingAltPDU(
+      H245_ArrayOf_GenericInformation & alternate  ///< Alternate RTP ports
+    ) const;
 
     /**This is called when request to create a channel is received from a
        remote machine and is about to be acknowledged.
@@ -685,11 +696,11 @@ class H323_RTPChannel : public H323_RealTimeChannel
       const H245_H2250LogicalChannelAckParameters & param ///< Acknowledgement PDU
     );
 
-	/**Alternate RTP port information for Same NAT
-	  */
-	virtual PBoolean OnReceivedAckAltPDU(
-	  const H245_ArrayOf_GenericInformation & alternate  ///< Alternate RTP ports
-	);
+    /**Alternate RTP port information for Same NAT
+      */
+    virtual PBoolean OnReceivedAckAltPDU(
+      const H245_ArrayOf_GenericInformation & alternate  ///< Alternate RTP ports
+    );
   //@}
 
     void AddFilter(
@@ -825,26 +836,26 @@ class H323_ExternalRTPChannel : public H323_RealTimeChannel
       const H245_H2250LogicalChannelAckParameters & param ///< Acknowledgement PDU
     );
 
-	/**Sending alternate RTP ports if behind same NAT
-	  */
-	virtual PBoolean OnSendingAltPDU(
-	  H245_ArrayOf_GenericInformation & /*alternate*/  ///< Alternate RTP ports
-	  ) const  {  return FALSE;  }
+    /**Sending alternate RTP ports if behind same NAT
+      */
+    virtual PBoolean OnSendingAltPDU(
+      H245_ArrayOf_GenericInformation & /*alternate*/  ///< Alternate RTP ports
+      ) const  {  return FALSE;  }
 
       /**This is called after a request to create a channel occurs from the
        local machine via the H245LogicalChannelDict::Open() function, and
        the request has been acknowledged by the remote endpoint.
      */
-	virtual PBoolean OnReceivedAckAltPDU(
+    virtual PBoolean OnReceivedAckAltPDU(
       H323_RTPChannel & /*channel*/,                                        ///< Channel using this session.
-	  const H245_ArrayOf_GenericInformation & /*alternate*/  ///< Alternate RTP ports
-	  )   { return FALSE; }
+      const H245_ArrayOf_GenericInformation & /*alternate*/  ///< Alternate RTP ports
+      )   { return FALSE; }
 
-	/**Alternate RTP port information for Same NAT
-	  */
-  	virtual PBoolean OnReceivedAckAltPDU(
-	  const H245_ArrayOf_GenericInformation & /*alternate*/  ///< Alternate RTP ports
-	 )    { return FALSE; };
+    /**Alternate RTP port information for Same NAT
+      */
+    virtual PBoolean OnReceivedAckAltPDU(
+      const H245_ArrayOf_GenericInformation & /*alternate*/  ///< Alternate RTP ports
+     )    { return FALSE; };
   //@}
 
     void SetExternalAddress(

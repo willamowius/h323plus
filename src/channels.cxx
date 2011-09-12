@@ -26,7 +26,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Id $
+ * $Id$
  *
  */
 
@@ -45,7 +45,7 @@
 #include <ptclib/delaychan.h>
 
 
-#define	MAX_PAYLOAD_TYPE_MISMATCHES 8
+#define MAX_PAYLOAD_TYPE_MISMATCHES 8
 #define RTP_TRACE_DISPLAY_RATE 16000 // 2 seconds
 
 
@@ -109,7 +109,7 @@ void H323LogicalChannelThread::Main()
     channel.Transmit();
 
 #ifdef _WIN32_WCE
-	Sleep(0); // Relinquish control to other thread
+    Sleep(0); // Relinquish control to other thread
 #endif
 }
 
@@ -327,7 +327,7 @@ PBoolean H323Channel::SetInitialBandwidth()
 #ifdef H323_VIDEO
   if (GetSessionID() == OpalMediaFormat::DefaultVideoSessionID) { 
      if (GetDirection() == H323Channel::IsTransmitter)
-		connection.OnSetInitialBandwidth((H323VideoCodec *)codec);
+        connection.OnSetInitialBandwidth((H323VideoCodec *)codec);
 
      return SetBandwidthUsed(
         codec->GetMediaFormat().GetOptionInteger(OpalVideoFormat::MaxBitRateOption)/100);
@@ -489,8 +489,8 @@ PBoolean H323_RealTimeChannel::OnSendingPDU(H245_OpenLogicalChannel & open) cons
                 H245_OpenLogicalChannel_forwardLogicalChannelParameters_multiplexParameters
                     ::e_h2250LogicalChannelParameters);
 
-	if (OnSendingAltPDU(open.m_genericInformation))
-		open.IncludeOptionalField(H245_OpenLogicalChannel::e_genericInformation);
+    if (OnSendingAltPDU(open.m_genericInformation))
+        open.IncludeOptionalField(H245_OpenLogicalChannel::e_genericInformation);
 
     connection.OnSendH245_OpenLogicalChannel(open, PTrue);
     return OnSendingPDU(open.m_forwardLogicalChannelParameters.m_dataType,
@@ -509,7 +509,7 @@ void H323_RealTimeChannel::OnSendOpenAck(const H245_OpenLogicalChannel & open,
 
   // select H225 choice
   ack.m_forwardMultiplexAckParameters.SetTag(
-	  H245_OpenLogicalChannelAck_forwardMultiplexAckParameters::e_h2250LogicalChannelAckParameters);
+      H245_OpenLogicalChannelAck_forwardMultiplexAckParameters::e_h2250LogicalChannelAckParameters);
 
   // get H225 parms
   H245_H2250LogicalChannelAckParameters & param = ack.m_forwardMultiplexAckParameters;
@@ -594,7 +594,7 @@ PBoolean H323_RealTimeChannel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck
   }
 
   if (ack.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation))
-		               OnReceivedAckAltPDU(ack.m_genericInformation);
+                       OnReceivedAckAltPDU(ack.m_genericInformation);
 
   return OnReceivedAckPDU(ack.m_forwardMultiplexAckParameters);
 }
@@ -762,6 +762,15 @@ PBoolean H323_RTPChannel::OnReceivedAckAltPDU(const H245_ArrayOf_GenericInformat
   return rtpCallbacks.OnReceivedAckAltPDU(*this, alternate);
 }
 
+PBoolean H323_RTPChannel::ReadFrame(DWORD & rtpTimestamp, RTP_DataFrame & frame)
+{
+  return rtpSession.ReadBufferedData(rtpTimestamp, frame);
+}
+
+PBoolean H323_RTPChannel::WriteFrame(RTP_DataFrame & frame)
+{
+  return rtpSession.WriteData(frame);
+}
 
 #if PTRACING
 class CodecReadAnalyser
@@ -948,7 +957,7 @@ void H323_RTPChannel::Transmit()
 
     if (sendPacket || (silent && frame.GetPayloadSize() > 0)) {
       // Send the frame of coded data we have so far to RTP transport
-      if (!rtpSession.WriteData(frame))
+      if (!WriteFrame(frame))
          break;
 
       // video frames produce many packets per frame especially at
@@ -1005,7 +1014,7 @@ void H323_RTPChannel::SendUniChannelBackProbe()
       frame.SetSequenceNumber(++sequenceNumber);
       if (i == packetCount-1) frame.SetMarker(true);
 
-      if (!rtpSession.WriteData(frame)) {
+      if (!WriteFrame(frame)) {
          PTRACE(2, "H323RTP\tERROR: BackChannel Probe Failed.");
          return;
       }
@@ -1053,7 +1062,7 @@ void H323_RTPChannel::Receive()
   PBoolean allowRtpPayloadChange = codec->GetMediaFormat().GetDefaultSessionID() == OpalMediaFormat::DefaultAudioSessionID;
 
   RTP_DataFrame frame;
-  while (rtpSession.ReadBufferedData(rtpTimestamp, frame)) {
+  while (ReadFrame(rtpTimestamp, frame)) {
 
     filterMutex.Wait();
     for (PINDEX i = 0; i < filters.GetSize(); i++)
