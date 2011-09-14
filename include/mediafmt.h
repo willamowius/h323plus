@@ -138,11 +138,13 @@ class OpalMediaOption : public PObject
     H245GenericInfo m_H245Generic;
 };
 
+#if PTLIB_VER < 2110
 #ifndef __USE_STL__
 __inline istream & operator>>(istream & strm, bool& b)
 {
    int i;strm >> i;b = i; return strm;
 }
+#endif
 #endif
 
 template <typename T>
