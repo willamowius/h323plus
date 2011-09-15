@@ -182,7 +182,7 @@ class OpalMediaOptionValue : public OpalMediaOption
       if (temp >= m_minimum && temp <= m_maximum)
         m_value = temp;
       else {
-#ifdef __USE_STL__
+#if PTLIB_VER >= 2110 || defined(__USE_STL__)
 	   strm.setstate(ios::badbit);
 #else
 	   strm.setf(ios::badbit , ios::badbit);

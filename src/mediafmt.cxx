@@ -378,7 +378,7 @@ void OpalMediaOptionEnum::ReadFrom(istream & strm)
 
   m_value = m_enumerations.GetSize();
 
-#ifdef __USE_STL__
+#if PTLIB_VER >= 2110 || defined(__USE_STL__)
    strm.setstate(ios::badbit);
 #else
    strm.setf(ios::badbit , ios::badbit);
