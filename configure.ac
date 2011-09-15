@@ -328,7 +328,7 @@ dnl ########################################################################
 dnl check for en/disabling H.235
 
 dnl MSWIN_DISPLAY h235,H.235.6
-dnl MSWIN_DEFINE  h235,H323_H235
+dnl MSWIN_DEFINE  h235,H323_H235X
 
 AC_ARG_ENABLE(h235,
        [  --disable-h235          disable H.235.6])
