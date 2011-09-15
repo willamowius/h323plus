@@ -178,7 +178,7 @@ default_h341=yes
 default_h350=yes
 default_h460=yes
 default_h4609=yes
-default_h46018=no
+default_h46017=no
 default_h46018=yes
 default_h46019m=no
 default_h46023=yes
@@ -333,7 +333,7 @@ dnl MSWIN_DEFINE  h235,H323_H235
 AC_ARG_ENABLE(h235,
        [  --disable-h235          disable H.235.6])
 if test "${enable_h235}x" = "x" ; then
-  enable_h230=$default_h235
+  enable_h235=$default_h235
 fi
 if test "$enable_h235" = "yes" ; then
   H323_H235=1
@@ -508,7 +508,7 @@ dnl ########################################################################
 dnl check for enabling H.460.17
 
 dnl MSWIN_DISPLAY h46017,H.460.17
-dnl MSWIN_DEFINE  h46017,H323_H46017
+dnl MSWIN_DEFINE  h46017,H323_H46017X
 
 AC_ARG_ENABLE(h46017,
        [  --disable-h46017        disable H.460.17])
@@ -548,7 +548,7 @@ dnl ########################################################################
 dnl check for enabling H.460.19 RTP multiplexing
 
 dnl MSWIN_DISPLAY h46018,H.460.19 RTP multiplexing
-dnl MSWIN_DEFINE  h46018,H323_H46019M
+dnl MSWIN_DEFINE  h46018,H323_H46019MX
 
 AC_ARG_ENABLE(h46019m,
        [  --disable-h46019m       disable H.460.19 RTP multiplexing])
