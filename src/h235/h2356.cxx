@@ -47,6 +47,7 @@
 
 #include "h235/h2356.h"
 #include "h235/h2351.h"
+#include "h235pluginmgr.h"
 #include "h323con.h"
 #include <algorithm>
 
@@ -392,6 +393,8 @@ void LoadDiffieHellmanMap(std::map<PString, H235_DiffieHellman*> & dhmap)
 
 /////////////////////////////////////////////////////////////////////////////////////
 
+H235SECURITY(Std6);
+
 H2356_Authenticator::H2356_Authenticator()
 : m_enabled(true), m_active(true), m_tokenState(e_clearNone)
 {
@@ -405,9 +408,33 @@ H2356_Authenticator::~H2356_Authenticator()
     DeleteObjectsInMap(m_dhRemoteMap);
 }
 
+PStringArray H2356_Authenticator::GetAuthenticatorNames()
+{
+    return PStringArray("Std6");
+}
+
+PBoolean H2356_Authenticator::GetAuthenticationIdentifiers(PStringArray & ids)
+{
+    for (PINDEX i = 0; i < PARRAYSIZE(H235_DHParameters); ++i) {
+        ids.AppendString(H235_DHParameters[i].parameterOID);
+    }
+    return true;
+}
+
+PBoolean H2356_Authenticator::IsMatch(const PString & identifier) const 
+{ 
+    PStringArray ids; 
+    if (GetAuthenticationIdentifiers(ids)) {
+      for (PINDEX i = 0; i < ids.GetSize(); ++i) 
+          if (ids[i] == identifier) return true;
+    }
+    return false; 
+}
+
+
 const char * H2356_Authenticator::GetName() const
 {
-    return "H.235.6 Encryption";
+    return H2356_Authenticator::GetAuthenticatorNames()[0];
 }
 
 PBoolean H2356_Authenticator::PrepareTokens(PASN_Array & clearTokens,

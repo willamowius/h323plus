@@ -49,6 +49,7 @@ class H323Connection;
 class PSSLCertificate;
 
 #include "ptlib_extras.h"
+#include <ptlib/pluginmgr.h>
 
 /** This abtract class embodies an H.235 authentication mechanism.
     NOTE: descendants must have a Clone() function for correct operation.
@@ -63,7 +64,25 @@ class H235Authenticator : public PObject
       ostream & strm
     ) const;
 
+#ifdef H323_H235
+    static H235Authenticator * CreateAuthenticator(const PString & authname,        ///< Feature Name Expression
+                                                    PPluginManager * pluginMgr = NULL   ///< Plugin Manager
+                                                 );
+
+    static H235Authenticator * CreateAuthenticatorByID(const PString & identifier
+                                                 );
+
+    static PBoolean GetAuthenticatorIdentifiers(const PString & deviceName,                 
+                                                PStringArray & caps, 
+                                                PPluginManager * pluginMgr = NULL);
+
+#endif
+
     virtual const char * GetName() const = 0;
+
+    static PStringArray GetAuthenticatorList();
+
+    virtual PBoolean IsMatch(const PString & /*identifier*/) const { return false; }
 
     virtual PBoolean PrepareTokens(
       PASN_Array & clearTokens,
@@ -217,6 +236,12 @@ PDECLARE_LIST(H235Authenticators, H235Authenticator)
       const PBYTEArray & rawPDU
     ) const;
 
+#ifdef H323_H235
+    PBoolean CreateAuthenticators(const PASN_Array & clearTokens, const PASN_Array & cryptoTokens);
+ protected:
+    void CreateAuthenticatorsByID(const PStringArray & identifiers);
+#endif
+
 };
 
 class H235AuthenticatorInfo : public PObject
@@ -342,6 +367,11 @@ class H2351_Authenticator : public H235Authenticator
 
     virtual const char * GetName() const;
 
+    static PStringArray GetAuthenticatorNames();
+    static PBoolean GetAuthenticationIdentifiers(PStringArray & ids);
+
+    virtual PBoolean IsMatch(const PString & identifier) const;
+
     virtual H225_CryptoH323Token * CreateCryptoToken();
 
     virtual PBoolean Finalise(
@@ -377,6 +407,39 @@ class H2351_Authenticator : public H235Authenticator
 };
 
 typedef H2351_Authenticator H235AuthProcedure1;  // Backwards interoperability
+
+//////////////////////////////////////////////////////////////////////////////
+
+#ifdef H323_H235
+typedef H2351_Authenticator H235_AuthenticatorStd1;
+#ifndef _WIN32_WCE
+    #if PTLIB_VER > 260
+       PPLUGIN_STATIC_LOAD(Std1,H235Authenticator);
+    #else
+       PWLIB_STATIC_LOAD_PLUGIN(Std1,H235Authenticator);
+    #endif
+#endif
+#endif
+
+template <class className> class H235PluginServiceDescriptor : public PDevicePluginServiceDescriptor
+{
+  public:
+    virtual PObject *   CreateInstance(int /*userData*/) const { return new className; }
+    virtual PStringArray GetDeviceNames(int /*userData*/) const { 
+               return className::GetAuthenticatorNames(); 
+    }
+    virtual bool  ValidateDeviceName(const PString & deviceName, int /*userData*/) const { 
+            return (deviceName == className::GetAuthenticatorNames()[0]);
+    } 
+    virtual bool GetDeviceCapabilities(const PString & /*deviceName*/, void * capabilities) const {
+        PStringArray & caps = *(PStringArray *)capabilities;
+        return className::GetAuthenticationIdentifiers(caps);
+    }
+};
+
+#define H235SECURITY(name)    \
+static H235PluginServiceDescriptor<H235_Authenticator##name> H235_Authenticator##name##_descriptor; \
+PCREATE_PLUGIN_STATIC(name, H235Authenticator, &H235_Authenticator##name##_descriptor);
 
 #endif
 

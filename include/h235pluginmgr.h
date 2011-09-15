@@ -29,16 +29,12 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.1  2007/08/06 20:50:49  shorne
- * First commit of h323plus
- *
+ * $Id$
  *
  *
 */
 
 #include <ptlib.h>
-#include <ptlib/pluginmgr.h>
 #include <h235auth.h>
 
 #if _MSC_VER > 1000
@@ -166,4 +162,3 @@ class cls : public H235PluginAuthenticator { \
  H235_REGISTER(cls, capName) \
 
 /////////////////////////////////////////////////////////////////////////////
-

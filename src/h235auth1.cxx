@@ -155,11 +155,13 @@ static void hmac_sha (const unsigned char*    k,      /* secret key */
 
 /////////////////////////////////////////////////////////////////////////////
 
-static PFactory<H235Authenticator>::Worker<H2351_Authenticator> factoryH2351_Authenticator("H2351_Authenticator");
+#ifdef H323_H235
+H235SECURITY(Std1);
+#endif
 
 H2351_Authenticator::H2351_Authenticator()
 {
-	usage = AnyApplication;  // Can be used either for GKAdmission or EPAuthenticstion
+    usage = AnyApplication;  // Can be used either for GKAdmission or EPAuthenticstion
 }
 
 
@@ -180,6 +182,21 @@ const char * H2351_Authenticator::GetName() const
   return "H.235.1";
 }
 
+PStringArray H2351_Authenticator::GetAuthenticatorNames()
+{
+    return PStringArray("Std1");
+}
+
+PBoolean H2351_Authenticator::GetAuthenticationIdentifiers(PStringArray & ids)
+{
+    ids.AppendString(OID_A);
+    return true;
+}
+
+PBoolean H2351_Authenticator::IsMatch(const PString & identifier) const 
+{ 
+    return (identifier == PString(OID_A)); 
+}
 
 H225_CryptoH323Token * H2351_Authenticator::CreateCryptoToken()
 {
@@ -366,19 +383,19 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
 #ifndef DISABLE_CALLAUTH
   // If has connection then EP Authenticator so CallBack to Check SenderID and Set Password
   if (connection != NULL) { 
-	// Senders ID is required for signal authentication
+    // Senders ID is required for signal authentication
     if (!crHashed.m_hashedVals.HasOptionalField(H235_ClearToken::e_sendersID)) {
       PTRACE(1, "H235RAS\tH2351_Authenticator requires senders ID.");
       return e_Error;
     }
 
-	localId = crHashed.m_hashedVals.m_sendersID.GetValue();
-	remoteId = PString::Empty();
-	if (!connection->OnCallAuthentication(localId,password)) {
-	PTRACE(1, "H235EP\tH2351_Authenticator Authentication Fail UserName \""  
-			<< localId << "\", not Authorised. \"");
-	return e_BadPassword;
-	}
+    localId = crHashed.m_hashedVals.m_sendersID.GetValue();
+    remoteId = PString::Empty();
+    if (!connection->OnCallAuthentication(localId,password)) {
+    PTRACE(1, "H235EP\tH2351_Authenticator Authentication Fail UserName \""  
+            << localId << "\", not Authorised. \"");
+    return e_BadPassword;
+    }
   } else {
 #endif
   //verify the username

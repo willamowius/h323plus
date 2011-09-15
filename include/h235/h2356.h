@@ -68,6 +68,11 @@ class H2356_Authenticator : public H235Authenticator
 
     virtual const char * GetName() const;
 
+    static PStringArray GetAuthenticatorNames();
+    static PBoolean GetAuthenticationIdentifiers(PStringArray & ids);
+
+    PBoolean IsMatch(const PString & identifier) const; 
+
     virtual PBoolean PrepareTokens(
       PASN_Array & clearTokens,
       PASN_Array & cryptoTokens
@@ -113,8 +118,15 @@ private:
 
 ////////////////////////////////////////////////////
 /// PFactory Loader
-static PFactory<H235Authenticator>::Worker<H2356_Authenticator> H2356_AuthenticatorFactory("H2356_Encryption");
 
+typedef H2356_Authenticator H235_AuthenticatorStd6;
+#ifndef _WIN32_WCE
+	#if PTLIB_VER > 260
+	   PPLUGIN_STATIC_LOAD(Std6,H235Authenticator);
+	#else
+	   PWLIB_STATIC_LOAD_PLUGIN(Std6,H235Authenticator);
+	#endif
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////////////
 /**Diffie-Hellman parameters.

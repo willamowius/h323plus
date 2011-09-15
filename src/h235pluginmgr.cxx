@@ -31,17 +31,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.3  2007/11/02 03:58:30  shorne
- * fixed missed warning on last commit
- *
- * Revision 1.2  2007/11/01 22:26:27  shorne
- * fix linux compile warnings
- *
- * Revision 1.1  2007/08/06 20:51:05  shorne
- * First commit of h323plus
- *
- *
+ * $Id$
  *
 */
 
@@ -61,6 +51,8 @@
 #pragma warning(disable:4700)
 #endif
 
+
+/////////////////////////////////////////////////////////////////////////////////////
 
 static int PluginControl(Pluginh235_Definition * h235, 
                                        void * context,
