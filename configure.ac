@@ -66,15 +66,15 @@ dnl look for ptlib, use a preference order of explicit PTLIBDIR, directory
 dnl at same level, home directory, /usr/local or /usr.
 
 if test "${PTLIBDIR:-unset}" != "unset" ; then 	 
-  AC_CHECK_FILE(${PTLIBDIR}/version.h, HAS_PTLIB=1) 	 
+  AC_CHECK_HEADER(${PTLIBDIR}/version.h, HAS_PTLIB=1) 	 
 fi
 
 if test "${HAS_PTLIB:-unset}" = "unset" ; then
-  AC_CHECK_FILE(${OPENH323DIR}/../ptlib/version.h, HAS_PTLIB=1) 	 
+  AC_CHECK_HEADER(${OPENH323DIR}/../ptlib/version.h, HAS_PTLIB=1) 	 
   if test "${HAS_PTLIB:-unset}" != "unset" ; then
     PTLIBDIR="${OPENH323DIR}/../ptlib"
   else
-    AC_CHECK_FILE(${HOME}/ptlib/version.h, HAS_PTLIB=1) 	 
+    AC_CHECK_HEADER(${HOME}/ptlib/version.h, HAS_PTLIB=1) 	 
     if test "${HAS_PTLIB:-unset}" != "unset" ; then
       PTLIBDIR="${HOME}/ptlib"
     else
