@@ -508,6 +508,37 @@ PBoolean H235Authenticators::CreateAuthenticators(const PASN_Array & clearTokens
     }
     return true;
 }
+
+PBoolean H235Authenticators::CreateAuthenticator(const PString & name)
+{
+   H235Authenticator * newAuth = H235Authenticator::CreateAuthenticator(name);
+
+   if (!newAuth) 
+     return false;
+
+   this->Append(newAuth);
+   return true;
+}
+
+PBoolean H235Authenticators::SupportsEncryption(PStringArray & list) const
+{
+   PBoolean found = false;
+   for (PINDEX j=0; j< this->GetSize(); ++j) {
+       H235Authenticator & auth = (*this)[j];
+       if (auth.GetApplication() == H235Authenticator::MediaEncryption)  {
+           list.AppendString(auth.GetName());
+           found = true;
+       }
+   }
+   return found;
+}
+
+PBoolean H235Authenticators::SupportsEncryption() const
+{
+    PStringArray list;
+    return SupportsEncryption(list);
+}
+
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -585,7 +616,11 @@ H235AuthenticatorInfo::H235AuthenticatorInfo(PSSLCertificate * cert)
 }
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifdef H323_H235
+H235SECURITY(MD5);
+#else
 static PFactory<H235Authenticator>::Worker<H235AuthSimpleMD5> factoryH235AuthSimpleMD5("SimpleMD5");
+#endif
 
 static const char OID_MD5[] = "1.2.840.113549.2.5";
 
@@ -606,6 +641,21 @@ const char * H235AuthSimpleMD5::GetName() const
   return "MD5";
 }
 
+PStringArray H235AuthSimpleMD5::GetAuthenticatorNames()
+{
+    return PStringArray("MD5");
+}
+
+PBoolean H235AuthSimpleMD5::GetAuthenticationIdentifiers(PStringArray & ids)
+{
+    ids.AppendString(OID_MD5);
+    return true;
+}
+
+PBoolean H235AuthSimpleMD5::IsMatch(const PString & identifier) const 
+{ 
+    return (identifier == PString(OID_MD5)); 
+}
 
 static PWCharArray GetUCS2plusNULL(const PString & str)
 {

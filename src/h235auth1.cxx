@@ -161,7 +161,7 @@ H235SECURITY(Std1);
 
 H2351_Authenticator::H2351_Authenticator()
 {
-    usage = AnyApplication;  // Can be used either for GKAdmission or EPAuthenticstion
+    usage = GKAdmission;  // Can be used either for GKAdmission (not EPAuthentication)
 }
 
 

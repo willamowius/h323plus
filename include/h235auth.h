@@ -66,7 +66,7 @@ class H235Authenticator : public PObject
 
 #ifdef H323_H235
     static H235Authenticator * CreateAuthenticator(const PString & authname,        ///< Feature Name Expression
-                                                    PPluginManager * pluginMgr = NULL   ///< Plugin Manager
+                                                PPluginManager * pluginMgr = NULL   ///< Plugin Manager
                                                  );
 
     static H235Authenticator * CreateAuthenticatorByID(const PString & identifier
@@ -238,6 +238,10 @@ PDECLARE_LIST(H235Authenticators, H235Authenticator)
 
 #ifdef H323_H235
     PBoolean CreateAuthenticators(const PASN_Array & clearTokens, const PASN_Array & cryptoTokens);
+    PBoolean CreateAuthenticator(const PString & name);
+    PBoolean SupportsEncryption(PStringArray & list) const;
+    PBoolean SupportsEncryption() const;
+
  protected:
     void CreateAuthenticatorsByID(const PStringArray & identifiers);
 #endif
@@ -284,6 +288,11 @@ class H235AuthSimpleMD5 : public H235Authenticator
 
     virtual const char * GetName() const;
 
+    static PStringArray GetAuthenticatorNames();
+    static PBoolean GetAuthenticationIdentifiers(PStringArray & ids);
+
+    virtual PBoolean IsMatch(const PString & identifier) const;
+
     virtual H225_CryptoH323Token * CreateCryptoToken();
 
     virtual ValidationResult ValidateCryptoToken(
@@ -311,6 +320,21 @@ class H235AuthSimpleMD5 : public H235Authenticator
       PBoolean received
     ) const;
 };
+
+////////////////////////////////////////////////////
+
+
+#ifdef H323_H235
+/// PFactory Loader
+typedef H235AuthSimpleMD5 H235_AuthenticatorMD5;
+#ifndef _WIN32_WCE
+	#if PTLIB_VER > 260
+	   PPLUGIN_STATIC_LOAD(MD5,H235Authenticator);
+	#else
+	   PWLIB_STATIC_LOAD_PLUGIN(MD5,H235Authenticator);
+	#endif
+#endif
+#endif
 
 
 /** This class embodies a RADIUS compatible based authentication (aka Cisco
