@@ -151,10 +151,12 @@ ifdef H323_H235
 HEADER_FILES	+= $(OH323_INCDIR)/h235/h2351.h \
                    $(OH323_INCDIR)/h235/h2356.h \
                    $(OH323_INCDIR)/h235/h235caps.h \
-                   $(OH323_INCDIR)/h235/h2356con.h
+                   $(OH323_INCDIR)/h235/h235chan.h \
+                   $(OH323_INCDIR)/h235/h235con.h
 COMMON_SOURCES	+= $(OH323_SRCDIR)/h235/h2356.cxx \
                    $(OH323_SRCDIR)/h235/h235caps.cxx \
-                   $(OH323_INCDIR)/h235/h235con.cxx
+                   $(OH323_SRCDIR)/h235/h235chan.cxx \
+                   $(OH323_SRCDIR)/h235/h235con.cxx
 endif
 
 ########### H.248
