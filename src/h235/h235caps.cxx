@@ -182,7 +182,7 @@ unsigned H235SecurityCapability::GetDefaultSessionID() const
 PBoolean H235SecurityCapability::IsUsable(const H323Connection & connection) const
 {
    const H235Capabilities & caps = (const H235Capabilities &)connection.GetLocalCapabilities();
-   return caps.GetAlgorithnms(m_capList);
+   return caps.GetAlgorithms(m_capList);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -548,24 +548,30 @@ H235Capabilities::H235Capabilities(const H323Capabilities & original)
 :  m_DHkey(NULL), m_h245Master(false)
 {
   m_algorithms.SetSize(0);
+  const H323CapabilitiesSet rset = original.GetSet();
 
-  for (PINDEX i = 0; i < original.GetSize(); i++)
-    WrapCapability(original[i]);
-
-  const H323CapabilitiesSet & origSet = original.GetSet();
-  PINDEX outerSize = origSet.GetSize();
-  set.SetSize(outerSize);
-  for (PINDEX outer = 0; outer < outerSize; outer++) {
-    PINDEX middleSize = origSet[outer].GetSize();
-    set[outer].SetSize(middleSize);
-    for (PINDEX middle = 0; middle < middleSize; middle++) {
-      PINDEX innerSize = origSet[outer][middle].GetSize();
-      for (PINDEX inner = 0; inner < innerSize; inner++)
-        set[outer][middle].Append(FindCapability(origSet[outer][middle][inner].GetCapabilityNumber()));
+  for (PINDEX i = 0; i < original.GetSize(); i++) {
+    unsigned capabilityNumber = original[i].GetCapabilityNumber();
+    PINDEX outer=0,middle=0,inner=0;
+    for (outer = 0; outer < rset.GetSize(); outer++) {
+        for (middle = 0; middle < rset[outer].GetSize(); middle++) {
+          for (inner = 0; inner < rset[outer][middle].GetSize(); inner++) {
+              if (rset[outer][middle][inner].GetCapabilityNumber() == capabilityNumber) {
+                 WrapCapability(outer, middle, original[i]);
+                 break;
+              }
+          }
+          if (rset[outer][middle].GetSize() == 0) {
+             WrapCapability(outer, middle, original[i]);
+             break;
+          }
+        }
+        if (rset[outer].GetSize() == 0) {
+           WrapCapability(outer, middle, original[i]);
+           break;
+        }
     }
   }
-
-
 }
 
 H235Capabilities::H235Capabilities(const H323Connection & /*connection*/, const H245_TerminalCapabilitySet & /*pdu*/)
@@ -595,7 +601,7 @@ static unsigned SetCapabilityNumber(const H323CapabilitiesList & table,
   return newCapabilityNumber;
 }
 
-void H235Capabilities::AddSecure(H323Capability * capability)
+void H235Capabilities::AddSecure(PINDEX descriptorNum, PINDEX simultaneous, H323Capability * capability)
 {
   if (capability == NULL)
     return;
@@ -608,20 +614,24 @@ void H235Capabilities::AddSecure(H323Capability * capability)
   if (table.GetObjectsIndex(capability) != P_MAX_INDEX)
     return;
 
-  capability->SetCapabilityNumber(SetCapabilityNumber(table, 1));
+  // Create the secure capability wrapper
+  unsigned capNumber = SetCapabilityNumber(table, capability->GetCapabilityNumber());
+  capability->SetCapabilityNumber(capNumber);
   ((H323SecureCapability *)capability)->SetCapabilityList(this);
+  SetCapability(descriptorNum, simultaneous, capability);
 
-  unsigned capNumber = capability->GetCapabilityNumber();
+  // Create the security capability
+  unsigned secNumber = 100+capNumber;
   H235SecurityCapability * secCap = new H235SecurityCapability(capNumber);
-  secCap->SetCapabilityNumber(SetCapabilityNumber(table, 100+capNumber));
-  ((H323SecureCapability *)capability)->SetSecurityCapabilityNumber(secCap->GetCapabilityNumber());
-  table.Append(capability);
-  table.Append(secCap);
+  secCap->SetCapabilityNumber(secNumber);
+  ((H323SecureCapability *)capability)->SetSecurityCapabilityNumber(secNumber);
+  SetCapability(descriptorNum, simultaneous, secCap);
+
 
   PTRACE(3, "H323\tAdded Secure Capability: " << *capability);
 }
 
-H323Capability * H235Capabilities::CopySecure(const H323Capability & capability)
+H323Capability * H235Capabilities::CopySecure(PINDEX descriptorNum, PINDEX simultaneous, const H323Capability & capability)
 {
   if (!PIsDescendant(&capability,H323SecureCapability) &&
       !PIsDescendant(&capability,H235SecurityCapability))
@@ -629,40 +639,40 @@ H323Capability * H235Capabilities::CopySecure(const H323Capability & capability)
 
   if (PIsDescendant(&capability,H235SecurityCapability)) {
      H235SecurityCapability * newCapability = (H235SecurityCapability *)capability.Clone();
-     newCapability->SetCapabilityNumber(capability.GetCapabilityNumber());  // Do not change number - TODO -SH
+     newCapability->SetCapabilityNumber(capability.GetCapabilityNumber());
      table.Append(newCapability);
+     SetCapability(descriptorNum, simultaneous, newCapability);
      return newCapability;
   } else {
      H323SecureCapability * newCapability = (H323SecureCapability *)capability.Clone();
-     newCapability->SetCapabilityNumber(SetCapabilityNumber(table, capability.GetCapabilityNumber()));
+     newCapability->SetCapabilityNumber(capability.GetCapabilityNumber());
      newCapability->SetCapabilityList(this);
-     table.Append(newCapability);
-
+     SetCapability(descriptorNum, simultaneous, newCapability);
      PTRACE(3, "H323\tCopied Secure Capability: " << *newCapability);
      return newCapability;
   }
 }
 
-void H235Capabilities::WrapCapability(H323Capability & capability)
+void H235Capabilities::WrapCapability(PINDEX descriptorNum, PINDEX simultaneous, H323Capability & capability)
 {
 
     if (PIsDescendant(&capability,H323SecureCapability) ||
         PIsDescendant(&capability,H235SecurityCapability)) {
-          CopySecure(capability);
+          CopySecure(descriptorNum, simultaneous, capability);
           return;
     }
 
     switch (capability.GetDefaultSessionID()) {
         case OpalMediaFormat::DefaultAudioSessionID:
         case OpalMediaFormat::DefaultVideoSessionID:
-            AddSecure(new H323SecureCapability(capability, H235ChNew,this));
+            AddSecure(descriptorNum, simultaneous, new H323SecureCapability(capability, H235ChNew,this));
             break;
         case OpalMediaFormat::NonRTPSessionID:
         case OpalMediaFormat::DefaultDataSessionID:
         case OpalMediaFormat::DefaultH224SessionID:
         case OpalMediaFormat::DefaultExtVideoSessionID:
         default:
-            Copy(capability);
+            SetCapability(descriptorNum, simultaneous, (H323Capability *)capability.Clone());
             break;
     }
 }
@@ -752,7 +762,7 @@ void H235Capabilities::SetDHKeyPair(const PStringList & keyOIDs, H235_DiffieHell
 
 }
 
-PBoolean H235Capabilities::GetAlgorithnms(const PStringList & algorithms) const
+PBoolean H235Capabilities::GetAlgorithms(const PStringList & algorithms) const
 {
     PStringList * m_localAlgorithms = PRemoveConst(PStringList,&algorithms);
     *m_localAlgorithms = m_algorithms;

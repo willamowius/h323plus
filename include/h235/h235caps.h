@@ -510,15 +510,24 @@ public:
     /**Construct a capability set from the H.245 PDU provided.
       */
     H235Capabilities(
-      const H323Connection & connection,      ///< Connection for capabilities
-      const H245_TerminalCapabilitySet & pdu  ///< PDU to convert to a capability set.
+      const H323Connection & connection,             ///< Connection for capabilities
+      const H245_TerminalCapabilitySet & pdu         ///< PDU to convert to a capability set.
     );
 
-    void WrapCapability(H323Capability & capability);
+    void WrapCapability(PINDEX descriptorNum,        ///< The member of the capabilityDescriptor to add
+                        PINDEX simultaneous,         ///< The member of the SimultaneousCapabilitySet to add
+                        H323Capability & capability  ///< capability to wrap
+                       );
 
-    void AddSecure(H323Capability * capability);
+    void AddSecure(PINDEX descriptorNum,             ///< The member of the capabilityDescriptor to add
+                   PINDEX simultaneous,              ///< The member of the SimultaneousCapabilitySet to add
+                   H323Capability * capability       ///< capability to add
+                   );
 
-    H323Capability * CopySecure(const H323Capability & capability);
+    H323Capability * CopySecure(PINDEX descriptorNum,             ///< The member of the capabilityDescriptor to add 
+                                PINDEX simultaneous,              ///< The member of the SimultaneousCapabilitySet to add
+                                const H323Capability & capability ///< capability to copy
+                                );
 
     /**Add all matching capabilities to descriptor lists.
        All capabilities that match the specified name are added as in the other
@@ -537,7 +546,7 @@ public:
     /**Get the Algorithms
          return false if no algorithms.
       */
-    PBoolean GetAlgorithnms(const PStringList & algorithms) const;
+    PBoolean GetAlgorithms(const PStringList & algorithms) const;
 
 protected:
     H235_DiffieHellman * m_DHkey; 
