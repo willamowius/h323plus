@@ -3188,7 +3188,7 @@ void H323Capabilities::Add(H323Capability * capability)
   if (table.GetObjectsIndex(capability) != P_MAX_INDEX)
     return;
 
-  capability->SetCapabilityNumber(MergeCapabilityNumber(table, 1));
+  capability->SetCapabilityNumber(MergeCapabilityNumber(table, capability->GetCapabilityNumber()));
   table.Append(capability);
 
   PTRACE(3, "H323\tAdded capability: " << *capability);
