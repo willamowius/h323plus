@@ -319,7 +319,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
   if (devices.GetSize() == 0) {
 	  cout << "No Video Grabber available Disabling Video Support!" << endl;
 	  hasVideo = FALSE;
-#if PTLIB_VER > 260
+#if PTLIB_VER >= 2110
   } else {
     PVideoInputDevice::Capabilities caps;
     if (PVideoInputDevice::GetDeviceCapabilities(devices[0],inputDriverName,&caps)) {
