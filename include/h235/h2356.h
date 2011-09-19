@@ -102,6 +102,8 @@ class H2356_Authenticator : public H235Authenticator
     virtual PBoolean IsActive() const;
     virtual void Disable();
 
+    virtual PBoolean GetAlgorithms(PStringList & algorithms) const;
+
 protected:
     void InitialiseSecurity();
 
@@ -113,6 +115,7 @@ private:
     PBoolean                               m_enabled;
     PBoolean                               m_active;
     h235TokenState                         m_tokenState;
+    PStringList                            m_algOIDs;
 	  
 };
 

@@ -301,6 +301,11 @@ void H235Authenticator::SetConnection(H323Connection * con)
     connection = con;
 }
 
+PBoolean H235Authenticator::GetAlgorithms(PStringList & /*algorithms*/) const
+{
+    return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void H235Authenticators::PreparePDU(H323TransactionPDU & pdu,
@@ -537,6 +542,23 @@ PBoolean H235Authenticators::SupportsEncryption() const
 {
     PStringArray list;
     return SupportsEncryption(list);
+}
+
+PBoolean H235Authenticators::GetAlgorithms(PStringList & algorithms) const
+{
+   PBoolean found = false;
+   for (PINDEX j=0; j< this->GetSize(); ++j) {
+       H235Authenticator & auth = (*this)[j];
+       if (auth.GetApplication() == H235Authenticator::MediaEncryption)  {
+           PStringList algs;
+           if (auth.GetAlgorithms(algs)) {
+              for (PINDEX i=0; i<algs.GetSize(); ++i)
+                     algorithms.AppendString(algs[i]);
+              found = true;
+           }
+       }
+   }
+   return found; 
 }
 
 #endif

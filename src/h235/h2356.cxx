@@ -399,6 +399,7 @@ H2356_Authenticator::H2356_Authenticator()
 : m_enabled(true), m_active(true), m_tokenState(e_clearNone)
 {
     usage = MediaEncryption;
+    m_algOIDs.SetSize(0);
     LoadDiffieHellmanMap(m_dhLocalMap);
 }
 
@@ -587,17 +588,22 @@ void H2356_Authenticator::InitialiseSecurity()
 
   l->second->SetRemoteKey(r->second->GetPublicKey());
 
-  PStringList algOIDs;
-  algOIDs.SetSize(0);
+  m_algOIDs.SetSize(0);
   for (PINDEX i=0; i<PARRAYSIZE(H235_Algorithms); ++i) {
       if (PString(H235_Algorithms[i].DHparameters) == dhOID)
-           algOIDs.AppendString(H235_Algorithms[i].algorithm);
+           m_algOIDs.AppendString(H235_Algorithms[i].algorithm);
   }
 
-  if (connection && (algOIDs.GetSize() > 0)) {
+  if (connection && (m_algOIDs.GetSize() > 0)) {
       H235Capabilities * localCaps = (H235Capabilities *)connection->GetLocalCapabilitiesRef();
-      localCaps->SetDHKeyPair(algOIDs,l->second,connection->IsH245Master());
+      localCaps->SetDHKeyPair(m_algOIDs,l->second,connection->IsH245Master());
   }
+}
+
+PBoolean H2356_Authenticator::GetAlgorithms(PStringList & algorithms) const
+{
+    algorithms = m_algOIDs;
+    return (m_algOIDs.GetSize() > 0);
 }
 
 

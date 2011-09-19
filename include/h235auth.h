@@ -174,6 +174,8 @@ class H235Authenticator : public PObject
 
     virtual void SetConnection(H323Connection * con);	// Set the connection for EPAuthentication
 
+    virtual PBoolean GetAlgorithms(PStringList & algorithms) const;  // Get the supported Algorithm OIDs
+
   protected:
     PBoolean AddCapability(
       unsigned mechanism,
@@ -241,6 +243,7 @@ PDECLARE_LIST(H235Authenticators, H235Authenticator)
     PBoolean CreateAuthenticator(const PString & name);
     PBoolean SupportsEncryption(PStringArray & list) const;
     PBoolean SupportsEncryption() const;
+    PBoolean GetAlgorithms(PStringList & algorithms) const;
 
  protected:
     void CreateAuthenticatorsByID(const PStringArray & identifiers);
