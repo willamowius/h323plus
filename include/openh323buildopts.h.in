@@ -44,7 +44,15 @@
      #define PTLIB_VER 290
 #endif
 #if PTLIB_MAJOR == 2 && PTLIB_MINOR == 10
+  #if PTLIB_BUILD == 0
      #define PTLIB_VER 2100
+  #endif
+  #if PTLIB_BUILD == 1
+     #define PTLIB_VER 2101
+  #endif
+  #if PTLIB_BUILD == 2
+     #define PTLIB_VER 2102
+  #endif
 #endif
 #if PTLIB_MAJOR == 2 && PTLIB_MINOR >= 11
      #define PTLIB_VER 2110
