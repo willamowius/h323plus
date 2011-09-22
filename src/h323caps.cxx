@@ -66,7 +66,7 @@ DEFINE_G711_CAPABILITY(H323_G711uLaw64Capability, H323_G711Capability::muLaw, "G
 ostream & operator<<(ostream & o , H323Capability::MainTypes t)
 {
   const char * const names[] = {
-    "Audio", "Video", "Data", "UserInput"
+    "Audio", "Video", "Data", "UserInput", "ExtVideo", "GenControl", "ConfControl", "Security"
   };
   return o << names[t];
 }
@@ -1984,6 +1984,7 @@ H323CodecExtendedVideoCapability::H323CodecExtendedVideoCapability()
 
 H323CodecExtendedVideoCapability::~H323CodecExtendedVideoCapability()
 {
+    extCapabilities.RemoveAll();
 }
 
 void H323CodecExtendedVideoCapability::AddCapability(const PString & cap)
@@ -2979,10 +2980,11 @@ H323Capabilities::H323Capabilities(const H323Connection & connection,
   if (pdu.HasOptionalField(H245_TerminalCapabilitySet::e_capabilityTable)) {
     for (PINDEX i = 0; i < pdu.m_capabilityTable.GetSize(); i++) {
       if (pdu.m_capabilityTable[i].HasOptionalField(H245_CapabilityTableEntry::e_capability)) {
-        H323Capability * capability = allCapabilities.FindCapability(pdu.m_capabilityTable[i].m_capability);
+        unsigned capabilityNo = pdu.m_capabilityTable[i].m_capabilityTableEntryNumber;
+        H323Capability * capability = allCapabilities.FindCapability(pdu.m_capabilityTable[i].m_capability, capabilityNo, pdu);
         if (capability != NULL) {
           H323Capability * copy = (H323Capability *)capability->Clone();
-          copy->SetCapabilityNumber(pdu.m_capabilityTable[i].m_capabilityTableEntryNumber);
+          copy->SetCapabilityNumber(capabilityNo);
           if (copy->OnReceivedPDU(pdu.m_capabilityTable[i].m_capability))
             table.Append(copy);
           else
@@ -3327,6 +3329,17 @@ H323Capability * H323Capabilities::FindCapability(const H323Capability & capabil
   return NULL;
 }
 
+H323Capability * H323Capabilities::FindCapability(const H245_Capability & cap,
+                                                  const unsigned capID,
+                                                  const H245_TerminalCapabilitySet & pdu) const
+
+{
+    if (cap.GetTag() == H245_Capability::e_h235SecurityCapability){
+      const H245_H235SecurityCapability & secCap = cap;
+      return FindCapability(H323Capability::e_Security, secCap, capID, pdu);
+    } else
+      return FindCapability(cap);
+}
 
 H323Capability * H323Capabilities::FindCapability(const H245_Capability & cap) const
 {
@@ -3561,6 +3574,31 @@ H323Capability * H323Capabilities::FindCapability(H323Capability::MainTypes main
 	}
 
 	return NULL;
+}
+
+H323Capability * H323Capabilities::FindCapability(H323Capability::MainTypes mainType,
+                                                  const PASN_Sequence & subTypePDU,
+                                                  const unsigned & capID,
+                                                  const H245_TerminalCapabilitySet & tcs) const
+{
+    if (mainType != H323Capability::e_Security)
+        return NULL;
+
+    const H245_H235SecurityCapability & secCapNo = (const H245_H235SecurityCapability &)subTypePDU;
+    const H245_CapabilityTableEntryNumber & capNo = secCapNo.m_mediaCapability;
+    unsigned m_remNo = capNo;
+
+    for (PINDEX i=0; i <tcs.m_capabilityTable.GetSize(); ++i) {
+       unsigned m_capNo = tcs.m_capabilityTable[i].m_capabilityTableEntryNumber;
+       if (m_capNo == m_remNo) {
+          H323Capability * assocCap = FindCapability(tcs.m_capabilityTable[i].m_capability);
+          if (assocCap != NULL) {
+             assocCap->SetAssociatedCapability(capID);
+             return FindCapability(H323Capability::e_Security, assocCap->GetCapabilityNumber());
+          }
+       }
+    }
+    return NULL;
 }
 
 H323Capability * H323Capabilities::FindCapability(bool, const H245_ExtendedVideoCapability & gen) const

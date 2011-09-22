@@ -45,8 +45,6 @@
 
 #pragma once
 
-//#include "h245.h"
-
 class H245_EncryptionAuthenticationAndIntegrity;
 class H235SecurityCapability  : public H323Capability
 {
@@ -209,6 +207,17 @@ class H235SecurityCapability  : public H323Capability
        H323Capability::CommandType type = e_TCS                    ///< Message Type
     ) const;
 
+
+    /**Set the Associated Capability Number
+      */
+    virtual void SetAssociatedCapability(unsigned capNumber);
+
+    /**Merge the Algorithms
+      */
+    PBoolean MergeAlgorithms(
+        const PStringArray & remote   ///< List of remote algorithms
+    );
+
     /**Get the number of Algorithms in the list
       */
     PINDEX GetAlgorithmCount();
@@ -282,14 +291,17 @@ public:
     /// Attach QoS
 	void AttachQoS(RTP_QOS * _rtpqos);
 
-    /// Attach Associated Security Capability
-    void SetSecurityCapabilityNumber(unsigned _secNo);
+    /// Set the Associated Capability 
+    virtual void SetAssociatedCapability(unsigned  _secNo);
 
     /// Set the Capability List
-    void SetCapabilityList(H323Capabilities * capabilities);
+    virtual void SetCapabilityList(H323Capabilities * capabilities);
 
     /// Set the encryption active
     void SetActive(PBoolean active);
+
+    /// Is encryption active
+    PBoolean IsActive() const;
 
   //@}
 
@@ -542,6 +554,11 @@ public:
     /**Add the DH KeyPair
       */
     void SetDHKeyPair(const PStringList & keyOIDs, H235_DiffieHellman * key, PBoolean isMaster);
+
+    /**Get the DH KeyPair
+      */
+   void GetDHKeyPair(PStringList & keyOIDs, H235_DiffieHellman * key, PBoolean & isMaster);
+
 
     /**Get the Algorithms
          return false if no algorithms.

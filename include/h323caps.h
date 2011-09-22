@@ -53,6 +53,7 @@
    inclusion can be avoided.
  */
 class PASN_Choice;
+class PASN_Sequence;
 class H245_Capability;
 class H245_DataType;
 class H245_ModeElement;
@@ -396,6 +397,12 @@ class H323Capability : public PObject
 
     /// Set unique capability number.
     virtual void SetCapabilityNumber(unsigned num) { assignedCapabilityNumber = num; }
+
+    //// Set Associated Capability Number
+    virtual void SetAssociatedCapability(unsigned) {};
+
+    //// Set Capability List
+    virtual void SetCapabilityList(H323Capabilities *) {};
 
     /**Get media format of the media data this class represents.
       */
@@ -2241,12 +2248,24 @@ class H323Capabilities : public PObject
     ) const;
 
     /**Find the capability given the H.245 capability PDU.
+       For Backwards interoperability
 
        Returns:
        NULL if no capability meeting the criteria was found
       */
     H323Capability * FindCapability(
-      const H245_Capability & cap  ///< H245 capability table entry
+      const H245_Capability & cap             ///< H245 capability table entry
+    ) const;
+
+    /**Find the capability given the H.245 capability PDU (with associcated TCS).
+
+       Returns:
+       NULL if no capability meeting the criteria was found
+      */
+    H323Capability * FindCapability(
+      const H245_Capability & cap,            ///< H245 capability table entry
+      unsigned capID,                         ///< Capability ID (of current capability)
+      const H245_TerminalCapabilitySet & pdu  ///< Reference PDU (for associated caps)
     ) const;
 
     /**Find the capability given the H.245 data type PDU.
@@ -2286,6 +2305,19 @@ class H323Capabilities : public PObject
     H323Capability * FindCapability(
         bool,                                         ///< PlaceHolder             
         const H245_ExtendedVideoCapability & gen      ///< extVideo cap
+    ) const;
+
+   /**Find Associated capability (like Security Capability).
+       Need to match the associated Capability in TCS
+
+       Returns:
+       NULL if no capability meeting the criteria was found
+      */
+    H323Capability * FindCapability(
+        H323Capability::MainTypes mainType,         ///< Main type to find
+		const PASN_Sequence & subTypePDU,		    ///< Sub-type info
+        const unsigned & capID,                     ///< Capability ID  (of subType)
+        const H245_TerminalCapabilitySet & tcs      ///< Orginal TCS (for associate reference)
     ) const;
 
     /**Find the capability given the sub-type info.
