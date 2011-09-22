@@ -187,11 +187,13 @@ PStringArray H2351_Authenticator::GetAuthenticatorNames()
     return PStringArray("Std1");
 }
 
-PBoolean H2351_Authenticator::GetAuthenticationIdentifiers(PStringArray & ids)
+#ifdef H323_H235
+PBoolean H2351_Authenticator::GetAuthenticationCapabilities(H235Authenticator::Capabilities * ids)
 {
-    ids.AppendString(OID_A);
+    ids->Identifiers.push_back(OID_A);
     return true;
 }
+#endif
 
 PBoolean H2351_Authenticator::IsMatch(const PString & identifier) const 
 { 

@@ -47,7 +47,6 @@
 
 #include "h235/h2356.h"
 #include "h235/h2351.h"
-#include "h235pluginmgr.h"
 #include "h323con.h"
 #include <algorithm>
 
@@ -414,20 +413,20 @@ PStringArray H2356_Authenticator::GetAuthenticatorNames()
     return PStringArray("Std6");
 }
 
-PBoolean H2356_Authenticator::GetAuthenticationIdentifiers(PStringArray & ids)
+PBoolean H2356_Authenticator::GetAuthenticationCapabilities(H235Authenticator::Capabilities * ids)
 {
     for (PINDEX i = 0; i < PARRAYSIZE(H235_DHParameters); ++i) {
-        ids.AppendString(H235_DHParameters[i].parameterOID);
+        ids->Identifiers.push_back(H235_DHParameters[i].parameterOID);
     }
     return true;
 }
 
 PBoolean H2356_Authenticator::IsMatch(const PString & identifier) const 
 { 
-    PStringArray ids; 
-    if (GetAuthenticationIdentifiers(ids)) {
-      for (PINDEX i = 0; i < ids.GetSize(); ++i) 
-          if (ids[i] == identifier) return true;
+    PStringArray ids;
+    for (PINDEX i = 0; i < PARRAYSIZE(H235_DHParameters); ++i) {
+        if (PString(H235_DHParameters[i].parameterOID) == identifier)
+               return true;
     }
     return false; 
 }
@@ -583,17 +582,19 @@ void H2356_Authenticator::InitialiseSecurity()
   if (dhOID.IsEmpty())
       return;
 
-  std::map<PString, H235_DiffieHellman*>::iterator l = m_dhLocalMap.find(dhOID);
-  std::map<PString, H235_DiffieHellman*>::iterator r = m_dhRemoteMap.find(dhOID);
-
-  l->second->SetRemoteKey(r->second->GetPublicKey());
-
   m_algOIDs.SetSize(0);
   for (PINDEX i=0; i<PARRAYSIZE(H235_Algorithms); ++i) {
       if (PString(H235_Algorithms[i].DHparameters) == dhOID)
            m_algOIDs.AppendString(H235_Algorithms[i].algorithm);
   }
 
+  std::map<PString, H235_DiffieHellman*>::iterator l = m_dhLocalMap.find(dhOID);
+  std::map<PString, H235_DiffieHellman*>::iterator r = m_dhRemoteMap.find(dhOID);
+
+  if (l == m_dhLocalMap.end() || r == m_dhRemoteMap.end())
+      return;
+
+  l->second->SetRemoteKey(r->second->GetPublicKey());
   if (connection && (m_algOIDs.GetSize() > 0)) {
       H235Capabilities * localCaps = (H235Capabilities *)connection->GetLocalCapabilitiesRef();
       localCaps->SetDHKeyPair(m_algOIDs,l->second,connection->IsH245Master());
@@ -606,6 +607,17 @@ PBoolean H2356_Authenticator::GetAlgorithms(PStringList & algorithms) const
     return (m_algOIDs.GetSize() > 0);
 }
 
+PBoolean H2356_Authenticator::GetAlgorithmDetails(const PString & algorithm, PString & sslName, PString & description)
+{
+      for (PINDEX i=0; i<PARRAYSIZE(H235_Encryptions); ++i) {
+          if (PString(H235_Encryptions[i].algorithmOID) == algorithm) {
+               sslName     = H235_Encryptions[i].sslDesc;
+               description = H235_Encryptions[i].desc;
+               return true;
+          }
+      }
+      return false;
+}
 
 #endif  // H323_H235
 

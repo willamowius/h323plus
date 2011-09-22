@@ -92,12 +92,12 @@ PStringArray H235Authenticator::GetAuthenticatorList()
 }
 
 #ifdef H323_H235
-PBoolean H235Authenticator::GetAuthenticatorIdentifiers(const PString & deviceName, PStringArray & caps, PPluginManager * pluginMgr)
+PBoolean H235Authenticator::GetAuthenticatorCapabilities(const PString & deviceName, H235Authenticator::Capabilities * caps, PPluginManager * pluginMgr)
 {
   if (pluginMgr == NULL)
     pluginMgr = &PPluginManager::GetPluginManager();
-
-  return pluginMgr->GetPluginsDeviceCapabilities(H235AuthenticatorPluginBaseClass,"",deviceName, &caps);
+  
+  return pluginMgr->GetPluginsDeviceCapabilities(H235AuthenticatorPluginBaseClass,"",deviceName, caps);
 }
 
 H235Authenticator * H235Authenticator::CreateAuthenticator(const PString & authname, PPluginManager * pluginMgr)
@@ -113,12 +113,13 @@ H235Authenticator * H235Authenticator::CreateAuthenticatorByID(const PString & i
   PBoolean found=false;
   PStringArray list = GetAuthenticatorList();
   for (PINDEX i=0; i < list.GetSize(); ++i) {
-      PStringArray caps;
-      if (GetAuthenticatorIdentifiers(list[i],caps)) {
-             for (PINDEX j=0;  i < caps.GetSize(); ++j)
-                 if (caps[j] == identifier) {
-                    found = true;  break;
-                 }
+      Capabilities caps;
+      if (GetAuthenticatorCapabilities(list[i],&caps)) {
+	      for (std::list<PString>::const_iterator r = caps.Identifiers.begin(); r != caps.Identifiers.end(); ++r)
+              if (*r ==  identifier) {
+                  found = true;
+                  break;
+              }
       }
       if (found)
          return CreateAuthenticator(list[i]);
@@ -302,6 +303,12 @@ void H235Authenticator::SetConnection(H323Connection * con)
 }
 
 PBoolean H235Authenticator::GetAlgorithms(PStringList & /*algorithms*/) const
+{
+    return false;
+}
+
+PBoolean H235Authenticator::GetAlgorithmDetails(const PString & /*algorithm*/, 
+                                    PString & /*sslName*/, PString & /*description*/)
 {
     return false;
 }
@@ -561,6 +568,18 @@ PBoolean H235Authenticators::GetAlgorithms(PStringList & algorithms) const
    return found; 
 }
 
+PBoolean H235Authenticators::GetAlgorithmDetails(const PString & algorithm, PString & sslName, PString & description)
+{
+   for (PINDEX j=0; j< this->GetSize(); ++j) {
+       H235Authenticator & auth = (*this)[j];
+       if (auth.GetApplication() == H235Authenticator::MediaEncryption)  {
+           if (auth.GetAlgorithmDetails(algorithm, sslName, description)) 
+              return true;
+       }
+   }
+   return false;
+}
+
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -668,11 +687,13 @@ PStringArray H235AuthSimpleMD5::GetAuthenticatorNames()
     return PStringArray("MD5");
 }
 
-PBoolean H235AuthSimpleMD5::GetAuthenticationIdentifiers(PStringArray & ids)
+#ifdef H323_H235
+PBoolean H235AuthSimpleMD5::GetAuthenticationCapabilities(H235Authenticator::Capabilities * ids)
 {
-    ids.AppendString(OID_MD5);
+    ids->Identifiers.push_back(OID_MD5);
     return true;
 }
+#endif
 
 PBoolean H235AuthSimpleMD5::IsMatch(const PString & identifier) const 
 { 

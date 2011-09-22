@@ -163,8 +163,10 @@ static struct {
     unsigned     sz;
     unsigned     send;
 } H235_DHParameters[] = {
- //    { OID_DH4096,  DH4096_P, DH4096_G, DH4096_SZ, 0 },
- //    { OID_DH2048,  DH2048_P, DH2048_G, DH2048_SZ, 0 },
+ //    { OID_DH4096,  DH4096_P, DH4096_G, DH4096_SZ, 0 },  // Not worth it takes too long to generate key. - SH
+#ifdef H323_H235_AES256
+     { OID_DH2048,  DH2048_P, DH2048_G, DH2048_SZ, 0 },
+#endif
      { OID_DH1024,  DH1024_P, DH1024_G, DH1024_SZ, 1 },
  //    { OID_H2351A,  DH1024_P, DH1024_G, DH1024_SZ, 1 },
      { OID_H235V3,  NULL    , NULL    , DHNULL   , 0 }
@@ -175,9 +177,20 @@ static struct {
 
 const char * OID_AES256 = "2.16.840.1.101.3.4.1.42";
 const char * SSL_AES256 = "DHE-RSA-AES256-SHA";
+const char * DES_AES256 = "AES256";
 
 const char * OID_AES128 = "2.16.840.1.101.3.4.1.2";
 const char * SSL_AES128 = "DHE-RSA-AES128-SHA";
+const char * DES_AES128 = "AES128";
+
+static struct {
+    const char * algorithmOID;
+    const char * sslDesc;
+    const char * desc;
+} H235_Encryptions[] = {
+    { OID_AES256, SSL_AES256, DES_AES256 },
+    { OID_AES128, SSL_AES128, DES_AES128 }
+};
 
 static struct {
     const char * algorithm;

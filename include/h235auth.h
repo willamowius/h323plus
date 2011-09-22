@@ -50,6 +50,7 @@ class PSSLCertificate;
 
 #include "ptlib_extras.h"
 #include <ptlib/pluginmgr.h>
+#include <list>
 
 /** This abtract class embodies an H.235 authentication mechanism.
     NOTE: descendants must have a Clone() function for correct operation.
@@ -72,8 +73,12 @@ class H235Authenticator : public PObject
     static H235Authenticator * CreateAuthenticatorByID(const PString & identifier
                                                  );
 
-    static PBoolean GetAuthenticatorIdentifiers(const PString & deviceName,                 
-                                                PStringArray & caps, 
+    typedef struct {
+       std::list<PString> Identifiers;
+    } Capabilities;
+
+    static PBoolean GetAuthenticatorCapabilities(const PString & deviceName,                 
+                                                Capabilities * caps, 
                                                 PPluginManager * pluginMgr = NULL);
 
 #endif
@@ -176,6 +181,11 @@ class H235Authenticator : public PObject
 
     virtual PBoolean GetAlgorithms(PStringList & algorithms) const;  // Get the supported Algorithm OIDs
 
+    virtual PBoolean GetAlgorithmDetails(const PString & algorithm,   ///< Algorithm OID
+                                         PString & sslName,           ///< SSL Description
+                                         PString & description        ///< Human Description
+                                         ); 
+
   protected:
     PBoolean AddCapability(
       unsigned mechanism,
@@ -244,7 +254,7 @@ PDECLARE_LIST(H235Authenticators, H235Authenticator)
     PBoolean SupportsEncryption(PStringArray & list) const;
     PBoolean SupportsEncryption() const;
     PBoolean GetAlgorithms(PStringList & algorithms) const;
-
+    PBoolean GetAlgorithmDetails(const PString & algorithm, PString & sslName, PString & description);
  protected:
     void CreateAuthenticatorsByID(const PStringArray & identifiers);
 #endif
@@ -292,8 +302,9 @@ class H235AuthSimpleMD5 : public H235Authenticator
     virtual const char * GetName() const;
 
     static PStringArray GetAuthenticatorNames();
-    static PBoolean GetAuthenticationIdentifiers(PStringArray & ids);
-
+#ifdef H323_H235
+    static PBoolean GetAuthenticationCapabilities(Capabilities * ids);
+#endif
     virtual PBoolean IsMatch(const PString & identifier) const;
 
     virtual H225_CryptoH323Token * CreateCryptoToken();
@@ -395,8 +406,9 @@ class H2351_Authenticator : public H235Authenticator
     virtual const char * GetName() const;
 
     static PStringArray GetAuthenticatorNames();
-    static PBoolean GetAuthenticationIdentifiers(PStringArray & ids);
-
+#ifdef H323_H235
+    static PBoolean GetAuthenticationCapabilities(Capabilities * ids);
+#endif
     virtual PBoolean IsMatch(const PString & identifier) const;
 
     virtual H225_CryptoH323Token * CreateCryptoToken();
@@ -459,8 +471,7 @@ template <class className> class H235PluginServiceDescriptor : public PDevicePlu
             return (deviceName == className::GetAuthenticatorNames()[0]);
     } 
     virtual bool GetDeviceCapabilities(const PString & /*deviceName*/, void * capabilities) const {
-        PStringArray & caps = *(PStringArray *)capabilities;
-        return className::GetAuthenticationIdentifiers(caps);
+        return className::GetAuthenticationCapabilities((H235Authenticator::Capabilities *)capabilities);
     }
 };
 

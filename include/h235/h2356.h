@@ -69,7 +69,7 @@ class H2356_Authenticator : public H235Authenticator
     virtual const char * GetName() const;
 
     static PStringArray GetAuthenticatorNames();
-    static PBoolean GetAuthenticationIdentifiers(PStringArray & ids);
+    static PBoolean GetAuthenticationCapabilities(Capabilities * ids);
 
     PBoolean IsMatch(const PString & identifier) const; 
 
@@ -103,6 +103,7 @@ class H2356_Authenticator : public H235Authenticator
     virtual void Disable();
 
     virtual PBoolean GetAlgorithms(PStringList & algorithms) const;
+    virtual PBoolean GetAlgorithmDetails(const PString & algorithm, PString & sslName, PString & description);
 
 protected:
     void InitialiseSecurity();
