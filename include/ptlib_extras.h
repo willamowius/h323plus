@@ -527,6 +527,8 @@ template <class D> class PSTLList : public PObject,
       {  
           PWaitAndSignal m(dictMutex);
 
+          if (IsEmpty()) return;
+
           if (!disallowDeleteObjects)
                 deleteListEntries(*this);  
           this->clear();
