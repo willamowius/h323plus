@@ -470,9 +470,11 @@ template <class className> class H235PluginServiceDescriptor : public PDevicePlu
     virtual bool  ValidateDeviceName(const PString & deviceName, int /*userData*/) const { 
             return (deviceName == className::GetAuthenticatorNames()[0]);
     } 
+#ifdef H323_H235
     virtual bool GetDeviceCapabilities(const PString & /*deviceName*/, void * capabilities) const {
         return className::GetAuthenticationCapabilities((H235Authenticator::Capabilities *)capabilities);
     }
+#endif
 };
 
 #define H235SECURITY(name)    \
