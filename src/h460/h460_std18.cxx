@@ -33,7 +33,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Id $
+ * $Id$
  *
  *
  */
@@ -63,41 +63,41 @@ H460_FEATURE(Std18);
 H460_FeatureStd18::H460_FeatureStd18()
 : H460_FeatureStd(18)
 {
-	PTRACE(6,"Std18\tInstance Created");
+    PTRACE(6,"Std18\tInstance Created");
 
-	EP = NULL;
-	handler = NULL;
-	isEnabled = FALSE;
-	FeatureCategory = FeatureSupported;
+    EP = NULL;
+    handler = NULL;
+    isEnabled = FALSE;
+    FeatureCategory = FeatureSupported;
 
 }
 
 H460_FeatureStd18::~H460_FeatureStd18()
 {
-	if (handler != NULL)
-		delete handler;
+    if (handler != NULL)
+        delete handler;
 }
 
 void H460_FeatureStd18::AttachEndPoint(H323EndPoint * _ep)
 {
-	EP =_ep; 
-	handler = NULL;
+    EP =_ep; 
+    handler = NULL;
 
-	isEnabled = EP->H46018IsEnabled();
+    isEnabled = EP->H46018IsEnabled();
 
-	if (isEnabled) {
-		PTRACE(6,"Std18\tEnabling and Initialising H.460.18 Handler");
-	    handler = new H46018Handler(_ep);
-	}
+    if (isEnabled) {
+        PTRACE(6,"Std18\tEnabling and Initialising H.460.18 Handler");
+        handler = new H46018Handler(*EP);
+    }
 }
 
 PBoolean H460_FeatureStd18::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu) 
 { 
-	if (!isEnabled)
-		return false;
+    if (!isEnabled)
+        return false;
 
-	// Ignore if already manually using STUN
-	PNatStrategy & natMethods = EP->GetNatMethods();
+    // Ignore if already manually using STUN
+    PNatStrategy & natMethods = EP->GetNatMethods();
     const PNatList & list = natMethods.GetNATList();
     if (list.GetSize() > 0) {
       for (PINDEX i=0; i < list.GetSize(); i++) {  
@@ -107,48 +107,48 @@ PBoolean H460_FeatureStd18::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu
       }
     }
 
-	H460_FeatureStd feat = H460_FeatureStd(18); 
-	pdu = feat;
-	return TRUE; 
+    H460_FeatureStd feat = H460_FeatureStd(18); 
+    pdu = feat;
+    return TRUE; 
 }
     
 void H460_FeatureStd18::OnReceiveGatekeeperConfirm(const H225_FeatureDescriptor & pdu) 
 {
-	isEnabled = true;
+    isEnabled = true;
 }
 
 PBoolean H460_FeatureStd18::OnSendRegistrationRequest(H225_FeatureDescriptor & pdu) 
 {
-	if (!isEnabled)
-		return FALSE;
+    if (!isEnabled)
+        return FALSE;
 
-	H460_FeatureStd feat = H460_FeatureStd(18); 
-	pdu = feat;
-	return TRUE; 
+    H460_FeatureStd feat = H460_FeatureStd(18); 
+    pdu = feat;
+    return TRUE; 
 }
 
 void H460_FeatureStd18::OnReceiveRegistrationConfirm(const H225_FeatureDescriptor & pdu) 
 {
-	isEnabled = true;
-	handler->Enable();
-	EP->H46018Received();
+    isEnabled = true;
+    handler->Enable();
+    EP->H46018Received();
 }
 
 void H460_FeatureStd18::OnReceiveServiceControlIndication(const H225_FeatureDescriptor & pdu) 
 {
-	if (handler == NULL)
-		return;
+    if (handler == NULL)
+        return;
 
-	H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
+    H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
 
-	if (!feat.Contains(H460_FeatureID(1))) {
-		PTRACE(4,"Std18\tERROR: Received SCI without Call Indication!");
-		return;
-	}
+    if (!feat.Contains(H460_FeatureID(1))) {
+        PTRACE(4,"Std18\tERROR: Received SCI without Call Indication!");
+        return;
+    }
  
-	PTRACE(4,"Std18\tSCI: Processing Incoming call request.");
-	PASN_OctetString raw = feat.Value(H460_FeatureID(1));
-	handler->CreateH225Transport(raw);
+    PTRACE(4,"Std18\tSCI: Processing Incoming call request.");
+    PASN_OctetString raw = feat.Value(H460_FeatureID(1));
+    handler->CreateH225Transport(raw);
 
 }
 
@@ -165,14 +165,14 @@ H460_FEATURE(Std19);
 H460_FeatureStd19::H460_FeatureStd19()
 : H460_FeatureStd(19)
 {
-	PTRACE(6,"Std19\tInstance Created");
+    PTRACE(6,"Std19\tInstance Created");
 
-	EP = NULL;
-	CON = NULL;
-	isEnabled = false;
-	isAvailable = true;
-	remoteSupport = false;
-	FeatureCategory = FeatureSupported;
+    EP = NULL;
+    CON = NULL;
+    isEnabled = false;
+    isAvailable = true;
+    remoteSupport = false;
+    FeatureCategory = FeatureSupported;
 }
 
 H460_FeatureStd19::~H460_FeatureStd19()
@@ -181,43 +181,43 @@ H460_FeatureStd19::~H460_FeatureStd19()
 
 void H460_FeatureStd19::AttachEndPoint(H323EndPoint * _ep)
 {
-	PTRACE(6,"Std19\tEndPoint Attached");
-	EP = _ep; 
-	// We only enable IF the gatekeeper supports H.460.18
-	H460_FeatureSet * gkfeat = EP->GetGatekeeperFeatures();
-	if (gkfeat && gkfeat->HasFeature(18)) {
-		isEnabled = true;
-	} else {
-		PTRACE(4,"Std19\tH.460.19 disabled as GK does not support H.460.18");
-		isEnabled = false;
-	}
+    PTRACE(6,"Std19\tEndPoint Attached");
+    EP = _ep; 
+    // We only enable IF the gatekeeper supports H.460.18
+    H460_FeatureSet * gkfeat = EP->GetGatekeeperFeatures();
+    if (gkfeat && gkfeat->HasFeature(18)) {
+        isEnabled = true;
+    } else {
+        PTRACE(4,"Std19\tH.460.19 disabled as GK does not support H.460.18");
+        isEnabled = false;
+    }
 }
 
 void H460_FeatureStd19::AttachConnection(H323Connection * _con)
 {
-	CON = _con;
+    CON = _con;
 }
 
 PBoolean H460_FeatureStd19::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu) 
 { 
-	if (!isEnabled || !isAvailable)
-		return FALSE;
+    if (!isEnabled || !isAvailable)
+        return FALSE;
 
-	CON->H46019Enabled();
-	H460_FeatureStd feat = H460_FeatureStd(19); 
+    CON->H46019Enabled();
+    H460_FeatureStd feat = H460_FeatureStd(19); 
 #ifdef H323_H46019M
     feat.Add(H46019_Multiplex);
 #endif
-	pdu = feat;
-	return TRUE; 
+    pdu = feat;
+    return TRUE; 
 }
 
 void H460_FeatureStd19::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu) 
 {
-	if (isEnabled && isAvailable) {
-		remoteSupport = TRUE;
-		CON->H46019Enabled();
-		CON->H46019SetCallReceiver();
+    if (isEnabled && isAvailable) {
+        remoteSupport = TRUE;
+        CON->H46019Enabled();
+        CON->H46019SetCallReceiver();
 #ifdef H323_H46019M
         H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
         if (feat.Contains(H46019_Multiplex)) 
@@ -227,61 +227,61 @@ void H460_FeatureStd19::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
         // if (feat.Contains(H46019_MultiServer))
         //    Do we need to do anything? - SH
 #endif
-	}
+    }
 }
 
 PBoolean H460_FeatureStd19::OnSendCallProceeding_UUIE(H225_FeatureDescriptor & pdu) 
 { 
-	if (!isEnabled || !isAvailable || !remoteSupport)
-		return FALSE;
+    if (!isEnabled || !isAvailable || !remoteSupport)
+        return FALSE;
 
-	H460_FeatureStd feat = H460_FeatureStd(19); 
-	pdu = feat;
-	return TRUE; 
+    H460_FeatureStd feat = H460_FeatureStd(19); 
+    pdu = feat;
+    return TRUE; 
 }
 
 void H460_FeatureStd19::OnReceiveCallProceeding_UUIE(const H225_FeatureDescriptor & pdu) 
 {
-	if (isEnabled && isAvailable) {
-		remoteSupport = TRUE;
-	    CON->H46019Enabled();
+    if (isEnabled && isAvailable) {
+        remoteSupport = TRUE;
+        CON->H46019Enabled();
 #ifdef H323_H46019M
         H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
         if (feat.Contains(H46019_Multiplex)) 
              CON->H46019MultiEnabled();
 #endif
-	}
+    }
 }
 
 void H460_FeatureStd19::OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pdu) 
 { 
-	if (!remoteSupport) {
-		remoteSupport = TRUE;
-	    CON->H46019Enabled();
+    if (!remoteSupport) {
+        remoteSupport = TRUE;
+        CON->H46019Enabled();
 #ifdef H323_H46019M
         H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
         if (feat.Contains(H46019_Multiplex)) 
              CON->H46019MultiEnabled();
 #endif
-	} 
+    } 
 }
 
 void H460_FeatureStd19::OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor & pdu) 
 {
-	if (!remoteSupport) {
-		remoteSupport = TRUE;
-	    CON->H46019Enabled();
+    if (!remoteSupport) {
+        remoteSupport = TRUE;
+        CON->H46019Enabled();
 #ifdef H323_H46019M
         H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
         if (feat.Contains(H46019_Multiplex)) 
              CON->H46019MultiEnabled();
 #endif
-	}
+    }
 }
 
 void H460_FeatureStd19::SetAvailable(bool avail)
 {
-	isAvailable = avail;
+    isAvailable = avail;
 }
 
 #endif
