@@ -1743,7 +1743,7 @@ PBoolean H323EndPoint::ParsePartyName(const PString & _remoteParty,
   if (alias.FindOneOf("$.:[") != P_MAX_INDEX) {
     H323TransportAddress test = alias;
     PIPSocket::Address ip;
-    if (test.GetIpAddress(ip) && ip.IsValid()) {
+    if (test.GetIpAddress(ip) && ip.IsValid() && !ip.IsAny()) {
       // The alias was a valid internet address, use it as such
       alias = PString::Empty();
       address = test;

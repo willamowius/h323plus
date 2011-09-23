@@ -252,7 +252,7 @@ static PString BuildIP(const PIPSocket::Address & ip, unsigned port)
 
   str << IpPrefix;
 
-  if (!ip.IsValid())
+  if (ip.IsAny() || !ip.IsValid())
     str << '*';
   else
 #if P_HAS_IPV6

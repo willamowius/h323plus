@@ -26,7 +26,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $ Id $
+ * $Id$
  *
  */
 
@@ -476,7 +476,7 @@ RTP_Session::RTP_Session(
 {
   sessionID = (BYTE)id;
   if (sessionID <= 0) {
-	  PTRACE(2,"RTP\tWARNING: Session ID <= 0 Invalid SessionID.");
+      PTRACE(2,"RTP\tWARNING: Session ID <= 0 Invalid SessionID.");
   } else if (sessionID > 256) {
       PTRACE(2,"RTP\tWARNING: Session ID " << sessionID << " Invalid SessionID.");
   }
@@ -879,8 +879,8 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveData(const RTP_DataFrame & 
   packetsReceived++;
 
   if (rtp.GetRemoteDataPort() > 0 && localAddress.IsEmpty()) {
-	  localAddress = rtp.GetLocalAddress().AsString() + ":" + PString(rtp.GetLocalDataPort());
-	  remoteAddress = rtp.GetRemoteAddress().AsString() + ":" + PString(rtp.GetRemoteDataPort());
+      localAddress = rtp.GetLocalAddress().AsString() + ":" + PString(rtp.GetLocalDataPort());
+      remoteAddress = rtp.GetRemoteAddress().AsString() + ":" + PString(rtp.GetRemoteDataPort());
   }
 
   // Call the statistics call-back on the first PDU with total count == 1
@@ -1420,7 +1420,7 @@ PBoolean RTP_UDP::ModifyQOS(RTP_QOS * rtpqos)
 
 void RTP_UDP::EnableGQoS(PBoolean success)
 {
-	enableGQOS = success;
+    enableGQOS = success;
 }
 
 #if P_QOS
@@ -1430,7 +1430,7 @@ PQoS & RTP_UDP::GetQOS()
        return dataSocket->GetQoSSpec();
     else if (controlSocket != NULL) 
        return controlSocket->GetQoSSpec();
-	else
+    else
        return *new PQoS(); 
 }
 #endif
@@ -1469,22 +1469,22 @@ PBoolean RTP_UDP::Open(PIPSocket::Address _localAddress,
 
 #ifdef P_STUN
   if (meth != NULL) {
-	H323Connection::SessionInformation * info = 
-		 connection.BuildSessionInformation(GetSessionID());
+    H323Connection::SessionInformation * info = 
+         connection.BuildSessionInformation(GetSessionID());
 
 #if PTLIB_VER > 260
     if (meth->CreateSocketPair(dataSocket, controlSocket, localAddress,(void *)info)) {
 #else
-	if (meth->CreateSocketPair(dataSocket, controlSocket, localAddress)) {
+    if (meth->CreateSocketPair(dataSocket, controlSocket, localAddress)) {
 #endif
       dataSocket->GetLocalAddress(localAddress, localDataPort);
       controlSocket->GetLocalAddress(localAddress, localControlPort);
-	  PTRACE(4, "RTP\tNAT Method " << meth->GetName() << " created NAT ports " << localDataPort << " " << localControlPort);
+      PTRACE(4, "RTP\tNAT Method " << meth->GetName() << " created NAT ports " << localDataPort << " " << localControlPort);
     }
     else
       PTRACE(1, "RTP\tNAT could not create socket pair!");
 
-	delete info;
+    delete info;
   }
 #endif
 
@@ -1693,7 +1693,7 @@ RTP_Session::SendReceiveStatus RTP_UDP::ReadDataOrControlPDU(PUDPSocket & socket
 
       // If remote address never set from higher levels, then try and figure
       // it out from the first packet received.
-      if (!remoteAddress.IsValid()) {
+      if (remoteAddress.IsAny() || !remoteAddress.IsValid()) {
         remoteAddress = addr;
         PTRACE(4, "RTP\tSet remote address from first " << channelName
                << " PDU from " << addr << ':' << port);
@@ -1707,35 +1707,35 @@ RTP_Session::SendReceiveStatus RTP_UDP::ReadDataOrControlPDU(PUDPSocket & socket
           remoteControlPort = port;
       }
 
-      if (!remoteTransmitAddress.IsValid())
-        remoteTransmitAddress = addr;
+      if (remoteTransmitAddress.IsAny() || !remoteTransmitAddress.IsValid())
+             remoteTransmitAddress = addr;
 
-	  else if (remoteTransmitAddress != addr) {
+      else if (remoteTransmitAddress != addr) {
 #ifdef H323_H46024A
-		  if (socket.IsAlternateAddress(addr,port)) {
-				remoteTransmitAddress = addr;
-				if (fromDataChannel) {
-					remoteDataPort = port;
-					// Fixes to makes sure sync,stats and jitter don't get screwed up 
-					syncSourceIn = ((RTP_DataFrame &)frame).GetSyncSource();
-					expectedSequenceNumber = ((RTP_DataFrame &)frame).GetSequenceNumber();
+          if (socket.IsAlternateAddress(addr,port)) {
+                remoteTransmitAddress = addr;
+                if (fromDataChannel) {
+                    remoteDataPort = port;
+                    // Fixes to makes sure sync,stats and jitter don't get screwed up 
+                    syncSourceIn = ((RTP_DataFrame &)frame).GetSyncSource();
+                    expectedSequenceNumber = ((RTP_DataFrame &)frame).GetSequenceNumber();
 #ifdef H323_AUDIO_CODECS
-					if (jitter != NULL)  jitter->ResetFirstWrite();
+                    if (jitter != NULL)  jitter->ResetFirstWrite();
 #endif
-				} else
-					remoteControlPort = port;
-		  } else
+                } else
+                    remoteControlPort = port;
+          } else
 #endif
-		  {
-			PTRACE(1, "RTP_UDP\tSession " << sessionID << ", "
-				   << channelName << " PDU from incorrect host, "
-					  " is " << addr << " should be " << remoteTransmitAddress);
-			return RTP_Session::e_IgnorePacket;
-		  }
+          {
+            PTRACE(1, "RTP_UDP\tSession " << sessionID << ", "
+                   << channelName << " PDU from incorrect host, "
+                      " is " << addr << " should be " << remoteTransmitAddress);
+            return RTP_Session::e_IgnorePacket;
+          }
       }
     }
 
-    if (remoteAddress.IsValid() && !appliedQOS) 
+    if (!remoteAddress.IsAny() && remoteAddress.IsValid() && !appliedQOS) 
       ApplyQOS(remoteAddress);
 
     return RTP_Session::e_ProcessPacket;
@@ -1814,7 +1814,7 @@ PBoolean RTP_UDP::WriteData(RTP_DataFrame & frame)
   }
 
   // Trying to send a PDU before we are set up!
-  if (!remoteAddress.IsValid() || remoteDataPort == 0)
+  if (remoteAddress.IsAny() || !remoteAddress.IsValid() || remoteDataPort == 0)
     return TRUE;
 
   switch (OnSendData(frame)) {
@@ -1851,7 +1851,7 @@ PBoolean RTP_UDP::WriteData(RTP_DataFrame & frame)
 PBoolean RTP_UDP::WriteControl(RTP_ControlFrame & frame)
 {
   // Trying to send a PDU before we are set up!
-  if (!remoteAddress.IsValid() || remoteControlPort == 0)
+  if (remoteAddress.IsAny() || !remoteAddress.IsValid() || remoteControlPort == 0)
     return true;
 
   while (!controlSocket->WriteTo(frame.GetPointer(), frame.GetCompoundSize(),
@@ -1867,7 +1867,7 @@ PBoolean RTP_UDP::WriteControl(RTP_ControlFrame & frame)
                << ", Write error on control port ("
                << controlSocket->GetErrorNumber(PChannel::LastWriteError) << "): "
                << controlSocket->GetErrorText(PChannel::LastWriteError));
-		return false;
+        return false;
     }
   }
 
