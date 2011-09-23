@@ -66,17 +66,17 @@ class GNUGKTransportThread : public PThread
    PCLASSINFO(GNUGKTransportThread, PThread)
 
    public:
-	GNUGKTransportThread(H323EndPoint & endpoint, GNUGKTransport * transport, WORD KeepAlive =0);
+    GNUGKTransportThread(H323EndPoint & endpoint, GNUGKTransport * transport, WORD KeepAlive =0);
 
    protected:
-	void Main();
-	PDECLARE_NOTIFIER(PTimer, GNUGKTransportThread, Ping);	/// Timer to notify to poll for External IP
-	PTimer	Keep;						/// Polling Timer													
-	PBoolean    isConnected;
-	GNUGKTransport * transport;
-	WORD   keepAlive;
+    void Main();
+    PDECLARE_NOTIFIER(PTimer, GNUGKTransportThread, Ping);    /// Timer to notify to poll for External IP
+    PTimer    Keep;                        /// Polling Timer                                                    
+    PBoolean    isConnected;
+    GNUGKTransport * transport;
+    WORD   keepAlive;
 
-	PTime   lastupdate;
+    PTime   lastupdate;
 
 };
 
@@ -87,7 +87,7 @@ GNUGKTransportThread::GNUGKTransportThread(H323EndPoint & ep, GNUGKTransport * t
             AutoDeleteThread,
             NormalPriority,
             "H225 Answer:%0x"),
-			 transport(t)
+             transport(t)
 {  
 
    isConnected = FALSE;
@@ -113,14 +113,14 @@ void GNUGKTransportThread::Ping(PTimer &, INT)
 
    PTime curTime = PTime();
    if ((curTime - lastupdate) < PTimeInterval(GNUGK_Feature::keepalive * 1000))
-	handlewait.Wait(lastupdate + PTimeInterval(GNUGK_Feature::keepalive * 1000) - curTime);
-	   
+    handlewait.Wait(lastupdate + PTimeInterval(GNUGK_Feature::keepalive * 1000) - curTime);
+       
 
-   if (transport->isCall() ||		/// We have call or we are closing down
+   if (transport->isCall() ||        /// We have call or we are closing down
        transport->CloseTransport()) 
-	Keep.Stop();
-   else					/// Stop what we are doing 
-	transport->InitialPDU();
+    Keep.Stop();
+   else                    /// Stop what we are doing 
+    transport->InitialPDU();
 
    lastupdate = PTime();
 }
@@ -130,34 +130,34 @@ void GNUGKTransportThread::Main()
   PTRACE(3, "GNUGK\tStarted Listening-KeepAlive Thread");
 
   PBoolean ret = TRUE;
-  while ((transport->IsOpen()) &&		// Transport is Open
-	(!isConnected) &&			// Does not have a call connection 
-	(ret) &&	                        // is not a Failed connection
-	(!transport->CloseTransport())) {	// not close due to shutdown
-	  ret = transport->HandleGNUGKSignallingChannelPDU(this);
+  while ((transport->IsOpen()) &&        // Transport is Open
+    (!isConnected) &&            // Does not have a call connection 
+    (ret) &&                            // is not a Failed connection
+    (!transport->CloseTransport())) {    // not close due to shutdown
+      ret = transport->HandleGNUGKSignallingChannelPDU(this);
 
-	  if (!ret && transport->CloseTransport()) {  // Closing down Instruction
+      if (!ret && transport->CloseTransport()) {  // Closing down Instruction
             PTRACE(3, "GNUGK\tShutting down GnuGk Thread");
             GNUGK_Feature::curtransport = NULL;
             transport->ConnectionLost(TRUE);
 
-	  } else if (!ret) {   // We have a socket failure wait 1 sec and try again.
+      } else if (!ret) {   // We have a socket failure wait 1 sec and try again.
              PTRACE(3, "GNUGK\tConnection Lost! Retrying Connection..");
-	     transport->ConnectionLost(TRUE);
+         transport->ConnectionLost(TRUE);
              while (!transport->CloseTransport() && 
                            !transport->Connect()) {
                 PTRACE(3, "GNUGK\tReconnect Failed! Waiting 1 sec");
                 PProcess::Sleep(1000);
              }
 
-	    if (!transport->CloseTransport()) {
+        if (!transport->CloseTransport()) {
               PTRACE(3, "GNUGK\tConnection ReEstablished");
-	      transport->ConnectionLost(FALSE);
-              ret = TRUE;			// Signal that the connection has been ReEstablished.
-	    }
-	  } else {				// We are connected to a call on this thread 
+          transport->ConnectionLost(FALSE);
+              ret = TRUE;            // Signal that the connection has been ReEstablished.
+        }
+      } else {                // We are connected to a call on this thread 
               isConnected = TRUE;
-	  } 
+      } 
   }
 
   PTRACE(3, "GNUGK\tTransport Closed");
@@ -166,48 +166,48 @@ void GNUGKTransportThread::Main()
 ///////////////////////////////////////////////////////////////////////////////////////
 
 GNUGKTransport::GNUGKTransport(H323EndPoint & endpoint,
-				GNUGK_Feature * feat,
-				PString & gkid  
-				)	
+                GNUGK_Feature * feat,
+                PString & gkid  
+                )    
    : H323TransportTCP(endpoint), GKid(gkid), Feature(feat)
 {
-	GNUGK_Feature::curtransport = this;
-	ReadTimeOut = PMaxTimeInterval;
-	isConnected = FALSE;
-	closeTransport = FALSE;
-	remoteShutDown = FALSE;
+    GNUGK_Feature::curtransport = this;
+    ReadTimeOut = PMaxTimeInterval;
+    isConnected = FALSE;
+    closeTransport = FALSE;
+    remoteShutDown = FALSE;
 }
 
 GNUGKTransport::~GNUGKTransport()
 {
-	Close();
+    Close();
 }
 
 PBoolean GNUGKTransport::HandleGNUGKSignallingSocket(H323SignalPDU & pdu)
 {
   for (;;) {
 
-	  if (!IsOpen())
-		  return FALSE;
+      if (!IsOpen())
+          return FALSE;
 
-	  H323SignalPDU rpdu;
-	  if (!rpdu.Read(*this)) { 
+      H323SignalPDU rpdu;
+      if (!rpdu.Read(*this)) { 
             PTRACE(3, "GNUGK\tSocket Read Failure");
             if (GetErrorNumber(PChannel::LastReadError) == 0) {
               PTRACE(3, "GNUGK\tRemote SHUT DOWN or Intermediary Shutdown!");
               remoteShutDown = TRUE;
             }
             return FALSE;
-	  } else if ((rpdu.GetQ931().GetMessageType() == Q931::InformationMsg) &&
+      } else if ((rpdu.GetQ931().GetMessageType() == Q931::InformationMsg) &&
                           (endpoint.HandleUnsolicitedInformation(rpdu))) {
               // Handle unsolicited Information Message
-	  } else if (rpdu.GetQ931().GetMessageType() == Q931::SetupMsg) {
+      } else if (rpdu.GetQ931().GetMessageType() == Q931::SetupMsg) {
               pdu = rpdu;
               return TRUE;
-	  } else {
-	     PTRACE(3, "GNUGK\tUnknown PDU Received");
+      } else {
+         PTRACE(3, "GNUGK\tUnknown PDU Received");
              return FALSE;
-	  }
+      }
 
   }
 }
@@ -227,43 +227,43 @@ PBoolean GNUGKTransport::HandleGNUGKSignallingChannelPDU(PThread * thread)
     // Create a new transport to the GK as this one will be closed at the end of the call.
       isConnected = TRUE;
       GNUGK_Feature::curtransport = NULL;
-	  CreateNewTransport();
+      CreateNewTransport();
 
-	// Process the Tokens
-	  unsigned callReference = pdu.GetQ931().GetCallReference();
-	  PString token = endpoint.BuildConnectionToken(*this, callReference, TRUE);
+    // Process the Tokens
+      unsigned callReference = pdu.GetQ931().GetCallReference();
+      PString token = endpoint.BuildConnectionToken(*this, callReference, TRUE);
 
-	  H323Connection * connection = endpoint.CreateConnection(callReference, NULL, this, &pdu);
-		if (connection == NULL) {
-			PTRACE(1, "GNUGK\tEndpoint could not create connection, " <<
-					  "sending release complete PDU: callRef=" << callReference);
-			Q931 pdu;
-			pdu.BuildReleaseComplete(callReference, TRUE);
-			PBYTEArray rawData;
-			pdu.Encode(rawData);
-			WritePDU(rawData);
-			return TRUE;
-		}
+      H323Connection * connection = endpoint.CreateConnection(callReference, NULL, this, &pdu);
+        if (connection == NULL) {
+            PTRACE(1, "GNUGK\tEndpoint could not create connection, " <<
+                      "sending release complete PDU: callRef=" << callReference);
+            Q931 pdu;
+            pdu.BuildReleaseComplete(callReference, TRUE);
+            PBYTEArray rawData;
+            pdu.Encode(rawData);
+            WritePDU(rawData);
+            return TRUE;
+        }
 
-		PTRACE(3, "GNUGK\tCreated new connection: " << token);
-		connectionsMutex.Wait();
-		GetEndPoint().GetConnections().SetAt(token, connection);
-		connectionsMutex.Signal();
+        PTRACE(3, "GNUGK\tCreated new connection: " << token);
+        connectionsMutex.Wait();
+        endpoint.GetConnections().SetAt(token, connection);
+        connectionsMutex.Signal();
 
-		connection->AttachSignalChannel(token, this, TRUE);
+        connection->AttachSignalChannel(token, this, TRUE);
  
-		 AttachThread(thread);
-		 thread->SetNoAutoDelete();
+         AttachThread(thread);
+         thread->SetNoAutoDelete();
 
-		 if (connection->HandleSignalPDU(pdu)) {
-			// All subsequent PDU's should wait forever
-			SetReadTimeout(PMaxTimeInterval);
-			connection->HandleSignallingChannel();
-		 }
-		 else {
-			connection->ClearCall(H323Connection::EndedByTransportFail);
-			PTRACE(1, "GNUGK\tSignal channel stopped on first PDU.");
-		 }
+         if (connection->HandleSignalPDU(pdu)) {
+            // All subsequent PDU's should wait forever
+            SetReadTimeout(PMaxTimeInterval);
+            connection->HandleSignallingChannel();
+         }
+         else {
+            connection->ClearCall(H323Connection::EndedByTransportFail);
+            PTRACE(1, "GNUGK\tSignal channel stopped on first PDU.");
+         }
 
   return TRUE;
 }
@@ -271,42 +271,42 @@ PBoolean GNUGKTransport::HandleGNUGKSignallingChannelPDU(PThread * thread)
 
 PBoolean GNUGKTransport::WritePDU( const PBYTEArray & pdu )
 {
-	PWaitAndSignal m(WriteMutex);
-	return H323TransportTCP::WritePDU(pdu);
+    PWaitAndSignal m(WriteMutex);
+    return H323TransportTCP::WritePDU(pdu);
 
 }
-	
+    
 PBoolean GNUGKTransport::ReadPDU(PBYTEArray & pdu)
 {
-	return H323TransportTCP::ReadPDU(pdu);
+    return H323TransportTCP::ReadPDU(pdu);
 }
 
 PBoolean GNUGKTransport::Connect() 
 { 
         PTRACE(4, "GNUGK\tConnecting to GK"  );
-	if (!H323TransportTCP::Connect())
-		return FALSE;
-	
-	return InitialPDU();
+    if (!H323TransportTCP::Connect())
+        return FALSE;
+    
+    return InitialPDU();
 }
 
 void GNUGKTransport::ConnectionLost(PBoolean established)
 {
-	PWaitAndSignal m(shutdownMutex);
+    PWaitAndSignal m(shutdownMutex);
 
-	if (closeTransport)
-		return;
+    if (closeTransport)
+        return;
          PTRACE(4,"GnuGK\tConnection lost " << established 
               << " have " << GNUGK_Feature::connectionlost);
-	if (GNUGK_Feature::connectionlost != established) {
-	   GetEndPoint().NATLostConnection(established);
-	   GNUGK_Feature::connectionlost = established;
-	}
+    if (GNUGK_Feature::connectionlost != established) {
+       GetEndPoint().NATLostConnection(established);
+       GNUGK_Feature::connectionlost = established;
+    }
 }
 
 PBoolean GNUGKTransport::IsConnectionLost()  
 { 
-	return GNUGK_Feature::connectionlost; 
+    return GNUGK_Feature::connectionlost; 
 }
 
 
@@ -315,7 +315,7 @@ PBoolean GNUGKTransport::InitialPDU()
   PWaitAndSignal mutex(IntMutex);
 
   if (!IsOpen())
-	  return FALSE;
+      return FALSE;
 
  PBYTEArray bytes(GKid,GKid.GetLength(), false);
 
@@ -327,13 +327,13 @@ PBoolean GNUGKTransport::InitialPDU()
 
   PBYTEArray rawData;
   if (!qPDU.Encode(rawData)) {
-	PTRACE(4, "GNUGK\tError Encoding PDU.");
+    PTRACE(4, "GNUGK\tError Encoding PDU.");
     return FALSE;
   }
 
   if (!WritePDU(rawData)) {
-	PTRACE(4, "GNUGK\tError Writing PDU.");
-	 return FALSE;
+    PTRACE(4, "GNUGK\tError Writing PDU.");
+     return FALSE;
   }
 
   PTRACE(6, "GNUGK\tSent KeepAlive PDU.");
@@ -343,35 +343,35 @@ PBoolean GNUGKTransport::InitialPDU()
 
 PBoolean GNUGKTransport::SetGKID(const PString & newid)
 {
-	if (GKid != newid) {
-	   GKid = newid;
-	   return TRUE;
-	}
-	return FALSE;
+    if (GKid != newid) {
+       GKid = newid;
+       return TRUE;
+    }
+    return FALSE;
 }
 
 PBoolean GNUGKTransport::CreateNewTransport()
 {
 
-	GNUGKTransport * transport = new GNUGKTransport(GetEndPoint(),Feature,GKid);
-	H323TransportAddress remote = GetRemoteAddress();
-	transport->SetRemoteAddress(remote);
+    GNUGKTransport * transport = new GNUGKTransport(GetEndPoint(),Feature,GKid);
+    H323TransportAddress remote = GetRemoteAddress();
+    transport->SetRemoteAddress(remote);
 
-	if (transport->Connect()) {
+    if (transport->Connect()) {
           PTRACE(3, "GNUGK\tConnected to " << transport->GetRemoteAddress());
-	    new GNUGKTransportThread(transport->GetEndPoint(), transport,GNUGK_Feature::keepalive);
-		if (transport->IsConnectionLost())
-		     transport->ConnectionLost(FALSE);
-		return TRUE;
-	}
-	return FALSE;
+        new GNUGKTransportThread(transport->GetEndPoint(), transport,GNUGK_Feature::keepalive);
+        if (transport->IsConnectionLost())
+             transport->ConnectionLost(FALSE);
+        return TRUE;
+    }
+    return FALSE;
 }
 
 PBoolean GNUGKTransport::Close() 
 { 
    PWaitAndSignal m(shutdownMutex);
 
-   PTRACE(4, "GNUGK\tClosing GnuGK NAT channel.");	
+   PTRACE(4, "GNUGK\tClosing GnuGK NAT channel.");    
    closeTransport = TRUE;
    return H323TransportTCP::Close(); 
 }
@@ -382,7 +382,7 @@ PBoolean GNUGKTransport::IsOpen () const
 }
 
 PBoolean GNUGKTransport::IsListening() const
-{	  
+{      
   if (isConnected)
     return FALSE;
 
@@ -398,56 +398,56 @@ PBoolean GNUGKTransport::IsListening() const
 /////////////////////////////////////////////////////////////////////////////
 
 GNUGK_Feature::GNUGK_Feature(H323EndPoint & EP, 
-							 H323TransportAddress & remoteAddress, 
-							 PString gkid,
-							 WORD KeepAlive )
+                             H323TransportAddress & remoteAddress, 
+                             PString gkid,
+                             WORD KeepAlive )
      :  ep(EP), address(remoteAddress), GKid(gkid)
 {
-	PTRACE(4, "GNUGK\tCreating GNUGK Feature.");	
-	keepalive = KeepAlive;
-	open = CreateNewTransport();
+    PTRACE(4, "GNUGK\tCreating GNUGK Feature.");    
+    keepalive = KeepAlive;
+    open = CreateNewTransport();
 }
 
 GNUGK_Feature::~GNUGK_Feature()
 {
-	if (curtransport != NULL)
-		curtransport->Close();
+    if (curtransport != NULL)
+        curtransport->Close();
 }
 
 PBoolean GNUGK_Feature::CreateNewTransport()
 {
-	PTRACE(5, "GNUGK\tCreating Transport.");
+    PTRACE(5, "GNUGK\tCreating Transport.");
 
-	GNUGKTransport * transport = new GNUGKTransport(ep,this,GKid);
-	transport->SetRemoteAddress(address);
+    GNUGKTransport * transport = new GNUGKTransport(ep,this,GKid);
+    transport->SetRemoteAddress(address);
 
-	if (transport->Connect()) {
-	 PTRACE(3, "GNUGK\tConnected to " << transport->GetRemoteAddress());
-	    new GNUGKTransportThread(transport->GetEndPoint(), transport,keepalive);
-		return TRUE;
-	}
+    if (transport->Connect()) {
+     PTRACE(3, "GNUGK\tConnected to " << transport->GetRemoteAddress());
+        new GNUGKTransportThread(transport->GetEndPoint(), transport,keepalive);
+        return TRUE;
+    }
 
-	 PTRACE(3, "GNUGK\tTransport Failure " << transport->GetRemoteAddress());
-	return FALSE;
+     PTRACE(3, "GNUGK\tTransport Failure " << transport->GetRemoteAddress());
+    return FALSE;
 }
 
 PBoolean GNUGK_Feature::ReRegister(const PString & newid)
 {
   // If there is a change in the gatekeeper id then notify the update socket
-	if ((GNUGK_Feature::curtransport != NULL) && curtransport->SetGKID(newid))
-	             return curtransport->InitialPDU();       // Send on existing Transport
+    if ((GNUGK_Feature::curtransport != NULL) && curtransport->SetGKID(newid))
+                 return curtransport->InitialPDU();       // Send on existing Transport
 
    return FALSE;
 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-	
+    
 PNatMethod_GnuGk::PNatMethod_GnuGk()
 {
-	EP = NULL;
-	available = false;
-	active = true;
+    EP = NULL;
+    available = false;
+    active = true;
 }
 
 PNatMethod_GnuGk::~PNatMethod_GnuGk()
@@ -489,48 +489,48 @@ void PNatMethod_GnuGk::AttachEndPoint(H323EndPoint * ep)
 
   pairedPortInfo.mutex.Signal();
 
-	available = FALSE;
+    available = FALSE;
 }
 
 PBoolean PNatMethod_GnuGk::GetExternalAddress(
       PIPSocket::Address & /*externalAddress*/, /// External address of router
       const PTimeInterval & /* maxAge */         /// Maximum age for caching
-	  )
+      )
 {
-	return FALSE;
+    return FALSE;
 }
 
 
 PBoolean PNatMethod_GnuGk::CreateSocketPair(
-							PUDPSocket * & socket1,
-							PUDPSocket * & socket2,
-							const PIPSocket::Address & binding
-							)
+                            PUDPSocket * & socket1,
+                            PUDPSocket * & socket2,
+                            const PIPSocket::Address & binding
+                            )
 {
 
-	  if (pairedPortInfo.basePort == 0 || pairedPortInfo.basePort > pairedPortInfo.maxPort)
-	  {
-		PTRACE(1, "GNUGK\tInvalid local UDP port range "
-			   << pairedPortInfo.currentPort << '-' << pairedPortInfo.maxPort);
-		return FALSE;
-	  }
+      if (pairedPortInfo.basePort == 0 || pairedPortInfo.basePort > pairedPortInfo.maxPort)
+      {
+        PTRACE(1, "GNUGK\tInvalid local UDP port range "
+               << pairedPortInfo.currentPort << '-' << pairedPortInfo.maxPort);
+        return FALSE;
+      }
 
     socket1 = new GNUGKUDPSocket();  /// Data 
     socket2 = new GNUGKUDPSocket();  /// Signal
 
 /// Make sure we have sequential ports
-	while ((!OpenSocket(*socket1, pairedPortInfo,binding)) ||
-		   (!OpenSocket(*socket2, pairedPortInfo,binding)) ||
-		   (socket2->GetPort() != socket1->GetPort() + 1) )
-	{
-			delete socket1;
-			delete socket2;
-			socket1 = new GNUGKUDPSocket();  /// Data 
-			socket2 = new GNUGKUDPSocket();  /// Signal
-	}
+    while ((!OpenSocket(*socket1, pairedPortInfo,binding)) ||
+           (!OpenSocket(*socket2, pairedPortInfo,binding)) ||
+           (socket2->GetPort() != socket1->GetPort() + 1) )
+    {
+            delete socket1;
+            delete socket2;
+            socket1 = new GNUGKUDPSocket();  /// Data 
+            socket2 = new GNUGKUDPSocket();  /// Signal
+    }
 
-		PTRACE(5, "GNUGK\tUDP ports "
-			   << socket1->GetPort() << '-' << socket2->GetPort());
+        PTRACE(5, "GNUGK\tUDP ports "
+               << socket1->GetPort() << '-' << socket2->GetPort());
 
 
 
@@ -562,8 +562,8 @@ PBoolean PNatMethod_GnuGk::OpenSocket(PUDPSocket & socket, PortInfo & portInfo, 
 
 void PNatMethod_GnuGk::SetAvailable() 
 { 
-	EP->NATMethodCallBack(GetName(),1,"Available");
-	available = true; 
+    EP->NATMethodCallBack(GetName(),1,"Available");
+    available = true; 
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -582,12 +582,12 @@ void GNUGKUDPSocket::SetSendAddress(const Address & address,WORD port)
      PUDPSocket::SetSendAddress(address,port);
 
 /*
-	    PString ping = "ping";
-		PBYTEArray bytes(ping,ping.GetLength(), false); 
-		if (PIPDatagramSocket::WriteTo(bytes, ping.GetLength(), sendAddress, sendPort))
-			PTRACE(4, "GNUGK\tUDP socket pinged " << sendAddress << '-' << sendPort << " from " << GetPort()); 
-		else
-			PTRACE(4, "GNUGK\tUDP socket no ping " << sendAddress << '-' << sendPort << " from " << GetPort()); 
+        PString ping = "ping";
+        PBYTEArray bytes(ping,ping.GetLength(), false); 
+        if (PIPDatagramSocket::WriteTo(bytes, ping.GetLength(), sendAddress, sendPort))
+            PTRACE(4, "GNUGK\tUDP socket pinged " << sendAddress << '-' << sendPort << " from " << GetPort()); 
+        else
+            PTRACE(4, "GNUGK\tUDP socket no ping " << sendAddress << '-' << sendPort << " from " << GetPort()); 
 */
 
   ApplyQoS();

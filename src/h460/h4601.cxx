@@ -33,7 +33,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Id $
+ * $Id$
  *
  *
 */
@@ -63,50 +63,50 @@ OpalOID::OpalOID()
 
 OpalOID::OpalOID(const char * str )
 {
-	SetValue(str);	
+    SetValue(str);    
 }
 
 OpalOID OpalOID::operator+(const char * str)
 { 
-	PString nStr = AsString() + "." + str;
-	OpalOID newVal(nStr);
-	return newVal;
+    PString nStr = AsString() + "." + str;
+    OpalOID newVal(nStr);
+    return newVal;
 }
 
 H460_FeatureID::H460_FeatureID()
 {
-	SetTag(H225_GenericIdentifier::e_standard); 
-	PASN_Integer & val = *this;
-	val.SetValue(0);
+    SetTag(H225_GenericIdentifier::e_standard); 
+    PASN_Integer & val = *this;
+    val.SetValue(0);
 }
 
 H460_FeatureID::H460_FeatureID(unsigned ID)
 { 
-	SetTag(H225_GenericIdentifier::e_standard); 
-	PASN_Integer & val = *this;
-	val.SetValue(ID);
+    SetTag(H225_GenericIdentifier::e_standard); 
+    PASN_Integer & val = *this;
+    val.SetValue(ID);
 }
 
 H460_FeatureID::H460_FeatureID(OpalOID ID)
 {
-	SetTag(H225_GenericIdentifier::e_oid);
-	PASN_ObjectId & val = *this;
-	val = ID;
+    SetTag(H225_GenericIdentifier::e_oid);
+    PASN_ObjectId & val = *this;
+    val = ID;
 }
 
 H460_FeatureID::H460_FeatureID(PString ID)
 {
-	SetTag(H225_GenericIdentifier::e_nonStandard); 
-	OpalGloballyUniqueID uid(ID);
-	H225_GloballyUniqueID & val = *this;
-	val = uid;
+    SetTag(H225_GenericIdentifier::e_nonStandard); 
+    OpalGloballyUniqueID uid(ID);
+    H225_GloballyUniqueID & val = *this;
+    val = uid;
 }
 
 H460_FeatureID::H460_FeatureID(H225_GenericIdentifier ID)
 {
-	SetTag(ID.GetTag()); 
-	H225_GenericIdentifier & val = *this;
-	val= ID;
+    SetTag(ID.GetTag()); 
+    H225_GenericIdentifier & val = *this;
+    val= ID;
 }
 
 PObject * H460_FeatureID::Clone() const
@@ -123,54 +123,54 @@ PObject::Comparison H460_FeatureID::Compare(const PObject & obj) const
   if (id.IDString() == IDString()) 
         return EqualTo;
   else
-	    return LessThan;
+        return LessThan;
 }
 
 
 PINLINE H460_FeatureID & H460_FeatureID::operator=(unsigned ID)
-{ 	
-	SetTag(H225_GenericIdentifier::e_standard); 
-	PASN_Integer & val = *this;
-	val.SetValue(ID);
-	return *this;
+{     
+    SetTag(H225_GenericIdentifier::e_standard); 
+    PASN_Integer & val = *this;
+    val.SetValue(ID);
+    return *this;
 };
 
 PINLINE H460_FeatureID & H460_FeatureID::operator=(OpalOID ID)
 {   
-	SetTag(H225_GenericIdentifier::e_oid); 
-	PASN_ObjectId & val = *this;
-	val.SetValue(ID.AsString());
-	return *this;
+    SetTag(H225_GenericIdentifier::e_oid); 
+    PASN_ObjectId & val = *this;
+    val.SetValue(ID.AsString());
+    return *this;
 };
 
 PINLINE H460_FeatureID & H460_FeatureID::operator=(PString ID)
 {  
-	SetTag(H225_GenericIdentifier::e_nonStandard); 
-	OpalGloballyUniqueID uid(ID);
-	H225_GloballyUniqueID & val = *this;
-	val = uid;
-	return *this;
+    SetTag(H225_GenericIdentifier::e_nonStandard); 
+    OpalGloballyUniqueID uid(ID);
+    H225_GloballyUniqueID & val = *this;
+    val = uid;
+    return *this;
 };
 
 PString H460_FeatureID::IDString() const
 {
-	if (GetFeatureType() == H225_GenericIdentifier::e_standard) {
-		    const PASN_Integer & jint = *this;
-			return "Std " + PString(jint);
-	}
-	
-	if (GetFeatureType() == H225_GenericIdentifier::e_oid) {
-	        const PASN_ObjectId & obj = *this;
-			return "OID " + obj.AsString();
-	}
+    if (GetFeatureType() == H225_GenericIdentifier::e_standard) {
+            const PASN_Integer & jint = *this;
+            return "Std " + PString(jint);
+    }
+    
+    if (GetFeatureType() == H225_GenericIdentifier::e_oid) {
+            const PASN_ObjectId & obj = *this;
+            return "OID " + obj.AsString();
+    }
 
-	if (GetFeatureType() == H225_GenericIdentifier::e_nonStandard) {
-		    const H225_GloballyUniqueID & gui = *this;
-		    const OpalGloballyUniqueID opalguid(gui);
-			return "NonStd " + opalguid.AsString();
-	}
+    if (GetFeatureType() == H225_GenericIdentifier::e_nonStandard) {
+            const H225_GloballyUniqueID & gui = *this;
+            const OpalGloballyUniqueID opalguid(gui);
+            return "NonStd " + opalguid.AsString();
+    }
 
-	return PString("unknown");
+    return PString("unknown");
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -181,125 +181,125 @@ H460_FeatureContent::H460_FeatureContent()
 
 H460_FeatureContent::H460_FeatureContent(const PASN_OctetString & param) 
 {
-	SetTag(H225_Content::e_raw); 
-	PASN_OctetString & val = *this;
-	val.SetValue(param);
+    SetTag(H225_Content::e_raw); 
+    PASN_OctetString & val = *this;
+    val.SetValue(param);
 }
 
 H460_FeatureContent::H460_FeatureContent(const PString & param) 
 {
-	SetTag(H225_Content::e_text); 
-	PASN_IA5String & val = *this;
-	val = param;
+    SetTag(H225_Content::e_text); 
+    PASN_IA5String & val = *this;
+    val = param;
 }
 
 H460_FeatureContent::H460_FeatureContent(PASN_BMPString & param) 
 {
-	SetTag(H225_Content::e_unicode); 
-	PASN_BMPString & val = *this;
-	val.SetValue(param);
+    SetTag(H225_Content::e_unicode); 
+    PASN_BMPString & val = *this;
+    val.SetValue(param);
 }
 
 H460_FeatureContent::H460_FeatureContent(const PBoolean & param) 
 {
-	SetTag(H225_Content::e_bool); 
-	PASN_Boolean & val = *this;
-	val.SetValue(param);
+    SetTag(H225_Content::e_bool); 
+    PASN_Boolean & val = *this;
+    val.SetValue(param);
 }
 
 H460_FeatureContent::H460_FeatureContent(unsigned param, unsigned len) 
 {
-	
+    
 
-	if (len == 8) {
-	  SetTag(H225_Content::e_number8);
-	  PASN_Integer & val = *this;
-	  val.SetConstraints(PASN_Object::FixedConstraint, 0, 255);
-	  val.SetValue(param);
-	}
-	else if (len == 16) {
-	  SetTag(H225_Content::e_number16);
-	  PASN_Integer & val = *this;
-	  val.SetConstraints(PASN_Object::FixedConstraint, 0, 65535);
-	  val.SetValue(param);
-	}
-	else if (len == 32) {
-	  SetTag(H225_Content::e_number32);
-	  PASN_Integer & val = *this;
-      val.SetConstraints(PASN_Object::FixedConstraint, 0, 4294967295U);
-	  val.SetValue(param);
-	}
-	else {
- 	  SetTag(H225_Content::e_number8);
-	  PASN_Integer & val = *this;
+    if (len == 8) {
+      SetTag(H225_Content::e_number8);
+      PASN_Integer & val = *this;
       val.SetConstraints(PASN_Object::FixedConstraint, 0, 255);
-	  val.SetValue(param);
+      val.SetValue(param);
+    }
+    else if (len == 16) {
+      SetTag(H225_Content::e_number16);
+      PASN_Integer & val = *this;
+      val.SetConstraints(PASN_Object::FixedConstraint, 0, 65535);
+      val.SetValue(param);
+    }
+    else if (len == 32) {
+      SetTag(H225_Content::e_number32);
+      PASN_Integer & val = *this;
+      val.SetConstraints(PASN_Object::FixedConstraint, 0, 4294967295U);
+      val.SetValue(param);
+    }
+    else {
+       SetTag(H225_Content::e_number8);
+      PASN_Integer & val = *this;
+      val.SetConstraints(PASN_Object::FixedConstraint, 0, 255);
+      val.SetValue(param);
     }
 }
 
 H460_FeatureContent::H460_FeatureContent(const H460_FeatureID & id) 
 {
-	SetTag(H225_Content::e_id); 
-	H225_GenericIdentifier & val = *this;
-	val = id;
+    SetTag(H225_Content::e_id); 
+    H225_GenericIdentifier & val = *this;
+    val = id;
 }
 
 H460_FeatureContent::H460_FeatureContent(const H225_AliasAddress & add) 
 {
-	SetTag(H225_Content::e_alias); 
-	H225_AliasAddress & val = *this;
-	val = add;
+    SetTag(H225_Content::e_alias); 
+    H225_AliasAddress & val = *this;
+    val = add;
 }
 
 H460_FeatureContent::H460_FeatureContent(const PURL & add)
 {
 
-	H225_AliasAddress alias;
-	alias.SetTag(H225_AliasAddress::e_url_ID);
-	PASN_IA5String & url = alias;
-	url = add.AsString();
+    H225_AliasAddress alias;
+    alias.SetTag(H225_AliasAddress::e_url_ID);
+    PASN_IA5String & url = alias;
+    url = add.AsString();
 
-	SetTag(H225_Content::e_alias); 
-	H225_AliasAddress & val = *this;
-	val = alias;
+    SetTag(H225_Content::e_alias); 
+    H225_AliasAddress & val = *this;
+    val = alias;
 }
 
 H460_FeatureContent::H460_FeatureContent(const H323TransportAddress & add) 
 {
-	SetTag(H225_Content::e_transport); 
-	H225_TransportAddress & val = *this;
-	add.SetPDU(val);
+    SetTag(H225_Content::e_transport); 
+    H225_TransportAddress & val = *this;
+    add.SetPDU(val);
 }
 
 H460_FeatureContent::H460_FeatureContent(const OpalGloballyUniqueID & guid)
 {
-	SetTag(H225_Content::e_id); 
-	H225_GenericIdentifier & val = *this;
-	val.SetTag(H225_GenericIdentifier::e_nonStandard);
-	H225_GloballyUniqueID & id = val;
-	id.SetValue(guid.AsString());
+    SetTag(H225_Content::e_id); 
+    H225_GenericIdentifier & val = *this;
+    val.SetTag(H225_GenericIdentifier::e_nonStandard);
+    H225_GloballyUniqueID & id = val;
+    id.SetValue(guid.AsString());
 }
 
 H460_FeatureContent::H460_FeatureContent(const H460_FeatureTable & table) 
 {
-	SetTag(H225_Content::e_compound);
-	H225_ArrayOf_EnumeratedParameter & val = *this;
-	//val.SetConstraints(PASN_Object::FixedConstraint, 1, 512);
-	val = table;
+    SetTag(H225_Content::e_compound);
+    H225_ArrayOf_EnumeratedParameter & val = *this;
+    //val.SetConstraints(PASN_Object::FixedConstraint, 1, 512);
+    val = table;
 }
 
 H460_FeatureContent::H460_FeatureContent(H460_Feature * add) 
 {
-	SetTag(H225_Content::e_nested); 
-	H225_ArrayOf_GenericData & val = *this;
-	//val.SetConstraints(PASN_Object::FixedConstraint, 1, 16);
-	val.Append(add);
-	val.SetSize(val.GetSize()+1);
+    SetTag(H225_Content::e_nested); 
+    H225_ArrayOf_GenericData & val = *this;
+    //val.SetConstraints(PASN_Object::FixedConstraint, 1, 16);
+    val.Append(add);
+    val.SetSize(val.GetSize()+1);
 }
 
 H460_FeatureContent::H460_FeatureContent(const H225_Content & param)
 {
-//	OnReceivedPDU(param);
+//    OnReceivedPDU(param);
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -321,12 +321,12 @@ H460_FeatureParameter::H460_FeatureParameter(const PString & Identifier)
 
 H460_FeatureParameter::H460_FeatureParameter(const OpalOID & Identifier)
 {
-	m_id = H460_FeatureID(Identifier);
+    m_id = H460_FeatureID(Identifier);
 }
 
 H460_FeatureParameter::H460_FeatureParameter(const H225_EnumeratedParameter & param)
 {
-//	OnReceivedPDU(param);
+//    OnReceivedPDU(param);
 }
 
 H460_FeatureParameter::H460_FeatureParameter(const H460_FeatureID & ID)
@@ -336,58 +336,58 @@ H460_FeatureParameter::H460_FeatureParameter(const H460_FeatureID & ID)
 
 H460_FeatureContent H460_FeatureParameter::operator=( const PASN_OctetString & value) 
 {
-	SetTag(e_content);
-	m_content = H460_FeatureContent(value);
-	return m_content; 
+    SetTag(e_content);
+    m_content = H460_FeatureContent(value);
+    return m_content; 
 }
 
 H460_FeatureContent H460_FeatureParameter::operator=( const PString & value ) 
 {
 
 // Check if url;
-	PURL * url = new PURL();	// BUG ?
-	if (url->Parse(value,"http"))   // Parameter is an Http Address
-		m_content = H460_FeatureContent(*url);
-		
+    PURL * url = new PURL();    // BUG ?
+    if (url->Parse(value,"http"))   // Parameter is an Http Address
+        m_content = H460_FeatureContent(*url);
+        
 
-	if (value.Find(":") != P_MAX_INDEX) {  
-		PStringArray Cmd = value.Tokenise(":", FALSE);	
+    if (value.Find(":") != P_MAX_INDEX) {  
+        PStringArray Cmd = value.Tokenise(":", FALSE);    
 
-		if (Cmd.GetSize() == 2) {	// Parameter is an Address
-			H323TransportAddress * add = new H323TransportAddress(Cmd[0],(short)Cmd[1].AsUnsigned());	// BUG: leak ?
-			m_content = H460_FeatureContent(*add);
-		}
-	}
-	SetTag(e_content);
-	return m_content; 
-	
+        if (Cmd.GetSize() == 2) {    // Parameter is an Address
+            H323TransportAddress * add = new H323TransportAddress(Cmd[0],(short)Cmd[1].AsUnsigned());    // BUG: leak ?
+            m_content = H460_FeatureContent(*add);
+        }
+    }
+    SetTag(e_content);
+    return m_content; 
+    
 }
 
 H460_FeatureContent  H460_FeatureParameter::operator=( const PASN_BMPString & value) 
 {
-	m_content = H460_FeatureContent(value);
-	SetTag(e_content);
-	return m_content; 
+    m_content = H460_FeatureContent(value);
+    SetTag(e_content);
+    return m_content; 
 }
 
 H460_FeatureContent  H460_FeatureParameter::operator=( const PBoolean & value ) 
 {
-	m_content = H460_FeatureContent(value);
-	SetTag(e_content);
-	return m_content;
+    m_content = H460_FeatureContent(value);
+    SetTag(e_content);
+    return m_content;
 }
 
 H460_FeatureContent  H460_FeatureParameter::operator=( const unsigned & value ) 
 {
 
   if (value == 0)
-	 m_content = H460_FeatureContent(value,32);
+     m_content = H460_FeatureContent(value,32);
   else if (value < 16)
-	 m_content = H460_FeatureContent(value,8);
+     m_content = H460_FeatureContent(value,8);
   else if (value < 256)
-	 m_content = H460_FeatureContent(value,16);
+     m_content = H460_FeatureContent(value,16);
   else
-	 m_content = H460_FeatureContent(value,32);
+     m_content = H460_FeatureContent(value,32);
 
   SetTag(e_content);
   return m_content;
@@ -395,205 +395,205 @@ H460_FeatureContent  H460_FeatureParameter::operator=( const unsigned & value )
 
 H460_FeatureContent  H460_FeatureParameter::operator=( const H460_FeatureID & value ) 
 {
-	m_content = H460_FeatureContent(value);
-	SetTag(e_content);
-	return m_content; 
+    m_content = H460_FeatureContent(value);
+    SetTag(e_content);
+    return m_content; 
 }
 
 H460_FeatureContent  H460_FeatureParameter::operator=( const H225_AliasAddress & value ) 
 {
-	m_content = H460_FeatureContent(value);
-	SetTag(e_content);
-	return m_content; 
+    m_content = H460_FeatureContent(value);
+    SetTag(e_content);
+    return m_content; 
 }
 
 H460_FeatureContent  H460_FeatureParameter::operator=( const H323TransportAddress & value ) 
 {
-	m_content = H460_FeatureContent(value);
-	SetTag(e_content);
-	return m_content; 
+    m_content = H460_FeatureContent(value);
+    SetTag(e_content);
+    return m_content; 
 }
 
 H460_FeatureContent  H460_FeatureParameter::operator=( const H460_FeatureTable & value ) 
 {
-	m_content = H460_FeatureContent(value);
-	SetTag(e_content);
-	return m_content; 
+    m_content = H460_FeatureContent(value);
+    SetTag(e_content);
+    return m_content; 
 }
 
 H460_FeatureContent  H460_FeatureParameter::operator=( H460_Feature * value ) 
 {
-	m_content = H460_FeatureContent(value);
-	SetTag(e_content);
-	return m_content; 
+    m_content = H460_FeatureContent(value);
+    SetTag(e_content);
+    return m_content; 
 }
 
 H460_FeatureParameter::operator PASN_OctetString &() 
 { 
-	PASN_OctetString & content = m_content;
-	return content;
+    PASN_OctetString & content = m_content;
+    return content;
 };
 
 H460_FeatureParameter::operator PString ()
 { 
-	PASN_IA5String & content = m_content;
-	return content.GetValue();
+    PASN_IA5String & content = m_content;
+    return content.GetValue();
 };
 
 H460_FeatureParameter::operator PASN_BMPString &()  
 { 
-	PASN_BMPString & content = m_content;
-	return content;
+    PASN_BMPString & content = m_content;
+    return content;
 };
 
 H460_FeatureParameter::operator PBoolean ()  
 { 
-	PASN_Boolean & content = m_content;
-	PBoolean con = content;
-	return con;
+    PASN_Boolean & content = m_content;
+    PBoolean con = content;
+    return con;
 };
 
 H460_FeatureParameter::operator unsigned()  
 { 
-	PASN_Integer & content = m_content;
-	return content;
+    PASN_Integer & content = m_content;
+    return content;
 };
 
 H460_FeatureParameter::operator H460_FeatureID &() 
 { 
-	H225_GenericIdentifier & content = m_content;
-	return (H460_FeatureID &)content;
+    H225_GenericIdentifier & content = m_content;
+    return (H460_FeatureID &)content;
 };
 
 H460_FeatureParameter::operator H225_AliasAddress &() 
 { 
-	H225_AliasAddress & content = m_content;
-	return content;
+    H225_AliasAddress & content = m_content;
+    return content;
 };
 
 H460_FeatureParameter::operator H323TransportAddress () 
 {
-	H225_TransportAddress & content = m_content;
-	return content;
+    H225_TransportAddress & content = m_content;
+    return content;
 
 };
 
 H460_FeatureParameter::operator H225_ArrayOf_EnumeratedParameter &() 
-{ 	     
-	H225_ArrayOf_EnumeratedParameter & content = m_content;
-	return content; 	
+{          
+    H225_ArrayOf_EnumeratedParameter & content = m_content;
+    return content;     
 };
 
 H460_FeatureParameter::operator PURL () 
-{ 	     
-	H225_AliasAddress & content = m_content;
-	PASN_IA5String & Surl = content;
-	return Surl.GetValue();
+{          
+    H225_AliasAddress & content = m_content;
+    PASN_IA5String & Surl = content;
+    return Surl.GetValue();
 };
 
 H460_FeatureParameter::operator OpalGloballyUniqueID ()
 {
-	H225_GenericIdentifier & content = m_content;
-	if (content.GetTag() == H225_GenericIdentifier::e_nonStandard) {
+    H225_GenericIdentifier & content = m_content;
+    if (content.GetTag() == H225_GenericIdentifier::e_nonStandard) {
        H225_GloballyUniqueID & id = content;
        return OpalGloballyUniqueID((PASN_OctetString &)id);
-	}
-	return OpalGloballyUniqueID();
+    }
+    return OpalGloballyUniqueID();
 };
 
 /////////////////////////////////////////////////////////////////////
 
 H460_FeatureTable::H460_FeatureTable()
 {
-	SetSize(0);
+    SetSize(0);
 }
 
 H460_FeatureTable::H460_FeatureTable(const H225_ArrayOf_EnumeratedParameter & Xparams)
 {
-//	OnReceivedPDU(Xparams);
+//    OnReceivedPDU(Xparams);
 }
 
 H460_FeatureParameter & H460_FeatureTable::AddParameter(const H460_FeatureID & id)
-{	
+{    
 PTRACE(6, "H460\tAdd ID: " << id );
 
-	 H460_FeatureParameter param = H460_FeatureParameter(id);
-	 PINDEX i = GetSize();
-	 SetSize(i+1);
-	 (*this)[i] = param;
-	 return (*this)[i];
+     H460_FeatureParameter param = H460_FeatureParameter(id);
+     PINDEX i = GetSize();
+     SetSize(i+1);
+     (*this)[i] = param;
+     return (*this)[i];
 }
 
 H460_FeatureParameter & H460_FeatureTable::AddParameter(const H460_FeatureID & id, const H460_FeatureContent & con)
-{	
+{    
 PTRACE(6, "H460\tAdd ID: " << id  << " content " << con);
 
       H460_FeatureParameter & Nparam = AddParameter(id);
-	  Nparam.addContent(con);
-	  return Nparam;
+      Nparam.addContent(con);
+      return Nparam;
 }
 
 void H460_FeatureTable::AddParameter(H225_EnumeratedParameter & Xparam)
 { 
-	 PINDEX i = GetSize();
-	 SetSize(i+1);
-	 (*this)[i] = Xparam;
+     PINDEX i = GetSize();
+     SetSize(i+1);
+     (*this)[i] = Xparam;
 }
 
 //void H460_FeatureTable::SetParameter(H460_FeatureParameter & Nparam, H225_EnumeratedParameter & Xparam) const
 //{
-//	Nparam.OnSendingPDU(Xparam);
+//    Nparam.OnSendingPDU(Xparam);
 //}
 
 H460_FeatureParameter & H460_FeatureTable::GetParameter(PINDEX id)
 {
-	return (*this)[id];	
+    return (*this)[id];    
 }
 
 H460_FeatureParameter & H460_FeatureTable::GetParameter(const H460_FeatureID & id)
 {
 
-	PINDEX num = GetParameterIndex(id);
-	return GetParameter(num);
+    PINDEX num = GetParameterIndex(id);
+    return GetParameter(num);
 }
 
 
 PINDEX H460_FeatureTable::GetParameterIndex(const H460_FeatureID & id) 
 {
-	PINDEX i;
+    PINDEX i;
 
-	for (i = 0; i < GetSize(); i++) {
-		H460_FeatureParameter & fparam = (*this)[i];
-		H460_FeatureID param = fparam.ID();
-		if (param == id)
-			return i;
-	}
+    for (i = 0; i < GetSize(); i++) {
+        H460_FeatureParameter & fparam = (*this)[i];
+        H460_FeatureID param = fparam.ID();
+        if (param == id)
+            return i;
+    }
 
-	return GetSize();
+    return GetSize();
 }
 
 PBoolean H460_FeatureTable::HasParameter(const H460_FeatureID & id) {
 
 PTRACE(6, "H460\tCheck has Parameter " << id);
 
-	if (GetParameterIndex(id) < GetSize())
-		return TRUE;
+    if (GetParameterIndex(id) < GetSize())
+        return TRUE;
 
-	return FALSE;
-	
+    return FALSE;
+    
 }
 
 void H460_FeatureTable::RemoveParameter(PINDEX id)
 {
-	RemoveAt(id);
+    RemoveAt(id);
 }
 
 void H460_FeatureTable::RemoveParameter(const H460_FeatureID & id)
 {
-	PINDEX j = GetParameterIndex(id); 
+    PINDEX j = GetParameterIndex(id); 
     
-	if (j < GetSize()) 
-		RemoveParameter(j);
+    if (j < GetSize()) 
+        RemoveParameter(j);
 
 }
 
@@ -602,38 +602,38 @@ void H460_FeatureTable::ReplaceParameter(const H460_FeatureID & id, const H460_F
     
 PTRACE(6, "H460\tReplace ID: " << id  << " content " << con);
 
-	PINDEX j = GetParameterIndex(id); 
+    PINDEX j = GetParameterIndex(id); 
 
-	if (j == GetSize())
-		return;
+    if (j == GetSize())
+        return;
 
-	RemoveAt(j);
+    RemoveAt(j);
 
-	AddParameter(id,con);
+    AddParameter(id,con);
 }
 
 
 PBoolean H460_FeatureTable::ParameterIsUnique(const H460_FeatureID & id)
 {
-	PINDEX i;
-	PINDEX j =0;
+    PINDEX i;
+    PINDEX j =0;
 
-	for (i = 0; i < GetSize(); i++) {
-		H460_FeatureParameter & param = GetParameter(i);
+    for (i = 0; i < GetSize(); i++) {
+        H460_FeatureParameter & param = GetParameter(i);
 
-		if (param.ID() == id) {
-			j++;
-		}
-	}
-	if (j <= 1)
-	   return TRUE;
-	else
-	   return FALSE;
+        if (param.ID() == id) {
+            j++;
+        }
+    }
+    if (j <= 1)
+       return TRUE;
+    else
+       return FALSE;
 }
 
 H460_FeatureParameter & H460_FeatureTable::operator[](PINDEX id)
 {
-	return (H460_FeatureParameter &)array[id];
+    return (H460_FeatureParameter &)array[id];
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -641,33 +641,33 @@ H460_FeatureParameter & H460_FeatureTable::operator[](PINDEX id)
 H460_Feature::H460_Feature()
    : CurrentTable((H460_FeatureTable*)&m_parameters)
 {
-//	IncludeOptionalField(e_parameters);
-//	CurrentTable = (H460_FeatureTable*)&m_parameters;
-	ep = NULL;
-	con = NULL;
-	FeatureCategory = FeatureSupported;
+//    IncludeOptionalField(e_parameters);
+//    CurrentTable = (H460_FeatureTable*)&m_parameters;
+    ep = NULL;
+    con = NULL;
+    FeatureCategory = FeatureSupported;
 }
 
-H460_Feature::H460_Feature(unsigned identifier)	
+H460_Feature::H460_Feature(unsigned identifier)    
    : CurrentTable((H460_FeatureTable*)&m_parameters)
 {
     SetFeatureID(H460_FeatureID(identifier));
-//	IncludeOptionalField(e_parameters);
-//	CurrentTable = (H460_FeatureTable*)&m_parameters;
-	ep = NULL;
-	con = NULL;
-	FeatureCategory = FeatureSupported;
+//    IncludeOptionalField(e_parameters);
+//    CurrentTable = (H460_FeatureTable*)&m_parameters;
+    ep = NULL;
+    con = NULL;
+    FeatureCategory = FeatureSupported;
 }
 
 H460_Feature::H460_Feature(PString identifier)
    : CurrentTable((H460_FeatureTable*)&m_parameters)
 {
     SetFeatureID(H460_FeatureID(identifier));
-//	IncludeOptionalField(e_parameters);
-//	CurrentTable = (H460_FeatureTable*)&m_parameters;
-	ep = NULL;
-	con = NULL;
-	FeatureCategory = FeatureSupported;
+//    IncludeOptionalField(e_parameters);
+//    CurrentTable = (H460_FeatureTable*)&m_parameters;
+    ep = NULL;
+    con = NULL;
+    FeatureCategory = FeatureSupported;
 }
 
 H460_Feature::H460_Feature(OpalOID identifier)
@@ -675,10 +675,10 @@ H460_Feature::H460_Feature(OpalOID identifier)
 {
     SetFeatureID(H460_FeatureID(identifier));
 //    IncludeOptionalField(e_parameters);
-//	  CurrentTable = (H460_FeatureTable *)&m_parameters;
-	ep = NULL;
-	con = NULL;
-	FeatureCategory = FeatureSupported;
+//      CurrentTable = (H460_FeatureTable *)&m_parameters;
+    ep = NULL;
+    con = NULL;
+    FeatureCategory = FeatureSupported;
 }
 
 
@@ -687,12 +687,12 @@ H460_Feature::H460_Feature(const H225_FeatureDescriptor & descriptor)
     SetFeatureID(descriptor.m_id);
     if (descriptor.HasOptionalField(H225_FeatureDescriptor::e_parameters)) {
         IncludeOptionalField(H225_FeatureDescriptor::e_parameters);
-	    m_parameters = descriptor.m_parameters;
+        m_parameters = descriptor.m_parameters;
     }  
 
     CurrentTable = (H460_FeatureTable *)&m_parameters;
-	ep = NULL;
-	con = NULL;
+    ep = NULL;
+    con = NULL;
     FeatureCategory = FeatureSupported;
 }
 
@@ -710,7 +710,7 @@ PBoolean H460_Feature::FeatureAdvertised(int mtype)
         case H460_MessageType::e_registrationRequest:
         case H460_MessageType::e_registrationConfirm: 
         case H460_MessageType::e_registrationReject:
-        case H460_MessageType::e_setup:					
+        case H460_MessageType::e_setup:                    
         case H460_MessageType::e_callProceeding:
             return true;
         default:
@@ -720,117 +720,117 @@ PBoolean H460_Feature::FeatureAdvertised(int mtype)
 
 H460_FeatureParameter & H460_Feature::AddParameter(H460_FeatureID * id, const H460_FeatureContent & con)
 {
-	if (!HasOptionalField(e_parameters)) {	
-	    IncludeOptionalField(e_parameters);
-	    CurrentTable = (H460_FeatureTable*)&m_parameters;
-		CurrentTable->SetSize(0);
-	}
-	return CurrentTable->AddParameter(*id, con);
+    if (!HasOptionalField(e_parameters)) {    
+        IncludeOptionalField(e_parameters);
+        CurrentTable = (H460_FeatureTable*)&m_parameters;
+        CurrentTable->SetSize(0);
+    }
+    return CurrentTable->AddParameter(*id, con);
 }
 
 H460_FeatureParameter & H460_Feature::AddParameter(H460_FeatureID * id)
 {
-	if (!HasOptionalField(e_parameters)) {	
-	    IncludeOptionalField(e_parameters);
-	    CurrentTable = (H460_FeatureTable*)&m_parameters;
-		CurrentTable->SetSize(0);
-	}
-	return CurrentTable->AddParameter(*id);
+    if (!HasOptionalField(e_parameters)) {    
+        IncludeOptionalField(e_parameters);
+        CurrentTable = (H460_FeatureTable*)&m_parameters;
+        CurrentTable->SetSize(0);
+    }
+    return CurrentTable->AddParameter(*id);
 }
 
 void H460_Feature::AddParameter(H460_FeatureParameter * param)
 {
-	if (!HasOptionalField(e_parameters)) {	
-	    IncludeOptionalField(e_parameters);
-	    CurrentTable = (H460_FeatureTable*)&m_parameters;
-		CurrentTable->SetSize(0);
-	}
+    if (!HasOptionalField(e_parameters)) {    
+        IncludeOptionalField(e_parameters);
+        CurrentTable = (H460_FeatureTable*)&m_parameters;
+        CurrentTable->SetSize(0);
+    }
 
-	CurrentTable->AddParameter(*param);
+    CurrentTable->AddParameter(*param);
 }
 
 void H460_Feature::RemoveParameter(PINDEX id)
 {
-	CurrentTable->RemoveParameter(id);
+    CurrentTable->RemoveParameter(id);
 
-	if (CurrentTable->ParameterCount() == 0) {	
-	    RemoveOptionalField(e_parameters);
-	}
+    if (CurrentTable->ParameterCount() == 0) {    
+        RemoveOptionalField(e_parameters);
+    }
 }
 
 void H460_Feature::ReplaceParameter(const H460_FeatureID & id, const H460_FeatureContent & con)
 {
-	CurrentTable->ReplaceParameter(id, con);
+    CurrentTable->ReplaceParameter(id, con);
 }
 
 H460_FeatureParameter & H460_Feature::GetFeatureParameter(PINDEX id)
 {
-	return CurrentTable->GetParameter(id);
+    return CurrentTable->GetParameter(id);
 }
 
 H460_FeatureParameter & H460_Feature::GetFeatureParameter(const H460_FeatureID & id)
 {
-	return CurrentTable->GetParameter(id);
+    return CurrentTable->GetParameter(id);
 }
 
 PBoolean H460_Feature::HasFeatureParameter(const H460_FeatureID & id)
 {
-	return CurrentTable->HasParameter(id);
+    return CurrentTable->HasParameter(id);
 }
 
 PBoolean H460_Feature::Contains(const H460_FeatureID & id)
 {
-	PTRACE(6, "H460\tCheck for Parameter " << id);
+    PTRACE(6, "H460\tCheck for Parameter " << id);
 
-	if (HasOptionalField(e_parameters)) {	
-	    H460_FeatureTable & Table = (H460_FeatureTable &)m_parameters;
-		if (Table.HasParameter(id))
-			return TRUE;
-	}
+    if (HasOptionalField(e_parameters)) {    
+        H460_FeatureTable & Table = (H460_FeatureTable &)m_parameters;
+        if (Table.HasParameter(id))
+            return TRUE;
+    }
 
     return FALSE;
 }
 
 H460_FeatureParameter & H460_Feature::Value(const H460_FeatureID & id)
 {
-	if (HasOptionalField(e_parameters)) {	
-	    H460_FeatureTable & Table = (H460_FeatureTable &)m_parameters;
-		if (Table.HasParameter(id))
-			return Table.GetParameter(id);
-	}
-	PAssertAlways("LOGIC ERROR: Must call <if (.Contains)> before .Value");
-    return *(new H460_FeatureParameter());	// BUG: memory leak but is never called - SH
+    if (HasOptionalField(e_parameters)) {    
+        H460_FeatureTable & Table = (H460_FeatureTable &)m_parameters;
+        if (Table.HasParameter(id))
+            return Table.GetParameter(id);
+    }
+    PAssertAlways("LOGIC ERROR: Must call <if (.Contains)> before .Value");
+    return *(new H460_FeatureParameter());    // BUG: memory leak but is never called - SH
 }
 
 H460_FeatureParameter & H460_Feature::operator()(PINDEX id)
 {
-	return CurrentTable->GetParameter(id);
+    return CurrentTable->GetParameter(id);
 }
 
 H460_FeatureParameter & H460_Feature::operator()(const H460_FeatureID & id)
 { 
-	return GetFeatureParameter(id);
+    return GetFeatureParameter(id);
 }
 
 H460_FeatureTable & H460_Feature::GetCurrentTable()
 {
-	return *CurrentTable;
+    return *CurrentTable;
 }
 
 void H460_Feature::SetCurrentTable(H460_FeatureTable & table) 
 {
-	CurrentTable = &table;
+    CurrentTable = &table;
 }
 
 void H460_Feature::SetCurrentTable(H460_FeatureParameter & param)
 {
-	H225_ArrayOf_EnumeratedParameter & table = param;
+    H225_ArrayOf_EnumeratedParameter & table = param;
     SetCurrentTable((H460_FeatureTable &)table);
 }
 
 void H460_Feature::SetDefaultTable() 
 {
-	CurrentTable = (H460_FeatureTable*)&m_parameters;
+    CurrentTable = (H460_FeatureTable*)&m_parameters;
 }
 
 void H460_Feature::AttachEndPoint(H323EndPoint * _ep) 
@@ -893,25 +893,25 @@ PBoolean H460_Feature::PresenceFeatureList(std::map<PString,H460_FeatureID*> & p
 
    int count = 0;
    for (PINDEX i=0; i<featurelist.GetSize(); i++) {
-	 if (ep && !ep->OnFeatureInstance(H460_Feature::FeaturePresence,featurelist[i]))
-		   continue;
+     if (ep && !ep->OnFeatureInstance(H460_Feature::FeaturePresence,featurelist[i]))
+           continue;
 
-	 PDevicePluginServiceDescriptor * desc = 
-			(PDevicePluginServiceDescriptor *)pluginMgr->GetServiceDescriptor(featurelist[i], H460FeaturePluginBaseClass);
+     PDevicePluginServiceDescriptor * desc = 
+            (PDevicePluginServiceDescriptor *)pluginMgr->GetServiceDescriptor(featurelist[i], H460FeaturePluginBaseClass);
 
-	 if (desc != NULL && desc->ValidateDeviceName(featurelist[i], H460_Feature::FeaturePresence)) {
-		 PStringArray id = desc->GetDeviceNames(H460_Feature::FeaturePresence);
-		 PStringArray display = desc->GetDeviceNames(0);
-		 if (featurelist[i].Left(3) == "Std") {			// Std feature
-				plist.insert(pair<PString,H460_FeatureID*>(*(PString*)display[0].Clone(),new H460_FeatureID(id[0].AsInteger())));
-		 } else if (featurelist[i].Left(3) == "OID") {		// OID feature
-				OpalOID feat(id[0]);
-				plist.insert(pair<PString,H460_FeatureID*>(*(PString*)display[0].Clone(), new H460_FeatureID(feat)));
-		 } else	{   // NonStd Feature
-				plist.insert(pair<PString,H460_FeatureID*>(*(PString*)display[0].Clone(),new H460_FeatureID(id[0])));
-		 }
-		 count++;
-	 }  
+     if (desc != NULL && desc->ValidateDeviceName(featurelist[i], H460_Feature::FeaturePresence)) {
+         PStringArray id = desc->GetDeviceNames(H460_Feature::FeaturePresence);
+         PStringArray display = desc->GetDeviceNames(0);
+         if (featurelist[i].Left(3) == "Std") {            // Std feature
+                plist.insert(pair<PString,H460_FeatureID*>(*(PString*)display[0].Clone(),new H460_FeatureID(id[0].AsInteger())));
+         } else if (featurelist[i].Left(3) == "OID") {        // OID feature
+                OpalOID feat(id[0]);
+                plist.insert(pair<PString,H460_FeatureID*>(*(PString*)display[0].Clone(), new H460_FeatureID(feat)));
+         } else    {   // NonStd Feature
+                plist.insert(pair<PString,H460_FeatureID*>(*(PString*)display[0].Clone(),new H460_FeatureID(id[0])));
+         }
+         count++;
+     }  
    }
    return (count > 0);
 }
@@ -919,183 +919,183 @@ PBoolean H460_Feature::PresenceFeatureList(std::map<PString,H460_FeatureID*> & p
 /////////////////////////////////////////////////////////////////////
 
 H460_FeatureStd::H460_FeatureStd(unsigned Identifier)
-	: H460_Feature(Identifier)
+    : H460_Feature(Identifier)
 {
 }
 
 void H460_FeatureStd::Add(unsigned id)
 {
-	H460_FeatureID * feat_id = new H460_FeatureID(id);
-	AddParameter(feat_id);
-	delete feat_id;	
+    H460_FeatureID * feat_id = new H460_FeatureID(id);
+    AddParameter(feat_id);
+    delete feat_id;    
 }
 
 void H460_FeatureStd::Add(unsigned id, const H460_FeatureContent & con)
 {
-	H460_FeatureID * feat_id = new H460_FeatureID(id);
-	AddParameter(feat_id, con);
-	delete feat_id;	
+    H460_FeatureID * feat_id = new H460_FeatureID(id);
+    AddParameter(feat_id, con);
+    delete feat_id;    
 }
 
 void H460_FeatureStd::Remove(unsigned id)
 {
-	RemoveParameter(H460_FeatureID(id));
+    RemoveParameter(H460_FeatureID(id));
 }
 
 void H460_FeatureStd::Replace(unsigned id, const H460_FeatureContent & con)
 {
-	ReplaceParameter(H460_FeatureID(id),con);
+    ReplaceParameter(H460_FeatureID(id),con);
 }
 
 PBoolean H460_FeatureStd::HasParameter(unsigned id)
 {
-	return HasFeatureParameter(H460_FeatureID(id));
+    return HasFeatureParameter(H460_FeatureID(id));
 }
 
 H460_FeatureParameter & H460_FeatureStd::GetParameter(unsigned id)
 {
-	return GetFeatureParameter(H460_FeatureID(id));
+    return GetFeatureParameter(H460_FeatureID(id));
 }
 
 
 /////////////////////////////////////////////////////////////////////
 
 H460_FeatureNonStd::H460_FeatureNonStd(PString Identifier)
-	: H460_Feature(Identifier)
+    : H460_Feature(Identifier)
 {
 }
-	
+    
 void H460_FeatureNonStd::Add(const PString & id)
 {
-	H460_FeatureID * feat_id = new H460_FeatureID(id);
-	AddParameter(feat_id);
-	delete feat_id;
+    H460_FeatureID * feat_id = new H460_FeatureID(id);
+    AddParameter(feat_id);
+    delete feat_id;
 }
 
 void H460_FeatureNonStd::Add(const PString & id, const H460_FeatureContent & con)
 {
-	H460_FeatureID * feat_id = new H460_FeatureID(id);
-	AddParameter(feat_id, con);
-	delete feat_id;
+    H460_FeatureID * feat_id = new H460_FeatureID(id);
+    AddParameter(feat_id, con);
+    delete feat_id;
 }
 
 void H460_FeatureNonStd::Remove(const PString & id)
 {
-	RemoveParameter(H460_FeatureID(id));
+    RemoveParameter(H460_FeatureID(id));
 }
 
 void H460_FeatureNonStd::Replace(const PString & id, const H460_FeatureContent & con)
 {
-	ReplaceParameter(H460_FeatureID(id),con);
+    ReplaceParameter(H460_FeatureID(id),con);
 }
 
 PBoolean H460_FeatureNonStd::HasParameter(PString id)
 {
-	return HasFeatureParameter(H460_FeatureID(id));
+    return HasFeatureParameter(H460_FeatureID(id));
 }
 
 H460_FeatureParameter & H460_FeatureNonStd::operator[](PString id)
 {
-	return GetFeatureParameter(H460_FeatureID(id));
+    return GetFeatureParameter(H460_FeatureID(id));
 }
 
 /////////////////////////////////////////////////////////////////////
 
 H460_FeatureOID::H460_FeatureOID(OpalOID Identifier)
-	: H460_Feature(Identifier)
+    : H460_Feature(Identifier)
 {
 }
 
 void H460_FeatureOID::Add(const PString & id)
 {
-	PString val = GetBase() + "." + id;
-	H460_FeatureID * feat_id = new H460_FeatureID(OpalOID(val));
-	AddParameter(feat_id);
-	delete feat_id;
+    PString val = GetBase() + "." + id;
+    H460_FeatureID * feat_id = new H460_FeatureID(OpalOID(val));
+    AddParameter(feat_id);
+    delete feat_id;
 }
 
 void H460_FeatureOID::Add(const PString & id, const H460_FeatureContent & con)
 {
-	PString val = GetBase() + "." + id;
-	H460_FeatureID * feat_id = new H460_FeatureID(OpalOID(val));
-	AddParameter(feat_id, con);
-	delete feat_id;
+    PString val = GetBase() + "." + id;
+    H460_FeatureID * feat_id = new H460_FeatureID(OpalOID(val));
+    AddParameter(feat_id, con);
+    delete feat_id;
 }
 
 void H460_FeatureOID::Remove(const PString & id)
 {
-	PString val = GetBase() + "." + id;
-	RemoveParameter(H460_FeatureID(OpalOID(val)));
+    PString val = GetBase() + "." + id;
+    RemoveParameter(H460_FeatureID(OpalOID(val)));
 }
 
 void H460_FeatureOID::Replace(const PString & id, const H460_FeatureContent & con)
 {
-	PString val = GetBase() + "." + id;
-	ReplaceParameter(H460_FeatureID(OpalOID(val)),con);
+    PString val = GetBase() + "." + id;
+    ReplaceParameter(H460_FeatureID(OpalOID(val)),con);
 }
 
 
 PBoolean H460_FeatureOID::HasParameter(OpalOID id)
 {
-	return HasFeatureParameter(H460_FeatureID(id));
+    return HasFeatureParameter(H460_FeatureID(id));
 }
 
 
 H460_FeatureParameter & H460_FeatureOID::operator[](OpalOID id)
 {
-	PString val = GetBase() + "." + id.AsString();
-	return GetFeatureParameter(H460_FeatureID(OpalOID(val)));
+    PString val = GetBase() + "." + id.AsString();
+    return GetFeatureParameter(H460_FeatureID(OpalOID(val)));
 }
 
 PBoolean H460_FeatureOID::Contains(const PString & id) 
 {
-	PString val = GetBase() + "." + id;
-	return  H460_Feature::Contains(OpalOID(val));
+    PString val = GetBase() + "." + id;
+    return  H460_Feature::Contains(OpalOID(val));
 }
 
 H460_FeatureParameter & H460_FeatureOID::Value(const PString & id)
 {
-	PString val = GetBase() + "." + id;
-	return  H460_Feature::Value(OpalOID(val));
+    PString val = GetBase() + "." + id;
+    return  H460_Feature::Value(OpalOID(val));
 }
 
 PString H460_FeatureOID::GetBase()
 {
-	OpalOID id = (H460_FeatureID)m_id;
+    OpalOID id = (H460_FeatureID)m_id;
     return id.AsString();
 }
 
 /////////////////////////////////////////////////////////////////////
 H460_FeatureSet::H460_FeatureSet()
 {
-	ep = NULL;
-	baseSet = NULL;
+    ep = NULL;
+    baseSet = NULL;
 }
 
 H460_FeatureSet::H460_FeatureSet(H460_FeatureSet * _base)
 {
-	Features.DisallowDeleteObjects();   // Derived FeatureSets should not delete Objects.
-	AttachBaseFeatureSet(_base);
-	AttachEndPoint(_base->GetEndPoint());
+    Features.DisallowDeleteObjects();   // Derived FeatureSets should not delete Objects.
+    AttachBaseFeatureSet(_base);
+    AttachEndPoint(_base->GetEndPoint());
 }
 
 H460_FeatureSet::H460_FeatureSet(const H225_FeatureSet & fs)
 {
-	Features.DisallowDeleteObjects();   // Built FeatureSet should not delete Objects.
-	ep = NULL;
-	baseSet = NULL;
-	CreateFeatureSet(fs);
+    Features.DisallowDeleteObjects();   // Built FeatureSet should not delete Objects.
+    ep = NULL;
+    baseSet = NULL;
+    CreateFeatureSet(fs);
 }
 
 H460_FeatureSet::H460_FeatureSet(const H225_ArrayOf_GenericData & generic)
 {
-	Features.DisallowDeleteObjects();   // Built FeatureSet should not delete Objects.
-	ep = NULL;
-	baseSet = NULL;
+    Features.DisallowDeleteObjects();   // Built FeatureSet should not delete Objects.
+    ep = NULL;
+    baseSet = NULL;
 
     for (PINDEX i=0; i < generic.GetSize(); i++) {
-	   AddFeature((H460_Feature *)&generic[i]);
-	}
+       AddFeature((H460_Feature *)&generic[i]);
+    }
 }
 
 PBoolean H460_FeatureSet::ProcessFirstPDU(const H225_FeatureSet & fs)
@@ -1106,17 +1106,17 @@ PTRACE(6,"H460\tCreate Common FeatureSet");
     H460_FeatureSet remote = H460_FeatureSet(fs);
 
  /// Remove the features the remote does not support.
-	for (PINDEX i=Features.GetSize()-1;  i > -1;  i--) {
-	    H460_Feature & feat = Features.GetDataAt(i);
-		H460_FeatureID id = feat.GetFeatureID();
-		if (!remote.HasFeature(id))
-			 RemoveFeature(id);
-		else
-		   PTRACE(4,"H460\tUse Common Feature " << id);
-	}
+    for (PINDEX i=Features.GetSize()-1;  i > -1;  i--) {
+        H460_Feature & feat = Features.GetDataAt(i);
+        H460_FeatureID id = feat.GetFeatureID();
+        if (!remote.HasFeature(id))
+             RemoveFeature(id);
+        else
+           PTRACE(4,"H460\tUse Common Feature " << id);
+    }
 
 
-	return TRUE;
+    return TRUE;
 }
 
 PBoolean H460_FeatureSet::RemoveUnCommonFeatures()
@@ -1125,41 +1125,41 @@ PBoolean H460_FeatureSet::RemoveUnCommonFeatures()
 PTRACE(4,"H460\tRemoving UnCommon Features");
 
  /// Remove the features that have not been negotiated for the call.
-	for (PINDEX i=Features.GetSize()-1; i > -1;  i--) {
-	    H460_Feature & feat = Features.GetDataAt(i);
-		H460_FeatureID id = feat.GetFeatureID();
-		if (!feat.CommonFeature())
-			 RemoveFeature(id);
-	}
+    for (PINDEX i=Features.GetSize()-1; i > -1;  i--) {
+        H460_Feature & feat = Features.GetDataAt(i);
+        H460_FeatureID id = feat.GetFeatureID();
+        if (!feat.CommonFeature())
+             RemoveFeature(id);
+    }
 
-	return TRUE;
+    return TRUE;
 }
 
 PBoolean H460_FeatureSet::CreateFeatureSet(const H225_FeatureSet & fs)
 {
-	PTRACE(6,"H460\tCreate FeatureSet from FeatureSet PDU");
+    PTRACE(6,"H460\tCreate FeatureSet from FeatureSet PDU");
 
-	  if (fs.HasOptionalField(H225_FeatureSet::e_neededFeatures)) {
-	     const H225_ArrayOf_FeatureDescriptor & fsn = fs.m_neededFeatures;
-		  for (PINDEX i=0; i < fsn.GetSize(); i++) {
-			  AddFeature((H460_Feature *)&fsn[i]);
-		  }
-	  }
+      if (fs.HasOptionalField(H225_FeatureSet::e_neededFeatures)) {
+         const H225_ArrayOf_FeatureDescriptor & fsn = fs.m_neededFeatures;
+          for (PINDEX i=0; i < fsn.GetSize(); i++) {
+              AddFeature((H460_Feature *)&fsn[i]);
+          }
+      }
 
-	  if (fs.HasOptionalField(H225_FeatureSet::e_desiredFeatures)) {
-	    const H225_ArrayOf_FeatureDescriptor & fsd = fs.m_desiredFeatures;
-		  for (PINDEX i=0; i < fsd.GetSize(); i++) {
-			  AddFeature((H460_Feature *)&fsd[i]);
-		  }
-	  }
+      if (fs.HasOptionalField(H225_FeatureSet::e_desiredFeatures)) {
+        const H225_ArrayOf_FeatureDescriptor & fsd = fs.m_desiredFeatures;
+          for (PINDEX i=0; i < fsd.GetSize(); i++) {
+              AddFeature((H460_Feature *)&fsd[i]);
+          }
+      }
 
-	  if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
-	    const H225_ArrayOf_FeatureDescriptor & fss = fs.m_supportedFeatures; 
-		  for (PINDEX i=0; i < fss.GetSize(); i++) {
-			  AddFeature((H460_Feature *)&fss[i]);
-		  }
-	  }
-	  return TRUE;
+      if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
+        const H225_ArrayOf_FeatureDescriptor & fss = fs.m_supportedFeatures; 
+          for (PINDEX i=0; i < fss.GetSize(); i++) {
+              AddFeature((H460_Feature *)&fss[i]);
+          }
+      }
+      return TRUE;
 }
 
 
@@ -1167,79 +1167,79 @@ PBoolean H460_FeatureSet::LoadFeatureSet(int inst, H323Connection * con)
 {
 
   if ((ep) && (ep->FeatureSetDisabled()))
-	 return FALSE;
+     return FALSE;
 
   PStringList featurelist = H460_Feature::GetFeatureNames();
 
   // We need to reorder the features so that the std ones are first.
   // This is needed as some H.323 devices will not recognise the feature
-	  PStringList features;
-	  PINDEX i;
-	  for (i = 0; i < featurelist.GetSize(); i++) {
-		  if (featurelist[i].Left(3) == "Std")
-			  features.AppendString(featurelist[i]);
-	  }
-	  for (i = 0; i < featurelist.GetSize(); i++) {
-		  if (featurelist[i].Left(3) == "OID")
-			  features.AppendString(featurelist[i]);
-	  }
-	  for (i = 0; i < featurelist.GetSize(); i++) {
-		  if (featurelist[i].Left(3) == "Non")
-			  features.AppendString(featurelist[i]);
-	  }
+      PStringList features;
+      PINDEX i;
+      for (i = 0; i < featurelist.GetSize(); i++) {
+          if (featurelist[i].Left(3) == "Std")
+              features.AppendString(featurelist[i]);
+      }
+      for (i = 0; i < featurelist.GetSize(); i++) {
+          if (featurelist[i].Left(3) == "OID")
+              features.AppendString(featurelist[i]);
+      }
+      for (i = 0; i < featurelist.GetSize(); i++) {
+          if (featurelist[i].Left(3) == "Non")
+              features.AppendString(featurelist[i]);
+      }
 
       for (i = 0; i < features.GetSize(); i++) {
-  	    if ((ep) && (!ep->OnFeatureInstance(inst,features[i]))) {
-			PTRACE(4,"H460\tFeature " << features[i] << " disabled due to policy.");
-			continue;
-		} 
+          if ((ep) && (!ep->OnFeatureInstance(inst,features[i]))) {
+            PTRACE(4,"H460\tFeature " << features[i] << " disabled due to policy.");
+            continue;
+        } 
         H460_FeatureID id;
         H460_Feature * feat = NULL;
         if (baseSet && baseSet->HasFeature(features[i])) {
             H460_Feature * tempfeat = baseSet->GetFeature(features[i]);
-		      if ((tempfeat->GetPurpose() >= inst) && (tempfeat->GetPurpose() < inst*2)) 
-				  feat = tempfeat;
-		} else {
-	        feat = H460_Feature::CreateFeature(features[i],inst);
-			if ((feat) && (ep)) 
-		        feat->AttachEndPoint(ep);
-		}
-		
-		if (feat) {
-		    if (con)
-		        feat->AttachConnection(con);
+              if ((tempfeat->GetPurpose() >= inst) && (tempfeat->GetPurpose() < inst*2)) 
+                  feat = tempfeat;
+        } else {
+            feat = H460_Feature::CreateFeature(features[i],inst);
+            if ((feat) && (ep)) 
+                feat->AttachEndPoint(ep);
+        }
+        
+        if (feat) {
+            if (con)
+                feat->AttachConnection(con);
 
-	       AddFeature(feat);
-		   PTRACE(4,"H460\tLoaded Feature " << features[i]);
-		}
-	  }
+           AddFeature(feat);
+           PTRACE(4,"H460\tLoaded Feature " << features[i]);
+        }
+      }
 
   return TRUE;
 }
 
 PBoolean H460_FeatureSet::LoadFeature(const PString & featid)
 {
-	
-	H460_Feature * newfeat = H460_Feature::CreateFeature(featid);
+    
+    H460_Feature * newfeat = H460_Feature::CreateFeature(featid);
 
-	if (newfeat != NULL)
-		return AddFeature(newfeat);
-	else
-		return FALSE;
+    if (newfeat != NULL)
+        return AddFeature(newfeat);
+    else
+        return FALSE;
 }
 
 H460_FeatureSet * H460_FeatureSet::DeriveNewFeatureSet()
 {
-	return new H460_FeatureSet(this);
+    return new H460_FeatureSet(this);
 }
 
 
 PBoolean H460_FeatureSet::AddFeature(H460_Feature * Nfeat)
 {
 
-	PTRACE(4, "H460\tLoaded " << Nfeat->GetFeatureIDAsString());
+    PTRACE(4, "H460\tLoaded " << Nfeat->GetFeatureIDAsString());
 
-	return Features.SetAt(Nfeat->GetFeatureID(),Nfeat);
+    return Features.SetAt(Nfeat->GetFeatureID(),Nfeat);
 
 }
 
@@ -1247,58 +1247,58 @@ void H460_FeatureSet::RemoveFeature(H460_FeatureID id)
 {
   PStringStream info;
   info << "H460\tRemoved ";
-	switch (id.GetFeatureType()) {
-	   case H460_FeatureID::e_standard:
-			info << "Std Feature " << (unsigned)id << "\n";
-			break;
-	   case H460_FeatureID::e_oid:
-			info << "OID Feature " << (OpalOID)id << "\n";
-			break;
-	   case H460_FeatureID::e_nonStandard:
-			const H225_GloballyUniqueID h225_guid = ((H225_GloballyUniqueID &)(id));
-			const OpalGloballyUniqueID guid(h225_guid);
-			info << "NonStd Feature " << guid.AsString() << "\n";
-			break;
-	}
-	PTRACE(4, info);
+    switch (id.GetFeatureType()) {
+       case H460_FeatureID::e_standard:
+            info << "Std Feature " << (unsigned)id << "\n";
+            break;
+       case H460_FeatureID::e_oid:
+            info << "OID Feature " << (OpalOID)id << "\n";
+            break;
+       case H460_FeatureID::e_nonStandard:
+            const H225_GloballyUniqueID h225_guid = ((H225_GloballyUniqueID &)(id));
+            const OpalGloballyUniqueID guid(h225_guid);
+            info << "NonStd Feature " << guid.AsString() << "\n";
+            break;
+    }
+    PTRACE(4, info);
 
-	Features.RemoveAt(id);
+    Features.RemoveAt(id);
 }
 
 
 #if PTRACING
 PString featureType(PINDEX id)
 {
-	switch (id) {
-	case 1: return "Needed";
-	case 2: return "Desired";
-	case 3: return "Supported";
-	default: return "?";
-	} 
+    switch (id) {
+    case 1: return "Needed";
+    case 2: return "Desired";
+    case 3: return "Supported";
+    default: return "?";
+    } 
 }
 #endif
 
 PBoolean H460_FeatureSet::CreateFeatureSetPDU(H225_FeatureSet & fs, unsigned MessageID, PBoolean advertise)
 {
-	PTRACE(6,"H460\tCreate FeatureSet " << PTracePDU(MessageID) << " PDU");
-	
-	PBoolean buildPDU = FALSE;
+    PTRACE(6,"H460\tCreate FeatureSet " << PTracePDU(MessageID) << " PDU");
+    
+    PBoolean buildPDU = FALSE;
 
-	for (PINDEX i = 0; i < Features.GetSize(); i++) {    // Iterate thro the features
-	   H460_Feature & feat = Features.GetDataAt(i);
+    for (PINDEX i = 0; i < Features.GetSize(); i++) {    // Iterate thro the features
+       H460_Feature & feat = Features.GetDataAt(i);
 
         if (advertise != feat.FeatureAdvertised(MessageID))
              continue;
 
         PTRACE(6,"H460\tExamining " << feat.GetFeatureIDAsString());
-		PINDEX lastPos;
-		H225_FeatureDescriptor featdesc;
-		if (CreateFeaturePDU(feat,featdesc,MessageID)) {
+        PINDEX lastPos;
+        H225_FeatureDescriptor featdesc;
+        if (CreateFeaturePDU(feat,featdesc,MessageID)) {
 
 #if PTRACING
-		  PTRACE(6,"H460\tLoading Feature " << feat.GetFeatureIDAsString() << " as " 
+          PTRACE(6,"H460\tLoading Feature " << feat.GetFeatureIDAsString() << " as " 
             << featureType(feat.FeatureCategory) << " feature to " << PTracePDU(MessageID) 
-			<< " PDU\n" << featdesc );
+            << " PDU\n" << featdesc );
 #endif
 
 /// For some completely silly reason the ITU decided to send/receive H460 Messages in two places,
@@ -1315,54 +1315,54 @@ PBoolean H460_FeatureSet::CreateFeatureSetPDU(H225_FeatureSet & fs, unsigned Mes
 
 
       buildPDU = TRUE;
-	   switch (cat) {			// Add it to the correct feature list
-		   case H460_Feature::FeatureNeeded:
+       switch (cat) {            // Add it to the correct feature list
+           case H460_Feature::FeatureNeeded:
 
-			  if (featdesc.GetDataLength() > 0) {
-				if (!fs.HasOptionalField(H225_FeatureSet::e_neededFeatures))
-				    fs.IncludeOptionalField(H225_FeatureSet::e_neededFeatures);
+              if (featdesc.GetDataLength() > 0) {
+                if (!fs.HasOptionalField(H225_FeatureSet::e_neededFeatures))
+                    fs.IncludeOptionalField(H225_FeatureSet::e_neededFeatures);
 
                      H225_ArrayOf_FeatureDescriptor & fsn = fs.m_neededFeatures;
-						lastPos = fsn.GetSize();
-						fsn.SetSize(lastPos+1);
-						fsn[lastPos] = featdesc;
-			  } 
-			 break;
+                        lastPos = fsn.GetSize();
+                        fsn.SetSize(lastPos+1);
+                        fsn[lastPos] = featdesc;
+              } 
+             break;
 
-		   case H460_Feature::FeatureDesired:
+           case H460_Feature::FeatureDesired:
 
-			  if (featdesc.GetDataLength() > 0) {
-				if (!fs.HasOptionalField(H225_FeatureSet::e_desiredFeatures))
-				  fs.IncludeOptionalField(H225_FeatureSet::e_desiredFeatures);
+              if (featdesc.GetDataLength() > 0) {
+                if (!fs.HasOptionalField(H225_FeatureSet::e_desiredFeatures))
+                  fs.IncludeOptionalField(H225_FeatureSet::e_desiredFeatures);
 
                      H225_ArrayOf_FeatureDescriptor & fsd = fs.m_desiredFeatures;
-						lastPos = fsd.GetSize();
-						fsd.SetSize(lastPos+1);
-						fsd[lastPos] = featdesc;
-			  }
-			 break;
+                        lastPos = fsd.GetSize();
+                        fsd.SetSize(lastPos+1);
+                        fsd[lastPos] = featdesc;
+              }
+             break;
 
-		   case H460_Feature::FeatureSupported:
+           case H460_Feature::FeatureSupported:
 
-			  if (featdesc.GetDataLength() > 0) {
-				 if (!fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures))
-				   fs.IncludeOptionalField(H225_FeatureSet::e_supportedFeatures);
-				 
-					 H225_ArrayOf_FeatureDescriptor & fss = fs.m_supportedFeatures; 
-						lastPos = fss.GetSize();
-						fss.SetSize(lastPos+1);
-						fss[lastPos] = featdesc;
-			  }
-			 break;
-		  }
+              if (featdesc.GetDataLength() > 0) {
+                 if (!fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures))
+                   fs.IncludeOptionalField(H225_FeatureSet::e_supportedFeatures);
+                 
+                     H225_ArrayOf_FeatureDescriptor & fss = fs.m_supportedFeatures; 
+                        lastPos = fss.GetSize();
+                        fss.SetSize(lastPos+1);
+                        fss[lastPos] = featdesc;
+              }
+             break;
+          }
        }
-	}
+    }
 
 #if PTRACING
-	PTRACE(6,"H460\tFeatureSet for " << PTracePDU(MessageID) << " PDU\n" << fs);
+    PTRACE(6,"H460\tFeatureSet for " << PTracePDU(MessageID) << " PDU\n" << fs);
 #endif
 
-	return buildPDU;
+    return buildPDU;
 }
    
 void H460_FeatureSet::ReadFeatureSetPDU(const H225_FeatureSet & fs, unsigned MessageID)
@@ -1372,117 +1372,117 @@ PTRACE(6,"H460\tRead FeatureSet " << PTracePDU(MessageID) << " PDU");
    
 // Generate Common Set of Features.
    switch (MessageID) {
-	 case H460_MessageType::e_gatekeeperRequest:
-	 case H460_MessageType::e_gatekeeperConfirm:
+     case H460_MessageType::e_gatekeeperRequest:
+     case H460_MessageType::e_gatekeeperConfirm:
      case H460_MessageType::e_registrationRequest:
      case H460_MessageType::e_registrationConfirm: 
-	 case H460_MessageType::e_setup:
-		 ProcessFirstPDU(fs);
-		 break;
-	 default:
-		 break;
-   } 	
+     case H460_MessageType::e_setup:
+         ProcessFirstPDU(fs);
+         break;
+     default:
+         break;
+   }     
 
-	  H460_FeatureID ID;
+      H460_FeatureID ID;
 
-	  if (fs.HasOptionalField(H225_FeatureSet::e_neededFeatures)) {
-	    const H225_ArrayOf_FeatureDescriptor & fsn = fs.m_neededFeatures;
-		  for (PINDEX i=0; i < fsn.GetSize(); i++) {
-			  H225_FeatureDescriptor & fd = fsn[i];
-			  ID = GetFeatureIDPDU(fd);
+      if (fs.HasOptionalField(H225_FeatureSet::e_neededFeatures)) {
+        const H225_ArrayOf_FeatureDescriptor & fsn = fs.m_neededFeatures;
+          for (PINDEX i=0; i < fsn.GetSize(); i++) {
+              H225_FeatureDescriptor & fd = fsn[i];
+              ID = GetFeatureIDPDU(fd);
 
-			  if (HasFeature(ID))
-					ReadFeaturePDU(Features[ID],fd,MessageID);
-		  }
-	  }
+              if (HasFeature(ID))
+                    ReadFeaturePDU(Features[ID],fd,MessageID);
+          }
+      }
 
-	  if (fs.HasOptionalField(H225_FeatureSet::e_desiredFeatures)) {
-	    const H225_ArrayOf_FeatureDescriptor & fsd = fs.m_desiredFeatures;
-		  for (PINDEX i=0; i < fsd.GetSize(); i++) {
-			  H225_FeatureDescriptor & fd = fsd[i];
-			  ID = GetFeatureIDPDU(fd);
+      if (fs.HasOptionalField(H225_FeatureSet::e_desiredFeatures)) {
+        const H225_ArrayOf_FeatureDescriptor & fsd = fs.m_desiredFeatures;
+          for (PINDEX i=0; i < fsd.GetSize(); i++) {
+              H225_FeatureDescriptor & fd = fsd[i];
+              ID = GetFeatureIDPDU(fd);
 
-			  if (HasFeature(ID))
-					ReadFeaturePDU(Features[ID],fd,MessageID);
-		  }
-	  }
+              if (HasFeature(ID))
+                    ReadFeaturePDU(Features[ID],fd,MessageID);
+          }
+      }
 
-	  if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
-	    const H225_ArrayOf_FeatureDescriptor & fss = fs.m_supportedFeatures; 
-		  for (PINDEX i=0; i < fss.GetSize(); i++) {
-			  H225_FeatureDescriptor & fd = fss[i];	
-			  ID = GetFeatureIDPDU(fd);
+      if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
+        const H225_ArrayOf_FeatureDescriptor & fss = fs.m_supportedFeatures; 
+          for (PINDEX i=0; i < fss.GetSize(); i++) {
+              H225_FeatureDescriptor & fd = fss[i];    
+              ID = GetFeatureIDPDU(fd);
 
-			  if (HasFeature(ID))
-					ReadFeaturePDU(Features[ID],fd,MessageID);
-		  }
-	  }
+              if (HasFeature(ID))
+                    ReadFeaturePDU(Features[ID],fd,MessageID);
+          }
+      }
 
-	  if (MessageID == H460_MessageType::e_connect)
-				RemoveUnCommonFeatures();
+      if (MessageID == H460_MessageType::e_connect)
+                RemoveUnCommonFeatures();
 }
 
 PBoolean H460_FeatureSet::SupportNonCallService(const H225_FeatureSet & fs)
 {
-	H460_FeatureID ID;
+    H460_FeatureID ID;
 
-	  if (fs.HasOptionalField(H225_FeatureSet::e_neededFeatures)) {
-	    const H225_ArrayOf_FeatureDescriptor & fsn = fs.m_neededFeatures;
-		  for (PINDEX i=0; i < fsn.GetSize(); i++) {
-			  H225_FeatureDescriptor & fd = fsn[i];
-			  ID = GetFeatureIDPDU(fd);
-
-			  return SupportNonCallService(ID);
-		  }
-	  }
-
-	  if (fs.HasOptionalField(H225_FeatureSet::e_desiredFeatures)) {
-	    const H225_ArrayOf_FeatureDescriptor & fsd = fs.m_desiredFeatures;
-		  for (PINDEX i=0; i < fsd.GetSize(); i++) {
-			  H225_FeatureDescriptor & fd = fsd[i];
-			  ID = GetFeatureIDPDU(fd);
+      if (fs.HasOptionalField(H225_FeatureSet::e_neededFeatures)) {
+        const H225_ArrayOf_FeatureDescriptor & fsn = fs.m_neededFeatures;
+          for (PINDEX i=0; i < fsn.GetSize(); i++) {
+              H225_FeatureDescriptor & fd = fsn[i];
+              ID = GetFeatureIDPDU(fd);
 
               return SupportNonCallService(ID);
-		  }
-	  }
+          }
+      }
 
-	  if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
-	    const H225_ArrayOf_FeatureDescriptor & fss = fs.m_supportedFeatures; 
-		  for (PINDEX i=0; i < fss.GetSize(); i++) {
-			  H225_FeatureDescriptor & fd = fss[i];	
-			  ID = GetFeatureIDPDU(fd);
+      if (fs.HasOptionalField(H225_FeatureSet::e_desiredFeatures)) {
+        const H225_ArrayOf_FeatureDescriptor & fsd = fs.m_desiredFeatures;
+          for (PINDEX i=0; i < fsd.GetSize(); i++) {
+              H225_FeatureDescriptor & fd = fsd[i];
+              ID = GetFeatureIDPDU(fd);
 
-			  return SupportNonCallService(ID);
-		  }
-	  }
+              return SupportNonCallService(ID);
+          }
+      }
 
-	  return false;
+      if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
+        const H225_ArrayOf_FeatureDescriptor & fss = fs.m_supportedFeatures; 
+          for (PINDEX i=0; i < fss.GetSize(); i++) {
+              H225_FeatureDescriptor & fd = fss[i];    
+              ID = GetFeatureIDPDU(fd);
+
+              return SupportNonCallService(ID);
+          }
+      }
+
+      return false;
 }
 
 H460_FeatureID H460_FeatureSet::GetFeatureIDPDU(H225_FeatureDescriptor & pdu)
 {
-	
-	H460_FeatureID fid;
-	H225_GenericIdentifier & id = pdu.m_id;
+    
+    H460_FeatureID fid;
+    H225_GenericIdentifier & id = pdu.m_id;
 
-	  if ((id.GetTag() == H225_GenericIdentifier::e_standard)) {
-		  PASN_Integer & sid = id;
-		  unsigned iid = sid.GetValue();
-		  fid = H460_FeatureID(iid);
-	  } 
-	  
-	  if ((id.GetTag() == H225_GenericIdentifier::e_oid)) {
-		  PASN_ObjectId & oid = id;
-		  OpalOID  & aid = (OpalOID &)oid;
-		  fid = H460_FeatureID(aid);
+      if ((id.GetTag() == H225_GenericIdentifier::e_standard)) {
+          PASN_Integer & sid = id;
+          unsigned iid = sid.GetValue();
+          fid = H460_FeatureID(iid);
+      } 
+      
+      if ((id.GetTag() == H225_GenericIdentifier::e_oid)) {
+          PASN_ObjectId & oid = id;
+          OpalOID  & aid = (OpalOID &)oid;
+          fid = H460_FeatureID(aid);
 
-	  }
-	
-	  if ((id.GetTag() == H225_GenericIdentifier::e_nonStandard)) {
-		  H225_GloballyUniqueID & uns = id;
-		  PString uid = uns.AsString();
-		  fid = H460_FeatureID(uid);
-	  }
+      }
+    
+      if ((id.GetTag() == H225_GenericIdentifier::e_nonStandard)) {
+          H225_GloballyUniqueID & uns = id;
+          PString uid = uns.AsString();
+          fid = H460_FeatureID(uid);
+      }
 
     return fid;
 }
@@ -1492,260 +1492,260 @@ PBoolean H460_FeatureSet::CreateFeaturePDU(H460_Feature & Feat, H225_FeatureDesc
 
 PTRACE(6,"H460\tEncoding " << PTracePDU(MessageID) << " PDU for " << Feat.GetFeatureIDAsString() );
 
-	switch (MessageID) {
+    switch (MessageID) {
       case H460_MessageType::e_gatekeeperRequest:
-			return Feat.OnSendGatekeeperRequest(pdu);
+            return Feat.OnSendGatekeeperRequest(pdu);
 
       case H460_MessageType::e_gatekeeperConfirm:
-			return Feat.OnSendGatekeeperConfirm(pdu);
+            return Feat.OnSendGatekeeperConfirm(pdu);
 
       case H460_MessageType::e_gatekeeperReject:
-			return Feat.OnSendGatekeeperReject(pdu);
+            return Feat.OnSendGatekeeperReject(pdu);
 
       case H460_MessageType::e_registrationRequest:
-			return Feat.OnSendRegistrationRequest(pdu);
+            return Feat.OnSendRegistrationRequest(pdu);
 
       case H460_MessageType::e_registrationConfirm:
-			return Feat.OnSendRegistrationConfirm(pdu);
+            return Feat.OnSendRegistrationConfirm(pdu);
 
       case H460_MessageType::e_registrationReject:
-			return Feat.OnSendRegistrationReject(pdu);
+            return Feat.OnSendRegistrationReject(pdu);
 
       case H460_MessageType::e_admissionRequest:
-			return Feat.OnSendAdmissionRequest(pdu);
+            return Feat.OnSendAdmissionRequest(pdu);
 
       case H460_MessageType::e_admissionConfirm:
-			return Feat.OnSendAdmissionConfirm(pdu);
+            return Feat.OnSendAdmissionConfirm(pdu);
 
       case H460_MessageType::e_admissionReject:
-			return Feat.OnSendAdmissionReject(pdu);
+            return Feat.OnSendAdmissionReject(pdu);
 
       case H460_MessageType::e_locationRequest:
-			return Feat.OnSendLocationRequest(pdu);
+            return Feat.OnSendLocationRequest(pdu);
 
       case H460_MessageType::e_locationConfirm:
-			return Feat.OnSendLocationConfirm(pdu);
+            return Feat.OnSendLocationConfirm(pdu);
 
       case H460_MessageType::e_locationReject:
-			return Feat.OnSendLocationReject(pdu);
+            return Feat.OnSendLocationReject(pdu);
 
       case H460_MessageType::e_nonStandardMessage:
-			return Feat.OnSendNonStandardMessage(pdu);
+            return Feat.OnSendNonStandardMessage(pdu);
 
       case H460_MessageType::e_serviceControlIndication:
-			return Feat.OnSendServiceControlIndication(pdu);
+            return Feat.OnSendServiceControlIndication(pdu);
 
       case H460_MessageType::e_serviceControlResponse:
-			return Feat.OnSendServiceControlResponse(pdu);
+            return Feat.OnSendServiceControlResponse(pdu);
 
-	  case H460_MessageType::e_unregistrationRequest:
-		       Feat.OnSendUnregistrationRequest(pdu);
+      case H460_MessageType::e_unregistrationRequest:
+               Feat.OnSendUnregistrationRequest(pdu);
                break;
 
-	  case H460_MessageType::e_inforequest:
-		   return Feat.OnSendInfoRequestMessage(pdu);
+      case H460_MessageType::e_inforequest:
+           return Feat.OnSendInfoRequestMessage(pdu);
 
-	  case H460_MessageType::e_inforequestresponse:
-		   return Feat.OnSendInfoRequestResponseMessage(pdu);
+      case H460_MessageType::e_inforequestresponse:
+           return Feat.OnSendInfoRequestResponseMessage(pdu);
 
-	  case H460_MessageType::e_disengagerequest:
-		   return Feat.OnSendDisengagementRequestMessage(pdu);
+      case H460_MessageType::e_disengagerequest:
+           return Feat.OnSendDisengagementRequestMessage(pdu);
 
-	  case H460_MessageType::e_disengageconfirm:
+      case H460_MessageType::e_disengageconfirm:
            return Feat.OnSendDisengagementConfirmMessage(pdu);
 
 /*
-	  case H460_MessageType::e_Endpoint:
-	        return Feat.OnSendEndpoint(pdu);
+      case H460_MessageType::e_Endpoint:
+            return Feat.OnSendEndpoint(pdu);
 */
-	  case H460_MessageType::e_setup:
-		    return Feat.OnSendSetup_UUIE(pdu);
+      case H460_MessageType::e_setup:
+            return Feat.OnSendSetup_UUIE(pdu);
 
-	  case H460_MessageType::e_alerting:
-		    return Feat.OnSendAlerting_UUIE(pdu);
+      case H460_MessageType::e_alerting:
+            return Feat.OnSendAlerting_UUIE(pdu);
 
-	  case H460_MessageType::e_callProceeding:
-		    return Feat.OnSendCallProceeding_UUIE(pdu);
+      case H460_MessageType::e_callProceeding:
+            return Feat.OnSendCallProceeding_UUIE(pdu);
 
-	  case H460_MessageType::e_connect:
-		    return Feat.OnSendCallConnect_UUIE(pdu);
+      case H460_MessageType::e_connect:
+            return Feat.OnSendCallConnect_UUIE(pdu);
 
-	  case H460_MessageType::e_facility:
-			return Feat.OnSendFacility_UUIE(pdu);
-	  
-	  case H460_MessageType::e_releaseComplete:
-		    return Feat.OnSendReleaseComplete_UUIE(pdu);
+      case H460_MessageType::e_facility:
+            return Feat.OnSendFacility_UUIE(pdu);
+      
+      case H460_MessageType::e_releaseComplete:
+            return Feat.OnSendReleaseComplete_UUIE(pdu);
 
-	  default:
-		    return Feat.OnSendUnAllocatedPDU(pdu);
-	}
+      default:
+            return Feat.OnSendUnAllocatedPDU(pdu);
+    }
 
-	return FALSE;
+    return FALSE;
 }
 
 void H460_FeatureSet::ReadFeaturePDU(H460_Feature & Feat, const H225_FeatureDescriptor & pdu,unsigned MessageID)
 {
 
-PTRACE(6,"H460\tDecoding " << PTracePDU(MessageID) << " PDU for " << Feat.GetFeatureIDAsString() );	
+PTRACE(6,"H460\tDecoding " << PTracePDU(MessageID) << " PDU for " << Feat.GetFeatureIDAsString() );    
 
-	switch (MessageID) {
+    switch (MessageID) {
       case H460_MessageType::e_gatekeeperRequest:
-		       Feat.OnReceiveGatekeeperRequest(pdu);
-			   break;
+               Feat.OnReceiveGatekeeperRequest(pdu);
+               break;
 
       case H460_MessageType::e_gatekeeperConfirm:
-		       Feat.OnReceiveGatekeeperConfirm(pdu);
-			   break;
+               Feat.OnReceiveGatekeeperConfirm(pdu);
+               break;
       case H460_MessageType::e_gatekeeperReject:
-		       Feat.OnReceiveGatekeeperReject(pdu);
+               Feat.OnReceiveGatekeeperReject(pdu);
                break;
       case H460_MessageType::e_registrationRequest:
-		       Feat.OnReceiveRegistrationRequest(pdu);
+               Feat.OnReceiveRegistrationRequest(pdu);
                break;
       case H460_MessageType::e_registrationConfirm:
-		       Feat.OnReceiveRegistrationConfirm(pdu);
+               Feat.OnReceiveRegistrationConfirm(pdu);
                break;
       case H460_MessageType::e_registrationReject:
-		       Feat.OnReceiveRegistrationReject(pdu);
+               Feat.OnReceiveRegistrationReject(pdu);
                break;
       case H460_MessageType::e_admissionRequest:
-		       Feat.OnReceiveAdmissionRequest(pdu);
+               Feat.OnReceiveAdmissionRequest(pdu);
                break;
       case H460_MessageType::e_admissionConfirm:
-		       Feat.OnReceiveAdmissionConfirm(pdu);
+               Feat.OnReceiveAdmissionConfirm(pdu);
                break;
       case H460_MessageType::e_admissionReject:
-		       Feat.OnReceiveAdmissionReject(pdu);
+               Feat.OnReceiveAdmissionReject(pdu);
                break;
       case H460_MessageType::e_locationRequest:
-		       Feat.OnReceiveLocationRequest(pdu);
+               Feat.OnReceiveLocationRequest(pdu);
                break;
       case H460_MessageType::e_locationConfirm:
-		       Feat.OnReceiveLocationConfirm(pdu);
+               Feat.OnReceiveLocationConfirm(pdu);
                break;
       case H460_MessageType::e_locationReject:
-		       Feat.OnReceiveLocationReject(pdu);
+               Feat.OnReceiveLocationReject(pdu);
                break;
       case H460_MessageType::e_nonStandardMessage:
-		       Feat.OnReceiveNonStandardMessage(pdu);
+               Feat.OnReceiveNonStandardMessage(pdu);
                break;
       case H460_MessageType::e_serviceControlIndication:
-		       Feat.OnReceiveServiceControlIndication(pdu);
+               Feat.OnReceiveServiceControlIndication(pdu);
                break;
       case H460_MessageType::e_serviceControlResponse:
-		       Feat.OnReceiveServiceControlResponse(pdu);
+               Feat.OnReceiveServiceControlResponse(pdu);
                break;
 
-	  case H460_MessageType::e_unregistrationRequest:
-		       Feat.OnReceiveUnregistrationRequest(pdu);
+      case H460_MessageType::e_unregistrationRequest:
+               Feat.OnReceiveUnregistrationRequest(pdu);
                break;
 
-	  case H460_MessageType::e_inforequest:
-		       Feat.OnReceiveInfoRequestMessage(pdu);
+      case H460_MessageType::e_inforequest:
+               Feat.OnReceiveInfoRequestMessage(pdu);
                break;
 
-	  case H460_MessageType::e_inforequestresponse:
-		       Feat.OnReceiveInfoRequestResponseMessage(pdu);
-		       break;
+      case H460_MessageType::e_inforequestresponse:
+               Feat.OnReceiveInfoRequestResponseMessage(pdu);
+               break;
 
-	  case H460_MessageType::e_disengagerequest:
-		       Feat.OnReceiveDisengagementRequestMessage(pdu);
-		       break;
+      case H460_MessageType::e_disengagerequest:
+               Feat.OnReceiveDisengagementRequestMessage(pdu);
+               break;
 
-	  case H460_MessageType::e_disengageconfirm:
+      case H460_MessageType::e_disengageconfirm:
                Feat.OnReceiveDisengagementConfirmMessage(pdu);
-		       break;
+               break;
 
-//	  case H460_MessageType::e_Endpoint:
-//		return Feat.OnReceiveEndpoint(pdu);
+//      case H460_MessageType::e_Endpoint:
+//        return Feat.OnReceiveEndpoint(pdu);
 
-	  case H460_MessageType::e_setup:
-		       Feat.OnReceiveSetup_UUIE(pdu);
+      case H460_MessageType::e_setup:
+               Feat.OnReceiveSetup_UUIE(pdu);
                break;
-	  case H460_MessageType::e_alerting:
-		       Feat.OnReceiveAlerting_UUIE(pdu);
+      case H460_MessageType::e_alerting:
+               Feat.OnReceiveAlerting_UUIE(pdu);
                break;
-	  case H460_MessageType::e_callProceeding:
-		       Feat.OnReceiveCallProceeding_UUIE(pdu);
+      case H460_MessageType::e_callProceeding:
+               Feat.OnReceiveCallProceeding_UUIE(pdu);
                break;
-	  case H460_MessageType::e_connect:
-		       Feat.OnReceiveCallConnect_UUIE(pdu);
+      case H460_MessageType::e_connect:
+               Feat.OnReceiveCallConnect_UUIE(pdu);
                break;
-	  case H460_MessageType::e_facility:
-		       Feat.OnReceiveFacility_UUIE(pdu);
+      case H460_MessageType::e_facility:
+               Feat.OnReceiveFacility_UUIE(pdu);
                break;
-	  case H460_MessageType::e_releaseComplete :
-		       Feat.OnReceiveReleaseComplete_UUIE(pdu);
+      case H460_MessageType::e_releaseComplete :
+               Feat.OnReceiveReleaseComplete_UUIE(pdu);
                break;
       default:
                Feat.OnReceivedUnAllocatedPDU(pdu);
-	}
+    }
 }
 
 PString H460_FeatureSet::PTracePDU(PINDEX id) const
 {
-	switch (id) {
-		case H460_MessageType::e_gatekeeperRequest : return "GK Request";
-		case H460_MessageType::e_gatekeeperConfirm : return "GK Confirm"; 
-		case H460_MessageType::e_gatekeeperReject : return "GK Reject";
-		case H460_MessageType::e_registrationRequest : return  "Reg Request";
-		case H460_MessageType::e_registrationConfirm : return  "Reg Confirm"; 
-		case H460_MessageType::e_registrationReject : return  "Reg Reject";
-		case H460_MessageType::e_admissionRequest : return "Adm Reqest";
-		case H460_MessageType::e_admissionConfirm : return "Adm Confirm";
-		case H460_MessageType::e_admissionReject : return  "Adm Reject";
-		case H460_MessageType::e_locationRequest : return  "Loc Request";
-		case H460_MessageType::e_locationConfirm : return "Loc Confirm";
-		case H460_MessageType::e_locationReject : return "Loc Reject";
-		case H460_MessageType::e_nonStandardMessage : return  "NonStd";
-		case H460_MessageType::e_serviceControlIndication :return "Ctrl Indication";
-		case H460_MessageType::e_serviceControlResponse :return "Ctrl Response";
-		case H460_MessageType::e_unregistrationRequest:return "Unreg Request";
-		case H460_MessageType::e_inforequest:return "Info Request";
-	    case H460_MessageType::e_inforequestresponse:return "Info Response";
-	    case H460_MessageType::e_disengagerequest:return "Dis Request";
-	    case H460_MessageType::e_disengageconfirm:return "Dis Confirm";
-//		case H460_MessageType::e_Endpoint :return "Endpoint";
-		case H460_MessageType::e_setup :return "Setup";
-		case H460_MessageType::e_alerting :return "Alerting";
-		case H460_MessageType::e_callProceeding :return "CallProceed";
-		case H460_MessageType::e_connect :return "Connect";
-		case H460_MessageType::e_facility :return "Facility";
-		case H460_MessageType::e_releaseComplete : return "ReleaseComplete";
-		default: return "?";
-	}
+    switch (id) {
+        case H460_MessageType::e_gatekeeperRequest : return "GK Request";
+        case H460_MessageType::e_gatekeeperConfirm : return "GK Confirm"; 
+        case H460_MessageType::e_gatekeeperReject : return "GK Reject";
+        case H460_MessageType::e_registrationRequest : return  "Reg Request";
+        case H460_MessageType::e_registrationConfirm : return  "Reg Confirm"; 
+        case H460_MessageType::e_registrationReject : return  "Reg Reject";
+        case H460_MessageType::e_admissionRequest : return "Adm Reqest";
+        case H460_MessageType::e_admissionConfirm : return "Adm Confirm";
+        case H460_MessageType::e_admissionReject : return  "Adm Reject";
+        case H460_MessageType::e_locationRequest : return  "Loc Request";
+        case H460_MessageType::e_locationConfirm : return "Loc Confirm";
+        case H460_MessageType::e_locationReject : return "Loc Reject";
+        case H460_MessageType::e_nonStandardMessage : return  "NonStd";
+        case H460_MessageType::e_serviceControlIndication :return "Ctrl Indication";
+        case H460_MessageType::e_serviceControlResponse :return "Ctrl Response";
+        case H460_MessageType::e_unregistrationRequest:return "Unreg Request";
+        case H460_MessageType::e_inforequest:return "Info Request";
+        case H460_MessageType::e_inforequestresponse:return "Info Response";
+        case H460_MessageType::e_disengagerequest:return "Dis Request";
+        case H460_MessageType::e_disengageconfirm:return "Dis Confirm";
+//        case H460_MessageType::e_Endpoint :return "Endpoint";
+        case H460_MessageType::e_setup :return "Setup";
+        case H460_MessageType::e_alerting :return "Alerting";
+        case H460_MessageType::e_callProceeding :return "CallProceed";
+        case H460_MessageType::e_connect :return "Connect";
+        case H460_MessageType::e_facility :return "Facility";
+        case H460_MessageType::e_releaseComplete : return "ReleaseComplete";
+        default: return "?";
+    }
 }
 
 void H460_FeatureSet::DisableAllFeatures(int msgtype)
 {
-	if (Features.GetSize() > 0) {
-		PTRACE(4,"H460\tRemoving all H.460 Features remote/Gk expected to advertise " << PTracePDU(msgtype));
+    if (Features.GetSize() > 0) {
+        PTRACE(4,"H460\tRemoving all H.460 Features remote/Gk expected to advertise " << PTracePDU(msgtype));
         std::list<H460_FeatureID> removelist;
-	    for (PINDEX i =0; i < Features.GetSize(); i++) {
-	       H460_Feature & feat = Features.GetDataAt(i);
+        for (PINDEX i =0; i < Features.GetSize(); i++) {
+           H460_Feature & feat = Features.GetDataAt(i);
            if (feat.FeatureAdvertised(msgtype)) {
                PTRACE(4,"H460\tRemoving " << feat.GetFeatureIDAsString());
                removelist.push_back(feat.GetFeatureID());
            } else {
                PTRACE(4,"H460\tPreserving " << feat.GetFeatureIDAsString());
            }
-	    }
+        }
 
         while (!removelist.empty()) {
-			Features.RemoveAt(removelist.front());
-			removelist.pop_front();
+            Features.RemoveAt(removelist.front());
+            removelist.pop_front();
         }
-	}
+    }
 }
 
 void H460_FeatureSet::ReceiveFeature(unsigned id, const H225_FeatureSet & Message)
 {
-	ReadFeatureSetPDU(Message,id);
+    ReadFeatureSetPDU(Message,id);
 }
 
 PBoolean H460_FeatureSet::SendFeature(unsigned id, H225_FeatureSet & Message, PBoolean advertise)
 {
-	return CreateFeatureSetPDU(Message,id, advertise);
+    return CreateFeatureSetPDU(Message,id, advertise);
 }
 
 void H460_FeatureSet::AttachEndPoint(H323EndPoint * _ep) 
@@ -1761,30 +1761,30 @@ void H460_FeatureSet::AttachBaseFeatureSet(H460_FeatureSet * _baseSet)
 
 PBoolean H460_FeatureSet::HasFeature(const H460_FeatureID & id)
 {
-	for (PINDEX i =0; i < Features.GetSize(); i++) {
-	   H460_Feature & feat = Features.GetDataAt(i);
-		if (feat.GetFeatureID() == id) {
-			return TRUE;
-		}
-	}
-	return FALSE;
+    for (PINDEX i =0; i < Features.GetSize(); i++) {
+       H460_Feature & feat = Features.GetDataAt(i);
+        if (feat.GetFeatureID() == id) {
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 PBoolean H460_FeatureSet::SupportNonCallService(const H460_FeatureID & id)
 {
-	for (PINDEX i =0; i < Features.GetSize(); i++) {
-	   H460_Feature & feat = Features.GetDataAt(i);
-		if (feat.GetFeatureID() == id) {
-			return feat.SupportNonCallService();
-		}
-	}
-	return FALSE;
+    for (PINDEX i =0; i < Features.GetSize(); i++) {
+       H460_Feature & feat = Features.GetDataAt(i);
+        if (feat.GetFeatureID() == id) {
+            return feat.SupportNonCallService();
+        }
+    }
+    return FALSE;
 }
 
 H460_Feature * H460_FeatureSet::GetFeature(const H460_FeatureID & id)
 {
     if (HasFeature(id))
-	   return &Features[id];
+       return &Features[id];
     else
        return NULL;
 }

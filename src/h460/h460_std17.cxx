@@ -176,15 +176,15 @@ H460_FeatureStd17::~H460_FeatureStd17()
 
 void H460_FeatureStd17::AttachEndPoint(H323EndPoint * _ep)
 {
-	if (!EP)
-	   EP = _ep;
+    if (!EP)
+       EP = _ep;
 }
 
 void H460_FeatureStd17::AttachConnection(H323Connection * _con)
 {
-	CON = _con;
-	if (!EP)
-		EP = &CON->GetEndPoint();
+    CON = _con;
+    if (!EP)
+        EP = &CON->GetEndPoint();
 
 }
 
@@ -217,79 +217,79 @@ PBoolean H460_FeatureStd17::Initialise(const PString & remoteAddr)
 
 PBoolean H460_FeatureStd17::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu)
 {
-	H460_FeatureStd feat = H460_FeatureStd(17); 
-	pdu = feat;
-	return true;
+    H460_FeatureStd feat = H460_FeatureStd(17); 
+    pdu = feat;
+    return true;
 }
 
 void H460_FeatureStd17::OnReceiveGatekeeperConfirm(const H225_FeatureDescriptor & /*pdu*/)
 {
-	isEnabled = true;
+    isEnabled = true;
 }
 
 PBoolean H460_FeatureStd17::OnSendRegistrationRequest(H225_FeatureDescriptor & pdu)
 {
-	H460_FeatureStd feat = H460_FeatureStd(17); 
-	pdu = feat;
-	return true;
+    H460_FeatureStd feat = H460_FeatureStd(17); 
+    pdu = feat;
+    return true;
 }
 
 void H460_FeatureStd17::OnReceiveRegistrationConfirm(const H225_FeatureDescriptor & /*pdu*/)
 {
-	isEnabled = true;
+    isEnabled = true;
 }
 
 PBoolean H460_FeatureStd17::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
 {
     if (isEnabled) {
-	    H460_FeatureStd feat = H460_FeatureStd(17); 
-	    pdu = feat;
-	    return true; 
+        H460_FeatureStd feat = H460_FeatureStd(17); 
+        pdu = feat;
+        return true; 
     }
     return false;
 }
 
 void H460_FeatureStd17::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
 {
-	isEnabled = true;
+    isEnabled = true;
 }
 
 PBoolean H460_FeatureStd17::OnSendCallProceeding_UUIE(H225_FeatureDescriptor & pdu)
 {
-	H460_FeatureStd feat = H460_FeatureStd(17); 
-	pdu = feat;
-	return true; 
+    H460_FeatureStd feat = H460_FeatureStd(17); 
+    pdu = feat;
+    return true; 
 }
 
 void H460_FeatureStd17::OnReceiveCallProceeding_UUIE(const H225_FeatureDescriptor & pdu)
 {
-	isEnabled = true;
+    isEnabled = true;
 }
 
 PBoolean H460_FeatureStd17::OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu)
 {
-	H460_FeatureStd feat = H460_FeatureStd(17); 
-	pdu = feat;
-	return true; 
+    H460_FeatureStd feat = H460_FeatureStd(17); 
+    pdu = feat;
+    return true; 
 }
 
 void H460_FeatureStd17::OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pdu)
 {
-	if (!isEnabled)
-		isEnabled = true;
+    if (!isEnabled)
+        isEnabled = true;
 }
 
 PBoolean H460_FeatureStd17::OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu)
 {
-	H460_FeatureStd feat = H460_FeatureStd(17); 
-	pdu = feat;
-	return true; 
+    H460_FeatureStd feat = H460_FeatureStd(17); 
+    pdu = feat;
+    return true; 
 }
 
 void H460_FeatureStd17::OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor & pdu)
 {
-	if (!isEnabled)
-		isEnabled = true;
+    if (!isEnabled)
+        isEnabled = true;
 }
 
 PBoolean H460_FeatureStd17::InitialiseTunnel(const H323TransportAddress & remoteAddr)
@@ -309,12 +309,12 @@ class H46017TransportThread : public PThread
    PCLASSINFO(H46017TransportThread, PThread)
 
    public:
-	H46017TransportThread(H323EndPoint & endpoint, H46017Transport * transport);
+    H46017TransportThread(H323EndPoint & endpoint, H46017Transport * transport);
 
    protected:
-	void Main();
+    void Main();
 
-	H46017Transport * transport;
+    H46017Transport * transport;
 
 };
 
@@ -338,25 +338,25 @@ void H46017TransportThread::Main()
   PBoolean ret = TRUE;
   while ((transport->IsOpen()) && (!transport->CloseTransport())) {
 
-	  ret = transport->HandleH46017SignallingChannelPDU(this);
+      ret = transport->HandleH46017SignallingChannelPDU(this);
 
-	  if (!ret && transport->CloseTransport()) {  // Closing down Instruction
+      if (!ret && transport->CloseTransport()) {  // Closing down Instruction
           PTRACE(3, "H46017\tShutting down H46017 Thread");
           transport->ConnectionLost(TRUE);
 
-	  } else if (!ret) {   // We have a socket failure wait 1 sec and try again.
+      } else if (!ret) {   // We have a socket failure wait 1 sec and try again.
          PTRACE(3, "H46017\tConnection Lost! Retrying Connection..");
          transport->ConnectionLost(TRUE);
 
-	    if (transport->CloseTransport()) {
+        if (transport->CloseTransport()) {
             PTRACE(3, "H46017\tConnection Lost");
             break;
         } else {
             PTRACE(3, "H46017\tConnection ReEstablished");
-	        transport->ConnectionLost(FALSE);
-            ret = TRUE;			// Signal that the connection has been ReEstablished.
+            transport->ConnectionLost(FALSE);
+            ret = TRUE;            // Signal that the connection has been ReEstablished.
         }
-	  } 
+      } 
   }
 
   PTRACE(3, "H46017\tTransport Closed");
@@ -367,29 +367,29 @@ void H46017TransportThread::Main()
 
 
 H46017Transport::H46017Transport(H323EndPoint & endpoint,
-				                 H46017Handler * feat
-				)	
+                                 H46017Handler * feat
+                )    
    : H323TransportTCP(endpoint), con(NULL), Feature(feat)
 {
-	ReadTimeOut = PMaxTimeInterval;
-	isConnected = FALSE;
-	closeTransport = FALSE;
-	remoteShutDown = FALSE;
+    ReadTimeOut = PMaxTimeInterval;
+    isConnected = FALSE;
+    closeTransport = FALSE;
+    remoteShutDown = FALSE;
 
     m_socketWrite = PThread::Create(PCREATE_NOTIFIER(SocketWrite), 0, PThread::AutoDeleteThread);
 }
 
 H46017Transport::~H46017Transport()
 {
-	Close();
+    Close();
 }
 
 static PBoolean FindH46017RAS(const H225_H323_UU_PDU & pdu, PBYTEArray & ras)
 {
     H225_GenericData fid = H460_FeatureStd(17);
     if (pdu.HasOptionalField(H225_H323_UU_PDU::e_genericData)) {
-	   const H225_ArrayOf_GenericData & data = pdu.m_genericData;
-	    for (PINDEX i=0; i < data.GetSize(); i++) {
+       const H225_ArrayOf_GenericData & data = pdu.m_genericData;
+        for (PINDEX i=0; i < data.GetSize(); i++) {
             if (fid.m_id == data[i].m_id) {
                H460_Feature feat((const H225_FeatureDescriptor &)data[i]);
                if (feat.HasFeatureParameter(1)) {
@@ -398,7 +398,7 @@ static PBoolean FindH46017RAS(const H225_H323_UU_PDU & pdu, PBYTEArray & ras)
                    return true;
                }
             }
-	    }
+        }
     }
     return false;
 }
@@ -434,7 +434,7 @@ PBoolean H46017Transport::WriteRasPDU(const PBYTEArray & pdu)
 PBoolean H46017Transport::HandleH46017RAS(const H323SignalPDU & pdu)
 {
     PBYTEArray ras;
-	if ((pdu.GetQ931().GetMessageType() == Q931::FacilityMsg) &&
+    if ((pdu.GetQ931().GetMessageType() == Q931::FacilityMsg) &&
                            FindH46017RAS(pdu.m_h323_uu_pdu,ras)) {
        H46017RasTransport * rasTransport = Feature->GetRasTransport();
        return rasTransport->ReceivedPDU(ras);
@@ -446,18 +446,18 @@ PBoolean H46017Transport::HandleH46017SignallingSocket(H323SignalPDU & pdu)
 {
   for (;;) {
 
-	  if (!IsOpen())
-		  return false;
+      if (!IsOpen())
+          return false;
 
-	  H323SignalPDU rpdu;
-	  if (!rpdu.Read(*this)) { 
+      H323SignalPDU rpdu;
+      if (!rpdu.Read(*this)) { 
             PTRACE(3, "H46017\tSocket Read Failure");
             if (GetErrorNumber(PChannel::LastReadError) == 0) {
               PTRACE(3, "H46017\tRemote SHUT DOWN or Intermediary Shutdown!");
               remoteShutDown = TRUE;
             }
             return FALSE;
-	  } else {
+      } else {
           // Inspect the signalling message to see if RAS
           if (HandleH46017RAS(rpdu)) 
               continue;
@@ -465,7 +465,7 @@ PBoolean H46017Transport::HandleH46017SignallingSocket(H323SignalPDU & pdu)
           // return if a call is starting
           pdu = rpdu;
           return TRUE;
-	  }
+      }
   }
 }
 
@@ -489,36 +489,36 @@ PBoolean H46017Transport::HandleH46017SignallingChannelPDU(PThread * thread)
   PString token = endpoint.BuildConnectionToken(*this, callReference, TRUE);
 
   con = endpoint.CreateConnection(callReference, NULL, this, &pdu);
-	if (con == NULL) {
-		PTRACE(1, "H46017\tEndpoint could not create connection, " <<
-				  "sending release complete PDU: callRef=" << callReference);
-		Q931 pdu;
-		pdu.BuildReleaseComplete(callReference, TRUE);
-		PBYTEArray rawData;
-		pdu.Encode(rawData);
-		WritePDU(rawData);
-		return true;
-	}
+    if (con == NULL) {
+        PTRACE(1, "H46017\tEndpoint could not create connection, " <<
+                  "sending release complete PDU: callRef=" << callReference);
+        Q931 pdu;
+        pdu.BuildReleaseComplete(callReference, TRUE);
+        PBYTEArray rawData;
+        pdu.Encode(rawData);
+        WritePDU(rawData);
+        return true;
+    }
 
-	PTRACE(3, "H46017\tCreated new connection: " << token);
-	connectionsMutex.Wait();
-	GetEndPoint().GetConnections().SetAt(token, con);
-	connectionsMutex.Signal();
+    PTRACE(3, "H46017\tCreated new connection: " << token);
+    connectionsMutex.Wait();
+    endpoint.GetConnections().SetAt(token, con);
+    connectionsMutex.Signal();
 
-	con->AttachSignalChannel(token, this, TRUE);
+    con->AttachSignalChannel(token, this, TRUE);
 
-	 AttachThread(thread);
-	 thread->SetNoAutoDelete();
+     AttachThread(thread);
+     thread->SetNoAutoDelete();
 
-	 if (con->HandleSignalPDU(pdu)) {
-		// All subsequent PDU's should wait forever
-		SetReadTimeout(PMaxTimeInterval);
+     if (con->HandleSignalPDU(pdu)) {
+        // All subsequent PDU's should wait forever
+        SetReadTimeout(PMaxTimeInterval);
         ReadTunnel();
-	 }
-	 else {
-		con->ClearCall(H323Connection::EndedByTransportFail);
-		PTRACE(1, "H46017\tSignal channel stopped on first PDU.");
-	 }
+     }
+     else {
+        con->ClearCall(H323Connection::EndedByTransportFail);
+        PTRACE(1, "H46017\tSignal channel stopped on first PDU.");
+     }
       
      return true;
 }
@@ -526,7 +526,7 @@ PBoolean H46017Transport::HandleH46017SignallingChannelPDU(PThread * thread)
 PBoolean H46017Transport::WritePDU(const PBYTEArray & pdu)
 {
     PWaitAndSignal m(WriteMutex);
-	return H323TransportTCP::WritePDU(pdu);
+    return H323TransportTCP::WritePDU(pdu);
 }
 
 PBoolean H46017Transport::WriteSignalPDU( const H323SignalPDU & pdu )
@@ -545,41 +545,41 @@ PBoolean H46017Transport::WriteSignalPDU( const H323SignalPDU & pdu )
 
     return false;
 }
-	
+    
 PBoolean H46017Transport::ReadPDU(PBYTEArray & pdu)
 {
-	return H323TransportTCP::ReadPDU(pdu);
+    return H323TransportTCP::ReadPDU(pdu);
 }
 
 PBoolean H46017Transport::Connect() 
 { 
     PTRACE(4, "H46017\tConnecting to remote"  );
-	if (!H323TransportTCP::Connect())
-		return false;
-	
-	return true;
+    if (!H323TransportTCP::Connect())
+        return false;
+    
+    return true;
 }
 
 void H46017Transport::ConnectionLost(PBoolean established)
 {
-	PWaitAndSignal m(shutdownMutex);
+    PWaitAndSignal m(shutdownMutex);
 
-	if (closeTransport)
-		return;
+    if (closeTransport)
+        return;
     PBoolean lost = IsConnectionLost();
     PTRACE(4,"H46017\tConnection lost " << established << " have " << lost);
 }
 
 PBoolean H46017Transport::IsConnectionLost() const  
 { 
-	return Feature->IsConnectionLost(); 
+    return Feature->IsConnectionLost(); 
 }
 
 PBoolean H46017Transport::Close() 
 { 
    PWaitAndSignal m(shutdownMutex);
 
-   PTRACE(4, "H46017\tClosing H46017 NAT channel.");	
+   PTRACE(4, "H46017\tClosing H46017 NAT channel.");    
    closeTransport = TRUE;
    if (con) con->EndHandleControlChannel();
 
@@ -592,7 +592,7 @@ PBoolean H46017Transport::IsOpen () const
 }
 
 PBoolean H46017Transport::IsListening() const
-{	  
+{      
   if (isConnected)
     return FALSE;
 
@@ -644,7 +644,7 @@ PBoolean H46017Transport::ReadTunnel()
  
   while (IsOpen()) {
      H323SignalPDU pdu;
-	 if (!pdu.Read(*this)) {
+     if (!pdu.Read(*this)) {
          PTRACE(3, "H46017\tSocket Read Failure");
          return false;
      }
@@ -808,7 +808,7 @@ H46017Transport * H46017Handler::curtransport = NULL;
 H46017Handler::H46017Handler(H323EndPoint & _ep, const H323TransportAddress & _remoteAddress)
  : ep(_ep), ras(NULL), remoteAddress(_remoteAddress)
 {
-	PTRACE(4, "H46017\tCreating H46017 Feature.");	
+    PTRACE(4, "H46017\tCreating H46017 Feature.");
     
     PIPSocket::Address remAddr;
     remoteAddress.GetIpAddress(remAddr);
@@ -819,8 +819,8 @@ H46017Handler::~H46017Handler()
 {
     callEnded = true;
 
-	if (curtransport != NULL) {
-		curtransport->Close();
+    if (curtransport != NULL) {
+        curtransport->Close();
         curtransport = NULL;
     }
 
@@ -833,26 +833,26 @@ H46017Handler::~H46017Handler()
 
 PBoolean H46017Handler::CreateNewTransport()
 {
-	PTRACE(5, "H46017\tCreating Transport.");
+    PTRACE(5, "H46017\tCreating Transport.");
 
-	curtransport = new H46017Transport(ep,this);
-	curtransport->SetRemoteAddress(remoteAddress);
+    curtransport = new H46017Transport(ep,this);
+    curtransport->SetRemoteAddress(remoteAddress);
 
-	if (curtransport->Connect()) {
-	  PTRACE(3, "H46017\tConnected to " << curtransport->GetRemoteAddress());
-	    new H46017TransportThread(curtransport->GetEndPoint(), curtransport);
+    if (curtransport->Connect()) {
+      PTRACE(3, "H46017\tConnected to " << curtransport->GetRemoteAddress());
+        new H46017TransportThread(curtransport->GetEndPoint(), curtransport);
         openTransport = true;
-		return TRUE;
-	} 
+        return TRUE;
+    } 
      
-	PTRACE(3, "H46017\tTransport Failure " << curtransport->GetRemoteAddress());
+    PTRACE(3, "H46017\tTransport Failure " << curtransport->GetRemoteAddress());
     delete curtransport;
-	return FALSE;
+    return FALSE;
 }
 
 H323EndPoint * H46017Handler::GetEndPoint() 
 { 
-	return &ep; 
+    return &ep; 
 }
 
 H323TransportAddress H46017Handler::GetTunnelBindAddress() const
@@ -885,7 +885,7 @@ PBoolean H46017Handler::RegisterGatekeeper()
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 PCREATE_NAT_PLUGIN(H46017);
-	
+    
 PNatMethod_H46017::PNatMethod_H46017()
 : available(false), active(false), handler(NULL)
 {
@@ -929,48 +929,48 @@ void PNatMethod_H46017::AttachEndPoint(H323EndPoint * ep)
 
   pairedPortInfo.mutex.Signal();
 
-	available = FALSE;
+    available = FALSE;
 }
 
 PBoolean PNatMethod_H46017::GetExternalAddress(
       PIPSocket::Address & /*externalAddress*/, /// External address of router
       const PTimeInterval & /* maxAge */         /// Maximum age for caching
-	  )
+      )
 {
-	return FALSE;
+    return FALSE;
 }
 
 
 PBoolean PNatMethod_H46017::CreateSocketPair(
-							PUDPSocket * & socket1,
-							PUDPSocket * & socket2,
-					        const PIPSocket::Address & binding,
-					        void * userData
-							)
+                            PUDPSocket * & socket1,
+                            PUDPSocket * & socket2,
+                            const PIPSocket::Address & binding,
+                            void * userData
+                            )
 {
 
-	  if (pairedPortInfo.basePort == 0 || pairedPortInfo.basePort > pairedPortInfo.maxPort)
-	  {
-		PTRACE(1, "H46017\tInvalid local UDP port range "
-			   << pairedPortInfo.currentPort << '-' << pairedPortInfo.maxPort);
-		return FALSE;
-	  }
+      if (pairedPortInfo.basePort == 0 || pairedPortInfo.basePort > pairedPortInfo.maxPort)
+      {
+        PTRACE(1, "H46017\tInvalid local UDP port range "
+               << pairedPortInfo.currentPort << '-' << pairedPortInfo.maxPort);
+        return FALSE;
+      }
 
-	H323Connection::SessionInformation * info = (H323Connection::SessionInformation *)userData;
+    H323Connection::SessionInformation * info = (H323Connection::SessionInformation *)userData;
 
     socket1 = new H46017UDPSocket(*handler,info,true);  /// Data 
     socket2 = new H46017UDPSocket(*handler,info,false);  /// Signal
 
 /// Make sure we have sequential ports
-	while ((!OpenSocket(*socket1, pairedPortInfo, binding)) ||
-		   (!OpenSocket(*socket2, pairedPortInfo, binding)) ||
-		   (socket2->GetPort() != socket1->GetPort() + 1) )
-	{
-			delete socket1;
-			delete socket2;
-			socket1 = new H46017UDPSocket(*handler,info,true);  /// Data 
-			socket2 = new H46017UDPSocket(*handler,info,false);  /// Signal
-	}
+    while ((!OpenSocket(*socket1, pairedPortInfo, binding)) ||
+           (!OpenSocket(*socket2, pairedPortInfo, binding)) ||
+           (socket2->GetPort() != socket1->GetPort() + 1) )
+    {
+            delete socket1;
+            delete socket2;
+            socket1 = new H46017UDPSocket(*handler,info,true);  /// Data 
+            socket2 = new H46017UDPSocket(*handler,info,false);  /// Signal
+    }
 
     SetInformationHeader(*socket1,*socket2,info);
 
@@ -1003,18 +1003,18 @@ PBoolean PNatMethod_H46017::OpenSocket(PUDPSocket & socket, PortInfo & portInfo,
 }
 
 void PNatMethod_H46017::SetInformationHeader(PUDPSocket & data, PUDPSocket & control, 
-									     H323Connection::SessionInformation * info)
+                                         H323Connection::SessionInformation * info)
 {
-	if (!handler || handler->GetEndPoint() == NULL)
-		return;
+    if (!handler || handler->GetEndPoint() == NULL)
+        return;
 
     const H323Transport * transport = NULL;
     H323SignalPDU informationMsg;
-	H323Connection * connection = PRemoveConst(H323Connection, info->GetConnection());
+    H323Connection * connection = PRemoveConst(H323Connection, info->GetConnection());
     if (connection != NULL) {
         informationMsg.BuildInformation(*connection);
         transport = connection->GetSignallingChannel();
-	}
+    }
 
     ((H46017UDPSocket &)data).SetInformationHeader(informationMsg, transport);
     ((H46017UDPSocket &)control).SetInformationHeader(informationMsg, transport);
@@ -1168,7 +1168,7 @@ PBoolean H46017UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD 
         break;
     }
 
-	return true;
+    return true;
 }
 
 PBoolean H46017UDPSocket::WriteTo(const void * buf, PINDEX len, const Address & /*addr*/, WORD /*port*/)
