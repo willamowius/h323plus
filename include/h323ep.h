@@ -26,434 +26,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.38  2011/08/20 09:56:56  shorne
- * H.460.19 Multiplex Signalling Support. Media to do. Added H323_H46019M Switch disabled by default.
- *
- * Revision 1.37  2011/08/19 18:01:25  willamowius
- * pass parameters by reference instead of copy
- *
- * Revision 1.36  2011/07/04 11:16:09  willamowius
- * add switch to disable H.460.23
- *
- * Revision 1.35  2011/05/09 07:14:03  shorne
- * Remove redundent PTLIB Linking code
- *
- * Revision 1.34  2011/02/20 06:55:46  shorne
- * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
- *
- * Revision 1.33  2011/01/12 12:55:14  shorne
- * H.224 Bi-directional support added. Calback added for h239 Generic Command to close channel
- *
- * Revision 1.32  2010/09/20 08:02:26  willamowius
- * make H225 and H245 keepAlive optional
- *
- * Revision 1.31  2010/08/26 15:12:39  shorne
- * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
- *
- * Revision 1.30  2010/05/02 22:45:58  shorne
- * Added ability to disable the internal jitter buffer
- *
- * Revision 1.29  2010/02/24 03:44:40  shorne
- * Add ability to pass to the video plugin a custom frame size and rate to encode/decode
- *
- * Revision 1.28  2010/01/20 04:11:09  shorne
- * Add ability to advertise supported H.460 features in presence
- *
- * Revision 1.27  2009/12/21 01:15:08  shorne
- * Further Presence Development
- *
- * Revision 1.26  2009/12/08 04:05:14  shorne
- * Major update of presence system
- *
- * Revision 1.25  2009/11/19 03:56:39  shorne
- * Change the gkIdentifer to be stored as a PASN_BMPString to avoid problems with PString stripping NULL char off end which causes problems registration issues with pre GnuGk 2.3.1 releases.
- *
- * Revision 1.24  2009/11/17 10:50:14  shorne
- * Added Presence Support, Calling URI (not registered), Correct test of audio device name, Feature,NAT and TTL callback
- *
- * Revision 1.23  2009/09/20 00:51:09  shorne
- * simplified headers and ensure H.460.18 if always first feature for better interop
- *
- * Revision 1.22  2009/07/09 15:09:19  shorne
- * Added ability to access Gatekeeper features
- *
- * Revision 1.21  2009/07/03 10:35:59  willamowius
- * RegInvokeReRegistration is only available with GnuGk NAT feature
- *
- * Revision 1.20  2009/07/03 10:33:42  willamowius
- * RegInvokeReRegistration is also used without the GnuGk ANT feature
- *
- * Revision 1.19  2009/07/03 04:14:59  shorne
- * more H.460.18/19 support
- *
- * Revision 1.18  2009/06/28 00:11:03  shorne
- * Added H.460.18/19 Support
- *
- * Revision 1.17  2009/02/21 14:04:35  shorne
- * Added OnCapabilitySet Callback, FileTransfer Handlers,baseline H.450 Message warning support
- *
- * Revision 1.16  2008/11/08 16:56:22  willamowius
- * fixes to compile with video disabled
- *
- * Revision 1.15  2008/11/08 16:18:42  willamowius
- * fixes to compile with video disabled
- *
- * Revision 1.14  2008/09/27 06:14:22  shorne
- * Change in NatStrategy to a pointer which is created and distroyed in the constructor/destructor of H323EndPoint
- *
- * Revision 1.13  2008/05/27 15:40:42  shorne
- * Enable the ability to be able to only autostart Transmit or Receive Audio
- *
- * Revision 1.12  2008/05/23 11:19:35  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.11  2008/04/25 01:15:42  shorne
- * Added callback for H.460 Instances
- *
- * Revision 1.10  2008/02/10 23:11:33  shorne
- * Fix to compile H323plus without Video
- *
- * Revision 1.9  2008/01/04 06:23:07  shorne
- * Cleaner setup and teardown of h460 module
- *
- * Revision 1.8  2008/01/02 17:50:57  shorne
- * Fix for memory leak in H.460 module
- *
- * Revision 1.7  2008/01/01 00:16:12  shorne
- * Added GnuGknat and FileTransfer support
- *
- * Revision 1.6  2007/11/17 00:14:47  shorne
- * Fix to make disabling function calls consistent
- *
- * Revision 1.5  2007/11/16 22:09:42  shorne
- * Added ability to disable H.245 QoS for NetMeeting Interop
- *
- * Revision 1.4  2007/11/01 20:17:31  shorne
- * updates for H.239 support
- *
- * Revision 1.3  2007/10/25 21:08:03  shorne
- * Added support for HD Video devices
- *
- * Revision 1.2  2007/08/20 19:13:27  shorne
- * Added Generic Capability support. Fixed Linux compile errors
- *
- * Revision 1.1  2007/08/06 20:50:49  shorne
- * First commit of h323plus
- *
- * Revision 1.87.2.8  2007/07/20 22:03:21  shorne
- * Initial H.350 Support
- *
- * Revision 1.87.2.7  2007/05/23 06:59:36  shorne
- * Added Assigned Alias/Gatekeeper
- *
- * Revision 1.87.2.6  2007/04/19 12:16:15  shorne
- * added ability to detect if no nat
- *
- * Revision 1.87.2.5  2007/02/19 20:11:05  shorne
- * Added Baseline H.239 Support
- *
- * Revision 1.87.2.4  2007/02/11 00:45:20  shorne
- * Added ability to disable NAT method on a call by call basis
- *
- * Revision 1.87.2.3  2007/02/02 22:12:43  shorne
- * Added ability to set FrameSize for video plugins
- *
- * Revision 1.87.2.2  2007/01/30 01:07:40  shorne
- * Added ability to disable H460
- *
- * Revision 1.87.2.1  2006/12/23 19:08:02  shorne
- * Plugin video codecs & sundry
- *
- * Revision 1.87  2006/06/26 02:52:51  shorne
- * Moved H460 feature loader from H323EndPoint Constructor
- *
- * Revision 1.86  2006/06/23 20:01:28  shorne
- * More H460 support
- *
- * Revision 1.85  2006/06/23 07:06:04  csoutheren
- * Fixed linux compile
- *
- * Revision 1.84  2006/06/23 06:02:44  csoutheren
- * Added missing declarations for H.224 backport
- *
- * Revision 1.83  2006/06/09 06:30:12  csoutheren
- * Remove compile warning and errors with gcc
- *
- * Revision 1.82  2006/05/30 11:14:55  hfriederich
- * Switch from DISABLE_H460 to H323_H460
- *
- * Revision 1.81  2006/05/16 11:44:09  shorne
- * extended DNS SRV, H460 Feature , Call Credit, extend conference goals
- *
- * Revision 1.80  2006/03/07 10:37:46  csoutheren
- * Add ability to disable GRQ on GK registration
- *
- * Revision 1.79  2006/01/26 03:47:17  shorne
- * Caller Authentication, more Nat Traversal support, more PBX support
- *
- * Revision 1.78  2006/01/20 00:32:24  csoutheren
- * First check-in of signalling aggregation code - incomplete and disabled by default
- *
- * Revision 1.77  2006/01/18 07:46:08  csoutheren
- * Initial version of RTP aggregation (disabled by default)
- *
- * Revision 1.76  2005/11/30 13:05:01  csoutheren
- * Changed tags for Doxygen
- *
- * Revision 1.75  2005/11/22 03:38:45  shorne
- * Added ToS support to TCP Transports. thx Norbert Bartalsky (TOPCALL)
- *
- * Revision 1.74  2005/11/21 21:02:19  shorne
- * Added GnuGK Nat detection support
- *
- * Revision 1.73  2005/09/16 08:12:49  csoutheren
- * Added ability to set timeout for connect
- *
- * Revision 1.72  2005/07/12 12:28:52  csoutheren
- * Fixes for H.450 errors and return values
- * Thanks to Iker Perez San Roman
- *
- * Revision 1.71  2005/03/10 07:01:29  csoutheren
- * Fixed problem with H.450 call identifiers not being unique across all calls on an
- *  endpoint. Thanks to Thien Nguyen
- *
- * Revision 1.70  2005/01/03 14:03:20  csoutheren
- * Added new configure options and ability to disable/enable modules
- *
- * Revision 1.69  2005/01/03 06:25:52  csoutheren
- * Added extensive support for disabling code modules at compile time
- *
- * Revision 1.68  2004/12/20 02:32:34  csoutheren
- * Cleeaned up OSP functions
- *
- * Revision 1.67  2004/12/08 01:59:22  csoutheren
- * initial support for Transnexus OSP toolkit
- *
- * Revision 1.66  2004/11/25 07:38:58  csoutheren
- * Ensured that external TCP address translation is performed when using STUN to handle UDP
- *
- * Revision 1.65  2004/09/03 01:06:09  csoutheren
- * Added initial hooks for H.460 GEF
- * Thanks to Simon Horne and ISVO (Asia) Pte Ltd. for this contribution
- *
- * Revision 1.64  2004/07/27 05:28:45  csoutheren
- * Added ability to set priority of channel threads
- *
- * Revision 1.63  2004/07/27 01:15:16  csoutheren
- * Added virtual to InternalMakeCall
- *
- * Revision 1.62  2004/07/19 13:19:55  csoutheren
- * Fixed typo in secondaryConnectionsActive
- *
- * Revision 1.61  2004/07/11 11:36:25  rjongbloed
- * Added virtual to CleanUpConnections, thanks Eize Slange
- *
- * Revision 1.60  2004/06/15 03:30:00  csoutheren
- * Added OnSendARQ to allow access to the ARQ message before sent by connection
- *
- * Revision 1.59  2004/06/04 07:05:10  csoutheren
- * Fixed obvious typos
- *
- * Revision 1.58  2004/06/01 05:48:02  csoutheren
- * Changed capability table to use abstract factory routines rather than internal linked list
- *
- * Revision 1.57  2004/05/17 12:14:24  csoutheren
- * Added support for different SETUP PDU types
- *
- * Revision 1.56  2003/12/29 04:58:55  csoutheren
- * Added callbacks on H323EndPoint when gatekeeper discovery succeeds or fails
- *
- * Revision 1.55  2003/12/28 02:52:15  csoutheren
- * Added virtual to a few functions
- *
- * Revision 1.54  2003/12/28 02:38:14  csoutheren
- * Added H323EndPoint::OnOutgoingCall
- *
- * Revision 1.53  2003/12/28 00:07:10  csoutheren
- * Added callbacks on H323EndPoint when gatekeeper registration succeeds or fails
- *
- * Revision 1.52  2003/04/24 01:49:33  dereks
- * Add ability to set no media timeout interval
- *
- * Revision 1.51  2003/04/10 09:39:48  robertj
- * Added associated transport to new GetInterfaceAddresses() function so
- *   interfaces can be ordered according to active transport links. Improves
- *   interoperability.
- *
- * Revision 1.50  2003/04/10 01:05:11  craigs
- * Added functions to access to lists of interfaces
- *
- * Revision 1.49  2003/04/07 13:09:25  robertj
- * Added ILS support to callto URL parsing in MakeCall(), ie can now call hosts
- *   registered with an ILS directory.
- *
- * Revision 1.48  2003/02/13 00:11:31  robertj
- * Added missing virtual for controlling call transfer, thanks Andrey Pinaev
- *
- * Revision 1.47  2003/02/09 00:48:06  robertj
- * Added function to return if registered with gatekeeper.
- *
- * Revision 1.46  2003/02/04 07:06:41  robertj
- * Added STUN support.
- *
- * Revision 1.45  2003/01/26 05:57:58  robertj
- * Changed ParsePartyName so will accept addresses of the form
- *   alias@gk:address which will do an LRQ call to "address" using "alias"
- *   to determine the IP address to connect to.
- *
- * Revision 1.44  2003/01/23 02:36:30  robertj
- * Increased (and made configurable) timeout for H.245 channel TCP connection.
- *
- * Revision 1.43  2002/11/28 01:19:55  craigs
- * Added virtual to several functions
- *
- * Revision 1.42  2002/11/27 06:54:52  robertj
- * Added Service Control Session management as per Annex K/H.323 via RAS
- *   only at this stage.
- * Added H.248 ASN and very primitive infrastructure for linking into the
- *   Service Control Session management system.
- * Added basic infrastructure for Annex K/H.323 HTTP transport system.
- * Added Call Credit Service Control to display account balances.
- *
- * Revision 1.41  2002/11/15 05:17:22  robertj
- * Added facility redirect support without changing the call token for access
- *   to the call. If it gets redirected a new H323Connection object is
- *   created but it looks like the same thing to an application.
- *
- * Revision 1.40  2002/11/10 08:10:43  robertj
- * Moved constants for "well known" ports to better place (OPAL change).
- *
- * Revision 1.39  2002/10/31 00:32:15  robertj
- * Enhanced jitter buffer system so operates dynamically between minimum and
- *   maximum values. Altered API to assure app writers note the change!
- *
- * Revision 1.38  2002/10/23 06:06:10  robertj
- * Added function to be smarter in using a gatekeeper for use by endpoint.
- *
- * Revision 1.37  2002/10/21 06:07:44  robertj
- * Added function to set gatekeeper access token OID.
- *
- * Revision 1.36  2002/09/16 01:14:15  robertj
- * Added #define so can select if #pragma interface/implementation is used on
- *   platform basis (eg MacOS) rather than compiler, thanks Robert Monaghan.
- *
- * Revision 1.35  2002/09/10 06:32:25  robertj
- * Added function to get gatekeeper password.
- *
- * Revision 1.34  2002/09/03 06:19:36  robertj
- * Normalised the multi-include header prevention ifdef/define symbol.
- *
- * Revision 1.33  2002/07/19 03:39:19  robertj
- * Bullet proofed setting of RTP IP port base, can't be zero!
- *
- * Revision 1.32  2002/07/18 01:50:10  robertj
- * Changed port secltion code to force apps to use function interface.
- *
- * Revision 1.31  2002/06/22 05:48:38  robertj
- * Added partial implementation for H.450.11 Call Intrusion
- *
- * Revision 1.30  2002/06/13 06:15:19  robertj
- * Allowed TransferCall() to be used on H323Connection as well as H323EndPoint.
- *
- * Revision 1.29  2002/06/12 03:55:21  robertj
- * Added function to add/remove multiple listeners in one go comparing against
- *   what is already running so does not interrupt unchanged listeners.
- *
- * Revision 1.28  2002/05/29 06:40:29  robertj
- * Changed sending of endSession/ReleaseComplete PDU's to occur immediately
- *   on call clearance and not wait for background thread to do it.
- * Stricter compliance by waiting for reply endSession before closing down.
- *
- * Revision 1.27  2002/05/28 06:15:09  robertj
- * Split UDP (for RAS) from RTP port bases.
- * Added current port variable so cycles around the port range specified which
- *   fixes some wierd problems on some platforms, thanks Federico Pinna
- *
- * Revision 1.26  2002/05/17 03:38:05  robertj
- * Fixed problems with H.235 authentication on RAS for server and client.
- *
- * Revision 1.25  2002/05/16 00:03:05  robertj
- * Added function to get the tokens for all active calls.
- * Improved documentation for use of T.38 and T.120 functions.
- *
- * Revision 1.24  2002/05/15 08:59:18  rogerh
- * Update comments
- *
- * Revision 1.23  2002/05/03 05:38:15  robertj
- * Added Q.931 Keypad IE mechanism for user indications (DTMF).
- *
- * Revision 1.22  2002/05/02 07:56:24  robertj
- * Added automatic clearing of call if no media (RTP data) is transferred in a
- *   configurable (default 5 minutes) amount of time.
- *
- * Revision 1.21  2002/04/18 01:41:07  robertj
- * Fixed bad variable name for disabling DTMF detection, very confusing.
- *
- * Revision 1.20  2002/04/17 00:49:56  robertj
- * Added ability to disable the in band DTMF detection.
- *
- * Revision 1.19  2002/04/10 06:48:47  robertj
- * Added functions to set port member variables.
- *
- * Revision 1.18  2002/03/14 03:49:38  dereks
- * Fix minor documentation error.
- *
- * Revision 1.17  2002/02/04 07:17:52  robertj
- * Added H.450.2 Consultation Transfer, thanks Norwood Systems.
- *
- * Revision 1.16  2002/01/24 06:29:02  robertj
- * Added option to disable H.245 negotiation in SETUP pdu, this required
- *   API change so have a bit mask instead of a series of booleans.
- *
- * Revision 1.15  2002/01/17 07:04:58  robertj
- * Added support for RFC2833 embedded DTMF in the RTP stream.
- *
- * Revision 1.14  2002/01/13 23:59:43  robertj
- * Added CallTransfer timeouts to endpoint, hanks Ben Madsen of Norwood Systems.
- *
- * Revision 1.13  2002/01/08 04:45:35  robertj
- * Added MakeCallLocked() so can start a call with the H323Connection instance
- *   initally locked so can do things to it before the call really starts.
- *
- * Revision 1.12  2001/12/22 03:20:44  robertj
- * Added create protocol function to H323Connection.
- *
- * Revision 1.11  2001/12/13 10:55:30  robertj
- * Added gatekeeper access token OID specification for auto inclusion of
- *   access tokens frm ACF to SETUP pdu.
- *
- * Revision 1.10  2001/11/09 05:39:54  craigs
- * Added initial T.38 support thanks to Adam Lazur
- *
- * Revision 1.9  2001/11/01 00:27:33  robertj
- * Added default Fast Start disabled and H.245 tunneling disable flags
- *   to the endpoint instance.
- *
- * Revision 1.8  2001/09/11 01:24:36  robertj
- * Added conditional compilation to remove video and/or audio codecs.
- *
- * Revision 1.7  2001/09/11 00:21:21  robertj
- * Fixed missing stack sizes in endpoint for cleaner thread and jitter thread.
- *
- * Revision 1.6  2001/08/24 14:03:26  rogerh
- * Fix some spelling mistakes
- *
- * Revision 1.5  2001/08/16 07:49:16  robertj
- * Changed the H.450 support to be more extensible. Protocol handlers
- *   are now in separate classes instead of all in H323Connection.
- *
- * Revision 1.4  2001/08/10 11:03:49  robertj
- * Major changes to H.235 support in RAS to support server.
- *
- * Revision 1.3  2001/08/08 23:54:11  robertj
- * Fixed problem with setting gk password before have a gk variable.
- *
- * Revision 1.2  2001/08/06 03:15:17  robertj
- * Improved access to H.235 secure RAS functionality.
- *
- * Revision 1.1  2001/08/06 03:08:11  robertj
- * Fission of h323.h to h323ep.h & h323con.h, h323.h now just includes files.
+ * $Id$
  *
  */
 
@@ -567,18 +140,18 @@ class H323EndPoint : public PObject
       H225_VendorIdentifier & info
     ) const;
 
-	/**Set the Gateway supported protocol default always H.323
-	  */
+    /**Set the Gateway supported protocol default always H.323
+      */
     PBoolean SetGatewaySupportedProtocol(
-		H225_ArrayOf_SupportedProtocols & protocols
-	) const;
+        H225_ArrayOf_SupportedProtocols & protocols
+    ) const;
 
    /**Set the gateway prefixes 
       Override this to set the acceptable prefixes to the gatekeeper
       */
     virtual PBoolean OnSetGatewayPrefixes(
-		PStringList & prefixes
-	) const;
+        PStringList & prefixes
+    ) const;
 
     /**Set the H221NonStandard information in H225 PDU's.
       */
@@ -628,27 +201,27 @@ class H323EndPoint : public PObject
       H323Capability * cap  ///< New capability specification
     );
 
-	/**Manually remove capability type. This removes the specified Capability type out of the 
-	   default capability list.
-	  */
-	PBoolean RemoveCapability(
-		H323Capability::MainTypes capabilityType  ///< capability type
-	);
+    /**Manually remove capability type. This removes the specified Capability type out of the 
+       default capability list.
+      */
+    PBoolean RemoveCapability(
+        H323Capability::MainTypes capabilityType  ///< capability type
+    );
 
 #ifdef H323_VIDEO
-	/**Set the Video Frame Size. This is used for capabilities
-	   that use 1 definition for all Video Frame Sizes. This will remove all capabilities
-	   not matching the specified Frame Size and send a message to the remaining video capabilities 
-	   to set the maximum framesize allowed to the specified value
-	  */
-	PBoolean SetVideoFrameSize(H323Capability::CapabilityFrameSize frameSize, 
-		                  int frameUnits = 1
-	);
+    /**Set the Video Frame Size. This is used for capabilities
+       that use 1 definition for all Video Frame Sizes. This will remove all capabilities
+       not matching the specified Frame Size and send a message to the remaining video capabilities 
+       to set the maximum framesize allowed to the specified value
+      */
+    PBoolean SetVideoFrameSize(H323Capability::CapabilityFrameSize frameSize, 
+                          int frameUnits = 1
+    );
 
-	/**Set the Video Encoder size and rate. 
-		This is used for generic Video Capabilities to set the appropriate level for a given encoder 
-		frame size and rate.
-	  */
+    /**Set the Video Encoder size and rate. 
+        This is used for generic Video Capabilities to set the appropriate level for a given encoder 
+        frame size and rate.
+      */
     PBoolean SetVideoEncoder(unsigned frameWidth, unsigned frameHeight, unsigned frameRate);
 
 #endif
@@ -673,26 +246,26 @@ class H323EndPoint : public PObject
 #ifdef H323_VIDEO
 #ifdef H323_H239
     /** Open Extended Video Session
-	  */
-	PBoolean OpenExtendedVideoSession(
-		const PString & token        ///< Connection Token
-	);
+      */
+    PBoolean OpenExtendedVideoSession(
+        const PString & token        ///< Connection Token
+    );
 
     /** Open Extended Video Session
-	  */
-	PBoolean OpenExtendedVideoSession(
-		const PString & token,       ///< Connection Token
-		H323ChannelNumber & num      ///< Opened Channel number
-	);
+      */
+    PBoolean OpenExtendedVideoSession(
+        const PString & token,       ///< Connection Token
+        H323ChannelNumber & num      ///< Opened Channel number
+    );
 
     PBoolean CloseExtendedVideoSession(
-		const PString & token        ///< Connection Token
-	);
+        const PString & token        ///< Connection Token
+    );
 
     PBoolean CloseExtendedVideoSession(
-		const PString & token,             ///< Connection Token
-		const H323ChannelNumber & num      ///< channel number
-	);
+        const PString & token,             ///< Connection Token
+        const H323ChannelNumber & num      ///< channel number
+    );
 
     /**Add all Extended Video capabilities to this endpoints capability table.
       */
@@ -849,9 +422,9 @@ class H323EndPoint : public PObject
       int reason = -1    ///< Reason for gatekeeper removal
     );
 
-	/**Force the endpoint to reregister with Gatekeeper
-	  */
-	void ForceGatekeeperReRegistration();
+    /**Force the endpoint to reregister with Gatekeeper
+      */
+    void ForceGatekeeperReRegistration();
 
     /**Set the H.235 password for the gatekeeper.
       */
@@ -864,18 +437,18 @@ class H323EndPoint : public PObject
     virtual const PString & GetGatekeeperPassword() const { return gatekeeperPassword; }
 
     /** Check the IP of the Gatekeeper on reregistration
-	    Use this to check if Gatekeeper IP had changed (used for DDNS type registrations)
-		Default returns FALSE
-	  */
-	virtual PBoolean GatekeeperCheckIP(const H323TransportAddress & oldAddr,H323TransportAddress & newaddress);
+        Use this to check if Gatekeeper IP had changed (used for DDNS type registrations)
+        Default returns FALSE
+      */
+    virtual PBoolean GatekeeperCheckIP(const H323TransportAddress & oldAddr,H323TransportAddress & newaddress);
 
     /**Create a list of authenticators for gatekeeper.
       */
     virtual H235Authenticators CreateAuthenticators();
 
-	/**Called when sending a Admission Request to the gatekeeper
-	 */
-	virtual void OnAdmissionRequest(H323Connection & connection);
+    /**Called when sending a Admission Request to the gatekeeper
+     */
+    virtual void OnAdmissionRequest(H323Connection & connection);
 
     /**Called when the gatekeeper sends a GatekeeperConfirm
       */
@@ -893,17 +466,17 @@ class H323EndPoint : public PObject
       */
     virtual void  OnRegistrationReject();
 
-	/**Called when Unregistered by Gatekeeper 
-	 */
-	virtual void OnUnRegisterRequest(); 
+    /**Called when Unregistered by Gatekeeper 
+     */
+    virtual void OnUnRegisterRequest(); 
 
-	/**Called when reply Unregister to Gatekeeper 
-	 */
-	virtual void OnUnRegisterConfirm(); 
+    /**Called when reply Unregister to Gatekeeper 
+     */
+    virtual void OnUnRegisterConfirm(); 
 
-	/**Called when TTL registration fails 
-	 */
-	virtual void OnRegisterTTLFail();
+    /**Called when TTL registration fails 
+     */
+    virtual void OnRegisterTTLFail();
   //@}
 
   /**@name Connection management */
@@ -978,8 +551,8 @@ class H323EndPoint : public PObject
 
 #ifndef DISABLE_CALLAUTH
      /**Make a Authenticated call to a remote party. 
-	This Function sets Security Information to be included when calling
-	a EP which requires Authentication
+    This Function sets Security Information to be included when calling
+    a EP which requires Authentication
        */
       H323Connection * MakeAuthenticatedCall (
                         const PString & remoteParty,  ///* Remote party to call
@@ -987,18 +560,18 @@ class H323EndPoint : public PObject
                         const PString & Password,     ///* Password to Use (MUST NOT BE EMPTY)
                         PString & token,              ///* String to receive token for connection
                         void * userData = NULL        ///* user data to pass to CreateConnection
-     );											
-#endif	
+     );                                            
+#endif    
 
      /**Make a Supplimentary call to a remote party. 
-		This Function makes a Non Call supplimentary connection (lightweight call) for the purpose
-		of delivering H.450 & H.460 non call content such as instant messaging and messagebank messages
+        This Function makes a Non Call supplimentary connection (lightweight call) for the purpose
+        of delivering H.450 & H.460 non call content such as instant messaging and messagebank messages
        */
       H323Connection * MakeSupplimentaryCall (
                         const PString & remoteParty,  ///* Remote party to call
                         PString & token,              ///* String to receive token for connection
                         void * userData = NULL        ///* user data to pass to CreateConnection
-      );													
+      );                                                    
 
     /**Make a call to a remote party. An appropriate transport is determined
        from the remoteParty parameter. The general form for this parameter is
@@ -1022,7 +595,7 @@ class H323EndPoint : public PObject
       const PString & remoteParty,     ///< Remote party to call
       PString & token,                 ///< String to receive token for connection
       void * userData = NULL,           ///< user data to pass to CreateConnection
-	  PBoolean supplimentary = false   ///< Whether the call is a supplimentary call
+      PBoolean supplimentary = false   ///< Whether the call is a supplimentary call
     );
 
     /**Make a call to a remote party using the specified transport.
@@ -1050,7 +623,7 @@ class H323EndPoint : public PObject
       H323Transport * transport,    ///< Transport to use for call.
       PString & token,              ///< String to receive token for connection
       void * userData = NULL,        ///< user data to pass to CreateConnection
-	  PBoolean supplimentary = false   ///< Whether the call is a supplimentary call
+      PBoolean supplimentary = false   ///< Whether the call is a supplimentary call
     );
 
     /**Make a call to a remote party using the specified transport.
@@ -1151,9 +724,9 @@ class H323EndPoint : public PObject
 
 #endif // H323_H450
 
-	/** Use DNS SRV and ENUM to resolve all the possible addresses a call party 
+    /** Use DNS SRV and ENUM to resolve all the possible addresses a call party 
        can be found. Only effective if not registered with Gatekeeper
-	  */
+      */
     PBoolean ResolveCallParty(
       const PString & _remoteParty, 
       PStringList & addresses
@@ -1500,18 +1073,18 @@ class H323EndPoint : public PObject
      virtual EPSecurityPolicy GetEPSecurityPolicy();
 
      /** Retrieve the List of UserNames/Passwords to be used
-	 to Authenticate Incoming Calls.
+     to Authenticate Incoming Calls.
        */
      H235AuthenticatorList GetAuthenticatorList();
 
      /** Call Authentication Call Back 
-	 This fires for all the Authentication Methods created by
-	 CreateEPAuthenticators() The Function Supplies the Name of 
-	 the Authentication process and the supplied SenderID (Username) 
-	 and this is then check against EPAuthList to:
-	 1. Check if the username exists and if so
-	 2. Return the password in the clear to validate.
-	 Returning FALSE indicates that Authentication Failed failed for that Method..
+     This fires for all the Authentication Methods created by
+     CreateEPAuthenticators() The Function Supplies the Name of 
+     the Authentication process and the supplied SenderID (Username) 
+     and this is then check against EPAuthList to:
+     1. Check if the username exists and if so
+     2. Return the password in the clear to validate.
+     Returning FALSE indicates that Authentication Failed failed for that Method..
        */
       virtual PBoolean OnCallAuthentication(const PString & username,  ///* UserName of Caller
                                         PString & password         ///* Password related to caller
@@ -1633,36 +1206,36 @@ class H323EndPoint : public PObject
 
 #ifdef H323_GNUGK
      /**Call back from GK admission confirm to notify the Endpoint it is behind a NAT
-	(GNUGK Gatekeeper) The default does nothing. Override this to notify the user they are behind a NAT.
+    (GNUGK Gatekeeper) The default does nothing. Override this to notify the user they are behind a NAT.
      */
-	virtual void OnGatekeeperNATDetect(
-		PIPSocket::Address publicAddr,         ///< Public address as returned by the Gatekeeper
-		const PString & gkIdentifier,                ///< Identifier at the gatekeeper
-		H323TransportAddress & gkRouteAddress  ///< Gatekeeper Route Address
-		);
-		
+    virtual void OnGatekeeperNATDetect(
+        PIPSocket::Address publicAddr,         ///< Public address as returned by the Gatekeeper
+        const PString & gkIdentifier,                ///< Identifier at the gatekeeper
+        H323TransportAddress & gkRouteAddress  ///< Gatekeeper Route Address
+        );
+        
      /**Call back from GK admission confirm to notify the Endpoint it is not detected as being NAT
-	(GNUGK Gatekeeper) The default does nothing. Override this to notify the user they are not NAT 
-	so they can confirm that it is true.
+    (GNUGK Gatekeeper) The default does nothing. Override this to notify the user they are not NAT 
+    so they can confirm that it is true.
      */
-	virtual void OnGatekeeperOpenNATDetect(
-		const PString & gkIdentifier,                ///< Identifier at the gatekeeper
-		H323TransportAddress & gkRouteAddress  ///< Gatekeeper Route Address
-		);
+    virtual void OnGatekeeperOpenNATDetect(
+        const PString & gkIdentifier,                ///< Identifier at the gatekeeper
+        H323TransportAddress & gkRouteAddress  ///< Gatekeeper Route Address
+        );
 
-	/** Fired with the keep-alive connection to GnuGk fails or is re-established
-	    This allows the endpoint to re-register.
-	  */
-	virtual void NATLostConnection(PBoolean lost);
+    /** Fired with the keep-alive connection to GnuGk fails or is re-established
+        This allows the endpoint to re-register.
+      */
+    virtual void NATLostConnection(PBoolean lost);
 #endif
 
-	/** Call back for GK assigned aliases returned from the gatekeeper in the RCF. 
-	    The default returns FALSE which appends the new aliases to the existing alias list. 
-		By overriding this function and returning TRUE overrides the default operation
-	  */
-	virtual PBoolean OnGatekeeperAliases(
-		const H225_ArrayOf_AliasAddress & aliases  ///< Alias List returned from the gatekeeper
-		);
+    /** Call back for GK assigned aliases returned from the gatekeeper in the RCF. 
+        The default returns FALSE which appends the new aliases to the existing alias list. 
+        By overriding this function and returning TRUE overrides the default operation
+      */
+    virtual PBoolean OnGatekeeperAliases(
+        const H225_ArrayOf_AliasAddress & aliases  ///< Alias List returned from the gatekeeper
+        );
   //@}
 
 #ifdef H323_H248
@@ -1670,7 +1243,7 @@ class H323EndPoint : public PObject
   //@{
     /**Call back for HTTP based Service Control.
        An application may override this to use an HTTP link to display 
-	   call information/CDR's or Billing information.
+       call information/CDR's or Billing information.
 
        The default behaviour does nothing.
       */
@@ -1685,23 +1258,23 @@ class H323EndPoint : public PObject
 
        The default behaviour does nothing.
       */
-	virtual void OnCallCreditServiceControl(
+    virtual void OnCallCreditServiceControl(
       const PString & amount,         ///< UTF-8 string for amount, including currency.
       PBoolean mode,                      ///< Flag indicating that calls will debit the account.
-	  const unsigned & durationLimit  ///< Duration Limit (used to decrement display)
+      const unsigned & durationLimit  ///< Duration Limit (used to decrement display)
     );
 
 #ifdef H323_H350
     /**Call back for LDAP based Service Control.
        An application may override this to use an LDAP directory to query
-	   White Page searches.
+       White Page searches.
 
        The default behaviour does nothing.
       */
     virtual void OnH350ServiceControl(
-		const PString & url,
-		const PString & BaseDN
-		);
+        const PString & url,
+        const PString & BaseDN
+        );
 #endif
 
     /**Call back for call credit information.
@@ -1773,13 +1346,13 @@ class H323EndPoint : public PObject
 
 #if H323_H224
 
-	/** Create an instance of the H.224 protocol handler.
+    /** Create an instance of the H.224 protocol handler.
         This is called when the subsystem requires that a H.224 channel be established.
-		
+        
         Note that if the application overrides this it should return a pointer to a
         heap variable (using new) as it will be automatically deleted when the Connection
         is deleted.
-		
+        
         The default behaviour creates a new OpalH224Handler.
       */
     virtual OpalH224Handler * CreateH224ProtocolHandler(
@@ -1787,14 +1360,14 @@ class H323EndPoint : public PObject
       H323Connection & connection, 
       unsigned sessionID
     ) const;
-	
+    
     /** Create an instance of the H.224 protocol handler.
         This is called when the subsystem requires that a H.224 channel be established.
-		
+        
         Note that if the application overrides this it should return a pointer to a
         heap variable (using new) as it will be automatically deleted when the Connection
         is deleted.
-		
+        
         The default behaviour creates a new OpalH281Handler.
       */
     virtual OpalH281Handler * CreateH281ProtocolHandler(
@@ -1804,28 +1377,28 @@ class H323EndPoint : public PObject
 
 #ifdef H323_FILE
     /** Open File Transfer Session
-	    Use this to initiate a file transfer.
-	  */
-	PBoolean OpenFileTransferSession(
+        Use this to initiate a file transfer.
+      */
+    PBoolean OpenFileTransferSession(
         const H323FileTransferList & list,      ///< List of Files Requested
-		const PString & token,                  ///< Connection Token
-		H323ChannelNumber & num                 ///< Opened Channel number
-	);
+        const PString & token,                  ///< Connection Token
+        H323ChannelNumber & num                 ///< Opened Channel number
+    );
 
-	/** Open a File Transfer Channel.
+    /** Open a File Transfer Channel.
         This is called when the subsystem requires that a File Transfer channel be established.
 
-		An implementer should override this function to facilitate file transfer. 
-		If transmitting, list of files should be populated to notify the channel which files to read.
-		If receiving, the list of files should be altered to include path information for the storage
-		of received files.
-		
+        An implementer should override this function to facilitate file transfer. 
+        If transmitting, list of files should be populated to notify the channel which files to read.
+        If receiving, the list of files should be altered to include path information for the storage
+        of received files.
+        
         The default behaviour returns FALSE to indicate File Transfer is not implemented. 
       */
     virtual PBoolean OpenFileTransferChannel(H323Connection & connection,         ///< Connection
-										   PBoolean isEncoder,                    ///< direction of channel
-						                   H323FileTransferList & filelist        ///< Transfer File List
-										   ); 
+                                           PBoolean isEncoder,                    ///< direction of channel
+                                           H323FileTransferList & filelist        ///< Transfer File List
+                                           ); 
 #endif
 
   /**@name Additional call services */
@@ -1956,13 +1529,13 @@ class H323EndPoint : public PObject
       PBoolean mode ///< New default mode
     ) { disableH245inSetup = mode; } 
 
-	/** Get the default H.245 QoS mode.
-	  */
-	PBoolean IsH245QoSDisabled() const
-	  { return disableH245QoS; }
+    /** Get the default H.245 QoS mode.
+      */
+    PBoolean IsH245QoSDisabled() const
+      { return disableH245QoS; }
 
     /** Disable H.245 QoS support
-	  */
+      */
     void DisableH245QoS(
       PBoolean mode ///< New default mode
     ) { disableH245QoS = mode; } 
@@ -2248,7 +1821,7 @@ class H323EndPoint : public PObject
     void SetInitialBandwidth(unsigned bandwidth) { initialBandwidth = bandwidth; }
 
 #ifdef H323_VIDEO
-	virtual void OnSetInitialBandwidth(H323VideoCodec * /*codec*/) {};
+    virtual void OnSetInitialBandwidth(H323VideoCodec * /*codec*/) {};
 #endif
 
     /**Called when an outgoing PDU requires a feature set
@@ -2260,162 +1833,162 @@ class H323EndPoint : public PObject
     virtual void OnReceiveFeatureSet(unsigned, const H225_FeatureSet &);
 
 #ifdef H323_H460
-	/**Get the complete list of Gatekeeper features
-	  */
-	H460_FeatureSet * GetGatekeeperFeatures();
+    /**Get the complete list of Gatekeeper features
+      */
+    H460_FeatureSet * GetGatekeeperFeatures();
 #endif
 
-	/**Load the Base FeatureSet usually called when you initialise the endpoint prior to 
-	   registering with a gatekeeper.
-	  */
-	virtual void LoadBaseFeatureSet();
-
-	/**Callback when creating Feature Instance. This can be used to disable features on
-	   a case by case basis by returning FALSE
-	   Default returns TRUE
+    /**Load the Base FeatureSet usually called when you initialise the endpoint prior to 
+       registering with a gatekeeper.
       */
-	virtual PBoolean OnFeatureInstance(int instType, const PString & identifer);
+    virtual void LoadBaseFeatureSet();
+
+    /**Callback when creating Feature Instance. This can be used to disable features on
+       a case by case basis by returning FALSE
+       Default returns TRUE
+      */
+    virtual PBoolean OnFeatureInstance(int instType, const PString & identifer);
 
     /**Handle Unsolicited Information PDU received on the signal listening socket not
        associated with a connection.
      */
-	virtual PBoolean HandleUnsolicitedInformation(const H323SignalPDU & pdu);
+    virtual PBoolean HandleUnsolicitedInformation(const H323SignalPDU & pdu);
 
 #ifdef H323_H460
-	/** Get the Endpoint FeatureSet
-	    This creates a new instance of the featureSet
-	 */
+    /** Get the Endpoint FeatureSet
+        This creates a new instance of the featureSet
+     */
     H460_FeatureSet * GetFeatureSet() {  return features.DeriveNewFeatureSet(); };
 
     /** Is the FeatureSet disabled
-	  */
-	PBoolean FeatureSetDisabled()  {  return disableH460; }
+      */
+    PBoolean FeatureSetDisabled()  {  return disableH460; }
 
-	/** Disable all FeatureSets. Use this for pre H323v4 interoperability
-	  */
-	void FeatureSetDisable()  {  disableH460 = TRUE;  }
-		
-	/** Feature Callback
-	  */
-	virtual void FeatureCallBack(const PString & FeatID,		///< Feature Identifier
-								PINDEX msgID,					///< Message Identifer
-								const PString & message			///< Message
-								) {};
+    /** Disable all FeatureSets. Use this for pre H323v4 interoperability
+      */
+    void FeatureSetDisable()  {  disableH460 = TRUE;  }
+        
+    /** Feature Callback
+      */
+    virtual void FeatureCallBack(const PString & FeatID,        ///< Feature Identifier
+                                PINDEX msgID,                    ///< Message Identifer
+                                const PString & message            ///< Message
+                                ) {};
 
 #ifdef H323_H46018
 
-	/** Disable H.460.18 Feature. (By Default it is enabled)
-	  */	
-	void H46018Enable(PBoolean enable);
+    /** Disable H.460.18 Feature. (By Default it is enabled)
+      */    
+    void H46018Enable(PBoolean enable);
 
-	/** Query whether we are using H.460.18
-	  */
-	PBoolean H46018IsEnabled();
+    /** Query whether we are using H.460.18
+      */
+    PBoolean H46018IsEnabled();
 
     /** Signal that H.460.18 has been received. ie. We are behind a NAT/FW
-	  */
-	void H46018Received() {};
+      */
+    void H46018Received() {};
 
-	/** Whether H.460.18 is in Operation for this call
-	  */
-	PBoolean H46018InOperation();
+    /** Whether H.460.18 is in Operation for this call
+      */
+    PBoolean H46018InOperation();
 
 #endif
 
 #ifdef H323_H46023
-	/** Disable H.460.23 Feature. (By Default it is enabled)
-	  */	
-	void H46023Enable(PBoolean enable);
+    /** Disable H.460.23 Feature. (By Default it is enabled)
+      */    
+    void H46023Enable(PBoolean enable);
 
-	/** Query whether we are using H.460.23
-	  */
-	PBoolean H46023IsEnabled();
+    /** Query whether we are using H.460.23
+      */
+    PBoolean H46023IsEnabled();
 #endif
 
 #ifdef H323_H460P
 
-	/** Get the presence handler. By default it returns NULL
-		Implementor must create an instance of the presencehandler
-		to enable presence
-	  */
-	H460PresenceHandler * GetPresenceHandler()  { return presenceHandler; }  
+    /** Get the presence handler. By default it returns NULL
+        Implementor must create an instance of the presencehandler
+        to enable presence
+      */
+    H460PresenceHandler * GetPresenceHandler()  { return presenceHandler; }  
 
-	/** Set the local Presence State. 
-		Calling this will enable Presence in the endpoint
-	  */
-	void PresenceSetLocalState(const PStringList & alias, unsigned localstate, const PString & localdisplay = PString(), PBoolean updateOnly = false);
+    /** Set the local Presence State. 
+        Calling this will enable Presence in the endpoint
+      */
+    void PresenceSetLocalState(const PStringList & alias, unsigned localstate, const PString & localdisplay = PString(), PBoolean updateOnly = false);
 
-	enum presenceInstruction {
-		e_subscribe,
-		e_unsubscribe,
-		e_block,
-		e_unblock
-	};
+    enum presenceInstruction {
+        e_subscribe,
+        e_unsubscribe,
+        e_block,
+        e_unblock
+    };
 
-	enum presenceFeature {
-		e_preAudio,
-		e_preVideo,
-		e_preExtVideo,
-		e_preData
-	};
+    enum presenceFeature {
+        e_preAudio,
+        e_preVideo,
+        e_preExtVideo,
+        e_preData
+    };
 
-	struct presenceLocale {
-		PString		m_locale;
-		PString		m_region;
-		PString		m_country;
-		PString		m_countryCode;
-		PString		m_latitude;
-		PString		m_longitude;
-		PString		m_elevation;
-	};
+    struct presenceLocale {
+        PString        m_locale;
+        PString        m_region;
+        PString        m_country;
+        PString        m_countryCode;
+        PString        m_latitude;
+        PString        m_longitude;
+        PString        m_elevation;
+    };
 
-	void PresenceAddFeature(presenceFeature feat);
+    void PresenceAddFeature(presenceFeature feat);
 
-	void PresenceAddFeatureH460();
+    void PresenceAddFeatureH460();
 
-	void PresenceSetLocale(const presenceLocale & info);
+    void PresenceSetLocale(const presenceLocale & info);
 
-	/** Set Presence Instructions. 
-	  */
-	void PresenceSetInstruction(const PString & epalias, 
-								unsigned type, 
-								const PStringList & list,
+    /** Set Presence Instructions. 
+      */
+    void PresenceSetInstruction(const PString & epalias, 
+                                unsigned type, 
+                                const PStringList & list,
                                  PBoolean autoSend = true);
 
-	/** Submit Presence Authorizations. 
-	  */
-	void PresenceSendAuthorization(const OpalGloballyUniqueID & id, 
-									const PString & epalias,
-									PBoolean approved, 
-									const PStringList & subscribe);
+    /** Submit Presence Authorizations. 
+      */
+    void PresenceSendAuthorization(const OpalGloballyUniqueID & id, 
+                                    const PString & epalias,
+                                    PBoolean approved, 
+                                    const PStringList & subscribe);
 
-	/** Received Notifications
-	  */
-	virtual void PresenceNotification(const PString & locAlias,
-									const PString & subAlias,
-									unsigned state, 
-									const PString & display);
+    /** Received Notifications
+      */
+    virtual void PresenceNotification(const PString & locAlias,
+                                    const PString & subAlias,
+                                    unsigned state, 
+                                    const PString & display);
 
-	/** Received Instructions
-	  */
-	virtual void PresenceInstruction(const PString & locAlias,
-									unsigned type, 
-									const PString & subAlias);
+    /** Received Instructions
+      */
+    virtual void PresenceInstruction(const PString & locAlias,
+                                    unsigned type, 
+                                    const PString & subAlias);
 
-	/** Received Request for authorization
-	  */
-	virtual void PresenceAuthorization(const OpalGloballyUniqueID & id,
-									const PString & locAlias,
-									const PStringList & Aliases);
+    /** Received Request for authorization
+      */
+    virtual void PresenceAuthorization(const OpalGloballyUniqueID & id,
+                                    const PString & locAlias,
+                                    const PStringList & Aliases);
 #endif
 
 #endif
 
 
 #ifdef H323_AEC
-	PBoolean AECEnabled()   {  return enableAEC; }
+    PBoolean AECEnabled()   {  return enableAEC; }
 
-	void SetAECEnabled(PBoolean enabled)  { enableAEC = enabled; }
+    void SetAECEnabled(PBoolean enabled)  { enableAEC = enabled; }
 #endif
 
 #ifdef P_STUN
@@ -2436,24 +2009,24 @@ class H323EndPoint : public PObject
     );
 
     /**Type of NAT detected (if available) when initialing STUN Client
-	  */
-	virtual PBoolean STUNNatType(int /*type*/) { return FALSE; };
+      */
+    virtual PBoolean STUNNatType(int /*type*/) { return FALSE; };
 
     /** Retrieve the first available 
         NAT Traversal Techniques
      */
     PNatMethod * GetPreferedNatMethod(
         const PIPSocket::Address & address = 0 
-	);
+    );
 
     /** Get the Nat Methods List
        */
     PNatStrategy & GetNatMethods();
 
-	virtual void NATMethodCallBack(const PString & /*NatID*/,	///< Method Identifier
-								PINDEX /*msgID*/,				///< Message Identifer
-								const PString & /*message*/		///< Message
-								) {};
+    virtual void NATMethodCallBack(const PString & /*NatID*/,    ///< Method Identifier
+                                PINDEX /*msgID*/,                ///< Message Identifer
+                                const PString & /*message*/        ///< Message
+                                ) {};
 
 #endif // P_NONCORE
 
@@ -2475,7 +2048,7 @@ class H323EndPoint : public PObject
     void InternalTranslateTCPAddress(
       PIPSocket::Address & /*localAddr*/,
       const PIPSocket::Address & /*remoteAddr */,
-	  const H323Connection * conn = NULL
+      const H323Connection * conn = NULL
     );
 
     /**Provide TCP Port translation hook
@@ -2731,7 +2304,7 @@ class H323EndPoint : public PObject
       */
     PThread::Priority GetChannelThreadPriority() const { return channelThreadPriority; }
 
-    H323ConnectionDict GetConnections() { return connectionsActive; };
+    H323ConnectionDict & GetConnections() { return connectionsActive; };
 
     PBoolean EnableH225KeepAlive() const { return m_useH225KeepAlive; }
     PBoolean EnableH245KeepAlive() const { return m_useH245KeepAlive; }
@@ -2756,7 +2329,7 @@ class H323EndPoint : public PObject
       H323Transport * transport,     /// Transport to use for call.
       PString & token,               /// String to use/receive token for connection
       void * userData,               /// user data to pass to CreateConnection
-	  PBoolean supplimentary = false ///< Whether the call is a supplimentary call
+      PBoolean supplimentary = false ///< Whether the call is a supplimentary call
     );
 
     // Configuration variables, commonly changed
@@ -2773,8 +2346,8 @@ class H323EndPoint : public PObject
     PString     soundChannelRecordDriver;
     unsigned    soundChannelBuffers;
 #endif // P_AUDIO
-    PBoolean	autoStartReceiveAudio;
-    PBoolean	autoStartTransmitAudio;
+    PBoolean    autoStartReceiveAudio;
+    PBoolean    autoStartTransmitAudio;
 #endif // H323_AUDIO_CODECS
 
 #ifdef H323_VIDEO
@@ -2798,7 +2371,7 @@ class H323EndPoint : public PObject
     PBoolean        disableFastStart;
     PBoolean        disableH245Tunneling;
     PBoolean        disableH245inSetup;
-	PBoolean        disableH245QoS;
+    PBoolean        disableH245QoS;
     PBoolean        disableDetectInBandDTMF;
     PBoolean        canDisplayAmountString;
     PBoolean        canEnforceDurationLimit;
@@ -2859,7 +2432,7 @@ class H323EndPoint : public PObject
 #ifdef P_STUN
     PNatStrategy * natMethods;
     PSTUNClient * stun;
-	PBoolean disableSTUNTranslate;
+    PBoolean disableSTUNTranslate;
 #endif
 
 #ifdef H323_H46019M
@@ -2918,7 +2491,7 @@ class H323EndPoint : public PObject
     PINDEX logicalThreadStackSize;
     PINDEX rasThreadStackSize;
     PINDEX jitterThreadStackSize;
-	PBoolean useJitterBuffer;
+    PBoolean useJitterBuffer;
 
 #ifdef H323_RTP_AGGREGATE
     PINDEX rtpAggregationSize;
@@ -2948,27 +2521,27 @@ class H323EndPoint : public PObject
 
 #ifndef DISABLE_CALLAUTH
     // Call Authentication
-    PString EPSecurityUserName;	   /// Local UserName Authenticated Call 
-    PString EPSecurityPassword;	   /// Local Password Authenticated Call		
-    PBoolean isSecureCall;			   /// Flag to Specify Call to make is Authenticated.
+    PString EPSecurityUserName;       /// Local UserName Authenticated Call 
+    PString EPSecurityPassword;       /// Local Password Authenticated Call        
+    PBoolean isSecureCall;               /// Flag to Specify Call to make is Authenticated.
     EPSecurityPolicy CallAuthPolicy;   /// Incoming Call Authentication acceptance level
-    H235AuthenticatorList EPAuthList;  /// List of Usernames & Password to check incoming call Against				   
+    H235AuthenticatorList EPAuthList;  /// List of Usernames & Password to check incoming call Against                   
 #endif
 
 #ifdef H323_H460
-	H460_FeatureSet features;
-	PBoolean disableH460;
+    H460_FeatureSet features;
+    PBoolean disableH460;
 
 #ifdef H323_H46018
-	PBoolean m_h46018enabled;
+    PBoolean m_h46018enabled;
 #endif
 
 #ifdef H323_H46023
-	PBoolean m_h46023enabled;
+    PBoolean m_h46023enabled;
 #endif
 
 #ifdef H323_H460P
-	H460PresenceHandler * presenceHandler;
+    H460PresenceHandler * presenceHandler;
 #endif
 
 #endif
@@ -2978,16 +2551,16 @@ class H323EndPoint : public PObject
 #endif
 
 #ifdef H323_GNUGK
-	GNUGK_Feature * gnugk;
+    GNUGK_Feature * gnugk;
 #endif
 
     void RegInvokeReRegistration();
-	PMutex reregmutex;
+    PMutex reregmutex;
     PThread  *  RegThread;
     PDECLARE_NOTIFIER(PThread, H323EndPoint, RegMethod);
 
-	PBoolean m_useH225KeepAlive;
-	PBoolean m_useH245KeepAlive;
+    PBoolean m_useH225KeepAlive;
+    PBoolean m_useH245KeepAlive;
 };
 
 /////////////////////////////////////////////////////////////////////
