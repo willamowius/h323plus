@@ -35,10 +35,10 @@
  *
  * Contributor(s): ______________________________________.
  *
-* $Id $
-*
-*
-*/
+ * $Id$
+ *
+ *
+ */
 
 #if !defined(_H460_H)
 #define _H460_H
@@ -67,27 +67,27 @@ class OpalOID : public PASN_ObjectId
 {
 public:
 
-	OpalOID();
+    OpalOID();
 
-	OpalOID(
+    OpalOID(
       const char * str  ///< New string to assign.
     );
 
-	OpalOID operator+(const char *);
+    OpalOID operator+(const char *);
 
-	unsigned GetLastIdentifier() {
+    unsigned GetLastIdentifier() {
          return (*this)[GetSize()-1];
-	}
+    }
 };
 
 
 
 //////////////////////////////////////////////////////////////////////////////
 /**This is a base class for H.460 FeatureID.
-	Feature ID's can be in 3 formats:
-		Standard     : h460 series feature unsigned values;
-		OID		     : Array of unsigned values;
-		NonStandard  : PString Value
+    Feature ID's can be in 3 formats:
+        Standard     : h460 series feature unsigned values;
+        OID             : Array of unsigned values;
+        NonStandard  : PString Value
 
    The Derived Feature ID used as an index of the H460_FeatureContent
    is used to describe the parameters of a Feature.
@@ -100,61 +100,61 @@ class H460_FeatureID : public H225_GenericIdentifier
 
   /**@name Construction */
   //@{
-	/** Blank Feature
-	*/
-	H460_FeatureID();
+    /** Blank Feature
+    */
+    H460_FeatureID();
 
-	/** Standard Feature ID 
-	*/
-	H460_FeatureID(unsigned ID);
+    /** Standard Feature ID 
+    */
+    H460_FeatureID(unsigned ID);
 
-	/** OID Feature ID 
-	*/
+    /** OID Feature ID 
+    */
     H460_FeatureID(OpalOID ID);
 
-	/** NonStandard Feature ID 
-	*/
-	H460_FeatureID(PString ID);
+    /** NonStandard Feature ID 
+    */
+    H460_FeatureID(PString ID);
 
-	H460_FeatureID(H225_GenericIdentifier ID);
+    H460_FeatureID(H225_GenericIdentifier ID);
   //@}
 
   /**@name Operators */
   //@{
-	/** Standard Feature ID 
-	*/
+    /** Standard Feature ID 
+    */
        operator unsigned () const 
-		{ return ((PASN_Integer *)choice)->GetValue(); };
+        { return ((PASN_Integer *)choice)->GetValue(); };
 
-	/** OID Feature ID 
-	*/
+    /** OID Feature ID 
+    */
        operator OpalOID & () const
-	   { return (OpalOID &)*choice; };
+       { return (OpalOID &)*choice; };
 
-	/** NonStandard Feature ID 
-	*/
+    /** NonStandard Feature ID 
+    */
        operator PString () const 
-	   { return ((H225_GloballyUniqueID *)choice)->AsString(); };
+       { return ((H225_GloballyUniqueID *)choice)->AsString(); };
 
     
-	   PINLINE H460_FeatureID & operator=(unsigned ID);
+       PINLINE H460_FeatureID & operator=(unsigned ID);
 
-	   PINLINE H460_FeatureID & operator=(OpalOID ID);
+       PINLINE H460_FeatureID & operator=(OpalOID ID);
 
-	   PINLINE H460_FeatureID & operator=(PString ID);
-	 
-	/** Get the FeatureType
-	*/
-	   unsigned GetFeatureType() const { return GetTag(); };
+       PINLINE H460_FeatureID & operator=(PString ID);
+     
+    /** Get the FeatureType
+    */
+       unsigned GetFeatureType() const { return GetTag(); };
 
-	   PString IDString() const;
+       PString IDString() const;
   //@}
 
   /**@name PDictionary */
   //@{
     PObject * Clone() const;
 
-	PObject::Comparison Compare(const PObject & obj) const;
+    PObject::Comparison Compare(const PObject & obj) const;
   //@}
 
 };
@@ -175,100 +175,100 @@ class H460_FeatureContent : public H225_Content
 
   /**@name Construction */
   //@{
-	/** Blank Feature
-	*/
-	   H460_FeatureContent();
+    /** Blank Feature
+    */
+       H460_FeatureContent();
 
-	/** PASN_OctetString Raw information which can 
-		be deseminated by Derived Class
-	*/
-	   H460_FeatureContent(const PASN_OctetString & param);
+    /** PASN_OctetString Raw information which can 
+        be deseminated by Derived Class
+    */
+       H460_FeatureContent(const PASN_OctetString & param);
 
-	/** String Value
-	*/
-	   H460_FeatureContent(const PString & param);
+    /** String Value
+    */
+       H460_FeatureContent(const PString & param);
 
-	/** Blank Feature
-	*/
-	   H460_FeatureContent(PASN_BMPString & param);
+    /** Blank Feature
+    */
+       H460_FeatureContent(PASN_BMPString & param);
 
-	/** Boolean Value
-	*/
-	   H460_FeatureContent(const PBoolean & param);
+    /** Boolean Value
+    */
+       H460_FeatureContent(const PBoolean & param);
 
-	/** Integer Value
-	*/
-	   H460_FeatureContent(unsigned param, unsigned len);
+    /** Integer Value
+    */
+       H460_FeatureContent(unsigned param, unsigned len);
 
-	/** Feature Identifier
-	*/
-	   H460_FeatureContent(const H460_FeatureID & id);
+    /** Feature Identifier
+    */
+       H460_FeatureContent(const H460_FeatureID & id);
 
-	/** Alias Address Raw
-	*/
-	   H460_FeatureContent(const H225_AliasAddress & add);
+    /** Alias Address Raw
+    */
+       H460_FeatureContent(const H225_AliasAddress & add);
 
-	/** Alias Address Encoded
-	*/
+    /** Alias Address Encoded
+    */
        H460_FeatureContent(const PURL & add);
 
-	/** Transport Address
-	*/
-	   H460_FeatureContent(const H323TransportAddress & add);
+    /** Transport Address
+    */
+       H460_FeatureContent(const H323TransportAddress & add);
 
-	/** Feature Table
-	*/
-	   H460_FeatureContent(const H460_FeatureTable & table);
+    /** Feature Table
+    */
+       H460_FeatureContent(const H460_FeatureTable & table);
 
     /** GUID
-	  */
-	   H460_FeatureContent(const OpalGloballyUniqueID & guid);
+      */
+       H460_FeatureContent(const OpalGloballyUniqueID & guid);
 
-	/** Features
-	*/
-	   H460_FeatureContent(H460_Feature * data);
+    /** Features
+    */
+       H460_FeatureContent(H460_Feature * data);
 
-	/** Creation from PDU
-	*/
-	   H460_FeatureContent(const H225_Content & param);
+    /** Creation from PDU
+    */
+       H460_FeatureContent(const H225_Content & param);
 
   //@}
 
   /**@name Content Operators */
   //@{
-	operator PASN_OctetString () const { return *((PASN_OctetString *)choice); };
-	operator PString () const
-	{ 
-		switch (GetTag()) {
-			case e_text:  
-				return ((PASN_IA5String &)*choice).GetValue();
-			case e_transport: 
-				return H323TransportAddress(*(H225_TransportAddress *)choice);
-		}
-		
-		return PString();
-	}; 
+    operator PASN_OctetString () const { return *((PASN_OctetString *)choice); };
+    operator PString () const
+    { 
+        switch (GetTag()) {
+            case e_text:  
+                return ((PASN_IA5String &)*choice).GetValue();
+            case e_transport: 
+                return H323TransportAddress(*(H225_TransportAddress *)choice);
+        }
+        
+        return PString();
+    }; 
 
-	operator PASN_BMPString () const { return *(PASN_BMPString *)choice; };
-	operator PBoolean () const { return *(PASN_Boolean *)choice; };
+    operator PASN_BMPString () const { return *(PASN_BMPString *)choice; };
+    operator PBoolean () const { return *(PASN_Boolean *)choice; };
 
-	operator unsigned () const 
-	{ 
-		switch (GetTag()) {
-			case e_number8:  
-			case e_number16:
-			case e_number32: 
-				return *(PASN_Integer*)choice;
-			default: 
-				return 0;
-		 }
-	}
-		
-	operator H460_FeatureID () const { return *(H225_GenericIdentifier *)choice; };
-	operator H225_AliasAddress () const { return *(H225_AliasAddress *)choice; };
-	operator H323TransportAddress () const { return H323TransportAddress(*(H225_TransportAddress *)choice); };
-	operator H460_FeatureTable *() { return (H460_FeatureTable *)choice; };
-	operator H460_Feature *() { return (H460_Feature *)choice; };
+    operator unsigned () const 
+    { 
+        switch (GetTag()) {
+            case e_number8:  
+            case e_number16:
+            case e_number32: 
+                return *(PASN_Integer*)choice;
+            default: 
+                return 0;
+         }
+    }
+        
+    operator H460_FeatureID () const { return *(H225_GenericIdentifier *)choice; };
+    operator H225_AliasAddress () const { return *(H225_AliasAddress *)choice; };
+    operator H323TransportAddress () const { return H323TransportAddress(*(H225_TransportAddress *)choice); };
+    operator H460_FeatureTable *() { return (H460_FeatureTable *)choice; };
+    operator H460_Feature *() { return (H460_Feature *)choice; };
 
  //@} 
 };
@@ -297,105 +297,105 @@ class H460_FeatureParameter : public H225_EnumeratedParameter
 
     /**Create a new handler for a NonStandard H460 Feature.
      */
-	H460_FeatureParameter(const PString & Identifier);
+    H460_FeatureParameter(const PString & Identifier);
 
     /**Create a new handler for a OID H460 Feature.
      */
-	H460_FeatureParameter(const OpalOID & Identifier);
+    H460_FeatureParameter(const OpalOID & Identifier);
 
     /**Create a new handler from PDU
      */
-	H460_FeatureParameter(const H225_EnumeratedParameter & param);
+    H460_FeatureParameter(const H225_EnumeratedParameter & param);
 
-	/**Create a new Handler from FeatureID
-	*/
-	H460_FeatureParameter(const H460_FeatureID & ID);
+    /**Create a new Handler from FeatureID
+    */
+    H460_FeatureParameter(const H460_FeatureID & ID);
   //@}
 
   /**@name ID Operators */
   //@{
-	/** Feature Parameter ID 
-	*/
-	const H460_FeatureID ID() { return m_id; };
+    /** Feature Parameter ID 
+    */
+    const H460_FeatureID ID() { return m_id; };
 
-	/** Feature Parameter Contents
-	*/
-	 void addContent(const H460_FeatureContent & con ) 
-	 { IncludeOptionalField(e_content);  m_content = con; };
+    /** Feature Parameter Contents
+    */
+     void addContent(const H460_FeatureContent & con ) 
+     { IncludeOptionalField(e_content);  m_content = con; };
 
-	/** Replace Parameter Contents
-	*/
-	 void replaceContent(const H460_FeatureContent & con )
-			{ if (hasContent())  
-					delete &m_content; 
-				m_content = con; };
+    /** Replace Parameter Contents
+    */
+     void replaceContent(const H460_FeatureContent & con )
+            { if (hasContent())  
+                    delete &m_content; 
+                m_content = con; };
 
-	/** Feature parameter has Value
-	*/
-	 PBoolean hasContent() 
-			{ return (GetTag() == e_content); };
+    /** Feature parameter has Value
+    */
+     PBoolean hasContent() 
+            { return (GetTag() == e_content); };
 
   //@}
 
 
   /**@name Parameter Value Operators */
   //@{
-	operator PASN_OctetString &();
-	operator PString ();
-	operator PASN_BMPString &();
-	operator PBoolean ();
-	operator unsigned ();
-	operator H460_FeatureID &();
-	operator H225_AliasAddress &();
-	operator H323TransportAddress ();
-	operator H225_ArrayOf_EnumeratedParameter &();
-	operator PURL ();
-	operator OpalGloballyUniqueID ();
+    operator PASN_OctetString &();
+    operator PString ();
+    operator PASN_BMPString &();
+    operator PBoolean ();
+    operator unsigned ();
+    operator H460_FeatureID &();
+    operator H225_AliasAddress &();
+    operator H323TransportAddress ();
+    operator H225_ArrayOf_EnumeratedParameter &();
+    operator PURL ();
+    operator OpalGloballyUniqueID ();
 
 
-	H460_FeatureContent operator=(
-	const PASN_OctetString & value
-	);
+    H460_FeatureContent operator=(
+    const PASN_OctetString & value
+    );
 
-	H460_FeatureContent operator=(
-	const PString & value
-	);
+    H460_FeatureContent operator=(
+    const PString & value
+    );
 
-	H460_FeatureContent operator=(
-	const PASN_BMPString & value
-	);
+    H460_FeatureContent operator=(
+    const PASN_BMPString & value
+    );
 
-	H460_FeatureContent operator=(
-	const PBoolean & value
-	);
+    H460_FeatureContent operator=(
+    const PBoolean & value
+    );
 
-	H460_FeatureContent operator=(
-	const unsigned & value
-	);
+    H460_FeatureContent operator=(
+    const unsigned & value
+    );
 
-	H460_FeatureContent operator=(
-	const H460_FeatureID & value
-	);
+    H460_FeatureContent operator=(
+    const H460_FeatureID & value
+    );
 
-	H460_FeatureContent operator=(
-	const H225_AliasAddress & value
-	);
+    H460_FeatureContent operator=(
+    const H225_AliasAddress & value
+    );
 
-	H460_FeatureContent operator=(
-	const H323TransportAddress & value
-	);
+    H460_FeatureContent operator=(
+    const H323TransportAddress & value
+    );
 
-	H460_FeatureContent operator=(
-	const H460_FeatureTable & value
-	);
+    H460_FeatureContent operator=(
+    const H460_FeatureTable & value
+    );
 
-	H460_FeatureContent operator=(
-	H460_Feature * value
-	);
+    H460_FeatureContent operator=(
+    H460_Feature * value
+    );
 
-	H460_FeatureContent operator=(
-	const OpalGloballyUniqueID & value
-	);
+    H460_FeatureContent operator=(
+    const OpalGloballyUniqueID & value
+    );
 
 
 };
@@ -412,102 +412,102 @@ class H460_FeatureTable : public H225_ArrayOf_EnumeratedParameter
 
   /**@name Construction */
   //@{
-	/** Blank Feature
-	*/
-	H460_FeatureTable();
+    /** Blank Feature
+    */
+    H460_FeatureTable();
 
-	/** Contruction received from PDU 
-	*/
-	H460_FeatureTable(const H225_ArrayOf_EnumeratedParameter & Xparams);
+    /** Contruction received from PDU 
+    */
+    H460_FeatureTable(const H225_ArrayOf_EnumeratedParameter & Xparams);
   //@}
 
   /**@name Construction */
   //@{
 
-	/** AddParameter
-		Add a parameter to the parameter list from the
-		two components which make up the parameter.
-	*/
-	H460_FeatureParameter & AddParameter(const H460_FeatureID & id, const H460_FeatureContent & con);
+    /** AddParameter
+        Add a parameter to the parameter list from the
+        two components which make up the parameter.
+    */
+    H460_FeatureParameter & AddParameter(const H460_FeatureID & id, const H460_FeatureContent & con);
 
-	/** AddParameter
-		Add parameter without any content
-	*/
-	H460_FeatureParameter & AddParameter(const H460_FeatureID & id);
+    /** AddParameter
+        Add parameter without any content
+    */
+    H460_FeatureParameter & AddParameter(const H460_FeatureID & id);
 
-	/** AddParameter
-		Add parameter from information received in a PDU
-	*/
-	void AddParameter(H225_EnumeratedParameter & Xparam);
+    /** AddParameter
+        Add parameter from information received in a PDU
+    */
+    void AddParameter(H225_EnumeratedParameter & Xparam);
 
-	/** GetParameter
-		Get the parameter at defined index location in 
-		the parameter list. Used for iterations of the
-		parameter list.
-	*/
-	H460_FeatureParameter & GetParameter(PINDEX id);
+    /** GetParameter
+        Get the parameter at defined index location in 
+        the parameter list. Used for iterations of the
+        parameter list.
+    */
+    H460_FeatureParameter & GetParameter(PINDEX id);
 
-	/** GetParameter
-		Get the parameter with the matching Feature ID. The
-		paramter list is searcheed to find the parameter with the
-		matching feature id. If not found returns a blank 
-		feature parameter
-	*/
+    /** GetParameter
+        Get the parameter with the matching Feature ID. The
+        paramter list is searcheed to find the parameter with the
+        matching feature id. If not found returns a blank 
+        feature parameter
+    */
     H460_FeatureParameter & GetParameter(const H460_FeatureID & id);
 
-	/** GetParameterIndex
-		Get the paramter list index for the feature parameter
-		with the matching feature id.
-	*/
-	PINDEX GetParameterIndex(const H460_FeatureID & id);
+    /** GetParameterIndex
+        Get the paramter list index for the feature parameter
+        with the matching feature id.
+    */
+    PINDEX GetParameterIndex(const H460_FeatureID & id);
 
-	/** HasParameter
-		Return True if the parameter list contains a matching
-		feature parameter with the supplied feature id.
-	*/
-	PBoolean HasParameter(const H460_FeatureID & id);
+    /** HasParameter
+        Return True if the parameter list contains a matching
+        feature parameter with the supplied feature id.
+    */
+    PBoolean HasParameter(const H460_FeatureID & id);
 
-	/** RemoveParameter
-		Removes Feature Parameter from the Parameter list at the 
-		specified index.
-	*/
-	void RemoveParameter(PINDEX id);
+    /** RemoveParameter
+        Removes Feature Parameter from the Parameter list at the 
+        specified index.
+    */
+    void RemoveParameter(PINDEX id);
 
-	/** RemoveParameter
-		Remove Feature Parameter from the Parameter list with the
-		matching Feature ID.
-	*/
-	void RemoveParameter(const H460_FeatureID & id);
+    /** RemoveParameter
+        Remove Feature Parameter from the Parameter list with the
+        matching Feature ID.
+    */
+    void RemoveParameter(const H460_FeatureID & id);
 
-	/** ReplaceParameter
-		Replace the Feature contents of the unique Feature parameter 
-		with matching Feature ID in the parameter list.
-	*/
+    /** ReplaceParameter
+        Replace the Feature contents of the unique Feature parameter 
+        with matching Feature ID in the parameter list.
+    */
     void ReplaceParameter(const H460_FeatureID & id, const H460_FeatureContent & con);
 
-	/** ParameterCount
-		Number of Feature Parameters in the Parameter List.
-	*/
-	int ParameterCount() { return GetSize(); };
+    /** ParameterCount
+        Number of Feature Parameters in the Parameter List.
+    */
+    int ParameterCount() { return GetSize(); };
 
-	/** ParameterIsUnique
-		return TRUE if there is only 1 instance of
-		feature parameter with matching feature ID
-		exists in the feature list. You cannot replace
-		the contents of the parameter if the parameter ID
-		is not unique.
-	*/
-	PBoolean ParameterIsUnique(const H460_FeatureID & id);
+    /** ParameterIsUnique
+        return TRUE if there is only 1 instance of
+        feature parameter with matching feature ID
+        exists in the feature list. You cannot replace
+        the contents of the parameter if the parameter ID
+        is not unique.
+    */
+    PBoolean ParameterIsUnique(const H460_FeatureID & id);
 
-	/** Operator
-	*/
+    /** Operator
+    */
     inline H460_FeatureParameter & operator[](
       PINDEX id  ///* Index position in the collection of the object.
     ) const { return operator[](id); };
 
-	/** Operator
-	*/
-	H460_FeatureParameter & operator[](
+    /** Operator
+    */
+    H460_FeatureParameter & operator[](
       PINDEX id  ///* Index position in the collection of the object.
     );
   //@}
@@ -529,7 +529,7 @@ class H460_Feature : public H225_FeatureDescriptor
 
     /**Default Constructor
      */
-	H460_Feature();
+    H460_Feature();
 
     /**Create a new handler for a Standard H460 Feature.
      */
@@ -537,219 +537,219 @@ class H460_Feature : public H225_FeatureDescriptor
 
     /**Create a new handler for a NonStandard H460 Feature.
      */
-	H460_Feature(PString Identifier);
+    H460_Feature(PString Identifier);
 
     /**Create a new handler for a OID H460 Feature.
      */
-	H460_Feature(OpalOID Indentifier);
+    H460_Feature(OpalOID Indentifier);
 
     /**Create a new handler for a PDU Received Feature.
      */
-	H460_Feature(const H225_FeatureDescriptor & descriptor);
+    H460_Feature(const H225_FeatureDescriptor & descriptor);
 
   //@}
 
   /**@name Enumerators */
   //@{
 
-	enum {
+    enum {
       FeatureNeeded = 1,      ///< The Feature is Needed 
       FeatureDesired,         ///< Desired Feature
       FeatureSupported        ///< Supported Feature
-	} FeatureCategory;
+    } FeatureCategory;
 
 
-	enum {
-	  FeatureBase      =4,        ///< Create Startup use only Startup
-	  FeatureBaseAll   =5,        ///< Create Startup use RAS and Signal
-	  FeatureBaseRas   =6,        ///< Create Startup use RAS
-	  FeatureBaseSignal=7,	      ///< Create Base use Signal
+    enum {
+      FeatureBase      =4,        ///< Create Startup use only Startup
+      FeatureBaseAll   =5,        ///< Create Startup use RAS and Signal
+      FeatureBaseRas   =6,        ///< Create Startup use RAS
+      FeatureBaseSignal=7,          ///< Create Base use Signal
       FeatureRas       =8,        ///< Create Registering GK
-	  FeatureSignal    =16,       ///< Create Call Setup
-	  FeaturePresence  =24        ///< Create Call Setup/Advertise in Presence
-	} FeatureInstance;
+      FeatureSignal    =16,       ///< Create Call Setup
+      FeaturePresence  =24        ///< Create Call Setup/Advertise in Presence
+    } FeatureInstance;
 
   //@}
 
   /**@name Operators */
   //@{
-	/** Standard Feature ID 
-	*/
+    /** Standard Feature ID 
+    */
        operator unsigned () const { return (H460_FeatureID)m_id; };
 
-	/** OID Feature ID 
-	*/
+    /** OID Feature ID 
+    */
     //   operator OpalOID () const { return (H460_FeatureID)m_id; };
 
-	/** NonStandard Feature ID 
-	*/
+    /** NonStandard Feature ID 
+    */
        operator PString () const { return (H460_FeatureID)m_id; };
 
-	/** Get the FeatureID 
-	*/
-	   H460_FeatureID GetFeatureID() { return m_id; };
+    /** Get the FeatureID 
+    */
+       H460_FeatureID GetFeatureID() { return m_id; };
 
-	/** set the FeatureID
-	*/
+    /** set the FeatureID
+    */
        void SetFeatureID(const H460_FeatureID & id) { m_id = id; };
 
-	/** Get FeatureID as String
-	*/
-	   PString GetFeatureIDAsString();
+    /** Get FeatureID as String
+    */
+       PString GetFeatureIDAsString();
 
-	/** Get the FeatureType
-	*/
-	   unsigned GetFeatureType() { return ((H460_FeatureID)m_id).GetFeatureType(); };
+    /** Get the FeatureType
+    */
+       unsigned GetFeatureType() { return ((H460_FeatureID)m_id).GetFeatureType(); };
 
     /** Whether the current message is advertised.
       */
       virtual PBoolean FeatureAdvertised(int mtype);
 
     /** Whether Supports Non-Call Supplimentary Service
-	 */
-	   virtual PBoolean SupportNonCallService() { return false; };
+     */
+       virtual PBoolean SupportNonCallService() { return false; };
   //@}
 
   /**@name Parameter Control */
   //@{
-	/** Add Parameter 
-	*/
-	virtual H460_FeatureParameter & AddParameter(H460_FeatureID * id, const H460_FeatureContent & con);
+    /** Add Parameter 
+    */
+    virtual H460_FeatureParameter & AddParameter(H460_FeatureID * id, const H460_FeatureContent & con);
 
-	/** Add Parameter without contents 
-	*/
-	virtual H460_FeatureParameter & AddParameter(H460_FeatureID * id);
+    /** Add Parameter without contents 
+    */
+    virtual H460_FeatureParameter & AddParameter(H460_FeatureID * id);
 
-	/** Add Parameter from H460_FeatureParameter
-	*/
-	virtual void AddParameter(H460_FeatureParameter * param);
+    /** Add Parameter from H460_FeatureParameter
+    */
+    virtual void AddParameter(H460_FeatureParameter * param);
 
-	/** Delete Parameter 
-	*/
-	virtual void RemoveParameter(PINDEX id);
+    /** Delete Parameter 
+    */
+    virtual void RemoveParameter(PINDEX id);
 
-	/** Replace Parameter
-	*/
-	virtual void ReplaceParameter(const H460_FeatureID & id, const H460_FeatureContent & con);
+    /** Replace Parameter
+    */
+    virtual void ReplaceParameter(const H460_FeatureID & id, const H460_FeatureContent & con);
 
-	/** Get Parameter at index id
-	*/
+    /** Get Parameter at index id
+    */
     H460_FeatureParameter & GetFeatureParameter(PINDEX id);
 
-	/** Get Parameter with FeatureID
-	*/
+    /** Get Parameter with FeatureID
+    */
     H460_FeatureParameter & GetFeatureParameter(const H460_FeatureID & id);
 
-	/** Has Feature with FeatureID
-	*/
-	PBoolean HasFeatureParameter(const H460_FeatureID & id);
+    /** Has Feature with FeatureID
+    */
+    PBoolean HasFeatureParameter(const H460_FeatureID & id);
  
-	/** Contains Parameter (Use this when casting from H225_FeatureDescriptor)
-	  */
-	PBoolean Contains(const H460_FeatureID & id);
+    /** Contains Parameter (Use this when casting from H225_FeatureDescriptor)
+      */
+    PBoolean Contains(const H460_FeatureID & id);
 
-	/** Retrieve Parameter (Use this when casting from H225_FeatureDescriptor)
-	  */
+    /** Retrieve Parameter (Use this when casting from H225_FeatureDescriptor)
+      */
     H460_FeatureParameter & Value(const H460_FeatureID & id);
 
-	/** Accessing the Parameters
-	*/
+    /** Accessing the Parameters
+    */
     inline H460_FeatureParameter & operator()(
       PINDEX id  //* Index position in the collection of the object.
     ) const { return operator()(id); };
 
-	H460_FeatureParameter & operator()(
+    H460_FeatureParameter & operator()(
       PINDEX id  ///* Index position in the collection of the object.
     );
 
-	/** Accessing the Parameters
-	*/
+    /** Accessing the Parameters
+    */
     inline H460_FeatureParameter & operator[](
       const H460_FeatureID & id  //< FeatureID of the object.
     ) const { return operator()(id); };
 
-	H460_FeatureParameter & operator()(
+    H460_FeatureParameter & operator()(
       const H460_FeatureID & id  ///< FeatureID of the object.
     );
 
-	/** Get the Number of Parameters
-	*/
-	int GetParameterCount() 
-		{ return CurrentTable->ParameterCount(); };
+    /** Get the Number of Parameters
+    */
+    int GetParameterCount() 
+        { return CurrentTable->ParameterCount(); };
 
-	/** Get the Current Feature Table
-	  */
-	H460_FeatureTable & GetCurrentTable();
+    /** Get the Current Feature Table
+      */
+    H460_FeatureTable & GetCurrentTable();
 
-	/** Set the current feature table
-	  */
-	void SetCurrentTable(H460_FeatureTable & table);
+    /** Set the current feature table
+      */
+    void SetCurrentTable(H460_FeatureTable & table);
 
-	/** Set the curernt Feature Table from Parameter
-	  */
-	void SetCurrentTable(H460_FeatureParameter & param);
+    /** Set the curernt Feature Table from Parameter
+      */
+    void SetCurrentTable(H460_FeatureParameter & param);
 
     /** Set to default Feature table
-	  */
-	void SetDefaultTable();
+      */
+    void SetDefaultTable();
 
   //@}
 
   /**@name Plugin Management */
   //@{
-	/** Get Feature Names 
-	*/
-	static PStringList GetFeatureNames(PPluginManager * pluginMgr = NULL);
+    /** Get Feature Names 
+    */
+    static PStringList GetFeatureNames(PPluginManager * pluginMgr = NULL);
 
-	/** Get Feature Friendly Names
-	*/
-	static PStringList GetFeatureFriendlyNames(const PString & feature, PPluginManager * pluginMgr = NULL);
+    /** Get Feature Friendly Names
+    */
+    static PStringList GetFeatureFriendlyNames(const PString & feature, PPluginManager * pluginMgr = NULL);
 
-	/** Create instance of a feature 
-	*/
+    /** Create instance of a feature 
+    */
     static H460_Feature * CreateFeature(const PString & featurename,        ///< Feature Name Expression
-										int FeatureType = FeatureBase,		///< Feature Type
-										PPluginManager * pluginMgr = NULL   ///< Plugin Manager
+                                        int FeatureType = FeatureBase,        ///< Feature Type
+                                        PPluginManager * pluginMgr = NULL   ///< Plugin Manager
                                         );
-	/** Get Feature Name. This is usually the Derived Class Name
-	  */
+    /** Get Feature Name. This is usually the Derived Class Name
+      */
     static PStringArray GetFeatureName() { return PStringArray("empty"); };
 
-	/** Get Feature Friendly Name This usually the user friendly description
-	  */
+    /** Get Feature Friendly Name This usually the user friendly description
+      */
     static PStringArray GetFeatureFriendlyName() { return PStringArray("empty"); };
 
     /** Get the purpose of the the Feature whether for Signalling,RAS or both. This determines
-	    when the class is instantized
-	  */
-	static int GetPurpose()	{ return FeatureBase; };
+        when the class is instantized
+      */
+    static int GetPurpose()    { return FeatureBase; };
 
-	/** Get the Feature Identifier
-	  */
-	static PStringArray GetIdentifier() { return PStringArray("empty"); }
+    /** Get the Feature Identifier
+      */
+    static PStringArray GetIdentifier() { return PStringArray("empty"); }
 
     /** Get the Feature list to be advertised for presence
-	  */
-	static PBoolean PresenceFeatureList(std::map<PString,H460_FeatureID*> & plist, H323EndPoint * ep, PPluginManager * pluginMgr = NULL);
+      */
+    static PBoolean PresenceFeatureList(std::map<PString,H460_FeatureID*> & plist, H323EndPoint * ep, PPluginManager * pluginMgr = NULL);
 
-	/** Attach the endpoint. Override this to link your own Endpoint Instance.
-	  */
-	virtual void AttachEndPoint(H323EndPoint * _ep);
+    /** Attach the endpoint. Override this to link your own Endpoint Instance.
+      */
+    virtual void AttachEndPoint(H323EndPoint * _ep);
 
-	/** Attach the connection object, Override this to link to your own Connection Instance
-	  */
-	virtual void AttachConnection(H323Connection * _con);
+    /** Attach the connection object, Override this to link to your own Connection Instance
+      */
+    virtual void AttachConnection(H323Connection * _con);
 
-	virtual PBoolean CommonFeature() { return false; }
+    virtual PBoolean CommonFeature() { return false; }
 
   //@}
 
   /**@name H323 RAS Interface */
   //@{
-	/* These are the main calls which can be overridden to
-		allow the various derived features access to the GEF
-		interface.
-	*/
+    /* These are the main calls which can be overridden to
+        allow the various derived features access to the GEF
+        interface.
+    */
   // PDU calls (Used in the H225_RAS Class)
     virtual PBoolean OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu) { return FALSE; };
     virtual PBoolean OnSendGatekeeperConfirm(H225_FeatureDescriptor & pdu) { return FALSE; };
@@ -792,23 +792,23 @@ class H460_Feature : public H225_FeatureDescriptor
     virtual PBoolean OnSendNonStandardMessage(H225_FeatureDescriptor & pdu) { return FALSE; };
     virtual void OnReceiveNonStandardMessage(const H225_FeatureDescriptor & pdu) {};
 
-	virtual PBoolean OnSendUnregistrationRequest(H225_FeatureDescriptor & pdu) { return FALSE; };
-	virtual void OnReceiveUnregistrationRequest(const H225_FeatureDescriptor & pdu) {};
+    virtual PBoolean OnSendUnregistrationRequest(H225_FeatureDescriptor & pdu) { return FALSE; };
+    virtual void OnReceiveUnregistrationRequest(const H225_FeatureDescriptor & pdu) {};
 
-	virtual PBoolean OnSendEndpoint(H225_FeatureDescriptor & pdu) { return FALSE; };
-	virtual void OnReceiveEndpoint(const H225_FeatureDescriptor & pdu) {};
+    virtual PBoolean OnSendEndpoint(H225_FeatureDescriptor & pdu) { return FALSE; };
+    virtual void OnReceiveEndpoint(const H225_FeatureDescriptor & pdu) {};
 
     virtual PBoolean OnSendInfoRequestMessage(H225_FeatureDescriptor & pdu) { return FALSE; };
     virtual void OnReceiveInfoRequestMessage(const H225_FeatureDescriptor & pdu) {};
 
-	virtual PBoolean OnSendInfoRequestResponseMessage(H225_FeatureDescriptor & pdu) { return FALSE; };
-	virtual void OnReceiveInfoRequestResponseMessage(const H225_FeatureDescriptor & pdu) {};
+    virtual PBoolean OnSendInfoRequestResponseMessage(H225_FeatureDescriptor & pdu) { return FALSE; };
+    virtual void OnReceiveInfoRequestResponseMessage(const H225_FeatureDescriptor & pdu) {};
 
     virtual PBoolean OnSendDisengagementRequestMessage(H225_FeatureDescriptor & pdu) { return FALSE; };
     virtual void OnReceiveDisengagementRequestMessage(const H225_FeatureDescriptor & pdu) {};
 
-	virtual PBoolean OnSendDisengagementConfirmMessage(H225_FeatureDescriptor & pdu) { return FALSE; };
-	virtual void OnReceiveDisengagementConfirmMessage(const H225_FeatureDescriptor & pdu) {};
+    virtual PBoolean OnSendDisengagementConfirmMessage(H225_FeatureDescriptor & pdu) { return FALSE; };
+    virtual void OnReceiveDisengagementConfirmMessage(const H225_FeatureDescriptor & pdu) {};
   //@}
 
   /**@name Signal PDU Interface */
@@ -829,27 +829,27 @@ class H460_Feature : public H225_FeatureDescriptor
     virtual PBoolean OnSendFacility_UUIE(H225_FeatureDescriptor & pdu) { return FALSE; };
     virtual void OnReceiveFacility_UUIE(const H225_FeatureDescriptor & pdu) {};
 
-	virtual PBoolean OnSendReleaseComplete_UUIE(H225_FeatureDescriptor & pdu) { return FALSE; };
-	virtual void OnReceiveReleaseComplete_UUIE(const H225_FeatureDescriptor & pdu) {};
+    virtual PBoolean OnSendReleaseComplete_UUIE(H225_FeatureDescriptor & pdu) { return FALSE; };
+    virtual void OnReceiveReleaseComplete_UUIE(const H225_FeatureDescriptor & pdu) {};
 
-	virtual PBoolean OnSendUnAllocatedPDU(H225_FeatureDescriptor & pdu) { return FALSE; };
-	virtual void OnReceivedUnAllocatedPDU(const H225_FeatureDescriptor & pdu) {};
+    virtual PBoolean OnSendUnAllocatedPDU(H225_FeatureDescriptor & pdu) { return FALSE; };
+    virtual void OnReceivedUnAllocatedPDU(const H225_FeatureDescriptor & pdu) {};
 
   //@}
 
   /**@name H501 Support */
   //@{
   // H501 Calls (To Be Implemented
-		// H501_MessageCommonInfo
-		// H501_AddressTemplate
-		// H501_ContactInformation
-		// H501_RouteInformation
+        // H501_MessageCommonInfo
+        // H501_AddressTemplate
+        // H501_ContactInformation
+        // H501_RouteInformation
   //@}
 
   protected:
-	  H460_FeatureTable * CurrentTable;
-	  H323EndPoint * ep;
-	  H323Connection * con;
+      H460_FeatureTable * CurrentTable;
+      H323EndPoint * ep;
+      H323Connection * con;
 };
 
 class H460_FeatureStd : public H460_Feature
@@ -859,39 +859,39 @@ class H460_FeatureStd : public H460_Feature
 
   /**@name Construction */
   //@{
-	  H460_FeatureStd() {};
+      H460_FeatureStd() {};
 
     /**Create a new handler for a Standard H460 Feature.
      */
-	H460_FeatureStd(unsigned Identifier);
+    H460_FeatureStd(unsigned Identifier);
   //@}
 
   /**@name Parameter Control */
   //@{
-	/** Add item 
-	*/
-	void Add(unsigned id);
-	void Add(unsigned id, const H460_FeatureContent & con);
+    /** Add item 
+    */
+    void Add(unsigned id);
+    void Add(unsigned id, const H460_FeatureContent & con);
 
-	/** Delete item 
-	*/
-	void Remove(unsigned id);
+    /** Delete item 
+    */
+    void Remove(unsigned id);
 
-	/** Replace item 
-	*/
-	void Replace(unsigned id,const H460_FeatureContent & con);
+    /** Replace item 
+    */
+    void Replace(unsigned id,const H460_FeatureContent & con);
 
-	/** Has Parameter
-	  */
-	PBoolean HasParameter(unsigned id);
+    /** Has Parameter
+      */
+    PBoolean HasParameter(unsigned id);
 
-	/** Get Parameter
-	  */
-	H460_FeatureParameter & GetParameter(unsigned id);
+    /** Get Parameter
+      */
+    H460_FeatureParameter & GetParameter(unsigned id);
   //@}
 
-	/** Operator
-	*/
+    /** Operator
+    */
     inline H460_FeatureParameter & operator[] (
       unsigned id  ///* Index value of the object.
     ) { return GetParameter(id); };
@@ -907,39 +907,39 @@ class H460_FeatureNonStd : public H460_Feature
   //@{
     /**Create a new handler for a Standard H460 Feature.
      */
-	H460_FeatureNonStd(PString Identifier);
+    H460_FeatureNonStd(PString Identifier);
   //@}
 
   /**@name Parameter Control */
   //@{
-	/** Add item 
-	*/
-	void Add(const PString & id);
-	void Add(const PString & id, const H460_FeatureContent & con);
+    /** Add item 
+    */
+    void Add(const PString & id);
+    void Add(const PString & id, const H460_FeatureContent & con);
 
-	/** Delete item 
-	*/
-	void Remove(const PString & id);
+    /** Delete item 
+    */
+    void Remove(const PString & id);
 
-	/** Replace item 
-	*/
-	void Replace(const PString & id, const H460_FeatureContent & con);
+    /** Replace item 
+    */
+    void Replace(const PString & id, const H460_FeatureContent & con);
 
-	/** Has Parameter
-	  */
-	PBoolean HasParameter(PString id);
+    /** Has Parameter
+      */
+    PBoolean HasParameter(PString id);
 
   //@}
 
-	/** Operator
-	*/
+    /** Operator
+    */
     inline H460_FeatureParameter & operator[](
       PString id  ///* Index position in the collection of the object.
     ) const { return operator[](id); };
 
-	/** Operator
-	*/
-	H460_FeatureParameter & operator[](
+    /** Operator
+    */
+    H460_FeatureParameter & operator[](
       PString id  ///* Index position in the collection of the object.
     );
 
@@ -954,47 +954,47 @@ class H460_FeatureOID : public H460_Feature
   //@{
     /**Create a new handler for a Standard H460 Feature.
      */
-	H460_FeatureOID(OpalOID Identifier);
+    H460_FeatureOID(OpalOID Identifier);
   //@}
 
   /**@name Parameter Control */
   //@{
-	/** Add item 
-	*/
-	void Add(const PString & id);
-	void Add(const PString & id, const H460_FeatureContent & con);
+    /** Add item 
+    */
+    void Add(const PString & id);
+    void Add(const PString & id, const H460_FeatureContent & con);
 
-	/** Delete item 
-	*/
-	void Remove(const PString & id);
+    /** Delete item 
+    */
+    void Remove(const PString & id);
 
-	/** Replace item 
-	*/
-	void Replace(const PString & id, const H460_FeatureContent & con);
+    /** Replace item 
+    */
+    void Replace(const PString & id, const H460_FeatureContent & con);
 
-	/** Has Parameter
-	  */
-	PBoolean HasParameter(OpalOID id);
+    /** Has Parameter
+      */
+    PBoolean HasParameter(OpalOID id);
 
-	/** Contains a Parameter
-	  */
-	PBoolean Contains(const PString & id);
+    /** Contains a Parameter
+      */
+    PBoolean Contains(const PString & id);
 
     /** Value of a parameter
-	  */
-	H460_FeatureParameter & Value(const PString & id);
+      */
+    H460_FeatureParameter & Value(const PString & id);
 
   //@}
 
-	/** Operator
-	*/
+    /** Operator
+    */
     inline H460_FeatureParameter & operator[](
       OpalOID id  ///* Index position in the collection of the object.
     ) const { return operator[](id); };
 
-	/** Operator
-	*/
-	H460_FeatureParameter & operator[](
+    /** Operator
+    */
+    H460_FeatureParameter & operator[](
       OpalOID id  ///* Index position in the collection of the object.
     );
 
@@ -1015,97 +1015,97 @@ class H460_FeatureSet : public PObject
     PCLASSINFO(H460_FeatureSet, PObject);
   public:
 
-	/** Blank Constructor
-	 */
-	H460_FeatureSet();
+    /** Blank Constructor
+     */
+    H460_FeatureSet();
 
-	/** Build a new featureSet from a base featureset
-	 */
+    /** Build a new featureSet from a base featureset
+     */
     H460_FeatureSet(H460_FeatureSet * _base);
 
-	/** Build a Feature Set from the contents of a Feature Set PDU
-	 */
-	H460_FeatureSet(const H225_FeatureSet & fs);
+    /** Build a Feature Set from the contents of a Feature Set PDU
+     */
+    H460_FeatureSet(const H225_FeatureSet & fs);
 
     /** Build a FeatureSet from the contents of a generic data field.
-	 */
-	H460_FeatureSet(const H225_ArrayOf_GenericData & generic);
+     */
+    H460_FeatureSet(const H225_ArrayOf_GenericData & generic);
 
     /** Derive new Feature Set based on this Feature Set ie Clone this FeatureSet
-	  */
-	H460_FeatureSet * DeriveNewFeatureSet();
+      */
+    H460_FeatureSet * DeriveNewFeatureSet();
 
-	/** Load Entire Feature Sets from PFactory loader
-	   */
-	virtual PBoolean LoadFeatureSet(int inst = H460_Feature::FeatureBase,
-		                                  H323Connection * con = NULL);
+    /** Load Entire Feature Sets from PFactory loader
+       */
+    virtual PBoolean LoadFeatureSet(int inst = H460_Feature::FeatureBase,
+                                          H323Connection * con = NULL);
 
-	/** Remove uncommon features from featureSet
-		This is usually done after receiving the connect message
-	  */
-	PBoolean RemoveUnCommonFeatures();
+    /** Remove uncommon features from featureSet
+        This is usually done after receiving the connect message
+      */
+    PBoolean RemoveUnCommonFeatures();
 
-	/** Process the first PDU, This will combine the features supported by
-	    the remote and local party to derive a common feature set. This will 
-		remove features that are not supported be the remote.
-	  */
-	PBoolean ProcessFirstPDU(const H225_FeatureSet & fs);
+    /** Process the first PDU, This will combine the features supported by
+        the remote and local party to derive a common feature set. This will 
+        remove features that are not supported be the remote.
+      */
+    PBoolean ProcessFirstPDU(const H225_FeatureSet & fs);
 
-	/**  Create FeatureSet from a FeatureSet PDU
-	  */
-	virtual PBoolean CreateFeatureSet(const H225_FeatureSet & fs);
+    /**  Create FeatureSet from a FeatureSet PDU
+      */
+    virtual PBoolean CreateFeatureSet(const H225_FeatureSet & fs);
 
-	/** Load Feature from id.
-	  */
-	virtual PBoolean LoadFeature(const PString & featid);
-	
-	/** Add a Feature to the Feature Set
-	*/
-	PBoolean AddFeature(H460_Feature * Nfeat);
+    /** Load Feature from id.
+      */
+    virtual PBoolean LoadFeature(const PString & featid);
+    
+    /** Add a Feature to the Feature Set
+    */
+    PBoolean AddFeature(H460_Feature * Nfeat);
 
-	/** Remove a Feature from the Feature Set
-	*/
-	void RemoveFeature(H460_FeatureID id);
+    /** Remove a Feature from the Feature Set
+    */
+    void RemoveFeature(H460_FeatureID id);
 
-	/** Get Feature with id
-	*/
-	H460_Feature * GetFeature(const H460_FeatureID & id);
+    /** Get Feature with id
+    */
+    H460_Feature * GetFeature(const H460_FeatureID & id);
 
-	/** Determine if the FeatureSet has a particular FeatureID.
-	  */
-	PBoolean HasFeature(const H460_FeatureID & feat);
+    /** Determine if the FeatureSet has a particular FeatureID.
+      */
+    PBoolean HasFeature(const H460_FeatureID & feat);
 
-	/** New Processing Paradigm
-		 Main PDU & RAS link to OpenH323
-	*/
-	void ReceiveFeature(unsigned id, const H225_FeatureSet & Message);
+    /** New Processing Paradigm
+         Main PDU & RAS link to OpenH323
+    */
+    void ReceiveFeature(unsigned id, const H225_FeatureSet & Message);
 
-	/** New Processing Paradigm
-		 Main PDU & RAS link to OpenH323
-	*/
-	PBoolean SendFeature(unsigned id, H225_FeatureSet & Message, PBoolean advertise);	
+    /** New Processing Paradigm
+         Main PDU & RAS link to OpenH323
+    */
+    PBoolean SendFeature(unsigned id, H225_FeatureSet & Message, PBoolean advertise);    
 
-	/**Disable all features
-		Remote does not support H.460 so we remove all features
-	  */
+    /**Disable all features
+        Remote does not support H.460 so we remove all features
+      */
     void DisableAllFeatures(int msgtype);
 
-	/** Attach Endpoint
-	*/
-	virtual void AttachEndPoint(H323EndPoint * _ep);
+    /** Attach Endpoint
+    */
+    virtual void AttachEndPoint(H323EndPoint * _ep);
 
-	/** Attach Base FeatureSet
-	 */
-	virtual void AttachBaseFeatureSet(H460_FeatureSet * _baseSet);
+    /** Attach Base FeatureSet
+     */
+    virtual void AttachBaseFeatureSet(H460_FeatureSet * _baseSet);
 
-	/** Attach Endpoint to collect Events from
-	  */
-	H323EndPoint * GetEndPoint() { return ep; };
+    /** Attach Endpoint to collect Events from
+      */
+    H323EndPoint * GetEndPoint() { return ep; };
 
-	/** Determine whether the FeatureSet supports
-	    NonCallSupplimentaryServices. 
-	  */
-	virtual PBoolean SupportNonCallService(const H225_FeatureSet & fs);
+    /** Determine whether the FeatureSet supports
+        NonCallSupplimentaryServices. 
+      */
+    virtual PBoolean SupportNonCallService(const H225_FeatureSet & fs);
 
   protected:
 
@@ -1135,23 +1135,23 @@ template <class className> class H460PluginServiceDescriptor : public PDevicePlu
   public:
     virtual PObject *   CreateInstance(int /*userData*/) const { return new className; }
     virtual PStringArray GetDeviceNames(int userData) const 
-	{ 
-		if (userData == 24)  // Presence Identifer
-			return className::GetIdentifier(); 
-		else
-			return className::GetFeatureFriendlyName(); 
-	}
+    { 
+        if (userData == 24)  // Presence Identifer
+            return className::GetIdentifier(); 
+        else
+            return className::GetFeatureFriendlyName(); 
+    }
     virtual bool  ValidateDeviceName(const PString & deviceName, int userData) const 
-	{ 
-	     PStringArray devices = className::GetFeatureName(); 
-		 if ((deviceName == devices[0]) &&
-			 (className::GetPurpose() >= userData) && 
-			 (className::GetPurpose() < userData*2)) {
+    { 
+         PStringArray devices = className::GetFeatureName(); 
+         if ((deviceName == devices[0]) &&
+             (className::GetPurpose() >= userData) && 
+             (className::GetPurpose() < userData*2)) {
 
-		        return true; 
-		 } else
-			    return false;
-	} 
+                return true; 
+         } else
+                return false;
+    } 
 };
 
 #define H460_FEATURE(name)    \
