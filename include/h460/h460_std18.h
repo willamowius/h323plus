@@ -33,25 +33,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.6  2009/10/21 10:09:01  shorne
- * Updates for H.460.18/.19/.23/.24
- *
- * Revision 1.5  2009/09/29 07:23:03  shorne
- * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
- *
- * Revision 1.4  2009/08/28 14:36:06  shorne
- * Fixes to enable compilation with PTLIB 2.6.4
- *
- * Revision 1.3  2009/07/25 10:35:51  shorne
- * First cut of H.460.23/.24 support
- *
- * Revision 1.2  2009/06/28 01:08:51  shorne
- * Fix so features load properly
- *
- * Revision 1.1  2009/06/28 00:11:03  shorne
- * Added H.460.18/19 Support
- *
+ * $Id$
  *
  *
  */
@@ -151,10 +133,10 @@ public:
     virtual PBoolean OnSendCallProceeding_UUIE(H225_FeatureDescriptor & pdu);
     virtual void OnReceiveCallProceeding_UUIE(const H225_FeatureDescriptor & pdu);
 
- //   virtual PBoolean OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu);
+    virtual PBoolean OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu);
     virtual void OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pdu);
 
-//    virtual PBoolean OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu);
+    virtual PBoolean OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu);
     virtual void OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor & pdu);
 
 	////////////////////
@@ -168,6 +150,7 @@ private:
     PBoolean isEnabled;
 	PBoolean isAvailable;
     PBoolean remoteSupport;
+    PBoolean multiSupport;
 };
 
 // Need to declare for Factory Loader

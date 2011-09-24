@@ -160,18 +160,14 @@ void H460_FeatureStd18::OnReceiveServiceControlIndication(const H225_FeatureDesc
 H460_FEATURE(Std19);
 
 #define H46019_Multiplex      1
-#define H46019_MultiServer    1
+#define H46019_MultiServer    2
 
 H460_FeatureStd19::H460_FeatureStd19()
-: H460_FeatureStd(19)
+: H460_FeatureStd(19), EP(NULL), CON(NULL), isEnabled(false),
+    isAvailable(true), remoteSupport(false), multiSupport(false)
 {
     PTRACE(6,"Std19\tInstance Created");
 
-    EP = NULL;
-    CON = NULL;
-    isEnabled = false;
-    isAvailable = true;
-    remoteSupport = false;
     FeatureCategory = FeatureSupported;
 }
 
@@ -220,8 +216,10 @@ void H460_FeatureStd19::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
         CON->H46019SetCallReceiver();
 #ifdef H323_H46019M
         H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
-        if (feat.Contains(H46019_Multiplex)) 
+        if (feat.Contains(H46019_Multiplex)) { 
+             multiSupport = true;
              CON->H46019MultiEnabled();
+        }
         
         /// MultiServer?
         // if (feat.Contains(H46019_MultiServer))
@@ -236,6 +234,10 @@ PBoolean H460_FeatureStd19::OnSendCallProceeding_UUIE(H225_FeatureDescriptor & p
         return FALSE;
 
     H460_FeatureStd feat = H460_FeatureStd(19); 
+#ifdef H323_H46019M
+    if (multiSupport)
+         feat.Add(H46019_Multiplex);
+#endif
     pdu = feat;
     return TRUE; 
 }
@@ -247,10 +249,26 @@ void H460_FeatureStd19::OnReceiveCallProceeding_UUIE(const H225_FeatureDescripto
         CON->H46019Enabled();
 #ifdef H323_H46019M
         H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
-        if (feat.Contains(H46019_Multiplex)) 
+        if (feat.Contains(H46019_Multiplex)) {
              CON->H46019MultiEnabled();
+             multiSupport = true;
+        }
 #endif
     }
+}
+
+PBoolean H460_FeatureStd19::OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu)
+{
+    if (!isEnabled || !isAvailable || !remoteSupport)
+        return FALSE;
+
+    H460_FeatureStd feat = H460_FeatureStd(19); 
+#ifdef H323_H46019M
+    if (multiSupport)
+         feat.Add(H46019_Multiplex);
+#endif
+    pdu = feat;
+    return TRUE; 
 }
 
 void H460_FeatureStd19::OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pdu) 
@@ -260,10 +278,26 @@ void H460_FeatureStd19::OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pd
         CON->H46019Enabled();
 #ifdef H323_H46019M
         H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
-        if (feat.Contains(H46019_Multiplex)) 
+        if (feat.Contains(H46019_Multiplex)) {
+             multiSupport = true;
              CON->H46019MultiEnabled();
+        }
 #endif
     } 
+}
+
+PBoolean H460_FeatureStd19::OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu)
+{
+    if (!isEnabled || !isAvailable || !remoteSupport)
+        return FALSE;
+
+    H460_FeatureStd feat = H460_FeatureStd(19); 
+#ifdef H323_H46019M
+    if (multiSupport)
+         feat.Add(H46019_Multiplex);
+#endif
+    pdu = feat;
+    return TRUE; 
 }
 
 void H460_FeatureStd19::OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor & pdu) 
@@ -273,8 +307,10 @@ void H460_FeatureStd19::OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor &
         CON->H46019Enabled();
 #ifdef H323_H46019M
         H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
-        if (feat.Contains(H46019_Multiplex)) 
+        if (feat.Contains(H46019_Multiplex)) {
+             multiSupport = true;
              CON->H46019MultiEnabled();
+        }
 #endif
     }
 }

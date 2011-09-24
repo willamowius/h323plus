@@ -194,7 +194,7 @@ class H46018Handler : public PObject
     PBoolean CreateH225Transport(const PASN_OctetString & information);
 
 #ifdef H323_H46019M
-    void EnableMultiplex();
+    void EnableMultiplex(bool enable);
 #endif
 
 #ifdef H323_H46024A
@@ -219,7 +219,7 @@ class H46018Handler : public PObject
     PBoolean m_h46018inOperation;
 };
 
-
+class H46019MultiplexSocket;
 class PNatMethod_H46019  : public PNatMethod
 {
     PCLASSINFO(PNatMethod_H46019,PNatMethod);
@@ -296,12 +296,16 @@ class PNatMethod_H46019  : public PNatMethod
     /** EnableMultiplex
         Enable Multiplexing for this call
      */
-    void EnableMultiplex();
+    static void EnableMultiplex(bool enable);
 
     /** IsMultiplex
         Is Multiplexing media
      */
-    PBoolean IsMultiplexed();
+    static PBoolean IsMultiplexed();
+
+    /**Get multiplex socket
+      */
+    static H46019MultiplexSocket * GetMultiplexSocket(bool rtp);
 #endif
 
     /**  OpenSocket
@@ -371,9 +375,9 @@ class PNatMethod_H46019  : public PNatMethod
     H46018Handler * handler;            ///< handler
 
 #ifdef H323_H46019M
-    PBoolean                      multiplex;
-    PortInfo                      muxPortInfo;
-    H323Connection::NAT_Sockets   muxSockets;
+    static PBoolean                      multiplex;
+    PortInfo                             muxPortInfo;
+    static H323Connection::NAT_Sockets   muxSockets;
 #endif
 
 };
@@ -396,8 +400,7 @@ struct  H46019MultiPacket {
 
 typedef std::queue<H46019MultiPacket> H46019MultiQueue;
 
-class H46019MultiplexSocket : public PUDPSocket,
-                              public PThread
+class H46019MultiplexSocket : public PUDPSocket
 {
   PCLASSINFO(H46019MultiplexSocket, PUDPSocket);
 
@@ -406,7 +409,6 @@ class H46019MultiplexSocket : public PUDPSocket,
 
     ~H46019MultiplexSocket();
 
-    void Main();
 
      /**Read a datagram from a remote computer
        @return PTrue if any bytes were sucessfully read.
@@ -431,10 +433,19 @@ class H46019MultiplexSocket : public PUDPSocket,
     void RegisterSocket(unsigned id, PUDPSocket * socket);
     void UnregisterSocket(unsigned id);
 
+    unsigned GetSocketCount();
+
+    virtual PBoolean Close();
+
+    void Start();
+
   private:
-    
+
+    PBoolean                   m_shutdown;
     PMutex                     m_mutex;
     map<unsigned, PUDPSocket*> m_socketMap;
+    PThread *                  m_readThread;
+    PDECLARE_NOTIFIER(PThread, H46019MultiplexSocket, ReadThread);
 
 };
 #endif
@@ -444,7 +455,6 @@ class H46019UDPSocket : public PUDPSocket
     PCLASSINFO(H46019UDPSocket, PUDPSocket);
   public:
     /**@name Construction/Deconstructor */
-    //@{
     /** create a UDP Socket Fully Nat Supported
         ready for H323plus to Call.
     */
@@ -496,10 +506,6 @@ class H46019UDPSocket : public PUDPSocket
     void SetTTL(unsigned val);
 
 #ifdef H323_H46019M
-
-    /** Attach Mutiplex socket
-      */
-    void AttachMultiplexSocket(PUDPSocket * multi);
 
     /** Get Multiplex Address
       */
@@ -654,7 +660,6 @@ private:
     H46019MultiQueue m_multQueue;                   ///< Incoming frame Queue
     unsigned         m_multiBuffer;                 ///< Multiplex BufferSize
     PMutex           m_multiMutex;                  ///< MultiQueue mutex
-    PUDPSocket *     m_multiplexSocket;             ///< Multiplex Socket
     PBoolean         m_shutDown;                    ///< Shutdown
 #endif
 

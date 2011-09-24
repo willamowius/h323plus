@@ -310,8 +310,8 @@ class H323Connection : public PObject
       * By default, this does nothing
       */
     virtual void OnSendIRR(
-		H225_InfoRequestResponse & irr
-	) const;
+        H225_InfoRequestResponse & irr
+    ) const;
 
     /**
       * called when an DRQ needs to be sent to a gatekeeper. This allows the connection
@@ -320,8 +320,8 @@ class H323Connection : public PObject
       * By default, this does nothing
       */
     virtual void OnSendDRQ(
-		H225_DisengageRequest & drq
-	) const;
+        H225_DisengageRequest & drq
+    ) const;
 
     /** Called when a connection is established.
         Default behaviour is to call H323EndPoint::OnConnectionEstablished
@@ -448,9 +448,9 @@ class H323Connection : public PObject
 
     /**Change the transport (signalling channel) for this connection.
       */
-	virtual void ChangeSignalChannel(
-		H323Transport * channel  ///< New Transport for PDU's
-		);
+    virtual void ChangeSignalChannel(
+        H323Transport * channel  ///< New Transport for PDU's
+        );
 
     /**Write a PDU to the signalling channel.
       */
@@ -463,15 +463,15 @@ class H323Connection : public PObject
      */
     virtual void HandleSignallingChannel();
 
-	/**Handle the situation where the call signalling channel fails
-		return TRUE to keep the call alive / False to drop the call
-	  */
-	virtual PBoolean HandleSignalChannelFailure()  { return FALSE; }
+    /**Handle the situation where the call signalling channel fails
+        return TRUE to keep the call alive / False to drop the call
+      */
+    virtual PBoolean HandleSignalChannelFailure()  { return FALSE; }
 
-	/**Handle the situation where the media channel fails
-		return TRUE to keep the call alive / False to drop the call
-	  */
-	virtual PBoolean HandleControlChannelFailure()  { return FALSE; }
+    /**Handle the situation where the media channel fails
+        return TRUE to keep the call alive / False to drop the call
+      */
+    virtual PBoolean HandleControlChannelFailure()  { return FALSE; }
 
     /**Handle a single received PDU from the signalling channel.
        This is an internal function and is unlikely to be used by applications.
@@ -672,7 +672,7 @@ class H323Connection : public PObject
       */
     virtual PBoolean RouteCallToMC(
       const PString & forwardParty,   ///< Party to forward call to
-      const H225_ConferenceIdentifier & confID	/// conference to join
+      const H225_ConferenceIdentifier & confID    /// conference to join
     );
 
 #ifdef H323_H450
@@ -766,7 +766,7 @@ class H323Connection : public PObject
       to correctly charge the correct party for Transferred or forwarded calls.
        */
      virtual void SetCallLinkage(
-		H225_AdmissionRequest & arq   ///< Admission Request PDU
+        H225_AdmissionRequest & arq   ///< Admission Request PDU
       );
 
      /**Set the call linkage associated with the current call. This is used to detect the callToken which has 
@@ -774,13 +774,13 @@ class H323Connection : public PObject
       to correctly charge the correct party for Transferred or forwarded calls.
      */
      virtual void GetCallLinkage(
-		const H225_AdmissionRequest & arq  ///< Admission Request PDU
-	);
+        const H225_AdmissionRequest & arq  ///< Admission Request PDU
+    );
 
     /**Retrieves the redirecting number(s) and additional call diversion information (div. counter
-	   and div. reason) as of an incoming redirected call, currently only according to H.450.3 call diversion
-	   supplementary service 
-	*/
+       and div. reason) as of an incoming redirected call, currently only according to H.450.3 call diversion
+       supplementary service 
+    */
 
     PBoolean GetRedirectingNumber(
       PString &originalCalledNr,               
@@ -821,8 +821,8 @@ class H323Connection : public PObject
        for the held endpoint.
       */
     void SetVideoHoldMedia(
-	  PChannel * videoChannel
-	);
+      PChannel * videoChannel
+    );
 
     /**CallBack when Call is put on hold. This allows the device to release the 
        Local Input device to be used for another active connection
@@ -838,7 +838,7 @@ class H323Connection : public PObject
     virtual PChannel *  OnCallRetrieve(PBoolean IsEncoder,  ///* Direction
                                unsigned sessionId,      ///* Session Id    
                                unsigned bufferSize,     ///* Size of each sound buffer (Audio)
-                               PChannel * channel);	///* Channel being Held
+                               PChannel * channel);    ///* Channel being Held
 
     /**Determine if Meadia On Hold is enabled.
       */
@@ -920,7 +920,7 @@ class H323Connection : public PObject
       AnswerCallAlertWithMedia,    ///< As for AnswerCallPending but starts media channels
       AnswerCallDeferredWithMedia, ///< As for AnswerCallDeferred but starts media channels
       AnswerCallDeniedByInvalidCID, ///< As for AnswerCallDenied but returns e_invalidCID
-	  AnswerCallNowWithAlert,
+      AnswerCallNowWithAlert,
       NumAnswerCallResponses
     };
 #if PTRACING
@@ -1326,13 +1326,13 @@ class H323Connection : public PObject
     );
 
     /**This function is called when a common capability set has been calculated
-		Override this function to display to the user the various Capabilities
-		available (started and not started) for the call.
+        Override this function to display to the user the various Capabilities
+        available (started and not started) for the call.
 
        The default behaviour returns TRUE.
      */
-	virtual PBoolean OnCommonCapabilitySet(
-	  H323Capabilities & caps				///< Common Capability Set
+    virtual PBoolean OnCommonCapabilitySet(
+      H323Capabilities & caps                ///< Common Capability Set
     ) const;
 
     /**Send a new capability set.
@@ -1367,8 +1367,8 @@ class H323Connection : public PObject
       */
     virtual void OnSendH245_OpenLogicalChannel(
         H245_OpenLogicalChannel & /*open*/, 
-		PBoolean /*forward*/
-		) { }
+        PBoolean /*forward*/
+        ) { }
 
     /**Return if this H245 connection is a master or slave
      */
@@ -1430,14 +1430,14 @@ class H323Connection : public PObject
       unsigned sessionID    ///< Session ID to find default logical channel.
     );
 
-	/** MinMerge the local and remote Video and Extended Video Capabilities to ensure
-	    correct maximum framesize is negotiated between the parties.
-	  */
-	virtual PBoolean MergeCapabilities(
-		unsigned sessionID,                ///< Session ID to find default logical channel.
-		const H323Capability & local,     ///< Local Capability
-		H323Capability * remote           ///< remote Capability
-	);
+    /** MinMerge the local and remote Video and Extended Video Capabilities to ensure
+        correct maximum framesize is negotiated between the parties.
+      */
+    virtual PBoolean MergeCapabilities(
+        unsigned sessionID,                ///< Session ID to find default logical channel.
+        const H323Capability & local,     ///< Local Capability
+        H323Capability * remote           ///< remote Capability
+    );
 
     /**Select default logical channel for fast start.
        Internal function, not for normal use.
@@ -1448,8 +1448,8 @@ class H323Connection : public PObject
       PBoolean receiver         ///< Whether to open receivers
     );
 
-	/** Disable FastStart on a call by call basis
-	  */
+    /** Disable FastStart on a call by call basis
+      */
     void DisableFastStart();
 
     /**Open a new logical channel.
@@ -1482,10 +1482,10 @@ class H323Connection : public PObject
        The default behaviour simply returns TRUE.
      */
     virtual PBoolean OnOpenLogicalChannel(
-      const H245_OpenLogicalChannel & openPDU,			///< Received PDU for the channel open
-      H245_OpenLogicalChannelAck & ackPDU,				///< PDU to send for acknowledgement
-      unsigned & errorCode,								///< Error to return if refused
-	  const unsigned & channelNumber = 0				///< Channel Number to open
+      const H245_OpenLogicalChannel & openPDU,            ///< Received PDU for the channel open
+      H245_OpenLogicalChannelAck & ackPDU,                ///< PDU to send for acknowledgement
+      unsigned & errorCode,                                ///< Error to return if refused
+      const unsigned & channelNumber = 0                ///< Channel Number to open
     );
 
     /**Callback for when a logical channel conflict has occurred.
@@ -1642,42 +1642,42 @@ class H323Connection : public PObject
       */
     virtual void OpenExtendedVideoSessionDenied();
 
-	/** On Receiving a H.239 Control Request
-	    Return False to reject the request to open channel.
+    /** On Receiving a H.239 Control Request
+        Return False to reject the request to open channel.
         Set Delay to delay opening the channel. 
         Calling OnH239ControlRequest() will invoke
-	*/
+    */
     virtual PBoolean AcceptH239ControlRequest(PBoolean & delay);
 
-	/** On Receiving a H.239 Control Request
-	    Return False to reject the request to open channel.
-	*/
+    /** On Receiving a H.239 Control Request
+        Return False to reject the request to open channel.
+    */
     PBoolean OnH239ControlRequest(H239Control * ctrl = NULL);
 
-	/** On Receiving a H.239 Control Command
+    /** On Receiving a H.239 Control Command
         This usually means the closing of the H.239 Channel
-	*/
+    */
     virtual PBoolean OnH239ControlCommand(H239Control * ctrl = NULL);
 
-	/** Open an Extended Video Session
-	    This will open an Extended Video session.
-	*/
+    /** Open an Extended Video Session
+        This will open an Extended Video session.
+    */
     PBoolean OpenExtendedVideoSession(H323ChannelNumber & num, int defaultSession=0);
 
-	/** On Received an Extended Video OLC
-	    This indicates the receipt of Extended Video OLC
-	*/
-	virtual void OnReceivedExtendedVideoSession(
-		   unsigned /*role*/,                           ///< role 1-Presentation 2-Live
-		   const H323ChannelNumber & /*channelnum*/     ///< Channel number of just opened channel
-	) const {};
+    /** On Received an Extended Video OLC
+        This indicates the receipt of Extended Video OLC
+    */
+    virtual void OnReceivedExtendedVideoSession(
+           unsigned /*role*/,                           ///< role 1-Presentation 2-Live
+           const H323ChannelNumber & /*channelnum*/     ///< Channel number of just opened channel
+    ) const {};
     
-	/** Close an Extended Video Session matching the channel number
-	    This will close the Extended Video matching the channel number (if open)
-	 */
+    /** Close an Extended Video Session matching the channel number
+        This will close the Extended Video matching the channel number (if open)
+     */
     virtual PBoolean CloseExtendedVideoSession(
        const H323ChannelNumber & num     ///< Channel number to close.
-	);
+    );
 
     /**Open a channel for use by an extended video codec.
        The H323VideoCodec class will use this function to open the channel to
@@ -1690,7 +1690,7 @@ class H323Connection : public PObject
       H323VideoCodec & codec ///< codec doing the opening
     );
 
-	virtual PBoolean SendH239GenericResponse(PBoolean response);
+    virtual PBoolean SendH239GenericResponse(PBoolean response);
 
     H245NegLogicalChannels * GetLogicalChannels();
         
@@ -1830,7 +1830,7 @@ class H323Connection : public PObject
     );
 
 #ifdef H323_VIDEO
-	virtual void OnSetInitialBandwidth(H323VideoCodec * codec);
+    virtual void OnSetInitialBandwidth(H323VideoCodec * codec);
 #endif
 
     /**Get the available bandwidth in 100's of bits/sec.
@@ -1998,53 +1998,53 @@ class H323Connection : public PObject
     /**Send a user input indication to the remote endpoint.
        This sends a H.249 Annex A Navigation user input. 
       */
-	virtual void SendUserInputIndicationNavigate(
-		H323_UserInputCapability::NavigateKeyID keyID
-	);
+    virtual void SendUserInputIndicationNavigate(
+        H323_UserInputCapability::NavigateKeyID keyID
+    );
 
     /**Send a user input indication to the remote endpoint.
        This Receives/Sends a H.249 Annex A Navigation user input. 
       */
-	virtual void OnUserInputIndicationNavigate(
-		const H245_ArrayOf_GenericParameter & contents
-	);
-	
+    virtual void OnUserInputIndicationNavigate(
+        const H245_ArrayOf_GenericParameter & contents
+    );
+    
     /**Send a user input indication to the remote endpoint.
        This Receives/Sends a H.249 Annex B Softkey user input. 
       */
     virtual void SendUserInputIndicationSoftkey(
-		unsigned key, 
-		const PString & keyName = PString()
-	);
+        unsigned key, 
+        const PString & keyName = PString()
+    );
 
     virtual void OnUserInputIndicationSoftkey(
-		const H245_ArrayOf_GenericParameter & contents
-	);
+        const H245_ArrayOf_GenericParameter & contents
+    );
 
     /**Send a user input indication to the remote endpoint.
        This Receives/Sends a H.249 Annex C Point Device user input. 
       */
     virtual void SendUserInputIndicationPointDevice(
-	                    unsigned x,              ///< X coord 
-						unsigned y,              ///< Y coord 
-						unsigned button=0,       ///< Mouse Button 1 = left 2 = right
-						unsigned buttonstate=0,  ///< Button state 1 = button down 2 = button up
-						unsigned clickcount=0    ///< ClickCount 1 = sigle click 2= doubleclick
+                        unsigned x,              ///< X coord 
+                        unsigned y,              ///< Y coord 
+                        unsigned button=0,       ///< Mouse Button 1 = left 2 = right
+                        unsigned buttonstate=0,  ///< Button state 1 = button down 2 = button up
+                        unsigned clickcount=0    ///< ClickCount 1 = sigle click 2= doubleclick
     );
 
     virtual void OnUserInputIndicationPointDevice(
-		const H245_ArrayOf_GenericParameter & contents
-	);
-	
+        const H245_ArrayOf_GenericParameter & contents
+    );
+    
     /**Send a user input indication to the remote endpoint.
        This Receives/Sends a H.249 Annex D Softkey user input. 
       */
-	virtual void SendUserInputIndicationModal();
+    virtual void SendUserInputIndicationModal();
 
     virtual void OnUserInputIndicationModal(
-		const H245_ArrayOf_GenericParameter & contents
-	);
-	
+        const H245_ArrayOf_GenericParameter & contents
+    );
+    
 #endif
 
 
@@ -2113,44 +2113,44 @@ class H323Connection : public PObject
         unsigned newSessionID
     );
 
-	/**Received OLC Generic Information. This is used to supply alternate RTP 
-	   destination information in the generic information field in the OLC for the
-	   purpose of probing for an alternate route to the remote party.
-	  */
-	virtual PBoolean OnReceiveOLCGenericInformation(unsigned sessionID, 
-	                    const H245_ArrayOf_GenericInformation & alternate) const;
+    /**Received OLC Generic Information. This is used to supply alternate RTP 
+       destination information in the generic information field in the OLC for the
+       purpose of probing for an alternate route to the remote party.
+      */
+    virtual PBoolean OnReceiveOLCGenericInformation(unsigned sessionID, 
+                        const H245_ArrayOf_GenericInformation & alternate) const;
 
-	/**Send Generic Information in the OLC. This is used to include generic
-	   information in the openlogicalchannel
-	  */
+    /**Send Generic Information in the OLC. This is used to include generic
+       information in the openlogicalchannel
+      */
     virtual PBoolean OnSendingOLCGenericInformation(
-						const unsigned & sessionID,						///< Session Information
-				        H245_ArrayOf_GenericInformation & gen,		    ///< Generic OLC/OLCack message
-						PBoolean isAck
-						) const;
+                        const unsigned & sessionID,                        ///< Session Information
+                        H245_ArrayOf_GenericInformation & gen,            ///< Generic OLC/OLCack message
+                        PBoolean isAck
+                        ) const;
 
 #ifdef H323_H4609
   /** H.460.9 Call Statistics
-	*/
-	class  H4609Statistics  : public PObject 
-	{
-	 public:
-		H4609Statistics();
-		H323TransportAddress sendRTPaddr;      // Send RTP Address
-		H323TransportAddress recvRTPaddr;      // Receive RTP Address
-		H323TransportAddress sendRTCPaddr;     // Send RTCP Address (not used)
-		H323TransportAddress recvRTCPaddr;     // Receive RTCP Address (not used)
-		unsigned sessionid;
-		unsigned meanEndToEndDelay;			   // EstimatedEndtoEnd...
-		unsigned worstEndToEndDelay;		   // EstimatedEndtoEnd...
-		unsigned packetsReceived;
-		unsigned accumPacketLost;
-		unsigned packetLossRate;
-		unsigned fractionLostRate;
-		unsigned meanJitter;
-		unsigned worstJitter;
-		unsigned bandwidth;
-	};
+    */
+    class  H4609Statistics  : public PObject 
+    {
+     public:
+        H4609Statistics();
+        H323TransportAddress sendRTPaddr;      // Send RTP Address
+        H323TransportAddress recvRTPaddr;      // Receive RTP Address
+        H323TransportAddress sendRTCPaddr;     // Send RTCP Address (not used)
+        H323TransportAddress recvRTCPaddr;     // Receive RTCP Address (not used)
+        unsigned sessionid;
+        unsigned meanEndToEndDelay;               // EstimatedEndtoEnd...
+        unsigned worstEndToEndDelay;           // EstimatedEndtoEnd...
+        unsigned packetsReceived;
+        unsigned accumPacketLost;
+        unsigned packetLossRate;
+        unsigned fractionLostRate;
+        unsigned meanJitter;
+        unsigned worstJitter;
+        unsigned bandwidth;
+    };
 
   /** H.460.9 Queue statistics
     */
@@ -2227,55 +2227,55 @@ class H323Connection : public PObject
 
     /** Set Remote is behind NAT
     */
-	void SetRemoteNAT()
-	{ remoteIsNAT = true; }
+    void SetRemoteNAT()
+    { remoteIsNAT = true; }
 
-	/** Is NAT Support Available
-	  */
-	PBoolean HasNATSupport() const
-	{ return NATsupport; }
+    /** Is NAT Support Available
+      */
+    PBoolean HasNATSupport() const
+    { return NATsupport; }
 
-	/** Disable NAT Support for allocation of RTP sockets
-	  */
-	void DisableNATSupport()
-	{ NATsupport = false; remoteIsNAT = false; }
-	
-	/** Set the information that the call parties are 
-	    behind the same NAT device
-	  */
-	void SetSameNAT() { sameNAT = true; };
+    /** Disable NAT Support for allocation of RTP sockets
+      */
+    void DisableNATSupport()
+    { NATsupport = false; remoteIsNAT = false; }
+    
+    /** Set the information that the call parties are 
+        behind the same NAT device
+      */
+    void SetSameNAT() { sameNAT = true; };
 
-	/** Determine if the two parties are behind the same NAT
-	  */
-	PBoolean isSameNAT() const { return sameNAT; };
+    /** Determine if the two parties are behind the same NAT
+      */
+    PBoolean isSameNAT() const { return sameNAT; };
 
 #ifdef P_STUN
-	/** GetPreferedNatMethod
+    /** GetPreferedNatMethod
         returns the NATMethod to use for a call 
         by default calls the H323Endpoint function of the same name
-	  */
+      */
     virtual PNatMethod * GetPreferedNatMethod(const PIPSocket::Address & ip) const;
 
     virtual PUDPSocket * GetNatSocket(unsigned session, PBoolean rtp);
 
-	/** Set RTP NAT information callback
-	  */
-	virtual void SetRTPNAT(unsigned sessionid, PUDPSocket * _rtp, PUDPSocket * _rtcp);
+    /** Set RTP NAT information callback
+      */
+    virtual void SetRTPNAT(unsigned sessionid, PUDPSocket * _rtp, PUDPSocket * _rtcp);
 
-	/** Set NAT Channel in effect 
-	  */
+    /** Set NAT Channel in effect 
+      */
     void SetNATChannelActive(unsigned sessionid);
 
-	/** Is NAT Method Active
-	  */
+    /** Is NAT Method Active
+      */
     PBoolean IsNATMethodActive(unsigned sessionid);
 
 #endif
-	/** Set Endpoint Type Information
-	  Override this to advertise the Endpoint type on a Call by Call basis
+    /** Set Endpoint Type Information
+      Override this to advertise the Endpoint type on a Call by Call basis
 
       The default behaviour calls H323EndPoint::SetEndpointTypeInfo().
-	  */
+      */
     virtual void SetEndpointTypeInfo(H225_EndpointType & info) const;
 
   //@}
@@ -2392,86 +2392,86 @@ class H323Connection : public PObject
 
     /** Create an instance of the H.224 protocol handler.
         This is called when the subsystem requires that a H.224 channel be established.
-  		
+          
         Note that if the application overrides this it should return a pointer
         to a heap variable (using new) as it will be automatically deleted when
         the H323Connection is deleted.
- 	
+     
         The default behaviour calls the OpalEndpoint function of the same name if
         there is not already a H.224 handler associated with this connection. If there
         is already such a H.224 handler associated, this instance is returned instead.
     */
     virtual OpalH224Handler *CreateH224ProtocolHandler(H323Channel::Directions dir, unsigned sessionID);
-  	
+      
     /** Create an instance of the H.281 protocol handler.
         This is called when the subsystem requires that a H.224 channel be established.
-  		
+          
         Note that if the application overrides this it should return a pointer
         to a heap variable (using new) as it will be automatically deleted when
         the associated H.224 handler is deleted.
-  		
+          
      The default behavour returns H323Endpoint::CreateH224ProtocolHandler()
      */
      virtual OpalH281Handler *CreateH281ProtocolHandler(OpalH224Handler & h224Handler);
 #endif
 
 #ifdef H323_FILE
-	/** Open an File Transfer Session
-	    Use this to open a file transfer session for the tranferring of files
-		between H323 clients.
-	*/
+    /** Open an File Transfer Session
+        Use this to open a file transfer session for the tranferring of files
+        between H323 clients.
+    */
      PBoolean OpenFileTransferSession( const H323FileTransferList & list,
-		                               H323ChannelNumber & num   ///< Created Channel number
-		                              );
+                                       H323ChannelNumber & num   ///< Created Channel number
+                                      );
 
 
     /** Close the File Transfer Session
-	    Use this to close the file transfer session. 
+        Use this to close the file transfer session. 
 
-	 */
+     */
      PBoolean CloseFileTransferSession(unsigned num  ///< Channel number
-		                               );
+                                       );
 
     /** Create an instance of the File Transfer handler.
         This is called when the subsystem requires that a a file transfer channel be established.
-  		
+          
         The default behaviour calls the OnCreateFileTransferHandler function of the same name if
         there is not already a file transfer handler associated with this connection. If there
         is already such a file transfer handler associated, this instance is returned instead.
     */
-     H323FileTransferHandler *CreateFileTransferHandler(unsigned sessionID,					///< Session Identifier
-														H323Channel::Directions dir,		///< direction of channel
-						                                H323FileTransferList & filelist		///< Transfer File List
-														);
+     H323FileTransferHandler *CreateFileTransferHandler(unsigned sessionID,                    ///< Session Identifier
+                                                        H323Channel::Directions dir,        ///< direction of channel
+                                                        H323FileTransferList & filelist        ///< Transfer File List
+                                                        );
 
 
     /** OnCreateFileTransferHandler Function
 
-	    Override this function and create your own derived FileTransfer Handler
-		to collect File Transfer events
+        Override this function and create your own derived FileTransfer Handler
+        to collect File Transfer events
 
-	    Note that if the application overrides this it should return a pointer
+        Note that if the application overrides this it should return a pointer
         to a heap variable (using new) as it will be automatically deleted when
         the H323Connection is deleted.
-	 */
-     virtual H323FileTransferHandler *OnCreateFileTransferHandler(unsigned sessionID,		///< Session Identifier
-														H323Channel::Directions dir,		///< direction of channel
-						                                H323FileTransferList & filelist		///< Transfer File List
-														);
+     */
+     virtual H323FileTransferHandler *OnCreateFileTransferHandler(unsigned sessionID,        ///< Session Identifier
+                                                        H323Channel::Directions dir,        ///< direction of channel
+                                                        H323FileTransferList & filelist        ///< Transfer File List
+                                                        );
 
-	/** Open a File Transfer Channel.
+    /** Open a File Transfer Channel.
         This is called when the subsystem requires that a File Transfer channel be established.
 
-		An implementer should override this function to facilitate file transfer. 
-		If transmitting, list of files should be populated to notify the channel which files to read.
-		If receiving, the list of files should be altered to include path information for the storage
-		of received files.
-		
+        An implementer should override this function to facilitate file transfer. 
+        If transmitting, list of files should be populated to notify the channel which files to read.
+        If receiving, the list of files should be altered to include path information for the storage
+        of received files.
+        
         The default behaviour returns FALSE to indicate File Transfer is not implemented. 
       */
-      virtual PBoolean OpenFileTransferChannel( PBoolean isEncoder,						///< direction of channel
-						                        H323FileTransferList & filelist			///< Transfer File List
-										 ); 
+      virtual PBoolean OpenFileTransferChannel( PBoolean isEncoder,                        ///< direction of channel
+                                                H323FileTransferList & filelist            ///< Transfer File List
+                                         ); 
 #endif
 
     /**Get separate H.235 authentication for the connection.
@@ -2585,7 +2585,7 @@ class H323Connection : public PObject
 
     /**Get the remote party Alias List, if there was one.
       */
-	const PStringArray & GetRemotePartyAliases() const { return remoteAliasNames; }
+    const PStringArray & GetRemotePartyAliases() const { return remoteAliasNames; }
 
     /**Set the name/alias of remote end from information in the PDU.
       */
@@ -2729,106 +2729,110 @@ class H323Connection : public PObject
 
 #ifdef P_STUN
 
-	/**Session Information 
-		This contains session information which is passed to the socket handler
-		when creating RTP socket pairs.
-	  */
-	class SessionInformation : public PObject
-	{
-		public:
+    /**Session Information 
+        This contains session information which is passed to the socket handler
+        when creating RTP socket pairs.
+      */
+    class SessionInformation : public PObject
+    {
+        public:
             SessionInformation(const OpalGloballyUniqueID & id, const PString & token, unsigned session, const H323Connection * connection);
 
-			const PString & GetCallToken();
+            const PString & GetCallToken();
 
-			unsigned GetSessionID() const;
+            unsigned GetSessionID() const;
 
-			const OpalGloballyUniqueID & GetCallIdentifer();
+            const OpalGloballyUniqueID & GetCallIdentifer();
 
             void SetSendMultiplexID(unsigned id);
 
             unsigned GetRecvMultiplexID() const;
 
-			const PString & GetCUI();
+            const PString & GetCUI();
 
             const H323Connection * GetConnection(); 
 
-		protected:
-			OpalGloballyUniqueID m_callID;
-			PString m_callToken;
-			unsigned m_sessionID;
+        protected:
+            OpalGloballyUniqueID m_callID;
+            PString m_callToken;
+            unsigned m_sessionID;
             unsigned m_recvMultiID;
             unsigned m_sendMultiID;
-			PString m_CUI;
+            PString m_CUI;
             const H323Connection * m_connection;
 
-	};
+    };
 
-	SessionInformation * BuildSessionInformation(unsigned sessionID) const;
+    SessionInformation * BuildSessionInformation(unsigned sessionID) const;
 
-	struct NAT_Sockets 
-	{
-		PUDPSocket * rtp;
-		PUDPSocket * rtcp;
+    class NAT_Sockets 
+    {
+      public:
+        NAT_Sockets() 
+        { rtp = NULL; rtcp = NULL; isActive = false; }
+
+        PUDPSocket * rtp;
+        PUDPSocket * rtcp;
         PBoolean     isActive;
-	};
+    };
 
 #endif
 
 #ifdef H323_H460
-	/** Disable the feature set as the remote does not support it.
-	  */
-	void DisableFeatureSet(int) const;
+    /** Disable the feature set as the remote does not support it.
+      */
+    void DisableFeatureSet(int) const;
 
-	/** Disable Feautures on a call by call basis
-	  */
-	void DisableFeatures(PBoolean disable = true);
+    /** Disable Feautures on a call by call basis
+      */
+    void DisableFeatures(PBoolean disable = true);
 #endif
 
     virtual PBoolean OnSendFeatureSet(unsigned, H225_FeatureSet &, PBoolean) const;
 
     virtual void OnReceiveFeatureSet(unsigned, const H225_FeatureSet &) const;
 
-	/** On resolving H.245 Address conflict
-	  */
-	virtual PBoolean OnH245AddressConflict();
+    /** On resolving H.245 Address conflict
+      */
+    virtual PBoolean OnH245AddressConflict();
 
 #ifdef H323_H46018
     /** Call to set the direction of call establishment
-	  */
-	void H46019SetCallReceiver();
+      */
+    void H46019SetCallReceiver();
 
-	/** Enable H46019 for this call
-	  */
-	void H46019Enabled();
+    /** Enable H46019 for this call
+      */
+    void H46019Enabled();
 
-	/** Enable H46019 Multiplexing for this call
-	  */
-	void H46019MultiEnabled();
+    /** Enable H46019 Multiplexing for this call
+      */
+    void H46019MultiEnabled();
 
-	/** Is H46019 Multiplexing enabled for this call
-	  */
+    /** Is H46019 Multiplexing enabled for this call
+      */
     PBoolean IsH46019Multiplexed() const;
 #endif
 
 #ifdef H323_H46024A
-	/** Enable H46024A for this call
-	  */
-	void H46024AEnabled();
-
-	/** send H46024A notification
+    /** Enable H46024A for this call
       */
-	PBoolean SendH46024AMessage(bool sender);
+    void H46024AEnabled();
 
-	/** received H46024A notification
-	  */
-	PBoolean ReceivedH46024AMessage(bool toStart);
+    /** send H46024A notification
+      */
+    PBoolean SendH46024AMessage(bool sender);
 
-	/** Enable H46024B for this call
-	  */
+    /** received H46024A notification
+      */
+    PBoolean ReceivedH46024AMessage(bool toStart);
+
+    /** Enable H46024B for this call
+      */
 #endif
 
 #ifdef H323_H46024B
-	void H46024BEnabled();
+    void H46024BEnabled();
 #endif
 
   //@}
@@ -2841,23 +2845,23 @@ class H323Connection : public PObject
     const H235Authenticators & GetEPAuthenticators() const;
 
     /** Set Authentication to support Validation CallBack
-	OnCallAuthentication is called when a EPAuthentication CryptoToken 
-	is Validated.
+    OnCallAuthentication is called when a EPAuthentication CryptoToken 
+    is Validated.
       */
     virtual void SetAuthenticationConnection();
 
     /** EP Authentication CallBack to check username and get Password
-	for Call Authentication. By Default it calls the corresponding
-	Endpoint Function. 
+    for Call Authentication. By Default it calls the corresponding
+    Endpoint Function. 
       */
     virtual PBoolean OnCallAuthentication(const PString & username, 
                                       PString & password);
 
     /** EP Authentication CallBack to allow the connection to approve the authentication
-	   even if it has failed. Use this to override authentication on a call by call basis
-	   Return TRUE to Authenticate.
+       even if it has failed. Use this to override authentication on a call by call basis
+       Return TRUE to Authenticate.
       */
-	virtual PBoolean OnEPAuthenticationFailed(H235Authenticator::ValidationResult result) const;
+    virtual PBoolean OnEPAuthenticationFailed(H235Authenticator::ValidationResult result) const;
 
     /** EP Authentication Finalise Callback. After the PDU has been built this
         Callback allows the Authentication mechanisms to finalise the PDU.
@@ -2865,14 +2869,14 @@ class H323Connection : public PObject
     virtual void OnAuthenticationFinalise(unsigned pdu,PBYTEArray & rawData);
 
     /** Whether the Call has Authentication
-	  */
+      */
     PBoolean HasAuthentication() const
        { return hasAuthentication; }
 
     /** Whether the Authentication has Failed
-	  */
-	PBoolean HasAuthenticationFailed() 
-	   { return AuthenticationFailed; };
+      */
+    PBoolean HasAuthenticationFailed() 
+       { return AuthenticationFailed; };
   //@}
 #endif
 
@@ -2882,33 +2886,33 @@ class H323Connection : public PObject
     /** On Send Service Control Session
       */
     PBoolean OnSendServiceControlSessions(
-	         H225_ArrayOf_ServiceControlSession & serviceControl, ///< Service control PDU
+             H225_ArrayOf_ServiceControlSession & serviceControl, ///< Service control PDU
                  H225_ServiceControlSession_reason reason           ///< Reason for Service Control
-		) const;
+        ) const;
 
     /** On Receive Service Control Session
       */
     void OnReceiveServiceControlSessions(
-		const H225_ArrayOf_ServiceControlSession & serviceControl  ///< Service control PDU
-		);
+        const H225_ArrayOf_ServiceControlSession & serviceControl  ///< Service control PDU
+        );
 
     /** On Send Call Credit 
       */
     virtual void OnReceiveServiceControl(const PString & amount,    ///< Current Balance 
                                          PBoolean credit,               ///< Debit or Credit
                                          const unsigned & timelimit,///< Time Remaining
-                                         const PString & url,	    ///< url for TopUp
-	 									 const PString & ldapURL,   ///< LDAP URL
-									     const PString & baseDN     ///< LDAP base DN
-									    );
+                                         const PString & url,        ///< url for TopUp
+                                          const PString & ldapURL,   ///< LDAP URL
+                                         const PString & baseDN     ///< LDAP base DN
+                                        );
 
     /** On Receive Call Credit
      */
     virtual PBoolean OnSendServiceControl(PString & amount,          ///< Current Balance 
                                       PBoolean credit,               ///< Debit or Credit
                                       unsigned & timelimit,      ///< Time Remaining
-                                      PString & url		 ///< url for TopUp
-								     ) const;
+                                      PString & url         ///< url for TopUp
+                                     ) const;
   //@}
 #endif
 
@@ -2920,7 +2924,7 @@ class H323Connection : public PObject
 
     /** Disable QoS in H.245
       */
-	virtual void DisableH245QoS();
+    virtual void DisableH245QoS();
 
     /** Has QoS in H.245
       */
@@ -2931,9 +2935,9 @@ class H323Connection : public PObject
       */
     virtual void SetNonCallConnection();
 
-	/** Is a Non-Call related connection like text messaging or file transfer
-	  */
-	virtual PBoolean IsNonCallConnection() const;
+    /** Is a Non-Call related connection like text messaging or file transfer
+      */
+    virtual PBoolean IsNonCallConnection() const;
 
 #ifdef H323_H460
     /** Get the connection FeatureSet
@@ -2967,21 +2971,21 @@ class H323Connection : public PObject
       h245request,
       h245response,
       h245command,
-	  h245indication
+      h245indication
     };
 
-	virtual PBoolean OnHandleH245GenericMessage(h245MessageType type, const H245_GenericMessage & pdu);
+    virtual PBoolean OnHandleH245GenericMessage(h245MessageType type, const H245_GenericMessage & pdu);
 
-	virtual PBoolean OnReceivedGenericMessage(h245MessageType, const PString & );
-	virtual PBoolean OnReceivedGenericMessage(h245MessageType type, const PString & id, const H245_ArrayOf_GenericParameter & content);
+    virtual PBoolean OnReceivedGenericMessage(h245MessageType, const PString & );
+    virtual PBoolean OnReceivedGenericMessage(h245MessageType type, const PString & id, const H245_ArrayOf_GenericParameter & content);
 
 #ifdef H323_H230
     /** Open Conference Controls
       */
-	PBoolean OpenConferenceControlSession(
-				        PBoolean & chairControl,
-		                PBoolean & extControls
-						);
+    PBoolean OpenConferenceControlSession(
+                        PBoolean & chairControl,
+                        PBoolean & extControls
+                        );
 
 
 #endif
@@ -3023,7 +3027,7 @@ class H323Connection : public PObject
     PString            remotePartyName;
     PString            remotePartyNumber;
     PString            remotePartyAddress;
-	PStringArray       remoteAliasNames;
+    PStringArray       remoteAliasNames;
     PString            destExtraCallInfo;
     PString            remoteApplication;
     H323Capabilities   remoteCapabilities; // Capabilities remote system supports
@@ -3039,9 +3043,9 @@ class H323Connection : public PObject
     SendUserInputModes sendUserInputMode;
 
     H323Transport * signallingChannel;
-	PMutex			signallingMutex;
+    PMutex            signallingMutex;
     H323Transport * controlChannel;
-	PMutex			controlMutex;
+    PMutex            controlMutex;
     PBoolean            h245Tunneling;
     H323SignalPDU * h245TunnelRxPDU;
     H323SignalPDU * h245TunnelTxPDU;
@@ -3091,7 +3095,7 @@ class H323Connection : public PObject
 #endif
 
 #ifdef H323_H224
-	PBoolean startH224;
+    PBoolean startH224;
 #endif
 
     PSyncPoint digitsWaitFlag;
@@ -3170,8 +3174,8 @@ class H323Connection : public PObject
 
     // used to detect remote NAT endpoints
     PBoolean remoteIsNAT;    ///< Remote Caller is NAT
-	PBoolean NATsupport;     ///< Disable support for NATed callers
-	PBoolean sameNAT;        ///< Call parties are behind the same NAT
+    PBoolean NATsupport;     ///< Disable support for NATed callers
+    PBoolean sameNAT;        ///< Call parties are behind the same NAT
 
 #ifndef DISABLE_CALLAUTH
     PBoolean AuthenticationFailed;
@@ -3180,7 +3184,7 @@ class H323Connection : public PObject
 #endif
 
 #ifdef H323_AEC
-	PAec * aec;
+    PAec * aec;
 #endif
 
     PBoolean nonCallConnection; 
@@ -3193,7 +3197,7 @@ class H323Connection : public PObject
 
   public:
     PBoolean StartHandleControlChannel();
-	virtual PBoolean OnStartHandleControlChannel();
+    virtual PBoolean OnStartHandleControlChannel();
     void EndHandleControlChannel();
 
 #ifdef H323_RTP_AGGREGATE
@@ -3216,42 +3220,42 @@ class H323Connection : public PObject
 #endif
 
 #ifdef H323_H460
-	PBoolean disableH460;
-	H460_FeatureSet       * features;
+    PBoolean disableH460;
+    H460_FeatureSet       * features;
 
 #ifdef H323_H4609
-	PBoolean m_h4609enabled;
-	PBoolean m_h4609Final;
-	PQueue<H4609Statistics> * m_h4609Stats;
+    PBoolean m_h4609enabled;
+    PBoolean m_h4609Final;
+    PQueue<H4609Statistics> * m_h4609Stats;
 #endif
 
 #ifdef H323_H46018
-	PBoolean m_H46019CallReceiver;
-	PBoolean m_H46019enabled;
+    PBoolean m_H46019CallReceiver;
+    PBoolean m_H46019enabled;
     PBoolean m_H46019multiplex;
-	PBoolean m_h245Connect;
+    PBoolean m_h245Connect;
 #endif
 
 #ifdef H323_H46024A
-	PBoolean m_H46024Aenabled;
-	PBoolean m_H46024Ainitator;
-	PINDEX m_H46024Astate;
+    PBoolean m_H46024Aenabled;
+    PBoolean m_H46024Ainitator;
+    PINDEX m_H46024Astate;
 #endif
 
 #ifdef H323_H46024B
-	PBoolean m_H46024Benabled;
-	PINDEX m_H46024Bstate;
+    PBoolean m_H46024Benabled;
+    PINDEX m_H46024Bstate;
 #endif
 
 #endif
 
 #ifdef P_STUN
-	PMutex NATSocketMutex;
-	std::map<unsigned,NAT_Sockets> m_NATSockets;
+    PMutex NATSocketMutex;
+    std::map<unsigned,NAT_Sockets> m_NATSockets;
 #endif
 
 #ifdef H323_H239
-	PBoolean DecodeH239GenericResponse(const H245_ArrayOf_GenericParameter & params);
+    PBoolean DecodeH239GenericResponse(const H245_ArrayOf_GenericParameter & params);
     H323ChannelNumber m_H239ChanId;
 #endif
 };
