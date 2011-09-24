@@ -23,181 +23,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.16  2011/01/12 13:08:38  shorne
- * H.239 Clunge for channelID=0 and set Channelid in OLCack
- *
- * Revision 1.15  2010/08/26 15:12:39  shorne
- * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
- *
- * Revision 1.14  2010/05/03 03:56:34  shorne
- * Improved collection of sender reports including identifying session they originated from
- *
- * Revision 1.13  2010/05/02 22:55:07  shorne
- * Added support to be able to set NAT Method on a call by call basis
- *
- * Revision 1.12  2010/04/12 21:40:12  willamowius
- * give application access to RTP sender report
- *
- * Revision 1.11  2009/07/09 15:11:12  shorne
- * Simplfied and standardised compiler directives
- *
- * Revision 1.10  2009/07/03 04:15:01  shorne
- * more H.460.18/19 support
- *
- * Revision 1.9  2009/06/28 04:47:53  shorne
- * Fixes for H.460.19 NAT Method loading
- *
- * Revision 1.8  2009/06/28 01:41:52  shorne
- * Replaced P_HAS_QOS with P_QOS (depreciated in PTLib)
- *
- * Revision 1.7  2009/06/28 00:11:03  shorne
- * Added H.460.18/19 Support
- *
- * Revision 1.6  2008/05/23 11:22:09  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.5  2008/02/06 02:52:59  shorne
- * Added support for Standards based NAT Traversal
- *
- * Revision 1.4  2007/11/16 22:09:43  shorne
- * Added ability to disable H.245 QoS for NetMeeting Interop
- *
- * Revision 1.3  2007/10/19 19:54:18  shorne
- * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
- *  Robert
- *
- * Revision 1.2  2007/10/16 17:08:57  shorne
- * Qos capability negotiation
- *
- * Revision 1.1  2007/08/06 20:51:07  shorne
- * First commit of h323plus
- *
- * Revision 1.34.2.5  2007/09/05 04:14:40  rjongbloed
- * Back ported from OPAL media packetization in TCS
- *
- * Revision 1.34.2.4  2007/09/03 09:44:44  rjongbloed
- * Back ported from OPAL the H.323 media packetization support
- *
- * Revision 1.34.2.3  2007/05/23 06:58:02  shorne
- * Nat Support for EP's nested behind same NAT
- *
- * Revision 1.34.2.2  2007/02/11 00:45:20  shorne
- * Added ability to disable NAT method on a call by call basis
- *
- * Revision 1.34.2.1  2006/12/23 19:08:02  shorne
- * Plugin video codecs & sundry
- *
- * Revision 1.34  2006/01/26 03:38:54  shorne
- * Added transport capability exchange
- *
- * Revision 1.33  2005/06/21 06:46:35  csoutheren
- * Add ability to create capabilities without codecs for external RTP interface
- *
- * Revision 1.32  2005/01/03 14:03:42  csoutheren
- * Added new configure options and ability to disable/enable modules
- *
- * Revision 1.31  2005/01/03 06:26:09  csoutheren
- * Added extensive support for disabling code modules at compile time
- *
- * Revision 1.30  2004/11/25 07:38:59  csoutheren
- * Ensured that external TCP address translation is performed when using STUN to handle UDP
- *
- * Revision 1.29  2004/07/03 05:47:54  rjongbloed
- * Added virtual function for determining RTP payload type used in an H.323 channel,
- *    also some added bullet proofing for exception conditions, thanks Guilhem Tardy
- *
- * Revision 1.28  2004/04/03 08:28:07  csoutheren
- * Remove pseudo-RTTI and replaced with real RTTI
- *
- * Revision 1.27  2003/10/27 06:03:39  csoutheren
- * Added support for QoS
- *   Thanks to Henry Harrison of AliceStreet
- *
- * Revision 1.26  2003/02/07 00:28:24  robertj
- * Changed function to virtual to help in using external multiicast RTP stacks.
- *
- * Revision 1.25  2003/02/05 06:32:10  robertj
- * Fixed non-stun symmetric NAT support recently broken.
- *
- * Revision 1.24  2003/02/05 01:55:14  robertj
- * Fixed setting of correct address in OLC's when STUN is used.
- *
- * Revision 1.23  2003/02/04 07:06:41  robertj
- * Added STUN support.
- *
- * Revision 1.22  2002/11/19 01:47:26  robertj
- * Included canonical name in RTP statistics returned in IRR
- *
- * Revision 1.21  2002/10/08 13:08:21  robertj
- * Changed for IPv6 support, thanks Sébastien Josset.
- *
- * Revision 1.20  2002/08/05 10:03:47  robertj
- * Cosmetic changes to normalise the usage of pragma interface/implementation.
- *
- * Revision 1.19  2002/07/02 10:02:32  robertj
- * Added H323TransportAddress::GetIpAddress() so don't have to provide port
- *   when you don't need it as in GetIpAndPort(),.
- *
- * Revision 1.18  2002/06/24 08:07:49  robertj
- * Fixed setting of H.225.0 logical channel parameter silenceSuppression field
- *   to correctly indicate if codec is going to stop sending RTP on silence.
- *
- * Revision 1.17  2002/05/28 06:27:23  robertj
- * Split UDP (for RAS) from RTP port bases.
- * Added current port variable so cycles around the port range specified which
- *   fixes some wierd problems on some platforms, thanks Federico Pinna
- *
- * Revision 1.16  2001/10/02 02:06:23  robertj
- * Fixed CIsco IOS compatibility, yet again!.
- *
- * Revision 1.15  2001/10/02 01:53:53  robertj
- * Fixed CIsco IOS compatibility, again.
- *
- * Revision 1.14  2001/08/06 03:08:57  robertj
- * Fission of h323.h to h323ep.h & h323con.h, h323.h now just includes files.
- *
- * Revision 1.13  2001/02/09 05:13:56  craigs
- * Added pragma implementation to (hopefully) reduce the executable image size
- * under Linux
- *
- * Revision 1.12  2001/01/25 07:27:16  robertj
- * Major changes to add more flexible OpalMediaFormat class to normalise
- *   all information about media types, especially codecs.
- *
- * Revision 1.11  2000/12/18 08:59:20  craigs
- * Added ability to set ports
- *
- * Revision 1.10  2000/09/22 00:32:34  craigs
- * Added extra logging
- * Fixed problems with no fastConnect with tunelling
- *
- * Revision 1.9  2000/08/31 08:15:41  robertj
- * Added support for dynamic RTP payload types in H.245 OpenLogicalChannel negotiations.
- *
- * Revision 1.8  2000/08/23 14:27:04  craigs
- * Added prototype support for Microsoft GSM codec
- *
- * Revision 1.7  2000/07/12 13:06:49  robertj
- * Removed test for sessionID in OLC, just trace a warning instead of abandoning connection.
- *
- * Revision 1.6  2000/07/11 19:36:43  robertj
- * Fixed silenceSuppression field in OLC only to be included on transmitter.
- *
- * Revision 1.5  2000/05/23 12:57:37  robertj
- * Added ability to change IP Type Of Service code from applications.
- *
- * Revision 1.4  2000/05/02 04:32:27  robertj
- * Fixed copyright notice comment.
- *
- * Revision 1.3  2000/04/05 03:17:32  robertj
- * Added more RTP statistics gathering and H.245 round trip delay calculation.
- *
- * Revision 1.2  2000/01/20 05:57:46  robertj
- * Added extra flexibility in receiving incorrectly formed OpenLogicalChannel PDU's
- *
- * Revision 1.1  1999/12/23 23:02:36  robertj
- * File reorganision for separating RTP from H.323 and creation of LID for VPB support.
+ * $Id$
  *
  */
 
@@ -269,9 +95,9 @@ H323_RTP_UDP::H323_RTP_UDP(const H323Connection & conn,
   PNatMethod * meth = NULL;
   if (conn.HasNATSupport()) {
       meth = conn.GetPreferedNatMethod(remoteAddress);
-	  if (meth != NULL) {
-	     PTRACE(4, "RTP\tNAT Method " << meth->GetName() << " selected for call.");
-	  }
+      if (meth != NULL) {
+         PTRACE(4, "RTP\tNAT Method " << meth->GetName() << " selected for call.");
+      }
   }
 #endif
 
@@ -280,11 +106,11 @@ H323_RTP_UDP::H323_RTP_UDP(const H323Connection & conn,
   while (!rtp.Open(localAddress,
                    nextPort, nextPort,
                    endpoint.GetRtpIpTypeofService(),
-				   conn,
+                   conn,
 #ifdef P_STUN
                    meth,
 #else
-		           NULL,
+                   NULL,
 #endif
                    rtpQos)) {
     nextPort = endpoint.GetRtpIpPortPair();
@@ -299,7 +125,7 @@ H323_RTP_UDP::H323_RTP_UDP(const H323Connection & conn,
 
 unsigned H323_RTP_UDP::GetSessionID() const
 {
-	return rtp.GetSessionID();
+    return rtp.GetSessionID();
 }
 
 PBoolean H323_RTP_UDP::OnSendingPDU(const H323_RTPChannel & channel,
@@ -353,16 +179,16 @@ PBoolean H323_RTP_UDP::OnSendingPDU(const H323_RTPChannel & channel,
   // GQoS
 #if P_QOS
   if (connection.H245QoSEnabled() && WriteTransportCapPDU(param.m_transportCapability,channel)) {
-		param.IncludeOptionalField(H245_H2250LogicalChannelParameters::e_transportCapability);
+        param.IncludeOptionalField(H245_H2250LogicalChannelParameters::e_transportCapability);
   }
 #endif
   return TRUE;
 }
 
 PBoolean H323_RTP_UDP::OnSendingAltPDU(const H323_RTPChannel & channel,
-				H245_ArrayOf_GenericInformation & generic) const
+                H245_ArrayOf_GenericInformation & generic) const
 {
-		return connection.OnSendingOLCGenericInformation(channel.GetSessionID(),generic,false);
+        return connection.OnSendingOLCGenericInformation(channel.GetSessionID(),generic,false);
 }
 
 void H323_RTP_UDP::OnSendingAckPDU(const H323_RTPChannel & channel,
@@ -452,8 +278,8 @@ PBoolean H323_RTP_UDP::OnReceivedPDU(H323_RTPChannel & channel,
   // GQoS
 #if P_QOS
   if (param.HasOptionalField(H245_H2250LogicalChannelParameters::e_transportCapability) && connection.H245QoSEnabled()) {
-	 H245_TransportCapability trans = param.m_transportCapability;
-		ReadTransportCapPDU(trans,channel);
+     H245_TransportCapability trans = param.m_transportCapability;
+        ReadTransportCapPDU(trans,channel);
   }
 #endif
 
@@ -509,9 +335,9 @@ PBoolean H323_RTP_UDP::OnReceivedAckPDU(H323_RTPChannel & channel,
 }
 
 PBoolean H323_RTP_UDP::OnReceivedAckAltPDU(H323_RTPChannel & channel,
-	  const H245_ArrayOf_GenericInformation & alternate)
+      const H245_ArrayOf_GenericInformation & alternate)
 {
-	return connection.OnReceiveOLCGenericInformation(channel.GetSessionID(),alternate);
+    return connection.OnReceiveOLCGenericInformation(channel.GetSessionID(),alternate);
 }
 
 void H323_RTP_UDP::OnSendRasInfo(H225_RTPSession & info)
@@ -533,98 +359,109 @@ void H323_RTP_UDP::OnSendRasInfo(H225_RTPSession & info)
 
 #if P_QOS
 PBoolean H323_RTP_UDP::WriteTransportCapPDU(H245_TransportCapability & cap, 
-											const H323_RTPChannel & channel) const
+                                            const H323_RTPChannel & channel) const
 {
- 
+    cap.IncludeOptionalField(H245_TransportCapability::e_mediaChannelCapabilities); 
+    H245_ArrayOf_MediaChannelCapability & mediaCaps = cap.m_mediaChannelCapabilities;
+    mediaCaps.SetSize(1);
+    H245_MediaChannelCapability & mediaCap = mediaCaps[0];
+    mediaCap.IncludeOptionalField(H245_MediaChannelCapability::e_mediaTransport);
+    H245_MediaTransportType & transport = mediaCap.m_mediaTransport;
+    transport.SetTag(H245_MediaTransportType::e_ip_UDP);
+
     PQoS & qos = rtp.GetQOS();
-	cap.IncludeOptionalField(H245_TransportCapability::e_qOSCapabilities);
-	H245_ArrayOf_QOSCapability & QoSs = cap.m_qOSCapabilities;
+    int m_dscp = qos.GetDSCP();
+    if (m_dscp == 0) 
+        return true;
 
-	 H245_QOSCapability Cap = H245_QOSCapability();
-	  Cap.IncludeOptionalField(H245_QOSCapability::e_localQoS);
-	   PASN_Boolean & localqos = Cap.m_localQoS;
-	   localqos.SetValue(TRUE);
+    cap.IncludeOptionalField(H245_TransportCapability::e_qOSCapabilities);
+    H245_ArrayOf_QOSCapability & QoSs = cap.m_qOSCapabilities;
 
-	  Cap.IncludeOptionalField(H245_QOSCapability::e_dscpValue);
-	   PASN_Integer & dscp = Cap.m_dscpValue;
-	   dscp = qos.GetDSCP();
+     H245_QOSCapability Cap = H245_QOSCapability();
+      Cap.IncludeOptionalField(H245_QOSCapability::e_localQoS);
+       PASN_Boolean & localqos = Cap.m_localQoS;
+       localqos.SetValue(TRUE);
 
-	if (PUDPSocket::SupportQoS(rtp.GetLocalAddress())) {		
-	  Cap.IncludeOptionalField(H245_QOSCapability::e_rsvpParameters);
-	  H245_RSVPParameters & rsvp = Cap.m_rsvpParameters; 
+      Cap.IncludeOptionalField(H245_QOSCapability::e_dscpValue);
+       PASN_Integer & dscp = Cap.m_dscpValue;
+       dscp = m_dscp;
 
-	  if (channel.GetDirection() == H323Channel::IsReceiver) {   /// If Reply don't have to send body
-		  rtp.EnableGQoS(TRUE);
-		  return TRUE;
-	  }
-	  rsvp.IncludeOptionalField(H245_RSVPParameters::e_qosMode); 
-		H245_QOSMode & mode = rsvp.m_qosMode;
-		  if (qos.GetServiceType() == SERVICETYPE_GUARANTEED) 
-			 mode.SetTag(H245_QOSMode::e_guaranteedQOS); 
-		  else 
-			 mode.SetTag(H245_QOSMode::e_controlledLoad); 
-		
-	  rsvp.IncludeOptionalField(H245_RSVPParameters::e_tokenRate); 
-		   rsvp.m_tokenRate = qos.GetTokenRate();
-	  rsvp.IncludeOptionalField(H245_RSVPParameters::e_bucketSize);
-		   rsvp.m_bucketSize = qos.GetTokenBucketSize();
-	  rsvp.HasOptionalField(H245_RSVPParameters::e_peakRate);
-		   rsvp.m_peakRate = qos.GetPeakBandwidth();
-	}
-	QoSs.SetSize(1);
-	QoSs[0] = Cap;
-	return TRUE;
+    if (PUDPSocket::SupportQoS(rtp.GetLocalAddress())) {        
+      Cap.IncludeOptionalField(H245_QOSCapability::e_rsvpParameters);
+      H245_RSVPParameters & rsvp = Cap.m_rsvpParameters; 
+
+      if (channel.GetDirection() == H323Channel::IsReceiver) {   /// If Reply don't have to send body
+          rtp.EnableGQoS(TRUE);
+          return true;
+      }
+      rsvp.IncludeOptionalField(H245_RSVPParameters::e_qosMode); 
+        H245_QOSMode & mode = rsvp.m_qosMode;
+          if (qos.GetServiceType() == SERVICETYPE_GUARANTEED) 
+             mode.SetTag(H245_QOSMode::e_guaranteedQOS); 
+          else 
+             mode.SetTag(H245_QOSMode::e_controlledLoad); 
+        
+      rsvp.IncludeOptionalField(H245_RSVPParameters::e_tokenRate); 
+           rsvp.m_tokenRate = qos.GetTokenRate();
+      rsvp.IncludeOptionalField(H245_RSVPParameters::e_bucketSize);
+           rsvp.m_bucketSize = qos.GetTokenBucketSize();
+      rsvp.HasOptionalField(H245_RSVPParameters::e_peakRate);
+           rsvp.m_peakRate = qos.GetPeakBandwidth();
+    }
+    QoSs.SetSize(1);
+    QoSs[0] = Cap;
+    return true;
 }
 
 void H323_RTP_UDP::ReadTransportCapPDU(const H245_TransportCapability & cap,
-													H323_RTPChannel & channel)
+                                                    H323_RTPChannel & channel)
 {
-	if (!cap.HasOptionalField(H245_TransportCapability::e_qOSCapabilities)) 
-		return;	
+    if (!cap.HasOptionalField(H245_TransportCapability::e_qOSCapabilities)) 
+        return;    
 
 
-	const H245_ArrayOf_QOSCapability QoSs = cap.m_qOSCapabilities;
-	for (PINDEX i =0; i < QoSs.GetSize(); i++) {
-	  PQoS & qos = rtp.GetQOS();
-	  const H245_QOSCapability & QoS = QoSs[i];
-//		if (QoS.HasOptionalField(H245_QOSCapability::e_localQoS)) {
-//	       PASN_Boolean & localqos = QoS.m_localQoS;
-//		}
-		if (QoS.HasOptionalField(H245_QOSCapability::e_dscpValue)) {
-	        const PASN_Integer & dscp = QoS.m_dscpValue;
-	        qos.SetDSCP(dscp);
-		}
+    const H245_ArrayOf_QOSCapability QoSs = cap.m_qOSCapabilities;
+    for (PINDEX i =0; i < QoSs.GetSize(); i++) {
+      PQoS & qos = rtp.GetQOS();
+      const H245_QOSCapability & QoS = QoSs[i];
+//        if (QoS.HasOptionalField(H245_QOSCapability::e_localQoS)) {
+//           PASN_Boolean & localqos = QoS.m_localQoS;
+//        }
+        if (QoS.HasOptionalField(H245_QOSCapability::e_dscpValue)) {
+            const PASN_Integer & dscp = QoS.m_dscpValue;
+            qos.SetDSCP(dscp);
+        }
 
-		if (PUDPSocket::SupportQoS(rtp.GetLocalAddress())) {
-			if (!QoS.HasOptionalField(H245_QOSCapability::e_rsvpParameters)) {
-				PTRACE(4,"TRANS\tDisabling GQoS");
-				rtp.EnableGQoS(FALSE);  
-				return;
-			}
-		
-			const H245_RSVPParameters & rsvp = QoS.m_rsvpParameters; 
-			if (channel.GetDirection() != H323Channel::IsReceiver) {
-				rtp.EnableGQoS(TRUE);
-				return;
-			}	  
-			if (rsvp.HasOptionalField(H245_RSVPParameters::e_qosMode)) {
-					const H245_QOSMode & mode = rsvp.m_qosMode;
-					if (mode.GetTag() == H245_QOSMode::e_guaranteedQOS) {
-						qos.SetWinServiceType(SERVICETYPE_GUARANTEED);
-						qos.SetDSCP(PQoS::guaranteedDSCP);
-					} else {
-						qos.SetWinServiceType(SERVICETYPE_CONTROLLEDLOAD);
-						qos.SetDSCP(PQoS::controlledLoadDSCP);
-					}
-			}
-			if (rsvp.HasOptionalField(H245_RSVPParameters::e_tokenRate)) 
-				qos.SetAvgBytesPerSec(rsvp.m_tokenRate);
-			if (rsvp.HasOptionalField(H245_RSVPParameters::e_bucketSize))
-				qos.SetMaxFrameBytes(rsvp.m_bucketSize);
-			if (rsvp.HasOptionalField(H245_RSVPParameters::e_peakRate))
-				qos.SetPeakBytesPerSec(rsvp.m_peakRate);	
-		}
-	}
+        if (PUDPSocket::SupportQoS(rtp.GetLocalAddress())) {
+            if (!QoS.HasOptionalField(H245_QOSCapability::e_rsvpParameters)) {
+                PTRACE(4,"TRANS\tDisabling GQoS");
+                rtp.EnableGQoS(FALSE);  
+                return;
+            }
+        
+            const H245_RSVPParameters & rsvp = QoS.m_rsvpParameters; 
+            if (channel.GetDirection() != H323Channel::IsReceiver) {
+                rtp.EnableGQoS(TRUE);
+                return;
+            }      
+            if (rsvp.HasOptionalField(H245_RSVPParameters::e_qosMode)) {
+                    const H245_QOSMode & mode = rsvp.m_qosMode;
+                    if (mode.GetTag() == H245_QOSMode::e_guaranteedQOS) {
+                        qos.SetWinServiceType(SERVICETYPE_GUARANTEED);
+                        qos.SetDSCP(PQoS::guaranteedDSCP);
+                    } else {
+                        qos.SetWinServiceType(SERVICETYPE_CONTROLLEDLOAD);
+                        qos.SetDSCP(PQoS::controlledLoadDSCP);
+                    }
+            }
+            if (rsvp.HasOptionalField(H245_RSVPParameters::e_tokenRate)) 
+                qos.SetAvgBytesPerSec(rsvp.m_tokenRate);
+            if (rsvp.HasOptionalField(H245_RSVPParameters::e_bucketSize))
+                qos.SetMaxFrameBytes(rsvp.m_bucketSize);
+            if (rsvp.HasOptionalField(H245_RSVPParameters::e_peakRate))
+                qos.SetPeakBytesPerSec(rsvp.m_peakRate);    
+        }
+    }
 }
 #endif
 /////////////////////////////////////////////////////////////////////////////
