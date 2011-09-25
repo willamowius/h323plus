@@ -219,7 +219,11 @@ class H46018Handler : public PObject
     PBoolean m_h46018inOperation;
 };
 
-class H46019MultiplexSocket;
+
+#ifdef H323_H46019M
+typedef map<unsigned, PUDPSocket*> muxSocketMap;
+#endif
+
 class PNatMethod_H46019  : public PNatMethod
 {
     PCLASSINFO(PNatMethod_H46019,PNatMethod);
@@ -303,9 +307,22 @@ class PNatMethod_H46019  : public PNatMethod
      */
     static PBoolean IsMultiplexed();
 
-    /**Get multiplex socket
+    /** Get multiplex socket
       */
-    static H46019MultiplexSocket * GetMultiplexSocket(bool rtp);
+    static PUDPSocket * GetMultiplexSocket(bool rtp);
+
+    /** Register a multiplex socket
+      */
+    static void RegisterSocket(bool rtp, unsigned id, PUDPSocket * socket);
+
+    /** Unregister a multiplex socket
+      */
+    static void UnregisterSocket(bool rtp, unsigned id);
+
+    /** Start Multiplex listener thread
+      */
+    void StartMultiplexListener();
+
 #endif
 
     /**  OpenSocket
@@ -370,14 +387,21 @@ class PNatMethod_H46019  : public PNatMethod
                 H323Connection::SessionInformation * info    ///< session Information
                 );
     
-    PBoolean available;                    ///< Whether this NAT Method is available for call
+    PBoolean available;                 ///< Whether this NAT Method is available for call
     PBoolean active;                    ///< Whether the method is active for call
     H46018Handler * handler;            ///< handler
 
 #ifdef H323_H46019M
     static PBoolean                      multiplex;
+    static PBoolean                      muxShutdown;
     PortInfo                             muxPortInfo;
     static H323Connection::NAT_Sockets   muxSockets;
+
+    static muxSocketMap                  rtpSocketMap;
+    static muxSocketMap                  rtcpSocketMap;
+    static PMutex                        muxMutex;
+    PThread *                            m_readThread;
+    PDECLARE_NOTIFIER(PThread, PNatMethod_H46019, ReadThread);
 #endif
 
 };
@@ -407,8 +431,19 @@ class H46019MultiplexSocket : public PUDPSocket
   public:
     H46019MultiplexSocket();
 
+    H46019MultiplexSocket(bool rtp);
+
     ~H46019MultiplexSocket();
 
+    enum MuxType {
+        e_unknown,
+        e_rtp,
+        e_rtcp
+    };
+
+    virtual MuxType GetMultiplexType() const;
+
+    virtual void SetMultiplexType(MuxType type);
 
      /**Read a datagram from a remote computer
        @return PTrue if any bytes were sucessfully read.
@@ -430,22 +465,12 @@ class H46019MultiplexSocket : public PUDPSocket
       WORD port           ///< Port to which the datagram is sent.
     );
 
-    void RegisterSocket(unsigned id, PUDPSocket * socket);
-    void UnregisterSocket(unsigned id);
-
-    unsigned GetSocketCount();
-
     virtual PBoolean Close();
-
-    void Start();
 
   private:
 
-    PBoolean                   m_shutdown;
+    MuxType                    m_plexType;
     PMutex                     m_mutex;
-    map<unsigned, PUDPSocket*> m_socketMap;
-    PThread *                  m_readThread;
-    PDECLARE_NOTIFIER(PThread, H46019MultiplexSocket, ReadThread);
 
 };
 #endif
