@@ -84,7 +84,7 @@ class H46018TransportThread : public PThread
 
 H46018TransportThread::H46018TransportThread(H323EndPoint & ep, H46018Transport * t)
   : PThread(ep.GetSignallingThreadStackSize(), AutoDeleteThread,
-            NormalPriority,"H225 Answer:%0x"),transport(t)
+            NormalPriority,"H46019 Answer:%0x"),transport(t)
 {  
 
     isConnected = false;
@@ -98,15 +98,13 @@ void H46018TransportThread::Main()
     PTRACE(3, "H46018\tStarted Listening Thread");
 
     PBoolean ret = true;
-    while ((transport->IsOpen()) &&        // Transport is Open
-    (!isConnected) &&            // Does not have a call connection 
-    (ret) &&                            // is not a Failed connection
-    (!transport->CloseTransport())) {    // not close due to shutdown
+    while (transport->IsOpen()) {    // not close due to shutdown
         ret = transport->HandleH46018SignallingChannelPDU(this);
 
         if (!ret && transport->CloseTransport()) {  // Closing down Instruction
             PTRACE(3, "H46018\tShutting down H46018 Thread");
             transport->ConnectionLost(true);
+            break;
         } 
     }
 
@@ -213,9 +211,6 @@ PBoolean H46018Transport::HandleH46018SignallingChannelPDU(PThread * thread)
     connectionsMutex.Signal();
 
     connection->AttachSignalChannel(token, this, true);
- 
-    AttachThread(thread);
-    thread->SetNoAutoDelete();
 
     if (connection->HandleSignalPDU(pdu)) {
         // All subsequent PDU's should wait forever
