@@ -45,6 +45,7 @@
 #include <ptclib/pdns.h>
 #ifdef H323_H46018
 #include <h460/h460_std18.h>
+#include <h460/h46018_h225.h>
 #endif
 
 #ifdef H323_UPnP
@@ -185,16 +186,52 @@ PSTUNClient::NatTypes PNatMethod_H46024::GetNATType()
     return natType;
 }
 
+
 PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
                                              PUDPSocket * & socket2,
-                                            const PIPSocket::Address & binding)
+                                             const PIPSocket::Address & binding,
+	                                         void * userData
+                                             )
 {
+#ifdef H323_H46019M
+    H323Connection::SessionInformation * info = (H323Connection::SessionInformation *)userData;
+    PNatMethod_H46019 * handler = 
+               (PNatMethod_H46019 *)feat->GetEndPoint()->GetNatMethods().GetMethodByName("H46019");
+
+    if (handler && info->GetRecvMultiplexID() > 0) {
+        if (!handler->IsMultiplexed()) {
+           H46019MultiplexSocket * & muxSocket1 = (H46019MultiplexSocket * &)handler->GetMultiplexSocket(true); 
+           H46019MultiplexSocket * & muxSocket2 = (H46019MultiplexSocket * &)handler->GetMultiplexSocket(false); 
+           muxSocket1 = new H46019MultiplexSocket(true);
+           muxSocket2 = new H46019MultiplexSocket(false);
+            pairedPortInfo.basePort    = feat->GetEndPoint()->GetMultiplexPort();
+            pairedPortInfo.maxPort     = pairedPortInfo.basePort+1;
+            pairedPortInfo.currentPort = pairedPortInfo.basePort-1;
+   
+           if (PSTUNClient::CreateSocketPair(muxSocket1->GetSubSocket(),
+                                             muxSocket2->GetSubSocket(),
+                                            binding)) {
+              handler->StartMultiplexListener();  // Start Multiplexing Listening thread;
+              handler->EnableMultiplex(true); 
+           }
+        }
+
+       socket1 = new H46019UDPSocket(*handler->GetHandler(),info,true);      /// Data 
+       socket2 = new H46019UDPSocket(*handler->GetHandler(),info,false);     /// Signal
+       
+       PNatMethod_H46019::RegisterSocket(true ,info->GetRecvMultiplexID(), socket1);
+       PNatMethod_H46019::RegisterSocket(false,info->GetRecvMultiplexID(), socket2);
+
+    } else
+#endif
+    {
 #if (PTLIB_VER > 260)
-    pairedPortInfo.currentPort = 
+        pairedPortInfo.currentPort = 
             RandomPortPair(pairedPortInfo.basePort-1,pairedPortInfo.maxPort-2);
 #endif
 
-    return PSTUNClient::CreateSocketPair(socket1,socket2,binding);
+       return PSTUNClient::CreateSocketPair(socket1,socket2,binding);
+    }
 }
 
 

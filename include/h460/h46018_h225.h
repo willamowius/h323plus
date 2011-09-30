@@ -222,6 +222,8 @@ class H46018Handler : public PObject
 
 #ifdef H323_H46019M
 typedef map<unsigned, PUDPSocket*> muxSocketMap;
+
+class H46019MultiplexSocket;
 #endif
 
 class PNatMethod_H46019  : public PNatMethod
@@ -246,6 +248,8 @@ class PNatMethod_H46019  : public PNatMethod
         Attach endpoint reference
     */
     void AttachHandler(H46018Handler * _handler);
+
+    H46018Handler * GetHandler();
 
     /**  GetExternalAddress
         Get the external address.
@@ -309,7 +313,7 @@ class PNatMethod_H46019  : public PNatMethod
 
     /** Get multiplex socket
       */
-    static PUDPSocket * GetMultiplexSocket(bool rtp);
+    static PUDPSocket * & GetMultiplexSocket(bool rtp);
 
     /** Register a multiplex socket
       */
@@ -467,8 +471,11 @@ class H46019MultiplexSocket : public PUDPSocket
 
     virtual PBoolean Close();
 
+    PUDPSocket * & GetSubSocket()  { return m_subSocket; }
+
   private:
 
+    PUDPSocket              *  m_subSocket;
     MuxType                    m_plexType;
     PMutex                     m_mutex;
 

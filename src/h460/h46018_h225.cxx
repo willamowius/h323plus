@@ -492,6 +492,11 @@ void PNatMethod_H46019::AttachHandler(H46018Handler * _handler)
     available = FALSE;
 }
 
+H46018Handler * PNatMethod_H46019::GetHandler()
+{
+    return handler;
+}
+
 PBoolean PNatMethod_H46019::GetExternalAddress(PIPSocket::Address & /*externalAddress*/, /// External address of router
                     const PTimeInterval & /* maxAge */         /// Maximum age for caching
                     )
@@ -629,12 +634,12 @@ PBoolean PNatMethod_H46019::IsMultiplexed()
     return multiplex;
 }
 
-PUDPSocket * PNatMethod_H46019::GetMultiplexSocket(bool rtp)
+PUDPSocket * & PNatMethod_H46019::GetMultiplexSocket(bool rtp)
 {
     if (rtp)
-      return muxSockets.rtp;
+      return (PUDPSocket * &)muxSockets.rtp;
     else
-      return muxSockets.rtcp;
+      return (PUDPSocket * &)muxSockets.rtcp;
 }
 
 void PNatMethod_H46019::StartMultiplexListener()
@@ -759,18 +764,22 @@ void PNatMethod_H46019::UnregisterSocket(bool rtp, unsigned id)
 
 #ifdef H323_H46019M
 H46019MultiplexSocket::H46019MultiplexSocket()
-: m_plexType(e_unknown)
+ : m_subSocket(NULL), m_plexType(e_unknown)
 {   
 }
 
 H46019MultiplexSocket::H46019MultiplexSocket(bool rtp)
+: m_subSocket(NULL), m_plexType(rtp ? e_rtp : e_rtcp)
 {
-    m_plexType = rtp ? e_rtp : e_rtcp;
+
 }
 
 H46019MultiplexSocket::~H46019MultiplexSocket()
 {
     Close();
+
+    if (m_subSocket)
+        delete m_subSocket;
 }
 
 H46019MultiplexSocket::MuxType H46019MultiplexSocket::GetMultiplexType() const
@@ -785,17 +794,27 @@ void H46019MultiplexSocket::SetMultiplexType(H46019MultiplexSocket::MuxType type
 
 PBoolean H46019MultiplexSocket::ReadFrom(void *buf, PINDEX len, Address & addr, WORD & pt)
 {
-    return PUDPSocket::ReadFrom(buf,len,addr,pt);
+    if (m_subSocket)
+        return m_subSocket->ReadFrom(buf,len,addr,pt);
+    else
+        return PUDPSocket::ReadFrom(buf,len,addr,pt);
 }
 
 PBoolean H46019MultiplexSocket::WriteTo(const void *buf, PINDEX len, const Address & addr, WORD pt)
 {
     PWaitAndSignal m(m_mutex);
-    return PUDPSocket::WriteTo(buf,len,addr,pt);
+
+    if (m_subSocket)
+        return m_subSocket->WriteTo(buf,len,addr,pt);
+    else
+        return PUDPSocket::WriteTo(buf,len,addr,pt);
 }
 
 PBoolean H46019MultiplexSocket::Close()
 {
+    if (m_subSocket)
+        return m_subSocket->Close();
+
     return PUDPSocket::Close();
 }
 #endif

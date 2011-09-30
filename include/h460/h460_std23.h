@@ -31,7 +31,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Id $
+ * $Id$
  *
  */
 
@@ -79,7 +79,8 @@ class PNatMethod_H46024  : public PSTUNClient,
 		virtual PBoolean CreateSocketPair(
 		  PUDPSocket * & socket1,
 		  PUDPSocket * & socket2,
-		  const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny()
+		  const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny(),
+          void * userData = NULL
 		);
 
 		// Whether the NAT Method is available

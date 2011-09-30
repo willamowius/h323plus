@@ -45,6 +45,7 @@
 
 #ifdef H323_UPnP
 #include "h460/upnpcp.h"
+#include "h460/h46018_h225.h"
 
 #include <Natupnp.h>
 #include <UPnP.h>
@@ -1022,42 +1023,93 @@ PBoolean PNatMethod_UPnP::CreateSocketPair(PUDPSocket * & socket1, PUDPSocket * 
       const PIPSocket::Address & binding, void * userData)
 {
 
-      if (pairedPortInfo.basePort == 0 || pairedPortInfo.basePort > pairedPortInfo.maxPort)
-      {
-        PTRACE(1, "UPnP\tInvalid local UDP port range "
-               << pairedPortInfo.currentPort << '-' << pairedPortInfo.maxPort);
-        return FALSE;
-      }
+#ifdef H323_H46019M
+    H323Connection::SessionInformation * info = (H323Connection::SessionInformation *)userData;
+    PNatMethod_H46019 * handler = 
+               (PNatMethod_H46019 *)ep->GetNatMethods().GetMethodByName("H46019");
 
-    socket1 = new UPnPUDPSocket(this);  /// Data 
-    socket2 = new UPnPUDPSocket(this);  /// Signal
+    if (handler && info->GetRecvMultiplexID() > 0) {
+        if (!handler->IsMultiplexed()) {
+           H46019MultiplexSocket * & muxSocket1 = (H46019MultiplexSocket * &)handler->GetMultiplexSocket(true); 
+           H46019MultiplexSocket * & muxSocket2 = (H46019MultiplexSocket * &)handler->GetMultiplexSocket(false); 
+           muxSocket1 = new H46019MultiplexSocket(true);
+           muxSocket2 = new H46019MultiplexSocket(false);
+            pairedPortInfo.basePort    = ep->GetMultiplexPort();
+            pairedPortInfo.maxPort     = pairedPortInfo.basePort+1;
+            pairedPortInfo.currentPort = pairedPortInfo.basePort-1;
+   
+                while ((!OpenSocket(*muxSocket1, pairedPortInfo,binding)) ||
+                       (!OpenSocket(*muxSocket2, pairedPortInfo,binding)) ||
+                       (socket2->GetPort() != socket1->GetPort() + 1) )
+                {
+                        delete muxSocket1;
+                        delete muxSocket2;
+                        socket1 = new UPnPUDPSocket(this);  /// Data 
+                        socket2 = new UPnPUDPSocket(this);  /// Signal
+                }
 
-/// Make sure we have sequential ports
-    while ((!OpenSocket(*socket1, pairedPortInfo,binding)) ||
-           (!OpenSocket(*socket2, pairedPortInfo,binding)) ||
-           (socket2->GetPort() != socket1->GetPort() + 1) )
-    {
-            delete socket1;
-            delete socket2;
-            socket1 = new UPnPUDPSocket(this);  /// Data 
-            socket2 = new UPnPUDPSocket(this);  /// Signal
+                // Open UPnP mappings
+                WORD locPort,extPort;
+                PIPSocket::Address locAddr, extAddr;
+                socket1->GetLocalAddress(locAddr,locPort);
+                
+                if (m_pUPnP->CreateMap(true,"UDP",locAddr,locPort,extAddr,extPort)) {
+                    ((UPnPUDPSocket*)socket1)->SetMasqAddress(extAddr,extPort);
+                    ((UPnPUDPSocket*)socket2)->SetMasqAddress(extAddr,extPort+1);
+                } else {
+                    PTRACE(3, "UPnP\tError mapped ports. Abort Creating socket pair.");
+                    return false;
+                }
+
+              handler->StartMultiplexListener();  // Start Multiplexing Listening thread;
+              handler->EnableMultiplex(true); 
+        }
+
+       socket1 = new H46019UDPSocket(*handler->GetHandler(),info,true);      /// Data 
+       socket2 = new H46019UDPSocket(*handler->GetHandler(),info,false);     /// Signal
+       
+       PNatMethod_H46019::RegisterSocket(true ,info->GetRecvMultiplexID(), socket1);
+       PNatMethod_H46019::RegisterSocket(false,info->GetRecvMultiplexID(), socket2);
+
+    } else 
+#endif
+   {
+        if (pairedPortInfo.basePort == 0 || pairedPortInfo.basePort > pairedPortInfo.maxPort) {
+            PTRACE(1, "UPnP\tInvalid local UDP port range "
+                   << pairedPortInfo.currentPort << '-' << pairedPortInfo.maxPort);
+            return FALSE;
+        }
+
+        socket1 = new UPnPUDPSocket(this);  /// Data 
+        socket2 = new UPnPUDPSocket(this);  /// Signal
+
+    /// Make sure we have sequential ports
+        while ((!OpenSocket(*socket1, pairedPortInfo,binding)) ||
+               (!OpenSocket(*socket2, pairedPortInfo,binding)) ||
+               (socket2->GetPort() != socket1->GetPort() + 1) )
+        {
+                delete socket1;
+                delete socket2;
+                socket1 = new UPnPUDPSocket(this);  /// Data 
+                socket2 = new UPnPUDPSocket(this);  /// Signal
+        }
+
+        // Open UPnP mappings
+        WORD locPort,extPort;
+        PIPSocket::Address locAddr, extAddr;
+        socket1->GetLocalAddress(locAddr,locPort);
+        
+        if (m_pUPnP->CreateMap(true,"UDP",locAddr,locPort,extAddr,extPort)) {
+            ((UPnPUDPSocket*)socket1)->SetMasqAddress(extAddr,extPort);
+            ((UPnPUDPSocket*)socket2)->SetMasqAddress(extAddr,extPort+1);
+        } else {
+            PTRACE(3, "UPnP\tError mapped ports. Abort Creating socket pair.");
+            return false;
+        }
+
+        PTRACE(3, "UPnP\tUDP mapped ports " << locAddr << " " << locPort << "-" <<  locPort+1 <<
+            " to " << extAddr << " " << extPort << "-" <<  extPort+1 );
     }
-
-    // Open UPnP mappings
-    WORD locPort,extPort;
-    PIPSocket::Address locAddr, extAddr;
-    socket1->GetLocalAddress(locAddr,locPort);
-    
-    if (m_pUPnP->CreateMap(true,"UDP",locAddr,locPort,extAddr,extPort)) {
-        ((UPnPUDPSocket*)socket1)->SetMasqAddress(extAddr,extPort);
-        ((UPnPUDPSocket*)socket2)->SetMasqAddress(extAddr,extPort+1);
-    } else {
-        PTRACE(3, "UPnP\tError mapped ports. Abort Creating socket pair.");
-        return false;
-    }
-
-    PTRACE(3, "UPnP\tUDP mapped ports " << locAddr << " " << locPort << "-" <<  locPort+1 <<
-        " to " << extAddr << " " << extPort << "-" <<  extPort+1 );
 
     return true;
 }
