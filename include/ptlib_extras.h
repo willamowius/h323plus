@@ -668,12 +668,12 @@ template <class D> class PSTLList : public PObject,
           PWaitAndSignal m(dictMutex);
 
           if (!reorder) {
-              typename std::map< unsigned, D*, PSTLSortOrder>::const_iterator it = this->find(ref);
+              typename std::map< unsigned, D*, PSTLSortOrder>::iterator it = this->find(ref);
               if (replace)
                 delete it->second;  
               this->erase(it);
           } else {
-              for (std::map< unsigned, D*, PSTLSortOrder >::const_iterator r = this->begin(); r != this->end(); ++r) {
+              for (typename std::map< unsigned, D*, PSTLSortOrder >::iterator r = this->begin(); r != this->end(); ++r) {
                    if (*obj == *(r->second)) {
                       InternalRemoveResort(r->first);
                       break;
