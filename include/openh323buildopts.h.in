@@ -99,7 +99,7 @@
 #undef H323_H224
 #undef H323_H230
 #ifdef P_SSL && (PTLIB_VER > 260)
-  undef H323_H235
+  #undef H323_H235
 #endif
 #ifdef P_VIDEO
 #undef H323_H239
