@@ -60,7 +60,7 @@
 
 
 #if PTLIB_VER >= 2110
-//  #define H323_STLDICTIONARY  1
+  #define H323_STLDICTIONARY  1
 #endif
 
 /////////////////////////////////////////////////
@@ -98,7 +98,7 @@
 #undef H323_T120
 #undef H323_H224
 #undef H323_H230
-#ifdef P_SSL && (PTLIB_VER > 260)
+#if (PTLIB_VER > 260) && (P_SSL)
   #undef H323_H235
 #endif
 #ifdef P_VIDEO
