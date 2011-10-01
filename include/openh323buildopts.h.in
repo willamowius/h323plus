@@ -100,6 +100,7 @@
 #undef H323_H230
 #if (PTLIB_VER > 260) && (P_SSL)
   #undef H323_H235
+  #undef H323_H235_AES256
 #endif
 #ifdef P_VIDEO
 #undef H323_H239
