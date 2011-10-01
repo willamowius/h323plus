@@ -190,7 +190,11 @@ PStringArray H2351_Authenticator::GetAuthenticatorNames()
 #ifdef H323_H235
 PBoolean H2351_Authenticator::GetAuthenticationCapabilities(H235Authenticator::Capabilities * ids)
 {
-    ids->Identifiers.push_back(OID_A);
+      H235Authenticator::Capability cap;
+        cap.m_identifier = OID_A;
+        cap.m_cipher     = "H2351";
+        cap.m_description= "h2351";
+       ids->capabilityList.push_back(cap);
     return true;
 }
 #endif

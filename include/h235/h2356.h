@@ -125,11 +125,7 @@ private:
 
 typedef H2356_Authenticator H235_AuthenticatorStd6;
 #ifndef _WIN32_WCE
-	#if PTLIB_VER > 260
-	   PPLUGIN_STATIC_LOAD(Std6,H235Authenticator);
-	#else
-	   PWLIB_STATIC_LOAD_PLUGIN(Std6,H235Authenticator);
-	#endif
+   PPLUGIN_STATIC_LOAD(Std6,H235Authenticator);
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////////

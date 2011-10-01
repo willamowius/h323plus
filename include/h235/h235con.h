@@ -39,12 +39,93 @@
  */
 
 
+struct ssl_st;
+struct ssl_ctx_st;
+struct ssl_session_st;
+class RTP_DataFrame;
+class H235Context;
+class H235_DiffieHellman;
+class H235Capabilities;
+class H235Session : public  PObject
+{
+	 PCLASSINFO(H235Session, PObject);
 
-/**Context for TLS Sockets.
-   This class embodies a common environment for all connections made via TLS/SSL
-   using the PTLS Sockets class. It includes such things as the version of SSL
-   and certificates, CA's etc.
+public:
+
+ /**@name Constructor */
+  //@{
+    /** Create a SSL Session Context 
+     */
+    H235Session(H235Capabilities * caps,  const PString & algorithm);
+
+   /** Destroy the SSL Session Context
+     */
+	~H235Session();
+  //@}
+
+ /**@name General Public Functions */
+  //@{
+    /** Create Session
+     */
+    PBoolean CreateSession();
+
+    /** Set Master key
+      */
+    void SetMasterKey(const PBYTEArray & key);
+
+    /** Get Master key
+      */
+    const PBYTEArray & GetMasterKey();
+
+    /** Is Active 
+      */
+    PBoolean IsActive();
+
+    /** Is Initialised
+     */
+    PBoolean IsInitialised();
+
+    /** Read Frame
+     */
+    PBoolean ReadFrame(DWORD & rtpTimestamp, RTP_DataFrame & frame);
+
+    /** Write Frame
+     */
+    PBoolean WriteFrame(RTP_DataFrame & frame);
+  //@}
+
+protected:
+
+	/** Raw Read a Encrypted DataFrame from SSL */ 
+	unsigned char * RawRead(unsigned char * buffer,int & length);
+
+	/** Raw Write a unEncrypted DataFrame to SSL */
+	unsigned char * RawWrite(unsigned char * buffer,int & length);
+
+    /** Set Cipher */
+    void SetCipher(const PString & oid);
+
+    /** Set DH Shared key  */
+    PBoolean SetDHSharedkey();
+
+private:
+    H235_DiffieHellman & m_dh;
+    PString              m_algorithm;
+    H235Context        & m_context;
+    ssl_st             * m_ssl;		       /// SSL Object
+	ssl_session_st     * m_session;        /// SSL Session Object
+	static int session_count;              /// Session Count
+	int                  m_session_id;     /// Session Identifier.
+    PBYTEArray           m_session_key;    /// Session Key
+    PBoolean             m_isServer;       /// Server Cipher Mode
+    PBoolean             m_isInitialised;  /// Is Initialised
+};
+
+
+
+/**Context for SSL Connections.
   */
+struct ssl_st;
 struct ssl_ctx_st;
 class H235Context : public PObject 
 {
@@ -71,6 +152,14 @@ class H235Context : public PObject
     /**Get the internal TLS/SSL context structure.
       */
     operator ssl_ctx_st *() const { return m_context; }
+
+    /**Get context structure.
+      */
+    ssl_ctx_st * GetContext() const { return m_context; }
+
+    /**Generate session ID.
+      */
+    int Generate_Session_Id(const ssl_st * ssl, unsigned char *id, unsigned int *id_len);
 
   protected:
     void RandomSeed();

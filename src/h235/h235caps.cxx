@@ -98,6 +98,14 @@ PINDEX H235SecurityCapability::GetAlgorithmCount()
    return m_capList.GetSize();
 }
 
+PString H235SecurityCapability::GetAlgorithm() const
+{
+   if (m_capList.GetSize() > 0)
+      return m_capList[0];
+   else
+      return PString();
+}
+
 PBoolean H235SecurityCapability::OnSendingPDU(H245_EncryptionAuthenticationAndIntegrity & encAuth, H323Capability::CommandType type) const
 {
   if (m_capList.GetSize() == 0)
@@ -308,6 +316,16 @@ PBoolean H323SecureRealTimeCapability::IsActive() const
     return m_active;
 }
 
+void H323SecureRealTimeCapability::SetAlgorithm(const PString & alg)
+{
+    m_algorithm = alg;
+}
+
+PString H323SecureRealTimeCapability::GetAlgorithm() const
+{
+    return m_algorithm;
+}
+
 ///////////////////////////////////////////////////////////////////////////// 
 
 H323SecureCapability::H323SecureCapability(H323Capability & childCapability,
@@ -448,6 +466,7 @@ PBoolean H323SecureCapability::OnSendingPDU(H245_DataType & dataType) const
         secCap = (H235SecurityCapability *)m_capabilities->FindCapability(m_secNo);
         if (secCap && secCap->GetAlgorithmCount() > 0)
            (PRemoveConst(H323SecureCapability,this))->SetActive(true);
+           (PRemoveConst(H323SecureCapability,this))->SetAlgorithm(secCap->GetAlgorithm());
     }
 
     if (!IsActive()) {
@@ -587,13 +606,13 @@ H323Codec * H323SecureCapability::CreateCodec(H323Codec::Direction direction) co
 /////////////////////////////////////////////////////////////////////////////
 
 H235Capabilities::H235Capabilities()
-:  m_DHkey(NULL), m_h245Master(false)
+:   m_context(NULL), m_DHkey(NULL), m_h245Master(false)
 {
     m_algorithms.SetSize(0);
 }
 
 H235Capabilities::H235Capabilities(const H323Capabilities & original)
-:  m_DHkey(NULL), m_h245Master(false)
+:  m_context(NULL), m_DHkey(NULL), m_h245Master(false)
 {
   m_algorithms.SetSize(0);
   const H323CapabilitiesSet rset = original.GetSet();
@@ -623,7 +642,7 @@ H235Capabilities::H235Capabilities(const H323Capabilities & original)
 }
 
 H235Capabilities::H235Capabilities(const H323Connection & connection, const H245_TerminalCapabilitySet & pdu)
- : H323Capabilities(connection, pdu), m_DHkey(NULL), m_h245Master(false)
+ : H323Capabilities(connection, pdu), m_context(NULL), m_DHkey(NULL), m_h245Master(false)
 {
    const H235Capabilities & localCapabilities = (const H235Capabilities &)connection.GetLocalCapabilities();
    PRemoveConst(H235Capabilities,&localCapabilities)->GetDHKeyPair(m_algorithms, m_DHkey, m_h245Master);

@@ -115,8 +115,8 @@ H235Authenticator * H235Authenticator::CreateAuthenticatorByID(const PString & i
   for (PINDEX i=0; i < list.GetSize(); ++i) {
       Capabilities caps;
       if (GetAuthenticatorCapabilities(list[i],&caps)) {
-	      for (std::list<PString>::const_iterator r = caps.Identifiers.begin(); r != caps.Identifiers.end(); ++r)
-              if (*r ==  identifier) {
+	      for (std::list<Capability>::const_iterator r = caps.capabilityList.begin(); r != caps.capabilityList.end(); ++r)
+              if (PString(r->m_identifier) ==  identifier) {
                   found = true;
                   break;
               }
@@ -690,7 +690,12 @@ PStringArray H235AuthSimpleMD5::GetAuthenticatorNames()
 #ifdef H323_H235
 PBoolean H235AuthSimpleMD5::GetAuthenticationCapabilities(H235Authenticator::Capabilities * ids)
 {
-    ids->Identifiers.push_back(OID_MD5);
+      H235Authenticator::Capability cap;
+        cap.m_identifier = OID_MD5;
+        cap.m_cipher     = "MD5";
+        cap.m_description= "md5";
+       ids->capabilityList.push_back(cap);
+    
     return true;
 }
 #endif

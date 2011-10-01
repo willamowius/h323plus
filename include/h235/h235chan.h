@@ -51,6 +51,7 @@
  */
 
 class RTP_Session;
+class H235Session;
 class H323SecureRTPChannel  : public H323_RTPChannel
 {
   PCLASSINFO(H323SecureRTPChannel, H323_RTPChannel);
@@ -170,6 +171,9 @@ class H323SecureRTPChannel  : public H323_RTPChannel
         RTP_DataFrame & frame     /// RTP data frame
         );
   //@}
+
+protected:
+    H235Session   *  m_encryption;
 
 };
 

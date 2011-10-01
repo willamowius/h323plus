@@ -88,7 +88,7 @@ H235_DiffieHellman::H235_DiffieHellman(const BYTE * pData, PINDEX pSize,
 H235_DiffieHellman::H235_DiffieHellman(const H235_DiffieHellman & diffie)
 {
    dh = NULL;
-   dh = DHparams_dup(diffie.dh);
+   dh = DHparams_dup(diffie);
 }
 
 
@@ -98,7 +98,7 @@ H235_DiffieHellman & H235_DiffieHellman::operator=(const H235_DiffieHellman & di
     DH_free(dh);
    
    dh = NULL;
-   dh = DHparams_dup(diffie.dh);
+   dh = DHparams_dup(diffie);
 
   return *this;
 }
@@ -415,8 +415,12 @@ PStringArray H2356_Authenticator::GetAuthenticatorNames()
 
 PBoolean H2356_Authenticator::GetAuthenticationCapabilities(H235Authenticator::Capabilities * ids)
 {
-    for (PINDEX i = 0; i < PARRAYSIZE(H235_DHParameters); ++i) {
-        ids->Identifiers.push_back(H235_DHParameters[i].parameterOID);
+    for (PINDEX i = 0; i < PARRAYSIZE(H235_Encryptions); ++i) {
+      H235Authenticator::Capability cap;
+        cap.m_identifier = H235_Encryptions[i].algorithmOID;
+        cap.m_cipher     = H235_Encryptions[i].sslDesc;
+        cap.m_description= H235_Encryptions[i].desc;
+        ids->capabilityList.push_back(cap);
     }
     return true;
 }

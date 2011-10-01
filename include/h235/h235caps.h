@@ -222,6 +222,10 @@ class H235SecurityCapability  : public H323Capability
       */
     PINDEX GetAlgorithmCount();
 
+    /**Get the current Algorithms
+      */
+    PString GetAlgorithm() const;
+
   //@}
 
   protected:
@@ -303,6 +307,12 @@ public:
     /// Is encryption active
     PBoolean IsActive() const;
 
+    /// Set Algorithm
+    void SetAlgorithm(const PString & alg);
+
+    /// Get Algorithm
+    PString GetAlgorithm() const;
+
   //@}
 
 protected:
@@ -312,6 +322,7 @@ protected:
     H323Capabilities * m_capabilities;   /// Capabilities list
     unsigned  m_secNo;                   /// Security Capability
     RTP_QOS * nrtpqos;                   /// RTP QOS
+    PString   m_algorithm;               /// Algorithm for encryption
 
 };
 
@@ -507,6 +518,7 @@ class H323SecureCapability : public H323SecureRealTimeCapability
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
+class H235Context;
 class H235_DiffieHellman;
 class H235Capabilities : public H323Capabilities
 {
@@ -559,13 +571,16 @@ public:
       */
    void GetDHKeyPair(PStringList & keyOIDs, H235_DiffieHellman * key, PBoolean & isMaster);
 
-
     /**Get the Algorithms
          return false if no algorithms.
       */
     PBoolean GetAlgorithms(const PStringList & algorithms) const;
 
+    H235Context * GetContext() { return m_context; }
+    H235_DiffieHellman * GetDiffieHellMan() { return m_DHkey; }
+
 protected:
+    H235Context        * m_context;
     H235_DiffieHellman * m_DHkey; 
     PStringList          m_algorithms;
     PBoolean             m_h245Master;
