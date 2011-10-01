@@ -73,8 +73,14 @@ class H235Authenticator : public PObject
     static H235Authenticator * CreateAuthenticatorByID(const PString & identifier
                                                  );
 
+    struct Capability {
+        const char * m_identifier;
+        const char * m_cipher;
+        const char * m_description;
+    };
+
     typedef struct {
-       std::list<PString> Identifiers;
+       std::list<Capability> capabilityList;
     } Capabilities;
 
     static PBoolean GetAuthenticatorCapabilities(const PString & deviceName,                 
@@ -342,11 +348,7 @@ class H235AuthSimpleMD5 : public H235Authenticator
 /// PFactory Loader
 typedef H235AuthSimpleMD5 H235_AuthenticatorMD5;
 #ifndef _WIN32_WCE
-	#if PTLIB_VER > 260
-	   PPLUGIN_STATIC_LOAD(MD5,H235Authenticator);
-	#else
-	   PWLIB_STATIC_LOAD_PLUGIN(MD5,H235Authenticator);
-	#endif
+  PPLUGIN_STATIC_LOAD(MD5,H235Authenticator);
 #endif
 #endif
 
@@ -452,11 +454,7 @@ typedef H2351_Authenticator H235AuthProcedure1;  // Backwards interoperability
 #ifdef H323_H235
 typedef H2351_Authenticator H235_AuthenticatorStd1;
 #ifndef _WIN32_WCE
-    #if PTLIB_VER > 260
-       PPLUGIN_STATIC_LOAD(Std1,H235Authenticator);
-    #else
-       PWLIB_STATIC_LOAD_PLUGIN(Std1,H235Authenticator);
-    #endif
+ PPLUGIN_STATIC_LOAD(Std1,H235Authenticator);
 #endif
 #endif
 
@@ -479,12 +477,12 @@ template <class className> class H235PluginServiceDescriptor : public PDevicePlu
 
 #define H235SECURITY(name)    \
 static H235PluginServiceDescriptor<H235_Authenticator##name> H235_Authenticator##name##_descriptor; \
-PCREATE_PLUGIN_STATIC(name, H235Authenticator, &H235_Authenticator##name##_descriptor);
+PCREATE_PLUGIN(name, H235Authenticator, &H235_Authenticator##name##_descriptor); \
 
 #endif
 
 
-#endif //__OPAL_H235AUTH_H
+#endif //__H323_H235AUTH_H
 
 
 /////////////////////////////////////////////////////////////////////////////
