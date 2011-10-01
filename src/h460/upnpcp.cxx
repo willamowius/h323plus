@@ -45,7 +45,10 @@
 
 #ifdef H323_UPnP
 #include "h460/upnpcp.h"
+
+#ifdef H323_H46019M
 #include "h460/h46018_h225.h"
+#endif
 
 #include <Natupnp.h>
 #include <UPnP.h>

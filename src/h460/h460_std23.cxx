@@ -44,10 +44,11 @@
 #include <ptclib/random.h>
 #include <ptclib/pdns.h>
 #ifdef H323_H46018
-#include <h460/h460_std18.h>
-#include <h460/h46018_h225.h>
+  #include <h460/h460_std18.h>
 #endif
-
+#ifdef H323_H46019M
+  #include <h460/h46018_h225.h>
+#endif
 #ifdef H323_UPnP
  #include "h460/upnpcp.h"
 #endif
