@@ -50,7 +50,6 @@
 
 extern "C" {
 #include <openssl/ssl.h>
-#include <openssl/ssl_locl.h>
 #include <openssl/rand.h>
 };
 
@@ -129,7 +128,7 @@ static void tls1_PRF(const EVP_MD *md5, const EVP_MD *sha1,
 	for (i=0; i<olen; i++)
     	out1[i]^=out2[i]; 
 	}
-
+#if 0
 static int tls_change_cipher_state(SSL *s, int which)
 	{
 	static const unsigned char empty[]="";
@@ -284,7 +283,7 @@ err2:
 	return(0);
 
 }
-
+#endif
 ////////////////////////////////////////////////////////////////////////
 
 
@@ -388,7 +387,7 @@ PBoolean H235Session::IsInitialised()
 
 PBoolean H235Session::CreateSession()
 {
-
+#if 0
   session_count++;
   m_session_id = session_count;
 
@@ -475,6 +474,7 @@ PBoolean H235Session::CreateSession()
 
 	PTRACE(2, "H235SES\tTLS Session Finalised."); 
     m_isInitialised = true;
+#endif
 	return true;
 }
 
@@ -514,9 +514,9 @@ PBoolean H235Session::WriteFrame(RTP_DataFrame & frame)
     return true;
 }
 
-unsigned char * H235Session::RawRead(unsigned char * buffer,int & length)
+unsigned char * H235Session::RawRead(unsigned char * /*buffer*/,int & /*length*/)
 {
-
+#if 0
 ssl3_record_st * rr;
 ssl3_buffer_st * rb;
 
@@ -666,6 +666,7 @@ wb= &(m_ssl->s3->wbuf);
 	length = wr->length;
 
 	return wr->input;
+#endif
     return NULL;
 }
 
