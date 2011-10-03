@@ -673,12 +673,12 @@ template <class D> class PSTLList : public PObject,
                 delete it->second;  
               this->erase(it);
           } else {
-              for (typename std::map< unsigned, D*, PSTLSortOrder >::iterator r = this->begin(); r != this->end(); ++r) {
-                   if (*obj == *(r->second)) {
-                      InternalRemoveResort(r->first);
-                      break;
-                   }
-              }
+              //for (typename std::map< unsigned, D*, PSTLSortOrder >::iterator r = this->begin(); r != this->end(); ++r) {
+              //     if (*obj == *(r->second)) {
+              //        InternalRemoveResort(r->first);
+              //        break;
+              //     }
+              //}
               int sz = this->size();
               if (sz > 0) {
                   int newpos = sz;
