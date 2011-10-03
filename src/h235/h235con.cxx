@@ -582,11 +582,15 @@ printf("\n");
 
     length = rr->length;
 	return &rr->input[rr->off];
+#else
+    return NULL;
+#endif
 }
 
-unsigned char * H235Session::RawWrite(unsigned char * buffer , int & length)
-{
 
+unsigned char * H235Session::RawWrite(unsigned char * /*buffer*/ , int & /*length*/)
+{
+#if 0
 unsigned char * p;
 unsigned char * plen;
 
@@ -666,8 +670,9 @@ wb= &(m_ssl->s3->wbuf);
 	length = wr->length;
 
 	return wr->input;
-#endif
+#else
     return NULL;
+#endif
 }
 
 /////////////////////////////////////////////////////////////////
