@@ -307,7 +307,7 @@ H323EndPoint::H323EndPoint()
     signallingChannelConnectTimeout(0, 10, 0), // seconds
     signallingChannelCallTimeout(0, 0, 1),  // Minutes
     controlChannelStartTimeout(0, 0, 2),    // Minutes
-    endSessionTimeout(0, 10),               // Seconds
+    endSessionTimeout(0, 3),                // Seconds
     masterSlaveDeterminationTimeout(0, 30), // Seconds
     capabilityExchangeTimeout(0, 30),       // Seconds
     logicalChannelTimeout(0, 30),           // Seconds
