@@ -5614,11 +5614,7 @@ PBoolean H323Connection::OnReceiveOLCGenericInformation(unsigned sessionID,
                     }
 
                     if (!m_H46019multiplex && multiID > 0) {
-                        if (isAck) {
-                            PTRACE(2,"H46019\tMultiplex remote detected. To send Multiplexed!");
-                        } else {
-                            PTRACE(2,"H46019\tMULTIPLEX LOGIC ERROR! Multiplex OLC without supportTransmitMultiplexedMedia");
-                        }
+                        PTRACE(2,"H46019\tMultiplex remote detected. To send Multiplexed!");
                     }
 #endif 
                     
