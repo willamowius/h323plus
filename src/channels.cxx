@@ -593,7 +593,7 @@ PBoolean H323_RealTimeChannel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck
     return FALSE;
   }
 
-  if (ack.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation))
+  if (ack.HasOptionalField(H245_OpenLogicalChannelAck::e_genericInformation))
                        OnReceivedAckAltPDU(ack.m_genericInformation);
 
   return OnReceivedAckPDU(ack.m_forwardMultiplexAckParameters);
