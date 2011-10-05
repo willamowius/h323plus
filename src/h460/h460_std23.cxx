@@ -209,12 +209,11 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
             pairedPortInfo.maxPort     = pairedPortInfo.basePort+1;
             pairedPortInfo.currentPort = pairedPortInfo.basePort-1;
    
-           if (PSTUNClient::CreateSocketPair(muxSocket1->GetSubSocket(),
-                                             muxSocket2->GetSubSocket(),
-                                            binding)) {
-              handler->StartMultiplexListener();  // Start Multiplexing Listening thread;
-              handler->EnableMultiplex(true); 
-           }
+           if (!PSTUNClient::CreateSocketPair(muxSocket1->GetSubSocket(), muxSocket2->GetSubSocket(), binding)) 
+                return false;
+           
+           handler->StartMultiplexListener();  // Start Multiplexing Listening thread;
+           handler->EnableMultiplex(true); 
         }
 
        socket1 = new H46019UDPSocket(*handler->GetHandler(),info,true);      /// Data 
@@ -222,7 +221,7 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
        
        PNatMethod_H46019::RegisterSocket(true ,info->GetRecvMultiplexID(), socket1);
        PNatMethod_H46019::RegisterSocket(false,info->GetRecvMultiplexID(), socket2);
-
+       return true;
     } else
 #endif
     {
