@@ -1041,7 +1041,7 @@ void H46019UDPSocket::SetTTL(unsigned val)
 
 #ifdef H323_H46019M
 
-void H46019UDPSocket::GetMultiplexAddress(H323TransportAddress & address, unsigned & multiID)
+void H46019UDPSocket::GetMultiplexAddress(H323TransportAddress & address, unsigned & multiID, PBoolean OLCack)
 {
     // Get the local IP/Port of the underlying Multiplexed RTP;
     if (PNatMethod_H46019::IsMultiplexed()) {
@@ -1050,7 +1050,10 @@ void H46019UDPSocket::GetMultiplexAddress(H323TransportAddress & address, unsign
         PNatMethod_H46019::GetMultiplexSocket(rtpSocket)->GetLocalAddress(addr,port);
         address = H323TransportAddress(addr,port);
     }
-    multiID = m_recvMultiplexID;
+    if (OLCack)
+       multiID = m_sendMultiplexID;
+    else
+       multiID = m_recvMultiplexID;
 }
 
 unsigned H46019UDPSocket::GetRecvMultiplexID() const
@@ -1120,6 +1123,7 @@ PBoolean H46019UDPSocket::DoPseudoRead(int & selectStatus)
 
 PBoolean H46019UDPSocket::ReadSocket(void * buf, PINDEX & len, Address & addr, WORD & port)
 {
+    // TODO: Support for receive side only multiplex...SH
     if (m_recvMultiplexID == 0)
         return PUDPSocket::ReadFrom(buf, len, addr, port);
     else
@@ -1128,13 +1132,14 @@ PBoolean H46019UDPSocket::ReadSocket(void * buf, PINDEX & len, Address & addr, W
 
 PBoolean H46019UDPSocket::WriteSocket(const void * buf, PINDEX len, const Address & addr, WORD port)
 {
-    if (m_sendMultiplexID == 0) {
-        return PUDPSocket::WriteTo(buf,len, addr, port);
-    } else if (PNatMethod_H46019::IsMultiplexed()) {
+    if (PNatMethod_H46019::IsMultiplexed()) {  // Bi-Directional Multiplex
         RTP_MultiDataFrame frame(m_sendMultiplexID,(const BYTE *)buf,len);
-        return PNatMethod_H46019::GetMultiplexSocket(rtpSocket)->WriteTo(frame.GetPointer(), frame.GetSize(), addr, port);   
-    } else
-        return false;
+        return PNatMethod_H46019::GetMultiplexSocket(rtpSocket)->WriteTo(frame.GetPointer(), frame.GetSize(), addr, port);  
+    } else if (m_sendMultiplexID != 0) {       // Transmit only Multiplex
+        RTP_MultiDataFrame frame(m_sendMultiplexID,(const BYTE *)buf,len);
+        return PUDPSocket::WriteTo(frame.GetPointer(), frame.GetSize(), addr, port);
+    } else                                     // No Multiplex
+        return PUDPSocket::WriteTo(buf,len, addr, port);
 }
 #endif
 

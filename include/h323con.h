@@ -2118,7 +2118,9 @@ class H323Connection : public PObject
        purpose of probing for an alternate route to the remote party.
       */
     virtual PBoolean OnReceiveOLCGenericInformation(unsigned sessionID, 
-                        const H245_ArrayOf_GenericInformation & alternate) const;
+                        const H245_ArrayOf_GenericInformation & alternate, 
+                        PBoolean isAck
+                        ) const;
 
     /**Send Generic Information in the OLC. This is used to include generic
        information in the openlogicalchannel

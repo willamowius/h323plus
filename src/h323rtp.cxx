@@ -337,7 +337,7 @@ PBoolean H323_RTP_UDP::OnReceivedAckPDU(H323_RTPChannel & channel,
 PBoolean H323_RTP_UDP::OnReceivedAckAltPDU(H323_RTPChannel & channel,
       const H245_ArrayOf_GenericInformation & alternate)
 {
-    return connection.OnReceiveOLCGenericInformation(channel.GetSessionID(),alternate);
+    return connection.OnReceiveOLCGenericInformation(channel.GetSessionID(),alternate, true);
 }
 
 void H323_RTP_UDP::OnSendRasInfo(H225_RTPSession & info)

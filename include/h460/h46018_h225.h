@@ -542,7 +542,8 @@ class H46019UDPSocket : public PUDPSocket
     /** Get Multiplex Address
       */
     void GetMultiplexAddress(H323TransportAddress & address,       ///< Multiplex Address
-                             unsigned & multiID                    ///< Multiplex ID
+                             unsigned & multiID,                   ///< Multiplex ID
+                             PBoolean   isOLCack                   ///< Direction
                              );
 
     unsigned GetRecvMultiplexID() const;

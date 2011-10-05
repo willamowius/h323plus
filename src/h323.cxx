@@ -252,10 +252,10 @@ ostream & operator<<(ostream & o, H323Connection::SendUserInputModes m)
     "SendUserInputAsRFC2833",
     "SendUserInputAsSeparateRFC2833"
 #ifdef H323_H249
-	,"SendUserInputAsNavigation",
-	"SendUserInputAsSoftkey",
-	"SendUserInputAsPointDevice",
-	"SendUserInputAsModal"
+    ,"SendUserInputAsNavigation",
+    "SendUserInputAsSoftkey",
+    "SendUserInputAsPointDevice",
+    "SendUserInputAsModal"
 #endif
   };
 
@@ -293,31 +293,31 @@ static void ReceiveSetupFeatureSet(const H323Connection * connection, const H225
     H225_FeatureSet fs;
     PBoolean hasFeaturePDU = FALSE;
 
-	if (pdu.HasOptionalField(H225_Setup_UUIE::e_neededFeatures)) {
+    if (pdu.HasOptionalField(H225_Setup_UUIE::e_neededFeatures)) {
         fs.IncludeOptionalField(H225_FeatureSet::e_neededFeatures);
-	    H225_ArrayOf_FeatureDescriptor & fsn = fs.m_neededFeatures;
-	    fsn = pdu.m_neededFeatures;
-		hasFeaturePDU = TRUE;
-	}
+        H225_ArrayOf_FeatureDescriptor & fsn = fs.m_neededFeatures;
+        fsn = pdu.m_neededFeatures;
+        hasFeaturePDU = TRUE;
+    }
      
-	if (pdu.HasOptionalField(H225_Setup_UUIE::e_desiredFeatures)) {
+    if (pdu.HasOptionalField(H225_Setup_UUIE::e_desiredFeatures)) {
         fs.IncludeOptionalField(H225_FeatureSet::e_desiredFeatures);
-	    H225_ArrayOf_FeatureDescriptor & fsn = fs.m_desiredFeatures;
-	    fsn = pdu.m_desiredFeatures;
-		hasFeaturePDU = TRUE;
-	}
+        H225_ArrayOf_FeatureDescriptor & fsn = fs.m_desiredFeatures;
+        fsn = pdu.m_desiredFeatures;
+        hasFeaturePDU = TRUE;
+    }
 
-	if (pdu.HasOptionalField(H225_Setup_UUIE::e_supportedFeatures)) {
+    if (pdu.HasOptionalField(H225_Setup_UUIE::e_supportedFeatures)) {
         fs.IncludeOptionalField(H225_FeatureSet::e_supportedFeatures);
-	    H225_ArrayOf_FeatureDescriptor & fsn = fs.m_supportedFeatures;
-	    fsn = pdu.m_supportedFeatures;
-		hasFeaturePDU = TRUE;
-	}
+        H225_ArrayOf_FeatureDescriptor & fsn = fs.m_supportedFeatures;
+        fsn = pdu.m_supportedFeatures;
+        hasFeaturePDU = TRUE;
+    }
 
-	if (hasFeaturePDU)
-		connection->OnReceiveFeatureSet(H460_MessageType::e_setup, fs);
-	else
-		connection->DisableFeatureSet(H460_MessageType::e_setup);
+    if (hasFeaturePDU)
+        connection->OnReceiveFeatureSet(H460_MessageType::e_setup, fs);
+    else
+        connection->DisableFeatureSet(H460_MessageType::e_setup);
 
 }
 
@@ -326,16 +326,16 @@ static void ReceiveFeatureData(const H323Connection * connection, unsigned code,
 {
     if (pdu.m_h323_uu_pdu.HasOptionalField(H225_H323_UU_PDU::e_genericData)) {
         H225_FeatureSet fs;
-	    fs.IncludeOptionalField(H225_FeatureSet::e_supportedFeatures);
-	    H225_ArrayOf_FeatureDescriptor & fsn = fs.m_supportedFeatures;
-		const H225_ArrayOf_GenericData & data = pdu.m_h323_uu_pdu.m_genericData;
-		for (PINDEX i=0; i < data.GetSize(); i++) {
-			 PINDEX lastPos = fsn.GetSize();
-			 fsn.SetSize(lastPos+1);
-			 fsn[lastPos] = (H225_FeatureDescriptor &)data[i];
-		}
+        fs.IncludeOptionalField(H225_FeatureSet::e_supportedFeatures);
+        H225_ArrayOf_FeatureDescriptor & fsn = fs.m_supportedFeatures;
+        const H225_ArrayOf_GenericData & data = pdu.m_h323_uu_pdu.m_genericData;
+        for (PINDEX i=0; i < data.GetSize(); i++) {
+             PINDEX lastPos = fsn.GetSize();
+             fsn.SetSize(lastPos+1);
+             fsn[lastPos] = (H225_FeatureDescriptor &)data[i];
+        }
         connection->OnReceiveFeatureSet(code, fs);
-	}
+    }
 }
 #endif
 
@@ -349,7 +349,7 @@ static void ReceiveFeatureSet(const H323Connection * connection, unsigned code, 
 #ifndef DISABLE_CALLAUTH
 template <typename PDUType>
 static PBoolean ReceiveAuthenticatorPDU(const H323Connection * connection, 
-								   const PDUType & pdu, unsigned code)
+                                   const PDUType & pdu, unsigned code)
 {
 
 PBoolean AuthResult = FALSE;
@@ -357,18 +357,18 @@ H235Authenticators authenticators = connection->GetEPAuthenticators();
 PBYTEArray strm;
 
   if (!pdu.HasOptionalField(PDUType::e_tokens) && !pdu.HasOptionalField(PDUType::e_cryptoTokens)) {
-		PTRACE(2, "H235EP\tReceived unsecured EPAuthentication message (no crypto tokens),"
-			" expected one of:\n" << setfill(',') << connection->GetEPAuthenticators() << setfill(' '));
+        PTRACE(2, "H235EP\tReceived unsecured EPAuthentication message (no crypto tokens),"
+            " expected one of:\n" << setfill(',') << connection->GetEPAuthenticators() << setfill(' '));
        return connection->OnEPAuthenticationFailed(H235Authenticator::e_Absent);
   } else {
 
-	H235Authenticator::ValidationResult result = authenticators.ValidateSignalPDU(code, 
-													pdu.m_tokens, pdu.m_cryptoTokens,strm);
-	  if (result == H235Authenticator::e_OK) {
-		  PTRACE(4, "H235EP\tAuthentication succeeded");
-		  AuthResult = TRUE;
-	  }
-	  return AuthResult ? TRUE : connection->OnEPAuthenticationFailed(result);
+    H235Authenticator::ValidationResult result = authenticators.ValidateSignalPDU(code, 
+                                                    pdu.m_tokens, pdu.m_cryptoTokens,strm);
+      if (result == H235Authenticator::e_OK) {
+          PTRACE(4, "H235EP\tAuthentication succeeded");
+          AuthResult = TRUE;
+      }
+      return AuthResult ? TRUE : connection->OnEPAuthenticationFailed(result);
   }
 
    return AuthResult;
@@ -577,7 +577,7 @@ H323Connection::H323Connection(H323EndPoint & ep,
 #endif
 
 #ifdef H323_AEC
-	aec = NULL;
+    aec = NULL;
 #endif
 
 #ifdef H323_H460
@@ -645,7 +645,7 @@ H323Connection::~H323Connection()
 #endif
 #endif
 #ifdef P_STUN
-	m_NATSockets.clear();
+    m_NATSockets.clear();
 #endif
 
   PTRACE(3, "H323\tConnection " << callToken << " deleted.");
@@ -865,12 +865,12 @@ void H323Connection::ChangeSignalChannel(H323Transport * channel)
   }
 
   signallingMutex.Wait();
-	H323Transport * oldTransport = signallingChannel;
-	signallingChannel = channel;
-	  controlMutex.Wait();
-		H323Transport * oldControl = controlChannel;
-		StartControlChannel();
-	  controlMutex.Signal();
+    H323Transport * oldTransport = signallingChannel;
+    signallingChannel = channel;
+      controlMutex.Wait();
+        H323Transport * oldControl = controlChannel;
+        StartControlChannel();
+      controlMutex.Signal();
   signallingMutex.Signal();
 
   oldControl->CleanUpOnTermination();
@@ -895,13 +895,13 @@ PBoolean H323Connection::WriteSignalPDU(H323SignalPDU & pdu)
     if (gk != NULL)
       gk->InfoRequestResponse(*this, pdu.m_h323_uu_pdu, TRUE);
 
-	// We don't have to take down the call if the signalling channel fails.
-	// We may want to wait until the media fails or the local hangs up.
-	if (!pdu.Write(*signallingChannel,this)) {
-		PTRACE(2,"H225\tERROR: Signalling Channel Failure: PDU was not sent!");
-		return HandleSignalChannelFailure();
-	} 
-	return TRUE;
+    // We don't have to take down the call if the signalling channel fails.
+    // We may want to wait until the media fails or the local hangs up.
+    if (!pdu.Write(*signallingChannel,this)) {
+        PTRACE(2,"H225\tERROR: Signalling Channel Failure: PDU was not sent!");
+        return HandleSignalChannelFailure();
+    } 
+    return TRUE;
   }
 
   ClearCall(EndedByTransportFail);
@@ -935,7 +935,7 @@ PBoolean H323Connection::HandleReceivedSignalPDU(PBoolean readStatus, H323Signal
     if (!HandleSignalPDU(pdu)) {
 #ifndef DISABLE_CALLAUTH
       if (AuthenticationFailed)
-	      ClearCall(EndedBySecurityDenial);
+          ClearCall(EndedBySecurityDenial);
       else 
 #endif
         ClearCall(EndedByTransportFail);
@@ -1005,12 +1005,12 @@ PBoolean H323Connection::HandleSignalPDU(H323SignalPDU & pdu)
   // gets turned off once, it stays off for good.  
   // GNUGK NAT may accidently send an information PDU
   if (q931.GetMessageType() != Q931::InformationMsg) {
-	  if (h245Tunneling && !pdu.m_h323_uu_pdu.m_h245Tunneling) {
-		masterSlaveDeterminationProcedure->Stop();
-		capabilityExchangeProcedure->Stop();
-		PTRACE(3, "H225\tFast Start DISABLED!");
-		h245Tunneling = FALSE;
-	  }
+      if (h245Tunneling && !pdu.m_h323_uu_pdu.m_h245Tunneling) {
+        masterSlaveDeterminationProcedure->Stop();
+        capabilityExchangeProcedure->Stop();
+        PTRACE(3, "H225\tFast Start DISABLED!");
+        h245Tunneling = FALSE;
+      }
   }
 
   h245TunnelRxPDU = &pdu;
@@ -1316,15 +1316,15 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
 #ifndef DISABLE_CALLAUTH
   /// Do Authentication of Incoming Call before anything else
   if (!ReceiveAuthenticatorPDU<H225_Setup_UUIE>(this,setup, 
-							H225_H323_UU_PDU_h323_message_body::e_setup)) {
-	 if (GetEndPoint().GetEPSecurityPolicy() == H323EndPoint::SecRequired) {
-		PTRACE(4, "H235EP\tAuthentication Failed. Ending Call");
-		AuthenticationFailed = TRUE;
-		return FALSE;
-	 }
-	 PTRACE(6, "H235EP\tAuthentication Failed but allowed by policy");
+                            H225_H323_UU_PDU_h323_message_body::e_setup)) {
+     if (GetEndPoint().GetEPSecurityPolicy() == H323EndPoint::SecRequired) {
+        PTRACE(4, "H235EP\tAuthentication Failed. Ending Call");
+        AuthenticationFailed = TRUE;
+        return FALSE;
+     }
+     PTRACE(6, "H235EP\tAuthentication Failed but allowed by policy");
   } else {
-	 hasAuthentication = TRUE;
+     hasAuthentication = TRUE;
   }
 #endif
 
@@ -1338,8 +1338,8 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
 
     case H225_Setup_UUIE_conferenceGoal::e_callIndependentSupplementaryService:
       nonCallConnection = endpoint.OnReceiveCallIndependentSupplementaryService(this,setupPDU);
-	  if (!nonCallConnection) return FALSE;
-	   break;
+      if (!nonCallConnection) return FALSE;
+       break;
 
     case H225_Setup_UUIE_conferenceGoal::e_capability_negotiation:
       return endpoint.OnNegotiateConferenceCapabilities(setupPDU);
@@ -1405,8 +1405,8 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
     }
 
     /** Here is a spot where we should wait in case of Call Intrusion
-	for CIPL from other endpoints 
-	if (isCallIntrusion) return TRUE;
+    for CIPL from other endpoints 
+    if (isCallIntrusion) return TRUE;
     */
 
     // if the application indicates not to contine, then send a Q931 Release Complete PDU
@@ -1480,7 +1480,7 @@ if (nonCallConnection) {
 
   // See if remote endpoint wants to start fast
   if (fastStartState != FastStartDisabled &&
-	   setup.HasOptionalField(H225_Setup_UUIE::e_fastStart) &&
+       setup.HasOptionalField(H225_Setup_UUIE::e_fastStart) &&
        localCapabilities.GetSize() > 0) {
 
     DecodeFastStartCaps(setup.m_fastStart);
@@ -1488,7 +1488,7 @@ if (nonCallConnection) {
 
   // Check that if we are not doing Fast Connect that we have H.245 channel info
   if (fastStartState != FastStartResponse &&
-	  setup.HasOptionalField(H225_Setup_UUIE::e_h245Address)) {
+      setup.HasOptionalField(H225_Setup_UUIE::e_h245Address)) {
          if (!StartControlChannel(setup.m_h245Address))
                    return FALSE;
   }
@@ -1524,7 +1524,7 @@ void H323Connection::SetLocalPartyName(const PString & name)
 
   if (!name.IsEmpty()) {
     localAliasNames.RemoveAll();
-	localAliasNames.SetSize(0);
+    localAliasNames.SetSize(0);
     localAliasNames.AppendString(name);
   }
 }
@@ -1594,7 +1594,7 @@ PBoolean H323Connection::OnReceivedCallProceeding(const H323SignalPDU & pdu)
   // Check for fastStart data and start fast
 /*  MERA gatekeepers send fast start in call proceeding then
     decide to send a different one in either Alert,Progress or Connect and has assumed
-	you have ignored the one in the CallProceeding.. Very Frustrating - S.H.
+    you have ignored the one in the CallProceeding.. Very Frustrating - S.H.
 */
  if (!enableMERAHack && call.HasOptionalField(H225_CallProceeding_UUIE::e_fastStart))
     HandleFastStartAcknowledge(call.m_fastStart);
@@ -1603,7 +1603,7 @@ PBoolean H323Connection::OnReceivedCallProceeding(const H323SignalPDU & pdu)
         masterSlaveDeterminationProcedure->Stop();
         capabilityExchangeProcedure->Stop();
   } else {
-	    if (call.HasOptionalField(H225_CallProceeding_UUIE::e_h245Address))
+        if (call.HasOptionalField(H225_CallProceeding_UUIE::e_h245Address))
                return StartControlChannel(call.m_h245Address);
   }
 
@@ -1671,9 +1671,9 @@ PBoolean H323Connection::OnReceivedAlerting(const H323SignalPDU & pdu)
   alertingTime = PTime();
 
   if (nonCallConnection) 
-	  return true;
+      return true;
   else
-	  return OnAlerting(pdu, remotePartyName);
+      return OnAlerting(pdu, remotePartyName);
 }
 
 
@@ -1730,8 +1730,8 @@ PBoolean H323Connection::OnReceivedSignalConnect(const H323SignalPDU & pdu)
   // If we are already faststartacknowledged (early media)
   // there is no need to proceed any further
   if (fastStartState == FastStartAcknowledged) {
-	  PTRACE(4, "H225\tConnect Accepted: Early Media already negotiated.");
-	  return TRUE;
+      PTRACE(4, "H225\tConnect Accepted: Early Media already negotiated.");
+      return TRUE;
   }
 
   // Check for fastStart data and start fast
@@ -1741,7 +1741,7 @@ PBoolean H323Connection::OnReceivedSignalConnect(const H323SignalPDU & pdu)
   // Check that it has the H.245 channel connection info
   // ignore if we already have a Fast Start connection
   if (connect.HasOptionalField(H225_Connect_UUIE::e_h245Address) && 
-	         fastStartState != FastStartAcknowledged) {
+             fastStartState != FastStartAcknowledged) {
     if (!StartControlChannel(connect.m_h245Address)) 
         return FALSE;
   }
@@ -1752,12 +1752,12 @@ PBoolean H323Connection::OnReceivedSignalConnect(const H323SignalPDU & pdu)
     fastStartState = FastStartDisabled;
     fastStartChannels.RemoveAll();
 #ifdef P_STUN
-	m_NATSockets.clear();
+    m_NATSockets.clear();
 #endif
   }
 
   PTRACE(4, "H225\tFast Start " << (h245Tunneling ? "TRUE" : "FALSE")
-									<< " fastStartState " << fastStartState);
+                                    << " fastStartState " << fastStartState);
   
   // If we have a H.245 channel available, bring it up. We either have media
   // and this is just so user indications work, or we don't have media and
@@ -1846,7 +1846,7 @@ PBoolean H323Connection::OnReceivedFacility(const H323SignalPDU & pdu)
   }
 
   if ((fac.m_reason.GetTag() != H225_FacilityReason::e_callForwarded)
-	  && (fac.m_reason.GetTag() != H225_FacilityReason::e_routeCallToGatekeeper)
+      && (fac.m_reason.GetTag() != H225_FacilityReason::e_routeCallToGatekeeper)
       && (fac.m_reason.GetTag() != H225_FacilityReason::e_routeCallToMC))
     return TRUE;
 
@@ -1997,11 +1997,11 @@ PBoolean H323Connection::ForwardCall(const PString & forwardParty)
 
   PStringList Addresses;
   if (!endpoint.ResolveCallParty(forwardParty, Addresses)) 
-	  return FALSE;
+      return FALSE;
 
   if (!endpoint.ParsePartyName(Addresses[0], alias, address)) {
-	  PTRACE(2, "H323\tCould not parse forward party \"" << forwardParty << '"');
-	  return FALSE;
+      PTRACE(2, "H323\tCould not parse forward party \"" << forwardParty << '"');
+      return FALSE;
   }
 
   H323SignalPDU redirectPDU;
@@ -2032,11 +2032,11 @@ PBoolean H323Connection::RouteCallToMC(const PString & forwardParty, const H225_
 
   PStringList Addresses;
   if (!endpoint.ResolveCallParty(forwardParty, Addresses)) 
-	  return FALSE;
+      return FALSE;
 
   if (!endpoint.ParsePartyName(Addresses[0], alias, address)) {
-	  PTRACE(2, "H323\tCould not parse forward party \"" << forwardParty << '"');
-	  return FALSE;
+      PTRACE(2, "H323\tCould not parse forward party \"" << forwardParty << '"');
+      return FALSE;
   }
 
   H323SignalPDU redirectPDU;
@@ -2193,7 +2193,7 @@ void H323Connection::AnsweringCall(AnswerCallResponse response)
       ClearCall(EndedByInvalidConferenceID);
       break;
 
-	case AnswerCallNowWithAlert :
+    case AnswerCallNowWithAlert :
       if (alertingPDU != NULL) {
         // send Q931 Alerting PDU
         PTRACE(3, "H225\tSending Alerting PDU prior to AnswerCall Now");
@@ -2205,20 +2205,20 @@ void H323Connection::AnsweringCall(AnswerCallResponse response)
 #endif
         WriteSignalPDU(*alertingPDU);
         alertingTime = PTime();
-	  }
-	    // Now we progress with AnswerCallNow.
+      }
+        // Now we progress with AnswerCallNow.
     case AnswerCallNow :
       if (connectPDU != NULL) {
         H225_Connect_UUIE & connect = connectPDU->m_h323_uu_pdu.m_h323_message_body;
 
-		// If we have not already negotiated Fast Connect (early media)
-		if (fastStartState != FastStartAcknowledged) {
-		  // Now ask the application to select which channels to start
-		  if (SendFastStartAcknowledge(connect.m_fastStart))
-			connect.IncludeOptionalField(H225_Connect_UUIE::e_fastStart);
-		  else
-			connect.IncludeOptionalField(H225_Connect_UUIE::e_fastConnectRefused);
-		}
+        // If we have not already negotiated Fast Connect (early media)
+        if (fastStartState != FastStartAcknowledged) {
+          // Now ask the application to select which channels to start
+          if (SendFastStartAcknowledge(connect.m_fastStart))
+            connect.IncludeOptionalField(H225_Connect_UUIE::e_fastStart);
+          else
+            connect.IncludeOptionalField(H225_Connect_UUIE::e_fastConnectRefused);
+        }
 
         // See if aborted call
         if (connectionState == ShuttingDownConnection)
@@ -2274,7 +2274,7 @@ H323Connection::CallEndReason H323Connection::SendSignalSetup(const PString & al
     remotePartyName = remotePartyAddress = address;
   else {
     remotePartyName = alias;
-	remoteAliasNames.AppendString(alias);
+    remoteAliasNames.AppendString(alias);
     remotePartyAddress = alias + '@' + address;
   }
 
@@ -2519,11 +2519,11 @@ void H323Connection::NatDetection(const PIPSocket::Address & srcAddress, const P
     // in this case, we active the NAT mode and wait for incoming RTP to provide the media address before 
     // sending anything to the remote endpoint
     if ((!sigAddress.IsRFC1918() && srcAddress.IsRFC1918()) ||    // Internet Address
-		((sigAddress.IsRFC1918() && srcAddress.IsRFC1918()) && (sigAddress != srcAddress)))  // LAN on another LAN
+        ((sigAddress.IsRFC1918() && srcAddress.IsRFC1918()) && (sigAddress != srcAddress)))  // LAN on another LAN
     {
       PTRACE(3, "H225\tSource signal address " << srcAddress << " and TCP peer address " << sigAddress << " indicate remote endpoint is behind NAT");
       if (OnNatDetected())
-		  remoteIsNAT = true;
+          remoteIsNAT = true;
     }
 }
 
@@ -2545,9 +2545,9 @@ PNatMethod * H323Connection::GetPreferedNatMethod(const PIPSocket::Address & ip)
 
 PUDPSocket * H323Connection::GetNatSocket(unsigned session, PBoolean rtp) 
 {
-	std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(session);
-	if (sockets_iter != m_NATSockets.end()) {
-		NAT_Sockets sockets = sockets_iter->second;
+    std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(session);
+    if (sockets_iter != m_NATSockets.end()) {
+        NAT_Sockets sockets = sockets_iter->second;
         if (rtp)
             return sockets.rtp;
         else
@@ -2558,31 +2558,31 @@ PUDPSocket * H323Connection::GetNatSocket(unsigned session, PBoolean rtp)
 
 void H323Connection::SetRTPNAT(unsigned sessionid, PUDPSocket * _rtp, PUDPSocket * _rtcp)
 {
-	PWaitAndSignal m(NATSocketMutex);
+    PWaitAndSignal m(NATSocketMutex);
 
-	PTRACE(4,"H323\tRTP NAT Connection Callback! Session: " << sessionid);
+    PTRACE(4,"H323\tRTP NAT Connection Callback! Session: " << sessionid);
 
-	NAT_Sockets sockets;
-	 sockets.rtp = _rtp;
-	 sockets.rtcp = _rtcp;
+    NAT_Sockets sockets;
+     sockets.rtp = _rtp;
+     sockets.rtcp = _rtcp;
      sockets.isActive = false;
 
-	m_NATSockets.insert(pair<unsigned, NAT_Sockets>(sessionid, sockets));
+    m_NATSockets.insert(pair<unsigned, NAT_Sockets>(sessionid, sockets));
 }
 
 void H323Connection::SetNATChannelActive(unsigned sessionid)
 {
-	std::map<unsigned,NAT_Sockets>::iterator sockets_iter = m_NATSockets.find(sessionid);
-	if (sockets_iter != m_NATSockets.end()) {
-		NAT_Sockets socket = sockets_iter->second;
+    std::map<unsigned,NAT_Sockets>::iterator sockets_iter = m_NATSockets.find(sessionid);
+    if (sockets_iter != m_NATSockets.end()) {
+        NAT_Sockets socket = sockets_iter->second;
         socket.isActive = true;
-	}
+    }
 }
 
 PBoolean H323Connection::IsNATMethodActive(unsigned sessionid)
 {
-	for (std::map<unsigned,NAT_Sockets>::const_iterator r = m_NATSockets.begin(); r != m_NATSockets.end(); ++r) {
-	    NAT_Sockets socket = r->second; 
+    for (std::map<unsigned,NAT_Sockets>::const_iterator r = m_NATSockets.begin(); r != m_NATSockets.end(); ++r) {
+        NAT_Sockets socket = r->second; 
         if (!socket.isActive)
             return false;
     } 
@@ -2592,7 +2592,7 @@ PBoolean H323Connection::IsNATMethodActive(unsigned sessionid)
 
 void H323Connection::SetEndpointTypeInfo(H225_EndpointType & info) const
 {
-	return endpoint.SetEndpointTypeInfo(info);
+    return endpoint.SetEndpointTypeInfo(info);
 }
 
 
@@ -2689,7 +2689,7 @@ PBoolean H323Connection::SendFastStartAcknowledge(H225_ArrayOf_PASN_OctetString 
   // Last minute check to see that the remote has not decided
   // to send slow connect while we are doing fast!
   if (fastStartState == FastStartDisabled)
-	  return FALSE;
+      return FALSE;
 
   // Set flag so internal establishment check does not require H.245
   fastStartState = FastStartAcknowledged;
@@ -2748,8 +2748,8 @@ PBoolean H323Connection::HandleFastStartAcknowledge(const H225_ArrayOf_PASN_Octe
               // localCapability or remoteCapability structures.
               if (OnCreateLogicalChannel(*channelCapability, dir, error)) {
                 if (channelToStart.SetInitialBandwidth()) {
-					if (open.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation))
-						OnReceiveOLCGenericInformation(channelToStart.GetSessionID(),open.m_genericInformation);
+                    if (open.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation))
+                        OnReceiveOLCGenericInformation(channelToStart.GetSessionID(),open.m_genericInformation,true);
                   channelToStart.Start();
                   break;
                 }
@@ -2931,79 +2931,79 @@ PBoolean H323Connection::StartControlNegotiations(PBoolean renegotiate)
 
 PBoolean H323Connection::OnStartHandleControlChannel()
 {
-	 if (fastStartState == FastStartAcknowledged)
-		 return true;
+     if (fastStartState == FastStartAcknowledged)
+         return true;
 
      if (controlChannel == NULL)
          return StartControlNegotiations();
 #ifndef H323_H46018
-	 else {
-		 PTRACE(2, "H245\tHandle control channel");
-		 return StartHandleControlChannel();
-	 }
+     else {
+         PTRACE(2, "H245\tHandle control channel");
+         return StartHandleControlChannel();
+     }
 #else
-	if (!m_H46019enabled) {
-		PTRACE(2, "H245\tHandle control channel");
-		return StartHandleControlChannel();
-	}
+    if (!m_H46019enabled) {
+        PTRACE(2, "H245\tHandle control channel");
+        return StartHandleControlChannel();
+    }
 
-	// according to H.460.18 cl.11 we have to send a generic Indication on the opening of a
-	// H.245 control channel. Details are specified in H.460.18 cl.16
-	// This must be the first PDU otherwise gatekeeper/proxy will close the channel.
+    // according to H.460.18 cl.11 we have to send a generic Indication on the opening of a
+    // H.245 control channel. Details are specified in H.460.18 cl.16
+    // This must be the first PDU otherwise gatekeeper/proxy will close the channel.
 
-	PTRACE(2, "H46018\tStarted control channel");
+    PTRACE(2, "H46018\tStarted control channel");
 
-		if (endpoint.H46018IsEnabled() && !m_h245Connect) {
+        if (endpoint.H46018IsEnabled() && !m_h245Connect) {
 
-		H323ControlPDU pdu;
-		H245_GenericMessage & cap = pdu.Build(H245_IndicationMessage::e_genericIndication);
+        H323ControlPDU pdu;
+        H245_GenericMessage & cap = pdu.Build(H245_IndicationMessage::e_genericIndication);
 
-			H245_CapabilityIdentifier & id = cap.m_messageIdentifier;
-				id.SetTag(H245_CapabilityIdentifier::e_standard);
-				PASN_ObjectId & gid = id;
-				gid.SetValue(H46018OID);
+            H245_CapabilityIdentifier & id = cap.m_messageIdentifier;
+                id.SetTag(H245_CapabilityIdentifier::e_standard);
+                PASN_ObjectId & gid = id;
+                gid.SetValue(H46018OID);
 
-			cap.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
-				PASN_Integer & sub = cap.m_subMessageIdentifier;
-				sub = 1;
+            cap.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
+                PASN_Integer & sub = cap.m_subMessageIdentifier;
+                sub = 1;
 
-			cap.IncludeOptionalField(H245_GenericMessage::e_messageContent);
-			  H245_ArrayOf_GenericParameter & msg = cap.m_messageContent;
+            cap.IncludeOptionalField(H245_GenericMessage::e_messageContent);
+              H245_ArrayOf_GenericParameter & msg = cap.m_messageContent;
 
-			  // callIdentifer
-				H245_GenericParameter call;
-				   H245_ParameterIdentifier & idx = call.m_parameterIdentifier;
-					 idx.SetTag(H245_ParameterIdentifier::e_standard);
-					 PASN_Integer & m = idx;
-					 m =1;
-				   H245_ParameterValue & conx = call.m_parameterValue;
-					 conx.SetTag(H245_ParameterValue::e_octetString);
-					 PASN_OctetString & raw = conx;
-					 raw.SetValue(callIdentifier);
-				msg.SetSize(1);
-				msg[0] = call;
+              // callIdentifer
+                H245_GenericParameter call;
+                   H245_ParameterIdentifier & idx = call.m_parameterIdentifier;
+                     idx.SetTag(H245_ParameterIdentifier::e_standard);
+                     PASN_Integer & m = idx;
+                     m =1;
+                   H245_ParameterValue & conx = call.m_parameterValue;
+                     conx.SetTag(H245_ParameterValue::e_octetString);
+                     PASN_OctetString & raw = conx;
+                     raw.SetValue(callIdentifier);
+                msg.SetSize(1);
+                msg[0] = call;
 
-			  // Is receiver
-				if (m_H46019CallReceiver) {
- 					H245_GenericParameter answer;
-					H245_ParameterIdentifier & an = answer.m_parameterIdentifier;
-						an.SetTag(H245_ParameterIdentifier::e_standard);
-						PASN_Integer & n = an;
-						n =2;
-					H245_ParameterValue & aw = answer.m_parameterValue;
-					aw.SetTag(H245_ParameterValue::e_logical);
-					msg.SetSize(2);
-					msg[1] = answer;
-				}
-			PTRACE(4,"H46018\tSending H.245 Control PDU " << pdu);
+              // Is receiver
+                if (m_H46019CallReceiver) {
+                     H245_GenericParameter answer;
+                    H245_ParameterIdentifier & an = answer.m_parameterIdentifier;
+                        an.SetTag(H245_ParameterIdentifier::e_standard);
+                        PASN_Integer & n = an;
+                        n =2;
+                    H245_ParameterValue & aw = answer.m_parameterValue;
+                    aw.SetTag(H245_ParameterValue::e_logical);
+                    msg.SetSize(2);
+                    msg[1] = answer;
+                }
+            PTRACE(4,"H46018\tSending H.245 Control PDU " << pdu);
 
-			if (!WriteControlPDU(pdu))
-				  return false;
+            if (!WriteControlPDU(pdu))
+                  return false;
 
-	  		m_h245Connect = true;
-		}
+              m_h245Connect = true;
+        }
 
-	 return StartHandleControlChannel();
+     return StartHandleControlChannel();
 
 #endif
 }
@@ -3179,18 +3179,18 @@ PBoolean H323Connection::OnH245Request(const H323ControlPDU & pdu)
 
   switch (request.GetTag()) {
     case H245_RequestMessage::e_masterSlaveDetermination :
-	  if (fastStartState == FastStartResponse) {
-		 PTRACE(4,"H245\tIgnoring masterSlaveDetermination, already doing Fast Connect");
-		 return TRUE;
-	  }
-	  return masterSlaveDeterminationProcedure->HandleIncoming(request);
+      if (fastStartState == FastStartResponse) {
+         PTRACE(4,"H245\tIgnoring masterSlaveDetermination, already doing Fast Connect");
+         return TRUE;
+      }
+      return masterSlaveDeterminationProcedure->HandleIncoming(request);
 
     case H245_RequestMessage::e_terminalCapabilitySet :
     {
-	  if (fastStartState == FastStartResponse) {
-		 PTRACE(4,"H245\tIgnoring TerminalCapabilitySet, already doing Fast Connect");
-		 return TRUE;
-	  }
+      if (fastStartState == FastStartResponse) {
+         PTRACE(4,"H245\tIgnoring TerminalCapabilitySet, already doing Fast Connect");
+         return TRUE;
+      }
       const H245_TerminalCapabilitySet & tcs = request;
       if (tcs.m_protocolIdentifier.GetSize() >= 6) {
         h245version = tcs.m_protocolIdentifier[5];
@@ -3220,10 +3220,10 @@ PBoolean H323Connection::OnH245Request(const H323ControlPDU & pdu)
         return TRUE;
       break;
 
-	case H245_RequestMessage::e_genericRequest : 
+    case H245_RequestMessage::e_genericRequest : 
       if (OnHandleH245GenericMessage(h245request,request))
-	    return TRUE;
-	  break;
+        return TRUE;
+      break;
   }
 
   return OnUnknownControlPDU(pdu);
@@ -3276,10 +3276,10 @@ PBoolean H323Connection::OnH245Response(const H323ControlPDU & pdu)
         return TRUE;
       break;
 
-	case H245_ResponseMessage::e_genericResponse :
+    case H245_ResponseMessage::e_genericResponse :
       if (OnHandleH245GenericMessage(h245response,response))
-	    return TRUE;
-	  break;
+        return TRUE;
+      break;
   }
 
   return OnUnknownControlPDU(pdu);
@@ -3320,10 +3320,10 @@ PBoolean H323Connection::OnH245Command(const H323ControlPDU & pdu)
         return TRUE;
       break;
 
-	case H245_CommandMessage::e_genericCommand :
+    case H245_CommandMessage::e_genericCommand :
       if (OnHandleH245GenericMessage(h245command,command))
-	    return TRUE;
-	  break;
+        return TRUE;
+      break;
   }
 
   return OnUnknownControlPDU(pdu);
@@ -3366,14 +3366,14 @@ PBoolean H323Connection::OnH245Indication(const H323ControlPDU & pdu)
       break;
 
     case H245_IndicationMessage::e_flowControlIndication :
-	    PTRACE(3,"H245\tFlow Indication received NOT HANDLED!");
+        PTRACE(3,"H245\tFlow Indication received NOT HANDLED!");
         return TRUE;
       break;
 
-	case H245_IndicationMessage::e_genericIndication :
+    case H245_IndicationMessage::e_genericIndication :
       if (OnHandleH245GenericMessage(h245indication,indication))
-	    return TRUE;
-	  break;
+        return TRUE;
+      break;
   }
 
   return TRUE; // Do NOT call OnUnknownControlPDU for indications
@@ -3507,7 +3507,7 @@ void H323Connection::TransferCall(const PString & remoteParty,
 
 void H323Connection::OnReceivedInitiateReturnError()
 {
-	endpoint.OnReceivedInitiateReturnError();
+    endpoint.OnReceivedInitiateReturnError();
 }
 
 void H323Connection::ConsultationTransfer(const PString & primaryCallToken)
@@ -3596,10 +3596,10 @@ PBoolean H323Connection::GetRedirectingNumber(
     PString &lastDivertingNr,
     int &divCounter, 
     int &originaldivReason,
-	int &divReason)
+    int &divReason)
 {
   return h4503handler->GetRedirectingNumber(originalCalledNr,lastDivertingNr,
-	                                     divCounter,originaldivReason,divReason);
+                                         divCounter,originaldivReason,divReason);
 }
 
 void H323Connection::RetrieveCall()
@@ -3639,10 +3639,10 @@ PBoolean H323Connection::IsMediaOnHold() const
 PChannel * H323Connection::SwapHoldMediaChannels(PChannel * newChannel,unsigned sessionId)
 {
   if (IsMediaOnHold()) {
-	  if (newChannel == NULL) {
-	     PTRACE(4, "H4504\tCannot Retrieve session " << sessionId << " as hold media is NULL.");
+      if (newChannel == NULL) {
+         PTRACE(4, "H4504\tCannot Retrieve session " << sessionId << " as hold media is NULL.");
          return NULL;
-	  }
+      }
   }
 
   PChannel * existingTransmitChannel = NULL;
@@ -3652,22 +3652,22 @@ PChannel * H323Connection::SwapHoldMediaChannels(PChannel * newChannel,unsigned 
   for (PINDEX i = 0; i < count; ++i) {
     H323Channel* channel = logicalChannels->GetChannelAt(i);
 
-	if (!channel) {
-		 PTRACE(4, "H4504\tLogical Channel " << i << " Empty or closed! Session ID: " << sessionId);
-		// Fire off to ensure if channel is being Held that it is retrieved in derived application
-	     OnCallRetrieve(TRUE,sessionId,0,newChannel);
+    if (!channel) {
+         PTRACE(4, "H4504\tLogical Channel " << i << " Empty or closed! Session ID: " << sessionId);
+        // Fire off to ensure if channel is being Held that it is retrieved in derived application
+         OnCallRetrieve(TRUE,sessionId,0,newChannel);
          return NULL;
     }
 
-	unsigned int session_id = channel->GetSessionID();
+    unsigned int session_id = channel->GetSessionID();
     if (session_id == sessionId) {
       const H323ChannelNumber & channelNumber = channel->GetNumber();
 
       H323_RTPChannel * chan2 = reinterpret_cast<H323_RTPChannel*>(channel);
 
-	  H323Codec & codec = *channel->GetCodec();
-	  PChannel * rawChannel = codec.GetRawDataChannel();
-	  unsigned frameRate = codec.GetFrameRate()*2;
+      H323Codec & codec = *channel->GetCodec();
+      PChannel * rawChannel = codec.GetRawDataChannel();
+      unsigned frameRate = codec.GetFrameRate()*2;
 
       if (!channelNumber.IsFromRemote()) { // Transmit channel
         if (IsMediaOnHold()) {
@@ -3677,12 +3677,12 @@ PChannel * H323Connection::SwapHoldMediaChannels(PChannel * newChannel,unsigned 
               existingTransmitChannel = OnCallHold(TRUE,session_id,frameRate,existingTransmitChannel);
           } else {
              PTRACE(4, "H4504\tRetrieve Media OnHold Transmit " << i);
-	     existingTransmitChannel = codec.SwapChannel(OnCallRetrieve(TRUE,session_id,frameRate,existingTransmitChannel));
+         existingTransmitChannel = codec.SwapChannel(OnCallRetrieve(TRUE,session_id,frameRate,existingTransmitChannel));
           }
         }
         else {
           // Enable/mute the transmit channel depending on whether the remote end is held
-	   if (IsCallOnHold()) {
+       if (IsCallOnHold()) {
               PTRACE(4, "H4504\tHold Transmit " << i);
               chan2->SetPause(TRUE);
               if (codec.SetRawDataHeld(TRUE))
@@ -3715,9 +3715,9 @@ PChannel * H323Connection::SwapHoldMediaChannels(PChannel * newChannel,unsigned 
   return existingTransmitChannel;
 }
 
-PChannel * H323Connection::OnCallHold(PBoolean /*IsEncoder*/,				
-                                  unsigned /*sessionId*/,		
-                                  unsigned /*bufferSize*/,		
+PChannel * H323Connection::OnCallHold(PBoolean /*IsEncoder*/,                
+                                  unsigned /*sessionId*/,        
+                                  unsigned /*bufferSize*/,        
                                   PChannel * channel)
 {
          return channel;
@@ -3728,9 +3728,9 @@ PChannel * H323Connection::OnCallRetrieve(PBoolean /*IsEncoder*/,
                                  unsigned bufferSize,   
                                  PChannel * channel)
 {
-	if (bufferSize == 0)
-		return NULL;
-	else
+    if (bufferSize == 0)
+        return NULL;
+    else
         return channel;
 }
 
@@ -3830,7 +3830,7 @@ void H323Connection::OnSendCapabilitySet(H245_TerminalCapabilitySet & /*pdu*/)
 
 void H323Connection::OnReceivedCapabilitySet(const H245_TerminalCapabilitySet & /*pdu*/)
 {
-	// do nothing
+    // do nothing
 }
 
 PBoolean H323Connection::OnReceivedCapabilitySet(const H323Capabilities & remoteCaps,
@@ -3891,7 +3891,7 @@ PBoolean H323Connection::OnReceivedCapabilitySet(const H323Capabilities & remote
 
 PBoolean H323Connection::OnCommonCapabilitySet(H323Capabilities & caps) const
 {
-	return TRUE;
+    return TRUE;
 }
 
 
@@ -3992,8 +3992,8 @@ void H323Connection::InternalEstablishedConnectionCheck()
       H323Capability * capability = localCapabilities.FindCapability("H.224");
       if(capability != NULL) 
          OpenLogicalChannel(*capability,RTP_Session::DefaultH224SessionID, H323Channel::IsBidirectional);
-    }	   
-	startH224 = FALSE;
+    }       
+    startH224 = FALSE;
   }
 #endif
 
@@ -4042,7 +4042,7 @@ void H323Connection::OnSelectLogicalChannels()
   switch (fastStartState) {
     default : //FastStartDisabled :
 #ifdef H323_AUDIO_CODECS
-	  if (endpoint.CanAutoStartTransmitAudio())
+      if (endpoint.CanAutoStartTransmitAudio())
          SelectDefaultLogicalChannel(RTP_Session::DefaultAudioSessionID);
 #endif
 #ifdef H323_VIDEO
@@ -4062,15 +4062,15 @@ void H323Connection::OnSelectLogicalChannels()
     case FastStartInitiate :
 #ifdef H323_AUDIO_CODECS
       SelectFastStartChannels(RTP_Session::DefaultAudioSessionID, 
-							  endpoint.CanAutoStartTransmitAudio(), 
-							  endpoint.CanAutoStartReceiveAudio());
+                              endpoint.CanAutoStartTransmitAudio(), 
+                              endpoint.CanAutoStartReceiveAudio());
 #endif
 #ifdef H323_VIDEO
       SelectFastStartChannels(RTP_Session::DefaultVideoSessionID,
                               endpoint.CanAutoStartTransmitVideo(),
                               endpoint.CanAutoStartReceiveVideo());
 #ifdef H323_H239
-	  SelectFastStartChannels(RTP_Session::DefaultExtVideoSessionID,
+      SelectFastStartChannels(RTP_Session::DefaultExtVideoSessionID,
                               endpoint.CanAutoStartTransmitExtVideo(),
                               endpoint.CanAutoStartReceiveExtVideo());
 #endif
@@ -4078,7 +4078,7 @@ void H323Connection::OnSelectLogicalChannels()
 
 #if defined(H323_T38) || defined(H323_FILE)
       SelectFastStartChannels(RTP_Session::DefaultFaxSessionID, 
-		                      endpoint.CanAutoStartTransmitFax(),
+                              endpoint.CanAutoStartTransmitFax(),
                               endpoint.CanAutoStartReceiveFax());
 #endif
       break;
@@ -4127,7 +4127,7 @@ void H323Connection::SelectDefaultLogicalChannel(unsigned sessionID)
       if (remoteCapability != NULL) {
         PTRACE(3, "H323\tSelecting " << *remoteCapability);
         
-		MergeCapabilities(sessionID, localCapability, remoteCapability);
+        MergeCapabilities(sessionID, localCapability, remoteCapability);
         
         if (OpenLogicalChannel(*remoteCapability, sessionID, H323Channel::IsTransmitter))
           break;
@@ -4153,8 +4153,8 @@ PBoolean H323Connection::MergeCapabilities(unsigned sessionID, const H323Capabil
           remoteFormat.SetOptionInteger(OpalVideoFormat::TargetBitRateOption, maxBitRate);
 #endif
 #if PTRACING
-	  PTRACE(6, "H323\tCapability Merge: ");
-	  OpalMediaFormat::DebugOptionList(remoteFormat);
+      PTRACE(6, "H323\tCapability Merge: ");
+      OpalMediaFormat::DebugOptionList(remoteFormat);
 #endif
       return TRUE;
    }
@@ -4164,7 +4164,7 @@ PBoolean H323Connection::MergeCapabilities(unsigned sessionID, const H323Capabil
 
 void H323Connection::DisableFastStart()
 {
-	fastStartState = FastStartDisabled;
+    fastStartState = FastStartDisabled;
 }
 
 
@@ -4234,7 +4234,7 @@ PBoolean H323Connection::OpenLogicalChannel(const H323Capability & capability,
 PBoolean H323Connection::OnOpenLogicalChannel(const H245_OpenLogicalChannel & openPDU,
                                           H245_OpenLogicalChannelAck & ackPDU,
                                           unsigned & /*errorCode*/,
-										  const unsigned & sessionID)
+                                          const unsigned & sessionID)
 
 {
   // If get a OLC via H.245 stop trying to do fast start
@@ -4242,7 +4242,7 @@ PBoolean H323Connection::OnOpenLogicalChannel(const H245_OpenLogicalChannel & op
   if (!fastStartChannels.IsEmpty()) {
     fastStartChannels.RemoveAll();
 #ifdef P_STUN
-	m_NATSockets.clear();
+    m_NATSockets.clear();
 #endif
     PTRACE(1, "H245\tReceived early start OLC, aborting fast start");
   }
@@ -4250,10 +4250,10 @@ PBoolean H323Connection::OnOpenLogicalChannel(const H245_OpenLogicalChannel & op
 #ifdef H323_H46018
   PTRACE(4,"H323\tOnOpenLogicalChannel");
   if (openPDU.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation)) {
-		 OnReceiveOLCGenericInformation(sessionID,openPDU.m_genericInformation);
-		 
-		 if (OnSendingOLCGenericInformation(sessionID,ackPDU.m_genericInformation,true))
-			 ackPDU.IncludeOptionalField(H245_OpenLogicalChannelAck::e_genericInformation);
+         OnReceiveOLCGenericInformation(sessionID,openPDU.m_genericInformation,false);
+         
+         if (OnSendingOLCGenericInformation(sessionID,ackPDU.m_genericInformation,true))
+             ackPDU.IncludeOptionalField(H245_OpenLogicalChannelAck::e_genericInformation);
   }
 #endif
 
@@ -4363,30 +4363,30 @@ H323Channel * H323Connection::CreateLogicalChannel(const H245_OpenLogicalChannel
 #ifdef H323_VIDEO
 #ifdef H323_H239
   if (!startingFast &&
-	  open.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation)) {  // check for extended Video OLC
+      open.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation)) {  // check for extended Video OLC
 
     unsigned roleLabel = 0;
-	H323ChannelNumber channelnum = H323ChannelNumber(open.m_forwardLogicalChannelNumber, TRUE);
+    H323ChannelNumber channelnum = H323ChannelNumber(open.m_forwardLogicalChannelNumber, TRUE);
 
     const H245_ArrayOf_GenericInformation & cape = open.m_genericInformation;
-	for (PINDEX i=0; i<cape.GetSize(); i++) {
+    for (PINDEX i=0; i<cape.GetSize(); i++) {
        const H245_GenericMessage & gcap = cape[i];
        const PASN_ObjectId & object_id = gcap.m_messageIdentifier;
-	   if (object_id.AsString() == OpalPluginCodec_Identifer_H239_Video) {
-		   if (gcap.HasOptionalField(H245_GenericMessage::e_messageContent)) {
+       if (object_id.AsString() == OpalPluginCodec_Identifer_H239_Video) {
+           if (gcap.HasOptionalField(H245_GenericMessage::e_messageContent)) {
                const H245_ArrayOf_GenericParameter & params = gcap.m_messageContent;
                for (PINDEX j=0; j<params.GetSize(); j++) {
-				   const H245_GenericParameter & content = params[j];
-				   const H245_ParameterValue & paramval = content.m_parameterValue;
-				   if (paramval.GetTag() == H245_ParameterValue::e_booleanArray) {
-				       const PASN_Integer & val = paramval;
+                   const H245_GenericParameter & content = params[j];
+                   const H245_ParameterValue & paramval = content.m_parameterValue;
+                   if (paramval.GetTag() == H245_ParameterValue::e_booleanArray) {
+                       const PASN_Integer & val = paramval;
                        roleLabel = val;
-				   }
-			   }
-		   }
-	      OnReceivedExtendedVideoSession(roleLabel,channelnum);   
-	   }
-	}
+                   }
+               }
+           }
+          OnReceivedExtendedVideoSession(roleLabel,channelnum);   
+       }
+    }
   }
 #endif
 #endif // H323_VIDEO
@@ -4426,8 +4426,8 @@ H323Channel * H323Connection::CreateLogicalChannel(const H245_OpenLogicalChannel
   }
 
   if (startingFast && 
-	  open.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation))
-		  OnReceiveOLCGenericInformation(sessionID,open.m_genericInformation);
+      open.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation))
+          OnReceiveOLCGenericInformation(sessionID,open.m_genericInformation, false);
 
   if (!channel->SetInitialBandwidth())
     errorCode = H245_OpenLogicalChannelReject_cause::e_insufficientBandwidth;
@@ -4443,7 +4443,7 @@ H323Channel * H323Connection::CreateLogicalChannel(const H245_OpenLogicalChannel
 H323Channel * H323Connection::CreateRealTimeLogicalChannel(const H323Capability & capability,
                                                            H323Channel::Directions dir,
                                                            unsigned sessionID,
-							   const H245_H2250LogicalChannelParameters * param,
+                               const H245_H2250LogicalChannelParameters * param,
                                                            RTP_QOS * rtpqos)
 {
   RTP_Session * session = NULL;
@@ -4574,8 +4574,8 @@ PBoolean H323Connection::OpenAudioChannel(PBoolean isEncoding, unsigned bufferSi
 #ifdef H323_AEC
   if (endpoint.AECEnabled() && (aec == NULL)) {
     PTRACE(2, "H323\tCreating AEC instance.");
-	int rate = codec.GetMediaFormat().GetTimeUnits() * 1000;
-	aec = new PAec(rate);
+    int rate = codec.GetMediaFormat().GetTimeUnits() * 1000;
+    aec = new PAec(rate);
   }
    codec.AttachAEC(aec);
 #endif
@@ -4691,7 +4691,7 @@ unsigned H323Connection::GetBandwidthUsed() const
 #ifdef H323_VIDEO
 void H323Connection::OnSetInitialBandwidth(H323VideoCodec * codec)
 {
-	endpoint.OnSetInitialBandwidth(codec);
+    endpoint.OnSetInitialBandwidth(codec);
 }
 #endif
 
@@ -4762,11 +4762,11 @@ static PBoolean CheckSendUserInputMode(const H323Capabilities & caps,
     H323_UserInputCapability::SignalToneH245,
     H323_UserInputCapability::SignalToneRFC2833
 #ifdef H323_H249
-//	H323_UserInputCapability::SignalToneSeperateRFC2833,  // Not implemented
+//    H323_UserInputCapability::SignalToneSeperateRFC2833,  // Not implemented
    ,H323_UserInputCapability::H249A_Navigation,
-	H323_UserInputCapability::H249B_Softkey,
-	H323_UserInputCapability::H249C_PointDevice,
-	H323_UserInputCapability::H249D_Modal,
+    H323_UserInputCapability::H249B_Softkey,
+    H323_UserInputCapability::H249C_PointDevice,
+    H323_UserInputCapability::H249D_Modal,
     H323_UserInputCapability::NumSubTypes
 #endif
   };
@@ -4929,7 +4929,7 @@ void H323Connection::SendUserInputIndicationTone(char tone,
 void H323Connection::SendUserInputIndicationNavigate(H323_UserInputCapability::NavigateKeyID keyID)
 {
  if (!CheckSendUserInputMode(remoteCapabilities,SendUserInputAsNavigation))
-	 return;
+     return;
 
   PTRACE(2, "H323\tSendUserInputIndicationNavigate(" << keyID << ')');
 
@@ -4945,7 +4945,7 @@ void H323Connection::SendUserInputIndicationNavigate(H323_UserInputCapability::N
    H245_ArrayOf_GenericParameter & contents = info->m_messageContent;
 
    H245_GenericParameter * content = 
-		H323_UserInputCapability::BuildGenericParameter(1,H245_ParameterValue::e_unsignedMin,keyID);
+        H323_UserInputCapability::BuildGenericParameter(1,H245_ParameterValue::e_unsignedMin,keyID);
 
    contents.Append(content);
    contents.SetSize(contents.GetSize()+1);
@@ -4958,7 +4958,7 @@ void H323Connection::SendUserInputIndicationNavigate(H323_UserInputCapability::N
 void H323Connection::SendUserInputIndicationSoftkey(unsigned key, const PString & keyName)
 {
  if (!CheckSendUserInputMode(remoteCapabilities,SendUserInputAsSoftkey))
-	 return;
+     return;
 
   PTRACE(2, "H323\tSendUserInputIndicationSoftkey(" << key << ')');
 
@@ -4974,16 +4974,16 @@ void H323Connection::SendUserInputIndicationSoftkey(unsigned key, const PString 
    H245_ArrayOf_GenericParameter & contents = info->m_messageContent;
 
    H245_GenericParameter * content = 
-		H323_UserInputCapability::BuildGenericParameter(2,H245_ParameterValue::e_unsignedMin,key);
+        H323_UserInputCapability::BuildGenericParameter(2,H245_ParameterValue::e_unsignedMin,key);
     contents.Append(content);
     contents.SetSize(contents.GetSize()+1);
 
-	if (keyName.GetLength() > 0) {
+    if (keyName.GetLength() > 0) {
       H245_GenericParameter * contentstr = 
-		 H323_UserInputCapability::BuildGenericParameter(1,H245_ParameterValue::e_octetString,keyName);
+         H323_UserInputCapability::BuildGenericParameter(1,H245_ParameterValue::e_octetString,keyName);
       contents.Append(contentstr);
       contents.SetSize(contents.GetSize()+1);
-	}
+    }
 
   infolist.Append(info);
   infolist.SetSize(infolist.GetSize()+1);
@@ -4991,10 +4991,10 @@ void H323Connection::SendUserInputIndicationSoftkey(unsigned key, const PString 
 }
 
 void H323Connection::SendUserInputIndicationPointDevice(unsigned x, unsigned y, unsigned button, 
-														   unsigned buttonstate, unsigned clickcount)
+                                                           unsigned buttonstate, unsigned clickcount)
 {
  if (!CheckSendUserInputMode(remoteCapabilities,SendUserInputAsPointDevice))
-	 return;
+     return;
 
   PTRACE(6, "H323\tSendUserInputIndicationPointDevice");
 
@@ -5010,37 +5010,37 @@ void H323Connection::SendUserInputIndicationPointDevice(unsigned x, unsigned y, 
    H245_ArrayOf_GenericParameter & contents = info->m_messageContent;
 
 /// Add X and Y co-ords
-    H245_GenericParameter * X = 		 
-		H323_UserInputCapability::BuildGenericParameter(1,H245_ParameterValue::e_unsignedMin,x);
+    H245_GenericParameter * X =          
+        H323_UserInputCapability::BuildGenericParameter(1,H245_ParameterValue::e_unsignedMin,x);
     contents.Append(X);
     contents.SetSize(contents.GetSize()+1);
 
-    H245_GenericParameter * Y = 		 
-		H323_UserInputCapability::BuildGenericParameter(2,H245_ParameterValue::e_unsignedMin,y);
-	contents.Append(Y);
+    H245_GenericParameter * Y =          
+        H323_UserInputCapability::BuildGenericParameter(2,H245_ParameterValue::e_unsignedMin,y);
+    contents.Append(Y);
     contents.SetSize(contents.GetSize()+1);
 
 /// Optional values
-	if (button > 0) {
-      H245_GenericParameter * but = 		 
-		H323_UserInputCapability::BuildGenericParameter(3,H245_ParameterValue::e_unsignedMin,button);
+    if (button > 0) {
+      H245_GenericParameter * but =          
+        H323_UserInputCapability::BuildGenericParameter(3,H245_ParameterValue::e_unsignedMin,button);
       contents.Append(but);
       contents.SetSize(contents.GetSize()+1);
-	}
+    }
 
-	if (buttonstate > 0) {
-      H245_GenericParameter * butstate = 		 
-		H323_UserInputCapability::BuildGenericParameter(4,H245_ParameterValue::e_unsignedMin,buttonstate);
+    if (buttonstate > 0) {
+      H245_GenericParameter * butstate =          
+        H323_UserInputCapability::BuildGenericParameter(4,H245_ParameterValue::e_unsignedMin,buttonstate);
       contents.Append(butstate);
       contents.SetSize(contents.GetSize()+1);
-	}
+    }
 
-	if (clickcount > 0) {
-      H245_GenericParameter * cc = 		 
-		H323_UserInputCapability::BuildGenericParameter(5,H245_ParameterValue::e_unsignedMin,clickcount);
+    if (clickcount > 0) {
+      H245_GenericParameter * cc =          
+        H323_UserInputCapability::BuildGenericParameter(5,H245_ParameterValue::e_unsignedMin,clickcount);
       contents.Append(cc);
       contents.SetSize(contents.GetSize()+1);
-	}
+    }
 
   infolist.Append(info);
   infolist.SetSize(infolist.GetSize()+1);
@@ -5050,7 +5050,7 @@ void H323Connection::SendUserInputIndicationPointDevice(unsigned x, unsigned y, 
 void H323Connection::SendUserInputIndicationModal()
 {
  if (!CheckSendUserInputMode(remoteCapabilities,SendUserInputAsModal))
-	 return;
+     return;
 
 }
 #endif
@@ -5088,27 +5088,27 @@ void H323Connection::OnUserInputIndication(const H245_UserInputIndication & ind)
       break;
     }
 #ifdef H323_H249
-	case H245_UserInputIndication::e_genericInformation :  
-	{
-	  const H245_ArrayOf_GenericInformation & sig = ind;
-	  if ((sig.GetSize() > 0) &&
+    case H245_UserInputIndication::e_genericInformation :  
+    {
+      const H245_ArrayOf_GenericInformation & sig = ind;
+      if ((sig.GetSize() > 0) &&
          sig[0].HasOptionalField(H245_GenericMessage::e_subMessageIdentifier)) {
-		   const H245_CapabilityIdentifier & id = sig[0].m_messageIdentifier;
-		   if (id.GetTag() == H245_CapabilityIdentifier::e_standard) {
+           const H245_CapabilityIdentifier & id = sig[0].m_messageIdentifier;
+           if (id.GetTag() == H245_CapabilityIdentifier::e_standard) {
                const PASN_ObjectId & gid = id;
-			   PString sid = gid.AsString();
-			   if (sid == H323_UserInputCapability::SubTypeOID[0]) {          // Navigation
-				    OnUserInputIndicationNavigate(sig[0].m_messageContent);
-			   } else if (sid == H323_UserInputCapability::SubTypeOID[1]) {   // Softkey
+               PString sid = gid.AsString();
+               if (sid == H323_UserInputCapability::SubTypeOID[0]) {          // Navigation
+                    OnUserInputIndicationNavigate(sig[0].m_messageContent);
+               } else if (sid == H323_UserInputCapability::SubTypeOID[1]) {   // Softkey
                     OnUserInputIndicationSoftkey(sig[0].m_messageContent);
-			   } else if (sid == H323_UserInputCapability::SubTypeOID[2]) {   // PointingDevice
+               } else if (sid == H323_UserInputCapability::SubTypeOID[2]) {   // PointingDevice
                     OnUserInputIndicationPointDevice(sig[0].m_messageContent);
-			   } else if (sid == H323_UserInputCapability::SubTypeOID[3]) {   // Mode interface
-				    OnUserInputIndicationModal(sig[0].m_messageContent);
-			   }
-		   }
-	  }
-	}
+               } else if (sid == H323_UserInputCapability::SubTypeOID[3]) {   // Mode interface
+                    OnUserInputIndicationModal(sig[0].m_messageContent);
+               }
+           }
+      }
+    }
 #endif
   }
 }
@@ -5183,7 +5183,7 @@ H323_RTP_Session * H323Connection::GetSessionCallbacks(unsigned sessionID) const
 
 RTP_Session * H323Connection::UseSession(unsigned sessionID,
                                          const H245_TransportAddress & taddr,
-					                               H323Channel::Directions dir,
+                                                   H323Channel::Directions dir,
                                          RTP_QOS * rtpqos)
 {
   // We only support unicast IP at this time.
@@ -5193,7 +5193,7 @@ RTP_Session * H323Connection::UseSession(unsigned sessionID,
 
   // We must have a valid sessionID  H.239 sometimes negotiates 0
   if (sessionID < 0 || sessionID > 255) 
-	  return NULL;
+      return NULL;
 
   const H245_UnicastAddress & uaddr = taddr;
   if (uaddr.GetTag() != H245_UnicastAddress::e_iPAddress
@@ -5223,35 +5223,35 @@ RTP_Session * H323Connection::UseSession(unsigned sessionID,
 
 PBoolean H323Connection::OnHandleH245GenericMessage(h245MessageType type, const H245_GenericMessage & pdu)
 {
-	if (!pdu.HasOptionalField(H245_GenericMessage::e_subMessageIdentifier)) {
-		PTRACE(2,"H323\tUnIdentified Generic Message Received!");
-		return false;
-	}
+    if (!pdu.HasOptionalField(H245_GenericMessage::e_subMessageIdentifier)) {
+        PTRACE(2,"H323\tUnIdentified Generic Message Received!");
+        return false;
+    }
 
-	PString guid = PString();
-	const H245_CapabilityIdentifier & id = pdu.m_messageIdentifier;
-	
-	if (id.GetTag() == H245_CapabilityIdentifier::e_standard) {
-			  const PASN_ObjectId & gid = id;
-			  guid = gid.AsString();
-	}
-	else if (id.GetTag() == H245_CapabilityIdentifier::e_h221NonStandard) {
-		PTRACE(2,"H323\tUnknown NonStandard Generic Message Received!");
-			  return false;
-	}
-	else if (id.GetTag() == H245_CapabilityIdentifier::e_uuid) {
-			  const PASN_OctetString & gid = id;
-			  guid = gid.AsString();
-	}
-	else if (id.GetTag() == H245_CapabilityIdentifier::e_domainBased) {
-			  const PASN_IA5String & gid = id;
-			  guid = gid;
-	}
+    PString guid = PString();
+    const H245_CapabilityIdentifier & id = pdu.m_messageIdentifier;
+    
+    if (id.GetTag() == H245_CapabilityIdentifier::e_standard) {
+              const PASN_ObjectId & gid = id;
+              guid = gid.AsString();
+    }
+    else if (id.GetTag() == H245_CapabilityIdentifier::e_h221NonStandard) {
+        PTRACE(2,"H323\tUnknown NonStandard Generic Message Received!");
+              return false;
+    }
+    else if (id.GetTag() == H245_CapabilityIdentifier::e_uuid) {
+              const PASN_OctetString & gid = id;
+              guid = gid.AsString();
+    }
+    else if (id.GetTag() == H245_CapabilityIdentifier::e_domainBased) {
+              const PASN_IA5String & gid = id;
+              guid = gid;
+    }
 
-	if (pdu.HasOptionalField(H245_GenericMessage::e_messageContent))
-		return OnReceivedGenericMessage(type,guid,pdu.m_messageContent);
-	else
-		return OnReceivedGenericMessage(type,guid);
+    if (pdu.HasOptionalField(H245_GenericMessage::e_messageContent))
+        return OnReceivedGenericMessage(type,guid,pdu.m_messageContent);
+    else
+        return OnReceivedGenericMessage(type,guid);
 }
 
 
@@ -5259,30 +5259,30 @@ PBoolean H323Connection::OnHandleH245GenericMessage(h245MessageType type, const 
 
 PBoolean H323Connection::ReceivedH46024AMessage(bool toStart)
 {
-	if (m_H46024Astate < 3) {
-		if (m_H46024Ainitator && !toStart) {
-			PTRACE(4,"H46024A\tCONFLICT: wait for Media initiate Indication");
-			return true;
-		} else {
-		   PTRACE(4,"H46024A\tReceived Indication to " << (toStart ? "initiate" : "wait for") << " direct connection");
+    if (m_H46024Astate < 3) {
+        if (m_H46024Ainitator && !toStart) {
+            PTRACE(4,"H46024A\tCONFLICT: wait for Media initiate Indication");
+            return true;
+        } else {
+           PTRACE(4,"H46024A\tReceived Indication to " << (toStart ? "initiate" : "wait for") << " direct connection");
 
-		   	if (m_H46024Astate == 0)				// We are the receiver
-				m_H46024Astate = (toStart ? 1 : 2); 
+               if (m_H46024Astate == 0)                // We are the receiver
+                m_H46024Astate = (toStart ? 1 : 2); 
 
-			for (std::map<unsigned,NAT_Sockets>::const_iterator r = m_NATSockets.begin(); r != m_NATSockets.end(); ++r) {
-				NAT_Sockets sockets = r->second;
-				((H46019UDPSocket *)sockets.rtp)->H46024Adirect(toStart);
-				((H46019UDPSocket *)sockets.rtcp)->H46024Adirect(toStart);
-			}
-		}
+            for (std::map<unsigned,NAT_Sockets>::const_iterator r = m_NATSockets.begin(); r != m_NATSockets.end(); ++r) {
+                NAT_Sockets sockets = r->second;
+                ((H46019UDPSocket *)sockets.rtp)->H46024Adirect(toStart);
+                ((H46019UDPSocket *)sockets.rtcp)->H46024Adirect(toStart);
+            }
+        }
 
-		if (!toStart) {
-			PTRACE(4,"H46024A\tReply for remote to " << (!toStart ? "initiate" : "wait for") << " direct connection");
-			SendH46024AMessage(!toStart);
-		}
-		m_H46024Astate = 3;
-	}
-	return true;
+        if (!toStart) {
+            PTRACE(4,"H46024A\tReply for remote to " << (!toStart ? "initiate" : "wait for") << " direct connection");
+            SendH46024AMessage(!toStart);
+        }
+        m_H46024Astate = 3;
+    }
+    return true;
 }
 
 bool GetUnsignedGenericMessage(unsigned id, const H245_ArrayOf_GenericParameter & params, unsigned & val)
@@ -5290,24 +5290,24 @@ bool GetUnsignedGenericMessage(unsigned id, const H245_ArrayOf_GenericParameter 
    for (PINDEX i=0; i < params.GetSize(); i++)
    {
       const H245_GenericParameter & param = params[i];
-	  const H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
-	  if (idm.GetTag() == H245_ParameterIdentifier::e_standard) {
-		  const PASN_Integer & idx = idm;
-		  if (idx == id) {
-			 const H245_ParameterValue & genvalue = params[i].m_parameterValue;
-			 if ((genvalue.GetTag() == H245_ParameterValue::e_unsignedMin) ||
-				(genvalue.GetTag() == H245_ParameterValue::e_unsignedMax) ||
-				(genvalue.GetTag() == H245_ParameterValue::e_unsigned32Min) ||
-				(genvalue.GetTag() == H245_ParameterValue::e_unsigned32Max)) {
-					const PASN_Integer & xval = genvalue;
-					val = xval;
-					return true;
-			 }
-		  }
-	  }
+      const H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
+      if (idm.GetTag() == H245_ParameterIdentifier::e_standard) {
+          const PASN_Integer & idx = idm;
+          if (idx == id) {
+             const H245_ParameterValue & genvalue = params[i].m_parameterValue;
+             if ((genvalue.GetTag() == H245_ParameterValue::e_unsignedMin) ||
+                (genvalue.GetTag() == H245_ParameterValue::e_unsignedMax) ||
+                (genvalue.GetTag() == H245_ParameterValue::e_unsigned32Min) ||
+                (genvalue.GetTag() == H245_ParameterValue::e_unsigned32Max)) {
+                    const PASN_Integer & xval = genvalue;
+                    val = xval;
+                    return true;
+             }
+          }
+      }
    }
-	PTRACE(4,"H46024A\tError finding Transport parameter " << id);
-	return false;
+    PTRACE(4,"H46024A\tError finding Transport parameter " << id);
+    return false;
 }
 
 bool GetStringGenericOctetString(unsigned id, const H245_ArrayOf_GenericParameter & params, PString & str)
@@ -5315,23 +5315,23 @@ bool GetStringGenericOctetString(unsigned id, const H245_ArrayOf_GenericParamete
    for (PINDEX i=0; i < params.GetSize(); i++)
    {
       const H245_GenericParameter & param = params[i];
-	  const H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
-	  if (idm.GetTag() == H245_ParameterIdentifier::e_standard) {
-		 const PASN_Integer & idx = idm;
-		  if (idx == id) {
-			 const H245_ParameterValue & genvalue = params[i].m_parameterValue;
-			 if (genvalue.GetTag() == H245_ParameterValue::e_octetString) {
-				   const PASN_OctetString & valg = genvalue;
-				   PASN_IA5String data;
-				   valg.DecodeSubType(data);
-				   str = data;
-				   return true;
-			 }
-		 }
-	  }
+      const H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
+      if (idm.GetTag() == H245_ParameterIdentifier::e_standard) {
+         const PASN_Integer & idx = idm;
+          if (idx == id) {
+             const H245_ParameterValue & genvalue = params[i].m_parameterValue;
+             if (genvalue.GetTag() == H245_ParameterValue::e_octetString) {
+                   const PASN_OctetString & valg = genvalue;
+                   PASN_IA5String data;
+                   valg.DecodeSubType(data);
+                   str = data;
+                   return true;
+             }
+         }
+      }
    }
-	PTRACE(4,"H46024A\tError finding String parameter " << id);
-	return false;
+    PTRACE(4,"H46024A\tError finding String parameter " << id);
+    return false;
 }
 
 bool GetTransportGenericOctetString(unsigned id, const H245_ArrayOf_GenericParameter & params, H323TransportAddress & str)
@@ -5339,70 +5339,70 @@ bool GetTransportGenericOctetString(unsigned id, const H245_ArrayOf_GenericParam
    for (PINDEX i=0; i < params.GetSize(); i++)
    {
       const H245_GenericParameter & param = params[i];
-	  const H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
-	  if (idm.GetTag() == H245_ParameterIdentifier::e_standard) {
-		 const PASN_Integer & idx = idm;
-		  if (idx == id) {
-			 const H245_ParameterValue & genvalue = params[i].m_parameterValue;
-			 if (genvalue.GetTag() == H245_ParameterValue::e_octetString) {
-				   const PASN_OctetString & valg = genvalue;
-				   H245_TransportAddress addr;
-				   valg.DecodeSubType(addr);
-				   str = H323TransportAddress(addr);
-				   return true;
-			 }
-		 }
-	  }
+      const H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
+      if (idm.GetTag() == H245_ParameterIdentifier::e_standard) {
+         const PASN_Integer & idx = idm;
+          if (idx == id) {
+             const H245_ParameterValue & genvalue = params[i].m_parameterValue;
+             if (genvalue.GetTag() == H245_ParameterValue::e_octetString) {
+                   const PASN_OctetString & valg = genvalue;
+                   H245_TransportAddress addr;
+                   valg.DecodeSubType(addr);
+                   str = H323TransportAddress(addr);
+                   return true;
+             }
+         }
+      }
    }
    return false;
 }
 
 H245_GenericParameter & BuildGenericOctetString(H245_GenericParameter & param, unsigned id, const PASN_Object & data)
 {
-	 H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
-	     idm.SetTag(H245_ParameterIdentifier::e_standard);
-		 PASN_Integer & idx = idm;
-		 idx = id;
-		 H245_ParameterValue & genvalue = param.m_parameterValue;
-		 genvalue.SetTag(H245_ParameterValue::e_octetString);
-		 PASN_OctetString & valg = genvalue;
-	     valg.EncodeSubType(data);
-	return param;
+     H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
+         idm.SetTag(H245_ParameterIdentifier::e_standard);
+         PASN_Integer & idx = idm;
+         idx = id;
+         H245_ParameterValue & genvalue = param.m_parameterValue;
+         genvalue.SetTag(H245_ParameterValue::e_octetString);
+         PASN_OctetString & valg = genvalue;
+         valg.EncodeSubType(data);
+    return param;
 }
 
 H245_GenericParameter & BuildGenericOctetString(H245_GenericParameter & param, unsigned id, const H323TransportAddress & transport)
 {
-	H245_TransportAddress data;
-	transport.SetPDU(data);
-	return BuildGenericOctetString(param, id, data);
+    H245_TransportAddress data;
+    transport.SetPDU(data);
+    return BuildGenericOctetString(param, id, data);
 }
 
 H245_GenericParameter & BuildGenericInteger(H245_GenericParameter & param, unsigned id, unsigned val)
 {
-	 H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
-	     idm.SetTag(H245_ParameterIdentifier::e_standard);
-		 PASN_Integer & idx = idm;
-		 idx = id;
-		 H245_ParameterValue & genvalue = param.m_parameterValue;
-		 genvalue.SetTag(H245_ParameterValue::e_unsignedMin);
-		 PASN_Integer & xval = genvalue;
-		 xval = val;
-	return param;
+     H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
+         idm.SetTag(H245_ParameterIdentifier::e_standard);
+         PASN_Integer & idx = idm;
+         idx = id;
+         H245_ParameterValue & genvalue = param.m_parameterValue;
+         genvalue.SetTag(H245_ParameterValue::e_unsignedMin);
+         PASN_Integer & xval = genvalue;
+         xval = val;
+    return param;
 }
 
 void BuildH46024AIndication(H323ControlPDU & pdu, const PString & oid, bool sender)
 {
-	  H245_GenericMessage & cap = pdu.Build(H245_IndicationMessage::e_genericIndication);
-	  cap.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
-	  H245_CapabilityIdentifier & id = cap.m_messageIdentifier;
-	  id.SetTag(H245_CapabilityIdentifier::e_standard);
-	  PASN_ObjectId & gid = id;
-	  gid.SetValue(oid);
-	// Indicate whether remote can start channel.
-	  cap.IncludeOptionalField(H245_GenericMessage::e_messageContent);
-	  H245_ArrayOf_GenericParameter & data = cap.m_messageContent;
-	  data.SetSize(1);
-	  BuildGenericInteger(data[0], 0, (sender ? 1 : 0));
+      H245_GenericMessage & cap = pdu.Build(H245_IndicationMessage::e_genericIndication);
+      cap.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
+      H245_CapabilityIdentifier & id = cap.m_messageIdentifier;
+      id.SetTag(H245_CapabilityIdentifier::e_standard);
+      PASN_ObjectId & gid = id;
+      gid.SetValue(oid);
+    // Indicate whether remote can start channel.
+      cap.IncludeOptionalField(H245_GenericMessage::e_messageContent);
+      H245_ArrayOf_GenericParameter & data = cap.m_messageContent;
+      data.SetSize(1);
+      BuildGenericInteger(data[0], 0, (sender ? 1 : 0));
 }
 #endif // H323_H46024A
 
@@ -5412,44 +5412,44 @@ bool DecodeH46024BRequest(unsigned id, const H245_ArrayOf_GenericParameter & par
    for (PINDEX i=0; i < params.GetSize(); i++)
    {
       const H245_GenericParameter & param = params[i];
-	  const H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
-	  if (idm.GetTag() == H245_ParameterIdentifier::e_standard) {
-		  const PASN_Integer & idx = idm;
-		  if (idx == id) {
-			 const H245_ParameterValue & genvalue = params[i].m_parameterValue;
-			 if (genvalue.GetTag() == H245_ParameterValue::e_octetString) {
-					const PASN_OctetString & xval = genvalue;
-					xval.DecodeSubType(val);
-					return true;
-			 }
-		  }
-	  }
+      const H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
+      if (idm.GetTag() == H245_ParameterIdentifier::e_standard) {
+          const PASN_Integer & idx = idm;
+          if (idx == id) {
+             const H245_ParameterValue & genvalue = params[i].m_parameterValue;
+             if (genvalue.GetTag() == H245_ParameterValue::e_octetString) {
+                    const PASN_OctetString & xval = genvalue;
+                    xval.DecodeSubType(val);
+                    return true;
+             }
+          }
+      }
    }
-	PTRACE(4,"H46024B\tError finding H46024BRequest " << id);
-	return false;
+    PTRACE(4,"H46024B\tError finding H46024BRequest " << id);
+    return false;
 }
 
 void BuildH46024BResponse(H323ControlPDU & pdu)
 {
-	H245_GenericMessage & cap = pdu.Build(H245_ResponseMessage::e_genericResponse);
-	  H245_CapabilityIdentifier & id = cap.m_messageIdentifier;
-	  id.SetTag(H245_CapabilityIdentifier::e_standard);
-	  PASN_ObjectId & gid = id;
-	  gid.SetValue(H46024BOID);
-	
-	  cap.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
-	  PASN_Integer & num = cap.m_subMessageIdentifier;
-	  num = 1;
+    H245_GenericMessage & cap = pdu.Build(H245_ResponseMessage::e_genericResponse);
+      H245_CapabilityIdentifier & id = cap.m_messageIdentifier;
+      id.SetTag(H245_CapabilityIdentifier::e_standard);
+      PASN_ObjectId & gid = id;
+      gid.SetValue(H46024BOID);
+    
+      cap.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
+      PASN_Integer & num = cap.m_subMessageIdentifier;
+      num = 1;
 
 }
 
 void BuildH46024BIndication(H323ControlPDU & pdu)
 {
-	H245_GenericMessage & cap = pdu.Build(H245_IndicationMessage::e_genericIndication);
-	  H245_CapabilityIdentifier & id = cap.m_messageIdentifier;
-	  id.SetTag(H245_CapabilityIdentifier::e_standard);
-	  PASN_ObjectId & gid = id;
-	  gid.SetValue(H46024BOID);
+    H245_GenericMessage & cap = pdu.Build(H245_IndicationMessage::e_genericIndication);
+      H245_CapabilityIdentifier & id = cap.m_messageIdentifier;
+      id.SetTag(H245_CapabilityIdentifier::e_standard);
+      PASN_ObjectId & gid = id;
+      gid.SetValue(H46024BOID);
 }
 
 #endif  // H323_H46024B
@@ -5457,19 +5457,19 @@ void BuildH46024BIndication(H323ControlPDU & pdu)
 #ifdef H323_H46024A
 PBoolean H323Connection::SendH46024AMessage(bool sender)
 {
-	if ((sender && m_H46024Astate == 1) ||  // Message already sent
-		(!sender && m_H46024Astate == 2))	// Message already sent
-				return false;
+    if ((sender && m_H46024Astate == 1) ||  // Message already sent
+        (!sender && m_H46024Astate == 2))    // Message already sent
+                return false;
 
-	m_H46024Ainitator = sender;
-	if (m_H46024Astate == 0)				// We are instigator
-	    m_H46024Astate = (sender ? 2 : 1);  
+    m_H46024Ainitator = sender;
+    if (m_H46024Astate == 0)                // We are instigator
+        m_H46024Astate = (sender ? 2 : 1);  
 
-	PTRACE(4,"H46024A\tSending Control DirectMedia " << (sender ? "Initiate" : "Respond"));
+    PTRACE(4,"H46024A\tSending Control DirectMedia " << (sender ? "Initiate" : "Respond"));
 
-	H323ControlPDU pdu;
-	BuildH46024AIndication(pdu,H46024AOID,sender); 
-	return WriteControlPDU(pdu);
+    H323ControlPDU pdu;
+    BuildH46024AIndication(pdu,H46024AOID,sender); 
+    return WriteControlPDU(pdu);
 }
 
 #endif
@@ -5477,51 +5477,51 @@ PBoolean H323Connection::SendH46024AMessage(bool sender)
 PBoolean H323Connection::OnReceivedGenericMessage(h245MessageType type, const PString & id ) 
 { 
 #ifdef H323_H46024A
-	if (id == H46024AOID && type == h245indication) {
-		PTRACE(4,"H46024A\tReceived Generic Message.");
-		return ReceivedH46024AMessage(true);
-	}
+    if (id == H46024AOID && type == h245indication) {
+        PTRACE(4,"H46024A\tReceived Generic Message.");
+        return ReceivedH46024AMessage(true);
+    }
 #endif
 #ifdef H323_H46024B
-	if (id == H46024BOID && type == h245response) {
-		PTRACE(4,"H46024B\tReceived Generic Response.");
-		return true;
-	}
+    if (id == H46024BOID && type == h245response) {
+        PTRACE(4,"H46024B\tReceived Generic Response.");
+        return true;
+    }
 #endif
-	return false; 
+    return false; 
 }
 
 PBoolean H323Connection::OnReceivedGenericMessage(h245MessageType type, const PString & id, const H245_ArrayOf_GenericParameter & content)
 {
 #ifdef H323_H46024A
-	if (id == H46024AOID && type == h245indication) {
-		PTRACE(4,"H46024A\tReceived Generic Indication.");
-			unsigned start=0;
-			if (GetUnsignedGenericMessage(0,content,start))
-				return ReceivedH46024AMessage((bool)start);
-	}
+    if (id == H46024AOID && type == h245indication) {
+        PTRACE(4,"H46024A\tReceived Generic Indication.");
+            unsigned start=0;
+            if (GetUnsignedGenericMessage(0,content,start))
+                return ReceivedH46024AMessage((bool)start);
+    }
 #endif
 
 #ifdef H323_H46024B
-	if (id == H46024BOID && type == h245request) {
-		H46024B_ArrayOf_AlternateAddress address;
-		if (DecodeH46024BRequest(1, content, address)) {
-			PTRACE(4,"H46024B\tReceived\n" << address);
-			for (PINDEX i=0; i < address.GetSize(); ++i) {
-				std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(address[i].m_sessionID);
-					if (sockets_iter != m_NATSockets.end()) {
-						NAT_Sockets sockets = sockets_iter->second;
-						if (address[i].HasOptionalField(H46024B_AlternateAddress::e_rtpAddress)) { 
-							H323TransportAddress add = H323TransportAddress(address[i].m_rtpAddress); 
-							((H46019UDPSocket *)sockets.rtp)->H46024Bdirect(add);
-						}
-					}
-			}
-			H323ControlPDU pdu;
-			BuildH46024BResponse(pdu); 
-			return WriteControlPDU(pdu);
-		}
-	}
+    if (id == H46024BOID && type == h245request) {
+        H46024B_ArrayOf_AlternateAddress address;
+        if (DecodeH46024BRequest(1, content, address)) {
+            PTRACE(4,"H46024B\tReceived\n" << address);
+            for (PINDEX i=0; i < address.GetSize(); ++i) {
+                std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(address[i].m_sessionID);
+                    if (sockets_iter != m_NATSockets.end()) {
+                        NAT_Sockets sockets = sockets_iter->second;
+                        if (address[i].HasOptionalField(H46024B_AlternateAddress::e_rtpAddress)) { 
+                            H323TransportAddress add = H323TransportAddress(address[i].m_rtpAddress); 
+                            ((H46019UDPSocket *)sockets.rtp)->H46024Bdirect(add);
+                        }
+                    }
+            }
+            H323ControlPDU pdu;
+            BuildH46024BResponse(pdu); 
+            return WriteControlPDU(pdu);
+        }
+    }
 #endif
 
 #ifdef H323_H239
@@ -5529,19 +5529,19 @@ PBoolean H323Connection::OnReceivedGenericMessage(h245MessageType type, const PS
      H239Control * ctrl = (H239Control *)remoteCapabilities.FindCapability("H.239 Control");
      if (!ctrl) return false;
 
-	 switch (type) {
-		case h245request:
+     switch (type) {
+        case h245request:
             return ctrl->HandleGenericMessage(H239Control::e_h245request,this, &content);
-		case h245response:
+        case h245response:
             return ctrl->HandleGenericMessage(H239Control::e_h245response,this, &content);
-		case h245command:
+        case h245command:
             return ctrl->HandleGenericMessage(H239Control::e_h245command,this, &content);
-		case h245indication:
-	    	return ctrl->HandleGenericMessage(H239Control::e_h245indication,this, &content); 
-	 } 
+        case h245indication:
+            return ctrl->HandleGenericMessage(H239Control::e_h245indication,this, &content); 
+     } 
    }
 #endif
-	return false;
+    return false;
 }
 
 #ifdef H323_H239
@@ -5561,252 +5561,281 @@ H245NegLogicalChannels * H323Connection::GetLogicalChannels()
 #endif
 
 PBoolean H323Connection::OnReceiveOLCGenericInformation(unsigned sessionID,
-	                    const H245_ArrayOf_GenericInformation & alternate) const
+                        const H245_ArrayOf_GenericInformation & alternate,
+                        PBoolean isAck
+                        ) const
 {
-	PBoolean success = false;
+    PBoolean success = false;
 
 #ifdef H323_H460
-		PTRACE(4,"Handling Generic OLC Session " << sessionID );
-		for (PINDEX i=0; i<alternate.GetSize(); i++) {
-		  const H245_GenericInformation & info = alternate[i];
-		  const H245_CapabilityIdentifier & id = info.m_messageIdentifier;
-		  if (id.GetTag() != H245_CapabilityIdentifier::e_standard) 
-			  break;
+        PTRACE(4,"Handling Generic OLC Session " << sessionID );
+        for (PINDEX i=0; i<alternate.GetSize(); i++) {
+          const H245_GenericInformation & info = alternate[i];
+          const H245_CapabilityIdentifier & id = info.m_messageIdentifier;
+          if (id.GetTag() != H245_CapabilityIdentifier::e_standard) 
+              break;
 
 #ifdef H323_H46018
-		    const PASN_ObjectId & oid = id;	
-			const H245_ArrayOf_GenericParameter & msg = info.m_messageContent;
-			if (m_H46019enabled && (oid.AsString() == H46019OID)) {
-				H245_GenericParameter & val = msg[0];
-				 if (val.m_parameterValue.GetTag() != H245_ParameterValue::e_octetString) 
-					 break;
+            const PASN_ObjectId & oid = id;    
+            const H245_ArrayOf_GenericParameter & msg = info.m_messageContent;
+            if (m_H46019enabled && (oid.AsString() == H46019OID)) {
+                H245_GenericParameter & val = msg[0];
+                 if (val.m_parameterValue.GetTag() != H245_ParameterValue::e_octetString) 
+                     break;
 
-					PASN_OctetString & raw = val.m_parameterValue;
-					PPER_Stream pdu(raw);
-					H46019_TraversalParameters params;
-					if (!params.Decode(pdu)) {
-						PTRACE(2,"H46019\tError decoding Traversal Parameters!");
-						break;
-					} 
+                    PASN_OctetString & raw = val.m_parameterValue;
+                    PPER_Stream pdu(raw);
+                    H46019_TraversalParameters params;
+                    if (!params.Decode(pdu)) {
+                        PTRACE(2,"H46019\tError decoding Traversal Parameters!");
+                        break;
+                    } 
 
-					PTRACE(4,"H46019\tTraversal Parameters:\n" << params);
+                  PTRACE(4,"H46019\tTraversal Parameters: Rec'd Session " << sessionID 
+                               << " " << (isAck ? "OLCack" : "OLC")  << "\n" << params);
 #ifdef H323_H46019M
-				  H323TransportAddress multiRTPaddress;
-				  H323TransportAddress multiRTCPaddress;
+                  H323TransportAddress multiRTPaddress;
+                  H323TransportAddress multiRTCPaddress;
                   unsigned             multiID=0;
 
-                  if (m_H46019multiplex) {
                     if (params.HasOptionalField(H46019_TraversalParameters::e_multiplexedMediaChannel)) {
-						H245_TransportAddress & mRTP = params.m_multiplexedMediaChannel;
-						multiRTPaddress = H323TransportAddress(mRTP);
-					}
+                        H245_TransportAddress & mRTP = params.m_multiplexedMediaChannel;
+                        multiRTPaddress = H323TransportAddress(mRTP);
+                    }
 
                     if (params.HasOptionalField(H46019_TraversalParameters::e_multiplexedMediaControlChannel)) {
-						H245_TransportAddress & mRTCP = params.m_multiplexedMediaControlChannel;
-						multiRTCPaddress = H323TransportAddress(mRTCP);
-					}
+                        H245_TransportAddress & mRTCP = params.m_multiplexedMediaControlChannel;
+                        multiRTCPaddress = H323TransportAddress(mRTCP);
+                    }
 
                     if (params.HasOptionalField(H46019_TraversalParameters::e_multiplexID)) {
-						PASN_Integer & mID = params.m_multiplexID;
-						multiID = mID;
-					}
-                  }
+                        PASN_Integer & mID = params.m_multiplexID;
+                        multiID = mID;
+                    }
+
+                    if (!m_H46019multiplex && multiID > 0) {
+                        if (isAck) {
+                            PTRACE(2,"H46019\tMultiplex remote detected. To send Multiplexed!");
+                        } else {
+                            PTRACE(2,"H46019\tMULTIPLEX LOGIC ERROR! Multiplex OLC without supportTransmitMultiplexedMedia");
+                        }
+                    }
 #endif 
-					
-					H323TransportAddress RTPaddress;
-					H323TransportAddress RTCPaddress;
-					if (params.HasOptionalField(H46019_TraversalParameters::e_keepAliveChannel)) {
-						H245_TransportAddress & k = params.m_keepAliveChannel;
-						RTPaddress = H323TransportAddress(k);
-							PIPSocket::Address add; WORD port;
-							RTPaddress.GetIpAndPort(add,port);
-						RTCPaddress = H323TransportAddress(add,port+1);  // Compute the RTCP Address
-					}
+                    
+                    H323TransportAddress RTPaddress;
+                    H323TransportAddress RTCPaddress;
+                    bool keepAliveAddress = false;
+                    if (params.HasOptionalField(H46019_TraversalParameters::e_keepAliveChannel)) {
+                        H245_TransportAddress & k = params.m_keepAliveChannel;
+                        RTPaddress = H323TransportAddress(k);
+                            PIPSocket::Address add; WORD port;
+                            RTPaddress.GetIpAndPort(add,port);
+                        RTCPaddress = H323TransportAddress(add,port+1);  // Compute the RTCP Address
+                        keepAliveAddress = true;
+                    }
 
-					unsigned payload = 0;
-					if (params.HasOptionalField(H46019_TraversalParameters::e_keepAlivePayloadType)) {
-						PASN_Integer & p = params.m_keepAlivePayloadType;
-						payload = p;
-					}
+                    unsigned payload = 0;
+                    if (params.HasOptionalField(H46019_TraversalParameters::e_keepAlivePayloadType)) {
+                        PASN_Integer & p = params.m_keepAlivePayloadType;
+                        payload = p;
+                    }
 
-					unsigned ttl = 0;
-					if (params.HasOptionalField(H46019_TraversalParameters::e_keepAliveInterval)) {
-						H225_TimeToLive & a = params.m_keepAliveInterval;
-						ttl = a;
-					}
+                    unsigned ttl = 0;
+                    if (params.HasOptionalField(H46019_TraversalParameters::e_keepAliveInterval)) {
+                        H225_TimeToLive & a = params.m_keepAliveInterval;
+                        ttl = a;
+                    }
 
-					std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(sessionID);
-						if (sockets_iter != m_NATSockets.end()) {
-							NAT_Sockets sockets = sockets_iter->second;
+                    std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(sessionID);
+                        if (sockets_iter != m_NATSockets.end()) {
+                            NAT_Sockets sockets = sockets_iter->second;
 #ifdef H323_H46019M
                             if (multiID > 0) {
                                ((H46019UDPSocket *)sockets.rtp)->SetSendMultiplexID(multiID);
-							   ((H46019UDPSocket *)sockets.rtp)->Activate(multiRTPaddress,payload,ttl);
                                ((H46019UDPSocket *)sockets.rtcp)->SetSendMultiplexID(multiID);
-							   ((H46019UDPSocket *)sockets.rtcp)->Activate(multiRTCPaddress,payload,ttl);
+                               if (keepAliveAddress) {
+                                  ((H46019UDPSocket *)sockets.rtp)->Activate(multiRTPaddress,payload,ttl);
+                                  ((H46019UDPSocket *)sockets.rtcp)->Activate(multiRTCPaddress,payload,ttl);
+                               }
                             } else 
 #endif
                             {
-							   ((H46019UDPSocket *)sockets.rtp)->Activate(RTPaddress,payload,ttl);
-							   ((H46019UDPSocket *)sockets.rtcp)->Activate(RTCPaddress,payload,ttl);
+                              if (keepAliveAddress) {
+                                ((H46019UDPSocket *)sockets.rtp)->Activate(RTPaddress,payload,ttl);
+                                ((H46019UDPSocket *)sockets.rtcp)->Activate(RTCPaddress,payload,ttl);
+                              }
                             }
-						}
-				 success = true;
-			}
+                        }
+                 success = true;
+            }
 #ifdef H323_H46024A
-			if (m_H46024Aenabled && (oid.AsString() == H46024AOID)) {
-				PTRACE(4,"H46024A\tAlt Port Info:\n" << msg);
-				PString m_CUI = PString();  H323TransportAddress m_altAddr1, m_altAddr2;
-				bool error = false;
-				if (!GetStringGenericOctetString(0,msg,m_CUI))  error = true;
-				if (!GetTransportGenericOctetString(1,msg,m_altAddr1))  error = true;
-				if (!GetTransportGenericOctetString(2,msg,m_altAddr2))  error = true;
+            if (m_H46024Aenabled && (oid.AsString() == H46024AOID)) {
+                PTRACE(4,"H46024A\tAlt Port Info:\n" << msg);
+                PString m_CUI = PString();  H323TransportAddress m_altAddr1, m_altAddr2;
+                bool error = false;
+                if (!GetStringGenericOctetString(0,msg,m_CUI))  error = true;
+                if (!GetTransportGenericOctetString(1,msg,m_altAddr1))  error = true;
+                if (!GetTransportGenericOctetString(2,msg,m_altAddr2))  error = true;
 
-				if (!error) {
-					std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(sessionID);
-						if (sockets_iter != m_NATSockets.end()) {
-							NAT_Sockets sockets = sockets_iter->second;
-							((H46019UDPSocket *)sockets.rtp)->SetAlternateAddresses(m_altAddr1,m_CUI);
-							((H46019UDPSocket *)sockets.rtcp)->SetAlternateAddresses(m_altAddr2,m_CUI);
-							success = true;
-						}
-				}
-			}
+                if (!error) {
+                    std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(sessionID);
+                        if (sockets_iter != m_NATSockets.end()) {
+                            NAT_Sockets sockets = sockets_iter->second;
+                            ((H46019UDPSocket *)sockets.rtp)->SetAlternateAddresses(m_altAddr1,m_CUI);
+                            ((H46019UDPSocket *)sockets.rtcp)->SetAlternateAddresses(m_altAddr2,m_CUI);
+                            success = true;
+                        }
+                }
+            }
 #endif
 #endif  // H323_H46018
-		}
+        }
 
 #endif  // H323_H460
-	return success;
+    return success;
 }
 
 PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & sessionID,
-				H245_ArrayOf_GenericInformation & generic, PBoolean isAck) const
+                H245_ArrayOf_GenericInformation & generic, PBoolean isAck) const
 {
 #ifdef H323_H46018
-	PTRACE(4,"Set Generic " << (isAck ? "OLCack" : "OLC") << " Session " << sessionID );
-	if (m_H46019enabled) {
-		unsigned payload=0; unsigned ttl=0;
+    PTRACE(4,"Set Generic " << (isAck ? "OLCack" : "OLC") << " Session " << sessionID );
+    if (m_H46019enabled) {
+        unsigned payload=0; unsigned ttl=0; H323TransportAddress m_keepAlive;
 #ifdef H323_H46019M
         H323TransportAddress m_multiRTPAddress, m_multiRTCPAddress;
         unsigned multiID=0;
 #endif
 #ifdef H323_H46024A
-		PString m_cui = PString(); 
-		H323TransportAddress m_altAddr1, m_altAddr2;
+        PString m_cui = PString(); 
+        H323TransportAddress m_altAddr1, m_altAddr2;
 #endif
-		std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(sessionID);
-			if (sockets_iter != m_NATSockets.end()) {
-				NAT_Sockets sockets = sockets_iter->second;
-				H46019UDPSocket * rtp = ((H46019UDPSocket *)sockets.rtp);
-				H46019UDPSocket * rtcp = ((H46019UDPSocket *)sockets.rtcp);
-				if (rtp->GetPingPayload() == 0) 
-				    rtp->SetPingPayLoad(defH46019payload);
-				payload = rtp->GetPingPayload();
+        std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(sessionID);
+            if (sockets_iter != m_NATSockets.end()) {
+                NAT_Sockets sockets = sockets_iter->second;
+                H46019UDPSocket * rtp = ((H46019UDPSocket *)sockets.rtp);
+                H46019UDPSocket * rtcp = ((H46019UDPSocket *)sockets.rtcp);
+                if (rtp->GetPingPayload() == 0) 
+                    rtp->SetPingPayLoad(defH46019payload);
+                payload = rtp->GetPingPayload();
 
-				if (rtp->GetTTL() == 0) 
-				    rtp->SetTTL(ttl);
-				ttl = rtp->GetTTL();
-#ifdef H323_H46019M
-                if (!isAck && m_H46019multiplex) {
-                   rtp->GetMultiplexAddress(m_multiRTPAddress,multiID);
-                   rtcp->GetMultiplexAddress(m_multiRTCPAddress,multiID);
+                if (rtp->GetTTL() == 0) 
+                    rtp->SetTTL(ttl);
+                ttl = rtp->GetTTL();
+
+                PIPSocket::Address addr;  WORD port=0;
+                if (rtp->GetLocalAddress(addr,port)) {
+                   m_keepAlive = H323TransportAddress(addr,port);
                 }
-#endif			
-				if (isAck) {
-					rtp->Activate();  // Start the RTP Channel if not already started
-					rtcp->Activate();  // Start the RTCP Channel if not already started
-				}
-#ifdef H323_H46024A
-			  if (m_H46024Aenabled) {
-				rtp->GetAlternateAddresses(m_altAddr1,m_cui);
-				rtcp->GetAlternateAddresses(m_altAddr2,m_cui);
-			  }
-#endif
-			} else {
-				PTRACE(4,"H46019\tERROR NAT Socket not found for " << sessionID << " ABORTING!" );
-				return false;
-			}
-
-		  H245_GenericInformation info;
-		  H245_CapabilityIdentifier & id = info.m_messageIdentifier;
-		    id.SetTag(H245_CapabilityIdentifier::e_standard); 
-		    PASN_ObjectId & oid = id;
-			oid.SetValue(H46019OID);
-		 
-			  bool h46019msg = false;
-			  H46019_TraversalParameters params;
 #ifdef H323_H46019M
-              if (!isAck && m_H46019multiplex) {
+                if (/*!isAck &&*/ m_H46019multiplex) {
+                   rtp->GetMultiplexAddress(m_multiRTPAddress,multiID, isAck);
+                   rtcp->GetMultiplexAddress(m_multiRTCPAddress,multiID, isAck);
+                }
+#endif            
+                if (isAck) {
+                    rtp->Activate();  // Start the RTP Channel if not already started
+                    rtcp->Activate();  // Start the RTCP Channel if not already started
+                }
+#ifdef H323_H46024A
+              if (m_H46024Aenabled) {
+                rtp->GetAlternateAddresses(m_altAddr1,m_cui);
+                rtcp->GetAlternateAddresses(m_altAddr2,m_cui);
+              }
+#endif
+            } else {
+                PTRACE(4,"H46019\tERROR NAT Socket not found for " << sessionID << " ABORTING!" );
+                return false;
+            }
+
+          H245_GenericInformation info;
+          H245_CapabilityIdentifier & id = info.m_messageIdentifier;
+            id.SetTag(H245_CapabilityIdentifier::e_standard); 
+            PASN_ObjectId & oid = id;
+            oid.SetValue(H46019OID);
+         
+              bool h46019msg = false;
+              H46019_TraversalParameters params;
+#ifdef H323_H46019M
+              if (m_H46019multiplex) {   // TODO: Change bool to direction multiplex to go
                     params.IncludeOptionalField(H46019_TraversalParameters::e_multiplexedMediaChannel);
                     H245_TransportAddress & mRTP = params.m_multiplexedMediaChannel;
-					m_multiRTPAddress.SetPDU(mRTP);
+                    m_multiRTPAddress.SetPDU(mRTP);
 
                     params.IncludeOptionalField(H46019_TraversalParameters::e_multiplexedMediaControlChannel);
-				    H245_TransportAddress & mRTCP = params.m_multiplexedMediaControlChannel;
-					m_multiRTCPAddress.SetPDU(mRTCP);
+                    H245_TransportAddress & mRTCP = params.m_multiplexedMediaControlChannel;
+                    m_multiRTCPAddress.SetPDU(mRTCP);
 
                     params.IncludeOptionalField(H46019_TraversalParameters::e_multiplexID);
-				    PASN_Integer & mID = params.m_multiplexID;
-					mID = multiID;
+                    PASN_Integer & mID = params.m_multiplexID;
+                    mID = multiID;
                     h46019msg = true;
               }
 #endif
-			  if (/*!isAck ||*/ payload > 0) {
-					params.IncludeOptionalField(H46019_TraversalParameters::e_keepAlivePayloadType);
-					PASN_Integer & p = params.m_keepAlivePayloadType;
-					p = payload;
-					h46019msg = true;
-			  }
-			  if (/*isAck &&*/ ttl > 0) {
-					params.IncludeOptionalField(H46019_TraversalParameters::e_keepAliveInterval);
-					H225_TimeToLive & a = params.m_keepAliveInterval;
-					a = ttl;
-					h46019msg = true;
-			  }
+              if (!isAck) {
+                    params.IncludeOptionalField(H46019_TraversalParameters::e_keepAliveChannel);
+                    H245_TransportAddress & mKeep = params.m_keepAliveChannel;
+                    m_keepAlive.SetPDU(mKeep);
+                    h46019msg = true;
+              }
 
-			  if (h46019msg) {
-			    PTRACE(5,"H46019\tTraversal Parameters:\n" << params);
-				info.IncludeOptionalField(H245_GenericMessage::e_messageContent);
-				H245_ArrayOf_GenericParameter & msg = info.m_messageContent;
-				H245_GenericParameter genericParameter;
-				H245_ParameterIdentifier & idm = genericParameter.m_parameterIdentifier; 
-					idm.SetTag(H245_ParameterIdentifier::e_standard);
-					PASN_Integer & idx = idm;
-					idx = 1;
-				genericParameter.m_parameterValue.SetTag(H245_ParameterValue::e_octetString);
-				H245_ParameterValue & octetValue = genericParameter.m_parameterValue;
-				PASN_OctetString & raw = octetValue;
-				raw.EncodeSubType(params);
-				msg.SetSize(1);
-				msg[0] = genericParameter;
-			  }
-		  PINDEX sz = generic.GetSize();
-		  generic.SetSize(sz+1);
-		  generic[sz] = info;
+              if (!isAck && ttl > 0) {
+                    params.IncludeOptionalField(H46019_TraversalParameters::e_keepAliveInterval);
+                    H225_TimeToLive & a = params.m_keepAliveInterval;
+                    a = ttl;
+                    h46019msg = true;
+              }
+
+              if (isAck && payload > 0) {
+                    params.IncludeOptionalField(H46019_TraversalParameters::e_keepAlivePayloadType);
+                    PASN_Integer & p = params.m_keepAlivePayloadType;
+                    p = payload;
+                    h46019msg = true;
+              }
+
+              if (h46019msg) {
+                PTRACE(4,"H46019\tTraversal Parameters: Send Session " << sessionID 
+                                    << " " << (isAck ? "OLCack" : "OLC")  << "\n" << params);
+                info.IncludeOptionalField(H245_GenericMessage::e_messageContent);
+                H245_ArrayOf_GenericParameter & msg = info.m_messageContent;
+                H245_GenericParameter genericParameter;
+                H245_ParameterIdentifier & idm = genericParameter.m_parameterIdentifier; 
+                    idm.SetTag(H245_ParameterIdentifier::e_standard);
+                    PASN_Integer & idx = idm;
+                    idx = 1;
+                genericParameter.m_parameterValue.SetTag(H245_ParameterValue::e_octetString);
+                H245_ParameterValue & octetValue = genericParameter.m_parameterValue;
+                PASN_OctetString & raw = octetValue;
+                raw.EncodeSubType(params);
+                msg.SetSize(1);
+                msg[0] = genericParameter;
+              }
+          PINDEX sz = generic.GetSize();
+          generic.SetSize(sz+1);
+          generic[sz] = info;
 
 #ifdef H323_H46024A
-		  if (m_H46024Aenabled) {
-			  H245_GenericInformation alt;
-			  H245_CapabilityIdentifier & altid = alt.m_messageIdentifier;
-				id.SetTag(H245_CapabilityIdentifier::e_standard); 
-				PASN_ObjectId & oid = altid;
-				oid.SetValue(H46024AOID);
-				alt.IncludeOptionalField(H245_GenericMessage::e_messageContent);
-				H245_ArrayOf_GenericParameter & msg = alt.m_messageContent;
-				msg.SetSize(3);
-				  BuildGenericOctetString(msg[0],0,(PASN_IA5String)m_cui);
-				  BuildGenericOctetString(msg[1],1,m_altAddr1);
-				  BuildGenericOctetString(msg[2],2,m_altAddr2);
-			   PTRACE(5,"H46024A\tAltInfo:\n" << alt);
-			  PINDEX sz = generic.GetSize();
-			  generic.SetSize(sz+1);
-			  generic[sz] = alt;
-		  }
+          if (m_H46024Aenabled) {
+              H245_GenericInformation alt;
+              H245_CapabilityIdentifier & altid = alt.m_messageIdentifier;
+                id.SetTag(H245_CapabilityIdentifier::e_standard); 
+                PASN_ObjectId & oid = altid;
+                oid.SetValue(H46024AOID);
+                alt.IncludeOptionalField(H245_GenericMessage::e_messageContent);
+                H245_ArrayOf_GenericParameter & msg = alt.m_messageContent;
+                msg.SetSize(3);
+                  BuildGenericOctetString(msg[0],0,(PASN_IA5String)m_cui);
+                  BuildGenericOctetString(msg[1],1,m_altAddr1);
+                  BuildGenericOctetString(msg[2],2,m_altAddr2);
+               PTRACE(5,"H46024A\tAltInfo:\n" << alt);
+              PINDEX sz = generic.GetSize();
+              generic.SetSize(sz+1);
+              generic[sz] = alt;
+          }
 #endif
-		  if (generic.GetSize() > 0)
-				return true;
-	}
+          if (generic.GetSize() > 0)
+                return true;
+    }
 #endif
 
   return false; 
@@ -5821,7 +5850,7 @@ void H323Connection::ReleaseSession(unsigned sessionID)
 #ifdef H323_H46024A
    const RTP_Session * sess = GetSession(sessionID);
    if (sess && sess->GetReferenceCount() == 1) {  // last session reference
-	  std::map<unsigned,NAT_Sockets>::iterator sockets_iter = m_NATSockets.find(sessionID);
+      std::map<unsigned,NAT_Sockets>::iterator sockets_iter = m_NATSockets.find(sessionID);
       if (sockets_iter != m_NATSockets.end()) 
          m_NATSockets.erase(sockets_iter);
       else {
@@ -5843,7 +5872,7 @@ void H323Connection::UpdateSession(unsigned oldSessionID, unsigned newSessionID)
 void H323Connection::OnRTPStatistics(const RTP_Session & session) const
 {
 #ifdef H323_H4609
-   	if (!m_h4609Final && session.GetPacketsReceived() > 0) 
+       if (!m_h4609Final && session.GetPacketsReceived() > 0) 
         H4609QueueStats(session);
 #endif
   endpoint.OnRTPStatistics(*this, session);
@@ -5852,7 +5881,7 @@ void H323Connection::OnRTPStatistics(const RTP_Session & session) const
 void H323Connection::OnRTPFinalStatistics(const RTP_Session & session) const
 {
 #ifdef H323_H4609
-   	if (session.GetPacketsReceived() > 0) 
+       if (session.GetPacketsReceived() > 0) 
         H4609QueueStats(session);
 #endif
   endpoint.OnRTPFinalStatistics(*this, session);
@@ -5866,67 +5895,67 @@ void H323Connection::OnRxSenderReport(unsigned sessionID, const RTP_Session::Sen
 #ifdef H323_H4609
 
 H323Connection::H4609Statistics::H4609Statistics()
-{			
-	meanEndToEndDelay = 0;				
+{            
+    meanEndToEndDelay = 0;                
     worstEndToEndDelay = 0;
-	packetsReceived = 0;
+    packetsReceived = 0;
     accumPacketLost = 0;
-	packetLossRate = 0;
-	fractionLostRate = 0;
-	meanJitter = 0;
-	worstJitter = 0;
-	bandwidth = 0;
-	sessionid = 1;
+    packetLossRate = 0;
+    fractionLostRate = 0;
+    meanJitter = 0;
+    worstJitter = 0;
+    bandwidth = 0;
+    sessionid = 1;
 }
 
 void H323Connection::H4609QueueStats(const RTP_Session & session) const
 {
    if (!m_h4609enabled || (m_h4609Stats == NULL))
-	   return;
+       return;
  
-	H4609Statistics * stat = new H4609Statistics();
+    H4609Statistics * stat = new H4609Statistics();
 
-	stat->sendRTPaddr  = H323TransportAddress(session.GetLocalTransportAddress());  
+    stat->sendRTPaddr  = H323TransportAddress(session.GetLocalTransportAddress());  
     stat->recvRTPaddr  = H323TransportAddress(session.GetRemoteTransportAddress());    
-//	 stat->sendRTCPaddr = H323TransportAddress();  
+//     stat->sendRTCPaddr = H323TransportAddress();  
 //   stat->recvRTCPaddr = H323TransportAddress(); 
-	stat->sessionid = session.GetSessionID();
-	stat->meanEndToEndDelay = session.GetAverageSendTime();			
+    stat->sessionid = session.GetSessionID();
+    stat->meanEndToEndDelay = session.GetAverageSendTime();            
     stat->worstEndToEndDelay = session.GetMaximumSendTime();
-	stat->packetsReceived = session.GetPacketsReceived();
+    stat->packetsReceived = session.GetPacketsReceived();
     stat->accumPacketLost = session.GetPacketsLost();
-	stat->packetLossRate = session.GetPacketsLost() / session.GetPacketsReceived();
-	stat->fractionLostRate = stat->packetLossRate * 100;
-	stat->meanJitter = session.GetAvgJitterTime();
-	stat->worstJitter = session.GetMaxJitterTime();
-	if (session.GetPacketsReceived() > 0 && session.GetAverageReceiveTime() > 0)
+    stat->packetLossRate = session.GetPacketsLost() / session.GetPacketsReceived();
+    stat->fractionLostRate = stat->packetLossRate * 100;
+    stat->meanJitter = session.GetAvgJitterTime();
+    stat->worstJitter = session.GetMaxJitterTime();
+    if (session.GetPacketsReceived() > 0 && session.GetAverageReceiveTime() > 0)
       stat->bandwidth  = (unsigned)((session.GetOctetsReceived()/session.GetPacketsReceived()/session.GetAverageReceiveTime())*1000);
 
     if (m_h4609Stats)
         m_h4609Stats->Enqueue(stat);
 }
 
-	
+    
 PBoolean H323Connection::H4609DequeueStats(H4609Statistics & stat) 
 {   
-	if (m_h4609Stats == NULL)
-		return false;
+    if (m_h4609Stats == NULL)
+        return false;
 
-	H4609Statistics * s = m_h4609Stats->Dequeue(); 
-	if (s != NULL)
-	    stat = *s;
+    H4609Statistics * s = m_h4609Stats->Dequeue(); 
+    if (s != NULL)
+        stat = *s;
     return (s != NULL);
 }
 
 void H323Connection::H4609EnableStats() 
 { 
-	m_h4609enabled = true; 
-	m_h4609Stats = new PQueue<H4609Statistics>;
+    m_h4609enabled = true; 
+    m_h4609Stats = new PQueue<H4609Statistics>;
 }
-	
+    
 void H323Connection::H4609StatsFinal(PBoolean final) 
 { 
-	m_h4609Final = final;
+    m_h4609Final = final;
 }
 #endif
 
@@ -6074,19 +6103,19 @@ void H323Connection::OnSendARQ(H225_AdmissionRequest & arq)
 
     H225_FeatureSet fs;
     if (OnSendFeatureSet(H460_MessageType::e_admissionRequest, fs, false)) {
-		  if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
-			arq.IncludeOptionalField(H225_AdmissionRequest::e_genericData);
+          if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
+            arq.IncludeOptionalField(H225_AdmissionRequest::e_genericData);
 
-			H225_ArrayOf_FeatureDescriptor & fsn = fs.m_supportedFeatures;
-		    H225_ArrayOf_GenericData & data = arq.m_genericData;
+            H225_ArrayOf_FeatureDescriptor & fsn = fs.m_supportedFeatures;
+            H225_ArrayOf_GenericData & data = arq.m_genericData;
 
-			for (PINDEX i=0; i < fsn.GetSize(); i++) {
-				 PINDEX lastPos = data.GetSize();
-				 data.SetSize(lastPos+1);
-				 data[lastPos] = fsn[i];
-			}
-		  }
-	 }
+            for (PINDEX i=0; i < fsn.GetSize(); i++) {
+                 PINDEX lastPos = data.GetSize();
+                 data.SetSize(lastPos+1);
+                 data[lastPos] = fsn[i];
+            }
+          }
+     }
 #endif
   endpoint.OnSendARQ(*this, arq);
 }
@@ -6097,20 +6126,20 @@ void H323Connection::OnReceivedACF(const H225_AdmissionConfirm & acf)
     if (acf.HasOptionalField(H225_AdmissionConfirm::e_featureSet))
         OnReceiveFeatureSet(H460_MessageType::e_admissionConfirm, acf.m_featureSet);
 
-	if (acf.HasOptionalField(H225_AdmissionConfirm::e_genericData)) {
-		const H225_ArrayOf_GenericData & data = acf.m_genericData;
+    if (acf.HasOptionalField(H225_AdmissionConfirm::e_genericData)) {
+        const H225_ArrayOf_GenericData & data = acf.m_genericData;
 
-	  if (data.GetSize() > 0) {
+      if (data.GetSize() > 0) {
          H225_FeatureSet fs;
-		 fs.IncludeOptionalField(H225_FeatureSet::e_supportedFeatures);
-		 H225_ArrayOf_FeatureDescriptor & fsn = fs.m_supportedFeatures;
-		 fsn.SetSize(data.GetSize());
-			for (PINDEX i=0; i < data.GetSize(); i++) 
-				 fsn[i] = (H225_FeatureDescriptor &)data[i];
+         fs.IncludeOptionalField(H225_FeatureSet::e_supportedFeatures);
+         H225_ArrayOf_FeatureDescriptor & fsn = fs.m_supportedFeatures;
+         fsn.SetSize(data.GetSize());
+            for (PINDEX i=0; i < data.GetSize(); i++) 
+                 fsn[i] = (H225_FeatureDescriptor &)data[i];
 
-		 OnReceiveFeatureSet(H460_MessageType::e_admissionConfirm, fs);
-	  }
-	}
+         OnReceiveFeatureSet(H460_MessageType::e_admissionConfirm, fs);
+      }
+    }
 #endif
   endpoint.OnReceivedACF(*this, acf);
 }
@@ -6135,20 +6164,20 @@ void H323Connection::OnReceivedARJ(const H225_AdmissionReject & arj)
     if (arj.HasOptionalField(H225_AdmissionReject::e_featureSet))
         OnReceiveFeatureSet(H460_MessageType::e_admissionConfirm, arj.m_featureSet);
 
-	if (arj.HasOptionalField(H225_AdmissionReject::e_genericData)) {
-		const H225_ArrayOf_GenericData & data = arj.m_genericData;
+    if (arj.HasOptionalField(H225_AdmissionReject::e_genericData)) {
+        const H225_ArrayOf_GenericData & data = arj.m_genericData;
 
-	  if (data.GetSize() > 0) {
+      if (data.GetSize() > 0) {
          H225_FeatureSet fs;
-		 fs.IncludeOptionalField(H225_FeatureSet::e_supportedFeatures);
-		 H225_ArrayOf_FeatureDescriptor & fsn = fs.m_supportedFeatures;
-		 fsn.SetSize(data.GetSize());
-			for (PINDEX i=0; i < data.GetSize(); i++) 
-				 fsn[i] = (H225_FeatureDescriptor &)data[i];
+         fs.IncludeOptionalField(H225_FeatureSet::e_supportedFeatures);
+         H225_ArrayOf_FeatureDescriptor & fsn = fs.m_supportedFeatures;
+         fsn.SetSize(data.GetSize());
+            for (PINDEX i=0; i < data.GetSize(); i++) 
+                 fsn[i] = (H225_FeatureDescriptor &)data[i];
 
-		 OnReceiveFeatureSet(H460_MessageType::e_admissionReject, fs);
-	  }
-	}
+         OnReceiveFeatureSet(H460_MessageType::e_admissionReject, fs);
+      }
+    }
 #endif
   endpoint.OnReceivedARJ(*this, arj);
 }
@@ -6157,20 +6186,20 @@ void H323Connection::OnSendIRR(H225_InfoRequestResponse & irr) const
 {
 #ifdef H323_H460
     H225_FeatureSet fs;
-	if (OnSendFeatureSet(H460_MessageType::e_inforequestresponse, fs, false)) {
-		if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
-			irr.IncludeOptionalField(H225_InfoRequestResponse::e_genericData);
+    if (OnSendFeatureSet(H460_MessageType::e_inforequestresponse, fs, false)) {
+        if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
+            irr.IncludeOptionalField(H225_InfoRequestResponse::e_genericData);
 
-			H225_ArrayOf_FeatureDescriptor & fsn = fs.m_supportedFeatures;
-		    H225_ArrayOf_GenericData & data = irr.m_genericData;
+            H225_ArrayOf_FeatureDescriptor & fsn = fs.m_supportedFeatures;
+            H225_ArrayOf_GenericData & data = irr.m_genericData;
 
-			for (PINDEX i=0; i < fsn.GetSize(); i++) {
-				 PINDEX lastPos = data.GetSize();
-				 data.SetSize(lastPos+1);
-				 data[lastPos] = fsn[i];
-			}
-		}
-	 }
+            for (PINDEX i=0; i < fsn.GetSize(); i++) {
+                 PINDEX lastPos = data.GetSize();
+                 data.SetSize(lastPos+1);
+                 data[lastPos] = fsn[i];
+            }
+        }
+     }
 #endif
 }
 
@@ -6178,20 +6207,20 @@ void H323Connection::OnSendDRQ(H225_DisengageRequest & drq) const
 {
 #ifdef H323_H460
     H225_FeatureSet fs;
-	if (OnSendFeatureSet(H460_MessageType::e_disengagerequest, fs, false)) {
-		  if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
-			drq.IncludeOptionalField(H225_DisengageRequest::e_genericData);
+    if (OnSendFeatureSet(H460_MessageType::e_disengagerequest, fs, false)) {
+          if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
+            drq.IncludeOptionalField(H225_DisengageRequest::e_genericData);
 
-			H225_ArrayOf_FeatureDescriptor & fsn = fs.m_supportedFeatures;
-		    H225_ArrayOf_GenericData & data = drq.m_genericData;
+            H225_ArrayOf_FeatureDescriptor & fsn = fs.m_supportedFeatures;
+            H225_ArrayOf_GenericData & data = drq.m_genericData;
 
-			for (PINDEX i=0; i < fsn.GetSize(); i++) {
-				 PINDEX lastPos = data.GetSize();
-				 data.SetSize(lastPos+1);
-				 data[lastPos] = fsn[i];
-			}
-		  }
-	 }
+            for (PINDEX i=0; i < fsn.GetSize(); i++) {
+                 PINDEX lastPos = data.GetSize();
+                 data.SetSize(lastPos+1);
+                 data[lastPos] = fsn[i];
+            }
+          }
+     }
 #endif
 }
 
@@ -6248,19 +6277,19 @@ PBoolean H323Connection::OpenFileTransferSession(const H323FileTransferList & li
 
   for (PINDEX i = 0; i < localCapabilities.GetSize(); i++) {
     H323Capability & localCapability = localCapabilities[i];
-	if ((localCapability.GetMainType() == H323Capability::e_Data) && 
-		(localCapability.GetSubType() == H245_DataApplicationCapability_application::e_genericDataCapability)) {
+    if ((localCapability.GetMainType() == H323Capability::e_Data) && 
+        (localCapability.GetSubType() == H245_DataApplicationCapability_application::e_genericDataCapability)) {
       H323FileTransferCapability * remoteCapability = (H323FileTransferCapability *)remoteCapabilities.FindCapability(localCapability);
       if (remoteCapability != NULL) {
         PTRACE(3, "H323\tFile Transfer Available " << *remoteCapability);   
-		remoteCapability->SetFileTransferList(list);
-		if (logicalChannels->Open(*remoteCapability, OpalMediaFormat::DefaultDataSessionID,num)) {
-		   filetransferOpen = TRUE;
+        remoteCapability->SetFileTransferList(list);
+        if (logicalChannels->Open(*remoteCapability, OpalMediaFormat::DefaultDataSessionID,num)) {
+           filetransferOpen = TRUE;
            break;
-		}
+        }
         PTRACE(2, "H323\tFileTranfer OpenLogicalChannel failed: " << *remoteCapability);
       }
-	  break;
+      break;
     }
   }
 
@@ -6270,31 +6299,31 @@ PBoolean H323Connection::OpenFileTransferSession(const H323FileTransferList & li
 PBoolean H323Connection::CloseFileTransferSession(unsigned num)
 {
     CloseLogicalChannel(num,false);
-	return TRUE;
+    return TRUE;
 }
 
-H323FileTransferHandler * H323Connection::CreateFileTransferHandler(unsigned sessionID,	
-																	H323Channel::Directions dir,
-						                                            H323FileTransferList & filelist)
+H323FileTransferHandler * H323Connection::CreateFileTransferHandler(unsigned sessionID,    
+                                                                    H323Channel::Directions dir,
+                                                                    H323FileTransferList & filelist)
 {
     
   if (!filelist.IsMaster() && !OpenFileTransferChannel(dir == H323Channel::IsTransmitter, filelist)) 
-	    return NULL;
+        return NULL;
 
   return OnCreateFileTransferHandler(sessionID,dir,filelist);
 }
 
-H323FileTransferHandler * H323Connection::OnCreateFileTransferHandler(unsigned sessionID,	
-																	H323Channel::Directions dir,
-						                                            H323FileTransferList & filelist)
+H323FileTransferHandler * H323Connection::OnCreateFileTransferHandler(unsigned sessionID,    
+                                                                    H323Channel::Directions dir,
+                                                                    H323FileTransferList & filelist)
 {
     return new H323FileTransferHandler(*this, sessionID, dir, filelist);
 }
 
 
 PBoolean H323Connection::OpenFileTransferChannel( PBoolean isEncoder,
-						                      H323FileTransferList & filelist
-											 ) 
+                                              H323FileTransferList & filelist
+                                             ) 
 {
    return endpoint.OpenFileTransferChannel(*this,isEncoder,filelist);
 }
@@ -6397,23 +6426,23 @@ H323Connection::SessionInformation::SessionInformation(const OpalGloballyUniqueI
 #endif
 
 #ifdef H323_H46024A
-	// Some random number bases on the session id (for H.460.24A)
-	int rand = PRandom::Number((session *100),((session+1)*100)-1);
-	m_CUI = PString(rand); 
-	PTRACE(4,"H46024A\tGenerated CUI s: " << session << " value: " << m_CUI);
+    // Some random number bases on the session id (for H.460.24A)
+    int rand = PRandom::Number((session *100),((session+1)*100)-1);
+    m_CUI = PString(rand); 
+    PTRACE(4,"H46024A\tGenerated CUI s: " << session << " value: " << m_CUI);
 #else
-	m_CUI = PString();
+    m_CUI = PString();
 #endif
 }
 
 const PString & H323Connection::SessionInformation::GetCallToken()
 {
-	return m_callToken;
+    return m_callToken;
 }
 
 unsigned H323Connection::SessionInformation::GetSessionID() const
 {
-	return m_sessionID;
+    return m_sessionID;
 }
 
 void H323Connection::SessionInformation::SetSendMultiplexID(unsigned id)
@@ -6428,17 +6457,17 @@ unsigned H323Connection::SessionInformation::GetRecvMultiplexID() const
 
 H323Connection::SessionInformation * H323Connection::BuildSessionInformation(unsigned sessionID) const
 {
-	return new SessionInformation(GetCallIdentifier(),GetCallToken(),sessionID, this);
+    return new SessionInformation(GetCallIdentifier(),GetCallToken(),sessionID, this);
 }
 
 const OpalGloballyUniqueID & H323Connection::SessionInformation::GetCallIdentifer()
 {
-	return m_callID;
+    return m_callID;
 }
 
 const PString & H323Connection::SessionInformation::GetCUI()
 {
-	return m_CUI;
+    return m_CUI;
 }
 
 const H323Connection * H323Connection::SessionInformation::GetConnection()
@@ -6451,19 +6480,19 @@ const H323Connection * H323Connection::SessionInformation::GetConnection()
 #ifdef H323_H460
 void H323Connection::DisableFeatures(PBoolean disable)
 {
-	 disableH460 = disable;
+     disableH460 = disable;
 }
 
 #ifdef H323_H46018
 void H323Connection::H46019SetCallReceiver() 
 { 
-	PTRACE(4,"H46019\tCall is receiver.");
-	m_H46019CallReceiver = true; 
+    PTRACE(4,"H46019\tCall is receiver.");
+    m_H46019CallReceiver = true; 
 }
 
 void H323Connection::H46019Enabled() 
 { 
-	m_H46019enabled = true; 
+    m_H46019enabled = true; 
 }
 
 void H323Connection::H46019MultiEnabled()
@@ -6480,14 +6509,14 @@ PBoolean H323Connection::IsH46019Multiplexed() const
 #ifdef H323_H46024A
 void H323Connection::H46024AEnabled() 
 { 
-	m_H46024Aenabled = true; 
+    m_H46024Aenabled = true; 
 }
 #endif   // H323_H46024A
 
 #ifdef H323_H46024B
 void H323Connection::H46024BEnabled() 
 { 
-	m_H46024Benabled = true; 
+    m_H46024Benabled = true; 
 }
 #endif   // H323_H46024A
 #endif   // H323_H460
@@ -6495,9 +6524,9 @@ void H323Connection::H46024BEnabled()
 PBoolean H323Connection::OnH245AddressConflict()
 {
 #ifdef H323_H46018
-	return m_H46019enabled;
+    return m_H46019enabled;
 #else
-	return false;
+    return false;
 #endif
 }
 
@@ -6506,7 +6535,7 @@ PBoolean H323Connection::OnSendFeatureSet(unsigned code, H225_FeatureSet & feats
 {
 #ifdef H323_H460
    if (disableH460)
-	   return FALSE;
+       return FALSE;
 
    return features->SendFeature(code, feats, advertise);
 #else
@@ -6518,7 +6547,7 @@ void H323Connection::OnReceiveFeatureSet(unsigned code, const H225_FeatureSet & 
 {
 #ifdef H323_H460
    if (disableH460)
-	   return;
+       return;
 
    features->ReceiveFeature(code, feats);
 #else
@@ -6529,7 +6558,7 @@ void H323Connection::OnReceiveFeatureSet(unsigned code, const H225_FeatureSet & 
 #ifdef H323_H460
 void H323Connection::DisableFeatureSet(int msgtype) const
 {
-	features->DisableAllFeatures(msgtype);
+    features->DisableAllFeatures(msgtype);
 }
 #endif
 
@@ -6554,7 +6583,7 @@ PBoolean H323Connection::OnCallAuthentication(const PString & username,
 
 PBoolean H323Connection::OnEPAuthenticationFailed(H235Authenticator::ValidationResult result) const
 {
-	return FALSE;
+    return FALSE;
 }
 
 void H323Connection::OnAuthenticationFinalise(unsigned pdu,PBYTEArray & rawData)
@@ -6703,46 +6732,46 @@ PBoolean H323AggregatedH2x5Handle::OnRead()
 #ifdef H323_H248
 
 PBoolean H323Connection::OnSendServiceControlSessions(
-				   H225_ArrayOf_ServiceControlSession & serviceControl, 
-				   H225_ServiceControlSession_reason reason) const
+                   H225_ArrayOf_ServiceControlSession & serviceControl, 
+                   H225_ServiceControlSession_reason reason) const
 {
 
-	PString amount;
-	PBoolean credit=TRUE;
-	unsigned time;
-	PString url;
+    PString amount;
+    PBoolean credit=TRUE;
+    unsigned time;
+    PString url;
 
     if (!OnSendServiceControl(amount, credit,time, url) && 
-						(serviceControlSessions.GetSize() == 0))
-		return FALSE;
+                        (serviceControlSessions.GetSize() == 0))
+        return FALSE;
 
-	H323Dictionary<POrdinalKey, H323ServiceControlSession> SCS = serviceControlSessions;
+    H323Dictionary<POrdinalKey, H323ServiceControlSession> SCS = serviceControlSessions;
    
     if (!amount) {
         H323CallCreditServiceControl * csc = 
-			     new H323CallCreditServiceControl(amount,credit,time);
+                 new H323CallCreditServiceControl(amount,credit,time);
         SCS.SetAt(H323ServiceControlSession::e_CallCredit, csc);
-	}
+    }
 
-	if (!url) {
-		H323HTTPServiceControl * scs = new H323HTTPServiceControl(url);
+    if (!url) {
+        H323HTTPServiceControl * scs = new H323HTTPServiceControl(url);
         SCS.SetAt(H323ServiceControlSession::e_URL, scs);
-	}
+    }
 
     for (PINDEX j = 0; j < SCS.GetSize(); j++) {
 
-	  PINDEX last = serviceControl.GetSize();
-	  serviceControl.SetSize(last+1);
-	  H225_ServiceControlSession & pdu = serviceControl[last];
+      PINDEX last = serviceControl.GetSize();
+      serviceControl.SetSize(last+1);
+      H225_ServiceControlSession & pdu = serviceControl[last];
 
-	  unsigned type = ((H323ServiceControlSession *)SCS.GetAt(j))->GetType();
-	  pdu.m_sessionId = type;
-	  pdu.m_reason = reason;
+      unsigned type = ((H323ServiceControlSession *)SCS.GetAt(j))->GetType();
+      pdu.m_sessionId = type;
+      pdu.m_reason = reason;
 
-	  if (SCS[type].OnSendingPDU(pdu.m_contents))
-		pdu.IncludeOptionalField(H225_ServiceControlSession::e_contents);
+      if (SCS[type].OnSendingPDU(pdu.m_contents))
+        pdu.IncludeOptionalField(H225_ServiceControlSession::e_contents);
 
-	}
+    }
 
    return TRUE;
 }
@@ -6763,7 +6792,7 @@ void H323Connection::OnReceiveServiceControlSessions(const H225_ArrayOf_ServiceC
       if (pdu.HasOptionalField(H225_ServiceControlSession::e_contents)) {
           if (session->OnReceivedPDU(pdu.m_contents))
               isContent = TRUE;
-	  }
+      }
     }
 
     if (session == NULL && pdu.HasOptionalField(H225_ServiceControlSession::e_contents)) {
@@ -6773,52 +6802,52 @@ void H323Connection::OnReceiveServiceControlSessions(const H225_ArrayOf_ServiceC
   }
 
   if (isContent) {
-	PString amount;
-	PBoolean credit=TRUE;
-	unsigned time;
-	PString url;
-	PString ldapURL;
-	PString baseDN;
+    PString amount;
+    PBoolean credit=TRUE;
+    unsigned time;
+    PString url;
+    PString ldapURL;
+    PString baseDN;
 
     for (PINDEX j = 0; j < serviceControlSessions.GetSize(); j++) {
-	  H323ServiceControlSession & sess = serviceControlSessions[j];
-	  switch (sess.GetType()) {
-	     case H323ServiceControlSession::e_CallCredit:
-	        ((H323CallCreditServiceControl &)sess).GetValue(amount,credit,time);
+      H323ServiceControlSession & sess = serviceControlSessions[j];
+      switch (sess.GetType()) {
+         case H323ServiceControlSession::e_CallCredit:
+            ((H323CallCreditServiceControl &)sess).GetValue(amount,credit,time);
                  break;
          case H323ServiceControlSession::e_URL:
             ((H323HTTPServiceControl &)sess).GetValue(url);
                 break;
 #ifdef H323_H350
-		 case H323ServiceControlSession::e_NonStandard:
-			((H323H350ServiceControl &)sess).GetValue(ldapURL,baseDN);
-			    break;
+         case H323ServiceControlSession::e_NonStandard:
+            ((H323H350ServiceControl &)sess).GetValue(ldapURL,baseDN);
+                break;
 #endif
-		 default:
-			    break;
-	  } 
-	}
+         default:
+                break;
+      } 
+    }
     OnReceiveServiceControl(amount,credit,time,url,ldapURL,baseDN); 
-  }								 
+  }                                 
 }
 
 void H323Connection::OnReceiveServiceControl(const PString & amount, 
                                              PBoolean credit, 
                                              const unsigned & timelimit,
                                              const PString & url,
-											 const PString & ldapURL,
-											 const PString & baseDN
+                                             const PString & ldapURL,
+                                             const PString & baseDN
                                             )
 {
-	if (!amount)
-	    endpoint.OnCallCreditServiceControl(amount,credit,timelimit);
+    if (!amount)
+        endpoint.OnCallCreditServiceControl(amount,credit,timelimit);
 
-	if (!url)
-		endpoint.OnHTTPServiceControl(0, 0, url);
+    if (!url)
+        endpoint.OnHTTPServiceControl(0, 0, url);
 
 #ifdef H323_H350
-	if (!ldapURL)
-	    endpoint.OnH350ServiceControl(ldapURL,baseDN);
+    if (!ldapURL)
+        endpoint.OnH350ServiceControl(ldapURL,baseDN);
 #endif
 }
 
@@ -6828,14 +6857,14 @@ PBoolean H323Connection::OnSendServiceControl(PString & /*amount*/,
                                           PString & /*url*/
                                          ) const
 {
-	return FALSE;
+    return FALSE;
 }
 
 #endif
 
 void H323Connection::DisableH245inSETUP()
 { 
-	doH245inSETUP = FALSE; 
+    doH245inSETUP = FALSE; 
 }
 
 void H323Connection::DisableH245QoS()
@@ -6850,18 +6879,18 @@ PBoolean H323Connection::H245QoSEnabled() const
 
 void H323Connection::SetNonCallConnection()
 {  
-	nonCallConnection = TRUE; 
+    nonCallConnection = TRUE; 
 }
 
 PBoolean H323Connection::IsNonCallConnection() const
 {
-	return nonCallConnection;
+    return nonCallConnection;
 }
 
 #ifdef H323_H460
 H460_FeatureSet * H323Connection::GetFeatureSet()
 {
-	return features;
+    return features;
 }
 #endif
 
@@ -6895,7 +6924,7 @@ PBoolean H323Connection::OpenH239Channel()
 {
    if (callToken.IsEmpty()) {
       PTRACE(2,"H239\tERROR Open Channel. Not in a call");
-	  return false;
+      return false;
    }
 
    H239Control * ctrl = (H239Control *)remoteCapabilities.FindCapability("H.239 Control");
@@ -6945,21 +6974,21 @@ PBoolean H323Connection::OpenExtendedVideoSession(H323ChannelNumber & num, int d
   PBoolean applicationOpen = false;
   for (PINDEX i = 0; i < localCapabilities.GetSize(); i++) {
     H323Capability & localCapability = localCapabilities[i];
-	if ((localCapability.GetMainType() == H323Capability::e_Video) && 
-		(localCapability.GetSubType() == H245_VideoCapability::e_extendedVideoCapability)) {
+    if ((localCapability.GetMainType() == H323Capability::e_Video) && 
+        (localCapability.GetSubType() == H245_VideoCapability::e_extendedVideoCapability)) {
       H323ExtendedVideoCapability * remoteCapability = (H323ExtendedVideoCapability *)remoteCapabilities.FindCapability(localCapability);
       if (remoteCapability != NULL) {
         PTRACE(3, "H323\tApplication Available " << *remoteCapability);
          
-		for (PINDEX j = 0; j < remoteCapability->GetSize(); j++) {
+        for (PINDEX j = 0; j < remoteCapability->GetSize(); j++) {
           // SessionID must be 0 becouse otherwise Tandberg will reject the OLC.
-		  if (logicalChannels->Open(remoteCapability[j], defaultSession ,num)) {
-		     applicationOpen = TRUE;
+          if (logicalChannels->Open(remoteCapability[j], defaultSession ,num)) {
+             applicationOpen = TRUE;
              break;
           } else {
              PTRACE(2, "H323\tApplication OpenLogicalChannel failed: " << *remoteCapability);
           }
-		}
+        }
         if (applicationOpen) 
             break;
       } 
@@ -6971,7 +7000,7 @@ PBoolean H323Connection::OpenExtendedVideoSession(H323ChannelNumber & num, int d
 PBoolean H323Connection::CloseExtendedVideoSession(const H323ChannelNumber & num)
 {
     CloseLogicalChannel(num,num.IsFromRemote());
-	return TRUE;
+    return TRUE;
 }
 
 PBoolean H323Connection::OpenExtendedVideoChannel(PBoolean isEncoding,H323VideoCodec & codec)
@@ -6988,7 +7017,7 @@ PBoolean H323Connection::OpenConferenceControlSession(PBoolean & chairControl, P
   extControls = FALSE;
   for (PINDEX i = 0; i < localCapabilities.GetSize(); i++) {
     H323Capability & localCapability = localCapabilities[i];
-	if (localCapability.GetMainType() == H323Capability::e_ConferenceControl) {
+    if (localCapability.GetMainType() == H323Capability::e_ConferenceControl) {
       H323_ConferenceControlCapability * remoteCapability = (H323_ConferenceControlCapability *)remoteCapabilities.FindCapability(localCapability);
       if (remoteCapability != NULL) {
           chairControl = remoteCapability->SupportChairControls();
