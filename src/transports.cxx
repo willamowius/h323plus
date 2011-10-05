@@ -1683,7 +1683,7 @@ PBoolean H323TransportUDP::DiscoverGatekeeper(H323Gatekeeper & gk,
   }
   else {
     PTRACE(4, "RAS\tSearching interfaces:\n" << setfill('\n') << interfaces << setfill(' '));
-    // Check for if destination machine is local machine, if so only use that interface
+    // Check if destination machine is local machine, if so only use that interface
     for (i = 0; i < interfaces.GetSize(); i++) {
       if (interfaces[i].GetAddress() == destAddr) {
         PTRACE(3, "RAS\tGatekeeper discovery on local interface: " << destAddr);
@@ -1706,6 +1706,11 @@ PBoolean H323TransportUDP::DiscoverGatekeeper(H323Gatekeeper & gk,
 
   for (i = 0; i < interfaces.GetSize(); i++) {
     localAddress = interfaces[i].GetAddress();
+
+	// don't try to use IPv4 interface to reach IPv6 gatekeeper or IPv6 interface to reach IPv4 gatekeeper
+    if (localAddress.GetVersion() != destAddr.GetVersion())
+      continue;
+
     if (localAddress == 0 || (destAddr != localAddress && localAddress.IsLoopback()))
       continue;
 
