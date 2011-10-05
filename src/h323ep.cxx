@@ -393,7 +393,7 @@ H323EndPoint::H323EndPoint()
   t35Extension     = defaultT35Extension;
   manufacturerCode = defaultManufacturerCode; // Allocated by Australian Communications Authority, Oct 2000
 
-  rtpIpPorts.current = rtpIpPorts.base = 5000;
+  rtpIpPorts.current = rtpIpPorts.base = 5001;
   rtpIpPorts.max = 5999;
 
   // use dynamic port allocation by default
@@ -408,7 +408,7 @@ H323EndPoint::H323EndPoint()
 
 #ifdef H323_H46019M
   defaultMultiRTPPort = 2776;
-  rtpMuxID.current = rtpMuxID.base = (unsigned)900000;
+  rtpMuxID.current = rtpMuxID.base = PRandom::Number(999900);
   rtpMuxID.max   = (unsigned)1000000;
 #endif
 
