@@ -5650,6 +5650,13 @@ PBoolean H323Connection::OnReceiveOLCGenericInformation(unsigned sessionID,
                                ((H46019UDPSocket *)sockets.rtp)->SetSendMultiplexID(multiID);
                                ((H46019UDPSocket *)sockets.rtcp)->SetSendMultiplexID(multiID);
                                if (keepAliveAddress) {
+                                   PIPSocket::Address multiAddr;  
+                                   multiRTPaddress.GetIpAddress(multiAddr);    // Sanity check....
+                                   if (!multiAddr.IsValid() || multiAddr.IsAny()|| multiAddr.IsLoopback()) {
+                                      PTRACE(2,"H46019M\tInvalid Multiplex Address! Use Keepalive Address");
+                                      multiRTPaddress = RTPaddress;
+                                      multiRTCPaddress = RTCPaddress;
+                                   }                    
                                   ((H46019UDPSocket *)sockets.rtp)->Activate(multiRTPaddress,payload,ttl);
                                   ((H46019UDPSocket *)sockets.rtcp)->Activate(multiRTCPaddress,payload,ttl);
                                }
