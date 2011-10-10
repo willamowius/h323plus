@@ -441,6 +441,9 @@ PMutex                        PNatMethod_H46019::muxMutex;
     
 PNatMethod_H46019::PNatMethod_H46019()
 : available(false), active(true), handler(NULL)
+#ifdef H323_H46019M
+  , m_readThread(NULL)
+#endif
 {
 }
 
@@ -656,8 +659,9 @@ void PNatMethod_H46019::StartMultiplexListener()
 void PNatMethod_H46019::ReadThread(PThread &, INT)
 {
   
-  RTP_MultiDataFrame buffer(2000);
-  PINDEX len = 0;
+  PINDEX bufferLen = 2000;
+  RTP_MultiDataFrame buffer(bufferLen);
+  PINDEX len = bufferLen;
   PIPSocket::Address addr;
   WORD port=0;
 
@@ -699,6 +703,7 @@ void PNatMethod_H46019::ReadThread(PThread &, INT)
 
              ((H46019UDPSocket *)it->second)->WriteMultiplexBuffer(buffer.GetPointer()+4,len-4,addr,port);
             muxMutex.Signal();
+            len = bufferLen;
          } else {
               switch (socket->GetErrorNumber(PChannel::LastReadError)) {
                 case ECONNRESET :
