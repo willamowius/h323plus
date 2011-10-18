@@ -537,7 +537,7 @@ RTP_Session::~RTP_Session()
   userData->OnFinalStatistics(*this);
 
   PTRACE_IF(2, packetsSent != 0 || packetsReceived != 0,
-            "RTP\tFinal statistics:\n"
+            "RTP\tFinal statistics: Session " << sessionID << "\n"
             "    packetsSent       = " << packetsSent << "\n"
             "    octetsSent        = " << octetsSent << "\n"
             "    averageSendTime   = " << averageSendTime << "\n"
