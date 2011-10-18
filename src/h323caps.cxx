@@ -2965,19 +2965,14 @@ H323Capabilities::H323Capabilities()
 H323Capabilities::H323Capabilities(const H323Connection & connection,
                                    const H245_TerminalCapabilitySet & pdu)
 {
-  H323Capabilities allCapabilities;
   const H323Capabilities & localCapabilities = connection.GetLocalCapabilities();
-  for (PINDEX c = 0; c < localCapabilities.GetSize(); c++)
-    allCapabilities.Add(allCapabilities.Copy(localCapabilities[c]));
-//  allCapabilities.AddAllCapabilities(0, 0, "*");
-//  H323_UserInputCapability::AddAllCapabilities(allCapabilities, P_MAX_INDEX, P_MAX_INDEX);
 
   // Decode out of the PDU, the list of known codecs.
   if (pdu.HasOptionalField(H245_TerminalCapabilitySet::e_capabilityTable)) {
     for (PINDEX i = 0; i < pdu.m_capabilityTable.GetSize(); i++) {
       if (pdu.m_capabilityTable[i].HasOptionalField(H245_CapabilityTableEntry::e_capability)) {
         unsigned capabilityNo = pdu.m_capabilityTable[i].m_capabilityTableEntryNumber;
-        H323Capability * capability = allCapabilities.FindCapability(pdu.m_capabilityTable[i].m_capability, capabilityNo, pdu);
+        H323Capability * capability = localCapabilities.FindCapability(pdu.m_capabilityTable[i].m_capability, capabilityNo, pdu);
         if (capability != NULL) {
           H323Capability * copy = (H323Capability *)capability->Clone();
           copy->SetCapabilityNumber(capabilityNo);
@@ -3869,11 +3864,12 @@ void H323Capabilities::Reorder(const PStringArray & preferenceOrder)
   for (preference = 0; preference < preferenceOrder.GetSize(); preference++) {
     PStringArray wildcard = preferenceOrder[preference].Tokenise('*', FALSE);
     for (PINDEX idx = base; idx < table.GetSize(); idx++) {
-      PCaselessString str = table[idx].GetFormatName();
+       PCaselessString str = table[idx].GetFormatName();
       if (MatchWildcard(str, wildcard)) {
-        if (idx != base)
-          table.InsertAt(base, table.RemoveAt(idx));
-        base++;
+          if (idx != base)
+             table.InsertAt(base, table.RemoveAt(idx));
+          base++;
+          idx = base-1;  // start from last allocated
       }
     }
   }
