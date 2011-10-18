@@ -398,8 +398,9 @@ class OpalMediaFormat : public PCaselessString
       DefaultAudioSessionID     = 1,
       DefaultVideoSessionID     = 2,
       DefaultDataSessionID      = 3,
-      DefaultH224SessionID      = 4,
-      DefaultExtVideoSessionID  = 5,
+      DefaultH224SessionID      = 3,
+      DefaultExtVideoSessionID  = 4,
+      DefaultFileSessionID      = 5,
       LastSessionID             = 5
     };
 

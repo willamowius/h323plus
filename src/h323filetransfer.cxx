@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.9  2011/04/08 15:54:47  willamowius
+ * avoid using PString::GetPointer()
+ *
  * Revision 1.8  2011/01/10 10:31:16  shorne
  * fixed bug wth maxBitRate values in the TCS
  *
@@ -246,6 +249,11 @@ void H323FileTransferCapability::SetFileTransferList(const H323FileTransferList 
 	m_filelist.clear();
 	m_filelist = list;
 	m_filelist.SetMaster(true);
+}
+
+unsigned H323FileTransferCapability::GetDefaultSessionID() const
+{
+    return OpalMediaFormat::DefaultFileSessionID;
 }
 
 unsigned H323FileTransferCapability::GetSubType() const

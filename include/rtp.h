@@ -344,8 +344,9 @@ class RTP_Session : public PObject
       DefaultAudioSessionID    = 1,
       DefaultVideoSessionID    = 2,
       DefaultFaxSessionID      = 3,
-	  DefaultH224SessionID     = 4,
-	  DefaultExtVideoSessionID = 5
+      DefaultH224SessionID     = 3,
+      DefaultExtVideoSessionID = 4,
+      DefaultFileSessionID     = 5
     };
 
   /**@name Construction */

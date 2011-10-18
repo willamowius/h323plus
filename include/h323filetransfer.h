@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2009/02/21 14:06:02  shorne
+ * Major FileTransfer code review and improvement
+ *
  * Revision 1.2  2008/05/23 11:19:38  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -255,6 +258,14 @@ class H323FileTransferCapability : public H323DataCapability
        using the enum values of the protocol ASN H245_AudioCapability class.
      */
 	virtual unsigned GetSubType() const;
+
+    /**Get the default RTP session.
+       This function gets the default RTP session ID for the capability
+       type. 
+       The default behaviour returns zero, indicating it is not an RTP
+       based capability.
+      */
+    virtual unsigned GetDefaultSessionID() const;
   //@}
     
   /**@name Protocol manipulation */
