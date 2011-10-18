@@ -19,48 +19,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.8  2011/01/12 12:51:52  shorne
- * H.224 bi-directional support added
- *
- * Revision 1.7  2010/03/19 22:40:30  willamowius
- * fix compile with H.460 disabled
- *
- * Revision 1.6  2008/05/23 11:22:02  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.5  2008/01/24 08:09:48  shorne
- * Fix for H224 capability exchange Thx mohammad alam
- *
- * Revision 1.4  2008/01/23 22:08:12  shorne
- * added missing const
- *
- * Revision 1.3  2008/01/22 01:11:22  shorne
- * Fix H.224 Capability exchange
- *
- * Revision 1.2  2007/11/01 14:34:50  willamowius
- * add newline at end of file
- *
- * Revision 1.1  2007/08/06 20:51:07  shorne
- * First commit of h323plus
- *
- * Revision 1.2  2006/06/23 06:02:44  csoutheren
- * Added missing declarations for H.224 backport
- *
- * Revision 1.1  2006/06/22 11:07:23  shorne
- * Backport of FECC (H.224) from Opal
- *
- * Revision 1.4  2006/06/07 08:02:22  hfriederich
- * Fixing crashes when creating the RTP session failed
- *
- * Revision 1.3  2006/05/01 10:29:50  csoutheren
- * Added pragams for gcc < 4
- *
- * Revision 1.2  2006/04/24 12:53:50  rjongbloed
- * Port of H.224 Far End Camera Control to DevStudio/Windows
- *
- * Revision 1.1  2006/04/20 16:48:17  hfriederich
- * Initial version of H.224/H.281 implementation.
+ * $Id$
  *
  */
 
@@ -94,12 +53,12 @@ PObject::Comparison H323_H224Capability::Compare(const PObject & obj) const
 {
   Comparison result = H323DataCapability::Compare(obj);
 
-  if(result != EqualTo)	{
+  if(result != EqualTo)    {
     return result;
   }
-	
+    
   PAssert(PIsDescendant(&obj, H323_H224Capability), PInvalidCast);
-	
+    
   return EqualTo;
 }
 
@@ -124,11 +83,11 @@ H323Channel * H323_H224Capability::CreateChannel(H323Connection & connection,
                                                  const H245_H2250LogicalChannelParameters * /*params*/) const
 {
  
-	RTP_Session *session;
+    RTP_Session *session;
     H245_TransportAddress addr;
     connection.GetControlChannel().SetUpTransportPDU(addr, H323Transport::UseLocalTSAP);
     session = connection.UseSession(sessionID, addr, direction);
-	
+    
   if(session == NULL) {
     return NULL;
   } 
@@ -140,10 +99,10 @@ PBoolean H323_H224Capability::OnSendingPDU(H245_DataApplicationCapability & pdu)
 {
   pdu.m_maxBitRate = maxBitRate;
   pdu.m_application.SetTag(H245_DataApplicationCapability_application::e_h224);
-	
+    
   H245_DataProtocolCapability & dataProtocolCapability = (H245_DataProtocolCapability &)pdu.m_application;
   dataProtocolCapability.SetTag(H245_DataProtocolCapability::e_hdlcFrameTunnelling);
-	
+    
   return TRUE;
 }
 
@@ -151,7 +110,7 @@ PBoolean H323_H224Capability::OnSendingPDU(H245_DataMode & pdu) const
 {
   pdu.m_bitRate = maxBitRate;
   pdu.m_application.SetTag(H245_DataMode_application::e_h224);
-	
+    
   return TRUE;
 }
 
@@ -159,11 +118,11 @@ PBoolean H323_H224Capability::OnReceivedPDU(const H245_DataApplicationCapability
 {
 
   if (pdu.m_application.GetTag() != H245_DataApplicationCapability_application::e_h224)
-	  return FALSE;
+      return FALSE;
 
   const H245_DataProtocolCapability & dataProtocolCapability = pdu.m_application;
   if (dataProtocolCapability.GetTag() != H245_DataProtocolCapability::e_hdlcFrameTunnelling)
-	  return FALSE;
+      return FALSE;
 
   maxBitRate = pdu.m_maxBitRate;
   return TRUE;
@@ -180,15 +139,15 @@ H323_H224Channel::H323_H224Channel(H323Connection & connection,
 {
   direction = theDirection;
   sessionID = theSessionID;
-	
+    
   h224Handler = NULL;
-	
+    
   rtpPayloadType = (RTP_DataFrame::PayloadTypes)100;
 }
 
 H323_H224Channel::~H323_H224Channel()
 {
-  // h224Handler is deleted by OpalConnection
+  // h224Handler is deleted by H323Connection
 }
 
 H323Channel::Directions H323_H224Channel::GetDirection() const
@@ -204,11 +163,11 @@ PBoolean H323_H224Channel::SetInitialBandwidth()
 PBoolean H323_H224Channel::Open()
 {
   PBoolean result = H323Channel::Open();
-	
+    
   if(result == FALSE) {
     return FALSE;
   }
-	
+    
   return TRUE;
 }
 
@@ -217,22 +176,22 @@ PBoolean H323_H224Channel::Start()
   if(!Open()) {
     return FALSE;
   }
-	
+    
   if(h224Handler == NULL) {
-	  h224Handler = connection.CreateH224ProtocolHandler(direction,sessionID);
+      h224Handler = connection.CreateH224ProtocolHandler(direction,sessionID);
   }
 
   if (!h224Handler) {
       PTRACE(4,"H224\tError starting " << (direction == H323Channel::IsTransmitter ? "Transmitter" : "Receiver"));
       return false;
   }
-	
+    
   if(direction == H323Channel::IsReceiver) {
     h224Handler->StartReceive();
-  }	else {
+  }    else {
     h224Handler->StartTransmit();
   }
-	
+    
   return TRUE;
 }
 
@@ -241,9 +200,9 @@ void H323_H224Channel::Close()
   if(terminating) {
     return;
   }
-	
+    
   if(h224Handler != NULL) {
-	
+    
     if(direction == H323Channel::IsReceiver) {
       h224Handler->StopReceive();
     } else {
@@ -252,7 +211,7 @@ void H323_H224Channel::Close()
 
     delete h224Handler;
   }
-	
+    
  // H323Channel::Close();
 }
 
@@ -268,77 +227,77 @@ void H323_H224Channel::Transmit()
 PBoolean H323_H224Channel::OnSendingPDU(H245_OpenLogicalChannel & open) const
 {
   open.m_forwardLogicalChannelNumber = (unsigned)number;
-		
+        
   if(open.HasOptionalField(H245_OpenLogicalChannel::e_reverseLogicalChannelParameters)) {
-	  
-	open.m_reverseLogicalChannelParameters.IncludeOptionalField(
-		H245_OpenLogicalChannel_reverseLogicalChannelParameters::e_multiplexParameters);
-			
+      
+    open.m_reverseLogicalChannelParameters.IncludeOptionalField(
+        H245_OpenLogicalChannel_reverseLogicalChannelParameters::e_multiplexParameters);
+            
     open.m_reverseLogicalChannelParameters.m_multiplexParameters.SetTag(
-		H245_OpenLogicalChannel_reverseLogicalChannelParameters_multiplexParameters::e_h2250LogicalChannelParameters);
-			
+        H245_OpenLogicalChannel_reverseLogicalChannelParameters_multiplexParameters::e_h2250LogicalChannelParameters);
+            
     return OnSendingPDU(open.m_reverseLogicalChannelParameters.m_multiplexParameters);
-	
-  }	else {
-	  
+    
+  }    else {
+      
     open.m_forwardLogicalChannelParameters.m_multiplexParameters.SetTag(
-		H245_OpenLogicalChannel_forwardLogicalChannelParameters_multiplexParameters::e_h2250LogicalChannelParameters);
-		
+        H245_OpenLogicalChannel_forwardLogicalChannelParameters_multiplexParameters::e_h2250LogicalChannelParameters);
+        
     return OnSendingPDU(open.m_forwardLogicalChannelParameters.m_multiplexParameters);
   }
 }
 
 void H323_H224Channel::OnSendOpenAck(const H245_OpenLogicalChannel & openPDU, 
-										H245_OpenLogicalChannelAck & ack) const
+                                        H245_OpenLogicalChannelAck & ack) const
 {
   // set forwardMultiplexAckParameters option
   ack.IncludeOptionalField(H245_OpenLogicalChannelAck::e_forwardMultiplexAckParameters);
-	
+    
   // select H225 choice
   ack.m_forwardMultiplexAckParameters.SetTag(
     H245_OpenLogicalChannelAck_forwardMultiplexAckParameters::e_h2250LogicalChannelAckParameters);
-	
+    
   // get H225 params
   H245_H2250LogicalChannelAckParameters & param = ack.m_forwardMultiplexAckParameters;
-	
+    
   // set session ID
   param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_sessionID);
   const H245_H2250LogicalChannelParameters & openparam =
-	  openPDU.m_forwardLogicalChannelParameters.m_multiplexParameters;
-	
+      openPDU.m_forwardLogicalChannelParameters.m_multiplexParameters;
+    
   unsigned sessionID = openparam.m_sessionID;
   param.m_sessionID = sessionID;
-	
+    
   OnSendOpenAck(param);
 }
 
 PBoolean H323_H224Channel::OnReceivedPDU(const H245_OpenLogicalChannel & open,
-									 unsigned & errorCode)
+                                     unsigned & errorCode)
 {
   if(direction == H323Channel::IsReceiver) {
     number = H323ChannelNumber(open.m_forwardLogicalChannelNumber, TRUE);
   }
-	
+    
   PBoolean reverse = open.HasOptionalField(H245_OpenLogicalChannel::e_reverseLogicalChannelParameters);
   const H245_DataType & dataType = reverse ? open.m_reverseLogicalChannelParameters.m_dataType
-										   : open.m_forwardLogicalChannelParameters.m_dataType;
-	
+                                           : open.m_forwardLogicalChannelParameters.m_dataType;
+    
   if (!capability->OnReceivedPDU(dataType, direction)) {
-	  
+      
     errorCode = H245_OpenLogicalChannelReject_cause::e_dataTypeNotSupported;
     return FALSE;
   }
-	
+    
   if (reverse) {
     if (open.m_reverseLogicalChannelParameters.m_multiplexParameters.GetTag() ==
-			H245_OpenLogicalChannel_reverseLogicalChannelParameters_multiplexParameters::e_h2250LogicalChannelParameters) 
-	{
+            H245_OpenLogicalChannel_reverseLogicalChannelParameters_multiplexParameters::e_h2250LogicalChannelParameters) 
+    {
       return OnReceivedPDU(open.m_reverseLogicalChannelParameters.m_multiplexParameters, errorCode);
     }
-	  
+      
   } else {
     if (open.m_forwardLogicalChannelParameters.m_multiplexParameters.GetTag() ==
-			H245_OpenLogicalChannel_forwardLogicalChannelParameters_multiplexParameters::e_h2250LogicalChannelParameters)
+            H245_OpenLogicalChannel_forwardLogicalChannelParameters_multiplexParameters::e_h2250LogicalChannelParameters)
     {
       return OnReceivedPDU(open.m_forwardLogicalChannelParameters.m_multiplexParameters, errorCode);
     }
@@ -353,38 +312,38 @@ PBoolean H323_H224Channel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & a
   if (!ack.HasOptionalField(H245_OpenLogicalChannelAck::e_forwardMultiplexAckParameters)) {
     return FALSE;
   }
-	
+    
   if (ack.m_forwardMultiplexAckParameters.GetTag() !=
-	H245_OpenLogicalChannelAck_forwardMultiplexAckParameters::e_h2250LogicalChannelAckParameters)
+    H245_OpenLogicalChannelAck_forwardMultiplexAckParameters::e_h2250LogicalChannelAckParameters)
   {
-	return FALSE;
+    return FALSE;
   }
-	
+    
   return OnReceivedAckPDU(ack.m_forwardMultiplexAckParameters);
 }
 
 PBoolean H323_H224Channel::OnSendingPDU(H245_H2250LogicalChannelParameters & param) const
 {
   param.m_sessionID = sessionID;
-	
+    
   param.IncludeOptionalField(H245_H2250LogicalChannelParameters::e_mediaGuaranteedDelivery);
   param.m_mediaGuaranteedDelivery = FALSE;
-	
+    
   // unicast must have mediaControlChannel
   H323TransportAddress mediaControlAddress(rtpSession.GetLocalAddress(), rtpSession.GetLocalControlPort());
   param.IncludeOptionalField(H245_H2250LogicalChannelParameters::e_mediaControlChannel);
   mediaControlAddress.SetPDU(param.m_mediaControlChannel);
-	
+    
   if (direction == H323Channel::IsReceiver) {
     // set mediaChannel
     H323TransportAddress mediaAddress(rtpSession.GetLocalAddress(), rtpSession.GetLocalDataPort());
     param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel);
     mediaAddress.SetPDU(param.m_mediaChannel);
-	
-  }	else{
+    
+  }    else{
 
   }
-	
+    
   // Set dynamic payload type, if is one
   int rtpPayloadType = GetDynamicRTPPayloadType();
   
@@ -392,7 +351,7 @@ PBoolean H323_H224Channel::OnSendingPDU(H245_H2250LogicalChannelParameters & par
     param.IncludeOptionalField(H245_H2250LogicalChannelParameters::e_dynamicRTPPayloadType);
     param.m_dynamicRTPPayloadType = rtpPayloadType;
   }
-	
+    
   return TRUE;
 }
 
@@ -402,12 +361,12 @@ void H323_H224Channel::OnSendOpenAck(H245_H2250LogicalChannelAckParameters & par
   H323TransportAddress mediaControlAddress(rtpSession.GetLocalAddress(), rtpSession.GetLocalControlPort());
   param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaControlChannel);
   mediaControlAddress.SetPDU(param.m_mediaControlChannel);
-	
+    
   // set mediaChannel
   H323TransportAddress mediaAddress(rtpSession.GetLocalAddress(), rtpSession.GetLocalDataPort());
   param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel);
   mediaAddress.SetPDU(param.m_mediaChannel);
-	
+    
   // Set dynamic payload type, if is one
   int rtpPayloadType = GetDynamicRTPPayloadType();
   if (rtpPayloadType >= RTP_DataFrame::DynamicBase && rtpPayloadType < RTP_DataFrame::IllegalPayloadType) {
@@ -417,42 +376,42 @@ void H323_H224Channel::OnSendOpenAck(H245_H2250LogicalChannelAckParameters & par
 }
 
 PBoolean H323_H224Channel::OnReceivedPDU(const H245_H2250LogicalChannelParameters & param,
-						   unsigned & errorCode)
+                           unsigned & errorCode)
 {
   if (param.m_sessionID != sessionID) {
-	errorCode = H245_OpenLogicalChannelReject_cause::e_invalidSessionID;
-	return FALSE;
+    errorCode = H245_OpenLogicalChannelReject_cause::e_invalidSessionID;
+    return FALSE;
   }
-	
+    
   PBoolean ok = FALSE;
-	
+    
   if (param.HasOptionalField(H245_H2250LogicalChannelParameters::e_mediaControlChannel)) {
-		
-	if (!ExtractTransport(param.m_mediaControlChannel, FALSE, errorCode)) {
-	  return FALSE;
-	}
-	
-	ok = TRUE;
-  }
-	
-  if (param.HasOptionalField(H245_H2250LogicalChannelParameters::e_mediaChannel)) {
-	if (ok && direction == H323Channel::IsReceiver) {
-		
-	} else if (!ExtractTransport(param.m_mediaChannel, TRUE, errorCode)) {
+        
+    if (!ExtractTransport(param.m_mediaControlChannel, FALSE, errorCode)) {
       return FALSE;
     }
     
     ok = TRUE;
   }
-	
+    
+  if (param.HasOptionalField(H245_H2250LogicalChannelParameters::e_mediaChannel)) {
+    if (ok && direction == H323Channel::IsReceiver) {
+        
+    } else if (!ExtractTransport(param.m_mediaChannel, TRUE, errorCode)) {
+      return FALSE;
+    }
+    
+    ok = TRUE;
+  }
+    
   if (param.HasOptionalField(H245_H2250LogicalChannelParameters::e_dynamicRTPPayloadType)) {
     SetDynamicRTPPayloadType(param.m_dynamicRTPPayloadType);
   }
-	
+    
   if (ok) {
     return TRUE;
   }
-	
+    
   errorCode = H245_OpenLogicalChannelReject_cause::e_unspecified;
   return FALSE;
 }
@@ -461,28 +420,28 @@ PBoolean H323_H224Channel::OnReceivedAckPDU(const H245_H2250LogicalChannelAckPar
 {
   if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_sessionID)) {
   }
-	
+    
   if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaControlChannel)) {
     return FALSE;
   }
-	
+    
   unsigned errorCode;
   if (!ExtractTransport(param.m_mediaControlChannel, FALSE, errorCode)) {
     return FALSE;
   }
-	
+    
   if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel)) {
     return FALSE;
   }
-	
+    
   if (!ExtractTransport(param.m_mediaChannel, TRUE, errorCode)) {
     return FALSE;
   }
-	
+    
   if (param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_dynamicRTPPayloadType)) {
     SetDynamicRTPPayloadType(param.m_dynamicRTPPayloadType);
   }
-	
+    
   return TRUE;
 }
 
@@ -491,17 +450,17 @@ PBoolean H323_H224Channel::SetDynamicRTPPayloadType(int newType)
   if(newType == -1) {
     return TRUE;
   }
-	
+    
   if(newType < RTP_DataFrame::DynamicBase || newType >= RTP_DataFrame::IllegalPayloadType) {
     return FALSE;
   }
-	
+    
   if(rtpPayloadType < RTP_DataFrame::DynamicBase) {
     return FALSE;
   }
-	
+    
   rtpPayloadType = (RTP_DataFrame::PayloadTypes)newType;
-	
+    
   return TRUE;
 }
 /*
@@ -512,22 +471,22 @@ OpalMediaStream * H323_H224Channel::GetMediaStream() const
 }
 */
 PBoolean H323_H224Channel::ExtractTransport(const H245_TransportAddress & pdu,
-										PBoolean isDataPort,
-										unsigned & errorCode)
+                                        PBoolean isDataPort,
+                                        unsigned & errorCode)
 {
   if (pdu.GetTag() != H245_TransportAddress::e_unicastAddress) {
     errorCode = H245_OpenLogicalChannelReject_cause::e_multicastChannelNotAllowed;
     return FALSE;
   }
-	
+    
   H323TransportAddress transAddr = pdu;
-	
+    
   PIPSocket::Address ip;
   WORD port;
   if (transAddr.GetIpAndPort(ip, port)) {
     return rtpSession.SetRemoteSocketInfo(ip, port, isDataPort);
   }
-	
+    
   return FALSE;
 }
 
