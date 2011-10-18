@@ -868,7 +868,7 @@ H323Gatekeeper * H323EndPoint::InternalCreateGatekeeper(H323Transport * transpor
   RemoveGatekeeper(H225_UnregRequestReason::e_reregistrationRequired);
 
   if (transport == NULL)
-    transport = new H323TransportUDP(*this);
+    transport = new H323TransportUDP(*this, PIPSocket::Address::GetAny(4));
 
   H323Gatekeeper * gk = CreateGatekeeper(transport);
 

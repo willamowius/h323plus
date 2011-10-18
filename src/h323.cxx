@@ -2831,7 +2831,11 @@ PBoolean H323Connection::StartControlChannel(const H225_TransportAddress & h245A
   if (controlChannel != NULL)
     return TRUE;
 
-  controlChannel = new H323TransportTCP(endpoint);
+  unsigned m_version = 4;
+  if (h245Address.GetTag() == H225_TransportAddress::e_ip6Address)
+           m_version = 6;
+
+  controlChannel = new H323TransportTCP(endpoint, PIPSocket::Address::GetAny(m_version));
   if (!controlChannel->SetRemoteAddress(h245Address)) {
     PTRACE(1, "H225\tCould not extract H245 address");
     delete controlChannel;
@@ -6286,7 +6290,7 @@ PBoolean H323Connection::OpenFileTransferSession(const H323FileTransferList & li
       if (remoteCapability != NULL) {
         PTRACE(3, "H323\tFile Transfer Available " << *remoteCapability);   
         remoteCapability->SetFileTransferList(list);
-        if (logicalChannels->Open(*remoteCapability, OpalMediaFormat::DefaultDataSessionID,num)) {
+        if (logicalChannels->Open(*remoteCapability, OpalMediaFormat::DefaultFileSessionID,num)) {
            filetransferOpen = TRUE;
            break;
         }

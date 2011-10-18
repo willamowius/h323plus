@@ -68,7 +68,7 @@ class H323TransportAddress : public PString
 {
   PCLASSINFO(H323TransportAddress, PString);
   public:
-    H323TransportAddress() { }
+    H323TransportAddress() { m_version = 4; }
     H323TransportAddress(const char *);
     H323TransportAddress(const PString &);
     H323TransportAddress(const H225_TransportAddress &);
@@ -99,6 +99,12 @@ class H323TransportAddress : public PString
       WORD & port,
       const char * proto = "tcp"
     ) const;
+
+    /**Get the IP Version
+       6 = IPv6  4 = IPv4
+      */
+    unsigned GetIpVersion() const;
+
 
     /**Translate the transport address to a more human readable form.
        Returns the hostname if using IP.
@@ -137,6 +143,9 @@ class H323TransportAddress : public PString
 
   protected:
     void Validate();
+
+  private:
+    unsigned m_version;
 };
 
 

@@ -740,6 +740,7 @@ void H235Capabilities::WrapCapability(PINDEX descriptorNum, PINDEX simultaneous,
         case OpalMediaFormat::DefaultDataSessionID:
         case OpalMediaFormat::DefaultH224SessionID:
         case OpalMediaFormat::DefaultExtVideoSessionID:
+        case OpalMediaFormat::DefaultFileSessionID:
         default:
             SetCapability(descriptorNum, simultaneous, (H323Capability *)capability.Clone());
             break;
@@ -797,6 +798,7 @@ PINDEX H235Capabilities::AddAllCapabilities(PINDEX descriptorNum,
                 case OpalMediaFormat::DefaultDataSessionID:
                 case OpalMediaFormat::DefaultH224SessionID:
                 case OpalMediaFormat::DefaultExtVideoSessionID:
+                case OpalMediaFormat::DefaultFileSessionID:
                 default:
                     num = SetCapability(descriptorNum, simultaneous, capability);
                     break;

@@ -23,109 +23,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.1  2007/08/06 20:51:07  shorne
- * First commit of h323plus
- *
- * Revision 1.29  2005/03/10 06:24:09  csoutheren
- * Removed leak of transactor handle when calling SetTransport
- * Thanks to Victor Ivashin
- *
- * Revision 1.28  2005/03/04 03:21:21  csoutheren
- * Added local and remote addresses to all PDU logs to assist in debugging
- *
- * Revision 1.27  2005/01/16 20:39:44  csoutheren
- * Fixed problem with IPv6 INADDR_ANY
- *
- * Revision 1.26  2004/08/24 08:11:25  csoutheren
- * Added initial support for receiving broadcasts on Linux
- *
- * Revision 1.25  2004/06/15 03:31:51  csoutheren
- * Moved locking to avoid potential problems with race conditions in gkclient code
- *
- * Revision 1.24  2004/04/20 02:40:46  csoutheren
- * Fixed deadlock in transport thread shutdown caused by attempting
- * to age responses while threading is being killed
- *
- * Revision 1.23  2003/12/11 05:41:00  csoutheren
- * Added storage of H.225 version in endpoint structure
- * Disabled sending RIPs to endpoints that cannot handle them
- *
- * Revision 1.22  2003/10/27 01:55:33  csoutheren
- * Guarded against possible NULL interface
- *
- * Revision 1.21  2003/04/30 07:51:08  robertj
- * Redesigned the alternate credentials in ARQ system as old implementation
- *   was fraught with concurrency issues, most importantly it can cause false
- *   detection of replay attacks taking out an endpoint completely.
- *
- * Revision 1.20  2003/04/10 09:45:14  robertj
- * Added associated transport to new GetInterfaceAddresses() function so
- *   interfaces can be ordered according to active transport links. Improves
- *   interoperability.
- * Replaced old listener GetTransportPDU() with GetInterfaceAddresses()
- *   and H323SetTransportAddresses() functions.
- *
- * Revision 1.19  2003/04/10 01:00:41  craigs
- * Added functions to access to lists of interfaces
- *
- * Revision 1.18  2003/04/09 03:50:58  craigs
- * Fixed problem with peer elements
- *
- * Revision 1.17  2003/04/09 03:08:10  robertj
- * Fixed race condition in shutting down transactor (pure virtual call)
- *
- * Revision 1.16  2003/04/02 06:08:31  robertj
- * Fixed some trace log module names
- *
- * Revision 1.15  2003/04/01 05:59:33  robertj
- * Fixed H.501 transaction code setting members for m_common PDU part.
- *
- * Revision 1.14  2003/04/01 04:47:55  robertj
- * Abstracted H.225 RAS transaction processing (RIP and secondary thread) in
- *   server environment for use by H.501 peer elements.
- *
- * Revision 1.13  2003/03/26 00:46:29  robertj
- * Had another go at making H323Transactor being able to be created
- *   without having a listener running.
- *
- * Revision 1.12  2003/03/25 12:01:19  craigs
- * Fixed SEGV when no interface specified for peer element
- *
- * Revision 1.11  2003/03/25 08:12:54  robertj
- * Added ability to create a transactor without starting listener.
- *
- * Revision 1.10  2003/03/25 04:56:21  robertj
- * Fixed issues to do with multiple inheritence in transaction reply cache.
- *
- * Revision 1.9  2003/03/25 02:32:15  robertj
- * Additional tracing.
- * Fixed bug with incorrect authenticators being used in requests.
- *
- * Revision 1.8  2003/03/25 01:41:02  craigs
- * Still more signficant H.501 updates
- *
- * Revision 1.7  2003/03/24 07:16:13  robertj
- * Fixed incorrect cast to non const for setting authenticators.
- *
- * Revision 1.6  2003/03/21 06:27:55  robertj
- * Added setting of remote port in UDP transport constructor.
- * Removed odd trace output on timeout..
- *
- * Revision 1.5  2003/03/20 01:51:12  robertj
- * More abstraction of H.225 RAS and H.501 protocols transaction handling.
- *
- * Revision 1.4  2003/03/01 00:22:10  craigs
- * New PeerElement implementation
- *
- * Revision 1.3  2003/02/25 06:48:19  robertj
- * More work on PDU transaction abstraction.
- *
- * Revision 1.2  2003/02/21 07:23:18  robertj
- * Fixed up some comments
- *
- * Revision 1.1  2003/02/21 05:27:06  craigs
- * Initial version
+ * $Id$
  *
  */
 
@@ -230,7 +128,7 @@ H323Transactor::H323Transactor(H323EndPoint & ep,
   if (trans != NULL)
     transport = trans;
   else
-    transport = new H323TransportUDP(ep, PIPSocket::GetDefaultIpAny(), local_port, remote_port);
+    transport = new H323TransportUDP(ep, PIPSocket::Address::GetAny(4), local_port, remote_port);
 
   Construct();
 }
