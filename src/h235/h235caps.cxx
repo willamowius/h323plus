@@ -738,7 +738,6 @@ void H235Capabilities::WrapCapability(PINDEX descriptorNum, PINDEX simultaneous,
             break;
         case OpalMediaFormat::NonRTPSessionID:
         case OpalMediaFormat::DefaultDataSessionID:
-        case OpalMediaFormat::DefaultH224SessionID:
         case OpalMediaFormat::DefaultExtVideoSessionID:
         case OpalMediaFormat::DefaultFileSessionID:
         default:
@@ -796,7 +795,6 @@ PINDEX H235Capabilities::AddAllCapabilities(PINDEX descriptorNum,
                     delete capability;
                     break;
                 case OpalMediaFormat::DefaultDataSessionID:
-                case OpalMediaFormat::DefaultH224SessionID:
                 case OpalMediaFormat::DefaultExtVideoSessionID:
                 case OpalMediaFormat::DefaultFileSessionID:
                 default:
