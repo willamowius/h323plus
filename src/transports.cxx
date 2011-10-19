@@ -1690,6 +1690,8 @@ PBoolean H323TransportUDP::DiscoverGatekeeper(H323Gatekeeper & gk,
 #endif
       destAddr = INADDR_BROADCAST;
 
+    // Skip over the H323Transport::Close to make sure PUDPSocket is deleted.
+  PIndirectChannel::Close();
 
   WORD destPort = H225_RAS::DefaultRasUdpPort;
   if (!address) {
@@ -1697,13 +1699,13 @@ PBoolean H323TransportUDP::DiscoverGatekeeper(H323Gatekeeper & gk,
       PTRACE(2, "RAS\tError decoding address");
       return FALSE;
     }
+    remoteAddress = destAddr;
+    remotePort = destPort;
+  } else {
+    remoteAddress = 0;
+    remotePort = 0;
   }
 
-  // Skip over the H323Transport::Close to make sure PUDPSocket is deleted.
-  PIndirectChannel::Close();
-
-  remoteAddress = 0;
-  remotePort = 0;
 
   // Remember the original info for pre-bound socket
   PIPSocket::Address originalLocalAddress = localAddress;
@@ -1720,30 +1722,41 @@ PBoolean H323TransportUDP::DiscoverGatekeeper(H323Gatekeeper & gk,
 
   // Get the interfaces to try
   PIPSocket::InterfaceTable interfaces;
+  PIPSocket::InterfaceTable InterfaceList;
 
   // See if prebound to interface, only use that if so
   if (destAddr.IsLoopback()) {
     PTRACE(3, "RAS\tGatekeeper discovery on loopback interface");
     localAddress = destAddr;
   }
-  else if (!localAddress.IsAny()) {
-    PTRACE(3, "RAS\tGatekeeper discovery on pre-bound interface: "
-              << localAddress << ':' << localPort);
-    originalLocalPort = localPort;
-  }
-  else if (!PIPSocket::GetInterfaceTable(interfaces)) {
+  else if (!PIPSocket::GetInterfaceTable(InterfaceList)) {
     PTRACE(1, "RAS\tNo interfaces on system!");
   }
-  else {
-    PTRACE(4, "RAS\tSearching interfaces:\n" << setfill('\n') << interfaces << setfill(' '));
-    // Check if destination machine is local machine, if so only use that interface
-    for (i = 0; i < interfaces.GetSize(); i++) {
-      if (interfaces[i].GetAddress() == destAddr) {
-        PTRACE(3, "RAS\tGatekeeper discovery on local interface: " << destAddr);
-        localAddress = destAddr;
-        interfaces.RemoveAll();
+  else if (!localAddress.IsAny() && !localAddress.IsLoopback()) {
+    PTRACE(3, "RAS\tGatekeeper discovery on pre-bound interface: "
+              << localAddress.AsString(true) << ':' << localPort);
+    originalLocalPort = localPort;
+    for (i = 0; i < InterfaceList.GetSize(); i++) {
+      if (InterfaceList[i].GetAddress() == localAddress) {
+        PTRACE(3, "RAS\tGatekeeper local interface set: " << localAddress.AsString(true));
+        interfaces.Append(new PIPSocket::InterfaceEntry(InterfaceList[i].GetName(), 
+                                                        InterfaceList[i].GetAddress(), 
+                                                        InterfaceList[i].GetNetMask(), 
+                                                        InterfaceList[i].GetMACAddress()));
       }
     }
+    InterfaceList.RemoveAll();
+  } else {
+    for (i = 0; i < InterfaceList.GetSize(); i++) {
+      if (!InterfaceList[i].GetAddress().IsLoopback() &&
+           InterfaceList[i].GetAddress().GetVersion() == destAddr.GetVersion()) {
+            interfaces.Append(new PIPSocket::InterfaceEntry(InterfaceList[i].GetName(), 
+                                                            InterfaceList[i].GetAddress(), 
+                                                            InterfaceList[i].GetNetMask(), 
+                                                            InterfaceList[i].GetMACAddress()));
+      }
+    }
+    InterfaceList.RemoveAll();
   }
 
 #if P_HAS_IPV6
@@ -1753,6 +1766,8 @@ PBoolean H323TransportUDP::DiscoverGatekeeper(H323Gatekeeper & gk,
 
   if (interfaces.IsEmpty())
     interfaces.Append(new PIPSocket::InterfaceEntry("", localAddress, PIPSocket::Address(0xffffffff), ""));
+
+  
 
 #ifdef P_STUN
   PSTUNClient * stun = endpoint.GetSTUN(remoteAddress);
