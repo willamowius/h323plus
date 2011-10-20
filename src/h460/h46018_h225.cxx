@@ -450,6 +450,7 @@ PNatMethod_H46019::PNatMethod_H46019()
 PNatMethod_H46019::~PNatMethod_H46019()
 {
 
+#ifdef H323_H46019M
     PWaitAndSignal m(muxMutex);
 
     if (IsMultiplexed()) {
@@ -472,6 +473,7 @@ PNatMethod_H46019::~PNatMethod_H46019()
             muxSockets.rtcp = NULL;
         }
     }
+#endif
 }
 
 void PNatMethod_H46019::AttachHandler(H46018Handler * _handler)
