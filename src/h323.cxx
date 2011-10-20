@@ -5708,7 +5708,7 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
 #ifdef H323_H46018
     PTRACE(4,"Set Generic " << (isAck ? "OLCack" : "OLC") << " Session " << sessionID );
     if (m_H46019enabled) {
-        unsigned payload=0; unsigned ttl=0; H323TransportAddress m_keepAlive;
+        unsigned payload=0; unsigned ttl=0; //H323TransportAddress m_keepAlive;
 #ifdef H323_H46019M
         H323TransportAddress m_multiRTPAddress, m_multiRTCPAddress;
         unsigned multiID=0;
@@ -5730,10 +5730,12 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
                     rtp->SetTTL(ttl);
                 ttl = rtp->GetTTL();
 
-                PIPSocket::Address addr;  WORD port=0;
-                if (rtp->GetLocalAddress(addr,port)) {
-                   m_keepAlive = H323TransportAddress(addr,port);
-                }
+                // Traversal Clients do not need to send a keepalive address 
+                // ToDo Server implementation  - SH
+                //PIPSocket::Address addr;  WORD port=0;
+                //if (rtp->GetLocalAddress(addr,port)) {
+                //   m_keepAlive = H323TransportAddress(addr,port);
+                //}
 #ifdef H323_H46019M
                 if (/*!isAck &&*/ m_H46019multiplex) {
                    rtp->GetMultiplexAddress(m_multiRTPAddress,multiID, isAck);
@@ -5779,12 +5781,13 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
                     h46019msg = true;
               }
 #endif
-              if (!isAck) {
-                    params.IncludeOptionalField(H46019_TraversalParameters::e_keepAliveChannel);
-                    H245_TransportAddress & mKeep = params.m_keepAliveChannel;
-                    m_keepAlive.SetPDU(mKeep);
-                    h46019msg = true;
-              }
+               // Traversal Clients do not need to send a keepalive address only Servers - SH
+              //if (!isAck) {
+              //      params.IncludeOptionalField(H46019_TraversalParameters::e_keepAliveChannel);
+              //      H245_TransportAddress & mKeep = params.m_keepAliveChannel;
+              //      m_keepAlive.SetPDU(mKeep);
+              //      h46019msg = true;
+              //}
 
               if (!isAck && ttl > 0) {
                     params.IncludeOptionalField(H46019_TraversalParameters::e_keepAliveInterval);
