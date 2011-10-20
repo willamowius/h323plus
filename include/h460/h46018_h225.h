@@ -423,7 +423,7 @@ class PNatMethod_H46019  : public PNatMethod
 struct  H46019MultiPacket {
   PIPSocket::Address fromAddr;
   WORD               fromPort;
-  PBYTEArray       * frame;
+  PBYTEArray         frame;
 };
 
 typedef std::queue<H46019MultiPacket> H46019MultiQueue;
@@ -536,6 +536,10 @@ class H46019UDPSocket : public PUDPSocket
     /** Set Ping TTL
       */
     void SetTTL(unsigned val);
+
+    virtual PBoolean GetPeerAddress(
+      PIPSocketAddressAndPort & addr    ///< Variable to receive hosts IP address and port.
+    );
 
 #ifdef H323_H46019M
 
