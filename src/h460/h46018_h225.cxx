@@ -449,6 +449,29 @@ PNatMethod_H46019::PNatMethod_H46019()
 
 PNatMethod_H46019::~PNatMethod_H46019()
 {
+
+    PWaitAndSignal m(muxMutex);
+
+    if (IsMultiplexed()) {
+        EnableMultiplex(false);
+
+        muxShutdown = true;
+
+        rtpSocketMap.clear();
+        rtcpSocketMap.clear();
+
+        if (muxSockets.rtp) {
+            muxSockets.rtp->Close();
+            delete muxSockets.rtp;
+            muxSockets.rtp = NULL;
+        }
+
+        if (muxSockets.rtcp) {
+            muxSockets.rtcp->Close();
+            delete muxSockets.rtcp; 
+            muxSockets.rtcp = NULL;
+        }
+    }
 }
 
 void PNatMethod_H46019::AttachHandler(H46018Handler * _handler)
@@ -739,7 +762,7 @@ void PNatMethod_H46019::RegisterSocket(bool rtp, unsigned id, PUDPSocket * socke
 
 void PNatMethod_H46019::UnregisterSocket(bool rtp, unsigned id)
 {
-    PWaitAndSignal m(muxMutex);
+   // PWaitAndSignal m(muxMutex);
 
     if (rtp) {
         std::map<unsigned,PUDPSocket*>::iterator it = rtpSocketMap.find(id);
@@ -1137,14 +1160,15 @@ PBoolean H46019UDPSocket::ReadSocket(void * buf, PINDEX & len, Address & addr, W
 
 PBoolean H46019UDPSocket::WriteSocket(const void * buf, PINDEX len, const Address & addr, WORD port)
 {
-    if (PNatMethod_H46019::IsMultiplexed()) {  // Bi-Directional Multiplex
-        RTP_MultiDataFrame frame(m_sendMultiplexID,(const BYTE *)buf,len);
-        return PNatMethod_H46019::GetMultiplexSocket(rtpSocket)->WriteTo(frame.GetPointer(), frame.GetSize(), addr, port);  
-    } else if (m_sendMultiplexID != 0) {       // Transmit only Multiplex
+    if (m_sendMultiplexID == 0) {                                  // No Multiplex or receive Multiplex only
+        return PUDPSocket::WriteTo(buf,len, addr, port);
+    } else if (!PNatMethod_H46019::IsMultiplexed()) {              // Transmit only Multiplex  
         RTP_MultiDataFrame frame(m_sendMultiplexID,(const BYTE *)buf,len);
         return PUDPSocket::WriteTo(frame.GetPointer(), frame.GetSize(), addr, port);
-    } else                                     // No Multiplex
-        return PUDPSocket::WriteTo(buf,len, addr, port);
+    } else {                                                       // Bi-Directional Multiplex
+        RTP_MultiDataFrame frame(m_sendMultiplexID,(const BYTE *)buf,len);
+        return PNatMethod_H46019::GetMultiplexSocket(rtpSocket)->WriteTo(frame.GetPointer(), frame.GetSize(), addr, port);  
+    }                                                       
 }
 #endif
 
