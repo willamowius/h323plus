@@ -1432,6 +1432,9 @@ PBoolean H323DataChannel::OnSendingPDU(H245_OpenLogicalChannel & open) const
   H245_H2250LogicalChannelParameters & fparam = open.m_forwardLogicalChannelParameters.m_multiplexParameters;
   fparam.m_sessionID = GetSessionID();
 
+  if (connection.OnSendingOLCGenericInformation(GetSessionID(),open.m_genericInformation,false))
+        open.IncludeOptionalField(H245_OpenLogicalChannel::e_genericInformation);
+
   if (separateReverseChannel)
     return TRUE;
 
@@ -1479,6 +1482,9 @@ void H323DataChannel::OnSendOpenAck(const H245_OpenLogicalChannel & /*open*/,
   if (session != 0) {
     param->IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_sessionID);
     param->m_sessionID = GetSessionID();
+
+    if (connection.OnSendingOLCGenericInformation(session,ack.m_genericInformation,true))
+       ack.IncludeOptionalField(H245_OpenLogicalChannel::e_genericInformation);
   }
 
   param->IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel);
@@ -1507,6 +1513,13 @@ PBoolean H323DataChannel::OnReceivedPDU(const H245_OpenLogicalChannel & open,
     errorCode = H245_OpenLogicalChannelReject_cause::e_unsuitableReverseParameters;
     PTRACE(2, "LogChan\tOnReceivedPDU has unexpected reverse parameters");
     return FALSE;
+  }
+
+  if (open.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation) && 
+      !connection.OnReceiveOLCGenericInformation(GetSessionID(),open.m_genericInformation, false)) {
+        errorCode = H245_OpenLogicalChannelReject_cause::e_unspecified;
+        PTRACE(2, "LogChan\tOnReceivedPDU Invalid Generic Parameters");
+        return FALSE;
   }
 
   if (!capability->OnReceivedPDU(open.m_forwardLogicalChannelParameters.m_dataType, receiver)) {
@@ -1570,6 +1583,12 @@ PBoolean H323DataChannel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & ac
     if (!param.HasOptionalField(H245_H2250LogicalChannelParameters::e_mediaChannel)) {
       PTRACE(1, "LogChan\tNo media channel address provided");
       return FALSE;
+    }
+
+    if (ack.HasOptionalField(H245_OpenLogicalChannelAck::e_genericInformation) && 
+      !connection.OnReceiveOLCGenericInformation(GetSessionID(), ack.m_genericInformation, true)) {
+        PTRACE(1, "LogChan\tOnReceivedPDUAck Invalid Generic Parameters");
+        return FALSE;
     }
 
     address = &param.m_mediaChannel;

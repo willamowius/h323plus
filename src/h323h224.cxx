@@ -224,6 +224,11 @@ void H323_H224Channel::Transmit()
 
 }
 
+unsigned H323_H224Channel::GetSessionID() const
+{
+  return sessionID;
+}
+
 PBoolean H323_H224Channel::OnSendingPDU(H245_OpenLogicalChannel & open) const
 {
   open.m_forwardLogicalChannelNumber = (unsigned)number;
@@ -235,6 +240,9 @@ PBoolean H323_H224Channel::OnSendingPDU(H245_OpenLogicalChannel & open) const
             
     open.m_reverseLogicalChannelParameters.m_multiplexParameters.SetTag(
         H245_OpenLogicalChannel_reverseLogicalChannelParameters_multiplexParameters::e_h2250LogicalChannelParameters);
+
+    if (connection.OnSendingOLCGenericInformation(GetSessionID(),open.m_genericInformation,false))
+        open.IncludeOptionalField(H245_OpenLogicalChannel::e_genericInformation);
             
     return OnSendingPDU(open.m_reverseLogicalChannelParameters.m_multiplexParameters);
     
@@ -242,6 +250,9 @@ PBoolean H323_H224Channel::OnSendingPDU(H245_OpenLogicalChannel & open) const
       
     open.m_forwardLogicalChannelParameters.m_multiplexParameters.SetTag(
         H245_OpenLogicalChannel_forwardLogicalChannelParameters_multiplexParameters::e_h2250LogicalChannelParameters);
+
+    if (connection.OnSendingOLCGenericInformation(GetSessionID(),open.m_genericInformation,false))
+        open.IncludeOptionalField(H245_OpenLogicalChannel::e_genericInformation);
         
     return OnSendingPDU(open.m_forwardLogicalChannelParameters.m_multiplexParameters);
   }
@@ -264,6 +275,10 @@ void H323_H224Channel::OnSendOpenAck(const H245_OpenLogicalChannel & openPDU,
   param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_sessionID);
   const H245_H2250LogicalChannelParameters & openparam =
       openPDU.m_forwardLogicalChannelParameters.m_multiplexParameters;
+
+  // Set Generic information
+  if (connection.OnSendingOLCGenericInformation(GetSessionID(), ack.m_genericInformation,true))
+       ack.IncludeOptionalField(H245_OpenLogicalChannel::e_genericInformation);
     
   unsigned sessionID = openparam.m_sessionID;
   param.m_sessionID = sessionID;
@@ -286,6 +301,13 @@ PBoolean H323_H224Channel::OnReceivedPDU(const H245_OpenLogicalChannel & open,
       
     errorCode = H245_OpenLogicalChannelReject_cause::e_dataTypeNotSupported;
     return FALSE;
+  }
+
+  if (open.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation) && 
+      !connection.OnReceiveOLCGenericInformation(GetSessionID(),open.m_genericInformation, false)) {
+        errorCode = H245_OpenLogicalChannelReject_cause::e_unspecified;
+        PTRACE(2, "LogChan\tOnReceivedPDU Invalid Generic Parameters");
+        return FALSE;
   }
     
   if (reverse) {
@@ -317,6 +339,11 @@ PBoolean H323_H224Channel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & a
     H245_OpenLogicalChannelAck_forwardMultiplexAckParameters::e_h2250LogicalChannelAckParameters)
   {
     return FALSE;
+  }
+
+  if (ack.HasOptionalField(H245_OpenLogicalChannelAck::e_genericInformation) && 
+    !connection.OnReceiveOLCGenericInformation(GetSessionID(), ack.m_genericInformation, true)) {
+     return FALSE;
   }
     
   return OnReceivedAckPDU(ack.m_forwardMultiplexAckParameters);
