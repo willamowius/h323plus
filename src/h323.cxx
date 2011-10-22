@@ -5651,8 +5651,8 @@ PBoolean H323Connection::OnReceiveOLCGenericInformation(unsigned sessionID,
                             NAT_Sockets sockets = sockets_iter->second;
 #ifdef H323_H46019M
                             if (multiID > 0) {
-                               ((H46019UDPSocket *)sockets.rtp)->SetSendMultiplexID(multiID);
-                               ((H46019UDPSocket *)sockets.rtcp)->SetSendMultiplexID(multiID);
+                               ((H46019UDPSocket *)sockets.rtp)->SetSendMultiplexID(multiID, isAck);
+                               ((H46019UDPSocket *)sockets.rtcp)->SetSendMultiplexID(multiID, isAck);
                                if (keepAliveAddress) {
                                    PIPSocket::Address multiAddr;  
                                    multiRTPaddress.GetIpAddress(multiAddr);    // Sanity check....

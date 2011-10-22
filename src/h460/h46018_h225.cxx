@@ -1116,9 +1116,19 @@ unsigned H46019UDPSocket::GetRecvMultiplexID() const
     return m_recvMultiplexID;
 }
     
-void H46019UDPSocket::SetSendMultiplexID(unsigned id)
+void H46019UDPSocket::SetSendMultiplexID(unsigned id, PBoolean isAck)
 {
-    m_sendMultiplexID = id;
+    if (isAck) {
+        if (id != m_recvMultiplexID) {
+            PTRACE(3,"H46019\t" << (rtpSocket ? "RTP" : "RTCP") 
+                << " MultiplexID change for receive Session " << m_Session 
+                << " from " << m_recvMultiplexID << " to " << id);
+           PNatMethod_H46019::UnregisterSocket(rtpSocket, m_recvMultiplexID);
+           m_recvMultiplexID = id;
+           PNatMethod_H46019::RegisterSocket(rtpSocket, m_recvMultiplexID,this);
+        }
+    } else
+       m_sendMultiplexID = id;
 }
 
 PBoolean H46019UDPSocket::WriteMultiplexBuffer(const void * buf, PINDEX len, const Address & addr, WORD port)
