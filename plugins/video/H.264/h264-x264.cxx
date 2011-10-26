@@ -575,13 +575,24 @@ static int setFrameSizeAndRate(unsigned _level, bool stdaspect, unsigned & w, un
 	return 1;
 }
 
-static int SetLevelMBPS(unsigned & level, unsigned maxMB)
+static int SetLevelMBPS(unsigned & level, unsigned maxMBs, unsigned & maxMB )
 {
 	int j=0;
+    if (maxMB == 0) {
+      while (h264_levels[j].level_idc) {
+          if (level <= h264_levels[j].h241_level) {
+            maxMB = h264_levels[j].frame_size/256 + 1;
+            break;
+          } else 
+             j++;
+      }
+    }
+
+    j=0;
     while (h264_levels[j].level_idc) {
-	if (h264_levels[j].mbps > 500*maxMB) {
+	if (h264_levels[j].mbps > 500*maxMBs) {
         unsigned int nlevel = h264_levels[j].h241_level;
-        if (level == 0 || nlevel > level) 
+        if (level == 0 || nlevel > level)
             level = nlevel;
 		break;
 	}
@@ -1116,7 +1127,7 @@ static int encoder_set_options(
   }
     
 
-    if (cusMBPS > 0 && SetLevelMBPS(level,cusMBPS) && SetLevelMFS(level,cusMFS)) {
+    if (cusMBPS > 0 && SetLevelMBPS(level, cusMBPS, cusMFS) && SetLevelMFS(level,cusMFS)) {
         unsigned max_rate = (cusMBPS * 500) / (cusMFS * 256);
         if (frameRate > max_rate) // don't force frame rate to maximum possible, if application set a lower value
 	        frameRate = max_rate;
