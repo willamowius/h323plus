@@ -671,7 +671,7 @@ PUDPSocket * & PNatMethod_H46019::GetMultiplexSocket(bool rtp)
       return (PUDPSocket * &)muxSockets.rtcp;
 }
 
-unsigned ResolveSession(muxSocketMap & socMap, unsigned muxID, PBoolean rtp, const PIPSocket::Address addr, WORD port) 
+unsigned ResolveSession(muxSocketMap & socMap, unsigned muxID, PBoolean rtp, const PIPSocket::Address addr, WORD port, unsigned & correctMUX) 
 {
 
         std::map< unsigned, PUDPSocket*>::const_iterator i;
@@ -682,6 +682,7 @@ unsigned ResolveSession(muxSocketMap & socMap, unsigned muxID, PBoolean rtp, con
               if (((H46019UDPSocket *)i->second)->GetSendMultiplexID() == muxID) {
                   mapSocket = (H46019UDPSocket *)i->second;
                   eraseID = i->first;
+                  correctMUX = eraseID;
                   break;
               }
           }
@@ -756,12 +757,13 @@ void PNatMethod_H46019::ReadThread(PThread &, INT)
                      unsigned badMUXid = buffer.GetMultiplexID();
                      PTRACE(2,"H46019M\tReceived RTP packet with unknown MUX ID "
                                         << badMUXid << " " << addr << ":" << port);
-                     unsigned detected = ResolveSession(rtpSocketMap,badMUXid, true,addr,port);
+                     unsigned rightMUXid=0;
+                     unsigned detected = ResolveSession(rtpSocketMap,badMUXid, true,addr,port, rightMUXid);
                       if (!detected) continue;
                       it = rtpSocketMap.find(detected);
                       if (it == rtpSocketMap.end())  continue;
 
-                      PTRACE(2,"H46019M\tRecover Detected Session " << detected  << " NOT " << badMUXid);
+                      PTRACE(2,"H46019M\tERROR: Recover Receive Multiplex Session " << rightMUXid  << " incorrectly sent as " << badMUXid);
                  } 
                  break;
                case H46019MultiplexSocket::e_rtcp:
@@ -1130,10 +1132,8 @@ void H46019UDPSocket::GetMultiplexAddress(H323TransportAddress & address, unsign
         PNatMethod_H46019::GetMultiplexSocket(rtpSocket)->GetLocalAddress(addr,port);
         address = H323TransportAddress(addr,port);
     }
-    if (OLCack)
-       multiID = m_sendMultiplexID;
-    else
-       multiID = m_recvMultiplexID;
+
+    multiID = m_recvMultiplexID;
 }
 
 unsigned H46019UDPSocket::GetRecvMultiplexID() const
@@ -1155,14 +1155,12 @@ void H46019UDPSocket::SetMultiplexID(unsigned id, PBoolean isAck)
 
          m_sendMultiplexID = id;
     } else {
-            PTRACE(3,"H46019\t" << (rtpSocket ? "RTP" : "RTCP") 
-                << " MultiplexID for receive Session " << m_Session  
-                << " from " << m_recvMultiplexID << " to " << id); 
-
-         PNatMethod_H46019::UnregisterSocket(rtpSocket, m_recvMultiplexID);
-         m_recvMultiplexID = id;
-         PNatMethod_H46019::RegisterSocket(rtpSocket , m_recvMultiplexID, this);
-    }  
+        if (m_sendMultiplexID && id != m_sendMultiplexID) {
+            PTRACE(1,"H46019\tERROR: " << (rtpSocket ? "RTP" : "RTCP") 
+                << " MultiplexID OLCack for Send Session " << m_Session  
+                << " not match OLC " << id << " was " << m_sendMultiplexID); 
+        }
+    }
 }
 
 PBoolean H46019UDPSocket::WriteMultiplexBuffer(const void * buf, PINDEX len, const Address & addr, WORD port)
@@ -1183,6 +1181,9 @@ PBoolean H46019UDPSocket::WriteMultiplexBuffer(const void * buf, PINDEX len, con
 
 PBoolean H46019UDPSocket::ReadMultiplexBuffer(void * buf, PINDEX & len, Address & addr, WORD & port)
 {
+    if (m_multiBuffer == 0 || m_multQueue.size() == 0)
+        return false;
+
      H46019MultiPacket & packet = m_multQueue.front();
 
      len = packet.frame.GetSize();
