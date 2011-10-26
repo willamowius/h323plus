@@ -550,8 +550,10 @@ class H46019UDPSocket : public PUDPSocket
                              PBoolean   isOLCack                   ///< Direction
                              );
 
+    void SetMultiplexID(unsigned id, PBoolean isAck);
+
     unsigned GetRecvMultiplexID() const;
-    void SetSendMultiplexID(unsigned id, PBoolean isAck);
+    unsigned GetSendMultiplexID() const;
 
     PBoolean WriteMultiplexBuffer(
               const void * buf,     ///< Data to be written.
