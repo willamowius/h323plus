@@ -1240,7 +1240,7 @@ PBoolean H46019UDPSocket::ReadSocket(void * buf, PINDEX & len, Address & addr, W
 
 PBoolean H46019UDPSocket::WriteSocket(const void * buf, PINDEX len, const Address & addr, WORD port)
 {
-    if (!m_sendMultiplexID)      // No Multiplex Rec'v or Send
+    if (!PNatMethod_H46019::IsMultiplexed() && !m_sendMultiplexID)      // No Multiplex Rec'v or Send
          return PUDPSocket::WriteTo(buf,len, addr, port);
     else {
         if (m_remAddr.IsAny()) {
@@ -1248,12 +1248,16 @@ PBoolean H46019UDPSocket::WriteSocket(const void * buf, PINDEX len, const Addres
              m_remPort = port;
         }
 
-        RTP_MultiDataFrame frame(m_sendMultiplexID,(const BYTE *)buf,len);
         PUDPSocket * muxSocket = PNatMethod_H46019::GetMultiplexSocket(rtpSocket);
-        if (!muxSocket)          // Send Multiplex
+        if (muxSocket && !m_sendMultiplexID)                            // Rec'v Multiplex
+            return muxSocket->WriteTo(buf,len, addr, port);
+
+        RTP_MultiDataFrame frame(m_sendMultiplexID,(const BYTE *)buf,len);
+        if (!muxSocket)                                                // Send Multiplex
             return PUDPSocket::WriteTo(frame.GetPointer(), frame.GetSize(), addr, port);                                   
-        else                    //  Send & Rec'v Multiplexed
-            return muxSocket->WriteTo(frame.GetPointer(), frame.GetSize(), addr, port);  
+        else                                                           //  Send & Rec'v Multiplexed
+            return muxSocket->WriteTo(frame.GetPointer(), frame.GetSize(), addr, port);
+                                          
     }                                                     
 }
 #endif
