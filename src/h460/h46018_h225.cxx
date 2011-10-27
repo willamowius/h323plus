@@ -1243,11 +1243,12 @@ PBoolean H46019UDPSocket::WriteSocket(const void * buf, PINDEX len, const Addres
     if (!PNatMethod_H46019::IsMultiplexed() && !m_sendMultiplexID)      // No Multiplex Rec'v or Send
          return PUDPSocket::WriteTo(buf,len, addr, port);
     else {
+#ifdef H323_H46024A
         if (m_remAddr.IsAny()) {
              m_remAddr = addr;  
              m_remPort = port;
         }
-
+#endif
         PUDPSocket * muxSocket = PNatMethod_H46019::GetMultiplexSocket(rtpSocket);
         if (muxSocket && !m_sendMultiplexID)                            // Rec'v Multiplex
             return muxSocket->WriteTo(buf,len, addr, port);
