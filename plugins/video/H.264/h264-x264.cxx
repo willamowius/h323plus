@@ -560,7 +560,7 @@ static int setFrameSizeAndRate(unsigned _level, bool stdaspect, unsigned & w, un
 
 	int j=0;
     while (h264_resolutions[j].width) {
-		if (h264_resolutions[j].macroblocks <= maxMB && stdaspect == h264_resolutions[j].stdaspect) {
+		if (h264_resolutions[j].macroblocks <= maxMB /*&& stdaspect == h264_resolutions[j].stdaspect*/) {
 			h = h264_resolutions[j].height;
 			w = h264_resolutions[j].width;
 			r = (int)(maxMBsec / (h * w / 256));
