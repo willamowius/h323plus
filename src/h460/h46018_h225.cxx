@@ -135,8 +135,8 @@ H46018SignalPDU::H46018SignalPDU(const OpalGloballyUniqueID & callIdentifier)
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-H46018Transport::H46018Transport(H323EndPoint & endpoint)    
-   : H323TransportTCP(endpoint)
+H46018Transport::H46018Transport(H323EndPoint & endpoint, PIPSocket::Address binding)    
+   : H323TransportTCP(endpoint, binding)
 {
     ReadTimeOut = PMaxTimeInterval;
     isConnected = false;
@@ -375,7 +375,7 @@ void H46018Handler::SocketThread(PThread &, INT)
         return;
     }
 
-    H46018Transport * transport = new H46018Transport(EP);
+    H46018Transport * transport = new H46018Transport(EP, PIPSocket::Address::GetAny(m_address.GetIpVersion()));
     transport->SetRemoteAddress(m_address);
 
     if (transport->Connect(m_callId)) {
@@ -1148,17 +1148,21 @@ unsigned H46019UDPSocket::GetSendMultiplexID() const
     
 void H46019UDPSocket::SetMultiplexID(unsigned id, PBoolean isAck)
 {
-    if (!isAck) {
+    if (!m_sendMultiplexID) {
         PTRACE(3,"H46019\t" << (rtpSocket ? "RTP" : "RTCP") 
             << " MultiplexID for send Session " << m_Session  
             << " set to " << id);
 
          m_sendMultiplexID = id;
     } else {
-        if (m_sendMultiplexID && id != m_sendMultiplexID) {
+        if (id != m_sendMultiplexID) {
             PTRACE(1,"H46019\tERROR: " << (rtpSocket ? "RTP" : "RTCP") 
                 << " MultiplexID OLCack for Send Session " << m_Session  
                 << " not match OLC " << id << " was " << m_sendMultiplexID); 
+        } else {
+            PTRACE(3,"H46019\t" << (rtpSocket ? "RTP" : "RTCP") 
+                << " MultiplexID send Session " << m_Session  
+                << " already set to " << id);
         }
     }
 }
