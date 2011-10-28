@@ -1078,7 +1078,7 @@ class H460_FeatureSet : public PObject
     /** New Processing Paradigm
          Main PDU & RAS link to OpenH323
     */
-    void ReceiveFeature(unsigned id, const H225_FeatureSet & Message);
+    void ReceiveFeature(unsigned id, const H225_FeatureSet & Message, PBoolean genericData = false);
 
     /** New Processing Paradigm
          Main PDU & RAS link to OpenH323
@@ -1111,7 +1111,7 @@ class H460_FeatureSet : public PObject
 
    PBoolean CreateFeatureSetPDU(H225_FeatureSet & fs, unsigned MessageID, PBoolean advertise);
 
-   void ReadFeatureSetPDU(const H225_FeatureSet & fs, unsigned MessageID);
+   void ReadFeatureSetPDU(const H225_FeatureSet & fs, unsigned MessageID, PBoolean genericData = false);
 
    H460_FeatureID GetFeatureIDPDU(H225_FeatureDescriptor & pdu);
 

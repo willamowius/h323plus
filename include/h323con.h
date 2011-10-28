@@ -2792,7 +2792,7 @@ class H323Connection : public PObject
 
     virtual PBoolean OnSendFeatureSet(unsigned, H225_FeatureSet &, PBoolean) const;
 
-    virtual void OnReceiveFeatureSet(unsigned, const H225_FeatureSet &) const;
+    virtual void OnReceiveFeatureSet(unsigned, const H225_FeatureSet &, PBoolean = false) const;
 
     /** On resolving H.245 Address conflict
       */

@@ -3173,10 +3173,10 @@ PBoolean H323EndPoint::OnSendFeatureSet(unsigned pdu, H225_FeatureSet & feats, P
 #endif
 }
 
-void H323EndPoint::OnReceiveFeatureSet(unsigned pdu, const H225_FeatureSet & feats)
+void H323EndPoint::OnReceiveFeatureSet(unsigned pdu, const H225_FeatureSet & feats, PBoolean genericData)
 {
 #ifdef H323_H460
-	features.ReceiveFeature(pdu,feats);
+	features.ReceiveFeature(pdu,feats,genericData);
 #endif
 }
 

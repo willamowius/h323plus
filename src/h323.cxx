@@ -334,7 +334,7 @@ static void ReceiveFeatureData(const H323Connection * connection, unsigned code,
              fsn.SetSize(lastPos+1);
              fsn[lastPos] = (H225_FeatureDescriptor &)data[i];
         }
-        connection->OnReceiveFeatureSet(code, fs);
+        connection->OnReceiveFeatureSet(code, fs, true);
     }
 }
 #endif
@@ -6553,15 +6553,15 @@ PBoolean H323Connection::OnSendFeatureSet(unsigned code, H225_FeatureSet & feats
 #endif
 }
 
-void H323Connection::OnReceiveFeatureSet(unsigned code, const H225_FeatureSet & feats) const
+void H323Connection::OnReceiveFeatureSet(unsigned code, const H225_FeatureSet & feats, PBoolean genericData) const
 {
 #ifdef H323_H460
    if (disableH460)
        return;
 
-   features->ReceiveFeature(code, feats);
+   features->ReceiveFeature(code, feats, genericData);
 #else
-   endpoint.OnReceiveFeatureSet(code, feats);
+   endpoint.OnReceiveFeatureSet(code, feats, genericData);
 #endif
 }
 

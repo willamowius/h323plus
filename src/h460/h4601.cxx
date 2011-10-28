@@ -1365,23 +1365,25 @@ PBoolean H460_FeatureSet::CreateFeatureSetPDU(H225_FeatureSet & fs, unsigned Mes
     return buildPDU;
 }
    
-void H460_FeatureSet::ReadFeatureSetPDU(const H225_FeatureSet & fs, unsigned MessageID)
+void H460_FeatureSet::ReadFeatureSetPDU(const H225_FeatureSet & fs, unsigned MessageID, PBoolean genericData)
 {
 
 PTRACE(6,"H460\tRead FeatureSet " << PTracePDU(MessageID) << " PDU");
    
-// Generate Common Set of Features.
-   switch (MessageID) {
-     case H460_MessageType::e_gatekeeperRequest:
-     case H460_MessageType::e_gatekeeperConfirm:
-     case H460_MessageType::e_registrationRequest:
-     case H460_MessageType::e_registrationConfirm: 
-     case H460_MessageType::e_setup:
-         ProcessFirstPDU(fs);
-         break;
-     default:
-         break;
-   }     
+    if (!genericData) {
+       // Generate Common Set of Features.
+       switch (MessageID) {
+         case H460_MessageType::e_gatekeeperRequest:
+         case H460_MessageType::e_gatekeeperConfirm:
+         case H460_MessageType::e_registrationRequest:
+         case H460_MessageType::e_registrationConfirm: 
+         case H460_MessageType::e_setup:
+             ProcessFirstPDU(fs);
+             break;
+         default:
+             break;
+       }
+    }
 
       H460_FeatureID ID;
 
@@ -1738,9 +1740,9 @@ void H460_FeatureSet::DisableAllFeatures(int msgtype)
     }
 }
 
-void H460_FeatureSet::ReceiveFeature(unsigned id, const H225_FeatureSet & Message)
+void H460_FeatureSet::ReceiveFeature(unsigned id, const H225_FeatureSet & Message, PBoolean genericData)
 {
-    ReadFeatureSetPDU(Message,id);
+    ReadFeatureSetPDU(Message,id, genericData);
 }
 
 PBoolean H460_FeatureSet::SendFeature(unsigned id, H225_FeatureSet & Message, PBoolean advertise)

@@ -1830,7 +1830,7 @@ class H323EndPoint : public PObject
 
     /**Called when an incoming PDU contains a feature set
      */
-    virtual void OnReceiveFeatureSet(unsigned, const H225_FeatureSet &);
+    virtual void OnReceiveFeatureSet(unsigned, const H225_FeatureSet &, PBoolean = false);
 
 #ifdef H323_H460
     /**Get the complete list of Gatekeeper features
