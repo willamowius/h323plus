@@ -65,6 +65,7 @@ class GNUGKTransport  : public H323TransportTCP
      */
     GNUGKTransport(
       H323EndPoint & endpoint,        /// H323 End Point object
+      PIPSocket::Address binding,     /// Bind Interface
 	  GNUGK_Feature * feat,			  /// Feature
 	  PString & gkid                  /// Gatekeeper ID
     );

@@ -82,7 +82,8 @@ class H46018Transport  : public H323TransportTCP
     /**Create a new transport channel.
     */
     H46018Transport(
-        H323EndPoint & endpoint        /// H323 End Point object
+        H323EndPoint & endpoint,        /// H323 End Point object
+        PIPSocket::Address binding      /// Bind Interface
     );
 
     ~H46018Transport();

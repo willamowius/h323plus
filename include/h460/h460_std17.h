@@ -162,6 +162,7 @@ class H46017Transport  : public H323TransportTCP
      */
     H46017Transport(
       H323EndPoint & endpoint,        /// H323 End Point object
+      PIPSocket::Address binding,     /// Bind Interface
 	  H46017Handler * feat		      /// Feature
     );
 

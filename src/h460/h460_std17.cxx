@@ -367,9 +367,10 @@ void H46017TransportThread::Main()
 
 
 H46017Transport::H46017Transport(H323EndPoint & endpoint,
+                                 PIPSocket::Address binding,
                                  H46017Handler * feat
                 )    
-   : H323TransportTCP(endpoint), con(NULL), Feature(feat)
+   : H323TransportTCP(endpoint,binding), con(NULL), Feature(feat)
 {
     ReadTimeOut = PMaxTimeInterval;
     isConnected = FALSE;
@@ -835,7 +836,8 @@ PBoolean H46017Handler::CreateNewTransport()
 {
     PTRACE(5, "H46017\tCreating Transport.");
 
-    curtransport = new H46017Transport(ep,this);
+    curtransport = new H46017Transport(ep,
+                       PIPSocket::Address::GetAny(remoteAddress.GetIpVersion()), this);
     curtransport->SetRemoteAddress(remoteAddress);
 
     if (curtransport->Connect()) {

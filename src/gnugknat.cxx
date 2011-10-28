@@ -166,10 +166,11 @@ void GNUGKTransportThread::Main()
 ///////////////////////////////////////////////////////////////////////////////////////
 
 GNUGKTransport::GNUGKTransport(H323EndPoint & endpoint,
+                PIPSocket::Address binding,
                 GNUGK_Feature * feat,
                 PString & gkid  
-                )    
-   : H323TransportTCP(endpoint), GKid(gkid), Feature(feat)
+                )
+   : H323TransportTCP(endpoint, binding), GKid(gkid), Feature(feat)
 {
     GNUGK_Feature::curtransport = this;
     ReadTimeOut = PMaxTimeInterval;
@@ -352,9 +353,9 @@ PBoolean GNUGKTransport::SetGKID(const PString & newid)
 
 PBoolean GNUGKTransport::CreateNewTransport()
 {
-
-    GNUGKTransport * transport = new GNUGKTransport(GetEndPoint(),Feature,GKid);
     H323TransportAddress remote = GetRemoteAddress();
+    GNUGKTransport * transport = new GNUGKTransport(GetEndPoint(),
+                                     PIPSocket::Address::GetAny(remote.GetIpVersion()),Feature,GKid);
     transport->SetRemoteAddress(remote);
 
     if (transport->Connect()) {
@@ -418,7 +419,8 @@ PBoolean GNUGK_Feature::CreateNewTransport()
 {
     PTRACE(5, "GNUGK\tCreating Transport.");
 
-    GNUGKTransport * transport = new GNUGKTransport(ep,this,GKid);
+    GNUGKTransport * transport = new GNUGKTransport(ep,
+                                     PIPSocket::Address::GetAny(address.GetIpVersion()), this,GKid);
     transport->SetRemoteAddress(address);
 
     if (transport->Connect()) {
