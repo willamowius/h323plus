@@ -5338,6 +5338,28 @@ bool GetStringGenericOctetString(unsigned id, const H245_ArrayOf_GenericParamete
     return false;
 }
 
+bool GetUnsignedGeneric(unsigned id, const H245_ArrayOf_GenericParameter & params, unsigned & num)
+{
+   for (PINDEX i=0; i < params.GetSize(); i++)
+   {
+      const H245_GenericParameter & param = params[i];
+      const H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
+      if (idm.GetTag() == H245_ParameterIdentifier::e_standard) {
+         const PASN_Integer & idx = idm;
+          if (idx == id) {
+             const H245_ParameterValue & genvalue = params[i].m_parameterValue;
+             if (genvalue.GetTag() == H245_ParameterValue::e_unsigned32Min) {
+                   const PASN_Integer & valg = genvalue;
+                   num = valg;
+                   return true;
+             }
+         }
+      }
+   }
+    PTRACE(4,"H46024A\tError finding unsigned parameter " << id);
+    return false;
+}
+
 bool GetTransportGenericOctetString(unsigned id, const H245_ArrayOf_GenericParameter & params, H323TransportAddress & str)
 {
    for (PINDEX i=0; i < params.GetSize(); i++)
@@ -5389,6 +5411,19 @@ H245_GenericParameter & BuildGenericInteger(H245_GenericParameter & param, unsig
          idx = id;
          H245_ParameterValue & genvalue = param.m_parameterValue;
          genvalue.SetTag(H245_ParameterValue::e_unsignedMin);
+         PASN_Integer & xval = genvalue;
+         xval = val;
+    return param;
+}
+
+H245_GenericParameter & BuildGenericUnsigned(H245_GenericParameter & param, unsigned id, unsigned val)
+{
+     H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
+         idm.SetTag(H245_ParameterIdentifier::e_standard);
+         PASN_Integer & idx = idm;
+         idx = id;
+         H245_ParameterValue & genvalue = param.m_parameterValue;
+         genvalue.SetTag(H245_ParameterValue::e_unsigned32Min);
          PASN_Integer & xval = genvalue;
          xval = val;
     return param;
@@ -5512,12 +5547,15 @@ PBoolean H323Connection::OnReceivedGenericMessage(h245MessageType type, const PS
         if (DecodeH46024BRequest(1, content, address)) {
             PTRACE(4,"H46024B\tReceived\n" << address);
             for (PINDEX i=0; i < address.GetSize(); ++i) {
+                unsigned muxID = 0;
+                if (address[i].HasOptionalField(H46024B_AlternateAddress::e_multiplexID))
+                      muxID = address[i].m_multiplexID;
                 std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(address[i].m_sessionID);
                     if (sockets_iter != m_NATSockets.end()) {
                         NAT_Sockets sockets = sockets_iter->second;
                         if (address[i].HasOptionalField(H46024B_AlternateAddress::e_rtpAddress)) { 
                             H323TransportAddress add = H323TransportAddress(address[i].m_rtpAddress); 
-                            ((H46019UDPSocket *)sockets.rtp)->H46024Bdirect(add);
+                            ((H46019UDPSocket *)sockets.rtp)->H46024Bdirect(add,muxID);
                         }
                     }
             }
@@ -5678,18 +5716,19 @@ PBoolean H323Connection::OnReceiveOLCGenericInformation(unsigned sessionID,
 #ifdef H323_H46024A
             if (m_H46024Aenabled && (oid.AsString() == H46024AOID)) {
                 PTRACE(4,"H46024A\tAlt Port Info:\n" << msg);
-                PString m_CUI = PString();  H323TransportAddress m_altAddr1, m_altAddr2;
+                PString m_CUI = PString();  H323TransportAddress m_altAddr1, m_altAddr2; unsigned m_altMuxID=0;
                 bool error = false;
                 if (!GetStringGenericOctetString(0,msg,m_CUI))  error = true;
                 if (!GetTransportGenericOctetString(1,msg,m_altAddr1))  error = true;
                 if (!GetTransportGenericOctetString(2,msg,m_altAddr2))  error = true;
+                GetUnsignedGeneric(3,msg,m_altMuxID);
 
                 if (!error) {
                     std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(sessionID);
                         if (sockets_iter != m_NATSockets.end()) {
                             NAT_Sockets sockets = sockets_iter->second;
-                            ((H46019UDPSocket *)sockets.rtp)->SetAlternateAddresses(m_altAddr1,m_CUI);
-                            ((H46019UDPSocket *)sockets.rtcp)->SetAlternateAddresses(m_altAddr2,m_CUI);
+                            ((H46019UDPSocket *)sockets.rtp)->SetAlternateAddresses(m_altAddr1,m_CUI,m_altMuxID);
+                            ((H46019UDPSocket *)sockets.rtcp)->SetAlternateAddresses(m_altAddr2,m_CUI,m_altMuxID);
                             success = true;
                         }
                 }
@@ -5716,6 +5755,7 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
 #ifdef H323_H46024A
         PString m_cui = PString(); 
         H323TransportAddress m_altAddr1, m_altAddr2;
+        unsigned m_altMuxID=0;
 #endif
         std::map<unsigned,NAT_Sockets>::const_iterator sockets_iter = m_NATSockets.find(sessionID);
             if (sockets_iter != m_NATSockets.end()) {
@@ -5748,8 +5788,8 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
                 }
 #ifdef H323_H46024A
               if (m_H46024Aenabled) {
-                rtp->GetAlternateAddresses(m_altAddr1,m_cui);
-                rtcp->GetAlternateAddresses(m_altAddr2,m_cui);
+                rtp->GetAlternateAddresses(m_altAddr1,m_cui, m_altMuxID);
+                rtcp->GetAlternateAddresses(m_altAddr2,m_cui, m_altMuxID);
               }
 #endif
             } else {
@@ -5837,6 +5877,11 @@ PBoolean H323Connection::OnSendingOLCGenericInformation(const unsigned & session
                   BuildGenericOctetString(msg[0],0,(PASN_IA5String)m_cui);
                   BuildGenericOctetString(msg[1],1,m_altAddr1);
                   BuildGenericOctetString(msg[2],2,m_altAddr2);
+               
+                  if (m_altMuxID) {
+                      msg.SetSize(4);
+                      BuildGenericUnsigned(msg[3],3,m_altMuxID);
+                  }
                PTRACE(5,"H46024A\tAltInfo:\n" << alt);
               PINDEX sz = generic.GetSize();
               generic.SetSize(sz+1);

@@ -15,8 +15,9 @@ AlternateAddresses ::= SEQUENCE
 AlternateAddress ::= SEQUENCE
 {
 	sessionID	INTEGER(0..255),
-	rtpAddress	TransportAddress	OPTIONAL,
-	rtcpAddress	TransportAddress	OPTIONAL,
+	rtpAddress	TransportAddress	   OPTIONAL,
+	rtcpAddress	TransportAddress	   OPTIONAL,
+    multiplexID	INTEGER(0..4294967295) OPTIONAL,
 	...	
 }
 

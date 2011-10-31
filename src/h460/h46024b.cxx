@@ -23,22 +23,25 @@
 //
 
 H46024B_AlternateAddress::H46024B_AlternateAddress(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Sequence(tag, tagClass, 2, TRUE, 0)
+  : PASN_Sequence(tag, tagClass, 3, TRUE, 0)
 {
   m_sessionID.SetConstraints(PASN_Object::FixedConstraint, 0, 255);
+  m_multiplexID.SetConstraints(PASN_Object::FixedConstraint, 0, 4294967295U);
 }
 
 
 #ifndef PASN_NOPRINTON
 void H46024B_AlternateAddress::PrintOn(ostream & strm) const
 {
-  int indent = (int)strm.precision() + 2;
+  int indent = strm.precision() + 2;
   strm << "{\n";
   strm << setw(indent+12) << "sessionID = " << setprecision(indent) << m_sessionID << '\n';
   if (HasOptionalField(e_rtpAddress))
     strm << setw(indent+13) << "rtpAddress = " << setprecision(indent) << m_rtpAddress << '\n';
   if (HasOptionalField(e_rtcpAddress))
     strm << setw(indent+14) << "rtcpAddress = " << setprecision(indent) << m_rtcpAddress << '\n';
+  if (HasOptionalField(e_multiplexID))
+    strm << setw(indent+14) << "multiplexID = " << setprecision(indent) << m_multiplexID << '\n';
   strm << setw(indent-1) << setprecision(indent-2) << "}";
 }
 #endif
@@ -59,6 +62,8 @@ PObject::Comparison H46024B_AlternateAddress::Compare(const PObject & obj) const
     return result;
   if ((result = m_rtcpAddress.Compare(other.m_rtcpAddress)) != EqualTo)
     return result;
+  if ((result = m_multiplexID.Compare(other.m_multiplexID)) != EqualTo)
+    return result;
 
   return PASN_Sequence::Compare(other);
 }
@@ -72,6 +77,8 @@ PINDEX H46024B_AlternateAddress::GetDataLength() const
     length += m_rtpAddress.GetObjectLength();
   if (HasOptionalField(e_rtcpAddress))
     length += m_rtcpAddress.GetObjectLength();
+  if (HasOptionalField(e_multiplexID))
+    length += m_multiplexID.GetObjectLength();
   return length;
 }
 
@@ -87,6 +94,8 @@ PBoolean H46024B_AlternateAddress::Decode(PASN_Stream & strm)
     return FALSE;
   if (HasOptionalField(e_rtcpAddress) && !m_rtcpAddress.Decode(strm))
     return FALSE;
+  if (HasOptionalField(e_multiplexID) && !m_multiplexID.Decode(strm))
+    return FALSE;
 
   return UnknownExtensionsDecode(strm);
 }
@@ -101,6 +110,8 @@ void H46024B_AlternateAddress::Encode(PASN_Stream & strm) const
     m_rtpAddress.Encode(strm);
   if (HasOptionalField(e_rtcpAddress))
     m_rtcpAddress.Encode(strm);
+  if (HasOptionalField(e_multiplexID))
+    m_multiplexID.Encode(strm);
 
   UnknownExtensionsEncode(strm);
 }
@@ -159,7 +170,7 @@ H46024B_AlternateAddresses::H46024B_AlternateAddresses(unsigned tag, PASN_Object
 #ifndef PASN_NOPRINTON
 void H46024B_AlternateAddresses::PrintOn(ostream & strm) const
 {
-  int indent = (int)strm.precision() + 2;
+  int indent = strm.precision() + 2;
   strm << "{\n";
   strm << setw(indent+12) << "addresses = " << setprecision(indent) << m_addresses << '\n';
   strm << setw(indent-1) << setprecision(indent-2) << "}";

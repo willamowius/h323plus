@@ -582,10 +582,11 @@ class H46019UDPSocket : public PUDPSocket
             );
 
     PBoolean WriteSocket(
-      const void * buf,   ///< Data to be written as URGENT TCP data.
-      PINDEX len,         ///< Number of bytes pointed to by #buf#.
-      const Address & addr, ///< Address to which the datagram is sent.
-      WORD port           ///< Port to which the datagram is sent.
+      const void * buf,        ///< Data to be written as URGENT TCP data.
+      PINDEX len,              ///< Number of bytes pointed to by #buf#.
+      const Address & addr,    ///< Address to which the datagram is sent.
+      WORD port,               ///< Port to which the datagram is sent.
+      unsigned altMux = 0      ///< Whether use Alternate MUX
     );
 #endif
 
@@ -630,11 +631,11 @@ class H46019UDPSocket : public PUDPSocket
 
     /** Set Alternate Direct Address
       */
-    virtual void SetAlternateAddresses(const H323TransportAddress & address, const PString & cui);
+    virtual void SetAlternateAddresses(const H323TransportAddress & address, const PString & cui, unsigned muxID);
 
      /** Set Alternate Direct Address
       */
-    virtual void GetAlternateAddresses(H323TransportAddress & address, PString & cui);
+    virtual void GetAlternateAddresses(H323TransportAddress & address, PString & cui, unsigned & muxID);
 
     /** Callback to check if the address received is a permitted alternate
       */
@@ -651,7 +652,7 @@ class H46019UDPSocket : public PUDPSocket
 #ifdef H323_H46024B
     /** Start Probing to alternate address
       */
-    void H46024Bdirect(const H323TransportAddress & address);
+    void H46024Bdirect(const H323TransportAddress & address, unsigned muxID);
 #endif
     //@}
 
@@ -715,7 +716,9 @@ private:
     PINDEX m_probes;                                        ///< Probe count
     DWORD SSRC;                                                ///< Random number
 #endif
-    PIPSocket::Address m_altAddr;  WORD m_altPort;            ///< supplied remote Address (as supplied in Generic Information)
+    PIPSocket::Address m_altAddr;  
+	WORD m_altPort;                                           ///< supplied remote Address (as supplied in Generic Information)
+	unsigned m_altMuxID;
 #ifdef H323_H46024B
     // H46024 Annex B support
     PBoolean    m_h46024b;

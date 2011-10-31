@@ -32,12 +32,14 @@ class H46024B_AlternateAddress : public PASN_Sequence
 
     enum OptionalFields {
       e_rtpAddress,
-      e_rtcpAddress
+      e_rtcpAddress,
+      e_multiplexID
     };
 
     PASN_Integer m_sessionID;
     H245_TransportAddress m_rtpAddress;
     H245_TransportAddress m_rtcpAddress;
+    PASN_Integer m_multiplexID;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);
