@@ -1317,7 +1317,11 @@ void H46019UDPSocket::GetAlternateAddresses(H323TransportAddress & address, PStr
 {
 
     address = H323TransportAddress(m_locAddr,m_locPort);
+#ifdef H323_H46019M
     muxID = m_recvMultiplexID;
+#else
+    muxID = 0;
+#endif
 
     if (!rtpSocket)
         cui = m_CUI;
