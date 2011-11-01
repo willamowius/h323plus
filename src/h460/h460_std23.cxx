@@ -110,14 +110,10 @@ void PNatMethod_H46024::Start(const PString & server,H460_FeatureStd23 * _feat)
     feat = _feat;
 
    H323EndPoint * ep = feat->GetEndPoint();
-#if PTLIB_VER >= 2110
+
    SetServer(server);
    SetPortRanges(ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax(), ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax());
-#else
-   Initialise(server,ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax(), ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax());
-#endif
-
-    Resume();
+   Resume();
 }
 
 
@@ -400,21 +396,40 @@ void H460_FeatureStd23::OnNATTypeDetection(PSTUNClient::NatTypes type, const PIP
 
 bool H460_FeatureStd23::DetectALG(const PIPSocket::Address & detectAddress)
 {
+
+#if P_HAS_IPV6
+  // Again horrible code should be able to get interface listing for a given protocol - SH
+  PBoolean ipv6IPv4Discover = false;
+  if (detectAddress.GetVersion() == 4 && PIPSocket::GetDefaultIpAddressFamily() == AF_INET6) {
+      PIPSocket::SetDefaultIpAddressFamilyV4();
+      ipv6IPv4Discover = true;
+  }
+#endif
+    bool found = true;
     PIPSocket::InterfaceTable if_table;
     if (!PIPSocket::GetInterfaceTable(if_table)) {
         PTRACE(1, "Std23\tERROR: Can't get interface table");
-        return false;
-    }
-    
-    for (PINDEX i=0; i< if_table.GetSize(); i++) {
-        if (detectAddress == if_table[i].GetAddress()) {
-            PTRACE(4, "Std23\tNo Intermediary device detected between EP and GK");
-            return false;
+        found = false;
+    } else {  
+        for (PINDEX i=0; i< if_table.GetSize(); i++) {
+            if (detectAddress == if_table[i].GetAddress()) {
+                PTRACE(4, "Std23\tNo Intermediary device detected between EP and GK");
+                found = false;
+                break;
+            }
         }
     }
-    PTRACE(4, "Std23\tWARNING: Intermediary device detected!");
-    EP->NATMethodCallBack("ALG",1,"Available");
-    return true;
+#if P_HAS_IPV6
+  if (ipv6IPv4Discover)
+      PIPSocket::SetDefaultIpAddressFamilyV6();
+#endif
+    if (found) {
+        PTRACE(4, "Std23\tWARNING: Intermediary device detected!");
+        EP->NATMethodCallBack("ALG",1,"Available");
+        return true;
+    }
+
+    return false;
 }
 
 void H460_FeatureStd23::StartSTUNTest(const PString & server)

@@ -939,9 +939,8 @@ PBoolean UPnPThread::TestMapping()
     PIPSocket::Address locAddr, extAddr;
 
     PTRACE(4,"UPnP\tPerforming Port Mapping Test");
-
-    PString host = PIPSocket::GetHostName();
-    PIPSocket::GetHostAddress(host, locAddr); 
+ 
+    locAddr = PIPSocket::GetGatewayInterfaceAddress(4);
     locPort = m_piNatMethod->GetEndPoint()->GetRtpIpPortBase();
 
     if (CreateMap(true,"UDP",locAddr,locPort,extAddr,extPort)) {
