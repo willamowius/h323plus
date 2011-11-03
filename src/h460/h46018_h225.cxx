@@ -454,9 +454,9 @@ PNatMethod_H46019::~PNatMethod_H46019()
     PWaitAndSignal m(muxMutex);
 
     if (IsMultiplexed()) {
+        muxShutdown = true;
         EnableMultiplex(false);
 
-        muxShutdown = true;
         m_readThread = NULL;
 
         rtpSocketMap.clear();
@@ -737,16 +737,13 @@ void PNatMethod_H46019::ReadThread(PThread &, INT)
   //readList += *GetMultiplexSocket(false);  -- disabled temporarily SH
    
 
-    while (PIPSocket::Select(readList) == PChannel::NoError){
-
-         if (muxShutdown)
-             break;
+    while (!muxShutdown && PIPSocket::Select(readList) == PChannel::NoError){
 
          if (readList.IsEmpty())
             continue;   // TimeOut
 
          socket = (H46019MultiplexSocket *)&readList.front();
-         if (socket && socket->ReadFrom(buffer.GetPointer(),len,addr,port)) {
+         if (socket && socket->ReadFrom(buffer.GetPointer(),len,addr,port) && !muxShutdown) {
            PTRACE(2,"H46019M\tReading from " << socket->GetLocalAddress());
              int actRead = socket->GetLastReadCount();
              std::map<unsigned,PUDPSocket*>::const_iterator it;
@@ -782,6 +779,8 @@ void PNatMethod_H46019::ReadThread(PThread &, INT)
              ((H46019UDPSocket *)it->second)->WriteMultiplexBuffer(buffer.GetPointer()+4,actRead-4,addr,port);
              len = bufferLen;
          } else {
+             if (muxShutdown) continue;
+
               switch (socket->GetErrorNumber(PChannel::LastReadError)) {
                 case ECONNRESET :
                 case ECONNREFUSED :
