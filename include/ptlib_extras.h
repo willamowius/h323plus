@@ -295,7 +295,7 @@ template <class K, class D> class PSTLDictionary : public PObject,
           for (unsigned i = pos+1; i < sz; ++i) {
              typename std::map< unsigned, std::pair<K, D*>, PSTLSortOrder >::iterator j = this->find(i);
              DictionaryEntry entry =  make_pair(j->second.first,j->second.second) ;
-             insert(pair<unsigned, std::pair<K, D*> >(newpos,entry));
+             this->insert(pair<unsigned, std::pair<K, D*> >(newpos,entry));
              newpos++;
              this->erase(j);
           }
@@ -323,7 +323,7 @@ template <class K, class D> class PSTLDictionary : public PObject,
 
           unsigned pos = this->size();
           DictionaryEntry entry = make_pair(key,obj);
-          insert(pair<unsigned, std::pair<K, D*> >(pos,entry));
+          this->insert(pair<unsigned, std::pair<K, D*> >(pos,entry));
           return true;
       }
 
@@ -627,7 +627,7 @@ template <class D> class PSTLList : public PObject,
              typename std::map< unsigned, D*, PSTLSortOrder >::iterator j = this->find(i);
              PAssert(j != this->end() , psprintf("Index not found: %u sz: %u",i,this->size()));
              D* entry =  j->second;
-             insert(std::pair<unsigned, D*>(newpos,entry));
+             this->insert(std::pair<unsigned, D*>(newpos,entry));
              newpos++;
              this->erase(j);
           }
@@ -651,7 +651,7 @@ template <class D> class PSTLList : public PObject,
           PWaitAndSignal m(dictMutex);
 
           unsigned pos = this->size();
-          insert(std::pair<unsigned, D*>(pos,obj));
+          this->insert(std::pair<unsigned, D*>(pos,obj));
           return pos;
       }
 
@@ -685,13 +685,13 @@ template <class D> class PSTLList : public PObject,
                   for (int i = sz-1; i >= ref; --i) {
                      typename std::map< unsigned, D*, PSTLSortOrder >::iterator it = this->find(i);
                      D* entry =  it->second;
-                     insert(std::pair<unsigned, D*>(newpos,entry));
+                     this->insert(std::pair<unsigned, D*>(newpos,entry));
                      this->erase(it);
                      newpos--;
                   }
               }
           }
-          insert(std::pair<unsigned, D*>(ref,obj));
+          this->insert(std::pair<unsigned, D*>(ref,obj));
           return ref;        
       }
 
