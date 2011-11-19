@@ -538,11 +538,11 @@ class H46019UDPSocket : public PUDPSocket
       */
     void SetTTL(unsigned val);
 
+#ifdef H323_H46019M
+
     virtual PBoolean GetPeerAddress(
       PIPSocketAddressAndPort & addr    ///< Variable to receive hosts IP address and port.
     );
-
-#ifdef H323_H46019M
 
     /** Get Multiplex Address
       */
