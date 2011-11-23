@@ -57,7 +57,7 @@
      #define PTLIB_VER 2103
   #endif
   #ifndef PTLIB_VER
-     #define PTLIB_VER 2100
+     #define PTLIB_VER 2103
   #endif
 #endif
 #if PTLIB_MAJOR == 2 && PTLIB_MINOR >= 11
