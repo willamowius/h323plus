@@ -241,9 +241,11 @@ SimpleH323EndPoint::~SimpleH323EndPoint()
 PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
 {
 
+#if 0
   PDirectory DefaultDir = PProcess::Current().GetFile().GetDirectory();
   PPluginManager & pluginMgr = PPluginManager::GetPluginManager();
   pluginMgr.LoadPluginDirectory(DefaultDir);
+#endif
   
 
   // Get local username, multiple uses of -u indicates additional aliases
