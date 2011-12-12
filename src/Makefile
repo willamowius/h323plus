@@ -260,6 +260,8 @@ endif
 ########### T.120
 
 ifdef H323_T120
+HEADER_FILES	+= $(OH323_INCDIR)/mcspdu.h
+SOURCES         += $(OH323_SRCDIR)/mcspdu.cxx
 HEADER_FILES	+= $(OH323_INCDIR)/h323t120.h
 COMMON_SOURCES	+= $(OH323_SRCDIR)/h323t120.cxx
 HEADER_FILES	+= $(OH323_INCDIR)/t120proto.h
