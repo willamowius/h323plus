@@ -50,47 +50,47 @@
 class H323EndPoint;
 class H460_FeatureStd23;
 class PNatMethod_H46024  : public PSTUNClient,
-						   public PThread
+                           public PThread
 {
-	PCLASSINFO(PNatMethod_H46024, PNatMethod);
+    //PCLASSINFO(PNatMethod_H46024, PNatMethod); // compile issue with PTLIB SVN -SH
 
-	public:
-		PNatMethod_H46024();
+    public:
+        PNatMethod_H46024();
 
-		~PNatMethod_H46024();
+        ~PNatMethod_H46024();
 
-		static PStringList GetNatMethodName() {  return PStringArray("H46024"); };
+        static PStringList GetNatMethodName() {  return PStringArray("H46024"); };
 
-		virtual PString GetName() const
-				{ return GetNatMethodName()[0]; }
+        virtual PString GetName() const
+                { return GetNatMethodName()[0]; }
 
-		// Start the Nat Method testing
-		void Start(const PString & server,H460_FeatureStd23 * _feat);
+        // Start the Nat Method testing
+        void Start(const PString & server,H460_FeatureStd23 * _feat);
 
-		// Main thread testing
-		void Main();
+        // Main thread testing
+        void Main();
 
-		// Whether the NAT method is Available
-		virtual bool IsAvailable(
-				const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny()  ///< Interface to see if NAT is available on
-		);
+        // Whether the NAT method is Available
+        virtual bool IsAvailable(
+                const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny()  ///< Interface to see if NAT is available on
+        );
 
-		// Create the socket pair
-		virtual PBoolean CreateSocketPair(
-		  PUDPSocket * & socket1,
-		  PUDPSocket * & socket2,
-		  const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny(),
+        // Create the socket pair
+        virtual PBoolean CreateSocketPair(
+          PUDPSocket * & socket1,
+          PUDPSocket * & socket2,
+          const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny(),
           void * userData = NULL
-		);
+        );
 
-		// Whether the NAT Method is available
-		void SetAvailable();
+        // Whether the NAT Method is available
+        void SetAvailable();
 
-		// Whether the NAT method is activated for this call
-		virtual void Activate(bool act);
+        // Whether the NAT method is activated for this call
+        virtual void Activate(bool act);
 
-		// Reportable NAT Type
-		PSTUNClient::NatTypes GetNATType();
+        // Reportable NAT Type
+        PSTUNClient::NatTypes GetNATType();
 
 #if PTLIB_VER >= 2110
     virtual PString GetServer() const { return PString(); }
@@ -105,14 +105,14 @@ class PNatMethod_H46024  : public PSTUNClient,
 
 
 protected:
-		// Do a NAT test
+        // Do a NAT test
         PSTUNClient::NatTypes NATTest();
 
     private:
-		bool					isActive;
-		bool					isAvailable;
-		PSTUNClient::NatTypes	natType;
-		H460_FeatureStd23 *		feat;
+        bool                    isActive;
+        bool                    isAvailable;
+        PSTUNClient::NatTypes    natType;
+        H460_FeatureStd23 *        feat;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -131,50 +131,50 @@ public:
 
     static PStringArray GetFeatureName() { return PStringArray("Std23"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("P2Pnat Detect-H.460.23"); };
-    static int GetPurpose()	{ return FeatureRas; };
-	static PStringArray GetIdentifier() { return PStringArray("23"); };
+    static int GetPurpose()    { return FeatureRas; };
+    static PStringArray GetIdentifier() { return PStringArray("23"); };
 
-	virtual PBoolean CommonFeature() { return isEnabled; }
+    virtual PBoolean CommonFeature() { return isEnabled; }
 
-	// Messages
-	// GK -> EP
+    // Messages
+    // GK -> EP
     virtual PBoolean OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu);
     virtual void OnReceiveGatekeeperConfirm(const H225_FeatureDescriptor & pdu);
 
     virtual PBoolean OnSendRegistrationRequest(H225_FeatureDescriptor & pdu);
-	virtual void OnReceiveRegistrationConfirm(const H225_FeatureDescriptor & pdu);
+    virtual void OnReceiveRegistrationConfirm(const H225_FeatureDescriptor & pdu);
 
-	H323EndPoint * GetEndPoint() { return (H323EndPoint *)EP; }
+    H323EndPoint * GetEndPoint() { return (H323EndPoint *)EP; }
 
-	// Reporting the NAT Type
-	void OnNATTypeDetection(PSTUNClient::NatTypes type, const PIPSocket::Address & ExtIP);
+    // Reporting the NAT Type
+    void OnNATTypeDetection(PSTUNClient::NatTypes type, const PIPSocket::Address & ExtIP);
 
-	bool IsAvailable();
+    bool IsAvailable();
 
-	bool AlternateNATMethod();
-	bool UseAlternate();
+    bool AlternateNATMethod();
+    bool UseAlternate();
 
 #ifdef H323_UPnP
-	void InitialiseUPnP();
+    void InitialiseUPnP();
 #endif
 
 protected:
-	bool DetectALG(const PIPSocket::Address & detectAddress);
-	void StartSTUNTest(const PString & server);
-	
-	void DelayedReRegistration();
+    bool DetectALG(const PIPSocket::Address & detectAddress);
+    void StartSTUNTest(const PString & server);
+    
+    void DelayedReRegistration();
  
 private:
-    H323EndPoint *			EP;
-	PSTUNClient::NatTypes	natType;
-	PIPSocket::Address		externalIP;
-    PBoolean				natNotify;
-	PBoolean				alg;
-	PBoolean				isavailable;
-	PBoolean				isEnabled; 
-	int						useAlternate;
+    H323EndPoint *            EP;
+    PSTUNClient::NatTypes    natType;
+    PIPSocket::Address        externalIP;
+    PBoolean                natNotify;
+    PBoolean                alg;
+    PBoolean                isavailable;
+    PBoolean                isEnabled; 
+    int                        useAlternate;
 
-	// Delayed Reregistration
+    // Delayed Reregistration
     PThread  *  RegThread;
     PDECLARE_NOTIFIER(PThread, H460_FeatureStd23, RegMethod);
 
@@ -182,11 +182,11 @@ private:
 
 // Need to declare for Factory Loader
 #if !defined(_WIN32_WCE)
-	#if PTLIB_VER > 260
-	   PPLUGIN_STATIC_LOAD(Std23, H460_Feature);
-	#else
-	   PWLIB_STATIC_LOAD_PLUGIN(Std23, H460_Feature);
-	#endif
+    #if PTLIB_VER > 260
+       PPLUGIN_STATIC_LOAD(Std23, H460_Feature);
+    #else
+       PWLIB_STATIC_LOAD_PLUGIN(Std23, H460_Feature);
+    #endif
 #endif
 
 
@@ -209,55 +209,55 @@ public:
 
     static PStringArray GetFeatureName() { return PStringArray("Std24"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("P2Pnat Media-H.460.24"); };
-    static int GetPurpose()	{ return FeatureSignal; };
-	static PStringArray GetIdentifier() { return PStringArray("24"); };
+    static int GetPurpose()    { return FeatureSignal; };
+    static PStringArray GetIdentifier() { return PStringArray("24"); };
 
-	virtual PBoolean CommonFeature() { return isEnabled; }
+    virtual PBoolean CommonFeature() { return isEnabled; }
 
-	enum NatInstruct {
-		e_unknown,
-		e_noassist,
-		e_localMaster,
-	    e_remoteMaster,
-		e_localProxy,
-	    e_remoteProxy,
+    enum NatInstruct {
+        e_unknown,
+        e_noassist,
+        e_localMaster,
+        e_remoteMaster,
+        e_localProxy,
+        e_remoteProxy,
         e_natFullProxy,
-		e_natAnnexA,				// Same NAT
-		e_natAnnexB,				// NAT Offload
-		e_natFailure = 100
-	};
+        e_natAnnexA,                // Same NAT
+        e_natAnnexB,                // NAT Offload
+        e_natFailure = 100
+    };
 
     static PString GetNATStrategyString(NatInstruct method);
 
-	enum H46024NAT {
-		e_default,		// This will use the underlying NAT Method
-		e_enable,		// Use H.460.24 method (STUN)
-		e_AnnexA,       // Disable H.460.24 method but initiate AnnexA
-		e_AnnexB,		// Disable H.460.24 method but initiate AnnexB
-		e_disable		// Disable all and remote will do the NAT help		
-	};
+    enum H46024NAT {
+        e_default,        // This will use the underlying NAT Method
+        e_enable,        // Use H.460.24 method (STUN)
+        e_AnnexA,       // Disable H.460.24 method but initiate AnnexA
+        e_AnnexB,        // Disable H.460.24 method but initiate AnnexB
+        e_disable        // Disable all and remote will do the NAT help        
+    };
 
-	// Messages
+    // Messages
     virtual PBoolean OnSendAdmissionRequest(H225_FeatureDescriptor & pdu);
     virtual void OnReceiveAdmissionConfirm(const H225_FeatureDescriptor & pdu);
-	virtual void OnReceiveAdmissionReject(const H225_FeatureDescriptor & pdu);
+    virtual void OnReceiveAdmissionReject(const H225_FeatureDescriptor & pdu);
 
     virtual PBoolean OnSendSetup_UUIE(H225_FeatureDescriptor & pdu);
     virtual void OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu);
 
 protected:
-	void HandleNATInstruction(NatInstruct natconfig);
-	void SetNATMethods(H46024NAT state);
-	void SetH46019State(bool state);
+    void HandleNATInstruction(NatInstruct natconfig);
+    void SetNATMethods(H46024NAT state);
+    void SetH46019State(bool state);
  
 private:
     H323EndPoint * EP;
-	H323Connection * CON;
-	NatInstruct natconfig;
-	PMutex h460mute;
-	int nattype;
-	bool isEnabled;
-	bool useAlternate;
+    H323Connection * CON;
+    NatInstruct natconfig;
+    PMutex h460mute;
+    int nattype;
+    bool isEnabled;
+    bool useAlternate;
 
 
 };
@@ -266,11 +266,11 @@ inline ostream & operator<<(ostream & strm, H460_FeatureStd24::NatInstruct metho
 
 // Need to declare for Factory Loader
 #if !defined(_WIN32_WCE)
-	#if PTLIB_VER > 260
-	   PPLUGIN_STATIC_LOAD(Std24, H460_Feature);
-	#else
-	   PWLIB_STATIC_LOAD_PLUGIN(Std24, H460_Feature);
-	#endif
+    #if PTLIB_VER > 260
+       PPLUGIN_STATIC_LOAD(Std24, H460_Feature);
+    #else
+       PWLIB_STATIC_LOAD_PLUGIN(Std24, H460_Feature);
+    #endif
 #endif
 
 #endif 
