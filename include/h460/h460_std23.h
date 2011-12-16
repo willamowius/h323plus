@@ -52,7 +52,9 @@ class H460_FeatureStd23;
 class PNatMethod_H46024  : public PSTUNClient,
                            public PThread
 {
-    //PCLASSINFO(PNatMethod_H46024, PNatMethod); // compile issue with PTLIB SVN -SH
+    // compile issue with PTLIB SVN object.h/cxx r26772 revert both files back to SVN r26754 - SH
+    // commenting out will create a ambiguous delete in class destructor compile error.
+    PCLASSINFO(PNatMethod_H46024, PNatMethod); 
 
     public:
         PNatMethod_H46024();
@@ -102,7 +104,6 @@ class PNatMethod_H46024  : public PSTUNClient,
     virtual bool CreateSocket(BYTE,PUDPSocket * &, const PIPSocket::Address,WORD)  { return false; }
     virtual void SetCredentials(const PString &, const PString &, const PString &) {}
 #endif
-
 
 protected:
         // Do a NAT test
