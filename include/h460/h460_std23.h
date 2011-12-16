@@ -47,6 +47,15 @@
 #pragma once
 #endif
 
+// WARNING - remove it when the ptlib problem is fixed! - SH
+#if SVN_REVISION > 26772
+	#if _WIN32
+	#pragma message("H.460.23 Compile issue with PTLib object.h/cxx SVN r26772 revert both files to r26754")
+	#else
+	#warning("H.460.23 Compile issue with PTLib object.h/cxx SVN r26772 revert both files to r26754")
+	#endif
+#endif
+
 class H323EndPoint;
 class H460_FeatureStd23;
 class PNatMethod_H46024  : public PSTUNClient,
