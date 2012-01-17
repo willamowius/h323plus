@@ -361,8 +361,8 @@ class H323Gatekeeper : public H225_RAS
 
       private:
         // Disable copy constructor and assignment
-        AlternateInfo(const AlternateInfo &) { }
-        AlternateInfo & operator=(const AlternateInfo &) { return *this; }
+        AlternateInfo(const AlternateInfo &);
+        AlternateInfo & operator=(const AlternateInfo &);
     };
     PSortedList<AlternateInfo> alternates;
     PBoolean               alternatePermanent;
