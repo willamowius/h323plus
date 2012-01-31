@@ -102,7 +102,7 @@
 #undef H323_H460
 #ifdef H323_H460
 #undef H323_H4609
-#if (PTLIB_VER > 260) && (P_STUN)
+#if (PTLIB_VER > 260) && defined(P_STUN)
     #undef H323_H46017
     #undef H323_H46018
     #if defined(H323_H46018)
