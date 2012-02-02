@@ -1,3 +1,15 @@
+
+H323plus 1.24.0 - 1.24.1
+Added UPnP Standalone support (without H.460.23/.24)
+Major rehashing of UPnP code
+Added EmphasisSpeed and MaxPayloadSize support to plugins
+Added vs2010 Build files
+Added Basline Windows X64 Support
+FIX MediaEncryption so it compiles dynamically with OpenSSL 
+FIX H.460.24 Annex A and B tweaks
+Added RTP Multiplexing support to H.460.23/.24
+FIX IPv6 Support and checks
+
 H323plus 1.23.0 - 1.23.1
 Added MediaChannelCapability to OLC
 Added H.235.6 Support
