@@ -21,7 +21,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Id $
+ * $Id$
  *
  */
 
@@ -408,6 +408,24 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
       for (PINDEX i = 0; i < natmethods.GetSize(); i++) {
 			cout << natmethods[i] << endl;
 	  }
+	  cout << endl;
+
+////////////////////////////////////////
+
+      PStringArray security = H235Authenticator::GetAuthenticatorList();
+      cout << "Available Security: " << endl;
+      for (PINDEX i = 0; i < security.GetSize(); i++) {
+          cout << security[i] << endl;
+#ifdef H323_H235
+          H235Authenticator::Capabilities caps;
+          if (H235Authenticator::GetAuthenticatorCapabilities(security[i],&caps)) {
+             for (list<H235Authenticator::Capability>::iterator j = 
+                       caps.capabilityList.begin(); j != caps.capabilityList.end(); ++j) {
+                 cout << "   " << j->m_identifier << " " << j->m_cipher << " " << j->m_description << endl;
+              }
+          }
+#endif
+      }
 	  cout << endl;
 
 ////////////////////////////////////////
