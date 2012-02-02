@@ -485,7 +485,6 @@ PBoolean H323Gatekeeper::OnReceiveRegistrationConfirm(const H225_RegistrationCon
 
   registrationFailReason = RegistrationSuccessful;
 
-  endpointIdentifier = rcf.m_endpointIdentifier;
   PTRACE(3, "RAS\tRegistered " << endpointIdentifier << " with " << gatekeeperIdentifier);
 
   if (rcf.HasOptionalField(H225_RegistrationConfirm::e_assignedGatekeeper))
