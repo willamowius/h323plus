@@ -23,138 +23,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.15  2010/09/19 05:50:50  shorne
- * Remove PLUS_FRAMEHEADER switch, added support for passing input device capabilities to the video plugin
- *
- * Revision 1.14  2010/08/31 04:00:49  shorne
- * Improved H.263/H.263+ interworking
- *
- * Revision 1.13  2010/08/26 15:12:39  shorne
- * Major H.239 upgrade. Special thx again to Marek Domaracky and Igor Pavlov
- *
- * Revision 1.12  2010/08/23 08:26:55  willamowius
- * disable PLUS_FRAMEHEADER for now, it seriously degrades video quality
- *
- * Revision 1.11  2010/08/19 12:42:37  shorne
- * Improved H.239 Support
- *
- * Revision 1.10  2010/06/06 14:27:25  shorne
- * added support for multiple frame decoding, Flow control,aspect ratio management
- *
- * Revision 1.9  2010/05/02 22:36:40  shorne
- * Added Event controller interface
- *
- * Revision 1.8  2010/02/24 02:56:15  shorne
- * Update to match latest Opal SVN
- *
- * Revision 1.7  2009/11/12 06:27:15  shorne
- * Updated definitions
- *
- * Revision 1.6  2009/02/21 14:07:43  shorne
- * Updated with changes from Opal
- *
- * Revision 1.5  2007/11/06 17:45:38  shorne
- * Added h323pluslib definition
- *
- * Revision 1.4  2007/11/06 17:43:33  shorne
- * added i480 standard framesize
- *
- * Revision 1.3  2007/10/30 04:23:43  shorne
- * Corrections and Improvements for H.239 support
- *
- * Revision 1.2  2007/10/19 19:53:43  shorne
- * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
- *  Robert
- *
- * Revision 1.1  2007/08/20 20:19:53  shorne
- * Moved opalplugin.h to codec directory to be plugin compile compatible with Opal
- *
- * Revision 1.2  2007/08/20 19:13:28  shorne
- * Added Generic Capability support. Fixed Linux compile errors
- *
- * Revision 1.1  2007/08/06 20:50:50  shorne
- * First commit of h323plus
- *
- * Revision 1.10.2.5  2007/09/26 05:14:28  rjongbloed
- * Added some extra RTP magic numbers: min header size, max packet size etc
- *
- * Revision 1.10.2.4  2007/08/17 08:38:22  rjongbloed
- * Back ported OPAL meda options based plug ins and H.323 generic capabilties.
- *
- * Revision 1.10.2.3  2007/02/19 20:12:45  shorne
- * added H.239 support
- *
- * Revision 1.10.2.2  2007/02/19 14:19:36  shorne
- * Added H.239 OIDs
- *
- * Revision 1.10.2.1  2006/12/23 19:08:02  shorne
- * Plugin video codecs & sundry
- *
- * Revision 1.10  2006/05/16 11:26:06  shorne
- * Added more hid key input mask types
- *
- * Revision 1.9  2005/11/21 21:04:10  shorne
- * Added more HID input switches
- *
- * Revision 1.8  2005/08/23 08:13:06  shorne
- * Added HID plugin volume & LCD display support
- *
- * Revision 1.7  2005/07/03 13:54:23  shorne
- * Added Initial LID Plugin Support
- *
- * Revision 1.6  2005/06/07 03:22:22  csoutheren
- * Added patch 1198741 with support for plugin codecs with generic capabilities
- * Added patch 1198754 with support for setting quality level on audio codecs
- * Added patch 1198760 with GSM-AMR codec support
- * Many thanks to Richard van der Hoff for his work
- *
- * Revision 1.5  2004/12/20 23:30:20  csoutheren
- * Added plugin support for packet loss concealment frames
- *
- * Revision 1.4  2004/11/29 06:30:53  csoutheren
- * Added support for wideband codecs
- *
- * Revision 1.3  2004/05/18 22:26:28  csoutheren
- * Initial support for embedded codecs
- * Fixed problems with streamed codec support
- * Updates for abstract factory loading methods
- *
- * Revision 1.2  2004/05/09 14:44:36  csoutheren
- * Added support for streamed plugin audio codecs
- *
- * Revision 1.1  2004/04/09 12:25:25  csoutheren
- * Renamed from h323plugin.h
- *
- * Revision 1.2  2004/04/03 10:38:24  csoutheren
- * Added in initial cut at codec plugin code. Branches are for wimps :)
- *
- * Revision 1.1.2.1  2004/03/31 11:03:16  csoutheren
- * Initial public version
- *
- * Revision 1.8  2004/02/23 13:17:32  craigs
- * Fixed problems with codec interface functions
- *
- * Revision 1.7  2004/02/23 13:04:09  craigs
- * Removed warnings when compliing plugins
- *
- * Revision 1.6  2004/01/27 14:55:46  craigs
- * Implemented static linking of new codecs
- *
- * Revision 1.5  2004/01/23 05:21:15  craigs
- * Updated for changes to the codec plugin interface
- *
- * Revision 1.4  2004/01/09 11:27:46  craigs
- * Plugin codec audio now works :)
- *
- * Revision 1.3  2004/01/09 07:32:22  craigs
- * More fixes for capability problems
- *
- * Revision 1.2  2004/01/06 07:05:03  craigs
- * Changed to support plugin codecs
- *
- * Revision 1.1  2004/01/04 13:37:51  craigs
- * Implementation of codec plugins
+ * $Id $
  *
  *
  */
@@ -694,9 +563,9 @@ enum {
 #define PLUGINCODEC_CIF_MPI       "CIF MPI"
 #define PLUGINCODEC_CIF4_MPI     "CIF4 MPI"
 #define PLUGINCODEC_CIF16_MPI   "CIF16 MPI"
-#define PLUGINCODEC_480P_MPI	 "480 MPI"
+#define PLUGINCODEC_480P_MPI     "480 MPI"
 #define PLUGINCODEC_n720P_MPI    "n720 MPI"
-#define PLUGINCODEC_w720P_MPI	 "w720 MPI"
+#define PLUGINCODEC_w720P_MPI     "w720 MPI"
 #define PLUGINCODEC_w1080P_MPI   "w1080 MPI"
 #define PLUGINCODEC_CUSTOM_MPI "Custom MPI"
 
