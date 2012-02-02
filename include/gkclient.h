@@ -26,7 +26,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $ Id $
+ * $Id$
  *
  */
 
@@ -101,8 +101,8 @@ class H323Gatekeeper : public H225_RAS
     void OnReceiveFeatureSet(unsigned, const H225_FeatureSet & features) const;
 
 #if H323_H460
-	void DisableFeatureSet(int msgtype) const;
-	H460_FeatureSet & GetFeatures();
+    void DisableFeatureSet(int msgtype) const;
+    H460_FeatureSet & GetFeatures();
 #endif
   //@}
 
@@ -236,8 +236,8 @@ class H323Gatekeeper : public H225_RAS
       */
     PBoolean IsRegistered() const { return registrationFailReason == RegistrationSuccessful; }
 
-	/** Force the client to reregister with gatekeeper (used with H.460 features)
-	  */
+    /** Force the client to reregister with gatekeeper (used with H.460 features)
+      */
     void ReRegisterNow();
 
     enum RegistrationFailReasons {
@@ -249,7 +249,7 @@ class H323Gatekeeper : public H225_RAS
       DuplicateAlias,
       SecurityDenied,
       TransportError,
-	  NeededFeatureNotSupported,
+      NeededFeatureNotSupported,
       NumRegistrationFailReasons,
       RegistrationRejectReasonMask = 0x8000
     };
@@ -286,12 +286,12 @@ class H323Gatekeeper : public H225_RAS
     H323TransportAddress GetGatekeeperRouteAddress() const
     { return gkRouteAddress; }
   //@}
-	
+    
 
   protected:
     PBoolean StartDiscovery(const H323TransportAddress & address);
     unsigned SetupGatekeeperRequest(H323RasPDU & request);
-	
+    
     void Connect(const H323TransportAddress & address, const PString & gatekeeperIdentifier);
     PDECLARE_NOTIFIER(PThread, H323Gatekeeper, MonitorMain);
     PDECLARE_NOTIFIER(PTimer, H323Gatekeeper, TickleMonitor);
@@ -315,13 +315,13 @@ class H323Gatekeeper : public H225_RAS
       PBoolean permanent
     );
 
-	void SetAssignedGatekeeper(
-	    const H225_AlternateGK & gk
-	);
+    void SetAssignedGatekeeper(
+        const H225_AlternateGK & gk
+    );
 
-	PBoolean GetAssignedGatekeeper(
-	    H225_AlternateGK & gk
-	);
+    PBoolean GetAssignedGatekeeper(
+        H225_AlternateGK & gk
+    );
 
     virtual PBoolean MakeRequest(
       Request & request
@@ -335,16 +335,16 @@ class H323Gatekeeper : public H225_RAS
     // Gatekeeper registration state variables
     PBoolean     discoveryComplete;
     PASN_BMPString  endpointIdentifier;
-	PString  localId;
+    PString  localId;
     RegistrationFailReasons registrationFailReason;
-	PMutex RegisterMutex;
+    PMutex RegisterMutex;
 
     class AlternateInfo : public PObject {
         PCLASSINFO(AlternateInfo, PObject);
       public:
         AlternateInfo(const H225_AlternateGK & alt);
-	    ~AlternateInfo();
-		H225_AlternateGK GetAlternate();
+        ~AlternateInfo();
+        H225_AlternateGK GetAlternate();
         Comparison Compare(const PObject & obj);
         void PrintOn(ostream & strm) const;
 
@@ -368,7 +368,7 @@ class H323Gatekeeper : public H225_RAS
     PBoolean               alternatePermanent;
     PSemaphore         requestMutex;
     H235Authenticators authenticators;
-	AlternateInfo *    assignedGK;
+    AlternateInfo *    assignedGK;
 
     enum {
       RequireARQ,
