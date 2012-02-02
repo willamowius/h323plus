@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.15  2010/09/19 05:50:50  shorne
+ * Remove PLUS_FRAMEHEADER switch, added support for passing input device capabilities to the video plugin
+ *
  * Revision 1.14  2010/08/31 04:00:49  shorne
  * Improved H.263/H.263+ interworking
  *
@@ -420,6 +423,8 @@ struct PluginCodec_Option {
 #define PLUGINCODEC_OPTION_TX_KEY_FRAME_PERIOD        "Tx Key Frame Period"
 #define PLUGINCODEC_OPTION_CUSTOM_FORMAT              "CustomFmt"
 #define PLUGINCODEC_OPTION_INPUT_FORMAT               "InputFmt"
+#define PLUGINCODEC_OPTION_EMPHASIS_SPEED             "Emphasis Speed"
+#define PLUGINCODEC_OPTION_MAX_PAYLOAD                "Max Payload Size"
 
 // Events
 #define PLUGINCODEC_EVENT_FASTUPDATE             "on_fast_update"
