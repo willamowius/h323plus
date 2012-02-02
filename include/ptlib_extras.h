@@ -43,6 +43,30 @@
 
 #include "openh323buildopts.h"
 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// H323 RTP Sorted Queue
+
+#include <algorithm>
+#include <queue>
+
+class H323FRAME {
+public:
+   
+     struct Info {
+        unsigned  m_sequence;
+     };
+
+     int operator() ( const std::pair<PBYTEArray, H323FRAME::Info>& p1,
+                      const std::pair<PBYTEArray, H323FRAME::Info>& p2 ) {
+           return (p1.second.m_sequence > p2.second.m_sequence);
+     }
+};
+
+typedef std::priority_queue< std::pair<PBYTEArray, H323FRAME::Info >, 
+        std::vector< std::pair<PBYTEArray, H323FRAME::Info> >,H323FRAME > RTP_Sortedframes;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #ifndef H323_STLDICTIONARY
 
 #define H323Dictionary  PDictionary
@@ -54,7 +78,6 @@
 #else
 
 #include <map>
-#include <algorithm>
 
 template <class PAIR>
 class deleteDictionaryEntry {
@@ -525,7 +548,7 @@ template <class D> class PSTLList : public PObject,
      */
     virtual void RemoveAll()
       {  
-          PWaitAndSignal m(dictMutex);
+          //PWaitAndSignal m(dictMutex);
 
           if (IsEmpty()) return;
 
