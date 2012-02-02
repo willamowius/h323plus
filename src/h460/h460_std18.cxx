@@ -101,7 +101,7 @@ PBoolean H460_FeatureStd18::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu
     const PNatList & list = natMethods.GetNATList();
     if (list.GetSize() > 0) {
       for (PINDEX i=0; i < list.GetSize(); i++) {  
-          if (list[i].GetName() == "STUN" && list[i].IsAvailable()) {
+          if (list[i].GetName() == "STUN" && list[i].IsAvailable(PIPSocket::Address::GetAny(4))) {
              return false;
         }
       }
