@@ -58,10 +58,10 @@
 #include "h460/h460_std17.h"
 #endif
 
-#ifdef H323_H46018 
+#ifdef H323_H46018
 #include "h460/h460_std18.h"
 #include "h460/h46018_h225.h"
-#endif  
+#endif
 
 #ifdef H323_H46023
 #include "h460/h460_std23.h"
@@ -3231,7 +3231,7 @@ PBoolean H323EndPoint::H46023IsEnabled()
 { 
 	return m_h46023enabled; 
 }
-#endif  // H323_H46018
+#endif  // H323_H46023
 
 #ifdef H323_H460P
 void H323EndPoint::PresenceSetLocalState(const PStringList & alias, unsigned localstate, const PString & localdisplay, PBoolean updateOnly)
