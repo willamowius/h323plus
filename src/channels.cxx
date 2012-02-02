@@ -228,7 +228,8 @@ void H323Channel::CleanUpOnTermination()
   // If we have a receiver thread, wait for it to die.
   if (receiveThread != NULL) {
     PTRACE(4, "LogChan\tAwaiting termination of " << receiveThread << ' ' << receiveThread->GetThreadName());
-    PAssert(receiveThread->WaitForTermination(10000), "Receive media thread did not terminate");
+    receiveThread->WaitForTermination(5000);
+   // PAssert(receiveThread->WaitForTermination(10000), "Receive media thread did not terminate");
     delete receiveThread;
     receiveThread = NULL;
   }
@@ -236,7 +237,8 @@ void H323Channel::CleanUpOnTermination()
   // If we have a transmitter thread, wait for it to die.
   if (transmitThread != NULL) {
     PTRACE(4, "LogChan\tAwaiting termination of " << transmitThread << ' ' << transmitThread->GetThreadName());
-    PAssert(transmitThread->WaitForTermination(10000), "Transmit media thread did not terminate");
+    transmitThread->WaitForTermination(5000);
+   // PAssert(transmitThread->WaitForTermination(10000), "Transmit media thread did not terminate");
     delete transmitThread;
     transmitThread = NULL;
   }
@@ -825,9 +827,10 @@ void H323_RTPChannel::Transmit()
   // Get parameters from the codec on time and data sizes
   PBoolean isAudio = mediaFormat.NeedsJitterBuffer();
   unsigned framesInPacket = capability->GetTxFramesInPacket();
-  unsigned maxFrameSize = mediaFormat.GetFrameSize();
-  if (maxFrameSize == 0)
-    maxFrameSize = isAudio ? 8 : 2000;
+  unsigned maxSampleSize = mediaFormat.GetFrameSize();
+  unsigned maxSampleTime = mediaFormat.GetFrameTime();
+
+  unsigned maxFrameSize = isAudio ? maxSampleSize*maxSampleTime : 2000;
   RTP_DataFrame frame(framesInPacket*maxFrameSize);
 
   rtpPayloadType = GetRTPPayloadType();
@@ -850,7 +853,7 @@ void H323_RTPChannel::Transmit()
   unsigned frameCount = 0;
   DWORD rtpTimestamp = PRandom();
   DWORD nextTimestamp = 0;
-  frame.SetPayloadSize(0);
+  //frame.SetPayloadSize(0);
 
 #if PTRACING
   DWORD lastDisplayedTimestamp = 0;
@@ -858,6 +861,7 @@ void H323_RTPChannel::Transmit()
   if (PTrace::GetLevel() >= 5)
     codecReadAnalysis = new CodecReadAnalyser;
 #endif
+
 
   /* Now keep getting encoded frames from the codec, it is expected that the
      Read() function will maintain the Real Time aspects of the transmission.
@@ -973,7 +977,7 @@ void H323_RTPChannel::Transmit()
       if (isAudio)
         frame.SetMarker(FALSE); 
 
-      frame.SetPayloadSize(0);
+      frame.SetPayloadSize(maxFrameSize);
       frameOffset = 0;
       frameCount = 0;
     }

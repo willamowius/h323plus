@@ -234,7 +234,8 @@ RTP_JitterBuffer::~RTP_JitterBuffer()
 #endif
   {
     PTRACE(3, "RTP\tRemoving jitter buffer " << this << ' ' << jitterThread->GetThreadName());
-    PAssert(jitterThread->WaitForTermination(10000), "Jitter buffer thread did not terminate");
+    //PAssert(jitterThread->WaitForTermination(10000), "Jitter buffer thread did not terminate");
+	jitterThread->WaitForTermination(3000);
     delete jitterThread;
     jitterThread = NULL;
   }
