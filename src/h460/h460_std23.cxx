@@ -219,8 +219,8 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
 {
     PWaitAndSignal m(portMute);
 
-#ifdef H323_H46019M
     H323Connection::SessionInformation * info = (H323Connection::SessionInformation *)userData;
+#ifdef H323_H46019M
     PNatMethod_H46019 * handler = 
                (PNatMethod_H46019 *)feat->GetEndPoint()->GetNatMethods().GetMethodByName("H46019");
 
