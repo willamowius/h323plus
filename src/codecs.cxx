@@ -26,374 +26,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.15  2011/01/14 14:59:58  shorne
- * Moved RemoveAllOptions to the class destructor to resolve issue with transitioning from fast connect to slow connect
- *
- * Revision 1.14  2011/01/12 13:11:41  shorne
- * Added ability to remove all mediaformat options
- *
- * Revision 1.13  2010/09/19 05:43:39  shorne
- * Added SetSupportedFormats
- *
- * Revision 1.12  2010/06/06 14:53:26  shorne
- * Added AVSync support, Aspect Ratio management, flow Control, Video 90k clock, fixes for wideband codecs and generic audio capabilities
- *
- * Revision 1.11  2010/05/02 22:43:05  shorne
- * Added RTP Information structure to be able to support A/V sync
- *
- * Revision 1.10  2010/02/10 01:03:06  shorne
- * Ensure AEC is initialized
- *
- * Revision 1.9  2009/08/21 04:35:47  shorne
- * Expressly reference codecs.h to avoid problems with windows SDK codecs.h
- *
- * Revision 1.8  2009/08/20 21:05:49  willamowius
- * fix comment
- *
- * Revision 1.7  2009/07/09 15:11:12  shorne
- * Simplfied and standardised compiler directives
- *
- * Revision 1.6  2008/05/23 11:21:12  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.5  2008/04/25 00:54:12  shorne
- * Added ability to set the video maximum bitrate
- *
- * Revision 1.4  2007/11/14 18:48:44  willamowius
- * avoid comparing a uninitialized variable
- *
- * Revision 1.3  2007/11/10 13:33:51  shorne
- * Fix reference to the correct AEC library based on the type of build
- *
- * Revision 1.2  2007/10/19 19:54:17  shorne
- * ported latest Video updates in OpenH323 committed after h323plus initial fork thanks
- *  Robert
- *
- * Revision 1.1  2007/08/06 20:51:03  shorne
- * First commit of h323plus
- *
- * Revision 1.92.2.8  2007/09/03 09:45:47  rjongbloed
- * Fixed failure to propagate meda format options to codec.
- *
- * Revision 1.92.2.7  2007/07/19 20:10:28  shorne
- * Changed HAS_AEC to H323_AEC
- *
- * Revision 1.92.2.6  2007/03/24 23:39:43  shorne
- * More H.239 work
- *
- * Revision 1.92.2.5  2007/03/06 00:18:13  shorne
- * Added Debug AEC support
- *
- * Revision 1.92.2.4  2007/03/05 11:57:12  shorne
- * Fixed compile issue with AEC
- *
- * Revision 1.92.2.3  2007/02/18 18:59:26  shorne
- * AEC tweaks
- *
- * Revision 1.92.2.2  2007/02/06 11:45:59  shorne
- * Added ability to send general codec options to Video Plugins
- *
- * Revision 1.92.2.1  2006/12/23 19:08:02  shorne
- * Plugin video codecs & sundry
- *
- * Revision 1.92  2006/05/16 11:28:58  shorne
- * added AEC support and  more call hold support.
- *
- * Revision 1.91  2006/01/26 03:31:09  shorne
- * Add the ability to remove a local input device when placing a call on hold
- *
- * Revision 1.90  2005/01/03 06:25:54  csoutheren
- * Added extensive support for disabling code modules at compile time
- *
- * Revision 1.89  2004/11/29 06:30:53  csoutheren
- * Added support for wideband codecs
- *
- * Revision 1.88  2004/07/03 06:49:28  rjongbloed
- * Split video temporal/spatial trade off H.245 packets to separate command and
- *   indication functions and added quality parameter, thanks Guilhem Tardy.
- * Added PTRACE_PARAM() macro to fix warnings on parameters used in PTRACE
- *  macros only.
- *
- * Revision 1.87  2004/05/09 10:22:26  csoutheren
- * Changed new DecodeFrame to handle bytes per frame
- *
- * Revision 1.86  2004/05/09 10:08:36  csoutheren
- * Changed new DecodeFrame to return bytes decoded rather than samples decoded
- * Added support for new DecodeFrame to plugin manager
- *
- * Revision 1.85  2004/05/02 04:52:24  rjongbloed
- * Fixed problems with G.711 caused by fixing problem with G.723.1-5k3 mode.
- *
- * Revision 1.84  2004/04/16 04:04:28  csoutheren
- * Prevent codecs with variable length frrames from doing strange things
- *
- * Revision 1.83  2004/02/04 10:29:27  rjongbloed
- * Fixed G.726 by allowing for more bits per pixels sizes in streamed codec, thanks Kevin Bouchard
- *
- * Revision 1.82  2003/11/12 11:14:51  csoutheren
- * Added H323FramedAudioCodec::DecodeSilenceFrame thanks to Henry Harrison of AliceStreet
- *
- * Revision 1.81  2003/07/16 10:43:13  csoutheren
- * Added SwapChannel function to H323Codec to allow media hold channels
- * to work better. Thanks to Federico Pinna
- *
- * Revision 1.80  2002/12/16 09:11:19  robertj
- * Added new video bit rate control, thanks Walter H. Whitlock
- *
- * Revision 1.79  2002/08/05 10:03:47  robertj
- * Cosmetic changes to normalise the usage of pragma interface/implementation.
- *
- * Revision 1.78  2002/05/29 04:48:48  robertj
- * Changed framed codec so if cannot decode frame just plays silence instead
- *   of returning error and thus shutting down channel, thanks Federico Pinna
- *
- * Revision 1.77  2002/04/16 03:27:54  dereks
- * Correct logical flaw in CloseRawDataChannel method.
- *
- * Revision 1.76  2002/04/05 00:52:17  dereks
- * Minor tweaks to cope with received h261 messages.
- *
- * Revision 1.75  2002/02/26 18:00:18  rogerh
- * Improve the information given in the trace for codec truncation
- *
- * Revision 1.74  2002/01/23 06:13:56  robertj
- * Added filter function hooks to codec raw data channel.
- *
- * Revision 1.73  2002/01/23 01:58:28  robertj
- * Added function to determine if codecs raw data channel is native format.
- *
- * Revision 1.72  2002/01/22 16:09:38  rogerh
- * Back out the DTMF detection from H323FramedAudioCodec::Write().
- * There will shortly be a better place for it.
- *
- * Revision 1.71  2002/01/22 15:21:47  rogerh
- * Add DTMF decoding to PCM audio streams. This has been tested with
- * NetMeeting sending Dial Pad codes, using the G.711 codec.
- * At this time, DTMF codes (fron NetMeeting) are just displayed on the
- * screen and are not passed up to the users application.
- *
- * Revision 1.70  2002/01/13 23:55:21  robertj
- * Added mutex so can change raw data channel while reading/writing from codec.
- *
- * Revision 1.69  2002/01/06 05:34:05  robertj
- * Fixed encoding error for 4 bit streamed codecs.
- *
- * Revision 1.68  2001/12/04 05:13:12  robertj
- * Added videa bandwidth limiting code for H.261, thanks Jose Luis Urien.
- *
- * Revision 1.67  2001/11/28 00:09:14  dereks
- * Additional information in PTRACE output.
- *
- * Revision 1.66  2001/11/16 01:05:35  craigs
- * Changed to allow access to uLaw/ALaw to/from linear functions
- *
- * Revision 1.65  2001/10/23 02:17:16  dereks
- * Initial release of cu30 video codec.
- *
- * Revision 1.64  2001/09/25 03:14:47  dereks
- * Add constant bitrate control for the h261 video codec.
- * Thanks Tiziano Morganti for the code to set bit rate. Good work!
- *
- * Revision 1.63  2001/09/21 02:50:06  robertj
- * Implemented static object for all "known" media formats.
- *
- * Revision 1.62  2001/09/12 07:48:05  robertj
- * Fixed various problems with tracing.
- *
- * Revision 1.61  2001/09/11 01:24:36  robertj
- * Added conditional compilation to remove video and/or audio codecs.
- *
- * Revision 1.60  2001/08/06 03:08:56  robertj
- * Fission of h323.h to h323ep.h & h323con.h, h323.h now just includes files.
- *
- * Revision 1.59  2001/04/03 09:34:13  robertj
- * Fixed output of partial frames when short changed by transmitter with G.711
- *
- * Revision 1.58  2001/03/29 23:45:08  robertj
- * Added ability to get current silence detect state and threshold.
- * Changed default signal on deadband time to be much shorter.
- *
- * Revision 1.57  2001/02/09 05:13:55  craigs
- * Added pragma implementation to (hopefully) reduce the executable image size
- * under Linux
- *
- * Revision 1.56  2001/01/25 07:27:16  robertj
- * Major changes to add more flexible OpalMediaFormat class to normalise
- *   all information about media types, especially codecs.
- *
- * Revision 1.55  2000/12/19 22:33:44  dereks
- * Adjust so that the video channel is used for reading/writing raw video
- * data, which better modularizes the video codec.
- *
- * Revision 1.54  2000/09/22 01:35:49  robertj
- * Added support for handling LID's that only do symmetric codecs.
- *
- * Revision 1.53  2000/08/31 08:15:41  robertj
- * Added support for dynamic RTP payload types in H.245 OpenLogicalChannel negotiations.
- *
- * Revision 1.52  2000/07/14 14:08:10  robertj
- * Fixed stream based codec so can support stream "frames" less than maximum specified.
- *
- * Revision 1.51  2000/05/16 02:04:17  craigs
- * Added access functions for silence compression mode
- *
- * Revision 1.50  2000/05/04 11:52:35  robertj
- * Added Packets Too Late statistics, requiring major rearrangement of jitter
- *    buffer code, not also changes semantics of codec Write() function slightly.
- *
- * Revision 1.49  2000/05/02 04:32:26  robertj
- * Fixed copyright notice comment.
- *
- * Revision 1.48  2000/04/28 12:58:37  robertj
- * Changed silence detection code so does not PTRACE unless threshold actually changes.
- *
- * Revision 1.47  2000/04/10 18:52:45  robertj
- * Improved "bootstrap" of silence detection algorithm.
- *
- * Revision 1.46  2000/03/23 03:00:06  robertj
- * Changed framed codec so only writes max of bytesPerFrame regardless of length.
- *
- * Revision 1.45  2000/02/04 05:11:19  craigs
- * Updated for new Makefiles and for new video transmission code
- *
- * Revision 1.44  2000/01/13 04:03:45  robertj
- * Added video transmission
- *
- * Revision 1.43  1999/12/31 00:05:36  robertj
- * Added Microsoft ACM G.723.1 codec capability.
- *
- * Revision 1.42  1999/12/23 23:02:35  robertj
- * File reorganision for separating RTP from H.323 and creation of LID for VPB support.
- *
- * Revision 1.41  1999/12/21 07:36:43  craigs
- * Fixed problem in H323VideoCodec destructor that caused hang or segv on exit
- *
- * Revision 1.40  1999/11/29 08:59:09  craigs
- * Added new code for new video code interface
- *
- * Revision 1.39  1999/11/29 04:50:11  robertj
- * Added adaptive threshold calculation to silence detection.
- *
- * Revision 1.38  1999/11/20 00:53:47  robertj
- * Fixed ability to have variable sized frames in single RTP packet under G.723.1
- *
- * Revision 1.37  1999/11/13 14:10:59  robertj
- * Changes to make silence detection selectable.
- *
- * Revision 1.36  1999/11/11 23:28:46  robertj
- * Added first cut silence detection algorithm.
- *
- * Revision 1.35  1999/11/04 00:45:07  robertj
- * Added extra constructors for nonStandard codecs and fixed receiveAndTransmitAudioCapability problem.
- *
- * Revision 1.34  1999/11/01 00:51:13  robertj
- * Fixed problem where codec close does not dispose of attached channel.
- *
- * Revision 1.33  1999/10/19 00:04:57  robertj
- * Changed OpenAudioChannel and OpenVideoChannel to allow a codec AttachChannel with no autodelete.
- *
- * Revision 1.32  1999/10/14 12:02:40  robertj
- * Fixed assignment of t35 info in nonstandard capabilities (wrong way around).
- *
- * Revision 1.31  1999/10/10 23:00:15  craigs
- * Fixed problem with raw channel ptrs not being NULLed out after deletion
- *
- * Revision 1.30  1999/10/09 02:15:08  craigs
- * Added codec to OpenVideoDevice and OpenAudioChannel
- *
- * Revision 1.29  1999/10/09 01:20:48  robertj
- * Fixed error in G711 packet size and trace message
- *
- * Revision 1.28  1999/10/08 09:59:03  robertj
- * Rewrite of capability for sending multiple audio frames
- *
- * Revision 1.27  1999/10/08 08:32:22  robertj
- * Fixed misleading trace text.
- *
- * Revision 1.26  1999/10/08 04:58:38  robertj
- * Added capability for sending multiple audio frames in single RTP packet
- *
- * Revision 1.25  1999/09/23 07:25:12  robertj
- * Added open audio and video function to connection and started multi-frame codec send functionality.
- *
- * Revision 1.24  1999/09/21 14:51:34  robertj
- * Fixed NonStandardCapabilityInfo class virtual destructor (and name).
- *
- * Revision 1.23  1999/09/21 14:14:36  robertj
- * Added non-standard codec capability classes
- *
- * Revision 1.22  1999/09/21 08:10:03  craigs
- * Added support for video devices and H261 codec
- *
- * Revision 1.21  1999/09/18 13:24:38  craigs
- * Added ability to disable jitter buffer
- * Added ability to access entire RTP packet in codec Write
- *
- * Revision 1.20  1999/09/13 13:59:14  robertj
- * Removed incorrect comment.
- *
- * Revision 1.19  1999/09/08 04:05:49  robertj
- * Added support for video capabilities & codec, still needs the actual codec itself!
- *
- * Revision 1.18  1999/08/31 12:34:18  robertj
- * Added gatekeeper support.
- *
- * Revision 1.17  1999/08/25 05:05:36  robertj
- * Added UserInput capability.
- * Allowed the attachment of a channel on a codec to optionally delete the channel object,
- * Improved opening of audio codecs, PSoundChannel creation now in endpoint.
- *
- * Revision 1.16  1999/07/16 16:05:48  robertj
- * Added "human readable" codec type name display.
- *
- * Revision 1.15  1999/07/16 15:01:30  robertj
- * Added message print when starting GSM codec.
- *
- * Revision 1.14  1999/07/15 14:45:36  robertj
- * Added propagation of codec open error to shut down logical channel.
- * Fixed control channel start up bug introduced with tunnelling.
- *
- * Revision 1.13  1999/07/13 09:53:24  robertj
- * Fixed some problems with jitter buffer and added more debugging.
- *
- * Revision 1.12  1999/07/10 02:42:53  robertj
- * Fixed interopability problem with NetMetting 2.1 G711 capability.
- *
- * Revision 1.11  1999/07/09 06:09:49  robertj
- * Major implementation. An ENORMOUS amount of stuff added everywhere.
- *
- * Revision 1.10  1999/06/24 13:32:45  robertj
- * Fixed ability to change sound device on codec and fixed NM3 G.711 compatibility
- *
- * Revision 1.9  1999/06/22 13:49:40  robertj
- * Added GSM support and further RTP protocol enhancements.
- *
- * Revision 1.8  1999/06/14 15:08:40  robertj
- * Added GSM codec class frame work (still no actual codec).
- *
- * Revision 1.7  1999/06/14 08:44:58  robertj
- * Fixed sound buffers to be correct size for stream based audio.
- * GNU C++ compatibility
- *
- * Revision 1.6  1999/06/14 06:39:08  robertj
- * Fixed problem with getting transmit flag to channel from PDU negotiator
- *
- * Revision 1.5  1999/06/14 05:15:55  robertj
- * Changes for using RTP sessions correctly in H323 Logical Channel context
- *
- * Revision 1.4  1999/06/13 12:41:14  robertj
- * Implement logical channel transmitter.
- * Fixed H245 connect on receiving call.
- *
- * Revision 1.3  1999/06/09 05:26:19  robertj
- * Major restructuring of classes.
- *
- * Revision 1.2  1999/06/06 06:06:36  robertj
- * Changes for new ASN compiler and v2 protocol ASN files.
- *
- * Revision 1.1  1999/01/16 01:31:04  robertj
- * Initial revision
+ * $ Id $
  *
  */
 
@@ -838,6 +471,16 @@ PBoolean H323VideoCodec::SetTargetFrameTimeMs(unsigned ms)
   return TRUE;
 }
 
+void H323VideoCodec::SetEmphasisSpeed(bool /*speed*/)
+{
+
+}
+
+void H323VideoCodec::SetMaxPayloadSize(int /*maxSize*/) 
+{ 
+
+}
+
 void H323VideoCodec::SetGeneralCodecOption(const char * /*opt*/,  int /*val*/)
 {
 }
@@ -849,8 +492,9 @@ void H323VideoCodec::SendMiscCommand(unsigned command)
     logicalChannel->SendMiscCommand(command);
 }
 
-void H323VideoCodec::SetSupportedFormats(std::list<PVideoFrameInfo> & /*info*/)
+PBoolean H323VideoCodec::SetSupportedFormats(std::list<PVideoFrameInfo> & /*info*/)
 {
+    return false;
 }
 
 #endif // H323_VIDEO
@@ -1111,13 +755,20 @@ PBoolean H323FramedAudioCodec::Read(BYTE * buffer, unsigned & length, RTP_DataFr
   }
 
   if (IsRawDataHeld) {	 // If connection is onHold
-    PProcess::Sleep(5);  // Sleep to avoid CPU overload. <--Should be a better method but it works :)
+    PThread::Sleep(5);  // Sleep to avoid CPU overload. <--Should be a better method but it works :)
     length = 0;
     return TRUE;
   }
 
   PINDEX numBytes = samplesPerFrame*2;
   PINDEX count;
+
+#if 0 //PTLIB_VER >= 2110
+    bool lastPacket = true;
+    if (rawDataChannel->SourceEncoded(lastPacket,length))
+        return rawDataChannel->Read(buffer, length);
+#endif
+
   if (!ReadRaw(sampleBuffer.GetPointer(samplesPerFrame), numBytes, count))
     return FALSE;
 
@@ -1174,6 +825,16 @@ PBoolean H323FramedAudioCodec::Write(const BYTE * buffer,
 
   unsigned bytesDecoded = samplesPerFrame*2;
 
+#if 0 //PTLIB_VER >= 290
+  if (rawDataChannel->DisableDecode()) {
+      if (WriteRaw(rtpFrame.GetPayloadPtr(), rtpFrame.GetPayloadSize(), &rtpInformation))  {
+         written = length; // pretend we wrote the data, to avoid error message
+	     return TRUE;
+      } else
+         return FALSE;
+  }
+#endif
+
   if (length != 0) {
     if (length > bytesPerFrame)
       length = bytesPerFrame;
@@ -1192,7 +853,7 @@ PBoolean H323FramedAudioCodec::Write(const BYTE * buffer,
 
   // Write as 16bit PCM to sound channel
   if (IsRawDataHeld) {		// If Connection om Hold 
-	PProcess::Sleep(5);	// Sleep to avoid CPU Overload <--- Must be a better way but need it to work.
+	PThread::Sleep(5);	// Sleep to avoid CPU Overload <--- Must be a better way but need it to work.
 	return TRUE;
   } else {
 #ifdef H323_AEC

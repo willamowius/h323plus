@@ -747,6 +747,8 @@ static void SetDefaultVideoOptions(OpalMediaFormat & mediaFormat)
   mediaFormat.AddOption(new OpalMediaOptionBoolean(OpalVideoFormat::DynamicVideoQualityOption, false, OpalMediaOption::NoMerge,  false));
   mediaFormat.AddOption(new OpalMediaOptionBoolean(OpalVideoFormat::AdaptivePacketDelayOption, false, OpalMediaOption::NoMerge,  false));
   mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::FrameTimeOption,           false, OpalMediaOption::NoMerge,  9000));
+  mediaFormat.AddOption(new OpalMediaOptionBoolean(OpalVideoFormat::EmphasisSpeedOption,       false, OpalMediaOption::MaxMerge,  false));
+  mediaFormat.AddOption(new OpalMediaOptionInteger(OpalVideoFormat::MaxPayloadSizeOption,      false, OpalMediaOption::MaxMerge,  0));
 
   mediaFormat.AddOption(new OpalMediaOptionBoolean(h323_temporalSpatialTradeOffCapability_tag, false, OpalMediaOption::NoMerge,  false));
   mediaFormat.AddOption(new OpalMediaOptionBoolean(h323_stillImageTransmission_tag           , false, OpalMediaOption::NoMerge,  false));
@@ -1299,7 +1301,11 @@ class H323PluginVideoCodec : public H323VideoCodec
     virtual unsigned GetMaxBitRate() const
     { return mediaFormat.GetOptionInteger(OpalVideoFormat::MaxBitRateOption); }
 
-    PBoolean SetMaxBitRate(unsigned bitRate);
+    virtual PBoolean SetMaxBitRate(unsigned bitRate);
+
+    virtual void SetEmphasisSpeed(bool speed);
+
+    virtual void SetMaxPayloadSize(int maxSize);
 
     void SetGeneralCodecOption(const char * opt, int val)
     { SetCodecControl(codec, context, SET_CODEC_OPTIONS_CONTROL, opt, val);}
@@ -1316,7 +1322,7 @@ class H323PluginVideoCodec : public H323VideoCodec
 
     virtual void OnFlowControl(long bitRateRestriction);
 
-    virtual void SetSupportedFormats(std::list<PVideoFrameInfo> & info);
+    virtual PBoolean SetSupportedFormats(std::list<PVideoFrameInfo> & info);
 
     virtual void OnLostPartialPicture()
     { EventCodecControl(codec, context, "on_lost_partial", ""); }
@@ -1527,6 +1533,18 @@ PBoolean H323PluginVideoCodec::SetMaxBitRate(unsigned bitRate)
     return false;
 }
 
+void H323PluginVideoCodec::SetEmphasisSpeed(bool speed)
+{
+  mediaFormat.SetOptionBoolean(OpalVideoFormat::EmphasisSpeedOption, speed);
+  //UpdatePluginOptions(codec, context, mediaFormat);
+}
+
+void H323PluginVideoCodec::SetMaxPayloadSize(int maxSize) 
+{ 
+  mediaFormat.SetOptionInteger(OpalVideoFormat::MaxPayloadSizeOption, (int)maxSize);
+  UpdatePluginOptions(codec, context, mediaFormat);
+}
+
 PStringArray LoadInputDeviceOptions(const OpalMediaFormat & fmt)
 {
      PStringArray list;
@@ -1550,7 +1568,7 @@ void H323PluginVideoCodec::OnFlowControl(long bitRateRestriction)
 
 }
 
-void H323PluginVideoCodec::SetSupportedFormats(std::list<PVideoFrameInfo> & info)
+PBoolean H323PluginVideoCodec::SetSupportedFormats(std::list<PVideoFrameInfo> & info)
 {
     PluginCodec_ControlDefn * ctl = GetCodecControl(codec, SET_CODEC_FORMAT_OPTIONS);
     int i=0;
@@ -1590,8 +1608,10 @@ void H323PluginVideoCodec::SetSupportedFormats(std::list<PVideoFrameInfo> & info
             }
 		  }
           SetFrameSize(nw,nh);
+          return true;
     } else {
        PTRACE(4,"PLUGIN\tUnable to set format options in codec");
+       return false;
     }
 }
 
@@ -1918,6 +1938,8 @@ void H323PluginVideoCodec::SetVideoMode(int mode)
         break;
      }
 }
+
+
 
 #endif // H323_VIDEO
 

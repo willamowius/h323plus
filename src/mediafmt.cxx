@@ -1023,6 +1023,8 @@ const char * const OpalVideoFormat::MaxBitRateOption = "Max Bit Rate";
 const char * const OpalVideoFormat::MaxFrameSizeOption = "Max Frame Size";
 const char * const OpalVideoFormat::FrameTimeOption = "Frame Time";
 const char * const OpalVideoFormat::ClockRateOption = "Clock Rate";
+const char * const OpalVideoFormat::EmphasisSpeedOption = "Emphasis Speed";
+const char * const OpalVideoFormat::MaxPayloadSizeOption = "Max Payload Size";
 
 OpalVideoFormat::OpalVideoFormat(const char * fullName,
                                  RTP_DataFrame::PayloadTypes rtpPayloadType,

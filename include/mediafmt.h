@@ -709,6 +709,8 @@ class OpalVideoFormat : public OpalMediaFormat
     static const char * const MaxFrameSizeOption;
     static const char * const FrameTimeOption;
 	static const char * const ClockRateOption;
+    static const char * const EmphasisSpeedOption;
+    static const char * const MaxPayloadSizeOption;
 
 };
 #endif

@@ -583,7 +583,7 @@ struct GenericOptionOrder {
     PString name;
     PString order;
 } OptionOrder[] = {
-   { "h.264", "41,42,3,6,4,5,7,10" },
+   { "h.264", "41,42,3,6,4,5,7,8,9,10,11" },
    { "", "" }
 };
 
@@ -685,7 +685,7 @@ PBoolean H323GenericCapabilityInfo::OnSendingGenericPDU(H245_GenericCapability &
           continue;
         break;
     }
-    
+ 
     H245_GenericParameter * param = new H245_GenericParameter;
 
     param->m_parameterIdentifier.SetTag(H245_ParameterIdentifier::e_standard);
@@ -694,7 +694,7 @@ PBoolean H323GenericCapabilityInfo::OnSendingGenericPDU(H245_GenericCapability &
 
     if (PIsDescendant(&option, OpalMediaOptionUnsigned) && parameterValue == 0)
         continue;
-
+  
     if (PIsDescendant(&option, OpalMediaOptionBoolean)) {
       if (!((const OpalMediaOptionBoolean &)option).GetValue()) {
         delete param;
@@ -3569,7 +3569,7 @@ H323Capability * H323Capabilities::FindCapability(H323Capability::MainTypes main
 
 H323Capability * H323Capabilities::FindCapability(H323Capability::MainTypes mainType,
                                                   const PASN_Sequence & subTypePDU,
-                                                  const unsigned & capID,
+                                                  const unsigned & /*capID*/,
                                                   const H245_TerminalCapabilitySet & tcs) const
 {
     if (mainType != H323Capability::e_Security)
@@ -3584,8 +3584,8 @@ H323Capability * H323Capabilities::FindCapability(H323Capability::MainTypes main
        if (m_capNo == m_remNo) {
           H323Capability * assocCap = FindCapability(tcs.m_capabilityTable[i].m_capability);
           if (assocCap != NULL) {
-             assocCap->SetAssociatedCapability(capID);
-             return FindCapability(H323Capability::e_Security, assocCap->GetCapabilityNumber());
+//             assocCap->SetAssociatedCapability(capID);
+              return FindCapability(H323Capability::e_Security, assocCap->GetCapabilityNumber());
           }
        }
     }

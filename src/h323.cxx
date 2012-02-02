@@ -593,6 +593,7 @@ H323Connection::H323Connection(H323EndPoint & ep,
   m_H46019CallReceiver = false;
   m_H46019enabled = false;
   m_H46019multiplex = false;
+  m_H46019offload = false;
   m_h245Connect = false;
 #endif
 #ifdef H323_H46024A
@@ -602,6 +603,10 @@ H323Connection::H323Connection(H323EndPoint & ep,
   m_H46024Benabled = false;
   m_H46024Bstate = 0;
 #endif
+#endif
+
+#ifdef H323_H235
+  localCapabilities.SetEncryptionContext(ep.GetMediaEncryptionContext());
 #endif
 
   nonCallConnection = FALSE;
@@ -2351,8 +2356,10 @@ H323Connection::CallEndReason H323Connection::SendSignalSetup(const PString & al
 
     // Update the Q.931 Information Element (if is an E.164 address)
     PString e164 = H323GetAliasAddressE164(newAliasAddresses);
-    if (!e164)
+    if (!e164) {
       remotePartyNumber = e164;
+      setupPDU.GetQ931().SetCalledPartyNumber(e164);
+    }
   }
 
   if (addAccessTokenToSetup && !gkAccessTokenOID && !gkAccessTokenData.IsEmpty()) {
@@ -2534,6 +2541,15 @@ PBoolean H323Connection::OnNatDetected()
        return false;
 #endif
     return true;
+}
+
+void H323Connection::DisableNATSupport() { 
+#if H323_H460
+    if (!IsH46019Multiplexed())
+#endif
+        NATsupport = false;
+
+    remoteIsNAT = false; 
 }
 
 #ifdef P_STUN
@@ -3918,6 +3934,35 @@ void H323Connection::SetInitialBandwidth(H323Capability::MainTypes captype, int 
 #endif
 }
 
+void H323Connection::SetMaxPayloadSize(H323Capability::MainTypes captype, int size)
+{
+#ifdef H323_VIDEO
+  for (PINDEX i=0; i< localCapabilities.GetSize(); ++i) {
+    if (localCapabilities[i].GetMainType() == captype) {
+      OpalMediaFormat & fmt = localCapabilities[i].GetWritableMediaFormat();
+      if (fmt.HasOption(OpalVideoFormat::MaxPayloadSizeOption)) {
+             fmt.SetOptionInteger(OpalVideoFormat::MaxPayloadSizeOption,size);
+  //           if (fmt.HasOption("Generic Parameter 9"))   // for H.264....
+  //               fmt.SetOptionInteger("Generic Parameter 9",size);
+      } 
+    }
+  }
+#endif
+}
+
+void H323Connection::SetEmphasisSpeed(H323Capability::MainTypes captype, bool speed)
+{
+#ifdef H323_VIDEO
+  for (PINDEX i=0; i< localCapabilities.GetSize(); ++i) {
+    if (localCapabilities[i].GetMainType() == captype) {
+      OpalMediaFormat & fmt = localCapabilities[i].GetWritableMediaFormat();
+      if (fmt.HasOption(OpalVideoFormat::EmphasisSpeedOption))
+          fmt.SetOptionBoolean(OpalVideoFormat::EmphasisSpeedOption,speed);
+    }
+  }
+#endif
+}
+
 
 void H323Connection::OnSetLocalCapabilities()
 {
@@ -5227,10 +5272,10 @@ RTP_Session * H323Connection::UseSession(unsigned sessionID,
 
 PBoolean H323Connection::OnHandleH245GenericMessage(h245MessageType type, const H245_GenericMessage & pdu)
 {
-    if (!pdu.HasOptionalField(H245_GenericMessage::e_subMessageIdentifier)) {
-        PTRACE(2,"H323\tUnIdentified Generic Message Received!");
-        return false;
-    }
+    //if (!pdu.HasOptionalField(H245_GenericMessage::e_subMessageIdentifier)) {
+    //    PTRACE(2,"H323\tUnIdentified Generic Message Received!");
+    //    return false;
+    //}
 
     PString guid = PString();
     const H245_CapabilityIdentifier & id = pdu.m_messageIdentifier;
@@ -5267,25 +5312,26 @@ PBoolean H323Connection::ReceivedH46024AMessage(bool toStart)
         if (m_H46024Ainitator && !toStart) {
             PTRACE(4,"H46024A\tCONFLICT: wait for Media initiate Indication");
             return true;
-        } else {
-           PTRACE(4,"H46024A\tReceived Indication to " << (toStart ? "initiate" : "wait for") << " direct connection");
+        } 
 
-               if (m_H46024Astate == 0)                // We are the receiver
-                m_H46024Astate = (toStart ? 1 : 2); 
+        PTRACE(4,"H46024A\tReceived Indication to " << (toStart ? "initiate" : "wait for") << " direct connection");
+
+            if (m_H46024Astate == 0)                // We are the receiver
+                m_H46024Astate = (toStart ? 2 : 1); 
 
             for (std::map<unsigned,NAT_Sockets>::const_iterator r = m_NATSockets.begin(); r != m_NATSockets.end(); ++r) {
                 NAT_Sockets sockets = r->second;
                 ((H46019UDPSocket *)sockets.rtp)->H46024Adirect(toStart);
                 ((H46019UDPSocket *)sockets.rtcp)->H46024Adirect(toStart);
             }
-        }
+    //    }
 
         if (!toStart) {
             PTRACE(4,"H46024A\tReply for remote to " << (!toStart ? "initiate" : "wait for") << " direct connection");
             SendH46024AMessage(!toStart);
         }
-        m_H46024Astate = 3;
-    }
+       m_H46024Astate = 3;
+   }
     return true;
 }
 
@@ -5432,16 +5478,16 @@ H245_GenericParameter & BuildGenericUnsigned(H245_GenericParameter & param, unsi
 void BuildH46024AIndication(H323ControlPDU & pdu, const PString & oid, bool sender)
 {
       H245_GenericMessage & cap = pdu.Build(H245_IndicationMessage::e_genericIndication);
-      cap.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
+  //    cap.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
       H245_CapabilityIdentifier & id = cap.m_messageIdentifier;
       id.SetTag(H245_CapabilityIdentifier::e_standard);
       PASN_ObjectId & gid = id;
       gid.SetValue(oid);
-    // Indicate whether remote can start channel.
-      cap.IncludeOptionalField(H245_GenericMessage::e_messageContent);
-      H245_ArrayOf_GenericParameter & data = cap.m_messageContent;
-      data.SetSize(1);
-      BuildGenericInteger(data[0], 0, (sender ? 1 : 0));
+    // Indicate whether remote can start channel. // standard does specify who starts - SH
+      //cap.IncludeOptionalField(H245_GenericMessage::e_messageContent);
+      //H245_ArrayOf_GenericParameter & data = cap.m_messageContent;
+      //data.SetSize(1);
+      //BuildGenericInteger(data[0], 0, (sender ? 1 : 0));
 }
 #endif // H323_H46024A
 
@@ -5496,15 +5542,15 @@ void BuildH46024BIndication(H323ControlPDU & pdu)
 #ifdef H323_H46024A
 PBoolean H323Connection::SendH46024AMessage(bool sender)
 {
-    if ((sender && m_H46024Astate == 1) ||  // Message already sent
-        (!sender && m_H46024Astate == 2))    // Message already sent
+    if ((sender && m_H46024Astate == 2) ||  // Message already sent
+        (!sender && m_H46024Astate == 1))    // Message already sent
                 return false;
 
     m_H46024Ainitator = sender;
     if (m_H46024Astate == 0)                // We are instigator
         m_H46024Astate = (sender ? 2 : 1);  
 
-    PTRACE(4,"H46024A\tSending Control DirectMedia " << (sender ? "Initiate" : "Respond"));
+    PTRACE(4,"H46024A\tSending Control DirectMedia " << (sender ? "Wait" : "Initiate"));
 
     H323ControlPDU pdu;
     BuildH46024AIndication(pdu,H46024AOID,sender); 
@@ -5518,7 +5564,7 @@ PBoolean H323Connection::OnReceivedGenericMessage(h245MessageType type, const PS
 #ifdef H323_H46024A
     if (id == H46024AOID && type == h245indication) {
         PTRACE(4,"H46024A\tReceived Generic Message.");
-        return ReceivedH46024AMessage(true);
+        return ReceivedH46024AMessage(m_H46024Ainitator);
     }
 #endif
 #ifdef H323_H46024B
@@ -5535,9 +5581,9 @@ PBoolean H323Connection::OnReceivedGenericMessage(h245MessageType type, const PS
 #ifdef H323_H46024A
     if (id == H46024AOID && type == h245indication) {
         PTRACE(4,"H46024A\tReceived Generic Indication.");
-            unsigned start=0;
-            if (GetUnsignedGenericMessage(0,content,start))
-                return ReceivedH46024AMessage((bool)start);
+          //  unsigned start=0;
+          //  if (GetUnsignedGenericMessage(0,content,start))
+                return ReceivedH46024AMessage(m_H46024Ainitator);
     }
 #endif
 
@@ -5620,7 +5666,7 @@ PBoolean H323Connection::OnReceiveOLCGenericInformation(unsigned sessionID,
 #ifdef H323_H46018
             const PASN_ObjectId & oid = id;    
             const H245_ArrayOf_GenericParameter & msg = info.m_messageContent;
-            if (m_H46019enabled && (oid.AsString() == H46019OID)) {
+            if (m_H46019enabled && (oid.AsString() == H46019OID) && msg.GetSize() > 0) {
                 H245_GenericParameter & val = msg[0];
                  if (val.m_parameterValue.GetTag() != H245_ParameterValue::e_octetString) 
                      break;
@@ -6547,12 +6593,23 @@ void H323Connection::H46019SetCallReceiver()
 
 void H323Connection::H46019Enabled() 
 { 
-    m_H46019enabled = true; 
+    if (!m_H46019offload)
+       m_H46019enabled = true; 
+}
+
+void H323Connection::H46019SetOffload() 
+{ 
+    if (!m_H46019multiplex)
+         m_H46019enabled = false; 
+
+    m_H46019offload = true;
 }
 
 void H323Connection::H46019MultiEnabled()
 {
+    m_H46019enabled = true;
     m_H46019multiplex = true;
+    NATsupport = true;
 }
 
 PBoolean H323Connection::IsH46019Multiplexed() const

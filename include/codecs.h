@@ -859,6 +859,19 @@ class H323VideoCodec : public H323Codec
     );
 
     /**
+       Set whether is preference frame rate over video quality.
+       This will emphasize speed over quality for a given bitrate.
+       With Speed the video frame size may be smaller with a higher frame rate (>20)
+       With Quality the video frame size is larger with a lower frame rate (>10)
+    */
+    virtual void SetEmphasisSpeed(bool speed);
+
+    /**
+       Set the maximum allowable MTU Size of the RTP Frame
+    */
+    virtual void SetMaxPayloadSize(int maxSize);
+
+    /**
        Set a miscellaneous option setting in the video codec.
        This message is used for Video Plugin Codecs.
     */
@@ -880,8 +893,9 @@ class H323VideoCodec : public H323Codec
 
    /**
       Set the supported Formats the codec is to support
+      Return whether codec supports setting Supported Formats.
     */
-    virtual void SetSupportedFormats(std::list<PVideoFrameInfo> & info);
+    virtual PBoolean SetSupportedFormats(std::list<PVideoFrameInfo> & info);
 
   protected:
 

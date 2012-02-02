@@ -42,7 +42,7 @@
 #endif
 
 #include "openh323buildopts.h"
-#if H323_H235
+#ifdef H323_H235
 #include "h235/h235caps.h"
 #else
 #include "h323caps.h"
@@ -1362,6 +1362,23 @@ class H323Connection : public PObject
          int bitRate                            ///< BitRate (in bytes)
     );
 
+    /**Set the Payload Size
+       This will set the RTP Payloadsize limit.
+       By Default it is 1400. 
+      */
+    void SetMaxPayloadSize(
+        H323Capability::MainTypes captype,      ///< Capability Type
+        int size                                ///< Payload size
+    );
+
+    /**Set the Video to emphasis Speed not Quality
+       This will weigh frame rate over frame size
+      */
+     void SetEmphasisSpeed(
+         H323Capability::MainTypes captype,     ///< Capability Type 
+         bool speed                             ///< Payload size
+     );
+
     /**Callback to modify the outgoing H245_OpenLogicalChannel.
        The default behaviour does nothing.
       */
@@ -2229,8 +2246,8 @@ class H323Connection : public PObject
 
     /** Set Remote is behind NAT
     */
-    void SetRemoteNAT()
-    { remoteIsNAT = true; }
+    void SetRemoteNAT(bool isNat = true)
+    { remoteIsNAT = isNat; }
 
     /** Is NAT Support Available
       */
@@ -2239,8 +2256,7 @@ class H323Connection : public PObject
 
     /** Disable NAT Support for allocation of RTP sockets
       */
-    void DisableNATSupport()
-    { NATsupport = false; remoteIsNAT = false; }
+    void DisableNATSupport();
     
     /** Set the information that the call parties are 
         behind the same NAT device
@@ -2814,6 +2830,10 @@ class H323Connection : public PObject
     /** Is H46019 Multiplexing enabled for this call
       */
     PBoolean IsH46019Multiplexed() const;
+
+    /** Is H46019 offload enabled for this call
+      */
+    void H46019SetOffload();
 #endif
 
 #ifdef H323_H46024A
@@ -3235,6 +3255,7 @@ class H323Connection : public PObject
     PBoolean m_H46019CallReceiver;
     PBoolean m_H46019enabled;
     PBoolean m_H46019multiplex;
+    PBoolean m_H46019offload;
     PBoolean m_h245Connect;
 #endif
 
