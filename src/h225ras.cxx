@@ -534,7 +534,7 @@ PBoolean H225_RAS::OnReceiveGatekeeperConfirm(const H323RasPDU &, const H225_Gat
   if (!CheckForResponse(H225_RasMessage::e_gatekeeperRequest, gcf.m_requestSeqNum))
     return FALSE;
 
-  if (gcf.HasOptionalField(H225_GatekeeperConfirm::e_gatekeeperIdentifier) {
+  if (gcf.HasOptionalField(H225_GatekeeperConfirm::e_gatekeeperIdentifier)) {
       if (gatekeeperIdentifier.IsEmpty())
         gatekeeperIdentifier = gcf.m_gatekeeperIdentifier;
       else {
