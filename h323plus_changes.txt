@@ -1,5 +1,6 @@
 
 H323plus 1.24.0 - 1.24.1
+FIX Memory allocation of RTP Frames (G.722 on Windows)
 Added UPnP Standalone support (without H.460.23/.24)
 Major rehashing of UPnP code
 Added EmphasisSpeed and MaxPayloadSize support to plugins
