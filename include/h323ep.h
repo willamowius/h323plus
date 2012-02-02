@@ -90,6 +90,14 @@ class H460PresenceHandler;
 class GNUGK_Feature;
 #endif
 
+#ifdef H323_H235
+class H235Context;
+#endif
+
+#ifdef H323_UPnP
+class PNatMethod_UPnP;
+#endif
+
 #ifdef H323_FILE
 class H323FileTransferHandler;
 class H323FileTransferList;
@@ -1375,6 +1383,12 @@ class H323EndPoint : public PObject
     ) const;
 #endif
 
+#ifdef H323_H235
+    /** Retrieve Media Encryption Context 
+      */
+    H235Context * GetMediaEncryptionContext();
+#endif
+
 #ifdef H323_FILE
     /** Open File Transfer Session
         Use this to initiate a file transfer.
@@ -1991,6 +2005,19 @@ class H323EndPoint : public PObject
     void SetAECEnabled(PBoolean enabled)  { enableAEC = enabled; }
 #endif
 
+#ifdef H323_UPnP
+    /**Initialise UPnP
+      */
+    PBoolean InitialiseUPnP();
+
+    /**On UPnP detected and tested.
+       return true to make available.
+      */
+    virtual PBoolean OnUPnPAvailable(const PString & device, 
+                             const PIPSocket::Address & publicIP, 
+                             PNatMethod_UPnP * nat);
+#endif
+
 #ifdef P_STUN
 
     /**Return the STUN server to use.
@@ -2021,14 +2048,15 @@ class H323EndPoint : public PObject
 
     /** Get the Nat Methods List
        */
-    PNatStrategy & GetNatMethods();
+    PNatStrategy & GetNatMethods() const;
 
     virtual void NATMethodCallBack(const PString & /*NatID*/,    ///< Method Identifier
                                 PINDEX /*msgID*/,                ///< Message Identifer
                                 const PString & /*message*/        ///< Message
                                 ) {};
 
-#endif // P_NONCORE
+#endif // P_STUN
+
 
     virtual PBoolean OnUnsolicitedInformation(const H323SignalPDU & /*pdu*/)
     { return FALSE; }
@@ -2431,8 +2459,6 @@ class H323EndPoint : public PObject
 
 #ifdef P_STUN
     PNatStrategy * natMethods;
-    PSTUNClient * stun;
-    PBoolean disableSTUNTranslate;
 #endif
 
 #ifdef H323_H46019M
@@ -2552,6 +2578,10 @@ class H323EndPoint : public PObject
 
 #ifdef H323_GNUGK
     GNUGK_Feature * gnugk;
+#endif
+
+#ifdef H323_H235
+    H235Context * m_encContext;
 #endif
 
     void RegInvokeReRegistration();

@@ -67,6 +67,10 @@
 #include "h460/h460_std23.h"
 #endif
 
+#ifdef H323_UPnP
+#include "h460/upnpcp.h"
+#endif
+
 #ifdef H323_H460P
 #include "h460/h460_oid3.h"
 #endif
@@ -91,6 +95,10 @@
 
 #ifdef H323_H224
 #include <h224handler.h>
+#endif
+
+#ifdef H323_H235
+#include "h235/h235con.h"
 #endif
 
 #ifdef H323_FILE
@@ -402,8 +410,6 @@ H323EndPoint::H323EndPoint()
 
 #ifdef P_STUN
   natMethods = new PNatStrategy();
-  stun = NULL;
-  disableSTUNTranslate = FALSE;
 #endif
 
 #ifdef H323_H46019M
@@ -507,6 +513,10 @@ H323EndPoint::H323EndPoint()
   gnugk = NULL;
 #endif
 
+#ifdef H323_H235
+  m_encContext = NULL;
+#endif
+
   m_useH225KeepAlive = PFalse;
   m_useH245KeepAlive = PFalse;
 
@@ -539,8 +549,12 @@ H323EndPoint::~H323EndPoint()
   // And shut down the gatekeeper (if there was one)
   RemoveGatekeeper();
 
-#if H323_GNUGK
+#ifdef H323_GNUGK
   delete gnugk;
+#endif
+
+#ifdef H323_H235
+  delete m_encContext;
 #endif
 
   // Shut down the listeners as soon as possible to avoid race conditions
@@ -1469,6 +1483,15 @@ PBoolean H323EndPoint::ResolveCallParty(const PString & _remoteParty, PStringLis
       }
 	}
 
+#if P_HAS_IPV6
+  // Again horrible code should be able to get interface listing for a given protocol - SH
+  PBoolean ipv6IPv4Discover = false;
+  if (PIPSocket::GetDefaultIpAddressFamily() == AF_INET6) {
+      PIPSocket::SetDefaultIpAddressFamilyV4();
+      ipv6IPv4Discover = true;
+  }
+#endif
+
      // attempt a DNS SRV lookup to detect a call signalling entry
 	PBoolean found = FALSE;
     if (remoteParty.Find('@') != P_MAX_INDEX) {
@@ -1481,13 +1504,17 @@ PBoolean H323EndPoint::ResolveCallParty(const PString & _remoteParty, PStringLis
 	   if (!found) str.RemoveAll();
 	   if (!found && (PDNS::LookupSRV(number,"_h323cs._tcp.",str))) {
 		   for (PINDEX i=0; i<str.GetSize(); i++) {
-		     PString a = str[i].Mid(str[i].Find('@')+1);
-	         PTRACE(4, "H323\tDNS SRV CS located remote party " << _remoteParty << " at " << a);
+		     PString dom = str[i].Mid(str[i].Find('@')+1);
+			 if (dom.Left(7) == "0.0.0.0") {
+				PTRACE(2, "EP\tERROR in CS SRV lookup (" << str[i] << ")");
+				continue;
+			 }
+	         PTRACE(4, "H323\tDNS SRV CS located remote party " << _remoteParty << " at " << dom);
              addresses.AppendString(str[i]);
 			 found = TRUE;
 		   }
        }
-/*
+
 	   if (!found) str.RemoveAll();
 	   if (!found && (PDNS::LookupSRV(number,"_h323ls._udp.",str))) {
 		   for (PINDEX j=0; j<str.GetSize(); j++) {
@@ -1505,7 +1532,7 @@ PBoolean H323EndPoint::ResolveCallParty(const PString & _remoteParty, PStringLis
 				}
 		   }
 	   }
-*/
+
 	   if (!found) {
            PTRACE(4, "H323\tDNS SRV Cannot resolve remote party " << remoteParty);
 		   addresses = PStringList(remoteParty);
@@ -1513,11 +1540,15 @@ PBoolean H323EndPoint::ResolveCallParty(const PString & _remoteParty, PStringLis
 	} else {
        addresses = PStringList(remoteParty);
     }
-	return TRUE;
-   }  
+#if P_HAS_IPV6
+     if (ipv6IPv4Discover)
+        PIPSocket::SetDefaultIpAddressFamilyV6();
+#endif
+    return true;   
+   }
 #endif
     addresses = PStringList(remoteParty);
-	return TRUE;
+	return true;
 }
 
 PBoolean H323EndPoint::ParsePartyName(const PString & _remoteParty,
@@ -1871,7 +1902,7 @@ PBoolean H323EndPoint::ClearCall(const PString & token,
 }
 
 void H323EndPoint::OnCallClearing(H323Connection * /*connection*/,
-								  H323Connection::CallEndReason /*reason*/)
+                             H323Connection::CallEndReason /*reason*/)
 {
 }
 
@@ -2926,7 +2957,7 @@ PSTUNClient * H323EndPoint::GetSTUN(const PIPSocket::Address & ip) const
   if (ip.IsValid() && IsLocalAddress(ip))
     return NULL;
 
-  return stun;
+  return (PSTUNClient *)GetNatMethods().GetMethodByName("STUN");
 }
 
 PNatMethod * H323EndPoint::GetPreferedNatMethod(const PIPSocket::Address & ip)
@@ -2953,7 +2984,7 @@ PNatMethod * H323EndPoint::GetPreferedNatMethod(const PIPSocket::Address & ip)
 
 }
 
-PNatStrategy & H323EndPoint::GetNatMethods() 
+PNatStrategy & H323EndPoint::GetNatMethods() const 
 { 
 	return *natMethods; 
 }
@@ -2961,21 +2992,12 @@ PNatStrategy & H323EndPoint::GetNatMethods()
 void H323EndPoint::SetSTUNServer(const PString & server)
 {
   natMethods->RemoveMethod("STUN");
-  delete stun;
 
-  if (server.IsEmpty())
-    stun = NULL;
-  else {
-#if PTLIB_VER >= 2110
-    stun = new PSTUNClient();
+  if (!server.IsEmpty()) {
+    PSTUNClient * stun = (PSTUNClient *)GetNatMethods().LoadNatMethod("STUN");
     stun->SetServer(server);
     stun->SetPortRanges(GetUDPPortBase(), GetUDPPortMax(),
                            GetRtpIpPortBase(), GetRtpIpPortMax());
-#else
-    stun = new PSTUNClient(server,
-                           GetUDPPortBase(), GetUDPPortMax(),
-                           GetRtpIpPortBase(), GetRtpIpPortMax());
-#endif
 
     natMethods->AddMethod(stun);
 
@@ -2987,29 +3009,53 @@ void H323EndPoint::SetSTUNServer(const PString & server)
 
 #endif // P_STUN
 
+#ifdef H323_UPnP
+PBoolean H323EndPoint::InitialiseUPnP()
+{
+     PNatMethod_UPnP * natMethod = (PNatMethod_UPnP *)GetNatMethods().GetMethodByName("UPnP");
+     if (natMethod) 
+         return true;
+ 
+     natMethod = (PNatMethod_UPnP *)GetNatMethods().LoadNatMethod("UPnP");
+     if (!natMethod) 
+         return false;
+
+     PTRACE(4,"EP\tStarting UPnP");
+     natMethod->AttachEndPoint(this);
+     GetNatMethods().AddMethod(natMethod);
+     return true;
+}
+
+PBoolean H323EndPoint::OnUPnPAvailable(const PString & device, const PIPSocket::Address & publicIP, PNatMethod_UPnP * nat)
+{
+    PTRACE(2,"EP\tUPnP Device " << device << " Public IP: " << publicIP);
+
+    NATMethodCallBack("UPnP", 1, "Available");
+    NATMethodCallBack("UPnP", 3,  publicIP);
+
+    return false;
+}
+
+#endif  // H323_UPnP
+
 void H323EndPoint::InternalTranslateTCPAddress(PIPSocket::Address & localAddr, const PIPSocket::Address & remoteAddr, 
 											   const H323Connection * connection)
 {
-#ifdef P_STUN
-  // if using STUN server, then translate internal local address to external if required
-  PBoolean disableSTUN;
-  if (connection != NULL)
-    disableSTUN = !connection->HasNATSupport();
-  else
-    disableSTUN = disableSTUNTranslate;
 
-  PIPSocket::Address addr;
-  if (
-       stun != NULL && !disableSTUN && (
-        (stun->GetRTPSupport() == PSTUNClient::RTPSupported) ||
-        (stun->GetRTPSupport() == PSTUNClient::RTPIfSendMedia) 
-       ) && 
-       localAddr.IsRFC1918() && 
-       !remoteAddr.IsRFC1918() && 
-       stun->GetExternalAddress(addr)
-     )
-  {
-    localAddr = addr;
+  if (remoteAddr.GetVersion() != 4)
+      return;
+
+#ifdef P_STUN
+  // if using NAT Method, then translate internal local address to external if required
+  if (connection && !connection->HasNATSupport())
+      return;
+
+  if (localAddr.IsRFC1918() && !remoteAddr.IsRFC1918()) {
+    const PNatList & list = natMethods->GetNATList();
+      for (PINDEX i=0; i < list.GetSize(); i++) {
+        if (list[i].IsAvailable(remoteAddr) && list[i].GetExternalAddress(localAddr))
+             break;
+      }
   }
   else
 #endif // P_STUN
@@ -3397,5 +3443,15 @@ void H323EndPoint::RegMethod(PThread &, INT)
 
 	gatekeeper->ReRegisterNow();
 }
+
+#ifdef H323_H235
+H235Context * H323EndPoint::GetMediaEncryptionContext()
+{
+    if (m_encContext == NULL) 
+        m_encContext = new H235Context();
+
+    return m_encContext;
+}
+#endif
 
 

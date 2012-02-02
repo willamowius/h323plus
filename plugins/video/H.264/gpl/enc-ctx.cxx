@@ -90,12 +90,12 @@ X264EncoderContext::X264EncoderContext()
 
    // No multicore support
    _context.i_threads           = 1;
-  // _context.b_sliced_threads    = 1;
+   _context.b_sliced_threads    = 1;
    _context.b_deterministic     = 1;
    _context.i_sync_lookahead    = 0;
    _context.i_frame_reference   = 1;
    _context.i_bframe            = 0;
- //  _context.b_vfr_input         = 0;
+   _context.b_vfr_input         = 0;
    _context.rc.b_mb_tree        = 0;
  
   // No aspect ratio correction 
@@ -104,8 +104,8 @@ X264EncoderContext::X264EncoderContext()
   
 #if X264_BUILD > 101
   // No automatic keyframe generation
-  _context.i_keyint_max               = X264_KEYINT_MAX_INFINITE;
-  _context.i_keyint_min               = X264_KEYINT_MAX_INFINITE;
+  _context.i_keyint_max               = 90; // X264_KEYINT_MAX_INFINITE;
+  _context.i_keyint_min               = 15; // X264_KEYINT_MAX_INFINITE;
 #endif
 
   // Enable logging
@@ -133,10 +133,21 @@ X264EncoderContext::X264EncoderContext()
   _context.rc.f_rf_constant       	= 16.0;	// great quality
 #else
    // Rate control set to ABR mode
+#if 1
+    _context.rc.i_rc_method            = X264_RC_ABR;
+    _context.rc.f_rate_tolerance       = 1.0;
+    _context.rc.i_lookahead            = 0;
+    _context.rc.i_qp_step              = 6;
+    _context.rc.psz_stat_out           = 0;
+    _context.rc.psz_stat_in            = 0;
+    _context.rc.f_vbv_buffer_init      = 0;
+    _context.i_scenecut_threshold      = 0;
+#else
   _context.rc.i_rc_method            = X264_RC_ABR;
   _context.rc.i_qp_min              = 25;
   _context.rc.i_qp_max              = 51;
-  _context.rc.f_rate_tolerance  	= 1;
+  _context.rc.i_qp_step             = 6;
+  _context.rc.f_rate_tolerance  	= 1.0;
   _context.rc.i_vbv_max_bitrate 	= 0;
   _context.rc.psz_stat_out          = 0;
   _context.rc.psz_stat_in           = 0;
@@ -144,6 +155,7 @@ X264EncoderContext::X264EncoderContext()
   _context.rc.i_vbv_buffer_size 	= 0;
   _context.rc.i_lookahead       	= 0;
   _context.i_scenecut_threshold     = 0;
+#endif
   SetTargetBitrate    ((unsigned)(H264_BITRATE / 1000));
 #endif
 
