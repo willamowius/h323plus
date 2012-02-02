@@ -316,6 +316,11 @@ class PNatMethod_H46019  : public PNatMethod
       */
     static PUDPSocket * & GetMultiplexSocket(bool rtp);
 
+    /** Get multiplex socket
+      */
+    static PUDPSocket * & GetMultiplexReadSocket(bool rtp);
+
+
     /** Register a multiplex socket
       */
     static void RegisterSocket(bool rtp, unsigned id, PUDPSocket * socket);
@@ -472,6 +477,9 @@ class H46019MultiplexSocket : public PUDPSocket
 
     virtual PBoolean Close();
 
+    PString GetLocalAddress();
+    PBoolean GetLocalAddress(Address & addr, WORD & port);
+
     PUDPSocket * & GetSubSocket()  { return m_subSocket; }
 
   private:
@@ -540,10 +548,6 @@ class H46019UDPSocket : public PUDPSocket
 
 #ifdef H323_H46019M
 
-    virtual PBoolean GetPeerAddress(
-      PIPSocketAddressAndPort & addr    ///< Variable to receive hosts IP address and port.
-    );
-
     /** Get Multiplex Address
       */
     void GetMultiplexAddress(H323TransportAddress & address,       ///< Multiplex Address
@@ -590,7 +594,7 @@ class H46019UDPSocket : public PUDPSocket
     );
 #endif
 
-#ifdef H323_H46024A
+
      /**Read a datagram from a remote computer
        @return PTrue if any bytes were sucessfully read.
        */
@@ -605,11 +609,25 @@ class H46019UDPSocket : public PUDPSocket
        @return PTrue if all the bytes were sucessfully written.
      */
     virtual PBoolean WriteTo(
+      const void * buf,     ///< Data to be written as URGENT TCP data.
+      PINDEX len,           ///< Number of bytes pointed to by #buf#.
+      const Address & addr, ///< Address to which the datagram is sent.
+      WORD port             ///< Port to which the datagram is sent.
+    );
+
+    /**Write a datagram to a remote computer.
+       @return PTrue if all the bytes were sucessfully written.
+     */
+    virtual PBoolean WriteTo(
       const void * buf,   ///< Data to be written as URGENT TCP data.
       PINDEX len,         ///< Number of bytes pointed to by #buf#.
       const Address & addr, ///< Address to which the datagram is sent.
-      WORD port           ///< Port to which the datagram is sent.
+      WORD port,           ///< Port to which the datagram is sent.
+      unsigned id          ///< id (could be MUX ID default = 0)
     );
+
+
+#if defined(H323_H46024A) || defined(H323_H46024B)
 
     enum  probe_state {
         e_notRequired,        ///< Polling has not started
@@ -629,13 +647,29 @@ class H46019UDPSocket : public PUDPSocket
         BYTE        cui[20];    // SHA-1 is always 160 (20 Bytes)
     };
 
+
+    /** Get Peer Address
+      */
+    virtual PBoolean GetPeerAddress(
+        PIPSocketAddressAndPort & addr    ///< Variable to receive hosts IP address and port.
+    );
+
+
     /** Set Alternate Direct Address
       */
-    virtual void SetAlternateAddresses(const H323TransportAddress & address, const PString & cui, unsigned muxID);
+    virtual void SetAlternateAddresses(
+        const H323TransportAddress & address, 
+        const PString & cui, 
+        unsigned muxID
+    );
 
      /** Set Alternate Direct Address
       */
-    virtual void GetAlternateAddresses(H323TransportAddress & address, PString & cui, unsigned & muxID);
+    virtual void GetAlternateAddresses(
+        H323TransportAddress & address, 
+        PString & cui, 
+        unsigned & muxID
+    );
 
     /** Callback to check if the address received is a permitted alternate
       */
@@ -660,9 +694,9 @@ class H46019UDPSocket : public PUDPSocket
 
  // H.460.19 Keepalives
     void InitialiseKeepAlive();    ///< Start the keepalive
-    void SendRTPPing(const PIPSocket::Address & ip, const WORD & port);
+    void SendRTPPing(const PIPSocket::Address & ip, const WORD & port, unsigned id = 0);
     void SendRTCPPing();
-    PBoolean SendRTCPFrame(RTP_ControlFrame & report, const PIPSocket::Address & ip, WORD port);
+    PBoolean SendRTCPFrame(RTP_ControlFrame & report, const PIPSocket::Address & ip, WORD port, unsigned id = 0);
     PMutex PingMutex;
 
 #ifdef H323_H46024A
@@ -704,7 +738,7 @@ private:
     PBoolean         m_shutDown;                    ///< Shutdown
 #endif
 
-#ifdef H323_H46024A
+#if defined(H323_H46024A) || defined(H323_H46024B)
     // H46024 Annex A support
     PString m_CUIrem;                                        ///< Remote CUI
     PIPSocket::Address m_locAddr;  WORD m_locPort;            ///< local Address (address used when starting socket)

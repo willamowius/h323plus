@@ -101,7 +101,7 @@ PBoolean H460_FeatureStd18::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu
     const PNatList & list = natMethods.GetNATList();
     if (list.GetSize() > 0) {
       for (PINDEX i=0; i < list.GetSize(); i++) {  
-          if (list[i].GetName() == "STUN" && list[i].IsAvailable(PIPSocket::GetDefaultIpAny())) {
+          if (list[i].GetName() == "STUN" && list[i].IsAvailable()) {
              return false;
         }
       }
@@ -217,8 +217,8 @@ void H460_FeatureStd19::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
 #ifdef H323_H46019M
         H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
         if (feat.Contains(H46019_Multiplex)) { 
+             EnableMultiplex();
              multiSupport = true;
-             CON->H46019MultiEnabled();
         }
         
         /// MultiServer?
@@ -244,17 +244,17 @@ PBoolean H460_FeatureStd19::OnSendCallProceeding_UUIE(H225_FeatureDescriptor & p
 
 void H460_FeatureStd19::OnReceiveCallProceeding_UUIE(const H225_FeatureDescriptor & pdu) 
 {
-    if (isEnabled && isAvailable) {
-        remoteSupport = TRUE;
-        CON->H46019Enabled();
-#ifdef H323_H46019M
-        H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
-        if (feat.Contains(H46019_Multiplex)) {
-             CON->H46019MultiEnabled();
-             multiSupport = true;
-        }
-#endif
-    }
+//    if (isEnabled && isAvailable) {
+//        remoteSupport = TRUE;
+//        CON->H46019Enabled();
+//#ifdef H323_H46019M
+//        H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
+//        if (feat.Contains(H46019_Multiplex)) {
+//             EnableMultiplex();
+//             multiSupport = true;
+//        }
+//#endif
+//    }
 }
 
 PBoolean H460_FeatureStd19::OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu)
@@ -279,8 +279,8 @@ void H460_FeatureStd19::OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pd
 #ifdef H323_H46019M
         H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
         if (feat.Contains(H46019_Multiplex)) {
+             EnableMultiplex();
              multiSupport = true;
-             CON->H46019MultiEnabled();
         }
 #endif
     } 
@@ -308,8 +308,8 @@ void H460_FeatureStd19::OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor &
 #ifdef H323_H46019M
         H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
         if (feat.Contains(H46019_Multiplex)) {
+             EnableMultiplex();
              multiSupport = true;
-             CON->H46019MultiEnabled();
         }
 #endif
     }
@@ -318,6 +318,33 @@ void H460_FeatureStd19::OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor &
 void H460_FeatureStd19::SetAvailable(bool avail)
 {
     isAvailable = avail;
+}
+
+void H460_FeatureStd19::EnableMultiplex()
+{
+    CON->H46019MultiEnabled();
+    const PNatList & list = EP->GetNatMethods().GetNATList();
+    if (list.GetSize() > 0) {
+      bool h24Active= false;
+      for (PINDEX i=0; i < list.GetSize(); i++) {  
+          if (((list[i].GetName() == "H46024") || (list[i].GetName() == "UPnP")) &&
+              list[i].IsAvailable(PIPSocket::Address::GetAny(4))) {
+                  h24Active= true;
+                  break;
+          }
+      }
+      if (h24Active) 
+          return;
+
+      for (PINDEX i=0; i < list.GetSize(); i++) {  
+          if (list[i].GetName() == "H46019" &&
+              !list[i].IsAvailable(PIPSocket::Address::GetAny(4))) {
+                  PTRACE(4,"Std19\tActivating Multiplexing for call");
+                  list[i].Activate(true);
+                  break;
+          }
+      }
+    }
 }
 
 #endif

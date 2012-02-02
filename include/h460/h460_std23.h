@@ -47,19 +47,10 @@
 #pragma once
 #endif
 
-// WARNING - remove it when the ptlib problem is fixed! - SH
-#if SVN_REVISION > 26772
-	#if _WIN32
-	#pragma message("H.460.23 Compile issue with PTLib object.h/cxx SVN r26772 revert both files to r26754")
-	#else
-	#warning("H.460.23 Compile issue with PTLib object.h/cxx SVN r26772 revert both files to r26754")
-	#endif
-#endif
 
 class H323EndPoint;
 class H460_FeatureStd23;
-class PNatMethod_H46024  : public PSTUNClient,
-                           public PThread
+class PNatMethod_H46024  : public PSTUNClient
 {
     // compile issue with PTLIB SVN object.h/cxx r26772 revert both files back to SVN r26754 - SH
     // commenting out will create a ambiguous delete in class destructor compile error.
@@ -77,9 +68,6 @@ class PNatMethod_H46024  : public PSTUNClient,
 
         // Start the Nat Method testing
         void Start(const PString & server,H460_FeatureStd23 * _feat);
-
-        // Main thread testing
-        void Main();
 
         // Whether the NAT method is Available
         virtual bool IsAvailable(
@@ -118,11 +106,17 @@ protected:
         // Do a NAT test
         PSTUNClient::NatTypes NATTest();
 
-    private:
+        void SetConnectionSockets(PUDPSocket * data,  PUDPSocket * control,  
+                              H323Connection::SessionInformation * info );
+
+private:
+        PThread *               mainThread;
+        PDECLARE_NOTIFIER(PThread, PNatMethod_H46024, MainMethod);
         bool                    isActive;
         bool                    isAvailable;
-        PSTUNClient::NatTypes    natType;
-        H460_FeatureStd23 *        feat;
+        PSTUNClient::NatTypes   natType;
+        H460_FeatureStd23 *     feat;
+        PMutex                  portMute;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -164,9 +158,9 @@ public:
     bool AlternateNATMethod();
     bool UseAlternate();
 
-#ifdef H323_UPnP
-    void InitialiseUPnP();
-#endif
+//#ifdef H323_UPnP
+    //void InitialiseUPnP();
+//#endif
 
 protected:
     bool DetectALG(const PIPSocket::Address & detectAddress);
@@ -177,12 +171,12 @@ protected:
 private:
     H323EndPoint *            EP;
     PSTUNClient::NatTypes    natType;
-    PIPSocket::Address        externalIP;
-    PBoolean                natNotify;
-    PBoolean                alg;
-    PBoolean                isavailable;
-    PBoolean                isEnabled; 
-    int                        useAlternate;
+    PIPSocket::Address       externalIP;
+    PBoolean                 natNotify;
+    PBoolean                 alg;
+    PBoolean                 isavailable;
+    PBoolean                 isEnabled; 
+    int                      useAlternate;
 
     // Delayed Reregistration
     PThread  *  RegThread;
@@ -247,6 +241,8 @@ public:
         e_disable        // Disable all and remote will do the NAT help        
     };
 
+    static PString GetH460NATString(H46024NAT method);
+
     // Messages
     virtual PBoolean OnSendAdmissionRequest(H225_FeatureDescriptor & pdu);
     virtual void OnReceiveAdmissionConfirm(const H225_FeatureDescriptor & pdu);
@@ -259,6 +255,7 @@ protected:
     void HandleNATInstruction(NatInstruct natconfig);
     void SetNATMethods(H46024NAT state);
     void SetH46019State(bool state);
+    PBoolean IsNatSendAvailable();
  
 private:
     H323EndPoint * EP;

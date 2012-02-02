@@ -663,6 +663,21 @@ PBoolean PNatMethod_H46019::IsMultiplexed()
     return multiplex;
 }
 
+PUDPSocket * & PNatMethod_H46019::GetMultiplexReadSocket(bool rtp)
+{
+    if (rtp)
+      if (((H46019MultiplexSocket * &)muxSockets.rtp)->GetSubSocket())
+          return ((H46019MultiplexSocket * &)muxSockets.rtp)->GetSubSocket();
+      else
+          return (PUDPSocket * &)muxSockets.rtp;
+    else
+      if (((H46019MultiplexSocket * &)muxSockets.rtcp)->GetSubSocket())
+          return ((H46019MultiplexSocket * &)muxSockets.rtcp)->GetSubSocket();
+      else
+          return (PUDPSocket * &)muxSockets.rtcp;
+}
+
+
 PUDPSocket * & PNatMethod_H46019::GetMultiplexSocket(bool rtp)
 {
     if (rtp)
@@ -730,24 +745,29 @@ void PNatMethod_H46019::ReadThread(PThread &, INT)
   PIPSocket::Address addr;
   WORD port=0;
 
-  H46019MultiplexSocket * socket = NULL;
+  PUDPSocket * socket = NULL;
+  H46019MultiplexSocket::MuxType socketRead;
 
-  PSocket::SelectList readList;
-  readList += *GetMultiplexSocket(true);
-  //readList += *GetMultiplexSocket(false);  -- disabled temporarily SH
-   
+  PUDPSocket & dataSocket = *GetMultiplexReadSocket(true);
+  PUDPSocket & ctrlSocket = *GetMultiplexReadSocket(false);
 
-    while (!muxShutdown && PIPSocket::Select(readList) == PChannel::NoError){
+  while (!muxShutdown) { 
+        
+      int select = PIPSocket::Select(dataSocket,ctrlSocket);
+      if (select == -1) {
+          socketRead = H46019MultiplexSocket::e_rtp;
+          socket = &dataSocket;
+      } else if (select == -2) {
+          socketRead = H46019MultiplexSocket::e_rtcp;
+          socket = &ctrlSocket;
+      } else
+         continue;
 
-         if (readList.IsEmpty())
-            continue;   // TimeOut
-
-         socket = (H46019MultiplexSocket *)&readList.front();
-         if (socket && socket->ReadFrom(buffer.GetPointer(),len,addr,port) && !muxShutdown) {
-           PTRACE(2,"H46019M\tReading from " << socket->GetLocalAddress());
+         if (!muxShutdown && socket && socket->ReadFrom(buffer.GetPointer(),len,addr,port)) {
              int actRead = socket->GetLastReadCount();
+
              std::map<unsigned,PUDPSocket*>::const_iterator it;
-             switch (socket->GetMultiplexType()) {
+             switch (socketRead) {
                case H46019MultiplexSocket::e_rtp:
                  it = rtpSocketMap.find(buffer.GetMultiplexID());
                  if (it == rtpSocketMap.end()) {
@@ -871,6 +891,22 @@ H46019MultiplexSocket::MuxType H46019MultiplexSocket::GetMultiplexType() const
 void H46019MultiplexSocket::SetMultiplexType(H46019MultiplexSocket::MuxType type)
 {
     m_plexType = type;
+}
+
+PBoolean H46019MultiplexSocket::GetLocalAddress(Address & addr, WORD & port)
+{
+    if (m_subSocket)
+        return m_subSocket->GetLocalAddress(addr, port);
+    else
+        return PUDPSocket::GetLocalAddress(addr, port);
+}
+
+PString H46019MultiplexSocket::GetLocalAddress()
+{
+    if (m_subSocket)
+        return m_subSocket->GetLocalAddress();
+    else
+        return PIPSocket::GetLocalAddress();
 }
 
 PBoolean H46019MultiplexSocket::ReadFrom(void *buf, PINDEX len, Address & addr, WORD & pt)
@@ -1017,7 +1053,7 @@ void H46019UDPSocket::Ping(PTimer &, INT)
     rtpSocket ? SendRTPPing(keepip,keepport) : SendRTCPPing();
 }
 
-void H46019UDPSocket::SendRTPPing(const PIPSocket::Address & ip, const WORD & port) {
+void H46019UDPSocket::SendRTPPing(const PIPSocket::Address & ip, const WORD & port, unsigned id) {
 
     RTP_DataFrame rtp;
 
@@ -1035,7 +1071,7 @@ void H46019UDPSocket::SendRTPPing(const PIPSocket::Address & ip, const WORD & po
 
     if (!WriteTo(rtp.GetPointer(),
                  rtp.GetHeaderSize()+rtp.GetPayloadSize(),
-                 ip, port)) {
+                 ip, port,id)) {
         switch (GetErrorNumber()) {
         case ECONNRESET :
         case ECONNREFUSED :
@@ -1049,7 +1085,7 @@ void H46019UDPSocket::SendRTPPing(const PIPSocket::Address & ip, const WORD & po
                 << GetErrorText(PChannel::LastWriteError));
         }
     } else {
-        PTRACE(6, "H46019UDP\tRTP KeepAlive sent: " << ip << ":" << port << " seq: " << keepseqno);    
+        PTRACE(6, "H46019UDP\tRTP KeepAlive sent: " << ip << ":" << port << " " << id << " seq: " << keepseqno);    
         keepseqno++;
     }
 }
@@ -1066,10 +1102,10 @@ void H46019UDPSocket::SendRTCPPing()
 }
 
 
-PBoolean H46019UDPSocket::SendRTCPFrame(RTP_ControlFrame & report, const PIPSocket::Address & ip, WORD port) {
+PBoolean H46019UDPSocket::SendRTCPFrame(RTP_ControlFrame & report, const PIPSocket::Address & ip, WORD port, unsigned id) {
 
      if (!WriteTo(report.GetPointer(),report.GetSize(),
-                 ip, port)) {
+                 ip, port,id)) {
         switch (GetErrorNumber()) {
             case ECONNRESET :
             case ECONNREFUSED :
@@ -1175,6 +1211,20 @@ void H46019UDPSocket::SetMultiplexID(unsigned id, PBoolean isAck)
 PBoolean H46019UDPSocket::WriteMultiplexBuffer(const void * buf, PINDEX len, const Address & addr, WORD port)
 {
 
+    if (rtpSocket && len == 12) {  /// Filter out RTP keepAlive Packets
+#ifdef H323_H46024B
+        if (m_h46024b && addr == m_altAddr /*&& port == m_altPort*/) {
+            PTRACE(4, "H46024B\ts:" << m_Session << (rtpSocket ? " RTP " : " RTCP ")  
+                << "Switching to " << addr << ":" << port << " from " << m_remAddr << ":" << m_remPort);
+            m_detAddr = addr;  m_detPort = port;
+            SetProbeState(e_direct);
+            Keep.Stop();  // Stop the keepAlive Packets
+            m_h46024b = false;
+        }
+#endif
+        return true;
+    }
+
     H46019MultiPacket packet;
         packet.fromAddr = addr;
         packet.fromPort = port;
@@ -1185,24 +1235,39 @@ PBoolean H46019UDPSocket::WriteMultiplexBuffer(const void * buf, PINDEX len, con
       m_multQueue.push(packet);
     m_multiMutex.Signal();
     m_multiBuffer++;
+
+    if (!rtpSocket) {
+        RTP_ControlFrame frame(len); 
+        memcpy(frame.GetPointer(),buf,len);
+        if (frame.GetPayloadType() == RTP_ControlFrame::e_ApplDefined) {
+            PTRACE(6,"H46024A\tReading RTCP Probe Packet.");
+            PBYTEArray tempData;
+            tempData.SetSize(2048);
+            int tempLen = 2048;
+            Address tempAddr;
+            return ReadFrom((void *)tempData.GetPointer(), tempLen, tempAddr, port);
+        }
+    }
     return true;
 }
 
 PBoolean H46019UDPSocket::ReadMultiplexBuffer(void * buf, PINDEX & len, Address & addr, WORD & port)
 {
-    if (m_multiBuffer == 0 || m_multQueue.size() == 0)
+
+     if (m_multiBuffer == 0 || m_multQueue.size() == 0)
         return false;
 
+    m_multiMutex.Wait();
      H46019MultiPacket & packet = m_multQueue.front();
 
-     len = packet.frame.GetSize();
-     memcpy(buf, packet.frame.GetPointer(), len);
+      addr = packet.fromAddr;
+      port = packet.fromPort;
+      len = packet.frame.GetSize();
+      memcpy(buf, packet.frame.GetPointer(), len);
 
-     addr = packet.fromAddr;
-     port = packet.fromPort;
-    m_multiMutex.Wait();
       m_multQueue.pop();
     m_multiMutex.Signal();
+
     m_multiBuffer--;
     return true;
 }
@@ -1250,7 +1315,7 @@ PBoolean H46019UDPSocket::ReadSocket(void * buf, PINDEX & len, Address & addr, W
 PBoolean H46019UDPSocket::WriteSocket(const void * buf, PINDEX len, const Address & addr, WORD port, unsigned altMux)
 {
     unsigned mux = m_sendMultiplexID;
-    if (altMux) mux = m_altMuxID;
+    if (altMux) mux = altMux;
 
     if (!PNatMethod_H46019::IsMultiplexed() && !mux)      // No Multiplex Rec'v or Send
          return PUDPSocket::WriteTo(buf,len, addr, port);
@@ -1264,7 +1329,6 @@ PBoolean H46019UDPSocket::WriteSocket(const void * buf, PINDEX len, const Addres
         PUDPSocket * muxSocket = PNatMethod_H46019::GetMultiplexSocket(rtpSocket);
         if (muxSocket && !mux)                            // Rec'v Multiplex
             return muxSocket->WriteTo(buf,len, addr, port);
-
 
         RTP_MultiDataFrame frame(mux,(const BYTE *)buf,len);
         if (!muxSocket)                                                // Send Multiplex
@@ -1314,8 +1378,12 @@ void H46019UDPSocket::SetAlternateAddresses(const H323TransportAddress & address
 
 void H46019UDPSocket::GetAlternateAddresses(H323TransportAddress & address, PString & cui, unsigned & muxID)
 {
+ 
+    PIPSocket::Address tempAddr;
+    WORD               tempPort;
+    if (GetLocalAddress(tempAddr,tempPort))
+        address = H323TransportAddress(tempAddr,tempPort);
 
-    address = H323TransportAddress(m_locAddr,m_locPort);
 #ifdef H323_H46019M
     muxID = m_recvMultiplexID;
 #else
@@ -1397,7 +1465,7 @@ void H46019UDPSocket::Probe(PTimer &, INT)
     BuildProbe(report, true);
 
      if (!WriteTo(report.GetPointer(),report.GetSize(),
-                 m_altAddr, m_altPort)) {
+                 m_altAddr, m_altPort, m_altMuxID)) {
         switch (GetErrorNumber()) {
             case ECONNRESET :
             case ECONNREFUSED :
@@ -1419,12 +1487,12 @@ void H46019UDPSocket::ProbeReceived(bool probe, const PIPSocket::Address & addr,
 {
 
     if (probe) {
-        m_Handler.H46024ADirect(false,m_Token);  //< Tell remote to wait for connection
+        m_Handler.H46024ADirect(true,m_Token);  //< Tell remote to wait for connection
     } else {
         RTP_ControlFrame reply;
         reply.SetSize(4+sizeof(probe_packet));
         BuildProbe(reply, false);
-        if (SendRTCPFrame(reply,addr,port)) {
+        if (SendRTCPFrame(reply,addr,port,m_altMuxID)) {
             PTRACE(4, "H46024A\tRTCP Reply packet sent: " << addr << ":" << port);    
         }
     }
@@ -1433,6 +1501,9 @@ void H46019UDPSocket::ProbeReceived(bool probe, const PIPSocket::Address & addr,
 
 void H46019UDPSocket::H46024Adirect(bool starter)
 {
+    if (GetProbeState() == e_direct)  // We might already be doing Annex B
+        return;
+
     if (starter) {  // We start the direct channel 
         m_detAddr = m_altAddr;  m_detPort = m_altPort;
         PTRACE(4, "H46024A\ts:" << m_Session << (rtpSocket ? " RTP " : " RTCP ")  
@@ -1443,6 +1514,7 @@ void H46019UDPSocket::H46024Adirect(bool starter)
 
     Keep.Stop();  // Stop the keepAlive Packets
 }
+#endif
 
 PBoolean H46019UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD & port)
 {
@@ -1454,7 +1526,7 @@ PBoolean H46019UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD 
 #else
     while (PUDPSocket::ReadFrom(buf, len, addr, port)) {
 #endif
-
+#if defined(H323_H46024A) || defined(H323_H46024B)
         /// Set the detected routed remote address (on first packet received)
         if (m_remAddr.IsAny()) {   
             m_remAddr = addr; 
@@ -1468,7 +1540,6 @@ PBoolean H46019UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD 
             SetProbeState(e_direct);
             Keep.Stop();  // Stop the keepAlive Packets
             m_h46024b = false;
-            continue;
         }
 #endif
         /// Check the probe state
@@ -1511,6 +1582,7 @@ PBoolean H46019UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD 
             default:
                 break;
         }
+#endif // H46024A/B
         return true;
     } 
        return false; 
@@ -1518,20 +1590,30 @@ PBoolean H46019UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD 
 
 PBoolean H46019UDPSocket::WriteTo(const void * buf, PINDEX len, const Address & addr, WORD port)
 {
+    return WriteTo(buf, len, addr, port, 0);
+}
+
+
+PBoolean H46019UDPSocket::WriteTo(const void * buf, PINDEX len, const Address & addr, WORD port, unsigned id)
+{
+#if defined(H323_H46024A) || defined(H323_H46024B)
     if (GetProbeState() == e_direct)
 #ifdef H323_H46019M
         return WriteSocket(buf,len, m_detAddr, m_detPort, m_altMuxID);
 #else
         return PUDPSocket::WriteTo(buf,len, m_detAddr, m_detPort);
-#endif
+#endif  // H46019M
     else
+#endif  // H46024A/B
 #ifdef H323_H46019M
-        return WriteSocket(buf,len, addr, port);
+        return WriteSocket(buf,len, addr, port, id);
 #else
         return PUDPSocket::WriteTo(buf,len, addr, port);
 #endif
 }
 
+
+#ifdef H323_H46024A
 PBoolean H46019UDPSocket::ReceivedProbePacket(const RTP_ControlFrame & frame, bool & probe, bool & success)
 {
 
@@ -1581,12 +1663,14 @@ PBoolean H46019UDPSocket::ReceivedProbePacket(const RTP_ControlFrame & frame, bo
    } else 
       return false;
 }
-
 #endif
 
 #ifdef H323_H46024B
 void H46019UDPSocket::H46024Bdirect(const H323TransportAddress & address, unsigned muxID)
 {
+    if (GetProbeState() == e_direct)  // We might already be doing annex A
+        return;
+
     address.GetIpAndPort(m_altAddr,m_altPort);
     m_altMuxID = muxID;
 
@@ -1598,7 +1682,10 @@ void H46019UDPSocket::H46024Bdirect(const H323TransportAddress & address, unsign
     // Sending an empty RTP frame to the alternate address
     // will add a mapping to the router to receive RTP from
     // the remote
-    SendRTPPing(m_altAddr, m_altPort);
+   for (PINDEX i=0; i<3; i++) {
+       SendRTPPing(m_altAddr, m_altPort, m_altMuxID);
+       PThread::Sleep(10);
+   }
 }
 
 #endif  // H323_H46024B

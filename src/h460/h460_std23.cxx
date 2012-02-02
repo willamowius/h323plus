@@ -39,8 +39,8 @@
 
 #ifdef H323_H46023
 
-#include "h460/h460_std23.h"
 #include <h323.h>
+#include "h460/h460_std23.h"
 #include <ptclib/random.h>
 #include <ptclib/pdns.h>
 #ifdef H323_H46018
@@ -65,25 +65,25 @@
 
 
 // H.460.23 NAT Detection Feature
-#define remoteNATOID        1         // bool if endpoint has remote NAT support
-#define AnnexAOID            2        // bool if endpoint supports H.460.24 Annex A
-#define localNATOID            3       // bool if endpoint is NATed
+#define remoteNATOID        1       // bool if endpoint has remote NAT support
+#define AnnexAOID           2       // bool if endpoint supports H.460.24 Annex A
+#define localNATOID         3       // bool if endpoint is NATed
 #define NATDetRASOID        4       // Detected RAS H225_TransportAddress 
-#define STUNServOID            5       // H225_TransportAddress of STUN Server 
-#define NATTypeOID            6       // integer 8 Endpoint NAT Type
-#define AnnexBOID            7       // bool if endpoint supports H.460.24 Annex B
+#define STUNServOID         5       // H225_TransportAddress of STUN Server 
+#define NATTypeOID          6       // integer 8 Endpoint NAT Type
+#define AnnexBOID           7       // bool if endpoint supports H.460.24 Annex B
 
 
 // H.460.24 P2Pnat Feature
-#define NATProxyOID            1       // PBoolean if gatekeeper will proxy
+#define NATProxyOID          1       // PBoolean if gatekeeper will proxy
 #define remoteMastOID        2       // PBoolean if remote endpoint can assist local endpoint directly
-#define mustProxyOID        3       // PBoolean if gatekeeper must proxy to reach local endpoint
-#define calledIsNatOID        4       // PBoolean if local endpoint is behind a NAT/FW
-#define NatRemoteTypeOID    5        // integer 8 reported NAT type
+#define mustProxyOID         3       // PBoolean if gatekeeper must proxy to reach local endpoint
+#define calledIsNatOID       4       // PBoolean if local endpoint is behind a NAT/FW
+#define NatRemoteTypeOID     5       // integer 8 reported NAT type
 #define apparentSourceOID    6       // H225_TransportAddress of apparent source address of endpoint
-#define SupAnnexAOID        7       // PBoolean if local endpoint supports H.460.24 Annex A
-#define NATInstOID            8       // integer 8 Instruction on how NAT is to be Traversed
-#define SupAnnexBOID        9       // bool if endpoint supports H.460.24 Annex B
+#define SupAnnexAOID         7       // PBoolean if local endpoint supports H.460.24 Annex A
+#define NATInstOID           8       // integer 8 Instruction on how NAT is to be Traversed
+#define SupAnnexBOID         9       // bool if endpoint supports H.460.24 Annex B
 
 
 //////////////////////////////////////////////////////////////////////
@@ -92,7 +92,7 @@ PCREATE_NAT_PLUGIN(H46024);
 
 
 PNatMethod_H46024::PNatMethod_H46024()
- : PThread(1000, NoAutoDeleteThread, LowPriority ,"H.460.24")
+: mainThread(NULL)
 {
     natType = PSTUNClient::UnknownNat;
     isAvailable = false;
@@ -103,6 +103,7 @@ PNatMethod_H46024::PNatMethod_H46024()
 PNatMethod_H46024::~PNatMethod_H46024()
 {
     natType = PSTUNClient::UnknownNat;
+    delete mainThread;
 }
 
 void PNatMethod_H46024::Start(const PString & server,H460_FeatureStd23 * _feat)
@@ -112,8 +113,15 @@ void PNatMethod_H46024::Start(const PString & server,H460_FeatureStd23 * _feat)
    H323EndPoint * ep = feat->GetEndPoint();
 
    SetServer(server);
+#ifdef H323_H46019M
+    WORD muxBase = ep->GetMultiplexPort();
+    SetPortRanges(muxBase-2, muxBase+2, muxBase-2, muxBase+20);
+#else
    SetPortRanges(ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax(), ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax());
-   Resume();
+#endif
+
+    mainThread  = PThread::Create(PCREATE_NOTIFIER(MainMethod), 0,  
+                       PThread::NoAutoDeleteThread,  PThread::LowPriority ,"H.460.24");
 }
 
 
@@ -121,21 +129,37 @@ void PNatMethod_H46024::Start(const PString & server,H460_FeatureStd23 * _feat)
 PSTUNClient::NatTypes PNatMethod_H46024::NATTest()
 {
 
-    PRandom rand;
-    WORD testport = (WORD)rand.Generate(singlePortInfo.basePort , singlePortInfo.maxPort);
     PSTUNClient::NatTypes testtype;
+    WORD testport;
+#ifdef H323_H46019M
+    testport = (WORD)feat->GetEndPoint()->GetMultiplexPort()-1;
+#else
+    PRandom rand;
+    testport = (WORD)rand.Generate(singlePortInfo.basePort , singlePortInfo.maxPort);   
+#endif
 
     singlePortInfo.currentPort = testport;
+    PTRACE(4,"Std23\tSTUN Test Port " << singlePortInfo.currentPort+1);
+
     testtype = GetNatType(true);
 
-    //PTRACE(4,"Std23\tSTUN Test Port " << singlePortInfo.currentPort << " result: " << testtype);  -BUG in PTLIB v2.11  SH
+#ifdef H323_H46019M
+    // if we have a cone NAT check the RTCP Port to see if not existing binding
+    if (testtype == PSTUNClient::ConeNat && natType == PSTUNClient::UnknownNat) {
+        PThread::Sleep(10);
+        PTRACE(4,"Std23\tCone NAT Detected rechecking. Test Port " << singlePortInfo.currentPort+1);
+        PSTUNClient::NatTypes test2 = GetNatType(true);
+        if (test2 > testtype)
+            testtype = test2;
+    }
+#endif
 
     return testtype;
 }
 
 int recheckTime = 300000;    // 5 minutes
 
-void PNatMethod_H46024::Main()
+void PNatMethod_H46024::MainMethod(PThread &, INT)
 {
 
     while (natType == PSTUNClient::UnknownNat ||
@@ -151,7 +175,7 @@ void PNatMethod_H46024::Main()
 
         if (natType == PSTUNClient::ConeNat) {
             isAvailable = true;
-            PProcess::Sleep(recheckTime);
+            PThread::Sleep(recheckTime);
         } else {
             isAvailable = false;
         }
@@ -175,6 +199,9 @@ void PNatMethod_H46024::SetAvailable()
 
 void PNatMethod_H46024::Activate(bool act)
 {
+    if (act && !isAvailable)  // Special case where activated but not available.
+       isAvailable = true;  
+
     isActive = act;
 }
 
@@ -190,6 +217,8 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
 	                                         void * userData
                                              )
 {
+    PWaitAndSignal m(portMute);
+
 #ifdef H323_H46019M
     H323Connection::SessionInformation * info = (H323Connection::SessionInformation *)userData;
     PNatMethod_H46019 * handler = 
@@ -198,15 +227,20 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
     if (handler && info->GetRecvMultiplexID() > 0) {
         if (!handler->IsMultiplexed()) {
            H46019MultiplexSocket * & muxSocket1 = (H46019MultiplexSocket * &)handler->GetMultiplexSocket(true); 
-           H46019MultiplexSocket * & muxSocket2 = (H46019MultiplexSocket * &)handler->GetMultiplexSocket(false); 
+           H46019MultiplexSocket * & muxSocket2 = (H46019MultiplexSocket * &)handler->GetMultiplexSocket(false);
            muxSocket1 = new H46019MultiplexSocket(true);
            muxSocket2 = new H46019MultiplexSocket(false);
-            pairedPortInfo.basePort    = feat->GetEndPoint()->GetMultiplexPort();
-            pairedPortInfo.maxPort     = pairedPortInfo.basePort+1;
-            pairedPortInfo.currentPort = pairedPortInfo.basePort-1;
-   
+ //           pairedPortInfo.maxPort     = pairedPortInfo.basePort+10;  
+ //           pairedPortInfo.basePort    = feat->GetEndPoint()->GetMultiplexPort();
+            pairedPortInfo.currentPort = feat->GetEndPoint()->GetMultiplexPort()-1;
+
            if (!PSTUNClient::CreateSocketPair(muxSocket1->GetSubSocket(), muxSocket2->GetSubSocket(), binding)) 
                 return false;
+
+           PIPSocket::Address stunAddress;
+           muxSocket1->GetSubSocket()->GetLocalAddress(stunAddress);
+           PTRACE(1,"Std24\tMux STUN Created: " << stunAddress  << " "
+                        << muxSocket1->GetSubSocket()->GetPort() << "-" << muxSocket2->GetSubSocket()->GetPort());
            
            handler->StartMultiplexListener();  // Start Multiplexing Listening thread;
            handler->EnableMultiplex(true); 
@@ -214,10 +248,10 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
 
        socket1 = new H46019UDPSocket(*handler->GetHandler(),info,true);      /// Data 
        socket2 = new H46019UDPSocket(*handler->GetHandler(),info,false);     /// Signal
-       
+ 
        PNatMethod_H46019::RegisterSocket(true ,info->GetRecvMultiplexID(), socket1);
        PNatMethod_H46019::RegisterSocket(false,info->GetRecvMultiplexID(), socket2);
-       return true;
+
     } else
 #endif
     {
@@ -225,11 +259,22 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
         pairedPortInfo.currentPort = 
             RandomPortPair(pairedPortInfo.basePort-1,pairedPortInfo.maxPort-2);
 #endif
-
-       return PSTUNClient::CreateSocketPair(socket1,socket2,binding);
+        if (!PSTUNClient::CreateSocketPair(socket1,socket2,binding))
+             return false;
     }
+
+    SetConnectionSockets(socket1,socket2,info);
+    return true;
 }
 
+
+void PNatMethod_H46024::SetConnectionSockets(PUDPSocket * data, PUDPSocket * control, 
+                                             H323Connection::SessionInformation * info)
+{
+    H323Connection * connection = PRemoveConst(H323Connection, info->GetConnection());
+    if (connection != NULL)
+        connection->SetRTPNAT(info->GetSessionID(),data,control);
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -358,18 +403,6 @@ void H460_FeatureStd23::OnReceiveRegistrationConfirm(const H225_FeatureDescripto
        }
 }
 
-#ifdef H323_UPnP
-void H460_FeatureStd23::InitialiseUPnP()
-{
-    PTRACE(4,"Std23\tStarting Alternate UPnP");
-
-      PNatMethod_UPnP * natMethod = (PNatMethod_UPnP *)EP->GetNatMethods().LoadNatMethod("UPnP");
-     if (natMethod) {
-         natMethod->AttachEndPoint(EP);
-         EP->GetNatMethods().AddMethod(natMethod);
-     }
-}
-#endif
 
 void H460_FeatureStd23::OnNATTypeDetection(PSTUNClient::NatTypes type, const PIPSocket::Address & ExtIP)
 {
@@ -382,7 +415,7 @@ void H460_FeatureStd23::OnNATTypeDetection(PSTUNClient::NatTypes type, const PIP
         PTRACE(4,"Std23\tSTUN Test Result: " << type << " forcing reregistration.");
 #ifdef H323_UPnP
         if (type > PSTUNClient::ConeNat)
-            InitialiseUPnP();
+            EP->InitialiseUPnP();
 #endif
         natType = type;  // first time detection
     } else {
@@ -435,12 +468,14 @@ bool H460_FeatureStd23::DetectALG(const PIPSocket::Address & detectAddress)
 void H460_FeatureStd23::StartSTUNTest(const PString & server)
 {
     PString s;
+#ifdef P_DNS
     PStringList SRVs;
     PStringList x = server.Tokenise(":");
     PString number = "h323:user@" + x[0];
     if (PDNS::LookupSRV(number,"_stun._udp.",SRVs))
         s = SRVs[0];
     else
+#endif
         s = server;
 
     // Remove any previous NAT methods.
@@ -448,6 +483,7 @@ void H460_FeatureStd23::StartSTUNTest(const PString & server)
     natType = PSTUNClient::UnknownNat;
 
     PNatMethod_H46024 * xnat = (PNatMethod_H46024 *)EP->GetNatMethods().LoadNatMethod("H46024");
+
     xnat->Start(s,this);
     EP->GetNatMethods().AddMethod(xnat);
 }
@@ -467,7 +503,7 @@ void H460_FeatureStd23::DelayedReRegistration()
 
 void H460_FeatureStd23::RegMethod(PThread &, INT)
 {
-    PProcess::Sleep(1000);
+    PThread::Sleep(1000);
     EP->ForceGatekeeperReRegistration();  // We have an ALG so notify the gatekeeper   
 }
 
@@ -488,6 +524,7 @@ bool H460_FeatureStd23::AlternateNATMethod()
                 PTRACE(4,"H46023\tUPnP Change NAT from " << natType << " to " << PSTUNClient::ConeNat);
                 natType = PSTUNClient::ConeNat;
                 useAlternate = 1;
+                natlist[i].Activate(true);
                 EP->NATMethodCallBack(natlist[i].GetName(),1,"Available");
                 return true;
             } else {
@@ -648,13 +685,19 @@ void H460_FeatureStd24::HandleNATInstruction(NatInstruct _config)
         switch (_config) {
             case H460_FeatureStd24::e_localMaster:
                 PTRACE(4,"Std24\tLocal NAT Support: H.460.24 ENABLED");
-                CON->SetRemoteNAT();
+                CON->SetRemoteNAT(true);
+                CON->H46019SetOffload();
                 SetNATMethods(e_enable);
                 break;
 
             case H460_FeatureStd24::e_remoteMaster:
                 PTRACE(4,"Std24\tRemote NAT Support: ALL NAT DISABLED");
-                SetNATMethods(e_disable);
+                CON->H46019SetOffload();
+                if (IsNatSendAvailable()) {  // If we can use STUN do it!
+                    CON->SetRemoteNAT(false);
+                    SetNATMethods(e_enable);
+                } else
+                    SetNATMethods(e_disable);
                 break;
 
             case H460_FeatureStd24::e_remoteProxy:
@@ -679,6 +722,7 @@ void H460_FeatureStd24::HandleNATInstruction(NatInstruct _config)
             case H460_FeatureStd24::e_natAnnexB:
                 PTRACE(4,"Std24\tSame NAT: H.460.24 AnnexA ENABLED");
                 CON->H46024BEnabled();
+                //CON->H46024AEnabled();  // Might be on same internal network
                 SetNATMethods(e_AnnexB);
                 break;
 #endif
@@ -709,17 +753,42 @@ void H460_FeatureStd24::SetH46019State(bool state)
 #endif
 }
 
+PBoolean H460_FeatureStd24::IsNatSendAvailable()
+{
+   PNatList & natlist = EP->GetNatMethods().GetNATList();
+
+   PBoolean available = false;
+   PINDEX i=0;
+   for (i=0; i< natlist.GetSize(); i++) {
+        if (natlist[i].GetName() == "H46024") break;
+   }
+   if (i < natlist.GetSize()) {
+     PNatMethod_H46024 & meth = (PNatMethod_H46024 &)natlist[i];
+      switch (meth.GetNatType(false)) {
+        case PSTUNClient::ConeNat :
+        case PSTUNClient::RestrictedNat :
+        case PSTUNClient::PortRestrictedNat :
+          available = true;
+          break;
+        case PSTUNClient::SymmetricNat :
+        default :   // UnknownNet, SymmetricFirewall, BlockedNat
+          break;
+      }
+   }
+   return available;
+}
+
 void H460_FeatureStd24::SetNATMethods(H46024NAT state)
 {
 
     PNatList & natlist = EP->GetNatMethods().GetNATList();
 
-    if ((state == H460_FeatureStd24::e_default) ||
+/*  if ((state == H460_FeatureStd24::e_default) ||
          (state == H460_FeatureStd24::e_AnnexA) ||
          (state == H460_FeatureStd24::e_AnnexB))
             SetH46019State(true);
     else
-            SetH46019State(false);
+            SetH46019State(false); */
 
     for (PINDEX i=0; i< natlist.GetSize(); i++)
     {
@@ -727,10 +796,10 @@ void H460_FeatureStd24::SetNATMethods(H46024NAT state)
             case H460_FeatureStd24::e_AnnexA:   // To do Annex A Implementation.
             case H460_FeatureStd24::e_AnnexB:   // To do Annex B Implementation.
             case H460_FeatureStd24::e_default:
-                if (natlist[i].GetName() == "H46024")
+                if (natlist[i].GetName() == "H46024" || natlist[i].GetName() == "UPnP")
                     natlist[i].Activate(false);
-                else
-                    natlist[i].Activate(true);
+                //else
+                //    natlist[i].Activate(true);
 
                 break;
             case H460_FeatureStd24::e_enable:
@@ -738,16 +807,27 @@ void H460_FeatureStd24::SetNATMethods(H46024NAT state)
                     natlist[i].Activate(true);
                 else if (natlist[i].GetName() == "UPnP" && useAlternate)
                     natlist[i].Activate(true);
+//                else  if ((natlist[i].GetName() == "H46019") && CON->IsH46019Multiplexed())
+//                    natlist[i].Activate(true);
                 else
                     natlist[i].Activate(false);
                 break;
             case H460_FeatureStd24::e_disable:
-                natlist[i].Activate(false);
+                if ((natlist[i].GetName() == "H46019") && CON->IsH46019Multiplexed())
+                    natlist[i].Activate(true);
+                else
+                    natlist[i].Activate(false);
                 break;
             default:
                 break;
         }
     }
+
+   PTRACE(6,"Std24\tNAT Methods " << GetH460NATString(state));
+   for (PINDEX i=0; i< natlist.GetSize(); i++) {
+       PTRACE(6, "H323\tNAT Method " << i << " " << natlist[i].GetName() << " Ready: "
+                  << (natlist[i].IsAvailable(PIPSocket::Address::GetAny(4)) ? "Yes" : "No"));  
+   }
 }
 
 PString H460_FeatureStd24::GetNATStrategyString(NatInstruct method)
@@ -770,6 +850,24 @@ PString H460_FeatureStd24::GetNATStrategyString(NatInstruct method)
 
    return psprintf("<NAT Strategy %u>", method);
 }
+
+PString H460_FeatureStd24::GetH460NATString(H46024NAT method)
+{
+    static const char * const Names[5] = {
+        "default"
+        "enable"
+        "AnnexA"
+        "AnnexB"
+        "disable"
+    };
+
+  if (method < 5)
+    return Names[method];
+
+   return psprintf("<H460NAT %u>", method);
+}
+
+
 
 #ifdef _MSC_VER
 #pragma warning(default : 4239)

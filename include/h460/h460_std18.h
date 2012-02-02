@@ -142,6 +142,7 @@ public:
 	////////////////////
 	// H.460.24 Override
 	void SetAvailable(bool avail);
+    void EnableMultiplex();
 
 private:
     H323EndPoint * EP;
