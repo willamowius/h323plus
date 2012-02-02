@@ -344,7 +344,7 @@ class H235AuthSimpleMD5 : public H235Authenticator
 ////////////////////////////////////////////////////
 
 
-#ifdef H323_H235
+#if PTLIB >= 2110 && !defined(H323_H235)
 /// PFactory Loader
 typedef H235AuthSimpleMD5 H235_AuthenticatorMD5;
 #ifndef _WIN32_WCE
@@ -451,8 +451,8 @@ typedef H2351_Authenticator H235AuthProcedure1;  // Backwards interoperability
 
 //////////////////////////////////////////////////////////////////////////////
 
-#ifdef H323_H235
 typedef H2351_Authenticator H235_AuthenticatorStd1;
+#if PTLIB_VER >= 2110 && defined(H323_H235)
 #ifndef _WIN32_WCE
  PPLUGIN_STATIC_LOAD(Std1,H235Authenticator);
 #endif
