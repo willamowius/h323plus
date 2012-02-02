@@ -485,7 +485,10 @@ PBoolean H323Gatekeeper::OnReceiveRegistrationConfirm(const H225_RegistrationCon
 
   registrationFailReason = RegistrationSuccessful;
 
-  PTRACE(3, "RAS\tRegistered " << endpointIdentifier << " with " << gatekeeperIdentifier);
+  if (endpointIdentifier.GetValue().IsEmpty())
+        endpointIdentifier = rcf.m_endpointIdentifier;
+
+  PTRACE(3, "RAS\tRegistered " << endpointIdentifier.GetValue() << " with " << gatekeeperIdentifier);
 
   if (rcf.HasOptionalField(H225_RegistrationConfirm::e_assignedGatekeeper))
     SetAssignedGatekeeper(rcf.m_assignedGatekeeper);
