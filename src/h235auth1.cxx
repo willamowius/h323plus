@@ -155,7 +155,7 @@ static void hmac_sha (const unsigned char*    k,      /* secret key */
 
 /////////////////////////////////////////////////////////////////////////////
 
-#ifdef H323_H235
+#if PTLIB_VER >= 2100 && defined(H323_H235) 
 H235SECURITY(Std1);
 #endif
 

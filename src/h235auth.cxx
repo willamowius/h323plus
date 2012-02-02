@@ -417,7 +417,7 @@ void H235Authenticators::PrepareSignalPDU(unsigned code,
     H235Authenticator & authenticator = (*this)[i];
      if (authenticator.IsSecuredSignalPDU(code, FALSE) &&
             authenticator.PrepareTokens(clearTokens, cryptoTokens)) {
-      PTRACE(4, "H235EP\tPrepared SignalPDU with authenticator " << authenticator);
+            PTRACE(4, "H235EP\tPrepared SignalPDU with authenticator " << authenticator);
        }
   }
 }
@@ -657,7 +657,7 @@ H235AuthenticatorInfo::H235AuthenticatorInfo(PSSLCertificate * cert)
 }
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef H323_H235
+#if PTLIB >= 2110 && defined(H323_H235)
 H235SECURITY(MD5);
 #else
 static PFactory<H235Authenticator>::Worker<H235AuthSimpleMD5> factoryH235AuthSimpleMD5("SimpleMD5");
@@ -1080,7 +1080,7 @@ PBoolean H235AuthCAT::IsSecuredPDU(unsigned rasPDU, PBoolean received) const
 }
 
 // need to load into factory here otherwise doesn't load...
-#if P_SSL && !defined(H323_H235) 
+#if P_SSL && (PTLIB_VER < 2100 || !defined(H323_H235))
 static PFactory<H235Authenticator>::Worker<H2351_Authenticator> factoryH2351_Authenticator("H2351_Authenticator");
 #endif
 
