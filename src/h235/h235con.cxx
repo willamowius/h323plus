@@ -135,7 +135,6 @@ void tls1_PRF(const EVP_MD *md5, const EVP_MD *sha1,
 
 int tls_change_cipher_state(SSL *s, int which)
 	{
-	static const unsigned char empty[]="";
 	unsigned char *p,*key_block,*mac_secret;
 	unsigned char *exp_label; //,buf[TLS_MD_MAX_CONST_SIZE+
 	unsigned char tmp1[EVP_MAX_KEY_LENGTH];
@@ -163,7 +162,7 @@ int tls_change_cipher_state(SSL *s, int which)
 		else if ((s->enc_read_ctx=(EVP_CIPHER_CTX *)OPENSSL_malloc(sizeof(EVP_CIPHER_CTX))) == NULL)
 			goto err;
 		dd= s->enc_read_ctx;
-		s->read_hash=m;
+		s->read_hash=(EVP_MD_CTX*)m;
 
 		if (s->expand != NULL)
 			{
@@ -197,7 +196,7 @@ int tls_change_cipher_state(SSL *s, int which)
 			OPENSSL_malloc(sizeof(EVP_CIPHER_CTX))) == NULL))
 			goto err;
 		dd= s->enc_write_ctx;
-		s->write_hash=m;
+		s->write_hash=(EVP_MD_CTX*)m;
 		if (s->compress != NULL)
 			{
 			COMP_CTX_free(s->compress);
@@ -653,7 +652,7 @@ if (!tls_change_cipher_state(m_ssl,statechg)) {
 wr= &(m_ssl->s3->wrec);
 wb= &(m_ssl->s3->wbuf);
 
-	mac_size = EVP_MD_size(m_ssl->write_hash);
+	mac_size = EVP_MD_size((EVP_MD*)m_ssl->write_hash);
 	p = wb->buf + prefix_len;
 
 	/* write the header */
