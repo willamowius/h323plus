@@ -548,6 +548,13 @@ class H46019UDPSocket : public PUDPSocket
 
 #ifdef H323_H46019M
 
+    /** Get Peer Address
+      */
+    virtual PBoolean GetPeerAddress(
+        PIPSocketAddressAndPort & addr    ///< Variable to receive hosts IP address and port.
+    );
+
+
     /** Get Multiplex Address
       */
     void GetMultiplexAddress(H323TransportAddress & address,       ///< Multiplex Address
@@ -646,13 +653,6 @@ class H46019UDPSocket : public PUDPSocket
         BYTE        name[4];    // Name is limited to 32 (4 Bytes)
         BYTE        cui[20];    // SHA-1 is always 160 (20 Bytes)
     };
-
-
-    /** Get Peer Address
-      */
-    virtual PBoolean GetPeerAddress(
-        PIPSocketAddressAndPort & addr    ///< Variable to receive hosts IP address and port.
-    );
 
 
     /** Set Alternate Direct Address
