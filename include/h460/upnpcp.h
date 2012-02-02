@@ -34,7 +34,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Id $
+ * $Id$
  *
  *
  */
@@ -42,7 +42,7 @@
 #ifndef H_UPNP
 #define H_UPNP
 
-#include <ptclib\pnat.h>
+#include <ptclib/pnat.h>
 
 #if _MSC_VER
 #pragma once
@@ -52,19 +52,19 @@ class H323EndPoint;
 class UPnPThread;
 class PNatMethod_UPnP : public PNatMethod
 {
-	PCLASSINFO(PNatMethod_UPnP,PNatMethod);
+    PCLASSINFO(PNatMethod_UPnP,PNatMethod);
 
 public:
 
   /**@name Construction */
   //@{
-	/** Default Contructor
-	*/
-	PNatMethod_UPnP();
+    /** Default Contructor
+    */
+    PNatMethod_UPnP();
 
-	/** Deconstructor
-	*/
-	~PNatMethod_UPnP();
+    /** Deconstructor
+    */
+    ~PNatMethod_UPnP();
   //@}
 
   /**@name General Functions */
@@ -74,40 +74,40 @@ public:
    virtual PBoolean GetExternalAddress(
       PIPSocket::Address & externalAddress, /// External address of router
       const PTimeInterval & maxAge = 1000   /// Maximum age for caching
-	  );
+      );
 
  /**  CreateSocketPair
-		Create the UDP Socket pair (not used)
+        Create the UDP Socket pair (not used)
   */
-   virtual PBoolean PNatMethod::CreateSocketPair(
-	   PUDPSocket *&,PUDPSocket *&,
-	   const PIPSocket::Address &) { return false; }
+   virtual PBoolean CreateSocketPair(
+       PUDPSocket *&,PUDPSocket *&,
+       const PIPSocket::Address &) { return false; }
 
   /**  CreateSocketPair
-		Create the UDP Socket pair
+        Create the UDP Socket pair
   */
     virtual PBoolean CreateSocketPair(
       PUDPSocket * & socket1,
       PUDPSocket * & socket2,
       const PIPSocket::Address & binding,
-	  void * userData
+      void * userData
     );
 
   /**  isAvailable.
-		Returns whether the Nat Method is ready and available in
-		assisting in NAT Traversal. The principal is function is
-		to allow the EP to detect various methods and if a method
-		is detected then this method is available for NAT traversal
-		The Order of adding to the PNstStrategy determines which method
-		is used
+        Returns whether the Nat Method is ready and available in
+        assisting in NAT Traversal. The principal is function is
+        to allow the EP to detect various methods and if a method
+        is detected then this method is available for NAT traversal
+        The Order of adding to the PNstStrategy determines which method
+        is used
   */
-   virtual bool IsAvailable(const PIPSocket::Address&) { return (available && active); }
+   virtual bool IsAvailable(const PIPSocket::Address & ip);
 
    void SetAvailable();
 
    void SetAvailable(const PString & devName);
 
-   virtual void Activate(bool act)  { active = act; }
+   virtual void Activate(bool act);
 
    PBoolean OpenSocket(PUDPSocket & socket, PortInfo & portInfo, const PIPSocket::Address & binding) const;
 
@@ -121,28 +121,33 @@ public:
     virtual bool GetServerAddress(
       PIPSocket::Address & address,   ///< Address of server
       WORD & port                     ///< Port server is using.
-	  ) const { return false; }
+      ) const { return false; }
 
     virtual bool GetInterfaceAddress(
       PIPSocket::Address & internalAddress
-	  ) const { return false; }
+      ) const { return false; }
 
     virtual PBoolean CreateSocket(
       PUDPSocket * & socket,
       const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny(),
       WORD localPort = 0
-	  ) { return false; }
+      ) { return false; }
 
     virtual RTPSupportTypes GetRTPSupport(
       PBoolean force = PFalse    ///< Force a new check
-	  );
+      );
   //@}
 
-	void SetExtIPAddress(const PString & newAddr);
+    void SetExtIPAddress(const PString & newAddr);
 
-	void RemoveUPnPMap(WORD port);
+    PBoolean OnUPnPAvailable(const PString & devName);
 
-	H323EndPoint * GetEndPoint();
+    PBoolean CreateUPnPMap(bool pair, const PString & protocol, const PIPSocket::Address & localIP, 
+                           const WORD & locPort, PIPSocket::Address & extIP , WORD & extPort);
+
+    void RemoveUPnPMap(WORD port, PBoolean udp = true);
+
+    H323EndPoint * GetEndPoint();
 
 #if PTLIB_VER >= 2110
     virtual PString GetServer() const { return PString(); }
@@ -157,23 +162,28 @@ public:
 #endif
 
 protected:
-	H323EndPoint*							ep;
-	UPnPThread*								m_pUPnP;
 
-	PIPSocket::Address						m_pExtIP;
-	
-	PBoolean								m_pShutdown;
-	PBoolean								available;
-	PBoolean								active;
+    void SetConnectionSockets(PUDPSocket * data,  PUDPSocket * control,  
+                              H323Connection::SessionInformation * info );
+
+private:
+    H323EndPoint*                            ep;
+    UPnPThread*                                m_pUPnP;
+
+    PIPSocket::Address                        m_pExtIP;
+    
+    PBoolean                                m_pShutdown;
+    PBoolean                                available;
+    PBoolean                                active;
 };
 
 
 #ifndef _WIN32_WCE
-	#if PTLIB_VER > 260
-	   PPLUGIN_STATIC_LOAD(UPnP,PNatMethod);
-	#else
-	   PWLIB_STATIC_LOAD_PLUGIN(UPnP,PNatMethod);
-	#endif
+    #if PTLIB_VER > 260
+       PPLUGIN_STATIC_LOAD(UPnP,PNatMethod);
+    #else
+       PWLIB_STATIC_LOAD_PLUGIN(UPnP,PNatMethod);
+    #endif
 #endif
 
 
@@ -183,31 +193,33 @@ class UPnPUDPSocket : public PUDPSocket
   public:
   /**@name Construction/Deconstructor */
   //@{
-	/** create a UDP Socket Fully Nat Supported
-		ready for H323plus to Call.
-	*/
+    /** create a UDP Socket Fully Nat Supported
+        ready for H323plus to Call.
+    */
     UPnPUDPSocket(PNatMethod_UPnP * nat);
 
-	/** Deconstructor to reallocate Socket and remove any exiting
-		allocated NAT ports, 
-	*/
-	~UPnPUDPSocket();
+    /** Deconstructor to reallocate Socket and remove any exiting
+        allocated NAT ports, 
+    */
+    ~UPnPUDPSocket();
 
-	/** Set Masq Address
-	  */
-	void SetMasqAddress(const PIPSocket::Address & ip, WORD port);
+    virtual PBoolean Close();
 
-	PBoolean GetLocalAddress(Address & addr);
+    /** Set Masq Address
+      */
+    void SetMasqAddress(const PIPSocket::Address & ip, WORD port);
 
-	PBoolean GetLocalAddress(Address & addr, WORD & port);
+    PBoolean GetLocalAddress(Address & addr);
+
+    PBoolean GetLocalAddress(Address & addr, WORD & port);
 
    //@}
 
   protected:
-    PNatMethod_UPnP*		natMethod;
+    PNatMethod_UPnP*        natMethod;
 
-	PIPSocket::Address		extIP;
-	WORD					extPort;
+    PIPSocket::Address        extIP;
+    WORD                    extPort;
 
 };
 
