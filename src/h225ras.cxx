@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2011/02/22 05:04:57  shorne
+ * Enable selectively removing capabilities based on the features PDU's advertising feature. H.460.9 now advertises in ARQ when receiving call.
+ *
  * Revision 1.7  2011/02/20 06:55:46  shorne
  * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
  *
@@ -765,17 +768,19 @@ PBoolean H225_RAS::OnReceiveGatekeeperConfirm(const H323RasPDU &, const H225_Gat
   if (!CheckForResponse(H225_RasMessage::e_gatekeeperRequest, gcf.m_requestSeqNum))
     return FALSE;
 
-  if (gatekeeperIdentifier.IsEmpty())
-    gatekeeperIdentifier = gcf.m_gatekeeperIdentifier;
-  else {
-    PString gkid = gcf.m_gatekeeperIdentifier;
-    if (gatekeeperIdentifier *= gkid)
-      gatekeeperIdentifier = gkid;
-    else {
-      PTRACE(2, "RAS\tReceived a GCF from " << gkid
-             << " but wanted it from " << gatekeeperIdentifier);
-      return FALSE;
-    }
+  if (gcf.HasOptionalField(H225_GatekeeperConfirm::e_gatekeeperIdentifier) {
+      if (gatekeeperIdentifier.IsEmpty())
+        gatekeeperIdentifier = gcf.m_gatekeeperIdentifier;
+      else {
+        PString gkid = gcf.m_gatekeeperIdentifier;
+        if (gatekeeperIdentifier *= gkid)
+          gatekeeperIdentifier = gkid;
+        else {
+          PTRACE(2, "RAS\tReceived a GCF from " << gkid
+                 << " but wanted it from " << gatekeeperIdentifier);
+          return FALSE;
+        }
+      }
   }
 
 #ifdef H323_H460
@@ -900,6 +905,14 @@ PBoolean H225_RAS::OnReceiveRegistrationConfirm(const H323RasPDU & pdu, const H2
 {
   if (!CheckForResponse(H225_RasMessage::e_registrationRequest, rcf.m_requestSeqNum))
     return FALSE;
+
+  if (gatekeeperIdentifier.IsEmpty()) {
+       if (!rcf.HasOptionalField(H225_RegistrationConfirm::e_gatekeeperIdentifier)) {
+           PTRACE(2,"H225RAS\tLOGIC ERROR: No Gatekeeper Identifier received!");
+           return false;
+       }
+       gatekeeperIdentifier = rcf.m_gatekeeperIdentifier;
+  }
 
   if (lastRequest != NULL) {
     PString endpointIdentifier = rcf.m_endpointIdentifier;
