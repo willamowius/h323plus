@@ -147,7 +147,7 @@ void GNUGKTransportThread::Main()
              while (!transport->CloseTransport() && 
                            !transport->Connect()) {
                 PTRACE(3, "GNUGK\tReconnect Failed! Waiting 1 sec");
-                PProcess::Sleep(1000);
+                PThread::Sleep(1000);
              }
 
         if (!transport->CloseTransport()) {
