@@ -144,7 +144,7 @@ class h235PluginDeviceManager : public PPluginModuleManager
 
 };
 
-static PFactory<PPluginModuleManager>::Worker<h235PluginDeviceManager> h323PluginCodecManagerFactory("h235PluginDeviceManager", true);
+static PFactory<PPluginModuleManager>::Worker<h235PluginDeviceManager> h235PluginCodecManagerFactory("h235PluginDeviceManager", true);
 
 ///////////////////////////////////////////////////////////////////////////////
 
