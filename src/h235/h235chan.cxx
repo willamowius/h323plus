@@ -70,29 +70,26 @@ void H323SecureRTPChannel::CleanUpOnTermination()
 
   return H323_RTPChannel::CleanUpOnTermination();
 }
-/*
-void BuildEncryptionSync(H245_EncryptionSync & sync, H323SecureRTPChannel & chan, H235Session & session)
+
+void BuildEncryptionSync(H245_EncryptionSync & sync, const H323SecureRTPChannel & chan, H235Session & session)
 {     
     sync.m_synchFlag = chan.GetRTPPayloadType();
 
-    PBYTEArray m_key = m_encryption.GetMasterKey();
-
-    H235_EncodedKeySyncMaterial toEncrypt;
-    toEncypt.SetValue(m_key.GetPointer(), m_key.GetSize());
-
     H235_H235Key h235key;
-    h235key.SetTag(H235_H235Key::e_sharedSecret);
+    h235key.SetTag(H235_H235Key::e_secureSharedSecret);
 
-        
-    sync.EncodeSubType();
+    H235_V3KeySyncMaterial & v3data = h235key;
+    v3data.IncludeOptionalField(H235_V3KeySyncMaterial::e_encryptedSessionKey);
+    session.EncodeMasterKey(v3data.m_encryptedSessionKey);
+
+    sync.m_h235Key.EncodeSubType(h235key);
 }
-*/
 
-void ReadEncryptionSync(const H245_EncryptionSync & sync, H235Session & /*session*/)
+
+void ReadEncryptionSync(const H245_EncryptionSync & sync, H235Session & session)
 {     
     H235_H235Key h235key;
     sync.m_h235Key.DecodeSubType(h235key);
-    PBYTEArray key(0);
 
     switch (h235key.GetTag()) {
         case H235_H235Key::e_secureChannel:
@@ -107,10 +104,8 @@ void ReadEncryptionSync(const H245_EncryptionSync & sync, H235Session & /*sessio
         case H235_H235Key::e_secureSharedSecret:
             {
               const H235_V3KeySyncMaterial & v3data = h235key;
-              if (v3data.HasOptionalField(H235_V3KeySyncMaterial::e_encryptedSessionKey)) {
-                  key = v3data.m_encryptedSessionKey.GetValue();
-                  PTRACE(4,"H235Key\tH235v3 secret received. " << key);
-              }
+              if (v3data.HasOptionalField(H235_V3KeySyncMaterial::e_encryptedSessionKey))
+                  session.DecodeMasterKey(v3data.m_encryptedSessionKey);
             }
            break;
     }  
@@ -119,17 +114,18 @@ void ReadEncryptionSync(const H245_EncryptionSync & sync, H235Session & /*sessio
 
 PBoolean H323SecureRTPChannel::OnSendingPDU(H245_OpenLogicalChannel & open) const
 {
-
   PTRACE(4, "H235RTP\tOnSendingPDU");
 
-   if (connection.IsH245Master() && m_encryption->IsActive()) {
- /*     if (m_encryption->CreateSession()) {
-            open.IncludeOptionalField(H245_OpenLogicalChannel::e_encryptionSync);
-            BuildEncryptionSync(open.m_encryptionSync,*this,*m_encryption);
-        } */
-    }
-
-  return H323_RealTimeChannel::OnSendingPDU(open);
+  if (H323_RealTimeChannel::OnSendingPDU(open)) {
+       if (connection.IsH245Master() && m_encryption && m_encryption->IsActive()) {
+            if (m_encryption->CreateSession()) {
+                open.IncludeOptionalField(H245_OpenLogicalChannel::e_encryptionSync);
+                BuildEncryptionSync(open.m_encryptionSync,*this,*m_encryption);
+            }
+        }
+       return true;
+  }
+  return false;
 }
 
 
@@ -156,10 +152,14 @@ PBoolean H323SecureRTPChannel::OnReceivedPDU(const H245_OpenLogicalChannel & ope
 {
    PTRACE(4, "H235RTP\tOnRecievedPDU");
 
-  if (open.HasOptionalField(H245_OpenLogicalChannel::e_encryptionSync))
-      ReadEncryptionSync(open.m_encryptionSync,*m_encryption);
-
-   return H323_RealTimeChannel::OnReceivedPDU(open,errorCode);
+   if (H323_RealTimeChannel::OnReceivedPDU(open,errorCode)) {
+       if (open.HasOptionalField(H245_OpenLogicalChannel::e_encryptionSync)) {
+           if (m_encryption->CreateSession())
+               ReadEncryptionSync(open.m_encryptionSync,*m_encryption);
+       }
+       return true;
+   }
+   return false;
 }
 
 
@@ -200,8 +200,8 @@ PBoolean H323SecureRTPChannel::OnReceivedAckPDU(const H245_H2250LogicalChannelAc
 
 PBoolean H323SecureRTPChannel::ReadFrame(DWORD & rtpTimestamp, RTP_DataFrame & frame)
 {
-	if (H323_RTPChannel::ReadFrame(rtpTimestamp, frame)) {
-		if (m_encryption->IsInitialised())
+	if (rtpSession.ReadBufferedData(rtpTimestamp, frame)) {
+		if (m_encryption && m_encryption->IsInitialised())
            return m_encryption->ReadFrame(rtpTimestamp,frame);
         else
 		   return true;
@@ -212,10 +212,10 @@ PBoolean H323SecureRTPChannel::ReadFrame(DWORD & rtpTimestamp, RTP_DataFrame & f
 
 PBoolean H323SecureRTPChannel::WriteFrame(RTP_DataFrame & frame) 
 {
-	if (m_encryption->IsInitialised())
-       return m_encryption->WriteFrame(frame);
-    else
-       return H323_RTPChannel::WriteFrame(frame);
+	if (m_encryption && m_encryption->IsInitialised() && m_encryption->WriteFrame(frame))
+       return true;
+
+    return rtpSession.WriteData(frame);
 }
 
 #endif   // H323_H235

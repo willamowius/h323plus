@@ -325,7 +325,6 @@ PBoolean H235_DiffieHellman::GenerateHalfKey()
 
 PBoolean H235_DiffieHellman::ComputeSessionKey(PBYTEArray & SessionKey)
 {
-
     if (!m_remKey)
         return false;
 
@@ -392,7 +391,11 @@ void LoadDiffieHellmanMap(std::map<PString, H235_DiffieHellman*> & dhmap)
 
 /////////////////////////////////////////////////////////////////////////////////////
 
+#if PTLIB_VER >= 2110
 H235SECURITY(Std6);
+#else
+static PFactory<H235Authenticator>::Worker<H2356_Authenticator> factoryH235AuthSimpleMD5("H2356_Authenticator");
+#endif
 
 H2356_Authenticator::H2356_Authenticator()
 : m_enabled(true), m_active(true), m_tokenState(e_clearNone)
@@ -438,7 +441,7 @@ PBoolean H2356_Authenticator::IsMatch(const PString & identifier) const
 
 const char * H2356_Authenticator::GetName() const
 {
-    return H2356_Authenticator::GetAuthenticatorNames()[0];
+    return "H.235.6";
 }
 
 PBoolean H2356_Authenticator::PrepareTokens(PASN_Array & clearTokens,
@@ -621,6 +624,18 @@ PBoolean H2356_Authenticator::GetAlgorithmDetails(const PString & algorithm, PSt
           }
       }
       return false;
+}
+
+PString H2356_Authenticator::GetAlgFromOID(const PString & oid)
+{
+    if (oid.IsEmpty())
+        return PString();
+
+    for (PINDEX i = 0; i < PARRAYSIZE(H235_Encryptions); ++i) {
+        if (PString(H235_Encryptions[i].algorithmOID) ==  oid)
+            return H235_Encryptions[i].sslDesc;
+    }
+    return PString();
 }
 
 #endif  // H323_H235

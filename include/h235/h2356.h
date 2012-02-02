@@ -105,6 +105,8 @@ class H2356_Authenticator : public H235Authenticator
     virtual PBoolean GetAlgorithms(PStringList & algorithms) const;
     virtual PBoolean GetAlgorithmDetails(const PString & algorithm, PString & sslName, PString & description);
 
+    static PString GetAlgFromOID(const PString & oid);
+
 protected:
     void InitialiseSecurity();
 
@@ -124,8 +126,10 @@ private:
 /// PFactory Loader
 
 typedef H2356_Authenticator H235_AuthenticatorStd6;
+#if PTLIB_VER >= 2110
 #ifndef _WIN32_WCE
    PPLUGIN_STATIC_LOAD(Std6,H235Authenticator);
+#endif
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////////

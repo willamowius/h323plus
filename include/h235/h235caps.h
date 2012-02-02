@@ -56,7 +56,7 @@ class H235SecurityCapability  : public H323Capability
 
     /**Create the Conference capability
       */
-    H235SecurityCapability(unsigned capabilityNo);
+    H235SecurityCapability(H323Capabilities * capabilities, unsigned capabilityNo);
   //@}
 
   /**@name Overrides from class PObject */
@@ -224,11 +224,12 @@ class H235SecurityCapability  : public H323Capability
 
     /**Get the current Algorithms
       */
-    PString GetAlgorithm() const;
+    PString GetAlgorithm();
 
   //@}
 
   protected:
+      H323Capabilities * m_capabilities;
       unsigned m_capNumber;
       PStringList m_capList;
 };
@@ -261,7 +262,8 @@ public:
          H323SecureRealTimeCapability(
           H323Capability & childCapability,          ///< Child Capability
           H323Capabilities * capabilities = NULL,    ///< Capabilities reference
-          unsigned secNo = 0                         ///< Security Capability No
+          unsigned secNo = 0,                        ///< Security Capability No
+          PBoolean active = false                    ///< Whether encryption Activated
           );
 
       H323SecureRealTimeCapability(
@@ -311,7 +313,7 @@ public:
     void SetAlgorithm(const PString & alg);
 
     /// Get Algorithm
-    PString GetAlgorithm() const;
+    const PString & GetAlgorithm() const;
 
   //@}
 
@@ -346,10 +348,11 @@ class H323SecureCapability : public H323SecureRealTimeCapability
     /**Create an encrypted audio based capability 
       */
     H323SecureCapability(	
-        H323Capability & childCapability,          /// ChildAudio Capability
-        enum H235ChType Ch = H235ChNew,			   /// ChannelType
-        H323Capabilities * capabilities = NULL,    /// Capabilities reference
-        unsigned secNo = 0                         ///< Security Capability No
+        H323Capability & childCapability,          ///< Child Capability
+        enum H235ChType Ch = H235ChNew,			   ///< ChannelType
+        H323Capabilities * capabilities = NULL,    ///< Capabilities reference
+        unsigned secNo = 0,                        ///< Security Capability No
+        PBoolean active = false                    ///< Whether encryption is active or not
     );
 
   //@}
@@ -379,6 +382,11 @@ class H323SecureCapability : public H323SecureRealTimeCapability
        using the enum values of the protocol ASN H245_AudioCapability class.
      */
     virtual unsigned GetSubType() const;
+
+	/**Get Generic Identifier 
+		Default returns PString::Empty
+	 */
+    virtual PString GetIdentifier() const;
 
     /**Get the name of the media data format this class represents.
      */
@@ -577,6 +585,7 @@ public:
     PBoolean GetAlgorithms(const PStringList & algorithms) const;
 
     H235Context * GetContext() { return m_context; }
+    void SetEncryptionContext(H235Context * context)  { m_context = context; }
     H235_DiffieHellman * GetDiffieHellMan() { return m_DHkey; }
 
 protected:

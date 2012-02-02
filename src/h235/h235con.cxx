@@ -50,12 +50,16 @@
 
 extern "C" {
 #include <openssl/ssl.h>
+#ifdef _WIN32
+   #undef OPENSSL_SYS_WINDOWS
+#endif
+#include "h235/ssl_locl.h"
 #include <openssl/rand.h>
 };
 
 
 ////////////////////////////////////////////////////////////////////////
-static void tls1_P_hash(const EVP_MD *md, const unsigned char *sec,
+void tls1_P_hash(const EVP_MD *md, const unsigned char *sec,
 			int sec_len, unsigned char *seed, int seed_len,
 			unsigned char *out, int olen)
 	{
@@ -108,7 +112,7 @@ static void tls1_P_hash(const EVP_MD *md, const unsigned char *sec,
 	}
 
 
-static void tls1_PRF(const EVP_MD *md5, const EVP_MD *sha1,
+void tls1_PRF(const EVP_MD *md5, const EVP_MD *sha1,
 		     unsigned char *label, int label_len,
 		     const unsigned char *sec, int slen, unsigned char *out1,
 		     unsigned char *out2, int olen)
@@ -128,8 +132,8 @@ static void tls1_PRF(const EVP_MD *md5, const EVP_MD *sha1,
 	for (i=0; i<olen; i++)
     	out1[i]^=out2[i]; 
 	}
-#if 0
-static int tls_change_cipher_state(SSL *s, int which)
+
+int tls_change_cipher_state(SSL *s, int which)
 	{
 	static const unsigned char empty[]="";
 	unsigned char *p,*key_block,*mac_secret;
@@ -283,24 +287,23 @@ err2:
 	return(0);
 
 }
-#endif
-////////////////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////////////////
 
 int  H235Session::session_count=0;
 
 H235Session::H235Session(H235Capabilities * caps, const PString & algorithm)
-: m_dh(*caps->GetDiffieHellMan()), m_algorithm(algorithm), m_context(*caps->GetContext()), 
-  m_ssl(NULL), m_session(NULL), m_isServer(false), m_isInitialised(false)
+: m_dh(*caps->GetDiffieHellMan()), m_algorithm(H2356_Authenticator::GetAlgFromOID(algorithm))
+  , m_context(*caps->GetContext()), m_ssl(NULL), m_session(NULL), m_isServer(false)
+  , m_isInitialised(false)
 {
-
 }
 
 
 H235Session::~H235Session()
 {
-    SSL_free(m_ssl);
-    SSL_SESSION_free(m_session);
+   SSL_SESSION_free(m_session);
+   //SSL_free(m_ssl);
 }
 
 void H235Session::SetMasterKey(const PBYTEArray & key)
@@ -312,6 +315,36 @@ void H235Session::SetMasterKey(const PBYTEArray & key)
 const PBYTEArray & H235Session::GetMasterKey()
 {
     return m_session_key;
+}
+
+void H235Session::EncodeMasterKey(PASN_OctetString & /*key*/)
+{
+    PTRACE(4,"H235Key\tEncode Master Key."); 
+
+}
+
+void H235Session::DecodeMasterKey(const PASN_OctetString & key)
+{
+    PBYTEArray k = key.GetValue();
+    PBYTEArray a;
+    PTRACE(4,"H235Key\tH235v3 secret received. " << k);
+
+    unsigned char * buf;
+    unsigned char * buf1;
+	int size = k.GetSize();
+	if (size > 0) {
+		  buf =(unsigned char *)OPENSSL_malloc(size);
+		  memmove(buf,k.GetPointer(), size);
+		  buf1 = RawRead(buf,size);	  
+		  if (size > 0) {
+			a.SetSize(size);
+			memmove(a.GetPointer(), buf1, size);
+		  }
+		  OPENSSL_free(buf);
+	      OPENSSL_free(buf1);
+	}
+
+  //  PTRACE(4,"H235Key\tH235v3 secret received. " << a);
 }
 
 void H235Session::SetCipher(const PString & oid)
@@ -330,6 +363,9 @@ void H235Session::SetCipher(const PString & oid)
         }
         sc = lc;
 
+    if (sc == NULL)
+        return;
+
     PTRACE(2,"H235SES\tCommon Cipher Set: " << sc->name);
 
     m_session->cipher = sc;
@@ -338,13 +374,10 @@ void H235Session::SetCipher(const PString & oid)
 
 PBoolean H235Session::SetDHSharedkey()
 {
+    int out = m_session_key.GetSize();
+    unsigned char *buf = (unsigned char *)OPENSSL_malloc(out);
 
-	unsigned char *buf=NULL;
-    int out=0;
-
-	buf=(unsigned char *)OPENSSL_malloc(m_session_key.GetSize());
-
-    memcpy(buf, m_session_key.GetPointer(), m_session_key.GetSize());
+    memcpy(buf, m_session_key.GetPointer(), out);
 
 //------------------------------------------------------------------------
 // Setup for receiving the DH Shared Secret
@@ -363,7 +396,7 @@ unsigned char buff[SSL_MAX_MASTER_KEY_LENGTH];
 
 	tls1_PRF(m_ssl->ctx->md5,m_ssl->ctx->sha1,
 		buf1,TLS_MD_MASTER_SECRET_CONST_SIZE+SSL3_RANDOM_SIZE*2,buf,out,
-		m_session->master_key,buff,sizeof buff);
+		m_session->master_key,buff,sizeof(buff));
 
 
     memset(buf,0,out);
@@ -387,7 +420,7 @@ PBoolean H235Session::IsInitialised()
 
 PBoolean H235Session::CreateSession()
 {
-#if 0
+
   session_count++;
   m_session_id = session_count;
 
@@ -460,6 +493,7 @@ PBoolean H235Session::CreateSession()
          m_isServer = true;
     }
 
+    // Same as tls1_generate_master_secret in OpenSSL
     SetDHSharedkey();
 
     int i= SSL_set_session(m_ssl,m_session);
@@ -474,7 +508,6 @@ PBoolean H235Session::CreateSession()
 
 	PTRACE(2, "H235SES\tTLS Session Finalised."); 
     m_isInitialised = true;
-#endif
 	return true;
 }
 
@@ -514,9 +547,9 @@ PBoolean H235Session::WriteFrame(RTP_DataFrame & frame)
     return true;
 }
 
-unsigned char * H235Session::RawRead(unsigned char * /*buffer*/,int & /*length*/)
+unsigned char * H235Session::RawRead(unsigned char * buffer,int & length)
 {
-#if 0
+
 ssl3_record_st * rr;
 ssl3_buffer_st * rb;
 
@@ -582,15 +615,12 @@ printf("\n");
 
     length = rr->length;
 	return &rr->input[rr->off];
-#else
-    return NULL;
-#endif
 }
 
 
-unsigned char * H235Session::RawWrite(unsigned char * /*buffer*/ , int & /*length*/)
+unsigned char * H235Session::RawWrite(unsigned char * buffer , int & length)
 {
-#if 0
+
 unsigned char * p;
 unsigned char * plen;
 
@@ -670,16 +700,13 @@ wb= &(m_ssl->s3->wbuf);
 	length = wr->length;
 
 	return wr->input;
-#else
-    return NULL;
-#endif
 }
 
 /////////////////////////////////////////////////////////////////
 H235Context::H235Context()
-: m_isActive(false), m_context(NULL)
+: m_isActive(false)
 {
-
+    Initialise();
 }
 
 H235Context::~H235Context()
@@ -698,6 +725,9 @@ void H235Context::Initialise()
     
     m_context  = SSL_CTX_new(TLSv1_method());
 
+    ssl_load_ciphers();
+    
+    m_isActive = true;
 }
 
 PBoolean H235Context::IsActive()
@@ -721,7 +751,6 @@ int H235Context::Generate_Session_Id(const ssl_st *ssl, unsigned char *id, unsig
 {
 	unsigned int count = 0;
 	do	{
-		PTRACE(1,"X");
 		RAND_pseudo_bytes(id, *id_len);
 		/* Prefix the session_id with the required prefix. NB: If our
 		 * prefix is too long, clip it - but there will be worse effects

@@ -42,6 +42,7 @@
 struct ssl_st;
 struct ssl_ctx_st;
 struct ssl_session_st;
+class PASN_OctetString;
 class RTP_DataFrame;
 class H235Context;
 class H235_DiffieHellman;
@@ -76,6 +77,14 @@ public:
     /** Get Master key
       */
     const PBYTEArray & GetMasterKey();
+
+    /** Encode Master key
+      */
+    void EncodeMasterKey(PASN_OctetString & key);
+
+    /** Decode Master key
+      */
+    void DecodeMasterKey(const PASN_OctetString & key);
 
     /** Is Active 
       */
