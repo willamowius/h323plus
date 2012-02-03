@@ -170,10 +170,8 @@ extern "C" {
 
 void ssl3_init_finished_mac(SSL *s)
     {
-    EVP_MD_CTX_set_flags(&(s->s3->finish_dgst1),
-        EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
-    EVP_DigestInit_ex(&(s->s3->finish_dgst1),s->ctx->md5, NULL);
-    EVP_DigestInit_ex(&(s->s3->finish_dgst2),s->ctx->sha1, NULL);
+	EVP_DigestInit_ex(&(s->s3->finish_dgst1),s->ctx->md5, NULL);
+	EVP_DigestInit_ex(&(s->s3->finish_dgst2),s->ctx->sha1, NULL);
     }
     
 void ssl3_cleanup_key_block(SSL *s)
@@ -439,8 +437,8 @@ static void tls1_P_hash(const EVP_MD *md, const unsigned char *sec,
 
     HMAC_CTX_init(&ctx);
     HMAC_CTX_init(&ctx_tmp);
-    HMAC_CTX_set_flags(&ctx, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
-    HMAC_CTX_set_flags(&ctx_tmp, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
+ //   HMAC_CTX_set_flags(&ctx, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
+ //   HMAC_CTX_set_flags(&ctx_tmp, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
     HMAC_Init_ex(&ctx,sec,sec_len,md, NULL);
     HMAC_Init_ex(&ctx_tmp,sec,sec_len,md, NULL);
     HMAC_Update(&ctx,seed,seed_len);
