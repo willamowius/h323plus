@@ -156,7 +156,7 @@ int tls_change_cipher_state(SSL *s, int which)
     int reuse_dd = 0;
 
     c=s->s3->tmp.new_sym_enc;
-    m=s->s3->tmp.new_hash;
+    m=(EVP_MD_CTX*)s->s3->tmp.new_hash;
     comp=s->s3->tmp.new_compression;
     key_block=s->s3->tmp.key_block;
 
@@ -225,7 +225,7 @@ int tls_change_cipher_state(SSL *s, int which)
     EVP_CIPHER_CTX_init(dd);
 
     p=s->s3->tmp.key_block;
-    i=EVP_MD_size(m);
+    i=EVP_MD_size((EVP_MD*)m);
     cl=EVP_CIPHER_key_length(c);
     j=0;
 
