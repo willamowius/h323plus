@@ -4,9 +4,10 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "h323plus", "h323plus_2010.vcxproj", "{71C46EAF-48C9-47BA-9532-27B51744548D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "simpleplus", "samples\simple\simple_2010.vcxproj", "{AC8B99A3-6DEA-48B0-A6A6-31A982FAAD0A}"
-	ProjectSection(ProjectDependencies) = postProject
-		{71C46EAF-48C9-47BA-9532-27B51744548D} = {71C46EAF-48C9-47BA-9532-27B51744548D}
-	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "plugins", "plugins", "{6A2D3D2B-7739-4E17-B81E-BEBEDADE43A4}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Vic H.261 Video Codec", "plugins\video\H.261-vic\h261vic_2010.vcxproj", "{4A1B92CB-CA8E-4511-A1D5-B0A322FDE67C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,14 +37,25 @@ Global
 		{AC8B99A3-6DEA-48B0-A6A6-31A982FAAD0A}.Debug|x64.Build.0 = Debug|x64
 		{AC8B99A3-6DEA-48B0-A6A6-31A982FAAD0A}.No Trace|Win32.ActiveCfg = No Trace|Win32
 		{AC8B99A3-6DEA-48B0-A6A6-31A982FAAD0A}.No Trace|Win32.Build.0 = No Trace|Win32
-		{AC8B99A3-6DEA-48B0-A6A6-31A982FAAD0A}.No Trace|x64.ActiveCfg = No Trace|x64
-		{AC8B99A3-6DEA-48B0-A6A6-31A982FAAD0A}.No Trace|x64.Build.0 = No Trace|x64
+		{AC8B99A3-6DEA-48B0-A6A6-31A982FAAD0A}.No Trace|x64.ActiveCfg = No Trace|Win32
 		{AC8B99A3-6DEA-48B0-A6A6-31A982FAAD0A}.Release|Win32.ActiveCfg = Release|Win32
 		{AC8B99A3-6DEA-48B0-A6A6-31A982FAAD0A}.Release|Win32.Build.0 = Release|Win32
-		{AC8B99A3-6DEA-48B0-A6A6-31A982FAAD0A}.Release|x64.ActiveCfg = Release|x64
-		{AC8B99A3-6DEA-48B0-A6A6-31A982FAAD0A}.Release|x64.Build.0 = Release|x64
+		{AC8B99A3-6DEA-48B0-A6A6-31A982FAAD0A}.Release|x64.ActiveCfg = Release|Win32
+		{4A1B92CB-CA8E-4511-A1D5-B0A322FDE67C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4A1B92CB-CA8E-4511-A1D5-B0A322FDE67C}.Debug|Win32.Build.0 = Debug|Win32
+		{4A1B92CB-CA8E-4511-A1D5-B0A322FDE67C}.Debug|x64.ActiveCfg = Debug|x64
+		{4A1B92CB-CA8E-4511-A1D5-B0A322FDE67C}.Debug|x64.Build.0 = Debug|x64
+		{4A1B92CB-CA8E-4511-A1D5-B0A322FDE67C}.No Trace|Win32.ActiveCfg = Release|Win32
+		{4A1B92CB-CA8E-4511-A1D5-B0A322FDE67C}.No Trace|Win32.Build.0 = Release|Win32
+		{4A1B92CB-CA8E-4511-A1D5-B0A322FDE67C}.No Trace|x64.ActiveCfg = Release|Win32
+		{4A1B92CB-CA8E-4511-A1D5-B0A322FDE67C}.Release|Win32.ActiveCfg = Release|Win32
+		{4A1B92CB-CA8E-4511-A1D5-B0A322FDE67C}.Release|Win32.Build.0 = Release|Win32
+		{4A1B92CB-CA8E-4511-A1D5-B0A322FDE67C}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4A1B92CB-CA8E-4511-A1D5-B0A322FDE67C} = {6A2D3D2B-7739-4E17-B81E-BEBEDADE43A4}
 	EndGlobalSection
 EndGlobal

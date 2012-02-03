@@ -19,6 +19,22 @@
     <Filter Include="ASN Files\ASN Sources">
       <UniqueIdentifier>{e9a9b0c0-f572-4cdc-865d-65977538a4ff}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\h235">
+      <UniqueIdentifier>{3c84cca4-ef28-4a2f-9c6e-5bbbbc6c7818}</UniqueIdentifier>
+      <Extensions>h235*.cxx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\h460">
+      <UniqueIdentifier>{a30c9bb7-f2cd-40cb-b8eb-55dec68faaf0}</UniqueIdentifier>
+      <Extensions>h460*.cxx</Extensions>
+    </Filter>
+    <Filter Include="Header Files\h235">
+      <UniqueIdentifier>{5aaef889-148b-4230-9651-fe6f933d7d4e}</UniqueIdentifier>
+      <Extensions>h235</Extensions>
+    </Filter>
+    <Filter Include="Header Files\h460">
+      <UniqueIdentifier>{3264fb26-b701-4953-a52f-e77d3cb032af}</UniqueIdentifier>
+      <Extensions>h460</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\channels.cxx">
@@ -45,19 +61,7 @@
     <ClCompile Include="src\h224.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\h225ras.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\h230\h230.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\h235auth.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\h235auth1.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\h235pluginmgr.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\h281.cxx">
@@ -109,30 +113,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\h450\h450pdu.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\h460\h4601.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\h460\h46018_h225.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\h460\h46024b.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\h460\h460_oid3.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\h460\h460_std18.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\h460\h460_std23.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\h460\h460_std9.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\h460\h460p.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\h501pdu.cxx">
@@ -279,6 +259,57 @@
     <ClCompile Include="src\x880.cxx">
       <Filter>ASN Files\ASN Sources</Filter>
     </ClCompile>
+    <ClCompile Include="src\h235\h2356.cxx">
+      <Filter>Source Files\h235</Filter>
+    </ClCompile>
+    <ClCompile Include="src\h225ras.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\h235auth.cxx">
+      <Filter>Source Files\h235</Filter>
+    </ClCompile>
+    <ClCompile Include="src\h235auth1.cxx">
+      <Filter>Source Files\h235</Filter>
+    </ClCompile>
+    <ClCompile Include="src\h235\h235caps.cxx">
+      <Filter>Source Files\h235</Filter>
+    </ClCompile>
+    <ClCompile Include="src\h235\h235chan.cxx">
+      <Filter>Source Files\h235</Filter>
+    </ClCompile>
+    <ClCompile Include="src\h235\h235con.cxx">
+      <Filter>Source Files\h235</Filter>
+    </ClCompile>
+    <ClCompile Include="src\h235pluginmgr.cxx">
+      <Filter>Source Files\h235</Filter>
+    </ClCompile>
+    <ClCompile Include="src\h460\h4601.cxx">
+      <Filter>Source Files\h460</Filter>
+    </ClCompile>
+    <ClCompile Include="src\h460\h46018_h225.cxx">
+      <Filter>Source Files\h460</Filter>
+    </ClCompile>
+    <ClCompile Include="src\h460\h46024b.cxx">
+      <Filter>Source Files\h460</Filter>
+    </ClCompile>
+    <ClCompile Include="src\h460\h460_oid3.cxx">
+      <Filter>Source Files\h460</Filter>
+    </ClCompile>
+    <ClCompile Include="src\h460\h460_std18.cxx">
+      <Filter>Source Files\h460</Filter>
+    </ClCompile>
+    <ClCompile Include="src\h460\h460_std23.cxx">
+      <Filter>Source Files\h460</Filter>
+    </ClCompile>
+    <ClCompile Include="src\h460\h460_std9.cxx">
+      <Filter>Source Files\h460</Filter>
+    </ClCompile>
+    <ClCompile Include="src\h460\h460p.cxx">
+      <Filter>Source Files\h460</Filter>
+    </ClCompile>
+    <ClCompile Include="src\h235\ssl_support.cxx">
+      <Filter>Source Files\h235</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\channels.h">
@@ -309,15 +340,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\h230\h230.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\h235auth.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\h235plugin.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\h235pluginmgr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\h281.h">
@@ -378,30 +400,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\h450\h450pdu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\h460\h4601.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\h460\h46018_h225.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\h460\h46024b.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\h460\h460_oid3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\h460\h460_std18.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\h460\h460_std23.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\h460\h460_std9.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\h460\h460p.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\jitter.h">
@@ -531,6 +529,54 @@
       <Filter>ASN Files\ASN Headers</Filter>
     </ClInclude>
     <ClInclude Include="include\openh323buildopts.h" />
+    <ClInclude Include="include\h235\h2351.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\h235\h2356.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\h235auth.h">
+      <Filter>Header Files\h235</Filter>
+    </ClInclude>
+    <ClInclude Include="include\h235pluginmgr.h">
+      <Filter>Header Files\h235</Filter>
+    </ClInclude>
+    <ClInclude Include="include\h235plugin.h">
+      <Filter>Header Files\h235</Filter>
+    </ClInclude>
+    <ClInclude Include="include\h235\h235con.h">
+      <Filter>Header Files\h235</Filter>
+    </ClInclude>
+    <ClInclude Include="include\h235\h235chan.h">
+      <Filter>Header Files\h235</Filter>
+    </ClInclude>
+    <ClInclude Include="include\h235\h235caps.h">
+      <Filter>Header Files\h235</Filter>
+    </ClInclude>
+    <ClInclude Include="include\h460\h4601.h">
+      <Filter>Header Files\h460</Filter>
+    </ClInclude>
+    <ClInclude Include="include\h460\h46018_h225.h">
+      <Filter>Header Files\h460</Filter>
+    </ClInclude>
+    <ClInclude Include="include\h460\h46024b.h">
+      <Filter>Header Files\h460</Filter>
+    </ClInclude>
+    <ClInclude Include="include\h460\h460_std18.h">
+      <Filter>Header Files\h460</Filter>
+    </ClInclude>
+    <ClInclude Include="include\h460\h460_oid3.h">
+      <Filter>Header Files\h460</Filter>
+    </ClInclude>
+    <ClInclude Include="include\h460\h460_std23.h">
+      <Filter>Header Files\h460</Filter>
+    </ClInclude>
+    <ClInclude Include="include\h460\h460_std9.h">
+      <Filter>Header Files\h460</Filter>
+    </ClInclude>
+    <ClInclude Include="include\h460\h460p.h">
+      <Filter>Header Files\h460</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\asn\gccpdu.asn">

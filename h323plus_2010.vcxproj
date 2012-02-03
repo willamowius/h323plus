@@ -450,6 +450,11 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="src\h235pluginmgr.cxx" />
+    <ClCompile Include="src\h235\h2356.cxx" />
+    <ClCompile Include="src\h235\h235caps.cxx" />
+    <ClCompile Include="src\h235\h235chan.cxx" />
+    <ClCompile Include="src\h235\h235con.cxx" />
+    <ClCompile Include="src\h235\ssl_support.cxx" />
     <ClCompile Include="src\h281.cxx" />
     <ClCompile Include="src\h323.cxx">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
@@ -1069,6 +1074,11 @@
     <ClInclude Include="include\h235auth.h" />
     <ClInclude Include="include\h235plugin.h" />
     <ClInclude Include="include\h235pluginmgr.h" />
+    <ClInclude Include="include\h235\h2351.h" />
+    <ClInclude Include="include\h235\h2356.h" />
+    <ClInclude Include="include\h235\h235caps.h" />
+    <ClInclude Include="include\h235\h235chan.h" />
+    <ClInclude Include="include\h235\h235con.h" />
     <ClInclude Include="include\h281.h" />
     <ClInclude Include="include\h281handler.h" />
     <ClInclude Include="include\h323.h" />
