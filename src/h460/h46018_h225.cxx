@@ -1518,15 +1518,15 @@ void H46019UDPSocket::H46024Adirect(bool starter)
 
 PBoolean H46019UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD & port)
 {
-    bool probe = false; bool success = false;
-    RTP_ControlFrame frame(2048); 
-
+    
 #ifdef H323_H46019M
     while (ReadSocket(buf, len, addr, port)) {
 #else
     while (PUDPSocket::ReadFrom(buf, len, addr, port)) {
 #endif
 #if defined(H323_H46024A) || defined(H323_H46024B)
+      bool probe = false; bool success = false;
+      RTP_ControlFrame frame(2048);
         /// Set the detected routed remote address (on first packet received)
         if (m_remAddr.IsAny()) {   
             m_remAddr = addr; 
