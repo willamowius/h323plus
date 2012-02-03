@@ -147,16 +147,13 @@ int tls_change_cipher_state(SSL *s, int which)
     EVP_CIPHER_CTX *dd;
     const EVP_CIPHER *c;
     const SSL_COMP *comp;
-#if OPENSSL_VERSION_NUMBER >= 0x01000000
-    EVP_MD_CTX *m;
-#else
     const EVP_MD *m;
-#endif
+
     int n,i,j,k,exp_label_len,cl;
     int reuse_dd = 0;
 
     c=s->s3->tmp.new_sym_enc;
-    m=(EVP_MD_CTX*)s->s3->tmp.new_hash;
+    m=s->s3->tmp.new_hash;
     comp=s->s3->tmp.new_compression;
     key_block=s->s3->tmp.key_block;
 
@@ -167,7 +164,11 @@ int tls_change_cipher_state(SSL *s, int which)
         else if ((s->enc_read_ctx=(EVP_CIPHER_CTX *)OPENSSL_malloc(sizeof(EVP_CIPHER_CTX))) == NULL)
             goto err;
         dd= s->enc_read_ctx;
+#if OPENSSL_VERSION_NUMBER >= 0x01000000
+        s->read_hash->digest=m;
+#else
         s->read_hash=m;
+#endif
 
         if (s->expand != NULL)
             {
@@ -201,7 +202,11 @@ int tls_change_cipher_state(SSL *s, int which)
             OPENSSL_malloc(sizeof(EVP_CIPHER_CTX))) == NULL))
             goto err;
         dd= s->enc_write_ctx;
+#if OPENSSL_VERSION_NUMBER >= 0x01000000
+        s->write_hash->digest=m;
+#else
         s->write_hash=m;
+#endif
         if (s->compress != NULL)
             {
             COMP_CTX_free(s->compress);
@@ -225,7 +230,7 @@ int tls_change_cipher_state(SSL *s, int which)
     EVP_CIPHER_CTX_init(dd);
 
     p=s->s3->tmp.key_block;
-    i=EVP_MD_size((EVP_MD*)m);
+    i=EVP_MD_size(m);
     cl=EVP_CIPHER_key_length(c);
     j=0;
 
