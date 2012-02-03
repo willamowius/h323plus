@@ -485,6 +485,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\h235\h2356.cxx"
+				>
+			</File>
+			<File
 				RelativePath="src\h235auth.cxx"
 				>
 				<FileConfiguration
@@ -547,6 +551,18 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\h235\h235caps.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\src\h235\h235chan.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\src\h235\h235con.cxx"
+				>
 			</File>
 			<File
 				RelativePath=".\src\h235pluginmgr.cxx"
@@ -914,6 +930,10 @@
 			</File>
 			<File
 				RelativePath=".\src\h460\h460_oid3.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\src\h460\h460_std17.cxx"
 				>
 			</File>
 			<File
@@ -1292,6 +1312,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\h235\ssl_support.cxx"
+				>
+			</File>
+			<File
 				RelativePath="src\svcctrl.cxx"
 				>
 				<FileConfiguration
@@ -1501,7 +1525,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\h235\h2351.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\h235\h2356.h"
+				>
+			</File>
+			<File
 				RelativePath="include\h235auth.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\h235\h235caps.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\h235\h235chan.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\h235\h235con.h"
 				>
 			</File>
 			<File
@@ -1606,6 +1650,10 @@
 			</File>
 			<File
 				RelativePath=".\include\h460\h460_oid3.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\h460\h460_std17.h"
 				>
 			</File>
 			<File
