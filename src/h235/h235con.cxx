@@ -58,6 +58,7 @@ extern "C" {
 };
 
 
+
 ////////////////////////////////////////////////////////////////////////
 void tls1_P_hash(const EVP_MD *md, const unsigned char *sec,
             int sec_len, unsigned char *seed, int seed_len,
@@ -146,7 +147,11 @@ int tls_change_cipher_state(SSL *s, int which)
     EVP_CIPHER_CTX *dd;
     const EVP_CIPHER *c;
     const SSL_COMP *comp;
+#if OPENSSL_VERSION_NUMBER >= 0x01000000
+    EVP_MD_CTX *m;
+#else
     const EVP_MD *m;
+#endif
     int n,i,j,k,exp_label_len,cl;
     int reuse_dd = 0;
 
@@ -652,7 +657,11 @@ if (!tls_change_cipher_state(m_ssl,statechg)) {
 wr= &(m_ssl->s3->wrec);
 wb= &(m_ssl->s3->wbuf);
 
-    mac_size = EVP_MD_size((EVP_MD*)m_ssl->write_hash);
+#if OPENSSL_VERSION_NUMBER >= 0x01000000
+    mac_size = EVP_MD_CTX_size(m_ssl->write_hash);
+#else
+    mac_size = EVP_MD_size(m_ssl->write_hash);
+#endif
     p = wb->buf + prefix_len;
 
     /* write the header */
