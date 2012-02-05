@@ -68,9 +68,9 @@ class H225TransportThread : public PThread
 
     H323Transport * transport;
 
-	PDECLARE_NOTIFIER(PTimer, H225TransportThread, KeepAlive);
-	PTimer	m_keepAlive;								
-	PBoolean useKeepAlive;
+    PDECLARE_NOTIFIER(PTimer, H225TransportThread, KeepAlive);
+    PTimer    m_keepAlive;                                
+    PBoolean useKeepAlive;
 };
 
 
@@ -94,8 +94,8 @@ class H245TransportThread : public PThread
     PBoolean useAggregator;
 #endif
 
-	PDECLARE_NOTIFIER(PTimer, H245TransportThread, KeepAlive);
-	PTimer	m_keepAlive;			
+    PDECLARE_NOTIFIER(PTimer, H245TransportThread, KeepAlive);
+    PTimer    m_keepAlive;            
 };
 
 
@@ -664,7 +664,7 @@ void H323SetTransportAddresses(const H323Transport & associatedTransport,
       PIPSocket::Address remoteIP;
       if (associatedTransport.GetRemoteAddress().GetIpAddress(remoteIP)) {
         associatedTransport.GetEndPoint().InternalTranslateTCPAddress(ip, remoteIP);
-	associatedTransport.GetEndPoint().TranslateTCPPort(port,remoteIP);
+    associatedTransport.GetEndPoint().TranslateTCPPort(port,remoteIP);
         addr = H323TransportAddress(ip, port);
       }
     }
@@ -799,21 +799,21 @@ PBoolean H323Transport::HandleSignallingSocket(H323SignalPDU & pdu)
 {
 
   for (;;) {
-	  H323SignalPDU rpdu;
-	  if (!rpdu.Read(*this)) { 
+      H323SignalPDU rpdu;
+      if (!rpdu.Read(*this)) { 
             return FALSE;
-	  }
-	  else if ((rpdu.GetQ931().GetMessageType() == Q931::InformationMsg) &&
+      }
+      else if ((rpdu.GetQ931().GetMessageType() == Q931::InformationMsg) &&
               endpoint.OnUnsolicitedInformation(rpdu)) {
            // Handle unsolicited Information Message
                 ;
-	  } 
+      } 
     else {
-		  pdu = rpdu;
-		  return TRUE;
-	  }	
+          pdu = rpdu;
+          return TRUE;
+      }    
   }
-	  
+      
   return FALSE;
 }
 
@@ -925,6 +925,11 @@ void H323Transport::CleanUpOnTermination()
   }
 }
 
+PChannel::Errors H323Transport::GetErrorCode(ErrorGroup group) const
+{
+    return PChannel::GetErrorCode(group);
+}
+
 
 PBoolean H323Transport::IsCompatibleTransport(const H225_TransportAddress & /*pdu*/) const
 {
@@ -935,8 +940,8 @@ PBoolean H323Transport::IsCompatibleTransport(const H225_TransportAddress & /*pd
 
 void H323Transport::SetUpTransportPDU(H225_TransportAddress & /*pdu*/,
                                       PBoolean /*localTsap*/,
-									  H323Connection * /*connection*/
-									  ) const
+                                      H323Connection * /*connection*/
+                                      ) const
 {
   PAssertAlways(PUnimplementedFunction);
 }
@@ -990,7 +995,7 @@ H323ListenerTCP::H323ListenerTCP(H323EndPoint & end,
                                  WORD port,
                                  PBoolean exclusive)
   : H323Listener(end),
-	  listener((port == 0) ? (WORD)H323EndPoint::DefaultTcpPort : port),
+      listener((port == 0) ? (WORD)H323EndPoint::DefaultTcpPort : port),
     localAddress(binding)
 {
   exclusiveListener = exclusive;
@@ -1780,7 +1785,7 @@ PBoolean H323TransportUDP::DiscoverGatekeeper(H323Gatekeeper & gk,
   for (i = 0; i < interfaces.GetSize(); i++) {
     localAddress = interfaces[i].GetAddress();
 
-	// don't try to use IPv4 interface to reach IPv6 gatekeeper or IPv6 interface to reach IPv4 gatekeeper
+    // don't try to use IPv4 interface to reach IPv6 gatekeeper or IPv6 interface to reach IPv4 gatekeeper
     if (localAddress.GetVersion() != destAddr.GetVersion())
       continue;
 
@@ -1857,10 +1862,10 @@ PBoolean H323TransportUDP::DiscoverGatekeeper(H323Gatekeeper & gk,
       socket = new PUDPSocket;
       sockets.Append(socket);
 
-	  if (!ListenUDP(*socket, endpoint, localAddress, 0)) {
-	    writeChannel = NULL;
+      if (!ListenUDP(*socket, endpoint, localAddress, 0)) {
+        writeChannel = NULL;
         return FALSE;
-	  }
+      }
 
       localPort = socket->GetPort();
 

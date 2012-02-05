@@ -1889,6 +1889,17 @@ class H323EndPoint : public PObject
                                 const PString & message            ///< Message
                                 ) {};
 
+#ifdef H323_H46017
+
+    /** Create a H.460.17 TCP connection
+        to the gatekeeper to tunnel RAS messages through
+      */
+    PBoolean H46017CreateConnection(
+                               const PString & gatekeeper,   ///< Gatekeeper IP/URL (incl port if not SRV) to connect to
+                               PBoolean useSRV = true        ///< Whether to use h323rs._tcp SRV records to resolve
+                               );
+#endif
+
 #ifdef H323_H46018
 
     /** Disable H.460.18 Feature. (By Default it is enabled)

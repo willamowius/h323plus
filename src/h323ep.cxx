@@ -1203,7 +1203,15 @@ PBoolean H323EndPoint::RemoveListener(H323Listener * listener)
 H323TransportAddressArray H323EndPoint::GetInterfaceAddresses(PBoolean excludeLocalHost,
                                                               H323Transport * associatedTransport)
 {
-  return H323GetInterfaceAddresses(listeners, excludeLocalHost, associatedTransport);
+#ifdef H323_H46017
+    if (PIsDescendant(associatedTransport,H46017RasTransport)) {
+        H323TransportAddressArray addrList;
+        addrList.SetSize(1);
+        addrList.SetAt(0, new H323TransportAddress(associatedTransport->GetLocalAddress()));
+        return addrList;
+    } else
+#endif
+     return H323GetInterfaceAddresses(listeners, excludeLocalHost, associatedTransport);
 }
 
 H323Connection * H323EndPoint::MakeCall(const PString & remoteParty,
@@ -3246,6 +3254,14 @@ void H323EndPoint::LoadBaseFeatureSet()
 #endif
 
 }
+
+#ifdef H323_H46017
+PBoolean H323EndPoint::H46017CreateConnection(const PString & gatekeeper, PBoolean useSRV)
+{
+   H460_Feature * m_h46017 = features.GetFeature(17);
+   return (m_h46017 && m_h46017->Initialise(gatekeeper,useSRV));
+}
+#endif
 
 #ifdef H323_H46018
 void H323EndPoint::H46018Enable(PBoolean enable) 

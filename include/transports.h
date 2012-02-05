@@ -490,6 +490,11 @@ class H323Transport : public PIndirectChannel
     /**Wait for associated thread to terminate.
       */
     void CleanUpOnTermination();
+
+    /**Get Error Code
+       Default calls PChannel::GetErrorCode(ErrorGroup group)
+      */
+    virtual PChannel::Errors GetErrorCode(ErrorGroup group = NumErrorGroups) const;
   //@}
 
   protected:

@@ -41,10 +41,9 @@
 #ifndef H_H460_FeatureStd17
 #define H_H460_FeatureStd17
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
+#include <ptlib/plugin.h>
 #include <vector>
 #include <queue>
 
@@ -73,7 +72,7 @@ public:
 
     //////////////////////
     // Public Function  call..
-    PBoolean Initialise(const PString & remoteAddr);
+    virtual PBoolean Initialise(const PString & remoteAddr = PString(), PBoolean srv = true);
 
     /////////////////////
     // Registration messages
@@ -265,6 +264,8 @@ class H46017Transport  : public H323TransportTCP
 	 PBoolean   isConnected;
 	 PBoolean   remoteShutDown;
 	 PBoolean	closeTransport;
+
+     PString    callToken;
 
 };
 
@@ -539,11 +540,24 @@ class H46017RasTransport : public H323TransportUDP
     );
     ~H46017RasTransport();
 
+    virtual H323TransportAddress GetLocalAddress() const;
+
+    virtual void SetUpTransportPDU(
+      H225_TransportAddress & pdu,
+      PBoolean localTsap,
+      H323Connection * connection = NULL
+    ) const;
+
     virtual PBoolean SetRemoteAddress(
       const H323TransportAddress & address
     );
 
     virtual PBoolean Connect();
+
+    /**Close the channel.
+      */
+    virtual PBoolean Close();
+
 
     PBoolean ReceivedPDU(
       const PBYTEArray & pdu  ///<  PDU read from Tunnel
@@ -563,7 +577,7 @@ class H46017RasTransport : public H323TransportUDP
       const H323TransportAddress & address  ///<  Address of gatekeeper (if present)
     );
 
-    virtual H323TransportAddress GetLocalAddress() const;
+    virtual PChannel::Errors GetErrorCode(ErrorGroup group = NumErrorGroups) const;
 
   protected:
     H46017Handler * m_handler;
@@ -572,6 +586,7 @@ class H46017RasTransport : public H323TransportUDP
     PSyncPoint  msgRecd;
     PBYTEArray  recdpdu;
 
+    PBoolean    shutdown;
 
 };
 

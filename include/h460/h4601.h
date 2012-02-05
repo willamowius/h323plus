@@ -608,6 +608,10 @@ class H460_Feature : public H225_FeatureDescriptor
     /** Whether Supports Non-Call Supplimentary Service
      */
        virtual PBoolean SupportNonCallService() { return false; };
+
+    /** Initialisation
+     */
+       virtual PBoolean Initialise(const PString & dum1 = PString(), PBoolean dum2 = true) { return false; };
   //@}
 
   /**@name Parameter Control */
