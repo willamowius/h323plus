@@ -57,6 +57,9 @@ class SimpleH323EndPoint : public H323EndPoint
 	virtual PBoolean OpenExtendedVideoChannel(H323Connection &, PBoolean,H323VideoCodec &);
 #endif
 #endif
+#ifdef H323_UPnP
+    virtual PBoolean OnUPnPAvailable(const PString & device, const PIPSocket::Address & publicIP, PNatMethod_UPnP * nat);
+#endif
 
     // New functions
     PBoolean Initialise(PArgList &);

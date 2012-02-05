@@ -35,6 +35,10 @@
 #include "main.h"
 #include "../../version.h"
 
+#ifdef H323_UPnP
+#include <h460/upnpcp.h>
+#endif
+
 #if defined(_MSC_VER) 
  #if PTLIB_VER > 280
    #define defVideoDriver "DirectShow"
@@ -457,6 +461,10 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
   }
 #endif
 
+#ifdef H323_UPnP
+   InitialiseUPnP();
+#endif
+
   PIPSocket::Address interfaceAddress(iface);
   WORD interfacePort = (WORD)listenPort.AsInteger();
 
@@ -814,6 +822,25 @@ PBoolean SimpleH323EndPoint::OpenExtendedVideoChannel(H323Connection & connectio
 #endif // H323_H239 
 #endif // H323_VIDEO
 
+#ifdef H323_UPnP
+PBoolean SimpleH323EndPoint::OnUPnPAvailable(const PString & device, const PIPSocket::Address & publicIP, PNatMethod_UPnP * nat)
+{
+    cout << "UPnP Device " << device << " Public IP: " << publicIP << endl;
+
+        for (PINDEX i = 0; i < listeners.GetSize(); ++i) {
+            H323TransportAddress locAddr = listeners[i].GetTransportAddress();
+            if (locAddr.GetIpVersion() == 4) {
+                PIPSocket::Address localIP;
+                PIPSocket::Address pubIP;
+                WORD locPort;
+                locAddr.GetIpAndPort(localIP,locPort);
+                nat->CreateUPnPMap(false, "TCP", localIP, locPort, pubIP , locPort);
+                break;
+            }
+        }
+       return true;
+}
+#endif
 
 
 ///////////////////////////////////////////////////////////////
