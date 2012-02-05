@@ -52,8 +52,7 @@ class H323EndPoint;
 class H460_FeatureStd23;
 class PNatMethod_H46024  : public PSTUNClient
 {
-    // compile issue with PTLIB SVN object.h/cxx r26772 revert both files back to SVN r26754 - SH
-    // commenting out will create a ambiguous delete in class destructor compile error.
+
     PCLASSINFO(PNatMethod_H46024, PNatMethod); 
 
     public:
@@ -94,9 +93,9 @@ class PNatMethod_H46024  : public PSTUNClient
 #if PTLIB_VER >= 2110
     virtual PString GetServer() const { return PString(); }
     virtual bool GetServerAddress(PIPSocketAddressAndPort & ) const { return false; }
-    virtual NatTypes GetNatType(bool) { return UnknownNat; }
+    virtual NatTypes GetNatType(bool force) { return PSTUNClient::GetNatType(force); }
     virtual NatTypes GetNatType(const PTimeInterval &) { return UnknownNat; }
-    virtual bool SetServer(const PString &) { return false; }
+    virtual bool SetServer(const PString & server) { return PSTUNClient::SetServer(server); }
     virtual bool Open(const PIPSocket::Address &) { return false; }
     virtual bool CreateSocket(BYTE,PUDPSocket * &, const PIPSocket::Address,WORD)  { return false; }
     virtual void SetCredentials(const PString &, const PString &, const PString &) {}
