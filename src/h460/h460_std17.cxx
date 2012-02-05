@@ -391,8 +391,8 @@ H46017Transport::H46017Transport(H323EndPoint & endpoint,
                                  PIPSocket::Address binding,
                                  H46017Handler * feat
                 )    
-   : H323TransportTCP(endpoint,binding), con(NULL), Feature(feat), ReadTimeOut(PMaxTimeInterval),
-       isConnected(false), closeTransport(false), remoteShutDown(false), callToken(PString())
+   : H323TransportTCP(endpoint,binding), ReadTimeOut(PMaxTimeInterval), con(NULL), Feature(feat),
+       isConnected(false), remoteShutDown(false), closeTransport(false), callToken(PString())
 {
     m_socketWrite = PThread::Create(PCREATE_NOTIFIER(SocketWrite), 0, PThread::AutoDeleteThread);
 }
