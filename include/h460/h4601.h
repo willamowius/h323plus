@@ -333,7 +333,7 @@ class H460_FeatureParameter : public H225_EnumeratedParameter
     /** Feature parameter has Value
     */
      PBoolean hasContent() 
-            { return (GetTag() == e_content); };
+         { return HasOptionalField(H225_EnumeratedParameter::e_content); };
 
   //@}
 
@@ -678,8 +678,7 @@ class H460_Feature : public H225_FeatureDescriptor
 
     /** Get the Number of Parameters
     */
-    int GetParameterCount() 
-        { return CurrentTable->ParameterCount(); };
+    int GetParameterCount();
 
     /** Get the Current Feature Table
       */

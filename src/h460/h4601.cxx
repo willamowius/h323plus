@@ -770,12 +770,16 @@ H460_FeatureParameter & H460_Feature::GetFeatureParameter(PINDEX id)
 
 H460_FeatureParameter & H460_Feature::GetFeatureParameter(const H460_FeatureID & id)
 {
+    if (!CurrentTable) {
+       PAssertAlways("LOGIC ERROR: Must call <if (.GetParameterCount)> before .GetParameter");
+       return *(new H460_FeatureParameter());    // BUG: memory leak but is never called - SH
+    }
     return CurrentTable->GetParameter(id);
 }
 
 PBoolean H460_Feature::HasFeatureParameter(const H460_FeatureID & id)
 {
-    return CurrentTable->HasParameter(id);
+    return CurrentTable && CurrentTable->HasParameter(id);
 }
 
 PBoolean H460_Feature::Contains(const H460_FeatureID & id)
@@ -790,6 +794,18 @@ PBoolean H460_Feature::Contains(const H460_FeatureID & id)
 
     return FALSE;
 }
+
+int H460_Feature::GetParameterCount() 
+{ 
+    if (HasOptionalField(e_parameters)) {    
+        SetDefaultTable();
+        return CurrentTable->GetSize();
+            return TRUE;
+    }
+    CurrentTable = NULL;
+    return 0;
+}
+
 
 H460_FeatureParameter & H460_Feature::Value(const H460_FeatureID & id)
 {
