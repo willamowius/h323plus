@@ -156,7 +156,7 @@ interface IxNATExternalIPAddressCallback : public INATExternalIPAddressCallback
 {
     IxNATExternalIPAddressCallback(UPnPCallbacks* p ) : m_pointer( p ), m_dwRef( 0 ) { };
 
-    ~IxNATExternalIPAddressCallback() { delete m_pointer; }
+    ~IxNATExternalIPAddressCallback() { /*delete m_pointer;*/ }
     
     HRESULT STDMETHODCALLTYPE NewExternalIPAddress( BSTR bstrNewExternalIPAddress ) {
         PAssert(m_pointer != NULL,PLogicError);            
@@ -197,7 +197,7 @@ interface IxNATNumberOfEntriesCallback : public INATNumberOfEntriesCallback
 {
     IxNATNumberOfEntriesCallback(UPnPCallbacks* p ) : m_pointer( p ), m_dwRef( 0 ) { };
 
-    ~IxNATNumberOfEntriesCallback() { delete m_pointer; }
+    ~IxNATNumberOfEntriesCallback() { /*delete m_pointer;*/ }
     
     HRESULT STDMETHODCALLTYPE NewNumberOfEntries( long lNewNumberOfEntries ) {
         PAssert(m_pointer != NULL,PLogicError);            
@@ -392,6 +392,8 @@ void UPnPThread::Close()
 
     SAFE_RELEASE(m_piEventManager);
     SAFE_RELEASE(m_piNAT);
+
+    delete m_piCallbacks;
 }
 
 bool UPnPThread::RemoveMap(WORD port, PBoolean udp)
