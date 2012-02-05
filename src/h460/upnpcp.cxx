@@ -479,10 +479,10 @@ bool UPnPThread::CreateMap(bool pair, const PString & protocol,
 
             PString key = PString((protocol == "UDP") ? "U" : "T") + PString(umap.ExternalPort);
             m_piMaps.insert(std::pair<PString,PortMappingContainer*>(key,(PortMappingContainer*)umap.Clone()));
-        //        if (i == 0) {
+               if (i == 0) {
                     extIP = umap.ExternalIPAddress;
                     extPort = umap.ExternalPort;
-        //        }
+               }
             success = true;
         } 
     }

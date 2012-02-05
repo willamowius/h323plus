@@ -520,7 +520,7 @@ bool H460_FeatureStd23::AlternateNATMethod()
             natlist[i].GetRTPSupport() == PSTUNClient::RTPSupported) {
             PIPSocket::Address extIP;
             natlist[i].GetExternalAddress(extIP);
-            if (extIP.IsAny() || !extIP.IsValid() || extIP == externalIP) {
+            if (extIP.IsAny() || !extIP.IsValid() || externalIP.IsLoopback() || extIP == externalIP) {
                 PTRACE(4,"H46023\tUPnP Change NAT from " << natType << " to " << PSTUNClient::ConeNat);
                 natType = PSTUNClient::ConeNat;
                 useAlternate = 1;
