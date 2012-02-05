@@ -577,6 +577,8 @@ class H46017RasTransport : public H323TransportUDP
       const H323TransportAddress & address  ///<  Address of gatekeeper (if present)
     );
 
+    virtual PBoolean IsRASTunnelled();
+
     virtual PChannel::Errors GetErrorCode(ErrorGroup group = NumErrorGroups) const;
 
   protected:

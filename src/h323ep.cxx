@@ -324,7 +324,8 @@ H323EndPoint::H323EndPoint()
     roundTripDelayRate(0, 0, 1),            // Minutes
     noMediaTimeout(0, 0, 5),                // Minutes
     gatekeeperRequestTimeout(0, 5),         // Seconds
-    rasRequestTimeout(0, 3)                // Seconds
+    rasRequestTimeout(0, 3),                // Seconds
+    registrationTimeToLive(0, 0, 1)         // Minutes
 
 #ifdef H323_H450
     ,
@@ -492,10 +493,9 @@ H323EndPoint::H323EndPoint()
   disableH460 = false;
 
 #ifdef H323_H46018
-  // We must set time to live to 30 to ensure pinhole open
-  registrationTimeToLive = PTimeInterval(0, 30);  
   m_h46018enabled = true;
 #endif
+
 #ifdef H323_H46023
   m_h46023enabled = true;
 #endif
@@ -3258,6 +3258,7 @@ void H323EndPoint::LoadBaseFeatureSet()
 #ifdef H323_H46017
 PBoolean H323EndPoint::H46017CreateConnection(const PString & gatekeeper, PBoolean useSRV)
 {
+   registrationTimeToLive = PTimeInterval(0, 19);
    H460_Feature * m_h46017 = features.GetFeature(17);
    return (m_h46017 && m_h46017->Initialise(gatekeeper,useSRV));
 }
@@ -3270,7 +3271,7 @@ void H323EndPoint::H46018Enable(PBoolean enable)
 	if (enable) {
 		// Must set reregistrations at between 15 and 45 sec
 		// otherwise the Pinhole in NAT will close
-		registrationTimeToLive = PTimeInterval(0, 30);  
+		registrationTimeToLive = PTimeInterval(0, 19);  
 	} else {
 		// Set timer to whatever gk allocates...
 		registrationTimeToLive = PTimeInterval();       

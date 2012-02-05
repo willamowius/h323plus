@@ -1298,6 +1298,11 @@ PBoolean H46017RasTransport::DiscoverGatekeeper(H323Gatekeeper & /*gk*/, H323Ras
     return true;
 }
 
+PBoolean H46017RasTransport::IsRASTunnelled()  
+{ 
+    return true; 
+}
+
 PChannel::Errors H46017RasTransport::GetErrorCode(ErrorGroup /*group*/) const
 {
     if (shutdown)

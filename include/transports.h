@@ -472,6 +472,10 @@ class H323Transport : public PIndirectChannel
       H323RasPDU & pdu,                     ///<  GatekeeperRequest PDU
       const H323TransportAddress & address  ///<  Address of gatekeeper (if present)
     );
+
+   /**Whether the RAS is tunnelled AKA H.460.17
+      */
+    virtual PBoolean IsRASTunnelled()  { return false; }
   //@}
 
 

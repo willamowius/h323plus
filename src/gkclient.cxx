@@ -349,16 +349,21 @@ PBoolean H323Gatekeeper::RegistrationRequest(PBoolean autoReg)
   if ((!discoveryComplete) && (endpoint.GatekeeperCheckIP(transport->GetRemoteAddress(),newaddress)))
       transport->SetRemoteAddress(newaddress);
 
-  rrq.m_rasAddress.SetSize(1);
-  transport->SetUpTransportPDU(rrq.m_rasAddress[0], TRUE);
+  if (transport->IsRASTunnelled()) {
+      rrq.IncludeOptionalField(H225_RegistrationRequest::e_maintainConnection);
+      rrq.m_maintainConnection = true;
+  } else {
+      rrq.m_rasAddress.SetSize(1);
+      transport->SetUpTransportPDU(rrq.m_rasAddress[0], TRUE);
 
-  H323TransportAddressArray listeners = endpoint.GetInterfaceAddresses(TRUE, transport);
-  if (listeners.IsEmpty()) {
-    PTRACE(1, "RAS\tCannot register with Gatekeeper without a H323Listener!");
-    return FALSE;
-  }
+      H323TransportAddressArray listeners = endpoint.GetInterfaceAddresses(TRUE, transport);
+      if (listeners.IsEmpty()) {
+        PTRACE(1, "RAS\tCannot register with Gatekeeper without a H323Listener!");
+        return FALSE;
+      }
 
-  H323SetTransportAddresses(*transport, listeners, rrq.m_callSignalAddress);
+      H323SetTransportAddresses(*transport, listeners, rrq.m_callSignalAddress);
+  } 
 
   endpoint.SetEndpointTypeInfo(rrq.m_terminalType);
   endpoint.SetVendorIdentifierInfo(rrq.m_endpointVendor);
