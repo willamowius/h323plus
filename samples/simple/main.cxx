@@ -99,19 +99,22 @@ void SimpleH323Process::Main()
              "s-sound:"
              "-sound-in:"
              "-sound-out:"
-			 "-sound-buffers:"
+             "-sound-buffers:"
 #ifdef H323_VIDEO
              "v-video::"
 #endif
              "T-h245tunneldisable."
              "Q-h245qosdisable."
 #ifdef H323_H46018
+             "k-h46017:"
+#endif
+#ifdef H323_H46018
              "-h46018disable."
 #endif
 #if PTRACING
              "t-trace."
 #endif
-			 "x-listenport:"
+             "x-listenport:"
              "u-user:"
           , FALSE);
 
@@ -138,6 +141,9 @@ void SimpleH323Process::Main()
             "  -f --fast-disable       : Disable fast start.\n"
             "  -T --h245tunneldisable  : Disable H245 tunnelling.\n"
             "  -Q --h245qosdisable     : Disable H245 QoS Exchange.\n"
+#ifdef H323_H46017
+           "   -k --h46017             : Use H.460.17 Gatekeeper.\n"
+#endif
 #ifdef H323_H46018
             "     --h46018disable      : Disable H.460.18.\n"
 #endif
@@ -151,7 +157,7 @@ void SimpleH323Process::Main()
             "  -t --trace              : Enable trace, use multiple times for more detail.\n"
             "  -o --output             : File for trace output, default is stderr.\n"
 #endif
-			"  -x --listenport         : Listening port (default 1720).\n"
+            "  -x --listenport         : Listening port (default 1720).\n"
             "  -h --help               : This help message.\n"
             << endl;
     return;
@@ -160,7 +166,7 @@ void SimpleH323Process::Main()
 #if PTRACING
   PTrace::Initialise(args.GetOptionCount('t'),
                      args.HasOption('o') ? (const char *)args.GetOptionString('o') : NULL,
-					 PTrace::DateAndTime | PTrace::TraceLevel | PTrace::FileAndLine);
+                     PTrace::DateAndTime | PTrace::TraceLevel | PTrace::FileAndLine);
 #endif
 
   // Create the H.323 endpoint and initialise it
@@ -185,8 +191,8 @@ void SimpleH323Process::Main()
     if (cmd == "X")
       break;
 
-	PStringArray Cmd = cmd.Tokenise(" ",FALSE);
-	if (Cmd[0] == "c") {
+    PStringArray Cmd = cmd.Tokenise(" ",FALSE);
+    if (Cmd[0] == "c") {
           if (!endpoint->currentCallToken.IsEmpty())
             cout << "Cannot make call whilst call in progress\n";
           else {
@@ -194,9 +200,9 @@ void SimpleH323Process::Main()
             str = Cmd[1].Trim();
             endpoint->MakeCall(str, endpoint->currentCallToken);
           }
-	}
+    }
     else if (cmd.FindOneOf("HYN0123456789ABCDES") != P_MAX_INDEX) {
-	  H323Connection * connection = endpoint->FindConnectionWithLock(endpoint->currentCallToken);
+      H323Connection * connection = endpoint->FindConnectionWithLock(endpoint->currentCallToken);
       if (connection != NULL) {
         if (cmd == "H")
           connection->ClearCall();
@@ -205,15 +211,15 @@ void SimpleH323Process::Main()
         else if (cmd == "N")
           connection->AnsweringCall(H323Connection::AnswerCallDenied);
 #ifdef H323_H239
-		else if (cmd == "S") {
+        else if (cmd == "S") {
           if (connection->OpenH239Channel())
-			  cout << "Application Session Open.." << endl;
-		  else
-			  cout << "Application Open Error: Remote may not support Feature!" << endl;
-		} else if (cmd == "E") {
+              cout << "Application Session Open.." << endl;
+          else
+              cout << "Application Open Error: Remote may not support Feature!" << endl;
+        } else if (cmd == "E") {
           if (connection->CloseH239Channel())
-			  cout << "Application Session Closed.." << endl;
-		}
+              cout << "Application Session Closed.." << endl;
+        }
 #endif
         else
           connection->SendUserInput(cmd);
@@ -310,7 +316,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
 #ifdef H323_VIDEO
   videoDriver = defVideoDriver;
   if (args.HasOption("video")) {
-	  videoDriver = args.GetOptionString("video");
+      videoDriver = args.GetOptionString("video");
   }
   cout << "Using video driver " << videoDriver << endl;
 
@@ -319,29 +325,29 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
 
   PStringList devices = PVideoInputDevice::GetDriversDeviceNames(inputDriverName);
   if (devices.GetSize() == 0) {
-	  cout << "No Video Grabber available Disabling Video Support!" << endl;
-	  hasVideo = FALSE;
+      cout << "No Video Grabber available Disabling Video Support!" << endl;
+      hasVideo = FALSE;
 #if PTLIB_VER >= 2110
   } else {
     PVideoInputDevice::Capabilities caps;
     if (PVideoInputDevice::GetDeviceCapabilities(devices[0],inputDriverName,&caps)) {
-	  cout << "Video Device " << devices[0] << " capabilities." << endl;
+      cout << "Video Device " << devices[0] << " capabilities." << endl;
       cout << "  Grabber capabilities." << endl;
-	  for (std::list<PVideoFrameInfo>::const_iterator r = caps.framesizes.begin(); r != caps.framesizes.end(); ++r) {
-		  cout << "        w: " << r->GetFrameWidth() << " h: " << r->GetFrameHeight() << " fmt: " 
-			   << r->GetColourFormat() << " fps: " << r->GetFrameRate() << endl;
-		  if ((r->GetFrameWidth() >= 1280) && (r->GetFrameHeight() >= 720)) {
-			  MaxVideoFrame = H323Capability::p720MPI;
-		  }
-	  }
-	  cout << "  Control capabilities." << endl;
-	  if (caps.controls.size() > 0) {
-	    for (std::list<PVideoControlInfo>::const_iterator r = caps.controls.begin(); r != caps.controls.end(); ++r) 
-		  cout << "        " << r->AsString(r->type) << ": max:" << r->max << " min:" << r->min << endl;
-	  } else {
+      for (std::list<PVideoFrameInfo>::const_iterator r = caps.framesizes.begin(); r != caps.framesizes.end(); ++r) {
+          cout << "        w: " << r->GetFrameWidth() << " h: " << r->GetFrameHeight() << " fmt: " 
+               << r->GetColourFormat() << " fps: " << r->GetFrameRate() << endl;
+          if ((r->GetFrameWidth() >= 1280) && (r->GetFrameHeight() >= 720)) {
+              MaxVideoFrame = H323Capability::p720MPI;
+          }
+      }
+      cout << "  Control capabilities." << endl;
+      if (caps.controls.size() > 0) {
+        for (std::list<PVideoControlInfo>::const_iterator r = caps.controls.begin(); r != caps.controls.end(); ++r) 
+          cout << "        " << r->AsString(r->type) << ": max:" << r->max << " min:" << r->min << endl;
+      } else {
           cout << "        No Control capabilities found." << endl;
-	  }
-	  cout << endl;
+      }
+      cout << endl;
     } else {
       cout << "InputDevice " << devices[0] << " capabilities not Available." << endl;
     }
@@ -349,7 +355,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
  }
 
   if (MaxVideoFrame == H323Capability::p720MPI)
-	  cout << "High Definition Webcam detected." << endl << endl;
+      cout << "High Definition Webcam detected." << endl << endl;
 #else
   hasVideo = FALSE;
 #endif
@@ -357,7 +363,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
   // Set the default codecs available on sound cards.
   AddAllCapabilities(0, P_MAX_INDEX, "*");
   if (!hasVideo)
-	RemoveCapability(H323Capability::e_Video);
+    RemoveCapability(H323Capability::e_Video);
 #ifdef H323_VIDEO
   else 
     SetVideoFrameSize(MaxVideoFrame);
@@ -381,20 +387,20 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
 
  ////////////////////////////////////////
 #ifdef H323_H460
-	// List all the available Features
-    PStringList features = H460_Feature::GetFeatureNames();
-	  cout << "Available Features: " << endl;
-      for (PINDEX i = 0; i < features.GetSize(); i++) {
-	      PStringList names = H460_Feature::GetFeatureFriendlyNames(features[i]);
-		    for (PINDEX j = 0; j < names.GetSize(); j++)
-				cout << features[i] << "\t" << names[j] << endl;
-	  }
-	  cout << endl;
+    // List all the available Features
+    PStringList featurelist = H460_Feature::GetFeatureNames();
+      cout << "Available Features: " << endl;
+      for (PINDEX i = 0; i < featurelist.GetSize(); i++) {
+          PStringList names = H460_Feature::GetFeatureFriendlyNames(featurelist[i]);
+            for (PINDEX j = 0; j < names.GetSize(); j++)
+                cout << featurelist[i] << "\t" << names[j] << endl;
+      }
+      cout << endl;
 
 #ifdef H323_H46018
   if (args.HasOption("h46018disable")) {
-	  cout << "H.460.18 is Disabled" << endl << endl;
-	  H46018Enable(PFalse);
+      cout << "H.460.18 is Disabled" << endl << endl;
+      H46018Enable(PFalse);
   }
 #endif
 
@@ -402,13 +408,13 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
 /////////////////////////////////////////
 
 // List all the available Features
-	  PStringArray natmethods = PNatStrategy::GetRegisteredList();
+      PStringArray natmethods = PNatStrategy::GetRegisteredList();
 
-	  cout << "Available NAT Methods: " << endl;
+      cout << "Available NAT Methods: " << endl;
       for (PINDEX i = 0; i < natmethods.GetSize(); i++) {
-			cout << natmethods[i] << endl;
-	  }
-	  cout << endl;
+            cout << natmethods[i] << endl;
+      }
+      cout << endl;
 
 ////////////////////////////////////////
 
@@ -426,7 +432,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
           }
 #endif
       }
-	  cout << endl;
+      cout << endl;
 
 ////////////////////////////////////////
  
@@ -470,6 +476,18 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
     SetGatekeeperPassword(args.GetOptionString('p'));
     cout << "Enabling H.235 security access to gatekeeper." << endl;
   }
+
+#ifdef H323_H46017
+    if (args.HasOption('k')) {
+       PString gk17 = args.GetOptionString('k');
+       if (H46017CreateConnection(gk17, false)) {
+           cout << "Using H.460.17 Gatekeeper Tunneling." << endl;
+           return true;
+       }
+       cout << "H.460.17 Gatekeeper Tunneling Failed." << endl;
+       return false;
+    }
+#endif
 
   // Establish link with gatekeeper if required.
   if (args.HasOption('g') || !args.HasOption('n')) {
@@ -744,8 +762,8 @@ PBoolean SimpleH323EndPoint::OpenVideoChannel(H323Connection & /*connection*/,
 
 #ifdef H323_H239
 PBoolean SimpleH323EndPoint::OpenExtendedVideoChannel(H323Connection & connection,
-											PBoolean PTRACE_PARAM(isEncoding),
-											H323VideoCodec & codec)
+                                            PBoolean PTRACE_PARAM(isEncoding),
+                                            H323VideoCodec & codec)
 {
 
 #ifdef P_APPSHARE
@@ -804,7 +822,7 @@ SimpleH323Connection::SimpleH323Connection(SimpleH323EndPoint & ep, unsigned ref
   : H323Connection(ep, ref)
 {
 #ifdef H323_H4609
-	H4609EnableStats();
+    H4609EnableStats();
 #endif
 }
 
