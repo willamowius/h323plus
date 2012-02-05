@@ -1,5 +1,7 @@
 
 H323plus 1.24.0 - 1.24.1
+Added H.460.17 Integration into H323Endpoint and Added To Simple example
+FIX Enumeration through H460_Feature Parameters
 FIX Memory allocation of RTP Frames (G.722 on Windows)
 Added UPnP Standalone support (without H.460.23/.24)
 Major rehashing of UPnP code
