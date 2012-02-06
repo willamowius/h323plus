@@ -800,7 +800,6 @@ int H460_Feature::GetParameterCount()
     if (HasOptionalField(e_parameters)) {    
         SetDefaultTable();
         return CurrentTable->GetSize();
-            return TRUE;
     }
     CurrentTable = NULL;
     return 0;
