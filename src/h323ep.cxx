@@ -1203,14 +1203,6 @@ PBoolean H323EndPoint::RemoveListener(H323Listener * listener)
 H323TransportAddressArray H323EndPoint::GetInterfaceAddresses(PBoolean excludeLocalHost,
                                                               H323Transport * associatedTransport)
 {
-#ifdef H323_H46017
-    if (PIsDescendant(associatedTransport,H46017RasTransport)) {
-        H323TransportAddressArray addrList;
-        addrList.SetSize(1);
-        addrList.SetAt(0, new H323TransportAddress(associatedTransport->GetLocalAddress()));
-        return addrList;
-    } else
-#endif
      return H323GetInterfaceAddresses(listeners, excludeLocalHost, associatedTransport);
 }
 
