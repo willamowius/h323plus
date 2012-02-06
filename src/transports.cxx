@@ -595,16 +595,20 @@ H323TransportAddressArray H323GetInterfaceAddresses(const H323ListenerList & lis
                                                     H323Transport * associatedTransport)
 {
   H323TransportAddressArray interfaceAddresses;
+  H323TransportAddress rasaddr(associatedTransport->GetRemoteAddress());
 
   PINDEX i;
   for (i = 0; i < listeners.GetSize(); i++) {
-    H323TransportAddressArray newAddrs = H323GetInterfaceAddresses(listeners[i].GetTransportAddress(), excludeLocalHost, associatedTransport);
-    PINDEX size  = interfaceAddresses.GetSize();
-    PINDEX nsize = newAddrs.GetSize();
-    interfaceAddresses.SetSize(size + nsize);
-    PINDEX j;
-    for (j = 0; j < nsize; j++)
-      interfaceAddresses.SetAt(size + j, new H323TransportAddress(newAddrs[j]));
+      H323TransportAddress sigaddr(listeners[i].GetTransportAddress());
+      if (sigaddr.GetIpVersion() == rasaddr.GetIpVersion()) {
+        H323TransportAddressArray newAddrs = H323GetInterfaceAddresses(sigaddr, excludeLocalHost, associatedTransport);
+        PINDEX size  = interfaceAddresses.GetSize();
+        PINDEX nsize = newAddrs.GetSize();
+        interfaceAddresses.SetSize(size + nsize);
+        PINDEX j;
+        for (j = 0; j < nsize; j++)
+          interfaceAddresses.SetAt(size + j, new H323TransportAddress(newAddrs[j]));
+      }
   }
 
   return interfaceAddresses;
