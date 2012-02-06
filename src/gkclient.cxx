@@ -902,11 +902,11 @@ PBoolean H323Gatekeeper::AdmissionRequest(H323Connection & connection,
     H323SetAliasAddress(destInfo, arq.m_srcInfo[0]);
     if (!connection.GetLocalPartyName()) {
       arq.IncludeOptionalField(H225_AdmissionRequest::e_destinationInfo);
-      H323SetAliasAddresses(connection.GetLocalAliasNames(), arq.m_destinationInfo);
+      H323SetAliasAddresses(endpoint.GetAliasNames(), arq.m_destinationInfo);
     }
   }
   else {
-    H323SetAliasAddresses(connection.GetLocalAliasNames(), arq.m_srcInfo);
+    H323SetAliasAddresses(endpoint.GetAliasNames(), arq.m_srcInfo);
     if (response.transportAddress == NULL || destInfo != *response.transportAddress) {
       arq.IncludeOptionalField(H225_AdmissionRequest::e_destinationInfo);
       arq.m_destinationInfo.SetSize(1);
