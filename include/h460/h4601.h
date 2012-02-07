@@ -514,6 +514,46 @@ class H460_FeatureTable : public H225_ArrayOf_EnumeratedParameter
 
 };
 
+
+///////////////////////////////////////////////////////////////////////////////
+// Maps
+
+template<class Msg>
+struct featOrder {
+    int setPriority(const PString & id) const
+    {
+	    if (id == "Std") return 1;  
+	    else if (id == "OID") return 2;
+        else return 3;
+    };
+
+    bool operator()(Msg s1, Msg s2) const
+    {
+        int i1 = setPriority(s1.Left(3));
+        int i2 = setPriority(s2.Left(3));
+
+        if (i1 < 3) {
+           if (i1 == i2) return (s1.Mid(3).AsInteger() < s2.Mid(3).AsInteger());
+           else return (i1 < i2);
+        } else return (s1 < s2);
+    }
+};
+
+template <class PAIR>
+class deletefeatpair { // PAIR::second_type is a pointer type
+public:
+	void operator()(const PAIR & p) { delete p.second; }
+};
+
+template <class M>
+inline void DeleteFeatureList(const M & m)
+{
+	typedef typename M::value_type PAIR;
+	std::for_each(m.begin(), m.end(), deletefeatpair<PAIR>());
+}
+
+#define H460FeatureList	std::map<PString, H460_FeatureID*, featOrder<PString> >
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /**This is a base class for H.323 Feature handling.
@@ -733,7 +773,7 @@ class H460_Feature : public H225_FeatureDescriptor
 
     /** Get the Feature list to be advertised for presence
       */
-    static PBoolean PresenceFeatureList(std::map<PString,H460_FeatureID*> & plist, H323EndPoint * ep, PPluginManager * pluginMgr = NULL);
+    static PBoolean FeatureList(int type, H460FeatureList & plist, H323EndPoint * ep, PPluginManager * pluginMgr = NULL);
 
     /** Attach the endpoint. Override this to link your own Endpoint Instance.
       */
@@ -1004,6 +1044,7 @@ class H460_FeatureOID : public H460_Feature
     PString GetBase();
 
 };
+
 ///////////////////////////////////////////////////////////////////////////////
 // Dictionary/List of Features
 
@@ -1138,7 +1179,7 @@ template <class className> class H460PluginServiceDescriptor : public PDevicePlu
     virtual PObject *   CreateInstance(int /*userData*/) const { return new className; }
     virtual PStringArray GetDeviceNames(int userData) const 
     { 
-        if (userData == 24)  // Presence Identifer
+        if (userData == 1)  // OID
             return className::GetIdentifier(); 
         else
             return className::GetFeatureFriendlyName(); 

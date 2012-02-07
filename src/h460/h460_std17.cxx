@@ -162,14 +162,16 @@ static void AnalysePacket(PBoolean out, int session, const RTP_DataFrame & frame
 // Must Declare for Factory Loader.
 H460_FEATURE(Std17);
 
+PBoolean H460_FeatureStd17::isEnabled = false;
 H460_FeatureStd17::H460_FeatureStd17()
-: H460_FeatureStd(17), EP(NULL), CON(NULL), m_handler(NULL), isEnabled(false)
+: H460_FeatureStd(17), EP(NULL), CON(NULL), m_handler(NULL)
 {
 
 }
 
 H460_FeatureStd17::~H460_FeatureStd17()
 {
+     isEnabled = false;
      delete m_handler;
 }
 
@@ -187,6 +189,14 @@ void H460_FeatureStd17::AttachConnection(H323Connection * _con)
 
 }
 
+int H460_FeatureStd17::GetPurpose()	
+{ 
+    if (isEnabled)
+      return FeatureRas;
+    else
+      return FeatureBase; 
+}
+
 PBoolean H460_FeatureStd17::Initialise(const PString & remoteAddr, PBoolean srv)
 {
 
@@ -199,10 +209,8 @@ PBoolean H460_FeatureStd17::Initialise(const PString & remoteAddr, PBoolean srv)
 #ifdef H323_H46018
     EP->H46018Enable(false);
 #endif
-#ifdef H323_H46023
-    EP->H46023Enable(false);
-#endif
-    return m_handler && m_handler->RegisterGatekeeper();
+    isEnabled = true;
+    return (m_handler && m_handler->RegisterGatekeeper());
 
  } else {
     std::vector<LookupRecord> routes;
@@ -224,94 +232,18 @@ PBoolean H460_FeatureStd17::Initialise(const PString & remoteAddr, PBoolean srv)
 #ifdef H323_H46018
         EP->H46018Enable(false);
 #endif
-#ifdef H323_H46023
-        EP->H46023Enable(false);
-#endif
+       isEnabled = true;
        if (!m_handler->RegisterGatekeeper())
            continue;
 
-      return true;
+       return true;
     }
     return false;
  }
+
+
 }
 
-PBoolean H460_FeatureStd17::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu)
-{
-    H460_FeatureStd feat = H460_FeatureStd(17); 
-    pdu = feat;
-    return true;
-}
-
-void H460_FeatureStd17::OnReceiveGatekeeperConfirm(const H225_FeatureDescriptor & /*pdu*/)
-{
-    isEnabled = true;
-}
-
-PBoolean H460_FeatureStd17::OnSendRegistrationRequest(H225_FeatureDescriptor & pdu)
-{
-    H460_FeatureStd feat = H460_FeatureStd(17); 
-    pdu = feat;
-    return true;
-}
-
-void H460_FeatureStd17::OnReceiveRegistrationConfirm(const H225_FeatureDescriptor & /*pdu*/)
-{
-    isEnabled = true;
-}
-
-PBoolean H460_FeatureStd17::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
-{
-    if (isEnabled) {
-        H460_FeatureStd feat = H460_FeatureStd(17); 
-        pdu = feat;
-        return true; 
-    }
-    return false;
-}
-
-void H460_FeatureStd17::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
-{
-    isEnabled = true;
-}
-
-PBoolean H460_FeatureStd17::OnSendCallProceeding_UUIE(H225_FeatureDescriptor & pdu)
-{
-    H460_FeatureStd feat = H460_FeatureStd(17); 
-    pdu = feat;
-    return true; 
-}
-
-void H460_FeatureStd17::OnReceiveCallProceeding_UUIE(const H225_FeatureDescriptor & pdu)
-{
-    isEnabled = true;
-}
-
-PBoolean H460_FeatureStd17::OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu)
-{
-    H460_FeatureStd feat = H460_FeatureStd(17); 
-    pdu = feat;
-    return true; 
-}
-
-void H460_FeatureStd17::OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pdu)
-{
-    if (!isEnabled)
-        isEnabled = true;
-}
-
-PBoolean H460_FeatureStd17::OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu)
-{
-    H460_FeatureStd feat = H460_FeatureStd(17); 
-    pdu = feat;
-    return true; 
-}
-
-void H460_FeatureStd17::OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor & pdu)
-{
-    if (!isEnabled)
-        isEnabled = true;
-}
 
 PBoolean H460_FeatureStd17::InitialiseTunnel(const H323TransportAddress & remoteAddr)
 {

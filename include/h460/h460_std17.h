@@ -65,7 +65,7 @@ public:
 
     static PStringArray GetFeatureName() { return PStringArray("Std17"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("NatTraversal-H.460.17"); };
-    static int GetPurpose()	{ return FeatureBase; };
+    static int GetPurpose();
 	static PStringArray GetIdentifier() { return PStringArray("17"); };
 
 	virtual PBoolean CommonFeature() { return isEnabled; }
@@ -74,27 +74,6 @@ public:
     // Public Function  call..
     virtual PBoolean Initialise(const PString & remoteAddr = PString(), PBoolean srv = true);
 
-    /////////////////////
-    // Registration messages
-    virtual PBoolean OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu);
-    virtual void OnReceiveGatekeeperConfirm(const H225_FeatureDescriptor & pdu);
-
-    virtual PBoolean OnSendRegistrationRequest(H225_FeatureDescriptor & pdu);
-    virtual void OnReceiveRegistrationConfirm(const H225_FeatureDescriptor & pdu);
-
-    ////////////////////
-    // Signalling messages
-    virtual PBoolean OnSendSetup_UUIE(H225_FeatureDescriptor & pdu);
-    virtual void OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu);
-
-    virtual PBoolean OnSendCallProceeding_UUIE(H225_FeatureDescriptor & pdu);
-    virtual void OnReceiveCallProceeding_UUIE(const H225_FeatureDescriptor & pdu);
-
-    virtual PBoolean OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu);
-    virtual void OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pdu);
-
-    virtual PBoolean OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu);
-    virtual void OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor & pdu);
 
 protected:
     PBoolean InitialiseTunnel(const H323TransportAddress & remoteAddr);
@@ -105,7 +84,7 @@ private:
     H323Connection * CON;
 
     H46017Handler * m_handler;
-    PBoolean isEnabled;
+    static PBoolean isEnabled;
 
 };
 

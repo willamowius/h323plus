@@ -707,24 +707,30 @@ PBoolean H460_Feature::FeatureAdvertised(int mtype)
 
 H460_FeatureParameter & H460_Feature::AddParameter(H460_FeatureID * id, const H460_FeatureContent & con)
 {
-    if (!HasOptionalField(e_parameters))
+    if (!HasOptionalField(e_parameters)) {
         IncludeOptionalField(e_parameters);
+        m_parameters.SetSize(0);
+    }
 
     return ((H460_FeatureTable &)m_parameters).AddParameter(*id, con);
 }
 
 H460_FeatureParameter & H460_Feature::AddParameter(H460_FeatureID * id)
 {
-    if (!HasOptionalField(e_parameters))
+    if (!HasOptionalField(e_parameters)) {
         IncludeOptionalField(e_parameters);
+        m_parameters.SetSize(0);
+    }
 
     return ((H460_FeatureTable &)m_parameters).AddParameter(*id);
 }
 
 void H460_Feature::AddParameter(H460_FeatureParameter * param)
 {
-    if (!HasOptionalField(e_parameters))
+    if (!HasOptionalField(e_parameters)) {
         IncludeOptionalField(e_parameters);
+        m_parameters.SetSize(0);
+    }
 
     ((H460_FeatureTable &)m_parameters).AddParameter(*param);
 }
@@ -894,36 +900,33 @@ H460_Feature * H460_Feature::CreateFeature(const PString & featurename, int pduT
   return (H460_Feature *)pluginMgr->CreatePluginsDeviceByName(featurename, H460FeaturePluginBaseClass,pduType);
 }
 
-PBoolean H460_Feature::PresenceFeatureList(std::map<PString,H460_FeatureID*> & plist, H323EndPoint * ep, PPluginManager * pluginMgr)
+PBoolean H460_Feature::FeatureList(int type, H460FeatureList & plist, H323EndPoint * ep, PPluginManager * pluginMgr)
 {
   if (pluginMgr == NULL)
     pluginMgr = &PPluginManager::GetPluginManager();
 
    PStringList featurelist = H460_Feature::GetFeatureNames(pluginMgr);
 
-   int count = 0;
    for (PINDEX i=0; i<featurelist.GetSize(); i++) {
-     if (ep && !ep->OnFeatureInstance(H460_Feature::FeaturePresence,featurelist[i]))
+     if (ep && !ep->OnFeatureInstance(type,featurelist[i]))
            continue;
 
      PDevicePluginServiceDescriptor * desc = 
             (PDevicePluginServiceDescriptor *)pluginMgr->GetServiceDescriptor(featurelist[i], H460FeaturePluginBaseClass);
 
-     if (desc != NULL && desc->ValidateDeviceName(featurelist[i], H460_Feature::FeaturePresence)) {
-         PStringArray id = desc->GetDeviceNames(H460_Feature::FeaturePresence);
-         PStringArray display = desc->GetDeviceNames(0);
-         if (featurelist[i].Left(3) == "Std") {            // Std feature
-                plist.insert(pair<PString,H460_FeatureID*>(*(PString*)display[0].Clone(),new H460_FeatureID(id[0].AsInteger())));
-         } else if (featurelist[i].Left(3) == "OID") {        // OID feature
-                OpalOID feat(id[0]);
-                plist.insert(pair<PString,H460_FeatureID*>(*(PString*)display[0].Clone(), new H460_FeatureID(feat)));
+     if (desc != NULL && desc->ValidateDeviceName(featurelist[i], type)) {
+         PString feat = featurelist[i].Left(3);
+         if (feat == "Std") {            // Std feature
+                plist.insert(pair<PString,H460_FeatureID*>(*(PString*)featurelist[i].Clone(), new H460_FeatureID(featurelist[i].Mid(3).AsInteger())));
+         } else if (feat == "OID") {        // OID feature
+                OpalOID oidfeat(desc->GetDeviceNames(1)[0]);
+                plist.insert(pair<PString,H460_FeatureID*>(*(PString*)featurelist[i].Clone(), new H460_FeatureID(oidfeat)));
          } else    {   // NonStd Feature
-                plist.insert(pair<PString,H460_FeatureID*>(*(PString*)display[0].Clone(),new H460_FeatureID(id[0])));
+                plist.insert(pair<PString,H460_FeatureID*>(*(PString*)featurelist[i].Clone(), new H460_FeatureID(feat)));
          }
-         count++;
      }  
    }
-   return (count > 0);
+   return (plist.size() > 0);
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -1119,7 +1122,7 @@ PTRACE(6,"H460\tCreate Common FeatureSet");
     for (PINDEX i=Features.GetSize()-1;  i > -1;  i--) {
         H460_Feature & feat = Features.GetDataAt(i);
         H460_FeatureID id = feat.GetFeatureID();
-        if (!remote.HasFeature(id))
+        if (!remote.HasFeature(id) && !feat.CommonFeature())
              RemoveFeature(id);
         else
            PTRACE(4,"H460\tUse Common Feature " << id);
@@ -1179,51 +1182,31 @@ PBoolean H460_FeatureSet::LoadFeatureSet(int inst, H323Connection * con)
   if ((ep) && (ep->FeatureSetDisabled()))
      return FALSE;
 
-  PStringList featurelist = H460_Feature::GetFeatureNames();
+  H460FeatureList featurelist;
+  H460_Feature::FeatureList(inst,featurelist,ep);
 
-  // We need to reorder the features so that the std ones are first.
-  // This is needed as some H.323 devices will not recognise the feature
-      PStringList features;
-      PINDEX i;
-      for (i = 0; i < featurelist.GetSize(); i++) {
-          if (featurelist[i].Left(3) == "Std")
-              features.AppendString(featurelist[i]);
-      }
-      for (i = 0; i < featurelist.GetSize(); i++) {
-          if (featurelist[i].Left(3) == "OID")
-              features.AppendString(featurelist[i]);
-      }
-      for (i = 0; i < featurelist.GetSize(); i++) {
-          if (featurelist[i].Left(3) == "Non")
-              features.AppendString(featurelist[i]);
-      }
-
-      for (i = 0; i < features.GetSize(); i++) {
-          if ((ep) && (!ep->OnFeatureInstance(inst,features[i]))) {
-            PTRACE(4,"H460\tFeature " << features[i] << " disabled due to policy.");
-            continue;
-        } 
-        H460_FeatureID id;
+  	 H460FeatureList::const_iterator it = featurelist.begin();
+	 while (it != featurelist.end()) {
         H460_Feature * feat = NULL;
-        if (baseSet && baseSet->HasFeature(features[i])) {
-            H460_Feature * tempfeat = baseSet->GetFeature(features[i]);
-              if ((tempfeat->GetPurpose() >= inst) && (tempfeat->GetPurpose() < inst*2)) 
-                  feat = tempfeat;
-        } else {
-            feat = H460_Feature::CreateFeature(features[i],inst);
+        if (baseSet && baseSet->HasFeature(*it->second))
+            feat = baseSet->GetFeature(*it->second);
+        else {
+            feat = H460_Feature::CreateFeature(it->first,inst);
             if ((feat) && (ep)) 
                 feat->AttachEndPoint(ep);
         }
-        
+
         if (feat) {
             if (con)
                 feat->AttachConnection(con);
 
            AddFeature(feat);
-           PTRACE(4,"H460\tLoaded Feature " << features[i]);
+           PTRACE(4,"H460\tLoaded Feature " << it->first);
         }
+        it++;
       }
 
+  DeleteFeatureList(featurelist);
   return TRUE;
 }
 

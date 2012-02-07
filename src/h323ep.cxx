@@ -3305,33 +3305,20 @@ void H323EndPoint::PresenceAddFeature(presenceFeature feat)
 	presenceHandler->AddEndpointFeature(feat);
 }
 
-template <class PAIR>
-class deletepair { // PAIR::second_type is a pointer type
-public:
-	void operator()(const PAIR & p) { delete p.second; }
-};
-
-template <class M>
-inline void DeleteMap(const M & m)
-{
-	typedef typename M::value_type PAIR;
-	std::for_each(m.begin(), m.end(), deletepair<PAIR>());
-}
-
 void H323EndPoint::PresenceAddFeatureH460()
 {
 	if (presenceHandler == NULL)
 		presenceHandler = new H460PresenceHandler(*this);
 
-	std::map<PString,H460_FeatureID*> plist;
-	if (H460_Feature::PresenceFeatureList(plist,this)) {
-		std::map<PString,H460_FeatureID*>::const_iterator it = plist.begin();
+	H460FeatureList plist;
+    if (H460_Feature::FeatureList(H460_Feature::FeaturePresence,plist,this)) {
+		H460FeatureList::const_iterator it = plist.begin();
 		while (it != plist.end()) {
-			presenceHandler->AddEndpointH460Feature(*(it->second), it->first);
+			presenceHandler->AddEndpointH460Feature(*it->second, it->first);
 			it++;
 		}
 	}
-	DeleteMap(plist);
+    DeleteFeatureList(plist);
 }
 
 void H323EndPoint::PresenceSetLocale(const presenceLocale & info)
