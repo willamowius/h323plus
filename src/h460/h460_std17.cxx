@@ -345,7 +345,7 @@ static PBoolean FindH46017RAS(const H225_H323_UU_PDU & pdu, std::list<PBYTEArray
                for (PINDEX i=0; i< feat.GetParameterCount(); ++i) {
                    H460_FeatureParameter & param = feat.GetFeatureParameter(i);
                    if (param.ID() == 1 && param.hasContent()) {
-                     PASN_OctetString raw = feat.GetFeatureParameter(1);
+                     PASN_OctetString raw = param;
                      ras.push_back(raw.GetValue());
                    }
                }
@@ -817,6 +817,7 @@ PBoolean H46017Handler::CreateNewTransport()
      
     PTRACE(3, "H46017\tTransport Failure " << curtransport->GetRemoteAddress());
     delete curtransport;
+    curtransport = NULL;
     return FALSE;
 }
 
