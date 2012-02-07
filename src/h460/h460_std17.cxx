@@ -403,23 +403,24 @@ H46017Transport::~H46017Transport()
     delete m_socketWrite;
 }
 
-static PBoolean FindH46017RAS(const H225_H323_UU_PDU & pdu, PBYTEArray & ras)
+static PBoolean FindH46017RAS(const H225_H323_UU_PDU & pdu, std::list<PBYTEArray> & ras)
 {
-    H225_GenericData fid = H460_FeatureStd(17);
     if (pdu.HasOptionalField(H225_H323_UU_PDU::e_genericData)) {
        const H225_ArrayOf_GenericData & data = pdu.m_genericData;
         for (PINDEX i=0; i < data.GetSize(); i++) {
-            if (fid.m_id == data[i].m_id) {
+            if (data[i].m_id == H460_FeatureID(17)) {
                H460_Feature feat((const H225_FeatureDescriptor &)data[i]);
-               if (feat.HasFeatureParameter(1)) {
-                   PASN_OctetString data = feat.GetFeatureParameter(1);
-                   ras = data.GetValue();
-                   return true;
+               for (PINDEX i=0; i< feat.GetParameterCount(); ++i) {
+                   H460_FeatureParameter & param = feat.GetFeatureParameter(i);
+                   if (param.ID() == 1 && param.hasContent()) {
+                     PASN_OctetString raw = feat.GetFeatureParameter(1);
+                     ras.push_back(raw.GetValue());
+                   }
                }
             }
         }
     }
-    return false;
+    return (ras.size() > 0);
 }
 
 PBoolean H46017Transport::WriteRasPDU(const PBYTEArray & pdu)
@@ -454,11 +455,16 @@ PBoolean H46017Transport::WriteRasPDU(const PBYTEArray & pdu)
 
 PBoolean H46017Transport::HandleH46017RAS(const H323SignalPDU & pdu)
 {
-    PBYTEArray ras;
+    std::list<PBYTEArray> ras;
     if ((pdu.GetQ931().GetMessageType() == Q931::FacilityMsg) &&
                            FindH46017RAS(pdu.m_h323_uu_pdu,ras)) {
-       H46017RasTransport * rasTransport = Feature->GetRasTransport();
-       return rasTransport->ReceivedPDU(ras);
+       H46017RasTransport * rasTransport = Feature->GetRasTransport(); 
+       for (std::list<PBYTEArray>::iterator r = ras.begin(); r != ras.end(); ++r) {
+           if (!rasTransport->ReceivedPDU(*r)) 
+              return false;
+       }
+       ras.clear();
+       return true;
     }
     return false;
 } 
