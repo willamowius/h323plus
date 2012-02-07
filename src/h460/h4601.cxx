@@ -639,43 +639,31 @@ H460_FeatureParameter & H460_FeatureTable::operator[](PINDEX id)
 /////////////////////////////////////////////////////////////////////
 
 H460_Feature::H460_Feature()
-   : CurrentTable((H460_FeatureTable*)&m_parameters)
 {
-//    IncludeOptionalField(e_parameters);
-//    CurrentTable = (H460_FeatureTable*)&m_parameters;
     ep = NULL;
     con = NULL;
     FeatureCategory = FeatureSupported;
 }
 
 H460_Feature::H460_Feature(unsigned identifier)    
-   : CurrentTable((H460_FeatureTable*)&m_parameters)
 {
     SetFeatureID(H460_FeatureID(identifier));
-//    IncludeOptionalField(e_parameters);
-//    CurrentTable = (H460_FeatureTable*)&m_parameters;
     ep = NULL;
     con = NULL;
     FeatureCategory = FeatureSupported;
 }
 
 H460_Feature::H460_Feature(PString identifier)
-   : CurrentTable((H460_FeatureTable*)&m_parameters)
 {
     SetFeatureID(H460_FeatureID(identifier));
-//    IncludeOptionalField(e_parameters);
-//    CurrentTable = (H460_FeatureTable*)&m_parameters;
     ep = NULL;
     con = NULL;
     FeatureCategory = FeatureSupported;
 }
 
 H460_Feature::H460_Feature(OpalOID identifier)
-   : CurrentTable((H460_FeatureTable*)&m_parameters)
 {
     SetFeatureID(H460_FeatureID(identifier));
-//    IncludeOptionalField(e_parameters);
-//      CurrentTable = (H460_FeatureTable *)&m_parameters;
     ep = NULL;
     con = NULL;
     FeatureCategory = FeatureSupported;
@@ -690,7 +678,6 @@ H460_Feature::H460_Feature(const H225_FeatureDescriptor & descriptor)
         m_parameters = descriptor.m_parameters;
     }  
 
-    CurrentTable = (H460_FeatureTable *)&m_parameters;
     ep = NULL;
     con = NULL;
     FeatureCategory = FeatureSupported;
@@ -720,66 +707,72 @@ PBoolean H460_Feature::FeatureAdvertised(int mtype)
 
 H460_FeatureParameter & H460_Feature::AddParameter(H460_FeatureID * id, const H460_FeatureContent & con)
 {
-    if (!HasOptionalField(e_parameters)) {    
+    if (!HasOptionalField(e_parameters))
         IncludeOptionalField(e_parameters);
-        CurrentTable = (H460_FeatureTable*)&m_parameters;
-        CurrentTable->SetSize(0);
-    }
-    return CurrentTable->AddParameter(*id, con);
+
+    return ((H460_FeatureTable &)m_parameters).AddParameter(*id, con);
 }
 
 H460_FeatureParameter & H460_Feature::AddParameter(H460_FeatureID * id)
 {
-    if (!HasOptionalField(e_parameters)) {    
+    if (!HasOptionalField(e_parameters))
         IncludeOptionalField(e_parameters);
-        CurrentTable = (H460_FeatureTable*)&m_parameters;
-        CurrentTable->SetSize(0);
-    }
-    return CurrentTable->AddParameter(*id);
+
+    return ((H460_FeatureTable &)m_parameters).AddParameter(*id);
 }
 
 void H460_Feature::AddParameter(H460_FeatureParameter * param)
 {
-    if (!HasOptionalField(e_parameters)) {    
+    if (!HasOptionalField(e_parameters))
         IncludeOptionalField(e_parameters);
-        CurrentTable = (H460_FeatureTable*)&m_parameters;
-        CurrentTable->SetSize(0);
-    }
 
-    CurrentTable->AddParameter(*param);
+    ((H460_FeatureTable &)m_parameters).AddParameter(*param);
 }
 
 void H460_Feature::RemoveParameter(PINDEX id)
 {
-    CurrentTable->RemoveParameter(id);
+    if (!HasOptionalField(e_parameters))
+        return;
 
-    if (CurrentTable->ParameterCount() == 0) {    
+    if (m_parameters.GetSize() > id)
+          ((H460_FeatureTable &)m_parameters).RemoveParameter(id);
+
+    if (m_parameters.GetSize() == 0)   
         RemoveOptionalField(e_parameters);
-    }
 }
 
 void H460_Feature::ReplaceParameter(const H460_FeatureID & id, const H460_FeatureContent & con)
 {
-    CurrentTable->ReplaceParameter(id, con);
+    if (!HasOptionalField(e_parameters)) {
+       PAssertAlways("LOGIC ERROR: NO Parameters or index out of bounds");
+       return;
+    }
+    ((H460_FeatureTable &)m_parameters).ReplaceParameter(id, con);
 }
 
 H460_FeatureParameter & H460_Feature::GetFeatureParameter(PINDEX id)
 {
-    return CurrentTable->GetParameter(id);
+    if (!HasOptionalField(e_parameters) || m_parameters.GetSize() <= id ) {
+       PAssertAlways("LOGIC ERROR: NO Parameters or index out of bounds");
+       return *(new H460_FeatureParameter());    // BUG: memory leak but is never called - SH
+    }
+    return (H460_FeatureParameter &)m_parameters[id];
+
 }
 
 H460_FeatureParameter & H460_Feature::GetFeatureParameter(const H460_FeatureID & id)
 {
-    if (!CurrentTable) {
-       PAssertAlways("LOGIC ERROR: Must call <if (.GetParameterCount)> before .GetParameter");
+    if (!HasOptionalField(e_parameters)) {
+       PAssertAlways("LOGIC ERROR: NO Parameters or index out of bounds");
        return *(new H460_FeatureParameter());    // BUG: memory leak but is never called - SH
     }
-    return CurrentTable->GetParameter(id);
+
+    return ((H460_FeatureTable &)m_parameters).GetParameter(id);
 }
 
 PBoolean H460_Feature::HasFeatureParameter(const H460_FeatureID & id)
 {
-    return CurrentTable && CurrentTable->HasParameter(id);
+    return Contains(id);
 }
 
 PBoolean H460_Feature::Contains(const H460_FeatureID & id)
@@ -789,20 +782,18 @@ PBoolean H460_Feature::Contains(const H460_FeatureID & id)
     if (HasOptionalField(e_parameters)) {    
         H460_FeatureTable & Table = (H460_FeatureTable &)m_parameters;
         if (Table.HasParameter(id))
-            return TRUE;
+            return true;
     }
 
-    return FALSE;
+    return false;
 }
 
 int H460_Feature::GetParameterCount() 
 { 
-    if (HasOptionalField(e_parameters)) {    
-        SetDefaultTable();
-        return CurrentTable->GetSize();
-    }
-    CurrentTable = NULL;
-    return 0;
+    if (!HasOptionalField(e_parameters))
+        return 0;
+
+    return m_parameters.GetSize();
 }
 
 
@@ -819,7 +810,7 @@ H460_FeatureParameter & H460_Feature::Value(const H460_FeatureID & id)
 
 H460_FeatureParameter & H460_Feature::operator()(PINDEX id)
 {
-    return CurrentTable->GetParameter(id);
+    return GetFeatureParameter(id);
 }
 
 H460_FeatureParameter & H460_Feature::operator()(const H460_FeatureID & id)
@@ -829,12 +820,16 @@ H460_FeatureParameter & H460_Feature::operator()(const H460_FeatureID & id)
 
 H460_FeatureTable & H460_Feature::GetCurrentTable()
 {
-    return *CurrentTable;
+    return ((H460_FeatureTable &)m_parameters);
 }
 
 void H460_Feature::SetCurrentTable(H460_FeatureTable & table) 
 {
-    CurrentTable = &table;
+    if (!HasOptionalField(e_parameters))
+        IncludeOptionalField(e_parameters);
+
+    m_parameters.SetSize(0);
+    m_parameters = table;
 }
 
 void H460_Feature::SetCurrentTable(H460_FeatureParameter & param)
@@ -845,7 +840,7 @@ void H460_Feature::SetCurrentTable(H460_FeatureParameter & param)
 
 void H460_Feature::SetDefaultTable() 
 {
-    CurrentTable = (H460_FeatureTable*)&m_parameters;
+    // Not used!
 }
 
 void H460_Feature::AttachEndPoint(H323EndPoint * _ep) 

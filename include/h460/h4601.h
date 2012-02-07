@@ -850,7 +850,6 @@ class H460_Feature : public H225_FeatureDescriptor
   //@}
 
   protected:
-      H460_FeatureTable * CurrentTable;
       H323EndPoint * ep;
       H323Connection * con;
 };
