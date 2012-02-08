@@ -4771,6 +4771,10 @@ PBoolean H323Connection::UseBandwidth(unsigned bandwidth, PBoolean removing)
 PBoolean H323Connection::SetBandwidthAvailable(unsigned newBandwidth, PBoolean force)
 {
   unsigned used = GetBandwidthUsed();
+
+  if (!OnSetBandwidthAvailable(newBandwidth*100,used*100))
+      return false;
+
   if (used > newBandwidth) {
     if (!force)
       return FALSE;
@@ -4787,7 +4791,13 @@ PBoolean H323Connection::SetBandwidthAvailable(unsigned newBandwidth, PBoolean f
   }
 
   bandwidthAvailable = newBandwidth - used;
-  return TRUE;
+
+  return true;
+}
+
+PBoolean H323Connection::OnSetBandwidthAvailable(unsigned /*newBandwidth*/, unsigned /*available*/)
+{
+  return true;
 }
 
 

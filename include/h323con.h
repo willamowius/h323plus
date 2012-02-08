@@ -1866,6 +1866,16 @@ class H323Connection : public PObject
       unsigned newBandwidth,    ///< New bandwidth limit
       PBoolean force = FALSE        ///< Force bandwidth limit
     );
+
+    /**When gatekeeper setting the bandwidth, OnSetBandwidthAvailable
+       provides a method to notify the implementor of the bandwidth change
+       and how much available bandwidth is available for the call. 
+       Note Bandwidth is in bits/sec
+      */
+    virtual PBoolean OnSetBandwidthAvailable(
+      unsigned newBandwidth,    ///< New bandwidth limit
+      unsigned available        ///< Remaining bandwidth
+      );
   //@}
 
   /**@name Indications */
