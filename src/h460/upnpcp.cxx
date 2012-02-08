@@ -982,7 +982,7 @@ PBoolean UPnPThread::TestMapping()
     PTRACE(4,"UPnP\tPerforming Port Mapping Test");
  
     locAddr = PIPSocket::GetGatewayInterfaceAddress(4);
-    locPort = m_piNatMethod->GetEndPoint()->GetRtpIpPortBase();
+    locPort = m_piNatMethod->GetRandomPort();
     extPort = locPort;
 
     if (CreateMap(true,"UDP",locAddr,locPort,extAddr,extPort)) {
@@ -1222,6 +1222,11 @@ void PNatMethod_UPnP::SetExtIPAddress(const PString & newAddr)
 {
     PTRACE(4,"UPnP\tDetected external IP address " <<  newAddr);
     m_pExtIP = newAddr;
+}
+
+WORD PNatMethod_UPnP::GetRandomPort()
+{
+   return RandomPortPair(UPnPUDPBasePort, UPnPUDPBasePort+1000);
 }
 
 PBoolean PNatMethod_UPnP::OnUPnPAvailable(const PString & devName)

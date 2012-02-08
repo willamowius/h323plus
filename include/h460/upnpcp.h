@@ -93,6 +93,10 @@ public:
       void * userData
     );
 
+  /** Retreive a random port in the allocated port range
+    */
+    WORD GetRandomPort();
+
   /**  isAvailable.
         Returns whether the Nat Method is ready and available in
         assisting in NAT Traversal. The principal is function is
