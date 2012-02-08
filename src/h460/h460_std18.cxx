@@ -129,9 +129,13 @@ PBoolean H460_FeatureStd18::OnSendRegistrationRequest(H225_FeatureDescriptor & p
 
 void H460_FeatureStd18::OnReceiveRegistrationConfirm(const H225_FeatureDescriptor & pdu) 
 {
+    if (EP) {
+      if (!EP->H46018IsEnabled()) return;
+      EP->H46018Received();
+    }
+    if (handler) handler->Enable();
+
     isEnabled = true;
-    handler->Enable();
-    EP->H46018Received();
 }
 
 void H460_FeatureStd18::OnReceiveServiceControlIndication(const H225_FeatureDescriptor & pdu) 
