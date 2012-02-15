@@ -540,7 +540,7 @@ PBoolean H323AudioCodec::Open(H323Connection & connection)
 
 void H323AudioCodec::Close()
 {
-  PWaitAndSignal mutex(rawChannelMutex);
+  //PWaitAndSignal mutex(rawChannelMutex); - TODO: This causes a lockup. Is it needed? -SH
 
   if (rawDataChannel != NULL)
     rawDataChannel->Close();
