@@ -583,7 +583,7 @@ struct GenericOptionOrder {
     PString name;
     PString order;
 } OptionOrder[] = {
-   { "h.264", "41,42,3,6,4,5,7,8,9,10,11" },
+   { "h.264", "41,42,4,3,5,6,7,8,9,10,11" },
    { "", "" }
 };
 
