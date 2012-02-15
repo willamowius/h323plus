@@ -244,7 +244,7 @@ class UPnPThread : public PThread
     void Main();
 
     bool CreateMap(bool pair, const PString & protocol, const PIPSocket::Address & localIP, 
-                const WORD & locPort, PIPSocket::Address & extIP , WORD & extPort);
+                const WORD & locPort, PIPSocket::Address & extIP , WORD & extPort, PBoolean force = false);
 
     bool RemoveMap(WORD port, PBoolean udp = true);
 
@@ -252,6 +252,8 @@ class UPnPThread : public PThread
     void SetMappingEnum();
 
     PBoolean IsMappingFree(WORD askPort, PBoolean udp);
+
+    WORD GetNextFreePort(WORD askPort, bool pair, PBoolean udp = true);
 
     void Shutdown();
 
@@ -263,8 +265,6 @@ protected:
 
     bool AddMapping(PortMappingContainer& newMapping);  
     bool RemoveMapping(PortMappingContainer& newMapping);
-
-    WORD GetNextFreePort(WORD askPort, bool pair, PBoolean udp = true);
 
     void Close();
     bool EnumMaps();
@@ -278,7 +278,7 @@ protected:
     map<PString,PortMappingContainer *> m_piMaps;
     map<PString,PortMappingContainer *> m_piUPnPMaps;
 
-    PNatMethod_UPnP*                m_piNatMethod;                        
+    PNatMethod_UPnP*                  m_piNatMethod;                        
     UPnPCallbacks*                    m_piCallbacks;
 
     PMutex                            m_MapMutex;
@@ -452,7 +452,7 @@ WORD UPnPThread::GetNextFreePort(WORD askPort, bool pair, PBoolean udp)
 
 bool UPnPThread::CreateMap(bool pair, const PString & protocol, 
                            const PIPSocket::Address & localIP, const WORD & locPort, 
-                           PIPSocket::Address & extIP , WORD & extPort)
+                           PIPSocket::Address & extIP , WORD & extPort, PBoolean force)
 {
     PWaitAndSignal m(m_MapMutex);
 
@@ -464,29 +464,43 @@ bool UPnPThread::CreateMap(bool pair, const PString & protocol,
     if (extPort > 0)
        RemoveMap(extPort, false);
 
-    WORD port = extPort; // GetNextFreePort(extPort,pair,udp);
+    extPort = locPort;
     
     bool success = false;
+    bool exit = false;
+    int loop=0;
+    int loopCount = force ? 10 : 1;
+
     PortMappingContainer umap;
-    for (WORD i=0; i < size; i++) {
-        umap.Protocol = protocol;
-        umap.InternalClient = localIP.AsString();
-        umap.InternalPort = locPort + i;
-        umap.Description = "h323plus";
-        umap.ExternalPort = port + i;
+    while (!success && !exit ) {
+        for (WORD i=0; i < size; i++) {
+            umap.Protocol = protocol;
+            umap.InternalClient = localIP.AsString();
+            umap.InternalPort = locPort + i;
+            umap.Description = "h323plus";
+            umap.ExternalPort = extPort + i;
 
-        if (AddMapping(umap)) {
-            PTRACE(4,"UPnP\tCreated map " << protocol << " " << umap.InternalClient << ":" << umap.InternalPort 
-                                                << " to " << umap.ExternalIPAddress << ":" << umap.ExternalPort);
+            if (AddMapping(umap)) {
+                PTRACE(4,"UPnP\tCreated map " << protocol << " " << umap.InternalClient << ":" << umap.InternalPort 
+                                                    << " to " << umap.ExternalIPAddress << ":" << umap.ExternalPort);
 
-            PString key = PString((protocol == "UDP") ? "U" : "T") + PString(umap.ExternalPort);
-            m_piMaps.insert(std::pair<PString,PortMappingContainer*>(key,(PortMappingContainer*)umap.Clone()));
-               if (i == 0) {
-                    extIP = umap.ExternalIPAddress;
-                    extPort = umap.ExternalPort;
-               }
-            success = true;
-        } 
+                PString key = PString((protocol == "UDP") ? "U" : "T") + PString(umap.ExternalPort);
+                m_piMaps.insert(std::pair<PString,PortMappingContainer*>(key,(PortMappingContainer*)umap.Clone()));
+                   if (i == 0) {
+                        extIP = umap.ExternalIPAddress;
+                        extPort = umap.ExternalPort;
+                   }
+                success = true;
+            }
+        }
+        if (success)
+          continue;
+
+        loop++;
+        PTRACE(4,"UPnP\tMapping Failure: " << protocol << " " << umap.InternalClient << ":" << umap.InternalPort
+                                           << " to " << umap.ExternalIPAddress << ":" << umap.ExternalPort << " retrying....");
+        extPort = extPort+10;   // Always set 10 just in case there is another device on a call.
+        exit = (loop == loopCount);
     }
 
     return success;
@@ -1109,7 +1123,7 @@ PBoolean PNatMethod_UPnP::CreateSocketPair(PUDPSocket * & socket1, PUDPSocket * 
                 muxSocket1->GetLocalAddress(locAddr,locPort);
                 extPort = locPort;
                 
-                if (m_pUPnP->CreateMap(true,"UDP",locAddr,locPort,extAddr,extPort)) {
+                if (m_pUPnP->CreateMap(true,"UDP",locAddr,locPort,extAddr,extPort,true)) {
                     ((UPnPUDPSocket*)muxSocket1->GetSubSocket())->SetMasqAddress(extAddr,extPort);
                     ((UPnPUDPSocket*)muxSocket2->GetSubSocket())->SetMasqAddress(extAddr,extPort+1);
                 } else {
@@ -1134,7 +1148,7 @@ PBoolean PNatMethod_UPnP::CreateSocketPair(PUDPSocket * & socket1, PUDPSocket * 
    {
          pairedPortInfo.basePort    = UPnPUDPBasePort;
          pairedPortInfo.maxPort     = UPnPUDPBasePort + 1000;
-         pairedPortInfo.currentPort = pairedPortInfo.basePort-1;
+         pairedPortInfo.currentPort = m_pUPnP->GetNextFreePort(pairedPortInfo.basePort,true)-1;
 
         if (pairedPortInfo.basePort == 0 || pairedPortInfo.basePort > pairedPortInfo.maxPort) {
             PTRACE(1, "UPnP\tInvalid local UDP port range "
@@ -1165,23 +1179,23 @@ PBoolean PNatMethod_UPnP::CreateSocketPair(PUDPSocket * & socket1, PUDPSocket * 
             socket1->GetLocalAddress(locAddr,locPort);
             extPort = locPort;
             
-            if (m_pUPnP->CreateMap(true,"UDP",locAddr,locPort,extAddr,extPort)) {
-                ((UPnPUDPSocket*)socket1)->SetMasqAddress(extAddr,extPort);
-                ((UPnPUDPSocket*)socket2)->SetMasqAddress(extAddr,extPort+1);
-            } else {
-                PTRACE(3, "UPnP\tError mapped ports. Abort Creating socket pair.");
-                return false;
-            }
+            bool upnpMapOk = false;
+            upnpMapOk = m_pUPnP->CreateMap(true,"UDP",locAddr,locPort,extAddr,extPort,true);
 
-            if (extPort != locPort) {
-                     PTRACE(3, "UPnP\tPort MisMatch " << locPort << " " << extPort << " Retrying!");
+            if (upnpMapOk && socket1->GetPort() != extPort) {
+                  PTRACE(3, "UPnP\tPort MisMatch " << socket1->GetPort() << " " << extPort << " Retrying!");
                     delete socket1;
                     delete socket2;
                     m_pUPnP->RemoveMap(extPort,true);
                     m_pUPnP->RemoveMap(extPort+1,true);
                     pairedPortInfo.currentPort = extPort-1;
+            } else if (!upnpMapOk) {
+                PTRACE(1, "UPnP\tERROR: Port Mapping Error Abort!");
+                return false;
             } else {
                 ok = true;
+               ((UPnPUDPSocket*)socket1)->SetMasqAddress(extAddr,extPort);
+                ((UPnPUDPSocket*)socket2)->SetMasqAddress(extAddr,extPort+1);
                 PTRACE(3, "UPnP\tUDP mapped ports " << locAddr << " " << locPort << "-" <<  locPort+1 <<
                 " to " << extAddr << " " << extPort << "-" <<  extPort+1 );
             }
@@ -1249,9 +1263,9 @@ bool PNatMethod_UPnP::IsAvailable(const PIPSocket::Address & addr)
 
 
 PBoolean PNatMethod_UPnP::CreateUPnPMap(bool pair, const PString & protocol, const PIPSocket::Address & localIP, 
-                                        const WORD & locPort, PIPSocket::Address & extIP , WORD & extPort)
+                                        const WORD & locPort, PIPSocket::Address & extIP , WORD & extPort, PBoolean force)
 {
-    return m_pUPnP->CreateMap(pair,protocol,localIP,locPort,extIP,extPort);
+    return m_pUPnP->CreateMap(pair,protocol,localIP,locPort,extIP,extPort,force);
 }
 
 void PNatMethod_UPnP::RemoveUPnPMap(WORD port,  PBoolean udp)

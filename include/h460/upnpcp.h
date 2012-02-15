@@ -147,7 +147,7 @@ public:
     PBoolean OnUPnPAvailable(const PString & devName);
 
     PBoolean CreateUPnPMap(bool pair, const PString & protocol, const PIPSocket::Address & localIP, 
-                           const WORD & locPort, PIPSocket::Address & extIP , WORD & extPort);
+                           const WORD & locPort, PIPSocket::Address & extIP , WORD & extPort, PBoolean force = false);
 
     void RemoveUPnPMap(WORD port, PBoolean udp = true);
 
