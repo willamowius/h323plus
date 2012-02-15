@@ -507,6 +507,9 @@ class H46019UDPSocket : public PUDPSocket
     ~H46019UDPSocket();
     //@}
 
+
+    PBoolean Close();
+
     PBoolean GetLocalAddress(Address & addr, WORD & port);
 
     /**@name Functions */

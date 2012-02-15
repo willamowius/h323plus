@@ -723,6 +723,15 @@ unsigned ResolveSession(muxSocketMap & socMap, unsigned muxID, PBoolean rtp, con
           return 0;
 }
 
+void CloseAllSessions(muxSocketMap & socMap) 
+{
+    std::map< unsigned, PUDPSocket*>::const_iterator i;
+    if (PNatMethod_H46019::IsMultiplexed()) {   // Check the send/receive multiplex is around the wrong way
+      for (i = socMap.begin(); i != socMap.end(); ++i)
+              i->second->Close();
+    }
+}
+
 
 void PNatMethod_H46019::StartMultiplexListener()
 {
@@ -803,6 +812,10 @@ void PNatMethod_H46019::ReadThread(PThread &, INT)
 
               switch (socket->GetErrorNumber(PChannel::LastReadError)) {
                 case ECONNRESET :
+                  PTRACE(2, "H46019M\tUDP Port Reset! Closing all Sockets");
+                  if (socketRead == H46019MultiplexSocket::e_rtp)
+                             CloseAllSessions(rtpSocketMap);
+                   continue;
                 case ECONNREFUSED :
                   PTRACE(2, "H46019M\tUDP Port on remote not ready.");
                   continue;
@@ -978,7 +991,6 @@ H46019UDPSocket::~H46019UDPSocket()
     delete keepStartTime;
 
 #ifdef H323_H46019M
-    m_shutDown = true;
     if (PNatMethod_H46019::IsMultiplexed()) {
         PNatMethod_H46019::UnregisterSocket(rtpSocket, m_recvMultiplexID);
         ClearMultiplexBuffer();
@@ -1019,6 +1031,14 @@ void H46019UDPSocket::Activate(const H323TransportAddress & keepalive, unsigned 
 {
     Allocate(keepalive,_payload,_ttl);
     InitialiseKeepAlive();
+}
+
+PBoolean H46019UDPSocket::Close()
+{
+#ifdef H323_H46019M
+    m_shutDown = true;
+#endif
+    return PUDPSocket::Close();
 }
 
 void H46019UDPSocket::InitialiseKeepAlive() 
@@ -1295,7 +1315,10 @@ PBoolean H46019UDPSocket::DoPseudoRead(int & selectStatus)
        if (m_shutDown) break;
    }
 
-   selectStatus += ((m_multiBuffer > 0) ? (rtpSocket ? -1 : -2) : 0);
+   if (m_shutDown)
+       selectStatus += PSocket::Interrupted;
+   else
+       selectStatus += ((m_multiBuffer > 0) ? (rtpSocket ? -1 : -2) : 0);
    return rtpSocket;
 }
 
