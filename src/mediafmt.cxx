@@ -652,6 +652,7 @@ OpalMediaFormat::OpalMediaFormat(const char * search, PBoolean exact)
       *this = *registeredFormat;
   }
   else {
+#if PTLIB_VER < 2110
     PWaitAndSignal m(OpalMediaFormatFactory::GetMutex());
     OpalMediaFormatFactory::KeyMap_T & keyMap = OpalMediaFormatFactory::GetKeyMap();
     OpalMediaFormatFactory::KeyMap_T::const_iterator r;
@@ -661,6 +662,12 @@ OpalMediaFormat::OpalMediaFormat(const char * search, PBoolean exact)
         break;
       }
     }
+#else
+    OpalMediaFormatFactory::KeyList_T keyList = OpalMediaFormatFactory::GetKeyList();
+    OpalMediaFormatFactory::KeyList_T::iterator r;
+       if (r->find(search))
+         *this = *OpalMediaFormatFactory::CreateInstance(*r);
+#endif
   }
 }
 
@@ -691,11 +698,14 @@ OpalMediaFormat::OpalMediaFormat(const char * fullName,
 
   // find the next unused dynamic number, and find anything with the new 
   // rtp payload type if it is explicitly required
-  PWaitAndSignal m(OpalMediaFormatFactory::GetMutex());
-  OpalMediaFormatFactory::KeyMap_T & keyMap = OpalMediaFormatFactory::GetKeyMap();
+
+
 
   OpalMediaFormat * match = NULL;
   RTP_DataFrame::PayloadTypes nextUnused = RTP_DataFrame::DynamicBase;
+#if PTLIB_VER < 2110
+  PWaitAndSignal m(OpalMediaFormatFactory::GetMutex());
+  OpalMediaFormatFactory::KeyMap_T & keyMap = OpalMediaFormatFactory::GetKeyMap();
   OpalMediaFormatFactory::KeyMap_T::iterator r;
 
   do {
@@ -711,6 +721,23 @@ OpalMediaFormat::OpalMediaFormat(const char * fullName,
         match = &fmt;
     }
   } while (r != keyMap.end());
+#else
+  OpalMediaFormatFactory::KeyList_T keyList = OpalMediaFormatFactory::GetKeyList();
+  OpalMediaFormatFactory::KeyList_T::iterator r;
+  do {
+    for (r = keyList.begin(); r != keyList.end(); ++r) {
+      if (*r == fullName)
+        continue;
+      OpalMediaFormat & fmt = *OpalMediaFormatFactory::CreateInstance(*r);
+      if (fmt.GetPayloadType() == nextUnused) {
+        nextUnused = (RTP_DataFrame::PayloadTypes)(nextUnused + 1);
+        break; // restart the search
+      }
+      if (fmt.GetPayloadType() == rtpPayloadType)
+        match = &fmt;
+    }
+  } while (r != keyList.end());
+#endif
 
   // If we found a match to the payload type, then it needs to be deconflicted
   // If the new format is just requesting any dynamic payload number, then give it the next unused one
@@ -746,11 +773,18 @@ OpalMediaFormat & OpalMediaFormat::operator=(const OpalMediaFormat &format)
 void OpalMediaFormat::GetRegisteredMediaFormats(OpalMediaFormat::List & list)
 {
   list.DisallowDeleteObjects();
+#if PTLIB_VER < 2110
   PWaitAndSignal m(OpalMediaFormatFactory::GetMutex());
   OpalMediaFormatFactory::KeyMap_T & keyMap = OpalMediaFormatFactory::GetKeyMap();
   OpalMediaFormatFactory::KeyMap_T::const_iterator r;
   for (r = keyMap.begin(); r != keyMap.end(); ++r)
     list.Append(OpalMediaFormatFactory::CreateInstance(r->first));
+#else
+  OpalMediaFormatFactory::KeyList_T keyList = OpalMediaFormatFactory::GetKeyList();
+  OpalMediaFormatFactory::KeyList_T::iterator r;
+  for (r = keyList.begin(); r != keyList.end(); ++r)
+    list.Append(OpalMediaFormatFactory::CreateInstance(*r));
+#endif
 }
 
 
@@ -981,7 +1015,9 @@ OpalMediaOption * OpalMediaFormat::FindOption(const PString & name) const
 
 bool OpalMediaFormat::SetRegisteredMediaFormat(const OpalMediaFormat & mediaFormat)
 {
+#if PTLIB_VER < 2110
   PWaitAndSignal mutex(OpalMediaFormatFactory::GetMutex());
+#endif
   OpalMediaFormat * registeredFormat = OpalMediaFormatFactory::CreateInstance(mediaFormat);
   if (registeredFormat == NULL)
     return false;
