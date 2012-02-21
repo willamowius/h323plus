@@ -67,12 +67,18 @@
 
 
 //////////////////////////////////////////////////
+// static codec definitions
 
 #ifdef H323_AUDIO_CODECS
+   #undef H323_STATIC_G7221
+   #undef H323_STATIC_GSM
+#endif
 
-#undef H323_EMBEDDED_GSM
-
-#endif // H323_AUDIO_CODECS
+#ifdef H323_VIDEO
+   #undef H323_STATIC_H261
+   #undef H323_STATIC_H263
+   #undef H323_STATIC_H264
+#endif
 
 /////////////////////////////////////////////////
 //

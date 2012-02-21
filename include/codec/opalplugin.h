@@ -647,6 +647,12 @@ struct PluginCodec_Video_SetFrameInfo {
 
 #ifdef OPAL_STATIC_CODEC
 
+#if _WIN32
+#pragma message("Building codec statically")
+#else
+#warning("Building codec statically")
+#endif
+
 #  undef PLUGIN_CODEC_DLL_API
 #  define PLUGIN_CODEC_DLL_API static
 #  define PLUGIN_CODEC_IMPLEMENT(name) \
@@ -659,7 +665,7 @@ struct PluginCodec_Definition * Opal_StaticCodec_##name##_GetCodecs(unsigned * p
 #  define PLUGIN_CODEC_IMPLEMENT_ALL(name, table, ver) \
 unsigned int Opal_StaticCodec_##name##_GetAPIVersion() \
 { return PWLIB_PLUGIN_API_VERSION; } \
-PLUGIN_CODEC_DLL_API struct PluginCodec_Definition * Opal_StaticCodec_##name##_GetCodecs(unsigned * count, unsigned version) \
+struct PluginCodec_Definition * Opal_StaticCodec_##name##_GetCodecs(unsigned * count, unsigned version) \
 { *count = sizeof(table)/sizeof(struct PluginCodec_Definition); return version < ver ? NULL : table; }
 
 
