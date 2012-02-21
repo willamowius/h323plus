@@ -195,6 +195,82 @@
 				CommandLine="if not exist c:\ptlib_plugins exit&#x0D;&#x0A;copy $(TargetPath) c:\ptlib_plugins&#x0D;&#x0A;copy $(TargetDir)\$(TargetName).pdb c:\ptlib_plugins&#x0D;&#x0A;"
 			/>
 		</Configuration>
+		<Configuration
+			Name="Static|Win32"
+			OutputDirectory="..\..\..\Lib"
+			IntermediateDirectory="..\..\Static\GSM"
+			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName=".\..\Release/gsm0610.tlb"
+				HeaderFileName=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories=".\inc"
+				PreprocessorDefinitions="WIN32;NDEBUG;PLUGIN_CODEC_DLL_EXPORTS"
+				StringPooling="true"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				RuntimeTypeInfo="true"
+				ProgramDataBaseFileName="$(IntDir)/$(TargetName).pdb"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="3081"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\GSM_0610_codec.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -223,6 +299,15 @@
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;PLUGIN_CODEC_DLL_EXPORTS;$(NoInherit)"
 						BasicRuntimeChecks="3"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Static|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;PLUGIN_CODEC_DLL_EXPORTS;$(NoInherit)"
 					/>
 				</FileConfiguration>
 			</File>
@@ -262,6 +347,18 @@
 							CompileAs="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Static|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories="./inc"
+							PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
+							WarningLevel="0"
+							CompileAs="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="src\code.c"
@@ -287,6 +384,18 @@
 							AdditionalIncludeDirectories="./inc"
 							PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
 							BasicRuntimeChecks="3"
+							WarningLevel="0"
+							CompileAs="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Static|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories="./inc"
+							PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
 							WarningLevel="0"
 							CompileAs="0"
 						/>
@@ -320,6 +429,18 @@
 							CompileAs="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Static|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories="./inc"
+							PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
+							WarningLevel="0"
+							CompileAs="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="src\gsm_create.c"
@@ -345,6 +466,18 @@
 							AdditionalIncludeDirectories="./inc"
 							PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
 							BasicRuntimeChecks="3"
+							WarningLevel="0"
+							CompileAs="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Static|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories="./inc"
+							PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
 							WarningLevel="0"
 							CompileAs="0"
 						/>
@@ -378,6 +511,18 @@
 							CompileAs="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Static|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories="./inc"
+							PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
+							WarningLevel="0"
+							CompileAs="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="src\gsm_destroy.c"
@@ -403,6 +548,18 @@
 							AdditionalIncludeDirectories="./inc"
 							PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
 							BasicRuntimeChecks="3"
+							WarningLevel="0"
+							CompileAs="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Static|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories="./inc"
+							PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
 							WarningLevel="0"
 							CompileAs="0"
 						/>
@@ -436,6 +593,18 @@
 							CompileAs="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Static|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories="./inc"
+							PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
+							WarningLevel="0"
+							CompileAs="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="src\gsm_lpc.c"
@@ -461,6 +630,18 @@
 							AdditionalIncludeDirectories="./inc"
 							PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
 							BasicRuntimeChecks="3"
+							WarningLevel="0"
+							CompileAs="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Static|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories="./inc"
+							PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
 							WarningLevel="0"
 							CompileAs="0"
 						/>
@@ -494,6 +675,18 @@
 							CompileAs="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Static|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories="./inc"
+							PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
+							WarningLevel="0"
+							CompileAs="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="src\long_term.c"
@@ -519,6 +712,18 @@
 							AdditionalIncludeDirectories="./inc"
 							PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
 							BasicRuntimeChecks="3"
+							WarningLevel="0"
+							CompileAs="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Static|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories="./inc"
+							PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
 							WarningLevel="0"
 							CompileAs="0"
 						/>
@@ -552,6 +757,18 @@
 							CompileAs="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Static|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories="./inc"
+							PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
+							WarningLevel="0"
+							CompileAs="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="src\rpe.c"
@@ -577,6 +794,18 @@
 							AdditionalIncludeDirectories="./inc"
 							PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
 							BasicRuntimeChecks="3"
+							WarningLevel="0"
+							CompileAs="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Static|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories="./inc"
+							PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
 							WarningLevel="0"
 							CompileAs="0"
 						/>
@@ -610,6 +839,18 @@
 							CompileAs="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Static|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories="./inc"
+							PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
+							WarningLevel="0"
+							CompileAs="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="src\table.c"
@@ -635,6 +876,18 @@
 							AdditionalIncludeDirectories="./inc"
 							PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
 							BasicRuntimeChecks="3"
+							WarningLevel="0"
+							CompileAs="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Static|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories="./inc"
+							PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;NeedFunctionPrototypes=1;WAV49;$(NoInherit)"
 							WarningLevel="0"
 							CompileAs="0"
 						/>
