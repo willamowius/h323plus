@@ -36,6 +36,11 @@
 #define _CRT_NONSTDC_NO_DEPRECATE 1
 #define _CRT_SECURE_NO_WARNINGS 1
 
+#include <openh323buildopts.h>
+#if H323_STATIC_G7221
+  #define OPAL_STATIC_CODEC 1
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -510,7 +515,7 @@ static struct PluginCodec_H323GenericCodecData prefix##_Cap = \
     prefix##_h323params \
 }; 
 
-G7221cPLUGIN_CODEC(G7221c);
+//G7221cPLUGIN_CODEC(G7221c);
 
 /////////////////////////////////////////////////////////////////////////////
 static struct PluginCodec_Definition G7221CodecDefn[] =

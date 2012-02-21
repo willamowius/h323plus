@@ -124,6 +124,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				EnableIntrinsicFunctions="false"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="..\..\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;PLUGIN_CODEC_DLL_EXPORTS"
 				StringPooling="true"
@@ -133,6 +134,7 @@
 				ProgramDataBaseFileName="$(IntDir)/$(TargetName).pdb"
 				WarningLevel="3"
 				DebugInformationFormat="0"
+				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -200,10 +202,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\G722-1\basop32.h"
-				>
-			</File>
-			<File
 				RelativePath=".\G722-1\coef2sam.c"
 				>
 			</File>
@@ -216,15 +214,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\G722-1\count.h"
-				>
-			</File>
-			<File
 				RelativePath=".\G722-1\dct4_a.c"
-				>
-			</File>
-			<File
-				RelativePath=".\G722-1\dct4_a.h"
 				>
 			</File>
 			<File
@@ -232,71 +222,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\G722-1\dct4_s.h"
-				>
-			</File>
-			<File
-				RelativePath=".\G722-1\decode.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\G722-1\decoder.c"
 				>
-			</File>
-			<File
-				RelativePath=".\G722-1\defs.h"
-				>
-			</File>
-			<File
-				RelativePath=".\G722-1\encode.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\G722-1\encoder.c"
 				>
 			</File>
 			<File
-				RelativePath=".\G722-1\huff_def.h"
-				>
-			</File>
-			<File
 				RelativePath=".\G722-1\huff_tab.c"
-				>
-			</File>
-			<File
-				RelativePath=".\G722-1\huff_tab.h"
 				>
 			</File>
 			<File
@@ -305,14 +239,6 @@
 			</File>
 			<File
 				RelativePath=".\G722-1\tables.c"
-				>
-			</File>
-			<File
-				RelativePath=".\G722-1\tables.h"
-				>
-			</File>
-			<File
-				RelativePath=".\G722-1\typedef.h"
 				>
 			</File>
 		</Filter>
