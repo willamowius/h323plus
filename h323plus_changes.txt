@@ -1,5 +1,6 @@
 
 H323plus 1.24.0 - 1.24.1
+FIX Statically loading codecs. Can now be set ftom OpenH323buildopts.h
 Added H.460.17 Integration into H323Endpoint and Added To Simple example
 FIX Enumeration through H460_Feature Parameters
 FIX Memory allocation of RTP Frames (G.722 on Windows)
