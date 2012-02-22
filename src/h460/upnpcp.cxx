@@ -1090,8 +1090,9 @@ PBoolean PNatMethod_UPnP::CreateSocketPair(PUDPSocket * & socket1, PUDPSocket * 
       const PIPSocket::Address & binding, void * userData)
 {
 
-#ifdef H323_H46019M
     H323Connection::SessionInformation * info = (H323Connection::SessionInformation *)userData;
+
+#ifdef H323_H46019M
     PNatMethod_H46019 * handler = 
                (PNatMethod_H46019 *)ep->GetNatMethods().GetMethodByName("H46019");
 
