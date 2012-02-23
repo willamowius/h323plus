@@ -31,6 +31,7 @@
 #pragma implementation "opalwavfile.h"
 #endif
 
+#include "openh323buildopts.h"
 #include "opalwavfile.h"
 
 #ifdef _MSC_VER
@@ -51,22 +52,30 @@ OpalWAVFile::OpalWAVFile(unsigned fmt)
 }
 
 
-OpalWAVFile::OpalWAVFile(OpenMode mode, int opts, unsigned fmt)
-  : PWAVFile(mode, opts, fmt)
+OpalWAVFile::OpalWAVFile(OpenMode mode,
+                     #if PTLIB_VER >= 2112
+                         OpenOptions opts,
+                     #else
+                         int opts, 
+                     #endif
+                         unsigned fmt)
+: PWAVFile(mode, opts, fmt)
 {
   SetAutoconvert();
 }
 
-
 OpalWAVFile::OpalWAVFile(const PFilePath & name, 
-                                  OpenMode mode,  /// Mode in which to open the file.
-                                       int opts,  /// #OpenOptions enum# for open operation.
-                                   unsigned fmt)  /// Type of WAV File to create
+                         OpenMode mode,  
+                     #if PTLIB_VER >= 2112
+                         OpenOptions opts,
+                     #else
+                         int opts, 
+                     #endif
+                         unsigned fmt)  
   : PWAVFile(name, mode, opts, fmt)
 {
   SetAutoconvert();
 }
-
 
 /////////////////////////////////////////////////////////////////////////////////
 

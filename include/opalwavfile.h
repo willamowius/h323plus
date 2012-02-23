@@ -21,39 +21,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.9  2005/11/30 13:05:01  csoutheren
- * Changed tags for Doxygen
- *
- * Revision 1.8  2004/08/26 08:05:03  csoutheren
- * Codecs now appear in abstract factory system
- * Fixed Windows factory bootstrap system (again)
- *
- * Revision 1.7  2004/08/09 11:11:33  csoutheren
- * Added stupid windows hack to force opalwavfile factories to register
- *
- * Revision 1.6  2004/07/15 11:13:49  rjongbloed
- * Migrated changes from crs_vxnml_devel branch into main trunk
- *
- * Revision 1.5.6.1  2004/07/07 07:10:11  csoutheren
- * Changed to use new factory based PWAVFile
- * Removed redundant blocking/unblocking when using G.723.1
- *
- * Revision 1.5  2002/09/16 01:14:15  robertj
- * Added #define so can select if #pragma interface/implementation is used on
- *   platform basis (eg MacOS) rather than compiler, thanks Robert Monaghan.
- *
- * Revision 1.4  2002/09/06 06:20:37  robertj
- * More cosmetic changes
- *
- * Revision 1.3  2002/08/08 13:00:02  craigs
- * Remove unused definition of LastReadCount thanks to Peter 'Luna' Runestig
- *
- * Revision 1.2  2002/08/05 10:03:47  robertj
- * Cosmetic changes to normalise the usage of pragma interface/implementation.
- *
- * Revision 1.1  2002/06/20 01:21:03  craigs
- * Initial version
+ * $Id$
  *
  */
 
@@ -94,10 +62,16 @@ class OpalWAVFile : public PWAVFile
 
        The #PChannel::IsOpen()# function may be used after object
        construction to determine if the file was successfully opened.
+
+       #WARNING API CHANGE IN PTLIB AS OF PTLIB 2.11.2
      */
     OpalWAVFile(
       OpenMode mode,            ///<  Mode in which to open the file.
-      int opts = ModeDefault,   ///<  #OpenOptions enum# for open operation.
+#if PTLIB_VER >= 2112
+      OpenOptions opts = ModeDefault,   ///<  #OpenOptions enum# for open operation.
+#else
+      int opts = ModeDefault,   ///<  #OpenOptions enum# for open operation. 
+#endif
       unsigned format = fmt_PCM ///<  Type of WAV File to create
     );
 
@@ -109,11 +83,17 @@ class OpalWAVFile : public PWAVFile
 
        The #PChannel::IsOpen()# function may be used after object
        construction to determine if the file was successfully opened.
+
+       #WARNING API CHANGE IN PTLIB AS OF PTLIB 2.11.2
      */
     OpalWAVFile(
       const PFilePath & name,     ///<  Name of file to open.
       OpenMode mode = ReadWrite,  ///<  Mode in which to open the file.
-      int opts = ModeDefault,     ///<  #OpenOptions enum# for open operation.
+#if PTLIB_VER >= 2112
+      OpenOptions opts = ModeDefault,   ///<  #OpenOptions enum# for open operation.
+#else
+      int opts = ModeDefault,   ///<  #OpenOptions enum# for open operation. 
+#endif
       unsigned format = fmt_PCM ///<  Type of WAV File to create
     );
 };
