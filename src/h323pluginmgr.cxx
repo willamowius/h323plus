@@ -3920,6 +3920,20 @@ void H323PluginCodecManager::CodecListing(const PString & matchStr, PStringList 
             }
         }
     }
+
+    PFactory<H323StaticPluginCodec>::KeyList_T staticList = PFactory<H323StaticPluginCodec>::GetKeyList();
+    PFactory<H323StaticPluginCodec>::KeyList_T::const_iterator s;
+    for (s = staticList.begin(); s != staticList.end(); ++s) {
+        int i = PString(*s).Find(matchStr);
+        if (i != P_MAX_INDEX) {
+            if (i == 0) 
+                listing.AppendString(PString(*s).Mid(matchStr.GetLength()));
+            else {
+                listing.AppendString(PString(*s).Left(PString(*s).GetLength() - 
+                                                 matchStr.GetLength()));
+            }
+        }
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////
