@@ -812,10 +812,10 @@ void PNatMethod_H46019::ReadThread(PThread &, INT)
 
               switch (socket->GetErrorNumber(PChannel::LastReadError)) {
                 case ECONNRESET :
-                  PTRACE(2, "H46019M\tUDP Port Reset! Closing all Sockets");
+/*                PTRACE(2, "H46019M\tUDP Port Reset! Closing all Sockets");
                   if (socketRead == H46019MultiplexSocket::e_rtp)
                              CloseAllSessions(rtpSocketMap);
-                   continue;
+                   continue; */
                 case ECONNREFUSED :
                   PTRACE(2, "H46019M\tUDP Port on remote not ready.");
                   continue;
