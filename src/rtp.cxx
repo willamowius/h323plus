@@ -489,6 +489,8 @@ RTP_Session::RTP_Session(
 #endif
 
   ignoreOtherSources = TRUE;
+  ignoreOtherSourcesCount = 0;
+  ignoreOtherSourceMaximum = 10;
   ignoreOutOfOrderPackets = TRUE;
   syncSourceOut = PRandom::Number();
   syncSourceIn = 0;
@@ -815,8 +817,20 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveData(const RTP_DataFrame & 
     if (ignoreOtherSources && frame.GetSyncSource() != syncSourceIn) {
       PTRACE(2, "RTP\tPacket from SSRC=" << frame.GetSyncSource()
              << " ignored, expecting SSRC=" << syncSourceIn);
-      return e_IgnorePacket; // Non fatal error, just ignore
+
+      if (ignoreOtherSourcesCount < ignoreOtherSourceMaximum) {
+         ignoreOtherSourcesCount++;
+         return e_IgnorePacket; // Non fatal error, just ignore
+      }
+
+      PTRACE(2, "RTP\tPacket from SSRC=" << frame.GetSyncSource()
+             << " " << ignoreOtherSourcesCount << " Consecutive Received. Auto switching to SSRC " << frame.GetSyncSource());
+      syncSourceIn = ((RTP_DataFrame &)frame).GetSyncSource();
+      expectedSequenceNumber = ((RTP_DataFrame &)frame).GetSequenceNumber();
     }
+
+    if (!ignoreOtherSourcesCount)
+        ignoreOtherSourcesCount=0;
 
     WORD sequenceNumber = frame.GetSequenceNumber();
     if (sequenceNumber == expectedSequenceNumber) {

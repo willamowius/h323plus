@@ -732,6 +732,8 @@ class RTP_Session : public PObject
 #endif
 
     PBoolean          ignoreOtherSources;
+    unsigned          ignoreOtherSourcesCount;
+    unsigned          ignoreOtherSourceMaximum;
     PBoolean          ignoreOutOfOrderPackets;
     DWORD         syncSourceOut;
     DWORD         syncSourceIn;
