@@ -1917,7 +1917,24 @@ class H323EndPoint : public PObject
     /** Whether H.460.18 is in Operation for this call
       */
     PBoolean H46018InOperation();
+#endif
 
+#ifdef H323_H46019M
+    /** Disable H.460.19 Multiplex Feature. (By Default it is enabled)
+      */    
+    void H46019MEnable(PBoolean enable);
+
+    /** Query whether we are using H.460.19 Multiplexing
+      */
+    PBoolean H46019MIsEnabled();
+
+    /** Enable H.460.19 Multiplex Send. (By Default it is disabled)
+      */ 
+    void H46019MSending(PBoolean enable);
+
+    /** Query whether we are using H.460.19 Multiplex Sending (H.460.19M Must be enabled)
+      */
+    PBoolean H46019MIsSending();
 #endif
 
 #ifdef H323_H46023
@@ -2571,6 +2588,11 @@ class H323EndPoint : public PObject
 
 #ifdef H323_H46018
     PBoolean m_h46018enabled;
+#endif
+
+#ifdef H323_H46019M
+    PBoolean m_h46019Menabled;
+    PBoolean m_h46019Msend;
 #endif
 
 #ifdef H323_H46023

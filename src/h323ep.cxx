@@ -496,6 +496,11 @@ H323EndPoint::H323EndPoint()
   m_h46018enabled = true;
 #endif
 
+#ifdef H323_H46019M
+  m_h46019Menabled = true;
+  m_h46019Msend = false;
+#endif
+
 #ifdef H323_H46023
   m_h46023enabled = true;
 #endif
@@ -3275,6 +3280,28 @@ PBoolean H323EndPoint::H46018IsEnabled()
 	return m_h46018enabled; 
 }
 #endif  // H323_H46018
+
+#ifdef H323_H46019M
+void H323EndPoint::H46019MEnable(PBoolean enable)
+{
+    m_h46019Menabled = enable;
+}
+
+PBoolean H323EndPoint::H46019MIsEnabled()
+{
+    return m_h46019Menabled;
+}
+
+void H323EndPoint::H46019MSending(PBoolean enable)
+{
+    m_h46019Msend = enable;
+}
+
+PBoolean H323EndPoint::H46019MIsSending()
+{
+    return (m_h46019Menabled && m_h46019Msend);
+}
+#endif  // H323_H46019M
 
 #ifdef H323_H46023
 void H323EndPoint::H46023Enable(PBoolean enable) 
