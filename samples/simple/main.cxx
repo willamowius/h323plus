@@ -109,7 +109,7 @@ void SimpleH323Process::Main()
 #endif
              "T-h245tunneldisable."
              "Q-h245qosdisable."
-#ifdef H323_H46018
+#ifdef H323_H46017
              "k-h46017:"
 #endif
 #ifdef H323_H46018
