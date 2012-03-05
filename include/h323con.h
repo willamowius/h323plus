@@ -3216,7 +3216,7 @@ class H323Connection : public PObject
 #endif
 
 #ifdef H323_AEC
-    PAec * aec;
+    H323Aec * aec;
 #endif
 
     PBoolean nonCallConnection; 

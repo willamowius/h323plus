@@ -164,7 +164,6 @@ AC_ARG_ENABLE(minsize,
 dnl these are the default configure settings
 default_audio=yes
 default_video=yes
-default_asntracing=yes
 default_h450=yes
 default_h501=yes
 default_t38=yes
@@ -186,11 +185,11 @@ default_h460p=yes
 default_t120=yes
 default_gnugk=yes
 default_file=yes
+default_aec=no
 
 if test "${enable_minsize}x" = "yesx" ; then
   default_audio=yes
   default_video=yes
-  default_asntracing=no
   default_h450=no
   default_h501=no
   default_t38=no
@@ -212,6 +211,7 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_t120=no
   default_gnugk=no
   default_file=no
+  default_aec=no
 fi
 
 
@@ -704,6 +704,33 @@ else
   AC_MSG_NOTICE(Disabling File Transfer)
 fi
 AC_SUBST(H323_FILE)
+
+dnl ########################################################################
+dnl look for Speex AEC
+
+dnl MSWIN_DISPLAY    aec,AEC (Acoustic Echo Cancellation)
+dnl MSWIN_CHECK_FILE aec,include\speex\speex_echo.h,H323_AEC=1
+dnl MSWIN_DIR_SYMBOL aec,AEC_DIR
+dnl MSWIN_CHECK_DIR  aec,c:\speex-1.2rc1\
+
+AC_ARG_ENABLE([aec],
+	      AS_HELP_STRING([--enable-aec],[disable Acoustic Echo Cancellation]),
+	      [enable_aec=$enableval],
+	      [enable_aec=$default_aec]
+	     )
+		 
+if test "$enable_aec" = "no" ; then
+  AC_MSG_NOTICE(AEC disabled)
+else
+  PTLIB_FIND_LUA([H323_AEC=1], [H323_AEC=])
+
+  if test "x${H323_AEC}" = "x1" ; then
+    AC_DEFINE(H323_AEC, 1, "AEC found")
+    STDCCFLAGS="$STDCCFLAGS $AEC_CFLAGS"
+    ENDLDLIBS="$ENDLDLIBS $AEC_LIBS"
+  fi
+fi
+AC_SUBST(H323_AEC)
 
 dnl ########################################################################
 dnl make directives

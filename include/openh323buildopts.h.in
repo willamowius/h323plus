@@ -85,7 +85,6 @@
 // Various item support
 //
 
-#undef H323_AEC
 #undef H323_T38
 #undef H323_T120
 #undef H323_H224
@@ -131,6 +130,13 @@
     #undef H323_GNUGK
 #endif
 #undef H323_FILE
+
+#undef H323_AEC
+#ifdef H323_AEC
+#pragma include_alias(<speex/speex_echo.h>,            <@AEC_DIR@/include/speex/speex_echo.h>      )
+#pragma include_alias(<speex/speex_preprocess.h>,      <@AEC_DIR@/include/speex/speex_preprocess.h>)
+#define H323_AEC_LIB "@AEC_DIR@/lib/libspeexdsp.lib"
+#endif
 
 #undef H323_SIGNAL_AGGREGATE
 #undef H323_RTP_AGGREGATE

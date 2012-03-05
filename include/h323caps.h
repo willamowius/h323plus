@@ -587,7 +587,6 @@ class H323GenericCapabilityInfo
    An application may create a descendent off this class and override
    functions as required for descibing the codec.
  */
-class PAec;
 class H323RealTimeCapability : public H323Capability
 {
   PCLASSINFO(H323RealTimeCapability, H323Capability);

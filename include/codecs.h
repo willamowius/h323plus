@@ -329,7 +329,7 @@ class H323Codec : public PObject
    An application may create a descendent off this class and override
    functions as required for descibing a specific codec.
  */
-class PAec;
+class H323Aec;
 class H323AudioCodec : public H323Codec
 {
   PCLASSINFO(H323AudioCodec, H323Codec);
@@ -446,7 +446,7 @@ class H323AudioCodec : public H323Codec
 	/** Attach Acoustic Echo Cancellation.
 	*/
 	virtual void AttachAEC(
-       PAec * /*_ARC*/   ///* Acoustic Echo Cancellation Instance
+       H323Aec * /*_ARC*/   ///* Acoustic Echo Cancellation Instance
     ) {};
 #endif
 
@@ -478,7 +478,7 @@ class H323AudioCodec : public H323Codec
    An application may create a descendent off this class and override
    functions as required for descibing a specific codec.
  */
-class PAec;
+class H323Aec;
 class H323FramedAudioCodec : public H323AudioCodec
 {
   PCLASSINFO(H323FramedAudioCodec, H323AudioCodec);
@@ -581,15 +581,17 @@ class H323FramedAudioCodec : public H323AudioCodec
     { memset(buffer, 0, length); }
 
 #ifdef H323_AEC	
-	/** Attach Acoustic Echo Cancellation.
-	*/
-	virtual void AttachAEC(
-       PAec * _ARC   ///* Acoustic Echo Cancellation Instance
+    /** Attach Acoustic Echo Cancellation.
+    */
+    virtual void AttachAEC(
+       H323Aec * _ARC   ///* Acoustic Echo Cancellation Instance
     );
 #endif
 
   protected:
-	PAec * aec;     // Acoustic Echo Canceller
+#ifdef H323_AEC	
+    H323Aec * aec;     // Acoustic Echo Canceller
+#endif
     PShortArray sampleBuffer;
     unsigned    bytesPerFrame;
 };

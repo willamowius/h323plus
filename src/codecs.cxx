@@ -47,17 +47,7 @@
 #include "h323con.h"
 
 #ifdef H323_AEC
-#include <ptclib/paec.h>
-
-#if _WIN32
-	#if _DEBUG
-	  #pragma comment(lib,"paecd.lib")
-	#elif PTRACING
-	  #pragma comment(lib,"paec.lib")
-	#else
-	  #pragma comment(lib,"paecn.lib")
-	#endif
-#endif
+#include <etc/h323aec.h>
 #endif // H323_AEC
 
 
@@ -741,7 +731,9 @@ H323FramedAudioCodec::H323FramedAudioCodec(const OpalMediaFormat & fmt, Directio
     sampleBuffer(samplesPerFrame)
 {
   bytesPerFrame = mediaFormat.GetFrameSize();
+#ifdef H323_AEC
   aec = NULL;
+#endif
 }
 
 
@@ -907,7 +899,7 @@ PBoolean H323FramedAudioCodec::DecodeFrame(const BYTE * /*buffer*/,
 }
 
 #ifdef H323_AEC 
-void H323FramedAudioCodec::AttachAEC(PAec * _aec)
+void H323FramedAudioCodec::AttachAEC(H323Aec * _aec)
 {
   aec = _aec;
 }

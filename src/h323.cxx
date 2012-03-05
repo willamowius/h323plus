@@ -86,7 +86,7 @@
 #endif
 
 #ifdef H323_AEC
-#include <ptclib/paec.h>
+#include <etc/h323aec.h>
 #endif
 
 #include "h235auth.h"
@@ -4624,7 +4624,7 @@ PBoolean H323Connection::OpenAudioChannel(PBoolean isEncoding, unsigned bufferSi
   if (endpoint.AECEnabled() && (aec == NULL)) {
     PTRACE(2, "H323\tCreating AEC instance.");
     int rate = codec.GetMediaFormat().GetTimeUnits() * 1000;
-    aec = new PAec(rate);
+    aec = new H323Aec(rate, codec.GetMediaFormat().GetFrameTime(), endpoint.GetSoundChannelBufferDepth());
   }
    codec.AttachAEC(aec);
 #endif
