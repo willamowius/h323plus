@@ -605,6 +605,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\etc\h323aec.cxx"
+				>
+			</File>
+			<File
 				RelativePath="src\h323annexg.cxx"
 				>
 				<FileConfiguration
@@ -1569,6 +1573,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\etc\h323aec.h"
+				>
+			</File>
+			<File
 				RelativePath="include\h323annexg.h"
 				>
 			</File>
@@ -1681,6 +1689,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\codec\opalplugin.h"
+				>
+			</File>
+			<File
 				RelativePath="include\opalvxml.h"
 				>
 			</File>
@@ -1690,6 +1702,10 @@
 			</File>
 			<File
 				RelativePath="include\peclient.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\ptlib_extras.h"
 				>
 			</File>
 			<File
@@ -1814,6 +1830,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\asn\h46017a.asn"
+				>
+			</File>
+			<File
 				RelativePath=".\src\asn\h46018.asn"
 				>
 			</File>
@@ -1922,6 +1942,10 @@
 				</File>
 				<File
 					RelativePath=".\include\h450\h4509.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\h460\h46017a.h"
 					>
 				</File>
 				<File
@@ -2178,6 +2202,10 @@
 				</File>
 				<File
 					RelativePath=".\src\h450\h4509.cxx"
+					>
+				</File>
+				<File
+					RelativePath=".\src\h460\h46017a.cxx"
 					>
 				</File>
 				<File
