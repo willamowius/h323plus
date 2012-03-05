@@ -176,8 +176,13 @@ void PNatMethod_H46024::MainMethod(PThread &, INT)
         if (natType == PSTUNClient::ConeNat) {
             isAvailable = true;
             PThread::Sleep(recheckTime);
-        } else {
-            isAvailable = false;
+            continue;
+        }
+
+        isAvailable = false;
+        if (natType == PSTUNClient::UnknownNat) {
+            PTRACE(1,"Std24\tNAT Test failed to resolve NAT Type");
+            break;
         }
     }
 
@@ -230,9 +235,7 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
            H46019MultiplexSocket * & muxSocket2 = (H46019MultiplexSocket * &)handler->GetMultiplexSocket(false);
            muxSocket1 = new H46019MultiplexSocket(true);
            muxSocket2 = new H46019MultiplexSocket(false);
- //           pairedPortInfo.maxPort     = pairedPortInfo.basePort+10;  
- //           pairedPortInfo.basePort    = feat->GetEndPoint()->GetMultiplexPort();
-            pairedPortInfo.currentPort = feat->GetEndPoint()->GetMultiplexPort()-1;
+           pairedPortInfo.currentPort = feat->GetEndPoint()->GetMultiplexPort()-1;
 
            if (!PSTUNClient::CreateSocketPair(muxSocket1->GetSubSocket(), muxSocket2->GetSubSocket(), binding)) 
                 return false;
@@ -305,14 +308,16 @@ void H460_FeatureStd23::AttachEndPoint(H323EndPoint * _ep)
 {
     EP = _ep;
     isEnabled = EP->H46023IsEnabled();
+
+    // Ignore if already manually using STUN
+    isavailable = (EP->GetSTUN() == NULL);
 }
 
 PBoolean H460_FeatureStd23::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu) 
 { 
     if (!isEnabled)
         return false;
-    // Ignore if already manually using STUN
-    isavailable = (EP->GetSTUN() == NULL);    
+
     if (!isavailable)
         return FALSE;
 
@@ -325,10 +330,6 @@ PBoolean H460_FeatureStd23::OnSendRegistrationRequest(H225_FeatureDescriptor & p
 { 
     if (!isEnabled)
         return false;
-
-    // Ignore if already manually using STUN
-    if (isavailable) 
-        isavailable = (EP->GetSTUN() == NULL);
 
     if (!isavailable)
             return FALSE;
@@ -782,13 +783,6 @@ void H460_FeatureStd24::SetNATMethods(H46024NAT state)
 {
 
     PNatList & natlist = EP->GetNatMethods().GetNATList();
-
-/*  if ((state == H460_FeatureStd24::e_default) ||
-         (state == H460_FeatureStd24::e_AnnexA) ||
-         (state == H460_FeatureStd24::e_AnnexB))
-            SetH46019State(true);
-    else
-            SetH46019State(false); */
 
     for (PINDEX i=0; i< natlist.GetSize(); i++)
     {
