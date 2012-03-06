@@ -722,8 +722,6 @@ AC_ARG_ENABLE([aec],
 if test "$enable_aec" = "no" ; then
   AC_MSG_NOTICE(AEC disabled)
 else
-  PTLIB_FIND_LUA([H323_AEC=1], [H323_AEC=])
-
   if test "x${H323_AEC}" = "x1" ; then
     AC_DEFINE(H323_AEC, 1, "AEC found")
     STDCCFLAGS="$STDCCFLAGS $AEC_CFLAGS"
