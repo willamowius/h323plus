@@ -609,6 +609,7 @@ INSTALL_PROGRAM
 ENDLDLIBS
 LDLIBS
 STDCCFLAGS
+H323_AEC
 H323_FILE
 H323_GNUGK
 H323_T120
@@ -723,6 +724,7 @@ enable_t38
 enable_t120
 enable_gnugk
 enable_file
+enable_aec
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1372,6 +1374,7 @@ Optional Features:
   --disable-t120          disable T.120
   --disable-gnugk         disable GnuGk NAT
   --disable-file          disable File Transfer
+  --enable-aec            disable Acoustic Echo Cancellation
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -3883,7 +3886,6 @@ fi
 
 default_audio=yes
 default_video=yes
-default_asntracing=yes
 default_h450=yes
 default_h501=yes
 default_t38=yes
@@ -3905,11 +3907,11 @@ default_h460p=yes
 default_t120=yes
 default_gnugk=yes
 default_file=yes
+default_aec=no
 
 if test "${enable_minsize}x" = "yesx" ; then
   default_audio=yes
   default_video=yes
-  default_asntracing=no
   default_h450=no
   default_h501=no
   default_t38=no
@@ -3931,6 +3933,7 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_t120=no
   default_gnugk=no
   default_file=no
+  default_aec=no
 fi
 
 
@@ -4493,6 +4496,31 @@ else
   H323_FILE=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling File Transfer" >&5
 $as_echo "$as_me: Disabling File Transfer" >&6;}
+fi
+
+
+
+
+# Check whether --enable-aec was given.
+if test "${enable_aec+set}" = set; then :
+  enableval=$enable_aec; enable_aec=$enableval
+else
+  enable_aec=$default_aec
+
+fi
+
+
+if test "$enable_aec" = "no" ; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: AEC disabled" >&5
+$as_echo "$as_me: AEC disabled" >&6;}
+else
+  if test "x${H323_AEC}" = "x1" ; then
+
+$as_echo "#define H323_AEC 1" >>confdefs.h
+
+    STDCCFLAGS="$STDCCFLAGS $AEC_CFLAGS"
+    ENDLDLIBS="$ENDLDLIBS $AEC_LIBS"
+  fi
 fi
 
 
