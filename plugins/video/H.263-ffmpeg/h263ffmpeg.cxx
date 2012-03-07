@@ -518,10 +518,17 @@ bool FFMPEGLibrary::Load()
     return false;
   }
 
+#if LIBAVCODEC_VERSION_MAJOR >= 53
+  if (!GetFunction("avcodec_decode_video2", (Function &)Favcodec_decode_video)) {
+    //cerr << "Failed to load avcodec_decode_video" << endl;
+    return false;
+  }
+#else
   if (!GetFunction("avcodec_decode_video", (Function &)Favcodec_decode_video)) {
     //cerr << "Failed to load avcodec_decode_video" << endl;
     return false;
   }
+#endif
 
   if (!GetFunction("avcodec_set_print_fn", (Function &)Favcodec_set_print_fn)) {
     //cerr << "Failed to load avcodec_set_print_fn" << endl;
@@ -663,10 +670,21 @@ int FFMPEGLibrary::AvcodecDecodeVideo(AVCodecContext *ctx, AVFrame *pict, int *g
 {
   WaitAndSignal m(processLock);
 
+#if LIBAVCODEC_VERSION_MAJOR >= 53
+     AVPacket pkt; 
+     av_init_packet(&pkt); 
+     pkt.data = (UInt8*)data; 
+     pkt.size = buf_size;
+#endif
+
 #ifdef USE_DLL_AVCODEC
   int res = Favcodec_decode_video(ctx, pict, got_picture_ptr, buf, buf_size);
 #else
-  int res = avcodec_decode_video(ctx, pict, got_picture_ptr, buf, buf_size);
+#if LIBAVCODEC_VERSION_MAJOR < 53
+      int res = avcodec_decode_video(ctx, pict, got_picture_ptr, buf, buf_size);
+#else
+      int res = avcodec_decode_video2(ctx, pict, got_picture_ptr, &pkt);
+   #endif
 #endif
   return res;
 }
@@ -2325,7 +2343,7 @@ extern "C" {
   PLUGIN_CODEC_DLL_API struct PluginCodec_Definition * PLUGIN_CODEC_GET_CODEC_FN(unsigned * count, unsigned version)
   {
     // check version numbers etc
-    if (version < PLUGIN_CODEC_VERSION_OPTIONS || !FFMPEGLibraryInstance.Load()) {
+    if (version < PLUGIN_CODEC_VERSION_OPTIONS /*|| !FFMPEGLibraryInstance.Load()*/) {
       *count = 0;
       return NULL;
     }
