@@ -98,6 +98,7 @@ extern "C" {
 #error Wrong libavcodec version for h.263.
 #endif
 
+#ifndef P_DEFAULT_PLUGIN_DIR
 #  ifdef  _WIN32
 #    define P_DEFAULT_PLUGIN_DIR "C:\\PTLIB_PLUGINS;C:\\PWLIB_PLUGINS"
 #    define DIR_SEPERATOR "\\"
@@ -107,13 +108,15 @@ extern "C" {
 #    define DIR_SEPERATOR "/"
 #    define DIR_TOKENISER ":"
 #  endif
+#endif
 
 #include <vector>
 
 // if defined, the FFMPEG code is access via another DLL
 // otherwise, the FFMPEG code is assumed to be statically linked into this plugin
-
+#ifndef H323_STATIC_H263
 #define USE_DLL_AVCODEC   1
+#endif
 
 #define RTP_RFC2190_PAYLOAD  34
 #define RTP_DYNAMIC_PAYLOAD  96
@@ -395,12 +398,11 @@ class FFMPEGLibrary
     int AvcodecDecodeVideo(AVCodecContext *ctx, AVFrame *pict, int *got_picture_ptr, BYTE *buf, int buf_size);
     void AvcodecFree(void * ptr);
 
-    void AvcodecSetPrintFn(void (*print_fn)(char *));
-
     bool IsLoaded();
     CriticalSection processLock;
 
   protected:
+#if USE_DLL_AVCODEC
     void (*Favcodec_init)(void);
     AVCodec *Favcodec_h263_encoder;
     AVCodec *Favcodec_h263p_encoder;
@@ -419,15 +421,13 @@ class FFMPEGLibrary
     void (*Favcodec_set_print_fn)(void (*print_fn)(char *));
     unsigned (*Favcodec_version)(void);
     unsigned (*Favcodec_build)(void);
-
+#endif
     bool isLoadedOK;
 };
 
 static FFMPEGLibrary FFMPEGLibraryInstance;
 
 //////////////////////////////////////////////////////////////////////////////
-
-#ifdef USE_DLL_AVCODEC
 
 FFMPEGLibrary::FFMPEGLibrary()
 {
@@ -439,6 +439,8 @@ bool FFMPEGLibrary::Load()
   WaitAndSignal m(processLock);
   if (IsLoaded())
     return true;
+
+#if USE_DLL_AVCODEC
 
   if (!DynaLink::Open("avcodec")
 #if defined(_WIN32)
@@ -563,6 +565,15 @@ bool FFMPEGLibrary::Load()
   Favcodec_register(Favcodec_h263_decoder);
   
   //Favcodec_set_print_fn(h263_ffmpeg_printon);
+#else
+  // must be called before using avcodec lib
+  avcodec_init();
+
+  // register only the codecs needed (to have smaller code)
+  register_avcodec(&h263_encoder);
+  register_avcodec(&h263p_encoder);
+  register_avcodec(&h263_decoder);
+#endif
 
   isLoadedOK = true;
 
@@ -571,34 +582,48 @@ bool FFMPEGLibrary::Load()
 
 FFMPEGLibrary::~FFMPEGLibrary()
 {
+#ifdef USE_DLL_AVCODEC
   DynaLink::Close();
+#endif
 }
 
 AVCodec *FFMPEGLibrary::AvcodecFindEncoder(enum CodecID id)
 {
+#ifdef USE_DLL_AVCODEC
   AVCodec *res = Favcodec_find_encoder(id);
-  //PTRACE_IF(6, res, "FFLINK\tFound encoder " << res->name << " @ " << ::hex << (int)res << ::dec);
+#else
+  AVCodec *res = avcodec_find_encoder(id);
+#endif
   return res;
 }
 
 AVCodec *FFMPEGLibrary::AvcodecFindDecoder(enum CodecID id)
 {
+#ifdef USE_DLL_AVCODEC
   AVCodec *res = Favcodec_find_decoder(id);
-  //PTRACE_IF(6, res, "FFLINK\tFound decoder " << res->name << " @ " << ::hex << (int)res << ::dec);
+#else
+  AVCodec *res = avcodec_find_decoder(id);
+#endif
   return res;
 }
 
 AVCodecContext *FFMPEGLibrary::AvcodecAllocContext(void)
 {
+#ifdef USE_DLL_AVCODEC
   AVCodecContext *res = Favcodec_alloc_context();
-  //PTRACE_IF(6, res, "FFLINK\tAllocated context @ " << ::hex << (int)res << ::dec);
+#else
+  AVCodecContext *res = avcodec_alloc_context();
+#endif
   return res;
 }
 
 AVFrame *FFMPEGLibrary::AvcodecAllocFrame(void)
 {
+#ifdef USE_DLL_AVCODEC
   AVFrame *res = Favcodec_alloc_frame();
-  //PTRACE_IF(6, res, "FFLINK\tAllocated frame @ " << ::hex << (int)res << ::dec);
+#else
+  AVFrame *res = avcodec_alloc_frame();
+#endif
   return res;
 }
 
@@ -606,25 +631,31 @@ int FFMPEGLibrary::AvcodecOpen(AVCodecContext *ctx, AVCodec *codec)
 {
   WaitAndSignal m(processLock);
 
-  //PTRACE(6, "FFLINK\tNow open context @ " << ::hex << (int)ctx << ", codec @ " << (int)codec << ::dec);
+#ifdef USE_DLL_AVCODEC
   return Favcodec_open(ctx, codec);
+#else
+  return avcodec_open(ctx, codec);
+#endif
 }
 
 int FFMPEGLibrary::AvcodecClose(AVCodecContext *ctx)
 {
-  //PTRACE(6, "FFLINK\tNow close context @ " << ::hex << (int)ctx << ::dec);
+#ifdef USE_DLL_AVCODEC
   return Favcodec_close(ctx);
+#else
+  return avcodec_close(ctx);
+#endif
 }
 
 int FFMPEGLibrary::AvcodecEncodeVideo(AVCodecContext *ctx, BYTE *buf, int buf_size, const AVFrame *pict)
 {
   WaitAndSignal m(processLock);
 
-  //PTRACE(6, "FFLINK\tNow encode video for ctxt @ " << ::hex << (int)ctx << ", pict @ " << (int)pict
-	// << ", buf @ " << (int)buf << ::dec << " (" << buf_size << " bytes)");
+#ifdef USE_DLL_AVCODEC
   int res = Favcodec_encode_video(ctx, buf, buf_size, pict);
-
-  //PTRACE(6, "FFLINK\tEncoded video into " << res << " bytes");
+#else
+  int res = avcodec_encode_video(ctx, buf, buf_size, pict);
+#endif
   return res;
 }
 
@@ -632,22 +663,21 @@ int FFMPEGLibrary::AvcodecDecodeVideo(AVCodecContext *ctx, AVFrame *pict, int *g
 {
   WaitAndSignal m(processLock);
 
-  //PTRACE(6, "FFLINK\tNow decode video for ctxt @ " << ::hex << (int)ctx << ", pict @ " << (int)pict
-	// << ", buf @ " << (int)buf << ::dec << " (" << buf_size << " bytes)");
+#ifdef USE_DLL_AVCODEC
   int res = Favcodec_decode_video(ctx, pict, got_picture_ptr, buf, buf_size);
-
-  //PTRACE(6, "FFLINK\tDecoded video of " << res << " bytes, got_picture=" << *got_picture_ptr);
+#else
+  int res = avcodec_decode_video(ctx, pict, got_picture_ptr, buf, buf_size);
+#endif
   return res;
-}
-
-void FFMPEGLibrary::AvcodecSetPrintFn(void (*print_fn)(char *))
-{
-  Favcodec_set_print_fn(print_fn);
 }
 
 void FFMPEGLibrary::AvcodecFree(void * ptr)
 {
+#ifdef USE_DLL_AVCODEC
   Favcodec_free(ptr);
+#else
+  av_free(ptr);
+#endif
 }
 
 bool FFMPEGLibrary::IsLoaded()
@@ -655,11 +685,6 @@ bool FFMPEGLibrary::IsLoaded()
   return isLoadedOK;
 }
 
-#else
-
-#error "Not yet able to use statically linked libavcodec"
-
-#endif // USE_DLL_AVCODEC
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1082,13 +1107,10 @@ int H263EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLen, BYTE *
       frameWidth != header->width || 
       frameHeight != header->height) {
 
-//#ifndef h323pluslib
     int sizeIndex = GetStdSize(header->width, header->height);
     if (sizeIndex == StdSizes::UnknownStdSize) {
-      //PTRACE(3, "H263\tCannot resize to " << header->width << "x" << header->height << " (non-standard format), Close down video transmission thread.");
       return false;
     }
-//#endif
 
     frameWidth  = header->width;
     frameHeight = header->height;
@@ -1997,7 +2019,7 @@ static struct PluginCodec_Option const * const xcifOptionTable[] = {
 
 /////////////////////////////////////////////////////////////////////////////
 
-static struct PluginCodec_Definition h263CodecDefn[6] =
+static struct PluginCodec_Definition h263CodecDefn[] =
 {
   { 
     // CIF only encoder
@@ -2144,88 +2166,13 @@ static struct PluginCodec_Definition h263CodecDefn[6] =
     PluginCodec_H323VideoCodec_h263,    // h323CapabilityType 
     NULL                                // h323CapabilityData
   },
-/*
-  { 
-    // All frame sizes (dynamic) encoder
-    PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
-    &licenseInfo,                       // license information
 
-    PluginCodec_MediaTypeVideo |        // video codec
-    PluginCodec_MediaTypeExtVideo |     // Extended video codec
-    PluginCodec_RTPTypeExplicit,        // specified RTP type
-
-    h263Desc,                           // text decription
-    YUV420PDesc,                        // source format
-    h263Desc,                           // destination format
-
-    xcifOptionTable,                    // user data 
-
-    H263_CLOCKRATE,                     // samples per second
-    H263_BITRATE,                       // raw bits per second
-    20000,                              // nanoseconds per frame
-
-    {{
-      CIF16_WIDTH,                        // frame width
-      CIF16_HEIGHT,                       // frame height
-      10,                                 // recommended frame rate
-      60,                                 // maximum frame rate
-    }},
-
-    RTP_RFC2190_PAYLOAD,                // IANA RTP payload code
-    sdpH263,                            // RTP payload name
-
-    create_encoder,                     // create codec function
-    destroy_encoder,                    // destroy codec
-    codec_encoder,                      // encode/decode
-    EncoderControls,                    // codec controls
-
-    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType 
-    NULL                                // h323CapabilityData
-  },
-  { 
-    // All frame sizes (dynamic) decoder
-    PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
-    &licenseInfo,                       // license information
-
-    PluginCodec_MediaTypeVideo |        // video codec
-    PluginCodec_MediaTypeExtVideo |     // Extended video codec
-    PluginCodec_RTPTypeExplicit,        // specified RTP type
-
-    h263Desc,                           // text decription
-    h263Desc,                           // source format
-    YUV420PDesc,                        // destination format
-
-    xcifOptionTable,                    // user data 
-
-    H263_CLOCKRATE,                     // samples per second
-    H263_BITRATE,                       // raw bits per second
-    20000,                              // nanoseconds per frame
-
-    {{
-      CIF16_WIDTH,                        // frame width
-      CIF16_HEIGHT,                       // frame height
-      10,                                 // recommended frame rate
-      60,                                 // maximum frame rate
-    }},
-    RTP_RFC2190_PAYLOAD,                // IANA RTP payload code
-    sdpH263,                            // RTP payload name
-
-    create_decoder,                     // create codec function
-    destroy_decoder,                    // destroy codec
-    codec_decoder,                      // encode/decode
-    DecoderControls,                    // codec controls
-
-    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType 
-    NULL                                // h323CapabilityData
-  }
-*/
   { 
     // 720p encoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
 
     PluginCodec_MediaTypeVideo |        // video codec
-  //  PluginCodec_MediaTypeExtVideo |     // Extended video codec
     PluginCodec_RTPTypeExplicit,        // specified RTP type
 
     h263720Desc,                        // text decription
@@ -2262,7 +2209,6 @@ static struct PluginCodec_Definition h263CodecDefn[6] =
     &licenseInfo,                       // license information
 
     PluginCodec_MediaTypeVideo |        // video codec
-  //  PluginCodec_MediaTypeExtVideo |     // Extended video codec
     PluginCodec_RTPTypeExplicit,        // specified RTP type
 
     h263720Desc,                        // text decription
