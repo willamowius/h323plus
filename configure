@@ -1374,7 +1374,7 @@ Optional Features:
   --disable-t120          disable T.120
   --disable-gnugk         disable GnuGk NAT
   --disable-file          disable File Transfer
-  --enable-aec            disable Acoustic Echo Cancellation
+  --enable-aec            enable Acoustic Echo Cancellation
 
 Some influential environment variables:
   CXX         C++ compiler command

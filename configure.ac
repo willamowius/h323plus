@@ -714,7 +714,7 @@ dnl MSWIN_DIR_SYMBOL aec,AEC_DIR
 dnl MSWIN_CHECK_DIR  aec,c:\speex-1.2rc1\
 
 AC_ARG_ENABLE([aec],
-	      AS_HELP_STRING([--enable-aec],[disable Acoustic Echo Cancellation]),
+	      AS_HELP_STRING([--enable-aec],[enable Acoustic Echo Cancellation]),
 	      [enable_aec=$enableval],
 	      [enable_aec=$default_aec]
 	     )
