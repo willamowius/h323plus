@@ -2573,7 +2573,7 @@ void H323PluginCodecManager::RegisterStaticCodec(
       PluginCodec_GetCodecFunction getCodecFn)
 {
   unsigned int count;
-  PluginCodec_Definition * codecs = (*getCodecFn)(&count, PLUGIN_CODEC_VERSION);
+  PluginCodec_Definition * codecs = (*getCodecFn)(&count, PLUGIN_CODEC_VERSION_OPTIONS);
   if (codecs == NULL || count == 0) {
     PTRACE(3, "H323PLUGIN\tStatic codec " << name << " contains no codec definitions");
     return;
