@@ -36,9 +36,7 @@
  * Contributor(s): Guilhem Tardy (gtardy@salyens.com)
  *                 Craig Southeren (craigs@postincrement.com)
  *
- * $Revision$
- * $Author$
- * $Date$
+ * $Id$
  */
 
 /*
@@ -53,11 +51,6 @@
 
 #define _CRT_NONSTDC_NO_DEPRECATE 1
 #define _CRT_SECURE_NO_WARNINGS 1
-
-#include <openh323buildopts.h>
-#if H323_STATIC_H263
-  #define OPAL_STATIC_CODEC 1
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -98,7 +91,6 @@ extern "C" {
 #error Wrong libavcodec version for h.263.
 #endif
 
-#ifndef P_DEFAULT_PLUGIN_DIR
 #  ifdef  _WIN32
 #    define P_DEFAULT_PLUGIN_DIR "C:\\PTLIB_PLUGINS;C:\\PWLIB_PLUGINS"
 #    define DIR_SEPERATOR "\\"
@@ -108,15 +100,13 @@ extern "C" {
 #    define DIR_SEPERATOR "/"
 #    define DIR_TOKENISER ":"
 #  endif
-#endif
 
 #include <vector>
 
 // if defined, the FFMPEG code is access via another DLL
 // otherwise, the FFMPEG code is assumed to be statically linked into this plugin
-#ifndef H323_STATIC_H263
+
 #define USE_DLL_AVCODEC   1
-#endif
 
 #define RTP_RFC2190_PAYLOAD  34
 #define RTP_DYNAMIC_PAYLOAD  96
@@ -398,11 +388,12 @@ class FFMPEGLibrary
     int AvcodecDecodeVideo(AVCodecContext *ctx, AVFrame *pict, int *got_picture_ptr, BYTE *buf, int buf_size);
     void AvcodecFree(void * ptr);
 
+    void AvcodecSetPrintFn(void (*print_fn)(char *));
+
     bool IsLoaded();
     CriticalSection processLock;
 
   protected:
-#if USE_DLL_AVCODEC
     void (*Favcodec_init)(void);
     AVCodec *Favcodec_h263_encoder;
     AVCodec *Favcodec_h263p_encoder;
@@ -421,13 +412,15 @@ class FFMPEGLibrary
     void (*Favcodec_set_print_fn)(void (*print_fn)(char *));
     unsigned (*Favcodec_version)(void);
     unsigned (*Favcodec_build)(void);
-#endif
+
     bool isLoadedOK;
 };
 
 static FFMPEGLibrary FFMPEGLibraryInstance;
 
 //////////////////////////////////////////////////////////////////////////////
+
+#ifdef USE_DLL_AVCODEC
 
 FFMPEGLibrary::FFMPEGLibrary()
 {
@@ -439,8 +432,6 @@ bool FFMPEGLibrary::Load()
   WaitAndSignal m(processLock);
   if (IsLoaded())
     return true;
-
-#if USE_DLL_AVCODEC
 
   if (!DynaLink::Open("avcodec")
 #if defined(_WIN32)
@@ -518,17 +509,10 @@ bool FFMPEGLibrary::Load()
     return false;
   }
 
-#if LIBAVCODEC_VERSION_MAJOR >= 53
-  if (!GetFunction("avcodec_decode_video2", (Function &)Favcodec_decode_video)) {
-    //cerr << "Failed to load avcodec_decode_video" << endl;
-    return false;
-  }
-#else
   if (!GetFunction("avcodec_decode_video", (Function &)Favcodec_decode_video)) {
     //cerr << "Failed to load avcodec_decode_video" << endl;
     return false;
   }
-#endif
 
   if (!GetFunction("avcodec_set_print_fn", (Function &)Favcodec_set_print_fn)) {
     //cerr << "Failed to load avcodec_set_print_fn" << endl;
@@ -572,15 +556,6 @@ bool FFMPEGLibrary::Load()
   Favcodec_register(Favcodec_h263_decoder);
   
   //Favcodec_set_print_fn(h263_ffmpeg_printon);
-#else
-  // must be called before using avcodec lib
-  avcodec_init();
-
-  // register only the codecs needed (to have smaller code)
-  register_avcodec(&h263_encoder);
-  register_avcodec(&h263p_encoder);
-  register_avcodec(&h263_decoder);
-#endif
 
   isLoadedOK = true;
 
@@ -589,48 +564,34 @@ bool FFMPEGLibrary::Load()
 
 FFMPEGLibrary::~FFMPEGLibrary()
 {
-#ifdef USE_DLL_AVCODEC
   DynaLink::Close();
-#endif
 }
 
 AVCodec *FFMPEGLibrary::AvcodecFindEncoder(enum CodecID id)
 {
-#ifdef USE_DLL_AVCODEC
   AVCodec *res = Favcodec_find_encoder(id);
-#else
-  AVCodec *res = avcodec_find_encoder(id);
-#endif
+  //PTRACE_IF(6, res, "FFLINK\tFound encoder " << res->name << " @ " << ::hex << (int)res << ::dec);
   return res;
 }
 
 AVCodec *FFMPEGLibrary::AvcodecFindDecoder(enum CodecID id)
 {
-#ifdef USE_DLL_AVCODEC
   AVCodec *res = Favcodec_find_decoder(id);
-#else
-  AVCodec *res = avcodec_find_decoder(id);
-#endif
+  //PTRACE_IF(6, res, "FFLINK\tFound decoder " << res->name << " @ " << ::hex << (int)res << ::dec);
   return res;
 }
 
 AVCodecContext *FFMPEGLibrary::AvcodecAllocContext(void)
 {
-#ifdef USE_DLL_AVCODEC
   AVCodecContext *res = Favcodec_alloc_context();
-#else
-  AVCodecContext *res = avcodec_alloc_context();
-#endif
+  //PTRACE_IF(6, res, "FFLINK\tAllocated context @ " << ::hex << (int)res << ::dec);
   return res;
 }
 
 AVFrame *FFMPEGLibrary::AvcodecAllocFrame(void)
 {
-#ifdef USE_DLL_AVCODEC
   AVFrame *res = Favcodec_alloc_frame();
-#else
-  AVFrame *res = avcodec_alloc_frame();
-#endif
+  //PTRACE_IF(6, res, "FFLINK\tAllocated frame @ " << ::hex << (int)res << ::dec);
   return res;
 }
 
@@ -638,31 +599,25 @@ int FFMPEGLibrary::AvcodecOpen(AVCodecContext *ctx, AVCodec *codec)
 {
   WaitAndSignal m(processLock);
 
-#ifdef USE_DLL_AVCODEC
+  //PTRACE(6, "FFLINK\tNow open context @ " << ::hex << (int)ctx << ", codec @ " << (int)codec << ::dec);
   return Favcodec_open(ctx, codec);
-#else
-  return avcodec_open(ctx, codec);
-#endif
 }
 
 int FFMPEGLibrary::AvcodecClose(AVCodecContext *ctx)
 {
-#ifdef USE_DLL_AVCODEC
+  //PTRACE(6, "FFLINK\tNow close context @ " << ::hex << (int)ctx << ::dec);
   return Favcodec_close(ctx);
-#else
-  return avcodec_close(ctx);
-#endif
 }
 
 int FFMPEGLibrary::AvcodecEncodeVideo(AVCodecContext *ctx, BYTE *buf, int buf_size, const AVFrame *pict)
 {
   WaitAndSignal m(processLock);
 
-#ifdef USE_DLL_AVCODEC
+  //PTRACE(6, "FFLINK\tNow encode video for ctxt @ " << ::hex << (int)ctx << ", pict @ " << (int)pict
+	// << ", buf @ " << (int)buf << ::dec << " (" << buf_size << " bytes)");
   int res = Favcodec_encode_video(ctx, buf, buf_size, pict);
-#else
-  int res = avcodec_encode_video(ctx, buf, buf_size, pict);
-#endif
+
+  //PTRACE(6, "FFLINK\tEncoded video into " << res << " bytes");
   return res;
 }
 
@@ -670,32 +625,22 @@ int FFMPEGLibrary::AvcodecDecodeVideo(AVCodecContext *ctx, AVFrame *pict, int *g
 {
   WaitAndSignal m(processLock);
 
-#if LIBAVCODEC_VERSION_MAJOR >= 53
-     AVPacket pkt; 
-     av_init_packet(&pkt); 
-     pkt.data = (UInt8*)data; 
-     pkt.size = buf_size;
-#endif
-
-#ifdef USE_DLL_AVCODEC
+  //PTRACE(6, "FFLINK\tNow decode video for ctxt @ " << ::hex << (int)ctx << ", pict @ " << (int)pict
+	// << ", buf @ " << (int)buf << ::dec << " (" << buf_size << " bytes)");
   int res = Favcodec_decode_video(ctx, pict, got_picture_ptr, buf, buf_size);
-#else
-#if LIBAVCODEC_VERSION_MAJOR < 53
-      int res = avcodec_decode_video(ctx, pict, got_picture_ptr, buf, buf_size);
-#else
-      int res = avcodec_decode_video2(ctx, pict, got_picture_ptr, &pkt);
-   #endif
-#endif
+
+  //PTRACE(6, "FFLINK\tDecoded video of " << res << " bytes, got_picture=" << *got_picture_ptr);
   return res;
+}
+
+void FFMPEGLibrary::AvcodecSetPrintFn(void (*print_fn)(char *))
+{
+  Favcodec_set_print_fn(print_fn);
 }
 
 void FFMPEGLibrary::AvcodecFree(void * ptr)
 {
-#ifdef USE_DLL_AVCODEC
   Favcodec_free(ptr);
-#else
-  av_free(ptr);
-#endif
 }
 
 bool FFMPEGLibrary::IsLoaded()
@@ -703,6 +648,11 @@ bool FFMPEGLibrary::IsLoaded()
   return isLoadedOK;
 }
 
+#else
+
+#error "Not yet able to use statically linked libavcodec"
+
+#endif // USE_DLL_AVCODEC
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1125,10 +1075,13 @@ int H263EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLen, BYTE *
       frameWidth != header->width || 
       frameHeight != header->height) {
 
+//#ifndef h323pluslib
     int sizeIndex = GetStdSize(header->width, header->height);
     if (sizeIndex == StdSizes::UnknownStdSize) {
+      //PTRACE(3, "H263\tCannot resize to " << header->width << "x" << header->height << " (non-standard format), Close down video transmission thread.");
       return false;
     }
+//#endif
 
     frameWidth  = header->width;
     frameHeight = header->height;
@@ -2343,7 +2296,7 @@ extern "C" {
   PLUGIN_CODEC_DLL_API struct PluginCodec_Definition * PLUGIN_CODEC_GET_CODEC_FN(unsigned * count, unsigned version)
   {
     // check version numbers etc
-    if (version < PLUGIN_CODEC_VERSION_OPTIONS /*|| !FFMPEGLibraryInstance.Load()*/) {
+    if (version < PLUGIN_CODEC_VERSION_OPTIONS || !FFMPEGLibraryInstance.Load()) {
       *count = 0;
       return NULL;
     }
