@@ -3954,23 +3954,22 @@ class H323StaticPluginCodec_##name : public H323StaticPluginCodec \
 }; \
 static PFactory<H323StaticPluginCodec>::Worker<H323StaticPluginCodec_##name > static##name##CodecFactory( #name ); \
 
-
 /////////////////////////////////////////////////////////////////////////////////////
 // Static codec definitions
 // Implementor may add more...
-
-#ifdef H323_STATIC_G7221
-    #if _WIN32
-	    #pragma comment(lib,"G7221_codec.lib")
-    #endif
-    INCLUDE_STATIC_CODEC(G7221)
-#endif
 
 #ifdef H323_STATIC_GSM
     #if _WIN32
 	    #pragma comment(lib,"GSM_0610_codec.lib")
     #endif
     INCLUDE_STATIC_CODEC(GSM_0610)
+#endif
+
+#ifdef H323_STATIC_G7221
+    #if _WIN32
+	    #pragma comment(lib,"G7221_codec.lib")
+    #endif
+    INCLUDE_STATIC_CODEC(G7221)
 #endif
 
 #ifdef H323_STATIC_H261
@@ -3982,9 +3981,9 @@ static PFactory<H323StaticPluginCodec>::Worker<H323StaticPluginCodec_##name > st
 
 #ifdef H323_STATIC_H263
     #if _WIN32
-	   #pragma comment(lib,"FFMPEG_H263_codec.lib")
+	   #pragma comment(lib,"FFMPEG_H263P_codec.lib")
     #endif
-    INCLUDE_STATIC_CODEC(FFMPEG_H263)
+    INCLUDE_STATIC_CODEC(FFMPEG_H263P)
 #endif
 
 #ifdef H323_STATIC_H264
