@@ -52,6 +52,20 @@
 
 #define _CRT_SECURE_NO_DEPRECATE
 
+#include <openh323buildopts.h>
+#if defined(H323_STATIC_H263)
+  #define OPAL_STATIC_CODEC 1
+  #ifdef _WIN32
+    #pragma comment(lib,"avcodec.lib")
+    #pragma comment(lib,"avutil.lib")
+  #endif
+#endif
+
+#include <codec/opalplugin.h>
+#ifndef OPAL_STATIC_CODEC
+#define USE_DLL_AVCODEC 1
+#endif
+
 #include "h263-1998.h"
 #include <limits>
 #include <stdio.h>
@@ -287,6 +301,7 @@ bool H263_Base_EncoderContext::Open(CodecID codecId)
 
   _context->error_concealment = 3;
   _context->error_recognition = 5;
+//  _context->err_recognition = 5;
 
   // debugging flags
   if (Trace::CanTraceUserPlane(4)) {
@@ -372,8 +387,8 @@ void H263_Base_EncoderContext::SetTSTO (unsigned tsto)
   _context->qmax = round ( (31.0 - H263P_MIN_QUANT) / 31.0 * tsto + H263P_MIN_QUANT);
   _context->qmax = min( _context->qmax, 31);
 
-  _context->mb_qmin = _context->qmin;
-  _context->mb_qmax = _context->qmax;
+ // _context->mb_qmin = _context->qmin;
+ // _context->mb_qmax = _context->qmax;
 
   // Lagrange multipliers - this is how the context defaults do it:
   _context->lmin = _context->qmin * FF_QP2LAMBDA;
@@ -389,7 +404,7 @@ void H263_Base_EncoderContext::EnableAnnex (Annex annex)
       // Annex D: Unrestructed Motion Vectors
       // Level 2+ 
       // works with eyeBeam, signaled via  non-standard "D"
-      _context->flags |= CODEC_FLAG_H263P_UMV; 
+//      _context->flags |= CODEC_FLAG_H263P_UMV; 
       break;
     case F:
       // Annex F: Advanced Prediction Mode
@@ -434,12 +449,12 @@ void H263_Base_EncoderContext::DisableAnnex (Annex annex)
       // Annex D: Unrestructed Motion Vectors
       // Level 2+ 
       // works with eyeBeam, signaled via  non-standard "D"
-      _context->flags &= ~CODEC_FLAG_H263P_UMV; 
+//      _context->flags &= ~CODEC_FLAG_H263P_UMV; 
       break;
     case F:
       // Annex F: Advanced Prediction Mode
       // does not work with eyeBeam
-      _context->flags &= ~CODEC_FLAG_OBMC; 
+//      _context->flags &= ~CODEC_FLAG_OBMC; 
       break;
     case I:
       // Annex I: Advanced Intra Coding
@@ -450,7 +465,7 @@ void H263_Base_EncoderContext::DisableAnnex (Annex annex)
     case K:
       // Annex K: 
       // does not work with eyeBeam
-      _context->flags &= ~CODEC_FLAG_H263P_SLICE_STRUCT;  
+//      _context->flags &= ~CODEC_FLAG_H263P_SLICE_STRUCT;  
       break;
     case J:
       // Annex J: Deblocking Filter
@@ -462,7 +477,7 @@ void H263_Base_EncoderContext::DisableAnnex (Annex annex)
     case S:
       // Annex S: Alternative INTER VLC mode
       // does not work with eyeBeam
-      _context->flags &= ~CODEC_FLAG_H263P_AIV;
+//      _context->flags &= ~CODEC_FLAG_H263P_AIV;
       break;
     case N:
     case P:
@@ -486,8 +501,11 @@ bool H263_Base_EncoderContext::OpenCodec()
   CODEC_TRACER(tracer, "GOP is " << _context->gop_size);
   CODEC_TRACER(tracer, "qmin set to " << _context->qmin);
   CODEC_TRACER(tracer, "qmax set to " << _context->qmax);
-  CODEC_TRACER(tracer, "mb_qmin set to " << _context->mb_qmin);
-  CODEC_TRACER(tracer, "mb_qmax set to " << _context->mb_qmax);
+//  CODEC_TRACER(tracer, "mb_qmin set to " << _context->mb_qmin);
+//  CODEC_TRACER(tracer, "mb_qmax set to " << _context->mb_qmax);
+  CODEC_TRACER(tracer, "qmin set to " << _context->qmin);
+  CODEC_TRACER(tracer, "qmax set to " << _context->qmax);
+
   CODEC_TRACER(tracer, "bit_rate set to " << _context->bit_rate);
   CODEC_TRACER(tracer, "bit_rate_tolerance set to " <<_context->bit_rate_tolerance);
   CODEC_TRACER(tracer, "rc_min_rate set to " << _context->rc_min_rate);
@@ -603,7 +621,7 @@ bool H263_RFC2190_EncoderContext::Open()
   _context->rtp_callback = &rtp_callback;
   _context->opaque = (H263_RFC2190_EncoderContext *)this; // used to separate out packets from different encode threads
 
-  _context->flags &= ~CODEC_FLAG_H263P_UMV;
+//  _context->flags &= ~CODEC_FLAG_H263P_UMV;
   _context->flags &= ~CODEC_FLAG_4MV;
 
  // _context->flags &= ~CODEC_FLAG_H263P_AIV;    // -?
@@ -721,6 +739,7 @@ int H263_RFC2190_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
   _inputFrame->data[1] = _inputFrame->data[0] + size;
   _inputFrame->data[2] = _inputFrame->data[1] + (size / 4);
   _inputFrame->pict_type = (flags && forceIFrame) ? FF_I_TYPE : 0;
+//  _inputFrame->pict_type = (flags && forceIFrame) ? AV_PICTURE_TYPE_I : AV_PICTURE_TYPE_NONE;
 
   currentMb = 0;
   currentBytes = 0;
@@ -930,6 +949,7 @@ int H263_RFC2429_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
   _inputFrame->data[1] = _inputFrame->data[0] + size;
   _inputFrame->data[2] = _inputFrame->data[1] + (size / 4);
   _inputFrame->pict_type = (flags && forceIFrame) ? FF_I_TYPE : 0;
+//  _inputFrame->pict_type = (flags && forceIFrame) ? AV_PICTURE_TYPE_I : AV_PICTURE_TYPE_NONE;
  
   _txH263PFrame->BeginNewFrame();
   _txH263PFrame->SetTimestamp(srcRTP.GetTimestamp());
@@ -2049,76 +2069,6 @@ static struct PluginCodec_Option const * const h263CIF4OptionTable[] = {
 /////////////////////////////////////////////////////////////////////////////
 
 static struct PluginCodec_Definition h263CodecDefn[] = {
-/*
-{ 
-  // All frame sizes (dynamic) encoder
-  PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
-  &licenseInfo,                       // license information
-
-  PluginCodec_MediaTypeVideo |        // audio codec
-  PluginCodec_RTPTypeShared |         // specified RTP type
-  PluginCodec_RTPTypeDynamic,         // specified RTP type
-
-  h263PDesc,                          // text decription
-  YUV420PDesc,                        // source format
-  h263PDesc,                          // destination format
-
-  h263POptionTable,                   // user data 
-
-  H263P_CLOCKRATE,                    // samples per second
-  H263P_BITRATE,                      // raw bits per second
-  20000,                              // nanoseconds per frame
-
-  CIF4_WIDTH,                         // frame width
-  CIF4_HEIGHT,                        // frame height
-  10,                                 // recommended frame rate
-  60,                                 // maximum frame rate
-  0,                                  // IANA RTP payload code
-  sdpH263P,                           // RTP payload name
-
-  create_encoder,                     // create codec function
-  destroy_encoder,                    // destroy codec
-  codec_encoder,                      // encode/decode
-  EncoderControls,                    // codec controls
-
-  PluginCodec_H323Codec_NoH323,    // h323CapabilityType 
-  NULL                                // h323CapabilityData
-},
-{ 
-  // All frame sizes (dynamic) decoder
-  PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
-  &licenseInfo,                       // license information
-
-  PluginCodec_MediaTypeVideo |        // audio codec
-  PluginCodec_RTPTypeShared |         // specified RTP type
-  PluginCodec_RTPTypeDynamic,         // specified RTP type
-
-  h263PDesc,                          // text decription
-  h263PDesc,                          // source format
-  YUV420PDesc,                        // destination format
-
-  h263POptionTable,                   // user data 
-
-  H263P_CLOCKRATE,                    // samples per second
-  H263P_BITRATE,                      // raw bits per second
-  20000,                              // nanoseconds per frame
-
-  CIF4_WIDTH,                         // frame width
-  CIF4_HEIGHT,                        // frame height
-  10,                                 // recommended frame rate
-  60,                                 // maximum frame rate
-  0,                                  // IANA RTP payload code
-  sdpH263P,                           // RTP payload name
-
-  create_decoder,                     // create codec function
-  destroy_decoder,                    // destroy codec
-  codec_decoder,                      // encode/decode
-  DecoderControls,                    // codec controls
-
-  PluginCodec_H323Codec_NoH323,    // h323CapabilityType 
-  NULL                                // h323CapabilityData
-},
-*/
   { 
     // QCIF only encoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
@@ -2372,12 +2322,6 @@ extern "C" {
 
   FFMPEGLibraryInstance.AvLogSetLevel(AV_LOG_DEBUG);
   FFMPEGLibraryInstance.AvLogSetCallback(&logCallbackFFMPEG);
-
-    //avcodec_init();
-    //avcodec_register_all();
-
-    //av_log_set_level(AV_LOG_FATAL);
-    //av_log_set_callback(&logCallbackFFMPEG);
 
     if (version < PLUGIN_CODEC_VERSION_OPTIONS) {
       *count = 0;

@@ -112,9 +112,9 @@ bool DynaLink::InternalOpen(const char * dir, const char *name)
     _hDLL = LoadLibrary(A2T(path));
   });
 # else
-  WITH_ALIGNED_STACK({  // must be called before using avcodec lib
+ // WITH_ALIGNED_STACK({  // must be called before using avcodec lib
     _hDLL = LoadLibrary(path);
-  });
+ // });
 # endif /* UNICODE */
 #else
   WITH_ALIGNED_STACK({  // must be called before using avcodec lib
@@ -198,23 +198,26 @@ FFMPEGLibrary::FFMPEGLibrary(CodecID codec)
 
 FFMPEGLibrary::~FFMPEGLibrary()
 {
+#ifdef USE_DLL_AVCODEC
   libAvcodec.Close();
   libAvutil.Close();
+#endif
 }
 
+#ifdef USE_DLL_AVCODEC
 #define CHECK_AVUTIL(name, func) \
       (seperateLibAvutil ? \
         libAvutil.GetFunction(name,  (DynaLink::Function &)func) : \
         libAvcodec.GetFunction(name, (DynaLink::Function &)func) \
-       ) \
-
+       )
+#endif
 
 bool FFMPEGLibrary::Load(int ver)
 {
   WaitAndSignal m(processLock);      
   if (IsLoaded())
     return true;
-
+#ifdef USE_DLL_AVCODEC
   bool seperateLibAvutil = false;
 
   if (libAvcodec.Open("avcodec-52") || libAvcodec.Open("avcodec-51"))
@@ -333,12 +336,12 @@ bool FFMPEGLibrary::Load(int ver)
   }
 
   Favcodec_set_dimensions = NULL;
-  //if (ver > 0) {
+  if (ver > 0) {
     if (!libAvcodec.GetFunction("avcodec_set_dimensions", (DynaLink::Function &)Favcodec_set_dimensions)) {
       TRACE (1, _codecString << "\tDYNA\tFailed to load avcodec_set_dimensions");
       return false;
     }
- // }
+  }
 
   if (!CHECK_AVUTIL("av_malloc", Favcodec_malloc)) {
     TRACE (1, _codecString << "\tDYNA\tFailed to load av_malloc");
@@ -404,8 +407,15 @@ bool FFMPEGLibrary::Load(int ver)
 
     if (FFCheckAlignment() != 0) {
       TRACE(1, _codecString << "\tDYNA\tff_check_alignment() reports failure - stack alignment is not correct");
-    }	    
+    }
+
   });
+
+#else
+
+    avcodec_register_all();
+
+#endif
 
   isLoadedOK = true;
   TRACE (4, _codecString << "\tDYNA\tSuccessfully loaded libavcodec library and verified functions");
@@ -415,141 +425,189 @@ bool FFMPEGLibrary::Load(int ver)
 
 AVCodec *FFMPEGLibrary::AvcodecFindEncoder(enum CodecID id)
 {
-//  char dummy[16];
 
+#ifdef USE_DLL_AVCODEC
   WITH_ALIGNED_STACK({
     AVCodec *res = Favcodec_find_encoder(id);
     return res;
   });
+#else
+    AVCodec *res = avcodec_find_encoder(id);
+    return res;
+#endif
 }
 
 AVCodec *FFMPEGLibrary::AvcodecFindDecoder(enum CodecID id)
 {
-//  char dummy[16];
 
   WaitAndSignal m(processLock);
 
+#ifdef USE_DLL_AVCODEC
   WITH_ALIGNED_STACK({
     AVCodec *res = Favcodec_find_decoder(id);
     return res;
   });
+#else
+    AVCodec *res = avcodec_find_decoder(id);
+    return res;
+#endif
 }
 
 AVCodecContext *FFMPEGLibrary::AvcodecAllocContext(void)
 {
-//  char dummy[16];
 
   WaitAndSignal m(processLock);
 
+#ifdef USE_DLL_AVCODEC
   WITH_ALIGNED_STACK({
     AVCodecContext *res = Favcodec_alloc_context();
     return res;
   });
+#else
+    AVCodecContext *res = avcodec_alloc_context();
+    return res;
+#endif
 }
 
 AVFrame *FFMPEGLibrary::AvcodecAllocFrame(void)
 {
-//  char dummy[16];
-
   WaitAndSignal m(processLock);
 
+#ifdef USE_DLL_AVCODEC
   WITH_ALIGNED_STACK({
     AVFrame *res = Favcodec_alloc_frame();
     return res;
-  });
+ });
+#else
+    AVFrame *res = avcodec_alloc_frame();
+    return res;
+#endif
+
 }
 
 int FFMPEGLibrary::AvcodecOpen(AVCodecContext *ctx, AVCodec *codec)
 {
-//  char dummy[16];
-
   WaitAndSignal m(processLock);
 
+#ifdef USE_DLL_AVCODEC
   WITH_ALIGNED_STACK({
     return Favcodec_open(ctx, codec);
   });
+#else
+   return avcodec_open(ctx, codec);
+#endif
 }
 
 int FFMPEGLibrary::AvcodecClose(AVCodecContext *ctx)
 {
-//  char dummy[16];
-
   WaitAndSignal m(processLock);
 
+#ifdef USE_DLL_AVCODEC
   WITH_ALIGNED_STACK({
     return Favcodec_close(ctx);
   });
+#else
+  return avcodec_close(ctx);
+#endif
 }
 
 int FFMPEGLibrary::AvcodecEncodeVideo(AVCodecContext *ctx, BYTE *buf, int buf_size, const AVFrame *pict)
 {
-//  char dummy[16];
-
+#ifdef USE_DLL_AVCODEC
   WITH_ALIGNED_STACK({
     int res = Favcodec_encode_video(ctx, buf, buf_size, pict);
-
     TRACE_UP(4, _codecString << "\tDYNA\tEncoded " << buf_size << " bytes of YUV420P data into " << res << " bytes");
     return res;
   });
+#else
+    int res = avcodec_encode_video(ctx, buf, buf_size, pict);
+    TRACE_UP(4, _codecString << "\tDYNA\tEncoded " << buf_size << " bytes of YUV420P data into " << res << " bytes");
+    return res;
+#endif
+
 }
 
 int FFMPEGLibrary::AvcodecDecodeVideo(AVCodecContext *ctx, AVFrame *pict, int *got_picture_ptr, BYTE *buf, int buf_size)
 {
-//  char dummy[16];
+int res=0;
+#if LIBAVCODEC_VERSION_MAJOR < 53
+    #ifdef USE_DLL_AVCODEC
+      WITH_ALIGNED_STACK({
+        res = Favcodec_decode_video(ctx, pict, got_picture_ptr, buf, buf_size);
+        TRACE_UP(4, _codecString << "\tDYNA\tDecoded video of " << res << " bytes, got_picture=" << *got_picture_ptr);
+      });
+    #else
+       res = avcodec_decode_video(ctx, pict, got_picture_ptr, buf, buf_size);
+    #endif
+#else
+     AVPacket pkt; 
+     av_init_packet(&pkt); 
+     pkt.data = (uint8_t*)buf; 
+     pkt.size = buf_size;
 
-  WITH_ALIGNED_STACK({
-    int res = Favcodec_decode_video(ctx, pict, got_picture_ptr, buf, buf_size);
-
-    TRACE_UP(4, _codecString << "\tDYNA\tDecoded video of " << res << " bytes, got_picture=" << *got_picture_ptr);
-    return res;
-  });
+    #ifdef USE_DLL_AVCODEC
+      WITH_ALIGNED_STACK({
+        res = Favcodec_decode_video(ctx, pict, got_picture_ptr, &pkt);
+      });
+    #else  
+      res = avcodec_decode_video2(ctx, pict, got_picture_ptr, &pkt);
+    #endif
+#endif
+   return res;
 }
 
 void FFMPEGLibrary::AvcodecFree(void * ptr)
 {
-//  char dummy[16];
-
   WaitAndSignal m(processLock);
 
+#ifdef USE_DLL_AVCODEC
   WITH_ALIGNED_STACK({
      Favcodec_free(ptr);
   });
+#else
+  av_free(ptr);
+#endif
 }
 
 void FFMPEGLibrary::AvSetDimensions(AVCodecContext *s, int width, int height)
 {
-//  char dummy[16];
-
   WaitAndSignal m(processLock);
 
+#ifdef USE_DLL_AVCODEC
   WITH_ALIGNED_STACK({
     Favcodec_set_dimensions(s, width, height);
   });
+#else
+    avcodec_set_dimensions(s, width, height);
+#endif
 }
   
 
 void FFMPEGLibrary::AvLogSetLevel(int level)
 {
-//  char dummy[16];
-
+#ifdef USE_DLL_AVCODEC
   WITH_ALIGNED_STACK({
     FAv_log_set_level(level);
   });
+#else
+    av_log_set_level(level);
+#endif
 }
 
 void FFMPEGLibrary::AvLogSetCallback(void (*callback)(void*, int, const char*, va_list))
 {
-//  char dummy[16];
-
+#ifdef USE_DLL_AVCODEC
   WITH_ALIGNED_STACK({
     FAv_log_set_callback(callback);
   });
+#else
+   av_log_set_callback(callback);
+#endif
 }
 
 int FFMPEGLibrary::FFCheckAlignment(void)
 {
-//  char dummy[16];
-
+#ifdef USE_DLL_AVCODEC
   if (Fff_check_alignment == NULL) {
     TRACE(1, _codecString << "\tDYNA\tff_check_alignment is not supported by libavcodec.so - skipping check");
     return 0;
@@ -557,6 +615,9 @@ int FFMPEGLibrary::FFCheckAlignment(void)
   else {
     return Fff_check_alignment();
   }
+#else
+  return 0;
+#endif
 }
 
 bool FFMPEGLibrary::IsLoaded()

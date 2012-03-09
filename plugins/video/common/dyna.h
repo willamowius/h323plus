@@ -112,11 +112,13 @@ class FFMPEGLibrary
     CriticalSection processLock;
 
   protected:
-    DynaLink libAvcodec;
-    DynaLink libAvutil;
 
     CodecID _codec;
     char _codecString [32];
+
+#ifdef USE_DLL_AVCODEC
+    DynaLink libAvcodec;
+    DynaLink libAvutil;
 
     void (*Favcodec_init)(void);
     AVCodec *Favcodec_h263_encoder;
@@ -145,7 +147,7 @@ class FFMPEGLibrary
     void (*FAv_log_set_level)(int level);
     void (*FAv_log_set_callback)(void (*callback)(void*, int, const char*, va_list));
     int (*Fff_check_alignment)(void);
-
+#endif
     bool isLoadedOK;
 };
 

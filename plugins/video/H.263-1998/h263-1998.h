@@ -49,7 +49,6 @@
 #ifndef __H263P_1998_H__
 #define __H263P_1998_H__ 1
 
-#include <codec/opalplugin.h>
 #include "h263pframe.h"
 #include "rfc2190.h"
 #include "critsect.h"

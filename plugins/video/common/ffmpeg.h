@@ -41,8 +41,6 @@
 #ifndef __FFMPEG_H__
 #define __FFMPEG_H__ 1
 
-#include <codec/opalplugin.h>
-
 #include <stdlib.h>
 #include <stdio.h>
 
