@@ -3594,7 +3594,7 @@ H323Capability * H323Capabilities::FindCapability(H323Capability::MainTypes main
 
 H323Capability * H323Capabilities::FindCapability(bool, const H245_ExtendedVideoCapability & gen) const
 {
-#ifdef H323_VIDEO
+#ifdef H323_H239
   H323Capability * newCap = NULL;
   for (PINDEX j=0; j < gen.m_videoCapability.GetSize(); ++j) {
     const H245_VideoCapability & vidCap = gen.m_videoCapability[j];
