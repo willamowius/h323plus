@@ -41,7 +41,7 @@
 #include <h323pdu.h>
 #include "h460/h460p.h"
 
-#ifdef H323_H460
+#ifdef H323_H460P
 
 static struct {
   unsigned msgid;
@@ -994,12 +994,26 @@ bool H323PresenceRemove::HandleIdentifier(bool opt)
 
 ///////////////////////////////////////////////////////////////////////
 
+H323PresenceInstruction::H323PresenceInstruction(Instruction instruct, const PString & alias, const PString & display)
+{
+    SetTag((unsigned)instruct);
+    H460P_PresenceAlias & palias = *this;
+    H225_AliasAddress & addr = palias.m_alias;
+    H323SetAliasAddress(alias, addr);
+
+    if (!display) {
+        palias.IncludeOptionalField(H460P_PresenceAlias::e_display);
+        H460P_PresenceDisplay & pdisp = palias.m_display;
+        pdisp.m_display.SetValue(display);
+    }
+}
+
 H323PresenceInstruction::H323PresenceInstruction(Instruction instruct, const PString & alias)
 {
     SetTag((unsigned)instruct);
-    H225_AliasAddress & addr = *this;
+    H460P_PresenceAlias & palias = *this;
+    H225_AliasAddress & addr = palias.m_alias;
     H323SetAliasAddress(alias, addr);
-
 }
 
 H323PresenceInstruction::Instruction H323PresenceInstruction::GetInstruction()
@@ -1007,10 +1021,25 @@ H323PresenceInstruction::Instruction H323PresenceInstruction::GetInstruction()
     return (Instruction)GetTag();
 }
 
+PString H323PresenceInstruction::GetAlias(PString & display) const
+{
+    const H460P_PresenceAlias & palias = *this;
+    if (palias.HasOptionalField(H460P_PresenceAlias::e_display)) {
+       const H460P_PresenceDisplay & pdisp = palias.m_display;
+       display = pdisp.m_display.GetValue();
+    } else {
+       display = PString();
+    }
+
+    const H225_AliasAddress & addr = palias.m_alias;
+    return H323GetAliasAddressString(addr);
+
+}
+
 PString H323PresenceInstruction::GetAlias() const
 {
-    const H225_AliasAddress & addr = *this;
-    return H323GetAliasAddressString(addr);
+    PString display = PString();
+    return GetAlias(display);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -1333,27 +1362,54 @@ void H323PresenceSubscription::SetSubscriptionDetails(const PString & subscribe,
     H323SetAliasAddress(subscribe, m_subscribe);
 
     for (PINDEX i=0; i< aliases.GetSize(); i++) {
-        H225_AliasAddress alias;
+        H460P_PresenceAlias pAlias;
+        H225_AliasAddress & alias = pAlias.m_alias;
         H323SetAliasAddress(aliases[i],alias);
         int size = m_aliases.GetSize();
         m_aliases.SetSize(size+1);
-        m_aliases[i] = alias;
+        m_aliases[i] = pAlias;
     }
 }
 
-void H323PresenceSubscription::SetSubscriptionDetails(const H225_AliasAddress & subscribe, const H225_AliasAddress & subscriber)
+void H323PresenceSubscription::SetSubscriptionDetails(const H225_AliasAddress & subscribe, const H225_AliasAddress & subscriber, const PString & display)
 {
     m_subscribe = subscribe;
+    H460P_PresenceAlias pAlias;
+    pAlias.m_alias = subscriber;
+    if (!display) {
+        pAlias.IncludeOptionalField(H460P_PresenceAlias::e_display);
+        H460P_PresenceDisplay & disp = pAlias.m_display;
+        disp.m_display.SetValue(display);
+    }
     int sz = m_aliases.GetSize();
     m_aliases.SetSize(sz+1);
-    m_aliases[sz] = subscriber;
+    m_aliases[sz] = pAlias;
+}
+
+void H323PresenceSubscription::GetSubscriberDetails(PresenceSubscriberList & aliases) const
+{
+
+    for (PINDEX i=0; i< m_aliases.GetSize(); i++) {
+        H460P_PresenceAlias & pAlias = m_aliases[i];
+        PString name, display = PString();
+        name = H323GetAliasAddressString(pAlias.m_alias);
+        if (pAlias.HasOptionalField(H460P_PresenceAlias::e_display)) {
+            H460P_PresenceDisplay & disp = pAlias.m_display;
+            display = disp.m_display.GetValue();
+        }
+
+        aliases.insert(pair<PString, PString>(name,display));
+    }
 }
 
 void H323PresenceSubscription::GetSubscriberDetails(PStringList & aliases) const
 {
-    for (PINDEX i=0; i< m_aliases.GetSize(); i++) {
-        PString a = H323GetAliasAddressString(m_aliases[i]);
-        aliases.AppendString(a);
+    PresenceSubscriberList slist;
+    GetSubscriberDetails(slist);
+
+    PresenceSubscriberList::const_iterator i;
+    for (i = slist.begin(); i != slist.end(); ++i) {
+        aliases.AppendString(i->first);
     }
 }
 

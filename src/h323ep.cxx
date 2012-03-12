@@ -2830,7 +2830,7 @@ PBoolean H323EndPoint::SetSoundChannelRecordDevice(const PString & name)
 PBoolean H323EndPoint::SetSoundChannelPlayDriver(const PString & name)
 {
   PPluginManager & pluginMgr = PPluginManager::GetPluginManager(); 
-  PStringList list = pluginMgr.GetPluginsProviding("PSoundChannel");
+  PStringList list = pluginMg2r.GetPluginsProviding("PSoundChannel");
   if (list.GetValuesIndex(name) == P_MAX_INDEX)
     return FALSE;
 
@@ -3369,7 +3369,19 @@ void H323EndPoint::PresenceSetInstruction(const PString & epalias, unsigned type
 	if (presenceHandler == NULL)
 		return;
 
-	presenceHandler->AddInstruction(epalias,(H323PresenceHandler::InstType)type,list,autoSend);
+    PString display = PString();
+    if (autoSend) {
+        int sz = localAliasNames.GetSize();
+        if (sz > 0) 
+           display = localAliasNames[sz-1];
+    }
+
+    PresenceInstructList instList;
+    for (PINDEX i=0; i < list.GetSize(); ++i) {
+        instList.insert(pair<PString, PString>(list[i],display));
+    }
+
+	presenceHandler->AddInstruction(epalias,(H323PresenceHandler::InstType)type,instList,autoSend);
 }
 
 void H323EndPoint::PresenceSendAuthorization(const OpalGloballyUniqueID & id, const PString & epalias,PBoolean approved, const PStringList & list)
@@ -3390,18 +3402,25 @@ void H323EndPoint::PresenceNotification(const PString & locAlias,
 						  << " " << display);
 }
 
-void H323EndPoint::PresenceInstruction(const PString & locAlias, unsigned type, const PString & subAlias)
+void H323EndPoint::PresenceInstruction(const PString & locAlias, unsigned type, const PString & subAlias, const PString & subDisplay)
 {
 	PTRACE(4,"EP\tReceived Gatekeeper Instruction to " 
 				<< H323PresenceInstruction::GetInstructionString(type) 
-				<< " " << subAlias);
+				<< " " << subAlias << " " << subDisplay);
 }
 
 void H323EndPoint::PresenceAuthorization(const OpalGloballyUniqueID & id,
 									const PString & locAlias,
-									const PStringList & Aliases)
+                                    const std::map<PString,PString> & Aliases)
 {
-	PTRACE(4,"EP\tReceived Presence Authorization " << id.AsString() << " from " << Aliases);
+    PStringStream s;
+
+    s << "EP\tReceived Presence Authorization " << id.AsString();
+    std::map<PString,PString>::const_iterator i;
+    for (i = Aliases.begin(); i != Aliases.end(); ++i) {
+       s << "\n from Alias " << i->first << " " << i->second;
+    }
+    PTRACE(4, s);
 }
 #endif  // H323_H460P
 

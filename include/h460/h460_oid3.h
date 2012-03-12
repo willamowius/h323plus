@@ -46,12 +46,15 @@
 
 // Must call the following
 #include <ptlib/plugin.h>
+#include <map>
 
 #if _MSC_VER
 #pragma once
 #endif 
 
 /////////////////////////////////////////////////////////////
+
+typedef std::map<PString,PString> PresenceInstructList;
 
 class H460_FeatureOID3;
 class H460PresenceHandler : public H323PresenceHandler
@@ -72,7 +75,7 @@ class H460PresenceHandler : public H323PresenceHandler
 
    void AddInstruction(const PString & epalias, 
 						H323PresenceHandler::InstType instType, 
-						const PStringList & subscribe,
+						const PresenceInstructList & subscribe,
                         PBoolean autoSend = true);
 
    void AddAuthorization(const OpalGloballyUniqueID id,
@@ -113,7 +116,7 @@ class H460PresenceHandler : public H323PresenceHandler
  	// Lists
 	PStringList PresenceSubscriptions;
 	PStringList PresenceBlockList;
-	list<H460P_PresenceFeature>   EndpointFeatures;
+    std::list<H460P_PresenceFeature>   EndpointFeatures;
 	localeInfo  EndpointLocale;
 
 	H225_ArrayOf_GenericData genericData;

@@ -33,31 +33,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.8  2010/02/24 03:00:00  shorne
- * Added generic data support to presence feature
- *
- * Revision 1.7  2010/01/20 04:23:08  shorne
- * Add ability to advertise supported H.460 features in presence
- *
- * Revision 1.6  2009/12/21 01:15:09  shorne
- * Further Presence Development
- *
- * Revision 1.5  2009/12/08 08:25:47  willamowius
- * gcc fixes for presence
- *
- * Revision 1.4  2009/12/08 04:05:14  shorne
- * Major update of presence system
- *
- * Revision 1.3  2009/11/17 11:01:28  shorne
- * Presence Support Update
- *
- * Revision 1.2  2008/02/21 00:04:33  shorne
- * fix variable naming issue on linux compile
- *
- * Revision 1.1  2008/01/29 04:38:12  shorne
- * completed Initial implementation
- *
+ * $Id$
  *
  *
  */
@@ -67,7 +43,7 @@
 
 #include "openh323buildopts.h"
 
-#ifdef H323_H460
+#ifdef H323_H460P
 
 #include <ptlib.h>
 #include <h460/h460pres.h>
@@ -75,6 +51,7 @@
 #include <transports.h>
 #include <list>
 #include <map>
+
 
 class H323PresenceNotification : public H460P_PresenceNotification
 {
@@ -132,6 +109,8 @@ class H323PresenceNotifications : public H460P_PresenceNotify
 	PStringList m_aliasList;
 };
 
+typedef std::map<PString,PString> PresenceSubscriberList;
+
 class H323PresenceSubscription : public H460P_PresenceSubscription
 {
 
@@ -141,7 +120,8 @@ public:
 
  // Sending Gatekeeper
 	void SetSubscriptionDetails(const PString & subscribe, const PStringList & aliases);
-	void SetSubscriptionDetails(const H225_AliasAddress & subscribe, const H225_AliasAddress & subscriber);
+	void SetSubscriptionDetails(const H225_AliasAddress & subscribe, const H225_AliasAddress & subscriber, const PString & display=PString());
+	void GetSubscriberDetails(PresenceSubscriberList & aliases) const;
 	void GetSubscriberDetails(PStringList & aliases) const;
 	PString GetSubscribed();
 
@@ -191,8 +171,11 @@ class H323PresenceInstruction  :  public H460P_PresenceInstruction
 	static PString GetInstructionString(unsigned instruct);
  
     H323PresenceInstruction(Instruction instruct, const PString & alias);
+    H323PresenceInstruction(Instruction instruct, const PString & alias, const PString & display);
+
 	Instruction GetInstruction();
-	PString GetAlias() const;
+    PString GetAlias() const;
+	PString GetAlias(PString & display) const;
 };
 
 class H323PresenceInstructions  : public H460P_PresenceInstruct
@@ -230,6 +213,7 @@ struct H323PresenceID
 	PBoolean								m_isSubscriber;
 	H225_AliasAddress						m_subscriber;
 	H225_AliasAddress						m_Alias;
+    PString                                 m_Display;
 	H323PresenceInstruction::Instruction	m_Status;
 	PBoolean								m_Active;
 	PTime									m_Updated;

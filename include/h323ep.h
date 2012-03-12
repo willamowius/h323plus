@@ -2015,13 +2015,14 @@ class H323EndPoint : public PObject
       */
     virtual void PresenceInstruction(const PString & locAlias,
                                     unsigned type, 
-                                    const PString & subAlias);
+                                    const PString & subAlias,
+                                    const PString & subDisplay);
 
     /** Received Request for authorization
       */
     virtual void PresenceAuthorization(const OpalGloballyUniqueID & id,
                                     const PString & locAlias,
-                                    const PStringList & Aliases);
+                                    const std::map<PString, PString> & Aliases);
 #endif
 
 #endif

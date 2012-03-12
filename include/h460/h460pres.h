@@ -16,7 +16,6 @@
 #include <ptclib/asner.h>
 
 #include "h225.h"
-#include "h235.h"
 
 
 //
@@ -168,10 +167,70 @@ class H460P_PresencePDU : public PASN_Choice
 
 
 //
+// PresenceDisplay
+//
+
+class H460P_PresenceDisplay : public PASN_Sequence
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_PresenceDisplay, PASN_Sequence);
+#endif
+  public:
+    H460P_PresenceDisplay(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    enum OptionalFields {
+      e_language
+    };
+
+    PASN_IA5String m_language;
+    PASN_BMPString m_display;
+
+    PINDEX GetDataLength() const;
+    PBoolean Decode(PASN_Stream & strm);
+    void Encode(PASN_Stream & strm) const;
+#ifndef PASN_NOPRINTON
+    void PrintOn(ostream & strm) const;
+#endif
+    Comparison Compare(const PObject & obj) const;
+    PObject * Clone() const;
+};
+
+
+//
+// PresenceAlias
+//
+
+class H460P_PresenceAlias : public PASN_Sequence
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_PresenceAlias, PASN_Sequence);
+#endif
+  public:
+    H460P_PresenceAlias(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    enum OptionalFields {
+      e_display
+    };
+
+    H225_AliasAddress m_alias;
+    H460P_PresenceDisplay m_display;
+
+    PINDEX GetDataLength() const;
+    PBoolean Decode(PASN_Stream & strm);
+    void Encode(PASN_Stream & strm) const;
+#ifndef PASN_NOPRINTON
+    void PrintOn(ostream & strm) const;
+#endif
+    Comparison Compare(const PObject & obj) const;
+    PObject * Clone() const;
+};
+
+
+//
 // PresenceInstruction
 //
 
-class H225_AliasAddress;
+class H460P_PresenceAlias;
 
 class H460P_PresenceInstruction : public PASN_Choice
 {
@@ -190,10 +249,10 @@ class H460P_PresenceInstruction : public PASN_Choice
     };
 
 #if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
-    operator H225_AliasAddress &() const;
+    operator H460P_PresenceAlias &() const;
 #else
-    operator H225_AliasAddress &();
-    operator const H225_AliasAddress &() const;
+    operator H460P_PresenceAlias &();
+    operator const H460P_PresenceAlias &() const;
 #endif
 
     PBoolean CreateObject();
@@ -219,36 +278,6 @@ class H460P_PresenceIdentifier : public PASN_Sequence
 
     H225_GloballyUniqueID m_guid;
     PASN_Boolean m_remove;
-
-    PINDEX GetDataLength() const;
-    PBoolean Decode(PASN_Stream & strm);
-    void Encode(PASN_Stream & strm) const;
-#ifndef PASN_NOPRINTON
-    void PrintOn(ostream & strm) const;
-#endif
-    Comparison Compare(const PObject & obj) const;
-    PObject * Clone() const;
-};
-
-
-//
-// PresenceDisplay
-//
-
-class H460P_PresenceDisplay : public PASN_Sequence
-{
-#ifndef PASN_LEANANDMEAN
-    PCLASSINFO(H460P_PresenceDisplay, PASN_Sequence);
-#endif
-  public:
-    H460P_PresenceDisplay(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
-
-    enum OptionalFields {
-      e_language
-    };
-
-    PASN_IA5String m_language;
-    PASN_BMPString m_display;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);
@@ -520,6 +549,26 @@ class H460P_ArrayOf_PresenceIdentifier : public PASN_Array
 
     PASN_Object * CreateObject() const;
     H460P_PresenceIdentifier & operator[](PINDEX i) const;
+    PObject * Clone() const;
+};
+
+
+//
+// ArrayOf_PresenceAlias
+//
+
+class H460P_PresenceAlias;
+
+class H460P_ArrayOf_PresenceAlias : public PASN_Array
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_ArrayOf_PresenceAlias, PASN_Array);
+#endif
+  public:
+    H460P_ArrayOf_PresenceAlias(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    PASN_Object * CreateObject() const;
+    H460P_PresenceAlias & operator[](PINDEX i) const;
     PObject * Clone() const;
 };
 
@@ -864,7 +913,7 @@ class H460P_PresenceSubscription : public PASN_Sequence
 
     H460P_PresenceIdentifier m_identifier;
     H225_AliasAddress m_subscribe;
-    H460P_ArrayOf_AliasAddress m_aliases;
+    H460P_ArrayOf_PresenceAlias m_aliases;
     PASN_Boolean m_approved;
     H225_TransportAddress m_rasAddress;
     H225_TimeToLive m_timeToLive;

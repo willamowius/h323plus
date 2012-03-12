@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2011/05/09 07:35:47  shorne
+ * updates for changes in PTLIB v2.11. The replacement of PDICTIONARY with H323Dictionary. Updates for the changes in the PNatMethod Class. Alteration in PFactory::Create, Remove redundent code and change change logging
+ *
  * Revision 1.7  2011/01/10 10:32:59  shorne
  * Don't set presence state if not a common feature
  *
@@ -205,15 +208,15 @@ void H460PresenceHandler::SetPresenceState(const PStringList & alias, unsigned l
 
 void H460PresenceHandler::AddInstruction(const PString & epalias, 
 						H323PresenceHandler::InstType instType, 
-						const PStringList & subscribe,
+						const PresenceInstructList & subscribe,
                         PBoolean autoSend)
 {
     H323PresenceInstructions instruct;
 	instruct.SetAlias(epalias);
-	for (PINDEX i=0; i< subscribe.GetSize(); i++) 
-	{
+    PresenceInstructList::const_iterator i;
+    for (i = subscribe.begin(); i != subscribe.end(); ++i) {
 		unsigned t = (int)instType;
-		H323PresenceInstruction inst((H323PresenceInstruction::Instruction)t, subscribe[i]);
+		H323PresenceInstruction inst((H323PresenceInstruction::Instruction)t, i->first,i->second);
 		instruct.Add(inst);
 	}
 
@@ -307,7 +310,7 @@ void H460PresenceHandler::PresenceRcvNotification(const H225_AliasAddress & addr
 
 void H460PresenceHandler::PresenceRcvAuthorization(const H225_AliasAddress & addr, const H323PresenceSubscription & subscript)
 {
-	PStringList aliases;
+	PresenceSubscriberList aliases;
 	subscript.GetSubscriberDetails(aliases);
 	OpalGloballyUniqueID id = subscript.GetSubscription();
 
@@ -317,10 +320,11 @@ void H460PresenceHandler::PresenceRcvAuthorization(const H225_AliasAddress & add
 	
 void H460PresenceHandler::PresenceRcvInstruction(const H225_AliasAddress & addr, const H323PresenceInstruction & instruct)
 {
-	PString alias = instruct.GetAlias();
+	PString display = PString();
+    PString alias = instruct.GetAlias(display);
 	unsigned i = instruct.GetTag();
 
-    ep.PresenceInstruction(H323GetAliasAddressString(addr),i, alias);
+    ep.PresenceInstruction(H323GetAliasAddressString(addr),i, alias, display);
 }
 
 void H460PresenceHandler::AddEndpointFeature(int feat)
@@ -351,7 +355,8 @@ void H460PresenceHandler::AddEndpointGenericData(const H225_GenericData & data)
 
 ///////////////////////////////////////////////////////////////////////
 
-static const char * OID_3 = "1.3.6.1.4.1.17090.0.3";            // Advertised Feature
+//static const char * OID_3 = "1.3.6.1.4.1.17090.0.3";            // Advertised Feature
+static const char * OID_3 = "1.3.6.1.4.1.17090.0.12";            // Advertised Feature v2
 static const char * OID3_ID = "1";
 
 ///////////////////////////////////////////////////////////////////////

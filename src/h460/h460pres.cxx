@@ -5,7 +5,7 @@
 //
 
 #ifdef P_USE_PRAGMA
-#pragma implementation "h460pres.h"
+#pragma implementation "H460pres.h"
 #endif
 
 #include <ptlib.h>
@@ -432,6 +432,179 @@ PObject * H460P_PresencePDU::Clone() const
 }
 
 
+//
+// PresenceDisplay
+//
+
+H460P_PresenceDisplay::H460P_PresenceDisplay(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Sequence(tag, tagClass, 1, FALSE, 0)
+{
+  m_display.SetConstraints(PASN_Object::FixedConstraint, 1, 128);
+}
+
+
+#ifndef PASN_NOPRINTON
+void H460P_PresenceDisplay::PrintOn(ostream & strm) const
+{
+  int indent = strm.precision() + 2;
+  strm << "{\n";
+  if (HasOptionalField(e_language))
+    strm << setw(indent+11) << "language = " << setprecision(indent) << m_language << '\n';
+  strm << setw(indent+10) << "display = " << setprecision(indent) << m_display << '\n';
+  strm << setw(indent-1) << setprecision(indent-2) << "}";
+}
+#endif
+
+
+PObject::Comparison H460P_PresenceDisplay::Compare(const PObject & obj) const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(&obj, H460P_PresenceDisplay), PInvalidCast);
+#endif
+  const H460P_PresenceDisplay & other = (const H460P_PresenceDisplay &)obj;
+
+  Comparison result;
+
+  if ((result = m_language.Compare(other.m_language)) != EqualTo)
+    return result;
+  if ((result = m_display.Compare(other.m_display)) != EqualTo)
+    return result;
+
+  return PASN_Sequence::Compare(other);
+}
+
+
+PINDEX H460P_PresenceDisplay::GetDataLength() const
+{
+  PINDEX length = 0;
+  if (HasOptionalField(e_language))
+    length += m_language.GetObjectLength();
+  length += m_display.GetObjectLength();
+  return length;
+}
+
+
+PBoolean H460P_PresenceDisplay::Decode(PASN_Stream & strm)
+{
+  if (!PreambleDecode(strm))
+    return FALSE;
+
+  if (HasOptionalField(e_language) && !m_language.Decode(strm))
+    return FALSE;
+  if (!m_display.Decode(strm))
+    return FALSE;
+
+  return UnknownExtensionsDecode(strm);
+}
+
+
+void H460P_PresenceDisplay::Encode(PASN_Stream & strm) const
+{
+  PreambleEncode(strm);
+
+  if (HasOptionalField(e_language))
+    m_language.Encode(strm);
+  m_display.Encode(strm);
+
+  UnknownExtensionsEncode(strm);
+}
+
+
+PObject * H460P_PresenceDisplay::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H460P_PresenceDisplay::Class()), PInvalidCast);
+#endif
+  return new H460P_PresenceDisplay(*this);
+}
+
+
+//
+// PresenceAlias
+//
+
+H460P_PresenceAlias::H460P_PresenceAlias(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Sequence(tag, tagClass, 1, TRUE, 0)
+{
+}
+
+
+#ifndef PASN_NOPRINTON
+void H460P_PresenceAlias::PrintOn(ostream & strm) const
+{
+  int indent = strm.precision() + 2;
+  strm << "{\n";
+  strm << setw(indent+8) << "alias = " << setprecision(indent) << m_alias << '\n';
+  if (HasOptionalField(e_display))
+    strm << setw(indent+10) << "display = " << setprecision(indent) << m_display << '\n';
+  strm << setw(indent-1) << setprecision(indent-2) << "}";
+}
+#endif
+
+
+PObject::Comparison H460P_PresenceAlias::Compare(const PObject & obj) const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(&obj, H460P_PresenceAlias), PInvalidCast);
+#endif
+  const H460P_PresenceAlias & other = (const H460P_PresenceAlias &)obj;
+
+  Comparison result;
+
+  if ((result = m_alias.Compare(other.m_alias)) != EqualTo)
+    return result;
+  if ((result = m_display.Compare(other.m_display)) != EqualTo)
+    return result;
+
+  return PASN_Sequence::Compare(other);
+}
+
+
+PINDEX H460P_PresenceAlias::GetDataLength() const
+{
+  PINDEX length = 0;
+  length += m_alias.GetObjectLength();
+  if (HasOptionalField(e_display))
+    length += m_display.GetObjectLength();
+  return length;
+}
+
+
+PBoolean H460P_PresenceAlias::Decode(PASN_Stream & strm)
+{
+  if (!PreambleDecode(strm))
+    return FALSE;
+
+  if (!m_alias.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_display) && !m_display.Decode(strm))
+    return FALSE;
+
+  return UnknownExtensionsDecode(strm);
+}
+
+
+void H460P_PresenceAlias::Encode(PASN_Stream & strm) const
+{
+  PreambleEncode(strm);
+
+  m_alias.Encode(strm);
+  if (HasOptionalField(e_display))
+    m_display.Encode(strm);
+
+  UnknownExtensionsEncode(strm);
+}
+
+
+PObject * H460P_PresenceAlias::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H460P_PresenceAlias::Class()), PInvalidCast);
+#endif
+  return new H460P_PresenceAlias(*this);
+}
+
+
 
 #ifndef PASN_NOPRINTON
 const static PASN_Names Names_H460P_PresenceInstruction[]={
@@ -457,24 +630,24 @@ H460P_PresenceInstruction::H460P_PresenceInstruction(unsigned tag, PASN_Object::
 
 
 #if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
-H460P_PresenceInstruction::operator H225_AliasAddress &() const
+H460P_PresenceInstruction::operator H460P_PresenceAlias &() const
 #else
-H460P_PresenceInstruction::operator H225_AliasAddress &()
+H460P_PresenceInstruction::operator H460P_PresenceAlias &()
 {
 #ifndef PASN_LEANANDMEAN
-  PAssert(PIsDescendant(PAssertNULL(choice), H225_AliasAddress), PInvalidCast);
+  PAssert(PIsDescendant(PAssertNULL(choice), H460P_PresenceAlias), PInvalidCast);
 #endif
-  return *(H225_AliasAddress *)choice;
+  return *(H460P_PresenceAlias *)choice;
 }
 
 
-H460P_PresenceInstruction::operator const H225_AliasAddress &() const
+H460P_PresenceInstruction::operator const H460P_PresenceAlias &() const
 #endif
 {
 #ifndef PASN_LEANANDMEAN
-  PAssert(PIsDescendant(PAssertNULL(choice), H225_AliasAddress), PInvalidCast);
+  PAssert(PIsDescendant(PAssertNULL(choice), H460P_PresenceAlias), PInvalidCast);
 #endif
-  return *(H225_AliasAddress *)choice;
+  return *(H460P_PresenceAlias *)choice;
 }
 
 
@@ -486,7 +659,7 @@ PBoolean H460P_PresenceInstruction::CreateObject()
     case e_block :
     case e_unblock :
     case e_pending :
-      choice = new H225_AliasAddress();
+      choice = new H460P_PresenceAlias();
       return TRUE;
   }
 
@@ -587,93 +760,6 @@ PObject * H460P_PresenceIdentifier::Clone() const
   PAssert(IsClass(H460P_PresenceIdentifier::Class()), PInvalidCast);
 #endif
   return new H460P_PresenceIdentifier(*this);
-}
-
-
-//
-// PresenceDisplay
-//
-
-H460P_PresenceDisplay::H460P_PresenceDisplay(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Sequence(tag, tagClass, 1, FALSE, 0)
-{
-  m_display.SetConstraints(PASN_Object::FixedConstraint, 1, 128);
-}
-
-
-#ifndef PASN_NOPRINTON
-void H460P_PresenceDisplay::PrintOn(ostream & strm) const
-{
-  int indent = strm.precision() + 2;
-  strm << "{\n";
-  if (HasOptionalField(e_language))
-    strm << setw(indent+11) << "language = " << setprecision(indent) << m_language << '\n';
-  strm << setw(indent+10) << "display = " << setprecision(indent) << m_display << '\n';
-  strm << setw(indent-1) << setprecision(indent-2) << "}";
-}
-#endif
-
-
-PObject::Comparison H460P_PresenceDisplay::Compare(const PObject & obj) const
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(PIsDescendant(&obj, H460P_PresenceDisplay), PInvalidCast);
-#endif
-  const H460P_PresenceDisplay & other = (const H460P_PresenceDisplay &)obj;
-
-  Comparison result;
-
-  if ((result = m_language.Compare(other.m_language)) != EqualTo)
-    return result;
-  if ((result = m_display.Compare(other.m_display)) != EqualTo)
-    return result;
-
-  return PASN_Sequence::Compare(other);
-}
-
-
-PINDEX H460P_PresenceDisplay::GetDataLength() const
-{
-  PINDEX length = 0;
-  if (HasOptionalField(e_language))
-    length += m_language.GetObjectLength();
-  length += m_display.GetObjectLength();
-  return length;
-}
-
-
-PBoolean H460P_PresenceDisplay::Decode(PASN_Stream & strm)
-{
-  if (!PreambleDecode(strm))
-    return FALSE;
-
-  if (HasOptionalField(e_language) && !m_language.Decode(strm))
-    return FALSE;
-  if (!m_display.Decode(strm))
-    return FALSE;
-
-  return UnknownExtensionsDecode(strm);
-}
-
-
-void H460P_PresenceDisplay::Encode(PASN_Stream & strm) const
-{
-  PreambleEncode(strm);
-
-  if (HasOptionalField(e_language))
-    m_language.Encode(strm);
-  m_display.Encode(strm);
-
-  UnknownExtensionsEncode(strm);
-}
-
-
-PObject * H460P_PresenceDisplay::Clone() const
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(IsClass(H460P_PresenceDisplay::Class()), PInvalidCast);
-#endif
-  return new H460P_PresenceDisplay(*this);
 }
 
 
@@ -1241,6 +1327,37 @@ PObject * H460P_ArrayOf_PresenceIdentifier::Clone() const
   PAssert(IsClass(H460P_ArrayOf_PresenceIdentifier::Class()), PInvalidCast);
 #endif
   return new H460P_ArrayOf_PresenceIdentifier(*this);
+}
+
+
+//
+// ArrayOf_PresenceAlias
+//
+
+H460P_ArrayOf_PresenceAlias::H460P_ArrayOf_PresenceAlias(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Array(tag, tagClass)
+{
+}
+
+
+PASN_Object * H460P_ArrayOf_PresenceAlias::CreateObject() const
+{
+  return new H460P_PresenceAlias;
+}
+
+
+H460P_PresenceAlias & H460P_ArrayOf_PresenceAlias::operator[](PINDEX i) const
+{
+  return (H460P_PresenceAlias &)array[i];
+}
+
+
+PObject * H460P_ArrayOf_PresenceAlias::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H460P_ArrayOf_PresenceAlias::Class()), PInvalidCast);
+#endif
+  return new H460P_ArrayOf_PresenceAlias(*this);
 }
 
 
