@@ -495,6 +495,7 @@ static PBoolean SetCodecControl(const PluginCodec_Definition * codec,
   return (*codecControls->control)(codec, context, SET_CODEC_OPTIONS_CONTROL, options, &optionsLen);
 }
 
+#if defined(H323_AUDIO_CODECS) || defined(H323_VIDEO)
 static PBoolean SetCodecControl(const PluginCodec_Definition * codec, 
                                                     void * context,
                                               const char * name,
@@ -503,6 +504,7 @@ static PBoolean SetCodecControl(const PluginCodec_Definition * codec,
 {
   return SetCodecControl(codec, context, name, parm, PString(PString::Signed, value));
 }
+#endif
 
 #ifdef H323_VIDEO
 
@@ -756,6 +758,7 @@ static void SetDefaultVideoOptions(OpalMediaFormat & mediaFormat)
 
 #endif  // #ifdef H323_VIDEO
 
+#if defined(H323_AUDIO_CODECS) || defined(H323_VIDEO)
 static void PopulateMediaFormatFromGenericData(OpalMediaFormat & mediaFormat, const PluginCodec_H323GenericCodecData * genericData)
 {
   const PluginCodec_H323GenericParameterDefinition *ptr = genericData->params;
@@ -811,6 +814,7 @@ static void PopulateMediaFormatFromGenericData(OpalMediaFormat & mediaFormat, co
     }
   }
 }
+#endif
 
 static PString CreateCodecName(PluginCodec_Definition * codec, PBoolean addSW)
 {
@@ -1063,7 +1067,7 @@ static H323CodecPluginCapabilityMapEntry videoMaps[] = {
 
 #endif  // H323_VIDEO
 
-
+#if defined(H323_AUDIO_CODECS) || defined(H323_VIDEO)
 static bool UpdatePluginOptions(const PluginCodec_Definition * codec, void * context, OpalMediaFormat & mediaFormat) {
 
     PluginCodec_ControlDefn * ctl = GetCodecControl(codec, SET_CODEC_OPTIONS_CONTROL);
@@ -1092,7 +1096,7 @@ static bool UpdatePluginOptions(const PluginCodec_Definition * codec, void * con
     }
 	return false;
 }
-
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -3032,7 +3036,7 @@ H323Codec * H323PluginCapabilityInfo::CreateCodec(const OpalMediaFormat & mediaF
 #endif  // NO_H323_AUDIO_CODECS
 
     case PluginCodec_MediaTypeAudioStreamed:
-#ifdef NO_H323_AUDIO_CODECS
+#ifndef H323_AUDIO_CODECS
       PTRACE(3, "H323PLUGIN\tAudio plugins disabled");
       return NULL;
 #else
@@ -3048,7 +3052,7 @@ H323Codec * H323PluginCapabilityInfo::CreateCodec(const OpalMediaFormat & mediaF
                                 bitsPerSample,
                                 codec);
       }
-#endif  // NO_H323_AUDIO_CODECS
+#endif  // H323_AUDIO_CODECS
 
     case PluginCodec_MediaTypeVideo:
 	case PluginCodec_MediaTypeExtended:
@@ -3884,6 +3888,7 @@ void H323PluginCodecManager::Reboot()
 
 OpalFactoryCodec * H323PluginCodecManager::CreateCodec(const PString & name)
 {
+#ifdef H323_AUDIO_CODECS
   // OpalPluginCodecFactory is not being loaded from Bootstrap 
   // This needs to be fixed - SH
   if (name =="L16|OpalG711ALaw64k") return new OpalG711ALaw64k_Encoder();
@@ -3902,6 +3907,7 @@ OpalFactoryCodec * H323PluginCodecManager::CreateCodec(const PString & name)
 		if (*r == name)
 			return OpalPluginCodecFactory::CreateInstance(*r);
 	}
+#endif
 	return NULL;
 }
 
