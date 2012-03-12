@@ -2830,7 +2830,7 @@ PBoolean H323EndPoint::SetSoundChannelRecordDevice(const PString & name)
 PBoolean H323EndPoint::SetSoundChannelPlayDriver(const PString & name)
 {
   PPluginManager & pluginMgr = PPluginManager::GetPluginManager(); 
-  PStringList list = pluginMg2r.GetPluginsProviding("PSoundChannel");
+  PStringList list = pluginMgr.GetPluginsProviding("PSoundChannel");
   if (list.GetValuesIndex(name) == P_MAX_INDEX)
     return FALSE;
 
