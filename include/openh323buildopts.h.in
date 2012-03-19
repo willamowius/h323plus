@@ -122,7 +122,10 @@
         #define H323_UPnP 1
     #endif
 #endif
-#undef H323_H460P	
+#undef H323_H460P
+#ifdef H323_H460P
+   #define H323_H460P_VER 2
+#endif
 #endif
 
 #undef H323_H501
@@ -135,6 +138,7 @@
 #ifdef H323_AEC
 #pragma include_alias(<speex/speex_echo.h>,            <@AEC_DIR@/include/speex/speex_echo.h>      )
 #pragma include_alias(<speex/speex_preprocess.h>,      <@AEC_DIR@/include/speex/speex_preprocess.h>)
+#pragma include_alias(<speex/speex_types.h>,           <@AEC_DIR@/include/speex/speex_types.h>     )
 #define H323_AEC_LIB "@AEC_DIR@/lib/libspeexdsp.lib"
 #endif
 
