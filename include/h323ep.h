@@ -1955,10 +1955,22 @@ class H323EndPoint : public PObject
       */
     H460PresenceHandler * GetPresenceHandler()  { return presenceHandler; }  
 
+	enum presenceStates {
+        e_preHidden,
+        e_preAvailable,
+        e_preOnline,
+        e_preOffline,
+        e_preOnCall,
+        e_preVoiceMail,
+        e_preNotAvailable,
+        e_preAway,
+        e_preGeneric
+	};
+
     /** Set the local Presence State. 
         Calling this will enable Presence in the endpoint
       */
-    void PresenceSetLocalState(const PStringList & alias, unsigned localstate, const PString & localdisplay = PString(), PBoolean updateOnly = false);
+    void PresenceSetLocalState(const PStringList & alias, presenceStates localstate, const PString & localdisplay = PString(), PBoolean updateOnly = false);
 
     enum presenceInstruction {
         e_subscribe,

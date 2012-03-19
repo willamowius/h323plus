@@ -3316,7 +3316,7 @@ PBoolean H323EndPoint::H46023IsEnabled()
 #endif  // H323_H46023
 
 #ifdef H323_H460P
-void H323EndPoint::PresenceSetLocalState(const PStringList & alias, unsigned localstate, const PString & localdisplay, PBoolean updateOnly)
+void H323EndPoint::PresenceSetLocalState(const PStringList & alias, presenceStates localstate, const PString & localdisplay, PBoolean updateOnly)
 {
     if (presenceHandler == NULL)
 		presenceHandler = new H460PresenceHandler(*this);

@@ -33,34 +33,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.8  2011/05/09 07:35:47  shorne
- * updates for changes in PTLIB v2.11. The replacement of PDICTIONARY with H323Dictionary. Updates for the changes in the PNatMethod Class. Alteration in PFactory::Create, Remove redundent code and change change logging
- *
- * Revision 1.7  2011/01/10 10:32:59  shorne
- * Don't set presence state if not a common feature
- *
- * Revision 1.6  2010/02/24 03:00:00  shorne
- * Added generic data support to presence feature
- *
- * Revision 1.5  2010/01/20 04:23:09  shorne
- * Add ability to advertise supported H.460 features in presence
- *
- * Revision 1.4  2009/12/21 01:15:09  shorne
- * Further Presence Development
- *
- * Revision 1.3  2009/12/08 08:25:47  willamowius
- * gcc fixes for presence
- *
- * Revision 1.2  2009/12/08 04:05:14  shorne
- * Major update of presence system
- *
- * Revision 1.1  2009/11/17 11:12:39  shorne
- * First Cut of Presence Feature
- *
- *
- *
- *
+ * $Id$
  *
  */
 
@@ -286,8 +259,8 @@ void H460PresenceHandler::OnInstructions(H323PresenceHandler::MsgType tag, const
 {
 	PINDEX j = 0;
 	switch (tag) {
-	  case H323PresenceHandler::e_Status:
-		  PTRACE(4,"OID3\tReceived Gatekeeper Status update!");
+	  case H323PresenceHandler::e_Instruct:
+		  PTRACE(4,"OID3\tReceived Gatekeeper Instruction!");
 		  for (j=0; j < instruction.GetSize(); j++) {
 		     PresenceRcvInstruction(addr,(const H323PresenceInstruction &)instruction[j]);
 		  }
