@@ -760,17 +760,29 @@ void PNatMethod_H46019::ReadThread(PThread &, INT)
   PUDPSocket & dataSocket = *GetMultiplexReadSocket(true);
   PUDPSocket & ctrlSocket = *GetMultiplexReadSocket(false);
 
+  int select = 0;
   while (!muxShutdown) { 
         
-      int select = PIPSocket::Select(dataSocket,ctrlSocket);
-      if (select == -1) {
-          socketRead = H46019MultiplexSocket::e_rtp;
-          socket = &dataSocket;
-      } else if (select == -2) {
-          socketRead = H46019MultiplexSocket::e_rtcp;
-          socket = &ctrlSocket;
-      } else
-         continue;
+      if (select == 0)
+         select = PIPSocket::Select(dataSocket,ctrlSocket);
+
+      switch (select) {
+        case -1:
+            socketRead = H46019MultiplexSocket::e_rtp;
+            socket = &dataSocket;
+            select = 0;
+            break;
+        case -2:
+        case -3:
+            socketRead = H46019MultiplexSocket::e_rtcp;
+            socket = &ctrlSocket;
+            if (select == -3) select = -1;  // loop back to read RTP socket
+            else select = 0;
+            break;
+        default:
+            select = 0;
+            continue;
+      }
 
          if (!muxShutdown && socket && socket->ReadFrom(buffer.GetPointer(),len,addr,port)) {
              int actRead = socket->GetLastReadCount();
