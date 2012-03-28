@@ -87,7 +87,6 @@ H235_DiffieHellman::H235_DiffieHellman(const BYTE * pData, PINDEX pSize,
 
 H235_DiffieHellman::H235_DiffieHellman(const H235_DiffieHellman & diffie)
 {
-   dh = NULL;
    dh = DHparams_dup(diffie);
 }
 
@@ -97,7 +96,6 @@ H235_DiffieHellman & H235_DiffieHellman::operator=(const H235_DiffieHellman & di
   if (dh != NULL)
     DH_free(dh);
    
-   dh = NULL;
    dh = DHparams_dup(diffie);
 
   return *this;
@@ -135,8 +133,8 @@ PBoolean H235_DiffieHellman::CreateParams()
 	if (i<0)
 		 i = -i;
 
-	if (i<0)
-		 i= 0;
+	if (i < 0)
+		 i = 0;
 
     if (i >= 0) {
     
@@ -217,7 +215,6 @@ void H235_DiffieHellman::Encode_P(PASN_BitString & p)
 	}
 
 	OPENSSL_free(data);
-
 }
 
 void H235_DiffieHellman::Decode_P(const PASN_BitString & p)
@@ -289,7 +286,6 @@ void H235_DiffieHellman::Encode_HalfKey(PASN_BitString & hk)
 	}
 
 	OPENSSL_free(data);
-
 }
 
 void H235_DiffieHellman::Decode_HalfKey(const PASN_BitString & hk)
@@ -463,9 +459,9 @@ PBoolean H2356_Authenticator::PrepareTokens(PASN_Array & clearTokens,
       if (m_dh && m_dh->GenerateHalfKey()) {
           clearToken.IncludeOptionalField(H235_ClearToken::e_dhkey);
           H235_DHset & dh = clearToken.m_dhkey;
-               m_dh->Encode_HalfKey(dh.m_halfkey);
-               m_dh->Encode_P(dh.m_modSize);
-               m_dh->Encode_G(dh.m_generator);
+          m_dh->Encode_HalfKey(dh.m_halfkey);
+          m_dh->Encode_P(dh.m_modSize);
+          m_dh->Encode_G(dh.m_generator);
       }
       i++;
   }
@@ -574,7 +570,6 @@ void H2356_Authenticator::Disable()
 
 void H2356_Authenticator::InitialiseSecurity()
 {
-  
   PString dhOID         = PString();
   int     lastKeyLength = 0;
   std::map<PString, H235_DiffieHellman*>::iterator i = m_dhLocalMap.begin();
