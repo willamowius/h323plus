@@ -114,15 +114,16 @@ H235Authenticator * H235Authenticator::CreateAuthenticatorByID(const PString & i
   PStringArray list = GetAuthenticatorList();
   for (PINDEX i=0; i < list.GetSize(); ++i) {
       Capabilities caps;
-      if (GetAuthenticatorCapabilities(list[i],&caps)) {
+      if (GetAuthenticatorCapabilities(list[i], &caps)) {
 	      for (std::list<Capability>::const_iterator r = caps.capabilityList.begin(); r != caps.capabilityList.end(); ++r)
-              if (PString(r->m_identifier) ==  identifier) {
+              if (PString(r->m_identifier) == identifier) {
                   found = true;
                   break;
               }
       }
-      if (found)
+      if (found) {
          return CreateAuthenticator(list[i]);
+      }
   }
   return NULL;
 }
@@ -471,7 +472,6 @@ H235Authenticator::ValidationResult
 #ifdef H323_H235
 PStringArray GetIdentifiers(const PASN_Array & clearTokens, const PASN_Array & cryptoTokens)
 {
-
  PStringArray ids;
 
   for (PINDEX i = 0; i < clearTokens.GetSize(); i++) {
@@ -506,17 +506,20 @@ PBoolean H235Authenticators::CreateAuthenticators(const PASN_Array & clearTokens
         return false;
     
     PStringArray identifiers = GetIdentifiers(clearTokens, cryptoTokens);
-    for (PINDEX i= 0; i<identifiers.GetSize(); ++i) {
+    for (PINDEX i = 0; i < identifiers.GetSize(); ++i) {
        PBoolean found = false;
-       for (PINDEX j=0; j< this->GetSize(); ++j) {
+       for (PINDEX j = 0; j < this->GetSize(); ++j) {
            H235Authenticator & auth = (*this)[j];
            if (auth.IsMatch(identifiers[i]))  {
                found = true;
                break; 
            }
        }
-       if (!found)
-         this->Append(H235Authenticator::CreateAuthenticatorByID(identifiers[i]));
+       if (!found) {
+         H235Authenticator * auth = H235Authenticator::CreateAuthenticatorByID(identifiers[i]);
+         if (auth)
+           this->Append(auth);
+       }
     }
     return true;
 }
