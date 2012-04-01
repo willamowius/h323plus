@@ -301,6 +301,13 @@ err2:
 
 int  H235Session::session_count=0;
 
+H235Session::H235Session(H235Context & context, H235_DiffieHellman & dh, const PString & algorithm)
+: m_dh(dh), m_algorithm(H2356_Authenticator::GetAlgFromOID(algorithm))
+  , m_context(context), m_ssl(NULL), m_session(NULL), m_isServer(false)
+  , m_isInitialised(false)
+{
+}
+
 H235Session::H235Session(H235Capabilities * caps, const PString & algorithm)
 : m_dh(*caps->GetDiffieHellMan()), m_algorithm(H2356_Authenticator::GetAlgFromOID(algorithm))
   , m_context(*caps->GetContext()), m_ssl(NULL), m_session(NULL), m_isServer(false)

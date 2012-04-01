@@ -55,8 +55,9 @@ public:
 
  /**@name Constructor */
   //@{
-    /** Create a SSL Session Context 
+    /** Create a SSL Session Context
      */
+    H235Session(H235Context & context, H235_DiffieHellman & dh, const PString & algorithm);
     H235Session(H235Capabilities * caps,  const PString & algorithm);
 
    /** Destroy the SSL Session Context
