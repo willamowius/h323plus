@@ -39,6 +39,9 @@
  *
  */
 
+#ifndef H2356_H
+#define H2356_H
+
 #include <ptlib.h>
 #include <ptlib/pluginmgr.h>
 #include <h235.h>
@@ -128,7 +131,7 @@ private:
 typedef H2356_Authenticator H235_AuthenticatorStd6;
 #if PTLIB_VER >= 2110
 #ifndef _WIN32_WCE
-   PPLUGIN_STATIC_LOAD(Std6,H235Authenticator);
+   PPLUGIN_STATIC_LOAD(Std6, H235Authenticator);
 #endif
 #endif
 
@@ -242,3 +245,6 @@ public:
 };
 
 #endif // H323_H235
+
+#endif // H2356_H
+

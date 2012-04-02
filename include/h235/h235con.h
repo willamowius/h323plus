@@ -38,6 +38,8 @@
  *
  */
 
+#ifndef H235CON_H
+#define H235CON_H
 
 struct ssl_st;
 struct ssl_ctx_st;
@@ -181,3 +183,6 @@ class H235Context : public PObject
     ssl_ctx_st *   m_context;		/// Context Container
 
 };
+
+#endif // H235CON_H
+
