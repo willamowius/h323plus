@@ -47,6 +47,7 @@ class RTP_DataFrame;
 class H235Context;
 class H235_DiffieHellman;
 class H235Capabilities;
+
 class H235Session : public  PObject
 {
 	 PCLASSINFO(H235Session, PObject);
