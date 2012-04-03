@@ -25,6 +25,8 @@
 
  */
 
+
+#ifndef _STATIC_LINK
 #include "h264pipe_win32.h"
 
 #ifdef _MSC_VER
@@ -368,3 +370,7 @@ H264EncCtx::ErrorMessage()
 
   return string;
 }
+
+#endif // 
+
+

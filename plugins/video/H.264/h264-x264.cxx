@@ -35,6 +35,23 @@
 
  */
 
+#ifdef _STATIC_LINK
+  #define OPAL_STATIC_CODEC 1
+  #ifdef _WIN32
+    #pragma comment(lib,"avcodec.lib")
+    #pragma comment(lib,"avutil.lib") 
+    #pragma comment(lib, "libx264.dll.a")
+  #endif
+#endif
+
+#define PLUGIN_CODEC_DLL_EXPORTS  1
+#include <codec/opalplugin.h>
+
+#ifndef OPAL_STATIC_CODEC
+#define USE_DLL_AVCODEC 1
+#endif
+
+
 #include "h264-x264.h"
 
 #include "plugin-config.h"
@@ -116,6 +133,8 @@ H264EncoderContext::H264EncoderContext()
   AddInputFormat(fmt720p);
   AddInputFormat(fmt4cif);
   AddInputFormat(fmtcif);
+
+  emphasisSpeed=false;
 }
 
 H264EncoderContext::~H264EncoderContext()
@@ -213,8 +232,11 @@ void H264EncoderContext::AddInputFormat(inputFormats & fmt)
     
 int H264EncoderContext::GetInputFormat(inputFormats & fmt)
 {
+    double minfps = minFPS;
+    if (emphasisSpeed) minfps = minSpeedFPS;  // Emphasis speed not quality. (Higher Framerate/Lower Framesize)
+
     for (std::list<inputFormats>::const_iterator r=videoInputFormats.begin(); r!=videoInputFormats.end(); ++r) {
-        if (r->mb <= maxMB && maxMBPS/r->mb > minFPS) {
+        if (r->mb <= maxMB && maxMBPS/r->mb > minfps) {
            fmt = *r;
            unsigned r = maxMBPS/fmt.mb + 1;
            if (fmt.r > r) fmt.r = r;
@@ -246,7 +268,18 @@ unsigned H264EncoderContext::GetMaxMBPS()
 
 void H264EncoderContext::SetMaxNALSize(unsigned size)
 {
-    H264EncCtxInstance.call(SET_MAX_NALSIZE, size);
+    if (size > 0 && size < 1400)
+       H264EncCtxInstance.call(SET_MAX_NALSIZE, size);
+}
+
+void H264EncoderContext::SetEmphasisSpeed(bool speed)
+{
+    emphasisSpeed = speed;
+}
+
+bool H264EncoderContext::GetEmphasisSpeed()
+{
+    return emphasisSpeed;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -258,6 +291,7 @@ H264DecoderContext::H264DecoderContext()
   _gotIFrame = false;
   _gotAGoodFrame = true; // false; //Force FastPictureUpdate on first frame
   _lastTimeStamp = 0;
+  _lastSeqNo = 0;
   _frameCounter = 0; 
   _frameAutoFPU = 0;
   _frameFPUInt = 300;  // Auto request IFrame every 300 frames (every 10 secs at 30 fps)
@@ -269,7 +303,7 @@ H264DecoderContext::H264DecoderContext()
     return;
   }
 
-  _context = FFMPEGLibraryInstance.AvcodecAllocContext();
+  _context = FFMPEGLibraryInstance.AvcodecAllocContext(_codec);
   if (_context == NULL) {
     TRACE(1, "H264\tDecoder\tFailed to allocate context for decoder");
     return;
@@ -284,10 +318,18 @@ H264DecoderContext::H264DecoderContext()
     _context->pix_fmt             = PIX_FMT_YUV420P;
     _context->skip_frame          = AVDISCARD_DEFAULT;
     _context->error_concealment   = FF_EC_GUESS_MVS; // | FF_EC_DEBLOCK;
+#if LIBAVCODEC_VERSION_MAJOR < 54
     _context->error_recognition   = FF_ER_CAREFUL;
+#else
+    _context->err_recognition   = 5;
+#endif
     _context->skip_loop_filter    = AVDISCARD_NONREF;
     _context->workaround_bugs     = FF_BUG_AUTODETECT;
+#if LIBAVCODEC_VERSION_MAJOR < 54
     _context->codec_type          = CODEC_TYPE_VIDEO;
+#else
+    _context->codec_type          = AVMEDIA_TYPE_VIDEO;
+#endif
     _context->codec_id            = CODEC_ID_H264;
     _context->thread_count        = 1; // using more than 1 thread causes race conditions
     _context->keyint_min          = 8;
@@ -340,6 +382,12 @@ int H264DecoderContext::DecodeFrames(const u_char * src, unsigned & srcLen, u_ch
     _gotAGoodFrame = false;
     return 1;
   }
+
+  //if (_lastSeqNo > 0) {
+  //    if (srcRTP.GetSequenceNumber() != _lastSeqNo+1) 
+  //         flags = requestIFrame;
+  //}
+  _lastSeqNo = srcRTP.GetSequenceNumber();
 
   if (srcRTP.GetMarker()==0)
   {
@@ -394,12 +442,14 @@ int H264DecoderContext::DecodeFrames(const u_char * src, unsigned & srcLen, u_ch
   }
 
   // Auto Fast Update Request. Don't trust the decoder. - SH
-  if (_frameAutoFPU == _frameFPUInt) {
-     TRACE(4, "H264\tDecoder\tAuto Request Fast Picture Update");
-     flags = requestIFrame;
-     _frameAutoFPU = 0;
-  } else
-     _frameAutoFPU++;
+  if (_frameFPUInt > 0) {
+      if (_frameAutoFPU == _frameFPUInt) {
+         TRACE(4, "H264\tDecoder\tAuto Request Fast Picture Update");
+         flags = requestIFrame;
+         _frameAutoFPU = 0;
+      } else
+         _frameAutoFPU++;
+  }
 
 
   TRACE_UP(4, "H264\tDecoder\tDecoded " << bytesDecoded << " bytes"<< ", Resolution: " << _context->width << "x" << _context->height);
@@ -1083,7 +1133,7 @@ static int encoder_set_options(
   unsigned cusMBPS = 0;   // Custom maximum MBPS
   unsigned cusMFS = 0;    // Custom maximum FrameSize
   unsigned staticMBPS = 0;  /// static macroblocks per sec
-  unsigned maxNALSize = 0;  /// max NAL Size
+  unsigned maxNALSize = H264_PAYLOAD_SIZE;  /// max NAL Size
   bool stdAspect = true;
 
   if (parm != NULL) {
@@ -1111,6 +1161,13 @@ static int encoder_set_options(
          context->SetMaxKeyFramePeriod (atoi(options[i+1]));
       if (STRCMPI(options[i], PLUGINCODEC_OPTION_TEMPORAL_SPATIAL_TRADE_OFF) == 0)
          context->SetTSTO (atoi(options[i+1]));
+      if (STRCMPI(options[i], PLUGINCODEC_OPTION_EMPHASIS_SPEED) == 0)  
+         context->SetEmphasisSpeed(atoi(options[i+1]));
+      if (STRCMPI(options[i], PLUGINCODEC_OPTION_MAX_PAYLOAD) == 0)
+          if (!maxNALSize || maxNALSize > (unsigned)atoi(options[i+1])) {
+                maxNALSize = atoi(options[i+1]);
+                context->SetMaxNALSize(maxNALSize);
+          }
       if (STRCMPI(options[i], PLUGINCODEC_OPTION_LEVEL) == 0)
          level = atoi(options[i+1]);
       if (STRCMPI(options[i], PLUGINCODEC_OPTION_CUSMBPS) == 0)
@@ -1163,10 +1220,6 @@ static int encoder_set_options(
 	  }
 	}
 
-    // If a custom max NAL size
-    if (maxNALSize > 500 && maxNALSize < 1400) 
-         context->SetMaxNALSize(maxNALSize);
-
 	// Write back the option list the changed information to the level
 	if (parm != NULL) {
 		char ** options = (char **)parm;
@@ -1182,6 +1235,8 @@ static int encoder_set_options(
 			 options[i+1] = num2str(frameWidth);
 		  if (STRCMPI(options[i], PLUGINCODEC_OPTION_LEVEL) == 0)
 			 options[i+1] = num2str(level);
+		  if (STRCMPI(options[i], PLUGINCODEC_OPTION_MAXNALSIZE) == 0)
+			 options[i+1] = num2str(maxNALSize);
 		}
 	}
 
@@ -1191,7 +1246,7 @@ static int encoder_set_options(
         context->SetProfileLevel(profile, constraints, h264level); 
 	    context->SetFrameHeight(frameHeight);
 	    context->SetFrameWidth(frameWidth);
-	    context->SetFrameRate(frameRate); 
+	    context->SetFrameRate(frameRate);
     } else {
         context->SetTargetBitrate((unsigned) (targetBitrate / 1000) );
         context->SetProfileLevel(profile, constraints, h264level); 

@@ -20,6 +20,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.6  2010/09/26 13:34:49  willamowius
+# don't warn about unused definitions
+#
 # Revision 1.5  2010/09/26 13:24:46  willamowius
 # fix comment
 #
@@ -92,9 +95,11 @@ DL_LIBS =@DL_LIBS@
 
 SHAREDDIR	= ./shared
 COMMONDIR	= ../common
+GPLDIR      = ./gpl
 PLUGINDIR	= ../../
 OBJDIR	= ./obj
 WIN32=@WIN32@
+STATICBUILD=no
 SUBDIRS		+= gpl
 
 BASENAME=h264
@@ -109,7 +114,13 @@ STDCCFLAGS	=@STDCCFLAGS@
 LDFLAGS		=@LDFLAGS@
 LIBAVCODEC_CFLAGS=@LIBAVCODEC_CFLAGS@
 
-EXTRACCFLAGS    +=  $(LIBAVCODEC_CFLAGS) -I$(COMMONDIR) -I$(PLUGINDIR) -DLIB_DIR='"$(libdir)"' -DVC_PLUGIN_DIR='"$(VC_PLUGIN_DIR)"' -DLICENCE_MPL
+EXTRACCFLAGS    +=  $(LIBAVCODEC_CFLAGS) -I$(COMMONDIR) -I$(PLUGINDIR) -DLIB_DIR='"$(libdir)"' -DVC_PLUGIN_DIR='"$(VC_PLUGIN_DIR)"' 
+
+ifeq ($(STATICBUILD),yes)
+  EXTRACCFLAGS    += -DX264_LINK_STATIC -D_STATIC_LINK
+else
+  EXTRACCFLAGS    += -DLICENCE_MPL
+
 
 STDCCFLAGS += -Wall -Wno-unused -Wformat -Wformat-security -Wreorder -fno-strict-aliasing
 
@@ -122,10 +133,16 @@ SRCS    += $(SHAREDDIR)/h264frame.cxx \
            $(COMMONDIR)/dyna.cxx \
            $(COMMONDIR)/trace.cxx
 
+ifeq ($(STATICBUILD),yes)
+SRCS    += h264pipe_static.cxx \
+SRC        $(GPLDIR)/enc-ctx.cxx
+
+else
 ifeq ($(WIN32),yes)
 SRCS    += h264pipe_win32.cxx
 else
 SRCS    += h264pipe_unix.cxx
+endif
 endif
 
 
