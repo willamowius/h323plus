@@ -52,8 +52,7 @@
 
 #define _CRT_SECURE_NO_DEPRECATE
 
-#include <openh323buildopts.h>
-#if defined(H323_STATIC_H263)
+#ifdef _STATIC_LINK
   #define OPAL_STATIC_CODEC 1
   #ifdef _WIN32
     #pragma comment(lib,"avcodec.lib")
