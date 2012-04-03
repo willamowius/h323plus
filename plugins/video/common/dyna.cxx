@@ -38,7 +38,9 @@
  *                 Matthias Schneider (ma30002000@yahoo.de)
  */
 
+#ifndef _STATIC_LINK
 #define USE_DLL_AVCODEC 1
+#endif
 
 #include "dyna.h"
 
