@@ -43,7 +43,7 @@ extern "C" {
 #endif
 #endif
 
-#if defined(_WIN32) 
+#if defined(_WIN32) || defined(_STATIC_LINK)
 /* to keep compatibility with old build */
 #define X264_LINK_STATIC 1
 #endif

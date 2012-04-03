@@ -400,7 +400,9 @@ int X264EncoderContext::EncodeFrames(const unsigned char * src, unsigned & srcLe
   }
   
   _txH264Frame->BeginNewFrame();
+#ifndef LICENCE_MPL
   _txH264Frame->SetFromFrame(NALs, numberOfNALs);
+#endif
   _txH264Frame->SetTimestamp(srcRTP.GetTimestamp());	// BUG: not set in srcRTP
   _frameCounter++; 
 
