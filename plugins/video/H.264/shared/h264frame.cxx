@@ -51,13 +51,14 @@
   #endif
 #endif
 
-#define MAX_NAL_BUFFER 150  // Max NAL Buffer at 1400 byte NAL Units
-#define MAX_FRAME_SIZE (MAX_NAL_BUFFER * 1400) + 12 // 150 Complete NAL Units plus header
+#define H264_PAYLOAD_SIZE      1400
+#define MAX_NAL_BUFFER 150  // Max NAL Buffer at H264_PAYLOAD_SIZE byte NAL Units
+#define MAX_FRAME_SIZE (MAX_NAL_BUFFER * H264_PAYLOAD_SIZE) + 12 // 150 Complete NAL Units plus header
 
 H264Frame::H264Frame ()
 {
   _timestamp = 0;
-  _maxPayloadSize = 1400;
+  _maxPayloadSize = H264_PAYLOAD_SIZE;
   _encodedFrame = (uint8_t*)malloc(MAX_FRAME_SIZE);
   _NALs = NULL;
   _numberOfNALsReserved = 0;
@@ -130,7 +131,6 @@ int x264_nal_encode(uint8_t *p_data, int *pi_data, int b_annexeb, x264_nal_t *na
 void H264Frame::SetMaxPayloadSize (uint16_t maxPayloadSize) {
 
    _maxPayloadSize = maxPayloadSize;
-   _nalBuffer = (MAX_FRAME_SIZE-12)/maxPayloadSize;
 
 }
 
