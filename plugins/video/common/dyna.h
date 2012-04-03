@@ -92,7 +92,7 @@ class FFMPEGLibrary
 
     AVCodec *AvcodecFindEncoder(enum CodecID id);
     AVCodec *AvcodecFindDecoder(enum CodecID id);
-    AVCodecContext *AvcodecAllocContext(void);
+    AVCodecContext *AvcodecAllocContext(AVCodec * codec = NULL);
     AVFrame *AvcodecAllocFrame(void);
     int AvcodecOpen(AVCodecContext *ctx, AVCodec *codec);
     int AvcodecClose(AVCodecContext *ctx);
@@ -131,12 +131,28 @@ class FFMPEGLibrary
     void (*Favcodec_register)(AVCodec *format);
     AVCodec *(*Favcodec_find_encoder)(enum CodecID id);
     AVCodec *(*Favcodec_find_decoder)(enum CodecID id);
+#if LIBAVCODEC_VERSION_MAJOR < 55
     AVCodecContext *(*Favcodec_alloc_context)(void);
+#else
+    AVCodecContext *(*Favcodec_alloc_context)(AVCodec * codec);
+#endif
     AVFrame *(*Favcodec_alloc_frame)(void);
+#if LIBAVCODEC_VERSION_MAJOR < 55
     int (*Favcodec_open)(AVCodecContext *ctx, AVCodec *codec);
+#else
+    int (*Favcodec_open)(AVCodecContext *avctx, AVCodec *codec, AVDictionary **options);
+#endif
     int (*Favcodec_close)(AVCodecContext *ctx);
+#if LIBAVCODEC_VERSION_MAJOR < 55
     int (*Favcodec_encode_video)(AVCodecContext *ctx, BYTE *buf, int buf_size, const AVFrame *pict);
+#else
+    int (*Favcodec_encode_video)(AVCodecContext *avctx, AVPacket *avpkt, const AVFrame *frame, int *got_packet_ptr);
+#endif
+#if LIBAVCODEC_VERSION_MAJOR < 53
     int (*Favcodec_decode_video)(AVCodecContext *ctx, AVFrame *pict, int *got_picture_ptr, BYTE *buf, int buf_size);
+#else
+    int (*Favcodec_decode_video)(AVCodecContext *ctx, AVFrame *pict, int *got_picture_ptr, const AVPacket *avpkt);
+#endif
     unsigned (*Favcodec_version)(void);
     unsigned (*Favcodec_build)(void);
     void (*Favcodec_set_dimensions)(AVCodecContext *ctx, int width, int height);

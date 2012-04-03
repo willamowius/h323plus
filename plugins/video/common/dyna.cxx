@@ -37,7 +37,11 @@
  *                 Craig Southeren (craigs@postincrement.com)
  *                 Matthias Schneider (ma30002000@yahoo.de)
  */
+
+#define USE_DLL_AVCODEC 1
+
 #include "dyna.h"
+
 
 #ifdef _MSC_VER
 #define snprintf _snprintf
@@ -305,35 +309,63 @@ bool FFMPEGLibrary::Load(int ver)
     return false;
   }
 
+#if LIBAVCODEC_VERSION_MAJOR < 55
   if (!libAvcodec.GetFunction("avcodec_alloc_context", (DynaLink::Function &)Favcodec_alloc_context)) {
     TRACE (1, _codecString << "\tDYNA\tFailed to load avcodec_alloc_context");
     return false;
   }
+#else
+  if (!libAvcodec.GetFunction("avcodec_alloc_context3", (DynaLink::Function &)Favcodec_alloc_context)) {
+    TRACE (1, _codecString << "\tDYNA\tFailed to load avcodec_alloc_context3");
+    return false;
+  }
+#endif
 
   if (!libAvcodec.GetFunction("avcodec_alloc_frame", (DynaLink::Function &)Favcodec_alloc_frame)) {
     TRACE (1, _codecString << "\tDYNA\tFailed to load avcodec_alloc_frame");
     return false;
   }
 
+#if LIBAVCODEC_VERSION_MAJOR < 55
   if (!libAvcodec.GetFunction("avcodec_open", (DynaLink::Function &)Favcodec_open)) {
     TRACE (1, _codecString << "\tDYNA\tFailed to load avcodec_open");
     return false;
   }
+#else
+  if (!libAvcodec.GetFunction("avcodec_open2", (DynaLink::Function &)Favcodec_open)) {
+    TRACE (1, _codecString << "\tDYNA\tFailed to load avcodec_open2");
+    return false;
+  }
+#endif
 
   if (!libAvcodec.GetFunction("avcodec_close", (DynaLink::Function &)Favcodec_close)) {
     TRACE (1, _codecString << "\tDYNA\tFailed to load avcodec_close");
     return false;
   }
 
+#if LIBAVCODEC_VERSION_MAJOR < 55
   if (!libAvcodec.GetFunction("avcodec_encode_video", (DynaLink::Function &)Favcodec_encode_video)) {
     TRACE (1, _codecString << "\tDYNA\tFailed to load avcodec_encode_video" );
     return false;
   }
+#else
+  if (!libAvcodec.GetFunction("avcodec_encode_video2", (DynaLink::Function &)Favcodec_encode_video)) {
+    TRACE (1, _codecString << "\tDYNA\tFailed to load avcodec_encode_video2" );
+    return false;
+  }
+#endif
 
+#if LIBAVCODEC_VERSION_MAJOR < 53
   if (!libAvcodec.GetFunction("avcodec_decode_video", (DynaLink::Function &)Favcodec_decode_video)) {
     TRACE (1, _codecString << "\tDYNA\tFailed to load avcodec_decode_video");
     return false;
   }
+#else
+  if (!libAvcodec.GetFunction("avcodec_decode_video2", (DynaLink::Function &)Favcodec_decode_video)) {
+    TRACE (1, _codecString << "\tDYNA\tFailed to load avcodec_decode_video2");
+    return false;
+  }
+#endif
 
   Favcodec_set_dimensions = NULL;
   if (ver > 0) {
@@ -453,18 +485,29 @@ AVCodec *FFMPEGLibrary::AvcodecFindDecoder(enum CodecID id)
 #endif
 }
 
-AVCodecContext *FFMPEGLibrary::AvcodecAllocContext(void)
+AVCodecContext *FFMPEGLibrary::AvcodecAllocContext(AVCodec * codec)
 {
 
   WaitAndSignal m(processLock);
 
 #ifdef USE_DLL_AVCODEC
-  WITH_ALIGNED_STACK({
-    AVCodecContext *res = Favcodec_alloc_context();
-    return res;
-  });
+    #if LIBAVCODEC_VERSION_MAJOR < 55
+      WITH_ALIGNED_STACK({
+        AVCodecContext *res = Favcodec_alloc_context();
+        return res;
+      });
+    #else
+      WITH_ALIGNED_STACK({
+        AVCodecContext *res = Favcodec_alloc_context(codec);
+        return res;
+      });
+    #endif
 #else
-    AVCodecContext *res = avcodec_alloc_context();
+    #if LIBAVCODEC_VERSION_MAJOR < 55
+        AVCodecContext *res = avcodec_alloc_context();
+    #else
+        AVCodecContext *res = avcodec_alloc_context3(codec);
+    #endif
     return res;
 #endif
 }
@@ -490,11 +533,23 @@ int FFMPEGLibrary::AvcodecOpen(AVCodecContext *ctx, AVCodec *codec)
   WaitAndSignal m(processLock);
 
 #ifdef USE_DLL_AVCODEC
-  WITH_ALIGNED_STACK({
-    return Favcodec_open(ctx, codec);
-  });
+    #if LIBAVCODEC_VERSION_MAJOR < 55
+      WITH_ALIGNED_STACK({
+        return Favcodec_open(ctx, codec);
+      });
+    #else
+      AVDictionary opts;
+      WITH_ALIGNED_STACK({
+       return Favcodec_open(ctx, codec, opts);
+      });
+    #endif
 #else
+#if LIBAVCODEC_VERSION_MAJOR < 55
    return avcodec_open(ctx, codec);
+#else
+   AVDictionary opts;
+   return avcodec_open2(ctx, codec, opts);
+#endif
 #endif
 }
 
@@ -513,16 +568,38 @@ int FFMPEGLibrary::AvcodecClose(AVCodecContext *ctx)
 
 int FFMPEGLibrary::AvcodecEncodeVideo(AVCodecContext *ctx, BYTE *buf, int buf_size, const AVFrame *pict)
 {
-#ifdef USE_DLL_AVCODEC
-  WITH_ALIGNED_STACK({
-    int res = Favcodec_encode_video(ctx, buf, buf_size, pict);
-    TRACE_UP(4, _codecString << "\tDYNA\tEncoded " << buf_size << " bytes of YUV420P data into " << res << " bytes");
-    return res;
-  });
+#if LIBAVCODEC_VERSION_MAJOR < 55
+    #ifdef USE_DLL_AVCODEC
+      WITH_ALIGNED_STACK({
+        int res = Favcodec_encode_video(ctx, buf, buf_size, pict);
+        TRACE_UP(4, _codecString << "\tDYNA\tEncoded " << buf_size << " bytes of YUV420P data into " << res << " bytes");
+        return res;
+      });
+    #else
+       int res = avcodec_encode_video(ctx, buf, buf_size, pict);
+       return res;
+    #endif
 #else
-    int res = avcodec_encode_video(ctx, buf, buf_size, pict);
-    TRACE_UP(4, _codecString << "\tDYNA\tEncoded " << buf_size << " bytes of YUV420P data into " << res << " bytes");
-    return res;
+     AVPacket pkt; 
+     av_init_packet(&pkt); 
+
+     int err = 0;
+     int gotFrame = 0;
+#ifdef USE_DLL_AVCODEC
+      WITH_ALIGNED_STACK({
+        err = Favcodec_encode_video(ctx, &pkt, pict, &gotFrame);
+      });
+#else
+        err = avcodec_encode_video2(ctx, &pkt, pict, &gotFrame);
+#endif
+
+   if (err || !gotFrame)
+       return 0;
+
+    memmove(buf, pkt.data, pkt.size);
+    TRACE_UP(4, _codecString << "\tDYNA\tEncoded " << buf_size << " bytes of YUV420P data into " << pkt.size << " bytes");
+    return pkt.size;
+
 #endif
 
 }
