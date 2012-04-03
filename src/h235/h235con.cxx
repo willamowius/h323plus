@@ -565,24 +565,28 @@ PBoolean H235Session::WriteFrame(RTP_DataFrame & frame)
 
 unsigned char * H235Session::RawRead(unsigned char * buffer,int & length)
 {
+    ssl3_record_st * rr;
+    ssl3_buffer_st * rb;
 
-ssl3_record_st * rr;
-ssl3_buffer_st * rb;
+    int type = SSL3_RT_APPLICATION_DATA;
+    int enc_err, statechg;
 
-int type = SSL3_RT_APPLICATION_DATA;
-int enc_err, statechg;
+    if ((m_ssl == NULL) || (m_ssl->s3 == NULL)) {
+        length = 0;
+        return NULL;
+    }
 
-if (m_ssl->s3->tmp.key_block == NULL) {
-  if (!m_ssl->method->ssl3_enc->setup_key_block(m_ssl)) {
+    if (m_ssl->s3->tmp.key_block == NULL) {
+        if (!m_ssl->method->ssl3_enc->setup_key_block(m_ssl)) {
             length = 0;
             return NULL;
-  }
-}
+        }
+    }
 
-if (m_isServer)
-   statechg = SSL3_CHANGE_CIPHER_SERVER_READ;
-else
-   statechg = SSL3_CHANGE_CIPHER_CLIENT_READ;
+    if (m_isServer)
+        statechg = SSL3_CHANGE_CIPHER_SERVER_READ;
+    else
+        statechg = SSL3_CHANGE_CIPHER_CLIENT_READ;
 
 
 if (!tls_change_cipher_state(m_ssl,statechg)) {
