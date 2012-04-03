@@ -265,7 +265,7 @@ bool H263_Base_EncoderContext::Open(CodecID codecId)
     return false;
   }
 
-  _context =  FFMPEGLibraryInstance.AvcodecAllocContext();
+  _context =  FFMPEGLibraryInstance.AvcodecAllocContext(_codec);
   if (_context == NULL) {
     TRACE_AND_LOG(tracer, 1, "Failed to allocate context for encoder");
     return false;
@@ -300,8 +300,11 @@ bool H263_Base_EncoderContext::Open(CodecID codecId)
   _context->flags |= CODEC_FLAG_PASS1;
 
   _context->error_concealment = 3;
+#if LIBAVCODEC_VERSION_MAJOR < 54
   _context->error_recognition = 5;
-//  _context->err_recognition = 5;
+#else
+  _context->err_recognition = 5;
+#endif
 
   // debugging flags
   if (Trace::CanTraceUserPlane(4)) {
@@ -738,8 +741,11 @@ int H263_RFC2190_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
 
   _inputFrame->data[1] = _inputFrame->data[0] + size;
   _inputFrame->data[2] = _inputFrame->data[1] + (size / 4);
+#if LIBAVCODEC_VERSION_MAJOR < 54
   _inputFrame->pict_type = (flags && forceIFrame) ? FF_I_TYPE : 0;
-//  _inputFrame->pict_type = (flags && forceIFrame) ? AV_PICTURE_TYPE_I : AV_PICTURE_TYPE_NONE;
+#else
+  _inputFrame->pict_type = (flags && forceIFrame) ? AV_PICTURE_TYPE_I : AV_PICTURE_TYPE_NONE;
+#endif
 
   currentMb = 0;
   currentBytes = 0;
@@ -948,8 +954,11 @@ int H263_RFC2429_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
   _inputFrame->data[0] = _inputFrameBuffer + FF_INPUT_BUFFER_PADDING_SIZE;
   _inputFrame->data[1] = _inputFrame->data[0] + size;
   _inputFrame->data[2] = _inputFrame->data[1] + (size / 4);
+#if LIBAVCODEC_VERSION_MAJOR < 54
   _inputFrame->pict_type = (flags && forceIFrame) ? FF_I_TYPE : 0;
-//  _inputFrame->pict_type = (flags && forceIFrame) ? AV_PICTURE_TYPE_I : AV_PICTURE_TYPE_NONE;
+#else
+  _inputFrame->pict_type = (flags && forceIFrame) ? AV_PICTURE_TYPE_I : AV_PICTURE_TYPE_NONE;
+#endif
  
   _txH263PFrame->BeginNewFrame();
   _txH263PFrame->SetTimestamp(srcRTP.GetTimestamp());
@@ -986,7 +995,7 @@ H263_Base_DecoderContext::H263_Base_DecoderContext(const char * _prefix)
     return;
   }
 
-  _context = FFMPEGLibraryInstance.AvcodecAllocContext();
+  _context = FFMPEGLibraryInstance.AvcodecAllocContext(_codec);
   if (_context == NULL) {
     TRACE_AND_LOG(tracer, 1, "Failed to allocate context for decoder");
     return;

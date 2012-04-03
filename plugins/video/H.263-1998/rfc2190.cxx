@@ -21,7 +21,7 @@
 
 #include <iostream>
 #include <string.h>
-#include <malloc.h>
+//#include <malloc.h>
 using namespace std;
 
 #include "rfc2190.h"
@@ -454,8 +454,8 @@ int RFC2190Depacketizer::SetPacket(const RTPFrame & inputFrame, bool & requestIF
   lastEbit = payload[0] & 0x07;
 
   // return 0 if no frame yet, return 1 if frame is available
-  if (!inputFrame.GetMarker()) 
-    return 0;
+//  if (!inputFrame.GetMarker()) 
+//    return 0;
 
   return 1;
 }
