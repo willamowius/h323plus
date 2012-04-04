@@ -396,9 +396,9 @@ static PFactory<H235Authenticator>::Worker<H2356_Authenticator> factoryH235AuthS
 H2356_Authenticator::H2356_Authenticator()
 : m_enabled(true), m_active(true), m_tokenState(e_clearNone)
 {
-    usage = MediaEncryption;
-    m_algOIDs.SetSize(0);
-    LoadDiffieHellmanMap(m_dhLocalMap);
+  usage = MediaEncryption;
+  m_algOIDs.SetSize(0);
+  LoadDiffieHellmanMap(m_dhLocalMap);
 }
 
 H2356_Authenticator::~H2356_Authenticator()
@@ -447,11 +447,10 @@ PBoolean H2356_Authenticator::PrepareTokens(PASN_Array & clearTokens,
     return FALSE;
 
   H225_ArrayOf_ClearToken & tokens = (H225_ArrayOf_ClearToken &)clearTokens;
-  int sz = 0;
 
   std::map<PString, H235_DiffieHellman*>::iterator i = m_dhLocalMap.begin();
   while (i != m_dhLocalMap.end()) {
-      sz = tokens.GetSize();
+      int sz = tokens.GetSize();
       tokens.SetSize(sz+1);
       H235_ClearToken & clearToken = tokens[sz];
       clearToken.m_tokenOID = i->first;
@@ -570,8 +569,8 @@ void H2356_Authenticator::Disable()
 
 void H2356_Authenticator::InitialiseSecurity()
 {
-  PString dhOID         = PString();
-  int     lastKeyLength = 0;
+  PString dhOID;
+  int lastKeyLength = 0;
   std::map<PString, H235_DiffieHellman*>::iterator i = m_dhLocalMap.begin();
   while (i != m_dhLocalMap.end()) {
       if (i->second->GetKeyLength() > lastKeyLength) {
@@ -603,41 +602,40 @@ void H2356_Authenticator::InitialiseSecurity()
   }
 }
 
-bool H2356_Authenticator::GetMediaSessionInfo(PString & sslAlgorithm, H235_DiffieHellman * key)
+H235_DiffieHellman * H2356_Authenticator::GetMediaSessionInfo(PString & sslAlgorithm)
 {
-  InitialiseSecurity();  // TODO: why is this done again for every session ?
+  InitialiseSecurity();
 
   if (m_algOIDs.GetSize() == 0) {
       PTRACE(1, "H235\tNo algorithms available");
-      return false;
+      return NULL;
   }
 
-  std::map<PString, H235_DiffieHellman*>::const_iterator l = m_dhLocalMap.find(m_algOIDs[0]);
+  PString DhOID = GetDhOIDFromAlg(m_algOIDs[0]);
+  std::map<PString, H235_DiffieHellman*>::const_iterator l = m_dhLocalMap.find(DhOID);
   if (l != m_dhLocalMap.end()) {
-     key = l->second;
      sslAlgorithm = GetAlgFromOID(m_algOIDs[0]);
-     return true;
+     return l->second;
   }
-  PTRACE(1, "H235\tAlgorithm " << m_algOIDs[0] << " not found in local map");
-  return false;
+  return NULL;
 }
 
 PBoolean H2356_Authenticator::GetAlgorithms(PStringList & algorithms) const
 {
-    algorithms = m_algOIDs;
-    return (m_algOIDs.GetSize() > 0);
+  algorithms = m_algOIDs;
+  return (m_algOIDs.GetSize() > 0);
 }
 
 PBoolean H2356_Authenticator::GetAlgorithmDetails(const PString & algorithm, PString & sslName, PString & description)
 {
-      for (PINDEX i=0; i<PARRAYSIZE(H235_Encryptions); ++i) {
-          if (PString(H235_Encryptions[i].algorithmOID) == algorithm) {
-               sslName     = H235_Encryptions[i].sslDesc;
-               description = H235_Encryptions[i].desc;
-               return true;
-          }
-      }
-      return false;
+  for (PINDEX i=0; i<PARRAYSIZE(H235_Encryptions); ++i) {
+    if (PString(H235_Encryptions[i].algorithmOID) == algorithm) {
+      sslName     = H235_Encryptions[i].sslDesc;
+      description = H235_Encryptions[i].desc;
+      return true;
+    }
+  }
+  return false;
 }
 
 PString H2356_Authenticator::GetAlgFromOID(const PString & oid)
@@ -646,8 +644,20 @@ PString H2356_Authenticator::GetAlgFromOID(const PString & oid)
         return PString();
 
     for (PINDEX i = 0; i < PARRAYSIZE(H235_Encryptions); ++i) {
-        if (PString(H235_Encryptions[i].algorithmOID) ==  oid)
+        if (PString(H235_Encryptions[i].algorithmOID) == oid)
             return H235_Encryptions[i].sslDesc;
+    }
+    return PString();
+}
+
+PString H2356_Authenticator::GetDhOIDFromAlg(const PString & alg)
+{
+    if (alg.IsEmpty())
+        return PString();
+
+    for (PINDEX i = 0; i < PARRAYSIZE(H235_Algorithms); ++i) {
+        if (PString(H235_Algorithms[i].algorithm) == alg)
+            return H235_Algorithms[i].DHparameters;
     }
     return PString();
 }

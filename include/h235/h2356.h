@@ -52,6 +52,7 @@
 #pragma once
 
 class H235_DiffieHellman;
+
 class H2356_Authenticator : public H235Authenticator
 {
     PCLASSINFO(H2356_Authenticator, H235Authenticator);
@@ -108,9 +109,13 @@ class H2356_Authenticator : public H235Authenticator
     virtual PBoolean GetAlgorithms(PStringList & algorithms) const;
     virtual PBoolean GetAlgorithmDetails(const PString & algorithm, PString & sslName, PString & description);
 
+    // get sslName for algorithm OID
     static PString GetAlgFromOID(const PString & oid);
+    // get DH token OID for algorithm OID
+    static PString GetDhOIDFromAlg(const PString & alg);
 
-    virtual PBoolean GetMediaSessionInfo(PString & sslAlgorithm, H235_DiffieHellman * key);
+    // get the sslAlgorithm and DH token to create a session
+    virtual H235_DiffieHellman * GetMediaSessionInfo(PString & sslAlgorithm);
 
 protected:
     void InitialiseSecurity();
