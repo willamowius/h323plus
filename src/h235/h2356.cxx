@@ -603,6 +603,24 @@ void H2356_Authenticator::InitialiseSecurity()
   }
 }
 
+bool H2356_Authenticator::GetMediaSessionInfo(PString & sslAlgorithm, H235_DiffieHellman * key)
+{
+  InitialiseSecurity();
+
+  if (m_algOIDs.GetSize() == 0)
+      return false;
+
+  sslAlgorithm = GetAlgFromOID(m_algOIDs[0]);
+
+  std::map<PString, H235_DiffieHellman*>::iterator l = m_dhLocalMap.find(m_algOIDs[0]);
+  
+  if (l != m_dhLocalMap.end()) {
+     key = l->second;
+     sslAlgorithm = GetAlgFromOID(m_algOIDs[0]);
+  }
+  return false;
+}
+
 PBoolean H2356_Authenticator::GetAlgorithms(PStringList & algorithms) const
 {
     algorithms = m_algOIDs;

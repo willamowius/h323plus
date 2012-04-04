@@ -110,6 +110,8 @@ class H2356_Authenticator : public H235Authenticator
 
     static PString GetAlgFromOID(const PString & oid);
 
+    virtual PBoolean GetMediaSessionInfo(PString & sslAlgorithm, H235_DiffieHellman * key);
+
 protected:
     void InitialiseSecurity();
 

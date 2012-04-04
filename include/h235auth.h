@@ -55,6 +55,9 @@ class PSSLCertificate;
 /** This abtract class embodies an H.235 authentication mechanism.
     NOTE: descendants must have a Clone() function for correct operation.
 */
+#ifdef H323_H235
+class H235_DiffieHellman;
+#endif
 class H235Authenticator : public PObject
 {
     PCLASSINFO(H235Authenticator, PObject);
@@ -87,6 +90,7 @@ class H235Authenticator : public PObject
                                                 Capabilities * caps, 
                                                 PPluginManager * pluginMgr = NULL);
 
+    virtual PBoolean GetMediaSessionInfo(PString & sslAlgorithm, H235_DiffieHellman * key);
 #endif
 
     virtual const char * GetName() const = 0;
@@ -261,6 +265,7 @@ PDECLARE_LIST(H235Authenticators, H235Authenticator)
     PBoolean SupportsEncryption() const;
     PBoolean GetAlgorithms(PStringList & algorithms) const;
     PBoolean GetAlgorithmDetails(const PString & algorithm, PString & sslName, PString & description);
+    PBoolean GetMediaSessionInfo(PString & sslAlgorithm, H235_DiffieHellman * key);
  protected:
     void CreateAuthenticatorsByID(const PStringArray & identifiers);
 #endif
