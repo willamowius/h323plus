@@ -605,19 +605,20 @@ void H2356_Authenticator::InitialiseSecurity()
 
 bool H2356_Authenticator::GetMediaSessionInfo(PString & sslAlgorithm, H235_DiffieHellman * key)
 {
-  InitialiseSecurity();
+  InitialiseSecurity();  // TODO: why is this done again for every session ?
 
-  if (m_algOIDs.GetSize() == 0)
+  if (m_algOIDs.GetSize() == 0) {
+      PTRACE(1, "H235\tNo algorithms available");
       return false;
+  }
 
-  sslAlgorithm = GetAlgFromOID(m_algOIDs[0]);
-
-  std::map<PString, H235_DiffieHellman*>::iterator l = m_dhLocalMap.find(m_algOIDs[0]);
-  
+  std::map<PString, H235_DiffieHellman*>::const_iterator l = m_dhLocalMap.find(m_algOIDs[0]);
   if (l != m_dhLocalMap.end()) {
      key = l->second;
      sslAlgorithm = GetAlgFromOID(m_algOIDs[0]);
+     return true;
   }
+  PTRACE(1, "H235\tAlgorithm " << m_algOIDs[0] << " not found in local map");
   return false;
 }
 
