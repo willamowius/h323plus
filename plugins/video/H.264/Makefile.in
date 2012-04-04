@@ -20,6 +20,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.7  2012/04/03 18:14:44  shorne
+# Static codec loading. Added VGA definition(disabled) Added EmphasisSpeed Added changing NAL Size
+#
 # Revision 1.6  2010/09/26 13:34:49  willamowius
 # don't warn about unused definitions
 #
@@ -120,6 +123,7 @@ ifeq ($(STATICBUILD),yes)
   EXTRACCFLAGS    += -DX264_LINK_STATIC -D_STATIC_LINK
 else
   EXTRACCFLAGS    += -DLICENCE_MPL
+endif
 
 
 STDCCFLAGS += -Wall -Wno-unused -Wformat -Wformat-security -Wreorder -fno-strict-aliasing
