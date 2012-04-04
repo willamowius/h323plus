@@ -399,6 +399,7 @@ H2356_Authenticator::H2356_Authenticator()
   usage = MediaEncryption;
   m_algOIDs.SetSize(0);
   LoadDiffieHellmanMap(m_dhLocalMap);
+  InitialiseSecurity(); // make sure m_algOIDs gets filled
 }
 
 H2356_Authenticator::~H2356_Authenticator()
@@ -573,7 +574,7 @@ void H2356_Authenticator::InitialiseSecurity()
   int lastKeyLength = 0;
   std::map<PString, H235_DiffieHellman*>::iterator i = m_dhLocalMap.begin();
   while (i != m_dhLocalMap.end()) {
-      if (i->second->GetKeyLength() > lastKeyLength) {
+      if (i->second && i->second->GetKeyLength() > lastKeyLength) {
           dhOID = i->first;
           lastKeyLength = i->second->GetKeyLength();
       }
