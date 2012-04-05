@@ -128,9 +128,9 @@ H235Authenticator * H235Authenticator::CreateAuthenticatorByID(const PString & i
   return NULL;
 }
 
-PBoolean H235Authenticator::GetMediaSessionInfo(PString & /*sslAlgorithm*/, H235_DiffieHellman * /*key*/)
+H235_DiffieHellman * H235Authenticator::GetMediaSessionInfo(PString & /*sslAlgorithm*/)
 {
-    return false;
+    return NULL;
 }
 #endif
 
@@ -588,16 +588,17 @@ PBoolean H235Authenticators::GetAlgorithmDetails(const PString & algorithm, PStr
    return false;
 }
 
-PBoolean H235Authenticators::GetMediaSessionInfo(PString & sslAlgorithm, H235_DiffieHellman * key)
+H235_DiffieHellman * H235Authenticators::GetMediaSessionInfo(PString & sslAlgorithm)
 {
    for (PINDEX j=0; j< this->GetSize(); ++j) {
        H235Authenticator & auth = (*this)[j];
        if (auth.GetApplication() == H235Authenticator::MediaEncryption)  {
-           if (auth.GetMediaSessionInfo(sslAlgorithm, key)) 
-              return true;
+           H235_DiffieHellman * key = auth.GetMediaSessionInfo(sslAlgorithm);
+           if (key != NULL) 
+              return key;
        }
    }
-   return false;
+   return NULL;
 }
 
 #endif
