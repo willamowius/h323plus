@@ -651,6 +651,18 @@ PString H2356_Authenticator::GetAlgFromOID(const PString & oid)
     return PString();
 }
 
+PString H2356_Authenticator::GetOIDFromAlg(const PString & sslName)
+{
+    if (sslName.IsEmpty())
+        return PString();
+
+    for (PINDEX i = 0; i < PARRAYSIZE(H235_Encryptions); ++i) {
+        if (H235_Encryptions[i].sslDesc == sslName)
+            return PString(H235_Encryptions[i].algorithmOID);
+    }
+    return PString();
+}
+
 PString H2356_Authenticator::GetDhOIDFromAlg(const PString & alg)
 {
     if (alg.IsEmpty())

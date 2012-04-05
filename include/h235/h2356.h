@@ -111,6 +111,8 @@ class H2356_Authenticator : public H235Authenticator
 
     // get sslName for algorithm OID
     static PString GetAlgFromOID(const PString & oid);
+    // get H.235 OID for sslName
+    static PString GetOIDFromAlg(const PString & sslName);
     // get DH token OID for algorithm OID
     static PString GetDhOIDFromAlg(const PString & alg);
 
