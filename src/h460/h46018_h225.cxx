@@ -69,12 +69,19 @@ class H46018TransportThread : public PThread
 
    public:
     H46018TransportThread(H323EndPoint & endpoint, H46018Transport * transport);
+    ~H46018TransportThread();
+
+    void ConnectionEstablished();
 
    protected:
     void Main();
 
     PBoolean    isConnected;
     H46018Transport * transport;
+
+    PDECLARE_NOTIFIER(PTimer, H46018TransportThread, KeepAlive);
+    PTimer    m_keepAlive;
+    unsigned  m_keepAliveInterval;
 
     PTime   lastupdate;
 
@@ -88,9 +95,15 @@ H46018TransportThread::H46018TransportThread(H323EndPoint & ep, H46018Transport 
 {  
 
     isConnected = false;
+    m_keepAliveInterval = 19;
 
     // Start the Thread
     Resume();
+}
+
+H46018TransportThread::~H46018TransportThread()
+{
+    m_keepAlive.Stop();
 }
 
 void H46018TransportThread::Main()
@@ -109,6 +122,34 @@ void H46018TransportThread::Main()
     }
 
     PTRACE(3, "H46018\tTransport Closed");
+}
+
+void H46018TransportThread::ConnectionEstablished()
+{
+     PTRACE(3, "H46019\tStarted KeepAlive");
+     m_keepAlive.SetNotifier(PCREATE_NOTIFIER(KeepAlive));
+     m_keepAlive.RunContinuous(m_keepAliveInterval * 1000);
+}
+
+void H46018TransportThread::KeepAlive(PTimer &, INT)
+{
+  // Send empty RFC1006 TPKT
+  int len = 4;
+  int packetLength = 7;  // min value permitted
+  PBYTEArray tpkt(len);
+  memset(tpkt.GetPointer(), 0 , len);
+
+  tpkt[0] = 3;
+  tpkt[1] = 0;
+  tpkt[2] = (BYTE)(packetLength >> 8);
+  tpkt[3] = (BYTE)packetLength;
+
+  PTRACE(5, "H225\tSending KeepAlive TPKT packet");
+
+  if (transport)
+     transport->Write((const BYTE *)&tpkt, len);
+
+  tpkt.SetSize(0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -215,6 +256,7 @@ PBoolean H46018Transport::HandleH46018SignallingChannelPDU(PThread * thread)
     if (connection->HandleSignalPDU(pdu)) {
         // All subsequent PDU's should wait forever
         SetReadTimeout(PMaxTimeInterval);
+        ((H46018TransportThread *)thread)->ConnectionEstablished();
         connection->HandleSignallingChannel();
     }
     else {
