@@ -1390,6 +1390,7 @@ RTP_UDP::RTP_UDP(
   controlSocket = NULL;
   appliedQOS = FALSE;
   enableGQOS = FALSE;
+  successiveWrongAddresses = 0;
 }
 
 
@@ -1728,6 +1729,8 @@ RTP_Session::SendReceiveStatus RTP_UDP::ReadDataOrControlPDU(PUDPSocket & socket
 #ifdef H323_H46024A
           if (socket.IsAlternateAddress(addr,port)) {
                 remoteTransmitAddress = addr;
+                remoteAddress = addr;
+                appliedQOS = false;
                 if (fromDataChannel) {
                     remoteDataPort = port;
                     // Fixes to makes sure sync,stats and jitter don't get screwed up 
@@ -1741,13 +1744,34 @@ RTP_Session::SendReceiveStatus RTP_UDP::ReadDataOrControlPDU(PUDPSocket & socket
           } else
 #endif
           {
+            successiveWrongAddresses++;
+            if (successiveWrongAddresses < 5) {
+                PTRACE(1, "RTP_UDP\tSession " << sessionID << ", "
+                       << channelName << " PDU from incorrect host, "
+                          " is " << addr << " should be " << remoteTransmitAddress);
+                return RTP_Session::e_IgnorePacket;
+            }
+
             PTRACE(1, "RTP_UDP\tSession " << sessionID << ", "
-                   << channelName << " PDU from incorrect host, "
-                      " is " << addr << " should be " << remoteTransmitAddress);
-            return RTP_Session::e_IgnorePacket;
+                       << channelName << " PDU from incorrect host limit switching to " << addr);
+
+            remoteTransmitAddress = addr;
+            remoteAddress = addr;
+            appliedQOS = false;
+               if (fromDataChannel) {
+                    remoteDataPort = port;
+                    // Fixes to makes sure sync,stats and jitter don't get screwed up 
+                    syncSourceIn = ((RTP_DataFrame &)frame).GetSyncSource();
+                    expectedSequenceNumber = ((RTP_DataFrame &)frame).GetSequenceNumber();
+#ifdef H323_AUDIO_CODECS
+                    if (jitter != NULL)  jitter->ResetFirstWrite();
+#endif                 
+               } else
+                 remoteControlPort = port;
           }
       }
     }
+    successiveWrongAddresses=0;
 
     if (!remoteAddress.IsAny() && remoteAddress.IsValid() && !appliedQOS) 
       ApplyQOS(remoteAddress);

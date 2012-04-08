@@ -1152,6 +1152,7 @@ class RTP_UDP : public RTP_Session
     PBoolean enableGQOS;
 
     PBoolean remoteIsNAT;
+    unsigned successiveWrongAddresses;
 };
 
 
