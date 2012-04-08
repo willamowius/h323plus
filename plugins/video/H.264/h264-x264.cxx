@@ -42,15 +42,15 @@
     #pragma comment(lib,"avutil.lib") 
     #pragma comment(lib, "libx264.dll.a")
   #endif
+#else
+  #define PLUGIN_CODEC_DLL_EXPORTS  1
 #endif
 
-#define PLUGIN_CODEC_DLL_EXPORTS  1
 #include <codec/opalplugin.h>
 
 #ifndef OPAL_STATIC_CODEC
 #define USE_DLL_AVCODEC 1
 #endif
-
 
 #include "h264-x264.h"
 
@@ -826,8 +826,10 @@ static void * create_encoder(const struct PluginCodec_Definition * /*codec*/)
 
 static void destroy_encoder(const struct PluginCodec_Definition * /*codec*/, void * _context)
 {
-  H264EncoderContext * context = (H264EncoderContext *)_context;
-  delete context;
+    if (_context) {
+      delete _context;
+      _context = NULL;
+    }
 }
 
 static int codec_encoder(const struct PluginCodec_Definition * ,
