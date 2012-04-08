@@ -61,7 +61,9 @@ class H225TransportThread : public PThread
 
     ~H225TransportThread();
 
-    void ConnectionEstablished();
+    void ConnectionEstablished(PBoolean keepAlive);
+
+    void EnableKeepAlive();
 
   protected:
     void Main();
@@ -122,15 +124,20 @@ H225TransportThread::~H225TransportThread()
        m_keepAlive.Stop();
 }
 
-void H225TransportThread::ConnectionEstablished()
+void H225TransportThread::ConnectionEstablished(PBoolean keepAlive)
 {
-  if (useKeepAlive) {
-     PTRACE(3, "H225\tStarted KeepAlive");
-     m_keepAlive.SetNotifier(PCREATE_NOTIFIER(KeepAlive));
-     m_keepAlive.RunContinuous(KeepAliveInterval * 1000);
-  }
+    if (useKeepAlive || keepAlive)
+        EnableKeepAlive();
 }
 
+void H225TransportThread::EnableKeepAlive()
+{
+    if (!m_keepAlive.IsRunning()) {
+        PTRACE(3, "H225\tStarted KeepAlive");
+        m_keepAlive.SetNotifier(PCREATE_NOTIFIER(KeepAlive));
+        m_keepAlive.RunContinuous(KeepAliveInterval * 1000);
+    }
+}
 
 void H225TransportThread::Main()
 {
@@ -144,19 +151,22 @@ void H225TransportThread::Main()
 void H225TransportThread::KeepAlive(PTimer &, INT)
 {
   // Send empty RFC1006 TPKT
-  int packetLength = 4;
-  PBYTEArray tpkt(packetLength);
-  memset(tpkt.GetPointer(),0 , packetLength);
+  int len = 4;
+  int packetLength = 7;
+  PBYTEArray tpkt(len);
+  memset(tpkt.GetPointer(), 0 , len);
 
   tpkt[0] = 3;
   tpkt[1] = 0;
   tpkt[2] = (BYTE)(packetLength >> 8);
   tpkt[3] = (BYTE)packetLength;
 
-  PTRACE(6, "H225\tSending KeepAlive TPKT packet");
+  PTRACE(5, "H225\tSending KeepAlive TPKT packet");
 
   if (transport)
-     transport->Write((const BYTE *)tpkt, packetLength);
+     transport->Write((const BYTE *)tpkt, len);
+
+  tpkt.SetSize(0);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -215,16 +225,18 @@ void H245TransportThread::Main()
 void H245TransportThread::KeepAlive(PTimer &, INT)
 {
   // Send empty RFC1006 TPKT
-  int packetLength = 4;
-  PBYTEArray tpkt(packetLength);
+  int len = 4;
+  int packetLength = 7;
+  PBYTEArray tpkt(len);
   tpkt[0] = 3;
   tpkt[1] = 0;
-  tpkt[2] = 0;
+  tpkt[2] = (BYTE)(packetLength >> 8);
   tpkt[3] = (BYTE)packetLength;
 
-  PTRACE(6, "H245\tSending KeepAlive TPKT packet");
+  PTRACE(5, "H245\tSending KeepAlive TPKT packet");
 
-  transport.Write((const BYTE *)tpkt, packetLength);
+  transport.Write((const BYTE *)tpkt, len);
+  tpkt.SetSize(0);
 }
 
 
@@ -883,7 +895,11 @@ PBoolean H323Transport::HandleFirstSignallingChannelPDU(PThread * thread)
     // H323 cleaner thread from now on. So thread must not auto delete and the "transport" 
     // variable is not deleted either
     PAssert(PIsDescendant(thread, H225TransportThread), PInvalidCast);
-    ((H225TransportThread *)thread)->ConnectionEstablished();
+    PBoolean keepAlive = false;
+#ifdef H323_H46018
+    keepAlive = connection->IsH46019Enabled();
+#endif
+    ((H225TransportThread *)thread)->ConnectionEstablished(keepAlive);
     AttachThread(thread);
     thread->SetNoAutoDelete();
 
