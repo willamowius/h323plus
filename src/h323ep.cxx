@@ -3056,10 +3056,19 @@ void H323EndPoint::InternalTranslateTCPAddress(PIPSocket::Address & localAddr, c
       return;
 
   if (localAddr.IsRFC1918() && !remoteAddr.IsRFC1918()) {
-    const PNatList & list = natMethods->GetNATList();
-      for (PINDEX i=0; i < list.GetSize(); i++) {
-        if (list[i].IsAvailable(remoteAddr) && list[i].GetExternalAddress(localAddr))
-             break;
+      if (!connection) {
+        PNatMethod * stun = GetNatMethods().GetMethodByName("STUN");
+        if (stun && stun->IsAvailable(remoteAddr) && stun->GetExternalAddress(localAddr)) {
+           PTRACE(2,"EP\tSTUN set localIP as " << localAddr);
+        }
+      } else {
+        const PNatList & list = natMethods->GetNATList();
+          for (PINDEX i=0; i < list.GetSize(); i++) {
+              if (list[i].IsAvailable(remoteAddr) && list[i].GetExternalAddress(localAddr)) {
+                 PTRACE(2,"EP\tNATMethod " << list[i].GetName() << " rewrite localIP as " << localAddr);
+                 break;
+              }
+          }
       }
   }
   else
