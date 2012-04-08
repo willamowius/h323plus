@@ -57,26 +57,35 @@ H264EncCtx::~H264EncCtx()
 
 bool H264EncCtx::Load()
 {
-  x264 = new X264EncoderContext();
-  if (x264) {
-	  TRACE(1, "H264\tSuccessfully loaded X264 Context");
-      loaded=true;
-	  return loaded;
-  }
-  return false;
+    if (!loaded) {
+      x264 = new X264EncoderContext();
+      if (x264) {
+          TRACE(1, "H264\tSuccessfully loaded X264 Context");
+          loaded=true;
+      }
+    }
+    return loaded;
 }
 
 void H264EncCtx::call(unsigned msg)
 {
   switch (msg) {
 	case H264ENCODERCONTEXT_CREATE:
-		x264 = new X264EncoderContext();
+        if (!loaded) {
+            x264 = new X264EncoderContext();
+            loaded=true;
+        }
 		break;
 	case H264ENCODERCONTEXT_DELETE:
-		delete x264;	
-		break;
+        if (loaded) {
+		    delete x264;
+            x264 = NULL;
+            loaded =false;
+		    break;
+        }
 	case APPLY_OPTIONS:
-		x264->ApplyOptions();	
+        if (x264)
+            x264->ApplyOptions();	
 		break;
 	default:
 	   break;
