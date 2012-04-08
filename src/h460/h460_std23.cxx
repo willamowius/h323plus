@@ -168,9 +168,10 @@ void PNatMethod_H46024::MainMethod(PThread &, INT)
         if (natType != testtype) {
             natType = testtype;
             PIPSocket::Address extIP;
-            GetExternalAddress(extIP);
-            feat->GetEndPoint()->NATMethodCallBack(GetName(),2,natType);
-            feat->OnNATTypeDetection(natType, extIP);
+            if (GetExternalAddress(extIP)) {
+                feat->GetEndPoint()->NATMethodCallBack(GetName(),2,natType);
+                feat->OnNATTypeDetection(natType, extIP);
+            }
         }
 
         if (natType == PSTUNClient::ConeNat) {
