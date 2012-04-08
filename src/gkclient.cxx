@@ -1698,21 +1698,23 @@ void H323Gatekeeper::SetAlternates(const H225_ArrayOf_AlternateGK & alts, PBoole
 
   alternates.RemoveAll();
 
+  // Always set the Assigned Gatekeepers (if any) first
   if (assignedGK != NULL)
       alternates.Append(assignedGK);
 
   for (i = 0; i < alts.GetSize(); i++) {
     AlternateInfo * alt = new AlternateInfo(alts[i]);
-    if (alt->rasAddress.IsEmpty())
+    if (!alt->IsValid())
       delete alt;
     else
       alternates.Append(alt);
   }
-  
-  alternatePermanent = permanent;
 
-  PTRACE(3, "RAS\tSet alternate gatekeepers:\n"
-         << setfill('\n') << alternates << setfill(' '));
+  if (alts.GetSize() > 0) {
+      alternatePermanent = permanent;
+      PTRACE(3, "RAS\tSet alternate gatekeepers:\n"
+             << setfill('\n') << alternates << setfill(' '));
+  }
 }
 
 void H323Gatekeeper::SetAssignedGatekeeper(const H225_AlternateGK & gk)
@@ -1908,6 +1910,18 @@ void H323Gatekeeper::AlternateInfo::PrintOn(ostream & strm) const
 
   if (priority > 0)
     strm << ";priority=" << priority;
+}
+
+PBoolean H323Gatekeeper::AlternateInfo::IsValid() const
+{
+    PIPSocket::Address addr;
+    rasAddress.GetIpAddress(addr);
+
+    if (addr.IsValid() && !addr.IsAny() && !addr.IsLoopback()) 
+        return true;
+
+    PTRACE(2,"GKALT\tAlternate Address " << addr << " is not valid. Ignoring...");
+    return false;
 }
 
 PBoolean H323Gatekeeper::OnSendFeatureSet(unsigned pduType, H225_FeatureSet & feats, PBoolean advertise) const

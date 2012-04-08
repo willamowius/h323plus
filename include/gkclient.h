@@ -345,6 +345,7 @@ class H323Gatekeeper : public H225_RAS
         AlternateInfo(const H225_AlternateGK & alt);
         ~AlternateInfo();
         H225_AlternateGK GetAlternate();
+        PBoolean IsValid() const;
         Comparison Compare(const PObject & obj);
         void PrintOn(ostream & strm) const;
 
