@@ -2833,6 +2833,10 @@ class H323Connection : public PObject
       */
     void H46019Enabled();
 
+    /** Is H46019 enabled for this call
+      */
+    PBoolean IsH46019Enabled() const;
+
     /** Enable H46019 Multiplexing for this call
       */
     void H46019MultiEnabled();

@@ -3091,7 +3091,7 @@ PBoolean H323Connection::HandleReceivedControlPDU(PBoolean readStatus, PPER_Stre
       ok = InternalEndSessionCheck(strm);
   }
   else if (controlChannel->GetErrorCode() == PChannel::Timeout) {
-    ok = TRUE;
+    ok = true;
   } 
   else {
       PTRACE(1, "H245\tRead error: " << controlChannel->GetErrorText(PChannel::LastReadError) 
@@ -3100,11 +3100,17 @@ PBoolean H323Connection::HandleReceivedControlPDU(PBoolean readStatus, PPER_Stre
     // call end reason.  This could happen if the remote end point misbehaves
     // and simply closes the H.245 TCP connection rather than sending an 
     // endSession.
-    if(endSessionSent == FALSE)
-      ClearCall(EndedByTransportFail);
-    else
-      PTRACE(1, "H245\tendSession already sent assuming H245 connection closed by remote side");
-    ok = FALSE;
+      if(endSessionSent == FALSE) {
+         PTRACE(1, "H245\tTCP Socket closed Unexpectedly. Attempting to reconnect.");
+         if (!controlChannel->Connect()) {
+             PTRACE(1, "H245\tTCP Socket could not reconnect. Proceed without control channel.");
+             PThread::Sleep(500);
+         }
+        ok = true;
+      } else {
+         PTRACE(1, "H245\tendSession already sent assuming H245 connection closed by remote side");
+         ok = false;
+      }
   }
 
   return ok;
@@ -6605,6 +6611,11 @@ void H323Connection::H46019Enabled()
 { 
     if (!m_H46019offload)
        m_H46019enabled = true; 
+}
+
+PBoolean H323Connection::IsH46019Enabled() const
+{
+    return m_H46019enabled;
 }
 
 void H323Connection::H46019SetOffload() 
