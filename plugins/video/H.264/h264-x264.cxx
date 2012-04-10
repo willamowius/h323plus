@@ -50,11 +50,17 @@
 
 #ifndef OPAL_STATIC_CODEC
 #define USE_DLL_AVCODEC 1
+#else
+ #ifndef _WIN32
+   #include "ffmpeg.h"
+ #endif
 #endif
 
 #include "h264-x264.h"
 
 #include "plugin-config.h"
+
+#ifndef _SIGNAL_ONLY
 
 #if _MSC_VER < 1600
  #include "../common/dyna.h"
@@ -819,17 +825,25 @@ static int adjust_to_BitRate (unsigned & width, unsigned & height, unsigned & fr
 
 /////////////////////////////////////////////////////////////////////////////
 
+#endif  // _SIGNAL_ONLY
+
 static void * create_encoder(const struct PluginCodec_Definition * /*codec*/)
 {
+#ifndef _SIGNAL_ONLY
   return new H264EncoderContext;
+#else
+  return NULL;
+#endif
 }
 
 static void destroy_encoder(const struct PluginCodec_Definition * /*codec*/, void * _context)
 {
+#ifndef _SIGNAL_ONLY
     if (_context) {
       delete _context;
       _context = NULL;
     }
+#endif
 }
 
 static int codec_encoder(const struct PluginCodec_Definition * ,
@@ -840,9 +854,15 @@ static int codec_encoder(const struct PluginCodec_Definition * ,
                                        unsigned * toLen,
                                    unsigned int * flag)
 {
+#ifndef _SIGNAL_ONLY
   H264EncoderContext * context = (H264EncoderContext *)_context;
   return context->EncodeFrames((const u_char *)from, *fromLen, (u_char *)to, *toLen, *flag);
+#else
+  return 1;
+#endif
 }
+
+#ifndef _SIGNAL_ONLY
 
 static int to_normalised_options(const struct PluginCodec_Definition *, void *, const char *, void * parm, unsigned * parmLen)
 {
@@ -1299,15 +1319,23 @@ static int encoder_get_output_data_size(const PluginCodec_Definition *, void *, 
 }
 /////////////////////////////////////////////////////////////////////////////
 
+#endif // _SIGNAL_ONLY
+
 static void * create_decoder(const struct PluginCodec_Definition *)
 {
+#ifndef _SIGNAL_ONLY
   return new H264DecoderContext;
+#else
+  return NULL;
+#endif
 }
 
 static void destroy_decoder(const struct PluginCodec_Definition * /*codec*/, void * _context)
 {
+#ifndef _SIGNAL_ONLY
   H264DecoderContext * context = (H264DecoderContext *)_context;
   delete context;
+#endif
 }
 
 static int codec_decoder(const struct PluginCodec_Definition *, 
@@ -1318,10 +1346,15 @@ static int codec_decoder(const struct PluginCodec_Definition *,
                                        unsigned * toLen,
                                    unsigned int * flag)
 {
+#ifndef _SIGNAL_ONLY
   H264DecoderContext * context = (H264DecoderContext *)_context;
   return context->DecodeFrames((const u_char *)from, *fromLen, (u_char *)to, *toLen, *flag);
+#else
+  return 1;
+#endif
 }
 
+#ifndef _SIGNAL_ONLY
 static int decoder_get_output_data_size(const PluginCodec_Definition * codec, void *, const char *, void *, unsigned *)
 {
   return sizeof(PluginCodec_Video_FrameHeader) + ((codec->parm.video.maxFrameWidth * codec->parm.video.maxFrameHeight * 3) / 2);
@@ -1428,6 +1461,8 @@ static void free_string(char * str)
   free(str);
 }
 
+#endif // _SIGNAL_ONLY
+
 /////////////////////////////////////////////////////////////////////////////
 
 extern "C" {
@@ -1436,6 +1471,8 @@ PLUGIN_CODEC_IMPLEMENT(H264)
 
 PLUGIN_CODEC_DLL_API struct PluginCodec_Definition * PLUGIN_CODEC_GET_CODEC_FN(unsigned * count, unsigned version)
 {
+
+#ifndef _SIGNAL_ONLY
 
   char * debug_level = getenv ("PTLIB_TRACE_CODECS");
   if (debug_level!=NULL) {
@@ -1462,14 +1499,20 @@ PLUGIN_CODEC_DLL_API struct PluginCodec_Definition * PLUGIN_CODEC_GET_CODEC_FN(u
   FFMPEGLibraryInstance.AvLogSetLevel(AV_LOG_DEBUG);
   FFMPEGLibraryInstance.AvLogSetCallback(&logCallbackFFMPEG);
 
+#endif  // _SIGNAL_ONLY
+
   if (version < PLUGIN_CODEC_VERSION_OPTIONS) {
     *count = 0;
+#ifndef _SIGNAL_ONLY
     TRACE(1, "H264\tCodec\tDisabled - plugin version mismatch");
+#endif
     return NULL;
   }
   else {
     *count = sizeof(h264CodecDefn) / sizeof(struct PluginCodec_Definition);
+#ifndef _SIGNAL_ONLY
     TRACE(1, "H264\tCodec\tEnabled");
+#endif
     return h264CodecDefn;
   }
 
