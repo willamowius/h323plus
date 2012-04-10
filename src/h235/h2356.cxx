@@ -321,24 +321,28 @@ PBoolean H235_DiffieHellman::GenerateHalfKey()
 
 PBoolean H235_DiffieHellman::ComputeSessionKey(PBYTEArray & SessionKey)
 {
-    if (!m_remKey)
+    SessionKey.SetSize(0);
+    if (!m_remKey) {
+		PTRACE(2,"H235_DH\tERROR Generating Shared DH: No remote key!");
         return false;
+    }
 
 	int len, out;
-	unsigned char *buf=NULL;
+	unsigned char *buf = NULL;
 
-	len=DH_size(dh);
-	buf=(unsigned char *)OPENSSL_malloc(len);
+	len = DH_size(dh);
+	buf = (unsigned char *)OPENSSL_malloc(len);
 
-	out=DH_compute_key(buf, m_remKey, dh);
+	out = DH_compute_key(buf, m_remKey, dh);
 
 	if (out <= 0) {
 		PTRACE(2,"H235_DH\tERROR Generating Shared DH!");
+		OPENSSL_free(buf);
 	    return false;
 	}
 
     SessionKey.SetSize(out);
-    memcpy(SessionKey.GetPointer(),(void *)buf,out);
+    memcpy(SessionKey.GetPointer(), (void *)buf, out);
 
 	OPENSSL_free(buf);
 

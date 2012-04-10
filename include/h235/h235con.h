@@ -70,25 +70,25 @@ public:
 
  /**@name General Public Functions */
   //@{
-    /** Create Session
+    /** Create Session - call SetMediaKey() before!
      */
     PBoolean CreateSession();
 
-    /** Set Master key
+    /** Set media key
       */
-    void SetMasterKey(const PBYTEArray & key);
+    void SetMediaKey(const PBYTEArray & key);
 
-    /** Get Master key
+    /** Get media key
       */
-    const PBYTEArray & GetMasterKey();
+    const PBYTEArray & GetMediaKey();
 
-    /** Encode Master key
+    /** Encode media key
       */
-    void EncodeMasterKey(PASN_OctetString & key);
+    void EncodeMediaKey(PBYTEArray & key);
 
-    /** Decode Master key
+    /** Decode media key
       */
-    void DecodeMasterKey(const PASN_OctetString & key);
+    void DecodeMediaKey(PBYTEArray & key);
 
     /** Is Active 
       */
@@ -118,8 +118,8 @@ protected:
     /** Set Cipher */
     void SetCipher(const PString & oid);
 
-    /** Set DH Shared key  */
-    PBoolean SetDHSharedkey();
+    /** put media key into OpenSSL session - called in CreateSession()  */
+    PBoolean InitMediaKey();
 
 private:
     H235_DiffieHellman & m_dh;

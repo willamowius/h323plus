@@ -75,19 +75,21 @@ void BuildEncryptionSync(H245_EncryptionSync & sync, const H323SecureRTPChannel 
 {     
     sync.m_synchFlag = chan.GetRTPPayloadType();
 
+	// TODO/BUG: this creates an empty key
+    PBYTEArray encryptedMediaKey;	// TODO: assign plain key here
+    session.EncodeMediaKey(encryptedMediaKey);
     H235_H235Key h235key;
     h235key.SetTag(H235_H235Key::e_secureSharedSecret);
-
     H235_V3KeySyncMaterial & v3data = h235key;
     v3data.IncludeOptionalField(H235_V3KeySyncMaterial::e_encryptedSessionKey);
-    session.EncodeMasterKey(v3data.m_encryptedSessionKey);
+    v3data.m_encryptedSessionKey = encryptedMediaKey;
 
     sync.m_h235Key.EncodeSubType(h235key);
 }
 
 
 void ReadEncryptionSync(const H245_EncryptionSync & sync, H235Session & session)
-{     
+{
     H235_H235Key h235key;
     sync.m_h235Key.DecodeSubType(h235key);
 
@@ -104,8 +106,11 @@ void ReadEncryptionSync(const H245_EncryptionSync & sync, H235Session & session)
         case H235_H235Key::e_secureSharedSecret:
             {
               const H235_V3KeySyncMaterial & v3data = h235key;
-              if (v3data.HasOptionalField(H235_V3KeySyncMaterial::e_encryptedSessionKey))
-                  session.DecodeMasterKey(v3data.m_encryptedSessionKey);
+              if (v3data.HasOptionalField(H235_V3KeySyncMaterial::e_encryptedSessionKey)) {
+                  PBYTEArray mediaKey = v3data.m_encryptedSessionKey;
+                  session.DecodeMediaKey(mediaKey);
+                  session.SetMediaKey(mediaKey);
+              }
             }
            break;
     }  

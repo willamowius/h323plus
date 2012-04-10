@@ -322,45 +322,44 @@ H235Session::~H235Session()
    //SSL_free(m_ssl);
 }
 
-void H235Session::SetMasterKey(const PBYTEArray & key)
+void H235Session::SetMediaKey(const PBYTEArray & key)
 {
     m_session_key = key;
     m_isServer = true;
 }
 
-const PBYTEArray & H235Session::GetMasterKey()
+const PBYTEArray & H235Session::GetMediaKey()
 {
     return m_session_key;
 }
 
-void H235Session::EncodeMasterKey(PASN_OctetString & /*key*/)
+void H235Session::EncodeMediaKey(PBYTEArray & key)
 {
-    PTRACE(4,"H235Key\tEncode Master Key."); 
+    PTRACE(4, "H235Key\tEncode media key: " << key); 
 
+    PTRACE(0, "H235Key\tEncode media key NOT implemeted, yet"); 
 }
 
-void H235Session::DecodeMasterKey(const PASN_OctetString & key)
+void H235Session::DecodeMediaKey(PBYTEArray & key)
 {
-    PBYTEArray k = key.GetValue();
-    PBYTEArray a;
-    PTRACE(4,"H235Key\tH235v3 secret received. " << k);
+    PBYTEArray decrypted;
+    PTRACE(4, "H235Key\tH235v3 encrypted key received. " << key);
 
-    unsigned char * buf;
-    unsigned char * buf1;
-    int size = k.GetSize();
+    int size = key.GetSize();
     if (size > 0) {
-          buf =(unsigned char *)OPENSSL_malloc(size);
-          memmove(buf,k.GetPointer(), size);
-          buf1 = RawRead(buf,size);      
+          unsigned char * cryptBuffer = (unsigned char *)OPENSSL_malloc(size);
+          memmove(cryptBuffer, key.GetPointer(), size);
+          unsigned char * plainBuffer = RawRead(cryptBuffer, size);      
           if (size > 0) {
-            a.SetSize(size);
-            memmove(a.GetPointer(), buf1, size);
+            decrypted.SetSize(size);
+            memmove(decrypted.GetPointer(), plainBuffer, size);
           }
-          OPENSSL_free(buf);
-          OPENSSL_free(buf1);
+          OPENSSL_free(cryptBuffer);
+          OPENSSL_free(plainBuffer);
     }
 
-  //  PTRACE(4,"H235Key\tH235v3 secret received. " << a);
+    key = decrypted;
+    PTRACE(4,"H235Key\tH235v3 key decrypted: " << key);
 }
 
 void H235Session::SetCipher(const PString & oid)
@@ -388,7 +387,7 @@ void H235Session::SetCipher(const PString & oid)
     m_session->cipher_id = sc->id;
 }
 
-PBoolean H235Session::SetDHSharedkey()
+PBoolean H235Session::InitMediaKey()
 {
     int out = m_session_key.GetSize();
     unsigned char *buf = (unsigned char *)OPENSSL_malloc(out);
@@ -398,8 +397,8 @@ PBoolean H235Session::SetDHSharedkey()
 //------------------------------------------------------------------------
 // Setup for receiving the DH Shared Secret
 
-unsigned char buf1[SSL3_RANDOM_SIZE*2+TLS_MD_MASTER_SECRET_CONST_SIZE];
-unsigned char buff[SSL_MAX_MASTER_KEY_LENGTH];
+    unsigned char buf1[SSL3_RANDOM_SIZE*2+TLS_MD_MASTER_SECRET_CONST_SIZE];
+    unsigned char buff[SSL_MAX_MASTER_KEY_LENGTH];
 
     // Setup the stuff to munge 
     memcpy(buf1,TLS_MD_MASTER_SECRET_CONST,
@@ -409,15 +408,13 @@ unsigned char buff[SSL_MAX_MASTER_KEY_LENGTH];
     memcpy(&(buf1[SSL3_RANDOM_SIZE+TLS_MD_MASTER_SECRET_CONST_SIZE]),
         m_ssl->s3->server_random,SSL3_RANDOM_SIZE);
 
-
     tls1_PRF(m_ssl->ctx->md5,m_ssl->ctx->sha1,
         buf1,TLS_MD_MASTER_SECRET_CONST_SIZE+SSL3_RANDOM_SIZE*2,buf,out,
         m_session->master_key,buff,sizeof(buff));
 
+    memset(buf, 0, out);
 
-    memset(buf,0,out);
-
-    PTRACE(2,"H235SES\tMaster Session Key Set!");
+    PTRACE(2,"H235SES\tShared Session Key Set!");
 
     OPENSSL_free(buf);
 
@@ -436,7 +433,6 @@ PBoolean H235Session::IsInitialised()
 
 PBoolean H235Session::CreateSession()
 {
-
   session_count++;
   m_session_id = session_count;
 
@@ -510,7 +506,7 @@ PBoolean H235Session::CreateSession()
     }
 
     // Same as tls1_generate_master_secret in OpenSSL
-    SetDHSharedkey();
+    InitMediaKey();
 
     int i= SSL_set_session(m_ssl,m_session);
     if (!i) {
