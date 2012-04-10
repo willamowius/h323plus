@@ -151,22 +151,18 @@ void H225TransportThread::Main()
 void H225TransportThread::KeepAlive(PTimer &, INT)
 {
   // Send empty RFC1006 TPKT
-  int len = 4;
-  int packetLength = 7;
-  PBYTEArray tpkt(len);
-  memset(tpkt.GetPointer(), 0 , len);
-
-  tpkt[0] = 3;
+  BYTE tpkt[4];
+  tpkt[0] = 3;  // Version 3
   tpkt[1] = 0;
-  tpkt[2] = (BYTE)(packetLength >> 8);
-  tpkt[3] = (BYTE)packetLength;
+
+  PINDEX len = sizeof(tpkt);
+  tpkt[2] = (BYTE)(len >> 8);
+  tpkt[3] = (BYTE)len;
 
   PTRACE(5, "H225\tSending KeepAlive TPKT packet");
 
   if (transport)
-     transport->Write((const BYTE *)tpkt, len);
-
-  tpkt.SetSize(0);
+     transport->Write(tpkt, len);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -225,18 +221,17 @@ void H245TransportThread::Main()
 void H245TransportThread::KeepAlive(PTimer &, INT)
 {
   // Send empty RFC1006 TPKT
-  int len = 4;
-  int packetLength = 7;
-  PBYTEArray tpkt(len);
-  tpkt[0] = 3;
+  BYTE tpkt[4];
+  tpkt[0] = 3;  // Version 3
   tpkt[1] = 0;
-  tpkt[2] = (BYTE)(packetLength >> 8);
-  tpkt[3] = (BYTE)packetLength;
+
+  PINDEX len = sizeof(tpkt);
+  tpkt[2] = (BYTE)(len >> 8);
+  tpkt[3] = (BYTE)len;
 
   PTRACE(5, "H245\tSending KeepAlive TPKT packet");
 
-  transport.Write((const BYTE *)tpkt, len);
-  tpkt.SetSize(0);
+  transport.Write(tpkt, len);
 }
 
 
