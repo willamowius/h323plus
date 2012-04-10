@@ -1,5 +1,8 @@
 
-H323plus 1.24.0 - 1.24.1
+H323plus 1.24.0 - 1.24.x
+FIX Try reconnecting signalling channel if goes down unexpectedly and not drop call
+FIX Check Alternate gatekeepers are valid
+FIX Added KeepAlives to H.460.19 signalling channel
 Added AEC Support directly into the library
 FIX Statically loading codecs. Can now be set ftom OpenH323buildopts.h
 Added H.460.17 Integration into H323Endpoint and Added To Simple example
