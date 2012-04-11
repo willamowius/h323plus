@@ -319,6 +319,7 @@ H235Session::H235Session(H235Capabilities * caps, const PString & oidAlgorithm)
 H235Session::~H235Session()
 {
    SSL_SESSION_free(m_session);
+   //TODO: should we call SSL_shutdown(m_ssl) before calling SSL_free(m_ssl) ?
    //SSL_free(m_ssl);
 }
 
@@ -437,22 +438,30 @@ PBoolean H235Session::CreateSession()
   m_session_id = session_count;
 
   ssl_ctx_st * ctx = m_context.GetContext();
-  m_ssl = SSL_new(ctx);
+  if (ctx == NULL) {
+      PTRACE(2, "H235SES\tNo SSL context");
+      return false;
+  } 
 
+  m_ssl = SSL_new(ctx);
   if (m_ssl == NULL) {
-      PTRACE(2,"H235SES\tSSL Error in Creation");
+      PTRACE(2, "H235SES\tSSL Error in Creation");
       return false;
   } 
 
   m_session = SSL_get1_session(m_ssl);
+  if (m_session == NULL) {
+      PTRACE(2, "H235SES\tFailed to get SSL session");
+      return false;
+  } 
 
   if (!ssl3_setup_buffers(m_ssl)) { 
-       PTRACE(2,"H235SES\tError Setting Buffers!");
+       PTRACE(2, "H235SES\tError Setting Buffers!");
        return false; 
   }
 
-  if (!ssl_init_wbio_buffer(m_ssl,0)) { 
-      PTRACE(2,"H235SES\tError Setting BIO!");
+  if (!ssl_init_wbio_buffer(m_ssl, 0)) { 
+      PTRACE(2, "H235SES\tError Setting BIO!");
       return false; 
   }
 
@@ -460,12 +469,11 @@ PBoolean H235Session::CreateSession()
 
   BUF_MEM *xbuf;
   if ((m_ssl->init_buf == NULL) 
-     && ((xbuf=BUF_MEM_new()) == NULL)  
-     && (!BUF_MEM_grow(xbuf,SSL3_RT_MAX_PLAIN_LENGTH))) {
-                m_ssl->init_buf=xbuf;
-                xbuf=NULL;
+     && ((xbuf = BUF_MEM_new()) == NULL)  
+     && (!BUF_MEM_grow(xbuf, SSL3_RT_MAX_PLAIN_LENGTH))) {
+                m_ssl->init_buf = xbuf;
+                xbuf = NULL;
   }
-
 
     m_session = SSL_SESSION_new();
     m_session->key_arg_length = 0;
@@ -489,7 +497,7 @@ PBoolean H235Session::CreateSession()
     m_session->ssl_version=m_ssl->version;
     m_session->session_id_length=SSL3_SSL_SESSION_ID_LENGTH;
 
-    PThread::Sleep(50);
+    PThread::Sleep(50);	// TODO: why do we have to sleep here ?
     if (!m_context.Generate_Session_Id(m_ssl, m_session->session_id, &m_session->session_id_length)){
         PTRACE(2, "H235SES\tSession ID Allocate Fail!");
         SSL_SESSION_free(m_session);
@@ -506,9 +514,12 @@ PBoolean H235Session::CreateSession()
     }
 
     // Same as tls1_generate_master_secret in OpenSSL
-    InitMediaKey();
+    if(!InitMediaKey()) {
+        PTRACE(2, "H235SES\tInitMediaKey failed");
+        return false;
+    }
 
-    int i= SSL_set_session(m_ssl,m_session);
+    int i = SSL_set_session(m_ssl,m_session);
     if (!i) {
         PTRACE(2, "H235SES\tTLS Error: Session Init Failure");
         return false;
