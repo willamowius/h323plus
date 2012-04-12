@@ -299,7 +299,7 @@ err2:
 
 ////////////////////////////////////////////////////////////////////////
 
-int  H235Session::session_count=0;
+int H235Session::session_count = 0;
 
 H235Session::H235Session(H235Context & context, H235_DiffieHellman & dh, const PString & sslAlgorithm)
 : m_dh(dh), m_algorithm(sslAlgorithm)
@@ -315,11 +315,11 @@ H235Session::H235Session(H235Capabilities * caps, const PString & oidAlgorithm)
 {
 }
 
-
 H235Session::~H235Session()
 {
    SSL_SESSION_free(m_session);
    //TODO: should we call SSL_shutdown(m_ssl) before calling SSL_free(m_ssl) ?
+   // delete m_ssl->init_buf; ??
    //SSL_free(m_ssl);
 }
 
@@ -336,48 +336,63 @@ const PBYTEArray & H235Session::GetMediaKey()
 
 void H235Session::EncodeMediaKey(PBYTEArray & key)
 {
-    PTRACE(4, "H235Key\tEncode media key: " << key); 
+    PTRACE(4, "H235Key\tEncode plain media key: " << endl << hex << key); 
 
-    PTRACE(0, "H235Key\tEncode media key NOT implemeted, yet"); 
+    PBYTEArray encrypted;
+    int size = key.GetSize();
+    if (size > 0) {
+          unsigned char * plainBuffer = (unsigned char *)OPENSSL_malloc(size);
+          memmove(plainBuffer, key.GetPointer(), size);
+          unsigned char * encryptedBuffer = RawRead(plainBuffer, size);      
+          if (size > 0) {
+            encrypted.SetSize(size);
+            memmove(encrypted.GetPointer(), encryptedBuffer, size);
+          }
+          OPENSSL_free(plainBuffer);
+          OPENSSL_free(encryptedBuffer);
+    }
+    key = encrypted;
+
+    PTRACE(4, "H235Key\tEncrypted key:" << endl << hex << key);
 }
 
 void H235Session::DecodeMediaKey(PBYTEArray & key)
 {
-    PBYTEArray decrypted;
-    PTRACE(4, "H235Key\tH235v3 encrypted key received. " << key);
+    PTRACE(4, "H235Key\tH235v3 encrypted key received, size=" << key.GetSize() << endl << hex << key);
 
+    PBYTEArray decrypted;
     int size = key.GetSize();
     if (size > 0) {
-          unsigned char * cryptBuffer = (unsigned char *)OPENSSL_malloc(size);
-          memmove(cryptBuffer, key.GetPointer(), size);
-          unsigned char * plainBuffer = RawRead(cryptBuffer, size);      
-          if (size > 0) {
+        unsigned char * cryptBuffer = (unsigned char *)OPENSSL_malloc(size);
+        memmove(cryptBuffer, key.GetPointer(), size);
+        unsigned char * plainBuffer = RawRead(cryptBuffer, size);      
+        PTRACE(0, "JW RawRead() returned size=" << size << " plainBuffer=" << plainBuffer);
+        if (size > 0) {
             decrypted.SetSize(size);
             memmove(decrypted.GetPointer(), plainBuffer, size);
-          }
-          OPENSSL_free(cryptBuffer);
-          OPENSSL_free(plainBuffer);
+        }
+        OPENSSL_free(cryptBuffer);
+        OPENSSL_free(plainBuffer);
     }
-
     key = decrypted;
-    PTRACE(4,"H235Key\tH235v3 key decrypted: " << key);
+
+    PTRACE(4, "H235Key\tH235v3 key decrypted, size= " << key.GetSize() << endl << hex << key);
 }
 
 void H235Session::SetCipher(const PString & oid)
 {
-  STACK_OF(SSL_CIPHER) *ciphers;
-  ssl_cipher_st *c = NULL, *sc = NULL, *lc = NULL;
-  PINDEX i;
+    STACK_OF(SSL_CIPHER) *ciphers;
+    ssl_cipher_st *c = NULL, *sc = NULL, *lc = NULL;
     ciphers = SSL_get_ciphers(m_ssl);
 
-        for (i=0; i<sk_SSL_CIPHER_num(ciphers); i++)
-        {
+    for (PINDEX i = 0; i < sk_SSL_CIPHER_num(ciphers); i++)
+    {
         c = sk_SSL_CIPHER_value(ciphers,i);
 
         if (oid == c->name)   // Get the Local Cipher
             lc = c;        
-        }
-        sc = lc;
+     }
+     sc = lc;
 
     if (sc == NULL)
         return;
@@ -449,11 +464,11 @@ PBoolean H235Session::CreateSession()
       return false;
   } 
 
-  m_session = SSL_get1_session(m_ssl);
-  if (m_session == NULL) {
-      PTRACE(2, "H235SES\tFailed to get SSL session");
-      return false;
-  } 
+//  m_session = SSL_get1_session(m_ssl);
+//  if (m_session == NULL) {
+//      PTRACE(2, "H235SES\tFailed to get SSL session");
+//      return false;
+//  } 
 
   if (!ssl3_setup_buffers(m_ssl)) { 
        PTRACE(2, "H235SES\tError Setting Buffers!");
@@ -475,10 +490,14 @@ PBoolean H235Session::CreateSession()
                 xbuf = NULL;
   }
 
-    m_session = SSL_SESSION_new();
-    m_session->key_arg_length = 0;
+  m_session = SSL_SESSION_new();
+  if (m_session == NULL) {
+      PTRACE(2, "H235SES\tFailed to create SSL session object");
+      return false;
+  } 
+  m_session->key_arg_length = 0;
 
-    m_session->sid_ctx_length= ctx->sid_ctx_length;
+    m_session->sid_ctx_length = ctx->sid_ctx_length;
     if(m_session->sid_ctx_length > SSL_MAX_SID_CTX_LENGTH) {
           PTRACE(2,"H235SES\tError Setting Context ID!");
             SSL_SESSION_free(m_session);
@@ -489,13 +508,13 @@ PBoolean H235Session::CreateSession()
 
     //Session Cert
     m_session->sess_cert = ssl_sess_cert_new();
-    ssl_sess_cert_free(m_session->sess_cert);
+//    ssl_sess_cert_free(m_session->sess_cert);
 
     m_session->timeout=SSL_get_default_timeout(m_ssl);
 
     //Set the Session ID
-    m_session->ssl_version=m_ssl->version;
-    m_session->session_id_length=SSL3_SSL_SESSION_ID_LENGTH;
+    m_session->ssl_version = m_ssl->version;
+    m_session->session_id_length = SSL3_SSL_SESSION_ID_LENGTH;
 
     PThread::Sleep(50);	// TODO: why do we have to sleep here ?
     if (!m_context.Generate_Session_Id(m_ssl, m_session->session_id, &m_session->session_id_length)){
@@ -519,14 +538,15 @@ PBoolean H235Session::CreateSession()
         return false;
     }
 
-    int i = SSL_set_session(m_ssl,m_session);
+    int i = SSL_set_session(m_ssl, m_session);
     if (!i) {
         PTRACE(2, "H235SES\tTLS Error: Session Init Failure");
         return false;
     }
 
-      if (!tls1_setup_key_block(m_ssl)) {
+    if (!tls1_setup_key_block(m_ssl)) {
         PTRACE(2, "H235SES\tTLS Error: Setting Key Blocks");
+        return false;
     }
 
     PTRACE(2, "H235SES\tTLS Session Finalised."); 
@@ -540,14 +560,17 @@ PBoolean H235Session::ReadFrame(DWORD & /*rtpTimestamp*/, RTP_DataFrame & frame)
     unsigned char * buf1;
     int size = frame.GetPayloadSize();
     if (size > 0) {
-          buf =(unsigned char *)OPENSSL_malloc(size);
-          memmove(buf,frame.GetPayloadPtr(), size);
-          buf1 = RawRead(buf,size);      
-          if (size > 0) {
+        buf = (unsigned char *)OPENSSL_malloc(size);
+        memmove(buf, frame.GetPayloadPtr(), size);
+        buf1 = RawRead(buf, size);      
+        if (size > 0) {
             frame.SetPayloadSize(size);
             memmove(frame.GetPayloadPtr(), buf1, size);
-          }
-          OPENSSL_free(buf);
+        } else {
+            PTRACE(1, "RawRead() failed");
+        }
+        OPENSSL_free(buf);
+        OPENSSL_free(buf1);
     }
     return true;
 }
@@ -564,13 +587,16 @@ PBoolean H235Session::WriteFrame(RTP_DataFrame & frame)
        if (len > 0) {
          frame.SetPayloadSize(len);
          memmove(frame.GetPayloadPtr(), buf1, len);    
+          } else {
+            PTRACE(1, "RawWrite() failed");
        }
        OPENSSL_free(buf);
+       OPENSSL_free(buf1);
     }
     return true;
 }
 
-unsigned char * H235Session::RawRead(unsigned char * buffer,int & length)
+unsigned char * H235Session::RawRead(unsigned char * buffer, int & length)
 {
     ssl3_record_st * rr;
     ssl3_buffer_st * rb;
@@ -579,12 +605,14 @@ unsigned char * H235Session::RawRead(unsigned char * buffer,int & length)
     int enc_err, statechg;
 
     if ((m_ssl == NULL) || (m_ssl->s3 == NULL)) {
+        PTRACE(2, "H235SES\tData structures missing");
         length = 0;
         return NULL;
     }
 
     if (m_ssl->s3->tmp.key_block == NULL) {
         if (!m_ssl->method->ssl3_enc->setup_key_block(m_ssl)) {
+            PTRACE(2, "H235SES\tError setup_key_block failed");
             length = 0;
             return NULL;
         }
@@ -596,18 +624,18 @@ unsigned char * H235Session::RawRead(unsigned char * buffer,int & length)
         statechg = SSL3_CHANGE_CIPHER_CLIENT_READ;
 
 
-if (!tls_change_cipher_state(m_ssl,statechg)) {
-  PTRACE(2, "H235SES\tError Setting Cipher State");
-  length = 0;
-  return NULL;
-} 
+    if (!tls_change_cipher_state(m_ssl,statechg)) {
+        PTRACE(2, "H235SES\tError Setting Cipher State");
+        length = 0;
+        return NULL;
+    }
 
-rr = &(m_ssl->s3->rrec);
-rb = &(m_ssl->s3->rbuf);
+    rr = &(m_ssl->s3->rrec);
+    rb = &(m_ssl->s3->rbuf);
 
-        rb->buf = buffer;
-        rb->len = length;
-        rb->offset = 0;
+    rb->buf = buffer;
+    rb->len = length;
+    rb->offset = 0;
     
     rr->input= rb->buf;
     rr->type = type;
@@ -615,9 +643,10 @@ rb = &(m_ssl->s3->rbuf);
     rr->off = 0;
     rr->data=rr->input;
                  
-  enc_err = m_ssl->method->ssl3_enc->enc(m_ssl, 0);
+    enc_err = m_ssl->method->ssl3_enc->enc(m_ssl, 0);
 
     if (enc_err <= 0) {
+        PTRACE(2, "H235SES\tenc() failed err=" << enc_err);
         if (enc_err == 0) {
             length = 0;
             return NULL;
