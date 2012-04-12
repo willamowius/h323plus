@@ -41,6 +41,9 @@
 #ifndef H235CON_H
 #define H235CON_H
 
+// for definition of EVP_CIPHER_CTX
+#include <openssl/evp.h>
+
 struct ssl_st;
 struct ssl_ctx_st;
 struct ssl_session_st;
@@ -49,6 +52,40 @@ class RTP_DataFrame;
 class H235Context;
 class H235_DiffieHellman;
 class H235Capabilities;
+
+class H235MediaSession : public PObject
+{
+    PCLASSINFO(H235MediaSession, PObject);
+
+public:
+
+ /**@name Constructor */
+  //@{
+    /** Create a H.235 media session
+     */
+    H235MediaSession(const PString & sslAlgorithm, const PBYTEArray & key);
+
+   /** Destroy the media session
+     */
+	~H235MediaSession();
+  //@}
+
+    /** Set media key
+      */
+    void SetKey(const PBYTEArray & key);
+
+    /** Encode data
+      */
+    PBYTEArray Encode(const PBYTEArray & data);
+
+    /** Decode data
+      */
+    PBYTEArray Decode(const PBYTEArray & data);
+
+protected:
+	EVP_CIPHER_CTX encode_ctx, decode_ctx;
+};
+
 
 class H235Session : public  PObject
 {

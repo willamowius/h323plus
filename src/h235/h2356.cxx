@@ -130,7 +130,7 @@ PBoolean H235_DiffieHellman::CreateParams()
  vbMutex.Signal();
 
 	// Make sure that i is non-negative
-	if (i<0)
+	if (i < 0)
 		 i = -i;
 
 	if (i < 0)
@@ -188,7 +188,7 @@ PBoolean H235_DiffieHellman::CheckParams()
 	 case DH_NOT_SUITABLE_GENERATOR:
          PTRACE(4,"H235_DH\tCHECK: the g value is not a generator");
 	}
-	 return FALSE;
+	return FALSE;
  }
 
  return TRUE;
@@ -261,11 +261,8 @@ void H235_DiffieHellman::Decode_G(const PASN_BitString & g)
     if (g.GetSize() == 0)
         return;
 
-    const unsigned char *data;
-    if (g.GetSize() > 0) {
-		data = g.GetDataPointer();
-		dh->g=BN_bin2bn(data,sizeof(data),NULL);
-    }
+    // TODO: Valgrind says "invalid read of size 1", why ?
+	dh->g = BN_bin2bn(g.GetDataPointer(), g.GetSize(), NULL);
 }
 
 
@@ -607,22 +604,23 @@ void H2356_Authenticator::InitialiseSecurity()
   }
 }
 
-H235_DiffieHellman * H2356_Authenticator::GetMediaSessionInfo(PString & sslAlgorithm)
+PBoolean H2356_Authenticator::GetMediaSessionInfo(PString & algorithmOID, PBYTEArray & sessionKey)
 {
   InitialiseSecurity();
+  PTRACE(0, "JW GetMediaSessionInfo #algos=" << m_algOIDs.GetSize() << " #localMap=" << m_dhLocalMap.size());
 
   if (m_algOIDs.GetSize() == 0) {
       PTRACE(1, "H235\tNo algorithms available");
-      return NULL;
+      return false;
   }
 
   PString DhOID = GetDhOIDFromAlg(m_algOIDs[0]);
   std::map<PString, H235_DiffieHellman*>::const_iterator l = m_dhLocalMap.find(DhOID);
   if (l != m_dhLocalMap.end()) {
-     sslAlgorithm = GetAlgFromOID(m_algOIDs[0]);
-     return l->second;
+     algorithmOID = m_algOIDs[0];
+     return l->second->ComputeSessionKey(sessionKey);
   }
-  return NULL;
+  return false;
 }
 
 PBoolean H2356_Authenticator::GetAlgorithms(PStringList & algorithms) const

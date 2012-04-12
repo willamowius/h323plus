@@ -90,7 +90,7 @@ class H235Authenticator : public PObject
                                                 Capabilities * caps, 
                                                 PPluginManager * pluginMgr = NULL);
 
-    virtual H235_DiffieHellman * GetMediaSessionInfo(PString & sslAlgorithm);
+    virtual PBoolean GetMediaSessionInfo(PString & algorithmOID, PBYTEArray & sessionKey); 
 #endif
 
     virtual const char * GetName() const = 0;
@@ -265,7 +265,7 @@ PDECLARE_LIST(H235Authenticators, H235Authenticator)
     PBoolean SupportsEncryption() const;
     PBoolean GetAlgorithms(PStringList & algorithms) const;
     PBoolean GetAlgorithmDetails(const PString & algorithm, PString & sslName, PString & description);
-    H235_DiffieHellman * GetMediaSessionInfo(PString & sslAlgorithm);
+	PBoolean GetMediaSessionInfo(PString & algorithmOID, PBYTEArray & sessionKey);
  protected:
     void CreateAuthenticatorsByID(const PStringArray & identifiers);
 #endif

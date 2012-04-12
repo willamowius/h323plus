@@ -116,8 +116,8 @@ class H2356_Authenticator : public H235Authenticator
     // get DH token OID for algorithm OID
     static PString GetDhOIDFromAlg(const PString & alg);
 
-    // get the sslAlgorithm and DH token to create a session
-    virtual H235_DiffieHellman * GetMediaSessionInfo(PString & sslAlgorithm);
+    // get the algorithmOID and DH session key for encryption
+    virtual PBoolean GetMediaSessionInfo(PString & algorithmOID, PBYTEArray & sessionKey);
 
 protected:
     void InitialiseSecurity();
