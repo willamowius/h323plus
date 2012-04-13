@@ -30,7 +30,7 @@
 
 #include <codec/opalplugin.h>
 
-#include "VoIPCodecs/inttypes.h"
+//#include "VoIPCodecs/inttypes.h"
 #include "VoIPCodecs/g722.h"
 
 
@@ -40,17 +40,20 @@
    see RFC3551/4.5.2. So some of these values have to be lied about so that
    the OPAL system gets it right.
   */
-#define CLOCK_RATE              8000  // Clock rate is not samples/second in this case!
-#define BITS_PER_SECOND         64000 // raw bits per second
+#define CLOCK_RATE              16000 
+#define bitspersec_g722_64      64000 // raw bits per second
+#define bitspersec_g722_56      56000 // raw bits per second
+#define bitspersec_g722_48      48000 // raw bits per second
 #define FRAME_TIME              1000  // Microseconds in a millisecond
 #define SAMPLES_PER_FRAME       16    // Samples in a millisecond
 #define	BYTES_PER_FRAME         8     // Bytes in a millisecond
 #define MAX_FRAMES_PER_PACKET   90    // 90 milliseconds, which means RTP packets smaller than 1500 bytes typical LAN maximum
 #define PREF_FRAMES_PER_PACKET  20    // 20 milliseconds
 
-// TODO: will never be loaded by H323Plus with this description!
-static const char L16Desc[]  = "PCM-16-16kHz"; // Cannot use "L16" as usual, force 16kHz PCM
-static const char g722[]     = "G.722-64k";
+static const char L16Desc[]  = "L16"; 
+static const char g722_64[]  = "G.722-64k";
+static const char g722_56[]  = "G.722-56k";
+static const char g722_48[]  = "G.722-48k";
 static const char sdpG722[]  = "G722";
 
 #if INCLUDE_SDP_16000_VERSION
@@ -64,12 +67,12 @@ static const char g722_16[]  = "G.722-16kHz";
 
 static void * create_encoder(const struct PluginCodec_Definition * codec)
 {
-  return g722_encode_init(NULL, BITS_PER_SECOND, 0);
+  return g722_encode_init(NULL, codec->bitsPerSec, 0);
 }
 
 static void destroy_encoder(const struct PluginCodec_Definition * codec, void * context)
 {
-  g722_encode_release(context);
+  g722_encode_release((g722_encode_state_t*)context);
 }
 
 static int encode(const struct PluginCodec_Definition * codec,
@@ -80,12 +83,12 @@ static int encode(const struct PluginCodec_Definition * codec,
                                        unsigned * toLen, 
                                    unsigned int * flag) 
 { 
-  g722_encode_state_t * state = context;
+  g722_encode_state_t * state = (g722_encode_state_t*)context;
 
   if (*toLen < *fromLen / 4)
     return 0; // Destination buffer not big enough
 
-  *toLen = g722_encode(state, to, from, *fromLen / 2);
+  *toLen = g722_encode(state, (uint8_t*)to, (const int16_t*)from, *fromLen / 2);
   return 1; 
 } 
 
@@ -94,12 +97,12 @@ static int encode(const struct PluginCodec_Definition * codec,
 
 static void * create_decoder(const struct PluginCodec_Definition * codec)
 {
-  return g722_decode_init(NULL, BITS_PER_SECOND, 0);
+  return g722_decode_init(NULL, codec->bitsPerSec, 0);
 }
 
 static void destroy_decoder(const struct PluginCodec_Definition * codec, void * context)
 {
-  g722_decode_release(context);
+  g722_decode_release((g722_decode_state_t*)context);
 }
 
 
@@ -111,12 +114,12 @@ static int decode(const struct PluginCodec_Definition * codec,
                                        unsigned * toLen, 
                                    unsigned int * flag) 
 {
-  g722_decode_state_t * state = _context;
+  g722_decode_state_t * state = (g722_decode_state_t*)_context;
 
   if (*toLen < *fromLen * 4)
     return 0; // Destination buffer not big enough
 
-  *toLen = g722_decode(state, to, from, *fromLen) * 2; 
+  *toLen = g722_decode(state, (int16_t*)to, (const uint8_t*)from, *fromLen) * 2; 
   return 1;
 } 
 
@@ -143,6 +146,66 @@ static struct PluginCodec_information licenseInfo = {
   NULL,                                         // codec license
   PluginCodec_License_LGPL                      // codec license code
 };
+
+
+#define DECLARE_H323PARAM(prefix) \
+  { \
+    /* encoder */ \
+    PLUGIN_CODEC_VERSION_WIDEBAND,        /* codec API version */ \
+    &licenseInfo,                         /* license information */ \
+    PluginCodec_MediaTypeAudio |          /* audio codec */ \
+    PluginCodec_InputTypeRaw |            /* raw input data */ \
+    PluginCodec_OutputTypeRaw |           /* raw output data */ \
+    PluginCodec_RTPTypeExplicit,          /* specified RTP type */ \
+    prefix,                               /* text decription */ \
+    L16Desc,                              /* source format */ \
+    prefix,                               /* destination format */ \
+    0,                                    /* user data */ \
+    CLOCK_RATE,                           /* samples per second */ \
+    bitspersec_##prefix,                  /* raw bits per second */ \
+    FRAME_TIME,                           /* microseconds per frame */ \
+    SAMPLES_PER_FRAME,                    /* samples per frame */ \
+    BYTES_PER_FRAME,                      /* bytes per frame */ \
+    PREF_FRAMES_PER_PACKET,               /* recommended number of frames per packet */ \
+    MAX_FRAMES_PER_PACKET,                /* maximum number of frames per packet */ \
+    PAYLOAD_CODE,                         /* IANA RTP payload code */ \
+    sdpG722,                              /* RTP payload name */ \
+    create_encoder,                          /* create codec function */ \
+    destroy_encoder,                         /* destroy codec */ \
+    encode,                                  /* encode/decode */ \
+    NULL,                                    /* codec controls */ \
+    PluginCodec_H323AudioCodec_##prefix##k,  /* h323CapabilityType */ \
+    NULL                                     /* h323CapabilityData */ \
+  }, \
+  { \
+    /* decoder */ \
+    PLUGIN_CODEC_VERSION_WIDEBAND,        /* codec API version */ \
+    &licenseInfo,                         /* license information */ \
+    PluginCodec_MediaTypeAudio |          /* audio codec */ \
+    PluginCodec_InputTypeRaw |            /* raw input data */ \
+    PluginCodec_OutputTypeRaw |           /* raw output data */ \
+    PluginCodec_RTPTypeExplicit,          /* specified RTP type */ \
+    prefix,                               /* text decription */ \
+    prefix,                               /* source format */ \
+    L16Desc,                              /* destination format */ \
+    0,                                    /* user data */ \
+    CLOCK_RATE,                           /* samples per second */ \
+    bitspersec_##prefix,                  /* raw bits per second */ \
+    FRAME_TIME,                           /* microseconds per frame */ \
+    SAMPLES_PER_FRAME,                    /* samples per frame */ \
+    BYTES_PER_FRAME,                      /* bytes per frame */ \
+    PREF_FRAMES_PER_PACKET,               /* recommended number of frames per packet */ \
+    MAX_FRAMES_PER_PACKET,                /* maximum number of frames per packet */ \
+    PAYLOAD_CODE,                         /* IANA RTP payload code */ \
+    sdpG722,                              /* RTP payload name */ \
+    create_decoder,                          /* create codec function */ \
+    destroy_decoder,                         /* destroy codec */ \
+    decode,                                  /* encode/decode */ \
+    NULL,                                    /* codec controls */ \
+    PluginCodec_H323AudioCodec_##prefix##k,  /* h323CapabilityType */ \
+    NULL                                     /* h323CapabilityData */ \
+  }, 
+
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -222,77 +285,9 @@ static struct PluginCodec_Definition g722CodecDefn[] =
     NULL                                  // h323CapabilityData
   },
 #endif
-
-  // Standards compliant version
-  { 
-    // encoder 
-    PLUGIN_CODEC_VERSION_WIDEBAND,        // codec API version
-    &licenseInfo,                         // license information
-
-    PluginCodec_MediaTypeAudio |          // audio codec
-    PluginCodec_InputTypeRaw |            // raw input data
-    PluginCodec_OutputTypeRaw |           // raw output data
-    PluginCodec_RTPTypeExplicit,          // specified RTP type
-
-    g722,                                 // text decription
-    L16Desc,                              // source format
-    g722,                                 // destination format
-
-    0,                                    // user data
-
-    CLOCK_RATE,                           // samples per second
-    BITS_PER_SECOND,                      // raw bits per second
-    FRAME_TIME,                           // microseconds per frame
-    SAMPLES_PER_FRAME,                    // samples per frame
-    BYTES_PER_FRAME,                      // bytes per frame
-    PREF_FRAMES_PER_PACKET,               // recommended number of frames per packet
-    MAX_FRAMES_PER_PACKET,                // maximum number of frames per packe
-    PAYLOAD_CODE,                         // IANA RTP payload code
-    sdpG722,                              // RTP payload name
-
-    create_encoder,                       // create codec function
-    destroy_encoder,                      // destroy codec
-    encode,                               // encode/decode
-    NULL,                                 // codec controls
-
-    PluginCodec_H323AudioCodec_g722_64k,  // h323CapabilityType 
-    NULL                                  // h323CapabilityData
-  },
-
-  { 
-    // decoder 
-    PLUGIN_CODEC_VERSION_WIDEBAND,        // codec API version
-    &licenseInfo,                         // license information
-
-    PluginCodec_MediaTypeAudio |          // audio codec
-    PluginCodec_InputTypeRaw |            // raw input data
-    PluginCodec_OutputTypeRaw |           // raw output data
-    PluginCodec_RTPTypeExplicit,          // specified RTP type
-
-    g722,                                 // text decription
-    g722,                                 // source format
-    L16Desc,                              // destination format
-
-    0,                                    // user data
-
-    CLOCK_RATE,                           // samples per second
-    BITS_PER_SECOND,                      // raw bits per second
-    FRAME_TIME,                           // microseconds per frame
-    SAMPLES_PER_FRAME,                    // samples per frame
-    BYTES_PER_FRAME,                      // bytes per frame
-    PREF_FRAMES_PER_PACKET,               // recommended number of frames per packet
-    MAX_FRAMES_PER_PACKET,                // maximum number of frames per packe
-    PAYLOAD_CODE,                         // IANA RTP payload code
-    sdpG722,                              // RTP payload name
-
-    create_decoder,                       // create codec function
-    destroy_decoder,                      // destroy codec
-    decode,                               // encode/decode
-    NULL,                                 // codec controls
-
-    PluginCodec_H323AudioCodec_g722_64k,  // h323CapabilityType 
-    NULL                                  // h323CapabilityData
-  }
+  DECLARE_H323PARAM(g722_64)
+  //DECLARE_H323PARAM(g722_56)   // Not Used
+  //DECLARE_H323PARAM(g722_48)   // Not Used
 };
 
 
