@@ -1114,7 +1114,7 @@ PBoolean H235AuthCAT::IsSecuredPDU(unsigned rasPDU, PBoolean received) const
 }
 
 // need to load into factory here otherwise doesn't load...
-#if P_SSL && (PTLIB_VER < 2100 || !defined(H323_H235))
+#if PTLIB_VER < 2110 && defined(P_SSL)
 static PFactory<H235Authenticator>::Worker<H2351_Authenticator> factoryH2351_Authenticator("H2351_Authenticator");
 #endif
 
