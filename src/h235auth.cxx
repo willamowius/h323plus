@@ -511,8 +511,8 @@ PBoolean H235Authenticators::CreateAuthenticators(H235Authenticator::Application
   PFactory<H235Authenticator>::KeyList_T::const_iterator r;
   for (r = keyList.begin(); r != keyList.end(); ++r) {
     H235Authenticator * Auth = PFactory<H235Authenticator>::CreateInstance(*r);
-    if ((Auth->GetApplication() == usage) ||
-        (Auth->GetApplication() == H235Authenticator::AnyApplication)) 
+    if (Auth && (Auth->GetApplication() == usage ||
+                 Auth->GetApplication() == H235Authenticator::AnyApplication)) 
            this->Append(Auth);
     else
            delete Auth;
