@@ -53,6 +53,8 @@ const char * OID_AES256 = "2.16.840.1.101.3.4.1.42";
 const char * OID_AES192 = "2.16.840.1.101.3.4.1.22";
 const char * OID_AES128 = "2.16.840.1.101.3.4.1.2";
 
+// the IV sequence is always 6 bytes long (2 bytes seq number + 4 bytes timestamp)
+const unsigned int IV_SEQUENCE_LEN = 6;
 
 H235CryptoEngine::H235CryptoEngine(const PString & algorithmOID)
 {
@@ -67,27 +69,21 @@ H235CryptoEngine::H235CryptoEngine(const PString & algorithmOID, const PBYTEArra
 
 H235CryptoEngine::~H235CryptoEngine()
 {
+	EVP_CIPHER_CTX_cleanup(&m_encryptCtx);
+	EVP_CIPHER_CTX_cleanup(&m_decryptCtx);
 }
 
 void H235CryptoEngine::SetKey(PBYTEArray key)
 {
-	// TODO: H.235.6 clause 9.3.1.1 says iv should be initialized to seq# + timestamp of RTP packets
-	unsigned char * iv;
 	const EVP_CIPHER * cipher = NULL;
 
 	if (m_algorithmOID == OID_AES128) {
 		cipher = EVP_aes_128_cbc();
-		iv = (unsigned char *)malloc(16);
-		memset(iv, 0, 16);
 	} else if (m_algorithmOID == OID_AES192) {
 		cipher = EVP_aes_192_cbc();
-		iv = (unsigned char *)malloc(24);
-		memset(iv, 0, 32);
 #ifdef H323_H235_AES256
 	} else if (m_algorithmOID == OID_AES256) {
 		cipher = EVP_aes_256_cbc();
-		iv = (unsigned char *)malloc(32);
-		memset(iv, 0, 32);
 #endif
 	} else {
 		PTRACE(1, "Unsupported algorithm " << m_algorithmOID);
@@ -95,23 +91,38 @@ void H235CryptoEngine::SetKey(PBYTEArray key)
 	}
   
 	EVP_CIPHER_CTX_init(&m_encryptCtx);
-	EVP_EncryptInit_ex(&m_encryptCtx, cipher, NULL, key.GetPointer(), iv);
+	EVP_EncryptInit_ex(&m_encryptCtx, cipher, NULL, key.GetPointer(), NULL);
 	EVP_CIPHER_CTX_init(&m_decryptCtx);
-	EVP_DecryptInit_ex(&m_decryptCtx, cipher, NULL, key.GetPointer(), iv);
-	free(iv);
+	EVP_DecryptInit_ex(&m_decryptCtx, cipher, NULL, key.GetPointer(), NULL);
 }
 
-PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data)
+void H235CryptoEngine::SetIV(unsigned char * iv, unsigned char * ivSequence, unsigned ivLen)
+{
+	// fill iv by repeating ivSequence until block size is reached
+	if (ivSequence) {
+		for (int i = 0; i < (ivLen / IV_SEQUENCE_LEN); i++) {
+			memcpy(iv + (i * IV_SEQUENCE_LEN), ivSequence, IV_SEQUENCE_LEN);
+		}
+	}
+	// copy partial ivSequence at end
+	if (ivLen % IV_SEQUENCE_LEN > 0)
+		memcpy(iv + ivLen - (ivLen % IV_SEQUENCE_LEN), ivSequence, ivLen % IV_SEQUENCE_LEN);
+}
+
+PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * ivSequence, bool rtpPadding)
 {
 	PBYTEArray data = _data;	// TODO: avoid copy, done because GetPointer() breaks const
+	unsigned char iv[EVP_MAX_IV_LENGTH];
 
 	/* max ciphertext len for a n bytes of plaintext is n + BLOCK_SIZE -1 bytes */
 	int ciphertext_len = data.GetSize() + EVP_CIPHER_CTX_block_size(&m_encryptCtx);
 	int final_len = 0;
     PBYTEArray ciphertext(ciphertext_len);
-  
+
+	SetIV(iv, ivSequence, EVP_CIPHER_CTX_block_size(&m_encryptCtx));
+
 	/* allows reusing of context for multiple encryption cycles */
-	EVP_EncryptInit_ex(&m_encryptCtx, NULL, NULL, NULL, NULL);
+	EVP_EncryptInit_ex(&m_encryptCtx, NULL, NULL, NULL, iv);
 
 	/* update ciphertext, ciphertext_len is filled with the length of ciphertext generated,
 	 *len is the size of plaintext in bytes */
@@ -124,18 +135,23 @@ PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data)
 	return ciphertext;
 }
 
-PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data)
+PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data, unsigned char * ivSequence, bool rtpPadding)
 {
 	PBYTEArray data = _data;	// TODO: avoid copy, done because GetPointer() breaks const
+	unsigned char iv[EVP_MAX_IV_LENGTH];
 
 	/* plaintext will always be equal to or lesser than length of ciphertext*/
 	int plaintext_len = data.GetSize();
 	int final_len = 0;
 	PBYTEArray plaintext(plaintext_len);
   
-	EVP_DecryptInit_ex(&m_decryptCtx, NULL, NULL, NULL, NULL);
+	SetIV(iv, ivSequence, EVP_CIPHER_CTX_block_size(&m_decryptCtx));
+  
+	EVP_DecryptInit_ex(&m_decryptCtx, NULL, NULL, NULL, iv);
 	EVP_DecryptUpdate(&m_decryptCtx, plaintext.GetPointer(), &plaintext_len, data.GetPointer(), data.GetSize());
-	EVP_DecryptFinal_ex(&m_decryptCtx, plaintext.GetPointer() + plaintext_len, &final_len);
+	if(!EVP_DecryptFinal_ex(&m_decryptCtx, plaintext.GetPointer() + plaintext_len, &final_len)) {
+		PTRACE(1, "EVP_DecryptFinal_ex() failed - incorrect padding ?");
+	}
 
 	plaintext.SetSize(plaintext_len + final_len);
 	return plaintext;
@@ -186,7 +202,7 @@ void H235Session::EncodeMediaKey(PBYTEArray & key)
 {
     PTRACE(4, "H235Key\tEncode plain media key: " << endl << hex << m_crytoMasterKey); 
 
-    key = m_dhcontext.Encrypt(m_crytoMasterKey);
+    key = m_dhcontext.Encrypt(m_crytoMasterKey, NULL, false);	// TODO: fix iv sequence and padding
 
     PTRACE(4, "H235Key\tEncrypted key:" << endl << hex << key);
 }
@@ -195,7 +211,7 @@ void H235Session::DecodeMediaKey(PBYTEArray & key)
 {
     PTRACE(4, "H235Key\tH235v3 encrypted key received, size=" << key.GetSize() << endl << hex << key);
 
-    m_crytoMasterKey = m_dhcontext.Decrypt(key);
+    m_crytoMasterKey = m_dhcontext.Decrypt(key, NULL, false);	// TODO: fix iv sequence and padding
     m_context.SetKey(m_crytoMasterKey);
 
     PTRACE(4, "H235Key\tH235v3 key decrypted, size= " << m_crytoMasterKey.GetSize() << endl << hex << m_crytoMasterKey);
@@ -228,7 +244,7 @@ PBoolean H235Session::CreateSession(PBoolean isMaster)
 PBoolean H235Session::ReadFrame(DWORD & /*rtpTimestamp*/, RTP_DataFrame & frame)
 {
     PBYTEArray buffer(frame.GetPayloadPtr(),frame.GetPayloadSize());
-    buffer = m_context.Decrypt(buffer);
+    buffer = m_context.Decrypt(buffer, NULL, false);	// TODO: fix iv sequence and padding
     frame.SetPayloadSize(buffer.GetSize());
     memcpy(frame.GetPayloadPtr(),buffer.GetPointer(), buffer.GetSize());
     buffer.SetSize(0);
@@ -238,7 +254,7 @@ PBoolean H235Session::ReadFrame(DWORD & /*rtpTimestamp*/, RTP_DataFrame & frame)
 PBoolean H235Session::WriteFrame(RTP_DataFrame & frame)
 {
     PBYTEArray buffer(frame.GetPayloadPtr(),frame.GetPayloadSize());
-    buffer = m_context.Encrypt(buffer);
+    buffer = m_context.Encrypt(buffer, NULL, false);	// TODO: fix iv sequence and padding
     frame.SetPayloadSize(buffer.GetSize());
     memcpy(frame.GetPayloadPtr(),buffer.GetPointer(), buffer.GetSize());
     buffer.SetSize(0);

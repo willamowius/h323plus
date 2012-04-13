@@ -66,19 +66,22 @@ public:
       */
     void SetKey(PBYTEArray key);
 
-    /** Encode data
+    /** Encrypt data
       */
-    PBYTEArray Encrypt(const PBYTEArray & data);
+    PBYTEArray Encrypt(const PBYTEArray & data, unsigned char * ivSequence, bool rtpPadding);
 
-    /** Decode data
+    /** Decrypt data
       */
-    PBYTEArray Decrypt(const PBYTEArray & data);
+    PBYTEArray Decrypt(const PBYTEArray & data, unsigned char * ivSequence, bool rtpPadding);
 
     /** Generate a random key of a size suitable for the alogorithm
       */
     PBYTEArray GenerateRandomKey();   // Use internal Algorithm and set
 
     PBYTEArray GenerateRandomKey(const PString & algorithmOID);  // Use assigned Algorithm
+
+protected:
+	static void SetIV(unsigned char * iv, unsigned char * ivSequence, unsigned ivLen);
 
 protected:
 	EVP_CIPHER_CTX m_encryptCtx, m_decryptCtx;
