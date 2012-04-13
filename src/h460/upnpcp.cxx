@@ -491,6 +491,9 @@ bool UPnPThread::CreateMap(bool pair, const PString & protocol,
                         extPort = umap.ExternalPort;
                    }
                 success = true;
+            } else {
+                success = false;
+                break;
             }
         }
         if (success)
@@ -1105,15 +1108,14 @@ PBoolean PNatMethod_UPnP::CreateSocketPair(PUDPSocket * & socket1, PUDPSocket * 
            muxSocket1->GetSubSocket() = new UPnPUDPSocket(this);  /// Data 
            muxSocket2->GetSubSocket() = new UPnPUDPSocket(this);  /// Signal
             pairedPortInfo.basePort    = ep->GetMultiplexPort();
-            pairedPortInfo.maxPort     = pairedPortInfo.basePort+1;
-            pairedPortInfo.currentPort = pairedPortInfo.basePort-1;
-   
+            pairedPortInfo.maxPort     = pairedPortInfo.basePort+100;
+            pairedPortInfo.currentPort = pairedPortInfo.basePort-1;  
                 while ((!OpenSocket(*(muxSocket1->GetSubSocket()), pairedPortInfo,binding)) ||
                        (!OpenSocket(*(muxSocket2->GetSubSocket()), pairedPortInfo,binding)) ||
                        (muxSocket2->GetSubSocket()->GetPort() != muxSocket1->GetSubSocket()->GetPort() + 1) )
                 {
-                        delete muxSocket1;
-                        delete muxSocket2;
+                        delete muxSocket1->GetSubSocket();
+                        delete muxSocket2->GetSubSocket();
                         muxSocket1->GetSubSocket() = new UPnPUDPSocket(this);  /// Data 
                         muxSocket2->GetSubSocket() = new UPnPUDPSocket(this);  /// Signal
                 }
