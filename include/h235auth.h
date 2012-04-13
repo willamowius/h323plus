@@ -260,6 +260,7 @@ PDECLARE_LIST(H235Authenticators, H235Authenticator)
 
 #ifdef H323_H235
     PBoolean CreateAuthenticators(const PASN_Array & clearTokens, const PASN_Array & cryptoTokens);
+    PBoolean CreateAuthenticators(H235Authenticator::Application usage);
     PBoolean CreateAuthenticator(const PString & name);
     PBoolean SupportsEncryption(PStringArray & list) const;
     PBoolean SupportsEncryption() const;

@@ -505,6 +505,21 @@ PStringArray GetIdentifiers(const PASN_Array & clearTokens, const PASN_Array & c
   return ids;
 }
 
+PBoolean H235Authenticators::CreateAuthenticators(H235Authenticator::Application usage)
+{
+  PFactory<H235Authenticator>::KeyList_T keyList = PFactory<H235Authenticator>::GetKeyList();
+  PFactory<H235Authenticator>::KeyList_T::const_iterator r;
+  for (r = keyList.begin(); r != keyList.end(); ++r) {
+    H235Authenticator * Auth = PFactory<H235Authenticator>::CreateInstance(*r);
+    if ((Auth->GetApplication() == usage) ||
+        (Auth->GetApplication() == H235Authenticator::AnyApplication)) 
+           this->Append(Auth);
+    else
+           delete Auth;
+  }
+  return true;
+}
+
 PBoolean H235Authenticators::CreateAuthenticators(const PASN_Array & clearTokens, const PASN_Array & cryptoTokens)
 {
     if (clearTokens.GetSize() == 0 && cryptoTokens.GetSize() == 0)
