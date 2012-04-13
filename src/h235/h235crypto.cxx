@@ -122,17 +122,32 @@ PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * i
 	int final_len = 0;
     PBYTEArray ciphertext(ciphertext_len);
 
-	SetIV(iv, ivSequence, EVP_CIPHER_CTX_block_size(&m_encryptCtx));
+	SetIV(iv, ivSequence, EVP_CIPHER_CTX_iv_length(&m_encryptCtx));
 
 	/* allows reusing of context for multiple encryption cycles */
 	EVP_EncryptInit_ex(&m_encryptCtx, NULL, NULL, NULL, iv);
+
+	if (rtpPadding)
+		EVP_CIPHER_CTX_set_padding(&m_encryptCtx, 1);
+	else
+		EVP_CIPHER_CTX_set_padding(&m_encryptCtx, 0);
 
 	/* update ciphertext, ciphertext_len is filled with the length of ciphertext generated,
 	 *len is the size of plaintext in bytes */
 	EVP_EncryptUpdate(&m_encryptCtx, ciphertext.GetPointer(), &ciphertext_len, data.GetPointer(), data.GetSize());
 
-	/* update ciphertext with the final remaining bytes */
-	EVP_EncryptFinal_ex(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len);
+	if (rtpPadding) {
+		// use RFC padding
+		PTRACE(0, "JW RFC padding");
+		/* update ciphertext with the final remaining bytes */
+		EVP_EncryptFinal_ex(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len);
+	} else if (data.GetSize() % EVP_CIPHER_CTX_block_size(&m_encryptCtx) > 0) {
+		// use cyphertext stealing
+		PTRACE(0, "JW ciphertext stealing not implemented, yet");
+	} else {
+		// neither necessary
+		PTRACE(0, "JW no padding, ciphertext_len=" << ciphertext_len);
+	}
 
 	ciphertext.SetSize(ciphertext_len + final_len);
 	return ciphertext;
@@ -148,9 +163,13 @@ PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data, unsigned char * i
 	int final_len = 0;
 	PBYTEArray plaintext(plaintext_len);
   
-	SetIV(iv, ivSequence, EVP_CIPHER_CTX_block_size(&m_decryptCtx));
+	SetIV(iv, ivSequence, EVP_CIPHER_CTX_iv_length(&m_decryptCtx));
   
 	EVP_DecryptInit_ex(&m_decryptCtx, NULL, NULL, NULL, iv);
+	if (rtpPadding)
+		EVP_CIPHER_CTX_set_padding(&m_decryptCtx, 1);
+	else
+		EVP_CIPHER_CTX_set_padding(&m_decryptCtx, 0);
 	EVP_DecryptUpdate(&m_decryptCtx, plaintext.GetPointer(), &plaintext_len, data.GetPointer(), data.GetSize());
 	if(!EVP_DecryptFinal_ex(&m_decryptCtx, plaintext.GetPointer() + plaintext_len, &final_len)) {
 		PTRACE(1, "EVP_DecryptFinal_ex() failed - incorrect padding ?");
