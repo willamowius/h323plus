@@ -103,13 +103,16 @@ void H235CryptoEngine::SetIV(unsigned char * iv, unsigned char * ivSequence, uns
 		for (unsigned i = 0; i < (ivLen / IV_SEQUENCE_LEN); i++) {
 			memcpy(iv + (i * IV_SEQUENCE_LEN), ivSequence, IV_SEQUENCE_LEN);
 		}
+		// copy partial ivSequence at end
+		if (ivLen % IV_SEQUENCE_LEN > 0) {
+			memcpy(iv + ivLen - (ivLen % IV_SEQUENCE_LEN), ivSequence, ivLen % IV_SEQUENCE_LEN);
+		}
+	} else {
+		memset(iv, 0, ivLen);
 	}
-	// copy partial ivSequence at end
-	if (ivLen % IV_SEQUENCE_LEN > 0)
-		memcpy(iv + ivLen - (ivLen % IV_SEQUENCE_LEN), ivSequence, ivLen % IV_SEQUENCE_LEN);
 }
 
-PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * ivSequence, bool /*rtpPadding*/)
+PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * ivSequence, bool rtpPadding)
 {
 	PBYTEArray & data = *(PRemoveConst(PBYTEArray, &_data));
 	unsigned char iv[EVP_MAX_IV_LENGTH];
@@ -135,7 +138,7 @@ PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * i
 	return ciphertext;
 }
 
-PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data, unsigned char * ivSequence, bool /*rtpPadding*/)
+PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data, unsigned char * ivSequence, bool rtpPadding)
 {
 	PBYTEArray & data = *(PRemoveConst(PBYTEArray, &_data));
 	unsigned char iv[EVP_MAX_IV_LENGTH];
