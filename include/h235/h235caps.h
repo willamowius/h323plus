@@ -526,7 +526,6 @@ class H323SecureCapability : public H323SecureRealTimeCapability
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-class H235Context;
 class H235_DiffieHellman;
 class H235Capabilities : public H323Capabilities
 {
@@ -584,12 +583,9 @@ public:
       */
     PBoolean GetAlgorithms(const PStringList & algorithms) const;
 
-    H235Context * GetContext() { return m_context; }
-    void SetEncryptionContext(H235Context * context)  { m_context = context; }
     H235_DiffieHellman * GetDiffieHellMan() { return m_DHkey; }
 
 protected:
-    H235Context        * m_context;
     H235_DiffieHellman * m_DHkey; 
     PStringList          m_algorithms;
     PBoolean             m_h245Master;

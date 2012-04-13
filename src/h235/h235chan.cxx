@@ -44,7 +44,7 @@
 #ifdef H323_H235
 
 #include "h235/h235chan.h"
-#include "h235/h235con.h"
+#include "h235/h235crypto.h"
 #include <h323rtp.h>
 #include <h323con.h>
 
@@ -109,7 +109,6 @@ void ReadEncryptionSync(const H245_EncryptionSync & sync, H235Session & session)
               if (v3data.HasOptionalField(H235_V3KeySyncMaterial::e_encryptedSessionKey)) {
                   PBYTEArray mediaKey = v3data.m_encryptedSessionKey;
                   session.DecodeMediaKey(mediaKey);
-                  session.SetMediaKey(mediaKey);
               }
             }
            break;

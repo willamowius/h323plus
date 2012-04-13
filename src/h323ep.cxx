@@ -97,10 +97,6 @@
 #include <h224handler.h>
 #endif
 
-#ifdef H323_H235
-#include "h235/h235con.h"
-#endif
-
 #ifdef H323_FILE
 #include "h323filetransfer.h"
 #endif
@@ -518,10 +514,6 @@ H323EndPoint::H323EndPoint()
   gnugk = NULL;
 #endif
 
-#ifdef H323_H235
-  m_encContext = NULL;
-#endif
-
   m_useH225KeepAlive = PFalse;
   m_useH245KeepAlive = PFalse;
 
@@ -556,10 +548,6 @@ H323EndPoint::~H323EndPoint()
 
 #ifdef H323_GNUGK
   delete gnugk;
-#endif
-
-#ifdef H323_H235
-  delete m_encContext;
 #endif
 
   // Shut down the listeners as soon as possible to avoid race conditions
@@ -3495,14 +3483,6 @@ void H323EndPoint::RegMethod(PThread &, INT)
 	gatekeeper->ReRegisterNow();
 }
 
-#ifdef H323_H235
-H235Context * H323EndPoint::GetMediaEncryptionContext()
-{
-    if (m_encContext == NULL) 
-        m_encContext = new H235Context();
 
-    return m_encContext;
-}
-#endif
 
 

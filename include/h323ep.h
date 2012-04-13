@@ -90,10 +90,6 @@ class H460PresenceHandler;
 class GNUGK_Feature;
 #endif
 
-#ifdef H323_H235
-class H235Context;
-#endif
-
 #ifdef H323_UPnP
 class PNatMethod_UPnP;
 #endif
@@ -1383,12 +1379,6 @@ class H323EndPoint : public PObject
     ) const;
 #endif
 
-#ifdef H323_H235
-    /** Retrieve Media Encryption Context 
-      */
-    H235Context * GetMediaEncryptionContext();
-#endif
-
 #ifdef H323_FILE
     /** Open File Transfer Session
         Use this to initiate a file transfer.
@@ -2624,10 +2614,6 @@ class H323EndPoint : public PObject
 
 #ifdef H323_GNUGK
     GNUGK_Feature * gnugk;
-#endif
-
-#ifdef H323_H235
-    H235Context * m_encContext;
 #endif
 
     void RegInvokeReRegistration();

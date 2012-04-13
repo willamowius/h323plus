@@ -54,6 +54,7 @@ public:
   //@{
     /** Create a H.235 crypto engine
      */
+    H235CryptoEngine(const PString & algorithmOID);
     H235CryptoEngine(const PString & algorithmOID, const PBYTEArray & key);
 
    /** Destroy the crypto engine
@@ -80,6 +81,64 @@ public:
 protected:
 	EVP_CIPHER_CTX m_encryptCtx, m_decryptCtx;
 	PString m_algorithmOID;	// eg. "2.16.840.1.101.3.4.1.2"
+};
+
+
+class RTP_DataFrame;
+class H235_DiffieHellman;
+class H235Capabilities;
+class H235Session : public  PObject
+{
+	 PCLASSINFO(H235Session, PObject);
+
+public:
+
+ /**@name Constructor */
+  //@{
+    /** Create a SSL Session Context
+     */
+    H235Session(H235Capabilities * caps,  const PString & oidAlgorithm);
+
+   /** Destroy the SSL Session Context
+     */
+	~H235Session();
+  //@}
+
+ /**@name General Public Functions */
+  //@{
+    /** Create Session - call SetMediaKey() before!
+     */
+    PBoolean CreateSession();
+
+    /** Encode media key
+      */
+    void EncodeMediaKey(PBYTEArray & key);
+
+    /** Decode media key
+      */
+    void DecodeMediaKey(PBYTEArray & key);
+
+    /** Is Active 
+      */
+    PBoolean IsActive();
+
+    /** Is Initialised
+     */
+    PBoolean IsInitialised();
+
+    /** Read Frame
+     */
+    PBoolean ReadFrame(DWORD & rtpTimestamp, RTP_DataFrame & frame);
+
+    /** Write Frame
+     */
+    PBoolean WriteFrame(RTP_DataFrame & frame);
+  //@}
+
+private:
+    H235_DiffieHellman & m_dh;
+    H235CryptoEngine     m_context;
+    PBoolean             m_isInitialised;  /// Is Initialised
 };
 
 #endif // H235CRYPTO_H

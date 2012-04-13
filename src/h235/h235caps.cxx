@@ -633,13 +633,13 @@ H323Codec * H323SecureCapability::CreateCodec(H323Codec::Direction direction) co
 /////////////////////////////////////////////////////////////////////////////
 
 H235Capabilities::H235Capabilities()
-:   m_context(NULL), m_DHkey(NULL), m_h245Master(false)
+: m_DHkey(NULL), m_h245Master(false)
 {
     m_algorithms.SetSize(0);
 }
 
 H235Capabilities::H235Capabilities(const H323Capabilities & original)
-:  m_context(NULL), m_DHkey(NULL), m_h245Master(false)
+: m_DHkey(NULL), m_h245Master(false)
 {
   m_algorithms.SetSize(0);
   const H323CapabilitiesSet rset = original.GetSet();
@@ -669,11 +669,10 @@ H235Capabilities::H235Capabilities(const H323Capabilities & original)
 }
 
 H235Capabilities::H235Capabilities(const H323Connection & connection, const H245_TerminalCapabilitySet & pdu)
- : H323Capabilities(connection, pdu), m_context(NULL), m_DHkey(NULL), m_h245Master(false)
+ : H323Capabilities(connection, pdu), m_DHkey(NULL), m_h245Master(false)
 {
    const H235Capabilities & localCapabilities = (const H235Capabilities &)connection.GetLocalCapabilities();
    PRemoveConst(H235Capabilities,&localCapabilities)->GetDHKeyPair(m_algorithms, m_DHkey, m_h245Master);
-   m_context = connection.GetEndPoint().GetMediaEncryptionContext();
 }
 
 static unsigned SetCapabilityNumber(const H323CapabilitiesList & table,

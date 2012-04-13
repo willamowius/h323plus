@@ -605,10 +605,6 @@ H323Connection::H323Connection(H323EndPoint & ep,
 #endif
 #endif
 
-#ifdef H323_H235
-  localCapabilities.SetEncryptionContext(ep.GetMediaEncryptionContext());
-#endif
-
   nonCallConnection = FALSE;
 }
 

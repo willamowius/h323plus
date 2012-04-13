@@ -41,9 +41,23 @@
 #ifdef H323_H235
 
 #include "h235/h235crypto.h"
-//#include "h235/h2351.h"	/7 can't inclkude, because it will result in double defined variables
 #include <openssl/aes.h>
 #include <openssl/rand.h>
+
+#include "rtp.h"
+#include "h235/h235caps.h"
+
+#ifdef H323_H235_AES256
+const char * OID_AES256 = "2.16.840.1.101.3.4.1.42";
+#endif
+const char * OID_AES192 = "2.16.840.1.101.3.4.1.22";
+const char * OID_AES128 = "2.16.840.1.101.3.4.1.2";
+
+
+H235CryptoEngine::H235CryptoEngine(const PString & algorithmOID)
+{
+	m_algorithmOID = algorithmOID;
+}
 
 H235CryptoEngine::H235CryptoEngine(const PString & algorithmOID, const PBYTEArray & key)
 {
@@ -61,18 +75,20 @@ void H235CryptoEngine::SetKey(PBYTEArray key)
 	unsigned char * iv;
 	const EVP_CIPHER * cipher = NULL;
 
-	if (m_algorithmOID == "2.16.840.1.101.3.4.1.2") {
+	if (m_algorithmOID == OID_AES128) {
 		cipher = EVP_aes_128_cbc();
 		iv = (unsigned char *)malloc(16);
 		memset(iv, 0, 16);
-	} else if (m_algorithmOID == "2.16.840.1.101.3.4.1.22") {
+	} else if (m_algorithmOID == OID_AES192) {
 		cipher = EVP_aes_192_cbc();
 		iv = (unsigned char *)malloc(24);
 		memset(iv, 0, 32);
-	} else if (m_algorithmOID == "2.16.840.1.101.3.4.1.42") {
+#ifdef H323_H235_AES256
+	} else if (m_algorithmOID == OID_AES256) {
 		cipher = EVP_aes_256_cbc();
 		iv = (unsigned char *)malloc(32);
 		memset(iv, 0, 32);
+#endif
 	} else {
 		PTRACE(1, "Unsupported algorithm " << m_algorithmOID);
 		return;
@@ -129,12 +145,14 @@ PBYTEArray H235CryptoEngine::GenerateRandomKey(const PString & algorithmOID)
 {
 	PBYTEArray key;
 
-	if (algorithmOID == "2.16.840.1.101.3.4.1.2") {
+	if (algorithmOID == OID_AES128) {
 		key.SetSize(16);
-	} else if (m_algorithmOID == "2.16.840.1.101.3.4.1.22") {
+	} else if (m_algorithmOID == OID_AES192) {
 		key.SetSize(24);
-	} else if (m_algorithmOID == "2.16.840.1.101.3.4.1.42") {
+#ifdef H323_H235_AES256
+	} else if (m_algorithmOID == OID_AES256) {
 		key.SetSize(32);
+#endif
 	} else {
 		PTRACE(1, "Unsupported algorithm " << algorithmOID);
 		return key;
@@ -142,6 +160,78 @@ PBYTEArray H235CryptoEngine::GenerateRandomKey(const PString & algorithmOID)
 	RAND_bytes(key.GetPointer(), key.GetSize());
 
 	return key;
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+
+H235Session::H235Session(H235Capabilities * caps, const PString & oidAlgorithm)
+: m_dh(*caps->GetDiffieHellMan()), m_context(oidAlgorithm), m_isInitialised(false)
+{
+
+}
+
+H235Session::~H235Session()
+{
+
+}
+
+
+void H235Session::EncodeMediaKey(PBYTEArray & key)
+{
+    PTRACE(4, "H235Key\tEncode plain media key: " << endl << hex << key); 
+
+    PBYTEArray encrypted;
+    // TODO: Encrypt Master Key with Diffie Hellman session key
+    key = encrypted;
+
+    PTRACE(4, "H235Key\tEncrypted key:" << endl << hex << key);
+}
+
+void H235Session::DecodeMediaKey(PBYTEArray & key)
+{
+    PTRACE(4, "H235Key\tH235v3 encrypted key received, size=" << key.GetSize() << endl << hex << key);
+
+    PBYTEArray decrypted;
+    // TODO: Decrypt Master Key with Diffie Hellman session key
+    key = decrypted;
+
+    PTRACE(4, "H235Key\tH235v3 key decrypted, size= " << key.GetSize() << endl << hex << key);
+}
+
+PBoolean H235Session::IsActive()
+{
+    return !IsInitialised();
+}
+
+PBoolean H235Session::IsInitialised() 
+{ 
+    return m_isInitialised; 
+}
+
+PBoolean H235Session::CreateSession()
+{
+    m_isInitialised = true;
+    return true;
+}
+
+PBoolean H235Session::ReadFrame(DWORD & /*rtpTimestamp*/, RTP_DataFrame & frame)
+{
+    PBYTEArray buffer(frame.GetPayloadPtr(),frame.GetPayloadSize());
+    buffer = m_context.Decrypt(buffer);
+    frame.SetPayloadSize(buffer.GetSize());
+    memcpy(frame.GetPayloadPtr(),buffer.GetPointer(), buffer.GetSize());
+    buffer.SetSize(0);
+    return true;
+}
+
+PBoolean H235Session::WriteFrame(RTP_DataFrame & frame)
+{
+    PBYTEArray buffer(frame.GetPayloadPtr(),frame.GetPayloadSize());
+    buffer = m_context.Encrypt(buffer);
+    frame.SetPayloadSize(buffer.GetSize());
+    memcpy(frame.GetPayloadPtr(),buffer.GetPointer(), buffer.GetSize());
+    buffer.SetSize(0);
+    return true;
 }
 
 #endif

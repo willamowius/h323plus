@@ -179,12 +179,16 @@ static struct {
 // Algorithms
 
 #ifdef H323_H235_AES256
-const char * OID_AES256 = "2.16.840.1.101.3.4.1.42";
+const char * ID_AES256 = "2.16.840.1.101.3.4.1.42";
 const char * SSL_AES256 = "DHE-RSA-AES256-SHA";
 const char * DES_AES256 = "AES256";
 #endif
 
-const char * OID_AES128 = "2.16.840.1.101.3.4.1.2";
+const char * ID_AES192 = "2.16.840.1.101.3.4.1.22";
+const char * SSL_AES192 = "DHE-RSA-AES192-SHA";
+const char * DES_AES192 = "AES192";
+
+const char * ID_AES128 = "2.16.840.1.101.3.4.1.2";
 const char * SSL_AES128 = "DHE-RSA-AES128-SHA";
 const char * DES_AES128 = "AES128";
 
@@ -194,23 +198,24 @@ static struct {
     const char * desc;
 } H235_Encryptions[] = {
 #ifdef H323_H235_AES256
-    { OID_AES256, SSL_AES256, DES_AES256 },
+    { ID_AES256, SSL_AES256, DES_AES256 },
 #endif
-    { OID_AES128, SSL_AES128, DES_AES128 },
-    { OID_H235V3, "H235v3"  , "H235v3"   }
+ // { ID_AES192, SSL_AES192, DES_AES192 },
+    { ID_AES128, SSL_AES128, DES_AES128 },
+    { OID_H235V3, "H235v3" , "H235v3"   }
 };
+
 
 static struct {
     const char * algorithm;
     const char * DHparameters;
 } H235_Algorithms[] = {
 #ifdef H323_H235_AES256
-    { OID_AES256, OID_DH4096 },
-    { OID_AES256, OID_DH2048 },
+    { ID_AES256, OID_DH4096 },
+    { ID_AES256, OID_DH2048 },
 #endif
-    { OID_AES128, OID_DH1024 }
+ // { ID_AES192, OID_DH2048 },
+    { ID_AES128, OID_DH1024 }
 };
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #endif  // _H2351_H
