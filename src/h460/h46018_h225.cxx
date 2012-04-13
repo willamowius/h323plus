@@ -1134,7 +1134,9 @@ void H46019UDPSocket::SendRTPPing(const PIPSocket::Address & ip, const WORD & po
 
     // determining correct timestamp
     PTime currentTime = PTime();
-    PTimeInterval timePassed = currentTime - *keepStartTime;
+    PTimeInterval timePassed = 0;
+    if (keepStartTime) 
+        timePassed = currentTime - *keepStartTime;
     rtp.SetTimestamp((DWORD)timePassed.GetMilliSeconds() * 8);
 
     rtp.SetMarker(TRUE);
