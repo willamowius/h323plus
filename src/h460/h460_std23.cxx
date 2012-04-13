@@ -416,8 +416,13 @@ void H460_FeatureStd23::OnNATTypeDetection(PSTUNClient::NatTypes type, const PIP
     if (natType == PSTUNClient::UnknownNat) {
         PTRACE(4,"Std23\tSTUN Test Result: " << type << " forcing reregistration.");
 #ifdef H323_UPnP
-        if (type > PSTUNClient::ConeNat)
-            EP->InitialiseUPnP();
+        if (type > PSTUNClient::ConeNat) {
+           PString name = PString();
+           if (IsAlternateAvailable(name))
+               EP->NATMethodCallBack(name,1,"Available");
+           else
+               EP->InitialiseUPnP();
+        }
 #endif
         natType = type;  // first time detection
     } else {
@@ -485,8 +490,15 @@ void H460_FeatureStd23::StartSTUNTest(const PString & server)
     natType = PSTUNClient::UnknownNat;
 
     PNatMethod_H46024 * xnat = (PNatMethod_H46024 *)EP->GetNatMethods().LoadNatMethod("H46024");
+#ifdef H323_UPnP
+    PString name = PString();
+    if (IsAlternateAvailable(name)) {
+          EP->NATMethodCallBack(name,1,"Available");
+          EP->ForceGatekeeperReRegistration();
+    } else
+#endif
+        xnat->Start(s,this);
 
-    xnat->Start(s,this);
     EP->GetNatMethods().AddMethod(xnat);
 }
 
@@ -494,6 +506,23 @@ bool H460_FeatureStd23::IsAvailable()
 {
     return isavailable;
 }
+
+#if H323_UPnP
+bool H460_FeatureStd23::IsAlternateAvailable(PString & name)
+{
+    PNatMethod_UPnP * upnpMethod = (PNatMethod_UPnP *)EP->GetNatMethods().GetMethodByName("UPnP");
+    if (upnpMethod && upnpMethod->IsAvailable(PIPSocket::Address::GetAny(4))) {
+          PTRACE(4,"Std23\tSTUN Setting alternate: UPnP");
+          name = upnpMethod->GetName();
+          natType = PSTUNClient::ConeNat;
+          natNotify = true;
+          useAlternate = 1;
+          upnpMethod->Activate(true);
+          return true;
+    }
+    return false;
+}
+#endif
 
 void H460_FeatureStd23::DelayedReRegistration()
 {

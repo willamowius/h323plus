@@ -157,14 +157,13 @@ public:
     bool AlternateNATMethod();
     bool UseAlternate();
 
-//#ifdef H323_UPnP
-    //void InitialiseUPnP();
-//#endif
-
 protected:
     bool DetectALG(const PIPSocket::Address & detectAddress);
     void StartSTUNTest(const PString & server);
     
+#ifdef H323_UPnP
+    bool IsAlternateAvailable(PString & name);
+#endif
     void DelayedReRegistration();
  
 private:
