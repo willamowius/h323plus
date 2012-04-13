@@ -391,7 +391,7 @@ void LoadDiffieHellmanMap(std::map<PString, H235_DiffieHellman*> & dhmap)
 #if PTLIB_VER >= 2110
 H235SECURITY(Std6);
 #else
-static PFactory<H235Authenticator>::Worker<H2356_Authenticator> factoryH235AuthSimpleMD5("H2356_Authenticator");
+static PFactory<H235Authenticator>::Worker<H2356_Authenticator> factoryH2356_Authenticator("H2356_Authenticator");
 #endif
 
 H2356_Authenticator::H2356_Authenticator()
