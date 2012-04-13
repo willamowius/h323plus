@@ -41,7 +41,6 @@
 #ifdef H323_H235
 
 #include "h235/h235crypto.h"
-#include <openssl/aes.h>
 #include <openssl/rand.h>
 
 #include "rtp.h"
@@ -106,8 +105,8 @@ PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data)
 {
 	PBYTEArray data = _data;	// TODO: avoid copy, done because GetPointer() breaks const
 
-	/* max ciphertext len for a n bytes of plaintext is n + AES_BLOCK_SIZE -1 bytes */
-	int ciphertext_len = data.GetSize() + AES_BLOCK_SIZE;	// TODO: this assumes AES cyphers
+	/* max ciphertext len for a n bytes of plaintext is n + BLOCK_SIZE -1 bytes */
+	int ciphertext_len = data.GetSize() + EVP_CIPHER_CTX_block_size(&m_encryptCtx);
 	int final_len = 0;
     PBYTEArray ciphertext(ciphertext_len);
   
@@ -182,7 +181,6 @@ H235Session::~H235Session()
 {
 
 }
-
 
 void H235Session::EncodeMediaKey(PBYTEArray & key)
 {
