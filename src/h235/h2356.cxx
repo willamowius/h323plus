@@ -275,7 +275,7 @@ void H235_DiffieHellman::Encode_HalfKey(PASN_BitString & hk)
 
 	len=BN_num_bytes(dh->pub_key);
 	bits_key=BN_num_bits(dh->pub_key);
-
+// TODO Verify that the halfkey is being packed properly - SH
 	data=(unsigned char *)OPENSSL_malloc(len+20);
 	if (data != NULL){
 		l=BN_bn2bin(dh->pub_key,data);
@@ -304,7 +304,7 @@ PBoolean H235_DiffieHellman::GenerateHalfKey()
 
     if (!CheckParams())
 	  return FALSE;
-
+// TODO check if half key is generated correctly - SH
 	if (!DH_generate_key(dh)) {
 		PStringStream ErrStr;
 		char buf[256];
