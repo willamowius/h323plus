@@ -76,7 +76,9 @@ public:
 
     /** Generate a random key of a size suitable for the alogorithm
       */
-    PBYTEArray GenerateRandomKey(const PString & algorithmOID);
+    PBYTEArray GenerateRandomKey();   // Use internal Algorithm and set
+
+    PBYTEArray GenerateRandomKey(const PString & algorithmOID);  // Use assigned Algorithm
 
 protected:
 	EVP_CIPHER_CTX m_encryptCtx, m_decryptCtx;
@@ -106,9 +108,9 @@ public:
 
  /**@name General Public Functions */
   //@{
-    /** Create Session - call SetMediaKey() before!
+    /** Create Session
      */
-    PBoolean CreateSession();
+    PBoolean CreateSession(PBoolean isMaster);
 
     /** Encode media key
       */
@@ -137,8 +139,13 @@ public:
 
 private:
     H235_DiffieHellman & m_dh;
-    H235CryptoEngine     m_context;
+    H235CryptoEngine     m_context;        /// Media encryption
+    H235CryptoEngine     m_dhcontext;      /// Media key encryption
     PBoolean             m_isInitialised;  /// Is Initialised
+    PBoolean             m_isMaster;
+
+    PBYTEArray           m_dhSessionkey;
+    PBYTEArray           m_crytoMasterKey;
 };
 
 #endif // H235CRYPTO_H

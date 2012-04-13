@@ -46,6 +46,7 @@
 
 #include "rtp.h"
 #include "h235/h235caps.h"
+#include "h235/h2356.h"
 
 #ifdef H323_H235_AES256
 const char * OID_AES256 = "2.16.840.1.101.3.4.1.42";
@@ -141,6 +142,13 @@ PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data)
 	return plaintext;
 }
 
+PBYTEArray H235CryptoEngine::GenerateRandomKey()
+{
+    PBYTEArray result = GenerateRandomKey(m_algorithmOID);	
+	SetKey(result);
+    return result;
+}
+
 PBYTEArray H235CryptoEngine::GenerateRandomKey(const PString & algorithmOID)
 {
 	PBYTEArray key;
@@ -165,7 +173,7 @@ PBYTEArray H235CryptoEngine::GenerateRandomKey(const PString & algorithmOID)
 ///////////////////////////////////////////////////////////////////////////////////
 
 H235Session::H235Session(H235Capabilities * caps, const PString & oidAlgorithm)
-: m_dh(*caps->GetDiffieHellMan()), m_context(oidAlgorithm), m_isInitialised(false)
+: m_dh(*caps->GetDiffieHellMan()), m_context(oidAlgorithm), m_dhcontext(oidAlgorithm), m_isInitialised(false), m_isMaster(false)
 {
 
 }
@@ -178,11 +186,9 @@ H235Session::~H235Session()
 
 void H235Session::EncodeMediaKey(PBYTEArray & key)
 {
-    PTRACE(4, "H235Key\tEncode plain media key: " << endl << hex << key); 
+    PTRACE(4, "H235Key\tEncode plain media key: " << endl << hex << m_crytoMasterKey); 
 
-    PBYTEArray encrypted;
-    // TODO: Encrypt Master Key with Diffie Hellman session key
-    key = encrypted;
+    key = m_dhcontext.Encrypt(m_crytoMasterKey);
 
     PTRACE(4, "H235Key\tEncrypted key:" << endl << hex << key);
 }
@@ -191,11 +197,10 @@ void H235Session::DecodeMediaKey(PBYTEArray & key)
 {
     PTRACE(4, "H235Key\tH235v3 encrypted key received, size=" << key.GetSize() << endl << hex << key);
 
-    PBYTEArray decrypted;
-    // TODO: Decrypt Master Key with Diffie Hellman session key
-    key = decrypted;
+    m_crytoMasterKey = m_dhcontext.Decrypt(key);
+    m_context.SetKey(m_crytoMasterKey);
 
-    PTRACE(4, "H235Key\tH235v3 key decrypted, size= " << key.GetSize() << endl << hex << key);
+    PTRACE(4, "H235Key\tH235v3 key decrypted, size= " << m_crytoMasterKey.GetSize() << endl << hex << m_crytoMasterKey);
 }
 
 PBoolean H235Session::IsActive()
@@ -208,9 +213,17 @@ PBoolean H235Session::IsInitialised()
     return m_isInitialised; 
 }
 
-PBoolean H235Session::CreateSession()
+PBoolean H235Session::CreateSession(PBoolean isMaster)
 {
+    m_isMaster = isMaster;
     m_isInitialised = true;
+
+    m_dh.ComputeSessionKey(m_dhSessionkey);
+    m_dhcontext.SetKey(m_dhSessionkey);
+
+    if (m_isMaster) 
+        m_crytoMasterKey = m_context.GenerateRandomKey();
+
     return true;
 }
 

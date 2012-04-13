@@ -121,8 +121,8 @@ PBoolean H323SecureRTPChannel::OnSendingPDU(H245_OpenLogicalChannel & open) cons
   PTRACE(4, "H235RTP\tOnSendingPDU");
 
   if (H323_RealTimeChannel::OnSendingPDU(open)) {
-       if (connection.IsH245Master() && m_encryption && m_encryption->IsActive()) {
-            if (m_encryption->CreateSession()) {
+       if (connection.IsH245Master() && m_encryption) {
+            if (m_encryption->CreateSession(true)) {
                 open.IncludeOptionalField(H245_OpenLogicalChannel::e_encryptionSync);
                 BuildEncryptionSync(open.m_encryptionSync,*this,*m_encryption);
             }
@@ -158,7 +158,7 @@ PBoolean H323SecureRTPChannel::OnReceivedPDU(const H245_OpenLogicalChannel & ope
 
    if (H323_RealTimeChannel::OnReceivedPDU(open,errorCode)) {
        if (open.HasOptionalField(H245_OpenLogicalChannel::e_encryptionSync)) {
-           if (m_encryption->CreateSession())
+           if (m_encryption->CreateSession(false))
                ReadEncryptionSync(open.m_encryptionSync,*m_encryption);
        }
        return true;
