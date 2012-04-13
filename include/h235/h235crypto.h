@@ -147,6 +147,8 @@ private:
     PBoolean             m_isInitialised;  /// Is Initialised
     PBoolean             m_isMaster;
 
+    unsigned char *      m_ivReadSequence;
+    unsigned char *      m_ivWriteSequence;
     PBYTEArray           m_dhSessionkey;
     PBYTEArray           m_crytoMasterKey;
 };

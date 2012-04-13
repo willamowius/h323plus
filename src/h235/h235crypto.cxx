@@ -100,7 +100,7 @@ void H235CryptoEngine::SetIV(unsigned char * iv, unsigned char * ivSequence, uns
 {
 	// fill iv by repeating ivSequence until block size is reached
 	if (ivSequence) {
-		for (int i = 0; i < (ivLen / IV_SEQUENCE_LEN); i++) {
+		for (unsigned i = 0; i < (ivLen / IV_SEQUENCE_LEN); i++) {
 			memcpy(iv + (i * IV_SEQUENCE_LEN), ivSequence, IV_SEQUENCE_LEN);
 		}
 	}
@@ -109,9 +109,9 @@ void H235CryptoEngine::SetIV(unsigned char * iv, unsigned char * ivSequence, uns
 		memcpy(iv + ivLen - (ivLen % IV_SEQUENCE_LEN), ivSequence, ivLen % IV_SEQUENCE_LEN);
 }
 
-PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * ivSequence, bool rtpPadding)
+PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * ivSequence, bool /*rtpPadding*/)
 {
-	PBYTEArray data = _data;	// TODO: avoid copy, done because GetPointer() breaks const
+	PBYTEArray & data = *(PRemoveConst(PBYTEArray, &_data));
 	unsigned char iv[EVP_MAX_IV_LENGTH];
 
 	/* max ciphertext len for a n bytes of plaintext is n + BLOCK_SIZE -1 bytes */
@@ -135,9 +135,9 @@ PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * i
 	return ciphertext;
 }
 
-PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data, unsigned char * ivSequence, bool rtpPadding)
+PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data, unsigned char * ivSequence, bool /*rtpPadding*/)
 {
-	PBYTEArray data = _data;	// TODO: avoid copy, done because GetPointer() breaks const
+	PBYTEArray & data = *(PRemoveConst(PBYTEArray, &_data));
 	unsigned char iv[EVP_MAX_IV_LENGTH];
 
 	/* plaintext will always be equal to or lesser than length of ciphertext*/
@@ -188,7 +188,9 @@ PBYTEArray H235CryptoEngine::GenerateRandomKey(const PString & algorithmOID)
 ///////////////////////////////////////////////////////////////////////////////////
 
 H235Session::H235Session(H235Capabilities * caps, const PString & oidAlgorithm)
-: m_dh(*caps->GetDiffieHellMan()), m_context(oidAlgorithm), m_dhcontext(oidAlgorithm), m_isInitialised(false), m_isMaster(false)
+: m_dh(*caps->GetDiffieHellMan()), m_context(oidAlgorithm), m_dhcontext(oidAlgorithm), 
+  m_isInitialised(false), m_isMaster(false),
+  m_ivReadSequence(NULL), m_ivWriteSequence(NULL), m_dhSessionkey(0), m_crytoMasterKey(0)
 {
 
 }
@@ -244,7 +246,7 @@ PBoolean H235Session::CreateSession(PBoolean isMaster)
 PBoolean H235Session::ReadFrame(DWORD & /*rtpTimestamp*/, RTP_DataFrame & frame)
 {
     PBYTEArray buffer(frame.GetPayloadPtr(),frame.GetPayloadSize());
-    buffer = m_context.Decrypt(buffer, NULL, false);	// TODO: fix iv sequence and padding
+    buffer = m_context.Decrypt(buffer, m_ivReadSequence, false);	// TODO: fix iv sequence and padding
     frame.SetPayloadSize(buffer.GetSize());
     memcpy(frame.GetPayloadPtr(),buffer.GetPointer(), buffer.GetSize());
     buffer.SetSize(0);
@@ -254,7 +256,7 @@ PBoolean H235Session::ReadFrame(DWORD & /*rtpTimestamp*/, RTP_DataFrame & frame)
 PBoolean H235Session::WriteFrame(RTP_DataFrame & frame)
 {
     PBYTEArray buffer(frame.GetPayloadPtr(),frame.GetPayloadSize());
-    buffer = m_context.Encrypt(buffer, NULL, false);	// TODO: fix iv sequence and padding
+    buffer = m_context.Encrypt(buffer, m_ivWriteSequence, false);	// TODO: fix iv sequence and padding
     frame.SetPayloadSize(buffer.GetSize());
     memcpy(frame.GetPayloadPtr(),buffer.GetPointer(), buffer.GetSize());
     buffer.SetSize(0);
