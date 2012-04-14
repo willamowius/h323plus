@@ -171,7 +171,7 @@ void H235_DiffieHellman::Encode_G(PASN_BitString & g) const
     memset(data, 0, len_p);
 	if (data != NULL) {
 		 if (BN_bn2bin(dh->g, data + len_p - len_g) > 0)
-		     g.SetData(bits_p,data);
+		     g.SetData(bits_p, data);
 	}
 	OPENSSL_free(data);
 }
@@ -220,10 +220,11 @@ PBoolean H235_DiffieHellman::GenerateHalfKey()
 {
     PWaitAndSignal m(vbMutex);
 
+	// TODO: no sense checking - p and g are from the spec
     if (!CheckParams())
 	  return FALSE;
 
-	// TODO check if half key is generated correctly - SH
+	// TODO check if half key is generated correctly - SH - looks OK - JW
 	if (!DH_generate_key(dh)) {
 		char buf[256];
 		ERR_error_string(ERR_get_error(), buf);
