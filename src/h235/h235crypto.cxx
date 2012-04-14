@@ -138,15 +138,13 @@ PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * i
 
 	if (rtpPadding) {
 		// use RFC padding
-		PTRACE(0, "JW RFC padding");
 		/* update ciphertext with the final remaining bytes */
 		EVP_EncryptFinal_ex(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len);
 	} else if (data.GetSize() % EVP_CIPHER_CTX_block_size(&m_encryptCtx) > 0) {
-		// use cyphertext stealing
+		// TODO: use cyphertext stealing
 		PTRACE(0, "JW ciphertext stealing not implemented, yet");
 	} else {
 		// neither necessary
-		PTRACE(0, "JW no padding, ciphertext_len=" << ciphertext_len);
 	}
 
 	ciphertext.SetSize(ciphertext_len + final_len);
@@ -170,6 +168,10 @@ PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data, unsigned char * i
 		EVP_CIPHER_CTX_set_padding(&m_decryptCtx, 1);
 	else
 		EVP_CIPHER_CTX_set_padding(&m_decryptCtx, 0);
+	if (data.GetSize() % EVP_CIPHER_CTX_block_size(&m_decryptCtx) > 0) {
+		// TODO: use cyphertext stealing
+		PTRACE(0, "JW ciphertext stealing not implemented, yet");
+	}
 	EVP_DecryptUpdate(&m_decryptCtx, plaintext.GetPointer(), &plaintext_len, data.GetPointer(), data.GetSize());
 	if(!EVP_DecryptFinal_ex(&m_decryptCtx, plaintext.GetPointer() + plaintext_len, &final_len)) {
 		PTRACE(1, "EVP_DecryptFinal_ex() failed - incorrect padding ?");
