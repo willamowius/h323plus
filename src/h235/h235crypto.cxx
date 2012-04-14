@@ -268,10 +268,10 @@ PBoolean H235Session::CreateSession(PBoolean isMaster)
 
 PBoolean H235Session::ReadFrame(DWORD & /*rtpTimestamp*/, RTP_DataFrame & frame)
 {
-    WORD m_ivSequence = frame.GetSequenceNumber();
-    PBOOLEAN m_padding = frame.GetPadding();
+    //WORD m_ivSequence = frame.GetSequenceNumber(); // TODO: fix ivSequence
+    PBoolean m_padding = frame.GetPadding();
     PBYTEArray buffer(frame.GetPayloadPtr(),frame.GetPayloadSize());
-    buffer = m_context.Decrypt(buffer, &m_ivSequence, m_padding);	
+    buffer = m_context.Decrypt(buffer, NULL, m_padding);
     frame.SetPayloadSize(buffer.GetSize());
     memcpy(frame.GetPayloadPtr(),buffer.GetPointer(), buffer.GetSize());
     buffer.SetSize(0);
@@ -280,10 +280,10 @@ PBoolean H235Session::ReadFrame(DWORD & /*rtpTimestamp*/, RTP_DataFrame & frame)
 
 PBoolean H235Session::WriteFrame(RTP_DataFrame & frame)
 {
-    WORD m_ivSequence = frame.GetSequenceNumber();
-    PBOOLEAN m_padding = frame.GetPadding();
+    //WORD m_ivSequence = frame.GetSequenceNumber(); // TODO: fix ivSequence
+    PBoolean m_padding = frame.GetPadding();
     PBYTEArray buffer(frame.GetPayloadPtr(),frame.GetPayloadSize());
-    buffer = m_context.Encrypt(buffer, &m_ivSequence, m_padding);	
+    buffer = m_context.Encrypt(buffer, NULL, m_padding);	
     frame.SetPayloadSize(buffer.GetSize());
     memcpy(frame.GetPayloadPtr(),buffer.GetPointer(), buffer.GetSize());
     buffer.SetSize(0);
