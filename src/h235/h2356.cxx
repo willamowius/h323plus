@@ -101,77 +101,17 @@ H235_DiffieHellman & H235_DiffieHellman::operator=(const H235_DiffieHellman & di
   return *this;
 }
 
-
 H235_DiffieHellman::~H235_DiffieHellman()
 {
   if (dh != NULL)
     DH_free(dh);
 }
 
-PBoolean H235_DiffieHellman::CreateParams()
-{
-
-   PWaitAndSignal m(vbMutex);
-
-    dsa_st *dsaparams;  // Digital Signature Algorithm Structure
-
-	int i;
-
-	const char *seed[] = { ";-)  :-(  :-)  :-(  ",
-				 ";-)  :-(  :-)  :-(  ",
-				 "Random String no. 12",
-				 ";-)  :-(  :-)  :-(  ",
-				  "hackers have no mo", /* from jargon file */
-		};
-	   unsigned char seedbuf[20];
-
- vbMutex.Wait();
-	RAND_bytes((unsigned char *) &i, sizeof i);
- vbMutex.Signal();
-
-	// Make sure that i is non-negative
-	if (i < 0)
-		 i = -i;
-
-	if (i < 0)
-		 i = 0;
-
-    if (i >= 0) {
-    
-		i %= sizeof seed / sizeof seed[0];
-
-	  if (strlen(seed[i]) != 20) {
-	     	 return FALSE;
-	  }
-
- vbMutex.Wait();
-		memcpy(seedbuf, seed[i], 20);
-		dsaparams = DSA_generate_parameters(m_keySize, seedbuf, 20, NULL, NULL, 0, NULL);
- vbMutex.Signal();
-
-	} else {
-		 /* Random Parameters (may take awhile) You should never get here ever!!!*/
-		dsaparams = DSA_generate_parameters(m_keySize, NULL, 0, NULL, NULL, 0, NULL);
-	}
-    
-    if (dsaparams == NULL) {
-		return FALSE;
-    }
-
-	dh = DH_new();
-    dh = DSA_dup_DH(dsaparams);
-    
-	DSA_free(dsaparams);
-
-    if (dh == NULL) {
-		return FALSE;
-    }
-
-	return TRUE;
-}
-
 PBoolean H235_DiffieHellman::CheckParams()
 {
+  // TODO: no sense in checking the parameters:
+  // DH_check() only cheks p and which are provided by the standard
+  // and the key can be any random number and doesn't need checking (JW)
 
  PWaitAndSignal m(vbMutex);
 
@@ -191,7 +131,7 @@ PBoolean H235_DiffieHellman::CheckParams()
 	return FALSE;
  }
 
- return TRUE;
+  return TRUE;
 }
 
 void H235_DiffieHellman::Encode_P(PASN_BitString & p)
@@ -278,8 +218,8 @@ void H235_DiffieHellman::Encode_HalfKey(PASN_BitString & hk)
 // TODO Verify that the halfkey is being packed properly - SH
 	data=(unsigned char *)OPENSSL_malloc(len+20);
 	if (data != NULL){
-		l=BN_bn2bin(dh->pub_key,data);
-		hk.SetData(bits_key,data);
+		l=BN_bn2bin(dh->pub_key, data);
+		hk.SetData(bits_key, data);
 	}
 
 	OPENSSL_free(data);

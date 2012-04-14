@@ -237,14 +237,6 @@ public:
 
   protected:
 
-/**@name Protected Functions */
-//@{
-    /**Create Diffie-Hellman parameters from Scratch.
-	Note: This function was built from the easy-tls example of the OpenSSL source code.
-      */
-	PBoolean CreateParams();
-//@}
-
     PMutex vbMutex;                   /// Mutex
 
     dh_st * dh;                       /// Local DiffieHellman
