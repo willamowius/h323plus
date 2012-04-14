@@ -168,7 +168,7 @@ void H235_DiffieHellman::Encode_HalfKey(PASN_BitString & hk) const
 //--- TEST
 #if 1
     BYTE * keyData = DH1024_HALF;
-    dh->pub_key = BN_bin2bn(keyData, gSize, NULL);
+    dh->pub_key = BN_bin2bn(keyData, 128, NULL);
 #endif
 
 	int len = BN_num_bytes(dh->pub_key);
@@ -215,6 +215,7 @@ PBoolean H235_DiffieHellman::GenerateHalfKey()
     return TRUE;
 }
 
+#ifdef DOESNT_COMPILE // PSSL_BIO isn't exported by PTLib
 PBoolean H235_DiffieHellman::Load(const PFilePath & dhFile,
                              PSSLFileTypes fileType)
 {
@@ -255,7 +256,7 @@ PBoolean H235_DiffieHellman::Load(const PFilePath & dhFile,
 
   return false;
 }
-
+#endif
 
 PBoolean H235_DiffieHellman::ComputeSessionKey(PBYTEArray & SessionKey)
 {

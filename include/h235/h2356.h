@@ -44,6 +44,7 @@
 
 #include <ptlib.h>
 #include <ptlib/pluginmgr.h>
+#include <ptclib/pssl.h>
 #include <h235.h>
 #include <h235auth.h>
 
@@ -209,10 +210,12 @@ public:
     int GetKeyLength() const;
 
    /**Load Diffie-Hellman parameters from file. */
+#ifdef DOESNT_COMPILE
     PBoolean Load(
       const PFilePath & dhFile, ///< Diffie-Hellman parameters file
       PSSLFileTypes fileType = PSSLFileTypeDEFAULT  ///< Type of file to read
     );
+#endif
 
 //@}
 
