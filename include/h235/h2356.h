@@ -159,10 +159,6 @@ public:
 /**@name Constructor/Destructor */
 //@{
 
-    /**Create new Diffie-Hellman parameters (Used for Remote DH Parameters)
-      */
-    H235_DiffieHellman();
-
     /**Create a set of Diffie-Hellman parameters.
       */
     H235_DiffieHellman(
@@ -198,7 +194,7 @@ public:
     operator dh_st *() const { return dh; }
 
    /** Check Parameters */
-	PBoolean CheckParams();
+	PBoolean CheckParams() const;
 
    /** SetRemotePublicKey */
     void SetRemoteKey(bignum_st * remKey);
@@ -210,25 +206,25 @@ public:
     PBoolean ComputeSessionKey(PBYTEArray & SessionKey);
 
    /** Get the Public Key */
-    bignum_st * GetPublicKey();
+    bignum_st * GetPublicKey() const;
 
    /** Get the Key Length */
-    int GetKeyLength();
+    int GetKeyLength() const;
 
 //@}
 
 /**@name Encoding for the H245 Stream */
 //@{
 	/** Encode Prime */
-	  void Encode_P(PASN_BitString & p);
+	  void Encode_P(PASN_BitString & p) const;
 	/** Decode Prime */
 	  void Decode_P(const PASN_BitString & p);
 	/** Encode Generator */
-	  void Encode_G(PASN_BitString & g);
+	  void Encode_G(PASN_BitString & g) const;
 	/** Decode Generator */
 	  void Decode_G(const PASN_BitString & g);
 	/** Encode Public Half Key */
-	  void Encode_HalfKey(PASN_BitString & hk);
+	  void Encode_HalfKey(PASN_BitString & hk) const;
 	/** decode Public Half Key */
 	  void Decode_HalfKey(const PASN_BitString & hk);
 

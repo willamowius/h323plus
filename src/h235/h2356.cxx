@@ -61,11 +61,6 @@ extern "C" {
 // Diffie Hellman
 
 
-H235_DiffieHellman::H235_DiffieHellman()
-: dh(NULL), m_remKey(NULL), m_toSend(true), m_keySize(0)
-{
-}
-
 H235_DiffieHellman::H235_DiffieHellman(const BYTE * pData, PINDEX pSize,
                                      const BYTE * gData, PINDEX gSize, 
                                      PBoolean send)
@@ -107,10 +102,10 @@ H235_DiffieHellman::~H235_DiffieHellman()
     DH_free(dh);
 }
 
-PBoolean H235_DiffieHellman::CheckParams()
+PBoolean H235_DiffieHellman::CheckParams() const
 {
   // TODO: no sense in checking the parameters:
-  // DH_check() only cheks p and which are provided by the standard
+  // DH_check() only cheks p and g which are provided by the standard
   // and the key can be any random number and doesn't need checking (JW)
 
  PWaitAndSignal m(vbMutex);
@@ -134,26 +129,18 @@ PBoolean H235_DiffieHellman::CheckParams()
   return TRUE;
 }
 
-void H235_DiffieHellman::Encode_P(PASN_BitString & p)
+void H235_DiffieHellman::Encode_P(PASN_BitString & p) const
 {
 	PWaitAndSignal m(vbMutex);
 
     if (!m_toSend)
         return;
 
-	unsigned char *data;
-	int l,len,bits_p;
-
-	len=BN_num_bytes(dh->p);
-	bits_p=BN_num_bits(dh->p);
- 
-
-	data=(unsigned char *)OPENSSL_malloc(len+20);
+	unsigned char * data= (unsigned char *)OPENSSL_malloc(BN_num_bytes(dh->p) + 20); // TODO: why + 20 ??
 	if (data != NULL) {
-		l=BN_bn2bin(dh->p,data);
-		p.SetData(bits_p,data);
+		if (BN_bn2bin(dh->p, data) > 0)
+	        p.SetData(BN_num_bits(dh->p), data);
 	}
-
 	OPENSSL_free(data);
 }
 
@@ -165,32 +152,27 @@ void H235_DiffieHellman::Decode_P(const PASN_BitString & p)
         return;
 
 	const unsigned char *data = p.GetDataPointer();
-	dh->p=BN_bin2bn(data,sizeof(data),NULL);
+	dh->p=BN_bin2bn(data,sizeof(data), NULL);
 }
 
-void H235_DiffieHellman::Encode_G(PASN_BitString & g)
+void H235_DiffieHellman::Encode_G(PASN_BitString & g) const
 {
     PWaitAndSignal m(vbMutex);
 
     if (!m_toSend)
         return;
 
-	unsigned char *data;
-	int l,len_p,len_g,bits_p;
-
-	len_p=BN_num_bytes(dh->p);
-    len_g=BN_num_bytes(dh->g);
-
-	bits_p=BN_num_bits(dh->p);
+	int len_p = BN_num_bytes(dh->p);
+    int len_g = BN_num_bytes(dh->g);
+	int bits_p = BN_num_bits(dh->p);
 
     // G is padded out to the length of P
-	data=(unsigned char *)OPENSSL_malloc(len_p+20);
-    memset(data,0,len_p);
+	unsigned char * data = (unsigned char *)OPENSSL_malloc(len_p + 20); // TODO: why + 20 ??
+    memset(data, 0, len_p);
 	if (data != NULL) {
-		 l=BN_bn2bin(dh->g,data+len_p-len_g);
-		 g.SetData(bits_p,data);
+		 if (BN_bn2bin(dh->g, data + len_p - len_g) > 0)
+		     g.SetData(bits_p,data);
 	}
-
 	OPENSSL_free(data);
 }
 
@@ -206,22 +188,18 @@ void H235_DiffieHellman::Decode_G(const PASN_BitString & g)
 }
 
 
-void H235_DiffieHellman::Encode_HalfKey(PASN_BitString & hk)
+void H235_DiffieHellman::Encode_HalfKey(PASN_BitString & hk) const
 {
     PWaitAndSignal m(vbMutex);
 
-	unsigned char *data;
-	int l,len,bits_key;
-
-	len=BN_num_bytes(dh->pub_key);
-	bits_key=BN_num_bits(dh->pub_key);
-// TODO Verify that the halfkey is being packed properly - SH
-	data=(unsigned char *)OPENSSL_malloc(len+20);
+	int len = BN_num_bytes(dh->pub_key);
+	int bits_key = BN_num_bits(dh->pub_key);
+    // TODO Verify that the halfkey is being packed properly - SH
+	unsigned char * data = (unsigned char *)OPENSSL_malloc(len + 20); // TODO: why + 20 ??
 	if (data != NULL){
-		l=BN_bn2bin(dh->pub_key, data);
-		hk.SetData(bits_key, data);
+		if (BN_bn2bin(dh->pub_key, data) > 0)
+			hk.SetData(bits_key, data);
 	}
-
 	OPENSSL_free(data);
 }
 
@@ -230,7 +208,7 @@ void H235_DiffieHellman::Decode_HalfKey(const PASN_BitString & hk)
 	PWaitAndSignal m(vbMutex);
 
 	const unsigned char *data = hk.GetDataPointer();
-	dh->pub_key = BN_bin2bn(data,sizeof(data),NULL);   
+	dh->pub_key = BN_bin2bn(data, sizeof(data), NULL);   
 }
 
 void H235_DiffieHellman::SetRemoteKey(bignum_st * remKey)
@@ -244,12 +222,12 @@ PBoolean H235_DiffieHellman::GenerateHalfKey()
 
     if (!CheckParams())
 	  return FALSE;
-// TODO check if half key is generated correctly - SH
+
+	// TODO check if half key is generated correctly - SH
 	if (!DH_generate_key(dh)) {
-		PStringStream ErrStr;
 		char buf[256];
 		ERR_error_string(ERR_get_error(), buf);
-        PTRACE(4,"H235_DH\tERROR DH Halfkey " << buf);
+        PTRACE(4, "H235_DH\tERROR DH Halfkey " << buf);
 		return FALSE;
 	}
 
@@ -260,18 +238,14 @@ PBoolean H235_DiffieHellman::ComputeSessionKey(PBYTEArray & SessionKey)
 {
     SessionKey.SetSize(0);
     if (!m_remKey) {
-		PTRACE(2,"H235_DH\tERROR Generating Shared DH: No remote key!");
+		PTRACE(2, "H235_DH\tERROR Generating Shared DH: No remote key!");
         return false;
     }
 
-	int len, out;
-	unsigned char *buf = NULL;
+	int len = DH_size(dh);
+	unsigned char * buf = (unsigned char *)OPENSSL_malloc(len);
 
-	len = DH_size(dh);
-	buf = (unsigned char *)OPENSSL_malloc(len);
-
-	out = DH_compute_key(buf, m_remKey, dh);
-
+	int out = DH_compute_key(buf, m_remKey, dh);
 	if (out <= 0) {
 		PTRACE(2,"H235_DH\tERROR Generating Shared DH!");
 		OPENSSL_free(buf);
@@ -286,12 +260,12 @@ PBoolean H235_DiffieHellman::ComputeSessionKey(PBYTEArray & SessionKey)
     return true;
 }
 
-bignum_st * H235_DiffieHellman::GetPublicKey()
+bignum_st * H235_DiffieHellman::GetPublicKey() const
 {
     return dh->pub_key;
 }
 
-int H235_DiffieHellman::GetKeyLength()
+int H235_DiffieHellman::GetKeyLength() const
 {
     return m_keySize;
 }
