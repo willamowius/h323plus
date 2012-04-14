@@ -193,9 +193,6 @@ public:
       */
     operator dh_st *() const { return dh; }
 
-   /** Check Parameters */
-	PBoolean CheckParams() const;
-
    /** SetRemotePublicKey */
     void SetRemoteKey(bignum_st * remKey);
 
@@ -210,6 +207,12 @@ public:
 
    /** Get the Key Length */
     int GetKeyLength() const;
+
+   /**Load Diffie-Hellman parameters from file. */
+    PBoolean Load(
+      const PFilePath & dhFile, ///< Diffie-Hellman parameters file
+      PSSLFileTypes fileType = PSSLFileTypeDEFAULT  ///< Type of file to read
+    );
 
 //@}
 

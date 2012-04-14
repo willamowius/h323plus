@@ -102,33 +102,6 @@ H235_DiffieHellman::~H235_DiffieHellman()
     DH_free(dh);
 }
 
-PBoolean H235_DiffieHellman::CheckParams() const
-{
-  // TODO: no sense in checking the parameters:
-  // DH_check() only cheks p and g which are provided by the standard
-  // and the key can be any random number and doesn't need checking (JW)
-
- PWaitAndSignal m(vbMutex);
-
- int i;
- if (!DH_check(dh,&i))
- {
-	switch (i) {
-	 case DH_CHECK_P_NOT_PRIME:
-         PTRACE(4,"H235_DH\tCHECK: p value is not prime");
-	 case DH_CHECK_P_NOT_SAFE_PRIME:
-         PTRACE(4,"H235_DH\tCHECK: p value is not a safe prime");
-	 case DH_UNABLE_TO_CHECK_GENERATOR:
-         PTRACE(4,"H235_DH\tCHECK: unable to check the generator value");
-	 case DH_NOT_SUITABLE_GENERATOR:
-         PTRACE(4,"H235_DH\tCHECK: the g value is not a generator");
-	}
-	return FALSE;
- }
-
-  return TRUE;
-}
-
 void H235_DiffieHellman::Encode_P(PASN_BitString & p) const
 {
 	PWaitAndSignal m(vbMutex);
@@ -192,6 +165,12 @@ void H235_DiffieHellman::Encode_HalfKey(PASN_BitString & hk) const
 {
     PWaitAndSignal m(vbMutex);
 
+//--- TEST
+#if 1
+    BYTE * keyData = DH1024_HALF;
+    dh->pub_key = BN_bin2bn(keyData, gSize, NULL);
+#endif
+
 	int len = BN_num_bytes(dh->pub_key);
 	int bits_key = BN_num_bits(dh->pub_key);
     // TODO Verify that the halfkey is being packed properly - SH
@@ -220,9 +199,10 @@ PBoolean H235_DiffieHellman::GenerateHalfKey()
 {
     PWaitAndSignal m(vbMutex);
 
-	// TODO: no sense checking - p and g are from the spec
-    if (!CheckParams())
-	  return FALSE;
+//--- TEST
+#if 1
+    return true;
+#endif
 
 	// TODO check if half key is generated correctly - SH - looks OK - JW
 	if (!DH_generate_key(dh)) {
@@ -234,6 +214,48 @@ PBoolean H235_DiffieHellman::GenerateHalfKey()
 
     return TRUE;
 }
+
+PBoolean H235_DiffieHellman::Load(const PFilePath & dhFile,
+                             PSSLFileTypes fileType)
+{
+  if (dh != NULL) {
+    DH_free(dh);
+    dh = NULL;
+  }
+
+  PSSL_BIO in;
+  if (!in.OpenRead(dhFile)) {
+    SSLerr(SSL_F_SSL_CTX_USE_PRIVATEKEY_FILE,ERR_R_SYS_LIB);
+    return false;
+  }
+
+  if (fileType == PSSLFileTypeDEFAULT)
+    fileType = dhFile.GetType() == ".pem" ? PSSLFileTypePEM : PSSLFileTypeASN1;
+
+  switch (fileType) {
+    case PSSLFileTypeASN1 :
+      dh = d2i_DHparams_bio(in, NULL);
+      if (dh != NULL)
+        return true;
+
+      SSLerr(SSL_F_SSL_CTX_USE_PRIVATEKEY_FILE, ERR_R_ASN1_LIB);
+      break;
+
+    case PSSLFileTypePEM :
+      dh = PEM_read_bio_DHparams(in, NULL, NULL, NULL);
+      if (dh != NULL)
+        return true;
+
+      SSLerr(SSL_F_SSL_CTX_USE_PRIVATEKEY_FILE, ERR_R_PEM_LIB);
+      break;
+
+    default :
+      SSLerr(SSL_F_SSL_CTX_USE_PRIVATEKEY_FILE,SSL_R_BAD_SSL_FILETYPE);
+  }
+
+  return false;
+}
+
 
 PBoolean H235_DiffieHellman::ComputeSessionKey(PBYTEArray & SessionKey)
 {
