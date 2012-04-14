@@ -211,8 +211,7 @@ PBYTEArray H235CryptoEngine::GenerateRandomKey(const PString & algorithmOID)
 
 H235Session::H235Session(H235Capabilities * caps, const PString & oidAlgorithm)
 : m_dh(*caps->GetDiffieHellMan()), m_context(oidAlgorithm), m_dhcontext(oidAlgorithm), 
-  m_isInitialised(false), m_isMaster(false),
-  m_ivReadSequence(NULL), m_ivWriteSequence(NULL), m_dhSessionkey(0), m_crytoMasterKey(0)
+  m_isInitialised(false), m_isMaster(false), m_dhSessionkey(0), m_crytoMasterKey(0)
 {
 
 }
@@ -267,8 +266,10 @@ PBoolean H235Session::CreateSession(PBoolean isMaster)
 
 PBoolean H235Session::ReadFrame(DWORD & /*rtpTimestamp*/, RTP_DataFrame & frame)
 {
+    WORD m_ivSequence = frame.GetSequenceNumber();
+    PBOOLEAN m_padding = frame.GetPadding();
     PBYTEArray buffer(frame.GetPayloadPtr(),frame.GetPayloadSize());
-    buffer = m_context.Decrypt(buffer, m_ivReadSequence, false);	// TODO: fix iv sequence and padding
+    buffer = m_context.Decrypt(buffer, &m_ivSequence, m_padding);	
     frame.SetPayloadSize(buffer.GetSize());
     memcpy(frame.GetPayloadPtr(),buffer.GetPointer(), buffer.GetSize());
     buffer.SetSize(0);
@@ -277,8 +278,10 @@ PBoolean H235Session::ReadFrame(DWORD & /*rtpTimestamp*/, RTP_DataFrame & frame)
 
 PBoolean H235Session::WriteFrame(RTP_DataFrame & frame)
 {
+    WORD m_ivSequence = frame.GetSequenceNumber();
+    PBOOLEAN m_padding = frame.GetPadding();
     PBYTEArray buffer(frame.GetPayloadPtr(),frame.GetPayloadSize());
-    buffer = m_context.Encrypt(buffer, m_ivWriteSequence, false);	// TODO: fix iv sequence and padding
+    buffer = m_context.Encrypt(buffer, &m_ivSequence, m_padding);	
     frame.SetPayloadSize(buffer.GetSize());
     memcpy(frame.GetPayloadPtr(),buffer.GetPointer(), buffer.GetSize());
     buffer.SetSize(0);
