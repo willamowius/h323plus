@@ -88,6 +88,14 @@ void RTP_DataFrame::SetExtension(PBoolean ext)
     theArray[0] &= 0xef;
 }
 
+void RTP_DataFrame::SetPadding(PBoolean padding)
+{
+  if (padding)
+    theArray[0] |= 0x20;
+  else
+    theArray[0] &= 0xdf;
+}
+
 
 void RTP_DataFrame::SetMarker(PBoolean m)
 {

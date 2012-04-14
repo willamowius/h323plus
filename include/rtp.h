@@ -128,6 +128,9 @@ class RTP_DataFrame : public PBYTEArray
     PBoolean GetExtension() const   { return (theArray[0]&0x10) != 0; }
     void SetExtension(PBoolean ext);
 
+    PBoolean GetPadding()  { return (theArray[0]&0x20) != 0; }
+    void SetPadding(PBoolean padding);
+
     PBoolean GetMarker() const { return (theArray[1]&0x80) != 0; }
     void SetMarker(PBoolean m);
 
