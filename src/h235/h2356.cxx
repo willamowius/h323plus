@@ -48,6 +48,7 @@
 #include "h235/h2356.h"
 #include "h235/h2351.h"
 #include "h323con.h"
+#include "ptclib/cypher.h"
 #include <algorithm>
 
 extern "C" {
@@ -57,14 +58,19 @@ extern "C" {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////
-
 // Diffie Hellman
 
+H235_DiffieHellman::H235_DiffieHellman(const PConfig  & dhFile, const PString & section)
+: dh(NULL), m_remKey(NULL), m_toSend(true), m_keySize(0), m_loadFromFile(false)
+{
+    if (Load(dhFile,section))
+      m_keySize = BN_num_bytes(dh->pub_key);
+}
 
 H235_DiffieHellman::H235_DiffieHellman(const BYTE * pData, PINDEX pSize,
                                      const BYTE * gData, PINDEX gSize, 
                                      PBoolean send)
-: m_remKey(NULL), m_toSend(send), m_keySize(pSize)
+: m_remKey(NULL), m_toSend(send), m_keySize(pSize), m_loadFromFile(false)
 {
   dh = DH_new();
   if (dh == NULL)
@@ -100,6 +106,33 @@ H235_DiffieHellman::~H235_DiffieHellman()
 {
   if (dh != NULL)
     DH_free(dh);
+}
+
+PBoolean H235_DiffieHellman::CheckParams() const
+{
+
+    // TODO: FIX so it actually checks the whole DH 
+    // including the strength of the DH Public/Private key pair - SH
+
+ PWaitAndSignal m(vbMutex);
+
+ int i;
+ if (!DH_check(dh,&i))
+ {
+	switch (i) {
+	 case DH_CHECK_P_NOT_PRIME:
+         PTRACE(4,"H235_DH\tCHECK: p value is not prime");
+	 case DH_CHECK_P_NOT_SAFE_PRIME:
+         PTRACE(4,"H235_DH\tCHECK: p value is not a safe prime");
+	 case DH_UNABLE_TO_CHECK_GENERATOR:
+         PTRACE(4,"H235_DH\tCHECK: unable to check the generator value");
+	 case DH_NOT_SUITABLE_GENERATOR:
+         PTRACE(4,"H235_DH\tCHECK: the g value is not a generator");
+	}
+	return FALSE;
+ }
+
+  return TRUE;
 }
 
 void H235_DiffieHellman::Encode_P(PASN_BitString & p) const
@@ -165,12 +198,6 @@ void H235_DiffieHellman::Encode_HalfKey(PASN_BitString & hk) const
 {
     PWaitAndSignal m(vbMutex);
 
-//--- TEST
-#if 1
-    BYTE * keyData = DH1024_HALF;
-    dh->pub_key = BN_bin2bn(keyData, 128, NULL);
-#endif
-
 	int len = BN_num_bytes(dh->pub_key);
 	int bits_key = BN_num_bits(dh->pub_key);
     // TODO Verify that the halfkey is being packed properly - SH
@@ -199,10 +226,8 @@ PBoolean H235_DiffieHellman::GenerateHalfKey()
 {
     PWaitAndSignal m(vbMutex);
 
-//--- TEST
-#if 1
-    return true;
-#endif
+    if (m_loadFromFile)
+        return true;
 
 	// TODO check if half key is generated correctly - SH - looks OK - JW
 	if (!DH_generate_key(dh)) {
@@ -215,48 +240,106 @@ PBoolean H235_DiffieHellman::GenerateHalfKey()
     return TRUE;
 }
 
-#ifdef DOESNT_COMPILE // PSSL_BIO isn't exported by PTLib
-PBoolean H235_DiffieHellman::Load(const PFilePath & dhFile,
-                             PSSLFileTypes fileType)
+PBoolean H235_DiffieHellman::Load(const PConfig  & dhFile, const PString & section)
 {
   if (dh != NULL) {
     DH_free(dh);
     dh = NULL;
   }
 
-  PSSL_BIO in;
-  if (!in.OpenRead(dhFile)) {
-    SSLerr(SSL_F_SSL_CTX_USE_PRIVATEKEY_FILE,ERR_R_SYS_LIB);
+  dh = DH_new();
+  if (dh == NULL)
     return false;
-  }
 
-  if (fileType == PSSLFileTypeDEFAULT)
-    fileType = dhFile.GetType() == ".pem" ? PSSLFileTypePEM : PSSLFileTypeASN1;
+    PString str = PString();
+    PBYTEArray data;
 
-  switch (fileType) {
-    case PSSLFileTypeASN1 :
-      dh = d2i_DHparams_bio(in, NULL);
-      if (dh != NULL)
-        return true;
+    PBoolean ok =true;
+    if (dhFile.HasKey(section, "PRIME")) {
+	    str = dhFile.GetString(section, "PRIME", "");
+        PBase64::Decode(str, data);
+        dh->p = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
+    } else 
+        ok = false;
 
-      SSLerr(SSL_F_SSL_CTX_USE_PRIVATEKEY_FILE, ERR_R_ASN1_LIB);
-      break;
+    if (dhFile.HasKey(section, "GENERATOR")) {
+	    str = dhFile.GetString(section, "GENERATOR", "");
+        PBase64::Decode(str, data);
+        PBYTEArray temp(1);
+        memcpy(temp.GetPointer(), data.GetPointer(), 1);
+        memset(data.GetPointer(), 0, data.GetSize());
+        memcpy(data.GetPointer() + data.GetSize()-1, temp.GetPointer(),1);
+        dh->g = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
+    } else 
+        ok = false;
 
-    case PSSLFileTypePEM :
-      dh = PEM_read_bio_DHparams(in, NULL, NULL, NULL);
-      if (dh != NULL)
-        return true;
+    if (dhFile.HasKey(section, "PUBLIC")) {
+	    str = dhFile.GetString(section, "PUBLIC", "");
+        PBase64::Decode(str, data);
+        dh->pub_key = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
+    } else 
+        ok = false;
+  
+    if (dhFile.HasKey(section, "PRIVATE")) {
+	    str = dhFile.GetString(section, "PRIVATE", "");
+        PBase64::Decode(str, data);
+        dh->priv_key = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
+    } else 
+        ok = false;
 
-      SSLerr(SSL_F_SSL_CTX_USE_PRIVATEKEY_FILE, ERR_R_PEM_LIB);
-      break;
-
-    default :
-      SSLerr(SSL_F_SSL_CTX_USE_PRIVATEKEY_FILE,SSL_R_BAD_SSL_FILETYPE);
-  }
-
-  return false;
+    if (ok /*&& CheckParams()*/) 
+       m_loadFromFile = true;
+    else {
+      DH_free(dh);
+      dh = NULL;
+    } 
+    
+    return m_loadFromFile;
 }
-#endif
+
+PBoolean H235_DiffieHellman::LoadedFromFile() 
+{
+    return m_loadFromFile;
+}
+
+PBoolean H235_DiffieHellman::Save(const PFilePath & dhFile, const PString & oid)
+{
+  if (!dh && dh->pub_key)
+    return false;
+
+  PConfig config(dhFile, oid);
+    PString str = PString();
+    int len = BN_num_bytes(dh->pub_key);
+    unsigned char * data = (unsigned char *)OPENSSL_malloc(len); 
+
+    if (data != NULL && BN_bn2bin(dh->p, data) > 0) {
+        str = PBase64::Encode(data, len, "");
+        config.SetString("PRIME",str);
+    }
+    OPENSSL_free(data);
+
+    data = (unsigned char *)OPENSSL_malloc(len); 
+    if (data != NULL && BN_bn2bin(dh->g, data) > 0) {
+        str = PBase64::Encode(data, len, "");
+        config.SetString("GENERATOR",str);
+    }
+    OPENSSL_free(data);
+
+    data = (unsigned char *)OPENSSL_malloc(len); 
+    if (data != NULL && BN_bn2bin(dh->pub_key, data) > 0) {
+        str = PBase64::Encode(data, len, "");
+        config.SetString("PUBLIC",str);
+    }
+    OPENSSL_free(data);
+
+    data = (unsigned char *)OPENSSL_malloc(len); 
+    if (data != NULL && BN_bn2bin(dh->priv_key, data) > 0) {
+        PString str = PBase64::Encode(data, len, "");
+        config.SetString("PRIVATE",str);
+    }
+    OPENSSL_free(data);
+   return true;
+}
 
 PBoolean H235_DiffieHellman::ComputeSessionKey(PBYTEArray & SessionKey)
 {
@@ -310,8 +393,49 @@ inline void DeleteObjectsInMap(const M & m)
 	std::for_each(m.begin(), m.end(), deletepair<PAIR>());
 }
 
-void LoadDiffieHellmanMap(std::map<PString, H235_DiffieHellman*> & dhmap)
+void LoadDiffieHellmanMap(std::map<PString, H235_DiffieHellman*> & dhmap, const PString & filePath = PString())
 {
+    PStringArray FilePaths;
+
+    PINDEX k=0;
+    if (!filePath.IsEmpty()) {
+      PStringArray temp = filePath.Tokenise(';');
+      for (k=0; k < temp.GetSize(); ++k) {
+          PFilePath dhFile = PString(temp[k]);
+          if (PFile::Exists(dhFile)) 
+              FilePaths.AppendString(dhFile);
+      }
+    } else {
+      char * env = ::getenv("H323_H235_DH");
+      if (env != NULL) {
+        const char * token = strtok(env, ";");
+          while (token != NULL) {
+            PFilePath dhFile = PString(token);
+            if (PFile::Exists(dhFile)) 
+                  FilePaths.AppendString(dhFile);
+            token = strtok(NULL, ";");
+          }
+      }
+    }
+  
+    int i=0;
+    for (PINDEX k=0; k < FilePaths.GetSize(); ++k) {
+        PConfig cfg(FilePaths[k],PString());
+        PStringArray oidList(cfg.GetSections());
+        for (PINDEX j=0; j < oidList.GetSize(); ++j) {  
+            H235_DiffieHellman * dh = new H235_DiffieHellman(cfg,oidList[j]);
+            if (dh->LoadedFromFile()) {
+                dhmap.insert(pair<PString, H235_DiffieHellman*>(oidList[j], dh));
+                i++;
+            } else 
+                delete dh;
+        }
+    }
+    if (i) {
+        dhmap.insert(pair<PString, H235_DiffieHellman*>(OID_H235V3,NULL));
+        return;
+    }
+
     for (PINDEX i = 0; i < PARRAYSIZE(H235_DHParameters); ++i) {
         if (H235_DHParameters[i].sz > 0) {
            dhmap.insert(pair<PString, H235_DiffieHellman*>(H235_DHParameters[i].parameterOID,
@@ -322,6 +446,7 @@ void LoadDiffieHellmanMap(std::map<PString, H235_DiffieHellman*> & dhmap)
            dhmap.insert(pair<PString, H235_DiffieHellman*>(H235_DHParameters[i].parameterOID,NULL));
         }
     }
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -337,7 +462,7 @@ H2356_Authenticator::H2356_Authenticator()
 {
   usage = MediaEncryption;
   m_algOIDs.SetSize(0);
-  LoadDiffieHellmanMap(m_dhLocalMap);
+  LoadDiffieHellmanMap(m_dhLocalMap, H235Authenticators::GetDHParameterFile());
   InitialiseSecurity(); // make sure m_algOIDs gets filled
 }
 
@@ -396,6 +521,10 @@ PBoolean H2356_Authenticator::PrepareTokens(PASN_Array & clearTokens,
       clearToken.m_tokenOID = i->first;
       H235_DiffieHellman * m_dh = i->second;
       if (m_dh && m_dh->GenerateHalfKey()) {
+#if 0  // For testing to generate a strong key pair - SH
+        if (!m_dh->LoadedFromFile())
+          m_dh->Save("test.pem",i->first);
+#endif
           clearToken.IncludeOptionalField(H235_ClearToken::e_dhkey);
           H235_DHset & dh = clearToken.m_dhkey;
           m_dh->Encode_HalfKey(dh.m_halfkey);
@@ -613,6 +742,17 @@ PString H2356_Authenticator::GetDhOIDFromAlg(const PString & alg)
             return H235_Algorithms[i].DHparameters;
     }
     return PString();
+}
+
+void H2356_Authenticator::ExportParameters(const PFilePath & path)
+{
+  std::map<PString, H235_DiffieHellman*>::iterator i = m_dhLocalMap.begin();
+  while (i != m_dhLocalMap.end()) {
+      if (i->second && i->second->GetKeyLength() > 0) {
+          i->second->Save(path,i->first);
+      }
+    i++;
+  }
 }
 
 #endif  // H323_H235

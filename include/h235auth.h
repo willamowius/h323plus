@@ -196,6 +196,9 @@ class H235Authenticator : public PObject
                                          PString & description        ///< Human Description
                                          ); 
 
+    virtual void ExportParameters(const PFilePath & /*path*/) {}  // export Parameters to file
+
+
   protected:
     PBoolean AddCapability(
       unsigned mechanism,
@@ -218,6 +221,7 @@ class H235Authenticator : public PObject
     Application usage;	       ///* Authenticator's Application 
     H323Connection * connection;   ///* CallToken of the Connection for EP Authentication
     PMutex mutex;
+
 };
 
 
@@ -267,8 +271,12 @@ PDECLARE_LIST(H235Authenticators, H235Authenticator)
     PBoolean GetAlgorithms(PStringList & algorithms) const;
     PBoolean GetAlgorithmDetails(const PString & algorithm, PString & sslName, PString & description);
 	PBoolean GetMediaSessionInfo(PString & algorithmOID, PBYTEArray & sessionKey);
+
+    static PString & GetDHParameterFile();
+    static void SetDHParameterFile(const PString & filePaths);
  protected:
     void CreateAuthenticatorsByID(const PStringArray & identifiers);
+    static PString m_dhFile;
 #endif
 
 };

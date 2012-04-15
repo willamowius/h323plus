@@ -44,7 +44,6 @@
 
 #include <ptlib.h>
 #include <ptlib/pluginmgr.h>
-#include <ptclib/pssl.h>
 #include <h235.h>
 #include <h235auth.h>
 
@@ -120,6 +119,9 @@ class H2356_Authenticator : public H235Authenticator
     // get the algorithmOID and DH session key for encryption
     virtual PBoolean GetMediaSessionInfo(PString & algorithmOID, PBYTEArray & sessionKey);
 
+    // Export the DH parameters to file
+    virtual void ExportParameters(const PFilePath & path);
+
 protected:
     void InitialiseSecurity();
 
@@ -170,6 +172,13 @@ public:
       PBoolean send       /// Whether to send P & G values in Tokens
     );
 
+    /**Create a set of Diffie-Hellman parameters from file.
+      */
+    H235_DiffieHellman(
+        const PConfig  & dhFile,                ///< Config file
+        const PString & section                 ///< section of config file
+    );
+
     /**Create a copy of the Diffie-Hellman parameters. from 
 	   H235_DiffieHellman structure
       */
@@ -194,6 +203,9 @@ public:
       */
     operator dh_st *() const { return dh; }
 
+   /** Check Parameters */
+	PBoolean CheckParams() const;
+
    /** SetRemotePublicKey */
     void SetRemoteKey(bignum_st * remKey);
 
@@ -210,12 +222,19 @@ public:
     int GetKeyLength() const;
 
    /**Load Diffie-Hellman parameters from file. */
-#ifdef DOESNT_COMPILE
     PBoolean Load(
-      const PFilePath & dhFile, ///< Diffie-Hellman parameters file
-      PSSLFileTypes fileType = PSSLFileTypeDEFAULT  ///< Type of file to read
+        const PConfig & dhFile,                 ///< Config file
+        const PString & section                 ///< section of config file
     );
-#endif
+
+   /**Are the parameters loaded from file ok. */
+    PBoolean LoadedFromFile();
+
+    /**Save Diffie-Hellman parameters to file. */
+    PBoolean Save(
+      const PFilePath & keyFile,                 ///< Diffie-Hellman parameter file
+      const PString & oid                        ///< OID section
+    );
 
 //@}
 
@@ -245,6 +264,8 @@ public:
     bignum_st * m_remKey;             /// Remote Public Key
     PBoolean m_toSend;                /// Whether P & G are transmitted.
     int m_keySize;                    /// Key Size
+
+    PBoolean m_loadFromFile;          /// Whether the setting have been loaded from file
 };
 
 #endif // H323_H235

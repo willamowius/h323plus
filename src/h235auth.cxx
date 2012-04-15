@@ -321,6 +321,10 @@ PBoolean H235Authenticator::GetAlgorithmDetails(const PString & /*algorithm*/,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifdef H323_H235
+PString H235Authenticators::m_dhFile=PString();
+#endif
+
 void H235Authenticators::PreparePDU(H323TransactionPDU & pdu,
                                     PASN_Array & clearTokens,
                                     unsigned clearOptionalField,
@@ -613,6 +617,18 @@ PBoolean H235Authenticators::GetMediaSessionInfo(PString & algorithmOID, PBYTEAr
    }
    return NULL;
 }
+
+PString & H235Authenticators::GetDHParameterFile()
+{
+    return m_dhFile;
+}
+
+void H235Authenticators::SetDHParameterFile(const PString & filePaths)
+{
+    m_dhFile = filePaths;
+}
+
+
 
 #endif
 
