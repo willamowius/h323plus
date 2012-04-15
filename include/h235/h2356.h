@@ -58,14 +58,14 @@ class H2356_Authenticator : public H235Authenticator
     PCLASSINFO(H2356_Authenticator, H235Authenticator);
   public:
 
-	H2356_Authenticator();
+    H2356_Authenticator();
 
-	~H2356_Authenticator();
+    ~H2356_Authenticator();
 
     enum h235TokenState { 
       e_clearNone,             // No Token Sent 
-	  e_clearSent,			   // ClearToken Sent
-	  e_clearReceived,		   // ClearToken Received
+      e_clearSent,               // ClearToken Sent
+      e_clearReceived,           // ClearToken Received
       e_clearComplete,         // Both Sent and received.
       e_clearDisable           // Disable Exchange
     };
@@ -134,7 +134,7 @@ private:
     PBoolean                               m_active;
     h235TokenState                         m_tokenState;
     PStringList                            m_algOIDs;
-	  
+      
 };
 
 ////////////////////////////////////////////////////
@@ -180,7 +180,7 @@ public:
     );
 
     /**Create a copy of the Diffie-Hellman parameters. from 
-	   H235_DiffieHellman structure
+       H235_DiffieHellman structure
       */
     H235_DiffieHellman(
       const H235_DiffieHellman & dh
@@ -204,13 +204,13 @@ public:
     operator dh_st *() const { return dh; }
 
    /** Check Parameters */
-	PBoolean CheckParams() const;
+    PBoolean CheckParams() const;
 
    /** SetRemotePublicKey */
     void SetRemoteKey(bignum_st * remKey);
 
    /** Generate Half Key */
-	PBoolean GenerateHalfKey();
+    PBoolean GenerateHalfKey();
 
    /** Compute Session key */
     PBoolean ComputeSessionKey(PBYTEArray & SessionKey);
@@ -240,18 +240,18 @@ public:
 
 /**@name Encoding for the H245 Stream */
 //@{
-	/** Encode Prime */
-	  void Encode_P(PASN_BitString & p) const;
-	/** Decode Prime */
-	  void Decode_P(const PASN_BitString & p);
-	/** Encode Generator */
-	  void Encode_G(PASN_BitString & g) const;
-	/** Decode Generator */
-	  void Decode_G(const PASN_BitString & g);
-	/** Encode Public Half Key */
-	  void Encode_HalfKey(PASN_BitString & hk) const;
-	/** decode Public Half Key */
-	  void Decode_HalfKey(const PASN_BitString & hk);
+    /** Encode Prime */
+      void Encode_P(PASN_BitString & p) const;
+    /** Decode Prime */
+      void Decode_P(const PASN_BitString & p);
+    /** Encode Generator */
+      void Encode_G(PASN_BitString & g) const;
+    /** Decode Generator */
+      void Decode_G(const PASN_BitString & g);
+    /** Encode Public Half Key */
+      void Encode_HalfKey(PASN_BitString & hk) const;
+    /** decode Public Half Key */
+      void Decode_HalfKey(const PASN_BitString & hk);
 
 //@}
 

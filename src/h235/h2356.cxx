@@ -119,17 +119,17 @@ PBoolean H235_DiffieHellman::CheckParams() const
  int i;
  if (!DH_check(dh,&i))
  {
-	switch (i) {
-	 case DH_CHECK_P_NOT_PRIME:
+    switch (i) {
+     case DH_CHECK_P_NOT_PRIME:
          PTRACE(4,"H235_DH\tCHECK: p value is not prime");
-	 case DH_CHECK_P_NOT_SAFE_PRIME:
+     case DH_CHECK_P_NOT_SAFE_PRIME:
          PTRACE(4,"H235_DH\tCHECK: p value is not a safe prime");
-	 case DH_UNABLE_TO_CHECK_GENERATOR:
+     case DH_UNABLE_TO_CHECK_GENERATOR:
          PTRACE(4,"H235_DH\tCHECK: unable to check the generator value");
-	 case DH_NOT_SUITABLE_GENERATOR:
+     case DH_NOT_SUITABLE_GENERATOR:
          PTRACE(4,"H235_DH\tCHECK: the g value is not a generator");
-	}
-	return FALSE;
+    }
+    return FALSE;
  }
 
   return TRUE;
@@ -137,28 +137,28 @@ PBoolean H235_DiffieHellman::CheckParams() const
 
 void H235_DiffieHellman::Encode_P(PASN_BitString & p) const
 {
-	PWaitAndSignal m(vbMutex);
+    PWaitAndSignal m(vbMutex);
 
     if (!m_toSend)
         return;
 
-	unsigned char * data= (unsigned char *)OPENSSL_malloc(BN_num_bytes(dh->p) + 20); // TODO: why + 20 ??
-	if (data != NULL) {
-		if (BN_bn2bin(dh->p, data) > 0)
-	        p.SetData(BN_num_bits(dh->p), data);
-	}
-	OPENSSL_free(data);
+    unsigned char * data= (unsigned char *)OPENSSL_malloc(BN_num_bytes(dh->p) + 20); // TODO: why + 20 ??
+    if (data != NULL) {
+        if (BN_bn2bin(dh->p, data) > 0)
+            p.SetData(BN_num_bits(dh->p), data);
+    }
+    OPENSSL_free(data);
 }
 
 void H235_DiffieHellman::Decode_P(const PASN_BitString & p)
 {
-	PWaitAndSignal m(vbMutex);
+    PWaitAndSignal m(vbMutex);
 
     if (p.GetSize() == 0)
         return;
 
-	const unsigned char *data = p.GetDataPointer();
-	dh->p=BN_bin2bn(data,sizeof(data), NULL);
+    const unsigned char *data = p.GetDataPointer();
+    dh->p=BN_bin2bn(data,sizeof(data), NULL);
 }
 
 void H235_DiffieHellman::Encode_G(PASN_BitString & g) const
@@ -168,29 +168,29 @@ void H235_DiffieHellman::Encode_G(PASN_BitString & g) const
     if (!m_toSend)
         return;
 
-	int len_p = BN_num_bytes(dh->p);
+    int len_p = BN_num_bytes(dh->p);
     int len_g = BN_num_bytes(dh->g);
-	int bits_p = BN_num_bits(dh->p);
+    int bits_p = BN_num_bits(dh->p);
 
     // G is padded out to the length of P
-	unsigned char * data = (unsigned char *)OPENSSL_malloc(len_p + 20); // TODO: why + 20 ??
+    unsigned char * data = (unsigned char *)OPENSSL_malloc(len_p + 20); // TODO: why + 20 ??
     memset(data, 0, len_p);
-	if (data != NULL) {
-		 if (BN_bn2bin(dh->g, data + len_p - len_g) > 0)
-		     g.SetData(bits_p, data);
-	}
-	OPENSSL_free(data);
+    if (data != NULL) {
+         if (BN_bn2bin(dh->g, data + len_p - len_g) > 0)
+             g.SetData(bits_p, data);
+    }
+    OPENSSL_free(data);
 }
 
 void H235_DiffieHellman::Decode_G(const PASN_BitString & g)
 {
-	PWaitAndSignal m(vbMutex);
+    PWaitAndSignal m(vbMutex);
 
     if (g.GetSize() == 0)
         return;
 
     // TODO: Valgrind says "invalid read of size 1", why ?
-	dh->g = BN_bin2bn(g.GetDataPointer(), g.GetSize(), NULL);
+    dh->g = BN_bin2bn(g.GetDataPointer(), g.GetSize(), NULL);
 }
 
 
@@ -198,23 +198,23 @@ void H235_DiffieHellman::Encode_HalfKey(PASN_BitString & hk) const
 {
     PWaitAndSignal m(vbMutex);
 
-	int len = BN_num_bytes(dh->pub_key);
-	int bits_key = BN_num_bits(dh->pub_key);
+    int len = BN_num_bytes(dh->pub_key);
+    int bits_key = BN_num_bits(dh->pub_key);
     // TODO Verify that the halfkey is being packed properly - SH
-	unsigned char * data = (unsigned char *)OPENSSL_malloc(len + 20); // TODO: why + 20 ??
-	if (data != NULL){
-		if (BN_bn2bin(dh->pub_key, data) > 0)
-			hk.SetData(bits_key, data);
-	}
-	OPENSSL_free(data);
+    unsigned char * data = (unsigned char *)OPENSSL_malloc(len + 20); // TODO: why + 20 ??
+    if (data != NULL){
+        if (BN_bn2bin(dh->pub_key, data) > 0)
+            hk.SetData(bits_key, data);
+    }
+    OPENSSL_free(data);
 }
 
 void H235_DiffieHellman::Decode_HalfKey(const PASN_BitString & hk)
 {
-	PWaitAndSignal m(vbMutex);
+    PWaitAndSignal m(vbMutex);
 
-	const unsigned char *data = hk.GetDataPointer();
-	dh->pub_key = BN_bin2bn(data, sizeof(data), NULL);   
+    const unsigned char *data = hk.GetDataPointer();
+    dh->pub_key = BN_bin2bn(data, sizeof(data), NULL);   
 }
 
 void H235_DiffieHellman::SetRemoteKey(bignum_st * remKey)
@@ -229,13 +229,13 @@ PBoolean H235_DiffieHellman::GenerateHalfKey()
     if (m_loadFromFile)
         return true;
 
-	// TODO check if half key is generated correctly - SH - looks OK - JW
-	if (!DH_generate_key(dh)) {
-		char buf[256];
-		ERR_error_string(ERR_get_error(), buf);
+    // TODO check if half key is generated correctly - SH - looks OK - JW
+    if (!DH_generate_key(dh)) {
+        char buf[256];
+        ERR_error_string(ERR_get_error(), buf);
         PTRACE(4, "H235_DH\tERROR DH Halfkey " << buf);
-		return FALSE;
-	}
+        return FALSE;
+    }
 
     return TRUE;
 }
@@ -256,14 +256,14 @@ PBoolean H235_DiffieHellman::Load(const PConfig  & dhFile, const PString & secti
 
     PBoolean ok =true;
     if (dhFile.HasKey(section, "PRIME")) {
-	    str = dhFile.GetString(section, "PRIME", "");
+        str = dhFile.GetString(section, "PRIME", "");
         PBase64::Decode(str, data);
         dh->p = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
     } else 
         ok = false;
 
     if (dhFile.HasKey(section, "GENERATOR")) {
-	    str = dhFile.GetString(section, "GENERATOR", "");
+        str = dhFile.GetString(section, "GENERATOR", "");
         PBase64::Decode(str, data);
         PBYTEArray temp(1);
         memcpy(temp.GetPointer(), data.GetPointer(), 1);
@@ -274,14 +274,14 @@ PBoolean H235_DiffieHellman::Load(const PConfig  & dhFile, const PString & secti
         ok = false;
 
     if (dhFile.HasKey(section, "PUBLIC")) {
-	    str = dhFile.GetString(section, "PUBLIC", "");
+        str = dhFile.GetString(section, "PUBLIC", "");
         PBase64::Decode(str, data);
         dh->pub_key = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
     } else 
         ok = false;
   
     if (dhFile.HasKey(section, "PRIVATE")) {
-	    str = dhFile.GetString(section, "PRIVATE", "");
+        str = dhFile.GetString(section, "PRIVATE", "");
         PBase64::Decode(str, data);
         dh->priv_key = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
     } else 
@@ -345,24 +345,24 @@ PBoolean H235_DiffieHellman::ComputeSessionKey(PBYTEArray & SessionKey)
 {
     SessionKey.SetSize(0);
     if (!m_remKey) {
-		PTRACE(2, "H235_DH\tERROR Generating Shared DH: No remote key!");
+        PTRACE(2, "H235_DH\tERROR Generating Shared DH: No remote key!");
         return false;
     }
 
-	int len = DH_size(dh);
-	unsigned char * buf = (unsigned char *)OPENSSL_malloc(len);
+    int len = DH_size(dh);
+    unsigned char * buf = (unsigned char *)OPENSSL_malloc(len);
 
-	int out = DH_compute_key(buf, m_remKey, dh);
-	if (out <= 0) {
-		PTRACE(2,"H235_DH\tERROR Generating Shared DH!");
-		OPENSSL_free(buf);
-	    return false;
-	}
+    int out = DH_compute_key(buf, m_remKey, dh);
+    if (out <= 0) {
+        PTRACE(2,"H235_DH\tERROR Generating Shared DH!");
+        OPENSSL_free(buf);
+        return false;
+    }
 
     SessionKey.SetSize(out);
     memcpy(SessionKey.GetPointer(), (void *)buf, out);
 
-	OPENSSL_free(buf);
+    OPENSSL_free(buf);
 
     return true;
 }
@@ -383,14 +383,14 @@ int H235_DiffieHellman::GetKeyLength() const
 template <class PAIR>
 class deletepair { // PAIR::second_type is a pointer type
 public:
-	void operator()(const PAIR & p) { if (p.second) delete p.second; }
+    void operator()(const PAIR & p) { if (p.second) delete p.second; }
 };
 
 template <class M>
 inline void DeleteObjectsInMap(const M & m)
 {
-	typedef typename M::value_type PAIR;
-	std::for_each(m.begin(), m.end(), deletepair<PAIR>());
+    typedef typename M::value_type PAIR;
+    std::for_each(m.begin(), m.end(), deletepair<PAIR>());
 }
 
 void LoadDiffieHellmanMap(std::map<PString, H235_DiffieHellman*> & dhmap, const PString & filePath = PString())
@@ -535,7 +535,7 @@ PBoolean H2356_Authenticator::PrepareTokens(PASN_Array & clearTokens,
   }
 
   if (m_tokenState == e_clearNone) {
-	  m_tokenState = e_clearSent;
+      m_tokenState = e_clearSent;
       return true;
   }
 
@@ -592,7 +592,7 @@ H235Authenticator::ValidationResult H2356_Authenticator::ValidateTokens(const PA
   }
   
   if (m_tokenState == e_clearNone) {
-	  m_tokenState = e_clearReceived;
+      m_tokenState = e_clearReceived;
       return e_OK;
   }
 
@@ -607,9 +607,9 @@ H235Authenticator::ValidationResult H2356_Authenticator::ValidateTokens(const PA
 PBoolean H2356_Authenticator::IsSecuredSignalPDU(unsigned signalPDU, PBoolean /*received*/) const
 {
   switch (signalPDU) {
-	  case H225_H323_UU_PDU_h323_message_body::e_setup:
-	  case H225_H323_UU_PDU_h323_message_body::e_connect:
-		  return enabled;
+      case H225_H323_UU_PDU_h323_message_body::e_setup:
+      case H225_H323_UU_PDU_h323_message_body::e_connect:
+          return enabled;
       default :
          return false;
   }

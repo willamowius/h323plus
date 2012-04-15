@@ -256,7 +256,7 @@ PBoolean H235SecurityCapability::IsUsable(const H323Connection & connection) con
 /////////////////////////////////////////////////////////////////////////////
 
 H323SecureRealTimeCapability::H323SecureRealTimeCapability(H323Capability & childCapability, H323Capabilities * capabilities, unsigned secNo, PBoolean active)
-				: ChildCapability(*(H323Capability *)childCapability.Clone()), m_active(active), 
+                : ChildCapability(*(H323Capability *)childCapability.Clone()), m_active(active), 
                   m_capabilities(capabilities), m_secNo(secNo),  nrtpqos(NULL)
 {
     assignedCapabilityNumber = childCapability.GetCapabilityNumber();
@@ -264,7 +264,7 @@ H323SecureRealTimeCapability::H323SecureRealTimeCapability(H323Capability & chil
 
 
 H323SecureRealTimeCapability::H323SecureRealTimeCapability(RTP_QOS * _rtpqos,H323Capability & childCapability)
-				: ChildCapability(*(H323Capability *)childCapability.Clone()), m_active(false), 
+                : ChildCapability(*(H323Capability *)childCapability.Clone()), m_active(false), 
                   m_capabilities(NULL), m_secNo(0), nrtpqos(_rtpqos)
 {
 }
@@ -276,8 +276,8 @@ H323SecureRealTimeCapability::~H323SecureRealTimeCapability()
 
 void H323SecureRealTimeCapability::AttachQoS(RTP_QOS * _rtpqos)
 {
-	  delete nrtpqos;  
-	  nrtpqos = _rtpqos;
+      delete nrtpqos;  
+      nrtpqos = _rtpqos;
 }
 
 void H323SecureRealTimeCapability::SetAssociatedCapability(unsigned _secNo)
@@ -291,10 +291,10 @@ H323Channel * H323SecureRealTimeCapability::CreateChannel(H323Connection & conne
                                  const H245_H2250LogicalChannelParameters * param) const
 {
 
-  RTP_Session * session = NULL;			  // Session
+  RTP_Session * session = NULL;              // Session
 
   if (param != NULL) {
-	session = connection.UseSession(param->m_sessionID, param->m_mediaControlChannel, dir, nrtpqos);
+    session = connection.UseSession(param->m_sessionID, param->m_mediaControlChannel, dir, nrtpqos);
   } else {
     // Make a fake transport address from the connection so gets initialised with
     // the transport type (IP, IPX, multicast etc).
@@ -316,7 +316,7 @@ unsigned H323SecureRealTimeCapability::GetCapabilityNumber() const
 void H323SecureRealTimeCapability::SetCapabilityNumber(unsigned num) 
 { 
     assignedCapabilityNumber = num;
-	ChildCapability.SetCapabilityNumber(num); 
+    ChildCapability.SetCapabilityNumber(num); 
 }
 
 void H323SecureRealTimeCapability::SetCapabilityList(H323Capabilities * capabilities)
@@ -347,14 +347,14 @@ const PString & H323SecureRealTimeCapability::GetAlgorithm() const
 ///////////////////////////////////////////////////////////////////////////// 
 
 H323SecureCapability::H323SecureCapability(H323Capability & childCapability,
-													 H235ChType Ch,
+                                                     H235ChType Ch,
                                                      H323Capabilities * capabilities,
                                                      unsigned secNo,
                                                      PBoolean active
-													 )
+                                                     )
    : H323SecureRealTimeCapability(childCapability, capabilities, secNo, active)
 {
-	chtype = Ch;
+    chtype = Ch;
 }
 
 H323Capability::MainTypes H323SecureCapability::GetMainType() const
@@ -365,23 +365,23 @@ H323Capability::MainTypes H323SecureCapability::GetMainType() const
 
 PObject * H323SecureCapability::Clone() const
 {
-	PTRACE(4, "H235RTP\tCloning Capability: " << GetFormatName());
+    PTRACE(4, "H235RTP\tCloning Capability: " << GetFormatName());
 
-	PBoolean IsClone = FALSE;
-	H235ChType ch = H235ChNew;
+    PBoolean IsClone = FALSE;
+    H235ChType ch = H235ChNew;
 
-	switch (chtype) {
-	case H235ChNew:	
-		   ch = H235ChClone;
-		   IsClone = TRUE;
-		break;
-	case H235ChClone:
-		   ch = H235Channel;
-		break;
-	case H235Channel:
-		   ch = H235Channel;
-		break;
-	}
+    switch (chtype) {
+    case H235ChNew:    
+           ch = H235ChClone;
+           IsClone = TRUE;
+        break;
+    case H235ChClone:
+           ch = H235Channel;
+        break;
+    case H235Channel:
+           ch = H235Channel;
+        break;
+    }
 
   return new H323SecureCapability(*(H323Capability *)ChildCapability.Clone(),ch, m_capabilities, m_secNo, m_active);
 }
@@ -572,7 +572,7 @@ PBoolean H323SecureCapability::OnReceivedPDU(const H245_DataType & dataType,PBoo
             break;
     }
 
-	return false;
+    return false;
 }
 
 //////////////////////////////////////////////////////////////////////////////

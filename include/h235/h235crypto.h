@@ -59,7 +59,7 @@ public:
 
    /** Destroy the crypto engine
      */
-	~H235CryptoEngine();
+    ~H235CryptoEngine();
   //@}
 
     /** Set key (for key updates)
@@ -81,11 +81,11 @@ public:
     PBYTEArray GenerateRandomKey(const PString & algorithmOID);  // Use assigned Algorithm
 
 protected:
-	static void SetIV(unsigned char * iv, unsigned char * ivSequence, unsigned ivLen);
+    static void SetIV(unsigned char * iv, unsigned char * ivSequence, unsigned ivLen);
 
 protected:
-	EVP_CIPHER_CTX m_encryptCtx, m_decryptCtx;
-	PString m_algorithmOID;	// eg. "2.16.840.1.101.3.4.1.2"
+    EVP_CIPHER_CTX m_encryptCtx, m_decryptCtx;
+    PString m_algorithmOID;    // eg. "2.16.840.1.101.3.4.1.2"
 };
 
 
@@ -94,7 +94,7 @@ class H235_DiffieHellman;
 class H235Capabilities;
 class H235Session : public  PObject
 {
-	 PCLASSINFO(H235Session, PObject);
+     PCLASSINFO(H235Session, PObject);
 
 public:
 
@@ -106,7 +106,7 @@ public:
 
    /** Destroy the SSL Session Context
      */
-	~H235Session();
+    ~H235Session();
   //@}
 
  /**@name General Public Functions */

@@ -295,7 +295,7 @@ public:
     virtual void SetCapabilityNumber(unsigned num);
 
     /// Attach QoS
-	void AttachQoS(RTP_QOS * _rtpqos);
+    void AttachQoS(RTP_QOS * _rtpqos);
 
     /// Set the Associated Capability 
     virtual void SetAssociatedCapability(unsigned  _secNo);
@@ -347,9 +347,9 @@ class H323SecureCapability : public H323SecureRealTimeCapability
 
     /**Create an encrypted audio based capability 
       */
-    H323SecureCapability(	
+    H323SecureCapability(
         H323Capability & childCapability,          ///< Child Capability
-        enum H235ChType Ch = H235ChNew,			   ///< ChannelType
+        enum H235ChType Ch = H235ChNew,               ///< ChannelType
         H323Capabilities * capabilities = NULL,    ///< Capabilities reference
         unsigned secNo = 0,                        ///< Security Capability No
         PBoolean active = false                    ///< Whether encryption is active or not
@@ -383,9 +383,9 @@ class H323SecureCapability : public H323SecureRealTimeCapability
      */
     virtual unsigned GetSubType() const;
 
-	/**Get Generic Identifier 
-		Default returns PString::Empty
-	 */
+    /**Get Generic Identifier 
+        Default returns PString::Empty
+     */
     virtual PString GetIdentifier() const;
 
     /**Get the name of the media data format this class represents.
@@ -474,7 +474,7 @@ class H323SecureCapability : public H323SecureRealTimeCapability
      */
     virtual PBoolean OnReceivedPDU(
       const H245_DataType & pdu,  /// PDU to get information from
-	  PBoolean receiver				  /// is receiver OLC
+      PBoolean receiver                  /// is receiver OLC
     );
 
     /**Compare the sub capability.
@@ -489,9 +489,9 @@ class H323SecureCapability : public H323SecureRealTimeCapability
       const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
     ) const;
 
-	/**Get Child Capability
-	  */
-	H323Capability & GetChildCapability() const { return ChildCapability; }
+    /**Get Child Capability
+      */
+    H323Capability & GetChildCapability() const { return ChildCapability; }
 
     /**Validate that the capability is usable given the connection.
        This checks agains the negotiated protocol version number and remote
