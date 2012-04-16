@@ -412,7 +412,9 @@ void LoadDiffieHellmanMap(std::map<PString, H235_DiffieHellman*> & dhmap, const 
           while (token != NULL) {
             PFilePath dhFile = PString(token);
             if (PFile::Exists(dhFile)) 
-                  FilePaths.AppendString(dhFile);
+              FilePaths.AppendString(dhFile);
+            else
+              PTRACE(1, "Error: DH key file not found: " << dhFile);
             token = strtok(NULL, ";");
           }
       }
@@ -427,8 +429,10 @@ void LoadDiffieHellmanMap(std::map<PString, H235_DiffieHellman*> & dhmap, const 
             if (dh->LoadedFromFile()) {
                 dhmap.insert(pair<PString, H235_DiffieHellman*>(oidList[j], dh));
                 i++;
-            } else 
+            } else {
+                PTRACE(1, "Error: Loading DH key file failed");
                 delete dh;
+            }
         }
     }
     if (i) {
