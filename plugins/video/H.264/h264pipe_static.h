@@ -63,6 +63,7 @@ class H264EncCtx
      void call(unsigned msg , const u_char * src, unsigned & srcLen, u_char * dst, unsigned & dstLen, unsigned & headerLen, unsigned int & flags, int & ret);
 
   protected:
+     bool InternalLoad();
      X264EncoderContext * x264;
      bool loaded;
 

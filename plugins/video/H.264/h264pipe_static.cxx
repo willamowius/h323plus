@@ -56,25 +56,24 @@ H264EncCtx::~H264EncCtx()
 }
 
 bool H264EncCtx::Load()
+{  
+    return true;
+}
+
+bool H264EncCtx::InternalLoad()
 {
-    if (!loaded) {
+   if (!loaded) {
       x264 = new X264EncoderContext();
-      if (x264) {
-          TRACE(1, "H264\tSuccessfully loaded X264 Context");
-          loaded=true;
-      }
-    }
-    return loaded;
+      loaded=true;
+   }
+   return loaded;
 }
 
 void H264EncCtx::call(unsigned msg)
 {
   switch (msg) {
 	case H264ENCODERCONTEXT_CREATE:
-        if (!loaded) {
-            x264 = new X264EncoderContext();
-            loaded=true;
-        }
+        // Don't Load here...
 		break;
 	case H264ENCODERCONTEXT_DELETE:
         if (loaded) {
@@ -84,7 +83,7 @@ void H264EncCtx::call(unsigned msg)
 		    break;
         }
 	case APPLY_OPTIONS:
-        if (x264)
+         if (InternalLoad())
             x264->ApplyOptions();	
 		break;
 	default:
@@ -96,22 +95,28 @@ void H264EncCtx::call(unsigned msg, unsigned value)
 {
   switch (msg) {
     case SET_FRAME_WIDTH:
-		x264->SetFrameWidth(value);
+        if (InternalLoad())
+		    x264->SetFrameWidth(value);
 		break;
     case SET_FRAME_HEIGHT:
-		x264->SetFrameHeight(value);
+        if (InternalLoad())
+		    x264->SetFrameHeight(value);
 	    break;
     case SET_FRAME_RATE:
-		x264->SetFrameRate(value);
+        if (InternalLoad())
+		    x264->SetFrameRate(value);
 		break;
 	case SET_MAX_KEY_FRAME_PERIOD:
-        x264->SetMaxKeyFramePeriod(value);
+        if (InternalLoad())
+            x264->SetMaxKeyFramePeriod(value);
 		break;
     case SET_TSTO:
-		x264->SetTSTO(value);
+        if (InternalLoad())
+		    x264->SetTSTO(value);
 		break;
     case SET_PROFILE_LEVEL:
-		x264->SetProfileLevel(value);
+        if (InternalLoad())
+		   x264->SetProfileLevel(value);
 	    break;
 	default:
 	    break;
@@ -123,7 +128,8 @@ void H264EncCtx::call(unsigned msg , const u_char * src, unsigned & srcLen, u_ch
   switch (msg) {
 	case ENCODE_FRAMES:
     case ENCODE_FRAMES_BUFFERED:
-        ret = (x264->EncodeFrames( src,  srcLen, dst, dstLen, flags));
+        if (InternalLoad())
+            ret = (x264->EncodeFrames( src,  srcLen, dst, dstLen, flags));
 		break;
 	default:
 		break;
