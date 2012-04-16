@@ -73,7 +73,9 @@ class H2356_Authenticator : public H235Authenticator
     virtual const char * GetName() const;
 
     static PStringArray GetAuthenticatorNames();
+#if PTLIB_VER >= 2110
     static PBoolean GetAuthenticationCapabilities(Capabilities * ids);
+#endif
 
     PBoolean IsMatch(const PString & identifier) const; 
 

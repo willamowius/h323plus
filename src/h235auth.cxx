@@ -48,9 +48,9 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-#if PTLIB_VER >= 2110
-
 static const char H235AuthenticatorPluginBaseClass[] = "H235Authenticator";
+
+#if PTLIB_VER >= 2110
 
 template <> H235Authenticator * PDevicePluginFactory<H235Authenticator>::Worker::Create(const PDefaultPFactoryKey & type) const
 {
@@ -87,7 +87,6 @@ PStringArray H235Authenticator::GetAuthenticatorList()
     return authList;
 }
 
-#if PTLIB_VER >= 2110
 H235Authenticator * H235Authenticator::CreateAuthenticator(const PString & authname, PPluginManager * pluginMgr)
 {
   if (pluginMgr == NULL)
@@ -95,6 +94,8 @@ H235Authenticator * H235Authenticator::CreateAuthenticator(const PString & authn
 
   return (H235Authenticator *)pluginMgr->CreatePluginsDeviceByName(authname, H235AuthenticatorPluginBaseClass,0);
 }
+
+#if PTLIB_VER >= 2110
 
 PBoolean H235Authenticator::GetAuthenticatorCapabilities(const PString & deviceName, H235Authenticator::Capabilities * caps, PPluginManager * pluginMgr)
 {
@@ -522,6 +523,7 @@ PBoolean H235Authenticators::CreateAuthenticators(H235Authenticator::Application
   return true;
 }
 
+#if PTLIB_VER >= 2110
 PBoolean H235Authenticators::CreateAuthenticators(const PASN_Array & clearTokens, const PASN_Array & cryptoTokens)
 {
     if (clearTokens.GetSize() == 0 && cryptoTokens.GetSize() == 0)
@@ -545,6 +547,7 @@ PBoolean H235Authenticators::CreateAuthenticators(const PASN_Array & clearTokens
     }
     return true;
 }
+#endif
 
 PBoolean H235Authenticators::CreateAuthenticator(const PString & name)
 {

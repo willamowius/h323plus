@@ -68,10 +68,11 @@ class H235Authenticator : public PObject
       ostream & strm
     ) const;
 
-#if PTLIB_VER >= 2110
     static H235Authenticator * CreateAuthenticator(const PString & authname,        ///< Feature Name Expression
                                                 PPluginManager * pluginMgr = NULL   ///< Plugin Manager
                                                  );
+#if PTLIB_VER >= 2110
+
     struct Capability {
         const char * m_identifier;
         const char * m_cipher;

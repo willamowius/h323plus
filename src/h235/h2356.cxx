@@ -481,6 +481,7 @@ PStringArray H2356_Authenticator::GetAuthenticatorNames()
     return PStringArray("Std6");
 }
 
+#if PTLIB_VER >= 2110
 PBoolean H2356_Authenticator::GetAuthenticationCapabilities(H235Authenticator::Capabilities * ids)
 {
     for (PINDEX i = 0; i < PARRAYSIZE(H235_Encryptions); ++i) {
@@ -492,6 +493,7 @@ PBoolean H2356_Authenticator::GetAuthenticationCapabilities(H235Authenticator::C
     }
     return true;
 }
+#endif
 
 PBoolean H2356_Authenticator::IsMatch(const PString & identifier) const 
 { 
