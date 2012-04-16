@@ -68,11 +68,11 @@ public:
 
     /** Encrypt data
       */
-    PBYTEArray Encrypt(const PBYTEArray & data, unsigned char * ivSequence, bool rtpPadding);
+    PBYTEArray Encrypt(const PBYTEArray & data, unsigned char * ivSequence, bool & rtpPadding);
 
     /** Decrypt data
       */
-    PBYTEArray Decrypt(const PBYTEArray & data, unsigned char * ivSequence, bool rtpPadding);
+    PBYTEArray Decrypt(const PBYTEArray & data, unsigned char * ivSequence, bool & rtpPadding);
 
     /** Generate a random key of a size suitable for the alogorithm
       */

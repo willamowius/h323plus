@@ -112,21 +112,21 @@ void H235CryptoEngine::SetIV(unsigned char * iv, unsigned char * ivSequence, uns
     }
 }
 
-PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * ivSequence, bool rtpPadding)
+PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * ivSequence, bool & rtpPadding)
 {
     PBYTEArray & data = *(PRemoveConst(PBYTEArray, &_data));
     unsigned char iv[EVP_MAX_IV_LENGTH];
 
-    /* max ciphertext len for a n bytes of plaintext is n + BLOCK_SIZE -1 bytes */
+    // max ciphertext len for a n bytes of plaintext is n + BLOCK_SIZE -1 bytes
     int ciphertext_len = data.GetSize() + EVP_CIPHER_CTX_block_size(&m_encryptCtx);
     int final_len = 0;
     PBYTEArray ciphertext(ciphertext_len);
 
     SetIV(iv, ivSequence, EVP_CIPHER_CTX_iv_length(&m_encryptCtx));
 
-    /* allows reusing of context for multiple encryption cycles */
     EVP_EncryptInit_ex(&m_encryptCtx, NULL, NULL, NULL, iv);
 
+    rtpPadding = (data.GetSize() % EVP_CIPHER_CTX_block_size(&m_encryptCtx) > 0);
     if (rtpPadding)
         EVP_CIPHER_CTX_set_padding(&m_encryptCtx, 1);
     else
@@ -137,21 +137,15 @@ PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * i
     EVP_EncryptUpdate(&m_encryptCtx, ciphertext.GetPointer(), &ciphertext_len, data.GetPointer(), data.GetSize());
 
     if (rtpPadding) {
-        // use RFC padding
-        /* update ciphertext with the final remaining bytes */
+        // use RFC padding: update ciphertext with the final remaining bytes
         EVP_EncryptFinal_ex(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len);
-    } else if (data.GetSize() % EVP_CIPHER_CTX_block_size(&m_encryptCtx) > 0) {
-        // TODO: use cyphertext stealing
-        PTRACE(0, "JW ciphertext stealing not implemented, yet");
-    } else {
-        // neither necessary
     }
 
     ciphertext.SetSize(ciphertext_len + final_len);
     return ciphertext;
 }
 
-PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data, unsigned char * ivSequence, bool rtpPadding)
+PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data, unsigned char * ivSequence, bool & rtpPadding)
 {
     PBYTEArray & data = *(PRemoveConst(PBYTEArray, &_data));
     unsigned char iv[EVP_MAX_IV_LENGTH];
@@ -227,7 +221,8 @@ void H235Session::EncodeMediaKey(PBYTEArray & key)
 {
     PTRACE(4, "H235Key\tEncode plain media key: " << endl << hex << m_crytoMasterKey); 
 
-    key = m_dhcontext.Encrypt(m_crytoMasterKey, NULL, false);    // TODO: fix iv sequence and padding
+    bool rtpPadding = false;
+    key = m_dhcontext.Encrypt(m_crytoMasterKey, NULL, rtpPadding);
 
     PTRACE(4, "H235Key\tEncrypted key:" << endl << hex << key);
 }
@@ -236,7 +231,8 @@ void H235Session::DecodeMediaKey(PBYTEArray & key)
 {
     PTRACE(4, "H235Key\tH235v3 encrypted key received, size=" << key.GetSize() << endl << hex << key);
 
-    m_crytoMasterKey = m_dhcontext.Decrypt(key, NULL, false);    // TODO: fix iv sequence and padding
+    bool rtpPadding = false;
+    m_crytoMasterKey = m_dhcontext.Decrypt(key, NULL, rtpPadding);
     m_context.SetKey(m_crytoMasterKey);
 
     PTRACE(4, "H235Key\tH235v3 key decrypted, size= " << m_crytoMasterKey.GetSize() << endl << hex << m_crytoMasterKey);
