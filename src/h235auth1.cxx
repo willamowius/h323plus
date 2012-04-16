@@ -155,7 +155,7 @@ static void hmac_sha (const unsigned char*    k,      /* secret key */
 
 /////////////////////////////////////////////////////////////////////////////
 
-#if PTLIB_VER >= 2100 && defined(H323_H235) 
+#if PTLIB_VER >= 2110
 H235SECURITY(Std1);
 #endif
 
@@ -187,7 +187,7 @@ PStringArray H2351_Authenticator::GetAuthenticatorNames()
     return PStringArray("Std1");
 }
 
-#ifdef H323_H235
+#if PTLIB_VER >= 2110
 PBoolean H2351_Authenticator::GetAuthenticationCapabilities(H235Authenticator::Capabilities * ids)
 {
       H235Authenticator::Capability cap;

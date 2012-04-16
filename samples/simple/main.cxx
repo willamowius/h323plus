@@ -426,7 +426,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
       cout << "Available Security: " << endl;
       for (PINDEX i = 0; i < security.GetSize(); i++) {
           cout << security[i] << endl;
-#ifdef H323_H235
+#if PTLIB_VER >= 2110
           H235Authenticator::Capabilities caps;
           if (H235Authenticator::GetAuthenticatorCapabilities(security[i],&caps)) {
              for (list<H235Authenticator::Capability>::iterator j = 

@@ -68,14 +68,10 @@ class H235Authenticator : public PObject
       ostream & strm
     ) const;
 
-#ifdef H323_H235
+#if PTLIB_VER >= 2110
     static H235Authenticator * CreateAuthenticator(const PString & authname,        ///< Feature Name Expression
                                                 PPluginManager * pluginMgr = NULL   ///< Plugin Manager
                                                  );
-
-    static H235Authenticator * CreateAuthenticatorByID(const PString & identifier
-                                                 );
-
     struct Capability {
         const char * m_identifier;
         const char * m_cipher;
@@ -86,10 +82,16 @@ class H235Authenticator : public PObject
        std::list<Capability> capabilityList;
     } Capabilities;
 
+    static H235Authenticator * CreateAuthenticatorByID(const PString & identifier
+                                                 );
+
     static PBoolean GetAuthenticatorCapabilities(const PString & deviceName,                 
                                                 Capabilities * caps, 
                                                 PPluginManager * pluginMgr = NULL);
+#endif
 
+#ifdef H323_H235
+    
     virtual PBoolean GetMediaSessionInfo(PString & algorithmOID, PBYTEArray & sessionKey); 
 #endif
 
@@ -322,7 +324,7 @@ class H235AuthSimpleMD5 : public H235Authenticator
     virtual const char * GetName() const;
 
     static PStringArray GetAuthenticatorNames();
-#ifdef H323_H235
+#if PTLIB_VER >= 2110
     static PBoolean GetAuthenticationCapabilities(Capabilities * ids);
 #endif
     virtual PBoolean IsMatch(const PString & identifier) const;
@@ -358,7 +360,7 @@ class H235AuthSimpleMD5 : public H235Authenticator
 ////////////////////////////////////////////////////
 
 
-#if PTLIB >= 2110 && !defined(H323_H235)
+#if PTLIB_VER >= 2110
 /// PFactory Loader
 typedef H235AuthSimpleMD5 H235_AuthenticatorMD5;
 #ifndef _WIN32_WCE
@@ -383,6 +385,11 @@ class H235AuthCAT : public H235Authenticator
 
     virtual const char * GetName() const;
 
+    static PStringArray GetAuthenticatorNames();
+#if PTLIB_VER >= 2110
+    static PBoolean GetAuthenticationCapabilities(Capabilities * ids);
+#endif
+
     virtual H235_ClearToken * CreateClearToken();
 
     virtual ValidationResult ValidateClearToken(
@@ -405,6 +412,14 @@ class H235AuthCAT : public H235Authenticator
     ) const;
 };
 
+#if PTLIB_VER >= 2110
+// PFactory Loader
+typedef H235AuthCAT H235_AuthenticatorCAT;
+#ifndef _WIN32_WCE
+  PPLUGIN_STATIC_LOAD(CAT,H235Authenticator);
+#endif
+#endif
+
 
 #if P_SSL
 
@@ -422,7 +437,7 @@ class H2351_Authenticator : public H235Authenticator
     virtual const char * GetName() const;
 
     static PStringArray GetAuthenticatorNames();
-#ifdef H323_H235
+#if PTLIB_VER >= 2110
     static PBoolean GetAuthenticationCapabilities(Capabilities * ids);
 #endif
     virtual PBoolean IsMatch(const PString & identifier) const;
@@ -482,7 +497,7 @@ template <class className> class H235PluginServiceDescriptor : public PDevicePlu
     virtual bool  ValidateDeviceName(const PString & deviceName, int /*userData*/) const { 
             return (deviceName == className::GetAuthenticatorNames()[0]);
     } 
-#ifdef H323_H235
+#if PTLIB_VER >= 2110
     virtual bool GetDeviceCapabilities(const PString & /*deviceName*/, void * capabilities) const {
         return className::GetAuthenticationCapabilities((H235Authenticator::Capabilities *)capabilities);
     }

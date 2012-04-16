@@ -48,15 +48,11 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-#ifdef H323_H235
+#if PTLIB_VER >= 2110
 
 static const char H235AuthenticatorPluginBaseClass[] = "H235Authenticator";
 
-#if PTLIB_VER >= 2110
 template <> H235Authenticator * PDevicePluginFactory<H235Authenticator>::Worker::Create(const PDefaultPFactoryKey & type) const
-#else
-template <> H235Authenticator * PDevicePluginFactory<H235Authenticator>::Worker::Create(const PString & type) const
-#endif
 {
   return H235Authenticator::CreateAuthenticator(type);
 }
@@ -91,21 +87,21 @@ PStringArray H235Authenticator::GetAuthenticatorList()
     return authList;
 }
 
-#ifdef H323_H235
-PBoolean H235Authenticator::GetAuthenticatorCapabilities(const PString & deviceName, H235Authenticator::Capabilities * caps, PPluginManager * pluginMgr)
-{
-  if (pluginMgr == NULL)
-    pluginMgr = &PPluginManager::GetPluginManager();
-  
-  return pluginMgr->GetPluginsDeviceCapabilities(H235AuthenticatorPluginBaseClass,"",deviceName, caps);
-}
-
+#if PTLIB_VER >= 2110
 H235Authenticator * H235Authenticator::CreateAuthenticator(const PString & authname, PPluginManager * pluginMgr)
 {
   if (pluginMgr == NULL)
     pluginMgr = &PPluginManager::GetPluginManager();
 
   return (H235Authenticator *)pluginMgr->CreatePluginsDeviceByName(authname, H235AuthenticatorPluginBaseClass,0);
+}
+
+PBoolean H235Authenticator::GetAuthenticatorCapabilities(const PString & deviceName, H235Authenticator::Capabilities * caps, PPluginManager * pluginMgr)
+{
+  if (pluginMgr == NULL)
+    pluginMgr = &PPluginManager::GetPluginManager();
+  
+  return pluginMgr->GetPluginsDeviceCapabilities(H235AuthenticatorPluginBaseClass,"",deviceName, caps);
 }
 
 H235Authenticator * H235Authenticator::CreateAuthenticatorByID(const PString & identifier)
@@ -127,7 +123,9 @@ H235Authenticator * H235Authenticator::CreateAuthenticatorByID(const PString & i
   }
   return NULL;
 }
+#endif
 
+#ifdef H323_H235
 PBoolean H235Authenticator::GetMediaSessionInfo(PString & /* algorithmOID */, PBYTEArray & /* sessionKey */)
 {
     return false;
@@ -707,7 +705,7 @@ H235AuthenticatorInfo::H235AuthenticatorInfo(PSSLCertificate * cert)
 }
 ///////////////////////////////////////////////////////////////////////////////
 
-#if PTLIB >= 2110 && defined(H323_H235)
+#if PTLIB_VER >= 2110
 H235SECURITY(MD5);
 #else
 static PFactory<H235Authenticator>::Worker<H235AuthSimpleMD5> factoryH235AuthSimpleMD5("SimpleMD5");
@@ -737,7 +735,7 @@ PStringArray H235AuthSimpleMD5::GetAuthenticatorNames()
     return PStringArray("MD5");
 }
 
-#ifdef H323_H235
+#if PTLIB_VER >= 2110
 PBoolean H235AuthSimpleMD5::GetAuthenticationCapabilities(H235Authenticator::Capabilities * ids)
 {
       H235Authenticator::Capability cap;
@@ -947,7 +945,11 @@ PBoolean H235AuthSimpleMD5::IsSecuredSignalPDU(unsigned signalPDU, PBoolean rece
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#if PTLIB_VER >= 2110
+H235SECURITY(CAT);
+#else
 static PFactory<H235Authenticator>::Worker<H235AuthCAT> factoryH235AuthCAT("SimpleCAT");
+#endif
 
 static const char OID_CAT[] = "1.2.840.113548.10.1.2.1";
 
@@ -967,6 +969,25 @@ const char * H235AuthCAT::GetName() const
 {
   return "CAT";
 }
+
+PStringArray H235AuthCAT::GetAuthenticatorNames()
+{
+    return PStringArray("CAT");
+}
+
+
+#if PTLIB_VER >= 2110
+PBoolean H235AuthCAT::GetAuthenticationCapabilities(H235Authenticator::Capabilities * ids)
+{
+      H235Authenticator::Capability cap;
+        cap.m_identifier = OID_CAT;
+        cap.m_cipher     = "CAT";
+        cap.m_description= "cat";
+       ids->capabilityList.push_back(cap);
+    
+    return true;
+}
+#endif
 
 
 H235_ClearToken * H235AuthCAT::CreateClearToken()
