@@ -397,6 +397,8 @@ void LoadDiffieHellmanMap(std::map<PString, H235_DiffieHellman*> & dhmap, const 
 {
     PStringArray FilePaths;
 
+    dhmap.insert(pair<PString, H235_DiffieHellman*>(OID_H235V3,NULL));
+
     PINDEX k=0;
     if (!filePath.IsEmpty()) {
       PStringArray temp = filePath.Tokenise(';');
@@ -436,8 +438,7 @@ void LoadDiffieHellmanMap(std::map<PString, H235_DiffieHellman*> & dhmap, const 
         }
     }
     if (i) {
-        dhmap.insert(pair<PString, H235_DiffieHellman*>(OID_H235V3,NULL));
-        return;
+        return;	// tokens loaded from file, don't generate tokens
     }
 
     for (PINDEX i = 0; i < PARRAYSIZE(H235_DHParameters); ++i) {
