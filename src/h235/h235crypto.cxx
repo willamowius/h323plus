@@ -364,19 +364,30 @@ PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * i
     EVP_EncryptInit_ex(&m_encryptCtx, NULL, NULL, NULL, iv);
 
 	rtpPadding = false;
-    EVP_CIPHER_CTX_set_padding(&m_encryptCtx, 0);
+	if (rtpPadding)
+    	EVP_CIPHER_CTX_set_padding(&m_encryptCtx, 1);
+	else
+    	EVP_CIPHER_CTX_set_padding(&m_encryptCtx, 0);
 
-    if (data.GetSize() % EVP_CIPHER_CTX_block_size(&m_encryptCtx) > 0) {
+    if (!rtpPadding && (data.GetSize() % EVP_CIPHER_CTX_block_size(&m_encryptCtx) > 0)) {
         // use cyphertext stealing
-    	EVP_EncryptUpdate_cts(&m_encryptCtx, ciphertext.GetPointer(), &ciphertext_len, data.GetPointer(), data.GetSize());
-       	EVP_EncryptFinal_cts(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len);
+    	if (!EVP_EncryptUpdate_cts(&m_encryptCtx, ciphertext.GetPointer(), &ciphertext_len, data.GetPointer(), data.GetSize())) {
+			PTRACE(1, "H235\tEVP_EncryptUpdate_cts() failed");
+		}
+       	if (!EVP_EncryptFinal_cts(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len)) {
+			PTRACE(1, "H235\tEVP_EncryptFinal_cts() failed");
+		}
 	} else {
     	/* update ciphertext, ciphertext_len is filled with the length of ciphertext generated,
     	 *len is the size of plaintext in bytes */
-    	EVP_EncryptUpdate(&m_encryptCtx, ciphertext.GetPointer(), &ciphertext_len, data.GetPointer(), data.GetSize());
+    	if (!EVP_EncryptUpdate(&m_encryptCtx, ciphertext.GetPointer(), &ciphertext_len, data.GetPointer(), data.GetSize())) {
+			PTRACE(1, "H235\tEVP_EncryptUpdate() failed");
+		}
 
        	// update ciphertext with the final remaining bytes, if any use RTP padding
-       	EVP_EncryptFinal_ex(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len);
+       	if (!EVP_EncryptFinal_ex(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len)) {
+			PTRACE(1, "H235\tEVP_EncryptFinal_ex() failed");
+		}
     }
 
     ciphertext.SetSize(ciphertext_len + final_len);
