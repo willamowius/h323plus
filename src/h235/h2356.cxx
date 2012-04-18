@@ -52,9 +52,10 @@
 #include <algorithm>
 
 extern "C" {
-#include <openssl/ssl.h>
+#include <openssl/ssl.h>	// needed for DHparams_dup with OpenSSL 0.9.8
 #include <openssl/err.h>
-#include <openssl/rand.h>
+#include <openssl/dh.h>
+#include <openssl/bn.h>
 };
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -158,7 +159,7 @@ void H235_DiffieHellman::Decode_P(const PASN_BitString & p)
         return;
 
     const unsigned char *data = p.GetDataPointer();
-    dh->p=BN_bin2bn(data,sizeof(data), NULL);
+    dh->p=BN_bin2bn(data, p.GetDataLength() - 1, NULL);
 }
 
 void H235_DiffieHellman::Encode_G(PASN_BitString & g) const
@@ -189,8 +190,7 @@ void H235_DiffieHellman::Decode_G(const PASN_BitString & g)
     if (g.GetSize() == 0)
         return;
 
-    // TODO: Valgrind says "invalid read of size 1", why ?
-    dh->g = BN_bin2bn(g.GetDataPointer(), g.GetSize(), NULL);
+    dh->g = BN_bin2bn(g.GetDataPointer(), g.GetDataLength() - 1, NULL);
 }
 
 
@@ -214,7 +214,7 @@ void H235_DiffieHellman::Decode_HalfKey(const PASN_BitString & hk)
     PWaitAndSignal m(vbMutex);
 
     const unsigned char *data = hk.GetDataPointer();
-    dh->pub_key = BN_bin2bn(data, sizeof(data), NULL);   
+    dh->pub_key = BN_bin2bn(data, hk.GetDataLength() - 1, NULL);
 }
 
 void H235_DiffieHellman::SetRemoteKey(bignum_st * remKey)
@@ -566,7 +566,7 @@ H235Authenticator::ValidationResult H2356_Authenticator::ValidateTokens(const PA
       m_tokenState = e_clearDisable;
       return e_Disabled; 
    }
-  
+
   std::map<PString, H235_DiffieHellman*>::iterator it = m_dhLocalMap.begin();
   while (it != m_dhLocalMap.end()) {
       PBoolean found = false;
@@ -575,14 +575,14 @@ H235Authenticator::ValidationResult H2356_Authenticator::ValidateTokens(const PA
           PString tokenOID = token.m_tokenOID.AsString();
           if (it->first == tokenOID) {
             if(it->second != NULL ) {
-              H235_DiffieHellman* m_dh = new H235_DiffieHellman(*it->second);
+              H235_DiffieHellman* m_dh = new H235_DiffieHellman(*it->second); // new token with same p and g
                const H235_DHset & dh = token.m_dhkey;
                m_dh->Decode_HalfKey(dh.m_halfkey);
-               if (dh.m_modSize.GetSize() > 0) {
+               if (dh.m_modSize.GetSize() > 0) {	// update p and g if included in token
                    m_dh->Decode_P(dh.m_modSize);
                    m_dh->Decode_G(dh.m_generator);
                }
-              m_dhRemoteMap.insert(pair<PString, H235_DiffieHellman*>(tokenOID,m_dh));
+              m_dhRemoteMap.insert(pair<PString, H235_DiffieHellman*>(tokenOID, m_dh));
             }
             found = true;
           }
@@ -673,6 +673,7 @@ void H2356_Authenticator::InitialiseSecurity()
       return;
 
   l->second->SetRemoteKey(r->second->GetPublicKey());
+
   if (connection && (m_algOIDs.GetSize() > 0)) {
       H235Capabilities * localCaps = (H235Capabilities *)connection->GetLocalCapabilitiesRef();
       localCaps->SetDHKeyPair(m_algOIDs,l->second,connection->IsH245Master());
@@ -681,7 +682,7 @@ void H2356_Authenticator::InitialiseSecurity()
 
 PBoolean H2356_Authenticator::GetMediaSessionInfo(PString & algorithmOID, PBYTEArray & sessionKey)
 {
-  InitialiseSecurity();
+   InitialiseSecurity();	// TODO: is this really necessary here ?
 
   if (m_algOIDs.GetSize() == 0) {
       PTRACE(1, "H235\tNo algorithms available");
