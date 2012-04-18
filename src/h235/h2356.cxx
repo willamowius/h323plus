@@ -229,7 +229,7 @@ PBoolean H235_DiffieHellman::GenerateHalfKey()
     if (m_loadFromFile)
         return true;
 
-    // TODO check if half key is generated correctly - SH - looks OK - JW
+    // TODO check if half key is generated correctly
     if (!DH_generate_key(dh)) {
         char buf[256];
         ERR_error_string(ERR_get_error(), buf);
@@ -573,7 +573,8 @@ H235Authenticator::ValidationResult H2356_Authenticator::ValidateTokens(const PA
        for (PINDEX i = 0; i < tokens.GetSize(); ++i) {
           const H235_ClearToken & token = tokens[i];
           PString tokenOID = token.m_tokenOID.AsString();
-          if (it->first == tokenOID && it->second != NULL ) {
+          if (it->first == tokenOID) {
+            if(it->second != NULL ) {
               H235_DiffieHellman* m_dh = new H235_DiffieHellman(*it->second);
                const H235_DHset & dh = token.m_dhkey;
                m_dh->Decode_HalfKey(dh.m_halfkey);
@@ -582,8 +583,8 @@ H235Authenticator::ValidationResult H2356_Authenticator::ValidateTokens(const PA
                    m_dh->Decode_G(dh.m_generator);
                }
               m_dhRemoteMap.insert(pair<PString, H235_DiffieHellman*>(tokenOID,m_dh));
-              found = true;
-              break;
+            }
+            found = true;
           }
        }
        if (!found) {
@@ -681,7 +682,6 @@ void H2356_Authenticator::InitialiseSecurity()
 PBoolean H2356_Authenticator::GetMediaSessionInfo(PString & algorithmOID, PBYTEArray & sessionKey)
 {
   InitialiseSecurity();
-  PTRACE(0, "JW GetMediaSessionInfo #algos=" << m_algOIDs.GetSize() << " #localMap=" << m_dhLocalMap.size());
 
   if (m_algOIDs.GetSize() == 0) {
       PTRACE(1, "H235\tNo algorithms available");
