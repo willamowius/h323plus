@@ -360,14 +360,10 @@ PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * i
     PBYTEArray ciphertext(ciphertext_len);
 
     SetIV(iv, ivSequence, EVP_CIPHER_CTX_iv_length(&m_encryptCtx));
-
     EVP_EncryptInit_ex(&m_encryptCtx, NULL, NULL, NULL, iv);
 
-	rtpPadding = false;
-	if (rtpPadding)
-    	EVP_CIPHER_CTX_set_padding(&m_encryptCtx, 1);
-	else
-    	EVP_CIPHER_CTX_set_padding(&m_encryptCtx, 0);
+	rtpPadding = (data.GetSize() < EVP_CIPHER_CTX_block_size(&m_encryptCtx));
+    EVP_CIPHER_CTX_set_padding(&m_encryptCtx, rtpPadding ? 1 : 0);
 
     if (!rtpPadding && (data.GetSize() % EVP_CIPHER_CTX_block_size(&m_encryptCtx) > 0)) {
         // use cyphertext stealing
@@ -384,8 +380,8 @@ PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * i
 			PTRACE(1, "H235\tEVP_EncryptUpdate() failed");
 		}
 
-       	// update ciphertext with the final remaining bytes, if any use RTP padding
-       	if (!EVP_EncryptFinal_ex(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len)) {
+	   	// update ciphertext with the final remaining bytes, if any use RTP padding
+      	if (!EVP_EncryptFinal_ex(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len)) {
 			PTRACE(1, "H235\tEVP_EncryptFinal_ex() failed");
 		}
     }
@@ -405,23 +401,24 @@ PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data, unsigned char * i
     PBYTEArray plaintext(plaintext_len);
   
     SetIV(iv, ivSequence, EVP_CIPHER_CTX_iv_length(&m_decryptCtx));
-  
     EVP_DecryptInit_ex(&m_decryptCtx, NULL, NULL, NULL, iv);
-    if (rtpPadding)
-        EVP_CIPHER_CTX_set_padding(&m_decryptCtx, 1);
-    else
-        EVP_CIPHER_CTX_set_padding(&m_decryptCtx, 0);
 
-    if (data.GetSize() % EVP_CIPHER_CTX_block_size(&m_decryptCtx) > 0) {
+    EVP_CIPHER_CTX_set_padding(&m_decryptCtx, rtpPadding ? 1 : 0);
+
+    if (!rtpPadding && data.GetSize() % EVP_CIPHER_CTX_block_size(&m_decryptCtx) > 0) {
         // use cyphertext stealing
-    	EVP_DecryptUpdate_cts(&m_decryptCtx, plaintext.GetPointer(), &plaintext_len, data.GetPointer(), data.GetSize());
+    	if (!EVP_DecryptUpdate_cts(&m_decryptCtx, plaintext.GetPointer(), &plaintext_len, data.GetPointer(), data.GetSize())) {
+        	PTRACE(1, "H235\tEVP_DecryptUpdate_cts() failed");
+    	}
     	if(!EVP_DecryptFinal_cts(&m_decryptCtx, plaintext.GetPointer() + plaintext_len, &final_len)) {
-        	PTRACE(1, "EVP_DecryptFinal_ex() failed - incorrect padding ?");
+        	PTRACE(1, "H235\tEVP_DecryptFinal_cts() failed");
     	}
     } else {
-    	EVP_DecryptUpdate(&m_decryptCtx, plaintext.GetPointer(), &plaintext_len, data.GetPointer(), data.GetSize());
-    	if(!EVP_DecryptFinal_ex(&m_decryptCtx, plaintext.GetPointer() + plaintext_len, &final_len)) {
-        	PTRACE(1, "EVP_DecryptFinal_ex() failed - incorrect padding ?");
+    	if (!EVP_DecryptUpdate(&m_decryptCtx, plaintext.GetPointer(), &plaintext_len, data.GetPointer(), data.GetSize())) {
+        	PTRACE(1, "H235\tEVP_DecryptUpdate() failed");
+    	}
+    	if (!EVP_DecryptFinal_ex(&m_decryptCtx, plaintext.GetPointer() + plaintext_len, &final_len)) {
+        	PTRACE(1, "H235\tEVP_DecryptFinal_ex() failed - incorrect padding ?");
     	}
     }
 
