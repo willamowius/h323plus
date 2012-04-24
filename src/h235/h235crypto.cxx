@@ -137,13 +137,11 @@ int EVP_EncryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
   *outl = 0;
 
   if (!ctx->final_used) {
-    //EVPerr(EVP_F_EVP_ENCRYPTFINAL_CTS, EVP_R_EXPECTING_PREVIOUS_CIPHERTEXT);
-    PTRACE(1, "CTS Error: expecting previous ciphertext");
+    PTRACE(1, "H235\tCTS Error: expecting previous ciphertext");
     return 0;
   }
   if (ctx->buf_len == 0) {
-    //EVPerr(EVP_F_EVP_ENCRYPTFINAL_CTS, EVP_R_EXPECTING_PREVIOUS_PLAINTEXT);
-    PTRACE(1, "CTS Error: expecting previous plaintext");
+    PTRACE(1, "H235\tCTS Error: expecting previous plaintext");
     return 0;
   }
 
@@ -190,8 +188,7 @@ int EVP_EncryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
     return 1;
   }
   default:
-    //EVPerr(EVP_F_EVP_ENCRYPTFINAL_CTS, EVP_R_UNSUPPORTED_MODE);
-    PTRACE(1, "CTS Error: unsupported mode");
+    PTRACE(1, "H235\tCTS Error: unsupported mode");
     return 0;
   }
   return 0;
@@ -211,13 +208,11 @@ int EVP_DecryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
   *outl = 0;
 
   if (!ctx->final_used) {
-    //EVPerr(EVP_F_EVP_DECRYPTFINAL_CTS, EVP_R_EXPECTING_PREVIOUS_CIPHERTEXT);
-    PTRACE(1, "CTS Error: expecting previous ciphertext");
+    PTRACE(1, "H235\tCTS Error: expecting previous ciphertext");
     return 0;
   }
   if (ctx->buf_len == 0) {
-    //EVPerr(EVP_F_EVP_DECRYPTFINAL_CTS, EVP_R_EXPECTING_PREVIOUS_CIPHERTEXT);
-    PTRACE(1, "CTS Error: expecting previous ciphertext");
+    PTRACE(1, "H235\tCTS Error: expecting previous ciphertext");
     return 0;
   }
 
@@ -285,13 +280,63 @@ int EVP_DecryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
     return 1;
   }
   default:
-    //EVPerr(EVP_F_EVP_DECRYPTFINAL_CTS, EVP_R_UNSUPPORTED_MODE);
-    PTRACE(1, "CTS Error: unsupported mode");
+    PTRACE(1, "H235\tCTS Error: unsupported mode");
     return 0;
   }
   return 0;
 }
 
+int EVP_DecryptFinal_relaxed(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
+	{
+	int i,n;
+	unsigned int b;
+	*outl=0;
+
+	b=ctx->cipher->block_size;
+	if (ctx->flags & EVP_CIPH_NO_PADDING)
+		{
+		if(ctx->buf_len)
+			{
+			PTRACE(1, "H235\tDecrypt error: data not a multiple of block length");
+			return 0;
+			}
+		*outl = 0;
+		return 1;
+		}
+	if (b > 1)
+		{
+		if (ctx->buf_len || !ctx->final_used)
+			{
+			PTRACE(1, "H235\tDecrypt error: wrong final block length");
+			return(0);
+			}
+		OPENSSL_assert(b <= sizeof ctx->final);
+		n=ctx->final[b-1];
+		if (n == 0 || n > (int)b)
+			{
+			PTRACE(1, "H235\tDecrypt error: bad decrypt");
+			return(0);
+			}
+        // Polycom endpoints (eg. m100 and PVX) don't fill the padding propperly, so we have to disable this check
+/*
+		for (i=0; i<n; i++)
+			{
+			if (ctx->final[--b] != n)
+				{
+			    PTRACE(1, "H235\tDecrypt error: incorrect padding");
+				return(0);
+				}
+			}
+*/
+		n=ctx->cipher->block_size-n;
+		for (i=0; i<n; i++)
+			out[i]=ctx->final[i];
+		*outl=n;
+		}
+	else
+		*outl=0;
+	return(1);
+	}
 
 H235CryptoEngine::H235CryptoEngine(const PString & algorithmOID)
 {
@@ -417,7 +462,7 @@ PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data, unsigned char * i
     	if (!EVP_DecryptUpdate(&m_decryptCtx, plaintext.GetPointer(), &plaintext_len, data.GetPointer(), data.GetSize())) {
         	PTRACE(1, "H235\tEVP_DecryptUpdate() failed");
     	}
-    	if (!EVP_DecryptFinal_ex(&m_decryptCtx, plaintext.GetPointer() + plaintext_len, &final_len)) {
+    	if (!EVP_DecryptFinal_relaxed(&m_decryptCtx, plaintext.GetPointer() + plaintext_len, &final_len)) {
         	PTRACE(1, "H235\tEVP_DecryptFinal_ex() failed - incorrect padding ?");
     	}
     }
