@@ -70,6 +70,8 @@ class H2356_Authenticator : public H235Authenticator
       e_clearDisable           // Disable Exchange
     };
 
+    virtual PObject * Clone() const;
+
     virtual const char * GetName() const;
 
     static PStringArray GetAuthenticatorNames();

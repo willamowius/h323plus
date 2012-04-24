@@ -507,6 +507,17 @@ PBoolean H2356_Authenticator::IsMatch(const PString & identifier) const
 }
 
 
+PObject * H2356_Authenticator::Clone() const
+{
+    H2356_Authenticator * auth = new H2356_Authenticator(*this);
+
+    // We do NOT copy these fields in Clone()
+    auth->lastRandomSequenceNumber = 0;
+    auth->lastTimestamp = 0;
+
+    return auth;
+}
+
 const char * H2356_Authenticator::GetName() const
 {
     return "H.235.6";
