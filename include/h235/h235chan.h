@@ -156,6 +156,17 @@ class H323SecureRTPChannel  : public H323_RTPChannel
       const H245_H2250LogicalChannelAckParameters & param /// Acknowledgement PDU
     );
 
+    /**Get the active payload type used by this channel.
+       This will use the dynamic payload type configured for the channel, or
+       the fixed payload type defined by the media format.
+       */
+    virtual RTP_DataFrame::PayloadTypes GetRTPPayloadType() const;
+
+    /**Set the dynamic payload type used by this channel.
+      */
+    virtual PBoolean SetDynamicRTPPayloadType(
+      int newType  ///< New RTP payload type number
+    );
   //@}
 
   /**@name Utilities */
@@ -173,7 +184,9 @@ class H323SecureRTPChannel  : public H323_RTPChannel
   //@}
 
 protected:
-    H235Session   *  m_encryption;
+    PString        m_algorithm;
+    H235Session*   m_encryption;
+    int            m_payload;
 
 };
 

@@ -40,12 +40,13 @@
 
 #ifdef H323_H235
 
+#include "h323con.h"
 #include "h235/h235crypto.h"
+#include "h235/h235caps.h"
+#include "h235/h2356.h"
 #include <openssl/rand.h>
 
 #include "rtp.h"
-#include "h235/h235caps.h"
-#include "h235/h2356.h"
 
 #ifdef H323_H235_AES256
 const char * OID_AES256 = "2.16.840.1.101.3.4.1.42";
@@ -287,60 +288,60 @@ int EVP_DecryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
 }
 
 int EVP_DecryptFinal_relaxed(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
-	{
-	int i,n;
-	unsigned int b;
-	*outl=0;
+    {
+    int i,n;
+    unsigned int b;
+    *outl=0;
 
-	b=ctx->cipher->block_size;
-	if (ctx->flags & EVP_CIPH_NO_PADDING)
-		{
-		if(ctx->buf_len)
-			{
-			PTRACE(1, "H235\tDecrypt error: data not a multiple of block length");
-			return 0;
-			}
-		*outl = 0;
-		return 1;
-		}
-	if (b > 1)
-		{
-		if (ctx->buf_len || !ctx->final_used)
-			{
-			PTRACE(1, "H235\tDecrypt error: wrong final block length");
-			return(0);
-			}
-		OPENSSL_assert(b <= sizeof ctx->final);
-		n=ctx->final[b-1];
-		if (n == 0 || n > (int)b)
-			{
-			PTRACE(1, "H235\tDecrypt error: bad decrypt");
-			return(0);
-			}
+    b=ctx->cipher->block_size;
+    if (ctx->flags & EVP_CIPH_NO_PADDING)
+        {
+        if(ctx->buf_len)
+            {
+            PTRACE(1, "H235\tDecrypt error: data not a multiple of block length");
+            return 0;
+            }
+        *outl = 0;
+        return 1;
+        }
+    if (b > 1)
+        {
+        if (ctx->buf_len || !ctx->final_used)
+            {
+            PTRACE(1, "H235\tDecrypt error: wrong final block length");
+            return(0);
+            }
+        OPENSSL_assert(b <= sizeof ctx->final);
+        n=ctx->final[b-1];
+        if (n == 0 || n > (int)b)
+            {
+            PTRACE(1, "H235\tDecrypt error: bad decrypt");
+            return(0);
+            }
         // Polycom endpoints (eg. m100 and PVX) don't fill the padding propperly, so we have to disable this check
 /*
-		for (i=0; i<n; i++)
-			{
-			if (ctx->final[--b] != n)
-				{
-			    PTRACE(1, "H235\tDecrypt error: incorrect padding");
-				return(0);
-				}
-			}
+        for (i=0; i<n; i++)
+            {
+            if (ctx->final[--b] != n)
+                {
+                PTRACE(1, "H235\tDecrypt error: incorrect padding");
+                return(0);
+                }
+            }
 */
-		n=ctx->cipher->block_size-n;
-		for (i=0; i<n; i++)
-			out[i]=ctx->final[i];
-		*outl=n;
-		}
-	else
-		*outl=0;
-	return(1);
-	}
+        n=ctx->cipher->block_size-n;
+        for (i=0; i<n; i++)
+            out[i]=ctx->final[i];
+        *outl=n;
+        }
+    else
+        *outl=0;
+    return(1);
+    }
 
 H235CryptoEngine::H235CryptoEngine(const PString & algorithmOID)
+:  m_algorithmOID(algorithmOID), m_initialised(false)
 {
-    m_algorithmOID = algorithmOID;
 }
 
 H235CryptoEngine::H235CryptoEngine(const PString & algorithmOID, const PBYTEArray & key)
@@ -351,8 +352,10 @@ H235CryptoEngine::H235CryptoEngine(const PString & algorithmOID, const PBYTEArra
 
 H235CryptoEngine::~H235CryptoEngine()
 {
-    EVP_CIPHER_CTX_cleanup(&m_encryptCtx);
-    EVP_CIPHER_CTX_cleanup(&m_decryptCtx);
+    if (m_initialised) {
+        EVP_CIPHER_CTX_cleanup(&m_encryptCtx);
+        EVP_CIPHER_CTX_cleanup(&m_decryptCtx);
+    }
 }
 
 void H235CryptoEngine::SetKey(PBYTEArray key)
@@ -376,6 +379,8 @@ void H235CryptoEngine::SetKey(PBYTEArray key)
     EVP_EncryptInit_ex(&m_encryptCtx, cipher, NULL, key.GetPointer(), NULL);
     EVP_CIPHER_CTX_init(&m_decryptCtx);
     EVP_DecryptInit_ex(&m_decryptCtx, cipher, NULL, key.GetPointer(), NULL);
+
+    m_initialised = true;
 }
 
 void H235CryptoEngine::SetIV(unsigned char * iv, unsigned char * ivSequence, unsigned ivLen)
@@ -407,28 +412,28 @@ PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * i
     SetIV(iv, ivSequence, EVP_CIPHER_CTX_iv_length(&m_encryptCtx));
     EVP_EncryptInit_ex(&m_encryptCtx, NULL, NULL, NULL, iv);
 
-	rtpPadding = (data.GetSize() < EVP_CIPHER_CTX_block_size(&m_encryptCtx));
+    rtpPadding = (data.GetSize() < EVP_CIPHER_CTX_block_size(&m_encryptCtx));
     EVP_CIPHER_CTX_set_padding(&m_encryptCtx, rtpPadding ? 1 : 0);
 
     if (!rtpPadding && (data.GetSize() % EVP_CIPHER_CTX_block_size(&m_encryptCtx) > 0)) {
         // use cyphertext stealing
-    	if (!EVP_EncryptUpdate_cts(&m_encryptCtx, ciphertext.GetPointer(), &ciphertext_len, data.GetPointer(), data.GetSize())) {
-			PTRACE(1, "H235\tEVP_EncryptUpdate_cts() failed");
-		}
-       	if (!EVP_EncryptFinal_cts(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len)) {
-			PTRACE(1, "H235\tEVP_EncryptFinal_cts() failed");
-		}
-	} else {
-    	/* update ciphertext, ciphertext_len is filled with the length of ciphertext generated,
-    	 *len is the size of plaintext in bytes */
-    	if (!EVP_EncryptUpdate(&m_encryptCtx, ciphertext.GetPointer(), &ciphertext_len, data.GetPointer(), data.GetSize())) {
-			PTRACE(1, "H235\tEVP_EncryptUpdate() failed");
-		}
+        if (!EVP_EncryptUpdate_cts(&m_encryptCtx, ciphertext.GetPointer(), &ciphertext_len, data.GetPointer(), data.GetSize())) {
+            PTRACE(1, "H235\tEVP_EncryptUpdate_cts() failed");
+        }
+           if (!EVP_EncryptFinal_cts(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len)) {
+            PTRACE(1, "H235\tEVP_EncryptFinal_cts() failed");
+        }
+    } else {
+        /* update ciphertext, ciphertext_len is filled with the length of ciphertext generated,
+         *len is the size of plaintext in bytes */
+        if (!EVP_EncryptUpdate(&m_encryptCtx, ciphertext.GetPointer(), &ciphertext_len, data.GetPointer(), data.GetSize())) {
+            PTRACE(1, "H235\tEVP_EncryptUpdate() failed");
+        }
 
-	   	// update ciphertext with the final remaining bytes, if any use RTP padding
-      	if (!EVP_EncryptFinal_ex(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len)) {
-			PTRACE(1, "H235\tEVP_EncryptFinal_ex() failed");
-		}
+           // update ciphertext with the final remaining bytes, if any use RTP padding
+          if (!EVP_EncryptFinal_ex(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len)) {
+            PTRACE(1, "H235\tEVP_EncryptFinal_ex() failed");
+        }
     }
 
     ciphertext.SetSize(ciphertext_len + final_len);
@@ -452,19 +457,19 @@ PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data, unsigned char * i
 
     if (!rtpPadding && data.GetSize() % EVP_CIPHER_CTX_block_size(&m_decryptCtx) > 0) {
         // use cyphertext stealing
-    	if (!EVP_DecryptUpdate_cts(&m_decryptCtx, plaintext.GetPointer(), &plaintext_len, data.GetPointer(), data.GetSize())) {
-        	PTRACE(1, "H235\tEVP_DecryptUpdate_cts() failed");
-    	}
-    	if(!EVP_DecryptFinal_cts(&m_decryptCtx, plaintext.GetPointer() + plaintext_len, &final_len)) {
-        	PTRACE(1, "H235\tEVP_DecryptFinal_cts() failed");
-    	}
+        if (!EVP_DecryptUpdate_cts(&m_decryptCtx, plaintext.GetPointer(), &plaintext_len, data.GetPointer(), data.GetSize())) {
+            PTRACE(1, "H235\tEVP_DecryptUpdate_cts() failed");
+        }
+        if(!EVP_DecryptFinal_cts(&m_decryptCtx, plaintext.GetPointer() + plaintext_len, &final_len)) {
+            PTRACE(1, "H235\tEVP_DecryptFinal_cts() failed");
+        }
     } else {
-    	if (!EVP_DecryptUpdate(&m_decryptCtx, plaintext.GetPointer(), &plaintext_len, data.GetPointer(), data.GetSize())) {
-        	PTRACE(1, "H235\tEVP_DecryptUpdate() failed");
-    	}
-    	if (!EVP_DecryptFinal_relaxed(&m_decryptCtx, plaintext.GetPointer() + plaintext_len, &final_len)) {
-        	PTRACE(1, "H235\tEVP_DecryptFinal_ex() failed - incorrect padding ?");
-    	}
+        if (!EVP_DecryptUpdate(&m_decryptCtx, plaintext.GetPointer(), &plaintext_len, data.GetPointer(), data.GetSize())) {
+            PTRACE(1, "H235\tEVP_DecryptUpdate() failed");
+        }
+        if (!EVP_DecryptFinal_relaxed(&m_decryptCtx, plaintext.GetPointer() + plaintext_len, &final_len)) {
+            PTRACE(1, "H235\tEVP_DecryptFinal_ex() failed - incorrect padding ?");
+        }
     }
 
     plaintext.SetSize(plaintext_len + final_len);
@@ -523,8 +528,13 @@ void H235Session::EncodeMediaKey(PBYTEArray & key)
     PTRACE(4, "H235Key\tEncrypted key:" << endl << hex << key);
 }
 
-void H235Session::DecodeMediaKey(PBYTEArray & key)
+PBoolean H235Session::DecodeMediaKey(PBYTEArray & key)
 {
+    if (!m_isInitialised) {
+       PTRACE(2, "H235Key\tLOGIC ERROR Session not initialised");
+       return false;
+    }
+
     PTRACE(4, "H235Key\tH235v3 encrypted key received, size=" << key.GetSize() << endl << hex << key);
 
     bool rtpPadding = false;
@@ -532,6 +542,7 @@ void H235Session::DecodeMediaKey(PBYTEArray & key)
     m_context.SetKey(m_crytoMasterKey);
 
     PTRACE(4, "H235Key\tH235v3 key decrypted, size= " << m_crytoMasterKey.GetSize() << endl << hex << m_crytoMasterKey);
+    return true;
 }
 
 PBoolean H235Session::IsActive()
@@ -547,38 +558,39 @@ PBoolean H235Session::IsInitialised()
 PBoolean H235Session::CreateSession(PBoolean isMaster)
 {
     m_isMaster = isMaster;
-    m_isInitialised = true;
-
     m_dh.ComputeSessionKey(m_dhSessionkey);
     m_dhcontext.SetKey(m_dhSessionkey);
 
     if (m_isMaster) 
         m_crytoMasterKey = m_context.GenerateRandomKey();
 
+    m_isInitialised = true;
     return true;
 }
 
 PBoolean H235Session::ReadFrame(DWORD & /*rtpTimestamp*/, RTP_DataFrame & frame)
 {
-    //WORD m_ivSequence = frame.GetSequenceNumber(); // TODO: fix ivSequence
+    unsigned char m_ivSequence[6];
+    memcpy(m_ivSequence, frame.GetSequenceNumberPtr(), 6);
     PBoolean m_padding = frame.GetPadding();
-    PBYTEArray buffer(frame.GetPayloadPtr(),frame.GetPayloadSize());
-    buffer = m_context.Decrypt(buffer, NULL, m_padding);
-    frame.SetPayloadSize(buffer.GetSize());
-    memcpy(frame.GetPayloadPtr(),buffer.GetPointer(), buffer.GetSize());
-    buffer.SetSize(0);
+    m_frameBuffer.SetSize(frame.GetPayloadSize());
+    memcpy(m_frameBuffer.GetPointer(),frame.GetPayloadPtr(), frame.GetPayloadSize());
+    m_frameBuffer = m_context.Decrypt(m_frameBuffer, m_ivSequence, m_padding);
+    frame.SetPayloadSize(m_frameBuffer.GetSize());
+    memcpy(frame.GetPayloadPtr(), m_frameBuffer.GetPointer(), m_frameBuffer.GetSize());
     return true;
 }
 
 PBoolean H235Session::WriteFrame(RTP_DataFrame & frame)
 {
-    //WORD m_ivSequence = frame.GetSequenceNumber(); // TODO: fix ivSequence
+    unsigned char m_ivSequence[6];
+    memcpy(m_ivSequence, frame.GetSequenceNumberPtr(), 6);
     PBoolean m_padding = frame.GetPadding();
-    PBYTEArray buffer(frame.GetPayloadPtr(),frame.GetPayloadSize());
-    buffer = m_context.Encrypt(buffer, NULL, m_padding);
-    frame.SetPayloadSize(buffer.GetSize());
-    memcpy(frame.GetPayloadPtr(),buffer.GetPointer(), buffer.GetSize());
-    buffer.SetSize(0);
+    m_frameBuffer.SetSize(frame.GetPayloadSize());
+    memcpy(m_frameBuffer.GetPointer(),frame.GetPayloadPtr(), frame.GetPayloadSize());
+    m_frameBuffer = m_context.Encrypt(m_frameBuffer, m_ivSequence, m_padding);
+    frame.SetPayloadSize(m_frameBuffer.GetSize());
+    memcpy(frame.GetPayloadPtr(), m_frameBuffer.GetPointer(), m_frameBuffer.GetSize());
     return true;
 }
 
