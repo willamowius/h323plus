@@ -6724,6 +6724,13 @@ void H323Connection::OnAuthenticationFinalise(unsigned pdu,PBYTEArray & rawData)
 }
 #endif
 
+#ifdef H323_H235
+void H323Connection::OnMediaEncryption(unsigned session, H323Channel::Directions dir, const PString & cipher) 
+{
+    endpoint.OnMediaEncryption(session, dir, cipher);
+}
+#endif
+
 #ifdef H323_SIGNAL_AGGREGATE
 
 void H323Connection::AggregateSignalChannel(H323Transport * transport)

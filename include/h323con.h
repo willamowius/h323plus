@@ -2916,6 +2916,18 @@ class H323Connection : public PObject
   //@}
 #endif
 
+#ifdef H323_H235
+  /**@name Media Encryption */
+  //@{
+    /** On Media Encryption
+        Fires when an encryption media session negotiated
+        Fires for each encrypted media session direction
+        Default calls H323Endpoint::OnMediaEncryption
+     */
+    virtual void OnMediaEncryption(unsigned session, H323Channel::Directions dir, const PString & cipher);
+  //@}
+#endif
+
 #ifdef H323_H248
   /**@name Call Service Control Session */
   //@{

@@ -61,6 +61,14 @@ class SimpleH323EndPoint : public H323EndPoint
     virtual PBoolean OnUPnPAvailable(const PString & device, const PIPSocket::Address & publicIP, PNatMethod_UPnP * nat);
 #endif
 
+#ifdef H323_H460P
+    virtual void PresenceInstruction(const PString & locAlias,unsigned type, 
+                                     const PString & subAlias, const PString & subDisplay);
+#endif
+#ifdef H323_H235
+    virtual void OnMediaEncryption(unsigned session, H323Channel::Directions dir, const PString & cipher);
+#endif
+
     // New functions
     PBoolean Initialise(PArgList &);
     PBoolean SetSoundDevice(PArgList &, const char *, PSoundChannel::Directions);

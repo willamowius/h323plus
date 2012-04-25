@@ -842,6 +842,22 @@ PBoolean SimpleH323EndPoint::OnUPnPAvailable(const PString & device, const PIPSo
 }
 #endif
 
+#ifdef H323_H460P
+void SimpleH323EndPoint::PresenceInstruction(const PString & locAlias,
+                                    unsigned type, 
+                                    const PString & subAlias,
+                                    const PString & subDisplay)
+{
+    cout << "Inst " << locAlias << " type:" << type << " " << subAlias << " " << subDisplay << endl;
+}
+#endif
+
+#ifdef H323_H235
+void SimpleH323EndPoint::OnMediaEncryption(unsigned session, H323Channel::Directions dir, const PString & cipher) 
+{
+    cout << "Media Encryption " << session << " " << dir << " " << cipher << endl;
+}
+#endif
 
 ///////////////////////////////////////////////////////////////
 

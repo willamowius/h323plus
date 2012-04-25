@@ -1090,10 +1090,24 @@ class H323EndPoint : public PObject
      2. Return the password in the clear to validate.
      Returning FALSE indicates that Authentication Failed failed for that Method..
        */
-      virtual PBoolean OnCallAuthentication(const PString & username,  ///* UserName of Caller
+     virtual PBoolean OnCallAuthentication(const PString & username,  ///* UserName of Caller
                                         PString & password         ///* Password related to caller
                                         );
  //@}
+#endif
+
+#ifdef H323_H235
+  /**@name Media Encryption */
+  //@{
+    /** On Media Encryption
+        Fires when an encryption session negotiated
+        Fires for each media session direction
+     */
+    virtual void OnMediaEncryption(unsigned /*session*/, 
+                                H323Channel::Directions /*dir*/, 
+                                const PString & /*cipher*/
+                                ) {};
+  //@}
 #endif
 
   /**@name Logical Channels management */
