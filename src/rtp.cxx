@@ -105,13 +105,17 @@ void RTP_DataFrame::SetMarker(PBoolean m)
     theArray[1] &= 0x7f;
 }
 
-
 void RTP_DataFrame::SetPayloadType(PayloadTypes t)
 {
   PAssert(t <= 0x7f, PInvalidParameter);
 
   theArray[1] &= 0x80;
   theArray[1] |= t;
+}
+
+BYTE * RTP_DataFrame::GetSequenceNumberPtr() const
+{
+    return (BYTE *)&theArray[2];
 }
 
 

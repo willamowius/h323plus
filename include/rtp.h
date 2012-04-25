@@ -138,6 +138,7 @@ class RTP_DataFrame : public PBYTEArray
     void         SetPayloadType(PayloadTypes t);
 
     WORD GetSequenceNumber() const { return *(PUInt16b *)&theArray[2]; }
+    BYTE * GetSequenceNumberPtr() const;
     void SetSequenceNumber(WORD n) { *(PUInt16b *)&theArray[2] = n; }
 
     DWORD GetTimestamp() const  { return *(PUInt32b *)&theArray[4]; }
