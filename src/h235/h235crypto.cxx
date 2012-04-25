@@ -63,281 +63,274 @@ const unsigned int IV_SEQUENCE_LEN = 6;
 int EVP_EncryptUpdate_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
                       const unsigned char *in, int inl)
 {
-  int bl = ctx->cipher->block_size;
-  int leftover = 0;
-  OPENSSL_assert(bl <= (int)sizeof(ctx->buf));
-  *outl = 0;
-
-  if ((ctx->buf_len + inl) <= bl) {
-    /* new plaintext is no more than 1 block */
-    /* copy the in data into the buffer and return */
-    memcpy(&(ctx->buf[ctx->buf_len]), in, inl);
-    ctx->buf_len += inl;
+    int bl = ctx->cipher->block_size;
+    int leftover = 0;
+    OPENSSL_assert(bl <= (int)sizeof(ctx->buf));
     *outl = 0;
-    return 1;
-  }
 
-  /* more than 1 block of new plaintext available */
-  /* encrypt the previous plaintext, if any */
-  if (ctx->final_used) {
-    if (!(ctx->cipher->do_cipher(ctx, out, ctx->final, bl))) {
-      return 0;
+    if ((ctx->buf_len + inl) <= bl) {
+        /* new plaintext is no more than 1 block */
+        /* copy the in data into the buffer and return */
+        memcpy(&(ctx->buf[ctx->buf_len]), in, inl);
+        ctx->buf_len += inl;
+        *outl = 0;
+        return 1;
     }
-    out += bl;
-    *outl += bl;
-    ctx->final_used = 0;
-  }
 
-  /* we already know ctx->buf_len + inl must be > bl */
-  memcpy(&(ctx->buf[ctx->buf_len]), in, (bl - ctx->buf_len));
-  in += (bl - ctx->buf_len);
-  inl -= (bl - ctx->buf_len);
-  ctx->buf_len = bl;
-
-  if (inl <= bl) {
-    memcpy(ctx->final, ctx->buf, bl);
-    ctx->final_used = 1;
-    memcpy(ctx->buf, in, inl);
-    ctx->buf_len = inl;
-    return 1;
-  } else {
-    if (!(ctx->cipher->do_cipher(ctx, out, ctx->buf, bl))) {
-      return 0;
+    /* more than 1 block of new plaintext available */
+    /* encrypt the previous plaintext, if any */
+    if (ctx->final_used) {
+        if (!(ctx->cipher->do_cipher(ctx, out, ctx->final, bl))) {
+          return 0;
+        }
+        out += bl;
+        *outl += bl;
+        ctx->final_used = 0;
     }
-    out += bl;
-    *outl += bl;
-    ctx->buf_len = 0;
 
-    leftover = inl & ctx->block_mask;
-    if (leftover) {
-      inl -= (bl + leftover);
-      memcpy(ctx->buf, &(in[(inl + bl)]), leftover);
-      ctx->buf_len = leftover;
+    /* we already know ctx->buf_len + inl must be > bl */
+    memcpy(&(ctx->buf[ctx->buf_len]), in, (bl - ctx->buf_len));
+    in += (bl - ctx->buf_len);
+    inl -= (bl - ctx->buf_len);
+    ctx->buf_len = bl;
+
+    if (inl <= bl) {
+        memcpy(ctx->final, ctx->buf, bl);
+        ctx->final_used = 1;
+        memcpy(ctx->buf, in, inl);
+        ctx->buf_len = inl;
+        return 1;
     } else {
-      inl -= (2 * bl);
-      memcpy(ctx->buf, &(in[(inl + bl)]), bl);
-      ctx->buf_len = bl;
-    }
-    memcpy(ctx->final, &(in[inl]), bl);
-    ctx->final_used = 1;
-    if (!(ctx->cipher->do_cipher(ctx, out, in, inl))) {
-      return 0;
-    }
-    out += inl;
-    *outl += inl;
-  }
+        if (!(ctx->cipher->do_cipher(ctx, out, ctx->buf, bl))) {
+            return 0;
+        }
+        out += bl;
+        *outl += bl;
+        ctx->buf_len = 0;
 
-  return 1;
+        leftover = inl & ctx->block_mask;
+        if (leftover) {
+            inl -= (bl + leftover);
+            memcpy(ctx->buf, &(in[(inl + bl)]), leftover);
+            ctx->buf_len = leftover;
+        } else {
+            inl -= (2 * bl);
+             memcpy(ctx->buf, &(in[(inl + bl)]), bl);
+             ctx->buf_len = bl;
+        }
+        memcpy(ctx->final, &(in[inl]), bl);
+        ctx->final_used = 1;
+        if (!(ctx->cipher->do_cipher(ctx, out, in, inl))) {
+            return 0;
+        }
+        out += inl;
+        *outl += inl;
+    }
+
+    return 1;
 }
 
 int EVP_EncryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
 {
-  unsigned char tmp[EVP_MAX_BLOCK_LENGTH];
-  int bl = ctx->cipher->block_size;
-  int leftover = 0;
-  *outl = 0;
+    unsigned char tmp[EVP_MAX_BLOCK_LENGTH];
+    int bl = ctx->cipher->block_size;
+    int leftover = 0;
+    *outl = 0;
 
-  if (!ctx->final_used) {
-    PTRACE(1, "H235\tCTS Error: expecting previous ciphertext");
+    if (!ctx->final_used) {
+        PTRACE(1, "H235\tCTS Error: expecting previous ciphertext");
+        return 0;
+    }
+    if (ctx->buf_len == 0) {
+        PTRACE(1, "H235\tCTS Error: expecting previous plaintext");
+        return 0;
+    }
+
+    /* handle leftover bytes */
+    leftover = ctx->buf_len;
+
+    switch (EVP_CIPHER_CTX_mode(ctx)) {
+        case EVP_CIPH_ECB_MODE: {
+            /* encrypt => C_{n} plus C' */
+            if (!(ctx->cipher->do_cipher(ctx, tmp, ctx->final, bl))) {
+                 return 0;
+            }
+
+            /* P_n plus C' */
+            memcpy(&(ctx->buf[leftover]), &(tmp[leftover]), (bl - leftover));
+            /* encrypt => C_{n-1} */
+            if (!(ctx->cipher->do_cipher(ctx, out, ctx->buf, bl))) {
+                return 0;
+            }
+
+            memcpy((out + bl), tmp, leftover);
+            *outl += (bl + leftover);
+            return 1;
+        }
+        case EVP_CIPH_CBC_MODE: {
+            /* encrypt => C_{n} plus C' */
+            if (!(ctx->cipher->do_cipher(ctx, tmp, ctx->final, bl))) {
+                return 0;
+            }
+
+            /* P_n plus 0s */
+            memset(&(ctx->buf[leftover]), 0, (bl - leftover));
+
+            /* note that in cbc encryption, plaintext will be xor'ed with the previous
+             * ciphertext, which is what we want.
+             */
+            /* encrypt => C_{n-1} */
+            if (!(ctx->cipher->do_cipher(ctx, out, ctx->buf, bl))) {
+                return 0;
+            }
+
+            memcpy((out + bl), tmp, leftover);
+            *outl += (bl + leftover);
+            return 1;
+        }
+        default:
+            PTRACE(1, "H235\tCTS Error: unsupported mode");
+            return 0;
+    }
     return 0;
-  }
-  if (ctx->buf_len == 0) {
-    PTRACE(1, "H235\tCTS Error: expecting previous plaintext");
-    return 0;
-  }
-
-  /* handle leftover bytes */
-  leftover = ctx->buf_len;
-
-  switch (EVP_CIPHER_CTX_mode(ctx)) {
-  case EVP_CIPH_ECB_MODE: {
-    /* encrypt => C_{n} plus C' */
-    if (!(ctx->cipher->do_cipher(ctx, tmp, ctx->final, bl))) {
-      return 0;
-    }
-
-    /* P_n plus C' */
-    memcpy(&(ctx->buf[leftover]), &(tmp[leftover]), (bl - leftover));
-    /* encrypt => C_{n-1} */
-    if (!(ctx->cipher->do_cipher(ctx, out, ctx->buf, bl))) {
-      return 0;
-    }
-
-    memcpy((out + bl), tmp, leftover);
-    *outl += (bl + leftover);
-    return 1;
-  }
-  case EVP_CIPH_CBC_MODE: {
-    /* encrypt => C_{n} plus C' */
-    if (!(ctx->cipher->do_cipher(ctx, tmp, ctx->final, bl))) {
-      return 0;
-    }
-
-    /* P_n plus 0s */
-    memset(&(ctx->buf[leftover]), 0, (bl - leftover));
-
-    /* note that in cbc encryption, plaintext will be xor'ed with the previous
-     * ciphertext, which is what we want.
-     */
-    /* encrypt => C_{n-1} */
-    if (!(ctx->cipher->do_cipher(ctx, out, ctx->buf, bl))) {
-      return 0;
-    }
-
-    memcpy((out + bl), tmp, leftover);
-    *outl += (bl + leftover);
-    return 1;
-  }
-  default:
-    PTRACE(1, "H235\tCTS Error: unsupported mode");
-    return 0;
-  }
-  return 0;
 }
 
 int EVP_DecryptUpdate_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
                       const unsigned char *in, int inl)
 {
-  return EVP_EncryptUpdate_cts(ctx, out, outl, in, inl);
+    return EVP_EncryptUpdate_cts(ctx, out, outl, in, inl);
 }
 
 int EVP_DecryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
 {
-  unsigned char tmp[EVP_MAX_BLOCK_LENGTH];
-  int bl = ctx->cipher->block_size;
-  int leftover = 0;
-  *outl = 0;
+    unsigned char tmp[EVP_MAX_BLOCK_LENGTH];
+    int bl = ctx->cipher->block_size;
+    int leftover = 0;
+    *outl = 0;
 
-  if (!ctx->final_used) {
-    PTRACE(1, "H235\tCTS Error: expecting previous ciphertext");
+    if (!ctx->final_used) {
+        PTRACE(1, "H235\tCTS Error: expecting previous ciphertext");
+        return 0;
+    }
+    if (ctx->buf_len == 0) {
+        PTRACE(1, "H235\tCTS Error: expecting previous ciphertext");
+        return 0;
+    }
+
+    /* handle leftover bytes */
+    leftover = ctx->buf_len;
+
+    switch (EVP_CIPHER_CTX_mode(ctx)) {
+        case EVP_CIPH_ECB_MODE: {
+            /* decrypt => P_n plus C' */
+            if (!(ctx->cipher->do_cipher(ctx, tmp, ctx->final, bl))) {
+                return 0;
+            }
+
+            /* C_n plus C' */
+            memcpy(&(ctx->buf[leftover]), &(tmp[leftover]), (bl - leftover));
+            /* decrypt => P_{n-1} */
+            if (!(ctx->cipher->do_cipher(ctx, out, ctx->buf, bl))) {
+                return 0;
+            }
+
+            memcpy((out + bl), tmp, leftover);
+            *outl += (bl + leftover);
+            return 1;
+        }
+        case EVP_CIPH_CBC_MODE: {
+            int i = 0;
+            unsigned char C_n_minus_2[EVP_MAX_BLOCK_LENGTH];
+
+            memcpy(C_n_minus_2, ctx->iv, bl);
+
+            /* C_n plus 0s in ctx->buf */
+            memset(&(ctx->buf[leftover]), 0, (bl - leftover));
+
+            /* ctx->final is C_{n-1} */
+            /* decrypt => (P_n plus C')'' */
+            if (!(ctx->cipher->do_cipher(ctx, tmp, ctx->final, bl))) {
+                return 0;
+            }
+            /* XOR'ed with C_{n-2} => (P_n plus C')' */
+            for (i = 0; i < bl; i++) {
+                tmp[i] = tmp[i] ^ C_n_minus_2[i];
+            }
+            /* XOR'ed with (C_n plus 0s) => P_n plus C' */
+            for (i = 0; i < bl; i++) {
+                tmp[i] = tmp[i] ^ ctx->buf[i];
+            }
+
+            /* C_n plus C' in ctx->buf */
+            memcpy(&(ctx->buf[leftover]), &(tmp[leftover]), (bl - leftover));
+            /* decrypt => P_{n-1}'' */
+            if (!(ctx->cipher->do_cipher(ctx, out, ctx->buf, bl))) {
+                return 0;
+            }
+            /* XOR'ed with C_{n-1} => P_{n-1}' */
+            for (i = 0; i < bl; i++) {
+                out[i] = out[i] ^ ctx->final[i];
+            }
+            /* XOR'ed with C_{n-2} => P_{n-1} */
+            for (i = 0; i < bl; i++) {
+                out[i] = out[i] ^ C_n_minus_2[i];
+            }
+
+            memcpy((out + bl), tmp, leftover);
+            *outl += (bl + leftover);
+            return 1;
+        }
+        default:
+            PTRACE(1, "H235\tCTS Error: unsupported mode");
+            return 0;
+    }
     return 0;
-  }
-  if (ctx->buf_len == 0) {
-    PTRACE(1, "H235\tCTS Error: expecting previous ciphertext");
-    return 0;
-  }
-
-  /* handle leftover bytes */
-  leftover = ctx->buf_len;
-
-  switch (EVP_CIPHER_CTX_mode(ctx)) {
-  case EVP_CIPH_ECB_MODE: {
-    /* decrypt => P_n plus C' */
-    if (!(ctx->cipher->do_cipher(ctx, tmp, ctx->final, bl))) {
-      return 0;
-    }
-
-    /* C_n plus C' */
-    memcpy(&(ctx->buf[leftover]), &(tmp[leftover]), (bl - leftover));
-    /* decrypt => P_{n-1} */
-    if (!(ctx->cipher->do_cipher(ctx, out, ctx->buf, bl))) {
-      return 0;
-    }
-
-    memcpy((out + bl), tmp, leftover);
-    *outl += (bl + leftover);
-    return 1;
-  }
-  case EVP_CIPH_CBC_MODE: {
-    int i = 0;
-    unsigned char C_n_minus_2[EVP_MAX_BLOCK_LENGTH];
-
-    memcpy(C_n_minus_2, ctx->iv, bl);
-
-    /* C_n plus 0s in ctx->buf */
-    memset(&(ctx->buf[leftover]), 0, (bl - leftover));
-
-    /* ctx->final is C_{n-1} */
-    /* decrypt => (P_n plus C')'' */
-    if (!(ctx->cipher->do_cipher(ctx, tmp, ctx->final, bl))) {
-      return 0;
-    }
-    /* XOR'ed with C_{n-2} => (P_n plus C')' */
-    for (i = 0; i < bl; i++) {
-      tmp[i] = tmp[i] ^ C_n_minus_2[i];
-    }
-    /* XOR'ed with (C_n plus 0s) => P_n plus C' */
-    for (i = 0; i < bl; i++) {
-      tmp[i] = tmp[i] ^ ctx->buf[i];
-    }
-
-    /* C_n plus C' in ctx->buf */
-    memcpy(&(ctx->buf[leftover]), &(tmp[leftover]), (bl - leftover));
-    /* decrypt => P_{n-1}'' */
-    if (!(ctx->cipher->do_cipher(ctx, out, ctx->buf, bl))) {
-      return 0;
-    }
-    /* XOR'ed with C_{n-1} => P_{n-1}' */
-    for (i = 0; i < bl; i++) {
-      out[i] = out[i] ^ ctx->final[i];
-    }
-    /* XOR'ed with C_{n-2} => P_{n-1} */
-    for (i = 0; i < bl; i++) {
-      out[i] = out[i] ^ C_n_minus_2[i];
-    }
-
-    memcpy((out + bl), tmp, leftover);
-    *outl += (bl + leftover);
-    return 1;
-  }
-  default:
-    PTRACE(1, "H235\tCTS Error: unsupported mode");
-    return 0;
-  }
-  return 0;
 }
 
 int EVP_DecryptFinal_relaxed(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
-    {
+{
     int i,n;
     unsigned int b;
     *outl=0;
 
     b=ctx->cipher->block_size;
-    if (ctx->flags & EVP_CIPH_NO_PADDING)
-        {
-        if(ctx->buf_len)
-            {
+    if (ctx->flags & EVP_CIPH_NO_PADDING) {
+        if(ctx->buf_len) {
             PTRACE(1, "H235\tDecrypt error: data not a multiple of block length");
             return 0;
-            }
+        }
         *outl = 0;
         return 1;
-        }
-    if (b > 1)
-        {
-        if (ctx->buf_len || !ctx->final_used)
-            {
+    }
+    if (b > 1) {
+        if (ctx->buf_len || !ctx->final_used) {
             PTRACE(1, "H235\tDecrypt error: wrong final block length");
             return(0);
-            }
+        }
         OPENSSL_assert(b <= sizeof ctx->final);
         n=ctx->final[b-1];
-        if (n == 0 || n > (int)b)
-            {
+        if (n == 0 || n > (int)b) {
             PTRACE(1, "H235\tDecrypt error: bad decrypt");
             return(0);
-            }
+        }
         // Polycom endpoints (eg. m100 and PVX) don't fill the padding propperly, so we have to disable this check
 /*
-        for (i=0; i<n; i++)
-            {
-            if (ctx->final[--b] != n)
-                {
+        for (i=0; i<n; i++) {
+            if (ctx->final[--b] != n) {
                 PTRACE(1, "H235\tDecrypt error: incorrect padding");
                 return(0);
-                }
             }
+        }
 */
         n=ctx->cipher->block_size-n;
         for (i=0; i<n; i++)
             out[i]=ctx->final[i];
         *outl=n;
-        }
+    }
     else
         *outl=0;
     return(1);
-    }
+}
 
 H235CryptoEngine::H235CryptoEngine(const PString & algorithmOID)
 :  m_algorithmOID(algorithmOID), m_initialised(false)
@@ -371,7 +364,7 @@ void H235CryptoEngine::SetKey(PBYTEArray key)
         cipher = EVP_aes_256_cbc();
 #endif
     } else {
-        PTRACE(1, "Unsupported algorithm " << m_algorithmOID);
+        PTRACE(1, "H235\tUnsupported algorithm " << m_algorithmOID);
         return;
     }
   
@@ -420,7 +413,7 @@ PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * i
         if (!EVP_EncryptUpdate_cts(&m_encryptCtx, ciphertext.GetPointer(), &ciphertext_len, data.GetPointer(), data.GetSize())) {
             PTRACE(1, "H235\tEVP_EncryptUpdate_cts() failed");
         }
-           if (!EVP_EncryptFinal_cts(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len)) {
+        if (!EVP_EncryptFinal_cts(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len)) {
             PTRACE(1, "H235\tEVP_EncryptFinal_cts() failed");
         }
     } else {
@@ -430,8 +423,8 @@ PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * i
             PTRACE(1, "H235\tEVP_EncryptUpdate() failed");
         }
 
-           // update ciphertext with the final remaining bytes, if any use RTP padding
-          if (!EVP_EncryptFinal_ex(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len)) {
+        // update ciphertext with the final remaining bytes, if any use RTP padding
+        if (!EVP_EncryptFinal_ex(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len)) {
             PTRACE(1, "H235\tEVP_EncryptFinal_ex() failed");
         }
     }
