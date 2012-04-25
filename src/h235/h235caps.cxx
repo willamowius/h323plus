@@ -850,7 +850,10 @@ PINDEX H235Capabilities::AddAllCapabilities(PINDEX descriptorNum,
 
 void H235Capabilities::SetDHKeyPair(const PStringList & keyOIDs, H235_DiffieHellman * key, PBoolean isMaster)
 {
-     m_algorithms = keyOIDs;
+    m_algorithms.SetSize(0);
+    for (PINDEX i=0; i < keyOIDs.GetSize(); ++i)
+         m_algorithms.AppendString(keyOIDs[i]);
+
      m_DHkey = key;
      m_h245Master = isMaster;
 
@@ -860,7 +863,10 @@ void H235Capabilities::SetDHKeyPair(const PStringList & keyOIDs, H235_DiffieHell
 
 void H235Capabilities::GetDHKeyPair(PStringList & keyOIDs, H235_DiffieHellman * key, PBoolean & isMaster)
 {
-     keyOIDs = m_algorithms;
+    keyOIDs.SetSize(0);
+    for (PINDEX i=0; i < m_algorithms.GetSize(); ++i)
+         keyOIDs.AppendString(m_algorithms[i]);
+
      if (m_DHkey)
          key = new H235_DiffieHellman(*m_DHkey);
      isMaster = m_h245Master;
@@ -869,8 +875,11 @@ void H235Capabilities::GetDHKeyPair(PStringList & keyOIDs, H235_DiffieHellman * 
 PBoolean H235Capabilities::GetAlgorithms(const PStringList & algorithms) const
 {
     PStringList * m_localAlgorithms = PRemoveConst(PStringList,&algorithms);
-    *m_localAlgorithms = m_algorithms;
-    return (m_algorithms.GetSize() > 0);
+    m_localAlgorithms->SetSize(0);
+    for (PINDEX i=0; i < m_algorithms.GetSize(); ++i)
+         m_localAlgorithms->AppendString(m_algorithms[i]);
+
+    return (algorithms.GetSize() > 0);
 }
 
 #endif
