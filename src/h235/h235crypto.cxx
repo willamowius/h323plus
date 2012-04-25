@@ -405,7 +405,8 @@ PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * i
     SetIV(iv, ivSequence, EVP_CIPHER_CTX_iv_length(&m_encryptCtx));
     EVP_EncryptInit_ex(&m_encryptCtx, NULL, NULL, NULL, iv);
 
-    rtpPadding = (data.GetSize() < EVP_CIPHER_CTX_block_size(&m_encryptCtx));
+    //rtpPadding = (data.GetSize() < EVP_CIPHER_CTX_block_size(&m_encryptCtx));
+    rtpPadding = true;
     EVP_CIPHER_CTX_set_padding(&m_encryptCtx, rtpPadding ? 1 : 0);
 
     if (!rtpPadding && (data.GetSize() % EVP_CIPHER_CTX_block_size(&m_encryptCtx) > 0)) {
