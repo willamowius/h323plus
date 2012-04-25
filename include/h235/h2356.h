@@ -102,6 +102,11 @@ class H2356_Authenticator : public H235Authenticator
       H225_ArrayOf_PASN_ObjectId & algorithmOIDs
     );
 
+    virtual PBoolean IsSecuredPDU(
+      unsigned rasPDU,
+      PBoolean received
+    ) const;
+
     virtual PBoolean IsSecuredSignalPDU(
       unsigned signalPDU,
       PBoolean received
@@ -137,7 +142,7 @@ private:
     PBoolean                               m_enabled;
     PBoolean                               m_active;
     h235TokenState                         m_tokenState;
-    PStringList                            m_algOIDs;
+    PStringArray                           m_algOIDs;
       
 };
 

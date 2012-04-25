@@ -634,6 +634,11 @@ PBoolean H2356_Authenticator::IsSecuredSignalPDU(unsigned signalPDU, PBoolean /*
   }
 }
 
+PBoolean H2356_Authenticator::IsSecuredPDU(unsigned /*rasPDU*/, PBoolean /*received*/) const
+{
+    return false;
+}
+
 PBoolean H2356_Authenticator::IsCapability(const H235_AuthenticationMechanism & /*mechansim*/, const PASN_ObjectId & /*algorithmOID*/)
 {
     return false;
@@ -693,7 +698,6 @@ void H2356_Authenticator::InitialiseSecurity()
 
 PBoolean H2356_Authenticator::GetMediaSessionInfo(PString & algorithmOID, PBYTEArray & sessionKey)
 {
-   InitialiseSecurity();	// TODO: is this really necessary here ?
 
   if (m_algOIDs.GetSize() == 0) {
       PTRACE(1, "H235\tNo algorithms available");
