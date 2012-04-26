@@ -73,40 +73,40 @@ H235_DiffieHellman::H235_DiffieHellman(const BYTE * pData, PINDEX pSize,
                                      PBoolean send)
 : m_remKey(NULL), m_toSend(send), m_keySize(pSize), m_loadFromFile(false)
 {
-  dh = DH_new();
-  if (dh == NULL)
-    return;
+    dh = DH_new();
+    if (dh == NULL)
+        return;
 
-  dh->p = BN_bin2bn(pData, pSize, NULL);
-  dh->g = BN_bin2bn(gData, gSize, NULL);
-  if (dh->p != NULL && dh->g != NULL)
-    return;
+    dh->p = BN_bin2bn(pData, pSize, NULL);
+    dh->g = BN_bin2bn(gData, gSize, NULL);
+    if (dh->p != NULL && dh->g != NULL)
+        return;
 
-  DH_free(dh);
-  dh = NULL;
+    DH_free(dh);
+    dh = NULL;
 }
 
 
 H235_DiffieHellman::H235_DiffieHellman(const H235_DiffieHellman & diffie)
 {
-   dh = DHparams_dup(diffie);
+    dh = DHparams_dup(diffie);
 }
 
 
-H235_DiffieHellman & H235_DiffieHellman::operator=(const H235_DiffieHellman & diffie)
+H235_DiffieHellman & H235_DiffieHellman::operator=(const H235_DiffieHellman & other)
 {
-  if (dh != NULL)
-    DH_free(dh);
-   
-   dh = DHparams_dup(diffie);
-
-  return *this;
+    if (this != &other) {
+        if (dh)
+            DH_free(dh);
+        dh = DHparams_dup(other);
+    }
+    return *this;
 }
 
 H235_DiffieHellman::~H235_DiffieHellman()
 {
-  if (dh != NULL)
-    DH_free(dh);
+    if (dh)
+        DH_free(dh);
 }
 
 PBoolean H235_DiffieHellman::CheckParams() const
@@ -465,10 +465,10 @@ static PFactory<H235Authenticator>::Worker<H2356_Authenticator> factoryH2356_Aut
 H2356_Authenticator::H2356_Authenticator()
 : m_enabled(true), m_active(true), m_tokenState(e_clearNone)
 {
-  usage = MediaEncryption;
-  m_algOIDs.SetSize(0);
-  LoadDiffieHellmanMap(m_dhLocalMap, H235Authenticators::GetDHParameterFile());
-  InitialiseSecurity(); // make sure m_algOIDs gets filled
+    usage = MediaEncryption;
+    m_algOIDs.SetSize(0);
+    LoadDiffieHellmanMap(m_dhLocalMap, H235Authenticators::GetDHParameterFile());
+    InitialiseSecurity(); // make sure m_algOIDs gets filled
 }
 
 H2356_Authenticator::~H2356_Authenticator()
@@ -501,7 +501,7 @@ PBoolean H2356_Authenticator::IsMatch(const PString & identifier) const
     PStringArray ids;
     for (PINDEX i = 0; i < PARRAYSIZE(H235_DHParameters); ++i) {
         if (PString(H235_DHParameters[i].parameterOID) == identifier)
-               return true;
+            return true;
     }
     return false; 
 }
@@ -526,101 +526,101 @@ const char * H2356_Authenticator::GetName() const
 PBoolean H2356_Authenticator::PrepareTokens(PASN_Array & clearTokens,
                                       PASN_Array & /*cryptoTokens*/)
 {
-  if (!IsActive() || (m_tokenState == e_clearDisable))
-    return FALSE;
+    if (!IsActive() || (m_tokenState == e_clearDisable))
+        return FALSE;
 
-  H225_ArrayOf_ClearToken & tokens = (H225_ArrayOf_ClearToken &)clearTokens;
+    H225_ArrayOf_ClearToken & tokens = (H225_ArrayOf_ClearToken &)clearTokens;
 
-  std::map<PString, H235_DiffieHellman*>::iterator i = m_dhLocalMap.begin();
-  while (i != m_dhLocalMap.end()) {
-      int sz = tokens.GetSize();
-      tokens.SetSize(sz+1);
-      H235_ClearToken & clearToken = tokens[sz];
-      clearToken.m_tokenOID = i->first;
-      H235_DiffieHellman * m_dh = i->second;
-      if (m_dh && m_dh->GenerateHalfKey()) {
+    std::map<PString, H235_DiffieHellman*>::iterator i = m_dhLocalMap.begin();
+    while (i != m_dhLocalMap.end()) {
+        int sz = tokens.GetSize();
+        tokens.SetSize(sz+1);
+        H235_ClearToken & clearToken = tokens[sz];
+        clearToken.m_tokenOID = i->first;
+        H235_DiffieHellman * dh = i->second;
+        if (dh && dh->GenerateHalfKey()) {
 #if 0  // For testing to generate a strong key pair - SH
-        if (!m_dh->LoadedFromFile())
-          m_dh->Save("test.pem",i->first);
+            if (!m_dh->LoadedFromFile())
+                m_dh->Save("test.pem",i->first);
 #endif
-          clearToken.IncludeOptionalField(H235_ClearToken::e_dhkey);
-          H235_DHset & dh = clearToken.m_dhkey;
-          m_dh->Encode_HalfKey(dh.m_halfkey);
-          m_dh->Encode_P(dh.m_modSize);
-          m_dh->Encode_G(dh.m_generator);
-      }
-      i++;
-  }
+            clearToken.IncludeOptionalField(H235_ClearToken::e_dhkey);
+            H235_DHset & dhkey = clearToken.m_dhkey;
+            dh->Encode_HalfKey(dhkey.m_halfkey);
+            dh->Encode_P(dhkey.m_modSize);
+            dh->Encode_G(dhkey.m_generator);
+        }
+        i++;
+    }
 
-  if (m_tokenState == e_clearNone) {
-      m_tokenState = e_clearSent;
-      return true;
-  }
+    if (m_tokenState == e_clearNone) {
+        m_tokenState = e_clearSent;
+        return true;
+    }
 
-  if (m_tokenState == e_clearReceived) {
-      m_tokenState = e_clearComplete;
-      InitialiseSecurity();
-  }
+    if (m_tokenState == e_clearReceived) {
+        m_tokenState = e_clearComplete;
+        InitialiseSecurity();
+    }
 
-  return true;
+    return true;
 }
 
 H235Authenticator::ValidationResult H2356_Authenticator::ValidateTokens(const PASN_Array & clearTokens,
                                    const PASN_Array & /*cryptoTokens*/, const PBYTEArray & /*rawPDU*/)
 {
-   if (!IsActive() || (m_tokenState == e_clearDisable))
-       return e_Disabled;
+    if (!IsActive() || (m_tokenState == e_clearDisable))
+        return e_Disabled;
 
-   const H225_ArrayOf_ClearToken & tokens = (const H225_ArrayOf_ClearToken &)clearTokens;
-   if (tokens.GetSize() == 0) {
-      DeleteObjectsInMap(m_dhLocalMap);
-      m_tokenState = e_clearDisable;
-      return e_Disabled; 
-   }
+    const H225_ArrayOf_ClearToken & tokens = (const H225_ArrayOf_ClearToken &)clearTokens;
+    if (tokens.GetSize() == 0) {
+        DeleteObjectsInMap(m_dhLocalMap);
+        m_tokenState = e_clearDisable;
+        return e_Disabled; 
+    }
 
-  std::map<PString, H235_DiffieHellman*>::iterator it = m_dhLocalMap.begin();
-  while (it != m_dhLocalMap.end()) {
-      PBoolean found = false;
-       for (PINDEX i = 0; i < tokens.GetSize(); ++i) {
-          const H235_ClearToken & token = tokens[i];
-          PString tokenOID = token.m_tokenOID.AsString();
-          if (it->first == tokenOID) {
-            if(it->second != NULL ) {
-              H235_DiffieHellman* m_dh = new H235_DiffieHellman(*it->second); // new token with same p and g
-               const H235_DHset & dh = token.m_dhkey;
-               m_dh->Decode_HalfKey(dh.m_halfkey);
-               if (dh.m_modSize.GetSize() > 0) {	// update p and g if included in token
-                   m_dh->Decode_P(dh.m_modSize);
-                   m_dh->Decode_G(dh.m_generator);
-               }
-              m_dhRemoteMap.insert(pair<PString, H235_DiffieHellman*>(tokenOID, m_dh));
+    std::map<PString, H235_DiffieHellman*>::iterator it = m_dhLocalMap.begin();
+    while (it != m_dhLocalMap.end()) {
+        PBoolean found = false;
+        for (PINDEX i = 0; i < tokens.GetSize(); ++i) {
+            const H235_ClearToken & token = tokens[i];
+            PString tokenOID = token.m_tokenOID.AsString();
+            if (it->first == tokenOID) {
+                if (it->second != NULL ) {
+                    H235_DiffieHellman* new_dh = new H235_DiffieHellman(*it->second); // new token with same p and g
+                    const H235_DHset & dh = token.m_dhkey;
+                    new_dh->Decode_HalfKey(dh.m_halfkey);
+                    if (dh.m_modSize.GetSize() > 0) {	// update p and g if included in token
+                        new_dh->Decode_P(dh.m_modSize);
+                        new_dh->Decode_G(dh.m_generator);
+                    }
+                    m_dhRemoteMap.insert(pair<PString, H235_DiffieHellman*>(tokenOID, new_dh));
+                }
+                found = true;
             }
-            found = true;
-          }
-       }
-       if (!found) {
-          delete it->second;
-          m_dhLocalMap.erase(it++);
-       } else
-          it++;
-  }
+        }
+        if (!found) {
+            delete it->second;
+            m_dhLocalMap.erase(it++);
+        } else
+            it++;
+    }
 
-  if (m_dhLocalMap.size() == 0) {
-      m_tokenState = e_clearDisable;
-      return e_Disabled;
-  }
-  
-  if (m_tokenState == e_clearNone) {
-      m_tokenState = e_clearReceived;
-      return e_OK;
-  }
+    if (m_dhLocalMap.size() == 0) {
+        m_tokenState = e_clearDisable;
+        return e_Disabled;
+    }
 
-  if (m_tokenState == e_clearSent) {
-      m_tokenState = e_clearComplete;
-      InitialiseSecurity();
-  }
+    if (m_tokenState == e_clearNone) {
+        m_tokenState = e_clearReceived;
+        return e_OK;
+    }
 
-   return e_OK;
+    if (m_tokenState == e_clearSent) {
+        m_tokenState = e_clearComplete;
+        InitialiseSecurity();
+    }
+
+    return e_OK;
 }
 
 PBoolean H2356_Authenticator::IsSecuredSignalPDU(unsigned signalPDU, PBoolean /*received*/) const
