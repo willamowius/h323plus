@@ -44,7 +44,7 @@
 
 #pragma once
 
-// TODO: this header should only declare and not define variables, otherwise its impossible that multiple source fules include it!
+// TODO: this header should only declare and not define variables, otherwise its impossible that multiple source files include it!
 
 ////////////////////////////////////////////////////////////////////////////////////
 // Session Keys
