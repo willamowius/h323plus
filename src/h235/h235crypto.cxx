@@ -59,6 +59,8 @@ const unsigned int IV_SEQUENCE_LEN = 6;
 
 
 // ciphertext stealing code based on a OpenSSL patch by An-Cheng Huang
+// Note: This ciphertext stealing implementation doesn't seem to always produce
+// compatible results, avoid when encrypting:
 
 int EVP_EncryptUpdate_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
                       const unsigned char *in, int inl)
@@ -405,7 +407,9 @@ PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * i
     SetIV(iv, ivSequence, EVP_CIPHER_CTX_iv_length(&m_encryptCtx));
     EVP_EncryptInit_ex(&m_encryptCtx, NULL, NULL, NULL, iv);
 
-    //rtpPadding = (data.GetSize() < EVP_CIPHER_CTX_block_size(&m_encryptCtx));
+    // always use padding, because our ciphertext stealing implementation
+    // doesn't seem to produce compatible results
+    //rtpPadding = (data.GetSize() < EVP_CIPHER_CTX_block_size(&m_encryptCtx));  // not interoperable!
     rtpPadding = (data.GetSize() % EVP_CIPHER_CTX_block_size(&m_encryptCtx) > 0);
     EVP_CIPHER_CTX_set_padding(&m_encryptCtx, rtpPadding ? 1 : 0);
 
