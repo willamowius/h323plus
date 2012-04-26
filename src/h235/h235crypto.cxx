@@ -48,11 +48,6 @@
 
 #include "rtp.h"
 
-#ifdef H323_H235_AES256
-const char * OID_AES256 = "2.16.840.1.101.3.4.1.42";
-#endif
-const char * OID_AES192 = "2.16.840.1.101.3.4.1.22";
-const char * OID_AES128 = "2.16.840.1.101.3.4.1.2";
 
 // the IV sequence is always 6 bytes long (2 bytes seq number + 4 bytes timestamp)
 const unsigned int IV_SEQUENCE_LEN = 6;
