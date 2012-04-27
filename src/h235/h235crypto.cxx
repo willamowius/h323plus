@@ -465,6 +465,7 @@ PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data, unsigned char * i
         }
     }
 
+	rtpPadding = false;	// we return the real length of the decrypted data without padding
     plaintext.SetSize(plaintext_len + final_len);
     return plaintext;
 }
