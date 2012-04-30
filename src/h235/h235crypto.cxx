@@ -43,6 +43,7 @@
 #include "h323con.h"
 #include "h235/h235crypto.h"
 #include "h235/h235caps.h"
+#include "h235/h2351.h"
 #include "h235/h2356.h"
 #include <openssl/rand.h>
 
@@ -352,12 +353,12 @@ void H235CryptoEngine::SetKey(PBYTEArray key)
 {
     const EVP_CIPHER * cipher = NULL;
 
-    if (m_algorithmOID == OID_AES128) {
+    if (m_algorithmOID == ID_AES128) {
         cipher = EVP_aes_128_cbc();
-    } else if (m_algorithmOID == OID_AES192) {
+    } else if (m_algorithmOID == ID_AES192) {
         cipher = EVP_aes_192_cbc();
 #ifdef H323_H235_AES256
-    } else if (m_algorithmOID == OID_AES256) {
+    } else if (m_algorithmOID == ID_AES256) {
         cipher = EVP_aes_256_cbc();
 #endif
     } else {
@@ -481,12 +482,12 @@ PBYTEArray H235CryptoEngine::GenerateRandomKey(const PString & algorithmOID)
 {
     PBYTEArray key;
 
-    if (algorithmOID == OID_AES128) {
+    if (algorithmOID == ID_AES128) {
         key.SetSize(16);
-    } else if (m_algorithmOID == OID_AES192) {
+    } else if (m_algorithmOID == ID_AES192) {
         key.SetSize(24);
 #ifdef H323_H235_AES256
-    } else if (m_algorithmOID == OID_AES256) {
+    } else if (m_algorithmOID == ID_AES256) {
         key.SetSize(32);
 #endif
     } else {

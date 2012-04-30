@@ -44,12 +44,6 @@ extern "C" {
 #include <openssl/evp.h>
 }
 
-#define OID_AES128 "2.16.840.1.101.3.4.1.2"
-#define OID_AES192 "2.16.840.1.101.3.4.1.22"
-#ifdef H323_H235_AES256
-#define OID_AES256 "2.16.840.1.101.3.4.1.42"
-#endif
-
 
 class H235CryptoEngine : public PObject
 {
