@@ -381,10 +381,11 @@ void H460_FeatureStd23::OnReceiveRegistrationConfirm(const H225_FeatureDescripto
 
    H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
 
-   PBoolean NATdetect = false;
-
-   if (feat.Contains(localNATOID))
-       NATdetect = feat.Value(localNATOID);
+   // Ignore whether the gatekeeper detected as being behind NAT
+   // The STUN test will confirm - SH
+   //PBoolean NATdetect = false;
+   //if (feat.Contains(localNATOID))
+   //    NATdetect = feat.Value(localNATOID);
 
        if (feat.Contains(STUNServOID)) {
           H323TransportAddress addr = feat.Value(STUNServOID);
