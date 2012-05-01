@@ -2585,20 +2585,17 @@ void H323Connection::SetRTPNAT(unsigned sessionid, PUDPSocket * _rtp, PUDPSocket
 void H323Connection::SetNATChannelActive(unsigned sessionid)
 {
     std::map<unsigned,NAT_Sockets>::iterator sockets_iter = m_NATSockets.find(sessionid);
-    if (sockets_iter != m_NATSockets.end()) {
-        NAT_Sockets socket = sockets_iter->second;
-        socket.isActive = true;
-    }
+    if (sockets_iter != m_NATSockets.end())
+        sockets_iter->second.isActive = true;
 }
 
 PBoolean H323Connection::IsNATMethodActive(unsigned sessionid)
 {
-    for (std::map<unsigned,NAT_Sockets>::const_iterator r = m_NATSockets.begin(); r != m_NATSockets.end(); ++r) {
-        NAT_Sockets socket = r->second; 
-        if (!socket.isActive)
-            return false;
-    } 
-    return true;
+    std::map<unsigned,NAT_Sockets>::iterator sockets_iter = m_NATSockets.find(sessionid);
+    if (sockets_iter != m_NATSockets.end())
+        return sockets_iter->second.isActive;
+
+    return false;
 }
 #endif
 
