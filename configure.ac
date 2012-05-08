@@ -181,7 +181,7 @@ default_h46017=no
 default_h46018=yes
 default_h46019m=no
 default_h46023=yes
-default_h460p=yes
+default_h460p=no
 default_t120=yes
 default_gnugk=yes
 default_file=yes
@@ -207,7 +207,7 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_h46018=no
   default_h46019m=no
   default_h46023=no
-  default_hh460p=no
+  default_h460p=no
   default_t120=no
   default_gnugk=no
   default_file=no
@@ -591,7 +591,7 @@ dnl MSWIN_DISPLAY h460p,H.460 Presence
 dnl MSWIN_DEFINE  h460p,H323_H460P
 
 AC_ARG_ENABLE(h460p,
-       [  --disable-h460p         disable H.460 Presence])
+       [  --enable-h460p         enable H.460 Presence])
 if test "${enable_h460p}x" = "x" ; then
   enable_h460p=$default_h460p
 fi
