@@ -561,7 +561,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\h235\h235con.cxx"
+				RelativePath=".\src\h235\h235crypto.cxx"
 				>
 			</File>
 			<File
@@ -1316,10 +1316,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\h235\ssl_support.cxx"
-				>
-			</File>
-			<File
 				RelativePath="src\svcctrl.cxx"
 				>
 				<FileConfiguration
@@ -1550,6 +1546,10 @@
 			</File>
 			<File
 				RelativePath=".\include\h235\h235con.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\h235\h235crypto.h"
 				>
 			</File>
 			<File
