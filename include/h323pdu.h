@@ -469,6 +469,17 @@ class H323RasPDU : public H225_RasMessage, public H323TransactionPDU
 
 
 /////////////////////////////////////////////////////////////////////////////
+// Language support
+
+void H323SetLanguage(const PString & lang, PASN_IA5String & asn);
+PBoolean H323SetLanguages(const PStringList & lang, H225_Setup_UUIE_language & asn);
+PBoolean H323SetLanguages(const PStringList & lang, H225_Connect_UUIE_language & asn);
+void H323GetLanguage(PStringList & lang, const PASN_IA5String & asn);
+PBoolean H323GetLanguages(PStringList & lang, const H225_Setup_UUIE_language & asn);
+PBoolean H323GetLanguages(PStringList & lang, const H225_Connect_UUIE_language & asn);
+
+
+/////////////////////////////////////////////////////////////////////////////
 
 void H323SetAliasAddresses(const H323TransportAddressArray & addresses, H225_ArrayOf_AliasAddress & aliases);
 void H323SetAliasAddresses(const PStringArray & names, H225_ArrayOf_AliasAddress & aliases, int tag = -1);

@@ -120,6 +120,51 @@ void H323TraceDumpPDU(const char * proto,
 }
 #endif
 
+///////////////////////////////////////////////////////////////////////////////
+
+void H323SetLanguage(const PString & lang, PASN_IA5String & asn)
+{
+	asn.SetValue(lang);
+}
+
+PBoolean H323SetLanguages(const PStringList & lang, H225_Setup_UUIE_language & asn)
+{
+  asn.SetSize(lang.GetSize());
+  for (PINDEX i = 0; i < asn.GetSize(); i++)
+    H323SetLanguage(lang[i], asn[i]);
+
+  return (asn.GetSize() > 0);
+}
+
+PBoolean H323SetLanguages(const PStringList & lang, H225_Connect_UUIE_language & asn)
+{
+  asn.SetSize(lang.GetSize());
+  for (PINDEX i = 0; i < asn.GetSize(); i++)
+    H323SetLanguage(lang[i], asn[i]);
+
+  return (asn.GetSize() > 0);
+}
+
+void H323GetLanguage(PStringList & lang, const PASN_IA5String & asn)
+{
+    lang.AppendString(asn.GetValue());
+}
+
+PBoolean H323GetLanguages(PStringList & lang, const H225_Setup_UUIE_language & asn)
+{
+  for (PINDEX i = 0; i < asn.GetSize(); i++)
+    H323GetLanguage(lang, asn[i]);
+
+  return (lang.GetSize() > 0);
+}
+
+PBoolean H323GetLanguages(PStringList & lang, const H225_Connect_UUIE_language & asn)
+{
+  for (PINDEX i = 0; i < asn.GetSize(); i++)
+    H323GetLanguage(lang, asn[i]);
+
+  return (lang.GetSize() > 0);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -554,6 +599,9 @@ H225_Setup_UUIE & H323SignalPDU::BuildSetup(const H323Connection & connection,
   setup.IncludeOptionalField(H225_Setup_UUIE::e_sourceAddress);
   H323SetAliasAddresses(connection.GetLocalAliasNames(), setup.m_sourceAddress);
 
+  if (H323SetLanguages(connection.GetLocalLanguages(), setup.m_language))
+	  IncludeOptionalField(H225_Setup_UUIE::e_language);
+
   setup.m_conferenceID = connection.GetConferenceIdentifier();
 
   if (connection.GetEndPoint().OnSendCallIndependentSupplementaryService(&connection,*this))
@@ -653,6 +701,9 @@ H225_Connect_UUIE & H323SignalPDU::BuildConnect(const H323Connection & connectio
   }
   connect.m_callIdentifier.m_guid = connection.GetCallIdentifier();
   connect.m_conferenceID = connection.GetConferenceIdentifier();
+
+  if (HasOptionalField(H225_Setup_UUIE::e_language))
+	  H323SetLanguages(connection.GetLocalLanguages(), connect.m_language);
 
   connection.SetEndpointTypeInfo(connect.m_destinationInfo);
 

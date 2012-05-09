@@ -1456,6 +1456,20 @@ class H323Connection : public PObject
         H323Capability * remote           ///< remote Capability
     );
 
+	/** Merge remote language support to the local supported languages to 
+		determine common languages supported.
+	  */
+	virtual PBoolean MergeLanguages(
+		const PStringList & remote
+	);
+
+	/** Event fires when a common language is determined
+		Implementers should override this function to notify the
+		user the language of the remote caller.
+		returning FALSE drops the call with reason  
+	  */
+	virtual PBoolean OnCommonLanguages(const PStringList & lang);
+
     /**Select default logical channel for fast start.
        Internal function, not for normal use.
       */
@@ -2587,7 +2601,13 @@ class H323Connection : public PObject
       */
     const PString GetDisplayName() const { return localDisplayName; }
 
+	/**Get  Local Alias Name list
+	  */
     const PStringList & GetLocalAliasNames() const { return localAliasNames; }
+
+    /**Get the local supported languages
+	  */
+	const PStringList & GetLocalLanguages() const { return localLanguages; }
 
     /**Get the remote party name.
        This returns a string indicating the remote parties names and aliases.
@@ -3067,6 +3087,7 @@ class H323Connection : public PObject
     PStringList        localAliasNames;
     PString            localPartyName;
     PString            localDisplayName;
+    PStringList	       localLanguages;
 #if H323_H235
     H235Capabilities   localCapabilities; // Capabilities local system supports
 #else
@@ -3076,6 +3097,7 @@ class H323Connection : public PObject
     PString            remotePartyNumber;
     PString            remotePartyAddress;
     PStringArray       remoteAliasNames;
+	PStringArray       remoteLanguages;
     PString            destExtraCallInfo;
     PString            remoteApplication;
     H323Capabilities   remoteCapabilities; // Capabilities remote system supports

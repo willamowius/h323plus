@@ -395,6 +395,7 @@ H323Connection::H323Connection(H323EndPoint & ep,
   : endpoint(ep),
     localAliasNames(ep.GetAliasNames()),
     localPartyName(ep.GetLocalUserName()),
+	localLanguages(ep.GetLocalLanguages()),
     localCapabilities(ep.GetCapabilities()),
     gkAccessTokenOID(ep.GetGkAccessTokenOID()),
     alertingTime(0),
@@ -1346,6 +1347,14 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
       return endpoint.OnNegotiateConferenceCapabilities(setupPDU);
   }
 
+  // Check Language Support
+  if (setup.HasOptionalField(H225_Setup_UUIE::e_language)) {
+      PStringList remoteLang;
+	  if (!H323GetLanguages(remoteLang, setup.m_language) || !MergeLanguages(remoteLang)) {
+		  PTRACE(2,"SETUP\tMissing or no common language support");
+	  }
+  }
+
   SetRemoteVersions(setup.m_protocolIdentifier);
 
   // Get the ring pattern
@@ -1698,6 +1707,13 @@ PBoolean H323Connection::OnReceivedSignalConnect(const H323SignalPDU & pdu)
   SetRemoteVersions(connect.m_protocolIdentifier);
   SetRemotePartyInfo(pdu);
   SetRemoteApplication(connect.m_destinationInfo);
+
+  if (connect.HasOptionalField(H225_Connect_UUIE::e_language)) {
+	  PStringList remoteLang;
+	  if (!H323GetLanguages(remoteLang, connect.m_language) || !MergeLanguages(remoteLang)) {
+		  PTRACE(2,"SETUP\tMissing or no common language support");
+	  }
+  }
 
 #ifndef DISABLE_CALLAUTH
    if (!ReceiveAuthenticatorPDU<H225_Connect_UUIE>(this,connect, 
@@ -4209,6 +4225,24 @@ PBoolean H323Connection::MergeCapabilities(unsigned sessionID, const H323Capabil
    return FALSE;
 }
 
+PBoolean H323Connection::MergeLanguages(const PStringList & remote)
+{
+	PStringList common;
+	common.SetSize(0);
+	for (PINDEX i=0; i < remote.GetSize(); ++i) {
+		for (PINDEX j=0; j < localLanguages.GetSize(); ++j) {
+			if (remote[i] == localLanguages[j])
+				common.AppendString(remote[i]);
+		}
+	}
+	localLanguages = common;
+	return OnCommonLanguages(localLanguages);
+}
+
+PBoolean H323Connection::OnCommonLanguages(const PStringList & lang) 
+{ 
+	return (lang.GetSize() > 0); 
+}
 
 void H323Connection::DisableFastStart()
 {

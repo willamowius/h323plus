@@ -1500,6 +1500,11 @@ class H323EndPoint : public PObject
      */
     const PStringList & GetAliasNames() const { return localAliasNames; }
 
+    /*Get the supported Speaking language
+		Use this to set languages supported by the caller/called
+	 */
+	const PStringList & GetLocalLanguages() const { return localLanguages; }
+
 #if P_LDAP
 
     /**Get the default ILS server to use for user lookup.
@@ -2407,6 +2412,8 @@ class H323EndPoint : public PObject
 
     // Configuration variables, commonly changed
     PStringList localAliasNames;
+
+	PStringList localLanguages;
 
 #ifdef H323_AUDIO_CODECS
     H323AudioCodec::SilenceDetectionMode defaultSilenceDetection;
