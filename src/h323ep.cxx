@@ -372,7 +372,7 @@ H323EndPoint::H323EndPoint()
 #endif
 
   autoCallForward = TRUE;
-  disableFastStart = FALSE;
+  disableFastStart = TRUE;
   disableH245Tunneling = FALSE;
   disableH245inSetup = TRUE;
   disableH245QoS = TRUE;
