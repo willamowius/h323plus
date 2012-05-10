@@ -210,6 +210,7 @@ endif
 ifdef H323_H460
 HEADER_FILES    += $(OH323_INCDIR)/h460/h460.h \
                    $(OH323_INCDIR)/h460/h4601.h \
+                   $(OH323_INCDIR)/h460/h4604.h \
                    $(OH323_INCDIR)/h460/h4609.h \
                    $(OH323_INCDIR)/h460/h460_std9.h \
                    $(OH323_INCDIR)/h460/h46015.h \
@@ -226,6 +227,7 @@ HEADER_FILES    += $(OH323_INCDIR)/h460/h460.h \
                    $(OH323_INCDIR)/h460/h460pres.h
 
 SOURCES         += \
+                   $(OH323_INCDIR)/h460/h4604.cxx \
                    $(OH323_SRCDIR)/h460/h4609.cxx \
                    $(OH323_INCDIR)/h460/h46015.cxx \
                    $(OH323_SRCDIR)/h460/h46017a.cxx \
