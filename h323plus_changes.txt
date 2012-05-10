@@ -1,10 +1,13 @@
 
 H323plus 1.24.0 - 1.24.x
+FIX Change FastStart to be default FALSE to bring into line with other video equipment
+Added Language support to Setup and Connect messages
+Added interoperable H.235.6 (Work in progress)
 FIX Try reconnecting signalling channel if goes down unexpectedly and not drop call
 FIX Check Alternate gatekeepers are valid
 FIX Added KeepAlives to H.460.19 signalling channel
 Added AEC Support directly into the library
-FIX Statically loading codecs. Can now be set ftom OpenH323buildopts.h
+FIX Statically loading codecs. Can now be set from OpenH323buildopts.h
 Added H.460.17 Integration into H323Endpoint and Added To Simple example
 FIX Enumeration through H460_Feature Parameters
 FIX Memory allocation of RTP Frames (G.722 on Windows)
@@ -20,7 +23,7 @@ FIX IPv6 Support and checks
 
 H323plus 1.23.0 - 1.23.1
 Added MediaChannelCapability to OLC
-Added H.235.6 Support
+Added H.235.6 Support (Experimental)
 Updated H323List for depreciation warnings with ptlib 2.11
 Added RTP multiplexing (with H.460.19)
 
