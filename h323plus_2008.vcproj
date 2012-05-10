@@ -933,10 +933,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\h460\h4604.cxx"
-				>
-			</File>
-			<File
 				RelativePath=".\src\h460\h460_oid3.cxx"
 				>
 			</File>
@@ -1661,10 +1657,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\h460\h4604.h"
-				>
-			</File>
-			<File
 				RelativePath=".\include\h460\h460_oid3.h"
 				>
 			</File>
@@ -1854,6 +1846,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\asn\h4604v2.asn"
+				>
+			</File>
+			<File
 				RelativePath=".\src\asn\h4609.asn"
 				>
 			</File>
@@ -1962,6 +1958,10 @@
 				</File>
 				<File
 					RelativePath=".\include\h460\h46019.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\h460\h4604.h"
 					>
 				</File>
 				<File
@@ -2222,6 +2222,10 @@
 				</File>
 				<File
 					RelativePath=".\src\h460\h46019.cxx"
+					>
+				</File>
+				<File
+					RelativePath=".\src\h460\h4604.cxx"
 					>
 				</File>
 				<File
