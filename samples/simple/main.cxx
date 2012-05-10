@@ -35,10 +35,6 @@
 #include "main.h"
 #include "../../version.h"
 
-#ifdef H323_UPnP
-#include <h460/upnpcp.h>
-#endif
-
 #if defined(_MSC_VER) 
  #if PTLIB_VER > 280
    #define defVideoDriver "DirectShow"
@@ -272,7 +268,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
   // Set the various options
   SetSilenceDetectionMode(args.HasOption('e') ? H323AudioCodec::NoSilenceDetection
                                               : H323AudioCodec::AdaptiveSilenceDetection);
-  DisableFastStart(args.HasOption('f'));
+  DisableFastStart(!args.HasOption('f'));
   DisableH245Tunneling(args.HasOption('T'));
   DisableH245QoS(args.HasOption('Q'));
 
@@ -306,6 +302,9 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
       return FALSE;
     }
   }
+
+  localLanguages.AppendString("en-us");
+  
 
   if (!SetSoundDevice(args, "sound", PSoundChannel::Recorder))
     return FALSE;
@@ -823,22 +822,11 @@ PBoolean SimpleH323EndPoint::OpenExtendedVideoChannel(H323Connection & connectio
 #endif // H323_VIDEO
 
 #ifdef H323_UPnP
-PBoolean SimpleH323EndPoint::OnUPnPAvailable(const PString & device, const PIPSocket::Address & publicIP, PNatMethod_UPnP * nat)
+PBoolean SimpleH323EndPoint::OnUPnPAvailable(const PString & device, const PIPSocket::Address & publicIP, PNatMethod_UPnP * /*nat*/)
 {
     cout << "UPnP Device " << device << " Public IP: " << publicIP << endl;
-
-        for (PINDEX i = 0; i < listeners.GetSize(); ++i) {
-            H323TransportAddress locAddr = listeners[i].GetTransportAddress();
-            if (locAddr.GetIpVersion() == 4) {
-                PIPSocket::Address localIP;
-                PIPSocket::Address pubIP;
-                WORD locPort;
-                locAddr.GetIpAndPort(localIP,locPort);
-                nat->CreateUPnPMap(false, "TCP", localIP, locPort, pubIP , locPort);
-                break;
-            }
-        }
-       return true;
+    // Use the PNatMethod pointer to create a TCP listener.
+    return true;
 }
 #endif
 
