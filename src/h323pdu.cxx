@@ -600,7 +600,7 @@ H225_Setup_UUIE & H323SignalPDU::BuildSetup(const H323Connection & connection,
   H323SetAliasAddresses(connection.GetLocalAliasNames(), setup.m_sourceAddress);
 
   if (H323SetLanguages(connection.GetLocalLanguages(), setup.m_language))
-	  IncludeOptionalField(H225_Setup_UUIE::e_language);
+	  setup.IncludeOptionalField(H225_Setup_UUIE::e_language);
 
   setup.m_conferenceID = connection.GetConferenceIdentifier();
 
@@ -702,8 +702,8 @@ H225_Connect_UUIE & H323SignalPDU::BuildConnect(const H323Connection & connectio
   connect.m_callIdentifier.m_guid = connection.GetCallIdentifier();
   connect.m_conferenceID = connection.GetConferenceIdentifier();
 
-  if (HasOptionalField(H225_Setup_UUIE::e_language))
-	  H323SetLanguages(connection.GetLocalLanguages(), connect.m_language);
+  if (H323SetLanguages(connection.GetLocalLanguages(), connect.m_language))
+     connect.IncludeOptionalField(H225_Setup_UUIE::e_language);
 
   connection.SetEndpointTypeInfo(connect.m_destinationInfo);
 
