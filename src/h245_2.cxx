@@ -12,203 +12,6 @@
 
 #if ! H323_DISABLE_H245
 
-//
-// ArrayOf_CustomPictureFormat
-//
-
-H245_ArrayOf_CustomPictureFormat::H245_ArrayOf_CustomPictureFormat(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Array(tag, tagClass)
-{
-}
-
-
-PASN_Object * H245_ArrayOf_CustomPictureFormat::CreateObject() const
-{
-  return new H245_CustomPictureFormat;
-}
-
-
-H245_CustomPictureFormat & H245_ArrayOf_CustomPictureFormat::operator[](PINDEX i) const
-{
-  return (H245_CustomPictureFormat &)array[i];
-}
-
-
-PObject * H245_ArrayOf_CustomPictureFormat::Clone() const
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(IsClass(H245_ArrayOf_CustomPictureFormat::Class()), PInvalidCast);
-#endif
-  return new H245_ArrayOf_CustomPictureFormat(*this);
-}
-
-
-//
-// ArrayOf_H263VideoModeCombos
-//
-
-H245_ArrayOf_H263VideoModeCombos::H245_ArrayOf_H263VideoModeCombos(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Array(tag, tagClass)
-{
-}
-
-
-PASN_Object * H245_ArrayOf_H263VideoModeCombos::CreateObject() const
-{
-  return new H245_H263VideoModeCombos;
-}
-
-
-H245_H263VideoModeCombos & H245_ArrayOf_H263VideoModeCombos::operator[](PINDEX i) const
-{
-  return (H245_H263VideoModeCombos &)array[i];
-}
-
-
-PObject * H245_ArrayOf_H263VideoModeCombos::Clone() const
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(IsClass(H245_ArrayOf_H263VideoModeCombos::Class()), PInvalidCast);
-#endif
-  return new H245_ArrayOf_H263VideoModeCombos(*this);
-}
-
-
-//
-// RefPictureSelection_additionalPictureMemory
-//
-
-H245_RefPictureSelection_additionalPictureMemory::H245_RefPictureSelection_additionalPictureMemory(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Sequence(tag, tagClass, 6, TRUE, 0)
-{
-  m_sqcifAdditionalPictureMemory.SetConstraints(PASN_Object::FixedConstraint, 1, 256);
-  m_qcifAdditionalPictureMemory.SetConstraints(PASN_Object::FixedConstraint, 1, 256);
-  m_cifAdditionalPictureMemory.SetConstraints(PASN_Object::FixedConstraint, 1, 256);
-  m_cif4AdditionalPictureMemory.SetConstraints(PASN_Object::FixedConstraint, 1, 256);
-  m_cif16AdditionalPictureMemory.SetConstraints(PASN_Object::FixedConstraint, 1, 256);
-  m_bigCpfAdditionalPictureMemory.SetConstraints(PASN_Object::FixedConstraint, 1, 256);
-}
-
-
-#ifndef PASN_NOPRINTON
-void H245_RefPictureSelection_additionalPictureMemory::PrintOn(ostream & strm) const
-{
-  int indent = strm.precision() + 2;
-  strm << "{\n";
-  if (HasOptionalField(e_sqcifAdditionalPictureMemory))
-    strm << setw(indent+31) << "sqcifAdditionalPictureMemory = " << setprecision(indent) << m_sqcifAdditionalPictureMemory << '\n';
-  if (HasOptionalField(e_qcifAdditionalPictureMemory))
-    strm << setw(indent+30) << "qcifAdditionalPictureMemory = " << setprecision(indent) << m_qcifAdditionalPictureMemory << '\n';
-  if (HasOptionalField(e_cifAdditionalPictureMemory))
-    strm << setw(indent+29) << "cifAdditionalPictureMemory = " << setprecision(indent) << m_cifAdditionalPictureMemory << '\n';
-  if (HasOptionalField(e_cif4AdditionalPictureMemory))
-    strm << setw(indent+30) << "cif4AdditionalPictureMemory = " << setprecision(indent) << m_cif4AdditionalPictureMemory << '\n';
-  if (HasOptionalField(e_cif16AdditionalPictureMemory))
-    strm << setw(indent+31) << "cif16AdditionalPictureMemory = " << setprecision(indent) << m_cif16AdditionalPictureMemory << '\n';
-  if (HasOptionalField(e_bigCpfAdditionalPictureMemory))
-    strm << setw(indent+32) << "bigCpfAdditionalPictureMemory = " << setprecision(indent) << m_bigCpfAdditionalPictureMemory << '\n';
-  strm << setw(indent-1) << setprecision(indent-2) << "}";
-}
-#endif
-
-
-PObject::Comparison H245_RefPictureSelection_additionalPictureMemory::Compare(const PObject & obj) const
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(PIsDescendant(&obj, H245_RefPictureSelection_additionalPictureMemory), PInvalidCast);
-#endif
-  const H245_RefPictureSelection_additionalPictureMemory & other = (const H245_RefPictureSelection_additionalPictureMemory &)obj;
-
-  Comparison result;
-
-  if ((result = m_sqcifAdditionalPictureMemory.Compare(other.m_sqcifAdditionalPictureMemory)) != EqualTo)
-    return result;
-  if ((result = m_qcifAdditionalPictureMemory.Compare(other.m_qcifAdditionalPictureMemory)) != EqualTo)
-    return result;
-  if ((result = m_cifAdditionalPictureMemory.Compare(other.m_cifAdditionalPictureMemory)) != EqualTo)
-    return result;
-  if ((result = m_cif4AdditionalPictureMemory.Compare(other.m_cif4AdditionalPictureMemory)) != EqualTo)
-    return result;
-  if ((result = m_cif16AdditionalPictureMemory.Compare(other.m_cif16AdditionalPictureMemory)) != EqualTo)
-    return result;
-  if ((result = m_bigCpfAdditionalPictureMemory.Compare(other.m_bigCpfAdditionalPictureMemory)) != EqualTo)
-    return result;
-
-  return PASN_Sequence::Compare(other);
-}
-
-
-PINDEX H245_RefPictureSelection_additionalPictureMemory::GetDataLength() const
-{
-  PINDEX length = 0;
-  if (HasOptionalField(e_sqcifAdditionalPictureMemory))
-    length += m_sqcifAdditionalPictureMemory.GetObjectLength();
-  if (HasOptionalField(e_qcifAdditionalPictureMemory))
-    length += m_qcifAdditionalPictureMemory.GetObjectLength();
-  if (HasOptionalField(e_cifAdditionalPictureMemory))
-    length += m_cifAdditionalPictureMemory.GetObjectLength();
-  if (HasOptionalField(e_cif4AdditionalPictureMemory))
-    length += m_cif4AdditionalPictureMemory.GetObjectLength();
-  if (HasOptionalField(e_cif16AdditionalPictureMemory))
-    length += m_cif16AdditionalPictureMemory.GetObjectLength();
-  if (HasOptionalField(e_bigCpfAdditionalPictureMemory))
-    length += m_bigCpfAdditionalPictureMemory.GetObjectLength();
-  return length;
-}
-
-
-PBoolean H245_RefPictureSelection_additionalPictureMemory::Decode(PASN_Stream & strm)
-{
-  if (!PreambleDecode(strm))
-    return FALSE;
-
-  if (HasOptionalField(e_sqcifAdditionalPictureMemory) && !m_sqcifAdditionalPictureMemory.Decode(strm))
-    return FALSE;
-  if (HasOptionalField(e_qcifAdditionalPictureMemory) && !m_qcifAdditionalPictureMemory.Decode(strm))
-    return FALSE;
-  if (HasOptionalField(e_cifAdditionalPictureMemory) && !m_cifAdditionalPictureMemory.Decode(strm))
-    return FALSE;
-  if (HasOptionalField(e_cif4AdditionalPictureMemory) && !m_cif4AdditionalPictureMemory.Decode(strm))
-    return FALSE;
-  if (HasOptionalField(e_cif16AdditionalPictureMemory) && !m_cif16AdditionalPictureMemory.Decode(strm))
-    return FALSE;
-  if (HasOptionalField(e_bigCpfAdditionalPictureMemory) && !m_bigCpfAdditionalPictureMemory.Decode(strm))
-    return FALSE;
-
-  return UnknownExtensionsDecode(strm);
-}
-
-
-void H245_RefPictureSelection_additionalPictureMemory::Encode(PASN_Stream & strm) const
-{
-  PreambleEncode(strm);
-
-  if (HasOptionalField(e_sqcifAdditionalPictureMemory))
-    m_sqcifAdditionalPictureMemory.Encode(strm);
-  if (HasOptionalField(e_qcifAdditionalPictureMemory))
-    m_qcifAdditionalPictureMemory.Encode(strm);
-  if (HasOptionalField(e_cifAdditionalPictureMemory))
-    m_cifAdditionalPictureMemory.Encode(strm);
-  if (HasOptionalField(e_cif4AdditionalPictureMemory))
-    m_cif4AdditionalPictureMemory.Encode(strm);
-  if (HasOptionalField(e_cif16AdditionalPictureMemory))
-    m_cif16AdditionalPictureMemory.Encode(strm);
-  if (HasOptionalField(e_bigCpfAdditionalPictureMemory))
-    m_bigCpfAdditionalPictureMemory.Encode(strm);
-
-  UnknownExtensionsEncode(strm);
-}
-
-
-PObject * H245_RefPictureSelection_additionalPictureMemory::Clone() const
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(IsClass(H245_RefPictureSelection_additionalPictureMemory::Class()), PInvalidCast);
-#endif
-  return new H245_RefPictureSelection_additionalPictureMemory(*this);
-}
-
-
 
 #ifndef PASN_NOPRINTON
 const static PASN_Names Names_H245_RefPictureSelection_videoBackChannelSend[]={
@@ -3112,6 +2915,7 @@ const static PASN_Names Names_H245_OpenLogicalChannelReject_cause[]={
      ,{"invalidDependentChannel",12}
      ,{"replacementForRejected",13}
      ,{"securityDenied",14}
+     ,{"qoSControlNotSupported",15}
 };
 #endif
 //
@@ -3121,7 +2925,7 @@ const static PASN_Names Names_H245_OpenLogicalChannelReject_cause[]={
 H245_OpenLogicalChannelReject_cause::H245_OpenLogicalChannelReject_cause(unsigned tag, PASN_Object::TagClass tagClass)
   : PASN_Choice(tag, tagClass, 6, TRUE
 #ifndef PASN_NOPRINTON
-    ,(const PASN_Names *)Names_H245_OpenLogicalChannelReject_cause,15
+    ,(const PASN_Names *)Names_H245_OpenLogicalChannelReject_cause,16
 #endif
 )
 {
@@ -3130,7 +2934,7 @@ H245_OpenLogicalChannelReject_cause::H245_OpenLogicalChannelReject_cause(unsigne
 
 PBoolean H245_OpenLogicalChannelReject_cause::CreateObject()
 {
-  choice = (tag <= e_securityDenied) ? new PASN_Null() : NULL;
+  choice = (tag <= e_qoSControlNotSupported) ? new PASN_Null() : NULL;
   return choice != NULL;
 }
 
@@ -3187,6 +2991,7 @@ const static PASN_Names Names_H245_CloseLogicalChannel_reason[]={
       {"unknown",0}
      ,{"reopen",1}
      ,{"reservationFailure",2}
+     ,{"networkErrorCode",3}
 };
 #endif
 //
@@ -3196,7 +3001,7 @@ const static PASN_Names Names_H245_CloseLogicalChannel_reason[]={
 H245_CloseLogicalChannel_reason::H245_CloseLogicalChannel_reason(unsigned tag, PASN_Object::TagClass tagClass)
   : PASN_Choice(tag, tagClass, 3, TRUE
 #ifndef PASN_NOPRINTON
-    ,(const PASN_Names *)Names_H245_CloseLogicalChannel_reason,3
+    ,(const PASN_Names *)Names_H245_CloseLogicalChannel_reason,4
 #endif
 )
 {
@@ -3205,8 +3010,20 @@ H245_CloseLogicalChannel_reason::H245_CloseLogicalChannel_reason(unsigned tag, P
 
 PBoolean H245_CloseLogicalChannel_reason::CreateObject()
 {
-  choice = (tag <= e_reservationFailure) ? new PASN_Null() : NULL;
-  return choice != NULL;
+  switch (tag) {
+    case e_unknown :
+    case e_reopen :
+    case e_reservationFailure :
+      choice = new PASN_Null();
+      return TRUE;
+    case e_networkErrorCode :
+      choice = new PASN_Integer();
+      choice->SetConstraints(PASN_Object::FixedConstraint, 0, 255);
+      return TRUE;
+  }
+
+  choice = NULL;
+  return FALSE;
 }
 
 
@@ -3226,6 +3043,7 @@ const static PASN_Names Names_H245_RequestChannelClose_reason[]={
      ,{"normal",1}
      ,{"reopen",2}
      ,{"reservationFailure",3}
+     ,{"networkErrorCode",4}
 };
 #endif
 //
@@ -3235,7 +3053,7 @@ const static PASN_Names Names_H245_RequestChannelClose_reason[]={
 H245_RequestChannelClose_reason::H245_RequestChannelClose_reason(unsigned tag, PASN_Object::TagClass tagClass)
   : PASN_Choice(tag, tagClass, 4, TRUE
 #ifndef PASN_NOPRINTON
-    ,(const PASN_Names *)Names_H245_RequestChannelClose_reason,4
+    ,(const PASN_Names *)Names_H245_RequestChannelClose_reason,5
 #endif
 )
 {
@@ -3244,8 +3062,21 @@ H245_RequestChannelClose_reason::H245_RequestChannelClose_reason(unsigned tag, P
 
 PBoolean H245_RequestChannelClose_reason::CreateObject()
 {
-  choice = (tag <= e_reservationFailure) ? new PASN_Null() : NULL;
-  return choice != NULL;
+  switch (tag) {
+    case e_unknown :
+    case e_normal :
+    case e_reopen :
+    case e_reservationFailure :
+      choice = new PASN_Null();
+      return TRUE;
+    case e_networkErrorCode :
+      choice = new PASN_Integer();
+      choice->SetConstraints(PASN_Object::FixedConstraint, 0, 255);
+      return TRUE;
+  }
+
+  choice = NULL;
+  return FALSE;
 }
 
 
@@ -11353,6 +11184,325 @@ PObject * H245_FECData_rfc2733_pktMode_rfc2733sameport::Clone() const
   PAssert(IsClass(H245_FECData_rfc2733_pktMode_rfc2733sameport::Class()), PInvalidCast);
 #endif
   return new H245_FECData_rfc2733_pktMode_rfc2733sameport(*this);
+}
+
+
+//
+// FECData_rfc2733_pktMode_rfc2733diffport
+//
+
+H245_FECData_rfc2733_pktMode_rfc2733diffport::H245_FECData_rfc2733_pktMode_rfc2733diffport(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Sequence(tag, tagClass, 0, TRUE, 0)
+{
+}
+
+
+#ifndef PASN_NOPRINTON
+void H245_FECData_rfc2733_pktMode_rfc2733diffport::PrintOn(ostream & strm) const
+{
+  int indent = strm.precision() + 2;
+  strm << "{\n";
+  strm << setw(indent+19) << "protectedChannel = " << setprecision(indent) << m_protectedChannel << '\n';
+  strm << setw(indent-1) << setprecision(indent-2) << "}";
+}
+#endif
+
+
+PObject::Comparison H245_FECData_rfc2733_pktMode_rfc2733diffport::Compare(const PObject & obj) const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(&obj, H245_FECData_rfc2733_pktMode_rfc2733diffport), PInvalidCast);
+#endif
+  const H245_FECData_rfc2733_pktMode_rfc2733diffport & other = (const H245_FECData_rfc2733_pktMode_rfc2733diffport &)obj;
+
+  Comparison result;
+
+  if ((result = m_protectedChannel.Compare(other.m_protectedChannel)) != EqualTo)
+    return result;
+
+  return PASN_Sequence::Compare(other);
+}
+
+
+PINDEX H245_FECData_rfc2733_pktMode_rfc2733diffport::GetDataLength() const
+{
+  PINDEX length = 0;
+  length += m_protectedChannel.GetObjectLength();
+  return length;
+}
+
+
+PBoolean H245_FECData_rfc2733_pktMode_rfc2733diffport::Decode(PASN_Stream & strm)
+{
+  if (!PreambleDecode(strm))
+    return FALSE;
+
+  if (!m_protectedChannel.Decode(strm))
+    return FALSE;
+
+  return UnknownExtensionsDecode(strm);
+}
+
+
+void H245_FECData_rfc2733_pktMode_rfc2733diffport::Encode(PASN_Stream & strm) const
+{
+  PreambleEncode(strm);
+
+  m_protectedChannel.Encode(strm);
+
+  UnknownExtensionsEncode(strm);
+}
+
+
+PObject * H245_FECData_rfc2733_pktMode_rfc2733diffport::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H245_FECData_rfc2733_pktMode_rfc2733diffport::Class()), PInvalidCast);
+#endif
+  return new H245_FECData_rfc2733_pktMode_rfc2733diffport(*this);
+}
+
+
+
+#ifndef PASN_NOPRINTON
+const static PASN_Names Names_H245_DepFECMode_rfc2733Mode_mode_separateStream[]={
+      {"differentPort",0}
+     ,{"samePort",1}
+};
+#endif
+//
+// DepFECMode_rfc2733Mode_mode_separateStream
+//
+
+H245_DepFECMode_rfc2733Mode_mode_separateStream::H245_DepFECMode_rfc2733Mode_mode_separateStream(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Choice(tag, tagClass, 2, TRUE
+#ifndef PASN_NOPRINTON
+    ,(const PASN_Names *)Names_H245_DepFECMode_rfc2733Mode_mode_separateStream,2
+#endif
+)
+{
+}
+
+
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+H245_DepFECMode_rfc2733Mode_mode_separateStream::operator H245_DepFECMode_rfc2733Mode_mode_separateStream_differentPort &() const
+#else
+H245_DepFECMode_rfc2733Mode_mode_separateStream::operator H245_DepFECMode_rfc2733Mode_mode_separateStream_differentPort &()
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(PAssertNULL(choice), H245_DepFECMode_rfc2733Mode_mode_separateStream_differentPort), PInvalidCast);
+#endif
+  return *(H245_DepFECMode_rfc2733Mode_mode_separateStream_differentPort *)choice;
+}
+
+
+H245_DepFECMode_rfc2733Mode_mode_separateStream::operator const H245_DepFECMode_rfc2733Mode_mode_separateStream_differentPort &() const
+#endif
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(PAssertNULL(choice), H245_DepFECMode_rfc2733Mode_mode_separateStream_differentPort), PInvalidCast);
+#endif
+  return *(H245_DepFECMode_rfc2733Mode_mode_separateStream_differentPort *)choice;
+}
+
+
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+H245_DepFECMode_rfc2733Mode_mode_separateStream::operator H245_DepFECMode_rfc2733Mode_mode_separateStream_samePort &() const
+#else
+H245_DepFECMode_rfc2733Mode_mode_separateStream::operator H245_DepFECMode_rfc2733Mode_mode_separateStream_samePort &()
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(PAssertNULL(choice), H245_DepFECMode_rfc2733Mode_mode_separateStream_samePort), PInvalidCast);
+#endif
+  return *(H245_DepFECMode_rfc2733Mode_mode_separateStream_samePort *)choice;
+}
+
+
+H245_DepFECMode_rfc2733Mode_mode_separateStream::operator const H245_DepFECMode_rfc2733Mode_mode_separateStream_samePort &() const
+#endif
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(PAssertNULL(choice), H245_DepFECMode_rfc2733Mode_mode_separateStream_samePort), PInvalidCast);
+#endif
+  return *(H245_DepFECMode_rfc2733Mode_mode_separateStream_samePort *)choice;
+}
+
+
+PBoolean H245_DepFECMode_rfc2733Mode_mode_separateStream::CreateObject()
+{
+  switch (tag) {
+    case e_differentPort :
+      choice = new H245_DepFECMode_rfc2733Mode_mode_separateStream_differentPort();
+      return TRUE;
+    case e_samePort :
+      choice = new H245_DepFECMode_rfc2733Mode_mode_separateStream_samePort();
+      return TRUE;
+  }
+
+  choice = NULL;
+  return FALSE;
+}
+
+
+PObject * H245_DepFECMode_rfc2733Mode_mode_separateStream::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H245_DepFECMode_rfc2733Mode_mode_separateStream::Class()), PInvalidCast);
+#endif
+  return new H245_DepFECMode_rfc2733Mode_mode_separateStream(*this);
+}
+
+
+
+#ifndef PASN_NOPRINTON
+const static PASN_Names Names_H245_MultilinkResponse_addConnection_responseCode_rejected[]={
+      {"connectionsNotAvailable",0}
+     ,{"userRejected",1}
+};
+#endif
+//
+// MultilinkResponse_addConnection_responseCode_rejected
+//
+
+H245_MultilinkResponse_addConnection_responseCode_rejected::H245_MultilinkResponse_addConnection_responseCode_rejected(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Choice(tag, tagClass, 2, TRUE
+#ifndef PASN_NOPRINTON
+    ,(const PASN_Names *)Names_H245_MultilinkResponse_addConnection_responseCode_rejected,2
+#endif
+)
+{
+}
+
+
+PBoolean H245_MultilinkResponse_addConnection_responseCode_rejected::CreateObject()
+{
+  choice = (tag <= e_userRejected) ? new PASN_Null() : NULL;
+  return choice != NULL;
+}
+
+
+PObject * H245_MultilinkResponse_addConnection_responseCode_rejected::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H245_MultilinkResponse_addConnection_responseCode_rejected::Class()), PInvalidCast);
+#endif
+  return new H245_MultilinkResponse_addConnection_responseCode_rejected(*this);
+}
+
+
+
+#ifndef PASN_NOPRINTON
+const static PASN_Names Names_H245_MiscellaneousCommand_type_progressiveRefinementStart_repeatCount[]={
+      {"doOneProgression",0}
+     ,{"doContinuousProgressions",1}
+     ,{"doOneIndependentProgression",2}
+     ,{"doContinuousIndependentProgressions",3}
+};
+#endif
+//
+// MiscellaneousCommand_type_progressiveRefinementStart_repeatCount
+//
+
+H245_MiscellaneousCommand_type_progressiveRefinementStart_repeatCount::H245_MiscellaneousCommand_type_progressiveRefinementStart_repeatCount(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Choice(tag, tagClass, 4, TRUE
+#ifndef PASN_NOPRINTON
+    ,(const PASN_Names *)Names_H245_MiscellaneousCommand_type_progressiveRefinementStart_repeatCount,4
+#endif
+)
+{
+}
+
+
+PBoolean H245_MiscellaneousCommand_type_progressiveRefinementStart_repeatCount::CreateObject()
+{
+  choice = (tag <= e_doContinuousIndependentProgressions) ? new PASN_Null() : NULL;
+  return choice != NULL;
+}
+
+
+PObject * H245_MiscellaneousCommand_type_progressiveRefinementStart_repeatCount::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H245_MiscellaneousCommand_type_progressiveRefinementStart_repeatCount::Class()), PInvalidCast);
+#endif
+  return new H245_MiscellaneousCommand_type_progressiveRefinementStart_repeatCount(*this);
+}
+
+
+
+#ifndef PASN_NOPRINTON
+const static PASN_Names Names_H245_NewATMVCCommand_aal_aal1_clockRecovery[]={
+      {"nullClockRecovery",0}
+     ,{"srtsClockRecovery",1}
+     ,{"adaptiveClockRecovery",2}
+};
+#endif
+//
+// NewATMVCCommand_aal_aal1_clockRecovery
+//
+
+H245_NewATMVCCommand_aal_aal1_clockRecovery::H245_NewATMVCCommand_aal_aal1_clockRecovery(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Choice(tag, tagClass, 3, TRUE
+#ifndef PASN_NOPRINTON
+    ,(const PASN_Names *)Names_H245_NewATMVCCommand_aal_aal1_clockRecovery,3
+#endif
+)
+{
+}
+
+
+PBoolean H245_NewATMVCCommand_aal_aal1_clockRecovery::CreateObject()
+{
+  choice = (tag <= e_adaptiveClockRecovery) ? new PASN_Null() : NULL;
+  return choice != NULL;
+}
+
+
+PObject * H245_NewATMVCCommand_aal_aal1_clockRecovery::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H245_NewATMVCCommand_aal_aal1_clockRecovery::Class()), PInvalidCast);
+#endif
+  return new H245_NewATMVCCommand_aal_aal1_clockRecovery(*this);
+}
+
+
+
+#ifndef PASN_NOPRINTON
+const static PASN_Names Names_H245_NewATMVCCommand_aal_aal1_errorCorrection[]={
+      {"nullErrorCorrection",0}
+     ,{"longInterleaver",1}
+     ,{"shortInterleaver",2}
+     ,{"errorCorrectionOnly",3}
+};
+#endif
+//
+// NewATMVCCommand_aal_aal1_errorCorrection
+//
+
+H245_NewATMVCCommand_aal_aal1_errorCorrection::H245_NewATMVCCommand_aal_aal1_errorCorrection(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Choice(tag, tagClass, 4, TRUE
+#ifndef PASN_NOPRINTON
+    ,(const PASN_Names *)Names_H245_NewATMVCCommand_aal_aal1_errorCorrection,4
+#endif
+)
+{
+}
+
+
+PBoolean H245_NewATMVCCommand_aal_aal1_errorCorrection::CreateObject()
+{
+  choice = (tag <= e_errorCorrectionOnly) ? new PASN_Null() : NULL;
+  return choice != NULL;
+}
+
+
+PObject * H245_NewATMVCCommand_aal_aal1_errorCorrection::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H245_NewATMVCCommand_aal_aal1_errorCorrection::Class()), PInvalidCast);
+#endif
+  return new H245_NewATMVCCommand_aal_aal1_errorCorrection(*this);
 }
 
 

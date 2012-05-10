@@ -12,325 +12,6 @@
 
 #if ! H323_DISABLE_H245
 
-//
-// FECData_rfc2733_pktMode_rfc2733diffport
-//
-
-H245_FECData_rfc2733_pktMode_rfc2733diffport::H245_FECData_rfc2733_pktMode_rfc2733diffport(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Sequence(tag, tagClass, 0, TRUE, 0)
-{
-}
-
-
-#ifndef PASN_NOPRINTON
-void H245_FECData_rfc2733_pktMode_rfc2733diffport::PrintOn(ostream & strm) const
-{
-  int indent = strm.precision() + 2;
-  strm << "{\n";
-  strm << setw(indent+19) << "protectedChannel = " << setprecision(indent) << m_protectedChannel << '\n';
-  strm << setw(indent-1) << setprecision(indent-2) << "}";
-}
-#endif
-
-
-PObject::Comparison H245_FECData_rfc2733_pktMode_rfc2733diffport::Compare(const PObject & obj) const
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(PIsDescendant(&obj, H245_FECData_rfc2733_pktMode_rfc2733diffport), PInvalidCast);
-#endif
-  const H245_FECData_rfc2733_pktMode_rfc2733diffport & other = (const H245_FECData_rfc2733_pktMode_rfc2733diffport &)obj;
-
-  Comparison result;
-
-  if ((result = m_protectedChannel.Compare(other.m_protectedChannel)) != EqualTo)
-    return result;
-
-  return PASN_Sequence::Compare(other);
-}
-
-
-PINDEX H245_FECData_rfc2733_pktMode_rfc2733diffport::GetDataLength() const
-{
-  PINDEX length = 0;
-  length += m_protectedChannel.GetObjectLength();
-  return length;
-}
-
-
-PBoolean H245_FECData_rfc2733_pktMode_rfc2733diffport::Decode(PASN_Stream & strm)
-{
-  if (!PreambleDecode(strm))
-    return FALSE;
-
-  if (!m_protectedChannel.Decode(strm))
-    return FALSE;
-
-  return UnknownExtensionsDecode(strm);
-}
-
-
-void H245_FECData_rfc2733_pktMode_rfc2733diffport::Encode(PASN_Stream & strm) const
-{
-  PreambleEncode(strm);
-
-  m_protectedChannel.Encode(strm);
-
-  UnknownExtensionsEncode(strm);
-}
-
-
-PObject * H245_FECData_rfc2733_pktMode_rfc2733diffport::Clone() const
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(IsClass(H245_FECData_rfc2733_pktMode_rfc2733diffport::Class()), PInvalidCast);
-#endif
-  return new H245_FECData_rfc2733_pktMode_rfc2733diffport(*this);
-}
-
-
-
-#ifndef PASN_NOPRINTON
-const static PASN_Names Names_H245_DepFECMode_rfc2733Mode_mode_separateStream[]={
-      {"differentPort",0}
-     ,{"samePort",1}
-};
-#endif
-//
-// DepFECMode_rfc2733Mode_mode_separateStream
-//
-
-H245_DepFECMode_rfc2733Mode_mode_separateStream::H245_DepFECMode_rfc2733Mode_mode_separateStream(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Choice(tag, tagClass, 2, TRUE
-#ifndef PASN_NOPRINTON
-    ,(const PASN_Names *)Names_H245_DepFECMode_rfc2733Mode_mode_separateStream,2
-#endif
-)
-{
-}
-
-
-#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
-H245_DepFECMode_rfc2733Mode_mode_separateStream::operator H245_DepFECMode_rfc2733Mode_mode_separateStream_differentPort &() const
-#else
-H245_DepFECMode_rfc2733Mode_mode_separateStream::operator H245_DepFECMode_rfc2733Mode_mode_separateStream_differentPort &()
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(PIsDescendant(PAssertNULL(choice), H245_DepFECMode_rfc2733Mode_mode_separateStream_differentPort), PInvalidCast);
-#endif
-  return *(H245_DepFECMode_rfc2733Mode_mode_separateStream_differentPort *)choice;
-}
-
-
-H245_DepFECMode_rfc2733Mode_mode_separateStream::operator const H245_DepFECMode_rfc2733Mode_mode_separateStream_differentPort &() const
-#endif
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(PIsDescendant(PAssertNULL(choice), H245_DepFECMode_rfc2733Mode_mode_separateStream_differentPort), PInvalidCast);
-#endif
-  return *(H245_DepFECMode_rfc2733Mode_mode_separateStream_differentPort *)choice;
-}
-
-
-#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
-H245_DepFECMode_rfc2733Mode_mode_separateStream::operator H245_DepFECMode_rfc2733Mode_mode_separateStream_samePort &() const
-#else
-H245_DepFECMode_rfc2733Mode_mode_separateStream::operator H245_DepFECMode_rfc2733Mode_mode_separateStream_samePort &()
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(PIsDescendant(PAssertNULL(choice), H245_DepFECMode_rfc2733Mode_mode_separateStream_samePort), PInvalidCast);
-#endif
-  return *(H245_DepFECMode_rfc2733Mode_mode_separateStream_samePort *)choice;
-}
-
-
-H245_DepFECMode_rfc2733Mode_mode_separateStream::operator const H245_DepFECMode_rfc2733Mode_mode_separateStream_samePort &() const
-#endif
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(PIsDescendant(PAssertNULL(choice), H245_DepFECMode_rfc2733Mode_mode_separateStream_samePort), PInvalidCast);
-#endif
-  return *(H245_DepFECMode_rfc2733Mode_mode_separateStream_samePort *)choice;
-}
-
-
-PBoolean H245_DepFECMode_rfc2733Mode_mode_separateStream::CreateObject()
-{
-  switch (tag) {
-    case e_differentPort :
-      choice = new H245_DepFECMode_rfc2733Mode_mode_separateStream_differentPort();
-      return TRUE;
-    case e_samePort :
-      choice = new H245_DepFECMode_rfc2733Mode_mode_separateStream_samePort();
-      return TRUE;
-  }
-
-  choice = NULL;
-  return FALSE;
-}
-
-
-PObject * H245_DepFECMode_rfc2733Mode_mode_separateStream::Clone() const
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(IsClass(H245_DepFECMode_rfc2733Mode_mode_separateStream::Class()), PInvalidCast);
-#endif
-  return new H245_DepFECMode_rfc2733Mode_mode_separateStream(*this);
-}
-
-
-
-#ifndef PASN_NOPRINTON
-const static PASN_Names Names_H245_MultilinkResponse_addConnection_responseCode_rejected[]={
-      {"connectionsNotAvailable",0}
-     ,{"userRejected",1}
-};
-#endif
-//
-// MultilinkResponse_addConnection_responseCode_rejected
-//
-
-H245_MultilinkResponse_addConnection_responseCode_rejected::H245_MultilinkResponse_addConnection_responseCode_rejected(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Choice(tag, tagClass, 2, TRUE
-#ifndef PASN_NOPRINTON
-    ,(const PASN_Names *)Names_H245_MultilinkResponse_addConnection_responseCode_rejected,2
-#endif
-)
-{
-}
-
-
-PBoolean H245_MultilinkResponse_addConnection_responseCode_rejected::CreateObject()
-{
-  choice = (tag <= e_userRejected) ? new PASN_Null() : NULL;
-  return choice != NULL;
-}
-
-
-PObject * H245_MultilinkResponse_addConnection_responseCode_rejected::Clone() const
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(IsClass(H245_MultilinkResponse_addConnection_responseCode_rejected::Class()), PInvalidCast);
-#endif
-  return new H245_MultilinkResponse_addConnection_responseCode_rejected(*this);
-}
-
-
-
-#ifndef PASN_NOPRINTON
-const static PASN_Names Names_H245_MiscellaneousCommand_type_progressiveRefinementStart_repeatCount[]={
-      {"doOneProgression",0}
-     ,{"doContinuousProgressions",1}
-     ,{"doOneIndependentProgression",2}
-     ,{"doContinuousIndependentProgressions",3}
-};
-#endif
-//
-// MiscellaneousCommand_type_progressiveRefinementStart_repeatCount
-//
-
-H245_MiscellaneousCommand_type_progressiveRefinementStart_repeatCount::H245_MiscellaneousCommand_type_progressiveRefinementStart_repeatCount(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Choice(tag, tagClass, 4, TRUE
-#ifndef PASN_NOPRINTON
-    ,(const PASN_Names *)Names_H245_MiscellaneousCommand_type_progressiveRefinementStart_repeatCount,4
-#endif
-)
-{
-}
-
-
-PBoolean H245_MiscellaneousCommand_type_progressiveRefinementStart_repeatCount::CreateObject()
-{
-  choice = (tag <= e_doContinuousIndependentProgressions) ? new PASN_Null() : NULL;
-  return choice != NULL;
-}
-
-
-PObject * H245_MiscellaneousCommand_type_progressiveRefinementStart_repeatCount::Clone() const
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(IsClass(H245_MiscellaneousCommand_type_progressiveRefinementStart_repeatCount::Class()), PInvalidCast);
-#endif
-  return new H245_MiscellaneousCommand_type_progressiveRefinementStart_repeatCount(*this);
-}
-
-
-
-#ifndef PASN_NOPRINTON
-const static PASN_Names Names_H245_NewATMVCCommand_aal_aal1_clockRecovery[]={
-      {"nullClockRecovery",0}
-     ,{"srtsClockRecovery",1}
-     ,{"adaptiveClockRecovery",2}
-};
-#endif
-//
-// NewATMVCCommand_aal_aal1_clockRecovery
-//
-
-H245_NewATMVCCommand_aal_aal1_clockRecovery::H245_NewATMVCCommand_aal_aal1_clockRecovery(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Choice(tag, tagClass, 3, TRUE
-#ifndef PASN_NOPRINTON
-    ,(const PASN_Names *)Names_H245_NewATMVCCommand_aal_aal1_clockRecovery,3
-#endif
-)
-{
-}
-
-
-PBoolean H245_NewATMVCCommand_aal_aal1_clockRecovery::CreateObject()
-{
-  choice = (tag <= e_adaptiveClockRecovery) ? new PASN_Null() : NULL;
-  return choice != NULL;
-}
-
-
-PObject * H245_NewATMVCCommand_aal_aal1_clockRecovery::Clone() const
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(IsClass(H245_NewATMVCCommand_aal_aal1_clockRecovery::Class()), PInvalidCast);
-#endif
-  return new H245_NewATMVCCommand_aal_aal1_clockRecovery(*this);
-}
-
-
-
-#ifndef PASN_NOPRINTON
-const static PASN_Names Names_H245_NewATMVCCommand_aal_aal1_errorCorrection[]={
-      {"nullErrorCorrection",0}
-     ,{"longInterleaver",1}
-     ,{"shortInterleaver",2}
-     ,{"errorCorrectionOnly",3}
-};
-#endif
-//
-// NewATMVCCommand_aal_aal1_errorCorrection
-//
-
-H245_NewATMVCCommand_aal_aal1_errorCorrection::H245_NewATMVCCommand_aal_aal1_errorCorrection(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Choice(tag, tagClass, 4, TRUE
-#ifndef PASN_NOPRINTON
-    ,(const PASN_Names *)Names_H245_NewATMVCCommand_aal_aal1_errorCorrection,4
-#endif
-)
-{
-}
-
-
-PBoolean H245_NewATMVCCommand_aal_aal1_errorCorrection::CreateObject()
-{
-  choice = (tag <= e_errorCorrectionOnly) ? new PASN_Null() : NULL;
-  return choice != NULL;
-}
-
-
-PObject * H245_NewATMVCCommand_aal_aal1_errorCorrection::Clone() const
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(IsClass(H245_NewATMVCCommand_aal_aal1_errorCorrection::Class()), PInvalidCast);
-#endif
-  return new H245_NewATMVCCommand_aal_aal1_errorCorrection(*this);
-}
-
-
 
 #ifndef PASN_NOPRINTON
 const static PASN_Names Names_H245_NewATMVCIndication_aal_aal1_clockRecovery[]={
@@ -2295,8 +1976,10 @@ PObject * H245_RSVPParameters::Clone() const
 //
 
 H245_ServicePriorityValue::H245_ServicePriorityValue(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Sequence(tag, tagClass, 1, TRUE, 0)
+  : PASN_Sequence(tag, tagClass, 1, TRUE, 1)
 {
+  m_value.SetConstraints(PASN_Object::FixedConstraint, 0, 255);
+  IncludeOptionalField(e_value);
 }
 
 
@@ -2307,6 +1990,8 @@ void H245_ServicePriorityValue::PrintOn(ostream & strm) const
   strm << "{\n";
   if (HasOptionalField(e_nonStandardParameter))
     strm << setw(indent+23) << "nonStandardParameter = " << setprecision(indent) << m_nonStandardParameter << '\n';
+  if (HasOptionalField(e_value))
+    strm << setw(indent+8) << "value = " << setprecision(indent) << m_value << '\n';
   strm << setw(indent-1) << setprecision(indent-2) << "}";
 }
 #endif
@@ -2344,6 +2029,8 @@ PBoolean H245_ServicePriorityValue::Decode(PASN_Stream & strm)
 
   if (HasOptionalField(e_nonStandardParameter) && !m_nonStandardParameter.Decode(strm))
     return FALSE;
+  if (!KnownExtensionDecode(strm, e_value, m_value))
+    return FALSE;
 
   return UnknownExtensionsDecode(strm);
 }
@@ -2355,6 +2042,7 @@ void H245_ServicePriorityValue::Encode(PASN_Stream & strm) const
 
   if (HasOptionalField(e_nonStandardParameter))
     m_nonStandardParameter.Encode(strm);
+  KnownExtensionEncode(strm, e_value, m_value);
 
   UnknownExtensionsEncode(strm);
 }
@@ -2374,8 +2062,10 @@ PObject * H245_ServicePriorityValue::Clone() const
 //
 
 H245_ServicePriority::H245_ServicePriority(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Sequence(tag, tagClass, 2, TRUE, 0)
+  : PASN_Sequence(tag, tagClass, 2, TRUE, 2)
 {
+  m_serviceClass.SetConstraints(PASN_Object::FixedConstraint, 0, 4095);
+  m_serviceSubclass.SetConstraints(PASN_Object::FixedConstraint, 0, 255);
 }
 
 
@@ -2389,6 +2079,10 @@ void H245_ServicePriority::PrintOn(ostream & strm) const
   strm << setw(indent+27) << "servicePrioritySignalled = " << setprecision(indent) << m_servicePrioritySignalled << '\n';
   if (HasOptionalField(e_servicePriorityValue))
     strm << setw(indent+23) << "servicePriorityValue = " << setprecision(indent) << m_servicePriorityValue << '\n';
+  if (HasOptionalField(e_serviceClass))
+    strm << setw(indent+15) << "serviceClass = " << setprecision(indent) << m_serviceClass << '\n';
+  if (HasOptionalField(e_serviceSubclass))
+    strm << setw(indent+18) << "serviceSubclass = " << setprecision(indent) << m_serviceSubclass << '\n';
   strm << setw(indent-1) << setprecision(indent-2) << "}";
 }
 #endif
@@ -2437,6 +2131,10 @@ PBoolean H245_ServicePriority::Decode(PASN_Stream & strm)
     return FALSE;
   if (HasOptionalField(e_servicePriorityValue) && !m_servicePriorityValue.Decode(strm))
     return FALSE;
+  if (!KnownExtensionDecode(strm, e_serviceClass, m_serviceClass))
+    return FALSE;
+  if (!KnownExtensionDecode(strm, e_serviceSubclass, m_serviceSubclass))
+    return FALSE;
 
   return UnknownExtensionsDecode(strm);
 }
@@ -2451,6 +2149,8 @@ void H245_ServicePriority::Encode(PASN_Stream & strm) const
   m_servicePrioritySignalled.Encode(strm);
   if (HasOptionalField(e_servicePriorityValue))
     m_servicePriorityValue.Encode(strm);
+  KnownExtensionEncode(strm, e_serviceClass, m_serviceClass);
+  KnownExtensionEncode(strm, e_serviceSubclass, m_serviceSubclass);
 
   UnknownExtensionsEncode(strm);
 }

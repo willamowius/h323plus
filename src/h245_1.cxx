@@ -4331,7 +4331,7 @@ H245_H261VideoCapability::H245_H261VideoCapability(unsigned tag, PASN_Object::Ta
   m_qcifMPI.SetConstraints(PASN_Object::FixedConstraint, 1, 4);
   m_cifMPI.SetConstraints(PASN_Object::FixedConstraint, 1, 4);
   m_maxBitRate.SetConstraints(PASN_Object::FixedConstraint, 1, 19200);
-//  IncludeOptionalField(e_videoBadMBsCap);   <--- This field is optional Boolean Tandberg interop   //***MODIFIED
+  IncludeOptionalField(e_videoBadMBsCap);
 }
 
 
@@ -4394,9 +4394,9 @@ PINDEX H245_H261VideoCapability::GetDataLength() const
 
 PBoolean H245_H261VideoCapability::Decode(PASN_Stream & strm)
 {
-
   if (!PreambleDecode(strm))
     return FALSE;
+
   if (HasOptionalField(e_qcifMPI) && !m_qcifMPI.Decode(strm))
     return FALSE;
   if (HasOptionalField(e_cifMPI) && !m_cifMPI.Decode(strm))
@@ -4445,7 +4445,7 @@ PObject * H245_H261VideoCapability::Clone() const
 //
 
 H245_H262VideoCapability::H245_H262VideoCapability(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Sequence(tag, tagClass, 6, FALSE, 0)
+  : PASN_Sequence(tag, tagClass, 6, TRUE, 1)
 {
   m_videoBitRate.SetConstraints(PASN_Object::FixedConstraint, 0, 1073741823);
   m_vbvBufferSize.SetConstraints(PASN_Object::FixedConstraint, 0, 262143);
@@ -4453,6 +4453,7 @@ H245_H262VideoCapability::H245_H262VideoCapability(unsigned tag, PASN_Object::Ta
   m_linesPerFrame.SetConstraints(PASN_Object::FixedConstraint, 0, 16383);
   m_framesPerSecond.SetConstraints(PASN_Object::FixedConstraint, 0, 15);
   m_luminanceSampleRate.SetConstraints(PASN_Object::FixedConstraint, 0, 4294967295U);
+  IncludeOptionalField(e_videoBadMBsCap);
 }
 
 
@@ -4484,7 +4485,8 @@ void H245_H262VideoCapability::PrintOn(ostream & strm) const
     strm << setw(indent+18) << "framesPerSecond = " << setprecision(indent) << m_framesPerSecond << '\n';
   if (HasOptionalField(e_luminanceSampleRate))
     strm << setw(indent+22) << "luminanceSampleRate = " << setprecision(indent) << m_luminanceSampleRate << '\n';
-  strm << setw(indent+17) << "videoBadMBsCap = " << setprecision(indent) << m_videoBadMBsCap << '\n';
+  if (HasOptionalField(e_videoBadMBsCap))
+    strm << setw(indent+17) << "videoBadMBsCap = " << setprecision(indent) << m_videoBadMBsCap << '\n';
   strm << setw(indent-1) << setprecision(indent-2) << "}";
 }
 #endif
@@ -4533,8 +4535,6 @@ PObject::Comparison H245_H262VideoCapability::Compare(const PObject & obj) const
     return result;
   if ((result = m_luminanceSampleRate.Compare(other.m_luminanceSampleRate)) != EqualTo)
     return result;
-  if ((result = m_videoBadMBsCap.Compare(other.m_videoBadMBsCap)) != EqualTo)
-    return result;
 
   return PASN_Sequence::Compare(other);
 }
@@ -4566,7 +4566,6 @@ PINDEX H245_H262VideoCapability::GetDataLength() const
     length += m_framesPerSecond.GetObjectLength();
   if (HasOptionalField(e_luminanceSampleRate))
     length += m_luminanceSampleRate.GetObjectLength();
-  length += m_videoBadMBsCap.GetObjectLength();
   return length;
 }
 
@@ -4610,7 +4609,7 @@ PBoolean H245_H262VideoCapability::Decode(PASN_Stream & strm)
     return FALSE;
   if (HasOptionalField(e_luminanceSampleRate) && !m_luminanceSampleRate.Decode(strm))
     return FALSE;
-  if (!m_videoBadMBsCap.Decode(strm))
+  if (!KnownExtensionDecode(strm, e_videoBadMBsCap, m_videoBadMBsCap))
     return FALSE;
 
   return UnknownExtensionsDecode(strm);
@@ -4644,7 +4643,7 @@ void H245_H262VideoCapability::Encode(PASN_Stream & strm) const
     m_framesPerSecond.Encode(strm);
   if (HasOptionalField(e_luminanceSampleRate))
     m_luminanceSampleRate.Encode(strm);
-  m_videoBadMBsCap.Encode(strm);
+  KnownExtensionEncode(strm, e_videoBadMBsCap, m_videoBadMBsCap);
 
   UnknownExtensionsEncode(strm);
 }
@@ -14156,6 +14155,8 @@ const static PASN_Names Names_H245_ConferenceIndication[]={
      ,{"floorRequested",11}
      ,{"terminalYouAreSeeingInSubPictureNumber",12}
      ,{"videoIndicateCompose",13}
+     ,{"masterMCU",14}
+     ,{"cancelMasterMCU",15}
 };
 #endif
 //
@@ -14165,7 +14166,7 @@ const static PASN_Names Names_H245_ConferenceIndication[]={
 H245_ConferenceIndication::H245_ConferenceIndication(unsigned tag, PASN_Object::TagClass tagClass)
   : PASN_Choice(tag, tagClass, 10, TRUE
 #ifndef PASN_NOPRINTON
-    ,(const PASN_Names *)Names_H245_ConferenceIndication,14
+    ,(const PASN_Names *)Names_H245_ConferenceIndication,16
 #endif
 )
 {
@@ -14258,6 +14259,8 @@ PBoolean H245_ConferenceIndication::CreateObject()
     case e_cancelSeenByAll :
     case e_requestForFloor :
     case e_withdrawChairToken :
+    case e_masterMCU :
+    case e_cancelMasterMCU :
       choice = new PASN_Null();
       return TRUE;
     case e_terminalYouAreSeeingInSubPictureNumber :
@@ -14287,9 +14290,10 @@ PObject * H245_ConferenceIndication::Clone() const
 //
 
 H245_TerminalYouAreSeeingInSubPictureNumber::H245_TerminalYouAreSeeingInSubPictureNumber(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Sequence(tag, tagClass, 0, TRUE, 0)
+  : PASN_Sequence(tag, tagClass, 0, TRUE, 1)
 {
   m_subPictureNumber.SetConstraints(PASN_Object::FixedConstraint, 0, 255);
+  IncludeOptionalField(e_mcuNumber);
 }
 
 
@@ -14300,6 +14304,8 @@ void H245_TerminalYouAreSeeingInSubPictureNumber::PrintOn(ostream & strm) const
   strm << "{\n";
   strm << setw(indent+17) << "terminalNumber = " << setprecision(indent) << m_terminalNumber << '\n';
   strm << setw(indent+19) << "subPictureNumber = " << setprecision(indent) << m_subPictureNumber << '\n';
+  if (HasOptionalField(e_mcuNumber))
+    strm << setw(indent+12) << "mcuNumber = " << setprecision(indent) << m_mcuNumber << '\n';
   strm << setw(indent-1) << setprecision(indent-2) << "}";
 }
 #endif
@@ -14341,6 +14347,8 @@ PBoolean H245_TerminalYouAreSeeingInSubPictureNumber::Decode(PASN_Stream & strm)
     return FALSE;
   if (!m_subPictureNumber.Decode(strm))
     return FALSE;
+  if (!KnownExtensionDecode(strm, e_mcuNumber, m_mcuNumber))
+    return FALSE;
 
   return UnknownExtensionsDecode(strm);
 }
@@ -14352,6 +14360,7 @@ void H245_TerminalYouAreSeeingInSubPictureNumber::Encode(PASN_Stream & strm) con
 
   m_terminalNumber.Encode(strm);
   m_subPictureNumber.Encode(strm);
+  KnownExtensionEncode(strm, e_mcuNumber, m_mcuNumber);
 
   UnknownExtensionsEncode(strm);
 }
@@ -16965,6 +16974,203 @@ PObject * H245_ArrayOf_CustomPictureClockFrequency::Clone() const
   PAssert(IsClass(H245_ArrayOf_CustomPictureClockFrequency::Class()), PInvalidCast);
 #endif
   return new H245_ArrayOf_CustomPictureClockFrequency(*this);
+}
+
+
+//
+// ArrayOf_CustomPictureFormat
+//
+
+H245_ArrayOf_CustomPictureFormat::H245_ArrayOf_CustomPictureFormat(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Array(tag, tagClass)
+{
+}
+
+
+PASN_Object * H245_ArrayOf_CustomPictureFormat::CreateObject() const
+{
+  return new H245_CustomPictureFormat;
+}
+
+
+H245_CustomPictureFormat & H245_ArrayOf_CustomPictureFormat::operator[](PINDEX i) const
+{
+  return (H245_CustomPictureFormat &)array[i];
+}
+
+
+PObject * H245_ArrayOf_CustomPictureFormat::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H245_ArrayOf_CustomPictureFormat::Class()), PInvalidCast);
+#endif
+  return new H245_ArrayOf_CustomPictureFormat(*this);
+}
+
+
+//
+// ArrayOf_H263VideoModeCombos
+//
+
+H245_ArrayOf_H263VideoModeCombos::H245_ArrayOf_H263VideoModeCombos(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Array(tag, tagClass)
+{
+}
+
+
+PASN_Object * H245_ArrayOf_H263VideoModeCombos::CreateObject() const
+{
+  return new H245_H263VideoModeCombos;
+}
+
+
+H245_H263VideoModeCombos & H245_ArrayOf_H263VideoModeCombos::operator[](PINDEX i) const
+{
+  return (H245_H263VideoModeCombos &)array[i];
+}
+
+
+PObject * H245_ArrayOf_H263VideoModeCombos::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H245_ArrayOf_H263VideoModeCombos::Class()), PInvalidCast);
+#endif
+  return new H245_ArrayOf_H263VideoModeCombos(*this);
+}
+
+
+//
+// RefPictureSelection_additionalPictureMemory
+//
+
+H245_RefPictureSelection_additionalPictureMemory::H245_RefPictureSelection_additionalPictureMemory(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Sequence(tag, tagClass, 6, TRUE, 0)
+{
+  m_sqcifAdditionalPictureMemory.SetConstraints(PASN_Object::FixedConstraint, 1, 256);
+  m_qcifAdditionalPictureMemory.SetConstraints(PASN_Object::FixedConstraint, 1, 256);
+  m_cifAdditionalPictureMemory.SetConstraints(PASN_Object::FixedConstraint, 1, 256);
+  m_cif4AdditionalPictureMemory.SetConstraints(PASN_Object::FixedConstraint, 1, 256);
+  m_cif16AdditionalPictureMemory.SetConstraints(PASN_Object::FixedConstraint, 1, 256);
+  m_bigCpfAdditionalPictureMemory.SetConstraints(PASN_Object::FixedConstraint, 1, 256);
+}
+
+
+#ifndef PASN_NOPRINTON
+void H245_RefPictureSelection_additionalPictureMemory::PrintOn(ostream & strm) const
+{
+  int indent = strm.precision() + 2;
+  strm << "{\n";
+  if (HasOptionalField(e_sqcifAdditionalPictureMemory))
+    strm << setw(indent+31) << "sqcifAdditionalPictureMemory = " << setprecision(indent) << m_sqcifAdditionalPictureMemory << '\n';
+  if (HasOptionalField(e_qcifAdditionalPictureMemory))
+    strm << setw(indent+30) << "qcifAdditionalPictureMemory = " << setprecision(indent) << m_qcifAdditionalPictureMemory << '\n';
+  if (HasOptionalField(e_cifAdditionalPictureMemory))
+    strm << setw(indent+29) << "cifAdditionalPictureMemory = " << setprecision(indent) << m_cifAdditionalPictureMemory << '\n';
+  if (HasOptionalField(e_cif4AdditionalPictureMemory))
+    strm << setw(indent+30) << "cif4AdditionalPictureMemory = " << setprecision(indent) << m_cif4AdditionalPictureMemory << '\n';
+  if (HasOptionalField(e_cif16AdditionalPictureMemory))
+    strm << setw(indent+31) << "cif16AdditionalPictureMemory = " << setprecision(indent) << m_cif16AdditionalPictureMemory << '\n';
+  if (HasOptionalField(e_bigCpfAdditionalPictureMemory))
+    strm << setw(indent+32) << "bigCpfAdditionalPictureMemory = " << setprecision(indent) << m_bigCpfAdditionalPictureMemory << '\n';
+  strm << setw(indent-1) << setprecision(indent-2) << "}";
+}
+#endif
+
+
+PObject::Comparison H245_RefPictureSelection_additionalPictureMemory::Compare(const PObject & obj) const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(&obj, H245_RefPictureSelection_additionalPictureMemory), PInvalidCast);
+#endif
+  const H245_RefPictureSelection_additionalPictureMemory & other = (const H245_RefPictureSelection_additionalPictureMemory &)obj;
+
+  Comparison result;
+
+  if ((result = m_sqcifAdditionalPictureMemory.Compare(other.m_sqcifAdditionalPictureMemory)) != EqualTo)
+    return result;
+  if ((result = m_qcifAdditionalPictureMemory.Compare(other.m_qcifAdditionalPictureMemory)) != EqualTo)
+    return result;
+  if ((result = m_cifAdditionalPictureMemory.Compare(other.m_cifAdditionalPictureMemory)) != EqualTo)
+    return result;
+  if ((result = m_cif4AdditionalPictureMemory.Compare(other.m_cif4AdditionalPictureMemory)) != EqualTo)
+    return result;
+  if ((result = m_cif16AdditionalPictureMemory.Compare(other.m_cif16AdditionalPictureMemory)) != EqualTo)
+    return result;
+  if ((result = m_bigCpfAdditionalPictureMemory.Compare(other.m_bigCpfAdditionalPictureMemory)) != EqualTo)
+    return result;
+
+  return PASN_Sequence::Compare(other);
+}
+
+
+PINDEX H245_RefPictureSelection_additionalPictureMemory::GetDataLength() const
+{
+  PINDEX length = 0;
+  if (HasOptionalField(e_sqcifAdditionalPictureMemory))
+    length += m_sqcifAdditionalPictureMemory.GetObjectLength();
+  if (HasOptionalField(e_qcifAdditionalPictureMemory))
+    length += m_qcifAdditionalPictureMemory.GetObjectLength();
+  if (HasOptionalField(e_cifAdditionalPictureMemory))
+    length += m_cifAdditionalPictureMemory.GetObjectLength();
+  if (HasOptionalField(e_cif4AdditionalPictureMemory))
+    length += m_cif4AdditionalPictureMemory.GetObjectLength();
+  if (HasOptionalField(e_cif16AdditionalPictureMemory))
+    length += m_cif16AdditionalPictureMemory.GetObjectLength();
+  if (HasOptionalField(e_bigCpfAdditionalPictureMemory))
+    length += m_bigCpfAdditionalPictureMemory.GetObjectLength();
+  return length;
+}
+
+
+PBoolean H245_RefPictureSelection_additionalPictureMemory::Decode(PASN_Stream & strm)
+{
+  if (!PreambleDecode(strm))
+    return FALSE;
+
+  if (HasOptionalField(e_sqcifAdditionalPictureMemory) && !m_sqcifAdditionalPictureMemory.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_qcifAdditionalPictureMemory) && !m_qcifAdditionalPictureMemory.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_cifAdditionalPictureMemory) && !m_cifAdditionalPictureMemory.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_cif4AdditionalPictureMemory) && !m_cif4AdditionalPictureMemory.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_cif16AdditionalPictureMemory) && !m_cif16AdditionalPictureMemory.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_bigCpfAdditionalPictureMemory) && !m_bigCpfAdditionalPictureMemory.Decode(strm))
+    return FALSE;
+
+  return UnknownExtensionsDecode(strm);
+}
+
+
+void H245_RefPictureSelection_additionalPictureMemory::Encode(PASN_Stream & strm) const
+{
+  PreambleEncode(strm);
+
+  if (HasOptionalField(e_sqcifAdditionalPictureMemory))
+    m_sqcifAdditionalPictureMemory.Encode(strm);
+  if (HasOptionalField(e_qcifAdditionalPictureMemory))
+    m_qcifAdditionalPictureMemory.Encode(strm);
+  if (HasOptionalField(e_cifAdditionalPictureMemory))
+    m_cifAdditionalPictureMemory.Encode(strm);
+  if (HasOptionalField(e_cif4AdditionalPictureMemory))
+    m_cif4AdditionalPictureMemory.Encode(strm);
+  if (HasOptionalField(e_cif16AdditionalPictureMemory))
+    m_cif16AdditionalPictureMemory.Encode(strm);
+  if (HasOptionalField(e_bigCpfAdditionalPictureMemory))
+    m_bigCpfAdditionalPictureMemory.Encode(strm);
+
+  UnknownExtensionsEncode(strm);
+}
+
+
+PObject * H245_RefPictureSelection_additionalPictureMemory::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H245_RefPictureSelection_additionalPictureMemory::Class()), PInvalidCast);
+#endif
+  return new H245_RefPictureSelection_additionalPictureMemory(*this);
 }
 
 

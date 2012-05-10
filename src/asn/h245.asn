@@ -281,7 +281,7 @@ TerminalCapabilitySet   ::=SEQUENCE
     protocolIdentifier  OBJECT IDENTIFIER,
                     -- shall be set to the value
                     -- {itu-t (0) recommendation (0) h (8) 245 
-                    -- version (0) 13}
+                    -- version (0) 15}
                 
 
     multiplexCapability MultiplexCapability OPTIONAL,
@@ -404,7 +404,7 @@ H235SecurityCapability  ::=SEQUENCE
     encryptionAuthenticationAndIntegrity    EncryptionAuthenticationAndIntegrity,
 
     mediaCapability CapabilityTableEntryNumber,
-        -- NOTE - The mediaCapability shall refer to Capability Table Entries 
+        -- NOTE – The mediaCapability shall refer to Capability Table Entries 
         -- that do contain, directly or indirectly, one or more transmit,
         -- receive, or receiveAndTransmit AudioCapability, VideoCapability,
         -- DataApplicationCapability, or similar capabilities indicated by a
@@ -661,7 +661,8 @@ ATMParameters       ::=SEQUENCE
 ServicePriorityValue    ::=SEQUENCE
 {
     nonStandardParameter    NonStandardParameter OPTIONAL,
-    ...
+    ... ,
+    value                           INTEGER(0..255)
 }
 
 ServicePriority ::=SEQUENCE
@@ -669,7 +670,9 @@ ServicePriority ::=SEQUENCE
     nonStandardData NonStandardParameter OPTIONAL,
     servicePrioritySignalled    BOOLEAN,
     servicePriorityValue    ServicePriorityValue OPTIONAL,
-    ...
+    ... ,
+    serviceClass                    INTEGER(0..4095) OPTIONAL,
+    serviceSubclass             INTEGER(0..255) OPTIONAL
 }
 
 AuthorizationParameters ::=SEQUENCE
@@ -708,13 +711,13 @@ GenericTransportParameters  ::=SEQUENCE
 {
     nonStandardData NonStandardParameter OPTIONAL,
     averageRate INTEGER (1..4294967295) OPTIONAL,
-                        -- average bandwidth bytes/sec
+                        -- average bandwidth bytes/s
     burst           INTEGER (1..4294967295) OPTIONAL, 
                         --  size in bytes
     peakRate        INTEGER (1..4294967295) OPTIONAL,
-                        -- peak bandwidth bytes/sec
+                        -- peak bandwidth bytes/s
     maxPktSize  INTEGER (1..4294967295) OPTIONAL,        
-                    -- size in bytes
+                        -- size in bytes
     ...
 }
 QOSCapability       ::=SEQUENCE
@@ -884,7 +887,8 @@ H262VideoCapability ::=SEQUENCE
     samplesPerLine  INTEGER (0..16383) OPTIONAL,       -- units samples/line
     linesPerFrame   INTEGER (0..16383) OPTIONAL,       -- units lines/frame
     framesPerSecond INTEGER (0..15) OPTIONAL,           -- frame_rate_code
-    luminanceSampleRate INTEGER (0..4294967295) OPTIONAL,  -- units samples/s   ...,
+    luminanceSampleRate INTEGER (0..4294967295) OPTIONAL,  -- units samples/s
+    ...,
     videoBadMBsCap  BOOLEAN
 }
 
@@ -1545,7 +1549,7 @@ CapabilityIdentifier    ::=CHOICE
     ...
 }
 
--- NOTE - The ranges of parameter values have been selected to ensure that the 
+-- NOTE – The ranges of parameter values have been selected to ensure that the 
 -- GenericParameter preamble, standard part of ParameterIdentifier and the 
 -- encoding of that choice, and the preamble of ParameterValue to fit into 
 -- 2 octets.
@@ -1624,7 +1628,7 @@ AudioTelephonyEventCapability   ::=SEQUENCE
 {
     dynamicRTPPayloadType   INTEGER(96..127),
     audioTelephoneEvent GeneralString, -- As per <list of values> 
-                                   -- in 3.9/RFC 2833
+                                   -- in RFC 4733
     ...
 }
 
@@ -1639,7 +1643,7 @@ AudioToneCapability ::=SEQUENCE
 NoPTAudioTelephonyEventCapability   ::=SEQUENCE
 {
     audioTelephoneEvent GeneralString, -- As per <list of values> 
-                                   -- in 3.9/RFC 2833
+                                   -- in RFC 4733
     ...
 }
 
@@ -1662,7 +1666,7 @@ MultiplePayloadStreamCapability     ::=SEQUENCE
 -- Capability Exchange Definitions: FECCapability
 -- =============================================================================
 
-DepFECCapability    ::=CHOICE  -- Deprecated, do not use
+DepFECCapability    ::=CHOICE -- Deprecated, do not use
 {
     rfc2733     SEQUENCE
     {
@@ -1682,10 +1686,10 @@ FECCapability                       ::= SEQUENCE
 {
     protectedCapability CapabilityTableEntryNumber, 
     fecScheme   OBJECT IDENTIFIER OPTIONAL,
-                      -- identifies encoding scheme
+                     -- identifies encoding scheme
     rfc2733Format   CHOICE
     {
-        rfc2733rfc2198  MaxRedundancy, -- RFC2198 
+        rfc2733rfc2198  MaxRedundancy, -- RFC 2198 
         rfc2733sameport MaxRedundancy,
                      -- separate packet, same port
         rfc2733diffport MaxRedundancy
@@ -2328,7 +2332,10 @@ OpenLogicalChannelReject    ::=SEQUENCE
         waitForCommunicationMode    NULL,
         invalidDependentChannel NULL,
         replacementForRejected  NULL,
-        securityDenied  NULL
+        securityDenied  NULL,
+        qoSControlNotSupported      NULL  --  added for callee to indicate 
+                    -- that requested QoS support cannot be
+                    -- supported.
     },
     ...,
         genericInformation          SEQUENCE OF GenericInformation OPTIONAL
@@ -2376,7 +2383,9 @@ CloseLogicalChannel ::=SEQUENCE
         unknown NULL,
         reopen  NULL,
         reservationFailure  NULL,
-        ...
+        ...,
+            networkErrorCode            INTEGER(0..255) -- Indicates the error 
+                    -- code received from network
     }
 }
 
@@ -2397,7 +2406,9 @@ RequestChannelClose ::=SEQUENCE
         normal  NULL,
         reopen  NULL,
         reservationFailure  NULL,
-        ...
+        ...,
+            networkErrorCode            INTEGER(0..255) -- Indicates the error 
+                                            -- code received from network
     }
 }
 
@@ -2702,10 +2713,10 @@ FECMode                 ::= SEQUENCE
 {
     protectedElement    ModeElementType, 
     fecScheme   OBJECT IDENTIFIER OPTIONAL,
-                      -- identifies encoding scheme
+                     -- identifies encoding scheme
     rfc2733Format   CHOICE
     {
-        rfc2733rfc2198  MaxRedundancy, -- RFC2198 redundancy
+        rfc2733rfc2198  MaxRedundancy, -- RFC 2198 redundancy
             rfc2733sameport         MaxRedundancy,
                      -- separate packet, same port
         rfc2733diffport MaxRedundancy
@@ -3139,7 +3150,7 @@ CommunicationModeTableEntry ::=SEQUENCE
                               -- participants in 
                               -- the conference
     sessionDescription  BMPString (SIZE(1..128)) ,
-                    -- Basic ISO/IEC 10646-1 (Unicode)
+                    -- Basic ISO/IEC 10646 (Unicode)
     dataType        CHOICE
     {
         videoData   VideoCapability,
@@ -3176,7 +3187,7 @@ ConferenceRequest   ::=CHOICE
 
     enterH243Password   NULL,          -- same as H.230 TCS1(MC->term)
     enterH243TerminalID NULL,          -- same as H.230 TCS2/TCI
-                                                       --  (MC->term)
+                                      --  (MC->term)
     enterH243ConferenceID   NULL,          -- same as H.230 TCS3 (MC->term)
     ...,
     enterExtensionAddress   NULL,          -- same as H.230 TCS4 (GW->term)
@@ -3941,14 +3952,17 @@ ConferenceIndication    ::=CHOICE
     withdrawChairToken  NULL,   -- same as H.230 CCR MC-> chair
     floorRequested  TerminalLabel,  -- same as H.230 TIF MC-> chair
     terminalYouAreSeeingInSubPictureNumber  TerminalYouAreSeeingInSubPictureNumber,
-    videoIndicateCompose    VideoIndicateCompose
+    videoIndicateCompose    VideoIndicateCompose,
+    masterMCU   NULL,   -- same as H.230 MIM
+    cancelMasterMCU NULL    -- same as H.230 cancel MIM
 }
 
 TerminalYouAreSeeingInSubPictureNumber  ::= SEQUENCE
 {
     terminalNumber  TerminalNumber,
     subPictureNumber    INTEGER (0..255),
-    ...
+    ...,
+    mcuNumber   McuNumber
 }
 
 VideoIndicateCompose    ::= SEQUENCE
@@ -4029,7 +4043,7 @@ H223SkewIndication  ::=SEQUENCE
 }
 
 -- =============================================================================
--- Indication Message : H.225.0 maximum logical channel skew
+-- Indication Message: H.225.0 maximum logical channel skew
 -- =============================================================================
 
 H2250MaximumSkewIndication  ::=SEQUENCE
@@ -4162,7 +4176,7 @@ UserInputIndication ::=CHOICE
     {
         nonStandard     NonStandardParameter,
         basicString NULL, -- indicates unsecured basic string
-        iA5String   NULL, -- indicates unsecured iA5 string
+        iA5String   NULL, -- indicates unsecured IA5 string
         generalString   NULL, -- indicates unsecured general string
         ...,
         encryptedBasicString    NULL, -- indicates encrypted Basic string

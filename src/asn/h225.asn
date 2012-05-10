@@ -1,12 +1,12 @@
 --
--- Abstract Syntax Notion (ASN.1) file for H.225.0 Version 6
+-- Abstract Syntax Notion (ASN.1) file for H.225.0 Version 7
 --
 -- File provided by Packetizer, Inc. - http://www.packetizer.com
--- Last Updated: 23 Apr 2006
+-- Last Updated: 05 Nov 2009
 --
 -- History of changes:
---    23 Apr 2006
---        Initial H.225.0v6 ASN.1 file
+--    05 Nov 2009
+--        Initial H.225.0v7 ASN.1 file
 --
 
 H323-MESSAGES DEFINITIONS AUTOMATIC TAGS ::=
@@ -120,7 +120,8 @@ Alerting-UUIE ::= SEQUENCE
         fastConnectRefused      NULL OPTIONAL,
         serviceControl          SEQUENCE OF ServiceControlSession OPTIONAL,
         capacity                CallCapacity OPTIONAL,
-        featureSet              FeatureSet OPTIONAL
+        featureSet              FeatureSet OPTIONAL,
+        displayName             SEQUENCE OF DisplayName OPTIONAL
 }
 
 CallProceeding-UUIE ::= SEQUENCE
@@ -161,7 +162,8 @@ Connect-UUIE ::= SEQUENCE
         fastConnectRefused      NULL OPTIONAL,
         serviceControl          SEQUENCE OF ServiceControlSession OPTIONAL,
         capacity                CallCapacity OPTIONAL,
-        featureSet              FeatureSet OPTIONAL
+        featureSet              FeatureSet OPTIONAL,
+        displayName             SEQUENCE OF DisplayName OPTIONAL
 }
 
 Information-UUIE ::=SEQUENCE
@@ -189,7 +191,9 @@ ReleaseComplete-UUIE ::= SEQUENCE
         screeningIndicator      ScreeningIndicator OPTIONAL,
         capacity                CallCapacity OPTIONAL,
         serviceControl          SEQUENCE OF ServiceControlSession OPTIONAL,
-        featureSet              FeatureSet OPTIONAL
+        featureSet              FeatureSet OPTIONAL,
+        destinationInfo         EndpointType OPTIONAL,
+        displayName             SEQUENCE OF DisplayName OPTIONAL
 }
 
 ReleaseCompleteReason ::= CHOICE
@@ -284,7 +288,8 @@ Setup-UUIE ::= SEQUENCE
         supportedFeatures               SEQUENCE OF FeatureDescriptor OPTIONAL,
         parallelH245Control             SEQUENCE OF OCTET STRING OPTIONAL,
         additionalSourceAddresses       SEQUENCE OF ExtendedAliasAddress OPTIONAL,
-        hopCount                        INTEGER (1..31) OPTIONAL
+        hopCount                        INTEGER (1..31) OPTIONAL,
+        displayName                     SEQUENCE OF DisplayName OPTIONAL
 }
 
 ScnConnectionType ::= CHOICE
@@ -482,7 +487,12 @@ Notify-UUIE ::= SEQUENCE
         callIdentifier          CallIdentifier,
         tokens                  SEQUENCE OF ClearToken OPTIONAL,
         cryptoTokens            SEQUENCE OF CryptoH323Token OPTIONAL,
-        ...
+        ...,
+        connectedAddress        SEQUENCE OF AliasAddress OPTIONAL,
+        presentationIndicator   PresentationIndicator OPTIONAL,
+        screeningIndicator      ScreeningIndicator OPTIONAL,
+        destinationInfo         EndpointType OPTIONAL,
+        displayName             SEQUENCE OF DisplayName OPTIONAL
 }
 
 -- Beginning of common message elements section
@@ -741,6 +751,12 @@ PrivatePartyNumber ::= SEQUENCE
 }
 
 NumberDigits ::= IA5String (SIZE (1..128)) (FROM ("0123456789#*,"))
+
+DisplayName ::= SEQUENCE
+{
+        language                IA5String OPTIONAL,	-- RFC4646 language tag
+        name                    BMPString(SIZE(1..80))
+}
 
 PublicTypeOfNumber ::= CHOICE
 {
@@ -1020,7 +1036,7 @@ CallReferenceValue      ::=     INTEGER (0..65535)
 EndpointIdentifier      ::=     BMPString (SIZE(1..128))
 ProtocolIdentifier      ::=     OBJECT IDENTIFIER       
                                         -- shall be set to  
-                                        -- {itu-t (0) recommendation (0) h (8) 2250 version (0) 4}
+                                        -- {itu-t (0) recommendation (0) h (8) 2250 version (0) 7}
 TimeToLive              ::=     INTEGER (1..4294967295) -- in seconds
 H248PackagesDescriptor  ::=     OCTET STRING  -- This octet string contans
                                               -- ASN.1 PER encoded H.248

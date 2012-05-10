@@ -1576,7 +1576,8 @@ class H245_H262VideoCapability : public PASN_Sequence
       e_samplesPerLine,
       e_linesPerFrame,
       e_framesPerSecond,
-      e_luminanceSampleRate
+      e_luminanceSampleRate,
+      e_videoBadMBsCap
     };
 
     PASN_Boolean m_profileAndLevel_SPatML;
@@ -5107,7 +5108,9 @@ class H245_ConferenceIndication : public PASN_Choice
       e_withdrawChairToken,
       e_floorRequested,
       e_terminalYouAreSeeingInSubPictureNumber,
-      e_videoIndicateCompose
+      e_videoIndicateCompose,
+      e_masterMCU,
+      e_cancelMasterMCU
     };
 
 #if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
@@ -5146,8 +5149,13 @@ class H245_TerminalYouAreSeeingInSubPictureNumber : public PASN_Sequence
   public:
     H245_TerminalYouAreSeeingInSubPictureNumber(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
 
+    enum OptionalFields {
+      e_mcuNumber
+    };
+
     H245_TerminalNumber m_terminalNumber;
     PASN_Integer m_subPictureNumber;
+    H245_McuNumber m_mcuNumber;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);
@@ -7530,7 +7538,8 @@ class H245_OpenLogicalChannelReject_cause : public PASN_Choice
       e_waitForCommunicationMode,
       e_invalidDependentChannel,
       e_replacementForRejected,
-      e_securityDenied
+      e_securityDenied,
+      e_qoSControlNotSupported
     };
 
     PBoolean CreateObject();
@@ -7575,7 +7584,8 @@ class H245_CloseLogicalChannel_reason : public PASN_Choice
     enum Choices {
       e_unknown,
       e_reopen,
-      e_reservationFailure
+      e_reservationFailure,
+      e_networkErrorCode
     };
 
     PBoolean CreateObject();
@@ -7599,7 +7609,8 @@ class H245_RequestChannelClose_reason : public PASN_Choice
       e_unknown,
       e_normal,
       e_reopen,
-      e_reservationFailure
+      e_reservationFailure,
+      e_networkErrorCode
     };
 
     PBoolean CreateObject();
@@ -11879,10 +11890,12 @@ class H245_ServicePriorityValue : public PASN_Sequence
     H245_ServicePriorityValue(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
 
     enum OptionalFields {
-      e_nonStandardParameter
+      e_nonStandardParameter,
+      e_value
     };
 
     H245_NonStandardParameter m_nonStandardParameter;
+    PASN_Integer m_value;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);
@@ -11909,12 +11922,16 @@ class H245_ServicePriority : public PASN_Sequence
 
     enum OptionalFields {
       e_nonStandardData,
-      e_servicePriorityValue
+      e_servicePriorityValue,
+      e_serviceClass,
+      e_serviceSubclass
     };
 
     H245_NonStandardParameter m_nonStandardData;
     PASN_Boolean m_servicePrioritySignalled;
     H245_ServicePriorityValue m_servicePriorityValue;
+    PASN_Integer m_serviceClass;
+    PASN_Integer m_serviceSubclass;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);

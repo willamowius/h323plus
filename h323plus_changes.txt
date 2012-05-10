@@ -1,5 +1,7 @@
 
 H323plus 1.24.0 - 1.24.x
+Updated ASN.1 to H.323v7 (H.225v7, H.245v15)
+Added H.460.4 Baseline
 FIX Change FastStart to be default FALSE to bring into line with other video equipment
 Added Language support to Setup and Connect messages
 Added interoperable H.235.6 (Work in progress)

@@ -50,8 +50,8 @@
 class H225_RAS;
 
 
-#define H225_PROTOCOL_VERSION 6
-#define H245_PROTOCOL_VERSION 13
+#define H225_PROTOCOL_VERSION 7
+#define H245_PROTOCOL_VERSION 15
 
 
 ///////////////////////////////////////////////////////////////////////////////

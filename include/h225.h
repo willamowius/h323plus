@@ -651,6 +651,36 @@ class H225_NumberDigits : public PASN_IA5String
 
 
 //
+// DisplayName
+//
+
+class H225_DisplayName : public PASN_Sequence
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H225_DisplayName, PASN_Sequence);
+#endif
+  public:
+    H225_DisplayName(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    enum OptionalFields {
+      e_language
+    };
+
+    PASN_IA5String m_language;
+    PASN_BMPString m_name;
+
+    PINDEX GetDataLength() const;
+    PBoolean Decode(PASN_Stream & strm);
+    void Encode(PASN_Stream & strm) const;
+#ifndef PASN_NOPRINTON
+    void PrintOn(ostream & strm) const;
+#endif
+    Comparison Compare(const PObject & obj) const;
+    PObject * Clone() const;
+};
+
+
+//
 // PublicTypeOfNumber
 //
 
@@ -3059,6 +3089,26 @@ class H225_ArrayOf_ServiceControlSession : public PASN_Array
 
 
 //
+// ArrayOf_DisplayName
+//
+
+class H225_DisplayName;
+
+class H225_ArrayOf_DisplayName : public PASN_Array
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H225_ArrayOf_DisplayName, PASN_Array);
+#endif
+  public:
+    H225_ArrayOf_DisplayName(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    PASN_Object * CreateObject() const;
+    H225_DisplayName & operator[](PINDEX i) const;
+    PObject * Clone() const;
+};
+
+
+//
 // Connect-UUIE_language
 //
 
@@ -4047,7 +4097,7 @@ class H225_RegistrationRejectReason_invalidTerminalAliases : public PASN_Sequenc
 // ArrayOf_QOSCapability
 //
 
-class MULTIMEDIA_QOSCapability;
+class H245_QOSCapability;
 
 class H225_ArrayOf_QOSCapability : public PASN_Array
 {
@@ -4408,39 +4458,6 @@ class H225_SetupAcknowledge_UUIE : public PASN_Sequence
 #endif
   public:
     H225_SetupAcknowledge_UUIE(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
-
-    enum OptionalFields {
-      e_tokens,
-      e_cryptoTokens
-    };
-
-    H225_ProtocolIdentifier m_protocolIdentifier;
-    H225_CallIdentifier m_callIdentifier;
-    H225_ArrayOf_ClearToken m_tokens;
-    H225_ArrayOf_CryptoH323Token m_cryptoTokens;
-
-    PINDEX GetDataLength() const;
-    PBoolean Decode(PASN_Stream & strm);
-    void Encode(PASN_Stream & strm) const;
-#ifndef PASN_NOPRINTON
-    void PrintOn(ostream & strm) const;
-#endif
-    Comparison Compare(const PObject & obj) const;
-    PObject * Clone() const;
-};
-
-
-//
-// Notify-UUIE
-//
-
-class H225_Notify_UUIE : public PASN_Sequence
-{
-#ifndef PASN_LEANANDMEAN
-    PCLASSINFO(H225_Notify_UUIE, PASN_Sequence);
-#endif
-  public:
-    H225_Notify_UUIE(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
 
     enum OptionalFields {
       e_tokens,
@@ -7249,54 +7266,6 @@ class H225_H323_UU_PDU : public PASN_Sequence
 
 
 //
-// ReleaseComplete-UUIE
-//
-
-class H225_ReleaseComplete_UUIE : public PASN_Sequence
-{
-#ifndef PASN_LEANANDMEAN
-    PCLASSINFO(H225_ReleaseComplete_UUIE, PASN_Sequence);
-#endif
-  public:
-    H225_ReleaseComplete_UUIE(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
-
-    enum OptionalFields {
-      e_reason,
-      e_callIdentifier,
-      e_tokens,
-      e_cryptoTokens,
-      e_busyAddress,
-      e_presentationIndicator,
-      e_screeningIndicator,
-      e_capacity,
-      e_serviceControl,
-      e_featureSet
-    };
-
-    H225_ProtocolIdentifier m_protocolIdentifier;
-    H225_ReleaseCompleteReason m_reason;
-    H225_CallIdentifier m_callIdentifier;
-    H225_ArrayOf_ClearToken m_tokens;
-    H225_ArrayOf_CryptoH323Token m_cryptoTokens;
-    H225_ArrayOf_AliasAddress m_busyAddress;
-    H225_PresentationIndicator m_presentationIndicator;
-    H225_ScreeningIndicator m_screeningIndicator;
-    H225_CallCapacity m_capacity;
-    H225_ArrayOf_ServiceControlSession m_serviceControl;
-    H225_FeatureSet m_featureSet;
-
-    PINDEX GetDataLength() const;
-    PBoolean Decode(PASN_Stream & strm);
-    void Encode(PASN_Stream & strm) const;
-#ifndef PASN_NOPRINTON
-    void PrintOn(ostream & strm) const;
-#endif
-    Comparison Compare(const PObject & obj) const;
-    PObject * Clone() const;
-};
-
-
-//
 // EndpointType
 //
 
@@ -8137,7 +8106,8 @@ class H225_Alerting_UUIE : public PASN_Sequence
       e_fastConnectRefused,
       e_serviceControl,
       e_capacity,
-      e_featureSet
+      e_featureSet,
+      e_displayName
     };
 
     H225_ProtocolIdentifier m_protocolIdentifier;
@@ -8157,6 +8127,7 @@ class H225_Alerting_UUIE : public PASN_Sequence
     H225_ArrayOf_ServiceControlSession m_serviceControl;
     H225_CallCapacity m_capacity;
     H225_FeatureSet m_featureSet;
+    H225_ArrayOf_DisplayName m_displayName;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);
@@ -8246,7 +8217,8 @@ class H225_Connect_UUIE : public PASN_Sequence
       e_fastConnectRefused,
       e_serviceControl,
       e_capacity,
-      e_featureSet
+      e_featureSet,
+      e_displayName
     };
 
     H225_ProtocolIdentifier m_protocolIdentifier;
@@ -8268,6 +8240,7 @@ class H225_Connect_UUIE : public PASN_Sequence
     H225_ArrayOf_ServiceControlSession m_serviceControl;
     H225_CallCapacity m_capacity;
     H225_FeatureSet m_featureSet;
+    H225_ArrayOf_DisplayName m_displayName;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);
@@ -8308,6 +8281,58 @@ class H225_Information_UUIE : public PASN_Sequence
     H225_ArrayOf_PASN_OctetString m_fastStart;
     PASN_Null m_fastConnectRefused;
     H225_CircuitInfo m_circuitInfo;
+
+    PINDEX GetDataLength() const;
+    PBoolean Decode(PASN_Stream & strm);
+    void Encode(PASN_Stream & strm) const;
+#ifndef PASN_NOPRINTON
+    void PrintOn(ostream & strm) const;
+#endif
+    Comparison Compare(const PObject & obj) const;
+    PObject * Clone() const;
+};
+
+
+//
+// ReleaseComplete-UUIE
+//
+
+class H225_ReleaseComplete_UUIE : public PASN_Sequence
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H225_ReleaseComplete_UUIE, PASN_Sequence);
+#endif
+  public:
+    H225_ReleaseComplete_UUIE(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    enum OptionalFields {
+      e_reason,
+      e_callIdentifier,
+      e_tokens,
+      e_cryptoTokens,
+      e_busyAddress,
+      e_presentationIndicator,
+      e_screeningIndicator,
+      e_capacity,
+      e_serviceControl,
+      e_featureSet,
+      e_destinationInfo,
+      e_displayName
+    };
+
+    H225_ProtocolIdentifier m_protocolIdentifier;
+    H225_ReleaseCompleteReason m_reason;
+    H225_CallIdentifier m_callIdentifier;
+    H225_ArrayOf_ClearToken m_tokens;
+    H225_ArrayOf_CryptoH323Token m_cryptoTokens;
+    H225_ArrayOf_AliasAddress m_busyAddress;
+    H225_PresentationIndicator m_presentationIndicator;
+    H225_ScreeningIndicator m_screeningIndicator;
+    H225_CallCapacity m_capacity;
+    H225_ArrayOf_ServiceControlSession m_serviceControl;
+    H225_FeatureSet m_featureSet;
+    H225_EndpointType m_destinationInfo;
+    H225_ArrayOf_DisplayName m_displayName;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);
@@ -8366,7 +8391,8 @@ class H225_Setup_UUIE : public PASN_Sequence
       e_supportedFeatures,
       e_parallelH245Control,
       e_additionalSourceAddresses,
-      e_hopCount
+      e_hopCount,
+      e_displayName
     };
 
     H225_ProtocolIdentifier m_protocolIdentifier;
@@ -8409,6 +8435,7 @@ class H225_Setup_UUIE : public PASN_Sequence
     H225_ArrayOf_PASN_OctetString m_parallelH245Control;
     H225_ArrayOf_ExtendedAliasAddress m_additionalSourceAddresses;
     PASN_Integer m_hopCount;
+    H225_ArrayOf_DisplayName m_displayName;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);
@@ -8522,6 +8549,49 @@ class H225_Progress_UUIE : public PASN_Sequence
     PASN_Boolean m_multipleCalls;
     PASN_Boolean m_maintainConnection;
     PASN_Null m_fastConnectRefused;
+
+    PINDEX GetDataLength() const;
+    PBoolean Decode(PASN_Stream & strm);
+    void Encode(PASN_Stream & strm) const;
+#ifndef PASN_NOPRINTON
+    void PrintOn(ostream & strm) const;
+#endif
+    Comparison Compare(const PObject & obj) const;
+    PObject * Clone() const;
+};
+
+
+//
+// Notify-UUIE
+//
+
+class H225_Notify_UUIE : public PASN_Sequence
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H225_Notify_UUIE, PASN_Sequence);
+#endif
+  public:
+    H225_Notify_UUIE(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    enum OptionalFields {
+      e_tokens,
+      e_cryptoTokens,
+      e_connectedAddress,
+      e_presentationIndicator,
+      e_screeningIndicator,
+      e_destinationInfo,
+      e_displayName
+    };
+
+    H225_ProtocolIdentifier m_protocolIdentifier;
+    H225_CallIdentifier m_callIdentifier;
+    H225_ArrayOf_ClearToken m_tokens;
+    H225_ArrayOf_CryptoH323Token m_cryptoTokens;
+    H225_ArrayOf_AliasAddress m_connectedAddress;
+    H225_PresentationIndicator m_presentationIndicator;
+    H225_ScreeningIndicator m_screeningIndicator;
+    H225_EndpointType m_destinationInfo;
+    H225_ArrayOf_DisplayName m_displayName;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);

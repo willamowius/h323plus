@@ -1571,6 +1571,93 @@ PObject * H225_NumberDigits::Clone() const
 }
 
 
+//
+// DisplayName
+//
+
+H225_DisplayName::H225_DisplayName(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Sequence(tag, tagClass, 1, FALSE, 0)
+{
+  m_name.SetConstraints(PASN_Object::FixedConstraint, 1, 80);
+}
+
+
+#ifndef PASN_NOPRINTON
+void H225_DisplayName::PrintOn(ostream & strm) const
+{
+  int indent = strm.precision() + 2;
+  strm << "{\n";
+  if (HasOptionalField(e_language))
+    strm << setw(indent+11) << "language = " << setprecision(indent) << m_language << '\n';
+  strm << setw(indent+7) << "name = " << setprecision(indent) << m_name << '\n';
+  strm << setw(indent-1) << setprecision(indent-2) << "}";
+}
+#endif
+
+
+PObject::Comparison H225_DisplayName::Compare(const PObject & obj) const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(&obj, H225_DisplayName), PInvalidCast);
+#endif
+  const H225_DisplayName & other = (const H225_DisplayName &)obj;
+
+  Comparison result;
+
+  if ((result = m_language.Compare(other.m_language)) != EqualTo)
+    return result;
+  if ((result = m_name.Compare(other.m_name)) != EqualTo)
+    return result;
+
+  return PASN_Sequence::Compare(other);
+}
+
+
+PINDEX H225_DisplayName::GetDataLength() const
+{
+  PINDEX length = 0;
+  if (HasOptionalField(e_language))
+    length += m_language.GetObjectLength();
+  length += m_name.GetObjectLength();
+  return length;
+}
+
+
+PBoolean H225_DisplayName::Decode(PASN_Stream & strm)
+{
+  if (!PreambleDecode(strm))
+    return FALSE;
+
+  if (HasOptionalField(e_language) && !m_language.Decode(strm))
+    return FALSE;
+  if (!m_name.Decode(strm))
+    return FALSE;
+
+  return UnknownExtensionsDecode(strm);
+}
+
+
+void H225_DisplayName::Encode(PASN_Stream & strm) const
+{
+  PreambleEncode(strm);
+
+  if (HasOptionalField(e_language))
+    m_language.Encode(strm);
+  m_name.Encode(strm);
+
+  UnknownExtensionsEncode(strm);
+}
+
+
+PObject * H225_DisplayName::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H225_DisplayName::Class()), PInvalidCast);
+#endif
+  return new H225_DisplayName(*this);
+}
+
+
 
 #ifndef PASN_NOPRINTON
 const static PASN_Names Names_H225_PublicTypeOfNumber[]={
@@ -7451,6 +7538,37 @@ PObject * H225_ArrayOf_ServiceControlSession::Clone() const
 
 
 //
+// ArrayOf_DisplayName
+//
+
+H225_ArrayOf_DisplayName::H225_ArrayOf_DisplayName(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Array(tag, tagClass)
+{
+}
+
+
+PASN_Object * H225_ArrayOf_DisplayName::CreateObject() const
+{
+  return new H225_DisplayName;
+}
+
+
+H225_DisplayName & H225_ArrayOf_DisplayName::operator[](PINDEX i) const
+{
+  return (H225_DisplayName &)array[i];
+}
+
+
+PObject * H225_ArrayOf_DisplayName::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H225_ArrayOf_DisplayName::Class()), PInvalidCast);
+#endif
+  return new H225_ArrayOf_DisplayName(*this);
+}
+
+
+//
 // Connect-UUIE_language
 //
 
@@ -9076,43 +9194,6 @@ PObject * H225_CallCreditServiceControl_billingMode::Clone() const
   PAssert(IsClass(H225_CallCreditServiceControl_billingMode::Class()), PInvalidCast);
 #endif
   return new H225_CallCreditServiceControl_billingMode(*this);
-}
-
-
-
-#ifndef PASN_NOPRINTON
-const static PASN_Names Names_H225_CallCreditServiceControl_callStartingPoint[]={
-      {"alerting",0}
-     ,{"connect",1}
-};
-#endif
-//
-// CallCreditServiceControl_callStartingPoint
-//
-
-H225_CallCreditServiceControl_callStartingPoint::H225_CallCreditServiceControl_callStartingPoint(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Choice(tag, tagClass, 2, TRUE
-#ifndef PASN_NOPRINTON
-    ,(const PASN_Names *)Names_H225_CallCreditServiceControl_callStartingPoint,2
-#endif
-)
-{
-}
-
-
-PBoolean H225_CallCreditServiceControl_callStartingPoint::CreateObject()
-{
-  choice = (tag <= e_connect) ? new PASN_Null() : NULL;
-  return choice != NULL;
-}
-
-
-PObject * H225_CallCreditServiceControl_callStartingPoint::Clone() const
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(IsClass(H225_CallCreditServiceControl_callStartingPoint::Class()), PInvalidCast);
-#endif
-  return new H225_CallCreditServiceControl_callStartingPoint(*this);
 }
 
 

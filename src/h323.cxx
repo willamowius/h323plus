@@ -1263,8 +1263,11 @@ void H323Connection::SetRemoteVersions(const H225_ProtocolIdentifier & protocolI
     case 5 :
       h245version = 9;  // H.323 version 5 
       break;
+	case 6 :
+	  h245version = 13; // H.323 version 6
+	  break;
     default:
-      h245version = 13; // H.323 version 6
+      h245version = 15; // H.323 version 7
       break;
   }
   PTRACE(3, "H225\tSet protocol version to " << h225version
