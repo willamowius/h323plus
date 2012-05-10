@@ -1,0 +1,15 @@
+
+MEDIA-OVER-H2250 {itu-t(0) recommendation(0) h(8) 460 26} DEFINITIONS AUTOMATIC TAGS ::=
+BEGIN
+FrameData ::= CHOICE
+{
+    rtp          OCTET STRING (SIZE(12..1500)),
+    rtcp         OCTET STRING (SIZE(1..1500))
+}
+UDPFrame ::= SEQUENCE
+{
+   sessionId     INTEGER (0..255),
+   dataFrame     BOOLEAN,
+   frame         SEQUENCE OF FrameData
+}
+END

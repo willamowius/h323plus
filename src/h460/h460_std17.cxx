@@ -45,13 +45,17 @@
 #include <h323ep.h>
 #include <h323pdu.h>
 #include <h460/h460_std17.h>
-#include <h460/h46017a.h>
+#ifdef H323_H46026
+ #include <h460/h46026.h>  // TODO MAKE Feature Identifier
+#endif
 
 #include <ptclib/pdns.h>
 #include <ptclib/delaychan.h>
 
+#ifdef H323_H46026
 //#define PACKET_ANALYSIS    1
 #define LOCAL_FASTUPDATE    1
+#endif
 
 #define MAX_AUDIO_FRAMES     3
 #define MAX_VIDEO_PAYLOAD    4000         // 4k Frame
@@ -133,6 +137,7 @@ static PBoolean HandleH245Command(PBoolean /*remote*/, const H245_CommandMessage
     return true;
 }
 
+#ifdef H323_H46026
 static void BuildFastUpdatePicture(unsigned sessionId, H323ControlPDU & pdu)
 {
     H245_CommandMessage & command = pdu.Build(H245_CommandMessage::e_miscellaneousCommand);
@@ -156,7 +161,8 @@ static void AnalysePacket(PBoolean out, int session, const RTP_DataFrame & frame
            << " src=" << frame.GetSyncSource()
            << " ccnt=" << frame.GetContribSrcCount());
 }
-#endif
+#endif // PACKET_ANALYSIS
+#endif // H323_H46026
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Must Declare for Factory Loader.
@@ -574,13 +580,15 @@ PBoolean H46017Transport::IsListening() const
   return h245listener->IsOpen();
 }
 
+#ifdef H323_H46026
+
 PBoolean H46017Transport::PostFrame(unsigned sessionID,bool rtp, const void * buf, PINDEX len)
 {
     if (!con) return false;
 
-    H46017UDPSocket * socket = (H46017UDPSocket *)con->GetNatSocket(sessionID,rtp); 
+    H46026UDPSocket * socket = (H46026UDPSocket *)con->GetNatSocket(sessionID,rtp); 
     if (socket)
-        return ((H46017UDPSocket *)socket)->WriteBuffer(buf,len);
+        return ((H46026UDPSocket *)socket)->WriteBuffer(buf,len);
  
     PTRACE(3,"H46017\tCannot find Socket " << sessionID << " " << (rtp ? "RTP" : "RTCP"));
     return false;
@@ -597,6 +605,7 @@ void H46017Transport::GenerateFastUpdatePicture(int session)
       lastFUP = now;
     }
 }
+#endif // H323_H46026
 
 PBoolean H46017Transport::WriteTunnel(const H323SignalPDU & msg, const h225Order::MessageHeader & prior)
 {
@@ -623,8 +632,10 @@ PBoolean H46017Transport::ReadTunnel()
     switch (pdu.GetQ931().GetMessageType()) {
       case Q931::FacilityMsg:
           if (ReadControl(pdu)) continue;
+#ifdef H323_H46026
       case Q931::InformationMsg:
           if (ReadMedia(pdu)) continue;
+#endif
       default:
           break;
     }
@@ -669,7 +680,7 @@ PBoolean H46017Transport::ReadControl(const H323SignalPDU & msg)
     return true;
 }
 
-
+#ifdef H323_H46026
 PBoolean H46017Transport::ReadMedia(const H323SignalPDU & msg)
 {
     if (msg.GetQ931().GetMessageType() != Q931::InformationMsg)
@@ -687,13 +698,13 @@ PBoolean H46017Transport::ReadMedia(const H323SignalPDU & msg)
     H460_FeatureStd & feat = (H460_FeatureStd &)data;
     PASN_OctetString & media = feat.Value(H460_FeatureID(1));
 
-    H46017A_UDPFrame frame;
+    H46026_UDPFrame frame;
     media.DecodeSubType(frame);
     int session = frame.m_sessionId;
     bool rtp = frame.m_dataFrame;
   
     for (PINDEX i=0; i < frame.m_frame.GetSize(); i++) {
-        const H46017A_FrameData & xdata = frame.m_frame[i];
+        const H46026_FrameData & xdata = frame.m_frame[i];
         const PASN_OctetString & payload = xdata;
 #if PACKET_ANALYSIS
         if (rtp) {
@@ -706,6 +717,7 @@ PBoolean H46017Transport::ReadMedia(const H323SignalPDU & msg)
     }
     return true;
 }
+#endif // H323_H46026
 
 void H46017Transport::SocketWrite(PThread &, INT)
 {
@@ -857,21 +869,23 @@ PBoolean H46017Handler::RegisterGatekeeper()
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-PCREATE_NAT_PLUGIN(H46017);
+#ifdef H323_H46026
+
+PCREATE_NAT_PLUGIN(H46026);
     
-PNatMethod_H46017::PNatMethod_H46017()
+PNatMethod_H46026::PNatMethod_H46026()
 : available(false), active(false), handler(NULL)
 {
 
 }
 
-PNatMethod_H46017::~PNatMethod_H46017()
+PNatMethod_H46026::~PNatMethod_H46026()
 {
 
 }
 
 
-void PNatMethod_H46017::AttachEndPoint(H323EndPoint * ep)
+void PNatMethod_H46026::AttachEndPoint(H323EndPoint * ep)
 {
 
    WORD portPairBase = ep->GetRtpIpPortBase();
@@ -905,7 +919,7 @@ void PNatMethod_H46017::AttachEndPoint(H323EndPoint * ep)
     available = FALSE;
 }
 
-PBoolean PNatMethod_H46017::GetExternalAddress(
+PBoolean PNatMethod_H46026::GetExternalAddress(
       PIPSocket::Address & /*externalAddress*/, /// External address of router
       const PTimeInterval & /* maxAge */         /// Maximum age for caching
       )
@@ -914,7 +928,7 @@ PBoolean PNatMethod_H46017::GetExternalAddress(
 }
 
 
-PBoolean PNatMethod_H46017::CreateSocketPair(
+PBoolean PNatMethod_H46026::CreateSocketPair(
                             PUDPSocket * & socket1,
                             PUDPSocket * & socket2,
                             const PIPSocket::Address & binding,
@@ -924,15 +938,15 @@ PBoolean PNatMethod_H46017::CreateSocketPair(
 
       if (pairedPortInfo.basePort == 0 || pairedPortInfo.basePort > pairedPortInfo.maxPort)
       {
-        PTRACE(1, "H46017\tInvalid local UDP port range "
+        PTRACE(1, "H46026\tInvalid local UDP port range "
                << pairedPortInfo.currentPort << '-' << pairedPortInfo.maxPort);
         return FALSE;
       }
 
     H323Connection::SessionInformation * info = (H323Connection::SessionInformation *)userData;
 
-    socket1 = new H46017UDPSocket(*handler,info,true);  /// Data 
-    socket2 = new H46017UDPSocket(*handler,info,false);  /// Signal
+    socket1 = new H46026UDPSocket(*handler,info,true);  /// Data 
+    socket2 = new H46026UDPSocket(*handler,info,false);  /// Signal
 
 /// Make sure we have sequential ports
     while ((!OpenSocket(*socket1, pairedPortInfo, binding)) ||
@@ -941,18 +955,18 @@ PBoolean PNatMethod_H46017::CreateSocketPair(
     {
             delete socket1;
             delete socket2;
-            socket1 = new H46017UDPSocket(*handler,info,true);  /// Data 
-            socket2 = new H46017UDPSocket(*handler,info,false);  /// Signal
+            socket1 = new H46026UDPSocket(*handler,info,true);  /// Data 
+            socket2 = new H46026UDPSocket(*handler,info,false);  /// Signal
     }
 
     SetInformationHeader(*socket1,*socket2,info);
 
-    PTRACE(3, "H46017\tUDP Ports Opened " << socket1->GetPort() << "-" << socket2->GetPort());
+    PTRACE(3, "H46026\tUDP Ports Opened " << socket1->GetPort() << "-" << socket2->GetPort());
 
     return TRUE;
 }
 
-PBoolean PNatMethod_H46017::OpenSocket(PUDPSocket & socket, PortInfo & portInfo, const PIPSocket::Address & binding) const
+PBoolean PNatMethod_H46026::OpenSocket(PUDPSocket & socket, PortInfo & portInfo, const PIPSocket::Address & binding) const
 {
   PWaitAndSignal mutex(portInfo.mutex);
 
@@ -970,12 +984,12 @@ PBoolean PNatMethod_H46017::OpenSocket(PUDPSocket & socket, PortInfo & portInfo,
 
   } while (portInfo.currentPort != startPort);
 
-  PTRACE(2, "H46017\tFailed to bind to local UDP port in range "
+  PTRACE(2, "H46026\tFailed to bind to local UDP port in range "
          << portInfo.currentPort << '-' << portInfo.maxPort);
   return FALSE;
 }
 
-void PNatMethod_H46017::SetInformationHeader(PUDPSocket & data, PUDPSocket & control, 
+void PNatMethod_H46026::SetInformationHeader(PUDPSocket & data, PUDPSocket & control, 
                                          H323Connection::SessionInformation * info)
 {
     if (!handler || handler->GetEndPoint() == NULL)
@@ -989,18 +1003,18 @@ void PNatMethod_H46017::SetInformationHeader(PUDPSocket & data, PUDPSocket & con
         transport = connection->GetSignallingChannel();
     }
 
-    ((H46017UDPSocket &)data).SetInformationHeader(informationMsg, transport);
-    ((H46017UDPSocket &)control).SetInformationHeader(informationMsg, transport);
+    ((H46026UDPSocket &)data).SetInformationHeader(informationMsg, transport);
+    ((H46026UDPSocket &)control).SetInformationHeader(informationMsg, transport);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-H46017UDPSocket::H46017UDPSocket(H46017Handler & _handler, H323Connection::SessionInformation * info, bool _rtpSocket)
+H46026UDPSocket::H46026UDPSocket(H46026Handler & _handler, H323Connection::SessionInformation * info, bool _rtpSocket)
 : m_transport(NULL), m_Session(info->GetSessionID()), rtpSocket(_rtpSocket), m_frameCount(0), m_payloadSize(0), m_frame(NULL), shutDown(false)
 {
 }
 
-H46017UDPSocket::~H46017UDPSocket()
+H46026UDPSocket::~H46026UDPSocket()
 {
     shutDown = true;
     writeMutex.Wait();
@@ -1012,19 +1026,19 @@ H46017UDPSocket::~H46017UDPSocket()
     delete m_frame;
 }
 
-void H46017UDPSocket::SetInformationHeader(const H323SignalPDU & _InformationMsg, const H323Transport * _transport)
+void H46026UDPSocket::SetInformationHeader(const H323SignalPDU & _InformationMsg, const H323Transport * _transport)
 {
     msg = _InformationMsg;
-    m_transport = (H46017Transport *)PRemoveConst(H323Transport,_transport);
+    m_transport = (H46026Transport *)PRemoveConst(H323Transport,_transport);
 }
 
 
-PBoolean H46017UDPSocket::BuildTunnelMediaPacket(const void * buf, PINDEX len)
+PBoolean H46026UDPSocket::BuildTunnelMediaPacket(const void * buf, PINDEX len)
 {
     PBoolean toSend = true;
     m_frameCount++;
     
-    H46017A_FrameData fdata;
+    H46026_FrameData fdata;
     fdata.SetTag(!rtpSocket);
     PASN_OctetString & raw = fdata;
             
@@ -1048,7 +1062,7 @@ PBoolean H46017UDPSocket::BuildTunnelMediaPacket(const void * buf, PINDEX len)
     raw.SetValue((const BYTE *)buf,len);
 
     if (!m_frame) {
-        m_frame = new H46017A_UDPFrame();
+        m_frame = new H46026_UDPFrame();
         m_frame->m_sessionId.SetValue(m_Session);
         m_frame->m_dataFrame = rtpSocket;
     }
@@ -1098,7 +1112,7 @@ PBoolean H46017UDPSocket::BuildTunnelMediaPacket(const void * buf, PINDEX len)
    return (toSend);
 }
 
-PBoolean H46017UDPSocket::WriteBuffer(const void * buf, PINDEX len)
+PBoolean H46026UDPSocket::WriteBuffer(const void * buf, PINDEX len)
 {
     PWaitAndSignal m(writeMutex);
     
@@ -1109,7 +1123,7 @@ PBoolean H46017UDPSocket::WriteBuffer(const void * buf, PINDEX len)
          return false;
 }
 
-PBoolean H46017UDPSocket::DoPseudoRead(int & selectStatus)
+PBoolean H46026UDPSocket::DoPseudoRead(int & selectStatus)
 {
    PAdaptiveDelay selectBlock;
    while (rtpSocket && rtpQueue.size() == 0) {
@@ -1121,7 +1135,7 @@ PBoolean H46017UDPSocket::DoPseudoRead(int & selectStatus)
    return rtpSocket;
 }
 
-PBoolean H46017UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD & port)
+PBoolean H46026UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD & port)
 {
     addr = "0.0.0.0";
     port = 0;
@@ -1144,14 +1158,14 @@ PBoolean H46017UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD 
     return true;
 }
 
-PBoolean H46017UDPSocket::WriteTo(const void * buf, PINDEX len, const Address & /*addr*/, WORD /*port*/)
+PBoolean H46026UDPSocket::WriteTo(const void * buf, PINDEX len, const Address & /*addr*/, WORD /*port*/)
 {
     BuildTunnelMediaPacket(buf, len);
     return true;
 }
 
 
-void H46017UDPSocket::GetLocalAddress(H245_TransportAddress & add)
+void H46026UDPSocket::GetLocalAddress(H245_TransportAddress & add)
 {
     PIPSocket::Address m_locAddr = PIPSocket::GetDefaultIpAny();
     WORD m_locPort = 0;
@@ -1159,10 +1173,12 @@ void H46017UDPSocket::GetLocalAddress(H245_TransportAddress & add)
     ladd.SetPDU(add);
 }
     
-void H46017UDPSocket::SetRemoteAddress(const H245_TransportAddress & add)
+void H46026UDPSocket::SetRemoteAddress(const H245_TransportAddress & add)
 {
    // Ignore!
 }
+
+#endif // H323_H46026
 
 /////////////////////////////////////////////////////////////////////////
 

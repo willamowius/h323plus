@@ -194,9 +194,9 @@ class H46017Transport  : public H323TransportTCP
     PBoolean ReadTunnel();
 
     PBoolean HandleControlPDU(const H323ControlPDU & pdu);
-
+#ifdef H323_H46026
     PBoolean PostFrame(unsigned sessionID,bool rtp,  const void * buf, PINDEX len);
-
+#endif
 	PBoolean isCall() { return isConnected; };
 
 	void ConnectionLost(PBoolean established);
@@ -221,10 +221,10 @@ class H46017Transport  : public H323TransportTCP
 
   protected:
     PBoolean ReadControl(const H323SignalPDU & msg);
+#ifdef H323_H46026
     PBoolean ReadMedia(const H323SignalPDU & msg);
-
     void GenerateFastUpdatePicture(int session);
-
+#endif
 	 PMutex connectionsMutex;
 	 PMutex WriteMutex;
 	 PMutex shutdownMutex;
@@ -300,9 +300,11 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////
 
-class PNatMethod_H46017  : public PNatMethod
+#ifdef H323_H46026
+
+class PNatMethod_H46026  : public PNatMethod
 {
-	PCLASSINFO(PNatMethod_H46017,PNatMethod);
+	PCLASSINFO(PNatMethod_H46026,PNatMethod);
 
 public:
 
@@ -310,11 +312,11 @@ public:
   //@{
 	/** Default Contructor
 	*/
-	PNatMethod_H46017();
+	PNatMethod_H46026();
 
 	/** Deconstructor
 	*/
-	~PNatMethod_H46017();
+	~PNatMethod_H46026();
   //@}
 
   /**@name General Functions */
@@ -375,7 +377,7 @@ public:
 	*/
    PBoolean OpenSocket(PUDPSocket & socket, PortInfo & portInfo, const PIPSocket::Address & binding) const;
 
-   static PStringArray GetNatMethodName() {  return PStringArray("H46017"); }
+   static PStringArray GetNatMethodName() {  return PStringArray("H46026"); }
 
    virtual PString GetName() const
             { return GetNatMethodName()[0]; }
@@ -423,27 +425,27 @@ protected:
 
 
 #ifndef _WIN32_WCE
-PPLUGIN_STATIC_LOAD(H46017, PNatMethod);
+PPLUGIN_STATIC_LOAD(H46026, PNatMethod);
 #endif
 
 typedef std::queue<PBYTEArray*> RTPQueue;
 
-class H46017A_UDPFrame;
-class H46017UDPSocket : public PUDPSocket
+class H46026_UDPFrame;
+class H46026UDPSocket : public PUDPSocket
 {
-  PCLASSINFO(H46017UDPSocket, PUDPSocket);
+  PCLASSINFO(H46026UDPSocket, PUDPSocket);
   public:
   /**@name Construction/Deconstructor */
   //@{
 	/** create a UDP Socket Fully Nat Supported
 		ready for H323plus to Call.
 	*/
-    H46017UDPSocket(H46017Handler & _handler, H323Connection::SessionInformation * info, bool _rtpSocket);
+    H46026UDPSocket(H46026Handler & _handler, H323Connection::SessionInformation * info, bool _rtpSocket);
 
 	/** Deconstructor to reallocate Socket and remove any exiting
 		allocated NAT ports, 
 	*/
-	~H46017UDPSocket();
+	~H46026UDPSocket();
 
    //@}
 
@@ -497,13 +499,14 @@ private:
     // tunnel data containers
     int m_frameCount;
     int m_payloadSize;
-    H46017A_UDPFrame * m_frame;
+    H46026_UDPFrame * m_frame;
     H323SignalPDU msg;
 
     RTPQueue rtpQueue;
     PMutex writeMutex;
     PBoolean shutDown;
 };
+#endif // H323_H46026
 
 //////////////////////////////////////////////////////////////////////
 
