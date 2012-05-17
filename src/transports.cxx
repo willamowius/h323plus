@@ -352,6 +352,15 @@ void H323TransportAddress::Validate()
 
   if (Find('$') == P_MAX_INDEX) {
     Splice(IpPrefix, 0, 0);
+#if P_HAS_IPV6
+    if (PIPSocket::GetDefaultIpAddressFamily() == AF_INET6) {
+      // If a DNS record then detect the version of the DNS record.
+      PIPSocket::Address ip;
+      WORD port = H323EndPoint::DefaultTcpPort;
+      if (GetIpAndPort(ip, port)) 
+         m_version = ip.GetVersion();
+    }
+#endif
     return;
   }
 
