@@ -478,6 +478,8 @@ void H323GetLanguage(PStringList & lang, const PASN_IA5String & asn);
 PBoolean H323GetLanguages(PStringList & lang, const H225_Setup_UUIE_language & asn);
 PBoolean H323GetLanguages(PStringList & lang, const H225_Connect_UUIE_language & asn);
 
+PString H323GetDisplayName(const H225_ArrayOf_DisplayName & asn);
+PBoolean H323SetDisplayName(const PStringList & alias, const PStringList & lang, H225_ArrayOf_DisplayName & asn);
 
 /////////////////////////////////////////////////////////////////////////////
 

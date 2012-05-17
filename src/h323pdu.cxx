@@ -166,6 +166,29 @@ PBoolean H323GetLanguages(PStringList & lang, const H225_Connect_UUIE_language &
   return (lang.GetSize() > 0);
 }
 
+PString H323GetDisplayName(const H225_ArrayOf_DisplayName & asn)
+{
+    if (asn.GetSize() > 0)
+       return asn[0].m_name.GetValue();
+    else
+       return PString();
+}
+
+PBoolean H323SetDisplayName(const PStringList & alias, const PStringList & lang, H225_ArrayOf_DisplayName & asn)
+{
+    int sz = alias.GetSize();
+    if (sz < 2) return false;
+    
+    asn.SetSize(1);
+    H225_DisplayName & name = asn[0];
+    name.m_name.SetValue(alias[sz-1]);
+    if (lang.GetSize() > 0) {
+       name.IncludeOptionalField(H225_DisplayName::e_language);
+       name.m_language = lang[0];
+    }
+    return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void H323SetAliasAddresses(const H323TransportAddressArray & addresses, H225_ArrayOf_AliasAddress & aliases)
@@ -600,7 +623,10 @@ H225_Setup_UUIE & H323SignalPDU::BuildSetup(const H323Connection & connection,
   H323SetAliasAddresses(connection.GetLocalAliasNames(), setup.m_sourceAddress);
 
   if (H323SetLanguages(connection.GetLocalLanguages(), setup.m_language))
-	  setup.IncludeOptionalField(H225_Setup_UUIE::e_language);
+      setup.IncludeOptionalField(H225_Setup_UUIE::e_language);
+
+  if (H323SetDisplayName(connection.GetLocalAliasNames(),connection.GetLocalLanguages(), setup.m_displayName))
+      setup.IncludeOptionalField(H225_Setup_UUIE::e_displayName);
 
   setup.m_conferenceID = connection.GetConferenceIdentifier();
 
