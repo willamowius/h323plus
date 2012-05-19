@@ -794,6 +794,10 @@ class H323EndPoint : public PObject
       PBoolean wait = TRUE   ///< Flag for wait for calls to e cleared.
     );
 
+    /**Determine if the connectionMutex will block
+      */
+    virtual PBoolean WillConnectionMutexBlock();
+
     /**Determine if a connection is active.
       */
     virtual PBoolean HasConnection(

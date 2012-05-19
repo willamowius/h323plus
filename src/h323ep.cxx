@@ -2041,6 +2041,10 @@ void H323EndPoint::CleanUpConnections()
   connectionsAreCleaned.Signal();
 }
 
+PBoolean H323EndPoint::WillConnectionMutexBlock()
+{
+    return !connectionsMutex.Try();
+}
 
 PBoolean H323EndPoint::HasConnection(const PString & token)
 {
@@ -2048,7 +2052,6 @@ PBoolean H323EndPoint::HasConnection(const PString & token)
 
   return FindConnectionWithoutLocks(token) != NULL;
 }
-
 
 H323Connection * H323EndPoint::FindConnectionWithLock(const PString & token)
 {
