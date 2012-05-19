@@ -1462,6 +1462,7 @@ PBoolean H323EndPoint::ResolveCallParty(const PString & _remoteParty, PStringLis
 		if (i >= number.GetLength()) {
            PString str;
           if (PDNS::ENUMLookup(number, "E2U+h323", str)) {
+            str.Replace("+","");
 		    if ((str.Find("//1") != P_MAX_INDEX) &&
 		         (str.Find('@') != P_MAX_INDEX)) {
 			   remoteParty = "h323:" + number + str.Mid(str.Find('@')-1);
