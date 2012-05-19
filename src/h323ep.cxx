@@ -453,7 +453,7 @@ H323EndPoint::H323EndPoint()
   logicalThreadStackSize    = 30000;
   rasThreadStackSize        = 30000;
   jitterThreadStackSize     = 30000;
-  useJitterBuffer			= true;
+  useJitterBuffer            = true;
 
 #ifdef H323_SIGNAL_AGGREGATE
   signallingAggregationSize = 25;
@@ -590,8 +590,8 @@ void H323EndPoint::SetEndpointTypeInfo(H225_EndpointType & info) const
     case e_GatewayAndMCWithAudioMP :
     case e_GatewayAndMCWithAVMP :
       info.IncludeOptionalField(H225_EndpointType::e_gateway);
-	  if (SetGatewaySupportedProtocol(info.m_gateway.m_protocol))
-		  info.m_gateway.IncludeOptionalField(H225_GatewayInfo::e_protocol);
+      if (SetGatewaySupportedProtocol(info.m_gateway.m_protocol))
+          info.m_gateway.IncludeOptionalField(H225_GatewayInfo::e_protocol);
       break;
     case e_GatekeeperOnly :
     case e_GatekeeperWithDataMP :
@@ -605,39 +605,39 @@ void H323EndPoint::SetEndpointTypeInfo(H225_EndpointType & info) const
     case e_MCUWithAVMP :
       info.IncludeOptionalField(H225_EndpointType::e_mcu);
       info.m_mc = TRUE;
-	  if (SetGatewaySupportedProtocol(info.m_mcu.m_protocol))
-		  info.m_mcu.IncludeOptionalField(H225_McuInfo::e_protocol);
+      if (SetGatewaySupportedProtocol(info.m_mcu.m_protocol))
+          info.m_mcu.IncludeOptionalField(H225_McuInfo::e_protocol);
   }
 }
 
 PBoolean H323EndPoint::SetGatewaySupportedProtocol(H225_ArrayOf_SupportedProtocols & protocols) const
 {
-	PStringList prefixes;
+    PStringList prefixes;
 
-	if (OnSetGatewayPrefixes(prefixes)) {
-		H225_SupportedProtocols proto;
-		proto.SetTag(H225_SupportedProtocols::e_h323);
-		H225_H323Caps & caps = proto;
-		caps.IncludeOptionalField(H225_H323Caps::e_supportedPrefixes);
-         H225_ArrayOf_SupportedPrefix & pre = caps.m_supportedPrefixes;	
-		 pre.SetSize(prefixes.GetSize());
-		  for (PINDEX i=0; i < prefixes.GetSize(); i++) {
-		     H225_SupportedPrefix p;
-			   H225_AliasAddress & alias = p.m_prefix;
-			   H323SetAliasAddress(prefixes[i],alias);
-		     pre[i] = p;
-		  }
-		protocols.SetSize(1);
-		protocols[0] = proto;
-		return TRUE;
-	}
+    if (OnSetGatewayPrefixes(prefixes)) {
+        H225_SupportedProtocols proto;
+        proto.SetTag(H225_SupportedProtocols::e_h323);
+        H225_H323Caps & caps = proto;
+        caps.IncludeOptionalField(H225_H323Caps::e_supportedPrefixes);
+         H225_ArrayOf_SupportedPrefix & pre = caps.m_supportedPrefixes;    
+         pre.SetSize(prefixes.GetSize());
+          for (PINDEX i=0; i < prefixes.GetSize(); i++) {
+             H225_SupportedPrefix p;
+               H225_AliasAddress & alias = p.m_prefix;
+               H323SetAliasAddress(prefixes[i],alias);
+             pre[i] = p;
+          }
+        protocols.SetSize(1);
+        protocols[0] = proto;
+        return TRUE;
+    }
 
-	return FALSE;
+    return FALSE;
 }
 
 PBoolean H323EndPoint::OnSetGatewayPrefixes(PStringList & /*prefixes*/) const
 {
-	return FALSE;
+    return FALSE;
 }
 
 void H323EndPoint::SetVendorIdentifierInfo(H225_VendorIdentifier & info) const
@@ -696,7 +696,7 @@ PINDEX H323EndPoint::SetCapability(PINDEX descriptorNum,
 
 PBoolean H323EndPoint::RemoveCapability(H323Capability::MainTypes capabilityType)
 {
-	return capabilities.RemoveCapability(capabilityType);
+    return capabilities.RemoveCapability(capabilityType);
 }
 
 #ifdef H323_VIDEO
@@ -706,7 +706,7 @@ PBoolean H323EndPoint::SetVideoEncoder(unsigned frameWidth, unsigned frameHeight
 }
 
 PBoolean H323EndPoint::SetVideoFrameSize(H323Capability::CapabilityFrameSize frameSize, 
-		                  int frameUnits)
+                          int frameUnits)
 {
     return capabilities.SetVideoFrameSize(frameSize,frameUnits);
 }
@@ -717,10 +717,10 @@ PINDEX H323EndPoint::AddAllCapabilities(PINDEX descriptorNum,
                                         const PString & name)
 {
     PINDEX reply = simultaneous;
-	reply = capabilities.AddAllCapabilities(descriptorNum, simultaneous, name);
+    reply = capabilities.AddAllCapabilities(descriptorNum, simultaneous, name);
 #ifdef H323_VIDEO
 #ifdef H323_H239
-	AddAllExtendedVideoCapabilities(descriptorNum, simultaneous);
+    AddAllExtendedVideoCapabilities(descriptorNum, simultaneous);
 #endif
 #endif
   return reply;
@@ -753,8 +753,8 @@ PBoolean H323EndPoint::OpenExtendedVideoSession(const PString & token,H323Channe
 }
 
 PBoolean H323EndPoint::CloseExtendedVideoSession(
-		                       const PString & token         
-	                           )
+                               const PString & token         
+                               )
 {
   H323Connection * connection = FindConnectionWithLock(token);
  
@@ -767,9 +767,9 @@ PBoolean H323EndPoint::CloseExtendedVideoSession(
 }
 
 PBoolean H323EndPoint::CloseExtendedVideoSession(
-		                       const PString & token,         
-		                       const H323ChannelNumber & /*num*/  
-	                           )
+                               const PString & token,         
+                               const H323ChannelNumber & /*num*/  
+                               )
 {
   return CloseExtendedVideoSession(token);
 }
@@ -938,8 +938,8 @@ PBoolean H323EndPoint::RemoveGatekeeper(int reason)
 
 void H323EndPoint::ForceGatekeeperReRegistration()
 {
-	if (gatekeeper != NULL)
-		RegInvokeReRegistration();
+    if (gatekeeper != NULL)
+        RegInvokeReRegistration();
 }
 
 void H323EndPoint::SetGatekeeperPassword(const PString & password)
@@ -955,9 +955,9 @@ void H323EndPoint::SetGatekeeperPassword(const PString & password)
 }
 
 PBoolean H323EndPoint::GatekeeperCheckIP(const H323TransportAddress & /*oldAddr*/,
-									 H323TransportAddress & /*newaddress*/)
+                                     H323TransportAddress & /*newaddress*/)
 {
-	return FALSE;
+    return FALSE;
 }
 
 void H323EndPoint::OnAdmissionRequest(H323Connection & /*connection*/)
@@ -1036,7 +1036,7 @@ H235Authenticators H323EndPoint::CreateEPAuthenticators()
 }
 
 PBoolean H323EndPoint::GetEPCredentials(PString & password, 
-									PString & username)
+                                    PString & username)
 {
   if (EPSecurityPassword.IsEmpty())
      return FALSE;
@@ -1053,38 +1053,38 @@ PBoolean H323EndPoint::GetEPCredentials(PString & password,
 
 void H323EndPoint::SetEPCredentials(PString password, PString username)
 {
-	EPSecurityPassword = password;			
-	EPSecurityUserName = username;			
+    EPSecurityPassword = password;            
+    EPSecurityUserName = username;            
 }
 
 void H323EndPoint::SetEPSecurityPolicy(EPSecurityPolicy policy)
 {
-	CallAuthPolicy = policy;
+    CallAuthPolicy = policy;
 }
 
 H323EndPoint::EPSecurityPolicy H323EndPoint::GetEPSecurityPolicy()
 {
-	return CallAuthPolicy;
+    return CallAuthPolicy;
 }
 
 H235AuthenticatorList H323EndPoint::GetAuthenticatorList()
 {
-	return EPAuthList;
+    return EPAuthList;
 }
 
 PBoolean H323EndPoint::OnCallAuthentication(const PString & username, 
-										PString & password)
+                                        PString & password)
 {
-	if (EPAuthList.HasUserName(username)) {
-		EPAuthList.LoadPassword(username, password);
-		return TRUE;
-	}
+    if (EPAuthList.HasUserName(username)) {
+        EPAuthList.LoadPassword(username, password);
+        return TRUE;
+    }
 
-	return FALSE;
+    return FALSE;
 }
 
 H323Connection * H323EndPoint::MakeAuthenticatedCall(const PString & remoteParty, 
-		const PString & UserName, const PString & Password, PString & token, void * userData)
+        const PString & UserName, const PString & Password, PString & token, void * userData)
 {
   isSecureCall = TRUE;
   SetEPCredentials(Password,UserName);
@@ -1100,7 +1100,7 @@ H323Connection * H323EndPoint::MakeSupplimentaryCall (
                         )
 {
 
-	return MakeCall(remoteParty, token, userData,true);
+    return MakeCall(remoteParty, token, userData,true);
 }
 #endif
 
@@ -1202,8 +1202,8 @@ H323TransportAddressArray H323EndPoint::GetInterfaceAddresses(PBoolean excludeLo
 H323Connection * H323EndPoint::MakeCall(const PString & remoteParty,
                                         PString & token,
                                         void * userData,
-										PBoolean supplimentary
-										)
+                                        PBoolean supplimentary
+                                        )
 {
   return MakeCall(remoteParty, NULL, token, userData, supplimentary);
 }
@@ -1213,14 +1213,14 @@ H323Connection * H323EndPoint::MakeCall(const PString & remoteParty,
                                         H323Transport * transport,
                                         PString & token,
                                         void * userData,
-										PBoolean supplimentary
-										)
+                                        PBoolean supplimentary
+                                        )
 {
   token = PString::Empty();
 
   PStringList Addresses;
   if (!ResolveCallParty(remoteParty, Addresses))
-	return NULL;
+    return NULL;
 
   H323Connection * connection = NULL;
   for (PINDEX i = 0; i < Addresses.GetSize(); i++) {
@@ -1232,11 +1232,11 @@ H323Connection * H323EndPoint::MakeCall(const PString & remoteParty,
                                      token,
                                      userData,
                                      supplimentary
-									 );
+                                     );
     if (connection != NULL) {
         connection->Unlock();
-	    break;
-	}
+        break;
+    }
   }
 
   return connection;
@@ -1252,7 +1252,7 @@ H323Connection * H323EndPoint::MakeCallLocked(const PString & remoteParty,
 
   PStringList Addresses;
   if (!ResolveCallParty(remoteParty, Addresses))
-	return NULL;
+    return NULL;
 
   H323Connection * connection = NULL;
   for (PINDEX i = 0; i < Addresses.GetSize(); i++) {
@@ -1264,7 +1264,7 @@ H323Connection * H323EndPoint::MakeCallLocked(const PString & remoteParty,
                              token,
                              userData);
      if (connection != NULL) 
-		    break;		 
+            break;         
   }
 
   return connection;
@@ -1278,8 +1278,8 @@ H323Connection * H323EndPoint::InternalMakeCall(const PString & trasferFromToken
                                                 H323Transport * transport,
                                                 PString & newToken,
                                                 void * userData,
-												PBoolean supplimentary
-												)
+                                                PBoolean supplimentary
+                                                )
 {
   PTRACE(2, "H323\tMaking call to: " << remoteParty);
 
@@ -1341,7 +1341,7 @@ H323Connection * H323EndPoint::InternalMakeCall(const PString & trasferFromToken
   }
 
   if (supplimentary) 
-	  connection->SetNonCallConnection();     
+      connection->SetNonCallConnection();     
 
   connection->Lock();
 
@@ -1451,31 +1451,31 @@ PBoolean H323EndPoint::ResolveCallParty(const PString & _remoteParty, PStringLis
      //if there is no '@', and there is no URL scheme, then attempt to use ENUM
     if ((_remoteParty.Find(':') == P_MAX_INDEX) && (remoteParty.Find('@') == P_MAX_INDEX)) {
 
-	PString number = _remoteParty;
-	if (number.Left(5) *= "h323:")
-	   number = number.Mid(5);
+    PString number = _remoteParty;
+    if (number.Left(5) *= "h323:")
+       number = number.Mid(5);
 
     PINDEX i;
     for (i = 0; i < number.GetLength(); ++i)
        if (!isdigit(number[i]))
         break;
-		if (i >= number.GetLength()) {
+        if (i >= number.GetLength()) {
            PString str;
           if (PDNS::ENUMLookup(number, "E2U+h323", str)) {
             str.Replace("+","");
-		    if ((str.Find("//1") != P_MAX_INDEX) &&
-		         (str.Find('@') != P_MAX_INDEX)) {
-			   remoteParty = "h323:" + number + str.Mid(str.Find('@')-1);
-		    } else {
+            if ((str.Find("//1") != P_MAX_INDEX) &&
+                 (str.Find('@') != P_MAX_INDEX)) {
+               remoteParty = "h323:" + number + str.Mid(str.Find('@')-1);
+            } else {
               remoteParty = str;
-		  }
-		  PTRACE(4, "H323\tENUM converted remote party " << _remoteParty << " to " << remoteParty);
+          }
+          PTRACE(4, "H323\tENUM converted remote party " << _remoteParty << " to " << remoteParty);
         } else {
           PTRACE(4, "H323\tENUM Cannot resolve remote party " << _remoteParty);
-		  return false;
+          return false;
         }
       }
-	}
+    }
 
 #if P_HAS_IPV6
   // Again horrible code should be able to get interface listing for a given protocol - SH
@@ -1487,51 +1487,51 @@ PBoolean H323EndPoint::ResolveCallParty(const PString & _remoteParty, PStringLis
 #endif
 
      // attempt a DNS SRV lookup to detect a call signalling entry
-	PBoolean found = FALSE;
+    PBoolean found = FALSE;
     if (remoteParty.Find('@') != P_MAX_INDEX) {
        PString number = remoteParty;
        if (number.Left(5) != "h323:") 
-          number = "h323:" + number;	  
-				
-	   PStringList str;
+          number = "h323:" + number;      
+                
+       PStringList str;
 
-	   if (!found) str.RemoveAll();
-	   if (!found && (PDNS::LookupSRV(number,"_h323cs._tcp.",str))) {
-		   for (PINDEX i=0; i<str.GetSize(); i++) {
-		     PString dom = str[i].Mid(str[i].Find('@')+1);
-			 if (dom.Left(7) == "0.0.0.0") {
-				PTRACE(2, "EP\tERROR in CS SRV lookup (" << str[i] << ")");
-				continue;
-			 }
-	         PTRACE(4, "H323\tDNS SRV CS located remote party " << _remoteParty << " at " << dom);
+       if (!found) str.RemoveAll();
+       if (!found && (PDNS::LookupSRV(number,"_h323cs._tcp.",str))) {
+           for (PINDEX i=0; i<str.GetSize(); i++) {
+             PString dom = str[i].Mid(str[i].Find('@')+1);
+             if (dom.Left(7) == "0.0.0.0") {
+                PTRACE(2, "EP\tERROR in CS SRV lookup (" << str[i] << ")");
+                continue;
+             }
+             PTRACE(4, "H323\tDNS SRV CS located remote party " << _remoteParty << " at " << dom);
              addresses.AppendString(str[i]);
-			 found = TRUE;
-		   }
+             found = TRUE;
+           }
        }
 
-	   if (!found) str.RemoveAll();
-	   if (!found && (PDNS::LookupSRV(number,"_h323ls._udp.",str))) {
-		   for (PINDEX j=0; j<str.GetSize(); j++) {
-			PString a = str[j].Mid(str[j].Find('@')+1);
-				H323TransportAddress newAddr, gkAddr(a);
-				H323Gatekeeper * gk = CreateGatekeeper(new H323TransportUDP(*this));
-				PBoolean ok = gk->DiscoverByAddress(gkAddr);
-				if (ok) 
-				  ok = gk->LocationRequest(remoteParty, newAddr);
-				delete gk;
-				if (ok) {
-				  PTRACE(3, "H323\tDNS SRV LR of \"" << remoteParty << "\" on gk " << gkAddr << " found " << newAddr);
-				  addresses.AppendString(newAddr);
-				  found = TRUE;
-				}
-		   }
-	   }
+       if (!found) str.RemoveAll();
+       if (!found && (PDNS::LookupSRV(number,"_h323ls._udp.",str))) {
+           for (PINDEX j=0; j<str.GetSize(); j++) {
+            PString a = str[j].Mid(str[j].Find('@')+1);
+                H323TransportAddress newAddr, gkAddr(a);
+                H323Gatekeeper * gk = CreateGatekeeper(new H323TransportUDP(*this));
+                PBoolean ok = gk->DiscoverByAddress(gkAddr);
+                if (ok) 
+                  ok = gk->LocationRequest(remoteParty, newAddr);
+                delete gk;
+                if (ok) {
+                  PTRACE(3, "H323\tDNS SRV LR of \"" << remoteParty << "\" on gk " << gkAddr << " found " << newAddr);
+                  addresses.AppendString(newAddr);
+                  found = TRUE;
+                }
+           }
+       }
 
-	   if (!found) {
+       if (!found) {
            PTRACE(4, "H323\tDNS SRV Cannot resolve remote party " << remoteParty);
-		   addresses = PStringList(remoteParty);
+           addresses = PStringList(remoteParty);
        }
-	} else {
+    } else {
        addresses = PStringList(remoteParty);
     }
 #if P_HAS_IPV6
@@ -1542,7 +1542,7 @@ PBoolean H323EndPoint::ResolveCallParty(const PString & _remoteParty, PStringLis
    }
 #endif
     addresses = PStringList(remoteParty);
-	return true;
+    return true;
 }
 
 PBoolean H323EndPoint::ParsePartyName(const PString & _remoteParty,
@@ -1586,8 +1586,8 @@ PBoolean H323EndPoint::ParsePartyName(const PString & _remoteParty,
     if (gatekeeper != NULL)
       alias = url.AsString();
     else {
-	  alias = remoteParty.Left(remoteParty.Find('@'));
-	  hostOnly = remoteParty.Mid(remoteParty.Find('@')+1);
+      alias = remoteParty.Left(remoteParty.Find('@'));
+      hostOnly = remoteParty.Mid(remoteParty.Find('@')+1);
     }
   } else {
      alias = url.GetUserName();
@@ -1790,7 +1790,7 @@ H323Connection * H323EndPoint::SetupTransfer(const PString & oldToken,
 
   PStringList Addresses;
   if (!ResolveCallParty(remoteParty, Addresses))
-	return NULL;
+    return NULL;
 
   H323Connection * connection = NULL;
      for (PINDEX i = 0; i < Addresses.GetSize(); i++) {
@@ -1803,9 +1803,9 @@ H323Connection * H323EndPoint::SetupTransfer(const PString & oldToken,
                                        userData);
         if (connection != NULL) {
             connection->Unlock();
-			break;
-		}
-	 }
+            break;
+        }
+     }
 
    return connection;
 }
@@ -1863,7 +1863,7 @@ H323Connection * H323EndPoint::IntrudeCall(const PString & remoteParty,
 
  PStringList Addresses;
   if (!ResolveCallParty(remoteParty, Addresses))
-	return NULL;
+    return NULL;
 
   H323Connection * connection = NULL;
      for (PINDEX i = 0; i < Addresses.GetSize(); i++) {
@@ -1874,11 +1874,11 @@ H323Connection * H323EndPoint::IntrudeCall(const PString & remoteParty,
                                            transport,
                                            token,
                                            userData);
-		 if (connection != NULL) {
+         if (connection != NULL) {
             connection->Unlock();
-			break;
-		 }
-	 }
+            break;
+         }
+     }
   return connection;
 }
 
@@ -2200,7 +2200,7 @@ PBoolean H323EndPoint::ForwardConnection(H323Connection & connection,
 
  PStringList Addresses;
   if (!ResolveCallParty(forwardParty, Addresses))
-	return FALSE;
+    return FALSE;
 
   H323Connection * newConnection = NULL;
      for (PINDEX i = 0; i < Addresses.GetSize(); i++) {
@@ -2213,11 +2213,11 @@ PBoolean H323EndPoint::ForwardConnection(H323Connection & connection,
                                            NULL);
         if (newConnection != NULL)
              break;
-	 }
+     }
 
 
-	 if (newConnection == NULL) 
-		 return FALSE;
+     if (newConnection == NULL) 
+         return FALSE;
 
      connection.SetCallEndReason(H323Connection::EndedByCallForwarded);
      newConnection->Unlock();
@@ -2442,8 +2442,8 @@ PBoolean H323EndPoint::OpenVideoChannel(H323Connection & /*connection*/,
 
 #ifdef H323_H239
 PBoolean H323EndPoint::OpenExtendedVideoChannel(H323Connection & /*connection*/,
-											PBoolean PTRACE_PARAM(isEncoding),
-											H323VideoCodec & /*codec*/)
+                                            PBoolean PTRACE_PARAM(isEncoding),
+                                            H323VideoCodec & /*codec*/)
 {
   PTRACE(1, "Codec\tCould not open extended video channel for "
          << (isEncoding ? "captur" : "display")
@@ -2486,56 +2486,56 @@ void H323EndPoint::OnUserInputTone(H323Connection & connection,
 void H323EndPoint::OnGatekeeperNATDetect(
                                    PIPSocket::Address publicAddr,   
                                    const PString & gkIdentifier,
-				           H323TransportAddress & gkRouteAddress
+                           H323TransportAddress & gkRouteAddress
                                    )
 {
-	if (gnugk != NULL) {
-		if (gnugk->ReRegister(gkIdentifier))
-			return;
-		else {
-		   	PTRACE(4, "GNUGK\tReRegistration Failure. Attempting new connection");
-			if (!gnugk->CreateNewTransport()) {
-			  PTRACE(4, "GNUGK\tNAT Support Failure: Retry from scratch");	
-			   delete gnugk;
-			   gnugk = NULL;
-			}
-		}
-	}
+    if (gnugk != NULL) {
+        if (gnugk->ReRegister(gkIdentifier))
+            return;
+        else {
+               PTRACE(4, "GNUGK\tReRegistration Failure. Attempting new connection");
+            if (!gnugk->CreateNewTransport()) {
+              PTRACE(4, "GNUGK\tNAT Support Failure: Retry from scratch");    
+               delete gnugk;
+               gnugk = NULL;
+            }
+        }
+    }
 
-	gnugk = new GNUGK_Feature(*this,gkRouteAddress,gkIdentifier);
+    gnugk = new GNUGK_Feature(*this,gkRouteAddress,gkIdentifier);
 
 #ifdef P_STUN
-	 if (gnugk->IsOpen()) {
- 	     PTRACE(4, "GNUGK\tNat Address " << gkRouteAddress);
+     if (gnugk->IsOpen()) {
+          PTRACE(4, "GNUGK\tNat Address " << gkRouteAddress);
 
-		 PNatMethod_GnuGk * natMethod = (PNatMethod_GnuGk *)natMethods->LoadNatMethod("GnuGk");
-		 if (natMethods) {
-			 natMethod->AttachEndPoint(this);
-			 natMethod->SetAvailable();
-			 natMethods->AddMethod(natMethod);
-		 }
-		 return; 
-	 } 
+         PNatMethod_GnuGk * natMethod = (PNatMethod_GnuGk *)natMethods->LoadNatMethod("GnuGk");
+         if (natMethods) {
+             natMethod->AttachEndPoint(this);
+             natMethod->SetAvailable();
+             natMethods->AddMethod(natMethod);
+         }
+         return; 
+     } 
 #endif
 
-	  PTRACE(4, "GNUGK\tConnection failed. Disabling support.");
-	  delete gnugk;
+      PTRACE(4, "GNUGK\tConnection failed. Disabling support.");
+      delete gnugk;
       gnugk = NULL;
 }
 
 void H323EndPoint::OnGatekeeperOpenNATDetect(
                           const PString & /*gkIdentifier*/,
-				   H323TransportAddress & /*gkRouteAddress*/
+                   H323TransportAddress & /*gkRouteAddress*/
                                    )
 {
 }
 #endif
 
 PBoolean H323EndPoint::OnGatekeeperAliases(
-		const H225_ArrayOf_AliasAddress & /*aliases*/  
-		                              )
+        const H225_ArrayOf_AliasAddress & /*aliases*/  
+                                      )
 {
-	return FALSE;
+    return FALSE;
 }
 
 #ifdef H323_H248
@@ -2557,7 +2557,7 @@ void H323EndPoint::OnCallCreditServiceControl(const PString & /*amount*/, PBoole
 
 #ifdef H323_H350
 void H323EndPoint::OnH350ServiceControl(const PString & /*url*/,
-										const PString & /*BaseDN*/)
+                                        const PString & /*BaseDN*/)
 {
 }
 #endif
@@ -2579,7 +2579,7 @@ H323ServiceControlSession * H323EndPoint::CreateServiceControlSession(const H225
     case H225_ServiceControlDescriptor::e_callCreditServiceControl :
       return new H323CallCreditServiceControl(contents);
 #ifdef H323_H350
-	case H225_ServiceControlDescriptor::e_nonStandard  :
+    case H225_ServiceControlDescriptor::e_nonStandard  :
       return new H323H350ServiceControl(contents);
 #endif
   }
@@ -2597,13 +2597,13 @@ PBoolean H323EndPoint::OnConferenceInvite(PBoolean /*sending*/,
 }
 
 PBoolean H323EndPoint::OnSendCallIndependentSupplementaryService(const H323Connection * connection, 
-														     H323SignalPDU & pdu )
+                                                             H323SignalPDU & pdu )
 {
   
 #ifdef H323_H460
 
   if (!connection->IsNonCallConnection())
-	  return false;
+      return false;
 
   H225_Setup_UUIE & setup = pdu.m_h323_uu_pdu.m_h323_message_body;
   setup.m_conferenceGoal.SetTag(H225_Setup_UUIE_conferenceGoal::e_callIndependentSupplementaryService);
@@ -2612,22 +2612,22 @@ PBoolean H323EndPoint::OnSendCallIndependentSupplementaryService(const H323Conne
   H460_FeatureSet * featset = NULL;
   H323Connection* conn = FindConnectionWithLock(connection->GetCallToken());
   if (conn != NULL) {
-	  featset = conn->GetFeatureSet();
-	  conn->Unlock();
+      featset = conn->GetFeatureSet();
+      conn->Unlock();
   }
 
   if (featset == NULL)
-	  return false;
+      return false;
 
   H225_FeatureSet fs;
   if (featset->SendFeature(H460_MessageType::e_setup, fs)) {
-	if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
+    if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
         setup.IncludeOptionalField(H225_Setup_UUIE::e_supportedFeatures);
-	    H225_ArrayOf_FeatureDescriptor & fsn = setup.m_supportedFeatures;
-	    fsn = fs.m_supportedFeatures;
-	} */
-	PTRACE(6,"MyEP\tSending H.460 Call Independent Supplementary Service"); 
-	return true;
+        H225_ArrayOf_FeatureDescriptor & fsn = setup.m_supportedFeatures;
+        fsn = fs.m_supportedFeatures;
+    } */
+    PTRACE(6,"MyEP\tSending H.460 Call Independent Supplementary Service"); 
+    return true;
 //  } else
  
 #endif
@@ -2637,11 +2637,11 @@ PBoolean H323EndPoint::OnSendCallIndependentSupplementaryService(const H323Conne
 }
 
 PBoolean H323EndPoint::OnReceiveCallIndependentSupplementaryService(const H323Connection * connection, 
-														        const H323SignalPDU & pdu)
+                                                                const H323SignalPDU & pdu)
 {
 #ifdef H323_H450
   if (pdu.m_h323_uu_pdu.HasOptionalField(H225_H323_UU_PDU::e_h4501SupplementaryService)) {
-	  PTRACE(6,"MyEP\tReceived H.450 Call Independent Supplementary Service");
+      PTRACE(6,"MyEP\tReceived H.450 Call Independent Supplementary Service");
       return true;
   }
 #endif
@@ -2649,31 +2649,31 @@ PBoolean H323EndPoint::OnReceiveCallIndependentSupplementaryService(const H323Co
 #ifdef H323_H460
 
   if (disableH460)
-	  return false;
+      return false;
 
   H225_FeatureSet fs;
   const H225_Setup_UUIE & setup = pdu.m_h323_uu_pdu.m_h323_message_body;
-		
+        
   if (setup.HasOptionalField(H225_Setup_UUIE::e_supportedFeatures)) {
-	  fs.IncludeOptionalField(H225_FeatureSet::e_supportedFeatures);
-	  fs.m_supportedFeatures = setup.m_supportedFeatures;
+      fs.IncludeOptionalField(H225_FeatureSet::e_supportedFeatures);
+      fs.m_supportedFeatures = setup.m_supportedFeatures;
   }
 
   if (setup.HasOptionalField(H225_Setup_UUIE::e_neededFeatures)) {
-	  fs.IncludeOptionalField(H225_FeatureSet::e_neededFeatures);
-	  fs.m_supportedFeatures = setup.m_neededFeatures;
+      fs.IncludeOptionalField(H225_FeatureSet::e_neededFeatures);
+      fs.m_supportedFeatures = setup.m_neededFeatures;
   }
 
   if (setup.HasOptionalField(H225_Setup_UUIE::e_desiredFeatures)) {
-	  fs.IncludeOptionalField(H225_FeatureSet::e_desiredFeatures);
-	  fs.m_supportedFeatures = setup.m_desiredFeatures;
+      fs.IncludeOptionalField(H225_FeatureSet::e_desiredFeatures);
+      fs.m_supportedFeatures = setup.m_desiredFeatures;
   }
 
   H460_FeatureSet * featset = NULL;
   H323Connection* conn = FindConnectionWithLock(connection->GetCallToken());
   if (conn != NULL) {
-	  featset = conn->GetFeatureSet();
-	  conn->Unlock();
+      featset = conn->GetFeatureSet();
+      conn->Unlock();
   }
 
   if (featset->SupportNonCallService(fs)) {
@@ -2710,7 +2710,7 @@ OpalT38Protocol * H323EndPoint::CreateT38ProtocolHandler(const H323Connection &)
 #ifdef H323_H224
 
 OpalH224Handler * H323EndPoint::CreateH224ProtocolHandler(H323Channel::Directions dir, H323Connection & connection, 
-														  unsigned sessionID) const
+                                                          unsigned sessionID) const
 {
   return new OpalH224Handler(dir, connection, sessionID);
 }
@@ -2725,9 +2725,9 @@ OpalH281Handler * H323EndPoint::CreateH281ProtocolHandler(OpalH224Handler & h224
 
 #ifdef H323_FILE
 PBoolean H323EndPoint::OpenFileTransferSession( const H323FileTransferList & list,
-	                                            const PString & token, 
-												H323ChannelNumber & num
-												)
+                                                const PString & token, 
+                                                H323ChannelNumber & num
+                                                )
 {
   H323Connection * connection = FindConnectionWithLock(token);
  
@@ -2741,9 +2741,9 @@ PBoolean H323EndPoint::OpenFileTransferSession( const H323FileTransferList & lis
 }
 
 PBoolean H323EndPoint::OpenFileTransferChannel(H323Connection & connection,
-											 PBoolean PTRACE_PARAM(isEncoder),
-						                     H323FileTransferList & filelist
-											) 
+                                             PBoolean PTRACE_PARAM(isEncoder),
+                                             H323FileTransferList & filelist
+                                            ) 
 {
    PTRACE(2,"FT\tAttempt to open File Transfer session! Not implemented Yet!");
    return FALSE;
@@ -2980,7 +2980,7 @@ PNatMethod * H323EndPoint::GetPreferedNatMethod(const PIPSocket::Address & ip)
 
 PNatStrategy & H323EndPoint::GetNatMethods() const 
 { 
-	return *natMethods; 
+    return *natMethods; 
 }
 
 void H323EndPoint::SetSTUNServer(const PString & server)
@@ -2996,8 +2996,8 @@ void H323EndPoint::SetSTUNServer(const PString & server)
     natMethods->AddMethod(stun);
 
     PTRACE(2, "H323\tSTUN server \"" << server << "\" replies " << stun->GetNatTypeName());
-	
-	STUNNatType((int)stun->GetNatType());
+    
+    STUNNatType((int)stun->GetNatType());
   }
 }
 
@@ -3033,7 +3033,7 @@ PBoolean H323EndPoint::OnUPnPAvailable(const PString & device, const PIPSocket::
 #endif  // H323_UPnP
 
 void H323EndPoint::InternalTranslateTCPAddress(PIPSocket::Address & localAddr, const PIPSocket::Address & remoteAddr, 
-											   const H323Connection * connection)
+                                               const H323Connection * connection)
 {
 
   if (remoteAddr.GetVersion() != 4)
@@ -3225,18 +3225,18 @@ PBoolean H323EndPoint::OnSendFeatureSet(unsigned pdu, H225_FeatureSet & feats, P
 void H323EndPoint::OnReceiveFeatureSet(unsigned pdu, const H225_FeatureSet & feats, PBoolean genericData)
 {
 #ifdef H323_H460
-	features.ReceiveFeature(pdu,feats,genericData);
+    features.ReceiveFeature(pdu,feats,genericData);
 #endif
 }
 
 #ifdef H323_H460
 H460_FeatureSet * H323EndPoint::GetGatekeeperFeatures()
 {
-	if (gatekeeper != NULL) {
-		return &gatekeeper->GetFeatures();
-	}
+    if (gatekeeper != NULL) {
+        return &gatekeeper->GetFeatures();
+    }
 
-	return NULL;
+    return NULL;
 }
 #endif
 
@@ -3262,20 +3262,20 @@ PBoolean H323EndPoint::H46017CreateConnection(const PString & gatekeeper, PBoole
 #ifdef H323_H46018
 void H323EndPoint::H46018Enable(PBoolean enable) 
 { 
-	m_h46018enabled = enable;
-	if (enable) {
-		// Must set reregistrations at between 15 and 45 sec
-		// otherwise the Pinhole in NAT will close
-		registrationTimeToLive = PTimeInterval(0, 19);  
-	} else {
-		// Set timer to whatever gk allocates...
-		registrationTimeToLive = PTimeInterval();       
-	}
+    m_h46018enabled = enable;
+    if (enable) {
+        // Must set reregistrations at between 15 and 45 sec
+        // otherwise the Pinhole in NAT will close
+        registrationTimeToLive = PTimeInterval(0, 19);  
+    } else {
+        // Set timer to whatever gk allocates...
+        registrationTimeToLive = PTimeInterval();       
+    }
 }
 
 PBoolean H323EndPoint::H46018IsEnabled() 
 { 
-	return m_h46018enabled; 
+    return m_h46018enabled; 
 }
 #endif  // H323_H46018
 
@@ -3304,12 +3304,12 @@ PBoolean H323EndPoint::H46019MIsSending()
 #ifdef H323_H46023
 void H323EndPoint::H46023Enable(PBoolean enable) 
 { 
-	m_h46023enabled = enable;
+    m_h46023enabled = enable;
 }
 
 PBoolean H323EndPoint::H46023IsEnabled() 
 { 
-	return m_h46023enabled; 
+    return m_h46023enabled; 
 }
 #endif  // H323_H46023
 
@@ -3317,55 +3317,55 @@ PBoolean H323EndPoint::H46023IsEnabled()
 void H323EndPoint::PresenceSetLocalState(const PStringList & alias, presenceStates localstate, const PString & localdisplay, PBoolean updateOnly)
 {
     if (presenceHandler == NULL)
-		presenceHandler = new H460PresenceHandler(*this);
+        presenceHandler = new H460PresenceHandler(*this);
 
-	presenceHandler->SetPresenceState(alias,localstate, localdisplay, updateOnly);
+    presenceHandler->SetPresenceState(alias,localstate, localdisplay, updateOnly);
 }
 
 void H323EndPoint::PresenceAddFeature(presenceFeature feat)
 {
-	if (presenceHandler == NULL)
-		presenceHandler = new H460PresenceHandler(*this);
+    if (presenceHandler == NULL)
+        presenceHandler = new H460PresenceHandler(*this);
 
-	presenceHandler->AddEndpointFeature(feat);
+    presenceHandler->AddEndpointFeature(feat);
 }
 
 void H323EndPoint::PresenceAddFeatureH460()
 {
-	if (presenceHandler == NULL)
-		presenceHandler = new H460PresenceHandler(*this);
+    if (presenceHandler == NULL)
+        presenceHandler = new H460PresenceHandler(*this);
 
-	H460FeatureList plist;
+    H460FeatureList plist;
     if (H460_Feature::FeatureList(H460_Feature::FeaturePresence,plist,this)) {
-		H460FeatureList::const_iterator it = plist.begin();
-		while (it != plist.end()) {
-			presenceHandler->AddEndpointH460Feature(*it->second, it->first);
-			it++;
-		}
-	}
+        H460FeatureList::const_iterator it = plist.begin();
+        while (it != plist.end()) {
+            presenceHandler->AddEndpointH460Feature(*it->second, it->first);
+            it++;
+        }
+    }
     DeleteFeatureList(plist);
 }
 
 void H323EndPoint::PresenceSetLocale(const presenceLocale & info)
 {
-	if (presenceHandler == NULL)
-		presenceHandler = new H460PresenceHandler(*this);
+    if (presenceHandler == NULL)
+        presenceHandler = new H460PresenceHandler(*this);
 
-	H460PresenceHandler::localeInfo & loc = presenceHandler->GetLocationInfo();
+    H460PresenceHandler::localeInfo & loc = presenceHandler->GetLocationInfo();
 
-	loc.m_region = info.m_region;
-	loc.m_country = info.m_country;
-	loc.m_locale = info.m_locale;
-	loc.m_countryCode = info.m_countryCode;
-	loc.m_latitude = info.m_latitude;
-	loc.m_longitude = info.m_longitude;
-	loc.m_elevation = info.m_elevation;
+    loc.m_region = info.m_region;
+    loc.m_country = info.m_country;
+    loc.m_locale = info.m_locale;
+    loc.m_countryCode = info.m_countryCode;
+    loc.m_latitude = info.m_latitude;
+    loc.m_longitude = info.m_longitude;
+    loc.m_elevation = info.m_elevation;
 }
 
 void H323EndPoint::PresenceSetInstruction(const PString & epalias, unsigned type, const PStringList & list, PBoolean autoSend)
 {
-	if (presenceHandler == NULL)
-		return;
+    if (presenceHandler == NULL)
+        return;
 
     PString display = PString();
     if (autoSend) {
@@ -3379,36 +3379,36 @@ void H323EndPoint::PresenceSetInstruction(const PString & epalias, unsigned type
         instList.insert(pair<PString, PString>(list[i],display));
     }
 
-	presenceHandler->AddInstruction(epalias,(H323PresenceHandler::InstType)type,instList,autoSend);
+    presenceHandler->AddInstruction(epalias,(H323PresenceHandler::InstType)type,instList,autoSend);
 }
 
 void H323EndPoint::PresenceSendAuthorization(const OpalGloballyUniqueID & id, const PString & epalias,PBoolean approved, const PStringList & list)
 {
-	if (presenceHandler == NULL)
-		return;
+    if (presenceHandler == NULL)
+        return;
 
-	presenceHandler->AddAuthorization(id,epalias,approved,list);
+    presenceHandler->AddAuthorization(id,epalias,approved,list);
 }
 
 void H323EndPoint::PresenceNotification(const PString & locAlias,
-										const PString & subAlias,
-										unsigned state, 
-										const PString & display)
+                                        const PString & subAlias,
+                                        unsigned state, 
+                                        const PString & display)
 {
-	PTRACE(4,"EP\tAlias " << subAlias << " PresenceState now " << state << " - "
-		                  << H323PresenceNotification::GetStateString(state)
-						  << " " << display);
+    PTRACE(4,"EP\tAlias " << subAlias << " PresenceState now " << state << " - "
+                          << H323PresenceNotification::GetStateString(state)
+                          << " " << display);
 }
 
 void H323EndPoint::PresenceInstruction(const PString & locAlias, unsigned type, const PString & subAlias, const PString & subDisplay)
 {
-	PTRACE(4,"EP\tReceived Gatekeeper Instruction to " 
-				<< H323PresenceInstruction::GetInstructionString(type) 
-				<< " " << subAlias << " " << subDisplay);
+    PTRACE(4,"EP\tReceived Gatekeeper Instruction to " 
+                << H323PresenceInstruction::GetInstructionString(type) 
+                << " " << subAlias << " " << subDisplay);
 }
 
 void H323EndPoint::PresenceAuthorization(const OpalGloballyUniqueID & id,
-									const PString & locAlias,
+                                    const PString & locAlias,
                                     const std::map<PString,PString> & Aliases)
 {
     PStringStream s;
@@ -3424,7 +3424,7 @@ void H323EndPoint::PresenceAuthorization(const OpalGloballyUniqueID & id,
 
 PBoolean H323EndPoint::OnFeatureInstance(int /*instType*/, const PString & /*identifer*/)
 {
-	return TRUE;
+    return TRUE;
 }
 
 PBoolean H323EndPoint::HandleUnsolicitedInformation(const H323SignalPDU & )
@@ -3463,25 +3463,25 @@ PHandleAggregator * H323EndPoint::GetSignallingAggregator()
 #ifdef H323_GNUGK
 void H323EndPoint::NATLostConnection(PBoolean lost)
 {
-	PTRACE(4,"GNUGK\tNAT Connection" << (lost ? "Lost" : " Re-established"));
-	if (!lost)
-		RegInvokeReRegistration();  
+    PTRACE(4,"GNUGK\tNAT Connection" << (lost ? "Lost" : " Re-established"));
+    if (!lost)
+        RegInvokeReRegistration();  
 }
 #endif
 
 void H323EndPoint::RegInvokeReRegistration()
 {
-	 RegThread = PThread::Create(PCREATE_NOTIFIER(RegMethod), 0,
-					PThread::AutoDeleteThread,
-					PThread::NormalPriority,
-					"regmeth:%x");
+     RegThread = PThread::Create(PCREATE_NOTIFIER(RegMethod), 0,
+                    PThread::AutoDeleteThread,
+                    PThread::NormalPriority,
+                    "regmeth:%x");
 }
 
 void H323EndPoint::RegMethod(PThread &, INT)
 {
-	PWaitAndSignal m(reregmutex);
+    PWaitAndSignal m(reregmutex);
 
-	gatekeeper->ReRegisterNow();
+    gatekeeper->ReRegisterNow();
 }
 
 
