@@ -46,7 +46,8 @@
 #include <h323pdu.h>
 #include <h460/h460_std17.h>
 #ifdef H323_H46026
- #include <h460/h46026.h>  // TODO MAKE Feature Identifier
+ #include <h460/h460.h> 
+ #include <h460/h46026.h>
 #endif
 
 #include <ptclib/pdns.h>
@@ -341,7 +342,7 @@ H46017Transport::~H46017Transport()
     delete m_socketWrite;
 }
 
-static PBoolean FindH46017RAS(const H225_H323_UU_PDU & pdu, std::list<PBYTEArray> & ras)
+PBoolean FindH46017RAS(const H225_H323_UU_PDU & pdu, std::list<PBYTEArray> & ras)
 {
     if (pdu.HasOptionalField(H225_H323_UU_PDU::e_genericData)) {
        const H225_ArrayOf_GenericData & data = pdu.m_genericData;
@@ -788,6 +789,9 @@ H46017Transport * H46017Handler::curtransport = NULL;
 
 H46017Handler::H46017Handler(H323EndPoint & _ep, const H323TransportAddress & _remoteAddress)
  : ep(_ep), ras(NULL), remoteAddress(_remoteAddress)
+#ifdef H323_H46026
+   , m_h46026tunnel(false)
+#endif
 {
     PTRACE(4, "H46017\tCreating H46017 Feature.");
     
@@ -867,14 +871,172 @@ PBoolean H46017Handler::RegisterGatekeeper()
     return true;
 }
 
+#ifdef H323_H46026
+void H46017Handler::SetH46026Tunnel(PBoolean tunnel)
+{
+    m_h46026tunnel = tunnel;
+}
+
+PBoolean H46017Handler::IsH46026Tunnel()
+{
+    return m_h46026tunnel;
+}
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 #ifdef H323_H46026
 
+H460_FEATURE(Std26);
+
+H460_FeatureStd26::H460_FeatureStd26()
+: EP(NULL), CON(NULL), handler(NULL), isEnabled(false)
+{
+  	 FeatureCategory = FeatureSupported;
+}
+
+H460_FeatureStd26::~H460_FeatureStd26()
+{
+
+}
+
+void H460_FeatureStd26::AttachEndPoint(H323EndPoint * _ep)
+{
+    if (!EP)
+       EP = _ep;
+}
+
+void H460_FeatureStd26::AttachConnection(H323Connection * _con)
+{
+    CON = _con;
+    if (!EP)
+        EP = &CON->GetEndPoint();
+}
+
+int H460_FeatureStd26::GetPurpose()
+{
+      return FeatureSignal;
+}
+
+
+void H460_FeatureStd26::AttachHandler(H46017Handler * m_handler)
+{
+    handler = m_handler;
+}
+
+PBoolean H460_FeatureStd26::FeatureAdvertised(int mtype)
+{
+     switch (mtype) {
+        case H460_MessageType::e_admissionRequest:
+        case H460_MessageType::e_admissionConfirm:
+        case H460_MessageType::e_admissionReject:
+            return true;
+        default:
+            return false;
+     }
+}
+
+PBoolean H460_FeatureStd26::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
+{
+    if (!handler)  // if no h46017 handler then no H460.26 support.
+        return false;
+
+	// Build Message
+    H460_FeatureStd feat = H460_FeatureStd(26); 
+    pdu = feat;
+
+	return true;
+}
+
+void H460_FeatureStd26::OnReceiveAdmissionConfirm(const H225_FeatureDescriptor & pdu)
+{
+   if (handler)
+       handler->SetH46026Tunnel(true);
+
+   isEnabled = true;
+
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+PBoolean H460_FeatureStd26::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
+{
+    if (!isEnabled)
+        return false;
+
+	// Build Message
+    H460_FeatureStd feat = H460_FeatureStd(26); 
+    pdu = feat;
+   
+    return true;
+}
+
+void H460_FeatureStd26::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
+{
+   if (handler)
+       handler->SetH46026Tunnel(true);
+
+    isEnabled = true;
+}
+
+PBoolean H460_FeatureStd26::OnSendCallProceeding_UUIE(H225_FeatureDescriptor & pdu)
+{
+    if (!isEnabled)
+        return false;
+
+	// Build Message
+    H460_FeatureStd feat = H460_FeatureStd(26); 
+    pdu = feat;
+
+	return true;
+}
+
+void H460_FeatureStd26::OnReceiveCallProceeding_UUIE(const H225_FeatureDescriptor & pdu)
+{
+    // do nothing
+}
+
+PBoolean H460_FeatureStd26::OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu)
+{
+    if (!isEnabled)
+        return false;
+
+	// Build Message
+    H460_FeatureStd feat = H460_FeatureStd(26); 
+    pdu = feat;
+
+	return true;
+}
+
+void H460_FeatureStd26::OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pdu)
+{
+    // do nothing
+}
+
+PBoolean H460_FeatureStd26::OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu)
+{
+    if (!isEnabled)
+        return false;
+
+	// Build Message
+    H460_FeatureStd feat = H460_FeatureStd(26); 
+    pdu = feat;
+
+	return true;
+}
+
+void H460_FeatureStd26::OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor & pdu)
+{
+    // do nothing
+}
+
+
+////////////////////////////////////////////////
+
 PCREATE_NAT_PLUGIN(H46026);
     
 PNatMethod_H46026::PNatMethod_H46026()
-: available(false), active(false), handler(NULL)
+: active(false), handler(NULL)
 {
 
 }
@@ -883,7 +1045,6 @@ PNatMethod_H46026::~PNatMethod_H46026()
 {
 
 }
-
 
 void PNatMethod_H46026::AttachEndPoint(H323EndPoint * ep)
 {
@@ -916,7 +1077,11 @@ void PNatMethod_H46026::AttachEndPoint(H323EndPoint * ep)
 
   pairedPortInfo.mutex.Signal();
 
-    available = FALSE;
+}
+
+void PNatMethod_H46026::AttachHandler(H46017Handler * m_handler)
+{
+    handler = m_handler;
 }
 
 PBoolean PNatMethod_H46026::GetExternalAddress(
@@ -1009,7 +1174,7 @@ void PNatMethod_H46026::SetInformationHeader(PUDPSocket & data, PUDPSocket & con
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-H46026UDPSocket::H46026UDPSocket(H46026Handler & _handler, H323Connection::SessionInformation * info, bool _rtpSocket)
+H46026UDPSocket::H46026UDPSocket(H46017Handler & _handler, H323Connection::SessionInformation * info, bool _rtpSocket)
 : m_transport(NULL), m_Session(info->GetSessionID()), rtpSocket(_rtpSocket), m_frameCount(0), m_payloadSize(0), m_frame(NULL), shutDown(false)
 {
 }
@@ -1029,7 +1194,7 @@ H46026UDPSocket::~H46026UDPSocket()
 void H46026UDPSocket::SetInformationHeader(const H323SignalPDU & _InformationMsg, const H323Transport * _transport)
 {
     msg = _InformationMsg;
-    m_transport = (H46026Transport *)PRemoveConst(H323Transport,_transport);
+    m_transport = (H46017Transport *)PRemoveConst(H323Transport,_transport);
 }
 
 

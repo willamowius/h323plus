@@ -181,6 +181,7 @@ default_h46017=no
 default_h46018=yes
 default_h46019m=no
 default_h46023=yes
+default_h46026=no
 default_h460p=no
 default_t120=yes
 default_gnugk=yes
@@ -207,7 +208,8 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_h46018=no
   default_h46019m=no
   default_h46023=no
-  default_h460p=no
+  default_h46026=no
+  default_hh460p=no
   default_t120=no
   default_gnugk=no
   default_file=no
@@ -583,6 +585,26 @@ else
   AC_MSG_NOTICE(Disabling H.460.23/.24)
 fi
 AC_SUBST(H323_H46023)
+
+dnl ########################################################################
+dnl check for disabling H.460.26
+
+dnl MSWIN_DISPLAY h46026,H.460.26
+dnl MSWIN_DEFINE  h46026,H323_H46026
+
+AC_ARG_ENABLE(h46026,
+       [  --disable-h46026        disable H.460.26])
+if test "${enable_h46026}x" = "x" ; then
+  enable_h46023=$default_h46026
+fi
+if test "$enable_h46026" = "yes" ; then
+  H323_H46026=1
+  AC_DEFINE(H323_H46026, 1)
+else
+  H323_H46026=
+  AC_MSG_NOTICE(Disabling H.460.26)
+fi
+AC_SUBST(H323_H46026)
 
 dnl ########################################################################
 dnl check for disabling H.460 Presence

@@ -3257,8 +3257,24 @@ void H323EndPoint::LoadBaseFeatureSet()
 PBoolean H323EndPoint::H46017CreateConnection(const PString & gatekeeper, PBoolean useSRV)
 {
    registrationTimeToLive = PTimeInterval(0, 19);
-   H460_Feature * m_h46017 = features.GetFeature(17);
-   return (m_h46017 && m_h46017->Initialise(gatekeeper,useSRV));
+   H460_FeatureStd17 * m_h46017 = (H460_FeatureStd17 *)features.GetFeature(17);
+
+   if(!m_h46017 || !m_h46017->Initialise(gatekeeper,useSRV))
+       return false;
+
+#ifdef H323_H46026
+     H460_FeatureStd26 * m_h46026 = (H460_FeatureStd26 *)features.GetFeature(26);
+     if (m_h46026) 
+         m_h46026->AttachHandler(m_h46017->GetHandler());
+
+     PNatMethod_H46026 * natMethod = (PNatMethod_H46026 *)natMethods->LoadNatMethod("H46026");
+     if (natMethods) {
+         natMethod->AttachEndPoint(this);
+         natMethod->AttachHandler(m_h46017->GetHandler());
+         natMethods->AddMethod(natMethod);
+     }
+#endif
+   return true;
 }
 #endif
 

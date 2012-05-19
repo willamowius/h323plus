@@ -139,11 +139,13 @@ PBoolean H323_RTP_UDP::OnSendingPDU(const H323_RTPChannel & channel,
   param.m_mediaGuaranteedDelivery = FALSE;
 
   // unicast must have mediaControlChannel
-  param.IncludeOptionalField(H245_H2250LogicalChannelParameters::e_mediaControlChannel);
-  H323TransportAddress mediaControlAddress(rtp.GetLocalAddress(), rtp.GetLocalControlPort());
-  mediaControlAddress.SetPDU(param.m_mediaControlChannel);
+  if (rtp.GetLocalDataPort() > 0) {  // if a valid Data port
+      param.IncludeOptionalField(H245_H2250LogicalChannelParameters::e_mediaControlChannel);
+      H323TransportAddress mediaControlAddress(rtp.GetLocalAddress(), rtp.GetLocalControlPort());
+      mediaControlAddress.SetPDU(param.m_mediaControlChannel);
+  }
 
-  if (channel.GetDirection() == H323Channel::IsReceiver) {
+  if ((channel.GetDirection() == H323Channel::IsReceiver) && rtp.GetLocalDataPort() > 0) {
     // set mediaChannel
     param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel);
     H323TransportAddress mediaAddress(rtp.GetLocalAddress(), rtp.GetLocalDataPort());
@@ -196,15 +198,17 @@ void H323_RTP_UDP::OnSendingAckPDU(const H323_RTPChannel & channel,
 {
   PTRACE(3, "RTP\tOnSendingAckPDU");
 
-  // set mediaControlChannel
-  param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaControlChannel);
-  H323TransportAddress mediaControlAddress(rtp.GetLocalAddress(), rtp.GetLocalControlPort());
-  mediaControlAddress.SetPDU(param.m_mediaControlChannel);
+  if (rtp.GetLocalDataPort() > 0) { // if a valid Data Port
+      // set mediaControlChannel
+      param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaControlChannel);
+      H323TransportAddress mediaControlAddress(rtp.GetLocalAddress(), rtp.GetLocalControlPort());
+      mediaControlAddress.SetPDU(param.m_mediaControlChannel);
 
-  // set mediaChannel
-  param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel);
-  H323TransportAddress mediaAddress(rtp.GetLocalAddress(), rtp.GetLocalDataPort());
-  mediaAddress.SetPDU(param.m_mediaChannel);
+      // set mediaChannel
+      param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel);
+      H323TransportAddress mediaAddress(rtp.GetLocalAddress(), rtp.GetLocalDataPort());
+      mediaAddress.SetPDU(param.m_mediaChannel);
+  }
 
   // Set dynamic payload type, if is one
   int rtpPayloadType = channel.GetRTPPayloadType();
@@ -367,6 +371,10 @@ PBoolean H323_RTP_UDP::WriteTransportCapPDU(H245_TransportCapability & cap,
     H245_MediaChannelCapability & mediaCap = mediaCaps[0];
     mediaCap.IncludeOptionalField(H245_MediaChannelCapability::e_mediaTransport);
     H245_MediaTransportType & transport = mediaCap.m_mediaTransport;
+    if (rtp.GetLocalDataPort() == 0) {
+       transport.SetTag(H245_MediaTransportType::e_ip_TCP);
+       return true;
+    }
     transport.SetTag(H245_MediaTransportType::e_ip_UDP);
 
     PQoS & qos = rtp.GetQOS();

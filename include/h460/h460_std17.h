@@ -70,10 +70,13 @@ public:
 
 	virtual PBoolean CommonFeature() { return isEnabled; }
 
+    static PBoolean IsEnabled()  { return isEnabled; }
+
     //////////////////////
     // Public Function  call..
     virtual PBoolean Initialise(const PString & remoteAddr = PString(), PBoolean srv = true);
 
+    H46017Handler * GetHandler() { return m_handler; }
 
 protected:
     PBoolean InitialiseTunnel(const H323TransportAddress & remoteAddr);
@@ -125,7 +128,6 @@ typedef std::priority_queue< std::pair<H323SignalPDU, h225Order::MessageHeader >
 ////////////////////////////////////////////////////////////////////////
 
 class H46017Handler;
-class PNatMethod_H46017;
 class H46017Transport  : public H323TransportTCP
 {
   PCLASSINFO(H46017Transport, H323TransportTCP);
@@ -250,7 +252,6 @@ class H46017Transport  : public H323TransportTCP
 
 //////////////////////////////////////////////////////////////////////
 
-class PNatMethod_H46017;
 class H46017RasTransport;
 class H46017Handler : public PObject  
 {
@@ -284,6 +285,16 @@ public:
 
 	static H46017Transport * curtransport;
 
+#ifdef H323_H46026
+    /**Set Flag to say media tunneling
+      */
+    void SetH46026Tunnel(PBoolean tunnel);
+
+    /**Is Media Tunneling
+      */
+    PBoolean IsH46026Tunnel();
+#endif
+
 private:
 	H323EndPoint & ep;
 
@@ -296,11 +307,69 @@ private:
     PBoolean openTransport;
     PBoolean callEnded;
 
+#ifdef H323_H46026
+    PBoolean   m_h46026tunnel;
+#endif
+
 };
 
 ///////////////////////////////////////////////////////////////////////////
 
 #ifdef H323_H46026
+
+class H460_FeatureStd26 : public H460_FeatureStd 
+{
+    PCLASSINFO(H460_FeatureStd26,H460_FeatureStd);
+
+public:
+
+    H460_FeatureStd26();
+    virtual ~H460_FeatureStd26();
+
+    // Universal Declarations Every H460 Feature should have the following
+    virtual void AttachEndPoint(H323EndPoint * _ep);
+    virtual void AttachConnection(H323Connection * _con);
+
+    static PStringArray GetFeatureName() { return PStringArray("Std26"); };
+    static PStringArray GetFeatureFriendlyName() { return PStringArray("TCPTunneling-H.460.26"); };
+    static int GetPurpose();
+	static PStringArray GetIdentifier() { return PStringArray("26"); };
+
+	virtual PBoolean FeatureAdvertised(int mtype);
+	virtual PBoolean CommonFeature() { return isEnabled; }
+
+	// Messages
+    virtual PBoolean OnSendAdmissionRequest(H225_FeatureDescriptor & pdu);
+    virtual void OnReceiveAdmissionConfirm(const H225_FeatureDescriptor & pdu);
+
+    virtual PBoolean OnSendSetup_UUIE(H225_FeatureDescriptor & pdu);
+    virtual void OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu);
+
+    virtual PBoolean OnSendCallProceeding_UUIE(H225_FeatureDescriptor & pdu);
+    virtual void OnReceiveCallProceeding_UUIE(const H225_FeatureDescriptor & pdu);
+
+    virtual PBoolean OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu);
+    virtual void OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pdu);
+
+    virtual PBoolean OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu);
+    virtual void OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor & pdu);
+
+    void AttachHandler(H46017Handler * m_handler);
+
+private:
+    H323EndPoint * EP;
+    H323Connection * CON;
+
+	H46017Handler * handler;			///< handler
+    PBoolean isEnabled;
+};
+
+// Need to declare for Factory Loader
+#ifndef _WIN32_WCE
+  PPLUGIN_STATIC_LOAD(Std26, H460_Feature);
+#endif
+
+//////////////////////////////////////////////////////////////////////////////
 
 class PNatMethod_H46026  : public PNatMethod
 {
@@ -322,6 +391,8 @@ public:
   /**@name General Functions */
   //@{
    void AttachEndPoint(H323EndPoint * ep);
+
+   void AttachHandler(H46017Handler * m_handler);
 
    virtual PBoolean GetExternalAddress(
       PIPSocket::Address & externalAddress, /// External address of router
@@ -363,9 +434,9 @@ public:
 		The Order of adding to the PNstStrategy determines which method
 		is used
   */
-   virtual bool IsAvailable(const PIPSocket::Address&) { return available; };
+   virtual bool IsAvailable(const PIPSocket::Address&) { return (handler && handler->IsH46026Tunnel()); };
 
-   void SetAvailable() { available = TRUE; };
+   void SetAvailable() {};
 
     /** Activate
 		Active/DeActivate the method on a call by call basis
@@ -417,7 +488,6 @@ public:
 
 
 protected:
-	PBoolean available;					///< Whether this NAT Method is available for call
 	PBoolean active;					///< Whether the method is active for call
 	H46017Handler * handler;			///< handler
 
@@ -440,7 +510,7 @@ class H46026UDPSocket : public PUDPSocket
 	/** create a UDP Socket Fully Nat Supported
 		ready for H323plus to Call.
 	*/
-    H46026UDPSocket(H46026Handler & _handler, H323Connection::SessionInformation * info, bool _rtpSocket);
+    H46026UDPSocket(H46017Handler & _handler, H323Connection::SessionInformation * info, bool _rtpSocket);
 
 	/** Deconstructor to reallocate Socket and remove any exiting
 		allocated NAT ports, 
