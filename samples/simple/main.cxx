@@ -111,6 +111,9 @@ void SimpleH323Process::Main()
 #ifdef H323_H46018
              "-h46018disable."
 #endif
+#ifdef P_HAS_IPV6
+             "-ipv6."
+#endif
 #if PTRACING
              "t-trace."
 #endif
@@ -146,6 +149,9 @@ void SimpleH323Process::Main()
 #endif
 #ifdef H323_H46018
             "     --h46018disable      : Disable H.460.18.\n"
+#endif
+#ifdef P_HAS_IPV6
+            "     --ipv6               : Enable IPv6 Support.\n"
 #endif
             "  -s --sound device       : Select sound input/output device.\n"
             "     --sound-in device    : Select sound input device.\n"
@@ -407,6 +413,14 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
   }
 #endif
 
+#ifdef H323_H460P
+  PresenceAddFeature(e_preAudio);
+  PresenceAddFeature(e_preVideo);
+ 
+  PresenceAddFeatureH460();
+  PresenceSetLocalState(localAliasNames,e_preOnline, "OnLine");
+#endif
+
 #endif
 /////////////////////////////////////////
 
@@ -476,7 +490,8 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
     return FALSE;
   }
 
-  //PIPSocket::SetDefaultIpAddressFamilyV6();
+  if (args.HasOption("ipv6") && PIPSocket::IsIpAddressFamilyV6Supported())
+    PIPSocket::SetDefaultIpAddressFamilyV6();
 
   // Initialise the security info
   if (args.HasOption('p')) {
