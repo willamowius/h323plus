@@ -362,6 +362,7 @@ private:
 
 	H46017Handler * handler;			///< handler
     PBoolean isEnabled;
+    static PBoolean isSupported;
 };
 
 // Need to declare for Factory Loader

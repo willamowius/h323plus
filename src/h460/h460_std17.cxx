@@ -889,15 +889,16 @@ PBoolean H46017Handler::IsH46026Tunnel()
 
 H460_FEATURE(Std26);
 
+PBoolean H460_FeatureStd26::isSupported = false;
 H460_FeatureStd26::H460_FeatureStd26()
-: EP(NULL), CON(NULL), handler(NULL), isEnabled(false)
+: H460_FeatureStd(26), EP(NULL), CON(NULL), handler(NULL), isEnabled(false)
 {
   	 FeatureCategory = FeatureSupported;
 }
 
 H460_FeatureStd26::~H460_FeatureStd26()
 {
-
+   isSupported = false;
 }
 
 void H460_FeatureStd26::AttachEndPoint(H323EndPoint * _ep)
@@ -915,13 +916,17 @@ void H460_FeatureStd26::AttachConnection(H323Connection * _con)
 
 int H460_FeatureStd26::GetPurpose()
 {
+    if (isSupported)
       return FeatureSignal;
+    else
+      return FeatureBase;
 }
 
 
 void H460_FeatureStd26::AttachHandler(H46017Handler * m_handler)
 {
     handler = m_handler;
+    isSupported = true;
 }
 
 PBoolean H460_FeatureStd26::FeatureAdvertised(int mtype)
