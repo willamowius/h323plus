@@ -553,8 +553,6 @@ PBoolean H235Session::IsInitialised()
 PBoolean H235Session::CreateSession(PBoolean isMaster)
 {
     m_isMaster = isMaster;
-    if (!m_dh)
-        return false;
     m_dh.ComputeSessionKey(m_dhSessionkey);
     m_dhcontext.SetKey(m_dhSessionkey);
 
