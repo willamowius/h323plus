@@ -1092,6 +1092,18 @@ H323Connection * H323EndPoint::MakeAuthenticatedCall(const PString & remoteParty
 }
 #endif
 
+#ifdef H323_H235
+void H323EndPoint::EncryptionCacheInitialise()
+{
+    H2356_Authenticator::InitialiseCache();
+}
+
+void H323EndPoint::EncryptionCacheRemove()
+{
+    H2356_Authenticator::RemoveCache();
+}
+#endif
+
 #ifdef H323_H460 
 H323Connection * H323EndPoint::MakeSupplimentaryCall (
                         const PString & remoteParty,  ///* Remote party to call

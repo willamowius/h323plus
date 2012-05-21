@@ -1103,6 +1103,18 @@ class H323EndPoint : public PObject
 #ifdef H323_H235
   /**@name Media Encryption */
   //@{
+    /**Initialise Encryption cache 
+       Use this to create the encryption information at Startup rather than at the
+       start of every call. This speeds up call establishment for high media encryption
+       sessions. MUST Call EncryptionCacheRemove() to cleanup cache
+      */
+    virtual void EncryptionCacheInitialise();
+
+    /**Remove Encryption cache 
+       Use this to remove the encryption information 
+      */
+    virtual void EncryptionCacheRemove();
+
     /** On Media Encryption
         Fires when an encryption session negotiated
         Fires for each media session direction
