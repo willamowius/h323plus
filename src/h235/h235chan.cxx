@@ -186,15 +186,16 @@ PBoolean H323SecureRTPChannel::OnReceivedPDU(const H245_OpenLogicalChannel & ope
 {
    PTRACE(4, "H235RTP\tOnRecievedPDU");
 
-   if (H323_RealTimeChannel::OnReceivedPDU(open,errorCode)) {
-       if (open.HasOptionalField(H245_OpenLogicalChannel::e_encryptionSync)) {
-           if (m_encryption->CreateSession(false)) {
-               connection.OnMediaEncryption(GetSessionID(), GetDirection(), CipherString(m_algorithm));
-               return ReadEncryptionSync(open.m_encryptionSync,*m_encryption);
-           }
+   if (!H323_RealTimeChannel::OnReceivedPDU(open,errorCode)) 
+       return false;
+
+   if (open.HasOptionalField(H245_OpenLogicalChannel::e_encryptionSync)) {
+       if (m_encryption->CreateSession(false)) {
+           connection.OnMediaEncryption(GetSessionID(), GetDirection(), CipherString(m_algorithm));
+           return ReadEncryptionSync(open.m_encryptionSync,*m_encryption);
        }
-   }
-   return false;
+   } 
+   return true;
 }
 
 
@@ -202,15 +203,16 @@ PBoolean H323SecureRTPChannel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck
 {
   PTRACE(3, "H235RTP\tOnReceiveOpenAck");
 
-  if (H323_RealTimeChannel::OnReceivedAckPDU(ack)) {
-      if (ack.HasOptionalField(H245_OpenLogicalChannel::e_encryptionSync)) {
-          if (m_encryption->CreateSession(false)) {
-                connection.OnMediaEncryption(GetSessionID(), GetDirection(), CipherString(m_algorithm));
-                return ReadEncryptionSync(ack.m_encryptionSync,*m_encryption);
-          }
+  if (!H323_RealTimeChannel::OnReceivedAckPDU(ack))
+      return false;
+
+  if (ack.HasOptionalField(H245_OpenLogicalChannelAck::e_encryptionSync)) {
+      if (m_encryption->CreateSession(false)) {
+            connection.OnMediaEncryption(GetSessionID(), GetDirection(), CipherString(m_algorithm));
+            return ReadEncryptionSync(ack.m_encryptionSync,*m_encryption);
       }
   }
-  return false;
+  return true;
 }
 
 PBoolean H323SecureRTPChannel::OnSendingPDU(H245_H2250LogicalChannelParameters & param) const
