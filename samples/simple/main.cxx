@@ -247,6 +247,11 @@ SimpleH323EndPoint::SimpleH323EndPoint()
 
 SimpleH323EndPoint::~SimpleH323EndPoint()
 {
+#ifdef H323_H235_AES256
+      cout << "Removing Encryption Cache: ";
+      EncryptionCacheRemove();
+      cout << "ok.." << endl;
+#endif
 }
 
 
@@ -450,6 +455,12 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
 #endif
       }
       cout << endl;
+
+#ifdef H323_H235_AES256
+      cout << "Initialising Encryption Cache: ";
+      EncryptionCacheInitialise();
+      cout << "ok.." << endl;
+#endif
 
 ////////////////////////////////////////
  
