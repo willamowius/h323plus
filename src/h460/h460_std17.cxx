@@ -426,9 +426,17 @@ PBoolean H46017Transport::HandleH46017SignallingSocket(H323SignalPDU & pdu)
             return false;
       } else {
 
+          if (closeTransport) 
+              return false;
+
           // Inspect the signalling message to see if RAS
           if (HandleH46017RAS(rpdu)) 
               continue;
+
+          if (rpdu.GetQ931().GetMessageType() == Q931::NationalEscapeMsg) {
+              PTRACE(5,"H46017\tEscape received. Ignoring...");
+              continue;
+          }
 
           // If not token and other then a setup message then something is wrong!!
           if (callToken.IsEmpty() &&
@@ -528,6 +536,9 @@ PBoolean H46017Transport::ReadPDU(PBYTEArray & pdu)
 
 PBoolean H46017Transport::Connect() 
 { 
+    if (closeTransport)
+        return true;
+
     PTRACE(4, "H46017\tConnecting to remote"  );
     if (!H323TransportTCP::Connect())
         return false;
@@ -935,6 +946,10 @@ PBoolean H460_FeatureStd26::FeatureAdvertised(int mtype)
         case H460_MessageType::e_admissionRequest:
         case H460_MessageType::e_admissionConfirm:
         case H460_MessageType::e_admissionReject:
+        case H460_MessageType::e_setup:
+        case H460_MessageType::e_callProceeding: 
+        case H460_MessageType::e_alerting:
+        case H460_MessageType::e_connect:
             return true;
         default:
             return false;
@@ -958,6 +973,8 @@ void H460_FeatureStd26::OnReceiveAdmissionConfirm(const H225_FeatureDescriptor &
    if (handler)
        handler->SetH46026Tunnel(true);
 
+   CON->DisableNATSupport();
+   FeatureCategory = FeatureNeeded;
    isEnabled = true;
 
 }
