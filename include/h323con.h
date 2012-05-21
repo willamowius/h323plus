@@ -42,8 +42,11 @@
 #endif
 
 #include "openh323buildopts.h"
+
+#include "h235auth.h"
 #ifdef H323_H235
 #include "h235/h235caps.h"
+#include "h235/h2356.h"
 #else
 #include "h323caps.h"
 #endif
@@ -51,10 +54,6 @@
 #include "channels.h"
 #include "guid.h"
 
-#include "h235auth.h"
-#ifdef H323_H235
-#include "h235/h2356.h"
-#endif
 #include "h225.h"
 
 #ifdef H323_SIGNAL_AGGREGATE
