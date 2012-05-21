@@ -51,7 +51,15 @@
 
 #pragma once
 
+struct H235_OIDiterator
+{
+  bool operator()(const char* s1, const char* s2) const
+  {
+    return strcmp(s1, s2) > 0;
+  }
+};
 class H235_DiffieHellman;
+typedef std::map<PString, H235_DiffieHellman*, H235_OIDiterator> H235_DHMap;
 
 class H2356_Authenticator : public H235Authenticator
 {
@@ -78,6 +86,8 @@ class H2356_Authenticator : public H235Authenticator
 #if PTLIB_VER >= 2110
     static PBoolean GetAuthenticationCapabilities(Capabilities * ids);
 #endif
+    static void InitialiseCache();
+    static void RemoveCache();
 
     PBoolean IsMatch(const PString & identifier) const; 
 
@@ -136,13 +146,14 @@ protected:
 
 private:
 
-    std::map<PString, H235_DiffieHellman*> m_dhLocalMap;
-    std::map<PString, H235_DiffieHellman*> m_dhRemoteMap;
+    static H235_DHMap                m_dhCachedMap;
+    H235_DHMap                       m_dhLocalMap;
+    H235_DHMap                       m_dhRemoteMap;
 
-    PBoolean                               m_enabled;
-    PBoolean                               m_active;
-    h235TokenState                         m_tokenState;
-    PStringArray                           m_algOIDs;
+    PBoolean                         m_enabled;
+    PBoolean                         m_active;
+    h235TokenState                   m_tokenState;
+    PStringArray                     m_algOIDs;
       
 };
 
@@ -208,6 +219,10 @@ public:
 
 /**@name Public Functions */
 //@{
+    /**Clone the parameters
+      */
+    virtual PObject * Clone() const;
+
     /**Get internal OpenSSL DH structure.
       */
     operator dh_st *() const { return dh; }
@@ -264,6 +279,17 @@ public:
 
 //@}
 
+/**@name Miscellaneous */
+//@{
+    /**Whether to send Prime and Generator. */
+    PBoolean GetToSend() const { return m_toSend; }
+
+    /**Get the key size */
+    int GetKeySize() const { return m_keySize; }
+
+    /**Whether parameters are loaded from file */
+    PBoolean LoadFile() const { return m_loadFromFile; }
+//@}
 
   protected:
 

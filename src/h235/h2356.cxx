@@ -79,17 +79,42 @@ H235_DiffieHellman::H235_DiffieHellman(const BYTE * pData, PINDEX pSize,
 
     dh->p = BN_bin2bn(pData, pSize, NULL);
     dh->g = BN_bin2bn(gData, gSize, NULL);
-    if (dh->p != NULL && dh->g != NULL)
+    if (dh->p != NULL && dh->g != NULL) {
+        GenerateHalfKey();
         return;
+    }
 
     DH_free(dh);
     dh = NULL;
 }
 
+void DH_dup(dh_st & dh, const dh_st * rem)
+{
+    int len = BN_num_bytes(rem->pub_key);
+
+    if (rem->pub_key) {
+        unsigned char * data = (unsigned char *)OPENSSL_malloc(len);
+        if (BN_bn2bin(rem->pub_key, data) > 0) { 
+            dh.pub_key = BN_bin2bn(data, len, NULL);
+            OPENSSL_free(data);
+        }
+    }
+
+    if (rem->priv_key) {
+        unsigned char * data = (unsigned char *)OPENSSL_malloc(len); 
+        if (BN_bn2bin(rem->priv_key, data) > 0) {
+            dh.priv_key = BN_bin2bn(data, len, NULL);
+            OPENSSL_free(data);
+        }
+    }
+}
 
 H235_DiffieHellman::H235_DiffieHellman(const H235_DiffieHellman & diffie)
+: m_remKey(NULL), m_toSend(diffie.GetToSend()), m_keySize(diffie.GetKeySize()), m_loadFromFile(diffie.LoadFile())
 {
-    dh = DHparams_dup(diffie);
+    const dh_st * remDH = diffie;
+    dh = DHparams_dup(remDH);
+    DH_dup(*dh, remDH);
 }
 
 
@@ -107,6 +132,11 @@ H235_DiffieHellman::~H235_DiffieHellman()
 {
     if (dh)
         DH_free(dh);
+}
+
+PObject * H235_DiffieHellman::Clone() const
+{
+    return new H235_DiffieHellman(*this);
 }
 
 PBoolean H235_DiffieHellman::CheckParams() const
@@ -224,10 +254,13 @@ void H235_DiffieHellman::SetRemoteKey(bignum_st * remKey)
 
 PBoolean H235_DiffieHellman::GenerateHalfKey()
 {
-    PWaitAndSignal m(vbMutex);
-
     if (m_loadFromFile)
         return true;
+
+    if (dh && dh->pub_key)
+        return true;
+
+    PWaitAndSignal m(vbMutex);
 
     // TODO check if half key is generated correctly
     if (!DH_generate_key(dh)) {
@@ -393,10 +426,21 @@ inline void DeleteObjectsInMap(const M & m)
     std::for_each(m.begin(), m.end(), deletepair<PAIR>());
 }
 
-void LoadDiffieHellmanMap(std::map<PString, H235_DiffieHellman*> & dhmap, const PString & filePath = PString())
+void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, const PString & filePath = PString())
 {
-    PStringArray FilePaths;
+    if (dhcache.size() > 0) {
+        H235_DHMap::iterator i = dhcache.begin();
+        while (i != dhcache.end()) {
+            if (i->second)
+                dhmap.insert(pair<PString, H235_DiffieHellman*>(i->first, (H235_DiffieHellman*)i->second->Clone()));
+            else
+                dhmap.insert(pair<PString, H235_DiffieHellman*>(i->first, NULL));
+            i++;
+        }    
+        return;
+    }
 
+    PStringArray FilePaths;
     dhmap.insert(pair<PString, H235_DiffieHellman*>(OID_H235V3,NULL));
 
     PINDEX k=0;
@@ -437,11 +481,10 @@ void LoadDiffieHellmanMap(std::map<PString, H235_DiffieHellman*> & dhmap, const 
             }
         }
     }
-    if (i) {
-        return;	// tokens loaded from file, don't generate tokens
-    }
 
+    // if not loaded from File then create.
     for (PINDEX i = 0; i < PARRAYSIZE(H235_DHParameters); ++i) {
+      if (dhmap.find(H235_DHParameters[i].parameterOID) == dhmap.end()) {
         if (H235_DHParameters[i].sz > 0) {
            dhmap.insert(pair<PString, H235_DiffieHellman*>(H235_DHParameters[i].parameterOID,
                   new H235_DiffieHellman(H235_DHParameters[i].dh_p, H235_DHParameters[i].sz,
@@ -450,6 +493,7 @@ void LoadDiffieHellmanMap(std::map<PString, H235_DiffieHellman*> & dhmap, const 
         } else {
            dhmap.insert(pair<PString, H235_DiffieHellman*>(H235_DHParameters[i].parameterOID,NULL));
         }
+      }
     }
 
 }
@@ -462,12 +506,14 @@ H235SECURITY(Std6);
 static PFactory<H235Authenticator>::Worker<H2356_Authenticator> factoryH2356_Authenticator("H2356_Authenticator");
 #endif
 
+H235_DHMap H2356_Authenticator::m_dhCachedMap;
+
 H2356_Authenticator::H2356_Authenticator()
 : m_enabled(true), m_active(true), m_tokenState(e_clearNone)
 {
     usage = MediaEncryption;
     m_algOIDs.SetSize(0);
-    LoadDiffieHellmanMap(m_dhLocalMap, H235Authenticators::GetDHParameterFile());
+    LoadH235_DHMap(m_dhLocalMap, m_dhCachedMap, H235Authenticators::GetDHParameterFile());
     InitialiseSecurity(); // make sure m_algOIDs gets filled
 }
 
@@ -495,6 +541,16 @@ PBoolean H2356_Authenticator::GetAuthenticationCapabilities(H235Authenticator::C
     return true;
 }
 #endif
+
+void H2356_Authenticator::InitialiseCache()
+{
+   LoadH235_DHMap(m_dhCachedMap, m_dhCachedMap, H235Authenticators::GetDHParameterFile());
+}
+
+void H2356_Authenticator::RemoveCache()
+{
+   DeleteObjectsInMap(m_dhCachedMap);
+}
 
 PBoolean H2356_Authenticator::IsMatch(const PString & identifier) const 
 { 
@@ -531,7 +587,7 @@ PBoolean H2356_Authenticator::PrepareTokens(PASN_Array & clearTokens,
 
     H225_ArrayOf_ClearToken & tokens = (H225_ArrayOf_ClearToken &)clearTokens;
 
-    std::map<PString, H235_DiffieHellman*>::iterator i = m_dhLocalMap.begin();
+    H235_DHMap::iterator i = m_dhLocalMap.begin();
     while (i != m_dhLocalMap.end()) {
         int sz = tokens.GetSize();
         tokens.SetSize(sz+1);
@@ -578,7 +634,8 @@ H235Authenticator::ValidationResult H2356_Authenticator::ValidateTokens(const PA
         return e_Disabled; 
     }
 
-    std::map<PString, H235_DiffieHellman*>::iterator it = m_dhLocalMap.begin();
+    PBoolean paramSet = false;
+    H235_DHMap::iterator it = m_dhLocalMap.begin();
     while (it != m_dhLocalMap.end()) {
         PBoolean found = false;
         for (PINDEX i = 0; i < tokens.GetSize(); ++i) {
@@ -586,6 +643,7 @@ H235Authenticator::ValidationResult H2356_Authenticator::ValidateTokens(const PA
             PString tokenOID = token.m_tokenOID.AsString();
             if (it->first == tokenOID) {
                 if (it->second != NULL ) {
+                  if (!paramSet) {
                     H235_DiffieHellman* new_dh = new H235_DiffieHellman(*it->second); // new token with same p and g
                     const H235_DHset & dh = token.m_dhkey;
                     new_dh->Decode_HalfKey(dh.m_halfkey);
@@ -593,7 +651,13 @@ H235Authenticator::ValidationResult H2356_Authenticator::ValidateTokens(const PA
                         new_dh->Decode_P(dh.m_modSize);
                         new_dh->Decode_G(dh.m_generator);
                     }
+                    PTRACE(4, "H2356\tSetting Encryption Algorithm " << it->first);
                     m_dhRemoteMap.insert(pair<PString, H235_DiffieHellman*>(tokenOID, new_dh));
+                    paramSet = true;
+                  } else {
+                    PTRACE(4, "H2356\tRemoving Lower Encryption Algorithm " << it->first);
+                    break;
+                  }
                 }
                 found = true;
             }
@@ -664,7 +728,7 @@ void H2356_Authenticator::InitialiseSecurity()
 {
   PString dhOID;
   int lastKeyLength = 0;
-  std::map<PString, H235_DiffieHellman*>::iterator i = m_dhLocalMap.begin();
+  H235_DHMap::iterator i = m_dhLocalMap.begin();
   while (i != m_dhLocalMap.end()) {
       if (i->second && i->second->GetKeyLength() > lastKeyLength) {
           dhOID = i->first;
@@ -682,8 +746,8 @@ void H2356_Authenticator::InitialiseSecurity()
            m_algOIDs.AppendString(H235_Algorithms[i].algorithm);
   }
 
-  std::map<PString, H235_DiffieHellman*>::iterator l = m_dhLocalMap.find(dhOID);
-  std::map<PString, H235_DiffieHellman*>::iterator r = m_dhRemoteMap.find(dhOID);
+  H235_DHMap::iterator l = m_dhLocalMap.find(dhOID);
+  H235_DHMap::iterator r = m_dhRemoteMap.find(dhOID);
 
   if (l == m_dhLocalMap.end() || r == m_dhRemoteMap.end())
       return;
@@ -705,7 +769,7 @@ PBoolean H2356_Authenticator::GetMediaSessionInfo(PString & algorithmOID, PBYTEA
   }
 
   PString DhOID = GetDhOIDFromAlg(m_algOIDs[0]);
-  std::map<PString, H235_DiffieHellman*>::const_iterator l = m_dhLocalMap.find(DhOID);
+  H235_DHMap::const_iterator l = m_dhLocalMap.find(DhOID);
   if (l != m_dhLocalMap.end()) {
      algorithmOID = m_algOIDs[0];
      return l->second->ComputeSessionKey(sessionKey);
@@ -769,7 +833,7 @@ PString H2356_Authenticator::GetDhOIDFromAlg(const PString & alg)
 
 void H2356_Authenticator::ExportParameters(const PFilePath & path)
 {
-  std::map<PString, H235_DiffieHellman*>::iterator i = m_dhLocalMap.begin();
+  H235_DHMap::iterator i = m_dhLocalMap.begin();
   while (i != m_dhLocalMap.end()) {
       if (i->second && i->second->GetKeyLength() > 0) {
           i->second->Save(path,i->first);
