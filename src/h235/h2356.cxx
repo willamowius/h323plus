@@ -113,7 +113,7 @@ H235_DiffieHellman::H235_DiffieHellman(const H235_DiffieHellman & diffie)
 : m_remKey(NULL), m_toSend(diffie.GetToSend()), m_keySize(diffie.GetKeySize()), m_loadFromFile(diffie.LoadFile())
 {
     const dh_st * remDH = diffie;
-    dh = DHparams_dup(remDH);
+    dh = DHparams_dup(diffie);
     DH_dup(*dh, remDH);
 }
 
