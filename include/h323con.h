@@ -2843,6 +2843,8 @@ class H323Connection : public PObject
       */
     virtual PBoolean OnH245AddressConflict();
 
+#ifdef H323_H460
+
 #ifdef H323_H46018
     /** Call to set the direction of call establishment
       */
@@ -2882,14 +2884,25 @@ class H323Connection : public PObject
       */
     PBoolean ReceivedH46024AMessage(bool toStart);
 
-    /** Enable H46024B for this call
-      */
 #endif
 
 #ifdef H323_H46024B
+    /** Enable H46024B for this call
+      */
     void H46024BEnabled();
 #endif
 
+#ifdef H323_H46026
+    /** Set Media Tunneled for this call
+      */
+    void H46026SetMediaTunneled();
+
+    /** Is Media Tunneled
+      */
+    PBoolean H46026IsMediaTunneled();
+#endif
+
+#endif  // H323_H460
   //@}
 
 #ifndef DISABLE_CALLAUTH
@@ -3315,6 +3328,10 @@ class H323Connection : public PObject
 #ifdef H323_H46024B
     PBoolean m_H46024Benabled;
     PINDEX m_H46024Bstate;
+#endif
+
+#ifdef H323_H46026
+    PBoolean m_H46026enabled;
 #endif
 
 #endif

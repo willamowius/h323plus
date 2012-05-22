@@ -330,10 +330,10 @@ H46017Transport::H46017Transport(H323EndPoint & endpoint,
                                  PIPSocket::Address binding,
                                  H46017Handler * feat
                 )    
-   : H323TransportTCP(endpoint,binding), ReadTimeOut(PMaxTimeInterval), con(NULL), Feature(feat),
-       isConnected(false), remoteShutDown(false), closeTransport(false), callToken(PString())
+   : H323TransportTCP(endpoint,binding), ReadTimeOut(PMaxTimeInterval), con(NULL), m_socketWrite(NULL), 
+     Feature(feat), isConnected(false), remoteShutDown(false), closeTransport(false), callToken(PString())
 {
-    m_socketWrite = PThread::Create(PCREATE_NOTIFIER(SocketWrite), 0, PThread::AutoDeleteThread);
+
 }
 
 H46017Transport::~H46017Transport()
@@ -542,7 +542,10 @@ PBoolean H46017Transport::Connect()
     PTRACE(4, "H46017\tConnecting to remote"  );
     if (!H323TransportTCP::Connect())
         return false;
-    
+
+    if (!m_socketWrite)
+        m_socketWrite = PThread::Create(PCREATE_NOTIFIER(SocketWrite), 0, PThread::AutoDeleteThread);
+
     return true;
 }
 
@@ -973,7 +976,7 @@ void H460_FeatureStd26::OnReceiveAdmissionConfirm(const H225_FeatureDescriptor &
    if (handler)
        handler->SetH46026Tunnel(true);
 
-   CON->DisableNATSupport();
+   CON->H46026SetMediaTunneled();
    FeatureCategory = FeatureNeeded;
    isEnabled = true;
 
@@ -1123,57 +1126,12 @@ PBoolean PNatMethod_H46026::CreateSocketPair(
                             )
 {
 
-      if (pairedPortInfo.basePort == 0 || pairedPortInfo.basePort > pairedPortInfo.maxPort)
-      {
-        PTRACE(1, "H46026\tInvalid local UDP port range "
-               << pairedPortInfo.currentPort << '-' << pairedPortInfo.maxPort);
-        return FALSE;
-      }
-
     H323Connection::SessionInformation * info = (H323Connection::SessionInformation *)userData;
 
     socket1 = new H46026UDPSocket(*handler,info,true);  /// Data 
     socket2 = new H46026UDPSocket(*handler,info,false);  /// Signal
 
-/// Make sure we have sequential ports
-    while ((!OpenSocket(*socket1, pairedPortInfo, binding)) ||
-           (!OpenSocket(*socket2, pairedPortInfo, binding)) ||
-           (socket2->GetPort() != socket1->GetPort() + 1) )
-    {
-            delete socket1;
-            delete socket2;
-            socket1 = new H46026UDPSocket(*handler,info,true);  /// Data 
-            socket2 = new H46026UDPSocket(*handler,info,false);  /// Signal
-    }
-
-    SetInformationHeader(*socket1,*socket2,info);
-
-    PTRACE(3, "H46026\tUDP Ports Opened " << socket1->GetPort() << "-" << socket2->GetPort());
-
     return TRUE;
-}
-
-PBoolean PNatMethod_H46026::OpenSocket(PUDPSocket & socket, PortInfo & portInfo, const PIPSocket::Address & binding) const
-{
-  PWaitAndSignal mutex(portInfo.mutex);
-
-  WORD startPort = portInfo.currentPort;
-
-  do {
-    portInfo.currentPort++;
-    if (portInfo.currentPort > portInfo.maxPort)
-      portInfo.currentPort = portInfo.basePort;
-
-    if (socket.Listen(binding, 1, portInfo.currentPort)) {
-      socket.SetReadTimeout(500);
-      return TRUE;
-    }
-
-  } while (portInfo.currentPort != startPort);
-
-  PTRACE(2, "H46026\tFailed to bind to local UDP port in range "
-         << portInfo.currentPort << '-' << portInfo.maxPort);
-  return FALSE;
 }
 
 void PNatMethod_H46026::SetInformationHeader(PUDPSocket & data, PUDPSocket & control, 
@@ -1351,6 +1309,12 @@ PBoolean H46026UDPSocket::WriteTo(const void * buf, PINDEX len, const Address & 
     return true;
 }
 
+PBoolean H46026UDPSocket::GetLocalAddress(Address & addr, WORD & port)
+{
+    addr = PIPSocket::GetDefaultIpAny();
+    port = 0;
+    return true;
+}
 
 void H46026UDPSocket::GetLocalAddress(H245_TransportAddress & add)
 {

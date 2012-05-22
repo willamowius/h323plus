@@ -201,7 +201,14 @@ void H460_FeatureStd19::AttachConnection(H323Connection * _con)
 PBoolean H460_FeatureStd19::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu) 
 { 
     if (!isEnabled || !isAvailable)
-        return FALSE;
+        return false;
+
+#ifdef H323_H46026
+    if (CON->H46026IsMediaTunneled()) {
+        isAvailable = false;
+        return false;
+    }
+#endif
 
     CON->H46019Enabled();
     H460_FeatureStd feat = H460_FeatureStd(19); 
@@ -210,7 +217,7 @@ PBoolean H460_FeatureStd19::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
         feat.Add(H46019_Multiplex);
 #endif
     pdu = feat;
-    return TRUE; 
+    return true; 
 }
 
 void H460_FeatureStd19::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu) 

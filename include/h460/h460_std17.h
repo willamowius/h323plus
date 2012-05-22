@@ -444,11 +444,6 @@ public:
 	 */
    virtual void Activate(bool act)  { active = act; }
 
-	/**  OpenSocket
-		Create a single UDP Socket 
-	*/
-   PBoolean OpenSocket(PUDPSocket & socket, PortInfo & portInfo, const PIPSocket::Address & binding) const;
-
    static PStringArray GetNatMethodName() {  return PStringArray("H46026"); }
 
    virtual PString GetName() const
@@ -557,6 +552,8 @@ class H46026UDPSocket : public PUDPSocket
     PBoolean BuildTunnelMediaPacket(const void * buf, PINDEX len);
 
     void GetLocalAddress(H245_TransportAddress & add);
+    PBoolean GetLocalAddress(Address & addr, WORD & port);
+
     void SetRemoteAddress(const H245_TransportAddress & add);
 
    //@}

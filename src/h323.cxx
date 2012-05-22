@@ -601,8 +601,13 @@ H323Connection::H323Connection(H323EndPoint & ep,
   m_H46024Aenabled = false;
   m_H46024Ainitator = false;
   m_H46024Astate = 0;
+#endif
+#ifdef H323_H46024B
   m_H46024Benabled = false;
   m_H46024Bstate = 0;
+#endif
+#ifdef H323_H46026
+  m_H46026enabled = false;
 #endif
 #endif
 
@@ -6682,6 +6687,20 @@ void H323Connection::H46024BEnabled()
     m_H46024Benabled = true; 
 }
 #endif   // H323_H46024A
+
+
+#ifdef H323_H46026
+void H323Connection::H46026SetMediaTunneled()
+{
+    m_H46026enabled = true;
+}
+
+PBoolean H323Connection::H46026IsMediaTunneled()
+{
+    return m_H46026enabled;
+}
+#endif   // H323_H46026
+
 #endif   // H323_H460
 
 PBoolean H323Connection::OnH245AddressConflict()
