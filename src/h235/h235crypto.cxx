@@ -571,27 +571,29 @@ PBoolean H235Session::CreateSession(PBoolean isMaster)
 
 PBoolean H235Session::ReadFrame(DWORD & /*rtpTimestamp*/, RTP_DataFrame & frame)
 {
-    unsigned char m_ivSequence[6];
-    memcpy(m_ivSequence, frame.GetSequenceNumberPtr(), 6);
-    PBoolean m_padding = frame.GetPadding();
+    unsigned char ivSequence[6];
+    memcpy(ivSequence, frame.GetSequenceNumberPtr(), 6);
+    PBoolean padding = frame.GetPadding();
     m_frameBuffer.SetSize(frame.GetPayloadSize());
     memcpy(m_frameBuffer.GetPointer(),frame.GetPayloadPtr(), frame.GetPayloadSize());
-    m_frameBuffer = m_context.Decrypt(m_frameBuffer, m_ivSequence, m_padding);
+    m_frameBuffer = m_context.Decrypt(m_frameBuffer, ivSequence, padding);
     frame.SetPayloadSize(m_frameBuffer.GetSize());
     memcpy(frame.GetPayloadPtr(), m_frameBuffer.GetPointer(), m_frameBuffer.GetSize());
+    frame.SetPadding(padding);
     return true;
 }
 
 PBoolean H235Session::WriteFrame(RTP_DataFrame & frame)
 {
-    unsigned char m_ivSequence[6];
-    memcpy(m_ivSequence, frame.GetSequenceNumberPtr(), 6);
-    PBoolean m_padding = frame.GetPadding();
+    unsigned char ivSequence[6];
+    memcpy(ivSequence, frame.GetSequenceNumberPtr(), 6);
+    PBoolean padding = frame.GetPadding();
     m_frameBuffer.SetSize(frame.GetPayloadSize());
     memcpy(m_frameBuffer.GetPointer(),frame.GetPayloadPtr(), frame.GetPayloadSize());
-    m_frameBuffer = m_context.Encrypt(m_frameBuffer, m_ivSequence, m_padding);
+    m_frameBuffer = m_context.Encrypt(m_frameBuffer, ivSequence, padding);
     frame.SetPayloadSize(m_frameBuffer.GetSize());
     memcpy(frame.GetPayloadPtr(), m_frameBuffer.GetPointer(), m_frameBuffer.GetSize());
+    frame.SetPadding(padding);
     return true;
 }
 
