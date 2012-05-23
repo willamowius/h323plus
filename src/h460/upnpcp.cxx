@@ -365,12 +365,13 @@ void UPnPThread::Main()
 
     PStringList IGDdevices;
     if (DetectDevice(IGDdevices) && TestMapping()) {
-        m_piNatMethod->OnUPnPAvailable(IGDdevices[0]);   
-        while (!m_piShutdown) {
-            if (m_piNewMapping)
-                EnumMaps();
+        if (m_piNatMethod->OnUPnPAvailable(IGDdevices[0])) {
+            while (!m_piShutdown) {
+                if (m_piNewMapping)
+                    EnumMaps();
 
-            m_ThreadSync.Wait(200);
+                m_ThreadSync.Wait(200);
+            }
         }
     }
     Close();
@@ -1250,7 +1251,9 @@ PBoolean PNatMethod_UPnP::OnUPnPAvailable(const PString & devName)
 {
     
     if (ep && ep->OnUPnPAvailable(devName, m_pExtIP, this))
-                        Activate(true);
+        Activate(true);
+    else
+        return false;
 
     SetAvailable();
     return true;
