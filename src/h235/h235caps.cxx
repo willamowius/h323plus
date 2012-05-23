@@ -304,6 +304,10 @@ H323Channel * H323SecureRealTimeCapability::CreateChannel(H323Connection & conne
   }
   if (!session)
     return NULL;
+  // don't create a secure RTP channel if we don't have a DH token
+  H235Capabilities * caps = dynamic_cast<H235Capabilities*>(connection.GetLocalCapabilitiesRef());
+  if (!caps || ! caps->GetDiffieHellMan())
+    return NULL;
 
   return new H323SecureRTPChannel(connection, *this, dir, *session); 
 }
