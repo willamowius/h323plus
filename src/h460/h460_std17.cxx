@@ -490,7 +490,7 @@ PBoolean H46017Transport::HandleH46017SignallingChannelPDU(PThread * thread)
 
     con->AttachSignalChannel(callToken, this, TRUE);
 
-     AttachThread(thread);
+     // AttachThread(thread);  TODO No need to attach Thread when already attached?
      thread->SetNoAutoDelete();
 
      if (con->HandleSignalPDU(pdu)) {
