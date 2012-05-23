@@ -254,9 +254,12 @@ PBoolean H323SecureRTPChannel::ReadFrame(DWORD & rtpTimestamp, RTP_DataFrame & f
 
 PBoolean H323SecureRTPChannel::WriteFrame(RTP_DataFrame & frame) 
 {
-	if (m_encryption && m_encryption->IsInitialised() && m_encryption->WriteFrame(frame))
-       return true;
-
+    if (m_encryption && m_encryption->IsInitialised()) {
+        if (m_encryption->WriteFrame(frame))
+            return rtpSession.WriteData(frame);
+        else
+            return true;
+    }
     return rtpSession.WriteData(frame);
 }
 
