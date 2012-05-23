@@ -291,6 +291,12 @@ H323Channel * H323SecureRealTimeCapability::CreateChannel(H323Connection & conne
                                  const H245_H2250LogicalChannelParameters * param) const
 {
 
+  // create a standard RTP channel if we don't have a DH token
+  H235Capabilities * caps = dynamic_cast<H235Capabilities*>(connection.GetLocalCapabilitiesRef());
+  if (!caps || !caps->GetDiffieHellMan())
+    return connection.CreateRealTimeLogicalChannel(*this, dir, sessionID, param, nrtpqos);
+
+
   RTP_Session * session = NULL;              // Session
 
   if (param != NULL && param->HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaControlChannel)) {
@@ -303,10 +309,6 @@ H323Channel * H323SecureRealTimeCapability::CreateChannel(H323Connection & conne
     session = connection.UseSession(sessionID, addr, dir, nrtpqos);
   }
   if (!session)
-    return NULL;
-  // don't create a secure RTP channel if we don't have a DH token
-  H235Capabilities * caps = dynamic_cast<H235Capabilities*>(connection.GetLocalCapabilitiesRef());
-  if (!caps || ! caps->GetDiffieHellMan())
     return NULL;
 
   return new H323SecureRTPChannel(connection, *this, dir, *session); 
