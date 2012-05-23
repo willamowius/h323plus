@@ -149,6 +149,8 @@ private:
     PBoolean             m_isMaster;
 
     PBYTEArray           m_crytoMasterKey;
+    int                  m_dhkeyLen;
+
     PBYTEArray           m_frameBuffer;
 };
 

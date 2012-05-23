@@ -1103,6 +1103,39 @@ class H323EndPoint : public PObject
 #ifdef H323_H235
   /**@name Media Encryption */
   //@{
+     enum H235MediaPolicy
+     {
+         encyptNone,           ///< Default: Do Not Include Media Encryption
+         encyptRequest,        ///< Request Encryption but Accept if Missing/Fail 
+         encyptRequired        ///< Calls are Rejected with EndedBySecurityDenial if no Media Encryption.
+     };
+
+     enum H235MediaCipher
+     {
+         encypt128 = 128             ///< Default: AES128
+#ifdef H323_H235_AES256
+         ,encypt192 = 192,           ///< AES192 
+         encypt256  = 256            ///< AES256
+#endif
+     };
+    
+    /** Enable Media Encryption
+        This enables media encryption.
+      */
+     virtual void SetH235MediaEncryption(H235MediaPolicy policy,     ///< How endpoint handles Encryption
+                                         H235MediaCipher level       ///< Maximum supported Cipher
+                                         );
+
+    /** Get Media Encryption Policy
+        This get the media encryption policy.
+      */
+    H235MediaPolicy GetH235MediaPolicy();
+
+    /** Get Media Encryption Cipher
+        This get the media encryption Cipher.
+      */
+    H235MediaCipher GetH235MediaCipher();
+
     /**Initialise Encryption cache 
        Use this to create the encryption information at Startup rather than at the
        start of every call. This speeds up call establishment for high media encryption

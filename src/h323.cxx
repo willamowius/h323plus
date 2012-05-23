@@ -359,12 +359,21 @@ PBYTEArray strm;
   if (!pdu.HasOptionalField(PDUType::e_tokens) && !pdu.HasOptionalField(PDUType::e_cryptoTokens)) {
         PTRACE(2, "H235EP\tReceived unsecured EPAuthentication message (no crypto tokens),"
             " expected one of:\n" << setfill(',') << connection->GetEPAuthenticators() << setfill(' '));
+#ifdef H323_H235
+        if (H235Authenticators::GetEncryptionPolicy() == 2) {
+           PTRACE(2, "H235EP\tCall rejected due to Media Encryption Policy!");
+           return false;
+        }
+#endif
        return connection->OnEPAuthenticationFailed(H235Authenticator::e_Absent);
   } else {
 
     H235Authenticator::ValidationResult result = authenticators.ValidateSignalPDU(code, 
                                                     pdu.m_tokens, pdu.m_cryptoTokens,strm);
-      if (result == H235Authenticator::e_OK) {
+      if (result == H235Authenticator::e_Failed) {
+          PTRACE(4, "H235EP\tSecurity Failure!");
+          return false;
+      }  else if (result == H235Authenticator::e_OK) {
           PTRACE(4, "H235EP\tAuthentication succeeded");
           AuthResult = TRUE;
       }

@@ -426,7 +426,7 @@ inline void DeleteObjectsInMap(const M & m)
     std::for_each(m.begin(), m.end(), deletepair<PAIR>());
 }
 
-void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, const PString & filePath = PString())
+void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, const PString & filePath = PString(), unsigned cipherlength = P_MAX_INDEX)
 {
     if (dhcache.size() > 0) {
         H235_DHMap::iterator i = dhcache.begin();
@@ -485,14 +485,15 @@ void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, const PString & fi
     // if not loaded from File then create.
     for (PINDEX i = 0; i < PARRAYSIZE(H235_DHParameters); ++i) {
       if (dhmap.find(H235_DHParameters[i].parameterOID) == dhmap.end()) {
-        if (H235_DHParameters[i].sz > 0) {
+        if (H235_DHParameters[i].sz > 0 && H235_DHParameters[i].sz <= cipherlength) {
            dhmap.insert(pair<PString, H235_DiffieHellman*>(H235_DHParameters[i].parameterOID,
                   new H235_DiffieHellman(H235_DHParameters[i].dh_p, H235_DHParameters[i].sz,
                                          H235_DHParameters[i].dh_g, H235_DHParameters[i].sz,
                                          H235_DHParameters[i].send)) );
-        } else {
+        } else if (H235_DHParameters[i].sz == 0) {
            dhmap.insert(pair<PString, H235_DiffieHellman*>(H235_DHParameters[i].parameterOID,NULL));
-        }
+        } else
+           continue;  // Ignore ciphers greater that cipherlength
       }
     }
 
@@ -509,12 +510,18 @@ static PFactory<H235Authenticator>::Worker<H2356_Authenticator> factoryH2356_Aut
 H235_DHMap H2356_Authenticator::m_dhCachedMap;
 
 H2356_Authenticator::H2356_Authenticator()
-: m_enabled(true), m_active(true), m_tokenState(e_clearNone)
+: m_tokenState(e_clearNone)
 {
     usage = MediaEncryption;
+
+    m_enabled = (H235Authenticators::GetEncryptionPolicy() > 0);
+    m_active = m_enabled;
+
     m_algOIDs.SetSize(0);
-    LoadH235_DHMap(m_dhLocalMap, m_dhCachedMap, H235Authenticators::GetDHParameterFile());
-    InitialiseSecurity(); // make sure m_algOIDs gets filled
+    if (m_enabled) {
+        LoadH235_DHMap(m_dhLocalMap, m_dhCachedMap, H235Authenticators::GetDHParameterFile(), H235Authenticators::GetMaxCipherLength());
+        InitialiseSecurity(); // make sure m_algOIDs gets filled
+    }
 }
 
 H2356_Authenticator::~H2356_Authenticator()
@@ -542,9 +549,9 @@ PBoolean H2356_Authenticator::GetAuthenticationCapabilities(H235Authenticator::C
 }
 #endif
 
-void H2356_Authenticator::InitialiseCache()
+void H2356_Authenticator::InitialiseCache(int cipherlength)
 {
-   LoadH235_DHMap(m_dhCachedMap, m_dhCachedMap, H235Authenticators::GetDHParameterFile());
+   LoadH235_DHMap(m_dhCachedMap, m_dhCachedMap, H235Authenticators::GetDHParameterFile(), cipherlength);
 }
 
 void H2356_Authenticator::RemoveCache()
@@ -671,7 +678,7 @@ H235Authenticator::ValidationResult H2356_Authenticator::ValidateTokens(const PA
 
     if (m_dhLocalMap.size() == 0) {
         m_tokenState = e_clearDisable;
-        return e_Disabled;
+        return e_Absent;
     }
 
     if (m_tokenState == e_clearNone) {

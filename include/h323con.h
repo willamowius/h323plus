@@ -3100,7 +3100,7 @@ class H323Connection : public PObject
     PString            localPartyName;
     PString            localDisplayName;
     PStringList	       localLanguages;
-#if H323_H235
+#ifdef H323_H235
     H235Capabilities   localCapabilities; // Capabilities local system supports
 #else
     H323Capabilities   localCapabilities; // Capabilities local system supports

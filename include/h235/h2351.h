@@ -68,7 +68,7 @@ const unsigned char DH1024_G[128] = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02 };
 
-//#define H323_H235_AES256 1
+
 #ifdef H323_H235_AES256
 // DH2048
 const unsigned DH2048_SZ = 256;
@@ -180,11 +180,11 @@ const static struct {
 const char * const ID_AES256 = "2.16.840.1.101.3.4.1.42";
 const char * const SSL_AES256 = "DHE-RSA-AES256-SHA";
 const char * const DES_AES256 = "AES256";
-#endif
 
 const char * const ID_AES192 = "2.16.840.1.101.3.4.1.22";
 const char * const SSL_AES192 = "DHE-RSA-AES192-SHA";
 const char * const DES_AES192 = "AES192";
+#endif
 
 const char * const ID_AES128 = "2.16.840.1.101.3.4.1.2";
 const char * const SSL_AES128 = "DHE-RSA-AES128-SHA";
@@ -211,8 +211,8 @@ const static struct {
 #ifdef H323_H235_AES256
 //   { ID_AES256, OID_DH4096 },
     { ID_AES256, OID_DH2048 },
-#endif
  // { ID_AES192, OID_DH2048 },
+#endif
     { ID_AES128, OID_DH1024 }
 };
 

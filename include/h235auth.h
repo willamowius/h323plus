@@ -121,7 +121,8 @@ class H235Authenticator : public PObject
       e_InvalidTime,///< Security parameters indicate peer has bad real time clock
       e_BadPassword,///< Security parameters indicate bad password in token
       e_ReplyAttack,///< Security parameters indicate an attack was made
-      e_Disabled    ///< Security is disabled by local system
+      e_Disabled,   ///< Security is disabled by local system
+      e_Failed      ///< Security has Failed
     };
 
     virtual ValidationResult ValidateTokens(
@@ -275,10 +276,21 @@ PDECLARE_LIST(H235Authenticators, H235Authenticator)
     PBoolean GetAlgorithmDetails(const PString & algorithm, PString & sslName, PString & description);
 	PBoolean GetMediaSessionInfo(PString & algorithmOID, PBYTEArray & sessionKey);
 
+    // Media Encryption Settings
+    static void SetEncryptionPolicy(PINDEX policy);
+    static PINDEX GetEncryptionPolicy();
+
+    static void SetMaxCipherLength(PINDEX cipher);
+    static PINDEX GetMaxCipherLength();
+
     static PString & GetDHParameterFile();
     static void SetDHParameterFile(const PString & filePaths);
+
  protected:
     void CreateAuthenticatorsByID(const PStringArray & identifiers);
+
+    static PINDEX m_encryptionPolicy;
+    static PINDEX m_cipherLength;
     static PString m_dhFile;
 #endif
 

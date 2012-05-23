@@ -321,7 +321,9 @@ PBoolean H235Authenticator::GetAlgorithmDetails(const PString & /*algorithm*/,
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef H323_H235
-PString H235Authenticators::m_dhFile=PString();
+PINDEX   H235Authenticators::m_encryptionPolicy = 0;   // Default Encryption is disabled
+PINDEX   H235Authenticators::m_cipherLength = 128;     // Ciphers above 128 must be expressly enabled.  
+PString  H235Authenticators::m_dhFile=PString();
 #endif
 
 void H235Authenticators::PreparePDU(H323TransactionPDU & pdu,
@@ -455,6 +457,10 @@ H235Authenticator::ValidationResult
             case H235Authenticator::e_Absent :
               PTRACE(4, "H235EP\tAuthenticator " << authenticator << " absent from PDU");
               authenticator.Disable();
+#ifdef H323_H235
+              if (authenticator.GetApplication() == H235Authenticator::MediaEncryption)
+                  return (H235Authenticators::GetEncryptionPolicy() < 2) ? H235Authenticator::e_Absent : H235Authenticator::e_Failed;
+#endif
               break;
 
             case H235Authenticator::e_Disabled :
@@ -629,7 +635,25 @@ void H235Authenticators::SetDHParameterFile(const PString & filePaths)
     m_dhFile = filePaths;
 }
 
+PINDEX H235Authenticators::GetMaxCipherLength()
+{
+    return m_cipherLength;
+}
+    
+void H235Authenticators::SetMaxCipherLength(PINDEX cipher)
+{
+    m_cipherLength = cipher;
+}
 
+void H235Authenticators::SetEncryptionPolicy(PINDEX policy)
+{
+    m_encryptionPolicy = policy;
+}
+
+PINDEX H235Authenticators::GetEncryptionPolicy()
+{
+    return m_encryptionPolicy;
+}
 
 #endif
 

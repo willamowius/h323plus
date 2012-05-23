@@ -49,6 +49,14 @@
 
 #include "rtp.h"
 
+#ifdef H323_H235_AES256
+#if _WIN32
+#pragma message("AES256 Encryption Enabled. Software may be subject to US export restrictions. http://www.bis.doc.gov/encryption/")
+#else
+#warning("AES256 Encryption Enabled. Software may be subject to US export restrictions. http://www.bis.doc.gov/encryption/")
+#endif
+#endif
+
 
 // the IV sequence is always 6 bytes long (2 bytes seq number + 4 bytes timestamp)
 const unsigned int IV_SEQUENCE_LEN = 6;
@@ -355,9 +363,9 @@ void H235CryptoEngine::SetKey(PBYTEArray key)
 
     if (m_algorithmOID == ID_AES128) {
         cipher = EVP_aes_128_cbc();
+#ifdef H323_H235_AES256
     } else if (m_algorithmOID == ID_AES192) {
         cipher = EVP_aes_192_cbc();
-#ifdef H323_H235_AES256
     } else if (m_algorithmOID == ID_AES256) {
         cipher = EVP_aes_256_cbc();
 #endif
@@ -484,9 +492,9 @@ PBYTEArray H235CryptoEngine::GenerateRandomKey(const PString & algorithmOID)
 
     if (algorithmOID == ID_AES128) {
         key.SetSize(16);
+#ifdef H323_H235_AES256
     } else if (m_algorithmOID == ID_AES192) {
         key.SetSize(24);
-#ifdef H323_H235_AES256
     } else if (m_algorithmOID == ID_AES256) {
         key.SetSize(32);
 #endif
@@ -505,7 +513,18 @@ H235Session::H235Session(H235Capabilities * caps, const PString & oidAlgorithm)
 : m_dh(*caps->GetDiffieHellMan()), m_context(oidAlgorithm), m_dhcontext(oidAlgorithm), 
   m_isInitialised(false), m_isMaster(false), m_crytoMasterKey(0)
 {
-
+    if (oidAlgorithm == ID_AES128) {
+        m_dhkeyLen = 16;
+#ifdef H323_H235_AES256
+    } else if (oidAlgorithm == ID_AES192) {
+        m_dhkeyLen = 24;
+    } else if (oidAlgorithm == ID_AES256) {
+        m_dhkeyLen = 32;
+#endif
+    } else {
+        PTRACE(1, "Unsupported algorithm " << oidAlgorithm);
+        m_dhkeyLen = 16;
+    }
 }
 
 H235Session::~H235Session()
@@ -556,8 +575,7 @@ PBoolean H235Session::CreateSession(PBoolean isMaster)
     PBYTEArray dhSessionkey;
     m_dh.ComputeSessionKey(dhSessionkey);
     PBYTEArray shortSessionKey;
-    unsigned keyLen = 16; // TODO: pick matching for algo
-    shortSessionKey.SetSize(keyLen);
+    shortSessionKey.SetSize(m_dhkeyLen);
     memcpy(shortSessionKey.GetPointer(), dhSessionkey.GetPointer() + dhSessionkey.GetSize() - shortSessionKey.GetSize(), shortSessionKey.GetSize());
 
     m_dhcontext.SetKey(shortSessionKey);
@@ -579,7 +597,7 @@ PBoolean H235Session::ReadFrame(DWORD & /*rtpTimestamp*/, RTP_DataFrame & frame)
     m_frameBuffer = m_context.Decrypt(m_frameBuffer, ivSequence, padding);
     frame.SetPayloadSize(m_frameBuffer.GetSize());
     memcpy(frame.GetPayloadPtr(), m_frameBuffer.GetPointer(), m_frameBuffer.GetSize());
-    frame.SetPadding(padding);
+    frame.SetPadding(padding);  // TODO: examine effect for RTP padding on codec decoding?
     return true;
 }
 
