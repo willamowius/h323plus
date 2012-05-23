@@ -1769,6 +1769,11 @@ PBoolean H323PluginVideoCodec::Write(const BYTE * /*buffer*/, unsigned length, c
     return FALSE;
   }
 
+  if (length == 0) {
+    written = length;
+    return TRUE;
+  }
+
   // Prepare AVSync Information
   rtpInformation.m_recvTime = PTime();
   rtpInformation.m_sendTime = CalculateRTPSendTime(src.GetTimestamp(),90000/GetFrameRate());
