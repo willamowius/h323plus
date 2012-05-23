@@ -276,9 +276,9 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
   // Load the base featureSet
   LoadBaseFeatureSet();
 
-  // Set the various options
-  SetSilenceDetectionMode(args.HasOption('e') ? H323AudioCodec::NoSilenceDetection
-                                              : H323AudioCodec::AdaptiveSilenceDetection);
+  // Set the various options  TODO Disable Silence until fix encryption
+  //SetSilenceDetectionMode(args.HasOption('e') ? H323AudioCodec::NoSilenceDetection
+  //                                            : H323AudioCodec::AdaptiveSilenceDetection);
   DisableFastStart(!args.HasOption('f'));
   DisableH245Tunneling(args.HasOption('T'));
   DisableH245QoS(args.HasOption('Q'));

@@ -385,7 +385,7 @@ H323EndPoint::H323EndPoint()
 #endif
 
 #ifdef H323_AUDIO_CODECS
-  defaultSilenceDetection = H323AudioCodec::AdaptiveSilenceDetection;
+  defaultSilenceDetection = H323AudioCodec::NoSilenceDetection;  //AdaptiveSilenceDetection; TODO Till Encryption fixed
 #endif
 
   defaultSendUserInputMode = H323Connection::SendUserInputAsString;
