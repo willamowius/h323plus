@@ -503,7 +503,7 @@ PBYTEArray H235CryptoEngine::GenerateRandomKey(const PString & algorithmOID)
 
 H235Session::H235Session(H235Capabilities * caps, const PString & oidAlgorithm)
 : m_dh(*caps->GetDiffieHellMan()), m_context(oidAlgorithm), m_dhcontext(oidAlgorithm), 
-  m_isInitialised(false), m_isMaster(false), m_dhSessionkey(0), m_crytoMasterKey(0)
+  m_isInitialised(false), m_isMaster(false), m_crytoMasterKey(0)
 {
 
 }
@@ -553,8 +553,14 @@ PBoolean H235Session::IsInitialised()
 PBoolean H235Session::CreateSession(PBoolean isMaster)
 {
     m_isMaster = isMaster;
-    m_dh.ComputeSessionKey(m_dhSessionkey);
-    m_dhcontext.SetKey(m_dhSessionkey);
+    PBYTEArray dhSessionkey;
+    m_dh.ComputeSessionKey(dhSessionkey);
+    PBYTEArray shortSessionKey;
+    unsigned keyLen = 16; // TODO: pick matching for algo
+    shortSessionKey.SetSize(keyLen);
+    memcpy(shortSessionKey.GetPointer(), dhSessionkey.GetPointer() + dhSessionkey.GetSize() - shortSessionKey.GetSize(), shortSessionKey.GetSize());
+
+    m_dhcontext.SetKey(shortSessionKey);
 
     if (m_isMaster) 
         m_crytoMasterKey = m_context.GenerateRandomKey();

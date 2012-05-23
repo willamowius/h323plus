@@ -148,7 +148,6 @@ private:
     PBoolean             m_isInitialised;  /// Is Initialised
     PBoolean             m_isMaster;
 
-    PBYTEArray           m_dhSessionkey;
     PBYTEArray           m_crytoMasterKey;
     PBYTEArray           m_frameBuffer;
 };
