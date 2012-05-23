@@ -293,7 +293,7 @@ H323Channel * H323SecureRealTimeCapability::CreateChannel(H323Connection & conne
 
   RTP_Session * session = NULL;              // Session
 
-  if (param != NULL) {
+  if (param != NULL && param->HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaControlChannel)) {
     session = connection.UseSession(param->m_sessionID, param->m_mediaControlChannel, dir, nrtpqos);
   } else {
     // Make a fake transport address from the connection so gets initialised with
