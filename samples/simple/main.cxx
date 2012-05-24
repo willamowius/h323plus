@@ -105,6 +105,9 @@ void SimpleH323Process::Main()
 #endif
              "T-h245tunneldisable."
              "Q-h245qosdisable."
+#ifdef H323_H235
+             "m-mediaenc:"
+#endif
 #ifdef H323_H46017
              "k-h46017:"
 #endif
@@ -144,6 +147,9 @@ void SimpleH323Process::Main()
             "  -f --fast-disable       : Disable fast start.\n"
             "  -T --h245tunneldisable  : Disable H245 tunnelling.\n"
             "  -Q --h245qosdisable     : Disable H245 QoS Exchange.\n"
+#ifdef H323_H235
+            "  -m --mediaenc           : Enable Media encryption (value max cipher 128, 192 or 256).\n"
+#endif
 #ifdef H323_H46017
            "   -k --h46017             : Use H.460.17 Gatekeeper.\n"
 #endif
@@ -456,10 +462,24 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
       }
       cout << endl;
 
+#ifdef H323_H235
+      if (args.HasOption('m'))  {
+        unsigned cipher = args.GetOptionString('m').AsInteger();
+        H235MediaCipher ncipher = encypt128;
 #ifdef H323_H235_AES256
-      cout << "Initialising Encryption Cache: ";
-      EncryptionCacheInitialise();
-      cout << "ok.." << endl;
+        if (cipher >= encypt192) ncipher = encypt192;
+        if (cipher >= encypt256) ncipher = encypt256;
+#endif
+        SetH235MediaEncryption(encyptRequest, ncipher);
+        cout << "Media Encryption AES" << ncipher << " enabled." << endl;
+#ifdef H323_H235_AES256
+        if (ncipher > encypt128) {
+            cout << "Initialising Encryption Seed Cache: ";
+            EncryptionCacheInitialise();
+            cout << "ok.." << endl;
+        }
+#endif
+      }
 #endif
 
 ////////////////////////////////////////
