@@ -1105,9 +1105,9 @@ class H323EndPoint : public PObject
   //@{
      enum H235MediaPolicy
      {
-         encyptNone,           ///< Default: Do Not Include Media Encryption
-         encyptRequest,        ///< Request Encryption but Accept if Missing/Fail 
-         encyptRequired        ///< Calls are Rejected with EndedBySecurityDenial if no Media Encryption.
+         encyptNone = 0,           ///< Default: Do Not Include Media Encryption
+         encyptRequest = 1,        ///< Request Encryption but Accept if Missing/Fail 
+         encyptRequired = 2        ///< Calls are Rejected with EndedBySecurityDenial if no Media Encryption.
      };
 
      enum H235MediaCipher
