@@ -280,6 +280,7 @@ PDECLARE_LIST(H235Authenticators, H235Authenticator)
     static void SetEncryptionPolicy(PINDEX policy);
     static PINDEX GetEncryptionPolicy();
 
+    // maximum cipher length in bits
     static void SetMaxCipherLength(PINDEX cipher);
     static PINDEX GetMaxCipherLength();
 
