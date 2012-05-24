@@ -464,9 +464,9 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
 
 #ifdef H323_H235
       if (args.HasOption('m'))  {
-        unsigned cipher = args.GetOptionString('m').AsInteger();
         H235MediaCipher ncipher = encypt128;
 #ifdef H323_H235_AES256
+        unsigned cipher = args.GetOptionString('m').AsInteger();
         if (cipher >= encypt192) ncipher = encypt192;
         if (cipher >= encypt256) ncipher = encypt256;
 #endif
