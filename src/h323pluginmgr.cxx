@@ -109,6 +109,8 @@ inline static bool IsValidMPI(int mpi) {
   return (mpi > 0) && (mpi < 5);
 }
 
+#define FASTPICTUREINTERVAL  1000
+
 #endif // H323_VIDEO
 
 typedef PFactory<OpalFactoryCodec, PString> OpalPluginCodecFactory;
@@ -1349,6 +1351,7 @@ class H323PluginVideoCodec : public H323VideoCodec
     bool         sendIntra;
 
     mutable PTimeInterval lastFrameTick;
+	PTime   lastFUPTime;
 };
 
 static bool SetFlowControl(const PluginCodec_Definition * codec, void * context, OpalMediaFormat & mediaFormat, long bitRate)
@@ -1506,6 +1509,7 @@ H323PluginVideoCodec::H323PluginVideoCodec(const OpalMediaFormat & fmt, Directio
     // and clear the memory in the destructor to avoid segfault in destructor
     bytesPerFrame = (maxHeight * maxWidth * 3)/2;
     bufferRTP = RTP_DataFrame(sizeof(PluginCodec_Video_FrameHeader) + bytesPerFrame, TRUE);
+	lastFUPTime=0;
 
 #if PTRACING
    PTRACE(6,"Agreed Codec Options");
@@ -1820,9 +1824,15 @@ PBoolean H323PluginVideoCodec::Write(const BYTE * /*buffer*/, unsigned length, c
         return FALSE;
       }
 
-      if (flags & PluginCodec_ReturnCoderRequestIFrame) {
-        PTRACE(6,"PLUGIN\tIFrame Request Decoder.");
-        logicalChannel->SendMiscCommand(H245_MiscellaneousCommand_type::e_videoFastUpdatePicture);
+      if (sendIntra || (flags & PluginCodec_ReturnCoderRequestIFrame)) {
+		PTime currentTime = PTime();
+		PTimeInterval lastTime = currentTime - lastFUPTime;
+		if (lastTime.GetMilliSeconds() > FASTPICTUREINTERVAL) {
+			PTRACE(6,"PLUGIN\tIFrame Request Decoder.");
+			logicalChannel->SendMiscCommand(H245_MiscellaneousCommand_type::e_videoFastUpdatePicture);
+			lastFUPTime = PTime();
+			sendIntra = false;
+		}
       }
       
       if (flags & PluginCodec_ReturnCoderLastFrame) {
