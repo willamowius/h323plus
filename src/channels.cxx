@@ -827,6 +827,7 @@ void H323_RTPChannel::Transmit()
   // Get parameters from the codec on time and data sizes
   PBoolean isAudio = mediaFormat.NeedsJitterBuffer();
   unsigned framesInPacket = capability->GetTxFramesInPacket();
+  if (framesInPacket > 8) framesInPacket = 1;  // TODO: Resolve issue with G.711 20ms
   unsigned maxSampleSize = mediaFormat.GetFrameSize();
   unsigned maxSampleTime = mediaFormat.GetFrameTime();
 
