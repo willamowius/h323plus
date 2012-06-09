@@ -771,7 +771,7 @@ PBoolean H323_RTPChannel::ReadFrame(DWORD & rtpTimestamp, RTP_DataFrame & frame)
 
 PBoolean H323_RTPChannel::WriteFrame(RTP_DataFrame & frame)
 {
-  return rtpSession.WriteData(frame);
+  return rtpSession.PreWriteData(frame) && rtpSession.WriteData(frame);
 }
 
 #if PTRACING

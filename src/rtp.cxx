@@ -1855,7 +1855,7 @@ RTP_Session::SendReceiveStatus RTP_UDP::ReadControlPDU()
 }
 
 
-PBoolean RTP_UDP::WriteData(RTP_DataFrame & frame)
+PBoolean RTP_UDP::PreWriteData(RTP_DataFrame & frame)
 {
   if (shutdownWrite) {
     PTRACE(3, "RTP_UDP\tSession " << sessionID << ", Write shutdown.");
@@ -1875,6 +1875,12 @@ PBoolean RTP_UDP::WriteData(RTP_DataFrame & frame)
     case e_AbortTransport :
       return FALSE;
   }
+ 
+  return TRUE;
+}
+
+PBoolean RTP_UDP::WriteData(RTP_DataFrame & frame)
+{
 
   while (!dataSocket->WriteTo(frame.GetPointer(),
                              frame.GetHeaderSize()+frame.GetPayloadSize(),

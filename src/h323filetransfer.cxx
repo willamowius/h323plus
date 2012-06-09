@@ -996,8 +996,8 @@ PBoolean H323FileTransferHandler::TransmitFrame(H323FilePacket & buffer, PBoolea
   
   transmitFrame.SetPayloadSize(buffer.GetSize());
   memmove(transmitFrame.GetPayloadPtr(),buffer.GetPointer(), buffer.GetSize());
-    
-  return (session && session->WriteData(transmitFrame));
+  // TODO: Add Support for Encryption. -SH
+  return (session && session->PreWriteData(transmitFrame) && session->WriteData(transmitFrame));
 }
 
 PBoolean H323FileTransferHandler::ReceiveFrame(H323FilePacket & buffer, PBoolean & final)

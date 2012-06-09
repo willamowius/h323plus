@@ -18,34 +18,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.5  2011/02/20 07:03:00  shorne
- * Improving H.224 stability by ensuring correct initialization and removing nested mutexes.
- *
- * Revision 1.4  2011/01/12 12:51:52  shorne
- * H.224 bi-directional support added
- *
- * Revision 1.3  2008/05/23 11:21:25  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.2  2007/11/01 14:35:52  willamowius
- * add newline at end of file
- *
- * Revision 1.1  2007/08/06 20:51:05  shorne
- * First commit of h323plus
- *
- * Revision 1.1  2006/06/22 11:07:23  shorne
- * Backport of FECC (H.224) from Opal
- *
- * Revision 1.3  2006/05/01 10:29:50  csoutheren
- * Added pragams for gcc < 4
- *
- * Revision 1.2  2006/04/24 12:53:50  rjongbloed
- * Port of H.224 Far End Camera Control to DevStudio/Windows
- *
- * Revision 1.1  2006/04/20 16:48:17  hfriederich
- * Initial version of H.224/H.281 implementation.
- *
+ * $Id $
  */
 
 #include <ptlib.h>
@@ -641,8 +614,9 @@ void OpalH224Handler::TransmitFrame(H224_Frame & frame)
   
   transmitFrame->SetPayloadSize(size);
   transmitFrame->SetMarker(TRUE);
-	
-  if(!session->WriteData(*transmitFrame)) {
+  
+  // TODO: Add Encryption Support - SH
+  if(!session->PreWriteData(*transmitFrame) || !session->WriteData(*transmitFrame)) {
     PTRACE(3, "H224\tFailed to write encoded H.224 frame");
   } else {
     PTRACE(3, "H224\tEncoded H.224 frame sent");

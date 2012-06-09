@@ -426,6 +426,12 @@ class RTP_Session : public PObject
         int & selectStatus
      );
 
+    /**Check the data before sending to the RTP Channel
+      */
+    virtual PBoolean PreWriteData(
+        RTP_DataFrame & frame   ///<  Frame to write to the RTP session
+    ) = 0;
+
     /**Write a data frame from the RTP channel.
       */
     virtual PBoolean WriteData(
@@ -1001,6 +1007,10 @@ class RTP_UDP : public RTP_Session
        from the UDPSocket
       */
     virtual PBoolean PseudoRead(int & selectStatus);
+
+    /**Check the data before sending to the RTP Channel
+      */
+    PBoolean PreWriteData(RTP_DataFrame & frame);
 
     /**Write a data frame from the RTP channel.
       */
