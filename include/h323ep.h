@@ -2105,6 +2105,10 @@ class H323EndPoint : public PObject
 #endif
 
 #ifdef H323_UPnP
+    /**Set UPnP
+      */
+    void SetUPnP(PBoolean active);
+
     /**Initialise UPnP
       */
     PBoolean InitialiseUPnP();
@@ -2670,6 +2674,10 @@ class H323EndPoint : public PObject
 
 #ifdef H323_H46023
     PBoolean m_h46023enabled;
+#endif
+
+#ifdef H323_UPnP
+    PBoolean m_UPnPenabled;
 #endif
 
 #ifdef H323_H460P

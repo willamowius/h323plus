@@ -501,6 +501,10 @@ H323EndPoint::H323EndPoint()
   m_h46023enabled = true;
 #endif
 
+#ifdef H323_UPnP
+  m_UPnPenabled = true;
+#endif
+
 #ifdef H323_H460P
   presenceHandler = NULL;
 #endif
@@ -3038,6 +3042,9 @@ void H323EndPoint::SetSTUNServer(const PString & server)
 #ifdef H323_UPnP
 PBoolean H323EndPoint::InitialiseUPnP()
 {
+     if (!m_UPnPenabled)
+         return false;
+
      PNatMethod_UPnP * natMethod = (PNatMethod_UPnP *)GetNatMethods().GetMethodByName("UPnP");
      if (natMethod) 
          return true;
@@ -3360,6 +3367,13 @@ PBoolean H323EndPoint::H46023IsEnabled()
     return m_h46023enabled; 
 }
 #endif  // H323_H46023
+
+#ifdef H323_UPnP
+void H323EndPoint::SetUPnP(PBoolean active)
+{
+    m_UPnPenabled = active;
+}
+#endif  // H323_UPnP
 
 #ifdef H323_H460P
 void H323EndPoint::PresenceSetLocalState(const PStringList & alias, presenceStates localstate, const PString & localdisplay, PBoolean updateOnly)
