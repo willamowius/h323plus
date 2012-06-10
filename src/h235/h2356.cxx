@@ -603,8 +603,8 @@ PBoolean H2356_Authenticator::PrepareTokens(PASN_Array & clearTokens,
         H235_DiffieHellman * dh = i->second;
         if (dh && dh->GenerateHalfKey()) {
 #if 0  // For testing to generate a strong key pair - SH
-            if (!m_dh->LoadedFromFile())
-                m_dh->Save("test.pem",i->first);
+            if (!dh->LoadedFromFile())
+                dh->Save("test.pem",i->first);
 #endif
             clearToken.IncludeOptionalField(H235_ClearToken::e_dhkey);
             H235_DHset & dhkey = clearToken.m_dhkey;
