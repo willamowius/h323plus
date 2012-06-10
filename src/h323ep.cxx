@@ -1113,6 +1113,16 @@ H323EndPoint::H235MediaCipher H323EndPoint::GetH235MediaCipher()
     return static_cast<H235MediaCipher>(H235Authenticators::GetMaxCipherLength());
 }
 
+void H323EndPoint::SetEncryptionCacheFiles(const PString & cachefile)
+{
+    H235Authenticators::SetDHParameterFile(cachefile);
+}
+
+const PString & H323EndPoint::GetEncryptionCacheFiles()
+{
+    return H235Authenticators::GetDHParameterFile();
+}
+
 void H323EndPoint::EncryptionCacheInitialise()
 {
     if (H235Authenticators::GetEncryptionPolicy())

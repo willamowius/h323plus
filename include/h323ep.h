@@ -1136,6 +1136,21 @@ class H323EndPoint : public PObject
       */
     H235MediaCipher GetH235MediaCipher();
 
+    /** Set Encryption Cache File Paths (can be multiple file paths)
+        Data must be stored in INI format with the section being the OID of the Algorith
+        Parameter names are as below and all values are base64 encoded. eg:
+           [ALG OID]
+           PRIME=
+           GENERATOR=
+           PUBLIC=
+           PRIVATE= 
+      */
+    virtual void SetEncryptionCacheFiles(const PString & cachefile);
+
+    /** Get Encryption Cache File Path (can be mulitple file paths)
+      */
+    virtual const PString & GetEncryptionCacheFiles();
+
     /**Initialise Encryption cache 
        Use this to create the encryption information at Startup rather than at the
        start of every call. This speeds up call establishment for high media encryption
