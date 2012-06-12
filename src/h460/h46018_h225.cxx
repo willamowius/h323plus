@@ -120,6 +120,7 @@ void H46018TransportThread::Main()
             break;
         } 
     }
+    m_keepAlive.Stop();
 
     PTRACE(3, "H46018\tTransport Closed");
 }
@@ -247,7 +248,7 @@ PBoolean H46018Transport::HandleH46018SignallingChannelPDU(PThread * thread)
     endpoint.GetConnections().SetAt(token, connection);
     connectionsMutex.Signal();
 
-    connection->AttachSignalChannel(token, this, true);
+    connection->AttachSignalChannel(token, this, false);
 
     if (connection->HandleSignalPDU(pdu)) {
         // All subsequent PDU's should wait forever
@@ -260,7 +261,7 @@ PBoolean H46018Transport::HandleH46018SignallingChannelPDU(PThread * thread)
         PTRACE(1, "H46018\tSignal channel stopped on first PDU.");
     }
 
-    return true;
+    return connection->HadAnsweredCall();
 }
 
 
