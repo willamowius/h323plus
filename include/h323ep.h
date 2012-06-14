@@ -446,6 +446,10 @@ class H323EndPoint : public PObject
       */
     virtual PBoolean GatekeeperCheckIP(const H323TransportAddress & oldAddr,H323TransportAddress & newaddress);
 
+    /**Create priority list for Gatekeeper authenticators.
+      */
+    virtual void SetAuthenticatorOrder(PStringList & names);
+
     /**Create a list of authenticators for gatekeeper.
       */
     virtual H235Authenticators CreateAuthenticators();
@@ -1569,6 +1573,16 @@ class H323EndPoint : public PObject
 	 */
 	const PStringList & GetLocalLanguages() const { return localLanguages; }
 
+    /*Set Whether to use the Q931 Display called and calling numbers instead
+      of the default AliasAddresses in the caller display.
+	 */
+    void SetQ931Display(PBoolean success)  { useQ931Display = success; }
+
+    /*Determine Whether to use the Q931 Display called and calling numbers instead
+      of the default AliasAddresses in the caller display.
+	 */
+    PBoolean UseQ931Display()  { return useQ931Display; }
+
 #if P_LDAP
 
     /**Get the default ILS server to use for user lookup.
@@ -2482,6 +2496,7 @@ class H323EndPoint : public PObject
     PStringList localAliasNames;
 
 	PStringList localLanguages;
+    PBoolean    useQ931Display;
 
 #ifdef H323_AUDIO_CODECS
     H323AudioCodec::SilenceDetectionMode defaultSilenceDetection;
@@ -2656,6 +2671,7 @@ class H323EndPoint : public PObject
     H323Capabilities capabilities;
     H323Gatekeeper * gatekeeper;
     PString          gatekeeperPassword;
+    PStringList      gkAuthenticatorOrder;
 
     H323ConnectionDict       connectionsActive;
 

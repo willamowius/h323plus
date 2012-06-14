@@ -467,6 +467,8 @@ H323Connection::H323Connection(H323EndPoint & ep,
 
   bandwidthAvailable = endpoint.GetInitialBandwidth();
 
+  useQ931Display = endpoint.UseQ931Display();
+
   uuiesRequested = 0; // Empty set
   addAccessTokenToSetup = TRUE; // Automatic inclusion of ACF access token in SETUP
   sendUserInputMode = endpoint.GetSendUserInputMode();
@@ -1384,7 +1386,9 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
   SetRemoteApplication(setup.m_sourceInfo);
 
   // Determine the remote parties name/number/address as best we can
-  setupPDU.GetQ931().GetCallingPartyNumber(remotePartyNumber);
+  setupPDU.GetQ931().GetCallingPartyNumber(remoteQ931Number);
+  remotePartyNumber = remoteQ931Number;
+  remoteQ931Display = setupPDU.GetQ931().GetDisplayName();
   remotePartyName = setupPDU.GetSourceAliases(signallingChannel);
   remoteAliasNames = setupPDU.GetSourceAliasNames();
 
@@ -1559,14 +1563,14 @@ void H323Connection::SetLocalPartyName(const PString & name)
 
 void H323Connection::SetRemotePartyInfo(const H323SignalPDU & pdu)
 {
-  PString newNumber;
-  if (pdu.GetQ931().GetCalledPartyNumber(newNumber))
-    remotePartyNumber = newNumber;
+  if (pdu.GetQ931().GetCalledPartyNumber(remoteQ931Number))
+    remotePartyNumber = remoteQ931Number;
 
   PString newRemotePartyName = pdu.GetQ931().GetDisplayName();
-  if (!newRemotePartyName.IsEmpty())
+  if (!newRemotePartyName.IsEmpty()) {
+    remoteQ931Display = newRemotePartyName;
     remotePartyName = newRemotePartyName;
-  else if (!remotePartyNumber.IsEmpty())
+  } else if (!remotePartyNumber.IsEmpty())
     remotePartyName = remotePartyNumber;
   else
     remotePartyName = signallingChannel->GetRemoteAddress().GetHostName();
@@ -1604,7 +1608,7 @@ PBoolean H323Connection::OnReceivedCallProceeding(const H323SignalPDU & pdu)
   const H225_CallProceeding_UUIE & call = pdu.m_h323_uu_pdu.m_h323_message_body;
 
   SetRemoteVersions(call.m_protocolIdentifier);
-  SetRemotePartyInfo(pdu);
+  //SetRemotePartyInfo(pdu);  - Call proceeding could be fake do not set call party info
   SetRemoteApplication(call.m_destinationInfo);
 
 #ifndef DISABLE_CALLAUTH

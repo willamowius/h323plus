@@ -379,6 +379,7 @@ H323EndPoint::H323EndPoint()
   disableDetectInBandDTMF = FALSE;
   canDisplayAmountString = FALSE;
   canEnforceDurationLimit = TRUE;
+  useQ931Display = FALSE;
 
 #ifdef H323_H450
   callIntrusionProtectionLevel = 3; //H45011_CIProtectionLevel::e_fullProtection;
@@ -996,20 +997,40 @@ void H323EndPoint::OnRegisterTTLFail()
 {
 }
 
+void H323EndPoint::SetAuthenticatorOrder(PStringList & names)
+{
+    gkAuthenticatorOrder = names;
+}
+
 H235Authenticators H323EndPoint::CreateAuthenticators()
 {
   H235Authenticators authenticators;
 
-  PFactory<H235Authenticator>::KeyList_T keyList = PFactory<H235Authenticator>::GetKeyList();
-  PFactory<H235Authenticator>::KeyList_T::const_iterator r;
-  for (r = keyList.begin(); r != keyList.end(); ++r) {
-    H235Authenticator * Auth = PFactory<H235Authenticator>::CreateInstance(*r);
-    if ((Auth->GetApplication() == H235Authenticator::GKAdmission) ||
-                  (Auth->GetApplication() == H235Authenticator::AnyApplication)) 
-                               authenticators.Append(Auth);
-  }
+  PStringList orgAuths = H235Authenticator::GetAuthenticatorList();
+  PStringList auths;
 
-  return authenticators;
+  PINDEX i=0;
+  if (gkAuthenticatorOrder.GetSize() > 0) {
+      for (i = 0; i < gkAuthenticatorOrder.GetSize(); ++i) {
+        if (orgAuths.GetStringsIndex(gkAuthenticatorOrder[i]) != P_MAX_INDEX)
+            auths.AppendString(gkAuthenticatorOrder[i]);
+      }
+      for (i = 0; i < orgAuths.GetSize(); ++i) {
+        if (gkAuthenticatorOrder.GetStringsIndex(orgAuths[i]) == P_MAX_INDEX)
+            auths.AppendString(orgAuths[i]);
+      }
+  } else 
+      auths = orgAuths;
+
+
+    for (i = 0; i < auths.GetSize(); ++i) {
+        H235Authenticator * Auth = PFactory<H235Authenticator>::CreateInstance(auths[i]);
+        if ((Auth->GetApplication() == H235Authenticator::GKAdmission) ||
+            (Auth->GetApplication() == H235Authenticator::AnyApplication)) 
+                        authenticators.Append(Auth);
+    }
+
+    return authenticators;
 }
 
 #ifndef DISABLE_CALLAUTH

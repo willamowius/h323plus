@@ -2617,8 +2617,7 @@ class H323Connection : public PObject
     virtual const PString & GetRemotePartyName() const { return remotePartyName; }
 
     /**Get the remote party number, if there was one one.
-       If the remote party has indicated an e164 number as one of its aliases
-       or as a field in the Q.931 PDU, then this function will return it.
+       If the remote party has indicated an e164 number as one of its aliases.
       */
     const PString & GetRemotePartyNumber() const { return remotePartyNumber; }
 
@@ -2633,6 +2632,16 @@ class H323Connection : public PObject
     /**Get the remote party Alias List, if there was one.
       */
     const PStringArray & GetRemotePartyAliases() const { return remoteAliasNames; }
+
+    /**Get the remote party Q931 DisplayName.
+       The remote party name as specified in the Q931::Display.
+      */
+    const PString & GetRemoteQ931Display() const { return remoteQ931Display; }
+
+    /**Get the remote party Q931 Number.
+       The remote party number as specified in the Q931
+      */
+    const PString & GetRemoteQ931Number() const { return remoteQ931Number; }
 
     /**Set the name/alias of remote end from information in the PDU.
       */
@@ -3107,6 +3116,9 @@ class H323Connection : public PObject
 #endif
     PString            remotePartyName;
     PString            remotePartyNumber;
+    PString            remoteQ931Display;
+    PString            remoteQ931Number;
+    PBoolean           useQ931Display;
     PString            remotePartyAddress;
     PStringArray       remoteAliasNames;
 	PStringArray       remoteLanguages;
@@ -3121,7 +3133,7 @@ class H323Connection : public PObject
     unsigned           uuiesRequested;
     PString            gkAccessTokenOID;
     PBYTEArray         gkAccessTokenData;
-    PBoolean               addAccessTokenToSetup;
+    PBoolean           addAccessTokenToSetup;
     SendUserInputModes sendUserInputMode;
 
     H323Transport * signallingChannel;
