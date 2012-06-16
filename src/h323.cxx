@@ -1389,11 +1389,16 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
   setupPDU.GetQ931().GetCallingPartyNumber(remoteQ931Number);
   remotePartyNumber = remoteQ931Number;
   remoteQ931Display = setupPDU.GetQ931().GetDisplayName();
-  remotePartyName = setupPDU.GetSourceAliases(signallingChannel);
   remoteAliasNames = setupPDU.GetSourceAliasNames();
-
-  // get the peer address
   remotePartyAddress = signallingChannel->GetRemoteAddress();
+
+  if (useQ931Display && !remotePartyNumber)
+      remotePartyName = remotePartyNumber;
+  else if (remoteAliasNames.GetSize() > 0)
+      remotePartyName = remoteAliasNames[0];
+  else
+      remotePartyName = remotePartyAddress;
+
   if (setup.m_sourceAddress.GetSize() > 0)
     remotePartyAddress = H323GetAliasAddressString(setup.m_sourceAddress[0]) + '@' + signallingChannel->GetRemoteAddress();
 
