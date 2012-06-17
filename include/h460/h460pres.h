@@ -209,11 +209,13 @@ class H460P_PresenceAlias : public PASN_Sequence
     H460P_PresenceAlias(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
 
     enum OptionalFields {
-      e_display
+      e_display,
+      e_avatar
     };
 
     H225_AliasAddress m_alias;
     H460P_PresenceDisplay m_display;
+    PASN_IA5String m_avatar;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);

@@ -83,6 +83,7 @@ class OpalT38Protocol;
 #endif
 
 #ifdef H323_H460P
+struct PresSubDetails;
 class H460PresenceHandler;
 #endif
 
@@ -2117,11 +2118,18 @@ class H323EndPoint : public PObject
                                     const PString & subAlias,
                                     const PString & subDisplay);
 
+    virtual void PresenceInstruction(const PString & locAlias,
+                                    unsigned type, 
+                                    const PString & subAlias,
+                                    const PString & subDisplay,
+                                    const PString & subAvatar
+                                    );
+
     /** Received Request for authorization
       */
     virtual void PresenceAuthorization(const OpalGloballyUniqueID & id,
                                     const PString & locAlias,
-                                    const std::map<PString, PString> & Aliases);
+                                    const std::map<PString,PresSubDetails> & Aliases);
 #endif
 
 #endif

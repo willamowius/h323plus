@@ -524,7 +524,7 @@ PObject * H460P_PresenceDisplay::Clone() const
 //
 
 H460P_PresenceAlias::H460P_PresenceAlias(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Sequence(tag, tagClass, 1, TRUE, 0)
+  : PASN_Sequence(tag, tagClass, 1, TRUE, 1)
 {
 }
 
@@ -537,6 +537,8 @@ void H460P_PresenceAlias::PrintOn(ostream & strm) const
   strm << setw(indent+8) << "alias = " << setprecision(indent) << m_alias << '\n';
   if (HasOptionalField(e_display))
     strm << setw(indent+10) << "display = " << setprecision(indent) << m_display << '\n';
+  if (HasOptionalField(e_avatar))
+    strm << setw(indent+9) << "avatar = " << setprecision(indent) << m_avatar << '\n';
   strm << setw(indent-1) << setprecision(indent-2) << "}";
 }
 #endif
@@ -579,6 +581,8 @@ PBoolean H460P_PresenceAlias::Decode(PASN_Stream & strm)
     return FALSE;
   if (HasOptionalField(e_display) && !m_display.Decode(strm))
     return FALSE;
+  if (!KnownExtensionDecode(strm, e_avatar, m_avatar))
+    return FALSE;
 
   return UnknownExtensionsDecode(strm);
 }
@@ -591,6 +595,7 @@ void H460P_PresenceAlias::Encode(PASN_Stream & strm) const
   m_alias.Encode(strm);
   if (HasOptionalField(e_display))
     m_display.Encode(strm);
+  KnownExtensionEncode(strm, e_avatar, m_avatar);
 
   UnknownExtensionsEncode(strm);
 }

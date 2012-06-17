@@ -109,7 +109,13 @@ class H323PresenceNotifications : public H460P_PresenceNotify
 	PStringList m_aliasList;
 };
 
-typedef std::map<PString,PString> PresenceSubscriberList;
+struct PresSubDetails
+{
+    PString m_display;
+    PString m_avatar;
+};
+
+typedef std::map<PString,PresSubDetails> PresenceSubscriberList;
 
 class H323PresenceSubscription : public H460P_PresenceSubscription
 {
@@ -120,7 +126,8 @@ public:
 
  // Sending Gatekeeper
 	void SetSubscriptionDetails(const PString & subscribe, const PStringList & aliases);
-	void SetSubscriptionDetails(const H225_AliasAddress & subscribe, const H225_AliasAddress & subscriber, const PString & display=PString());
+	void SetSubscriptionDetails(const H225_AliasAddress & subscribe, const H225_AliasAddress & subscriber, 
+                                const PString & display=PString(), const PString & avatar=PString());
 	void GetSubscriberDetails(PresenceSubscriberList & aliases) const;
 	void GetSubscriberDetails(PStringList & aliases) const;
 	PString GetSubscribed();
@@ -170,12 +177,13 @@ class H323PresenceInstruction  :  public H460P_PresenceInstruction
 
 	static PString GetInstructionString(unsigned instruct);
  
-    H323PresenceInstruction(Instruction instruct, const PString & alias);
-    H323PresenceInstruction(Instruction instruct, const PString & alias, const PString & display);
+    H323PresenceInstruction(Instruction instruct, const PString & alias, 
+                            const PString & display = PString(), const PString & avatar = PString());
 
 	Instruction GetInstruction();
     PString GetAlias() const;
-	PString GetAlias(PString & display) const;
+	PString GetAlias(PString & display, PString & avatar) const;
+
 };
 
 class H323PresenceInstructions  : public H460P_PresenceInstruct
@@ -214,6 +222,7 @@ struct H323PresenceID
 	H225_AliasAddress						m_subscriber;
 	H225_AliasAddress						m_Alias;
     PString                                 m_Display;
+    PString                                 m_Avatar;
 	H323PresenceInstruction::Instruction	m_Status;
 	PBoolean								m_Active;
 	PTime									m_Updated;

@@ -129,7 +129,8 @@ PresenceAlias ::= SEQUENCE
 {
     alias            AliasAddress,
     display          PresenceDisplay           OPTIONAL,
-    ...
+    ...,
+    avatar           IA5String                 OPTIONAL
 }
 
 PresenceInstruction ::= CHOICE

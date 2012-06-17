@@ -3500,16 +3500,22 @@ void H323EndPoint::PresenceInstruction(const PString & locAlias, unsigned type, 
                 << " " << subAlias << " " << subDisplay);
 }
 
+void H323EndPoint::PresenceInstruction(const PString & locAlias, unsigned type, const PString & subAlias, 
+                                       const PString & subDisplay, const PString & subAvatar)
+{
+    PresenceInstruction(locAlias, type, subAlias, subDisplay);
+}
+
 void H323EndPoint::PresenceAuthorization(const OpalGloballyUniqueID & id,
                                     const PString & locAlias,
-                                    const std::map<PString,PString> & Aliases)
+                                    const std::map<PString,PresSubDetails> & Aliases)
 {
     PStringStream s;
 
     s << "EP\tReceived Presence Authorization " << id.AsString();
-    std::map<PString,PString>::const_iterator i;
+    PresenceSubscriberList::const_iterator i;
     for (i = Aliases.begin(); i != Aliases.end(); ++i) {
-       s << "\n from Alias " << i->first << " " << i->second;
+       s << "\n from Alias " << i->first << " " << i->second.m_display;
     }
     PTRACE(4, s);
 }

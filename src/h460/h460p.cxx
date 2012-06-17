@@ -994,26 +994,25 @@ bool H323PresenceRemove::HandleIdentifier(bool opt)
 
 ///////////////////////////////////////////////////////////////////////
 
-H323PresenceInstruction::H323PresenceInstruction(Instruction instruct, const PString & alias, const PString & display)
+H323PresenceInstruction::H323PresenceInstruction(Instruction instruct, const PString & alias, const PString & display, const PString & avatar)
 {
     SetTag((unsigned)instruct);
     H460P_PresenceAlias & palias = *this;
     H225_AliasAddress & addr = palias.m_alias;
     H323SetAliasAddress(alias, addr);
 
+#if H323_H460P_VER >= 2
     if (!display) {
         palias.IncludeOptionalField(H460P_PresenceAlias::e_display);
         H460P_PresenceDisplay & pdisp = palias.m_display;
         pdisp.m_display.SetValue(display);
     }
-}
-
-H323PresenceInstruction::H323PresenceInstruction(Instruction instruct, const PString & alias)
-{
-    SetTag((unsigned)instruct);
-    H460P_PresenceAlias & palias = *this;
-    H225_AliasAddress & addr = palias.m_alias;
-    H323SetAliasAddress(alias, addr);
+    if (!avatar) {
+        palias.IncludeOptionalField(H460P_PresenceAlias::e_avatar);
+        PASN_IA5String & av = palias.m_avatar;
+        av.SetValue(avatar);
+    }
+#endif
 }
 
 H323PresenceInstruction::Instruction H323PresenceInstruction::GetInstruction()
@@ -1021,7 +1020,7 @@ H323PresenceInstruction::Instruction H323PresenceInstruction::GetInstruction()
     return (Instruction)GetTag();
 }
 
-PString H323PresenceInstruction::GetAlias(PString & display) const
+PString H323PresenceInstruction::GetAlias(PString & display, PString & avatar) const
 {
     const H460P_PresenceAlias & palias = *this;
     if (palias.HasOptionalField(H460P_PresenceAlias::e_display)) {
@@ -1030,16 +1029,19 @@ PString H323PresenceInstruction::GetAlias(PString & display) const
     } else {
        display = PString();
     }
-
+    if (palias.HasOptionalField(H460P_PresenceAlias::e_avatar)) {
+       const PASN_IA5String & pav = palias.m_avatar;
+       avatar = pav.GetValue();
+    }
     const H225_AliasAddress & addr = palias.m_alias;
     return H323GetAliasAddressString(addr);
-
 }
 
 PString H323PresenceInstruction::GetAlias() const
 {
     PString display = PString();
-    return GetAlias(display);
+    PString avatar = PString();
+    return GetAlias(display,avatar);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -1081,12 +1083,16 @@ static const char *InstructState[] = {
     "Subscribe",
     "Unsubscribe",
     "Block",
-    "Unblock"
+    "Unblock",
+    "Pending",
+    "Unknown"
 };
 
 PString H323PresenceInstruction::GetInstructionString(unsigned instruct)
 {
-     return InstructState[instruct];
+	if (instruct < 5) return InstructState[instruct];
+
+    return InstructState[5];
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -1371,7 +1377,8 @@ void H323PresenceSubscription::SetSubscriptionDetails(const PString & subscribe,
     }
 }
 
-void H323PresenceSubscription::SetSubscriptionDetails(const H225_AliasAddress & subscribe, const H225_AliasAddress & subscriber, const PString & display)
+void H323PresenceSubscription::SetSubscriptionDetails(const H225_AliasAddress & subscribe, const H225_AliasAddress & subscriber, 
+                                                      const PString & display, const PString & avatar)
 {
     m_subscribe = subscribe;
     H460P_PresenceAlias pAlias;
@@ -1380,6 +1387,11 @@ void H323PresenceSubscription::SetSubscriptionDetails(const H225_AliasAddress & 
         pAlias.IncludeOptionalField(H460P_PresenceAlias::e_display);
         H460P_PresenceDisplay & disp = pAlias.m_display;
         disp.m_display.SetValue(display);
+    }
+    if (!avatar) {
+        pAlias.IncludeOptionalField(H460P_PresenceAlias::e_avatar);
+        PASN_IA5String & avatar = pAlias.m_avatar;
+        avatar.SetValue(avatar);
     }
     int sz = m_aliases.GetSize();
     m_aliases.SetSize(sz+1);
@@ -1391,14 +1403,20 @@ void H323PresenceSubscription::GetSubscriberDetails(PresenceSubscriberList & ali
 
     for (PINDEX i=0; i< m_aliases.GetSize(); i++) {
         H460P_PresenceAlias & pAlias = m_aliases[i];
-        PString name, display = PString();
+        PresSubDetails details;
+        details.m_display = PString();
+        details.m_avatar = PString();
+        PString name = PString(); 
         name = H323GetAliasAddressString(pAlias.m_alias);
         if (pAlias.HasOptionalField(H460P_PresenceAlias::e_display)) {
             H460P_PresenceDisplay & disp = pAlias.m_display;
-            display = disp.m_display.GetValue();
+            details.m_display = disp.m_display.GetValue();
         }
-
-        aliases.insert(pair<PString, PString>(name,display));
+        if (pAlias.HasOptionalField(H460P_PresenceAlias::e_avatar)) {
+            PASN_IA5String & avatar = pAlias.m_avatar;
+            details.m_avatar = avatar.GetValue();
+        }
+        aliases.insert(pair<PString, PresSubDetails>(name,details));
     }
 }
 

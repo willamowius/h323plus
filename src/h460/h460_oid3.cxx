@@ -294,10 +294,11 @@ void H460PresenceHandler::PresenceRcvAuthorization(const H225_AliasAddress & add
 void H460PresenceHandler::PresenceRcvInstruction(const H225_AliasAddress & addr, const H323PresenceInstruction & instruct)
 {
 	PString display = PString();
-    PString alias = instruct.GetAlias(display);
+    PString avatar = PString();
+    PString alias = instruct.GetAlias(display, avatar);
 	unsigned i = instruct.GetTag();
 
-    ep.PresenceInstruction(H323GetAliasAddressString(addr),i, alias, display);
+    ep.PresenceInstruction(H323GetAliasAddressString(addr),i, alias, display, avatar);
 }
 
 void H460PresenceHandler::AddEndpointFeature(int feat)
