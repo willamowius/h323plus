@@ -486,6 +486,12 @@ class H323EndPoint : public PObject
     /**Called when TTL registration fails 
      */
     virtual void OnRegisterTTLFail();
+
+    /**When an IP address change has been detected
+       This will remove the listener and gatekeeper 
+       and bind to the new detected IP address
+     */
+    virtual PBoolean OnDetectedIPChange(PIPSocket::Address newIP = PIPSocket::Address::GetAny(4));
   //@}
 
   /**@name Connection management */
@@ -1428,7 +1434,6 @@ class H323EndPoint : public PObject
     virtual OpalT38Protocol * CreateT38ProtocolHandler(
       const H323Connection & connection  ///< Connection for which T.38 handler created
     ) const;
-  //@}
 #endif
 
 #if H323_H224
@@ -1487,6 +1492,7 @@ class H323EndPoint : public PObject
                                            H323FileTransferList & filelist        ///< Transfer File List
                                            ); 
 #endif
+  //@}
 
   /**@name Additional call services */
   //@{

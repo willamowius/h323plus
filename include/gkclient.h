@@ -285,11 +285,15 @@ class H323Gatekeeper : public H225_RAS
      */
     H323TransportAddress GetGatekeeperRouteAddress() const
     { return gkRouteAddress; }
+
+    /*
+     * Start Discovery of Gatekeeper at given transport Address.
+     */
+    PBoolean StartDiscovery(const H323TransportAddress & address);
   //@}
     
 
   protected:
-    PBoolean StartDiscovery(const H323TransportAddress & address);
     unsigned SetupGatekeeperRequest(H323RasPDU & request);
     
     void Connect(const H323TransportAddress & address, const PString & gatekeeperIdentifier);

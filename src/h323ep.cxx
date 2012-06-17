@@ -997,6 +997,36 @@ void H323EndPoint::OnRegisterTTLFail()
 {
 }
 
+PBoolean H323EndPoint::OnDetectedIPChange(PIPSocket::Address newIP)
+{
+    if (listeners.GetSize() > 0) { 
+        PIPSocket::Address oldIP;
+        WORD oldPort;
+        H323TransportAddress localAddress = listeners[0].GetTransportAddress();
+        localAddress.GetIpAndPort(oldIP,oldPort);
+        listeners.RemoveAll();
+
+        H323ListenerTCP * listener = new H323ListenerTCP(*this, newIP, oldPort);
+        if (!StartListener(listener)) {
+            PTRACE(4,"EP\tCould not bind listener port on \"" << newIP << '"');
+            return false;
+        }
+        PTRACE(2,"EP\tStopped Listener on \"" << oldIP << '"' << " Restarted \"" << newIP << '"');       
+    }
+
+    if (gatekeeper) {
+        H323TransportAddress add = gatekeeper->GetGatekeeperRouteAddress();
+        RemoveGatekeeper(H225_UnregRequestReason::e_reregistrationRequired);
+
+        H323TransportUDP * transport = new H323TransportUDP(*this, newIP);
+        H323Gatekeeper * gk = CreateGatekeeper(transport);
+        gk->SetPassword(gatekeeperPassword);
+
+        InternalRegisterGatekeeper(gk, gk->StartDiscovery(add));
+    }
+    return true;
+}
+
 void H323EndPoint::SetAuthenticatorOrder(PStringList & names)
 {
     gkAuthenticatorOrder = names;
