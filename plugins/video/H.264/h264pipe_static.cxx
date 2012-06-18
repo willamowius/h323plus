@@ -80,8 +80,8 @@ void H264EncCtx::call(unsigned msg)
 		    delete x264;
             x264 = NULL;
             loaded =false;
-		    break;
         }
+		break;
 	case APPLY_OPTIONS:
          if (InternalLoad())
             x264->ApplyOptions();	
