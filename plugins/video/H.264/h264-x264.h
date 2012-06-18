@@ -366,9 +366,12 @@ static struct PluginCodec_Option const * const optionTable[] = {
 #define H264_PROFILE_EXTENDED  16
 #define H264_PROFILE_HIGH       8   
 
-#define H264_BASE_IDC		   66   // RFC3984  Baseline 
+#define H264_BASE_IDC		   66   // RFC3984  Baseline
+#define H264_HIGH_IDC		  100   // RFC3984  High
+#define PLUGINCODEC_OPTION_PROFILE			"Generic Parameter 41"
 #define PLUGINCODEC_OPTION_LEVEL			"Generic Parameter 42"
 #define PLUGINCODEC_OPTION_ASPECT			"Generic Parameter 10"
+#define PLUGINCODEC_OPTION_MAXFRAMERATE	    "Generic Parameter 13"
 #define PLUGINCODEC_OPTION_CUSMBPS			"Generic Parameter 3"
 #define PLUGINCODEC_OPTION_CUSMFS			"Generic Parameter 4"
 #define PLUGINCODEC_OPTION_STATICMBPS	    "Generic Parameter 7"
@@ -413,7 +416,9 @@ static unsigned int   H264QCIF_Generic5        = 0;
 static unsigned int   H264QCIF_Generic6        = 0;
 static unsigned int   H264QCIF_Generic7        = 0;
 static unsigned int   H264QCIF_Generic9        = 0;
-static unsigned int   H264QCIF_Generic10       = H264_ASPECT_43;
+static unsigned int   H264QCIF_Generic10       = 0; //H264_ASPECT_43;
+static unsigned int   H264QCIF_Generic13       = 3000; 
+
 
 // H.264 CIF
 static const char     H264CIF_Desc[]          = { "H.264-CIF" };
@@ -431,7 +436,9 @@ static unsigned int   H264CIF_Generic5        = 0;
 static unsigned int   H264CIF_Generic6        = 0;
 static unsigned int   H264CIF_Generic7        = 0;
 static unsigned int   H264CIF_Generic9        = 0;
-static unsigned int   H264CIF_Generic10       = H264_ASPECT_43;
+static unsigned int   H264CIF_Generic10       = 0; //H264_ASPECT_43;
+static unsigned int   H264CIF_Generic13       = 3000; 
+
 
 // H.264 VGA
 static const char     H264VGA_Desc[]          = { "H.264-VGA" };
@@ -450,6 +457,7 @@ static unsigned int   H264VGA_Generic6        = 0;
 static unsigned int   H264VGA_Generic7        = 0;
 static unsigned int   H264VGA_Generic9        = 0;
 static unsigned int   H264VGA_Generic10       = 0;
+static unsigned int   H264VGA_Generic13       = 3000; 
 
 
 // H.264 CIF4   // compatible SIP profile
@@ -468,7 +476,9 @@ static unsigned int   H264CIF4_Generic5        = 0;
 static unsigned int   H264CIF4_Generic6        = 0;
 static unsigned int   H264CIF4_Generic7        = 0;
 static unsigned int   H264CIF4_Generic9        = 0;
-static unsigned int   H264CIF4_Generic10       = H264_ASPECT_43;
+static unsigned int   H264CIF4_Generic10       = 0; //H264_ASPECT_43;
+static unsigned int   H264CIF4_Generic13       = 3000; 
+
 
 // HD 720P
 static const char     H264720P_Desc[]          = { "H.264-720" };
@@ -486,7 +496,8 @@ static unsigned int   H264720P_Generic5        = 0;
 static unsigned int   H264720P_Generic6        = 0;
 static unsigned int   H264720P_Generic7        = 0;
 static unsigned int   H264720P_Generic9        = 0;
-static unsigned int   H264720P_Generic10       = H264_ASPECT_HD;
+static unsigned int   H264720P_Generic10       = 0;    //H264_ASPECT_HD;
+static unsigned int   H264720P_Generic13       = 3000; 
 
 // HD H.239 1920 x 1152 
 static const char     H264H239_Desc[]           = { "H.264" };
@@ -504,14 +515,15 @@ static unsigned int   H264H239_Generic5         = 0;
 static unsigned int   H264H239_Generic6         = 0;
 static unsigned int   H264H239_Generic7         = 0;
 static unsigned int   H264H239_Generic9         = 0;
-static unsigned int   H264H239_Generic10        = H264_ASPECT_HD;
+static unsigned int   H264H239_Generic10        = 0; //H264_ASPECT_HD;
+static unsigned int   H264H239_Generic13        = 3000; 
 
 
 static const char     H2641080P_Desc[]          = { "H.264-720" };
 static const char     H2641080P_MediaFmt[]      = { "H.264-720" };                             
 static unsigned int   H2641080P_FrameHeight     = P1080_HEIGHT;               
 static unsigned int   H2641080P_FrameWidth      = P1080_WIDTH;
-static unsigned int   H2641080P_Profile         = H264_PROFILE_BASE; 
+static unsigned int   H2641080P_Profile         = H264_PROFILE_BASE; //H264_PROFILE_HIGH;
 static unsigned int   H2641080P_Level           = H264_LEVEL2_2; //H264_LEVEL4;
 static unsigned int   H2641080P_MaxBitRate      = H264_LEVEL4_MBPS*100;
 static const char	  H2641080P_TargetBitRate[] =  { "2084000" }; 
@@ -522,7 +534,9 @@ static unsigned int   H2641080P_Generic5        = 0;
 static unsigned int   H2641080P_Generic6        = 0;
 static unsigned int   H2641080P_Generic7        = 0;
 static unsigned int   H2641080P_Generic9        = 0;
-static unsigned int   H2641080P_Generic10       = H264_ASPECT_HD;
+static unsigned int   H2641080P_Generic10       = 0; //H264_ASPECT_HD;
+static unsigned int   H2641080P_Generic13       = 3000; 
+
 
 // MEGA MACRO to set options
 #define DECLARE_GENERIC_OPTIONS(prefix) \
@@ -544,11 +558,12 @@ static const struct PluginCodec_H323GenericParameterDefinition prefix##_h323para
 	{{1,0,0,0,0},7, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, {prefix##_Generic7}}, \
 	{{1,0,0,0,0},9, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_Unsigned32Min, {prefix##_Generic9}}, \
 	{{1,0,0,0,0},10, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, {prefix##_Generic10}}, \
+	{{1,0,0,0,0},13, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, {prefix##_Generic13}}, \
 	{{1,0,0,0,0},41, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_BooleanArray,{prefix##_Profile}}, \
 	{{1,0,0,0,0},42, PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, {prefix##_Level}}, \
 }; \
 static struct PluginCodec_H323GenericCodecData prefix##_h323GenericData[] = { \
-    { OpalPluginCodec_Identifer_H264_Generic, prefix##_MaxBitRate, 9, prefix##_h323params } \
+    { OpalPluginCodec_Identifer_H264_Generic, prefix##_MaxBitRate, 10, prefix##_h323params } \
 }; \
 
 DECLARE_GENERIC_OPTIONS(H264QCIF)
@@ -619,10 +634,10 @@ DECLARE_GENERIC_OPTIONS(H2641080P)
 
 static struct PluginCodec_Definition h264CodecDefn[] = {
  // DECLARE_H323PARAM(H264QCIF),
-  DECLARE_H323PARAM(H264CIF),
+   DECLARE_H323PARAM(H264CIF),
  // DECLARE_H323PARAM(H264VGA),
  // DECLARE_H323PARAM(H264CIF4)
-//  DECLARE_H323PARAM(H264720P),
+ // DECLARE_H323PARAM(H264720P),
    DECLARE_H323PARAM(H264H239)
   ,DECLARE_H323PARAM(H2641080P)
 };

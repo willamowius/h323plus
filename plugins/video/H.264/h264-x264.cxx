@@ -129,7 +129,10 @@ H264EncoderContext::H264EncoderContext()
     }
   }
 
+#ifndef _DELAY_LOAD
   H264EncCtxInstance.call(H264ENCODERCONTEXT_CREATE);
+#endif
+
   // add default list of supported formats
   inputFormats fmt1080p = {8100, 1920, 1080, 4};
   inputFormats fmt720p = {3600, 1280, 720, 4};
@@ -839,10 +842,8 @@ static void * create_encoder(const struct PluginCodec_Definition * /*codec*/)
 static void destroy_encoder(const struct PluginCodec_Definition * /*codec*/, void * _context)
 {
 #ifndef _SIGNAL_ONLY
-    if (_context) {
-      delete _context;
-      _context = NULL;
-    }
+    H264EncoderContext * context = (H264EncoderContext *)_context;
+    delete context;
 #endif
 }
 
@@ -1141,7 +1142,7 @@ static int encoder_set_options(
   H264EncoderContext * context = (H264EncoderContext *)_context;
 
   context->Lock();
-  unsigned profile = 66;
+  unsigned profile = H264_BASE_IDC;
   unsigned constraints = 0;
   unsigned level = 0; //51;
   unsigned orgframeWidth = codec->parm.video.maxFrameWidth;
@@ -1190,6 +1191,8 @@ static int encoder_set_options(
                 maxNALSize = atoi(options[i+1]);
                 context->SetMaxNALSize(maxNALSize);
           }
+      if (STRCMPI(options[i], PLUGINCODEC_OPTION_PROFILE) == 0) 
+         profile = ((atoi(options[i+1]) == H264_PROFILE_HIGH) ? H264_HIGH_IDC : H264_BASE_IDC );
       if (STRCMPI(options[i], PLUGINCODEC_OPTION_LEVEL) == 0)
          level = atoi(options[i+1]);
       if (STRCMPI(options[i], PLUGINCODEC_OPTION_CUSMBPS) == 0)

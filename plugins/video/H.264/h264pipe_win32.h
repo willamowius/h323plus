@@ -45,6 +45,7 @@ class H264EncCtx
 	 unsigned GetInstanceNumber() { return instances; };
 
   protected:
+     bool InternalLoad();
      bool createPipes();
      void closeAndRemovePipes();
      void writeStream (LPCVOID data, unsigned bytes);

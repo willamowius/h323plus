@@ -74,11 +74,24 @@ H264EncCtx::H264EncCtx()
 
 H264EncCtx::~H264EncCtx()
 {
-  closeAndRemovePipes();
+    if (loaded)
+       closeAndRemovePipes();
 }
 
 bool H264EncCtx::Load()
 {
+#ifdef _DELAY_LOAD
+    return true;
+#else
+    return InternalLoad();
+#endif
+}
+
+bool H264EncCtx::InternalLoad()
+{
+  if (loaded)
+      return true;
+
   snprintf(pipeName, sizeof(pipeName), "\\\\.\\pipe\\x264-%u", GetInstanceNumber());
 
   if (!createPipes()) {
@@ -109,21 +122,40 @@ bool H264EncCtx::Load()
 	}
   } 
 
+  loaded = true;
+#ifdef _DELAY_LOAD
+  call(H264ENCODERCONTEXT_CREATE);
+#endif
+
   TRACE(1, "H264\tIPC\tPP: Successfully established communication with child process");
   return true;
 }
 
 void H264EncCtx::call(unsigned msg)
 {
+#ifdef _DELAY_LOAD
+  if (!InternalLoad())
+      return;
+#endif
+
   if (msg == H264ENCODERCONTEXT_CREATE) 
      startNewFrame = true;
+
   writeStream((LPCVOID)&msg, sizeof(msg));
   flushStream();
   readStream((LPVOID)&msg, sizeof(msg));
+
+  if (msg == H264ENCODERCONTEXT_DELETE) 
+     closeAndRemovePipes();
 }
 
 void H264EncCtx::call(unsigned msg, unsigned value)
 {
+#ifdef _DELAY_LOAD
+  if (!InternalLoad())
+      return;
+#endif
+
   switch (msg) {
     case SET_FRAME_WIDTH:  width  = value; size = (unsigned) (width * height * 1.5) + sizeof(frameHeader) + 40; break;
     case SET_FRAME_HEIGHT: height = value; size = (unsigned) (width * height * 1.5) + sizeof(frameHeader) + 40; break;
@@ -138,6 +170,11 @@ void H264EncCtx::call(unsigned msg, unsigned value)
      
 void H264EncCtx::call(unsigned msg , const u_char * src, unsigned & srcLen, u_char * dst, unsigned & dstLen, unsigned & headerLen, unsigned int & flags, int & ret)
 {
+#ifdef _DELAY_LOAD
+  if (!InternalLoad())
+      return;
+#endif
+
   if (startNewFrame) {
 
     writeStream((LPCVOID) &msg, sizeof(msg));
@@ -207,16 +244,20 @@ bool H264EncCtx::createPipes()
 		TRACE(1, "H264\tIPC\tPP: TimeOut on creating Pipe - terminating (" << ErrorMessage() << ")");
 		return false;
 	}
+    loaded = true;
 
   return true;
 }
 
 void H264EncCtx::closeAndRemovePipes()
 {
-  if (!DisconnectNamedPipe(stream))
- 	TRACE(1, "H264\tIPC\tPP: Failure on disconnecting Pipe (" << ErrorMessage() << ")");
-  if (!CloseHandle(stream))
- 	TRACE(1, "H264\tIPC\tPP: Failure on closing Handle (" << ErrorMessage() << ")");
+    if (loaded) {
+      if (!DisconnectNamedPipe(stream))
+ 	    TRACE(1, "H264\tIPC\tPP: Failure on disconnecting Pipe (" << ErrorMessage() << ")");
+      if (!CloseHandle(stream))
+ 	    TRACE(1, "H264\tIPC\tPP: Failure on closing Handle (" << ErrorMessage() << ")");
+    }
+    loaded = false;
 }
 
 void H264EncCtx::readStream (LPVOID data, unsigned bytes)
