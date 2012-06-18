@@ -2592,11 +2592,11 @@ class H323Connection : public PObject
       */
     void SetLocalPartyName(const PString & name);
 
-    /**Set the local Q.931 display name
+    /**Set the local Display name
       */
     void SetDisplayName(const PString & name) { localDisplayName = name; }
 
-    /**Get the local Q.931 display name
+    /**Get the local Display name
       */
     const PString GetDisplayName() const { return localDisplayName; }
 
