@@ -605,8 +605,8 @@ class H460_Feature : public H225_FeatureDescriptor
       FeatureBaseRas   =6,        ///< Create Startup use RAS
       FeatureBaseSignal=7,          ///< Create Base use Signal
       FeatureRas       =8,        ///< Create Registering GK
-      FeatureSignal    =16,       ///< Create Call Setup
-      FeaturePresence  =24        ///< Create Call Setup/Advertise in Presence
+      FeaturePresence  =10,       ///< Create Call Setup/Advertise in Presence
+      FeatureSignal    =16        ///< Create Call Setup
     } FeatureInstance;
 
   //@}
