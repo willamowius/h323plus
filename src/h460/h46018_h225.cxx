@@ -111,7 +111,7 @@ void H46018TransportThread::Main()
     PTRACE(3, "H46018\tStarted Listening Thread");
 
     PBoolean ret = true;
-    while (transport->IsOpen()) {    // not close due to shutdown
+    while (transport && transport->IsOpen()) {    // not close due to shutdown
         ret = transport->HandleH46018SignallingChannelPDU(this);
 
         if (!ret && transport->CloseTransport()) {  // Closing down Instruction
@@ -218,9 +218,8 @@ PBoolean H46018Transport::HandleH46018SignallingChannelPDU(PThread * thread)
 
     H323SignalPDU pdu;
     if (!HandleH46018SignallingSocket(pdu)) {
-        if (remoteShutDown) {   // Intentional Shutdown?
+        if (remoteShutDown && !closeTransport)   // Intentional Shutdown?
             Close();
-            }
         return false;
     }
 
