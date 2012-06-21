@@ -158,6 +158,7 @@ H46018SignalPDU::H46018SignalPDU(const OpalGloballyUniqueID & callIdentifier)
     q931pdu.BuildFacility(0, FALSE);
 
     // Build the UUIE
+    m_h323_uu_pdu.m_h245Tunneling.SetValue(true);  // We always H.245 Tunnel
     m_h323_uu_pdu.m_h323_message_body.SetTag(H225_H323_UU_PDU_h323_message_body::e_facility);
     H225_Facility_UUIE & fac = m_h323_uu_pdu.m_h323_message_body;
 
