@@ -1054,7 +1054,7 @@ bool H323PresenceInstruction::SetCategory(H323PresenceInstruction::Category cate
            cat.SetTag((unsigned)category);
            break;
        case e_Teleprence:
-           PTRACE(4,"H460P\tTelepresence contact not supported yet!");
+           // Not supported yet
            break;
        case e_Meeting:
            {
