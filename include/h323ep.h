@@ -2131,6 +2131,14 @@ class H323EndPoint : public PObject
                                     const PString & subAvatar
                                     );
 
+    virtual void PresenceInstruction(const PString & locAlias,
+                                    unsigned type, 
+                                    const PString & subAlias,
+                                    const PString & subDisplay,
+                                    const PString & subAvatar,
+                                    unsigned category 
+                                    );  
+
     /** Received Request for authorization
       */
     virtual void PresenceAuthorization(const OpalGloballyUniqueID & id,

@@ -3536,6 +3536,13 @@ void H323EndPoint::PresenceInstruction(const PString & locAlias, unsigned type, 
     PresenceInstruction(locAlias, type, subAlias, subDisplay);
 }
 
+void H323EndPoint::PresenceInstruction(const PString & locAlias, unsigned type, const PString & subAlias, 
+                                       const PString & subDisplay, const PString & subAvatar, unsigned category)
+{
+    PresenceInstruction(locAlias, type, subAlias, subDisplay, subAvatar);
+}
+
+
 void H323EndPoint::PresenceAuthorization(const OpalGloballyUniqueID & id,
                                     const PString & locAlias,
                                     const std::map<PString,PresSubDetails> & Aliases)

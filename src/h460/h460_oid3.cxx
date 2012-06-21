@@ -295,10 +295,11 @@ void H460PresenceHandler::PresenceRcvInstruction(const H225_AliasAddress & addr,
 {
 	PString display = PString();
     PString avatar = PString();
-    PString alias = instruct.GetAlias(display, avatar);
+    H323PresenceInstruction::Category cat = H323PresenceInstruction::e_UnknownCategory;
+    PString alias = instruct.GetAlias(display, avatar,cat);
 	unsigned i = instruct.GetTag();
 
-    ep.PresenceInstruction(H323GetAliasAddressString(addr),i, alias, display, avatar);
+    ep.PresenceInstruction(H323GetAliasAddressString(addr),i, alias, display, avatar, cat);
 }
 
 void H460PresenceHandler::AddEndpointFeature(int feat)

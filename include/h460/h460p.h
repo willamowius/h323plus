@@ -53,6 +53,59 @@
 #include <map>
 
 
+class H323PresenceInstruction  :  public H460P_PresenceInstruction
+{
+
+ public:
+
+	enum Instruction {
+        e_subscribe,
+        e_unsubscribe,
+        e_block,
+        e_unblock,
+        e_pending
+	};
+
+	static PString GetInstructionString(unsigned instruct);
+
+    enum Category {
+        e_Audio,
+        e_Video,
+        e_Data,
+        e_ExtVideo,
+        e_Teleprence,
+        e_Meeting,
+        e_UnknownCategory = 100
+    };
+
+    static PString GetCategoryString(unsigned cat);
+    static H323PresenceInstruction::Category GetCategory(const H460P_PresenceAlias & alias);
+    static bool SetCategory(H323PresenceInstruction::Category cat ,H460P_PresenceAlias & alias);
+
+    H323PresenceInstruction(Instruction instruct, const PString & alias, 
+                            const PString & display = PString(), const PString & avatar = PString(), Category category=e_UnknownCategory);
+
+	Instruction GetInstruction();
+    PString GetAlias() const;
+	PString GetAlias(PString & display, PString & avatar, H323PresenceInstruction::Category category=e_UnknownCategory) const;
+
+};
+
+class H323PresenceInstructions  : public H460P_PresenceInstruct
+{
+  public:
+	void Add(const H323PresenceInstruction & instruct);
+	H323PresenceInstruction & operator[](PINDEX i) const;
+
+	void SetAlias(const PString & alias);
+	void GetAlias(PString & alias);
+
+	void SetSize(PINDEX newSize);
+	PINDEX GetSize() const;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 class H323PresenceNotification : public H460P_PresenceNotification
 {
 
@@ -113,7 +166,10 @@ struct PresSubDetails
 {
     PString m_display;
     PString m_avatar;
+    unsigned m_category;
 };
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 typedef std::map<PString,PresSubDetails> PresenceSubscriberList;
 
@@ -127,7 +183,8 @@ public:
  // Sending Gatekeeper
 	void SetSubscriptionDetails(const PString & subscribe, const PStringList & aliases);
 	void SetSubscriptionDetails(const H225_AliasAddress & subscribe, const H225_AliasAddress & subscriber, 
-                                const PString & display=PString(), const PString & avatar=PString());
+                                const PString & display=PString(), const PString & avatar=PString(), 
+                                H323PresenceInstruction::Category category=H323PresenceInstruction::e_UnknownCategory);
 	void GetSubscriberDetails(PresenceSubscriberList & aliases) const;
 	void GetSubscriberDetails(PStringList & aliases) const;
 	PString GetSubscribed();
@@ -163,41 +220,7 @@ class H323PresenceSubscriptions : public H460P_PresenceAuthorize
 	PINDEX GetSize() const;
 };
 
-class H323PresenceInstruction  :  public H460P_PresenceInstruction
-{
-
- public:
-	enum Instruction {
-	  e_subscribe,
-      e_unsubscribe,
-      e_block,
-      e_unblock,
-	  e_pending
-	};
-
-	static PString GetInstructionString(unsigned instruct);
- 
-    H323PresenceInstruction(Instruction instruct, const PString & alias, 
-                            const PString & display = PString(), const PString & avatar = PString());
-
-	Instruction GetInstruction();
-    PString GetAlias() const;
-	PString GetAlias(PString & display, PString & avatar) const;
-
-};
-
-class H323PresenceInstructions  : public H460P_PresenceInstruct
-{
-  public:
-	void Add(const H323PresenceInstruction & instruct);
-	H323PresenceInstruction & operator[](PINDEX i) const;
-
-	void SetAlias(const PString & alias);
-	void GetAlias(PString & alias);
-
-	void SetSize(PINDEX newSize);
-	PINDEX GetSize() const;
-};
+//////////////////////////////////////////////////////////////////////////////////////////
 
 class H323PresenceIdentifiers   : public H460P_ArrayOf_PresenceIdentifier
 {
@@ -224,6 +247,7 @@ struct H323PresenceID
     PString                                 m_Display;
     PString                                 m_Avatar;
 	H323PresenceInstruction::Instruction	m_Status;
+    H323PresenceInstruction::Category       m_Category;
 	PBoolean								m_Active;
 	PTime									m_Updated;
 };

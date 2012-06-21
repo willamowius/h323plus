@@ -126,6 +126,8 @@ const char *PresName[] = {
 };
 const unsigned MaxPresTag =  H460P_PresenceMessage::e_presenceAlert;
 
+// OID's
+static const char * H460P_Meeting = "1.3.6.1.4.1.17090.0.12.0.1";
 
 ///////////////////////////////////////////////////////////////////
 
@@ -994,7 +996,83 @@ bool H323PresenceRemove::HandleIdentifier(bool opt)
 
 ///////////////////////////////////////////////////////////////////////
 
-H323PresenceInstruction::H323PresenceInstruction(Instruction instruct, const PString & alias, const PString & display, const PString & avatar)
+H323PresenceInstruction::Instruction H323PresenceInstruction::GetInstruction()
+{
+    return (Instruction)GetTag();
+}
+
+H323PresenceInstruction::Category  H323PresenceInstruction::GetCategory(const H460P_PresenceAlias & alias)
+{
+       Category category = H323PresenceInstruction::e_UnknownCategory;
+
+       if (!alias.HasOptionalField(H460P_PresenceAlias::e_category))
+           return category;
+
+       const H460P_PresenceFeature & cat = alias.m_category;
+       switch (cat.GetTag())  {
+           case H460P_PresenceFeature::e_audio:
+               category = H323PresenceInstruction::e_Audio;
+               break;
+           case H460P_PresenceFeature::e_video:
+               category = H323PresenceInstruction::e_Video;
+               break;
+           case H460P_PresenceFeature::e_data:
+               category = H323PresenceInstruction::e_Data;
+               break;
+           case H460P_PresenceFeature::e_extVideo:
+               category = H323PresenceInstruction::e_ExtVideo;
+               break;
+           case H460P_PresenceFeature::e_generic:
+               {
+                   const H460P_PresenceFeatureGeneric & gen = cat;
+                   const H225_GenericIdentifier & id = gen.m_identifier;
+                   if (id.GetTag() == H225_GenericIdentifier::e_oid) {
+                       const PASN_ObjectId & val = id;
+                       if (val.GetValue() == PString(H460P_Meeting))
+                           category = H323PresenceInstruction::e_Meeting; 
+                   } 
+               }
+               break;
+           default:
+               break;
+       }
+       return category;
+}
+
+bool H323PresenceInstruction::SetCategory(H323PresenceInstruction::Category category ,H460P_PresenceAlias & alias)
+{
+    if (category == H323PresenceInstruction::e_UnknownCategory)
+        return false;
+
+    alias.IncludeOptionalField(H460P_PresenceAlias::e_category);
+    H460P_PresenceFeature & cat = alias.m_category;
+    switch (category) {
+       case e_Audio:
+       case e_Video:
+       case e_Data:
+       case e_ExtVideo:
+           cat.SetTag((unsigned)category);
+           break;
+       case e_Teleprence:
+           PTRACE(4,"H460P\tTelepresence contact not supported yet!");
+           break;
+       case e_Meeting:
+           {
+               cat.SetTag(H460P_PresenceFeature::e_generic);
+               H460P_PresenceFeatureGeneric & gen = cat;
+               H225_GenericIdentifier & id = gen.m_identifier;
+               id.SetTag(H225_GenericIdentifier::e_oid);
+               PASN_ObjectId & val = id;
+               val.SetValue(H460P_Meeting);
+           }
+           break;
+       default:
+           break;
+    }
+    return true;
+}
+
+H323PresenceInstruction::H323PresenceInstruction(Instruction instruct, const PString & alias, const PString & display, const PString & avatar, H323PresenceInstruction::Category category)
 {
     SetTag((unsigned)instruct);
     H460P_PresenceAlias & palias = *this;
@@ -1012,27 +1090,26 @@ H323PresenceInstruction::H323PresenceInstruction(Instruction instruct, const PSt
         PASN_IA5String & av = palias.m_avatar;
         av.SetValue(avatar);
     }
+
+    SetCategory(category,palias);
+
 #endif
 }
 
-H323PresenceInstruction::Instruction H323PresenceInstruction::GetInstruction()
-{
-    return (Instruction)GetTag();
-}
-
-PString H323PresenceInstruction::GetAlias(PString & display, PString & avatar) const
+PString H323PresenceInstruction::GetAlias(PString & display, PString & avatar, H323PresenceInstruction::Category category) const
 {
     const H460P_PresenceAlias & palias = *this;
+#if H323_H460P_VER >= 2
     if (palias.HasOptionalField(H460P_PresenceAlias::e_display)) {
        const H460P_PresenceDisplay & pdisp = palias.m_display;
        display = pdisp.m_display.GetValue();
-    } else {
-       display = PString();
-    }
+    } 
     if (palias.HasOptionalField(H460P_PresenceAlias::e_avatar)) {
        const PASN_IA5String & pav = palias.m_avatar;
        avatar = pav.GetValue();
     }
+    category = GetCategory(palias);
+#endif
     const H225_AliasAddress & addr = palias.m_alias;
     return H323GetAliasAddressString(addr);
 }
@@ -1041,7 +1118,8 @@ PString H323PresenceInstruction::GetAlias() const
 {
     PString display = PString();
     PString avatar = PString();
-    return GetAlias(display,avatar);
+    Category cat = e_UnknownCategory;
+    return GetAlias(display,avatar,cat);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -1093,6 +1171,24 @@ PString H323PresenceInstruction::GetInstructionString(unsigned instruct)
 	if (instruct < 5) return InstructState[instruct];
 
     return InstructState[5];
+}
+
+static const char *CategoryState[] = {
+        "Audio",
+        "Video",
+        "Data",
+        "ExtVideo",
+        "Teleprence",
+        "Meeting",
+        "Unknown"
+};
+
+
+PString H323PresenceInstruction::GetCategoryString(unsigned cat)
+{
+	if (cat < 6) return CategoryState[cat];
+
+    return CategoryState[6];
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -1378,7 +1474,8 @@ void H323PresenceSubscription::SetSubscriptionDetails(const PString & subscribe,
 }
 
 void H323PresenceSubscription::SetSubscriptionDetails(const H225_AliasAddress & subscribe, const H225_AliasAddress & subscriber, 
-                                                      const PString & display, const PString & avatar)
+                                                      const PString & display, const PString & avatar, 
+                                                      H323PresenceInstruction::Category category )
 {
     m_subscribe = subscribe;
     H460P_PresenceAlias pAlias;
@@ -1393,6 +1490,8 @@ void H323PresenceSubscription::SetSubscriptionDetails(const H225_AliasAddress & 
         PASN_IA5String & avatar = pAlias.m_avatar;
         avatar.SetValue(avatar);
     }
+    H323PresenceInstruction::SetCategory(category,pAlias);
+
     int sz = m_aliases.GetSize();
     m_aliases.SetSize(sz+1);
     m_aliases[sz] = pAlias;
@@ -1406,6 +1505,7 @@ void H323PresenceSubscription::GetSubscriberDetails(PresenceSubscriberList & ali
         PresSubDetails details;
         details.m_display = PString();
         details.m_avatar = PString();
+        details.m_category = 100;
         PString name = PString(); 
         name = H323GetAliasAddressString(pAlias.m_alias);
         if (pAlias.HasOptionalField(H460P_PresenceAlias::e_display)) {
@@ -1416,6 +1516,8 @@ void H323PresenceSubscription::GetSubscriberDetails(PresenceSubscriberList & ali
             PASN_IA5String & avatar = pAlias.m_avatar;
             details.m_avatar = avatar.GetValue();
         }
+        details.m_category = H323PresenceInstruction::GetCategory(pAlias);
+
         aliases.insert(pair<PString, PresSubDetails>(name,details));
     }
 }

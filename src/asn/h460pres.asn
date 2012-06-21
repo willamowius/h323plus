@@ -121,8 +121,26 @@ PresencePDU ::= CHOICE
 
 PresenceDisplay ::= SEQUENCE
 {
-    language                IA5String                 OPTIONAL,    -- RFC4646 language tag
-    display                 BMPString(SIZE(1..128))
+    language      IA5String                 OPTIONAL,    -- RFC4646 language tag
+    display       BMPString(SIZE(1..128))
+}
+
+PresenceFeatureGeneric ::= SEQUENCE
+{
+    identifier    GenericIdentifier,
+    display       PresenceDisplay        OPTIONAL,
+    ...    
+}
+
+PresenceFeature ::= CHOICE
+{
+    audio        NULL,
+    video        NULL,
+    data         NULL,
+    extVideo     NULL,
+    ...,
+    generic      PresenceFeatureGeneric
+
 }
 
 PresenceAlias ::= SEQUENCE
@@ -130,7 +148,8 @@ PresenceAlias ::= SEQUENCE
     alias            AliasAddress,
     display          PresenceDisplay           OPTIONAL,
     ...,
-    avatar           IA5String                 OPTIONAL
+    avatar           IA5String                 OPTIONAL,
+    category         PresenceFeature           OPTIONAL
 }
 
 PresenceInstruction ::= CHOICE
@@ -202,24 +221,6 @@ PresenceState ::= CHOICE
     away             NULL,
     ...,
     generic          SEQUENCE OF PresenceDisplay
-
-}
-
-PresenceFeatureGeneric ::= SEQUENCE
-{
-    identifier    GenericIdentifier,
-    display       IA5String        OPTIONAL,
-    ...    
-}
-
-PresenceFeature ::= CHOICE
-{
-    audio        NULL,
-    video        NULL,
-    data         NULL,
-    extVideo     NULL,
-    ...,
-    generic      PresenceFeatureGeneric
 
 }
 

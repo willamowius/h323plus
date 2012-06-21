@@ -433,6 +433,166 @@ PObject * H460P_PresencePDU::Clone() const
 
 
 //
+// PresenceFeatureGeneric
+//
+
+H460P_PresenceFeatureGeneric::H460P_PresenceFeatureGeneric(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Sequence(tag, tagClass, 1, TRUE, 0)
+{
+}
+
+
+#ifndef PASN_NOPRINTON
+void H460P_PresenceFeatureGeneric::PrintOn(ostream & strm) const
+{
+  int indent = strm.precision() + 2;
+  strm << "{\n";
+  strm << setw(indent+13) << "identifier = " << setprecision(indent) << m_identifier << '\n';
+  if (HasOptionalField(e_display))
+    strm << setw(indent+10) << "display = " << setprecision(indent) << m_display << '\n';
+  strm << setw(indent-1) << setprecision(indent-2) << "}";
+}
+#endif
+
+
+PObject::Comparison H460P_PresenceFeatureGeneric::Compare(const PObject & obj) const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(&obj, H460P_PresenceFeatureGeneric), PInvalidCast);
+#endif
+  const H460P_PresenceFeatureGeneric & other = (const H460P_PresenceFeatureGeneric &)obj;
+
+  Comparison result;
+
+  if ((result = m_identifier.Compare(other.m_identifier)) != EqualTo)
+    return result;
+  if ((result = m_display.Compare(other.m_display)) != EqualTo)
+    return result;
+
+  return PASN_Sequence::Compare(other);
+}
+
+
+PINDEX H460P_PresenceFeatureGeneric::GetDataLength() const
+{
+  PINDEX length = 0;
+  length += m_identifier.GetObjectLength();
+  if (HasOptionalField(e_display))
+    length += m_display.GetObjectLength();
+  return length;
+}
+
+
+PBoolean H460P_PresenceFeatureGeneric::Decode(PASN_Stream & strm)
+{
+  if (!PreambleDecode(strm))
+    return FALSE;
+
+  if (!m_identifier.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_display) && !m_display.Decode(strm))
+    return FALSE;
+
+  return UnknownExtensionsDecode(strm);
+}
+
+
+void H460P_PresenceFeatureGeneric::Encode(PASN_Stream & strm) const
+{
+  PreambleEncode(strm);
+
+  m_identifier.Encode(strm);
+  if (HasOptionalField(e_display))
+    m_display.Encode(strm);
+
+  UnknownExtensionsEncode(strm);
+}
+
+
+PObject * H460P_PresenceFeatureGeneric::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H460P_PresenceFeatureGeneric::Class()), PInvalidCast);
+#endif
+  return new H460P_PresenceFeatureGeneric(*this);
+}
+
+
+
+#ifndef PASN_NOPRINTON
+const static PASN_Names Names_H460P_PresenceFeature[]={
+      {"audio",0}
+     ,{"video",1}
+     ,{"data",2}
+     ,{"extVideo",3}
+     ,{"generic",4}
+};
+#endif
+//
+// PresenceFeature
+//
+
+H460P_PresenceFeature::H460P_PresenceFeature(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Choice(tag, tagClass, 4, TRUE
+#ifndef PASN_NOPRINTON
+    ,(const PASN_Names *)Names_H460P_PresenceFeature,5
+#endif
+)
+{
+}
+
+
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+H460P_PresenceFeature::operator H460P_PresenceFeatureGeneric &() const
+#else
+H460P_PresenceFeature::operator H460P_PresenceFeatureGeneric &()
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(PAssertNULL(choice), H460P_PresenceFeatureGeneric), PInvalidCast);
+#endif
+  return *(H460P_PresenceFeatureGeneric *)choice;
+}
+
+
+H460P_PresenceFeature::operator const H460P_PresenceFeatureGeneric &() const
+#endif
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(PAssertNULL(choice), H460P_PresenceFeatureGeneric), PInvalidCast);
+#endif
+  return *(H460P_PresenceFeatureGeneric *)choice;
+}
+
+
+PBoolean H460P_PresenceFeature::CreateObject()
+{
+  switch (tag) {
+    case e_audio :
+    case e_video :
+    case e_data :
+    case e_extVideo :
+      choice = new PASN_Null();
+      return TRUE;
+    case e_generic :
+      choice = new H460P_PresenceFeatureGeneric();
+      return TRUE;
+  }
+
+  choice = NULL;
+  return FALSE;
+}
+
+
+PObject * H460P_PresenceFeature::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H460P_PresenceFeature::Class()), PInvalidCast);
+#endif
+  return new H460P_PresenceFeature(*this);
+}
+
+
+//
 // PresenceDisplay
 //
 
@@ -524,7 +684,7 @@ PObject * H460P_PresenceDisplay::Clone() const
 //
 
 H460P_PresenceAlias::H460P_PresenceAlias(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Sequence(tag, tagClass, 1, TRUE, 1)
+  : PASN_Sequence(tag, tagClass, 1, TRUE, 2)
 {
 }
 
@@ -539,6 +699,8 @@ void H460P_PresenceAlias::PrintOn(ostream & strm) const
     strm << setw(indent+10) << "display = " << setprecision(indent) << m_display << '\n';
   if (HasOptionalField(e_avatar))
     strm << setw(indent+9) << "avatar = " << setprecision(indent) << m_avatar << '\n';
+  if (HasOptionalField(e_category))
+    strm << setw(indent+11) << "category = " << setprecision(indent) << m_category << '\n';
   strm << setw(indent-1) << setprecision(indent-2) << "}";
 }
 #endif
@@ -583,6 +745,8 @@ PBoolean H460P_PresenceAlias::Decode(PASN_Stream & strm)
     return FALSE;
   if (!KnownExtensionDecode(strm, e_avatar, m_avatar))
     return FALSE;
+  if (!KnownExtensionDecode(strm, e_category, m_category))
+    return FALSE;
 
   return UnknownExtensionsDecode(strm);
 }
@@ -596,6 +760,7 @@ void H460P_PresenceAlias::Encode(PASN_Stream & strm) const
   if (HasOptionalField(e_display))
     m_display.Encode(strm);
   KnownExtensionEncode(strm, e_avatar, m_avatar);
+  KnownExtensionEncode(strm, e_category, m_category);
 
   UnknownExtensionsEncode(strm);
 }
@@ -847,166 +1012,6 @@ PObject * H460P_PresenceState::Clone() const
   PAssert(IsClass(H460P_PresenceState::Class()), PInvalidCast);
 #endif
   return new H460P_PresenceState(*this);
-}
-
-
-//
-// PresenceFeatureGeneric
-//
-
-H460P_PresenceFeatureGeneric::H460P_PresenceFeatureGeneric(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Sequence(tag, tagClass, 1, TRUE, 0)
-{
-}
-
-
-#ifndef PASN_NOPRINTON
-void H460P_PresenceFeatureGeneric::PrintOn(ostream & strm) const
-{
-  int indent = strm.precision() + 2;
-  strm << "{\n";
-  strm << setw(indent+13) << "identifier = " << setprecision(indent) << m_identifier << '\n';
-  if (HasOptionalField(e_display))
-    strm << setw(indent+10) << "display = " << setprecision(indent) << m_display << '\n';
-  strm << setw(indent-1) << setprecision(indent-2) << "}";
-}
-#endif
-
-
-PObject::Comparison H460P_PresenceFeatureGeneric::Compare(const PObject & obj) const
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(PIsDescendant(&obj, H460P_PresenceFeatureGeneric), PInvalidCast);
-#endif
-  const H460P_PresenceFeatureGeneric & other = (const H460P_PresenceFeatureGeneric &)obj;
-
-  Comparison result;
-
-  if ((result = m_identifier.Compare(other.m_identifier)) != EqualTo)
-    return result;
-  if ((result = m_display.Compare(other.m_display)) != EqualTo)
-    return result;
-
-  return PASN_Sequence::Compare(other);
-}
-
-
-PINDEX H460P_PresenceFeatureGeneric::GetDataLength() const
-{
-  PINDEX length = 0;
-  length += m_identifier.GetObjectLength();
-  if (HasOptionalField(e_display))
-    length += m_display.GetObjectLength();
-  return length;
-}
-
-
-PBoolean H460P_PresenceFeatureGeneric::Decode(PASN_Stream & strm)
-{
-  if (!PreambleDecode(strm))
-    return FALSE;
-
-  if (!m_identifier.Decode(strm))
-    return FALSE;
-  if (HasOptionalField(e_display) && !m_display.Decode(strm))
-    return FALSE;
-
-  return UnknownExtensionsDecode(strm);
-}
-
-
-void H460P_PresenceFeatureGeneric::Encode(PASN_Stream & strm) const
-{
-  PreambleEncode(strm);
-
-  m_identifier.Encode(strm);
-  if (HasOptionalField(e_display))
-    m_display.Encode(strm);
-
-  UnknownExtensionsEncode(strm);
-}
-
-
-PObject * H460P_PresenceFeatureGeneric::Clone() const
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(IsClass(H460P_PresenceFeatureGeneric::Class()), PInvalidCast);
-#endif
-  return new H460P_PresenceFeatureGeneric(*this);
-}
-
-
-
-#ifndef PASN_NOPRINTON
-const static PASN_Names Names_H460P_PresenceFeature[]={
-      {"audio",0}
-     ,{"video",1}
-     ,{"data",2}
-     ,{"extVideo",3}
-     ,{"generic",4}
-};
-#endif
-//
-// PresenceFeature
-//
-
-H460P_PresenceFeature::H460P_PresenceFeature(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Choice(tag, tagClass, 4, TRUE
-#ifndef PASN_NOPRINTON
-    ,(const PASN_Names *)Names_H460P_PresenceFeature,5
-#endif
-)
-{
-}
-
-
-#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
-H460P_PresenceFeature::operator H460P_PresenceFeatureGeneric &() const
-#else
-H460P_PresenceFeature::operator H460P_PresenceFeatureGeneric &()
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(PIsDescendant(PAssertNULL(choice), H460P_PresenceFeatureGeneric), PInvalidCast);
-#endif
-  return *(H460P_PresenceFeatureGeneric *)choice;
-}
-
-
-H460P_PresenceFeature::operator const H460P_PresenceFeatureGeneric &() const
-#endif
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(PIsDescendant(PAssertNULL(choice), H460P_PresenceFeatureGeneric), PInvalidCast);
-#endif
-  return *(H460P_PresenceFeatureGeneric *)choice;
-}
-
-
-PBoolean H460P_PresenceFeature::CreateObject()
-{
-  switch (tag) {
-    case e_audio :
-    case e_video :
-    case e_data :
-    case e_extVideo :
-      choice = new PASN_Null();
-      return TRUE;
-    case e_generic :
-      choice = new H460P_PresenceFeatureGeneric();
-      return TRUE;
-  }
-
-  choice = NULL;
-  return FALSE;
-}
-
-
-PObject * H460P_PresenceFeature::Clone() const
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(IsClass(H460P_PresenceFeature::Class()), PInvalidCast);
-#endif
-  return new H460P_PresenceFeature(*this);
 }
 
 

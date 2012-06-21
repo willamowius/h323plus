@@ -167,6 +167,70 @@ class H460P_PresencePDU : public PASN_Choice
 
 
 //
+// PresenceFeatureGeneric
+//
+
+class H460P_PresenceFeatureGeneric : public PASN_Sequence
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_PresenceFeatureGeneric, PASN_Sequence);
+#endif
+  public:
+    H460P_PresenceFeatureGeneric(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    enum OptionalFields {
+      e_display
+    };
+
+    H225_GenericIdentifier m_identifier;
+    PASN_IA5String m_display;
+
+    PINDEX GetDataLength() const;
+    PBoolean Decode(PASN_Stream & strm);
+    void Encode(PASN_Stream & strm) const;
+#ifndef PASN_NOPRINTON
+    void PrintOn(ostream & strm) const;
+#endif
+    Comparison Compare(const PObject & obj) const;
+    PObject * Clone() const;
+};
+
+
+//
+// PresenceFeature
+//
+
+class H460P_PresenceFeatureGeneric;
+
+class H460P_PresenceFeature : public PASN_Choice
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H460P_PresenceFeature, PASN_Choice);
+#endif
+  public:
+    H460P_PresenceFeature(unsigned tag = 0, TagClass tagClass = UniversalTagClass);
+
+    enum Choices {
+      e_audio,
+      e_video,
+      e_data,
+      e_extVideo,
+      e_generic
+    };
+
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+    operator H460P_PresenceFeatureGeneric &() const;
+#else
+    operator H460P_PresenceFeatureGeneric &();
+    operator const H460P_PresenceFeatureGeneric &() const;
+#endif
+
+    PBoolean CreateObject();
+    PObject * Clone() const;
+};
+
+
+//
 // PresenceDisplay
 //
 
@@ -210,12 +274,14 @@ class H460P_PresenceAlias : public PASN_Sequence
 
     enum OptionalFields {
       e_display,
-      e_avatar
+      e_avatar,
+      e_category
     };
 
     H225_AliasAddress m_alias;
     H460P_PresenceDisplay m_display;
     PASN_IA5String m_avatar;
+    H460P_PresenceFeature m_category;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);
@@ -323,70 +389,6 @@ class H460P_PresenceState : public PASN_Choice
 #else
     operator H460P_ArrayOf_PresenceDisplay &();
     operator const H460P_ArrayOf_PresenceDisplay &() const;
-#endif
-
-    PBoolean CreateObject();
-    PObject * Clone() const;
-};
-
-
-//
-// PresenceFeatureGeneric
-//
-
-class H460P_PresenceFeatureGeneric : public PASN_Sequence
-{
-#ifndef PASN_LEANANDMEAN
-    PCLASSINFO(H460P_PresenceFeatureGeneric, PASN_Sequence);
-#endif
-  public:
-    H460P_PresenceFeatureGeneric(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
-
-    enum OptionalFields {
-      e_display
-    };
-
-    H225_GenericIdentifier m_identifier;
-    PASN_IA5String m_display;
-
-    PINDEX GetDataLength() const;
-    PBoolean Decode(PASN_Stream & strm);
-    void Encode(PASN_Stream & strm) const;
-#ifndef PASN_NOPRINTON
-    void PrintOn(ostream & strm) const;
-#endif
-    Comparison Compare(const PObject & obj) const;
-    PObject * Clone() const;
-};
-
-
-//
-// PresenceFeature
-//
-
-class H460P_PresenceFeatureGeneric;
-
-class H460P_PresenceFeature : public PASN_Choice
-{
-#ifndef PASN_LEANANDMEAN
-    PCLASSINFO(H460P_PresenceFeature, PASN_Choice);
-#endif
-  public:
-    H460P_PresenceFeature(unsigned tag = 0, TagClass tagClass = UniversalTagClass);
-
-    enum Choices {
-      e_audio,
-      e_video,
-      e_data,
-      e_extVideo,
-      e_generic
-    };
-
-#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
-    operator H460P_PresenceFeatureGeneric &() const;
-#else
-    operator H460P_PresenceFeatureGeneric &();
-    operator const H460P_PresenceFeatureGeneric &() const;
 #endif
 
     PBoolean CreateObject();
