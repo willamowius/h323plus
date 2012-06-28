@@ -177,8 +177,12 @@ PString H323GetDisplayName(const H225_ArrayOf_DisplayName & asn)
 PBoolean H323SetDisplayName(const PStringList & alias, const PStringList & lang, H225_ArrayOf_DisplayName & asn)
 {
     int sz = alias.GetSize();
-    if (sz < 2) return false;
+    if (sz < 2)  // Need min of 2 aliases, last is always the display name.
+        return false;
     
+    if (alias[sz-1].IsEmpty())
+        return false;
+
     asn.SetSize(1);
     H225_DisplayName & name = asn[0];
     name.m_name.SetValue(alias[sz-1]);
@@ -622,12 +626,13 @@ H225_Setup_UUIE & H323SignalPDU::BuildSetup(const H323Connection & connection,
   setup.IncludeOptionalField(H225_Setup_UUIE::e_sourceAddress);
   H323SetAliasAddresses(connection.GetLocalAliasNames(), setup.m_sourceAddress);
 
+#if 0   // Interop issues with H323v7 with codian MCU comment out for now - SH
   if (H323SetLanguages(connection.GetLocalLanguages(), setup.m_language))
       setup.IncludeOptionalField(H225_Setup_UUIE::e_language);
 
   if (H323SetDisplayName(connection.GetLocalAliasNames(),connection.GetLocalLanguages(), setup.m_displayName))
       setup.IncludeOptionalField(H225_Setup_UUIE::e_displayName);
-
+#endif
   setup.m_conferenceID = connection.GetConferenceIdentifier();
 
   if (connection.GetEndPoint().OnSendCallIndependentSupplementaryService(&connection,*this))
