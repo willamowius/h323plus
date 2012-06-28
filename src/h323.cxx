@@ -996,6 +996,19 @@ PBoolean H323Connection::HandleReceivedSignalPDU(PBoolean readStatus, H323Signal
   return TRUE;
 }
 
+PBoolean CallEstablishmentMessage(const Q931 & q931)
+{
+  switch (q931.GetMessageType()) {
+    case Q931::SetupMsg :
+    case Q931::ProgressMsg :
+    case Q931::AlertingMsg :
+    case Q931::ConnectMsg :
+      return true;
+    default:
+      return false;
+  }
+}
+
 
 PBoolean H323Connection::HandleSignalPDU(H323SignalPDU & pdu)
 {
@@ -1019,19 +1032,15 @@ PBoolean H323Connection::HandleSignalPDU(H323SignalPDU & pdu)
     return FALSE;
   }
 
-  if (q931.GetMessageType() == Q931::NationalEscapeMsg      // H.460.19 KeepAlive Messages
-      || q931.GetMessageType() == Q931::InformationMsg) {   // GnuGk Nat Method KeepAlive message.
-      PTRACE(4, "H225\tNAT KeepAlive Received!");
-      return TRUE;
-  }
-
-  // If remote does not do tunneling, so we don't either. Note that if it
-  // gets turned off once, it stays off for good.  
-  if (h245Tunneling && !pdu.m_h323_uu_pdu.m_h245Tunneling.GetValue()) {
-    masterSlaveDeterminationProcedure->Stop();
-    capabilityExchangeProcedure->Stop();
-    PTRACE(3, "H225\tFast Start DISABLED!");
-    h245Tunneling = FALSE;
+  if (CallEstablishmentMessage(q931)) { 
+      // If remote does not do tunneling, so we don't either. Note that if it
+      // gets turned off once, it stays off for good. 
+      if (h245Tunneling && !pdu.m_h323_uu_pdu.m_h245Tunneling.GetValue()) {
+        masterSlaveDeterminationProcedure->Stop();
+        capabilityExchangeProcedure->Stop();
+        PTRACE(3, "H225\tFast Start DISABLED!");
+        h245Tunneling = FALSE;
+      }
   }
 
   h245TunnelRxPDU = &pdu;
