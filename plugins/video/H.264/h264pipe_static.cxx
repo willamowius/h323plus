@@ -70,6 +70,8 @@ bool H264EncCtx::Load()
 
 bool H264EncCtx::InternalLoad()
 {
+   WaitAndSignal m(_mutex);
+
    if (!loaded) {
       x264 = new X264EncoderContext();
       loaded=true;
@@ -81,7 +83,7 @@ void H264EncCtx::call(unsigned msg)
 {
   switch (msg) {
 	case H264ENCODERCONTEXT_CREATE:
-        // Don't Load here...
+        InternalLoad();
 		break;
 	case H264ENCODERCONTEXT_DELETE:
         if (loaded) {

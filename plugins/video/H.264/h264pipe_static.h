@@ -68,6 +68,8 @@ class H264EncCtx
      static bool loaded;
      static int encCounter;
 
+     CriticalSection _mutex;
+
 };
 
 #endif /* __PIPE_STATIC_H__ */
