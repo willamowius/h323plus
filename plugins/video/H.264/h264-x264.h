@@ -390,6 +390,8 @@ static struct PluginCodec_Option const * const optionTable[] = {
 #define H264_LEVEL1_2_MBPS    3840
 #define H264_LEVEL1_3         36      //  CIF 30 fps 
 #define H264_LEVEL1_3_MBPS    3840
+#define H264_LEVEL2_1         50
+#define H264_LEVEL2_1_MBPS    5120    //
 #define H264_LEVEL2_2         57
 #define H264_LEVEL2_2_MBPS    5120
 #define H264_LEVEL3           64      // 720p 30fps
@@ -446,8 +448,8 @@ static const char     H264VGA_MediaFmt[]      = { "H.264-VGA" };
 static unsigned int   H264VGA_FrameHeight     = VGA_HEIGHT;               
 static unsigned int   H264VGA_FrameWidth      = VGA_WIDTH; 
 static unsigned int   H264VGA_Profile         = H264_PROFILE_BASE; 
-static unsigned int   H264VGA_Level           = H264_LEVEL2_2;
-static unsigned int   H264VGA_MaxBitRate      = H264_LEVEL2_2_MBPS*100;
+static unsigned int   H264VGA_Level           = H264_LEVEL2_1;
+static unsigned int   H264VGA_MaxBitRate      = H264_LEVEL2_1_MBPS*100;
 static const char	  H264VGA_TargetBitRate[] =  { "512000" }; 
 static unsigned int   H264VGA_VideoType       = PluginCodec_MediaTypeVideo; 
 static unsigned int   H264VGA_Generic3        = 72;        
