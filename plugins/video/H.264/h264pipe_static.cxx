@@ -46,16 +46,21 @@
 
 X264EncoderContext * H264EncCtx::x264= NULL;
 bool H264EncCtx::loaded = false;
+int H264EncCtx::encCounter=0;
 H264EncCtx::H264EncCtx()
 {
+    encCounter++;
 }
 
 H264EncCtx::~H264EncCtx()
 {
-  if (x264)
-     delete x264;
-  x264=false;
-  loaded=false;
+  encCounter--;
+  if (encCounter==0) {
+      if (x264)
+         delete x264;
+      x264=NULL;
+      loaded=false;
+  }
 }
 
 bool H264EncCtx::Load()
@@ -65,7 +70,6 @@ bool H264EncCtx::Load()
 
 bool H264EncCtx::InternalLoad()
 {
-	WaitAndSignal m(_mutex);
    if (!loaded) {
       x264 = new X264EncoderContext();
       loaded=true;
