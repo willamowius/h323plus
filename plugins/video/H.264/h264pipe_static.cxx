@@ -44,8 +44,9 @@
 
 #include "../common/trace.h"
 
+X264EncoderContext * H264EncCtx::x264= NULL;
+bool H264EncCtx::loaded = false;
 H264EncCtx::H264EncCtx()
-: x264(NULL), loaded(false) 
 {
 }
 
@@ -53,6 +54,8 @@ H264EncCtx::~H264EncCtx()
 {
   if (x264)
      delete x264;
+  x264=false;
+  loaded=false;
 }
 
 bool H264EncCtx::Load()

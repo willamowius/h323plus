@@ -64,8 +64,8 @@ class H264EncCtx
 
   protected:
      bool InternalLoad();
-     X264EncoderContext * x264;
-     bool loaded;
+     static X264EncoderContext * x264;
+     static bool loaded;
 
 };
 
