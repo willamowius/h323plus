@@ -46,6 +46,7 @@
 #ifndef __H264PIPE_STATIC_H__
 #define __H264PIPE_STATIC_H__ 1
 
+#include "../common/critsect.h"
 #include "shared/pipes.h"
 
 typedef unsigned char u_char;
@@ -67,6 +68,7 @@ class H264EncCtx
      static X264EncoderContext * x264;
      static bool loaded;
 
+     CriticalSection _mutex;
 };
 
 #endif /* __PIPE_STATIC_H__ */

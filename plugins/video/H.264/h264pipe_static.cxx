@@ -65,6 +65,7 @@ bool H264EncCtx::Load()
 
 bool H264EncCtx::InternalLoad()
 {
+	WaitAndSignal m(_mutex);
    if (!loaded) {
       x264 = new X264EncoderContext();
       loaded=true;
