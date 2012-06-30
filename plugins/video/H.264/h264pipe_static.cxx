@@ -89,6 +89,10 @@ void H264EncCtx::call(unsigned msg)
         case H264ENCODERCONTEXT_DELETE:
             InternalUnLoad();
             break;
+        case APPLY_OPTIONS:
+            if (InternalLoad())
+                x264->ApplyOptions();
+            break;
         default:
             break;
   } 
