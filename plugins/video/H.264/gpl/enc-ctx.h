@@ -23,10 +23,15 @@
 #define __ENC_CTX_H__ 1
 
 #include <stdarg.h>
-#if defined(_WIN32) && _MSC_VER < 1600
+
+#if defined(_WIN32)
+#include "../../common/critsect.h"
+#if _MSC_VER < 1600
 #include "../../common/vs-stdint.h"
+#endif
 #else
 #include <stdint.h>
+#include "../common/critsect.h"
 #endif
 
 #include "../shared/h264frame.h"
@@ -126,6 +131,8 @@ class X264EncoderContext
     uint32_t _IFrameInterval; // confd frames between keyframes
     int _frameCounter;
     bool _fastUpdateRequested;
+
+	CriticalSection _mutex;
 } ;
 
 

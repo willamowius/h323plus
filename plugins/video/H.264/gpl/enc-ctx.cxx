@@ -70,6 +70,7 @@ static void logCallbackX264 (void * /*priv*/, int level, const char *fmt, va_lis
 
 X264EncoderContext::X264EncoderContext()
 {
+	WaitAndSignal m(_mutex);
   _frameCounter = 0;
   _PFramesSinceLastIFrame = 0;
   _fastUpdateRequested = false;
@@ -191,6 +192,7 @@ X264EncoderContext::X264EncoderContext()
 
 X264EncoderContext::~X264EncoderContext()
 {
+	WaitAndSignal m(_mutex);
     if (_codec != NULL)
     {
       X264_ENCODER_CLOSE(_codec);
@@ -310,6 +312,8 @@ void X264EncoderContext::SetMaxNALSize (unsigned size)
 
 int X264EncoderContext::EncodeFrames(const unsigned char * src, unsigned & srcLen, unsigned char * dst, unsigned & dstLen, unsigned int & flags)
 {
+	WaitAndSignal m(_mutex);
+
   // create RTP frame from source buffer
   RTPFrame srcRTP(src, srcLen);
 
