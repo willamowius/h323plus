@@ -44,16 +44,17 @@
 
 #include "../common/trace.h"
 
+X264EncoderContext H264EncCtx::x264;
+bool H264EncCtx::loaded=false;
 
 H264EncCtx::H264EncCtx()
-: x264(NULL), loaded(false)
 {
 
 }
 
 H264EncCtx::~H264EncCtx()
 {
-
+    InternalUnLoad();
 }
 
 bool H264EncCtx::Load()
@@ -66,16 +67,14 @@ bool H264EncCtx::InternalLoad()
    if (loaded)
        return true;
 
-   x264 = new X264EncoderContext();
-   loaded=true;
+   loaded = x264.Initialise();
    return loaded;
 }
 
 void H264EncCtx::InternalUnLoad()
 {
     if (loaded) {
-            delete x264;
-        x264 = NULL;
+        x264.Uninitialise();
         loaded =false;
     }
 }
@@ -91,7 +90,7 @@ void H264EncCtx::call(unsigned msg)
             break;
         case APPLY_OPTIONS:
             if (InternalLoad())
-                x264->ApplyOptions();
+                x264.ApplyOptions();
             break;
         default:
             break;
@@ -105,22 +104,22 @@ void H264EncCtx::call(unsigned msg, unsigned value)
 
   switch (msg) {
     case SET_FRAME_WIDTH:
-        x264->SetFrameWidth(value);
+        x264.SetFrameWidth(value);
         break;
     case SET_FRAME_HEIGHT:
-        x264->SetFrameHeight(value);
+        x264.SetFrameHeight(value);
         break;
     case SET_FRAME_RATE:
-        x264->SetFrameRate(value);
+        x264.SetFrameRate(value);
         break;
     case SET_MAX_KEY_FRAME_PERIOD:
-        x264->SetMaxKeyFramePeriod(value);
+        x264.SetMaxKeyFramePeriod(value);
         break;
     case SET_TSTO:
-        x264->SetTSTO(value);
+        x264.SetTSTO(value);
         break;
     case SET_PROFILE_LEVEL:
-        x264->SetProfileLevel(value);
+        x264.SetProfileLevel(value);
         break;
     default:
         break;
@@ -135,7 +134,7 @@ void H264EncCtx::call(unsigned msg , const u_char * src, unsigned & srcLen, u_ch
   switch (msg) {
     case ENCODE_FRAMES:
     case ENCODE_FRAMES_BUFFERED:
-        ret = x264->EncodeFrames( src,  srcLen, dst, dstLen, flags);
+        ret = x264.EncodeFrames( src,  srcLen, dst, dstLen, flags);
         break;
     default:
         break;

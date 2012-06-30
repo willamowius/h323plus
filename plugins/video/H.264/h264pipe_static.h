@@ -66,8 +66,8 @@ class H264EncCtx
      bool InternalLoad();
      void InternalUnLoad();
 
-     X264EncoderContext * x264;
-     bool                 loaded;
+     static X264EncoderContext x264;
+     static bool               loaded;
 
 };
 

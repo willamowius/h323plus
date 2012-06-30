@@ -69,8 +69,23 @@ static void logCallbackX264 (void * /*priv*/, int level, const char *fmt, va_lis
 }
 
 X264EncoderContext::X264EncoderContext()
+: _codec(NULL), _txH264Frame(NULL), _PFramesSinceLastIFrame(0),
+  _IFrameInterval(0), _frameCounter(0), _fastUpdateRequested(false)
 {
-	WaitAndSignal m(_mutex);
+#ifndef X264_LINK_STATIC
+    Initialise();
+#endif
+}
+
+X264EncoderContext::~X264EncoderContext()
+{
+   Uninitialise();
+}
+
+bool X264EncoderContext::Initialise()
+{
+   Uninitialise();
+
   _frameCounter = 0;
   _PFramesSinceLastIFrame = 0;
   _fastUpdateRequested = false;
@@ -176,28 +191,26 @@ X264EncoderContext::X264EncoderContext()
   _context.analyse.i_noise_reduction= 0;
   _context.analyse.b_ssim           = 0;
 
-
+#ifndef X264_DELAYLOAD
   _codec = X264_ENCODER_OPEN(&_context);
   if (_codec == NULL) {
     TRACE(1, "H264\tEncoder\tCouldn't init x264 encoder");
-  } 
-  else
-  {
+    return false;
+  } else {
     TRACE(4, "H264\tEncoder\tx264 encoder successfully opened");
-//	  x264_nal_t* NALs;
-//      int numberOfNALs = 0;
-//      X264_ENCODER_HEADERS(_codec, &NALs, &numberOfNALs);
   }
+#endif
+  return true;
 }
 
-X264EncoderContext::~X264EncoderContext()
+void X264EncoderContext::Uninitialise()
 {
-	WaitAndSignal m(_mutex);
-    if (_codec != NULL)
-    {
+  if (_codec != NULL)
+  {
       X264_ENCODER_CLOSE(_codec);
       TRACE(4, "H264\tEncoder\tClosed H.264 encoder, encoded " << _frameCounter << " Frames" );
-    }
+      _codec = NULL;
+  }
   if (_txH264Frame) delete _txH264Frame;
 }
 
@@ -283,6 +296,10 @@ void X264EncoderContext::SetProfileLevel (unsigned profileLevel)
 
 void X264EncoderContext::ApplyOptions()
 {
+
+#if X264_DELAYLOAD
+  return;  // We apply options when we do our first encode
+#else
   if (_codec != NULL)
     X264_ENCODER_CLOSE(_codec);
 
@@ -290,13 +307,9 @@ void X264EncoderContext::ApplyOptions()
   if (_codec == NULL) {
     TRACE(1, "H264\tEncoder\tCouldn't init x264 encoder");
   } 
-  else
-  {
-//	   x264_nal_t* NALs;
-//	  int numberOfNALs = 0;
-//	  X264_ENCODER_HEADERS(_codec, &NALs, &numberOfNALs);
-//	  TRACE(4, "H264\tEncoder\tx264 encoder successfully opened with headers");
-  }
+  TRACE(4, "H264\tEncoder\tx264 encoder successfully opened");
+#endif
+
 }
 
 void X264EncoderContext::fastUpdateRequested(void)
@@ -312,7 +325,6 @@ void X264EncoderContext::SetMaxNALSize (unsigned size)
 
 int X264EncoderContext::EncodeFrames(const unsigned char * src, unsigned & srcLen, unsigned char * dst, unsigned & dstLen, unsigned int & flags)
 {
-	WaitAndSignal m(_mutex);
 
   // create RTP frame from source buffer
   RTPFrame srcRTP(src, srcLen);
@@ -323,7 +335,11 @@ int X264EncoderContext::EncodeFrames(const unsigned char * src, unsigned & srcLe
   dstLen = 0;
 
   // from here, we are encoding a new frame
-  if ((!_codec) || (!_txH264Frame))
+  if (
+#ifndef X264_DELAYLOAD
+     (!_codec) ||
+#endif
+     (!_txH264Frame))
   {
     return 0;
   }
@@ -354,14 +370,20 @@ int X264EncoderContext::EncodeFrames(const unsigned char * src, unsigned & srcLe
 
   // do a validation of size
   // if the incoming data has changed size, tell the encoder
-  if ((unsigned)_context.i_width != header->width || (unsigned)_context.i_height != header->height)
+  if (!_codec || (unsigned)_context.i_width != header->width || (unsigned)_context.i_height != header->height)
   {
-    X264_ENCODER_CLOSE(_codec);
+    if (_codec)
+        X264_ENCODER_CLOSE(_codec);
     _context.i_width = header->width;
     _context.i_height = header->height;
     _codec = X264_ENCODER_OPEN(&_context);
-//    X264_ENCODER_HEADERS(_codec, &NALs, &numberOfNALs);
-//	numberOfNALs=0;
+    if (_codec == NULL) {
+          TRACE(1, "H264\tEncoder\tCouldn't init x264 encoder");
+          return 0;
+    } 
+#if X264_DELAYLOAD
+      TRACE(4, "H264\tEncoder\tx264 encoder successfully opened");
+#endif
   } 
 
   bool wantIFrame = _fastUpdateRequested;

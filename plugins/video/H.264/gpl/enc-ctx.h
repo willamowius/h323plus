@@ -51,6 +51,7 @@ extern "C" {
 #if defined(_WIN32) || defined(_STATIC_LINK)
 /* to keep compatibility with old build */
 #define X264_LINK_STATIC 1
+#define X264_DELAYLOAD   1
 #endif
 
 #define CIF_WIDTH 352
@@ -104,6 +105,9 @@ class X264EncoderContext
     X264EncoderContext ();
     ~X264EncoderContext ();
 
+    bool Initialise();
+    void Uninitialise();
+
     int EncodeFrames (const unsigned char * src, unsigned & srcLen, unsigned char * dst, unsigned & dstLen, unsigned int & flags);
 
     void fastUpdateRequested(void);
@@ -132,7 +136,6 @@ class X264EncoderContext
     int _frameCounter;
     bool _fastUpdateRequested;
 
-	CriticalSection _mutex;
 } ;
 
 
