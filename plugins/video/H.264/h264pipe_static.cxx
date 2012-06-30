@@ -44,23 +44,16 @@
 
 #include "../common/trace.h"
 
-X264EncoderContext * H264EncCtx::x264= NULL;
-bool H264EncCtx::loaded = false;
-int H264EncCtx::encCounter=0;
+
 H264EncCtx::H264EncCtx()
+: x264(NULL), loaded(false)
 {
-    encCounter++;
+
 }
 
 H264EncCtx::~H264EncCtx()
 {
-  encCounter--;
-  if (encCounter==0) {
-      if (x264)
-         delete x264;
-      x264=NULL;
-      loaded=false;
-  }
+
 }
 
 bool H264EncCtx::Load()
@@ -70,79 +63,78 @@ bool H264EncCtx::Load()
 
 bool H264EncCtx::InternalLoad()
 {
-   WaitAndSignal m(_mutex);
+   if (loaded)
+       return true;
 
-   if (!loaded) {
-      x264 = new X264EncoderContext();
-      loaded=true;
-   }
+   x264 = new X264EncoderContext();
+   loaded=true;
    return loaded;
+}
+
+void H264EncCtx::InternalUnLoad()
+{
+    if (loaded) {
+            delete x264;
+        x264 = NULL;
+        loaded =false;
+    }
 }
 
 void H264EncCtx::call(unsigned msg)
 {
   switch (msg) {
-	case H264ENCODERCONTEXT_CREATE:
-        InternalLoad();
-		break;
-	case H264ENCODERCONTEXT_DELETE:
-        if (loaded) {
-		    delete x264;
-            x264 = NULL;
-            loaded =false;
-        }
-		break;
-	case APPLY_OPTIONS:
-         if (InternalLoad())
-            x264->ApplyOptions();	
-		break;
-	default:
-	   break;
+        case H264ENCODERCONTEXT_CREATE:
+        // Do not load here wait for first call to codec to create.
+            break;
+        case H264ENCODERCONTEXT_DELETE:
+            InternalUnLoad();
+            break;
+        default:
+            break;
   } 
 }
 
 void H264EncCtx::call(unsigned msg, unsigned value)
 {
+  if (!InternalLoad())
+      return;
+
   switch (msg) {
     case SET_FRAME_WIDTH:
-        if (InternalLoad())
-		    x264->SetFrameWidth(value);
-		break;
+        x264->SetFrameWidth(value);
+        break;
     case SET_FRAME_HEIGHT:
-        if (InternalLoad())
-		    x264->SetFrameHeight(value);
-	    break;
+        x264->SetFrameHeight(value);
+        break;
     case SET_FRAME_RATE:
-        if (InternalLoad())
-		    x264->SetFrameRate(value);
-		break;
-	case SET_MAX_KEY_FRAME_PERIOD:
-        if (InternalLoad())
-            x264->SetMaxKeyFramePeriod(value);
-		break;
+        x264->SetFrameRate(value);
+        break;
+    case SET_MAX_KEY_FRAME_PERIOD:
+        x264->SetMaxKeyFramePeriod(value);
+        break;
     case SET_TSTO:
-        if (InternalLoad())
-		    x264->SetTSTO(value);
-		break;
+        x264->SetTSTO(value);
+        break;
     case SET_PROFILE_LEVEL:
-        if (InternalLoad())
-		   x264->SetProfileLevel(value);
-	    break;
-	default:
-	    break;
+        x264->SetProfileLevel(value);
+        break;
+    default:
+        break;
    }
 }
 
 void H264EncCtx::call(unsigned msg , const u_char * src, unsigned & srcLen, u_char * dst, unsigned & dstLen, unsigned & headerLen, unsigned int & flags, int & ret)
 {
+  if (!InternalLoad())
+      return;
+
   switch (msg) {
-	case ENCODE_FRAMES:
+    case ENCODE_FRAMES:
     case ENCODE_FRAMES_BUFFERED:
-        if (InternalLoad())
-            ret = (x264->EncodeFrames( src,  srcLen, dst, dstLen, flags));
-		break;
-	default:
-		break;
+        ret = x264->EncodeFrames( src,  srcLen, dst, dstLen, flags);
+        break;
+    default:
+        break;
   } 
 }
 

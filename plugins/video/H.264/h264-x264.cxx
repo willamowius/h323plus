@@ -42,6 +42,7 @@
     #pragma comment(lib,"avutil.lib") 
     #pragma comment(lib, "libx264.dll.a")
   #endif
+  #define _DELAY_LOAD 1
 #else
   #define PLUGIN_CODEC_DLL_EXPORTS  1
 #endif

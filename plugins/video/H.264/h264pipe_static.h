@@ -64,11 +64,10 @@ class H264EncCtx
 
   protected:
      bool InternalLoad();
-     static X264EncoderContext * x264;
-     static bool loaded;
-     static int encCounter;
+     void InternalUnLoad();
 
-     CriticalSection _mutex;
+     X264EncoderContext * x264;
+     bool                 loaded;
 
 };
 
