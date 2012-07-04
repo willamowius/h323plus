@@ -43,27 +43,9 @@
 
 #include "openh323buildopts.h"
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
-// H323 RTP Sorted Queue
-
+#include <ptclib/delaychan.h>
 #include <algorithm>
 #include <queue>
-
-class H323FRAME {
-public:
-   
-     struct Info {
-        unsigned  m_sequence;
-     };
-
-     int operator() ( const std::pair<PBYTEArray, H323FRAME::Info>& p1,
-                      const std::pair<PBYTEArray, H323FRAME::Info>& p2 ) {
-           return (p1.second.m_sequence > p2.second.m_sequence);
-     }
-};
-
-typedef std::priority_queue< std::pair<PBYTEArray, H323FRAME::Info >, 
-        std::vector< std::pair<PBYTEArray, H323FRAME::Info> >,H323FRAME > RTP_Sortedframes;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -726,6 +708,172 @@ template <class D> class PSTLList : public PObject,
 #define H323LIST  PSTLLIST
 
 #endif  // PTLIB_VER < 2110
+
+
+#ifdef H323_FRAMEBUFFER
+
+class H323FRAME {
+public:
+   
+     struct Info {
+        unsigned  m_sequence;
+        unsigned  m_timeStamp;
+        PBoolean  m_marker;
+     };
+
+     int operator() ( const std::pair<H323FRAME::Info, PBYTEArray>& p1,
+                      const std::pair<H323FRAME::Info, PBYTEArray>& p2 ) {
+           return (p1.first.m_sequence > p2.first.m_sequence);
+     }
+};
+
+typedef std::priority_queue< std::pair<H323FRAME::Info, PBYTEArray >, 
+        std::vector< std::pair<H323FRAME::Info, PBYTEArray> >,H323FRAME > RTP_Sortedframes;
+
+
+class H323_FrameBuffer : public PThread
+{
+    PCLASSINFO(H323_FrameBuffer, PThread);
+
+protected:
+    RTP_Sortedframes  m_buffer;
+    PBoolean m_threadRunning;
+
+    unsigned m_frameMarker;           // Number of complete frames;
+    PBoolean m_frameOutput;           // Signal to start output
+    unsigned m_frameStartTime;        // Time to of first packet
+    float    m_lossThreshold;         // Percentage loss
+    float    m_lossCount;             // Actual Packet lost
+    float    m_frameCount;            // Number of Frames Received from last Fast Picture Update
+    unsigned m_lastSequence;          // Last Received Sequence Number
+
+    PMutex bufferMutex;
+    PAdaptiveDelay m_outputDelay;
+    PBoolean  m_exit;
+
+public:
+    H323_FrameBuffer()
+    : PThread(10000, NoAutoDeleteThread), m_threadRunning(false),
+      m_frameMarker(0), m_frameOutput(false), m_frameStartTime(0),
+      m_lossThreshold(2.0), m_lossCount(0), m_frameCount(0),
+      m_lastSequence(0), m_exit(false)
+    {}
+
+    ~H323_FrameBuffer()
+    { 
+        if (m_threadRunning)
+            m_exit = true;  
+    }
+
+    void Start()
+    {
+        m_threadRunning=true;
+        Resume();
+    }
+
+    virtual void FrameOut(PBYTEArray & /*frame*/, PBoolean /*fup*/, PBoolean /*flow*/) {};
+
+    void Main() {
+
+        PBYTEArray frame;
+        unsigned delay=0;
+        PBoolean fup=false;
+
+        while (!m_exit) {
+            while (m_frameOutput && m_frameMarker > 0) {
+                if (m_buffer.size() == 0) {
+                    if (m_frameMarker > 0)
+                        m_frameMarker--;
+                    break;
+                }
+
+                // TODO: Check to see the number of complete frames
+                // does not exceed limit. if it does then drop the frames,
+                // send a Fast picture update and request a flow restriction. -SH
+                PBoolean flow = false;
+
+                H323FRAME::Info info;
+                  bufferMutex.Wait();
+                    info = m_buffer.top().first;
+                    frame.SetSize(m_buffer.top().second.GetSize());
+                    memcpy(frame.GetPointer(), m_buffer.top().second.GetPointer(), m_buffer.top().second.GetSize());
+                    unsigned lastTimeStamp = info.m_timeStamp;
+                    m_buffer.pop();
+                    if (info.m_marker && m_buffer.size() > 0) { // Peek ahead for next timestamp
+                        delay = (m_buffer.top().first.m_timeStamp - lastTimeStamp)/90;
+                        if (delay > 200 || delay < 0) {
+                           delay = 0;
+                           lastTimeStamp = m_buffer.top().first.m_timeStamp;
+                           fup = true;
+                        } 
+                    }
+                  bufferMutex.Signal();
+
+                  m_frameCount++;
+                  unsigned diff=0;
+                  if (m_lastSequence) {
+                     diff = info.m_sequence - m_lastSequence - 1;
+                     m_lossCount = m_lossCount + diff;
+                  }
+                  m_lastSequence = info.m_sequence;
+
+                  if (!fup) 
+                      fup = ((m_lossCount/m_frameCount)*100.0 > m_lossThreshold);
+
+                  FrameOut(frame, fup, flow);
+                  frame.SetSize(0);
+                  if (fup) {
+                     m_lossCount = m_frameCount = 0;
+                     fup = false;
+                  }
+
+                  if (info.m_marker && m_frameMarker > 0) {
+                        m_frameMarker--;
+                        m_outputDelay.Delay(delay);
+                  }
+            }
+            PThread::Sleep(3);
+        }
+     bufferMutex.Wait();
+        m_buffer.empty();
+     bufferMutex.Signal();
+
+        m_threadRunning = false;
+    }
+
+    virtual PBoolean FrameIn(unsigned seq,  unsigned time, PBoolean marker, unsigned payload, const PBYTEArray & frame)
+    {
+        if (!m_threadRunning) {  // Start thread on first frame.
+            Resume();
+            m_threadRunning = true;
+        }
+
+        if (!m_frameStartTime)
+            m_frameStartTime = time;
+            
+        H323FRAME::Info info;
+           info.m_sequence = seq;
+           info.m_marker = marker;
+           info.m_timeStamp = time;
+
+        PBYTEArray * m_frame = new PBYTEArray(payload+12);
+        memcpy(m_frame->GetPointer(),(PRemoveConst(PBYTEArray,&frame))->GetPointer(),payload+12);
+        bufferMutex.Wait();
+            m_buffer.push(pair<H323FRAME::Info, PBYTEArray>(info,*m_frame));
+        bufferMutex.Signal();
+
+        if (marker) {
+            // Make sure we have a min of 2 frames in buffer 
+            if (!m_frameOutput && (time - m_frameStartTime) >= 3000)
+                m_frameOutput = true;
+           m_frameMarker++;
+        }
+
+        return true;
+    }
+};
+
+#endif  // H323_FRAMEBUFFER
 
 #endif // _PTLIB_EXTRAS_H
 

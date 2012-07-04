@@ -41,6 +41,7 @@
 #include <h245.h>
 #include <rtp.h>
 #include <mediafmt.h>
+#include <openh323buildopts.h>
 
 #define H323CAP_TAG_PREFIX    "h323"
 static const char GET_CODEC_OPTIONS_CONTROL[]		= "get_codec_options";
@@ -1251,6 +1252,65 @@ class H323StreamedPluginAudioCodec : public H323StreamedAudioCodec
 // Plugin video codec class
 //
 
+#if 0
+static void CheckPacket(PBoolean encode, const RTP_DataFrame & frame)
+{
+    PTRACE(6, "RTP\t" << (encode ? "> " : "< ")
+           << " ver=" << frame.GetVersion()
+           << " pt=" << frame.GetPayloadType()
+           << " psz=" << frame.GetPayloadSize()
+           << " m=" << frame.GetMarker()
+           << " x=" << frame.GetExtension()
+           << " seq=" << frame.GetSequenceNumber()
+           << " ts=" << frame.GetTimestamp()
+           << " src=" << frame.GetSyncSource()
+           << " ccnt=" << frame.GetContribSrcCount());
+}
+#endif
+
+#ifdef H323_FRAMEBUFFER
+
+class H323PluginFrameBuffer : public H323_FrameBuffer
+{
+public:
+    H323PluginFrameBuffer()
+        : codec(NULL), m_noError(true), m_flowControl(false) {};
+
+    void SetCodec(H323Codec * _codec) { 
+        codec = _codec;
+        Start();
+    } 
+
+    virtual void FrameOut(PBYTEArray & frame, PBoolean fup, PBoolean flow)  {
+        m_flowControl = flow;
+        frameData.SetPayloadSize(frame.GetSize()-12);
+        memmove(frameData.GetPointer(), frame.GetPointer(), frame.GetSize());
+        unsigned written = 0;
+        m_noError = codec->WriteInternal(frameData.GetPointer(), frameData.GetSize(), frameData, written);
+        frameData.SetPayloadSize(0);
+    }
+
+    virtual PBoolean FrameIn(unsigned seq, unsigned time, PBoolean marker, unsigned payload, const PBYTEArray & frame) {
+        return ((codec) ? H323_FrameBuffer::FrameIn(seq,time,marker,payload,frame) : false);
+    }
+
+    PBoolean GetNoError() {
+        return m_noError;
+    }
+
+    PBoolean GetFlowControl() {
+        return m_flowControl;
+    }
+
+protected: 
+    RTP_DataFrame frameData;
+
+    H323Codec * codec;
+    PBoolean m_noError;
+    PBoolean m_flowControl;
+};
+#endif
+
 #ifdef H323_VIDEO
 
 class H323PluginVideoCodec : public H323VideoCodec
@@ -1264,6 +1324,10 @@ class H323PluginVideoCodec : public H323VideoCodec
  
     ~H323PluginVideoCodec();
 
+    virtual PBoolean Open(
+      H323Connection & connection ///< Connection between the endpoints
+    );
+
     virtual PBoolean Read(
       BYTE * buffer,            ///< Buffer of encoded data
       unsigned & length,        ///< Actual length of encoded data buffer
@@ -1271,6 +1335,13 @@ class H323PluginVideoCodec : public H323VideoCodec
     );
 
     virtual PBoolean Write(
+      const BYTE * buffer,        ///< Buffer of encoded data
+      unsigned length,            ///< Length of encoded data buffer
+      const RTP_DataFrame & src,  ///< RTP data frame
+      unsigned & written          ///< Number of bytes used from data buffer
+    );
+
+    virtual PBoolean WriteInternal(
       const BYTE * buffer,        ///< Buffer of encoded data
       unsigned length,            ///< Length of encoded data buffer
       const RTP_DataFrame & src,  ///< RTP data frame
@@ -1352,6 +1423,10 @@ class H323PluginVideoCodec : public H323VideoCodec
 
     mutable PTimeInterval lastFrameTick;
 	PTime   lastFUPTime;
+
+#ifdef H323_FRAMEBUFFER
+    H323PluginFrameBuffer  m_frameBuffer;
+#endif
 };
 
 static bool SetFlowControl(const PluginCodec_Definition * codec, void * context, OpalMediaFormat & mediaFormat, long bitRate)
@@ -1521,6 +1596,10 @@ H323PluginVideoCodec::~H323PluginVideoCodec()
 {
     //PWaitAndSignal mutex(videoHandlerActive);
 
+#ifdef H323_FRAMEBUFFER
+    m_frameBuffer.Terminate();
+    m_frameBuffer.WaitForTermination();
+#endif
     // Set the buffer memory to zero to prevent
     // memory leak
     bufferRTP.SetSize(0);
@@ -1602,9 +1681,9 @@ PBoolean H323PluginVideoCodec::SetSupportedFormats(std::list<PVideoFrameInfo> & 
       char ** _options = list.ToCharArray();
       unsigned int optionsLen = sizeof(_options);
       (*ctl->control)(codec, context, SET_CODEC_FORMAT_OPTIONS, _options, &optionsLen);
-          for (i = 0; _options[i] != NULL; i += 2) {
-			const char * key = _options[i];
-			int val = atoi(_options[i+1]);;
+      for (i = 0; _options[i] != NULL; i += 2) {
+            const char * key = _options[i];
+            int val = atoi(_options[i+1]);;
             if (mediaFormat.HasOption(key)) {
                 mediaFormat.SetOptionInteger(key,val);
                 if (strcmp(key, OpalVideoFormat::FrameWidthOption) == 0)
@@ -1759,7 +1838,29 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
     return TRUE;
 }
 
-PBoolean H323PluginVideoCodec::Write(const BYTE * /*buffer*/, unsigned length, const RTP_DataFrame & src, unsigned & written)
+PBoolean H323PluginVideoCodec::Open(H323Connection & connection) {
+
+#ifdef H323_FRAMEBUFFER
+    if (direction == Decoder) 
+        m_frameBuffer.SetCodec(this);
+#endif
+    return H323VideoCodec::Open(connection);
+}
+
+PBoolean H323PluginVideoCodec::Write(const BYTE * buffer, unsigned length, const RTP_DataFrame & src, unsigned & written)
+{
+#ifdef H323_FRAMEBUFFER
+    if (m_frameBuffer.FrameIn(src.GetSequenceNumber(), src.GetTimestamp(), src.GetMarker(), src.GetPayloadSize(), src)) {
+        written = length;
+        return true;
+    }
+    return false;
+#else
+    return WriteInternal(buffer, length, src, written);
+#endif
+}
+
+PBoolean H323PluginVideoCodec::WriteInternal(const BYTE * /*buffer*/, unsigned length, const RTP_DataFrame & src, unsigned & written)
 {
   PWaitAndSignal mutex(videoHandlerActive);
 
@@ -1802,11 +1903,7 @@ PBoolean H323PluginVideoCodec::Write(const BYTE * /*buffer*/, unsigned length, c
   bytesPerFrame = outputDataSize;
 
 #if 0
-   PTRACE(6,"RTP\t pt=" << src.GetPayloadType()  
-               << " m=" << src.GetMarker()
-               << " sn=" << src.GetSequenceNumber()
-               << " ts=" << src.GetTimestamp()
-               << " sz=" << src.GetPayloadSize());       
+  CheckPacket(false,src);
 #endif
 
   unsigned int fromLen = src.GetHeaderSize() + src.GetPayloadSize();

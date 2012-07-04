@@ -148,6 +148,8 @@
 #undef H323_SIGNAL_AGGREGATE
 #undef H323_RTP_AGGREGATE
 
+#undef H323_FRAMEBUFFER
+
 #endif
 
 // End Of File ///////////////////////////////////////////////////////////////

@@ -147,6 +147,8 @@ class H323Codec : public PObject
 
        This function is called every GetFrameRate() timestamp units, so MUST
        take less than that amount of time to complete!
+
+       This may call write Internal
      */
     virtual PBoolean Write(
       const BYTE * buffer,          ///< Buffer of encoded data
@@ -154,6 +156,24 @@ class H323Codec : public PObject
       const RTP_DataFrame & frame,  ///< Entire RTP frame
       unsigned & written            ///< Number of bytes used from data buffer
     ) = 0;
+
+    /**Decode the data and output it to appropriate device.
+       This will decode a single frame of received data. The exact size and
+       description of the data required in the buffer is codec dependent but
+       should be at least than OpalMediaFormat::GetFrameSize() in length.
+
+       It is expected this function anunciates the data. That is, for example
+       with audio data, the sound is output on a speaker.
+
+       This function is called every GetFrameRate() timestamp units, so MUST
+       take less than that amount of time to complete!
+     */
+    virtual PBoolean WriteInternal(
+      const BYTE * /*buffer*/,          ///< Buffer of encoded data
+      unsigned /*length*/,              ///< Length of encoded data buffer
+      const RTP_DataFrame & /*frame*/,  ///< Entire RTP frame
+      unsigned & /*written*/            ///< Number of bytes used from data buffer
+    ) { return false; }
 
     /**Get the frame rate in RTP timestamp units.
       */
