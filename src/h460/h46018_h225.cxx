@@ -257,8 +257,9 @@ PBoolean H46018Transport::HandleH46018SignallingChannelPDU(PThread * thread)
         connection->HandleSignallingChannel();
     }
     else {
-        connection->ClearCall(H323Connection::EndedByTransportFail);
+ //       connection->ClearCall(H323Connection::EndedByTransportFail);
         PTRACE(1, "H46018\tSignal channel stopped on first PDU.");
+        return false;
     }
 
     return connection->HadAnsweredCall();
