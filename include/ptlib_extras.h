@@ -742,6 +742,7 @@ protected:
     unsigned m_frameMarker;           // Number of complete frames;
     PBoolean m_frameOutput;           // Signal to start output
     unsigned m_frameStartTime;        // Time to of first packet
+    unsigned m_lastOddTime;           // Last Odd time stamp
     float    m_lossThreshold;         // Percentage loss
     float    m_lossCount;             // Actual Packet lost
     float    m_frameCount;            // Number of Frames Received from last Fast Picture Update
@@ -754,8 +755,8 @@ protected:
 public:
     H323_FrameBuffer()
     : PThread(10000, NoAutoDeleteThread), m_threadRunning(false),
-      m_frameMarker(0), m_frameOutput(false), m_frameStartTime(0),
-      m_lossThreshold(2.0), m_lossCount(0), m_frameCount(0),
+      m_frameMarker(0), m_frameOutput(false), m_frameStartTime(0), 
+      m_lastOddTime(0), m_lossThreshold(2.0), m_lossCount(0), m_frameCount(0),
       m_lastSequence(0), m_exit(false)
     {}
 
@@ -809,6 +810,9 @@ public:
                     }
                   bufferMutex.Signal();
 
+                  if (m_exit)
+                      continue;
+
                   m_frameCount++;
                   unsigned diff=0;
                   if (m_lastSequence) {
@@ -848,6 +852,9 @@ public:
             m_threadRunning = true;
         }
 
+        if (m_exit)
+            return false;
+
         if (!m_frameStartTime)
             m_frameStartTime = time;
             
@@ -860,10 +867,18 @@ public:
         memcpy(m_frame->GetPointer(),(PRemoveConst(PBYTEArray,&frame))->GetPointer(),payload+12);
         PBoolean added = true;
         bufferMutex.Wait();
-            if (m_frameOutput && m_buffer.size() > 0 && info.m_sequence > m_buffer.top().first.m_sequence) 
-               added = false;
-            else
-               m_buffer.push(pair<H323FRAME::Info, PBYTEArray>(info,*m_frame));
+        if (m_frameOutput && m_buffer.size() > 0 && info.m_sequence < m_buffer.top().first.m_sequence) {
+            if (info.m_sequence = m_lastOddTime+1) {
+                PTRACE(4,"RTPBUF\tTimeStamp Rebasing detected");
+                m_buffer.empty();
+                m_frameMarker=0;
+            } else {
+                m_lastOddTime = info.m_sequence;
+                added = false;
+            }
+        }
+        if (added)
+            m_buffer.push(pair<H323FRAME::Info, PBYTEArray>(info,*m_frame));
         bufferMutex.Signal();
 
         if (!added) {
