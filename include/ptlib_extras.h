@@ -868,7 +868,7 @@ public:
         PBoolean added = true;
         bufferMutex.Wait();
         if (m_frameOutput && m_buffer.size() > 0 && info.m_sequence < m_buffer.top().first.m_sequence) {
-            if (info.m_sequence = m_lastOddTime+1) {
+            if (info.m_sequence == m_lastOddTime+1) {
                 PTRACE(4,"RTPBUF\tTimeStamp Rebasing detected");
                 m_buffer.empty();
                 m_frameMarker=0;
