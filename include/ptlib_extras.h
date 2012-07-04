@@ -796,7 +796,7 @@ public:
                   bufferMutex.Wait();
                     info = m_buffer.top().first;
                     frame.SetSize(m_buffer.top().second.GetSize());
-                    memcpy(frame.GetPointer(), m_buffer.top().second.GetPointer(), m_buffer.top().second.GetSize());
+                    memcpy(frame.GetPointer(), m_buffer.top().second, m_buffer.top().second.GetSize());
                     unsigned lastTimeStamp = info.m_timeStamp;
                     m_buffer.pop();
                     if (info.m_marker && m_buffer.size() > 0) { // Peek ahead for next timestamp
@@ -858,9 +858,18 @@ public:
 
         PBYTEArray * m_frame = new PBYTEArray(payload+12);
         memcpy(m_frame->GetPointer(),(PRemoveConst(PBYTEArray,&frame))->GetPointer(),payload+12);
+        PBoolean added = true;
         bufferMutex.Wait();
-            m_buffer.push(pair<H323FRAME::Info, PBYTEArray>(info,*m_frame));
+            if (m_frameOutput && m_buffer.size() > 0 && info.m_sequence > m_buffer.top().first.m_sequence) 
+               added = false;
+            else
+               m_buffer.push(pair<H323FRAME::Info, PBYTEArray>(info,*m_frame));
         bufferMutex.Signal();
+
+        if (!added) {
+            PTRACE(4,"RTPBUF\tSkipped Packet " << info.m_sequence << " too old.");
+            return true;
+        }
 
         if (marker) {
             // Make sure we have a min of 2 frames in buffer 
