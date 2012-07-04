@@ -393,10 +393,13 @@ int H264DecoderContext::DecodeFrames(const u_char * src, unsigned & srcLen, u_ch
     return 1;
   }
 
+#if 0  
   if (_lastSeqNo > 0) {
       if (srcRTP.GetSequenceNumber() != _lastSeqNo+1) 
            flags = requestIFrame;
   }
+#endif
+
   _lastSeqNo = srcRTP.GetSequenceNumber();
 
   if (srcRTP.GetMarker()==0)
@@ -451,16 +454,17 @@ int H264DecoderContext::DecodeFrames(const u_char * src, unsigned & srcLen, u_ch
     return 1;
   }
 
-  // Auto Fast Update Request. Don't trust the decoder. - SH
-  //if (_frameFPUInt > 0) {
-  //    if (_frameAutoFPU == _frameFPUInt) {
-  //       TRACE(4, "H264\tDecoder\tAuto Request Fast Picture Update");
-  //       flags = requestIFrame;
-  //       _frameAutoFPU = 0;
-  //    } else
-  //       _frameAutoFPU++;
-  //}
-
+#if 0
+   // Auto Fast Update Request. Don't trust the decoder. - SH
+  if (_frameFPUInt > 0) {
+      if (_frameAutoFPU == _frameFPUInt) {
+         TRACE(4, "H264\tDecoder\tAuto Request Fast Picture Update");
+         flags = requestIFrame;
+         _frameAutoFPU = 0;
+      } else
+         _frameAutoFPU++;
+  }
+#endif
 
   TRACE_UP(4, "H264\tDecoder\tDecoded " << bytesDecoded << " bytes"<< ", Resolution: " << _context->width << "x" << _context->height);
   int frameBytes = (_context->width * _context->height * 3) / 2;
