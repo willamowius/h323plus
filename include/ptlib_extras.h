@@ -742,11 +742,15 @@ protected:
     unsigned m_frameMarker;           // Number of complete frames;
     PBoolean m_frameOutput;           // Signal to start output
     unsigned m_frameStartTime;        // Time to of first packet
-    unsigned m_lastOddTime;           // Last Odd time stamp
+    float    m_packetReceived;        // Packet Received count
+    float    m_oddTimeCount;          // Odd time count
+    float    m_lateThreshold;         // Threshold (percent) of late packets
+    PBoolean m_increaseBuffer;        // Increase Buffer
     float    m_lossThreshold;         // Percentage loss
     float    m_lossCount;             // Actual Packet lost
     float    m_frameCount;            // Number of Frames Received from last Fast Picture Update
     unsigned m_lastSequence;          // Last Received Sequence Number
+    PInt64   m_RenderTimeStamp;       // local realTime to render.
 
     PMutex bufferMutex;
     PAdaptiveDelay m_outputDelay;
@@ -756,8 +760,9 @@ public:
     H323_FrameBuffer()
     : PThread(10000, NoAutoDeleteThread), m_threadRunning(false),
       m_frameMarker(0), m_frameOutput(false), m_frameStartTime(0), 
-      m_lastOddTime(0), m_lossThreshold(2.0), m_lossCount(0), m_frameCount(0),
-      m_lastSequence(0), m_exit(false)
+      m_packetReceived(0), m_oddTimeCount(0), m_lateThreshold(5.0), m_increaseBuffer(false),
+      m_lossThreshold(2.0), m_lossCount(0), m_frameCount(0), 
+      m_lastSequence(0), m_RenderTimeStamp(0), m_exit(false)
     {}
 
     ~H323_FrameBuffer()
@@ -777,6 +782,7 @@ public:
     void Main() {
 
         PBYTEArray frame;
+        PTimeInterval lastMarker;
         unsigned delay=0;
         PBoolean fup=false;
 
@@ -787,6 +793,10 @@ public:
                         m_frameMarker--;
                     break;
                 }
+
+                // fixed local render clock
+                if (m_RenderTimeStamp == 0)
+                    m_RenderTimeStamp = PTimer::Tick().GetMilliSeconds();
 
                 // TODO: Check to see the number of complete frames
                 // does not exceed limit. if it does then drop the frames,
@@ -811,7 +821,7 @@ public:
                   bufferMutex.Signal();
 
                   if (m_exit)
-                      continue;
+                      break;
 
                   m_frameCount++;
                   unsigned diff=0;
@@ -832,11 +842,18 @@ public:
                   }
 
                   if (info.m_marker && m_frameMarker > 0) {
+                        if (m_increaseBuffer) {
+                            delay = delay*2;
+                            m_increaseBuffer=false;
+                        }
+                        m_RenderTimeStamp+=delay;
+                        unsigned ldelay = (unsigned)(m_RenderTimeStamp - PTimer::Tick().GetMilliSeconds());
+                        m_outputDelay.Delay(ldelay);
                         m_frameMarker--;
-                        m_outputDelay.Delay(delay);
-                  }
+                  } else 
+                      PThread::Sleep(3);
             }
-            PThread::Sleep(3);
+            PThread::Sleep(5);
         }
      bufferMutex.Wait();
         m_buffer.empty();
@@ -865,26 +882,22 @@ public:
 
         PBYTEArray * m_frame = new PBYTEArray(payload+12);
         memcpy(m_frame->GetPointer(),(PRemoveConst(PBYTEArray,&frame))->GetPointer(),payload+12);
-        PBoolean added = true;
+
         bufferMutex.Wait();
+        m_packetReceived++;
         if (m_frameOutput && m_buffer.size() > 0 && info.m_sequence < m_buffer.top().first.m_sequence) {
-            if (info.m_sequence == m_lastOddTime+1) {
-                PTRACE(4,"RTPBUF\tTimeStamp Rebasing detected");
-                m_buffer.empty();
-                m_frameMarker=0;
-            } else {
-                m_lastOddTime = info.m_sequence;
-                added = false;
+            m_oddTimeCount++;
+            PTRACE(6,"RTPBUF\tLate Packet Received " << (m_oddTimeCount/m_packetReceived)*100.0 << "%");
+            if ((m_oddTimeCount/m_packetReceived)*100.0 > m_lateThreshold) {
+                PTRACE(4,"RTPBUF\tLate Packet threshold reached increasing buffer.");
+                m_increaseBuffer = true;
+                m_packetReceived=0;
+                m_oddTimeCount=0;
             }
         }
-        if (added)
-            m_buffer.push(pair<H323FRAME::Info, PBYTEArray>(info,*m_frame));
-        bufferMutex.Signal();
 
-        if (!added) {
-            PTRACE(4,"RTPBUF\tSkipped Packet " << info.m_sequence << " too old.");
-            return true;
-        }
+        m_buffer.push(pair<H323FRAME::Info, PBYTEArray>(info,*m_frame));
+        bufferMutex.Signal();
 
         if (marker) {
             // Make sure we have a min of 2 frames in buffer 
