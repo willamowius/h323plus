@@ -742,6 +742,8 @@ protected:
     unsigned m_frameMarker;           // Number of complete frames;
     PBoolean m_frameOutput;           // Signal to start output
     unsigned m_frameStartTime;        // Time to of first packet
+    PInt64   m_StartTimeStamp;        // Start Time Stamp
+    float    m_calcClockRate;         // Calculated Clockrate (default 90)
     float    m_packetReceived;        // Packet Received count
     float    m_oddTimeCount;          // Odd time count
     float    m_lateThreshold;         // Threshold (percent) of late packets
@@ -760,6 +762,7 @@ public:
     H323_FrameBuffer()
     : PThread(10000, NoAutoDeleteThread), m_threadRunning(false),
       m_frameMarker(0), m_frameOutput(false), m_frameStartTime(0), 
+      m_StartTimeStamp(0), m_calcClockRate(90),
       m_packetReceived(0), m_oddTimeCount(0), m_lateThreshold(5.0), m_increaseBuffer(false),
       m_lossThreshold(2.0), m_lossCount(0), m_frameCount(0), 
       m_lastSequence(0), m_RenderTimeStamp(0), m_exit(false)
@@ -811,7 +814,7 @@ public:
                     unsigned lastTimeStamp = info.m_timeStamp;
                     m_buffer.pop();
                     if (info.m_marker && m_buffer.size() > 0) { // Peek ahead for next timestamp
-                        delay = (m_buffer.top().first.m_timeStamp - lastTimeStamp)/90;
+                        delay = (m_buffer.top().first.m_timeStamp - lastTimeStamp)/(unsigned)m_calcClockRate;
                         if (delay > 200 || delay < 0) {
                            delay = 0;
                            lastTimeStamp = m_buffer.top().first.m_timeStamp;
@@ -827,7 +830,10 @@ public:
                   unsigned diff=0;
                   if (m_lastSequence) {
                      diff = info.m_sequence - m_lastSequence - 1;
-                     m_lossCount = m_lossCount + diff;
+                     if (diff > 0) {
+                         PTRACE(5,"RTPBUF\tDetected loss of " << diff << " packets."); 
+                         m_lossCount = m_lossCount + diff;
+                     }
                   }
                   m_lastSequence = info.m_sequence;
 
@@ -864,6 +870,7 @@ public:
 
     virtual PBoolean FrameIn(unsigned seq,  unsigned time, PBoolean marker, unsigned payload, const PBYTEArray & frame)
     {
+
         if (!m_threadRunning) {  // Start thread on first frame.
             Resume();
             m_threadRunning = true;
@@ -872,8 +879,11 @@ public:
         if (m_exit)
             return false;
 
-        if (!m_frameStartTime)
+        if (!m_frameStartTime) {
             m_frameStartTime = time;
+            m_StartTimeStamp = PTimer::Tick().GetMilliSeconds();
+        } else if (marker && m_frameOutput)
+            m_calcClockRate = (float)(time - m_frameStartTime)/(PTimer::Tick().GetMilliSeconds() - m_StartTimeStamp);
             
         H323FRAME::Info info;
            info.m_sequence = seq;
