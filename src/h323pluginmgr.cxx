@@ -1869,7 +1869,7 @@ PBoolean H323PluginVideoCodec::Write(const BYTE * buffer, unsigned length, const
     return false;
 #else
         rtpInformation.m_recvTime = PTimer::Tick().GetMilliSeconds();
-        rtpInformation.m_timeStamp = src.GetTimeStamp();
+        rtpInformation.m_timeStamp = src.GetTimestamp();
         rtpInformation.m_clockRate = 90000;
         CalculateRTPSendTime(src.GetTimestamp(), rtpInformation.m_clockRate, rtpInformation.m_sendTime);
         rtpInformation.m_frame = &src;
