@@ -719,6 +719,7 @@ public:
         unsigned  m_sequence;
         unsigned  m_timeStamp;
         PBoolean  m_marker;
+        PInt64    m_receiveTime;
      };
 
      int operator() ( const std::pair<H323FRAME::Info, PBYTEArray>& p1,
@@ -780,7 +781,7 @@ public:
         Resume();
     }
 
-    virtual void FrameOut(PBYTEArray & /*frame*/, PBoolean /*fup*/, PBoolean /*flow*/) {};
+    virtual void FrameOut(PBYTEArray & /*frame*/, PInt64 /*receiveTime*/, unsigned /*clock*/, PBoolean /*fup*/, PBoolean /*flow*/) {};
 
     void Main() {
 
@@ -815,9 +816,10 @@ public:
                     m_buffer.pop();
                     if (info.m_marker && m_buffer.size() > 0) { // Peek ahead for next timestamp
                         delay = (m_buffer.top().first.m_timeStamp - lastTimeStamp)/(unsigned)m_calcClockRate;
-                        if (delay > 200 || delay < 0) {
+                        if (delay > 200 || (lastTimeStamp > m_buffer.top().first.m_timeStamp)) {
                            delay = 0;
                            lastTimeStamp = m_buffer.top().first.m_timeStamp;
+                           m_RenderTimeStamp = PTimer::Tick().GetMilliSeconds();
                            fup = true;
                         } 
                     }
@@ -840,7 +842,7 @@ public:
                   if (!fup) 
                       fup = ((m_lossCount/m_frameCount)*100.0 > m_lossThreshold);
 
-                  FrameOut(frame, fup, flow);
+                  FrameOut(frame, info.m_receiveTime, (unsigned)m_calcClockRate, fup, flow);
                   frame.SetSize(0);
                   if (fup) {
                      m_lossCount = m_frameCount = 0;
@@ -854,6 +856,7 @@ public:
                         }
                         m_RenderTimeStamp+=delay;
                         unsigned ldelay = (unsigned)(m_RenderTimeStamp - PTimer::Tick().GetMilliSeconds());
+PTRACE(1,"TEST\tFrame Buffer " << m_frameMarker << " Delay " << ldelay << " Clock " << m_calcClockRate);
                         m_outputDelay.Delay(ldelay);
                         m_frameMarker--;
                   } else 
@@ -879,16 +882,26 @@ public:
         if (m_exit)
             return false;
 
+        PInt64 now = PTimer::Tick().GetMilliSeconds();
+        // IF we haven't started or the clockrate goes out of bounds.
         if (!m_frameStartTime) {
             m_frameStartTime = time;
             m_StartTimeStamp = PTimer::Tick().GetMilliSeconds();
-        } else if (marker && m_frameOutput)
+        } else if (marker && m_frameOutput) {
             m_calcClockRate = (float)(time - m_frameStartTime)/(PTimer::Tick().GetMilliSeconds() - m_StartTimeStamp);
+            if (m_calcClockRate > 100 || m_calcClockRate < 40) {
+                PTRACE(4,"RTPBUF\tErroneous ClockRate: Resetting...");
+                m_calcClockRate = 90;
+                m_frameStartTime = time;
+                m_StartTimeStamp = PTimer::Tick().GetMilliSeconds();
+            }
+        }
             
         H323FRAME::Info info;
            info.m_sequence = seq;
            info.m_marker = marker;
            info.m_timeStamp = time;
+           info.m_receiveTime = now;
 
         PBYTEArray * m_frame = new PBYTEArray(payload+12);
         memcpy(m_frame->GetPointer(),(PRemoveConst(PBYTEArray,&frame))->GetPointer(),payload+12);
@@ -905,8 +918,8 @@ public:
                 m_oddTimeCount=0;
             }
         }
-
         m_buffer.push(pair<H323FRAME::Info, PBYTEArray>(info,*m_frame));
+        delete m_frame;
         bufferMutex.Signal();
 
         if (marker) {

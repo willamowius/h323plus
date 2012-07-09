@@ -75,9 +75,11 @@ H323Codec::H323Codec(const OpalMediaFormat & fmt, Direction dir)
   deleteChannel  = FALSE;
 
   rtpInformation.m_sessionID=0;
-  rtpInformation.m_sendTime = 0;
-  rtpInformation.m_frameLost = 0;
-  rtpInformation.m_recvTime = PTime();
+  rtpInformation.m_sendTime=0;
+  rtpInformation.m_timeStamp=0;
+  rtpInformation.m_clockRate=0;
+  rtpInformation.m_frameLost=0;
+  rtpInformation.m_recvTime=0;
   rtpInformation.m_frame=NULL;
 
   rtpSync.m_realTimeStamp = 0;
@@ -191,6 +193,11 @@ PBoolean H323Codec::ReadRaw(void * data, PINDEX size, PINDEX & length)
 
 PBoolean H323Codec::WriteRaw(void * data, PINDEX length, void * mark)
 {
+    return WriteInternal(data, length, mark);
+}
+
+PBoolean H323Codec::WriteInternal(void * data, PINDEX length, void * mark)
+{
   if (rawDataChannel == NULL) {
     PTRACE(1, "Codec\tNo audio channel for write");
     return FALSE;
@@ -235,7 +242,7 @@ PBoolean H323Codec::SetRawDataHeld(PBoolean /*hold*/)
 	return FALSE;
 }
 
-PBoolean H323Codec::OnRxSenderReport(DWORD rtpTimeStamp, const PTime & realTimeStamp)
+PBoolean H323Codec::OnRxSenderReport(DWORD rtpTimeStamp, const PInt64 & realTimeStamp)
 {
     rtpSync.m_rtpTimeStamp = rtpTimeStamp;
     rtpSync.m_realTimeStamp = realTimeStamp;
@@ -246,11 +253,23 @@ PTime H323Codec::CalculateRTPSendTime(DWORD timeStamp, unsigned rate) const
 {
     if (rtpSync.m_rtpTimeStamp == 0)
         return 0;
-// Need to review this
+
     DWORD timeDiff = (timeStamp - rtpSync.m_rtpTimeStamp)/rate;
 
     return rtpSync.m_realTimeStamp + timeDiff;
 
+}
+
+void H323Codec::CalculateRTPSendTime(DWORD timeStamp, unsigned rate, PInt64 & sendTime) const
+{
+    if (rtpSync.m_rtpTimeStamp == 0) {
+        sendTime = 0;
+        return;
+    }
+
+    DWORD timeDiff = (timeStamp - rtpSync.m_rtpTimeStamp)/rate;
+
+    sendTime = rtpSync.m_realTimeStamp + timeDiff;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -811,9 +830,11 @@ PBoolean H323FramedAudioCodec::Write(const BYTE * buffer,
   // Prepare AVSync Information
   rtpInformation.m_frameLost = (lastSequence > 0) ? rtpFrame.GetSequenceNumber() -lastSequence-1 : 0; 
         lastSequence = rtpFrame.GetSequenceNumber();
-  rtpInformation.m_recvTime = PTime();
-  rtpInformation.m_sendTime = CalculateRTPSendTime(rtpFrame.GetTimestamp(),GetFrameRate());
-  rtpInformation.m_frame = &rtpFrame;
+        rtpInformation.m_recvTime = PTimer::Tick().GetMilliSeconds();
+        rtpInformation.m_timeStamp = rtpFrame.GetTimestamp();
+        rtpInformation.m_clockRate = GetFrameRate();
+        CalculateRTPSendTime(rtpInformation.m_timeStamp, rtpInformation.m_clockRate, rtpInformation.m_sendTime);
+        rtpInformation.m_frame = &rtpFrame;
 
   unsigned bytesDecoded = samplesPerFrame*2;
 

@@ -1059,6 +1059,7 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveControl(RTP_ControlFrame & 
           const RTP_ControlFrame::SenderReport & sr = *(const RTP_ControlFrame::SenderReport *)payload;
           sender.sourceIdentifier = sr.ssrc;
           sender.realTimestamp = PTime(sr.ntp_sec-SecondsFrom1900to1970, sr.ntp_frac/4294);
+          sender.realTimestamp1970 = sr.ntp_sec-SecondsFrom1900to1970;
           sender.rtpTimestamp = sr.rtp_ts;
           sender.packetsSent = sr.psent;
           sender.octetsSent = sr.osent;

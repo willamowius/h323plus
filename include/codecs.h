@@ -76,16 +76,18 @@ class H323Codec : public PObject
 	struct H323_RTPInformation
 	{
 		int                   m_sessionID;
+        unsigned              m_timeStamp;
+        unsigned              m_clockRate;
         int                   m_frameLost;
-        PTime                 m_sendTime;
-        PTime                 m_recvTime;
+        PInt64                m_sendTime;
+        PInt64                m_recvTime;
 		const RTP_DataFrame * m_frame;
 	};
 
     struct AVSync
     {
-        DWORD m_rtpTimeStamp;
-        PTime m_realTimeStamp;
+        DWORD  m_rtpTimeStamp;
+        PInt64 m_realTimeStamp;
     };
 
     H323Codec(
@@ -169,10 +171,11 @@ class H323Codec : public PObject
        take less than that amount of time to complete!
      */
     virtual PBoolean WriteInternal(
-      const BYTE * /*buffer*/,          ///< Buffer of encoded data
-      unsigned /*length*/,              ///< Length of encoded data buffer
-      const RTP_DataFrame & /*frame*/,  ///< Entire RTP frame
-      unsigned & /*written*/            ///< Number of bytes used from data buffer
+      const BYTE * /*buffer*/,              ///< Buffer of encoded data
+      unsigned /*length*/,                  ///< Length of encoded data buffer
+      const RTP_DataFrame & /*frame*/,      ///< Entire RTP frame
+      unsigned & /*written*/,               ///< Number of bytes used from data buffer
+      H323_RTPInformation &  /*rtp*/        ///< RTP Information
     ) { return false; }
 
     /**Get the frame rate in RTP timestamp units.
@@ -262,6 +265,14 @@ class H323Codec : public PObject
 	  void * mark
     );
 
+    /**Write from the raw data channel.
+      */
+    PBoolean WriteInternal(
+      void * data,
+      PINDEX length,
+	  void * mark
+    );
+
     /**Attach the logical channel, for use by the codec.
        The channel provided is not deleted on destruction, it is just used.
 
@@ -315,11 +326,15 @@ class H323Codec : public PObject
    /**On Receive sender report.
         Use this for AV Synchronisation
     */
-    virtual PBoolean OnRxSenderReport(DWORD rtpTimeStamp, const PTime & realTimeStamp);
+    virtual PBoolean OnRxSenderReport(DWORD rtpTimeStamp, const PInt64 & realTimeStamp);
 
    /**Calculate the remote send time
     */
     virtual PTime CalculateRTPSendTime(DWORD timeStamp, unsigned rate) const;
+
+   /**Calculate the remote send time
+    */
+    void CalculateRTPSendTime(DWORD timeStamp, unsigned rate, PInt64 & sendTime) const;
 
   protected:
     Direction direction;

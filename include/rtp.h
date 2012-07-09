@@ -491,10 +491,11 @@ class RTP_Session : public PObject
         void PrintOn(ostream &) const;
 
         DWORD sourceIdentifier;
-        PTime realTimestamp;
-        DWORD rtpTimestamp;
-        DWORD packetsSent;
-        DWORD octetsSent;
+        PTime  realTimestamp;
+        PInt64 realTimestamp1970;
+        DWORD  rtpTimestamp;
+        DWORD  packetsSent;
+        DWORD  octetsSent;
     };
     virtual void OnRxSenderReport(const SenderReport & sender,
                                   const ReceiverReportArray & reports);

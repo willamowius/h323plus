@@ -1079,7 +1079,7 @@ void H323_RTPChannel::Receive()
 
     RTP_Session::SenderReport avData;
     if (rtpSession.AVSyncData(avData))
-        codec->OnRxSenderReport(avData.rtpTimestamp, avData.realTimestamp);
+        codec->OnRxSenderReport(avData.rtpTimestamp, avData.realTimestamp1970);
 
 #if PTRACING
     if (rtpTimestamp - lastDisplayedTimestamp > RTP_TRACE_DISPLAY_RATE) {

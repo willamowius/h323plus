@@ -367,7 +367,11 @@ H323EndPoint::H323EndPoint()
 #endif
 
 #ifdef H323_AUDIO_CODECS
+#ifndef H323_FRAMEBUFFER
   minAudioJitterDelay = 50;  // milliseconds
+#else
+  minAudioJitterDelay = 100;  // milliseconds
+#endif
   maxAudioJitterDelay = 250; // milliseconds
 #endif
 

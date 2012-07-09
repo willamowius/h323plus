@@ -1252,7 +1252,7 @@ class H323StreamedPluginAudioCodec : public H323StreamedAudioCodec
 // Plugin video codec class
 //
 
-#if 0
+#ifdef H323_PACKET_TRACE
 static void CheckPacket(PBoolean encode, const RTP_DataFrame & frame)
 {
     PTRACE(6, "RTP\t" << (encode ? "> " : "< ")
@@ -1281,12 +1281,18 @@ public:
         Start();
     } 
 
-    virtual void FrameOut(PBYTEArray & frame, PBoolean fup, PBoolean flow)  {
+    virtual void FrameOut(PBYTEArray & frame, PInt64 receiveTime, unsigned clock , PBoolean fup, PBoolean flow)  {
         m_flowControl = flow;
         frameData.SetPayloadSize(frame.GetSize()-12);
         memmove(frameData.GetPointer(), frame.GetPointer(), frame.GetSize());
         unsigned written = 0;
-        m_noError = codec->WriteInternal(frameData.GetPointer(), frameData.GetSize(), frameData, written);
+        H323Codec::H323_RTPInformation  rtpInformation;
+          rtpInformation.m_recvTime = receiveTime;
+          rtpInformation.m_timeStamp = frameData.GetTimestamp();
+          rtpInformation.m_clockRate = clock*1000;
+          codec->CalculateRTPSendTime(rtpInformation.m_timeStamp, rtpInformation.m_clockRate, rtpInformation.m_sendTime);
+          rtpInformation.m_frame = &frameData;
+        m_noError = codec->WriteInternal(frameData.GetPointer(), frameData.GetSize(), frameData, written, rtpInformation);
         frameData.SetPayloadSize(0);
     }
 
@@ -1342,15 +1348,21 @@ class H323PluginVideoCodec : public H323VideoCodec
     );
 
     virtual PBoolean WriteInternal(
-      const BYTE * buffer,        ///< Buffer of encoded data
-      unsigned length,            ///< Length of encoded data buffer
-      const RTP_DataFrame & src,  ///< RTP data frame
-      unsigned & written          ///< Number of bytes used from data buffer
+      const BYTE * buffer,             ///< Buffer of encoded data
+      unsigned length,                 ///< Length of encoded data buffer
+      const RTP_DataFrame & src,       ///< RTP data frame
+      unsigned & written,              ///< Number of bytes used from data buffer
+      H323_RTPInformation & rtp        ///< RTP Information
     );
 
     PBoolean RenderFrame(
       const BYTE * buffer,        ///< Buffer of data to render
-	  void * mark				  ///< WaterMark
+      void * mark                 ///< WaterMark
+    );
+
+    PBoolean RenderInternal(
+      const BYTE * buffer,        ///< Buffer of data to render
+      void * mark                 ///< WaterMark
     );
  
     virtual unsigned GetFrameRate() const 
@@ -1789,7 +1801,7 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
 
         videoIn->EnableAccess();
 
-        RenderFrame(data, &rtpInformation);
+        RenderFrame(data, NULL);
 
         PTimeInterval now = PTimer::Tick();
         if (lastFrameTick != 0)
@@ -1856,11 +1868,18 @@ PBoolean H323PluginVideoCodec::Write(const BYTE * buffer, unsigned length, const
     }
     return false;
 #else
-    return WriteInternal(buffer, length, src, written);
+        rtpInformation.m_recvTime = PTimer::Tick().GetMilliSeconds();
+        rtpInformation.m_timeStamp = src.GetTimeStamp();
+        rtpInformation.m_clockRate = 90000;
+        CalculateRTPSendTime(src.GetTimestamp(), rtpInformation.m_clockRate, rtpInformation.m_sendTime);
+        rtpInformation.m_frame = &src;
+
+    return WriteInternal(buffer, length, src, written, rtpInformation);
 #endif
 }
 
-PBoolean H323PluginVideoCodec::WriteInternal(const BYTE * /*buffer*/, unsigned length, const RTP_DataFrame & src, unsigned & written)
+PBoolean H323PluginVideoCodec::WriteInternal(const BYTE * /*buffer*/, unsigned length, const RTP_DataFrame & src, 
+                                             unsigned & written, H323_RTPInformation & rtp)
 {
   PWaitAndSignal mutex(videoHandlerActive);
 
@@ -1879,14 +1898,11 @@ PBoolean H323PluginVideoCodec::WriteInternal(const BYTE * /*buffer*/, unsigned l
     return TRUE;
   }
 
-  // Prepare AVSync Information
-  rtpInformation.m_recvTime = PTime();
-  rtpInformation.m_sendTime = CalculateRTPSendTime(src.GetTimestamp(),90000/GetFrameRate());
-  rtpInformation.m_frame = &src;
+  rtp.m_sessionID = rtpInformation.m_sessionID;
 
 #if PTLIB_VER >= 290
   if (((PVideoChannel *)rawDataChannel)->DisableDecode()) {
-      if (RenderFrame(src.GetPayloadPtr(), &rtpInformation)) {
+      if (RenderFrame(src.GetPayloadPtr(), &rtp)) {
          written = length; // pretend we wrote the data, to avoid error message
 	     return TRUE;
       } else
@@ -1902,7 +1918,7 @@ PBoolean H323PluginVideoCodec::WriteInternal(const BYTE * /*buffer*/, unsigned l
   bufferRTP.SetMinSize(outputDataSize);
   bytesPerFrame = outputDataSize;
 
-#if 0
+#ifdef H323_PACKET_TRACE
   CheckPacket(false,src);
 #endif
 
@@ -1938,7 +1954,7 @@ PBoolean H323PluginVideoCodec::WriteInternal(const BYTE * /*buffer*/, unsigned l
         if (!SetFrameSize(header->width,header->height))
            return false;
 
-        if (!RenderFrame(OPAL_VIDEO_FRAME_DATA_PTR(header), &rtpInformation)) 
+        if (!RenderFrame(OPAL_VIDEO_FRAME_DATA_PTR(header), &rtp)) 
 	       return false;
 
         if(flags & PluginCodec_ReturnCoderMoreFrame) {
@@ -1964,8 +1980,16 @@ PBoolean H323PluginVideoCodec::WriteInternal(const BYTE * /*buffer*/, unsigned l
   return TRUE;
 }
 
-
 PBoolean H323PluginVideoCodec::RenderFrame(const BYTE * buffer, void * mark)
+{
+#ifdef H323_PACKET_TRACE
+    H323_RTPInformation * rtp = (H323_RTPInformation * )mark;
+    if (rtp && rtp->m_frame) CheckPacket(false, *(rtp->m_frame));
+#endif
+    return RenderInternal(buffer,mark);
+}
+
+PBoolean H323PluginVideoCodec::RenderInternal(const BYTE * buffer, void * mark)
 {
     PVideoChannel *videoOut = (PVideoChannel *)rawDataChannel; // guaranteed to be non-NULL when called from Read() or Write()
 
