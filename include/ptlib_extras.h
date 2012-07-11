@@ -841,6 +841,16 @@ public:
 
                   if (!fup) 
                       fup = ((m_lossCount/m_frameCount)*100.0 > m_lossThreshold);
+                
+                  if (info.m_marker && m_frameMarker > 5) {
+                     bufferMutex.Wait();
+                        m_buffer.empty();
+                        m_frameOutput=false;
+                        m_frameMarker=0;
+                        m_RenderTimeStamp = 0;
+                        fup=true;
+                     bufferMutex.Signal();
+                  }
 
                   FrameOut(frame, info.m_receiveTime, (unsigned)m_calcClockRate, fup, flow);
                   frame.SetSize(0);
@@ -854,13 +864,15 @@ public:
                             delay = delay*2;
                             m_increaseBuffer=false;
                         }
-                        m_RenderTimeStamp+=delay;
-                        unsigned ldelay = (unsigned)(m_RenderTimeStamp - PTimer::Tick().GetMilliSeconds());
-PTRACE(1,"TEST\tFrame Buffer " << m_frameMarker << " Delay " << ldelay << " Clock " << m_calcClockRate);
-                        m_outputDelay.Delay(ldelay);
-                        m_frameMarker--;
+                      m_RenderTimeStamp+=delay;
+                      PInt64 nowTime = PTimer::Tick().GetMilliSeconds();
+                      unsigned ldelay = (unsigned)((m_RenderTimeStamp > nowTime)? m_RenderTimeStamp - nowTime : 0);
+                      if (!delay)  m_RenderTimeStamp = nowTime;
+                      PTRACE(1,"TEST\tFrame Buffer " << m_frameMarker << " Delay " << ldelay << " Clock " << m_calcClockRate);
+                      m_frameMarker--;
+                      m_outputDelay.Delay(ldelay);
                   } else 
-                      PThread::Sleep(3);
+                      PThread::Sleep(2);
             }
             PThread::Sleep(5);
         }
