@@ -802,9 +802,6 @@ public:
                 if (m_RenderTimeStamp == 0)
                     m_RenderTimeStamp = PTimer::Tick().GetMilliSeconds();
 
-                // TODO: Check to see the number of complete frames
-                // does not exceed limit. if it does then drop the frames,
-                // send a Fast picture update and request a flow restriction. -SH
                 PBoolean flow = false;
 
                 H323FRAME::Info info;
