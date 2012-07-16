@@ -2101,6 +2101,11 @@ class H323EndPoint : public PObject
       */
     void PresenceSetInstruction(const PString & epalias, 
                                 unsigned type, 
+                                const PString & alias, 
+                                const PString & display);
+
+    void PresenceSetInstruction(const PString & epalias, 
+                                unsigned type, 
                                 const PStringList & list,
                                  PBoolean autoSend = true);
 

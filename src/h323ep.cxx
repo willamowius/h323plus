@@ -3489,6 +3489,17 @@ void H323EndPoint::PresenceSetLocale(const presenceLocale & info)
     loc.m_elevation = info.m_elevation;
 }
 
+void H323EndPoint::PresenceSetInstruction(const PString & epalias, unsigned type, const PString & alias, const PString & display)
+{
+    if (presenceHandler == NULL)
+        return;
+
+    PresenceInstructList instList;
+    instList.insert(pair<PString, PString>(alias,display));
+
+    presenceHandler->AddInstruction(epalias,(H323PresenceHandler::InstType)type,instList,true);
+}
+
 void H323EndPoint::PresenceSetInstruction(const PString & epalias, unsigned type, const PStringList & list, PBoolean autoSend)
 {
     if (presenceHandler == NULL)
