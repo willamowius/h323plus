@@ -463,7 +463,7 @@ PBoolean H323PresenceHandler::BuildPresenceMessage(unsigned id, H323PresenceStor
         H323PresenceEndpoint & ep = iter->second;
         bool ok = false;
           if ((PresenceMessage_attributes[id].notification == 1) && (ep.m_Notify.GetSize() > 0)) ok = true;
-            if ((PresenceMessage_attributes[id].subscription == 1) && (ep.m_Authorize.GetSize() > 0)) ok = true;
+          if ((PresenceMessage_attributes[id].subscription == 1) && (ep.m_Authorize.GetSize() > 0)) ok = true;
           if ((PresenceMessage_attributes[id].instruction == 1) && (ep.m_Instruction.GetSize() > 0)) ok = true;
           if ((PresenceMessage_attributes[id].identifier == 1) && (ep.m_Identifiers.GetSize() > 0)) ok = true;
 
@@ -504,7 +504,7 @@ PBoolean H323PresenceHandler::BuildPresenceMessage(unsigned id, H323PresenceStor
             }
 
               if (ep.m_Notify.GetSize() > 0) ep.m_Notify.SetSize(0);
-                if (ep.m_Authorize.GetSize() > 0) ep.m_Authorize.SetSize(0);
+              if (ep.m_Authorize.GetSize() > 0) ep.m_Authorize.SetSize(0);
               if (ep.m_Instruction.GetSize() > 0) ep.m_Instruction.SetSize(0);
               if (ep.m_Identifiers.GetSize() > 0) ep.m_Identifiers.SetSize(0);
           }
