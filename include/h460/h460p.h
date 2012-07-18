@@ -87,7 +87,7 @@ class H323PresenceInstruction  :  public H460P_PresenceInstruction
 
 	Instruction GetInstruction();
     PString GetAlias() const;
-	PString GetAlias(PString & display, PString & avatar, H323PresenceInstruction::Category category=e_UnknownCategory) const;
+	PString GetAlias(PString & display, PString & avatar, H323PresenceInstruction::Category & category) const;
 
 };
 

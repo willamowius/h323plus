@@ -1096,7 +1096,7 @@ H323PresenceInstruction::H323PresenceInstruction(Instruction instruct, const PSt
 #endif
 }
 
-PString H323PresenceInstruction::GetAlias(PString & display, PString & avatar, H323PresenceInstruction::Category category) const
+PString H323PresenceInstruction::GetAlias(PString & display, PString & avatar, H323PresenceInstruction::Category & category) const
 {
     const H460P_PresenceAlias & palias = *this;
 #if H323_H460P_VER >= 2
@@ -1186,9 +1186,9 @@ static const char *CategoryState[] = {
 
 PString H323PresenceInstruction::GetCategoryString(unsigned cat)
 {
-	if (cat < 6) return CategoryState[cat];
+	if (cat < 7) return CategoryState[cat];
 
-    return CategoryState[6];
+    return CategoryState[7];
 }
 
 ///////////////////////////////////////////////////////////////////////
