@@ -81,6 +81,8 @@ public:
 
     PBYTEArray GenerateRandomKey(const PString & algorithmOID);  // Use assigned Algorithm
 
+	PString GetAlgorithmOID() const { return m_algorithmOID; }
+
 protected:
     static void SetIV(unsigned char * iv, unsigned char * ivSequence, unsigned ivLen);
 
@@ -140,6 +142,8 @@ public:
      */
     PBoolean WriteFrame(RTP_DataFrame & frame);
   //@}
+
+	PString GetAlgorithmOID() const { return m_context.GetAlgorithmOID(); }
 
 private:
     H235_DiffieHellman & m_dh;

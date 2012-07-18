@@ -97,7 +97,7 @@ void BuildEncryptionSync(H245_EncryptionSync & sync, const H323SecureRTPChannel 
     sync.m_synchFlag = chan.GetRTPPayloadType();
 
     PBYTEArray encryptedMediaKey;
-    PString m_algorithm;
+    PString m_algorithm = session.GetAlgorithmOID();
     session.EncodeMediaKey(encryptedMediaKey);
     H235_H235Key h235key;
     h235key.SetTag(H235_H235Key::e_secureSharedSecret);
