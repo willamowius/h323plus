@@ -1909,7 +1909,12 @@ PBoolean H323Connection::OnReceivedFacility(const H323SignalPDU & pdu)
   if (fac.m_reason.GetTag() == H225_FacilityReason::e_routeCallToGatekeeper) {
       PIPSocket::Address add;
       H323TransportAddress(remotePartyAddress).GetIpAddress(add);
-      address = add.AsString();
+      if (add.IsValid() && !add.IsAny() && !add.IsLoopback())
+            address = add.AsString();
+      else if (remotePartyAddress.Find('@') != P_MAX_INDEX)
+            address = remotePartyAddress.Left(remotePartyAddress.Find('@'));
+      else
+            address = remotePartyAddress;
   }
 
   if (fac.HasOptionalField(H225_Facility_UUIE::e_alternativeAliasAddress) &&
