@@ -788,12 +788,13 @@ PBoolean SimpleH323EndPoint::OpenVideoChannel(H323Connection & /*connection*/,
   PVideoDevice * device = isEncoding ? (PVideoDevice *)PVideoInputDevice::CreateDeviceByName(deviceName)
                                      : (PVideoDevice *)PVideoOutputDevice::CreateDeviceByName(deviceName);
 
- 
+#if PTLIB_VER >= 2110
   if (isEncoding) {
       PVideoInputDevice::Capabilities videoCaps;
       if (((PVideoInputDevice *)device)->GetDeviceCapabilities(deviceName,deviceDriver,&videoCaps))
           codec.SetSupportedFormats(videoCaps.framesizes);
   }
+#endif
 
   if (!device->SetFrameSize(codec.GetWidth(), codec.GetHeight()) ||
       !device->SetFrameRate(codec.GetFrameRate()) ||
