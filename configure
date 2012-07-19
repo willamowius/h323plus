@@ -629,6 +629,7 @@ H323_H341
 H323_H249
 H323_H248
 H323_H239
+H323_H235_AES256
 H323_H235
 H323_H230
 H323_H224
@@ -707,6 +708,7 @@ enable_video
 enable_h224
 enable_h230
 enable_h235
+enable_h235_256
 enable_h239
 enable_h248
 enable_h249
@@ -1358,6 +1360,7 @@ Optional Features:
   --disable-h224          disable H.224
   --disable-h230          disable H.230
   --disable-h235          disable H.235.6
+  --disable-h235-256      disable H.235.6 (256 bit)
   --disable-h239          disable H.239
   --disable-h248          enable H.248
   --disable-h249          disable H.249
@@ -1370,8 +1373,8 @@ Optional Features:
   --disable-h46018        disable H.460.18/.19
   --disable-h46019m       disable H.460.19 RTP multiplexing
   --disable-h46023        disable H.460.23/.24
-  --disable-h46026        disable H.460.26 Media Tunneling
-  --disable-h460p         disable H.460 Presence
+  --disable-h46026        disable H.460.26
+  --enable-h460p          enable H.460 Presence
   --disable-h501          disable H.501
   --disable-t38           disable T.38
   --disable-t120          disable T.120
@@ -3895,6 +3898,7 @@ default_t38=yes
 default_h224=yes
 default_h230=yes
 default_h235=no
+default_h235_256=no
 default_h239=yes
 default_h248=yes
 default_h249=yes
@@ -3922,6 +3926,7 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_h224=no
   default_h230=no
   default_h235=no
+  default_h235_256=no
   default_h239=no
   default_h248=no
   default_h249=no
@@ -4121,6 +4126,30 @@ else
   H323_H235=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.235.6" >&5
 $as_echo "$as_me: Disabling H.235.6" >&6;}
+fi
+
+
+
+
+# Check whether --enable-h235_256 was given.
+if test "${enable_h235_256+set}" = set; then :
+  enableval=$enable_h235_256;
+fi
+
+if test "${enable_h235_256}x" = "x" ; then
+  enable_h235_256=$default_h235_256
+fi
+if test "$enable_h235" != "yes" ; then
+  enable_h235_256="no"
+fi
+if test "$enable_h235_256" = "yes" ; then
+  H323_H235_AES256=1
+  $as_echo "#define H323_H235_AES256 1" >>confdefs.h
+
+else
+  H323_H235_AES256=
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.235.6 (256 bit)" >&5
+$as_echo "$as_me: Disabling H.235.6 (256 bit)" >&6;}
 fi
 
 
@@ -4377,13 +4406,14 @@ fi
 
 
 
+
 # Check whether --enable-h46026 was given.
 if test "${enable_h46026+set}" = set; then :
   enableval=$enable_h46026;
 fi
 
 if test "${enable_h46026}x" = "x" ; then
-  enable_h46026=$default_h46026
+  enable_h46023=$default_h46026
 fi
 if test "$enable_h46026" = "yes" ; then
   H323_H46026=1
@@ -4394,6 +4424,8 @@ else
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460.26" >&5
 $as_echo "$as_me: Disabling H.460.26" >&6;}
 fi
+
+
 
 
 # Check whether --enable-h460p was given.

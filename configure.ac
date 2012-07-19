@@ -170,6 +170,7 @@ default_t38=yes
 default_h224=yes
 default_h230=yes
 default_h235=no
+default_h235_256=no
 default_h239=yes
 default_h248=yes
 default_h249=yes
@@ -197,6 +198,7 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_h224=no
   default_h230=no
   default_h235=no
+  default_h235_256=no
   default_h239=no
   default_h248=no
   default_h249=no
@@ -330,7 +332,7 @@ dnl ########################################################################
 dnl check for en/disabling H.235
 
 dnl MSWIN_DISPLAY h235,H.235.6
-dnl MSWIN_DEFINE  h235,H323_H235X
+dnl MSWIN_DEFINE  h235,H323_H235
 
 AC_ARG_ENABLE(h235,
        [  --disable-h235          disable H.235.6])
@@ -345,6 +347,29 @@ else
   AC_MSG_NOTICE(Disabling H.235.6)
 fi
 AC_SUBST(H323_H235)
+
+dnl ########################################################################
+dnl check for en/disabling H.235 with 256 bits
+
+dnl MSWIN_DISPLAY h235,H.235.6 (256 bit)
+dnl MSWIN_DEFINE  h235,H323_H235_AES256
+
+AC_ARG_ENABLE(h235_256,
+       [  --disable-h235-256      disable H.235.6 (256 bit)])
+if test "${enable_h235_256}x" = "x" ; then
+  enable_h235_256=$default_h235_256
+fi
+if test "$enable_h235" != "yes" ; then
+  enable_h235_256="no"
+fi
+if test "$enable_h235_256" = "yes" ; then
+  H323_H235_AES256=1
+  AC_DEFINE(H323_H235_AES256, 1)
+else
+  H323_H235_AES256=
+  AC_MSG_NOTICE(Disabling H.235.6 (256 bit))
+fi
+AC_SUBST(H323_H235_AES256)
 
 dnl ########################################################################
 dnl check for disabling H.239
@@ -613,7 +638,7 @@ dnl MSWIN_DISPLAY h460p,H.460 Presence
 dnl MSWIN_DEFINE  h460p,H323_H460P
 
 AC_ARG_ENABLE(h460p,
-       [  --enable-h460p         enable H.460 Presence])
+       [  --enable-h460p          enable H.460 Presence])
 if test "${enable_h460p}x" = "x" ; then
   enable_h460p=$default_h460p
 fi
