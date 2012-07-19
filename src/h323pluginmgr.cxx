@@ -1293,7 +1293,7 @@ public:
           codec->CalculateRTPSendTime(rtpInformation.m_timeStamp, rtpInformation.m_clockRate, rtpInformation.m_sendTime);
           rtpInformation.m_frame = &frameData;
         m_noError = codec->WriteInternal(frameData.GetPointer(), frameData.GetSize(), frameData, written, rtpInformation);
-        frameData.SetPayloadSize(0);
+        //frameData.SetPayloadSize(0);
     }
 
     virtual PBoolean FrameIn(unsigned seq, unsigned time, PBoolean marker, unsigned payload, const PBYTEArray & frame) {
