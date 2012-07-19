@@ -1028,7 +1028,7 @@ H323PresenceInstruction::Category  H323PresenceInstruction::GetCategory(const H4
                    const H225_GenericIdentifier & id = gen.m_identifier;
                    if (id.GetTag() == H225_GenericIdentifier::e_oid) {
                        const PASN_ObjectId & val = id;
-                       if (val.GetValue() == PString(H460P_Meeting))
+                       if (val.AsString() == PString(H460P_Meeting))
                            category = H323PresenceInstruction::e_Meeting; 
                    } 
                }
