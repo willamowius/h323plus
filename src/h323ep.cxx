@@ -75,6 +75,10 @@
 #include "h460/h460_oid3.h"
 #endif
 
+#ifdef H323_H460PRE
+#include "h460/h460_oid6.h"
+#endif
+
 #endif  // H323_H460
 
 #include "gkclient.h"
@@ -513,6 +517,12 @@ H323EndPoint::H323EndPoint()
 #ifdef H323_H460P
   presenceHandler = NULL;
 #endif
+
+#ifdef H323_H460PRE
+	m_regPrior=0;
+	m_preempt= false;
+#endif
+
 #endif
 
 #ifdef H323_AEC 
@@ -3572,6 +3582,56 @@ void H323EndPoint::PresenceAuthorization(const OpalGloballyUniqueID & id,
     PTRACE(4, s);
 }
 #endif  // H323_H460P
+
+#ifdef H323_H460PRE
+
+unsigned H323EndPoint::GetRegistrationPriority() 
+{ 
+    return m_regPrior; 
+}
+
+void H323EndPoint::SetRegistrationPriority(unsigned value) 
+{  
+    m_regPrior = value; 
+}
+
+PBoolean H323EndPoint::GetPreempt() 
+{ 
+    return m_preempt; 
+}
+
+void H323EndPoint::SetPreempt(PBoolean topreempt) 
+{ 
+    m_preempt = topreempt; 
+}
+
+void H323EndPoint::OnNotifyPreempt(PBoolean unregister)
+{
+    if (unregister) 
+        OnGatekeeperState(H323EndPoint::uiGatePreEmpted);
+    else
+        OnGatekeeperState(H323EndPoint::uiGatePreEmpt);
+}
+
+void H323EndPoint::OnNotifyPriority()
+{
+    OnGatekeeperState(H323EndPoint::uiGatePriority);
+}
+
+void H323EndPoint::PreemptRegistration()
+{
+    if (gatekeeper) {
+        SetPreempt(true);
+        InternalRegisterGatekeeper(gatekeeper, true);
+    }
+}
+
+void H323EndPoint::OnGatekeeperState(short /*state*/) 
+{
+
+}
+
+#endif  // H323_H460PRE
 
 PBoolean H323EndPoint::OnFeatureInstance(int /*instType*/, const PString & /*identifer*/)
 {

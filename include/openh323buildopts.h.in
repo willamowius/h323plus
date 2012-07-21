@@ -131,6 +131,7 @@
 #ifdef H323_H460P
    #define H323_H460P_VER 2
 #endif
+#undef H323_H460PRE
 #endif
 
 #undef H323_H501

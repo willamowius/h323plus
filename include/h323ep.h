@@ -2152,6 +2152,52 @@ class H323EndPoint : public PObject
                                     const std::map<PString,PresSubDetails> & Aliases);
 #endif
 
+#ifdef H323_H460PRE
+
+    enum {
+        uiGateRegister      =0,
+        uiGateUnregister    =1,
+        uiGatePreEmpt       =2,   // Notification to pre-empt previous registration
+        uiGatePreEmpted     =3,   // Unregister due to pre-emption.
+        uiGatePriority      =4    // Unregister due to higher priority 
+    } uiGatekeeperstate;
+
+    /** Get the registration priority
+      */
+    unsigned GetRegistrationPriority();
+
+    /** Set the registration priority
+      */
+    void SetRegistrationPriority(unsigned value);
+
+    /** Get Pre-emption status
+      */
+    PBoolean GetPreempt();
+
+    /** Set Preempt
+      */
+    void SetPreempt(PBoolean topreempt);
+
+    /** On Notify Preempt
+      */
+    virtual void OnNotifyPreempt(PBoolean unregister);
+
+    /** OnNotifyPriority
+      */
+    virtual void OnNotifyPriority();
+
+    /**PremptRegistration
+      */
+    void PreemptRegistration();
+
+    /** On Notification of change in Gatekeeper status
+        Derive this function to be notified if registration
+        has been pre-Empted.
+      */
+    virtual void OnGatekeeperState(short state);
+
+#endif  // H323_H460PRE
+
 #endif
 
 
@@ -2741,6 +2787,11 @@ class H323EndPoint : public PObject
 
 #ifdef H323_H460P
     H460PresenceHandler * presenceHandler;
+#endif
+
+#ifdef H323_H460PRE
+	unsigned m_regPrior;
+	PBoolean m_preempt;
 #endif
 
 #endif
