@@ -616,6 +616,7 @@ H323_T120
 H323_T38
 H323_H501
 H323_H460P
+H323_H460PRE
 H323_H46026
 H323_H46023
 H323_H46019M
@@ -723,6 +724,7 @@ enable_h46019m
 enable_h46023
 enable_h46026
 enable_h460p
+enable_h460pre
 enable_h501
 enable_t38
 enable_t120
@@ -1375,6 +1377,7 @@ Optional Features:
   --disable-h46023        disable H.460.23/.24
   --disable-h46026        disable H.460.26
   --enable-h460p          enable H.460 Presence
+  --enable-h460pre        disable H.460 PreEmption
   --disable-h501          disable H.501
   --disable-t38           disable T.38
   --disable-t120          disable T.120
@@ -3912,6 +3915,7 @@ default_h46019m=no
 default_h46023=yes
 default_h46026=no
 default_h460p=no
+default_h460pre=no
 default_t120=yes
 default_gnugk=yes
 default_file=yes
@@ -3939,7 +3943,8 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_h46019m=no
   default_h46023=no
   default_h46026=no
-  default_hh460p=no
+  default_h460p=no
+  default_h460pre=no
   default_t120=no
   default_gnugk=no
   default_file=no
@@ -4447,6 +4452,23 @@ $as_echo "$as_me: Disabling H.460 Presence" >&6;}
 fi
 
 
+# Check whether --enable-h460pre was given.
+if test "${enable_h460pre+set}" = set; then :
+  enableval=$enable_h460pre;
+fi
+
+if test "${enable_h460pre}x" = "x" ; then
+  enable_h460pre=$default_h460pre
+fi
+if test "$enable_h460pre" = "yes" ; then
+  H323_H460PRE=1
+  $as_echo "#define H323_H460PRE 1" >>confdefs.h
+
+else
+  H323_H460PRE=
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460 PreEmption" >&5
+$as_echo "$as_me: Disabling H.460 PreEmption" >&6;}
+fi
 
 
 # Check whether --enable-h501 was given.

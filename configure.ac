@@ -184,6 +184,7 @@ default_h46019m=no
 default_h46023=yes
 default_h46026=no
 default_h460p=no
+default_h460pre=no
 default_t120=yes
 default_gnugk=yes
 default_file=yes
@@ -212,6 +213,7 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_h46023=no
   default_h46026=no
   default_hh460p=no
+  default_h460pre=no
   default_t120=no
   default_gnugk=no
   default_file=no
@@ -650,6 +652,26 @@ else
   AC_MSG_NOTICE(Disabling H.460 Presence)
 fi
 AC_SUBST(H323_H460P)
+
+dnl ########################################################################
+dnl check for Enable H.460 PreEmption
+
+dnl MSWIN_DISPLAY h460pre,H.460 PreEmption
+dnl MSWIN_DEFINE  h460pre,H323_H460PRE
+
+AC_ARG_ENABLE(h460pre,
+       [  --enable-h460pre         enable H.460 PreEmption])
+if test "${enable_h460pre}x" = "x" ; then
+  enable_h460p=$default_h460pre
+fi
+if test "$enable_h460pre" = "yes" ; then
+  H323_H460PRE=1
+  AC_DEFINE(H323_H460PRE, 1)
+else
+  H323_H460PRE=
+  AC_MSG_NOTICE(Disabling H.460 PreEmption)
+fi
+AC_SUBST(H323_H460PRE)
 
 dnl ########################################################################
 dnl check for disabling H.501
