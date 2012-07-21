@@ -224,27 +224,29 @@ HEADER_FILES    += $(OH323_INCDIR)/h460/h460.h \
                    $(OH323_INCDIR)/h460/h46026.h \
                    $(OH323_INCDIR)/h460/h460_oid3.h \
                    $(OH323_INCDIR)/h460/h460p.h \
-                   $(OH323_INCDIR)/h460/h460pres.h
+                   $(OH323_INCDIR)/h460/h460pres.h \
+                   $(OH323_INCDIR)/h460/h460_oid6.h
 
 SOURCES         += \
-                   $(OH323_INCDIR)/h460/h4604.cxx \
+                   $(OH323_SRCDIR)/h460/h4604.cxx \
                    $(OH323_SRCDIR)/h460/h4609.cxx \
-                   $(OH323_INCDIR)/h460/h46015.cxx \
+                   $(OH323_SRCDIR)/h460/h46015.cxx \
                    $(OH323_SRCDIR)/h460/h46019.cxx \
-                   $(OH323_INCDIR)/h460/h46024b.cxx \
-                   $(OH323_INCDIR)/h460/h46026.cxx \
-                   $(OH323_INCDIR)/h460/h460pres.cxx
+                   $(OH323_SRCDIR)/h460/h46024b.cxx \
+                   $(OH323_SRCDIR)/h460/h46026.cxx \
+                   $(OH323_SRCDIR)/h460/h460pres.cxx
 
 COMMON_SOURCES  += \
                    $(OH323_SRCDIR)/h460/h4601.cxx \
-                   $(OH323_INCDIR)/h460/h460_std9.cxx \
+                   $(OH323_SRCDIR)/h460/h460_std9.cxx \
                    $(OH323_SRCDIR)/h460/h460_std17.cxx \
                    $(OH323_SRCDIR)/h460/h46018.cxx \
                    $(OH323_SRCDIR)/h460/h460_std18.cxx \
                    $(OH323_SRCDIR)/h460/h46018_h225.cxx \
                    $(OH323_SRCDIR)/h460/h460_std23.cxx \
-                   $(OH323_INCDIR)/h460/h460_oid3.cxx \
-                   $(OH323_INCDIR)/h460/h460p.cxx
+                   $(OH323_SRCDIR)/h460/h460_oid3.cxx \
+                   $(OH323_SRCDIR)/h460/h460_oid6.cxx \
+                   $(OH323_SRCDIR)/h460/h460p.cxx
 endif 
 
 ########### H.501
