@@ -276,10 +276,10 @@ void H323Transactor::HandleTransactions(PThread &, INT)
     if (response->Read(*transport)) {
       consecutiveErrors = 0;
       lastRequest = NULL;
-      if (HandleTransaction(response->GetPDU()))
+      if (HandleTransaction(response->GetPDU()) && lastRequest) {
         lastRequest->responseHandled.Signal();
-      if (lastRequest != NULL)
         lastRequest->responseMutex.Signal();
+      } 
     }
     else {
       switch (transport->GetErrorCode(PChannel::LastReadError)) {
