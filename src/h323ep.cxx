@@ -3605,19 +3605,6 @@ void H323EndPoint::SetPreempt(PBoolean topreempt)
     m_preempt = topreempt; 
 }
 
-void H323EndPoint::OnNotifyPreempt(PBoolean unregister)
-{
-    if (unregister) 
-        OnGatekeeperState(H323EndPoint::uiGatePreEmpted);
-    else
-        OnGatekeeperState(H323EndPoint::uiGatePreEmpt);
-}
-
-void H323EndPoint::OnNotifyPriority()
-{
-    OnGatekeeperState(H323EndPoint::uiGatePriority);
-}
-
 void H323EndPoint::PreemptRegistration()
 {
     if (gatekeeper) {
@@ -3626,7 +3613,12 @@ void H323EndPoint::PreemptRegistration()
     }
 }
 
-void H323EndPoint::OnGatekeeperState(short /*state*/) 
+void H323EndPoint::OnNotifyPreempt(PBoolean unregister)
+{
+
+}
+
+void H323EndPoint::OnNotifyPriority()
 {
 
 }

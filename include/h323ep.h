@@ -2154,23 +2154,15 @@ class H323EndPoint : public PObject
 
 #ifdef H323_H460PRE
 
-    enum {
-        uiGateRegister      =0,
-        uiGateUnregister    =1,
-        uiGatePreEmpt       =2,   // Notification to pre-empt previous registration
-        uiGatePreEmpted     =3,   // Unregister due to pre-emption.
-        uiGatePriority      =4    // Unregister due to higher priority 
-    } uiGatekeeperstate;
-
     /** Get the registration priority
       */
     unsigned GetRegistrationPriority();
 
-    /** Set the registration priority
+    /** Set the registration priority from 0-9 default 0
       */
     void SetRegistrationPriority(unsigned value);
 
-    /** Get Pre-emption status
+    /** Get Pre-emption status 
       */
     PBoolean GetPreempt();
 
@@ -2178,23 +2170,22 @@ class H323EndPoint : public PObject
       */
     void SetPreempt(PBoolean topreempt);
 
-    /** On Notify Preempt
-      */
-    virtual void OnNotifyPreempt(PBoolean unregister);
-
-    /** OnNotifyPriority
-      */
-    virtual void OnNotifyPriority();
-
-    /**PremptRegistration
+    /**Prempt the previous registration
       */
     void PreemptRegistration();
 
-    /** On Notification of change in Gatekeeper status
-        Derive this function to be notified if registration
-        has been pre-Empted.
+    /** Notification of the local registration being PreEmpted.
+        Note this does not stop the gatekeeper periodically retrying to register
+        Once the other device has deregistered then registration will restored.
       */
-    virtual void OnGatekeeperState(short state);
+    virtual void OnNotifyPreempt(PBoolean unregister);
+
+    /** Notification of Priority.
+        This provides an opportunity to preEmpt the previous
+        registration. CAll PreemptRegistration() to preEmpt.
+      */
+    virtual void OnNotifyPriority();
+
 
 #endif  // H323_H460PRE
 
