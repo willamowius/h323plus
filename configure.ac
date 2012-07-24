@@ -333,11 +333,11 @@ AC_SUBST(H323_H230)
 dnl ########################################################################
 dnl check for en/disabling H.235
 
-dnl MSWIN_DISPLAY h235,H.235.6
+dnl MSWIN_DISPLAY h235,H.235.6 (128 bit)
 dnl MSWIN_DEFINE  h235,H323_H235
 
 AC_ARG_ENABLE(h235,
-       [  --disable-h235          disable H.235.6])
+       [  --disable-h235          disable H.235.6 (128 bit)])
 if test "${enable_h235}x" = "x" ; then
   enable_h235=$default_h235
 fi
@@ -353,8 +353,8 @@ AC_SUBST(H323_H235)
 dnl ########################################################################
 dnl check for en/disabling H.235 with 256 bits
 
-dnl MSWIN_DISPLAY h235,H.235.6 (256 bit)
-dnl MSWIN_DEFINE  h235,H323_H235_AES256
+dnl MSWIN_DISPLAY h235_256,H.235.6 (256 bit)
+dnl MSWIN_DEFINE  h235_256,H323_H235_AES256
 
 AC_ARG_ENABLE(h235_256,
        [  --disable-h235-256      disable H.235.6 (256 bit)])
