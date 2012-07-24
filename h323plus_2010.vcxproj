@@ -626,6 +626,7 @@
     <ClCompile Include="src\h460\h46018_h225.cxx" />
     <ClCompile Include="src\h460\h46024b.cxx" />
     <ClCompile Include="src\h460\h460_oid3.cxx" />
+    <ClCompile Include="src\h460\h460_oid6.cxx" />
     <ClCompile Include="src\h460\h460_std18.cxx" />
     <ClCompile Include="src\h460\h460_std23.cxx" />
     <ClCompile Include="src\h460\h460_std9.cxx" />
@@ -1103,6 +1104,7 @@
     <ClInclude Include="include\h460\h46018_h225.h" />
     <ClInclude Include="include\h460\h46024b.h" />
     <ClInclude Include="include\h460\h460_oid3.h" />
+    <ClInclude Include="include\h460\h460_oid6.h" />
     <ClInclude Include="include\h460\h460_std18.h" />
     <ClInclude Include="include\h460\h460_std23.h" />
     <ClInclude Include="include\h460\h460_std9.h" />
