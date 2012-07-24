@@ -160,7 +160,7 @@ PBoolean H235Authenticator::PrepareTokens(PASN_Array & clearTokens,
 
   H235_ClearToken * clearToken = CreateClearToken();
   if (clearToken != NULL) {
-    // Check if already have a token of thsi type and overwrite it
+    // Check if already have a token of this type and overwrite it
     for (PINDEX i = 0; i < clearTokens.GetSize(); i++) {
       H235_ClearToken & oldToken = (H235_ClearToken &)clearTokens[i];
       if (clearToken->m_tokenOID == oldToken.m_tokenOID) {
