@@ -521,8 +521,10 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
     return FALSE;
   }
 
+#ifdef P_HAS_IPV6
   if (args.HasOption("ipv6") && PIPSocket::IsIpAddressFamilyV6Supported())
     PIPSocket::SetDefaultIpAddressFamilyV6();
+#endif
 
   // Initialise the security info
   if (args.HasOption('p')) {
