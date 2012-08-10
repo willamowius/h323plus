@@ -374,7 +374,7 @@ class H235AuthSimpleMD5 : public H235Authenticator
 ////////////////////////////////////////////////////
 
 
-#if PTLIB_VER >= 2110
+#if PTLIB_VER >= 2110 && defined(P_SSL)
 /// PFactory Loader
 typedef H235AuthSimpleMD5 H235_AuthenticatorMD5;
 #ifndef _WIN32_WCE
@@ -426,7 +426,7 @@ class H235AuthCAT : public H235Authenticator
     ) const;
 };
 
-#if PTLIB_VER >= 2110
+#if PTLIB_VER >= 2110 && defined(P_SSL)
 // PFactory Loader
 typedef H235AuthCAT H235_AuthenticatorCAT;
 #ifndef _WIN32_WCE
