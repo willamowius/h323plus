@@ -248,7 +248,7 @@ PBoolean H46018Transport::HandleH46018SignallingChannelPDU(PThread * thread)
     endpoint.GetConnections().SetAt(token, connection);
     connectionsMutex.Signal();
 
-    connection->AttachSignalChannel(token, this, false);
+    connection->AttachSignalChannel(token, this, true);
 
     if (connection->HandleSignalPDU(pdu)) {
         // All subsequent PDU's should wait forever
