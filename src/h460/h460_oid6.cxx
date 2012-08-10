@@ -138,15 +138,11 @@ void H460_FeatureOID6::OnReceiveUnregistrationRequest(const H225_FeatureDescript
 
      H460_FeatureOID & feat = (H460_FeatureOID &)pdu;
 
-     if (feat.Contains(priNotOID)) {   // Priority notification
-            PTRACE(1,"TEST\t1");
+    if (feat.Contains(priNotOID))    // Priority notification
              EP->OnNotifyPriority();
-     }
 
-    if (feat.Contains(preNotOID)) {  // Preemption notification
-         PTRACE(1,"TEST\t2");
+    if (feat.Contains(preNotOID))   // Preemption notification
              EP->OnNotifyPreempt(true);
-    }
 
 }
 
