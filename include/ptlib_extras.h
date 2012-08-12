@@ -765,7 +765,7 @@ public:
       m_frameMarker(0), m_frameOutput(false), m_frameStartTime(0), 
       m_StartTimeStamp(0), m_calcClockRate(90),
       m_packetReceived(0), m_oddTimeCount(0), m_lateThreshold(5.0), m_increaseBuffer(false),
-      m_lossThreshold(2.0), m_lossCount(0), m_frameCount(0), 
+      m_lossThreshold(1.0), m_lossCount(0), m_frameCount(0), 
       m_lastSequence(0), m_RenderTimeStamp(0), m_exit(false)
     {}
 
@@ -864,8 +864,8 @@ public:
                       m_RenderTimeStamp+=delay;
                       PInt64 nowTime = PTimer::Tick().GetMilliSeconds();
                       unsigned ldelay = (unsigned)((m_RenderTimeStamp > nowTime)? m_RenderTimeStamp - nowTime : 0);
-                      if (!delay)  m_RenderTimeStamp = nowTime;
-                      PTRACE(1,"TEST\tFrame Buffer " << m_frameMarker << " Delay " << ldelay << " Clock " << m_calcClockRate);
+                      if (ldelay > 200) ldelay = 0;
+                      if (!ldelay)  m_RenderTimeStamp = nowTime;
                       m_frameMarker--;
                       m_outputDelay.Delay(ldelay);
                   } else 
