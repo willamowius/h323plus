@@ -932,10 +932,10 @@ public:
         bufferMutex.Signal();
 
         if (marker) {
-            // Make sure we have a min of 2 frames in buffer 
-            if (!m_frameOutput && (time - m_frameStartTime) >= 3000)
-                m_frameOutput = true;
            m_frameMarker++;
+           // Make sure we have a min of 3 frames in buffer to start
+           if (!m_frameOutput && m_frameMarker > 2)
+              m_frameOutput = true;
         }
 
         return true;
