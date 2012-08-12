@@ -511,7 +511,7 @@ H323EndPoint::H323EndPoint()
 #endif
 
 #ifdef H323_UPnP
-  m_UPnPenabled = true;
+  m_UPnPenabled = false;
 #endif
 
 #ifdef H323_H460P
