@@ -1484,7 +1484,13 @@ PObject::Comparison H323GenericVideoCapability::Compare(const PObject & obj) con
   if (!PIsDescendant(&obj, H323GenericVideoCapability))
     return LessThan;
 
-  return CompareInfo((const H323GenericVideoCapability &)obj);
+  const H323GenericVideoCapability & gen = (const H323GenericVideoCapability &)obj;
+  if (CompareInfo(gen) == PObject::EqualTo) {
+      // Check for Tandberg MXP Capability bug. Profile is set to 0 - SH
+      if (GetMediaFormat().GetOptionInteger("Generic Parameter 41") == 0)
+          return LessThan;
+  }
+  return EqualTo;
 }
 
 
