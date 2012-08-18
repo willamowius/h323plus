@@ -838,7 +838,7 @@ public:
 
                   if (!fup) 
                       fup = ((m_lossCount/m_frameCount)*100.0 > m_lossThreshold);
-                
+#if 0  // if buffer is growing check upline either in the color converter or rendering - SH
                   if (info.m_marker && m_frameMarker > 5) {
                      bufferMutex.Wait();
                         m_buffer.empty();
@@ -848,7 +848,7 @@ public:
                         fup=true;
                      bufferMutex.Signal();
                   }
-
+#endif
                   FrameOut(frame, info.m_receiveTime, (unsigned)m_calcClockRate, fup, flow);
                   frame.SetSize(0);
                   if (fup) {
