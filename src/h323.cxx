@@ -2520,7 +2520,10 @@ if (setup.m_conferenceGoal.GetTag() == H225_Setup_UUIE_conferenceGoal::e_create)
         break;
 
       default : // Is video or other data (eg T.120)
-        setupPDU.GetQ931().SetBearerCapabilities(Q931::TransferUnrestrictedDigital, 6);
+        unsigned transferRate= 384000;  // default to 384 kb/s;
+        OnBearerCapabilityTransferRate(transferRate);
+        unsigned rate = setupPDU.GetQ931().SetBearerTransferRate(transferRate);
+        setupPDU.GetQ931().SetBearerCapabilities(Q931::TransferUnrestrictedDigital, rate);
         i = localCapabilities.GetSize(); // Break out of the for loop
         break;
     }
@@ -3978,6 +3981,10 @@ void H323Connection::SendCapabilitySet(PBoolean empty)
   capabilityExchangeProcedure->Start(TRUE, empty);
 }
 
+void H323Connection::OnBearerCapabilityTransferRate(unsigned & bitRate)
+{
+
+}
 
 void H323Connection::SetInitialBandwidth(H323Capability::MainTypes captype, int bitRate)
 {

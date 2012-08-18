@@ -26,235 +26,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.6  2010/05/02 22:53:52  shorne
- * Fix warning on vs2010
- *
- * Revision 1.5  2010/04/30 19:17:18  willamowius
- * fix memory leak when q931 decoding fails
- *
- * Revision 1.4  2010/01/04 05:54:47  shorne
- * Added SetCallingSubAddressIE and SetCalledSubAddressIE support
- *
- * Revision 1.3  2008/05/27 03:15:20  shorne
- * Updated Windows compilation to compile with latest ptlib SVN
- *
- * Revision 1.2  2008/05/23 11:22:32  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.1  2007/08/06 20:51:07  shorne
- * First commit of h323plus
- *
- * Revision 1.66  2006/08/12 03:59:46  csoutheren
- * Added additional Q.931 message types
- * Thanks to ii7@bk.ru
- *
- * Revision 1.65  2004/12/09 23:37:14  csoutheren
- * Added new Q.931 termination codes
- *
- * Revision 1.64  2004/11/19 00:14:18  csoutheren
- * Prevent GetBearerCapabilities from reading invalid memory (array index out of bounds)
- * Thanks to Michal Zygmuntowicz
- *
- * Revision 1.63  2004/11/07 12:45:09  rjongbloed
- * Minor change to parsing of bearer capabilities, thanks Michal Zygmuntowicz
- *
- * Revision 1.62  2004/07/11 11:37:28  rjongbloed
- * Added ConnectAck support and fixed bugs in ChannelIdentificationIE, thanks Eize Slange
- *
- * Revision 1.61  2004/06/06 08:44:26  rjongbloed
- * Fixed incorrect test for Q.931 calls state information element, thanks Stelios Vaiopoulos
- *
- * Revision 1.60  2004/05/07 06:44:17  csoutheren
- * Fixed problem with empty Q>931 DisplayName
- *
- * Revision 1.59  2003/08/24 23:10:30  rjongbloed
- * Fixed incorrect mask in bearer caps decoding, thanks Greg Adams
- *
- * Revision 1.58  2003/03/18 05:54:18  robertj
- * Added ChannelIdentifier IE support, thanks Eize Slange
- *
- * Revision 1.57  2003/02/12 02:23:01  robertj
- * Fixed printing of cause codes that are impossible as opposed to merely
- *   unlikely or unallocated.
- *
- * Revision 1.56  2003/02/12 00:02:23  robertj
- * Added more Q.931 cause codes.
- * Added ability to trace text version of cause codes and IE codes.
- *
- * Revision 1.55  2002/11/19 06:19:25  robertj
- * Added extra "congested" Q.931 codes.
- *
- * Revision 1.54  2002/08/06 02:27:39  robertj
- * GNU C++ v3 compatibility.
- *
- * Revision 1.53  2002/08/05 10:03:48  robertj
- * Cosmetic changes to normalise the usage of pragma interface/implementation.
- *
- * Revision 1.52  2002/07/25 10:55:44  robertj
- * Changes to allow more granularity in PDU dumps, hex output increasing
- *   with increasing trace level.
- *
- * Revision 1.51  2002/07/05 03:13:38  robertj
- * Added copy constructor for Q.931 so makes duplicate instead of reference to IE's.
- *
- * Revision 1.50  2002/07/03 10:26:05  robertj
- * Fixed bearer capabilities for H,450.1 needing non ITU standard, thanks Florian Winterstein
- *
- * Revision 1.49  2002/05/22 23:12:03  robertj
- * Enhanced the display of Release-Complete cause codes.
- *
- * Revision 1.48  2002/05/07 23:49:35  craigs
- * Changed comment on length of userUserIE field thanks to Paul Long
- *
- * Revision 1.47  2002/05/03 05:38:19  robertj
- * Added Q.931 Keypad IE mechanism for user indications (DTMF).
- *
- * Revision 1.46  2002/04/22 07:32:16  craigs
- * Changed GetProgressIndicator to be const
- *
- * Revision 1.45  2002/04/19 04:49:14  robertj
- * Fixed currect bit shift for CallState IE standard bits.
- *
- * Revision 1.44  2002/04/19 02:16:47  robertj
- * Added CallState IE processing.
- *
- * Revision 1.43  2002/04/18 06:16:32  craigs
- * Extra robustness in handling of strange UserUserIE lengths
- *
- * Revision 1.42  2002/01/07 04:25:21  robertj
- * Added support for Connected-Number Information Element, thanks Hans Verbeek
- *
- * Revision 1.41  2002/01/06 05:28:41  robertj
- * Fixed crash if given bad data in number field, thanks Chih-Wei Huang.
- *
- * Revision 1.40  2001/09/17 02:06:40  robertj
- * Added Redirecting Number IE to Q.931, thanks Frank Derks
- *
- * Revision 1.39  2001/09/13 02:41:21  robertj
- * Fixed call reference generation to use full range and common code, thanks Carlo Kielstra
- *
- * Revision 1.38  2001/08/27 03:45:59  robertj
- * Added automatic setting of bearer capability transfer mode from H.323
- *    capabilities on connection at time of SETUP PDU.
- *
- * Revision 1.37  2001/08/20 06:48:28  robertj
- * Added Q.931 function for setting bearer capabilities, allowing
- *    applications to set the data rate as they require.
- *
- * Revision 1.36  2001/08/07 02:57:09  robertj
- * Fixed incorrect Q.931 bearer capability, thanks Carlo Kielstra.
- *
- * Revision 1.35  2001/07/24 23:40:15  craigs
- * Added ability to remove Q931 IE
- *
- * Revision 1.34  2001/06/14 06:25:16  robertj
- * Added further H.225 PDU build functions.
- * Moved some functionality from connection to PDU class.
- *
- * Revision 1.33  2001/05/30 04:38:40  robertj
- * Added BuildStatusEnquiry() Q.931 function, thanks Markus Storm
- *
- * Revision 1.32  2001/04/05 00:06:31  robertj
- * Fixed some more encoding/decoding problems with little used bits of
- *   the Q.931 protocol, thanks Hans Verbeek.
- *
- * Revision 1.31  2001/04/03 23:06:15  robertj
- * Fixed correct encoding and decoding of Q.850 cause field, thanks Hans Verbeek.
- *
- * Revision 1.30  2001/02/09 05:13:56  craigs
- * Added pragma implementation to (hopefully) reduce the executable image size
- * under Linux
- *
- * Revision 1.29  2001/01/19 06:57:26  robertj
- * Added Information message type.
- *
- * Revision 1.28  2000/10/13 02:16:04  robertj
- * Added support for Progress Indicator Q.931/H.225 message.
- *
- * Revision 1.27  2000/07/11 11:17:01  robertj
- * Improved trace log display of Q.931 PDU's (correct order and extra IE fields).
- *
- * Revision 1.26  2000/07/09 14:54:11  robertj
- * Added facility IE to facility message.
- * Changed reference to the word "field" to be more correct IE or "Information Element"
- *
- * Revision 1.25  2000/06/21 08:07:47  robertj
- * Added cause/reason to release complete PDU, where relevent.
- *
- * Revision 1.24  2000/05/09 12:19:31  robertj
- * Added ability to get and set "distinctive ring" Q.931 functionality.
- *
- * Revision 1.23  2000/05/08 14:07:35  robertj
- * Improved the provision and detection of calling and caller numbers, aliases and hostnames.
- *
- * Revision 1.22  2000/05/06 02:18:26  robertj
- * Changed the new CallingPartyNumber code so defaults for octet3a are application dependent.
- *
- * Revision 1.21  2000/05/05 00:44:05  robertj
- * Added presentation and screening fields to Calling Party Number field, thanks Dean Anderson.
- *
- * Revision 1.20  2000/05/02 04:32:27  robertj
- * Fixed copyright notice comment.
- *
- * Revision 1.19  2000/03/21 01:08:11  robertj
- * Fixed incorrect call reference code being used in originated call.
- *
- * Revision 1.18  2000/02/17 12:07:43  robertj
- * Used ne wPWLib random number generator after finding major problem in MSVC rand().
- *
- * Revision 1.17  1999/12/23 22:44:06  robertj
- * Added calling party number field.
- *
- * Revision 1.16  1999/09/22 04:18:29  robertj
- * Fixed missing "known" message types in debugging output.
- *
- * Revision 1.15  1999/09/10 03:36:48  robertj
- * Added simple Q.931 Status response to Q.931 Status Enquiry
- *
- * Revision 1.14  1999/08/31 13:54:35  robertj
- * Fixed problem with memory overrun building PDU's
- *
- * Revision 1.13  1999/08/31 12:34:19  robertj
- * Added gatekeeper support.
- *
- * Revision 1.12  1999/08/13 06:34:38  robertj
- * Fixed problem in CallPartyNumber Q.931 encoding.
- * Added field name display to Q.931 protocol.
- *
- * Revision 1.11  1999/08/10 13:14:15  robertj
- * Added Q.931 Called Number field if have "phone number" style destination addres.
- *
- * Revision 1.10  1999/07/16 02:15:30  robertj
- * Fixed more tunneling problems.
- *
- * Revision 1.9  1999/07/09 14:59:59  robertj
- * Fixed GNU C++ compatibility.
- *
- * Revision 1.8  1999/07/09 06:09:50  robertj
- * Major implementation. An ENORMOUS amount of stuff added everywhere.
- *
- * Revision 1.7  1999/06/14 15:19:48  robertj
- * GNU C compatibility
- *
- * Revision 1.6  1999/06/13 12:41:14  robertj
- * Implement logical channel transmitter.
- * Fixed H245 connect on receiving call.
- *
- * Revision 1.5  1999/06/09 05:26:20  robertj
- * Major restructuring of classes.
- *
- * Revision 1.4  1999/02/23 11:04:29  robertj
- * Added capability to make outgoing call.
- *
- * Revision 1.3  1999/01/16 01:31:38  robertj
- * Major implementation.
- *
- * Revision 1.2  1999/01/02 04:00:52  robertj
- * Added higher level protocol negotiations.
- *
- * Revision 1.1  1998/12/14 09:13:37  robertj
- * Initial revision
+ * $id $
  *
  */
 
@@ -830,6 +602,16 @@ void Q931::RemoveIE(InformationElementCodes ie)
   informationElements.RemoveAt(ie);
 }
 
+unsigned Q931::SetBearerTransferRate(unsigned bitrate)
+{
+   unsigned rawTransferRate = bitrate/64000;
+
+   if      (rawTransferRate <= 2)  return rawTransferRate;
+   else if (rawTransferRate <= 6)  return  6;
+   else if (rawTransferRate <= 24) return 24;
+   else if (rawTransferRate >= 30) return 30;
+   else return 32;  // Never called. Bug with Polycom RMX
+}
 
 void Q931::SetBearerCapabilities(InformationTransferCapability capability,
                                  unsigned transferRate,
@@ -860,6 +642,11 @@ void Q931::SetBearerCapabilities(InformationTransferCapability capability,
           break;
         case 30 :
           data[1] = 0x97;
+          break;
+        case 32 :
+          data[1] = 0x98;
+          data[2] = 0xA0;
+          size = 4;
           break;
         default :
           PAssert(transferRate > 0 && transferRate < 128, PInvalidParameter);

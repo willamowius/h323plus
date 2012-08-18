@@ -1350,6 +1350,14 @@ class H323Connection : public PObject
       */
     virtual void OnSetLocalCapabilities();
 
+    /**Set the Bearer Capability Transfer Rate
+       This will set the Transfer Rate of the Bearer Capabities.
+       Default = 768kb/s
+      */
+    virtual void OnBearerCapabilityTransferRate(
+         unsigned & bitRate                            ///< BitRate (in bytes)
+    );
+
     /**Set the initial Capability Bandwidth for the TCS
        This will set the bandwidth limit for the given capability type that
        will be negotiated in the TCS. This fuinction sets the Maximum bitRate
