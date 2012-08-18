@@ -90,6 +90,9 @@ class PNatMethod_H46024  : public PSTUNClient
         // Reportable NAT Type
         PSTUNClient::NatTypes GetNATType();
 
+        // Set Port Information
+        void SetPortInformation(PortInfo & pairedPortInfo, WORD portPairBase, WORD portPairMax);
+
 #if PTLIB_VER >= 2110
     virtual PString GetServer() const { return PString(); }
     virtual bool GetServerAddress(PIPSocketAddressAndPort & ) const { return false; }
@@ -116,6 +119,13 @@ private:
         PSTUNClient::NatTypes   natType;
         H460_FeatureStd23 *     feat;
         PMutex                  portMute;
+
+#ifdef H323_H46019M
+        PortInfo                standardPorts;
+        PortInfo                multiplexPorts;
+#endif
+
+        friend H323EndPoint;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -263,7 +273,6 @@ private:
     int nattype;
     bool isEnabled;
     bool useAlternate;
-
 
 };
 

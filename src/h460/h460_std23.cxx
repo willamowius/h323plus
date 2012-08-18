@@ -106,6 +106,24 @@ PNatMethod_H46024::~PNatMethod_H46024()
     delete mainThread;
 }
 
+void PNatMethod_H46024::SetPortInformation(PortInfo & pairedPortInfo, WORD portPairBase, WORD portPairMax)
+{
+  pairedPortInfo.basePort = (WORD)((portPairBase+1)&0xfffe);
+  if (portPairBase == 0) {
+    pairedPortInfo.basePort = 0;
+    pairedPortInfo.maxPort = 0;
+  }
+  else if (portPairMax == 0)
+    pairedPortInfo.maxPort = (WORD)(pairedPortInfo.basePort+99);
+  else if (portPairMax < portPairBase)
+    pairedPortInfo.maxPort = portPairBase;
+  else
+    pairedPortInfo.maxPort = portPairMax;
+
+  pairedPortInfo.currentPort = pairedPortInfo.basePort;
+
+}
+
 void PNatMethod_H46024::Start(const PString & server,H460_FeatureStd23 * _feat)
 {
     feat = _feat;
@@ -115,9 +133,11 @@ void PNatMethod_H46024::Start(const PString & server,H460_FeatureStd23 * _feat)
    SetServer(server);
 #ifdef H323_H46019M
     WORD muxBase = ep->GetMultiplexPort();
+    SetPortInformation(multiplexPorts,muxBase-2, muxBase+2);
+    SetPortInformation(standardPorts, ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax());
     SetPortRanges(muxBase-2, muxBase+2, muxBase-2, muxBase+20);
 #else
-   SetPortRanges(ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax(), ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax());
+    SetPortRanges(ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax(), ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax());
 #endif
 
     mainThread  = PThread::Create(PCREATE_NOTIFIER(MainMethod), 0,  
@@ -230,15 +250,18 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
     PNatMethod_H46019 * handler = 
                (PNatMethod_H46019 *)feat->GetEndPoint()->GetNatMethods().GetMethodByName("H46019");
 
-    if (handler && info->GetRecvMultiplexID() > 0) {
+    if (handler && info && (info->GetRecvMultiplexID() > 0)) {
         if (!handler->IsMultiplexed()) {
+           // Set Multiplex ports here
+           SetPortRanges(multiplexPorts.basePort, multiplexPorts.maxPort, multiplexPorts.basePort, multiplexPorts.maxPort);
+
            H46019MultiplexSocket * & muxSocket1 = (H46019MultiplexSocket * &)handler->GetMultiplexSocket(true); 
            H46019MultiplexSocket * & muxSocket2 = (H46019MultiplexSocket * &)handler->GetMultiplexSocket(false);
            muxSocket1 = new H46019MultiplexSocket(true);
            muxSocket2 = new H46019MultiplexSocket(false);
            pairedPortInfo.currentPort = feat->GetEndPoint()->GetMultiplexPort()-1;
 
-           if (!PSTUNClient::CreateSocketPair(muxSocket1->GetSubSocket(), muxSocket2->GetSubSocket(), binding)) 
+           if (!PSTUNClient::CreateSocketPair(muxSocket1->GetSubSocket(), muxSocket2->GetSubSocket(), binding, (void *)1)) 
                 return false;
 
            PIPSocket::Address stunAddress;
@@ -256,14 +279,17 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
        PNatMethod_H46019::RegisterSocket(true ,info->GetRecvMultiplexID(), socket1);
        PNatMethod_H46019::RegisterSocket(false,info->GetRecvMultiplexID(), socket2);
 
-    } else
-#endif
+    } else {
+        // Set standard ports here
+        SetPortRanges(standardPorts.basePort, standardPorts.maxPort, standardPorts.basePort, standardPorts.maxPort);
+#else
     {
+#endif
 #if (PTLIB_VER > 260)
         pairedPortInfo.currentPort = 
             RandomPortPair(pairedPortInfo.basePort-1,pairedPortInfo.maxPort-2);
 #endif
-        if (!PSTUNClient::CreateSocketPair(socket1,socket2,binding))
+        if (!PSTUNClient::CreateSocketPair(socket1,socket2,binding, NULL))
              return false;
     }
 
