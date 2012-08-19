@@ -125,7 +125,7 @@ private:
         PortInfo                multiplexPorts;
 #endif
 
-        friend H323EndPoint;
+        friend class H323EndPoint;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
