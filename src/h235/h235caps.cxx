@@ -350,6 +350,11 @@ const PString & H323SecureRealTimeCapability::GetAlgorithm() const
    return m_algorithm;
 }
 
+const OpalMediaFormat & H323SecureRealTimeCapability::GetMediaFormat() const
+{
+   return ChildCapability.GetMediaFormat();
+}
+
 ///////////////////////////////////////////////////////////////////////////// 
 
 H323SecureCapability::H323SecureCapability(H323Capability & childCapability,

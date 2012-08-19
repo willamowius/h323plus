@@ -315,6 +315,9 @@ public:
     /// Get Algorithm
     const PString & GetAlgorithm() const;
 
+    /// Get the MediaFormat for this capability.
+    virtual const OpalMediaFormat & GetMediaFormat() const;
+
   //@}
 
 protected:

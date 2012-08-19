@@ -406,7 +406,7 @@ class H323Capability : public PObject
 
     /**Get media format of the media data this class represents.
       */
-    const OpalMediaFormat & GetMediaFormat() const;
+    virtual const OpalMediaFormat & GetMediaFormat() const;
     OpalMediaFormat & GetWritableMediaFormat();
 
     /// Get the payload type for the capaibility
