@@ -261,7 +261,11 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
            muxSocket2 = new H46019MultiplexSocket(false);
            pairedPortInfo.currentPort = feat->GetEndPoint()->GetMultiplexPort()-1;
 
+#if 0
            if (!PSTUNClient::CreateSocketPair(muxSocket1->GetSubSocket(), muxSocket2->GetSubSocket(), binding, (void *)1)) 
+#else
+           if (!PSTUNClient::CreateSocketPair(muxSocket1->GetSubSocket(), muxSocket2->GetSubSocket(), binding))
+#endif
                 return false;
 
            PIPSocket::Address stunAddress;
@@ -289,7 +293,12 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
         pairedPortInfo.currentPort = 
             RandomPortPair(pairedPortInfo.basePort-1,pairedPortInfo.maxPort-2);
 #endif
+
+#if 0
         if (!PSTUNClient::CreateSocketPair(socket1,socket2,binding, NULL))
+#else
+        if (!PSTUNClient::CreateSocketPair(socket1,socket2,binding))
+#endif
              return false;
     }
 
