@@ -91,9 +91,6 @@ class SimpleH323Connection : public H323Connection
 
     virtual PBoolean OnStartLogicalChannel(H323Channel &);
     virtual void OnUserInputString(const PString &);
-
-  protected:
-    PBoolean noFastStart;
 };
 
 
