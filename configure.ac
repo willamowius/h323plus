@@ -354,6 +354,7 @@ dnl ########################################################################
 dnl check for en/disabling H.235 with 256 bits
 
 dnl MSWIN_DISPLAY h235_256,H.235.6 (256 bit)
+dnl MSWIN_DEFAULT h235_256,Disabled
 dnl MSWIN_DEFINE  h235_256,H323_H235_AES256
 
 AC_ARG_ENABLE(h235_256,
