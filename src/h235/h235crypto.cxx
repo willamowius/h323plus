@@ -400,6 +400,9 @@ void H235CryptoEngine::SetIV(unsigned char * iv, unsigned char * ivSequence, uns
 
 PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * ivSequence, bool & rtpPadding)
 {
+    if (!m_initialised)
+        return PBYTEArray();
+
     PBYTEArray & data = *(PRemoveConst(PBYTEArray, &_data));
     unsigned char iv[EVP_MAX_IV_LENGTH];
 
@@ -444,6 +447,9 @@ PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * i
 
 PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data, unsigned char * ivSequence, bool & rtpPadding)
 {
+    if (!m_initialised)
+        return PBYTEArray();
+
     PBYTEArray & data = *(PRemoveConst(PBYTEArray, &_data));
     unsigned char iv[EVP_MAX_IV_LENGTH];
 
