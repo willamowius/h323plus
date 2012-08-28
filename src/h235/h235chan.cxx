@@ -128,12 +128,10 @@ PBoolean ReadEncryptionSync(const H245_EncryptionSync & sync, H235Session & sess
         case H235_H235Key::e_secureSharedSecret:
             {
                 const H235_V3KeySyncMaterial & v3data = h235key;
-                PString algorithmOID = PString();
                 if (!v3data.HasOptionalField(H235_V3KeySyncMaterial::e_algorithmOID)) {
-                    PTRACE(1, "H235\tError: No algo for session and media key");
-                    return false;
+                    // the algo is required, but is really redundant
+                    PTRACE(3, "H235\tWarning: No algo set in encryptionSync");
                 }
-                algorithmOID = v3data.m_algorithmOID.AsString();
                 if (v3data.HasOptionalField(H235_V3KeySyncMaterial::e_encryptedSessionKey)) {
                   PBYTEArray mediaKey = v3data.m_encryptedSessionKey;
                   return session.DecodeMediaKey(mediaKey);
