@@ -284,10 +284,6 @@ PBoolean H235_DiffieHellman::GenerateHalfKey()
       return FALSE;
   }
 
-  char * p = BN_bn2hex(dh->p);
-  char * g = BN_bn2hex(dh->g);
-  char * pub = BN_bn2hex(dh->pub_key);
-  char * priv = BN_bn2hex(dh->priv_key);
   return TRUE;
 }
 
