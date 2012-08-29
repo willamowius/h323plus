@@ -174,6 +174,7 @@ typedef H2356_Authenticator H235_AuthenticatorStd6;
   */
 struct dh_st;
 struct bignum_st;
+
 class H235_DiffieHellman : public PObject
 {
   PCLASSINFO(H235_DiffieHellman, PObject);
@@ -297,10 +298,10 @@ public:
 
     dh_st * dh;                       /// Local DiffieHellman
     bignum_st * m_remKey;             /// Remote Public Key
-    PBoolean m_toSend;                /// Whether P & G are transmitted.
+    PBoolean m_toSend;                /// Whether P & G are transmitted
     int m_keySize;                    /// Key Size
 
-    PBoolean m_loadFromFile;          /// Whether the setting have been loaded from file
+    PBoolean m_loadFromFile;          /// Whether the settings have been loaded from file
 };
 
 #endif // H323_H235
