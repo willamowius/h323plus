@@ -238,14 +238,16 @@ void H235_DiffieHellman::Encode_HalfKey(PASN_BitString & hk) const
 {
   PWaitAndSignal m(vbMutex);
 
-  int len = BN_num_bytes(dh->pub_key);
-  int bits_key = BN_num_bits(dh->pub_key);
-  // TODO Verify that the halfkey is being packed properly - SH
-  unsigned char * data = (unsigned char *)OPENSSL_malloc(len);
-  memset(data, 0, len);
+  int len_p = BN_num_bytes(dh->p);
+  int len_key = BN_num_bytes(dh->pub_key);
+  int bits_p = BN_num_bits(dh->p);
+
+  // halfkey is padded out to the length of P
+  unsigned char * data = (unsigned char *)OPENSSL_malloc(len_p);
+  memset(data, 0, len_p);
   if (data != NULL){
-    if (BN_bn2bin(dh->pub_key, data) > 0) {
-       hk.SetData(bits_key, data);
+    if (BN_bn2bin(dh->pub_key, data + len_p - len_key) > 0) {
+       hk.SetData(bits_p, data);
     } else {
       PTRACE(1, "H235_DH\tFailed to encode halfkey");
     }
@@ -276,7 +278,6 @@ PBoolean H235_DiffieHellman::GenerateHalfKey()
 
   PWaitAndSignal m(vbMutex);
 
-  // TODO check if half key is generated correctly
   if (!DH_generate_key(dh)) {
       char buf[256];
       ERR_error_string(ERR_get_error(), buf);
