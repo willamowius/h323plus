@@ -378,13 +378,13 @@ PObject * H323SecureCapability::Clone() const
 {
     PTRACE(4, "H235RTP\tCloning Capability: " << GetFormatName());
 
-    PBoolean IsClone = FALSE;
+    //PBoolean IsClone = FALSE;
     H235ChType ch = H235ChNew;
 
     switch (chtype) {
     case H235ChNew:    
            ch = H235ChClone;
-           IsClone = TRUE;
+           //IsClone = TRUE;
         break;
     case H235ChClone:
            ch = H235Channel;
