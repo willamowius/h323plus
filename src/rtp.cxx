@@ -862,7 +862,7 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveData(const RTP_DataFrame & 
         // The following has the implicit assumption that something that has jitter
         // is an audio codec and thus is in 8kHz timestamp units.
         diff *= 8;
-        long variance = diff - lastTransitTime;
+        long variance = (long)diff - (long)lastTransitTime;
         lastTransitTime = diff;
         if (variance < 0)
           variance = -variance;
