@@ -854,7 +854,9 @@ void H323_RTPChannel::Transmit()
   unsigned frameCount = 0;
   DWORD rtpTimestamp = PRandom();
   DWORD nextTimestamp = 0;
-  //frame.SetPayloadSize(0);
+#ifndef H323_FIXED_VIDEOCLOCK
+  PInt64 lastFrameTime = 0;
+#endif
 
 #if PTRACING
   DWORD lastDisplayedTimestamp = 0;
@@ -879,7 +881,17 @@ void H323_RTPChannel::Transmit()
     { 
        if(frame.GetMarker()) {
           // Video uses a 90khz clock. Note that framerate should really be a float.
-          nextTimestamp = rtpTimestamp + 90000/codec->GetFrameRate(); 
+#ifdef H323_FIXED_VIDEOCLOCK
+           nextTimestamp = rtpTimestamp + 90000/codec->GetFrameRate(); 
+#else
+           PInt64 nowTime = PTimer::Tick().GetMilliSeconds();
+           if (lastFrameTime == 0) {
+              nextTimestamp = rtpTimestamp + 90000/codec->GetFrameRate(); 
+           } else {
+              nextTimestamp = rtpTimestamp + (DWORD)(90000.0*((float)(nowTime-lastFrameTime))/1000.0);
+           }
+           lastFrameTime = nowTime;
+#endif
        }
     }
 
