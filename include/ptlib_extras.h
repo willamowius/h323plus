@@ -838,17 +838,7 @@ public:
 
                   if (!fup) 
                       fup = ((m_lossCount/m_frameCount)*100.0 > m_lossThreshold);
-#if 0  // if buffer is growing check upline either in the color converter or rendering - SH
-                  if (info.m_marker && m_frameMarker > 5) {
-                     bufferMutex.Wait();
-                        m_buffer.empty();
-                        m_frameOutput=false;
-                        m_frameMarker=0;
-                        m_RenderTimeStamp = 0;
-                        fup=true;
-                     bufferMutex.Signal();
-                  }
-#endif
+
                   FrameOut(frame, info.m_receiveTime, (unsigned)m_calcClockRate, fup, flow);
                   frame.SetSize(0);
                   if (fup) {
@@ -864,7 +854,7 @@ public:
                       m_RenderTimeStamp+=delay;
                       PInt64 nowTime = PTimer::Tick().GetMilliSeconds();
                       unsigned ldelay = (unsigned)((m_RenderTimeStamp > nowTime)? m_RenderTimeStamp - nowTime : 0);
-                      if (ldelay > 200) ldelay = 0;
+                      if (ldelay > 200 || m_frameMarker > 5) ldelay = 0;
                       if (!ldelay)  m_RenderTimeStamp = nowTime;
                       m_frameMarker--;
                       m_outputDelay.Delay(ldelay);
