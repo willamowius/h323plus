@@ -453,8 +453,7 @@
     <ClCompile Include="src\h235\h2356.cxx" />
     <ClCompile Include="src\h235\h235caps.cxx" />
     <ClCompile Include="src\h235\h235chan.cxx" />
-    <ClCompile Include="src\h235\h235con.cxx" />
-    <ClCompile Include="src\h235\ssl_support.cxx" />
+    <ClCompile Include="src\h235\h235cypto.cxx" />
     <ClCompile Include="src\h281.cxx" />
     <ClCompile Include="src\h323.cxx">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
