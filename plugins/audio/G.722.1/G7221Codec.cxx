@@ -36,9 +36,11 @@
 #define _CRT_NONSTDC_NO_DEPRECATE 1
 #define _CRT_SECURE_NO_WARNINGS 1
 
+#ifdef _WIN32
 #include <openh323buildopts.h>
 #if H323_STATIC_G7221
   #define OPAL_STATIC_CODEC 1
+#endif
 #endif
 
 #include <stdio.h>
