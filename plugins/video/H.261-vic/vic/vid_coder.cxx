@@ -35,6 +35,9 @@
 /************ Change log
  *
  * $Log$
+ * Revision 1.1  2010/02/24 02:19:22  shorne
+ * First commit of h323plus mirror
+ *
  * Revision 1.3  2006/12/19 03:11:55  dereksmithies
  * Add excellent fixes from Ben Weekes to suppress valgrind error messages.
  * This will help memory management - many thanks.
@@ -172,7 +175,7 @@ inline void Pre_Vid_Coder::save(u_char* lum, u_char* cache, int stride)
 void Pre_Vid_Coder::ProcessFrame(VideoFrame *vf)
 {
   if (!SameSize(vf))
-        SetSize(vf->width,vf->height);
+    SetSize(vf->width,vf->height);
   frametime= vf->ts;  //Need frametime for deciding what blocks are old.
   suppress(vf->frameptr);
   saveblks(vf->frameptr);
@@ -248,9 +251,9 @@ void Pre_Vid_Coder::age_blocks()
 	 * Now go through and look for some idle blocks to send
 	 * as background fill.
 	 */
-        //HORRIBLE, need better algorithm for determining n.
+    //TODO: HORRIBLE, need better algorithm for determining n.
 
-	int n = ((0*frametime) < frametime)? idle_high : idle_low;
+	int n = (frametime >= 1) ? idle_high : idle_low;
 
 	while (n > 0) {
 		int s = CR_STATE(crvec[rover]);
