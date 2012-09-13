@@ -1059,7 +1059,7 @@ int H263EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLen, BYTE *
   // from here, we are encoding a new frame
   lastTimeStamp = srcRTP.GetTimestamp();
 
-  if (srcRTP.GetPayloadSize() < sizeof(PluginCodec_Video_FrameHeader)) {
+  if ((size_t)srcRTP.GetPayloadSize() < sizeof(PluginCodec_Video_FrameHeader)) {
     //PTRACE(1,"H263\tVideo grab too small, Close down video transmission thread.");
     return 0;
   }
@@ -1307,7 +1307,7 @@ bool H263DecoderContext::DecodeFrames(const BYTE * src, unsigned & srcLen, BYTE 
 
   // copy payload to a temporary buffer if there are not enough bytes after the end of the payload
   if (srcRTP.GetHeaderSize() + srcPayloadSize + FF_INPUT_BUFFER_PADDING_SIZE > srcLen) {
-    if (srcPayloadSize + FF_INPUT_BUFFER_PADDING_SIZE > sizeof(encFrameBuffer))
+    if (srcPayloadSize + FF_INPUT_BUFFER_PADDING_SIZE > (int)sizeof(encFrameBuffer))
       return 0; 
 
     memcpy(encFrameBuffer, srcRTP.GetPayloadPtr(), srcPayloadSize);
