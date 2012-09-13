@@ -21,7 +21,7 @@
 
 #include <iostream>
 #include <string.h>
-//#include <malloc.h>
+#include <malloc.h>
 using namespace std;
 
 #include "rfc2190.h"
