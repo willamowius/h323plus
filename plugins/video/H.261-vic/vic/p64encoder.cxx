@@ -12,6 +12,9 @@
 /************ Change log
  *
  * $Log$
+ * Revision 1.3  2011/01/10 21:41:36  willamowius
+ * revert: call PreIncEncodeSetup() again
+ *
  * Revision 1.2  2011/01/09 10:06:56  shorne
  * Fix for polycom interop.. Alessandro Angeli
  *
@@ -172,6 +175,7 @@ VideoFrame::VideoFrame(u_char *cr, int newWidth, int newHeight)
   crvec = cr;
   frameptr = NULL;
   width = height = 0; // avoid uninitialized compare
+  ts = 0; // avoid uninitialized compare
   SetSize(newWidth,newHeight);
 }
 
@@ -180,6 +184,7 @@ VideoFrame::VideoFrame(int newWidth, int newHeight)
   crvec = NULL;
   frameptr = NULL;
   width = height = 0; // avoid uninitialized compare
+  ts = 0; // avoid uninitialized compare
   SetSize(newWidth,newHeight);
 }
 
