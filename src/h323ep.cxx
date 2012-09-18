@@ -3370,8 +3370,15 @@ PBoolean H323EndPoint::H46017CreateConnection(const PString & gatekeeper, PBoole
    registrationTimeToLive = PTimeInterval(0, 19);
    H460_FeatureStd17 * m_h46017 = (H460_FeatureStd17 *)features.GetFeature(17);
 
-   if(!m_h46017 || !m_h46017->Initialise(gatekeeper,useSRV))
+   if(!m_h46017) {
+       PTRACE(4, "Can't create H.460.17 feature - plugin loaded ?");
        return false;
+   }
+
+   if(!m_h46017->Initialise(gatekeeper, useSRV)) {
+       PTRACE(4, "H.460.17 Gatekeeper connection failed");
+       return false;
+   }
 
 #ifdef H323_H46026
      H460_FeatureStd26 * m_h46026 = (H460_FeatureStd26 *)features.GetFeature(26);
