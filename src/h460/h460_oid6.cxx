@@ -1,6 +1,6 @@
 /* H460_oid6.cxx
  *
- * Copyright (c) 2012 ISVO (Asia) Pte Ltd. All Rights Reserved.
+ * Copyright (c) 2012 Spranto Int'l Pte Ltd. All Rights Reserved.
  *
  * The contents of this file are subject to the Mozilla Public License
  * Version 1.1 (the "License"); you may not use this file except in
@@ -31,7 +31,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Id $
+ * $Id$
  *
  */
 
@@ -41,7 +41,7 @@
 #ifdef H323_H460PRE
 
 #include "h460/h460_oid6.h"
-#include "h323ep.h"
+#include <h323.h>
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4239)
