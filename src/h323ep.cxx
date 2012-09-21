@@ -1034,7 +1034,9 @@ PBoolean H323EndPoint::OnDetectedIPChange(PIPSocket::Address newIP)
 
     if (gatekeeper) {
         H323TransportAddress add = gatekeeper->GetGatekeeperRouteAddress();
-        RemoveGatekeeper(H225_UnregRequestReason::e_reregistrationRequired);
+        RemoveGatekeeper(H225_UnregRequestReason::e_maintenance);
+
+        PThread::Sleep(500);
 
         H323TransportUDP * transport = new H323TransportUDP(*this, newIP);
         H323Gatekeeper * gk = CreateGatekeeper(transport);
