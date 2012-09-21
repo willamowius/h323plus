@@ -129,11 +129,15 @@
         #define H323_UPnP 1
     #endif
 #endif
+// Presence Feature
 #undef H323_H460P
 #ifdef H323_H460P
    #define H323_H460P_VER 2
 #endif
+// Registration Priority Feature
 #undef H323_H460PRE
+// Endpoint Compatibility 
+#undef H323_H460COM
 #endif
 
 #undef H323_H501

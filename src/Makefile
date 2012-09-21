@@ -225,7 +225,8 @@ HEADER_FILES    += $(OH323_INCDIR)/h460/h460.h \
                    $(OH323_INCDIR)/h460/h460_oid3.h \
                    $(OH323_INCDIR)/h460/h460p.h \
                    $(OH323_INCDIR)/h460/h460pres.h \
-                   $(OH323_INCDIR)/h460/h460_oid6.h
+                   $(OH323_INCDIR)/h460/h460_oid6.h \
+                   $(OH323_INCDIR)/h460/h460_oid9.h \
 
 SOURCES         += \
                    $(OH323_SRCDIR)/h460/h4604.cxx \
@@ -246,6 +247,7 @@ COMMON_SOURCES  += \
                    $(OH323_SRCDIR)/h460/h460_std23.cxx \
                    $(OH323_SRCDIR)/h460/h460_oid3.cxx \
                    $(OH323_SRCDIR)/h460/h460_oid6.cxx \
+                   $(OH323_SRCDIR)/h460/h460_oid9.cxx \
                    $(OH323_SRCDIR)/h460/h460p.cxx
 endif 
 

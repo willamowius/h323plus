@@ -615,8 +615,9 @@ H323_GNUGK
 H323_T120
 H323_T38
 H323_H501
-H323_H460PRE
 H323_H460P
+H323_H460PRE
+H323_H323COM
 H323_H46026
 H323_H46023
 H323_H46019M
@@ -725,6 +726,7 @@ enable_h46023
 enable_h46026
 enable_h460p
 enable_h460pre
+enable_h460com
 enable_h501
 enable_t38
 enable_t120
@@ -1377,7 +1379,8 @@ Optional Features:
   --disable-h46023        disable H.460.23/.24
   --disable-h46026        disable H.460.26
   --enable-h460p          enable H.460 Presence
-  --enable-h460pre         enable H.460 PreEmption
+  --enable-h460pre        enable H.460 PreEmption
+  --enable-h460com        enable H.460 Compat Feature
   --disable-h501          disable H.501
   --disable-t38           disable T.38
   --disable-t120          disable T.120
@@ -3916,6 +3919,7 @@ default_h46023=yes
 default_h46026=no
 default_h460p=no
 default_h460pre=no
+default_h460com=no
 default_t120=yes
 default_gnugk=yes
 default_file=yes
@@ -3945,6 +3949,7 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_h46026=no
   default_hh460p=no
   default_h460pre=no
+  default_h460com=no
   default_t120=no
   default_gnugk=no
   default_file=no
@@ -4472,6 +4477,25 @@ else
 $as_echo "$as_me: Disabling H.460 PreEmption" >&6;}
 fi
 
+
+
+# Check whether --enable-h460com was given.
+if test "${enable_h460com+set}" = set; then :
+  enableval=$enable_h460com;
+fi
+
+if test "${enable_h460com}x" = "x" ; then
+  enable_h460com=$default_h460com
+fi
+if test "$enable_h460com" = "yes" ; then
+  H323_H460COM=1
+  $as_echo "#define H323_H460COM 1" >>confdefs.h
+
+else
+  H323_H460COM=
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460 Compat Feature" >&5
+$as_echo "$as_me: Disabling H.460 Compat Feature" >&6;}
+fi
 
 
 

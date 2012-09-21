@@ -6743,6 +6743,13 @@ PBoolean H323Connection::H46026IsMediaTunneled()
 }
 #endif   // H323_H46026
 
+#ifdef H323_H460COM
+void H323Connection::OnRemoteVendorInformation(const PString & product, const PString & version)
+{
+
+}
+#endif
+
 #endif   // H323_H460
 
 PBoolean H323Connection::OnH245AddressConflict()

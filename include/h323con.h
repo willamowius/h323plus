@@ -2919,6 +2919,13 @@ class H323Connection : public PObject
     PBoolean H46026IsMediaTunneled();
 #endif
 
+#ifdef H323_H460COM
+    /** On Received remote vendor Information
+      */
+    virtual void OnRemoteVendorInformation(const PString & product, const PString & version);
+#endif
+
+
 #endif  // H323_H460
   //@}
 

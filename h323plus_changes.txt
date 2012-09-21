@@ -1,5 +1,6 @@
 
 H323plus 1.24.0 - 1.24.x
+Added H.460 Compatibility Feature
 Added H.460.26 Support (depreciated nonstandard H.460.17a) [Work in Progress]
 Updated ASN.1 to H.323v7 (H.225v7, H.245v15)
 Added H.460.4 Baseline

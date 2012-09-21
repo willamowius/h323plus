@@ -79,6 +79,10 @@
 #include "h460/h460_oid6.h"
 #endif
 
+#ifdef H323_H460COM
+#include "h460/h460_oid9.h"
+#endif
+
 #endif  // H323_H460
 
 #include "gkclient.h"
