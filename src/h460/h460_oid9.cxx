@@ -44,10 +44,6 @@
 #include "h460/h460_oid9.h"
 #include "h323ep.h"
 
-#ifdef _MSC_VER
-#pragma warning(disable : 4239)
-#endif
-
 // Compatibility Feature
 #define baseOID "1.3.6.1.4.1.17090.0.9"  // Remote Vendor Information
 #define VendorProdOID      "1"    // PASN_String of productID
@@ -93,7 +89,7 @@ PBoolean H460_FeatureOID9::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
 { 
     // Build Message
     PTRACE(6,"OID9\tSending ARQ ");
-    H460_FeatureOID & feat = H460_FeatureOID(baseOID);
+    H460_FeatureOID feat = H460_FeatureOID(baseOID);
 
     pdu = feat;
     return TRUE;  
@@ -115,9 +111,5 @@ void H460_FeatureOID9::OnReceiveAdmissionConfirm(const H225_FeatureDescriptor & 
     if (m_product.GetLength() > 0)
        m_con->OnRemoteVendorInformation(m_product, m_version);
 }
-    
-#ifdef _MSC_VER
-#pragma warning(default : 4239)
-#endif
 
 #endif
