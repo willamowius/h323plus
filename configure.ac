@@ -848,20 +848,3 @@ AC_CONFIG_SUBDIRS(plugins)
 
 AC_OUTPUT()
 
-
-dnl ########################################################################
-dnl check if upad128_t is defined (Solaris)
-
-if test "${OSTYPE:-unknown}" = "solaris"; then
-  AC_MSG_CHECKING(for upad128_t)
-  AC_TRY_COMPILE([#include <sys/types.h>],
-                 [upad128_t upad; upad._q = 0.0;], has_upad128_t=y)
-  if test ${has_upad128_t} == "y"; then
-    AC_MSG_RESULT(yes)
-    AC_DEFINE(P_HAS_UPAD128_T)
-  else
-    AC_MSG_RESULT(no)
-  fi
-fi
-
-
