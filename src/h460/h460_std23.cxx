@@ -141,7 +141,7 @@ void PNatMethod_H46024::Start(const PString & server,H460_FeatureStd23 * _feat)
 #endif
 
     mainThread  = PThread::Create(PCREATE_NOTIFIER(MainMethod), 0,  
-                       PThread::NoAutoDeleteThread,  PThread::LowPriority ,"H.460.24");
+                       PThread::NoAutoDeleteThread, PThread::NormalPriority, "H.460.24");
 }
 
 
