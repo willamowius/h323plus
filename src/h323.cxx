@@ -1411,8 +1411,12 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
   else
       remotePartyName = remotePartyAddress;
 
-  if (setup.m_sourceAddress.GetSize() > 0)
-    remotePartyAddress = H323GetAliasAddressString(setup.m_sourceAddress[0]) + '@' + signallingChannel->GetRemoteAddress();
+  if (setup.m_sourceAddress.GetSize() > 0) {
+    if (!remotePartyAddress.IsEmpty())
+        remotePartyAddress = H323GetAliasAddressString(setup.m_sourceAddress[0]) + '@' + remotePartyAddress;
+    else
+        remotePartyAddress = H323GetAliasAddressString(setup.m_sourceAddress[0]);
+  }
 
 #ifdef H323_H460
      ReceiveSetupFeatureSet(this, setup);
@@ -2335,7 +2339,10 @@ H323Connection::CallEndReason H323Connection::SendSignalSetup(const PString & al
   else {
     remotePartyName = alias;
     remoteAliasNames.AppendString(alias);
-    remotePartyAddress = alias + '@' + address;
+    if (!address.IsEmpty())
+       remotePartyAddress = alias + '@' + address;
+    else
+       remotePartyAddress = alias;
   }
 
   // Start building the setup PDU to get various ID's
