@@ -554,7 +554,7 @@ void PNatMethod_H46019::AttachHandler(H46018Handler * _handler)
 
 #ifdef H323_H46019M
     muxPortInfo.basePort    = handler->GetEndPoint()->GetMultiplexPort();
-    muxPortInfo.maxPort     = muxPortInfo.basePort+1;
+    muxPortInfo.maxPort     = muxPortInfo.basePort+100;  // Just in case defined ports are blocked. - SH
     muxPortInfo.currentPort = muxPortInfo.basePort-1;
 #endif
 
@@ -652,7 +652,7 @@ PBoolean PNatMethod_H46019::OpenSocket(PUDPSocket & socket, PortInfo & portInfo,
     do {
         portInfo.currentPort++;
         if (portInfo.currentPort > portInfo.maxPort)
-        portInfo.currentPort = portInfo.basePort;
+            portInfo.currentPort = portInfo.basePort;
 
         if (socket.Listen(binding,1, portInfo.currentPort)) {
             socket.SetReadTimeout(500);
@@ -661,7 +661,7 @@ PBoolean PNatMethod_H46019::OpenSocket(PUDPSocket & socket, PortInfo & portInfo,
 
     } while (portInfo.currentPort != startPort);
 
-    PTRACE(2, "H46019\tFailed to bind to local UDP port in range "
+    PTRACE(2, "H46019\tFailed to bind to " << binding << " local UDP port range "
         << portInfo.currentPort << '-' << portInfo.maxPort);
       return false;
 }
