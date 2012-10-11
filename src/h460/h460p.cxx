@@ -1186,9 +1186,9 @@ static const char *CategoryState[] = {
 
 PString H323PresenceInstruction::GetCategoryString(unsigned cat)
 {
-	if (cat < 7) return CategoryState[cat];
+	if (cat < 6) return CategoryState[cat];
 
-    return CategoryState[7];
+    return CategoryState[6];
 }
 
 ///////////////////////////////////////////////////////////////////////
