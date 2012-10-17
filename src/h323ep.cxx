@@ -1017,34 +1017,50 @@ void H323EndPoint::OnRegisterTTLFail()
 
 PBoolean H323EndPoint::OnDetectedIPChange(PIPSocket::Address newIP)
 {
+    if (!newIP.IsValid() || newIP.IsAny() || newIP.IsLoopback()) {
+        PTRACE(2,"EP\tInvalid Listening Interface \"" << newIP << '"');
+        return false;
+    }
+
+    if (!gatekeeper) {
+        PTRACE(2,"EP\tExisting Gatekeeper is NULL!"); 
+        return false;
+    }
+
+    WORD oldPort = DefaultTcpPort;
     if (listeners.GetSize() > 0) { 
-        PIPSocket::Address oldIP;
-        WORD oldPort;
         H323TransportAddress localAddress = listeners[0].GetTransportAddress();
+        PIPSocket::Address oldIP;
         localAddress.GetIpAndPort(oldIP,oldPort);
-        listeners.RemoveAll();
-
-        H323ListenerTCP * listener = new H323ListenerTCP(*this, newIP, oldPort);
-        if (!StartListener(listener)) {
-            PTRACE(4,"EP\tCould not bind listener port on \"" << newIP << '"');
-            return false;
+        if (oldIP == newIP) {
+            PTRACE(2,"EP\tNo IP Change already listening on \"" << newIP << '"'); 
+            return true;
         }
-        PTRACE(2,"EP\tStopped Listener on \"" << oldIP << '"' << " Restarted \"" << newIP << '"');       
+        listeners.RemoveAll();
+        PTRACE(2,"EP\tStopped Listener on \"" << oldIP << '"');
     }
 
-    if (gatekeeper) {
-        H323TransportAddress add = gatekeeper->GetGatekeeperRouteAddress();
-        RemoveGatekeeper(H225_UnregRequestReason::e_maintenance);
+    H323ListenerTCP * listener = new H323ListenerTCP(*this, newIP, oldPort);
+    if (!StartListener(listener)) {
+         PTRACE(4,"EP\tCould not bind listener port on \"" << newIP << '"');
+         return false;
+    } 
+    PTRACE(2,"EP\tBound listener port on \"" << newIP << '"'); 
 
-        PThread::Sleep(500);
-
-        H323TransportUDP * transport = new H323TransportUDP(*this, newIP);
-        H323Gatekeeper * gk = CreateGatekeeper(transport);
-        gk->SetPassword(gatekeeperPassword);
-
-        InternalRegisterGatekeeper(gk, gk->StartDiscovery(add));
+    H323TransportAddress add = gatekeeper->GetGatekeeperRouteAddress();
+    RemoveGatekeeper(H225_UnregRequestReason::e_maintenance);
+    PThread::Sleep(500);
+       
+    H323TransportUDP * transport = new H323TransportUDP(*this, newIP);
+    H323Gatekeeper * gk = CreateGatekeeper(transport);
+    if (gk) {
+       gk->SetPassword(gatekeeperPassword);
+       InternalRegisterGatekeeper(gk, gk->StartDiscovery(add));
+       return true;
     }
-    return true;
+
+    PTRACE(2,"EP\tERROR: Failed with IP Change to \"" << newIP << '"'); 
+    return false;
 }
 
 void H323EndPoint::SetAuthenticatorOrder(PStringList & names)
@@ -1602,11 +1618,11 @@ PBoolean H323EndPoint::ResolveCallParty(const PString & _remoteParty, PStringLis
 
      // attempt a DNS SRV lookup to detect a call signalling entry
     PBoolean found = FALSE;
-    if (remoteParty.Find('@') != P_MAX_INDEX) {
+   if (remoteParty.Find('@') != P_MAX_INDEX) {
        PString number = remoteParty;
        if (number.Left(5) != "h323:") 
           number = "h323:" + number;      
-                
+               
        PStringList str;
 
        if (!found) str.RemoveAll();
@@ -1622,7 +1638,7 @@ PBoolean H323EndPoint::ResolveCallParty(const PString & _remoteParty, PStringLis
              found = TRUE;
            }
        }
-
+/*
        if (!found) str.RemoveAll();
        if (!found && (PDNS::LookupSRV(number,"_h323ls._udp.",str))) {
            for (PINDEX j=0; j<str.GetSize(); j++) {
@@ -1640,7 +1656,7 @@ PBoolean H323EndPoint::ResolveCallParty(const PString & _remoteParty, PStringLis
                 }
            }
        }
-
+*/
        if (!found) {
            PTRACE(4, "H323\tDNS SRV Cannot resolve remote party " << remoteParty);
            addresses = PStringList(remoteParty);
