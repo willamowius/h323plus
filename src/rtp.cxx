@@ -209,6 +209,13 @@ PBoolean RTP_DataFrame::SetPayloadSize(PINDEX sz)
   return SetMinSize(GetHeaderSize()+payloadSize);
 }
 
+PBoolean RTP_DataFrame::IsValid() const
+{
+   if (GetVersion() != 2)
+       return false;
+
+   return (GetPayloadType() < RTP_DataFrame::IllegalPayloadType);
+}
 
 #if PTRACING
 static const char * const PayloadTypesNames[RTP_DataFrame::LastKnownPayloadType] = {
@@ -255,26 +262,28 @@ ostream & operator<<(ostream & o, RTP_DataFrame::PayloadTypes t)
 
 /////////////////////////////////////////////////////////////////////////////
 
+#define MUX_HEADER_SIZE 4
+
 RTP_MultiDataFrame::RTP_MultiDataFrame(const BYTE * buffer, PINDEX length)
 : PBYTEArray(buffer,length)
 {
 }
 
 RTP_MultiDataFrame::RTP_MultiDataFrame(DWORD id, const BYTE * buffer, PINDEX rtplen)
-: PBYTEArray(rtplen+4)
+: PBYTEArray(rtplen + MUX_HEADER_SIZE)
 {
-   memcpy(theArray+4,buffer,rtplen);
+   memcpy(theArray + MUX_HEADER_SIZE, buffer, rtplen);
    *(PUInt32b *)&theArray[0] = id;
 }
 
 RTP_MultiDataFrame::RTP_MultiDataFrame(PINDEX rtplen)
-: PBYTEArray(rtplen+4)
+: PBYTEArray(rtplen+MUX_HEADER_SIZE)
 {
 }
 
 int  RTP_MultiDataFrame::GetMultiHeaderSize() const
 {
-    return 4;
+    return MUX_HEADER_SIZE;
 }
 
 DWORD RTP_MultiDataFrame::GetMultiplexID() const
@@ -282,7 +291,7 @@ DWORD RTP_MultiDataFrame::GetMultiplexID() const
    return *(PUInt32b *)&theArray[0];
 }
 
-void RTP_MultiDataFrame::SetMulitplexID(DWORD id)
+void RTP_MultiDataFrame::SetMultiplexID(DWORD id)
 {
    *(PUInt32b *)&theArray[0] = id;
 }
@@ -299,6 +308,25 @@ void RTP_MultiDataFrame::SetRTPPayload(RTP_DataFrame & frame)
     int sz = frame.GetPayloadSize() + frame.GetHeaderSize();
     SetSize(sz+ GetMultiHeaderSize());
     memcpy(frame.GetPointer(),theArray+GetMultiHeaderSize(), sz);
+}
+
+PBoolean RTP_MultiDataFrame::IsValidRTPPayload(PBoolean muxed) const
+{  
+    PINDEX mux_header = muxed ? GetMultiHeaderSize() : 0;
+
+    // Simple sanity check for RTP version
+    unsigned rtpVersion = (theArray[mux_header]>>6)&3;
+    if (rtpVersion != 2)
+        return false;
+
+    // check payloadType is valid
+    RTP_DataFrame::PayloadTypes rtpPayloadType =(RTP_DataFrame::PayloadTypes)(theArray[mux_header+1]&0x7f);
+    return (rtpPayloadType < RTP_DataFrame::IllegalPayloadType);
+}
+
+PBoolean RTP_MultiDataFrame::IsNotMultiplexed() const
+{
+    return IsValidRTPPayload(false);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -427,7 +455,7 @@ WORD RTP_MultiControlFrame::GetMultiplexID() const
    return *(PUInt16b *)&theArray[0];
 }
 
-void RTP_MultiControlFrame::SetMulitplexID(WORD id)
+void RTP_MultiControlFrame::SetMultiplexID(WORD id)
 {
    *(PUInt16b *)&theArray[0] = id;
 }

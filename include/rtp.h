@@ -163,6 +163,8 @@ class RTP_DataFrame : public PBYTEArray
     PBoolean   SetPayloadSize(PINDEX sz);
     BYTE * GetPayloadPtr()     const { return (BYTE *)(theArray+GetHeaderSize()); }
 
+    PBoolean IsValid() const;
+
   protected:
     PINDEX payloadSize;
 
@@ -198,11 +200,14 @@ class RTP_MultiDataFrame : public PBYTEArray
       PINDEX rtplen          ///< Length of RTP Frame
   );
 
-  int    GetMultiHeaderSize() const;
+  int   GetMultiHeaderSize() const;
   DWORD GetMultiplexID() const;
-  void SetMulitplexID(DWORD id);
+  void SetMultiplexID(DWORD id);
   void GetRTPPayload(RTP_DataFrame & frame) const;
   void SetRTPPayload(RTP_DataFrame & frame);
+
+  PBoolean IsValidRTPPayload(PBoolean muxed = true) const;
+  PBoolean IsNotMultiplexed() const;
 
 };
 
@@ -328,7 +333,7 @@ class RTP_MultiControlFrame : public PBYTEArray
 
   int  GetMultiHeaderSize() const;
   WORD GetMultiplexID() const;
-  void SetMulitplexID(WORD id);
+  void SetMultiplexID(WORD id);
   void GetRTCPPayload(RTP_ControlFrame & frame) const;
   void SetRTCPPayload(RTP_ControlFrame & frame);
 
