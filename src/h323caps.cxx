@@ -1486,7 +1486,7 @@ PObject::Comparison H323GenericVideoCapability::Compare(const PObject & obj) con
 
   const H323GenericVideoCapability & gen = (const H323GenericVideoCapability &)obj;
   if (CompareInfo(gen) == PObject::EqualTo) {
-      // Check for Tandberg MXP Capability bug. Profile is set to 0 - SH
+      // We do not support RCDO Yet  - SH
       if (GetMediaFormat().GetOptionInteger("Generic Parameter 41") == 0)
           return LessThan;
   }
