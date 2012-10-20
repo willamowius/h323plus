@@ -223,6 +223,7 @@ class H46018Handler : public PObject
 
 #ifdef H323_H46019M
 typedef map<unsigned, PUDPSocket*> muxSocketMap;
+typedef map<PString, unsigned> muxPortMap;
 
 class H46019MultiplexSocket;
 #endif
@@ -408,6 +409,7 @@ class PNatMethod_H46019  : public PNatMethod
     static H323Connection::NAT_Sockets   muxSockets;
 
     static muxSocketMap                  rtpSocketMap;
+    static muxPortMap                    rtpPortMap;
     static muxSocketMap                  rtcpSocketMap;
     static PMutex                        muxMutex;
     PThread *                            m_readThread;

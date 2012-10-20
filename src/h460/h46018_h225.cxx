@@ -474,6 +474,7 @@ void H46018Handler::H46024ADirect(bool reply, const PString & token)
 H323Connection::NAT_Sockets   PNatMethod_H46019::muxSockets;
 PBoolean                      PNatMethod_H46019::multiplex=false;
 muxSocketMap                  PNatMethod_H46019::rtpSocketMap;
+muxPortMap                    PNatMethod_H46019::rtpPortMap;
 muxSocketMap                  PNatMethod_H46019::rtcpSocketMap;
 PBoolean                      PNatMethod_H46019::muxShutdown;
 PMutex                        PNatMethod_H46019::muxMutex;
@@ -500,6 +501,7 @@ PNatMethod_H46019::~PNatMethod_H46019()
         m_readThread = NULL;
 
         rtpSocketMap.clear();
+        rtpPortMap.clear();
         rtcpSocketMap.clear();
 
         if (muxSockets.rtp) {
@@ -726,6 +728,40 @@ PUDPSocket * & PNatMethod_H46019::GetMultiplexSocket(bool rtp)
       return (PUDPSocket * &)muxSockets.rtcp;
 }
 
+unsigned DetectSourceAddress(muxSocketMap & socMap, const PIPSocket::Address addr, WORD port)
+{
+          PIPSocketAddressAndPort daddr;
+          daddr.SetAddress(addr,port);
+
+          std::map< unsigned, PUDPSocket*>::const_iterator i;
+          for (i = socMap.begin(); i != socMap.end(); ++i) {
+            PIPSocketAddressAndPort raddr;
+            i->second->GetPeerAddress(raddr); 
+            if (raddr.AsString() == daddr.AsString())
+                return i->first;
+          }
+          return 0;
+}
+
+unsigned ResolveMuxIDFromSourceAddress(muxSocketMap & socMap, muxPortMap & portMap, const PIPSocket::Address addr, WORD port)
+{
+          PIPSocketAddressAndPort daddr;
+          daddr.SetAddress(addr,port);
+
+          std::map<PString, unsigned>::const_iterator it;
+          it = portMap.find(daddr.AsString());
+          if (it != portMap.end())
+              return it->second;
+
+          unsigned id = DetectSourceAddress(socMap, addr, port);
+          if (id) {
+            PTRACE(2,"H46019M\tUnMUX Packet received from " << daddr.AsString() << " permenant assigned MUX " << id);
+            portMap.insert(pair<PString,unsigned>(daddr.AsString(),id));
+          }
+          return id;
+}
+
+
 unsigned ResolveSession(muxSocketMap & socMap, unsigned muxID, PBoolean rtp, const PIPSocket::Address addr, WORD port, unsigned & correctMUX) 
 {
 
@@ -741,26 +777,16 @@ unsigned ResolveSession(muxSocketMap & socMap, unsigned muxID, PBoolean rtp, con
                   break;
               }
           }
-          // Due to some disagreement GnuGk send the send multiplex id
-          // If we detect it then swap out the socket map with the receiver mux id
           if (eraseID > 0) {
                mapSocket->SetMultiplexID(muxID,true);
                PNatMethod_H46019::RegisterSocket(rtp,muxID, mapSocket);
                PNatMethod_H46019::UnregisterSocket(rtp, eraseID);
                return muxID;
-          }
-
-        } else {                                    // Check source address
-          PIPSocketAddressAndPort daddr;
-          daddr.SetAddress(addr,port);
-          for (i = socMap.begin(); i != socMap.end(); ++i) {
-            PIPSocketAddressAndPort raddr;
-            i->second->GetPeerAddress(raddr); 
-            if (raddr.AsString() == daddr.AsString())
-                return i->first;
-          }
+          } else
+             return 0;
+        } else {
+           return DetectSourceAddress(socMap, addr, port);
         }
-          return 0;
 }
 
 void CloseAllSessions(muxSocketMap & socMap) 
@@ -826,17 +852,31 @@ void PNatMethod_H46019::ReadThread(PThread &, INT)
 
          if (!muxShutdown && socket && socket->ReadFrom(buffer.GetPointer(),len,addr,port)) {
              int actRead = socket->GetLastReadCount();
-
+             int muxHeader = buffer.GetMultiHeaderSize();
              std::map<unsigned,PUDPSocket*>::const_iterator it;
              switch (socketRead) {
                case H46019MultiplexSocket::e_rtp:
-                 it = rtpSocketMap.find(buffer.GetMultiplexID());
+               {
+                 DWORD multiplexID=0;
+                 if (PNatMethod_H46019::IsMultiplexed() && !buffer.IsValidRTPPayload()) {
+                     if (!buffer.IsNotMultiplexed()) {
+                         PTRACE(2,"H46019M\tBad RTP MUX Packet received from " << addr << ":" << port);
+                         continue;
+                     }
+                     // We have received a valid RTP UnMuxed Packet.
+                     muxHeader=0;  // Read from the first byte.
+                     multiplexID = ResolveMuxIDFromSourceAddress(rtpSocketMap, rtpPortMap, addr, port);
+                 } else {
+                     multiplexID = buffer.GetMultiplexID();
+                 }
+
+                 it = rtpSocketMap.find(multiplexID);
                  if (it == rtpSocketMap.end()) {
-                     unsigned badMUXid = buffer.GetMultiplexID();
+                     unsigned badMUXid = multiplexID;
                      PTRACE(2,"H46019M\tReceived RTP packet with unknown MUX ID "
                                         << badMUXid << " " << addr << ":" << port);
                      unsigned rightMUXid=0;
-                     unsigned detected = ResolveSession(rtpSocketMap,badMUXid, true,addr,port, rightMUXid);
+                     unsigned detected = ResolveSession(rtpSocketMap, badMUXid, true, addr, port, rightMUXid);
                       if (!detected) continue;
                       it = rtpSocketMap.find(detected);
                       if (it == rtpSocketMap.end())  continue;
@@ -844,6 +884,7 @@ void PNatMethod_H46019::ReadThread(PThread &, INT)
                       PTRACE(2,"H46019M\tERROR: Recover Receive Multiplex Session " << rightMUXid  << " incorrectly sent as " << badMUXid);
                  } 
                  break;
+               }
                case H46019MultiplexSocket::e_rtcp:
                  it = rtcpSocketMap.find(buffer.GetMultiplexID());
                  if (it == rtcpSocketMap.end()) {
@@ -857,7 +898,7 @@ void PNatMethod_H46019::ReadThread(PThread &, INT)
                      continue;
              }
 
-             ((H46019UDPSocket *)it->second)->WriteMultiplexBuffer(buffer.GetPointer()+4,actRead-4,addr,port);
+             ((H46019UDPSocket *)it->second)->WriteMultiplexBuffer(buffer.GetPointer()+muxHeader, actRead-muxHeader, addr, port);
              len = bufferLen;
          } else {
              if (muxShutdown) continue;
