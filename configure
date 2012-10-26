@@ -1363,11 +1363,11 @@ Optional Features:
   --disable-video         disable video functions
   --disable-h224          disable H.224
   --disable-h230          disable H.230
-  --disable-h235          disable H.235.6 (128 bit)
-  --disable-h235-256      disable H.235.6 (256 bit)
+  --enable-h235           enable H.235.6 (128 bit)
+  --enable-h235-256       enable H.235.6 (256 bit)
   --disable-h239          disable H.239
-  --disable-h248          enable H.248
-  --disable-h249          disable H.249
+  --disable-h248          disable H.248
+  --enable-h249           enable H.249
   --disable-h341          disable H.341
   --disable-h350          disable H.350
   --disable-h450          disable H.450
@@ -3907,7 +3907,7 @@ default_h235=no
 default_h235_256=no
 default_h239=yes
 default_h248=yes
-default_h249=yes
+default_h249=no
 default_h341=yes
 default_h350=yes
 default_h460=yes
