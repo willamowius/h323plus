@@ -1594,8 +1594,11 @@ H323PluginVideoCodec::H323PluginVideoCodec(const OpalMediaFormat & fmt, Directio
 
     // Need to allocate buffer to the maximum framesize statically
     // and clear the memory in the destructor to avoid segfault in destructor
+    // Need the buffer to be sufficiently large enough to deal with errant endpoints sending video 
+    // too big for the capability advertised -SH
+    unsigned maxBytesRTPFrame = (1080 * 1200 * 3)/2 ;
+    bufferRTP = RTP_DataFrame(sizeof(PluginCodec_Video_FrameHeader) + maxBytesRTPFrame, TRUE);
     bytesPerFrame = (maxHeight * maxWidth * 3)/2;
-    bufferRTP = RTP_DataFrame(sizeof(PluginCodec_Video_FrameHeader) + bytesPerFrame, TRUE);
 	lastFUPTime=0;
 
 #if PTRACING
@@ -4121,12 +4124,12 @@ static PFactory<H323StaticPluginCodec>::Worker<H323StaticPluginCodec_##name > st
     INCLUDE_STATIC_CODEC(VIC_H261)
 #endif
 
-#ifdef H323_STATIC_H263
+//#ifdef H323_STATIC_H263
     #if _WIN32
 	   #pragma comment(lib,"FFMPEG_H263P_codec.lib")
     #endif
     INCLUDE_STATIC_CODEC(FFMPEG_H263P)
-#endif
+//#endif
 
 #ifdef H323_STATIC_H264
     #if _WIN32
