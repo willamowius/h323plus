@@ -3710,6 +3710,7 @@ PBoolean H323Capabilities::SetVideoFrameSize(H323Capability::CapabilityFrameSize
     if (frameSize != H323Capability::cifMPI) Remove("*-CIF*");
     if (frameSize != H323Capability::qcifMPI) Remove("*-QCIF*");
     if (frameSize != H323Capability::sqcifMPI) Remove("*-SQCIF*");
+    if (frameSize != H323Capability::i480MPI) Remove("*-VGA*");
     if (frameSize != H323Capability::p720MPI) Remove("*-720*");
     if (frameSize != H323Capability::i1080MPI) Remove("*-1080*");
 
