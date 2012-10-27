@@ -4124,12 +4124,12 @@ static PFactory<H323StaticPluginCodec>::Worker<H323StaticPluginCodec_##name > st
     INCLUDE_STATIC_CODEC(VIC_H261)
 #endif
 
-//#ifdef H323_STATIC_H263
+#ifdef H323_STATIC_H263
     #if _WIN32
 	   #pragma comment(lib,"FFMPEG_H263P_codec.lib")
     #endif
     INCLUDE_STATIC_CODEC(FFMPEG_H263P)
-//#endif
+#endif
 
 #ifdef H323_STATIC_H264
     #if _WIN32
