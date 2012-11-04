@@ -110,10 +110,12 @@ void BuildEncryptionSync(H245_EncryptionSync & sync, const H323SecureRTPChannel 
 }
 
 
-PBoolean ReadEncryptionSync(const H245_EncryptionSync & sync, H235Session & session)
+PBoolean ReadEncryptionSync(const H245_EncryptionSync & sync, H323SecureRTPChannel & chan, H235Session & session)
 {
     H235_H235Key h235key;
     sync.m_h235Key.DecodeSubType(h235key);
+
+    chan.SetDynamicRTPPayloadType(sync.m_synchFlag);
 
     switch (h235key.GetTag()) {
         case H235_H235Key::e_secureChannel:
@@ -189,7 +191,7 @@ PBoolean H323SecureRTPChannel::OnReceivedPDU(const H245_OpenLogicalChannel & ope
    if (open.HasOptionalField(H245_OpenLogicalChannel::e_encryptionSync)) {
        if (m_encryption->CreateSession(false)) {
            connection.OnMediaEncryption(GetSessionID(), GetDirection(), CipherString(m_algorithm));
-           return ReadEncryptionSync(open.m_encryptionSync,*m_encryption);
+           return ReadEncryptionSync(open.m_encryptionSync,*this,*m_encryption);
        }
    } 
    return true;
@@ -206,7 +208,7 @@ PBoolean H323SecureRTPChannel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck
   if (ack.HasOptionalField(H245_OpenLogicalChannelAck::e_encryptionSync)) {
       if (m_encryption->CreateSession(false)) {
             connection.OnMediaEncryption(GetSessionID(), GetDirection(), CipherString(m_algorithm));
-            return ReadEncryptionSync(ack.m_encryptionSync,*m_encryption);
+            return ReadEncryptionSync(ack.m_encryptionSync,*this,*m_encryption);
       }
   }
   return true;
@@ -282,6 +284,15 @@ RTP_DataFrame::PayloadTypes H323SecureRTPChannel::GetRTPPayloadType() const
 
 PBoolean H323SecureRTPChannel::SetDynamicRTPPayloadType(int newType)
 {
+    if (m_payload == newType)
+        return true;
+
+    if (m_payload != RTP_DataFrame::IllegalPayloadType) {
+        PTRACE(1,"WARNING: Change Payload " << GetSessionID() << " " << 
+                 (GetDirection() == IsReceiver ? "Receive" : "Transmit") << 
+                  " to " << newType << " from " << m_payload);
+    }
+
     m_payload = newType;
     return true;
 }
