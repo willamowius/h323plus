@@ -151,7 +151,7 @@ void SimpleH323Process::Main()
             "  -m --mediaenc           : Enable Media encryption (value max cipher 128, 192 or 256).\n"
 #endif
 #ifdef H323_H46017
-           "   -k --h46017             : Use H.460.17 Gatekeeper.\n"
+            "   -k --h46017            : Use H.460.17 Gatekeeper.\n"
 #endif
 #ifdef H323_H46018
             "     --h46018disable      : Disable H.460.18.\n"
