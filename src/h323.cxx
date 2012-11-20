@@ -1584,8 +1584,11 @@ void H323Connection::SetLocalPartyName(const PString & name)
 
 void H323Connection::SetRemotePartyInfo(const H323SignalPDU & pdu)
 {
-  if (pdu.GetQ931().GetCalledPartyNumber(remoteQ931Number))
+  PString number=PString();
+  if (pdu.GetQ931().GetCalledPartyNumber(number) && !number.IsEmpty()) {
+    remoteQ931Number = number;
     remotePartyNumber = remoteQ931Number;
+  }
 
   PString newRemotePartyName = pdu.GetQ931().GetDisplayName();
   if (!newRemotePartyName.IsEmpty()) {
@@ -1597,6 +1600,15 @@ void H323Connection::SetRemotePartyInfo(const H323SignalPDU & pdu)
     remotePartyName = signallingChannel->GetRemoteAddress().GetHostName();
 
   PTRACE(2, "H225\tSet remote party name: \"" << remotePartyName << '"');
+}
+
+
+void H323Connection::SetRemotePartyName(const PString & name)
+{
+    if (useQ931Display)
+        remoteQ931Number = name;
+
+    remotePartyName = name;
 }
 
 

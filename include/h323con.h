@@ -2600,6 +2600,10 @@ class H323Connection : public PObject
       */
     void SetLocalPartyName(const PString & name);
 
+    /**Set the remote name/alias.
+      */
+    void SetRemotePartyName(const PString & name);
+
     /**Set the local Display name
       */
     void SetDisplayName(const PString & name) { localDisplayName = name; }

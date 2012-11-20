@@ -1469,6 +1469,7 @@ H323Connection * H323EndPoint::InternalMakeCall(const PString & trasferFromToken
     connectionsMutex.Signal();
     return NULL;
   }
+  connection->SetRemotePartyName(remoteParty);
 
   if (supplimentary) 
       connection->SetNonCallConnection();     
