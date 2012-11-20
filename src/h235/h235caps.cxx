@@ -640,6 +640,23 @@ H323Codec * H323SecureCapability::CreateCodec(H323Codec::Direction direction) co
     return ChildCapability.CreateCodec(direction);
 }
 
+/////////////////////////////////////////////////////////////////////////////
+
+static PStringArray & GetH235Codecs()
+{
+  static const char * defaultCodecs[] = { "all" };
+  static PStringArray codecs(
+          sizeof(defaultCodecs)/sizeof(defaultCodecs[0]),
+          defaultCodecs
+  );
+  return codecs;
+}
+
+static PMutex & GetH235CodecsMutex()
+{
+  static PMutex mutex;
+  return mutex;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -772,7 +789,10 @@ void H235Capabilities::WrapCapability(PINDEX descriptorNum, PINDEX simultaneous,
     switch (capability.GetDefaultSessionID()) {
         case OpalMediaFormat::DefaultAudioSessionID:
         case OpalMediaFormat::DefaultVideoSessionID:
-            AddSecure(descriptorNum, simultaneous, new H323SecureCapability(capability, H235ChNew,this));
+            if (IsH235Codec(capability.GetFormatName()))
+                AddSecure(descriptorNum, simultaneous, new H323SecureCapability(capability, H235ChNew,this));
+            else
+                SetCapability(descriptorNum, simultaneous, (H323Capability *)capability.Clone());        
             break;
         case OpalMediaFormat::NonRTPSessionID:
         case OpalMediaFormat::DefaultDataSessionID:
@@ -891,6 +911,26 @@ PBoolean H235Capabilities::GetAlgorithms(const PStringList & algorithms) const
          m_localAlgorithms->AppendString(m_algorithms[i]);
 
     return (algorithms.GetSize() > 0);
+}
+
+void H235Capabilities::SetH235Codecs(const PStringArray & servers)
+{
+     PWaitAndSignal m(GetH235CodecsMutex());
+     GetH235Codecs() = servers;
+}
+
+PBoolean H235Capabilities::IsH235Codec(const PString & name)
+{
+    PStringArray codecs = GetH235Codecs();
+
+    if ((codecs.GetSize() == 0) || (codecs[0] *= "all"))
+        return true;
+    
+    for (PINDEX i=0; i<codecs.GetSize(); ++i) {
+        if (name.Find(codecs[i]) != P_MAX_INDEX)
+            return true;
+    }
+    return false;
 }
 
 #endif

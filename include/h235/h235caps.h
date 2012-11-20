@@ -588,6 +588,11 @@ public:
 
     H235_DiffieHellman * GetDiffieHellMan() { return m_DHkey; }
 
+    /**Filter codecs
+      */
+    static void SetH235Codecs(const PStringArray & servers);
+    PBoolean IsH235Codec(const PString & name);
+
 protected:
     H235_DiffieHellman * m_DHkey; 
     PStringList          m_algorithms;
