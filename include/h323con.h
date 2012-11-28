@@ -1841,12 +1841,6 @@ class H323Connection : public PObject
       unsigned sessionId,   ///< Session ID to search for.
       PBoolean fromRemote       ///< Indicates the direction of RTP data.
     ) const;
-
-#ifdef H323_H239
-    /**Get H.239 Channel Number.
-      */
-    H323ChannelNumber  GeExtendedChannelNum() const;
-#endif
   //@}
 
   /**@name Bandwidth Management */
@@ -3372,10 +3366,6 @@ class H323Connection : public PObject
     std::map<unsigned,NAT_Sockets> m_NATSockets;
 #endif
 
-#ifdef H323_H239
-    PBoolean DecodeH239GenericResponse(const H245_ArrayOf_GenericParameter & params);
-    H323ChannelNumber m_H239ChanId;
-#endif
 };
 
 
