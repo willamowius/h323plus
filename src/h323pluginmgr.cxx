@@ -1596,7 +1596,7 @@ H323PluginVideoCodec::H323PluginVideoCodec(const OpalMediaFormat & fmt, Directio
     // and clear the memory in the destructor to avoid segfault in destructor
     // Need the buffer to be sufficiently large enough to deal with errant endpoints sending video 
     // too big for the capability advertised -SH
-    unsigned maxBytesRTPFrame = (1080 * 1200 * 3)/2 ;
+    unsigned maxBytesRTPFrame = (1920 * 1200 * 3)/2 ;
     bufferRTP = RTP_DataFrame(sizeof(PluginCodec_Video_FrameHeader) + maxBytesRTPFrame, TRUE);
     bytesPerFrame = (maxHeight * maxWidth * 3)/2;
 	lastFUPTime=0;
