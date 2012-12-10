@@ -55,6 +55,7 @@
 #include <map>
 
 #include <ptclib/delaychan.h>
+#include <ptclib/random.h>
 
 /////////////////////////////////////////////////////////////////////
 #define SAFE_RELEASE(p) { if(p) { (p)->Release(); (p)=NULL; } }
@@ -1043,6 +1044,7 @@ PNatMethod_UPnP::PNatMethod_UPnP()
 {
     available = false;
     active = false;
+
     m_pShutdown = false;
 
     m_pExtIP = PIPSocket::GetDefaultIpAny();
@@ -1244,7 +1246,13 @@ void PNatMethod_UPnP::SetExtIPAddress(const PString & newAddr)
 
 WORD PNatMethod_UPnP::GetRandomPort()
 {
-   return RandomPortPair(UPnPUDPBasePort, UPnPUDPBasePort+1000);
+    WORD num;
+    PRandom rand;
+    num = (WORD)rand.Generate(UPnPUDPBasePort, UPnPUDPBasePort+1000);
+    if (num %2 != 0) 
+         num++;  // Make sure the number is even
+
+    return num;
 }
 
 PBoolean PNatMethod_UPnP::OnUPnPAvailable(const PString & devName)

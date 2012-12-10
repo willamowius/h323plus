@@ -236,6 +236,17 @@ PSTUNClient::NatTypes PNatMethod_H46024::GetNATType()
     return natType;
 }
 
+WORD PNatMethod_H46024::CreateRandomPortPair(unsigned int start, unsigned int end)
+{
+    WORD num;
+    PRandom rand;
+    num = (WORD)rand.Generate(start,end);
+    if (num %2 != 0) 
+        num++;  // Make sure the number is even
+
+    return num;
+}
+
 
 PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
                                              PUDPSocket * & socket2,
@@ -291,7 +302,7 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
 #endif
 #if (PTLIB_VER > 260)
         pairedPortInfo.currentPort = 
-            RandomPortPair(pairedPortInfo.basePort-1,pairedPortInfo.maxPort-2);
+            CreateRandomPortPair(pairedPortInfo.basePort-1,pairedPortInfo.maxPort-2);
 #endif
 
 #if 0

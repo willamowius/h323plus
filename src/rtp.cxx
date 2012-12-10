@@ -713,7 +713,7 @@ bool RTP_Session::AVSyncData(SenderReport & sender)
 
 void RTP_Session::SetTxStatisticsInterval(unsigned packets)
 {
-  txStatisticsInterval = PMAX(packets, 2);
+  txStatisticsInterval = PMAX(packets, (unsigned)2);
   txStatisticsCount = 0;
   averageSendTimeAccum = 0;
   maximumSendTimeAccum = 0;
@@ -723,7 +723,7 @@ void RTP_Session::SetTxStatisticsInterval(unsigned packets)
 
 void RTP_Session::SetRxStatisticsInterval(unsigned packets)
 {
-  rxStatisticsInterval = PMAX(packets, 2);
+  rxStatisticsInterval = PMAX(packets, (unsigned)2);
   rxStatisticsCount = 0;
   averageReceiveTimeAccum = 0;
   maximumReceiveTimeAccum = 0;

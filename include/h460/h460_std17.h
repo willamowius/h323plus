@@ -444,10 +444,15 @@ public:
 	 */
    virtual void Activate(bool act)  { active = act; }
 
+#if PTLIB_VER > 2120
+   static PString GetNatMethodName() { return "H46026"; }
+   virtual PString GetName() const
+            { return GetNatMethodName(); }
+#else
    static PStringArray GetNatMethodName() {  return PStringArray("H46026"); }
-
    virtual PString GetName() const
             { return GetNatMethodName()[0]; }
+#endif
 
    // All these are virtual and never used. 
     virtual bool GetServerAddress(
@@ -480,6 +485,8 @@ public:
     virtual bool CreateSocket(BYTE component,PUDPSocket * & socket,
             const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny(),WORD localPort = 0)  { return false; }
     virtual void SetCredentials(const PString &, const PString &, const PString &) {}
+protected:
+    virtual NatTypes InternalGetNatType(bool, const PTimeInterval &) { return UnknownNat; }
 #endif
 
 

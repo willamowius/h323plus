@@ -60,10 +60,15 @@ class PNatMethod_H46024  : public PSTUNClient
 
         ~PNatMethod_H46024();
 
+#if PTLIB_VER > 2120
+        static PString GetNatMethodName() { return "H46024"; }
+        virtual PString GetName() const
+               { return GetNatMethodName(); }
+#else
         static PStringList GetNatMethodName() {  return PStringArray("H46024"); };
-
         virtual PString GetName() const
                 { return GetNatMethodName()[0]; }
+#endif
 
         // Start the Nat Method testing
         void Start(const PString & server,H460_FeatureStd23 * _feat);
@@ -92,6 +97,9 @@ class PNatMethod_H46024  : public PSTUNClient
 
         // Set Port Information
         void SetPortInformation(PortInfo & pairedPortInfo, WORD portPairBase, WORD portPairMax);
+
+        //  CreateRandomPortPair
+        WORD CreateRandomPortPair(unsigned int start, unsigned int end);
 
 #if PTLIB_VER >= 2110
     virtual PString GetServer() const { return PString(); }

@@ -115,11 +115,15 @@ public:
 
    PBoolean OpenSocket(PUDPSocket & socket, PortInfo & portInfo, const PIPSocket::Address & binding) const;
 
-
+#if PTLIB_VER > 2120
+   static PString GetNatMethodName() { return "UPnP"; }
+   virtual PString GetName() const
+            { return GetNatMethodName(); }
+#else
    static PStringList GetNatMethodName() {  return PStringArray("UPnP"); };
    virtual PString GetName() const
             { return GetNatMethodName()[0]; }
-
+#endif
 
    // All these are virtual and never used. 
     virtual bool GetServerAddress(
@@ -163,6 +167,8 @@ public:
     virtual bool CreateSocket(BYTE component,PUDPSocket * & socket,
             const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny(),WORD localPort = 0)  { return false; }
     virtual void SetCredentials(const PString &, const PString &, const PString &) {}
+protected:
+    virtual NatTypes InternalGetNatType(bool, const PTimeInterval &) { return UnknownNat; }
 #endif
 
 protected:
