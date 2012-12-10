@@ -798,11 +798,15 @@ PBoolean SimpleH323EndPoint::OpenVideoChannel(H323Connection & /*connection*/,
   }
 #endif
 
+  if (!device->Open(deviceName, TRUE)) {
+    PTRACE(1, "Failed to open the video device \"" << deviceName << '"');
+    return FALSE;
+  }
+
   if (!device->SetFrameSize(codec.GetWidth(), codec.GetHeight()) ||
       !device->SetFrameRate(codec.GetFrameRate()) ||
-      !device->SetColourFormatConverter("YUV420P") ||
-      !device->Open(deviceName, TRUE)) {
-    PTRACE(1, "Failed to open or configure the video device \"" << deviceName << '"');
+      !device->SetColourFormatConverter("YUV420P")) {
+    PTRACE(1, "Failed to configure the video device \"" << deviceName << '"');
     return FALSE;
   }
 
