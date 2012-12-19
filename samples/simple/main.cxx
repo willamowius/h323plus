@@ -496,7 +496,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
       PIPSocket::InterfaceTable interfaceTable;
       if (PIPSocket::GetInterfaceTable(interfaceTable)) {
           for (PINDEX j=0; j < interfaceTable.GetSize(); ++j) {
-              if (interfaceTable[j].GetAddress().GetVersion() == 4) {
+              if (interfaceTable[j].GetAddress().GetVersion() == 4 && !interfaceTable[j].GetAddress().IsLoopback()) {
                  iface = interfaceTable[j].GetAddress().AsString();
                  break;
               }
@@ -790,29 +790,31 @@ PBoolean SimpleH323EndPoint::OpenVideoChannel(H323Connection & /*connection*/,
   PVideoDevice * device = isEncoding ? (PVideoDevice *)PVideoInputDevice::CreateDeviceByName(deviceName)
                                      : (PVideoDevice *)PVideoOutputDevice::CreateDeviceByName(deviceName);
 
+  // codec needs a list of possible formats, otherwise the frame size isn't negotiated properly
 #if PTLIB_VER >= 2110
   if (isEncoding) {
       PVideoInputDevice::Capabilities videoCaps;
       if (((PVideoInputDevice *)device)->GetDeviceCapabilities(deviceName,deviceDriver,&videoCaps))
           codec.SetSupportedFormats(videoCaps.framesizes);
   }
+#else
+  if (isEncoding) {
+    PVideoInputDevice::Capabilities caps;
+    PVideoFrameInfo cap;
+    cap.SetColourFormat("YUV420P");
+    cap.SetFrameRate(30);
+    // sizes must be from largest to smallest
+    cap.SetFrameSize(1280, 720);
+    caps.framesizes.push_back(cap);
+    cap.SetFrameSize(704, 576);
+    caps.framesizes.push_back(cap);
+    cap.SetFrameSize(640, 400);
+    caps.framesizes.push_back(cap);
+    cap.SetFrameSize(352, 288);
+    caps.framesizes.push_back(cap);
+    codec.SetSupportedFormats(caps.framesizes);
+  }
 #endif
-
-  // codec needs a list of possible formats, otherwise the frame size isn't negotiated properly
-  PVideoInputDevice::Capabilities caps;
-  PVideoFrameInfo cap;
-  cap.SetColourFormat("YUV420P");
-  cap.SetFrameRate(30);
-  // sizes must be from largest to smallest
-  cap.SetFrameSize(1280, 720);
-  caps.framesizes.push_back(cap);
-  cap.SetFrameSize(704, 576);
-  caps.framesizes.push_back(cap);
-  cap.SetFrameSize(640, 400);
-  caps.framesizes.push_back(cap);
-  cap.SetFrameSize(352, 288);
-  caps.framesizes.push_back(cap);
-  codec.SetSupportedFormats(caps.framesizes);
 
   if (!device->Open(deviceName, TRUE)) {
     PTRACE(1, "Failed to open the video device \"" << deviceName << '"');
