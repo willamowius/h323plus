@@ -1,5 +1,13 @@
 
-H323plus 1.24.0 - 1.24.x
+===============================================================================
+H323plus 1.25.0 - 1.25.x
+===============================================================================
+
+
+
+===============================================================================
+H323plus 1.24.0 - 1.24.2
+===============================================================================
 Added H.460 Compatibility Feature
 Added H.460.26 Support (depreciated nonstandard H.460.17a) [Work in Progress]
 Updated ASN.1 to H.323v7 (H.225v7, H.245v15)
@@ -25,13 +33,20 @@ FIX H.460.24 Annex A and B tweaks
 Added RTP Multiplexing support to H.460.23/.24
 FIX IPv6 Support and checks
 
+
+===============================================================================
 H323plus 1.23.0 - 1.23.1
+===============================================================================
 Added MediaChannelCapability to OLC
 Added H.235.6 Support (Experimental)
 Updated H323List for depreciation warnings with ptlib 2.11
 Added RTP multiplexing (with H.460.19)
 
+
+
+===============================================================================
 H323plus 1.22 - 1.23
+===============================================================================
 (Fixed) Deadlock in NAT Method when locking H323Connection
 (Fixed) Encoded audio/video input and output support
 Added H.460.17 support
@@ -44,7 +59,10 @@ Use fastStart element in CallProceeding again, set enableMERAHack in H323Connect
 Improved H.264 decoder with better initialisation and support for send FPU's
 
 
+
+===============================================================================
 H323plus 1.21 - 1.22
+===============================================================================
 Fixed H.239 Support and now support H.239 only plugins
 G.711 now 20ms sample rate by default
 Added H.264 support (tested with polycom,lifesize,tandberg)
@@ -74,8 +92,10 @@ Added H.460.18/.19 support (Disabled by default)
 (fixed) Slow start being accidently activated when FastStart being acknowledged.
 
 
-H323plus 1.20 - 1.21
 
+===============================================================================
+H323plus 1.20 - 1.21
+===============================================================================
 Updated to compile with Ptlib 2.2.x and 2.3.x (PBoolean etc.)
 (Fixed) Early Media Fixed as the FastStartState is now checked if acknowledged prior to sending connect message.
 (Fixed) RTP Payload Types not read from the audio plugin codecs (standard and non-standard)
