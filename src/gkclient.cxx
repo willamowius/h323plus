@@ -1820,6 +1820,13 @@ PBoolean H323Gatekeeper::MakeRequest(Request & request)
       requestMutex.Signal();
       return FALSE;
     }
+
+    if (request.responseResult == Request::NoResponseReceived && 
+        endpoint.GetConnections().GetSize() > 0) {
+        PTRACE(2,"GK\tRegistration no response. Unregister deferred as on call.");
+        requestMutex.Signal();
+        return TRUE;
+    }
     
     AlternateInfo * altInfo;
     PIPSocket::Address localAddress;
