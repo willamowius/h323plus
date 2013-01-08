@@ -1128,6 +1128,8 @@ PBoolean H323SignalPDU::Read(H323Transport & transport)
         PTRACE(1, "H225\tRead error (" << transport.GetErrorNumber(PChannel::LastReadError)
                                  << "): " << transport.GetErrorText(PChannel::LastReadError));
          if (transport.IsOpen() && !transport.Connect()) {
+             // TODO: consult connection.HandleSignalChannelFailure() and disconnect or continue
+             // this happens many minutes after the network connection is cut!
              PTRACE(1, "H225\tTCP Socket could not reconnect. Proceed without control channel.");
              PThread::Sleep(100);
          } else 

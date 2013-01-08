@@ -231,7 +231,10 @@ void H245TransportThread::KeepAlive(PTimer &, INT)
 
   PTRACE(5, "H245\tSending KeepAlive TPKT packet");
 
-  transport.Write(tpkt, len);
+  // TODO: check for error and consult connection.HandleControlChannelFailure() and disconnect or continue
+  // Write() seems to always return TRUE
+  PBoolean ok = transport.Write(tpkt, len);
+  PTRACE(0, "JW Sending KeepAlive ok=" << ok << " len=" << len << " err=" << transport.GetErrorCode());
 }
 
 
