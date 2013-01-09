@@ -3175,11 +3175,14 @@ PBoolean H323Connection::HandleReceivedControlPDU(PBoolean readStatus, PPER_Stre
     // and simply closes the H.245 TCP connection rather than sending an 
     // endSession.
       if(endSessionSent == FALSE) {
+         PTRACE(1, "H245\tTCP Socket closed Unexpectedly.");
+         if (!HandleControlChannelFailure()) {
+             PTRACE(1, "H245\tAborting call");
+             ClearCall(EndedByTransportFail);
+             return false;
+         }
          PTRACE(1, "H245\tTCP Socket closed Unexpectedly. Attempting to reconnect.");
          if (!controlChannel->Connect()) {
-             // TODO: consult HandleControlChannelFailure() and disconnect or continue
-             // this happens many minutes after the network connection is cut
-             // just returning false doesn't end the call!!!
              PTRACE(1, "H245\tTCP Socket could not reconnect. Proceed without control channel.");
              PThread::Sleep(500);
          }
