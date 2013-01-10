@@ -827,8 +827,7 @@ public:
 
                   m_frameCount++;
                   if (m_lastSequence) {
-                     unsigned diff=0;
-                     diff = info.m_sequence - m_lastSequence - 1;
+                     unsigned diff = info.m_sequence - m_lastSequence - 1;
                      if (diff > 0) {
                          PTRACE(5,"RTPBUF\tDetected loss of " << diff << " packets."); 
                          m_lossCount = m_lossCount + diff;
