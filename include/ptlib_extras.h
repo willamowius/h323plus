@@ -792,7 +792,7 @@ public:
 
         while (!m_exit) {
             while (m_frameOutput && m_frameMarker > 0) {
-                if (m_buffer.size() == 0) {
+                if (m_buffer.empty()) {
                     if (m_frameMarker > 0)
                         m_frameMarker--;
                     break;
@@ -811,7 +811,7 @@ public:
                     memcpy(frame.GetPointer(), m_buffer.top().second, m_buffer.top().second.GetSize());
                     unsigned lastTimeStamp = info.m_timeStamp;
                     m_buffer.pop();
-                    if (info.m_marker && m_buffer.size() > 0) { // Peek ahead for next timestamp
+                    if (info.m_marker && !m_buffer.empty()) { // Peek ahead for next timestamp
                         delay = (m_buffer.top().first.m_timeStamp - lastTimeStamp)/(unsigned)m_calcClockRate;
                         if (delay < 0 || delay > 200 || (lastTimeStamp > m_buffer.top().first.m_timeStamp)) {
                            delay = 0;
@@ -826,8 +826,8 @@ public:
                       break;
 
                   m_frameCount++;
-                  unsigned diff=0;
                   if (m_lastSequence) {
+                     unsigned diff=0;
                      diff = info.m_sequence - m_lastSequence - 1;
                      if (diff > 0) {
                          PTRACE(5,"RTPBUF\tDetected loss of " << diff << " packets."); 
@@ -864,7 +864,7 @@ public:
             PThread::Sleep(5);
         }
      bufferMutex.Wait();
-        m_buffer.empty();
+     m_buffer.empty();	// TODO: this looks bogus, did you mean m_buffer.clear() ? - JW
      bufferMutex.Signal();
 
         m_threadRunning = false;
@@ -907,7 +907,7 @@ public:
 
         bufferMutex.Wait();
         m_packetReceived++;
-        if (m_frameOutput && m_buffer.size() > 0 && info.m_sequence < m_buffer.top().first.m_sequence) {
+        if (m_frameOutput && !m_buffer.empty() && info.m_sequence < m_buffer.top().first.m_sequence) {
             m_oddTimeCount++;
             PTRACE(6,"RTPBUF\tLate Packet Received " << (m_oddTimeCount/m_packetReceived)*100.0 << "%");
             if ((m_oddTimeCount/m_packetReceived)*100.0 > m_lateThreshold) {
