@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2011/06/28 10:32:24  shorne
+ * Fix typos in comments
+ *
  * Revision 1.3  2010/02/24 03:40:07  shorne
  * Added ability to compile without t.38/t.120 support on windows
  *
@@ -477,7 +480,7 @@ PBoolean H323_T38Channel::CreateListener()
 
   if (usesTCP) {
     return H323DataChannel::CreateListener();
-    PTRACE(3, "H323T38\tCreated listener " << *listener);
+    PTRACE(3, "H323T38\tCreated listener " << *listener);	// TODO: this never executed - JW
   }
 
   return CreateTransport();
