@@ -739,8 +739,7 @@ PINDEX H323EndPoint::AddAllCapabilities(PINDEX descriptorNum,
                                         PINDEX simultaneous,
                                         const PString & name)
 {
-    PINDEX reply = simultaneous;
-    reply = capabilities.AddAllCapabilities(descriptorNum, simultaneous, name);
+    PINDEX reply = capabilities.AddAllCapabilities(descriptorNum, simultaneous, name);
 #ifdef H323_VIDEO
 #ifdef H323_H239
     AddAllExtendedVideoCapabilities(descriptorNum, simultaneous);
@@ -1617,14 +1616,14 @@ PBoolean H323EndPoint::ResolveCallParty(const PString & _remoteParty, PStringLis
   }
 #endif
 
-     // attempt a DNS SRV lookup to detect a call signalling entry
-    PBoolean found = FALSE;
+   // attempt a DNS SRV lookup to detect a call signalling entry
    if (remoteParty.Find('@') != P_MAX_INDEX) {
        PString number = remoteParty;
        if (number.Left(5) != "h323:") 
           number = "h323:" + number;      
                
        PStringList str;
+       PBoolean found = FALSE;
 
        if (!found) str.RemoveAll();
        if (!found && (PDNS::LookupSRV(number,"_h323cs._tcp.",str))) {
@@ -2810,7 +2809,7 @@ PBoolean H323EndPoint::OnReceiveCallIndependentSupplementaryService(const H323Co
       conn->Unlock();
   }
 
-  if (featset->SupportNonCallService(fs)) {
+  if (featset && featset->SupportNonCallService(fs)) {
      PTRACE(6,"MyEP\tReceived H.460 Call Independent Supplementary Service");
      return true;
   } else 
