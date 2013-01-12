@@ -2446,7 +2446,7 @@ class H323VideoPluginCapability : public H323VideoCapability,
              case H323Capability::p720MPI : 
  			     if (cif16MPI==0) return true;
 				 break;
-				 w = CIF16_WIDTH; h = CIF16_HEIGHT;
+				 w = CIF16_WIDTH; h = CIF16_HEIGHT;	// TODO: this code is never executed, move before break ? - JW
              default: return false;
          }
 
