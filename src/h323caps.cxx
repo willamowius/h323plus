@@ -4012,9 +4012,8 @@ void H245_AudioCapability::PrintOn(ostream & strm) const
               (h221.m_manufacturerCode == 21324)
             ) {
             PString name = "Unknown";
-            PINDEX i;
             if (data.GetSize() >= 21) {
-              for (i = 0; msNonStandardCodec[i].name != NULL; i++) {
+              for (PINDEX i = 0; msNonStandardCodec[i].name != NULL; i++) {
                 if ((data[20] == msNonStandardCodec[i].sig[0]) && 
                     (data[21] == msNonStandardCodec[i].sig[1])) {
                   name = msNonStandardCodec[i].name;
