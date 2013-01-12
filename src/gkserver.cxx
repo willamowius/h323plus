@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2011/02/20 06:55:46  shorne
+ * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
+ *
  * Revision 1.4  2010/08/05 13:31:21  willamowius
  * fix memory leak (thanks Francisco Olarte)
  *
@@ -847,7 +850,7 @@ H323GatekeeperRRQ::H323GatekeeperRRQ(H323GatekeeperListener & rasChannel,
       // just use the physical reply address already set by ancestor.
       H323TransportAddress rasAddress = rrq.m_rasAddress[i];
       PIPSocket::Address rasIP;
-      if (!senderIsIP |
+      if (!senderIsIP ||
           !rasAddress.GetIpAddress(rasIP) ||
           senderIsLocal == ep.IsLocalAddress(rasIP)) {
         PTRACE(4, "RAS\tFound suitable RAS address in RRQ: " << rasAddress);
