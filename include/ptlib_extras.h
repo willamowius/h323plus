@@ -862,9 +862,10 @@ public:
             }
             PThread::Sleep(5);
         }
-     bufferMutex.Wait();
-     m_buffer.empty();	// TODO: this looks bogus, did you mean m_buffer.clear() ? - JW
-     bufferMutex.Signal();
+        bufferMutex.Wait();
+        while (!m_buffer.empty()) 
+           m_buffer.pop();
+        bufferMutex.Signal();
 
         m_threadRunning = false;
     }
