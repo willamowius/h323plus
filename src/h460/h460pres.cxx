@@ -5,7 +5,7 @@
 //
 
 #ifdef P_USE_PRAGMA
-#pragma implementation "H460pres.h"
+#pragma implementation "h460pres.h"
 #endif
 
 #include <ptlib.h>
