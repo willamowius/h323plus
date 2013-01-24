@@ -835,8 +835,6 @@ PBoolean H323Transport::HandleSignallingSocket(H323SignalPDU & pdu)
           return TRUE;
       }    
   }
-      
-  return FALSE;
 }
 
 PBoolean H323Transport::HandleFirstSignallingChannelPDU(PThread * thread)

@@ -198,7 +198,6 @@ int EVP_EncryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
             PTRACE(1, "H235\tCTS Error: unsupported mode");
             return 0;
     }
-    return 0;
 }
 
 int EVP_DecryptUpdate_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
@@ -290,7 +289,6 @@ int EVP_DecryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
             PTRACE(1, "H235\tCTS Error: unsupported mode");
             return 0;
     }
-    return 0;
 }
 
 int EVP_DecryptFinal_relaxed(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)

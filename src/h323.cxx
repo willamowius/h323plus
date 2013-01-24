@@ -379,8 +379,6 @@ PBYTEArray strm;
       }
       return AuthResult ? TRUE : connection->OnEPAuthenticationFailed(result);
   }
-
-   return AuthResult;
 }
 
 #ifdef H323_H46018

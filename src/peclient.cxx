@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/05/23 11:22:30  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.1  2007/08/06 20:51:07  shorne
  * First commit of h323plus
  *
@@ -1529,8 +1532,6 @@ H323PeerElement::Error H323PeerElement::SendAccessRequestByID(const OpalGlobally
         return Rejected;
     }
   }
-
-  return Rejected;
 }
 
 H323PeerElement::Error H323PeerElement::SendAccessRequestByAddr(const H323TransportAddress & peerAddr, 

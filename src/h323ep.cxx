@@ -2740,33 +2740,13 @@ PBoolean H323EndPoint::OnSendCallIndependentSupplementaryService(const H323Conne
 
   H225_Setup_UUIE & setup = pdu.m_h323_uu_pdu.m_h323_message_body;
   setup.m_conferenceGoal.SetTag(H225_Setup_UUIE_conferenceGoal::e_callIndependentSupplementaryService);
-/*
-  // This is horrible however it's the easiest way to get the connection featureSet.
-  H460_FeatureSet * featset = NULL;
-  H323Connection* conn = FindConnectionWithLock(connection->GetCallToken());
-  if (conn != NULL) {
-      featset = conn->GetFeatureSet();
-      conn->Unlock();
-  }
 
-  if (featset == NULL)
-      return false;
+  PTRACE(6,"MyEP\tSending H.460 Call Independent Supplementary Service"); 
+  return true;
 
-  H225_FeatureSet fs;
-  if (featset->SendFeature(H460_MessageType::e_setup, fs)) {
-    if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
-        setup.IncludeOptionalField(H225_Setup_UUIE::e_supportedFeatures);
-        H225_ArrayOf_FeatureDescriptor & fsn = setup.m_supportedFeatures;
-        fsn = fs.m_supportedFeatures;
-    } */
-    PTRACE(6,"MyEP\tSending H.460 Call Independent Supplementary Service"); 
-    return true;
-//  } else
- 
+#else
+  return false;
 #endif
- // {
-    return false;
-//  }
 }
 
 PBoolean H323EndPoint::OnReceiveCallIndependentSupplementaryService(const H323Connection * connection, 

@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.7  2011/06/28 10:32:24  shorne
+ * Fix typos in comments
+ *
  * Revision 1.6  2008/05/23 11:22:45  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -743,7 +746,6 @@ PBoolean H230Control::OnReceivedT124Indication(const GCC_IndicationPDU & pdu)
 	  default:
 		  return FALSE;
 	}
-	return FALSE;
 }
 
 PBoolean H230Control::OnConferenceJoinRequest(const GCC_ConferenceJoinRequest & /*pdu*/)

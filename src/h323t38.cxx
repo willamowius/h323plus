@@ -24,6 +24,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.5  2013/01/12 22:27:38  willamowius
+ * add comment
+ *
  * Revision 1.4  2011/06/28 10:32:24  shorne
  * Fix typos in comments
  *
@@ -478,10 +481,8 @@ PBoolean H323_T38Channel::CreateListener()
   if (listener != NULL)
     return TRUE;
 
-  if (usesTCP) {
+  if (usesTCP)
     return H323DataChannel::CreateListener();
-    PTRACE(3, "H323T38\tCreated listener " << *listener);	// TODO: this never executed - JW
-  }
 
   return CreateTransport();
 }
