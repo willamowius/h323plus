@@ -276,8 +276,10 @@ H323SecureRealTimeCapability::~H323SecureRealTimeCapability()
 
 void H323SecureRealTimeCapability::AttachQoS(RTP_QOS * _rtpqos)
 {
+#ifdef P_QOS
       delete nrtpqos;  
       nrtpqos = _rtpqos;
+#endif
 }
 
 void H323SecureRealTimeCapability::SetAssociatedCapability(unsigned _secNo)

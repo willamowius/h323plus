@@ -1501,7 +1501,12 @@ PBoolean RTP_UDP::Open(PIPSocket::Address _localAddress,
                    const H323Connection &,
                    void *,
 #endif
-                   RTP_QOS * rtpQos)
+#ifdef P_QOS
+                   RTP_QOS * rtpQos
+#else
+				   RTP_QOS *
+#endif
+				   )
 {
   // save local address 
   localAddress = _localAddress;
@@ -1514,14 +1519,14 @@ PBoolean RTP_UDP::Open(PIPSocket::Address _localAddress,
   dataSocket = NULL;
   controlSocket = NULL;
 
+#if P_QOS
   PQoS * dataQos = NULL;
   PQoS * ctrlQos = NULL;
   if (rtpQos != NULL) {
-#if P_QOS
     dataQos = &(rtpQos->dataQoS);
     ctrlQos = &(rtpQos->ctrlQoS);
-#endif
   }
+#endif
 
 #ifdef P_STUN
   if (meth != NULL) {
@@ -1545,8 +1550,13 @@ PBoolean RTP_UDP::Open(PIPSocket::Address _localAddress,
 #endif
 
   if (dataSocket == NULL || controlSocket == NULL) {
+#if P_QOS
     dataSocket = new PUDPSocket(dataQos);
     controlSocket = new PUDPSocket(ctrlQos);
+#else
+    dataSocket = new PUDPSocket();
+    controlSocket = new PUDPSocket();
+#endif
     while (!dataSocket->Listen(localAddress,    1, localDataPort) ||
            !controlSocket->Listen(localAddress, 1, localControlPort)) {
       dataSocket->Close();

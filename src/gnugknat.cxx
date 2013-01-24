@@ -582,17 +582,9 @@ GNUGKUDPSocket::~GNUGKUDPSocket()
 void GNUGKUDPSocket::SetSendAddress(const Address & address,WORD port)
 {
      PUDPSocket::SetSendAddress(address,port);
-
-/*
-        PString ping = "ping";
-        PBYTEArray bytes(ping,ping.GetLength(), false); 
-        if (PIPDatagramSocket::WriteTo(bytes, ping.GetLength(), sendAddress, sendPort))
-            PTRACE(4, "GNUGK\tUDP socket pinged " << sendAddress << '-' << sendPort << " from " << GetPort()); 
-        else
-            PTRACE(4, "GNUGK\tUDP socket no ping " << sendAddress << '-' << sendPort << " from " << GetPort()); 
-*/
-
-  ApplyQoS();
+#ifdef P_QOS
+     ApplyQoS();
+#endif
 }
 
 #endif  // H323_GNUGK
