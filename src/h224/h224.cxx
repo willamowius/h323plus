@@ -35,8 +35,8 @@
 #pragma warning(disable : 4244)
 #endif
 
-#include <h224.h>
-#include <h224handler.h>
+#include <h224/h224.h>
+#include <h224/h224handler.h>
 #include <h323con.h>
 #include <h245.h>
 

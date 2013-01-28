@@ -19,6 +19,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.3  2011/01/12 12:51:52  shorne
+ * H.224 bi-directional support added
+ *
  * Revision 1.2  2008/05/23 11:19:31  willamowius
  * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
  *
@@ -44,8 +47,8 @@
 #endif
 
 #include <ptlib.h>
-#include <h224handler.h>
-#include <h281.h>
+#include <h224/h224handler.h>
+#include <h224/h281.h>
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4244)

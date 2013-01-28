@@ -19,6 +19,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2011/02/20 07:03:00  shorne
+ * Improving H.224 stability by ensuring correct initialization and removing nested mutexes.
+ *
  * Revision 1.3  2011/01/12 12:51:52  shorne
  * H.224 bi-directional support added
  *
@@ -53,9 +56,9 @@
 #pragma warning(disable : 4244)
 #endif
 
-#include <h281.h>
-#include <h281handler.h>
-#include <h224handler.h>
+#include <h224/h281.h>
+#include <h224/h281handler.h>
+#include <h224/h224handler.h>
 
 #define MAX_H281_DATA_SIZE 
 

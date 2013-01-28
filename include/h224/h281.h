@@ -19,6 +19,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2007/08/06 20:50:49  shorne
+ * First commit of h323plus
+ *
  * Revision 1.1  2006/06/22 11:07:22  shorne
  * Backport of FECC (H.224) from Opal
  *
@@ -37,8 +40,7 @@
 #pragma interface
 #endif
 
-#include <ptlib.h>
-#include <h224.h>
+#include <h224/h224.h>
 
 class H281_Frame : public H224_Frame
 {

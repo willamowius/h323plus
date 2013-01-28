@@ -102,7 +102,7 @@
 #include <ptclib/enum.h>
 
 #ifdef H323_H224
-#include <h224handler.h>
+#include <h224/h224handler.h>
 #endif
 
 #ifdef H323_FILE

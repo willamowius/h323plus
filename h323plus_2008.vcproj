@@ -445,7 +445,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\h224.cxx"
+				RelativePath=".\src\h224\h224.cxx"
 				>
 			</File>
 			<File
@@ -569,7 +569,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\h281.cxx"
+				RelativePath=".\src\h224\h281.cxx"
 				>
 			</File>
 			<File
@@ -1517,11 +1517,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\h224.h"
+				RelativePath=".\include\h224\h224.h"
 				>
 			</File>
 			<File
-				RelativePath=".\include\h224handler.h"
+				RelativePath=".\include\h224\h224handler.h"
 				>
 			</File>
 			<File
@@ -1569,11 +1569,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\h281.h"
+				RelativePath=".\include\h224\h281.h"
 				>
 			</File>
 			<File
-				RelativePath=".\include\h281handler.h"
+				RelativePath=".\include\h224\h281handler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\h224\h284.h"
 				>
 			</File>
 			<File
@@ -1921,6 +1925,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\h284.h"
+					>
+				</File>
+				<File
 					RelativePath=".\include\h350\h350_service.h"
 					>
 				</File>
@@ -2183,6 +2191,10 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\src\h224\h284.cxx"
+					>
 				</File>
 				<File
 					RelativePath=".\src\h350\h350_service.cxx"
