@@ -1427,12 +1427,12 @@ PBoolean H460_FeatureSet::SupportNonCallService(const H225_FeatureSet & fs)
           for (PINDEX i=0; i < fsn.GetSize(); i++) {
               H225_FeatureDescriptor & fd = fsn[i];
               ID = GetFeatureIDPDU(fd);
-			  if (SupportNonCallService(ID)) {
-				nonCallService = true;
-				break;
-			  }
+              if (SupportNonCallService(ID)) {
+                nonCallService = true;
+                break;
+              }
           }
-	    if (nonCallService) return true;
+        if (nonCallService) return true;
       }
 
       if (fs.HasOptionalField(H225_FeatureSet::e_desiredFeatures)) {
@@ -1441,12 +1441,12 @@ PBoolean H460_FeatureSet::SupportNonCallService(const H225_FeatureSet & fs)
           for (PINDEX i=0; i < fsd.GetSize(); i++) {
               H225_FeatureDescriptor & fd = fsd[i];
               ID = GetFeatureIDPDU(fd);
-			  if (SupportNonCallService(ID)) {
-				nonCallService = true;
-				break;
-			  }
+              if (SupportNonCallService(ID)) {
+                nonCallService = true;
+                break;
+              }
           }
-	    if (nonCallService) return true;
+        if (nonCallService) return true;
       }
 
       if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
@@ -1454,12 +1454,12 @@ PBoolean H460_FeatureSet::SupportNonCallService(const H225_FeatureSet & fs)
           for (PINDEX i=0; i < fss.GetSize(); i++) {
               H225_FeatureDescriptor & fd = fss[i];    
               ID = GetFeatureIDPDU(fd);
-			  if (SupportNonCallService(ID)) {
-				nonCallService = true;
-				break;
-			  }
+              if (SupportNonCallService(ID)) {
+                nonCallService = true;
+                break;
+              }
           }
-	    if (nonCallService) return true;
+        if (nonCallService) return true;
       }
 
       return false;
