@@ -325,6 +325,7 @@ endif
 
 
 VPATH_CXX := $(OH323_SRCDIR) \
+             $(OH323_SRCDIR)/h224 \
              $(OH323_SRCDIR)/h230 \
              $(OH323_SRCDIR)/h235 \
              $(OH323_SRCDIR)/h341 \
