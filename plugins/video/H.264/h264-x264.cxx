@@ -1120,8 +1120,13 @@ TRACE(4, "H264\tFLOW\tAdjust to bitrate: " << targetBitrate);
 		    char ** options = (char **)parm;
 	        if (options == NULL) return 0;
 	        for (int i = 0; options[i] != NULL; i += 2) {
-		      if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_TIME) == 0)
-			     options[i+1] = num2str(H264_CLOCKRATE/frameRate);
+		      if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_TIME) == 0) {
+                 if (frameRate > 0) {
+			       options[i+1] = num2str(H264_CLOCKRATE/frameRate);
+                 } else {
+			       options[i+1] = 0;
+                 }
+              }
 		      if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_HEIGHT) == 0)
 			     options[i+1] = num2str(frameHeight);
 		      if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_WIDTH) == 0)
