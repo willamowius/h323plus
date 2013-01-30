@@ -417,7 +417,7 @@ class OpalMediaFormat : public PCaselessString
       */
     unsigned GetBandwidth() const { return bandwidth; }
 
-    /**Get the average bandwidth used in bits/second.
+    /**Set the average bandwidth used in bits/second.
       */
     void SetBandwidth(unsigned newbandwidth) { bandwidth = newbandwidth; }
 
