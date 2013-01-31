@@ -51,6 +51,11 @@
 class PSTUNClient;
 #endif
 
+// Add H.224 Handlers
+#ifdef H323_H224
+#include <h224/h224.h>
+#endif
+
 class PHandleAggregator;
 
 /* The following classes have forward references to avoid including the VERY
@@ -70,8 +75,7 @@ class H323ConnectionsCleaner;
 class H323ServiceControlSession;
 
 #if H323_H224
-class OpalH224Handler;
-class OpalH281Handler;
+class H224_H281Handler;
 #endif
 
 #ifdef H323_T120
@@ -1453,7 +1457,8 @@ class H323EndPoint : public PObject
       unsigned sessionID
     ) const;
     
-    /** Create an instance of the H.224 protocol handler.
+#ifdef H224_H281
+    /** Create an instance of the H.281 protocol handler.
         This is called when the subsystem requires that a H.224 channel be established.
         
         Note that if the application overrides this it should return a pointer to a
@@ -1462,10 +1467,27 @@ class H323EndPoint : public PObject
         
         The default behaviour creates a new OpalH281Handler.
       */
-    virtual OpalH281Handler * CreateH281ProtocolHandler(
+    virtual H224_H281Handler * CreateH281ProtocolHandler(
       OpalH224Handler & h224Handler
     ) const;
+
+    /** On Create an instance of the H.224 handler.
+        This is called when the subsystem creates a H.224 Handler.
+
+        Use this to derive implementers classes
+        return false to not create Handler.
+
+     The default behavour returns false
+      */
+    PBoolean OnCreateH224Handler(
+        H323Channel::Directions dir, 
+        const H323Connection & connection,
+        const PString & id, 
+        H224_Handler * m_handler
+    ) const;
 #endif
+
+#endif  // H323_H224
 
 #ifdef H323_FILE
     /** Open File Transfer Session

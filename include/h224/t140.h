@@ -1,4 +1,4 @@
-/* h284.h
+/* t140.h
  *
  * Copyright (c) 2013 Spranto International Pte Ltd. All Rights Reserved.
  *
@@ -35,33 +35,30 @@
  *
  */
 
-
-#ifndef __H323PLUS_H284_H
-#define __H323PLUS_H284_H
+#ifndef __H323PLUS_T140_H
+#define __H323PLUS_T140_H
 
 #ifdef P_USE_PRAGMA
 #pragma interface
 #endif
 
-
-class H224_H284Handler : public H224_Handler
+class H224_T140Handler : public H224_Handler
 {
-  PCLASSINFO(H224_H284Handler, H224_Handler);
+  PCLASSINFO(H224_T140Handler, H224_Handler);
     
 public:
     
-    H224_H284Handler();
-    ~H224_H284Handler();
+    H224_T140Handler();
+    ~H224_T140Handler();
 
-    static PStringList GetHandlerName() {  return PStringArray("H.284"); };
+    static PStringList GetHandlerName() {  return PStringArray("T.140"); };
     virtual PString GetName() const
             { return GetHandlerName()[0]; }
 
-    virtual BYTE GetClientID() const  
-            { return H284_CLIENT_ID; }
-
+    virtual BYTE GetClientID() const
+            { return T140_CLIENT_ID; }
+    
     virtual void SetRemoteSupport();
-
     virtual void SendExtraCapabilities() const;
     virtual void OnReceivedExtraCapabilities(const BYTE *capabilities, PINDEX size);
     virtual void OnReceivedMessage(const H224_Frame & message);
@@ -71,9 +68,9 @@ protected:
 };
 
 #ifndef _WIN32_WCE
-  PPLUGIN_STATIC_LOAD(H284, H224_Handler);
+  PPLUGIN_STATIC_LOAD(T140, H224_Handler);
 #endif
 
 
 
-#endif // __H323PLUS_H284_H
+#endif // __H323PLUS_T140_H

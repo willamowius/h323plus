@@ -27,7 +27,7 @@
  * H323Plus Project (www.h323plus.org/)
  *
  * The Initial Developer of the Original Code is 
- * Spranto International Pte Ltd Pte Ltd.
+ * Spranto International Pte Ltd.
  *
  * Contributor(s): ______________________________________.
  *
@@ -36,5 +36,71 @@
  */
  
 #include <ptlib.h>
-#include <h224/h284.h>
+#include <openh323buildopts.h>
+
+#ifdef H224_H284
+
+#include <h224/h224.h>
+
+
+class H284_Frame : public H224_Frame
+{
+
+    PCLASSINFO(H284_Frame, H224_Frame);
+    
+public:    
+    H284_Frame();
+    ~H284_Frame();
+
+};
+
+
+H284_Frame::H284_Frame()
+{
+
+}
+    
+H284_Frame::~H284_Frame()
+{
+
+}
+
+/////////////////////////////////////////////////////////////////
+// Must Declare for Factory Loader.
+H224_HANDLER(H284);
+/////////////////////////////////////////////////////////////////
+
+H224_H284Handler::H224_H284Handler()
+: H224_Handler("H.284"), remoteSupport(false)
+{
+
+}
+  
+H224_H284Handler::~H224_H284Handler()
+{
+
+}
+
+void H224_H284Handler::SetRemoteSupport()
+{
+    remoteSupport = true;
+}
+
+void H224_H284Handler::SendExtraCapabilities() const
+{
+
+}
+
+void H224_H284Handler::OnReceivedExtraCapabilities(const BYTE * /*capabilities*/, PINDEX /*size*/)
+{
+
+}
+
+void H224_H284Handler::OnReceivedMessage(const H224_Frame & /*message*/)
+{
+
+}
+
+#endif // H224_H284
+
  

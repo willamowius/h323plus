@@ -1,4 +1,4 @@
-/* h284.h
+/* t140.cxx
  *
  * Copyright (c) 2013 Spranto International Pte Ltd. All Rights Reserved.
  *
@@ -34,46 +34,70 @@
  * $Id$
  *
  */
+ 
+#include <ptlib.h>
+#include <openh323buildopts.h>
 
+#ifdef H224_T140
 
-#ifndef __H323PLUS_H284_H
-#define __H323PLUS_H284_H
+#include <h224/h224.h>
 
-#ifdef P_USE_PRAGMA
-#pragma interface
-#endif
-
-
-class H224_H284Handler : public H224_Handler
+class T140_Frame : public H224_Frame
 {
-  PCLASSINFO(H224_H284Handler, H224_Handler);
+
+    PCLASSINFO(T140_Frame, H224_Frame);
     
-public:
-    
-    H224_H284Handler();
-    ~H224_H284Handler();
+public:    
+    T140_Frame();
+    ~T140_Frame();
 
-    static PStringList GetHandlerName() {  return PStringArray("H.284"); };
-    virtual PString GetName() const
-            { return GetHandlerName()[0]; }
-
-    virtual BYTE GetClientID() const  
-            { return H284_CLIENT_ID; }
-
-    virtual void SetRemoteSupport();
-
-    virtual void SendExtraCapabilities() const;
-    virtual void OnReceivedExtraCapabilities(const BYTE *capabilities, PINDEX size);
-    virtual void OnReceivedMessage(const H224_Frame & message);
-
-protected:
-    PBoolean remoteSupport;
 };
 
-#ifndef _WIN32_WCE
-  PPLUGIN_STATIC_LOAD(H284, H224_Handler);
-#endif
 
+T140_Frame::T140_Frame()
+{
 
+}
+    
+T140_Frame::~T140_Frame()
+{
 
-#endif // __H323PLUS_H284_H
+}
+
+/////////////////////////////////////////////////////////////////
+// Must Declare for Factory Loader.
+H224_HANDLER(T140);
+/////////////////////////////////////////////////////////////////
+
+H224_T140Handler::H224_T140Handler()
+: H224_Handler("T.140"), remoteSupport(false)
+{
+
+}
+  
+H224_T140Handler::~H224_T140Handler()
+{
+
+}
+
+void H224_T140Handler::SetRemoteSupport()
+{
+    remoteSupport = true;
+}
+
+void H224_T140Handler::SendExtraCapabilities() const
+{
+
+}
+    
+void H224_T140Handler::OnReceivedExtraCapabilities(const BYTE * /*capabilities*/, PINDEX /*size*/)
+{
+
+}
+
+void H224_T140Handler::OnReceivedMessage(const H224_Frame & /*message*/)
+{
+
+}
+    
+#endif // H224_T140

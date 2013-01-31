@@ -101,10 +101,6 @@
 #include <ptclib/pils.h>
 #include <ptclib/enum.h>
 
-#ifdef H323_H224
-#include <h224/h224handler.h>
-#endif
-
 #ifdef H323_FILE
 #include "h323filetransfer.h"
 #endif
@@ -2825,13 +2821,21 @@ OpalT38Protocol * H323EndPoint::CreateT38ProtocolHandler(const H323Connection &)
 OpalH224Handler * H323EndPoint::CreateH224ProtocolHandler(H323Channel::Directions dir, H323Connection & connection, 
                                                           unsigned sessionID) const
 {
-  return new OpalH224Handler(dir, connection, sessionID);
+    return new OpalH224Handler(dir, connection, sessionID);
 }
 
 
-OpalH281Handler * H323EndPoint::CreateH281ProtocolHandler(OpalH224Handler & h224Handler) const
+H224_H281Handler * H323EndPoint::CreateH281ProtocolHandler(OpalH224Handler & h224Handler) const
 {
-  return new OpalH281Handler(h224Handler);
+    return new H224_H281Handler(h224Handler);
+}
+
+PBoolean H323EndPoint::OnCreateH224Handler(H323Channel::Directions /*dir*/, const H323Connection & /*connection*/, const PString & id, H224_Handler * /*m_handler*/) const
+{
+    if (id == "H.281")
+        return true;
+    else
+        return false;
 }
 
 #endif

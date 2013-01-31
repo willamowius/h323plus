@@ -168,7 +168,8 @@ class OpalT38Protocol;
 
 #ifdef H323_H224
 class OpalH224Handler;
-class OpalH281Handler;
+class H224_Handler;
+class H224_H281Handler;
 #endif
 
 class OpalRFC2833;
@@ -2445,7 +2446,8 @@ class H323Connection : public PObject
         is already such a H.224 handler associated, this instance is returned instead.
     */
     virtual OpalH224Handler *CreateH224ProtocolHandler(H323Channel::Directions dir, unsigned sessionID);
-      
+  
+#ifdef H224_H281
     /** Create an instance of the H.281 protocol handler.
         This is called when the subsystem requires that a H.224 channel be established.
           
@@ -2453,10 +2455,22 @@ class H323Connection : public PObject
         to a heap variable (using new) as it will be automatically deleted when
         the associated H.224 handler is deleted.
           
-     The default behavour returns H323Endpoint::CreateH224ProtocolHandler()
+     The default behavour returns H323Endpoint::CreateH281ProtocolHandler()
      */
-     virtual OpalH281Handler *CreateH281ProtocolHandler(OpalH224Handler & h224Handler);
+    virtual H224_H281Handler *CreateH281ProtocolHandler(OpalH224Handler & h224Handler);
+
+    /** On Create an instance of the H.224 handler.
+        This is called when the subsystem creates a H.224 Handler.
+
+        Use this to derive implementers classes
+        return false to not create Handler.
+
+     The default behavour returns H323Endpoint::OnCreateH224Handler()
+     */
+    PBoolean OnCreateH224Handler(H323Channel::Directions dir, const PString & id, H224_Handler * m_handler) const;
 #endif
+
+#endif  // H323_H224
 
 #ifdef H323_FILE
     /** Open an File Transfer Session
@@ -3267,10 +3281,6 @@ class H323Connection : public PObject
 
 #ifdef H323_T38
     OpalT38Protocol                  * t38handler;
-#endif
-
-#ifdef H323_H224
-    OpalH281Handler                  * h281handler;
 #endif
 
 #ifdef P_DTMF

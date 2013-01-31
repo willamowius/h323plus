@@ -33,7 +33,6 @@
 #include <ptlib.h>
 
 #include <h224/h224.h>
-#include <h224/h224handler.h>
 #include <h323caps.h>
 
 #define H323_H224_CAPABILITY_NAME "H.224"

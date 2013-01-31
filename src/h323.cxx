@@ -6481,11 +6481,19 @@ OpalH224Handler * H323Connection::CreateH224ProtocolHandler(H323Channel::Directi
   return endpoint.CreateH224ProtocolHandler(dir, *this, sessionID);
 }
 
-OpalH281Handler * H323Connection::CreateH281ProtocolHandler(OpalH224Handler & h224Handler)
+#ifdef H224_H281
+H224_H281Handler * H323Connection::CreateH281ProtocolHandler(OpalH224Handler & h224Handler)
 {
-  return endpoint.CreateH281ProtocolHandler(h224Handler);
+    return endpoint.CreateH281ProtocolHandler(h224Handler);
+}
+
+PBoolean H323Connection::OnCreateH224Handler(H323Channel::Directions dir, const PString & id, H224_Handler * m_handler) const
+{
+    return endpoint.OnCreateH224Handler(dir,*this,id,m_handler);
 }
 #endif
+
+#endif  // H323_H224
 
 #ifdef H323_FILE
 PBoolean H323Connection::OpenFileTransferSession(const H323FileTransferList & list, H323ChannelNumber & num)

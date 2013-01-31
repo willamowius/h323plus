@@ -573,6 +573,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\h224\h284.cxx"
+				>
+			</File>
+			<File
 				RelativePath="src\h323.cxx"
 				>
 				<FileConfiguration
@@ -1388,6 +1392,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\h224\t140.cxx"
+				>
+			</File>
+			<File
 				RelativePath="src\t38proto.cxx"
 				>
 				<FileConfiguration
@@ -1761,6 +1769,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\h224\t140.h"
+				>
+			</File>
+			<File
 				RelativePath="include\t38.h"
 				>
 			</File>
@@ -1922,10 +1934,6 @@
 				</File>
 				<File
 					RelativePath="src\h248.h"
-					>
-				</File>
-				<File
-					RelativePath=".\include\h284.h"
 					>
 				</File>
 				<File
@@ -2191,10 +2199,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\src\h224\h284.cxx"
-					>
 				</File>
 				<File
 					RelativePath=".\src\h350\h350_service.cxx"

@@ -19,6 +19,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.1  2013/01/28 23:52:23  shorne
+ * Restructure files create h224 directory
+ *
  * Revision 1.3  2011/01/12 12:51:52  shorne
  * H.224 bi-directional support added
  *
@@ -48,10 +51,19 @@
 
 #include <ptlib.h>
 #include <rtp.h>
+#ifdef H224_H281
+#include <h224/h281.h>
 #include <h224/h281handler.h>
+#endif
+#ifdef H224_H284
+#include <h224/h284.h>
+#endif
+#ifdef H224_T140
+#include <h224/t140.h>
+#endif
 #include <channels.h>
+#include <map>
 
-#define H281_CLIENT_ID 0x01
 
 class H224_Frame;
 class OpalH224Handler;
@@ -59,18 +71,18 @@ class OpalH224Handler;
 class OpalH224ReceiverThread : public PThread
 {
   PCLASSINFO(OpalH224ReceiverThread, PThread);
-	
+    
 public:
-	
+    
   OpalH224ReceiverThread(OpalH224Handler *h224Handler, RTP_Session & rtpSession);
   ~OpalH224ReceiverThread();
-	
+    
   virtual void Main();
-	
+    
   void Close();
-	
+    
 private:
-		
+        
   OpalH224Handler *h224Handler;
   mutable PMutex inUse;
   unsigned timestamp;
@@ -78,49 +90,48 @@ private:
   PBoolean terminate;
 };
 
-class OpalH281Handler;
-class H323Connection;
 
+class H323Connection;
 class OpalH224Handler : public PObject
 {
   PCLASSINFO(OpalH224Handler, PObject);
-	
+    
 public:
-	
+    
   OpalH224Handler(H323Channel::Directions dir, H323Connection & connection, unsigned sessionID);
   ~OpalH224Handler();
-	
+
+  void CreateHandlers(H323Connection & connection);
+  void DeleteHandlers();
+    
   virtual void StartTransmit();
   virtual void StopTransmit();
   virtual void StartReceive();
   virtual void StopReceive();
-	
+    
   PBoolean SendClientList();
   PBoolean SendExtraCapabilities();
-  PBoolean SendClientListCommand();
   PBoolean SendExtraCapabilitiesCommand(BYTE clientID);
 
   PBoolean SendExtraCapabilitiesMessage(BYTE clientID, BYTE *data, PINDEX length);
 
   PBoolean TransmitClientFrame(BYTE clientID, H224_Frame & frame);
-	
+    
   virtual PBoolean OnReceivedFrame(H224_Frame & frame);
   virtual PBoolean OnReceivedCMEMessage(H224_Frame & frame);
   virtual PBoolean OnReceivedClientList(H224_Frame & frame);
   virtual PBoolean OnReceivedClientListCommand();
   virtual PBoolean OnReceivedExtraCapabilities(H224_Frame & frame);
   virtual PBoolean OnReceivedExtraCapabilitiesCommand();
-	
+    
   PMutex & GetTransmitMutex() { return transmitMutex; }
-	
+    
   RTP_Session * GetSession() const { return session; }
-	
+    
   virtual OpalH224ReceiverThread * CreateH224ReceiverThread();
-	
-  OpalH281Handler *GetH281Handler() { return h281Handler; }
 
   H323Channel::Directions GetDirection() { return sessionDirection; }
-	
+    
 protected:
 
   RTP_Session * session;
@@ -130,16 +141,18 @@ protected:
   RTP_DataFrame *transmitFrame;
   BYTE transmitBitIndex;
   PTime *transmitStartTime;
-	
+    
   OpalH224ReceiverThread *receiverThread;
-	
-  OpalH281Handler *h281Handler;
+
+  PMutex handlersMutex;
+  std::map<BYTE, H224_Handler*> m_h224Handlers;
+
   H323Channel::Directions sessionDirection;
-	
+    
 private:
-		
+        
   void TransmitFrame(H224_Frame & frame);
-	
+    
 };
 
 #endif // __H323_H224HANDLER_H

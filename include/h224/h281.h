@@ -18,18 +18,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.1  2007/08/06 20:50:49  shorne
- * First commit of h323plus
- *
- * Revision 1.1  2006/06/22 11:07:22  shorne
- * Backport of FECC (H.224) from Opal
- *
- * Revision 1.2  2006/04/23 18:52:19  dsandras
- * Removed warnings when compiling with gcc on Linux.
- *
- * Revision 1.1  2006/04/20 16:48:17  hfriederich
- * Initial version of H.224/H.281 implementation.
+ * $Id$
  *
  */
 
@@ -40,95 +29,94 @@
 #pragma interface
 #endif
 
-#include <h224/h224.h>
-
 class H281_Frame : public H224_Frame
 {
   PCLASSINFO(H281_Frame, H224_Frame);
-	
+    
 public:
-	
+    
   enum RequestType {
-	IllegalRequest		= 0x00,
-	StartAction			= 0x01,
-	ContinueAction		= 0x02,
-	StopAction			= 0x03,
-	SelectVideoSource	= 0x04,
-	VideoSourceSwitched = 0x05,
-	StoreAsPreset		= 0x07,
-	ActivatePreset		= 0x08
+    IllegalRequest        = 0x00,
+    StartAction            = 0x01,
+    ContinueAction        = 0x02,
+    StopAction            = 0x03,
+    SelectVideoSource    = 0x04,
+    VideoSourceSwitched = 0x05,
+    StoreAsPreset        = 0x07,
+    ActivatePreset        = 0x08
   };
-	
+    
   enum PanDirection {
-	NoPan		= 0x00,
-	IllegalPan	= 0x40,
-	PanLeft		= 0x80,
-	PanRight	= 0xc0,
+    NoPan        = 0x00,
+    IllegalPan    = 0x40,
+    PanLeft        = 0x80,
+    PanRight    = 0xc0,
   };
-	
+    
   enum TiltDirection {
-    NoTilt		= 0x00,
-	IllegalTilt = 0x10,
-	TiltDown	= 0x20,
-	TiltUp		= 0x30,
+    NoTilt        = 0x00,
+    IllegalTilt = 0x10,
+    TiltDown    = 0x20,
+    TiltUp        = 0x30,
   };
-	
+    
   enum ZoomDirection {
-    NoZoom		= 0x00,
-	IllegalZoom = 0x04,
-	ZoomOut		= 0x08,
-	ZoomIn		= 0x0c
+    NoZoom        = 0x00,
+    IllegalZoom = 0x04,
+    ZoomOut        = 0x08,
+    ZoomIn        = 0x0c
   };
-	
+    
   enum FocusDirection {
-    NoFocus			= 0x00,
-	IllegalFocus	= 0x01,
-	FocusOut		= 0x02,
-	FocusIn			= 0x03
+    NoFocus            = 0x00,
+    IllegalFocus    = 0x01,
+    FocusOut        = 0x02,
+    FocusIn            = 0x03
   };
-	
-  enum VideoMode {	
-    MotionVideo					= 0x00,
-	IllegalVideoMode			= 0x01,
-	NormalResolutionStillImage	= 0x02,
-	DoubleResolutionStillImage	= 0x03
+    
+  enum VideoMode {    
+    MotionVideo                    = 0x00,
+    IllegalVideoMode            = 0x01,
+    NormalResolutionStillImage    = 0x02,
+    DoubleResolutionStillImage    = 0x03
   };
-	
+    
   H281_Frame();
   ~H281_Frame();
-	
+    
   RequestType GetRequestType() const { return (RequestType)(GetClientDataPtr())[0]; }
   void SetRequestType(RequestType requestType);
-	
+    
   // The following methods are only valid when
-  // request type is either StartAction, ContinueAction or StopAction	
+  // request type is either StartAction, ContinueAction or StopAction    
   PanDirection GetPanDirection() const;
   void SetPanDirection(PanDirection direction);
-	
+    
   TiltDirection GetTiltDirection() const;
   void SetTiltDirection(TiltDirection direction);
 
   ZoomDirection GetZoomDirection() const;
   void SetZoomDirection(ZoomDirection direction);
-	
+    
   FocusDirection GetFocusDirection() const;
   void SetFocusDirection(FocusDirection direction);
-	
+    
   // Only valid when RequestType is StartAction
   BYTE GetTimeout() const;
   void SetTimeout(BYTE timeout);
-	
+    
   // Only valid when RequestType is SelectVideoSource or VideoSourceSwitched
   BYTE GetVideoSourceNumber() const;
   void SetVideoSourceNumber(BYTE videoSourceNumber);
-	
+    
   VideoMode GetVideoMode() const;
   void SetVideoMode(VideoMode videoMode);
-	
+    
   // Only valid when RequestType is StoreAsPreset or ActivatePreset
   BYTE GetPresetNumber() const;
   void SetPresetNumber(BYTE presetNumber);
 };
+
 
 #endif // __OPAL_H281_H
 
