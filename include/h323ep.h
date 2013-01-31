@@ -1951,6 +1951,11 @@ class H323EndPoint : public PObject
      */
     void SetInitialBandwidth(unsigned bandwidth) { initialBandwidth = bandwidth; }
 
+    /**Set the BitRate to appear in the BearerCapabilities for Setup messages
+     */
+    virtual void OnBearerCapabilityTransferRate(unsigned & bitRate) 
+        { if (initialBandwidth > bitRate) bitRate = initialBandwidth; }
+
 #ifdef H323_VIDEO
     virtual void OnSetInitialBandwidth(H323VideoCodec * /*codec*/) {};
 #endif

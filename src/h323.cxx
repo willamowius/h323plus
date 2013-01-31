@@ -4006,7 +4006,7 @@ void H323Connection::SendCapabilitySet(PBoolean empty)
 
 void H323Connection::OnBearerCapabilityTransferRate(unsigned & bitRate)
 {
-
+    endpoint.OnBearerCapabilityTransferRate(bitRate);
 }
 
 void H323Connection::SetInitialBandwidth(H323Capability::MainTypes captype, int bitRate)
