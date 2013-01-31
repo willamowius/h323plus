@@ -112,10 +112,7 @@ BYTE H224_Frame::GetClientID() const
 
 void H224_Frame::SetClientID(BYTE clientID)
 {
-  // At the moment, only H.281 (client ID 0x01)
-  // is supported
-  PAssert(clientID <= 0x01, "Invalid client ID");
-    
+
   BYTE *data = GetInformationFieldPtr();
     
   data[4] = clientID;
