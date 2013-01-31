@@ -40,28 +40,67 @@
 
 #ifdef H224_T140
 
+#define T140_BS 0x0008          // Back Space: Erases the last entered character.
+#define T140_NEWLINE 0x2028     // Line separator.
+
 #include <h224/h224.h>
 
-class T140_Frame : public H224_Frame
-{
-
-    PCLASSINFO(T140_Frame, H224_Frame);
-    
-public:    
-    T140_Frame();
-    ~T140_Frame();
-
-};
-
-
 T140_Frame::T140_Frame()
+: H224_Frame(2)
 {
-
+  SetHighPriority(TRUE);
+	
+  BYTE *data = GetClientDataPtr();
+  data[0] = 0x00;
+  data[1] = 0x00;
 }
     
 T140_Frame::~T140_Frame()
 {
 
+}
+
+T140_Frame::DataType T140_Frame::GetDataType() const
+{
+   BYTE *data = GetClientDataPtr();
+
+   if ((data[0] == 0x00) && (data[1] == 0x08))
+        return T140_Frame::BackSpace;
+   else if ((data[0] == 0x20) && (data[1] == 0x28))
+        return T140_Frame::NewLine;
+   else
+        return T140_Frame::TextData;
+}
+
+void T140_Frame::SetDataType(DataType type)
+{
+    BYTE *data = GetClientDataPtr();
+
+    switch (type) {
+        case T140_Frame::BackSpace :
+            data[0] = 0x00;
+            data[1] = 0x08;
+            break;
+        case T140_Frame::NewLine :
+            data[0] = 0x20;
+            data[1] = 0x28;
+            break;
+        default:
+            break;
+    }
+}
+
+void T140_Frame::SetCharacter(const PString & str)
+{
+    PWCharArray ucs2 = str.AsUCS2();
+    memcpy(GetClientDataPtr(),ucs2.GetPointer(),2);
+}
+    
+PString T140_Frame::GetCharacter() const
+{
+    PWCharArray ucs2;
+    memcpy(ucs2.GetPointer(),GetClientDataPtr(),2);
+    return ucs2;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -85,6 +124,11 @@ void H224_T140Handler::SetRemoteSupport()
     remoteSupport = true;
 }
 
+PBoolean H224_T140Handler::HasRemoteSupport()
+{
+    return remoteSupport;
+}
+
 void H224_T140Handler::SendExtraCapabilities() const
 {
 
@@ -95,9 +139,47 @@ void H224_T140Handler::OnReceivedExtraCapabilities(const BYTE * /*capabilities*/
 
 }
 
-void H224_T140Handler::OnReceivedMessage(const H224_Frame & /*message*/)
+void H224_T140Handler::SendBackSpace()
 {
+    if (!remoteSupport)
+        return;
 
+    transmitFrame.SetDataType(T140_Frame::BackSpace);
+    m_h224Handler->TransmitClientFrame(T140_CLIENT_ID, transmitFrame);
+}
+    
+void H224_T140Handler::SendNewLine()
+{
+    if (!remoteSupport)
+        return;
+
+    transmitFrame.SetDataType(T140_Frame::NewLine);
+    m_h224Handler->TransmitClientFrame(T140_CLIENT_ID, transmitFrame);
+}
+    
+void H224_T140Handler::SendCharacter(const PString & text)
+{
+    if (!remoteSupport)
+        return;
+
+    transmitFrame.SetCharacter(text);
+    m_h224Handler->TransmitClientFrame(T140_CLIENT_ID, transmitFrame);
+}
+
+void H224_T140Handler::OnReceivedMessage(const H224_Frame & msg)
+{
+    const T140_Frame & message = (const T140_Frame &)msg;
+
+    switch (message.GetDataType()) {
+        case T140_Frame::BackSpace :
+            ReceivedBackSpace();
+            break;
+        case T140_Frame::NewLine :
+            ReceivedNewLine();
+            break;
+        default: // Normal Text
+            ReceivedText(message.GetCharacter());
+    }
 }
     
 #endif // H224_T140

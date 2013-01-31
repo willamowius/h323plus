@@ -31,7 +31,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Id $
+ * $Id$
  *
  */
  
@@ -84,6 +84,11 @@ H224_H284Handler::~H224_H284Handler()
 void H224_H284Handler::SetRemoteSupport()
 {
     remoteSupport = true;
+}
+
+PBoolean H224_H284Handler::HasRemoteSupport()
+{
+    return remoteSupport;
 }
 
 void H224_H284Handler::SendExtraCapabilities() const

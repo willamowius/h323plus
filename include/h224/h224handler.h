@@ -18,27 +18,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.1  2013/01/28 23:52:23  shorne
- * Restructure files create h224 directory
- *
- * Revision 1.3  2011/01/12 12:51:52  shorne
- * H.224 bi-directional support added
- *
- * Revision 1.2  2008/05/23 11:19:21  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.1  2007/08/06 20:50:48  shorne
- * First commit of h323plus
- *
- * Revision 1.1  2006/06/22 11:07:22  shorne
- * Backport of FECC (H.224) from Opal
- *
- * Revision 1.2  2006/04/23 18:52:19  dsandras
- * Removed warnings when compiling with gcc on Linux.
- *
- * Revision 1.1  2006/04/20 16:48:17  hfriederich
- * Initial version of H.224/H.281 implementation.
+ * $Id$
  *
  */
 

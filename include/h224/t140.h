@@ -42,6 +42,28 @@
 #pragma interface
 #endif
 
+class T140_Frame : public H224_Frame
+{
+    PCLASSINFO(T140_Frame, H224_Frame);
+    
+public:
+    T140_Frame();
+    ~T140_Frame();
+
+     enum DataType {
+        TextData        = 0,
+        BackSpace       = 1,
+        NewLine         = 2
+      };
+
+    DataType GetDataType() const;
+    void SetDataType(DataType type);
+
+    void SetCharacter(const PString & str);
+    PString GetCharacter() const;
+    
+};
+
 class H224_T140Handler : public H224_Handler
 {
   PCLASSINFO(H224_T140Handler, H224_Handler);
@@ -59,12 +81,24 @@ public:
             { return T140_CLIENT_ID; }
     
     virtual void SetRemoteSupport();
+    virtual PBoolean HasRemoteSupport();
     virtual void SendExtraCapabilities() const;
     virtual void OnReceivedExtraCapabilities(const BYTE *capabilities, PINDEX size);
     virtual void OnReceivedMessage(const H224_Frame & message);
 
+    void SendBackSpace();
+    void SendNewLine();
+    void SendCharacter(const PString & text);
+
+    // T.140 Events
+    virtual void ReceivedBackSpace() {};
+    virtual void ReceivedNewLine() {};
+    virtual void ReceivedText(const PString &) {};
+
+
 protected:
     PBoolean remoteSupport;
+    T140_Frame transmitFrame;
 };
 
 #ifndef _WIN32_WCE

@@ -18,33 +18,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.1  2013/01/28 23:52:23  shorne
- * Restructure files create h224 directory
- *
- * Revision 1.4  2011/02/20 07:03:00  shorne
- * Improving H.224 stability by ensuring correct initialization and removing nested mutexes.
- *
- * Revision 1.3  2011/01/12 12:51:52  shorne
- * H.224 bi-directional support added
- *
- * Revision 1.2  2008/05/23 11:21:52  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.1  2007/08/06 20:51:05  shorne
- * First commit of h323plus
- *
- * Revision 1.1  2006/06/22 11:07:23  shorne
- * Backport of FECC (H.224) from Opal
- *
- * Revision 1.3  2006/05/01 10:29:50  csoutheren
- * Added pragams for gcc < 4
- *
- * Revision 1.2  2006/04/24 12:53:50  rjongbloed
- * Port of H.224 Far End Camera Control to DevStudio/Windows
- *
- * Revision 1.1  2006/04/20 16:48:17  hfriederich
- * Initial version of H.224/H.281 implementation.
+ * $Id$
  *
  */
 
@@ -653,6 +627,11 @@ void H224_H281Handler::SendExtraCapabilities() const
 void H224_H281Handler::SetRemoteSupport()
 {
 	remoteHasH281 = TRUE;
+}
+
+PBoolean H224_H281Handler::HasRemoteSupport()
+{
+    return remoteHasH281;
 }
 
 void H224_H281Handler::OnReceivedExtraCapabilities(const BYTE *capabilities, PINDEX size)

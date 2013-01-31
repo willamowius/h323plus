@@ -61,6 +61,7 @@ public:
             { return H284_CLIENT_ID; }
 
     virtual void SetRemoteSupport();
+    virtual PBoolean HasRemoteSupport();
 
     virtual void SendExtraCapabilities() const;
     virtual void OnReceivedExtraCapabilities(const BYTE *capabilities, PINDEX size);
