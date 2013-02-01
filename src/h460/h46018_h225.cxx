@@ -1458,6 +1458,14 @@ PBoolean H46019UDPSocket::WriteSocket(const void * buf, PINDEX len, const Addres
 }
 #endif
 
+#ifdef H323_H46019M
+PBoolean H46019UDPSocket::GetPeerAddress(PIPSocketAddressAndPort & addr)
+{
+    addr.SetAddress(m_remAddr,m_remPort);
+    return true;
+}
+#endif
+
 #ifdef H323_H46024A
 void H46019UDPSocket::SetProbeState(probe_state newstate)
 {
@@ -1519,14 +1527,6 @@ void H46019UDPSocket::GetAlternateAddresses(H323TransportAddress & address, PStr
     PTRACE(6,"H46024A\ts:" << m_Session << (rtpSocket ? " RTP " : " RTCP ") << " Alt:" << address << " CUI " << cui);
 
 }
-
-#ifdef H323_H46019M
-PBoolean H46019UDPSocket::GetPeerAddress(PIPSocketAddressAndPort & addr)
-{
-    addr.SetAddress(m_remAddr,m_remPort);
-    return true;
-}
-#endif
 
 PBoolean H46019UDPSocket::IsAlternateAddress(const Address & address,WORD port)
 {
