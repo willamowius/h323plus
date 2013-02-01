@@ -1456,20 +1456,6 @@ class H323EndPoint : public PObject
       H323Connection & connection, 
       unsigned sessionID
     ) const;
-    
-#ifdef H224_H281
-    /** Create an instance of the H.281 protocol handler.
-        This is called when the subsystem requires that a H.224 channel be established.
-        
-        Note that if the application overrides this it should return a pointer to a
-        heap variable (using new) as it will be automatically deleted when the Connection
-        is deleted.
-        
-        The default behaviour creates a new OpalH281Handler.
-      */
-    virtual H224_H281Handler * CreateH281ProtocolHandler(
-      OpalH224Handler & h224Handler
-    ) const;
 
     /** On Create an instance of the H.224 handler.
         This is called when the subsystem creates a H.224 Handler.
@@ -1484,6 +1470,25 @@ class H323EndPoint : public PObject
         const H323Connection & connection,
         const PString & id, 
         H224_Handler * m_handler
+    ) const;
+
+    
+#ifdef H224_H281
+    /** Create an instance of the H.281 protocol handler.
+
+        *** NOTE This function is depreciated for H323plus 1.26 ***
+        *** Use OnCreateH224Handler function call instead ***
+
+        This is called when the subsystem requires that a H.224 channel be established.
+        
+        Note that if the application overrides this it should return a pointer to a
+        heap variable (using new) as it will be automatically deleted when the Connection
+        is deleted.
+        
+        The default behaviour creates a new OpalH281Handler.
+      */
+    virtual H224_H281Handler * CreateH281ProtocolHandler(
+      OpalH224Handler & h224Handler
     ) const;
 #endif
 

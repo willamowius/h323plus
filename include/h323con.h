@@ -2446,18 +2446,6 @@ class H323Connection : public PObject
         is already such a H.224 handler associated, this instance is returned instead.
     */
     virtual OpalH224Handler *CreateH224ProtocolHandler(H323Channel::Directions dir, unsigned sessionID);
-  
-#ifdef H224_H281
-    /** Create an instance of the H.281 protocol handler.
-        This is called when the subsystem requires that a H.224 channel be established.
-          
-        Note that if the application overrides this it should return a pointer
-        to a heap variable (using new) as it will be automatically deleted when
-        the associated H.224 handler is deleted.
-          
-     The default behavour returns H323Endpoint::CreateH281ProtocolHandler()
-     */
-    virtual H224_H281Handler *CreateH281ProtocolHandler(OpalH224Handler & h224Handler);
 
     /** On Create an instance of the H.224 handler.
         This is called when the subsystem creates a H.224 Handler.
@@ -2468,6 +2456,23 @@ class H323Connection : public PObject
      The default behavour returns H323Endpoint::OnCreateH224Handler()
      */
     PBoolean OnCreateH224Handler(H323Channel::Directions dir, const PString & id, H224_Handler * m_handler) const;
+
+  
+#ifdef H224_H281
+    /** Create an instance of the H.281 protocol handler.
+
+        *** NOTE This function is depreciated for H323plus 1.26 ***
+        *** Use OnCreateH224Handler function call instead ***
+
+        This is called when the subsystem requires that a H.224 channel be established.
+          
+        Note that if the application overrides this it should return a pointer
+        to a heap variable (using new) as it will be automatically deleted when
+        the associated H.224 handler is deleted.
+          
+     The default behavour returns H323Endpoint::CreateH281ProtocolHandler()
+     */
+    virtual H224_H281Handler *CreateH281ProtocolHandler(OpalH224Handler & h224Handler);
 #endif
 
 #endif  // H323_H224

@@ -2824,12 +2824,6 @@ OpalH224Handler * H323EndPoint::CreateH224ProtocolHandler(H323Channel::Direction
     return new OpalH224Handler(dir, connection, sessionID);
 }
 
-
-H224_H281Handler * H323EndPoint::CreateH281ProtocolHandler(OpalH224Handler & h224Handler) const
-{
-    return new H224_H281Handler(h224Handler);
-}
-
 PBoolean H323EndPoint::OnCreateH224Handler(H323Channel::Directions /*dir*/, const H323Connection & /*connection*/, const PString & id, H224_Handler * /*m_handler*/) const
 {
     if (id == "H281")
@@ -2837,6 +2831,13 @@ PBoolean H323EndPoint::OnCreateH224Handler(H323Channel::Directions /*dir*/, cons
     else
         return false;
 }
+
+#ifdef H224_H281
+H224_H281Handler * H323EndPoint::CreateH281ProtocolHandler(OpalH224Handler & h224Handler) const
+{
+    return new H224_H281Handler(h224Handler);
+}
+#endif
 
 #endif
 
