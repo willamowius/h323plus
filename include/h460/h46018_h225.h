@@ -345,11 +345,11 @@ class PNatMethod_H46019  : public PNatMethod
         Get the NAT method name 
     */
 #if PTLIB_VER > 2120
-   static PString GetNatMethodName() { return "GnuGk"; }
+   static PString GetNatMethodName() { return "H46019"; }
    virtual PString GetName() const
             { return GetNatMethodName(); }
 #else
-    static PStringList GetNatMethodName() {  return PStringArray("GnuGk"); };
+    static PStringList GetNatMethodName() {  return PStringArray("H46019"); };
     virtual PString GetName() const
             { return GetNatMethodName()[0]; }
 #endif
