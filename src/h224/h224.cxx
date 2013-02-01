@@ -324,7 +324,7 @@ void OpalH224Handler::CreateHandlers(H323Connection & connection)
 
     for (PINDEX i = 0; i < handlers.GetSize(); i++) {
         H224_Handler * handler = NULL;
-        if (handlers[i] == "H.281")  // Backwards compatibility
+        if (handlers[i] == "H281")  // Backwards compatibility
             handler = connection.CreateH281ProtocolHandler(*this);
         if (!handler) {
             handler = H224_Handler::CreateHandler(handlers[i]);
@@ -470,39 +470,6 @@ PBoolean OpalH224Handler::SendExtraCapabilities()
   for (std::map<BYTE,H224_Handler*>::iterator it = m_h224Handlers.begin(); it != m_h224Handlers.end(); ++it)
     it->second->SendExtraCapabilities();
   handlersMutex.Signal();
-    
-  return TRUE;
-}
-
-PBoolean OpalH224Handler::SendExtraCapabilitiesCommand(BYTE clientID)
-{
-  PWaitAndSignal m(transmitMutex);
-    
-  if(canTransmit == FALSE)
-    return FALSE;
-    
-  H224_Frame h224Frame = H224_Frame(4);
-  h224Frame.SetHighPriority(TRUE);
-  h224Frame.SetDestinationTerminalAddress(H224_BROADCAST);
-  h224Frame.SetSourceTerminalAddress(H224_BROADCAST);
-    
-  // CME frame
-  h224Frame.SetClientID(0x00);
-    
-  // Begin and end of sequence
-  h224Frame.SetBS(TRUE);
-  h224Frame.SetES(TRUE);
-  h224Frame.SetC1(FALSE);
-  h224Frame.SetC0(FALSE);
-  h224Frame.SetSegmentNumber(0);
-    
-  BYTE *ptr = h224Frame.GetClientDataPtr();
-    
-  ptr[0] = 0x01; // Client list code
-  ptr[1] = 0xFF; // Response code
-  ptr[2] = (0x80 | clientID); // clientID with extra capabilities
-    
-  TransmitFrame(h224Frame);
     
   return TRUE;
 }

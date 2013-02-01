@@ -2832,7 +2832,7 @@ H224_H281Handler * H323EndPoint::CreateH281ProtocolHandler(OpalH224Handler & h22
 
 PBoolean H323EndPoint::OnCreateH224Handler(H323Channel::Directions /*dir*/, const H323Connection & /*connection*/, const PString & id, H224_Handler * /*m_handler*/) const
 {
-    if (id == "H.281")
+    if (id == "H281")
         return true;
     else
         return false;

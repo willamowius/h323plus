@@ -91,7 +91,6 @@ public:
     
   PBoolean SendClientList();
   PBoolean SendExtraCapabilities();
-  PBoolean SendExtraCapabilitiesCommand(BYTE clientID);
 
   PBoolean SendExtraCapabilitiesMessage(BYTE clientID, BYTE *data, PINDEX length);
 
