@@ -73,7 +73,7 @@ public:
     H224_T140Handler();
     ~H224_T140Handler();
 
-    static PStringList GetHandlerName() {  return PStringArray("T.140"); };
+    static PStringList GetHandlerName() {  return PStringArray("T140"); };
     virtual PString GetName() const
             { return GetHandlerName()[0]; }
 

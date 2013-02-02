@@ -71,7 +71,7 @@ H224_HANDLER(H284);
 /////////////////////////////////////////////////////////////////
 
 H224_H284Handler::H224_H284Handler()
-: H224_Handler("H.284"), remoteSupport(false)
+: H224_Handler("H284"), remoteSupport(false)
 {
 
 }

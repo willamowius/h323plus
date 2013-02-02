@@ -53,7 +53,7 @@ public:
     H224_H284Handler();
     ~H224_H284Handler();
 
-    static PStringList GetHandlerName() {  return PStringArray("H.284"); };
+    static PStringList GetHandlerName() {  return PStringArray("H284"); };
     virtual PString GetName() const
             { return GetHandlerName()[0]; }
 

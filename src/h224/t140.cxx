@@ -109,7 +109,7 @@ H224_HANDLER(T140);
 /////////////////////////////////////////////////////////////////
 
 H224_T140Handler::H224_T140Handler()
-: H224_Handler("T.140"), remoteSupport(false)
+: H224_Handler("T140"), remoteSupport(false)
 {
 
 }

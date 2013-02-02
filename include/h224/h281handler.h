@@ -110,7 +110,7 @@ public:
 
   void Initialise();
 
-   static PStringList GetHandlerName() {  return PStringArray("H.281"); };
+   static PStringList GetHandlerName() {  return PStringArray("H281"); };
    virtual PString GetName() const
             { return GetHandlerName()[0]; }
 

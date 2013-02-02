@@ -450,13 +450,13 @@ H224_HANDLER(H281);
 ///////////////////////////////
 
 H224_H281Handler::H224_H281Handler()
-: H224_Handler("H.281")
+: H224_Handler("H281")
 {
 	Initialise();
 }
 
 H224_H281Handler::H224_H281Handler(OpalH224Handler & theH224Handler)
-: H224_Handler("H.281")
+: H224_Handler("H281")
 {
     AttachH224Handler(&theH224Handler);
 	Initialise();
