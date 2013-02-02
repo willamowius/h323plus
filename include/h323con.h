@@ -2455,7 +2455,7 @@ class H323Connection : public PObject
 
      The default behavour returns H323Endpoint::OnCreateH224Handler()
      */
-    PBoolean OnCreateH224Handler(H323Channel::Directions dir, const PString & id, H224_Handler * m_handler) const;
+    virtual PBoolean OnCreateH224Handler(H323Channel::Directions dir, const PString & id, H224_Handler * m_handler) const;
 
   
 #ifdef H224_H281

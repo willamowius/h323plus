@@ -1465,7 +1465,7 @@ class H323EndPoint : public PObject
 
      The default behavour returns false
       */
-    PBoolean OnCreateH224Handler(
+    virtual PBoolean OnCreateH224Handler(
         H323Channel::Directions dir, 
         const H323Connection & connection,
         const PString & id, 
