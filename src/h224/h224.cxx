@@ -233,7 +233,7 @@ PBoolean H224_Frame::Decode(const BYTE *data,
 /////////////////////////////////////
 
 H224_Handler::H224_Handler(const PString & name)
-: m_h224Handler(NULL), m_h224Display(name)
+: m_h224Handler(NULL), m_direction(H323Channel::IsTransmitter), m_h224Display(name)
 {
 
 }
@@ -245,8 +245,10 @@ H224_Handler::~H224_Handler()
 
 void H224_Handler::AttachH224Handler(OpalH224Handler * h224Handler)
 {
-  if (!m_h224Handler)
+    if (!m_h224Handler) {
       m_h224Handler = h224Handler;
+      m_direction = h224Handler->GetDirection();
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

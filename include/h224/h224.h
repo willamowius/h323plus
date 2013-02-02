@@ -108,8 +108,9 @@ public:
     static H224_Handler * CreateHandler(const PString & handlerName, PPluginManager * pluginMgr = NULL);
 
 protected:
-    OpalH224Handler * m_h224Handler;
-    PString              m_h224Display;
+    OpalH224Handler *        m_h224Handler;
+    int                      m_direction;
+    PString                  m_h224Display;
 };
 
 
