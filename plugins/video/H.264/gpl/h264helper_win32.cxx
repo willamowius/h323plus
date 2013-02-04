@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
   }
 
   x264 = NULL;
-  dstLen=1400;
+  dstLen = 1400;
 
   openPipe(argv[1]);
    
@@ -213,12 +213,12 @@ int main(int argc, char *argv[])
           writeStream(stream,(LPCVOID)&msg, sizeof(msg)); 
           flushStream(stream);
         break;
-      case H264ENCODERCONTEXT_DELETE:;
+      case H264ENCODERCONTEXT_DELETE:
           delete x264;
           writeStream(stream,(LPCVOID)&msg, sizeof(msg)); 
           flushStream(stream);
         break;
-      case APPLY_OPTIONS:;
+      case APPLY_OPTIONS:
           x264->ApplyOptions ();
           writeStream(stream,(LPCVOID)&msg, sizeof(msg)); 
           flushStream(stream);

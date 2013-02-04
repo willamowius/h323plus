@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
   }
 
   x264 = NULL;
-  dstLen=1400;
+  dstLen = 1400;
   dlStream.open(argv[1], std::ios::binary);
   if (dlStream.fail()) { TRACE (1, "H264\tIPC\tCP: Error when opening DL named pipe"); exit (1); }
   ulStream.open(argv[2],std::ios::binary);
@@ -141,12 +141,12 @@ int main(int argc, char *argv[])
         writeStream(ulStream,(char*)&msg, sizeof(msg)); 
         flushStream(ulStream);
       break;
-    case H264ENCODERCONTEXT_DELETE:;
+    case H264ENCODERCONTEXT_DELETE:
         delete x264;
         writeStream(ulStream,(char*)&msg, sizeof(msg)); 
         flushStream(ulStream);
       break;
-    case APPLY_OPTIONS:;
+    case APPLY_OPTIONS:
         x264->ApplyOptions ();
         writeStream(ulStream,(char*)&msg, sizeof(msg)); 
         flushStream(ulStream);
