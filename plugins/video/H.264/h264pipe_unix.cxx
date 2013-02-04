@@ -28,6 +28,8 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include "trace.h"
 #include "rtpframe.h"
 #include "h264pipe_unix.h"
