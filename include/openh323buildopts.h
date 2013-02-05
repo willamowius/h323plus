@@ -1,3 +1,4 @@
+/* include/openh323buildopts.h.  Generated from openh323buildopts.h.in by configure.  */
 /*
  * openh323buildopts.h
  *
@@ -35,7 +36,7 @@
 #include <ptbuildopts.h>
 #include <ptlib/../../revision.h>
 
-#if PTLIB_MAJOR == 2 && PTLIB_MINOR < 10
+#if PTLIB_MAJOR == 2 && PTLIB_MINOR <= 10
    #define PTLIB_VER ( PTLIB_MAJOR*100 + PTLIB_MINOR*10 + PTLIB_BUILD )
 #else
    #define PTLIB_VER ( PTLIB_MAJOR*1000 + PTLIB_MINOR*10 + PTLIB_BUILD )
@@ -49,13 +50,13 @@
 //
 
 #define OPENH323_MAJOR 1
-#define OPENH323_MINOR 24
-#define OPENH323_BUILD 0
-#define OPENH323_VERSION "1.24.0"
+#define OPENH323_MINOR 25
+#define OPENH323_BUILD 1
+#define OPENH323_VERSION "1.25.1"
 #define H323PLUS_VER ( OPENH323_MAJOR*1000 + OPENH323_MINOR*10 + OPENH323_BUILD )
 
 
-#if PTLIB_VER >= 2110
+#if 1 // PTLIB_VER >= 2110
   #define H323_STLDICTIONARY  1
 #endif
 
@@ -67,33 +68,47 @@
 
 
 //////////////////////////////////////////////////
+// static codec definitions
 
 #ifdef H323_AUDIO_CODECS
+/*    #undef H323_STATIC_G7221 */
+/*    #undef H323_STATIC_GSM */
+#endif
 
-#undef H323_EMBEDDED_GSM
-
-#endif // H323_AUDIO_CODECS
+#ifdef H323_VIDEO
+/*    #undef H323_STATIC_H261 */
+/*    #undef H323_STATIC_H263 */
+/*    #undef H323_STATIC_H264 */
+#endif
 
 /////////////////////////////////////////////////
 //
 // Various item support
 //
 
-#undef H323_AEC
 #define H323_T38 1
 #define H323_T120 1
 #define H323_H224 1
+#ifdef H323_H224
+    #define H224_H281   1
+/*     #undef H224_T140 */
+/*     #undef H224_H284 */
+#endif
 #define H323_H230 1
 #if (PTLIB_VER > 260) && (P_SSL)
-  #undef H323_H235
-  #undef H323_H235_AES256
+/*   #undef H323_H235 */
+  #ifdef H323_H235
+/*     #undef H323_H235_AES256 */
+  #endif
 #endif
 #ifdef P_VIDEO
 #define H323_H239 1
 #endif
 #define H323_H248 1
-#define H323_H249 1
+//#undef H323_H249
+#ifdef P_SNMP
 #define H323_H341 1
+#endif
 #ifdef P_LDAP
 #define H323_H350 1
 #endif
@@ -103,10 +118,13 @@
 #ifdef H323_H460
 #define H323_H4609 1
 #if (PTLIB_VER > 260) && defined(P_STUN)
-    #undef H323_H46017
+/*     #undef H323_H46017 */
+    #if defined(H323_H46017)
+/*         #undef H323_H46026 */
+    #endif
     #define H323_H46018 1
     #if defined(H323_H46018)
-        #undef H323_H46019M
+/*         #undef H323_H46019M */
     #endif
     #define H323_H46023 1
     #if defined(H323_H46018) && defined(H323_H46023) && defined(P_SSL)
@@ -117,7 +135,15 @@
         #define H323_UPnP 1
     #endif
 #endif
-#define H323_H460P 1
+// Presence Feature
+/* #undef H323_H460P */
+#ifdef H323_H460P
+   #define H323_H460P_VER 2
+#endif
+// Registration Priority Feature
+#define H323_H460PRE 1
+// Endpoint Compatibility 
+/* #undef H323_H460COM */
 #endif
 
 #define H323_H501 1
@@ -126,10 +152,23 @@
 #endif
 #define H323_FILE 1
 
-#undef H323_SIGNAL_AGGREGATE
-#undef H323_RTP_AGGREGATE
+/* #undef H323_AEC */
+#ifdef H323_AEC
+#pragma include_alias(<speex/speex_echo.h>,            <@AEC_DIR@/include/speex/speex_echo.h>      )
+#pragma include_alias(<speex/speex_preprocess.h>,      <@AEC_DIR@/include/speex/speex_preprocess.h>)
+#pragma include_alias(<speex/speex_types.h>,           <@AEC_DIR@/include/speex/speex_types.h>     )
+#define H323_AEC_LIB "@AEC_DIR@/lib/libspeexdsp.lib"
+#endif
+
+/* #undef H323_SIGNAL_AGGREGATE */
+/* #undef H323_RTP_AGGREGATE */
+
+/* #undef H323_FIXED_VIDEOCLOCK */
+
+#define H323_FRAMEBUFFER 1
+
+//#define H323_PACKET_TRACE 1
 
 #endif
 
 // End Of File ///////////////////////////////////////////////////////////////
-
