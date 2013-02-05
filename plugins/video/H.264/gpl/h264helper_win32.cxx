@@ -52,6 +52,9 @@ unsigned flags;
 int ret;
 
 X264EncoderContext* x264;
+#ifndef X264_LINK_STATIC
+extern X264Library X264Lib;
+#endif
 
 const char* 
 ErrorMessage()
@@ -182,6 +185,7 @@ void flushStream (HANDLE stream)
 
 int main(int argc, char *argv[])
 {
+  unsigned status = 0;
   if (argc != 2) { fprintf(stderr, "Not to be executed directly - exiting\n"); exit (1); }
 
   char * debug_level = getenv ("PTLIB_TRACE_CODECS"); 
@@ -205,6 +209,20 @@ int main(int argc, char *argv[])
 
   openPipe(argv[1]);
    
+#ifndef X264_LINK_STATIC
+  if (X264Lib.Load()) 
+    status = 1;
+  else 
+    status = 0;
+#else
+  status = 1;
+#endif
+
+  if (status == 0) {
+    TRACE (1, "H264\tIPC\tCP: Failed to load dynamic library - exiting"); 
+    closeAndExit();
+  }
+
   while (1) {
     readStream(stream, (LPVOID)&msg, sizeof(msg));
     switch (msg) {
@@ -303,3 +321,4 @@ int main(int argc, char *argv[])
   }
   return 0;
 }
+

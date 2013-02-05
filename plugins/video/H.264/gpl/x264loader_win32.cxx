@@ -48,7 +48,7 @@ bool X264Library::Load()
     return true;
    
   char dllName [512];
-  snprintf(dllName, sizeof(dllName), "libX264-%c.dll", X264_BUILD);
+  snprintf(dllName, sizeof(dllName), "libX264-%d.dll", X264_BUILD);
 
   if ( !Open(dllName))  {
     TRACE (1, "H264\tDYNA\tFailed to load x264 library - codec disabled");
