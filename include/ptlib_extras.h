@@ -813,7 +813,7 @@ public:
                     m_buffer.pop();
                     if (info.m_marker && !m_buffer.empty()) { // Peek ahead for next timestamp
                         delay = (m_buffer.top().first.m_timeStamp - lastTimeStamp)/(unsigned)m_calcClockRate;
-                        if (delay < 0 || delay > 200 || (lastTimeStamp > m_buffer.top().first.m_timeStamp)) {
+                        if (delay <= 0 || delay > 200 || (lastTimeStamp > m_buffer.top().first.m_timeStamp)) {
                            delay = 0;
                            lastTimeStamp = m_buffer.top().first.m_timeStamp;
                            m_RenderTimeStamp = PTimer::Tick().GetMilliSeconds();
