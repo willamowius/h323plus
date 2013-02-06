@@ -916,7 +916,7 @@ PBoolean H323Gatekeeper::AdmissionRequest(H323Connection & connection,
     if (response.transportAddress == NULL || destInfo != *response.transportAddress) {
       arq.IncludeOptionalField(H225_AdmissionRequest::e_destinationInfo);
       arq.m_destinationInfo.SetSize(1);
-      H323SetAliasAddress(destInfo, arq.m_destinationInfo[0]);
+      H323SetAliasAddress(destInfo, arq.m_destinationInfo[0], -2);
     }
   }
 

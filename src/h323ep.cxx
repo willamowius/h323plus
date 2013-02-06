@@ -1684,6 +1684,12 @@ PBoolean H323EndPoint::ParsePartyName(const PString & _remoteParty,
     PTRACE(4, "H323\tConverted " << _remoteParty << " to " << remoteParty);
   }
 
+  PINDEX phash = _remoteParty.Find("#");
+  if (phash != P_MAX_INDEX) {
+	remoteParty.Replace("#","%");
+    PTRACE(4, "H323\tAdjusted " << remoteParty);
+  }
+
   //check if IPv6 address
   PINDEX ipv6 = remoteParty.Find("::");
   if (ipv6 != P_MAX_INDEX) {

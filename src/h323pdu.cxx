@@ -255,6 +255,7 @@ static struct {
 
 void H323SetAliasAddress(const PString & _name, H225_AliasAddress & alias, int tag)
 {
+  int originalTag = tag;
   PString name = _name;
   // See if alias type was explicitly specified
   if (tag < 0) {
@@ -268,6 +269,15 @@ void H323SetAliasAddress(const PString & _name, H225_AliasAddress & alias, int t
           }
         }
       }
+  }
+
+  // password present
+  PINDEX eps = name.Find("%");  
+  if (eps != P_MAX_INDEX && eps > 0) {
+	   if (originalTag == -2)  // ARQ
+		  name.Replace("%","#");
+	   else
+		  name = name.Mid(eps+1);
   }
 
   if (tag < 0 || tag == 1) {
@@ -1461,6 +1471,15 @@ void H323SignalPDU::SetQ931Fields(const H323Connection & connection,
       PString otherName = connection.GetRemotePartyName();
       if (IsE164(otherName))
         otherNumber = otherName;
+	  int passchar = otherName.Find("%");
+	  if (passchar != P_MAX_INDEX) {
+		 int at = otherName.Find("@");
+		 if (at != P_MAX_INDEX) {
+			otherNumber = otherName.Mid(5,at-5);  // remove the "H323:"
+		    otherNumber.Replace("%","#");
+		 }
+		 otherName = otherName.Mid(passchar+1);
+	  }
     }
 
     if (connection.HadAnsweredCall()) {
