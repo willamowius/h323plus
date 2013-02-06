@@ -5,6 +5,7 @@ H323plus 1.25.0 - 1.25.x
 Added H.224 Factory loader moved to H224 subdirectory
 Added T.140 Support
 Added H.284 <New> far end motor control
+add support for <ip>##<room>#<pass> dialing
 
 
 ===============================================================================
