@@ -166,7 +166,7 @@ const static struct {
     unsigned     send;
 } H235_DHParameters[] = {
 #ifdef H323_H235_AES256
-//    { OID_DH4096,  DH4096_P, DH4096_G, DH4096_SZ, 0 },  // Not worth it takes too long to generate key. - SH
+//    { OID_DH4096,  DH4096_P, DH4096_G, DH4096_SZ, 0 },  // DO NOT USE: There is an error in H.235 ASN.1 and cannot support keysize > 2048. (Fix in ITU)
      { OID_DH2048,  DH2048_P, DH2048_G, DH2048_SZ, 0 },
 #endif
      { OID_DH1024,  DH1024_P, DH1024_G, DH1024_SZ, 1 },
