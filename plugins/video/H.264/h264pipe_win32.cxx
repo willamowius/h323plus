@@ -92,7 +92,7 @@ bool H264EncCtx::InternalLoad()
   if (loaded)
       return true;
 
-  snprintf(pipeName, sizeof(pipeName), "\\\\.\\pipe\\x264-%u", GetInstanceNumber());
+  snprintf(pipeName, sizeof(pipeName), "\\\\.\\pipe\\x264-%d-%u", GetCurrentProcessId(), GetInstanceNumber());
 
   if (!createPipes()) {
   
