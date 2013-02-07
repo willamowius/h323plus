@@ -8,7 +8,7 @@ TimeStamp			::= INTEGER(1..4294967295) -- seconds since 00:00 1/1/1970 UTC
 RandomVal			::= INTEGER -- 32-bit Integer
 Password			::= BMPString (SIZE (1..128))
 Identifier			::= BMPString (SIZE (1..128))
-KeyMaterial			::= BIT STRING(SIZE(1..2048))
+KeyMaterial			::= BIT STRING(SIZE(1..4096))
 
 NonStandardParameter ::= SEQUENCE
 {
@@ -20,9 +20,9 @@ NonStandardParameter ::= SEQUENCE
 -- utilize standard Network Octet ordering (e.g., Big Endian)
 DHset ::= SEQUENCE  
 {
-	halfkey		BIT STRING (SIZE(0..2048)), -- = g^x mod n
-	modSize		BIT STRING (SIZE(0..2048)), --  n
-	generator		BIT STRING (SIZE(0..2048)), -- g
+	halfkey		BIT STRING (SIZE(0..4096)), -- = g^x mod n
+	modSize		BIT STRING (SIZE(0..4096)), --  n
+	generator		BIT STRING (SIZE(0..4096)), -- g
 	...
 }
 

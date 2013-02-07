@@ -247,7 +247,7 @@ PObject * H235_Identifier::Clone() const
 H235_KeyMaterial::H235_KeyMaterial(unsigned tag, PASN_Object::TagClass tagClass)
   : PASN_BitString(tag, tagClass)
 {
-  SetConstraints(PASN_Object::FixedConstraint, 1, 2048);
+  SetConstraints(PASN_Object::FixedConstraint, 1, 4096);
 }
 
 
@@ -350,9 +350,9 @@ PObject * H235_NonStandardParameter::Clone() const
 H235_DHset::H235_DHset(unsigned tag, PASN_Object::TagClass tagClass)
   : PASN_Sequence(tag, tagClass, 0, TRUE, 0)
 {
-  m_halfkey.SetConstraints(PASN_Object::FixedConstraint, 0, 2048);
-  m_modSize.SetConstraints(PASN_Object::FixedConstraint, 0, 2048);
-  m_generator.SetConstraints(PASN_Object::FixedConstraint, 0, 2048);
+  m_halfkey.SetConstraints(PASN_Object::FixedConstraint, 0, 4096);
+  m_modSize.SetConstraints(PASN_Object::FixedConstraint, 0, 4096);
+  m_generator.SetConstraints(PASN_Object::FixedConstraint, 0, 4096);
 }
 
 
