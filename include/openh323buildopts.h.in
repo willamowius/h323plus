@@ -55,7 +55,7 @@
 #define H323PLUS_VER ( OPENH323_MAJOR*1000 + OPENH323_MINOR*10 + OPENH323_BUILD )
 
 
-#if 1 // PTLIB_VER >= 2110
+#if PTLIB_VER >= 2110
   #define H323_STLDICTIONARY  1
 #endif
 
@@ -95,16 +95,16 @@
 #endif
 #undef H323_H230
 #if (PTLIB_VER > 260) && (P_SSL)
-  #define H323_H235 1
+  #undef H323_H235
   #ifdef H323_H235
-    #define H323_H235_AES256 1
+    #undef H323_H235_AES256
   #endif
 #endif
 #ifdef P_VIDEO
 #undef H323_H239
 #endif
 #undef H323_H248
-//#undef H323_H249
+#undef H323_H249
 #ifdef P_SNMP
 #undef H323_H341
 #endif
@@ -117,13 +117,13 @@
 #ifdef H323_H460
 #undef H323_H4609
 #if (PTLIB_VER > 260) && defined(P_STUN)
-    #define H323_H46017 1
+    #undef H323_H46017
     #if defined(H323_H46017)
         #undef H323_H46026
     #endif
-    #define H323_H46018 1
+    #undef H323_H46018
     #if defined(H323_H46018)
-        #define H323_H46019M 1
+        #undef H323_H46019M
     #endif
     #undef H323_H46023
     #if defined(H323_H46018) && defined(H323_H46023) && defined(P_SSL)
@@ -135,14 +135,14 @@
     #endif
 #endif
 // Presence Feature
-#define H323_H460P 1
+#undef H323_H460P
 #ifdef H323_H460P
    #define H323_H460P_VER 2
 #endif
 // Registration Priority Feature
-#define H323_H460PRE 1
+#undef H323_H460PRE
 // Endpoint Compatibility 
-#define H323_H460COM 1
+#undef H323_H460COM
 #endif
 
 #undef H323_H501
