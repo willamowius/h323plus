@@ -685,6 +685,8 @@ void H224_H281Handler::OnReceivedMessage(const H224_Frame & msg)
     requestedTiltDirection = message.GetTiltDirection();
     requestedZoomDirection = message.GetZoomDirection();
     requestedFocusDirection = message.GetFocusDirection();
+
+    PTRACE(5, "H281\tReceived Start Action P: " << requestedPanDirection << " T: " << requestedTiltDirection << " Z:" << requestedZoomDirection );
 		
     OnStartAction(requestedPanDirection,
 				  requestedTiltDirection,
@@ -734,6 +736,8 @@ void H224_H281Handler::OnReceivedMessage(const H224_Frame & msg)
       requestedTiltDirection = H281_Frame::NoTilt;
       requestedZoomDirection = H281_Frame::NoZoom;
       requestedFocusDirection = H281_Frame::NoFocus;
+
+      PTRACE(5, "H281\tReceived Stop Action P: " << requestedPanDirection << " T: " << requestedTiltDirection << " Z:" << requestedZoomDirection );
 			
       OnStopAction();
     }

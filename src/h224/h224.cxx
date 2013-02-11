@@ -539,6 +539,8 @@ PBoolean OpalH224Handler::OnReceivedFrame(H224_Frame & frame)
   if(clientID == 0x00) {
     return OnReceivedCMEMessage(frame);
   }
+
+  PTRACE(5, "H224\tReceived frame for ClientID " << clientID);
     
   handlersMutex.Wait();
   for (std::map<BYTE,H224_Handler*>::iterator it = m_h224Handlers.begin(); it != m_h224Handlers.end(); ++it) {
