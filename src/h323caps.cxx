@@ -3239,6 +3239,7 @@ void H323Capabilities::Remove(H323Capability * capability)
   PTRACE(3, "H323\tRemoving capability: " << *capability);
 
   unsigned capabilityNumber = capability->GetCapabilityNumber();
+  unsigned capabilityType = capability->GetMainType();
 
   for (PINDEX outer = 0; outer < set.GetSize(); outer++) {
     for (PINDEX middle = 0; middle < set[outer].GetSize(); middle++) {
@@ -3257,7 +3258,8 @@ void H323Capabilities::Remove(H323Capability * capability)
 
   table.Remove(capability);
 #ifdef H323_H235
-  RemoveSecure(capabilityNumber);
+  if (capabilityType != H323Capability::e_Security)
+     RemoveSecure(capabilityNumber);
 #endif
 }
 
