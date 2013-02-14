@@ -100,7 +100,7 @@ class H323Gatekeeper : public H225_RAS
     PBoolean OnSendFeatureSet(unsigned, H225_FeatureSet & features, PBoolean) const;
     void OnReceiveFeatureSet(unsigned, const H225_FeatureSet & features) const;
 
-#if H323_H460
+#ifdef H323_H460
     void DisableFeatureSet(int msgtype) const;
     H460_FeatureSet & GetFeatures();
 #endif

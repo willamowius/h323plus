@@ -2619,7 +2619,7 @@ PBoolean H323Connection::OnNatDetected()
 }
 
 void H323Connection::DisableNATSupport() { 
-#if H323_H460
+#ifdef H323_H460
     if (!IsH46019Multiplexed())
 #endif
         NATsupport = false;
