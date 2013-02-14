@@ -2167,6 +2167,14 @@ class H323Capabilities : public PObject
     void Remove(
       const PStringArray & formatNames  ///< Array of format names to remove
     );
+ 
+#ifdef H323_H235
+    /**Remove security capability associated with a given media capability 
+      */
+    void RemoveSecure(
+       unsigned capabilityNumber  ///< Associated capability number
+	);
+#endif
 
     /**Remove all of the capabilities.
       */

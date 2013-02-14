@@ -3212,6 +3212,24 @@ H323Capability * H323Capabilities::Copy(const H323Capability & capability)
   return newCapability;
 }
 
+#ifdef H323_H235
+void H323Capabilities::RemoveSecure(unsigned capabilityNumber)
+{
+  H323Capability * capability = NULL;
+  for (PINDEX i = 0; i < table.GetSize(); i++) {
+      if (table[i].GetMainType() == H323Capability::e_Security &&
+          table[i].GetSubType() == capabilityNumber) {
+            capability = &table[i];
+            break;
+      }
+  }
+
+  if (capability != NULL) {
+      PTRACE(3, "H323\tFound associated Security capability: " << *capability);
+      Remove(capability);
+  }
+}
+#endif
 
 void H323Capabilities::Remove(H323Capability * capability)
 {
@@ -3238,6 +3256,9 @@ void H323Capabilities::Remove(H323Capability * capability)
   }
 
   table.Remove(capability);
+#ifdef H323_H235
+  RemoveSecure(capabilityNumber);
+#endif
 }
 
 
