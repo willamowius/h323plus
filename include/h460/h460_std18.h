@@ -125,6 +125,8 @@ public:
 
 	virtual PBoolean CommonFeature() { return remoteSupport; }
 
+    virtual PBoolean FeatureAdvertised(int mtype);
+
     /////////////////////
     // H.460.19 Messages
     virtual PBoolean OnSendSetup_UUIE(H225_FeatureDescriptor & pdu);

@@ -47,6 +47,7 @@
 #include <h323pdu.h>
 #include <h460/h460_std18.h>
 #include <h460/h46018_h225.h>
+#include <h460/h460.h>
 
 #if _WIN32
 #pragma message("H.460.18/.19 Enabled. See Tandberg Patent License. http://www.tandberg.com/collateral/tandberg-ITU-license.pdf")
@@ -198,6 +199,19 @@ void H460_FeatureStd19::AttachConnection(H323Connection * _con)
     CON = _con;
 }
 
+PBoolean H460_FeatureStd19::FeatureAdvertised(int mtype)
+{
+     switch (mtype) {
+        case H460_MessageType::e_setup:
+        case H460_MessageType::e_callProceeding: 
+        case H460_MessageType::e_alerting:
+        case H460_MessageType::e_connect:
+            return true;
+        default:
+            return false;
+     }
+}
+
 PBoolean H460_FeatureStd19::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu) 
 { 
     if (!isEnabled || !isAvailable)
@@ -252,17 +266,7 @@ PBoolean H460_FeatureStd19::OnSendCallProceeding_UUIE(H225_FeatureDescriptor & p
 
 void H460_FeatureStd19::OnReceiveCallProceeding_UUIE(const H225_FeatureDescriptor & pdu) 
 {
-//    if (isEnabled && isAvailable) {
-//        remoteSupport = TRUE;
-//        CON->H46019Enabled();
-//#ifdef H323_H46019M
-//        H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
-//        if (feat.Contains(H46019_Multiplex)) {
-//             EnableMultiplex();
-//             multiSupport = true;
-//        }
-//#endif
-//    }
+//   Ignore message
 }
 
 PBoolean H460_FeatureStd19::OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu)
