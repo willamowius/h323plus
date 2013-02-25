@@ -6486,6 +6486,14 @@ PBoolean H323Connection::OnCreateH224Handler(H323Channel::Directions dir, const 
     return endpoint.OnCreateH224Handler(dir,*this,id,m_handler);
 }
 
+H224_Handler * H323Connection::CreateH224Handler(H323Channel::Directions dir, OpalH224Handler & h224Handler, const PString & id)
+{
+    if (id == "H281")  // Backwards compatibility
+        return CreateH281ProtocolHandler(h224Handler);
+    else
+        return NULL;
+}
+
 #ifdef H224_H281
 H224_H281Handler * H323Connection::CreateH281ProtocolHandler(OpalH224Handler & h224Handler)
 {

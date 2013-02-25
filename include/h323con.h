@@ -2457,7 +2457,18 @@ class H323Connection : public PObject
      */
     virtual PBoolean OnCreateH224Handler(H323Channel::Directions dir, const PString & id, H224_Handler * m_handler) const;
 
-  
+   /** Create an instance of a H.224 protocol handler.
+
+        This is called when the subsystem requires that a H.224 channel be established.
+
+        Note that if the application overrides this it should return a pointer
+        to a heap variable (using new) as it will be automatically deleted when
+        the associated H.224 handler is deleted.
+
+     The default behavour returns NULL to have the subsystem instance from the H.224 Factory;
+     */
+    virtual H224_Handler *CreateH224Handler(H323Channel::Directions dir, OpalH224Handler & h224Handler, const PString & id);
+
 #ifdef H224_H281
     /** Create an instance of the H.281 protocol handler.
 
