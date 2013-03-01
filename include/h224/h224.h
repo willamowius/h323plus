@@ -32,6 +32,7 @@
 
 #include <ptlib/pluginmgr.h>
 #include <q922.h>
+#include <channels.h>
 
 #define H224_HEADER_SIZE 6
 
@@ -92,7 +93,7 @@ public:
     H224_Handler(const PString & name);
     ~H224_Handler();
 
-    virtual PBoolean IsActive() { return true; }
+    virtual PBoolean IsActive(H323Channel::Directions /*dir*/) { return true; }
 
     void AttachH224Handler(OpalH224Handler * h224Handler);
 

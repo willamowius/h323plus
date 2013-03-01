@@ -364,7 +364,7 @@ PString H224_H284Handler::ControlIDAsString(BYTE id)
     return str;
 };
 
-PBoolean H224_H284Handler::IsActive() const
+PBoolean H224_H284Handler::IsActive(H323Channel::Directions /*dir*/) const
 { 
     return (m_controlMap.size() != 0);
 }

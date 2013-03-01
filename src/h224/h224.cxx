@@ -447,7 +447,7 @@ PBoolean OpalH224Handler::SendClientList()
   ptr[2] = (BYTE)(count >> 2); // client count
   int i = 3;
     for (std::map<BYTE,H224_Handler*>::iterator it = m_h224Handlers.begin(); it != m_h224Handlers.end(); ++it) {
-        if (it->second->IsActive()) {
+        if (it->second->IsActive(sessionDirection)) {
             BYTE clientID = it->first;
             ptr[i] = (0x80 | clientID);
             if(clientID == 0x7e) { // extended client ID
@@ -470,8 +470,10 @@ PBoolean OpalH224Handler::SendExtraCapabilities()
     return FALSE;
 
   handlersMutex.Wait();
-  for (std::map<BYTE,H224_Handler*>::iterator it = m_h224Handlers.begin(); it != m_h224Handlers.end(); ++it)
-    it->second->SendExtraCapabilities();
+  for (std::map<BYTE,H224_Handler*>::iterator it = m_h224Handlers.begin(); it != m_h224Handlers.end(); ++it) {
+    if (it->second->IsActive(sessionDirection)) 
+        it->second->SendExtraCapabilities();
+  }
   handlersMutex.Signal();
     
   return TRUE;

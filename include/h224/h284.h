@@ -174,7 +174,7 @@ public:
     H224_H284Handler();
     ~H224_H284Handler();
 
-    virtual PBoolean IsActive() const;
+    virtual PBoolean IsActive(H323Channel::Directions dir) const;
 
     static PStringList GetHandlerName() {  return PStringArray("H284"); };
     virtual PString GetName() const
