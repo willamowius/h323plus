@@ -42,6 +42,8 @@
 #pragma interface
 #endif
 
+#define T140_CLIENT_ID 0x02
+
 class T140_Frame : public H224_Frame
 {
     PCLASSINFO(T140_Frame, H224_Frame);

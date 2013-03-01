@@ -29,6 +29,8 @@
 #pragma interface
 #endif
 
+#define H281_CLIENT_ID 0x01
+
 class H281_Frame : public H224_Frame
 {
   PCLASSINFO(H281_Frame, H224_Frame);

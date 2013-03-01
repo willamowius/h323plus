@@ -447,14 +447,16 @@ PBoolean OpalH224Handler::SendClientList()
   ptr[2] = (BYTE)(count >> 2); // client count
   int i = 3;
     for (std::map<BYTE,H224_Handler*>::iterator it = m_h224Handlers.begin(); it != m_h224Handlers.end(); ++it) {
-        BYTE clientID = it->first;
-        ptr[i] = (0x80 | clientID);
-        if(clientID == 0x7e) { // extended client ID
-          i += 2;
-        } else if(clientID == 0x7f) { // non-standard client ID
-          i += 6;
-        } else { // standard client ID 
-          i++;
+        if (it->second->IsActive()) {
+            BYTE clientID = it->first;
+            ptr[i] = (0x80 | clientID);
+            if(clientID == 0x7e) { // extended client ID
+              i += 2;
+            } else if(clientID == 0x7f) { // non-standard client ID
+              i += 6;
+            } else { // standard client ID 
+              i++;
+            }
         }
     }
   TransmitFrame(h224Frame);

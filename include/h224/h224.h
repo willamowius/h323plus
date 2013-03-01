@@ -37,9 +37,6 @@
 
 #define H224_BROADCAST 0x0000
 
-#define H281_CLIENT_ID 0x01
-#define T140_CLIENT_ID 0x02
-#define H284_CLIENT_ID 0x03
 
 class H224_Frame : public Q922_Frame
 {
@@ -94,6 +91,8 @@ class H224_Handler : public PObject
 public:
     H224_Handler(const PString & name);
     ~H224_Handler();
+
+    virtual PBoolean IsActive() { return true; }
 
     void AttachH224Handler(OpalH224Handler * h224Handler);
 
