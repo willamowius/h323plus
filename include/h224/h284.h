@@ -113,18 +113,34 @@ public:
 
     H284_ControlPoint(H224_H284Handler & handler, BYTE ctrlID=0);
 
-    PString Name();
+    virtual PString Name() const;
 
+    virtual PBoolean IsActive() const;
+
+    // Set Data from Implementer
+    virtual void SetData(PBoolean absolute = false, PBoolean viewport=false, unsigned step=0, 
+        unsigned min=0, unsigned max=0, unsigned current=0, 
+        unsigned vportMin=0, unsigned vportMax=0);
+
+    // Set Information internally
     void Set(BYTE id, PBoolean absolute = false, PBoolean viewport=false, WORD step=0, 
         DWORD min=0, DWORD max=0, DWORD current=0, 
         DWORD vportMin=0, DWORD vportMax=0
     );
 
+    // Set Data from Far End
+    PBoolean SetData(const BYTE * data, int & length);
+
+    // Send Data to far end
+    PBoolean Load(BYTE * data, int & length) const;
+
+    // Build Instruction to Send
     void BuildInstruction(Action act, DWORD value, H284_Instruction & inst);
+
+    // Process incoming instruction
     void HandleInstruction(const H284_Instruction & inst);
 
-    PBoolean SetData(const BYTE * data, int & length);
-    PBoolean Load(BYTE * data, int & length) const;
+
 
     unsigned GetControlType();
 
@@ -141,11 +157,12 @@ public:
 
 protected :
     H224_H284Handler &    m_handler;
-    Type                m_cpType;
-    unsigned            m_lastInstruction;
+    Type                  m_cpType;
+    unsigned              m_lastInstruction;
+    PBoolean              m_isActive;
 
 };
-typedef std::map<BYTE,H284_ControlPoint> H284_ControlMap;
+typedef std::map<BYTE,H284_ControlPoint*> H284_ControlMap;
 
 
 ////////////////////////////////////////////////////////////////
@@ -186,9 +203,10 @@ public:
     virtual void SetRemoteSupport();
     virtual PBoolean HasRemoteSupport();
 
-    void Add(ControlPointID id, PBoolean absolute = false, PBoolean viewport=false, WORD step=0, 
-        DWORD min=0, DWORD max=0, DWORD current=0, 
-        DWORD vportMin=0, DWORD vportMax=0
+    void Add(ControlPointID id);
+
+    void Add(ControlPointID id, PBoolean absolute, PBoolean viewport=false, WORD step=0, 
+        DWORD min=0, DWORD max=0, DWORD current=0, DWORD vportMin=0, DWORD vportMax=0
     );
     virtual PBoolean OnAddControlPoint(ControlPointID id,H284_ControlPoint & cp);
 

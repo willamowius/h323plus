@@ -100,43 +100,55 @@ PBoolean H284_Frame::ReadInstructions(H224_H284Handler & handler) const
 
 H284_ControlPoint::H284_ControlPoint(H224_H284Handler & handler, BYTE ctrlID)
 :     PBYTEArray(H284_CPSIZE), m_handler(handler), m_cpType(e_unknown), 
-    m_lastInstruction(0)
+    m_lastInstruction(0), m_isActive(false)
 {
     theArray[0] = ctrlID;
 }
 
-PString H284_ControlPoint::Name()
+PString H284_ControlPoint::Name() const
 {
     return H224_H284Handler::ControlIDAsString(theArray[0]);
 }
 
-void H284_ControlPoint::Set(BYTE id, PBoolean absolute, PBoolean viewport, WORD step, 
-        DWORD min, DWORD max, DWORD current, DWORD vportMin, DWORD vportMax)
+PBoolean H284_ControlPoint::IsActive() const
+{
+    return m_isActive;
+}
+
+void H284_ControlPoint::SetData(PBoolean absolute, PBoolean viewport, unsigned step, 
+        unsigned min, unsigned max, unsigned current, unsigned vportMin, unsigned vportMax)
 {
     int sz = H284_CPSIZE;
     if (!absolute) sz = 4;
     else if (!viewport) sz = 16;
 
     SetSize(sz);
-
-    theArray[0] = id;
     if (absolute) theArray[1] |= 0x80;
     if (viewport) theArray[1] |= 0x40;
-    *(PUInt16b *)&theArray[2] = step;
+    *(PUInt16b *)&theArray[2] = (WORD)step;
 
     if (absolute) {
-        *(PUInt32b *)&theArray[4] = min;
-        *(PUInt32b *)&theArray[8] = max;
-        *(PUInt32b *)&theArray[12] = current;
+        *(PUInt32b *)&theArray[4] = (DWORD)min;
+        *(PUInt32b *)&theArray[8] = (DWORD)max;
+        *(PUInt32b *)&theArray[12] = (DWORD)current;
         if (viewport) {
-            *(PUInt32b *)&theArray[16] = vportMin;
-            *(PUInt32b *)&theArray[20] = vportMax;
+            *(PUInt32b *)&theArray[16] = (DWORD)vportMin;
+            *(PUInt32b *)&theArray[20] = (DWORD)vportMax;
         }
     } 
 
     if (!absolute) m_cpType = e_simple;
-    else if (!GetStep()) m_cpType = e_relative;
-    else m_cpType = e_absolute;
+    else if (!GetStep()) m_cpType = e_absolute;
+    else m_cpType = e_relative;
+
+    m_isActive = true;
+}
+
+void H284_ControlPoint::Set(BYTE id, PBoolean absolute, PBoolean viewport, WORD step, 
+        DWORD min, DWORD max, DWORD current, DWORD vportMin, DWORD vportMax)
+{
+    theArray[0] = id;
+    SetData(absolute, viewport, step, min, max, current, vportMin, vportMax);
 }
 
 PBoolean H284_ControlPoint::SetData(const BYTE * data, int & length)
@@ -158,6 +170,7 @@ PBoolean H284_ControlPoint::SetData(const BYTE * data, int & length)
     memcpy(theArray+1,(const void *)data,sz-1);
 
     length += sz;
+    m_isActive = true;
     return true;
 }
 
@@ -332,6 +345,21 @@ void H284_Instruction::SetInstructionType(int newType)
 H224_HANDLER(H284);
 /////////////////////////////////////////////////////////////////
 
+template <class PAIR>
+class deletepair { // PAIR::second_type is a pointer type
+public:
+    void operator()(const PAIR & p) { delete p.second; }
+};
+
+template <class M>
+inline void DeleteObjectsInMap(const M & m)
+{
+    typedef typename M::value_type PAIR;
+    std::for_each(m.begin(), m.end(), deletepair<PAIR>());
+}
+
+////////////////////////////////////
+
 H224_H284Handler::H224_H284Handler()
 : H224_Handler("H284"), m_remoteSupport(false), m_lastInstruction(0)
 {
@@ -341,8 +369,7 @@ H224_H284Handler::H224_H284Handler()
 H224_H284Handler::~H224_H284Handler()
 {
     PWaitAndSignal m(m_ctrlMutex);
-
-    m_controlMap.clear();
+    DeleteObjectsInMap(m_controlMap);
 }
 
 PString H224_H284Handler::ControlIDAsString(BYTE id)
@@ -385,7 +412,7 @@ H284_ControlPoint * H224_H284Handler::GetControlPoint(BYTE id)
 
     H284_ControlMap::iterator iter = m_controlMap.find(id);
     if (iter != m_controlMap.end())
-        return &(iter->second);
+        return iter->second;
     else
         return NULL;
 }
@@ -397,8 +424,12 @@ void H224_H284Handler::SendExtraCapabilities() const
     PBYTEArray extraCaps(1200);
     int sz = 0;
     H284_ControlMap::const_iterator iter = m_controlMap.begin();
-    while (iter != m_controlMap.end())
-        iter->second.Load(extraCaps.GetPointer()+sz,sz);
+    while (iter != m_controlMap.end()) {
+        H284_ControlPoint * cp = iter->second;
+        if (cp) 
+            cp->Load(extraCaps.GetPointer()+sz,sz);
+        iter++;
+    }
 
     extraCaps.SetSize(sz);
     m_h224Handler->SendExtraCapabilitiesMessage(H284_CLIENT_ID, extraCaps.GetPointer(), extraCaps.GetSize());
@@ -430,38 +461,52 @@ void H224_H284Handler::OnReceivedExtraCapabilities(const BYTE * extraCaps, PINDE
     }
 }
 
+void H224_H284Handler::Add(ControlPointID id)
+{
+    PWaitAndSignal m(m_ctrlMutex);
+
+    H284_ControlPoint * cp = new H284_ControlPoint(*this,id);
+
+    if (OnAddControlPoint(id,*cp))
+        m_controlMap.insert(std::pair<BYTE,H284_ControlPoint*>(id,cp));
+}
+
 void H224_H284Handler::Add(ControlPointID id, PBoolean absolute, PBoolean viewport, WORD step, 
         DWORD min, DWORD max, DWORD current, DWORD vportMin, DWORD vportMax)
 {
     PWaitAndSignal m(m_ctrlMutex);
 
-    H284_ControlPoint cp(*this);
-    cp.Set(id, absolute, viewport, step, min, max, current, vportMin, vportMax);
+    H284_ControlPoint * cp = new H284_ControlPoint(*this);
+    cp->Set(id, absolute, viewport, step, min, max, current, vportMin, vportMax);
 
-    if (OnAddControlPoint(id,cp))
-        m_controlMap.insert(std::pair<BYTE,H284_ControlPoint>(id,cp));    
+    if (OnAddControlPoint(id,*cp))
+        m_controlMap.insert(std::pair<BYTE,H284_ControlPoint*>(id,cp));    
 }
 
-PBoolean H224_H284Handler::OnAddControlPoint(ControlPointID /*id*/,H284_ControlPoint & /*cp*/)
+PBoolean H224_H284Handler::OnAddControlPoint(ControlPointID id,H284_ControlPoint & /*cp*/)
 {
+    PTRACE(4,"H284\tAdd COntrol Point " << ControlIDAsString(id));
     return true;
 }
 
-void H224_H284Handler::ReceiveInstruction(ControlPointID /*id*/, H284_ControlPoint::Action /*action*/, unsigned /*value*/) const
+void H224_H284Handler::ReceiveInstruction(ControlPointID id, H284_ControlPoint::Action action, unsigned value) const
 {
-
+    PTRACE(4,"H284\tInstruction Rec'd " << ControlIDAsString(id) << " action " << action << " " << value);
 }
 
 PBoolean H224_H284Handler::SendInstruction(ControlPointID id, H284_ControlPoint::Action action, unsigned value)
 {
 
     H284_ControlPoint * cp = GetControlPoint(id);
-    if (!cp)
+    if (!cp || !cp->IsActive()) {
+        PTRACE(4,"H284\tInstruction for " << ControlIDAsString(id) << " ignored as no remote support");
         return false;
+    }
 
     H284_Instruction inst;
     cp->BuildInstruction(action,value,inst);
     PostInstruction(inst);
+    PTRACE(4,"H284\tInstruction Sent " << ControlIDAsString(id) << " action " << action << " " << value);
     return true;
 }
 
@@ -470,7 +515,7 @@ void H224_H284Handler::PostInstruction(H284_Instruction & inst)
     m_lastInstruction++;
     inst.SetIdentifier(m_lastInstruction);
 
-    //    Need to put this on the resend queue etc.
+    //   TODO: Need to put this on the resend queue etc.
     switch (inst.GetInstructionType()) {
         case H284_ControlPoint::e_simple:
         case H284_ControlPoint::e_relative:
