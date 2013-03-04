@@ -73,6 +73,7 @@ PBoolean H284_Frame::ReadInstructions(H224_H284Handler & handler) const
         cp = handler.GetControlPoint(info[0]);
         if (cp) {
             switch (cp->GetControlType()) {
+                case H284_ControlPoint::e_unknown:
                 case H284_ControlPoint::e_relative:
                 case H284_ControlPoint::e_absolute:
                     msgSize = 8;
@@ -161,6 +162,10 @@ PBoolean H284_ControlPoint::SetData(const BYTE * data, int & length)
 
     bool absolute = ((info[1]&0x80) != 0);
     bool viewport = ((info[1]&0x40) != 0);
+
+    if (!absolute) m_cpType = e_simple;
+    else if (!GetStep()) m_cpType = e_absolute;
+    else m_cpType = e_relative;
 
     int sz = H284_CPSIZE;
     if (!absolute) sz = 4;
@@ -257,7 +262,7 @@ void H284_ControlPoint::HandleInstruction(const H284_Instruction & inst)
 {
     unsigned id = (unsigned)inst.GetIdentifer();
 
-    if (m_cpType != e_simple && m_lastInstruction <= id) {
+    if (m_cpType != e_simple &&  id <= m_lastInstruction) {
         PTRACE(5,"H284\tCP: " << Name() << " ignore duplicate instruction: " << id);
         return;
     }
