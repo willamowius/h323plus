@@ -539,16 +539,21 @@ void H224_H284Handler::PostInstruction(H284_Instruction & inst)
     inst.SetIdentifier(m_lastInstruction);
 
     //   TODO: Need to put this on the resend queue etc.
+    int sendCount = 1;
     switch (inst.GetInstructionType()) {
+        case H284_ControlPoint::e_absolute:
+           sendCount = 3;
         case H284_ControlPoint::e_simple:
         case H284_ControlPoint::e_relative:
-        case H284_ControlPoint::e_absolute:
         default:
             break;
     }
 
-    m_transmitFrame.AddInstruction(inst);
-    m_h224Handler->TransmitClientFrame(H284_CLIENT_ID, m_transmitFrame);
+    for (PINDEX i=0; i < sendCount; ++i) {
+        m_transmitFrame.AddInstruction(inst);
+        m_h224Handler->TransmitClientFrame(H284_CLIENT_ID, m_transmitFrame);
+        PThread::Sleep(10);
+    }
     m_transmitFrame.SetClientDataSize(0);
 }
 
