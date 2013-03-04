@@ -222,7 +222,7 @@ PBoolean H224_Frame::Decode(const BYTE *data,
   if((highOrderAddressOctet != 0x00) ||
      (!(lowOrderAddressOctet == 0x61 || lowOrderAddressOctet == 0x71)) ||
      (controlFieldOctet != 0x03) ||
-     (GetClientID() > 0x02))
+     (GetClientID() > 0x03))
   {        
       return FALSE;
   }
