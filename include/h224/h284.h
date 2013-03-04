@@ -200,8 +200,17 @@ public:
     virtual BYTE GetClientID() const  
             { return H284_CLIENT_ID; }
 
+    /** Set Remote (receive) Support
+    */
     virtual void SetRemoteSupport();
+
+    /** Set Local (transmit) Support
+    */
+    virtual void SetLocalSupport();
+
     virtual PBoolean HasRemoteSupport();
+
+    virtual void OnRemoteSupportDetected() {};
 
     void Add(ControlPointID id);
 
@@ -209,6 +218,7 @@ public:
         DWORD min=0, DWORD max=0, DWORD current=0, DWORD vportMin=0, DWORD vportMax=0
     );
     virtual PBoolean OnAddControlPoint(ControlPointID id,H284_ControlPoint & cp);
+    virtual PBoolean OnReceivedControlData(BYTE id, const BYTE * data, int & length);
 
     PBoolean SendInstruction(ControlPointID id, H284_ControlPoint::Action action, unsigned value);
     virtual void ReceiveInstruction(ControlPointID id, H284_ControlPoint::Action action, unsigned value) const;

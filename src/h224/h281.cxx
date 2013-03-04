@@ -626,7 +626,15 @@ void H224_H281Handler::SendExtraCapabilities() const
 
 void H224_H281Handler::SetRemoteSupport()
 {
-	remoteHasH281 = TRUE;
+    if (m_direction == H323Channel::IsReceiver)
+        OnRemoteSupportDetected();
+
+    remoteHasH281 = true;
+}
+
+void H224_H281Handler::SetLocalSupport()
+{
+    remoteHasH281 = true;
 }
 
 PBoolean H224_H281Handler::HasRemoteSupport()

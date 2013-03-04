@@ -93,13 +93,15 @@ public:
     H224_Handler(const PString & name);
     ~H224_Handler();
 
-    virtual PBoolean IsActive(H323Channel::Directions /*dir*/) { return true; }
+    virtual PBoolean IsActive(H323Channel::Directions /*dir*/) const { return true; }
 
     void AttachH224Handler(OpalH224Handler * h224Handler);
 
     virtual PString GetName() const = 0;
     virtual BYTE GetClientID() const = 0;
     virtual void SetRemoteSupport() = 0;
+    virtual void SetLocalSupport() = 0;
+    virtual void OnRemoteSupportDetected() = 0;
     virtual void SendExtraCapabilities() const = 0;
     virtual void OnReceivedExtraCapabilities(const BYTE *capabilities, PINDEX size) =0;
     virtual void OnReceivedMessage(const H224_Frame & message) = 0;

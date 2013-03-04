@@ -49,7 +49,7 @@ T140_Frame::T140_Frame()
 : H224_Frame(2)
 {
   SetHighPriority(TRUE);
-	
+
   BYTE *data = GetClientDataPtr();
   data[0] = 0x00;
   data[1] = 0x00;
@@ -92,15 +92,29 @@ void T140_Frame::SetDataType(DataType type)
 
 void T140_Frame::SetCharacter(const PString & str)
 {
-    PWCharArray ucs2 = str.AsUCS2();
-    memcpy(GetClientDataPtr(),ucs2.GetPointer(),2);
+
+    int sz = str.GetLength()*2;
+    SetClientDataSize(sz);
+    PWCharArray ucs2;
+    int j=0;
+    for (PINDEX i=0; i < str.GetLength(); ++i) {
+        ucs2 = str.Mid(i,1).AsUCS2();
+        *(GetClientDataPtr()+j) = ucs2[0];
+        *(GetClientDataPtr()+j+1) = ucs2[1];
+        j+=2;
+    }
 }
     
 PString T140_Frame::GetCharacter() const
 {
+    PString result;
     PWCharArray ucs2;
-    memcpy(ucs2.GetPointer(),GetClientDataPtr(),2);
-    return ucs2;
+    for (PINDEX i = 0; i < GetClientDataSize(); i+=2) {
+        ucs2[0] = *(GetClientDataPtr()+i);
+        ucs2[1] = *(GetClientDataPtr()+i+i);
+        result += PString(ucs2).Left(1);
+    }
+    return result;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -120,6 +134,14 @@ H224_T140Handler::~H224_T140Handler()
 }
 
 void H224_T140Handler::SetRemoteSupport()
+{
+    if (m_direction == H323Channel::IsReceiver)
+            OnRemoteSupportDetected();
+
+    remoteSupport = true;
+}
+
+void H224_T140Handler::SetLocalSupport()
 {
     remoteSupport = true;
 }
@@ -144,6 +166,7 @@ void H224_T140Handler::SendBackSpace()
     if (!remoteSupport)
         return;
 
+    PTRACE(4,"T140\tSend Backspace");
     transmitFrame.SetDataType(T140_Frame::BackSpace);
     m_h224Handler->TransmitClientFrame(T140_CLIENT_ID, transmitFrame);
 }
@@ -153,6 +176,7 @@ void H224_T140Handler::SendNewLine()
     if (!remoteSupport)
         return;
 
+    PTRACE(4,"T140\tSend NewLine");
     transmitFrame.SetDataType(T140_Frame::NewLine);
     m_h224Handler->TransmitClientFrame(T140_CLIENT_ID, transmitFrame);
 }
@@ -162,6 +186,7 @@ void H224_T140Handler::SendCharacter(const PString & text)
     if (!remoteSupport)
         return;
 
+    PTRACE(4,"T140\tSend Chars " << text);
     transmitFrame.SetCharacter(text);
     m_h224Handler->TransmitClientFrame(T140_CLIENT_ID, transmitFrame);
 }

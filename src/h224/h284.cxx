@@ -398,11 +398,22 @@ PBoolean H224_H284Handler::IsActive(H323Channel::Directions /*dir*/) const
 
 void H224_H284Handler::SetRemoteSupport()
 {
+    if (m_direction == H323Channel::IsReceiver)
+        OnRemoteSupportDetected();
+
+    m_remoteSupport = true;
+}
+
+void H224_H284Handler::SetLocalSupport()
+{
     m_remoteSupport = true;
 }
 
 PBoolean H224_H284Handler::HasRemoteSupport()
 {
+    if (m_direction == H323Channel::IsReceiver)
+        OnRemoteSupportDetected();
+
     return m_remoteSupport;
 }
 
@@ -440,7 +451,6 @@ void H224_H284Handler::OnReceivedExtraCapabilities(const BYTE * extraCaps, PINDE
     PWaitAndSignal m(m_ctrlMutex);
 
     PINDEX sz = 0;
-    H284_ControlPoint * cp = NULL;
     while (sz < size) {
         BYTE info[2];
         memcpy(info,extraCaps+sz,2);
@@ -448,8 +458,7 @@ void H224_H284Handler::OnReceivedExtraCapabilities(const BYTE * extraCaps, PINDE
         bool absolute = ((info[1]&0x80) != 0);
         bool viewport = ((info[1]&0x40) != 0);
         int step = 0;
-        cp = GetControlPoint(id);
-        if (cp && cp->SetData(extraCaps+sz,step)) {
+        if (OnReceivedControlData(id,extraCaps+sz,step)) {
             PTRACE(6,"H284\tP: " << sz << " found " << ControlIDAsString(id));
         } else {
             int step = H284_CPSIZE;
@@ -487,6 +496,15 @@ PBoolean H224_H284Handler::OnAddControlPoint(ControlPointID id,H284_ControlPoint
 {
     PTRACE(4,"H284\tAdd COntrol Point " << ControlIDAsString(id));
     return true;
+}
+
+PBoolean H224_H284Handler::OnReceivedControlData(BYTE id, const BYTE * data, int & length)
+{
+    H284_ControlPoint * cp = GetControlPoint(id);
+    if (cp && cp->SetData(data,length))
+		return true;
+
+	return false;
 }
 
 void H224_H284Handler::ReceiveInstruction(ControlPointID id, H284_ControlPoint::Action action, unsigned value) const

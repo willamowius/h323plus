@@ -444,7 +444,7 @@ PBoolean OpalH224Handler::SendClientList()
     
   ptr[0] = 0x01; // Client list code
   ptr[1] = 0x00; // Message code
-  ptr[2] = (BYTE)(count >> 2); // client count
+  ptr[2] = (BYTE)count; // client count
   int i = 3;
     for (std::map<BYTE,H224_Handler*>::iterator it = m_h224Handlers.begin(); it != m_h224Handlers.end(); ++it) {
         if (it->second->IsActive(sessionDirection)) {

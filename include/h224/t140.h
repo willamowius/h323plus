@@ -82,7 +82,16 @@ public:
     virtual BYTE GetClientID() const
             { return T140_CLIENT_ID; }
     
+    /** Set Remote (receive) Support
+    */
     virtual void SetRemoteSupport();
+
+    /** Set Local (transmit) Support
+    */
+    virtual void SetLocalSupport();
+
+    virtual void OnRemoteSupportDetected() {};
+
     virtual PBoolean HasRemoteSupport();
     virtual void SendExtraCapabilities() const;
     virtual void OnReceivedExtraCapabilities(const BYTE *capabilities, PINDEX size);

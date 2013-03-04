@@ -155,13 +155,19 @@ public:
    */
   void ActivatePreset(BYTE presetNumber);
 
-  /** Set Remote Support
+  /** Set Remote (receive) Support
     */
   virtual void SetRemoteSupport();
+
+  /** Set Local (transmit) Support
+    */
+  virtual void SetLocalSupport();
   
   /** Has Remote Support
     */
   virtual PBoolean HasRemoteSupport();
+
+  virtual void OnRemoteSupportDetected() {};
     
   /** Causes the H.281 handler to send its capabilities.
       Capabilities include the number of available cameras, (default one)
