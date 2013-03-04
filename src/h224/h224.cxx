@@ -367,6 +367,7 @@ void OpalH224Handler::StartTransmit()
   transmitBitIndex = 7;
   transmitStartTime = new PTime();
     
+  PThread::Sleep(300); // delay sending info for NAT Probs and remote can create theirs
   SendClientList();
   SendExtraCapabilities();
 }
