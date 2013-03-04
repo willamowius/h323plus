@@ -363,7 +363,7 @@ inline void DeleteObjectsInMap(const M & m)
 H224_H284Handler::H224_H284Handler()
 : H224_Handler("H284"), m_remoteSupport(false), m_lastInstruction(0)
 {
-
+    m_transmitFrame.SetClientDataSize(0);
 }
   
 H224_H284Handler::~H224_H284Handler()
