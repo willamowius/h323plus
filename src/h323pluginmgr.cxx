@@ -1471,8 +1471,8 @@ static bool SetFlowControl(const PluginCodec_Definition * codec, void * context,
       (*ctl->control)(codec, context ,SET_CODEC_FLOWCONTROL_OPTIONS, _options, &optionsLen);
           for (int i = 0; _options[i] != NULL; i += 2) {
 			const char * key = _options[i];
-			int val = atoi(_options[i+1]);
-            if (mediaFormat.HasOption(key))
+            int val = (_options[i+1] != NULL ? atoi(_options[i+1]) : 0);
+            if (mediaFormat.HasOption(key) && val > 0)
                 mediaFormat.SetOptionInteger(key,val); 
 		  }
       free(_options);
