@@ -64,10 +64,10 @@ public:
 private:
         
   OpalH224Handler *h224Handler;
-  mutable PMutex inUse;
-  unsigned timestamp;
   RTP_Session & rtpSession;
-  PBoolean terminate;
+
+  PSyncPointAck  exitReceive;
+  PBoolean threadClosed;
 };
 
 

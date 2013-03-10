@@ -681,64 +681,50 @@ void OpalH224Handler::TransmitFrame(H224_Frame & frame)
 ////////////////////////////////////
 
 OpalH224ReceiverThread::OpalH224ReceiverThread(OpalH224Handler *theH224Handler, RTP_Session & session)
-: PThread(10000, NoAutoDeleteThread, HighestPriority, "H.224 Receiver Thread"),
-  rtpSession(session)
+: PThread(10000, AutoDeleteThread, NormalPriority, "H.224 Receiver Thread"),
+  h224Handler(theH224Handler), rtpSession(session), threadClosed(true)
 {
-  h224Handler = theH224Handler;
-  timestamp = 0;
-  terminate = FALSE;
+
 }
 
 OpalH224ReceiverThread::~OpalH224ReceiverThread()
 {
+	Close();
 }
 
 void OpalH224ReceiverThread::Main()
-{    
+{
   RTP_DataFrame packet = RTP_DataFrame(300);
-  H224_Frame h224Frame = H224_Frame();
-    
-  for (;;) {
-      
-    inUse.Wait();
-        
-    if(!rtpSession.ReadBufferedData(timestamp, packet)) {
-      inUse.Signal();
-      return;
-    }
-    
-    timestamp = packet.GetTimestamp();
-        
-    if(h224Frame.Decode(packet.GetPayloadPtr(), packet.GetPayloadSize())) {
-      PBoolean result = h224Handler->OnReceivedFrame(h224Frame);
+  H224_Frame h224Frame = H224_Frame(); 
+  unsigned timestamp = 0; 
 
-      if(result == FALSE) {
-        // FALSE indicates a serious problem, therefore the thread is closed
-        return;
-      }
-    } else {
-      PTRACE(3, "Decoding of H.224 frame failed");
+  threadClosed = false;
+
+  while (!exitReceive.Wait(0)) {
+
+    if(!rtpSession.ReadBufferedData(timestamp, packet)) {
+        PThread::Sleep(5);
+        continue;
     }
-        
-    inUse.Signal();
-        
-    if(terminate == TRUE) {
-      return;
-    }
+ 
+    timestamp = packet.GetTimestamp();
+    if (!h224Frame.Decode(packet.GetPayloadPtr(), packet.GetPayloadSize()) ||
+        !h224Handler->OnReceivedFrame(h224Frame))
+           PTRACE(3, "Decoding of H.224 frame failed");
+
   }
+
+  threadClosed = true;
+  exitReceive.Acknowledge();
 }
 
 void OpalH224ReceiverThread::Close()
 {
-  rtpSession.Close(TRUE);
-    
-  inUse.Wait();
-    
-  terminate = TRUE;
-    
-  inUse.Signal();
-    
-  PAssert(WaitForTermination(10000), "H224 receiver thread not terminated");
+    if (!threadClosed) {
+      rtpSession.Close(true);
+      exitReceive.Signal();
+    }
+
 }
 
 #endif // H323_H224
