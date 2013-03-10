@@ -702,10 +702,8 @@ void OpalH224ReceiverThread::Main()
 
   while (!exitReceive.Wait(0)) {
 
-    if(!rtpSession.ReadBufferedData(timestamp, packet)) {
-        PThread::Sleep(5);
-        continue;
-    }
+    if(!rtpSession.ReadBufferedData(timestamp, packet)) 
+        break;
  
     timestamp = packet.GetTimestamp();
     if (!h224Frame.Decode(packet.GetPayloadPtr(), packet.GetPayloadSize()) ||
