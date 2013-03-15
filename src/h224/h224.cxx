@@ -707,9 +707,9 @@ void OpalH224ReceiverThread::Main()
  
     timestamp = packet.GetTimestamp();
     if (!h224Frame.Decode(packet.GetPayloadPtr(), packet.GetPayloadSize()) ||
-        !h224Handler->OnReceivedFrame(h224Frame))
+        !h224Handler->OnReceivedFrame(h224Frame)) {
            PTRACE(3, "Decoding of H.224 frame failed");
-
+    }
   }
 
   threadClosed = true;
