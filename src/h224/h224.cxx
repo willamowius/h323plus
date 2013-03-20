@@ -516,7 +516,7 @@ PBoolean OpalH224Handler::SendExtraCapabilitiesMessage(BYTE clientID,
   return TRUE;    
 }
 
-PBoolean OpalH224Handler::TransmitClientFrame(BYTE clientID, H224_Frame & frame)
+PBoolean OpalH224Handler::TransmitClientFrame(BYTE clientID, H224_Frame & frame, PBoolean replay)
 {
 
   if(canTransmit == FALSE)
@@ -526,7 +526,7 @@ PBoolean OpalH224Handler::TransmitClientFrame(BYTE clientID, H224_Frame & frame)
     
   frame.SetClientID(clientID);
     
-  TransmitFrame(frame);
+  TransmitFrame(frame,replay);
     
   return TRUE;
 }
@@ -653,36 +653,38 @@ OpalH224ReceiverThread * OpalH224Handler::CreateH224ReceiverThread()
   return new OpalH224ReceiverThread(this, *session);
 }
 
-void OpalH224Handler::TransmitFrame(H224_Frame & frame)
+void OpalH224Handler::TransmitFrame(H224_Frame & frame, PBoolean replay)
 {    
-  PINDEX size = frame.GetEncodedSize();
-    
-  if(!frame.Encode(transmitFrame->GetPayloadPtr(), size, transmitBitIndex)) {
-    PTRACE(3, "H224\tFailed to encode H.224 frame");
-    return;
-  }
-    
-  // determining correct timestamp
-  PTime currentTime = PTime();
-  PTimeInterval timePassed = currentTime - *transmitStartTime;
-  transmitFrame->SetTimestamp((DWORD)timePassed.GetMilliSeconds() * 8);
+    if (!replay) {
+        PINDEX size = frame.GetEncodedSize();
+
+        if(!frame.Encode(transmitFrame->GetPayloadPtr(), size, transmitBitIndex)) {
+        PTRACE(3, "H224\tFailed to encode H.224 frame");
+        return;
+        }
+
+        // determining correct timestamp
+        PTime currentTime = PTime();
+        PTimeInterval timePassed = currentTime - *transmitStartTime;
+        transmitFrame->SetTimestamp((DWORD)timePassed.GetMilliSeconds() * 8);
+
+        transmitFrame->SetPayloadSize(size);
+        transmitFrame->SetMarker(TRUE);
+    }
   
-  transmitFrame->SetPayloadSize(size);
-  transmitFrame->SetMarker(TRUE);
-  
-  // TODO: Add Encryption Support - SH
-  if(!session->PreWriteData(*transmitFrame) || !session->WriteData(*transmitFrame)) {
-    PTRACE(3, "H224\tFailed to write encoded H.224 frame");
-  } else {
-    PTRACE(3, "H224\tEncoded H.224 frame sent");
-  }
+    // TODO: Add Encryption Support - SH
+    if(!session->PreWriteData(*transmitFrame) || !session->WriteData(*transmitFrame)) {
+        PTRACE(3, "H224\tFailed to write encoded H.224 frame");
+    } else {
+        PTRACE(3, "H224\tEncoded H.224 frame sent");
+    }
 }
 
 ////////////////////////////////////
 
 OpalH224ReceiverThread::OpalH224ReceiverThread(OpalH224Handler *theH224Handler, RTP_Session & session)
 : PThread(10000, AutoDeleteThread, NormalPriority, "H.224 Receiver Thread"),
-  h224Handler(theH224Handler), rtpSession(session), threadClosed(true)
+  h224Handler(theH224Handler), rtpSession(session), threadClosed(true), lastTimeStamp(0)
 {
 
 }
@@ -706,10 +708,14 @@ void OpalH224ReceiverThread::Main()
         break;
  
     timestamp = packet.GetTimestamp();
+	if (timestamp == lastTimeStamp)
+		continue;
+
     if (!h224Frame.Decode(packet.GetPayloadPtr(), packet.GetPayloadSize()) ||
         !h224Handler->OnReceivedFrame(h224Frame)) {
            PTRACE(3, "Decoding of H.224 frame failed");
     }
+	lastTimeStamp = timestamp;
   }
 
   threadClosed = true;

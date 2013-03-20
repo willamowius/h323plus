@@ -43,6 +43,8 @@
 #define T140_BS 0x0008          // Back Space: Erases the last entered character.
 #define T140_NEWLINE 0x2028     // Line separator.
 
+#define T140_PACKETCOUNT 3
+
 #include <h224/h224.h>
 
 T140_Frame::T140_Frame()
@@ -161,6 +163,16 @@ void H224_T140Handler::OnReceivedExtraCapabilities(const BYTE * /*capabilities*/
 
 }
 
+void H224_T140Handler::SendT140Frame(T140_Frame & frame)
+{
+    if (!m_h224Handler) return;
+
+    for (PINDEX i=0; i < T140_PACKETCOUNT; ++i) {
+        m_h224Handler->TransmitClientFrame(T140_CLIENT_ID, frame, (i>0));
+        PThread::Sleep(10);
+    }
+}
+
 void H224_T140Handler::SendBackSpace()
 {
     if (!remoteSupport)
@@ -168,7 +180,7 @@ void H224_T140Handler::SendBackSpace()
 
     PTRACE(4,"T140\tSend Backspace");
     transmitFrame.SetDataType(T140_Frame::BackSpace);
-    m_h224Handler->TransmitClientFrame(T140_CLIENT_ID, transmitFrame);
+    SendT140Frame(transmitFrame);
 }
     
 void H224_T140Handler::SendNewLine()
@@ -178,7 +190,7 @@ void H224_T140Handler::SendNewLine()
 
     PTRACE(4,"T140\tSend NewLine");
     transmitFrame.SetDataType(T140_Frame::NewLine);
-    m_h224Handler->TransmitClientFrame(T140_CLIENT_ID, transmitFrame);
+    SendT140Frame(transmitFrame);
 }
     
 void H224_T140Handler::SendCharacter(const PString & text)
@@ -188,7 +200,7 @@ void H224_T140Handler::SendCharacter(const PString & text)
 
     PTRACE(4,"T140\tSend Chars " << text);
     transmitFrame.SetCharacter(text);
-    m_h224Handler->TransmitClientFrame(T140_CLIENT_ID, transmitFrame);
+    SendT140Frame(transmitFrame);
 }
 
 void H224_T140Handler::OnReceivedMessage(const H224_Frame & msg)

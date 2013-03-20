@@ -108,6 +108,8 @@ public:
 
 
 protected:
+    void SendT140Frame(T140_Frame & frame);
+
     PBoolean remoteSupport;
     T140_Frame transmitFrame;
 };

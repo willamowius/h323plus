@@ -68,6 +68,8 @@ private:
 
   PSyncPointAck  exitReceive;
   PBoolean threadClosed;
+
+  unsigned lastTimeStamp;
 };
 
 
@@ -94,7 +96,7 @@ public:
 
   PBoolean SendExtraCapabilitiesMessage(BYTE clientID, BYTE *data, PINDEX length);
 
-  PBoolean TransmitClientFrame(BYTE clientID, H224_Frame & frame);
+  PBoolean TransmitClientFrame(BYTE clientID, H224_Frame & frame, PBoolean replay = false);
     
   virtual PBoolean OnReceivedFrame(H224_Frame & frame);
   virtual PBoolean OnReceivedCMEMessage(H224_Frame & frame);
@@ -130,7 +132,7 @@ protected:
     
 private:
         
-  void TransmitFrame(H224_Frame & frame);
+  void TransmitFrame(H224_Frame & frame, PBoolean replay = false);
     
 };
 
