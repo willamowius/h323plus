@@ -612,7 +612,8 @@ template <class D> class PSTLList : public PObject,
 
           PAssert(ref < this->size(), psprintf("Index out of Bounds ref: %u sz: %u",ref,this->size()));
           typename std::map< unsigned, D*, PSTLSortOrder>::const_iterator i = this->find(ref);
-          return i->second;   
+		  if (i != this->end()) return i->second;  
+		  else return NULL;
       };
 
 
