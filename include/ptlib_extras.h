@@ -788,7 +788,7 @@ public:
 
         PBYTEArray frame;
         PTimeInterval lastMarker;
-        unsigned delay=0;
+        int delay=0;
         PBoolean fup=false;
 
         while (!m_exit) {
