@@ -100,7 +100,6 @@ H323Gatekeeper::H323Gatekeeper(H323EndPoint & ep, H323Transport * trans)
 #endif
 
   localId = PString();
-  assignedGK = NULL;
 }
 
 
@@ -297,7 +296,7 @@ PBoolean H323Gatekeeper::OnReceiveGatekeeperConfirm(const H225_GatekeeperConfirm
     // This will force the gatekeeper to register to the assigned Gatekeeper.
     if (lastRequest->responseInfo != NULL) {
       H323TransportAddress & gkAddress = *(H323TransportAddress *)lastRequest->responseInfo;
-      gkAddress = assignedGK->rasAddress;
+      gkAddress = assignedGK.rasAddress;
       gatekeeperIdentifier = PString();
     }
   } else {
@@ -413,9 +412,9 @@ PBoolean H323Gatekeeper::RegistrationRequest(PBoolean autoReg)
     rrq.m_callCreditCapability.m_canEnforceDurationLimit = TRUE;
   }
 
-  if (assignedGK != NULL) {
+  if (assignedGK.IsValid()) {
       rrq.IncludeOptionalField(H225_RegistrationRequest::e_assignedGatekeeper);
-      rrq.m_assignedGatekeeper = assignedGK->GetAlternate();
+      rrq.m_assignedGatekeeper = assignedGK.GetAlternate();
   }
 
   if (IsRegistered()) {
@@ -1702,38 +1701,29 @@ void H323Gatekeeper::SetAlternates(const H225_ArrayOf_AlternateGK & alts, PBoole
     }
   }
 
-  alternates.RemoveAll();
-
-  // Always set the Assigned Gatekeepers (if any) first
-  if (assignedGK != NULL)
-      alternates.Append(assignedGK);
-
+  alternates.SetSize(0);
   for (i = 0; i < alts.GetSize(); i++) {
-    AlternateInfo * alt = new AlternateInfo(alts[i]);
-    if (!alt->IsValid())
-      delete alt;
-    else
-      alternates.Append(alt);
+	  if (AlternateInfo::IsValid(alts[i])) {
+		PTRACE(3, "RAS\tAdded alternate gatekeeper:" << H323TransportAddress(alts[i].m_rasAddress));
+		alternates.Append(new AlternateInfo(alts[i]));
+	  }
   }
 
-  if (alts.GetSize() > 0) {
+  if (alternates.GetSize() > 0)
       alternatePermanent = permanent;
-      PTRACE(3, "RAS\tSet alternate gatekeepers:\n"
-             << setfill('\n') << alternates << setfill(' '));
-  }
 }
 
 void H323Gatekeeper::SetAssignedGatekeeper(const H225_AlternateGK & gk)
 {
-   assignedGK = new AlternateInfo(gk);
+   assignedGK.SetAlternate(gk);
 }
 
 PBoolean H323Gatekeeper::GetAssignedGatekeeper(H225_AlternateGK & gk)
 {
-    if (assignedGK == NULL)
+    if (!assignedGK.IsValid())
         return FALSE;
 
-    gk = assignedGK->GetAlternate();
+    gk = assignedGK.GetAlternate();
     return TRUE;
 }
 
@@ -1874,14 +1864,14 @@ PBoolean H323Gatekeeper::MakeRequest(Request & request)
     }
   }
 }
-    
+   
+H323Gatekeeper::AlternateInfo::AlternateInfo()
+{
+}
 
 H323Gatekeeper::AlternateInfo::AlternateInfo(const H225_AlternateGK & alt)
-  : rasAddress(alt.m_rasAddress),
-    gatekeeperIdentifier(alt.m_gatekeeperIdentifier.GetValue()),
-    priority(alt.m_priority)
 {
-  registrationState = alt.m_needToRegister ? NeedToRegister : NoRegistrationNeeded;
+    SetAlternate(alt);
 }
 
 
@@ -1905,7 +1895,7 @@ PObject::Comparison H323Gatekeeper::AlternateInfo::Compare(const PObject & obj)
 H225_AlternateGK H323Gatekeeper::AlternateInfo::GetAlternate()
 {
     H225_AlternateGK gk;
-    rasAddress.SetPDU(gk.m_rasAddress);
+    rasAddress = gk.m_rasAddress;
     gk.m_gatekeeperIdentifier = gatekeeperIdentifier;
     gk.m_priority = priority;
     gk.m_needToRegister = registrationState;
@@ -1913,6 +1903,21 @@ H225_AlternateGK H323Gatekeeper::AlternateInfo::GetAlternate()
     return gk;
 }
 
+void H323Gatekeeper::AlternateInfo::GetAlternate(AlternateInfo & alt)
+{
+	alt.rasAddress = alt.rasAddress;
+    alt.gatekeeperIdentifier = alt.gatekeeperIdentifier;
+    alt.priority = alt.priority;
+	alt.registrationState = alt.registrationState;
+}
+
+void H323Gatekeeper::AlternateInfo::SetAlternate(const H225_AlternateGK & alt)
+{
+	rasAddress = alt.m_rasAddress;
+    gatekeeperIdentifier = alt.m_gatekeeperIdentifier.GetValue();
+    priority = alt.m_priority;
+	registrationState = alt.m_needToRegister ? NeedToRegister : NoRegistrationNeeded;
+}
 
 void H323Gatekeeper::AlternateInfo::PrintOn(ostream & strm) const
 {
@@ -1928,12 +1933,24 @@ void H323Gatekeeper::AlternateInfo::PrintOn(ostream & strm) const
 PBoolean H323Gatekeeper::AlternateInfo::IsValid() const
 {
     PIPSocket::Address addr;
-    rasAddress.GetIpAddress(addr);
+    H323TransportAddress(rasAddress).GetIpAddress(addr);
 
     if (addr.IsValid() && !addr.IsAny() && !addr.IsLoopback()) 
         return true;
 
     PTRACE(2,"GKALT\tAlternate Address " << addr << " is not valid. Ignoring...");
+    return false;
+}
+
+PBoolean H323Gatekeeper::AlternateInfo::IsValid(const H225_AlternateGK & alt)
+{
+	H323TransportAddress taddr = alt.m_rasAddress;
+    PIPSocket::Address addr;
+    taddr.GetIpAddress(addr);
+
+    if (addr.IsValid() && !addr.IsAny() && !addr.IsLoopback()) 
+        return true;
+
     return false;
 }
 

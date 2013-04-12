@@ -292,6 +292,35 @@ class H323Gatekeeper : public H225_RAS
     PBoolean StartDiscovery(const H323TransportAddress & address);
   //@}
     
+	class AlternateInfo : public PObject {
+        PCLASSINFO(AlternateInfo, PObject);
+      public:
+        AlternateInfo();
+        AlternateInfo(const H225_AlternateGK & alt);
+        ~AlternateInfo();
+        H225_AlternateGK GetAlternate();
+        void GetAlternate(AlternateInfo & alt);
+        void SetAlternate(const H225_AlternateGK & alt);
+        PBoolean IsValid() const;
+        static PBoolean IsValid(const H225_AlternateGK & alt);
+        Comparison Compare(const PObject & obj);
+        void PrintOn(ostream & strm) const;
+
+        H225_TransportAddress rasAddress;
+        PString              gatekeeperIdentifier;
+        unsigned             priority;
+        enum {
+          NoRegistrationNeeded,
+          NeedToRegister,
+          Register,
+          IsRegistered,
+          RegistrationFailed
+        } registrationState;
+
+      private:
+        // Disable copy constructor and assignment
+         AlternateInfo & operator=(const AlternateInfo &);
+    };
 
   protected:
     unsigned SetupGatekeeperRequest(H323RasPDU & request);
@@ -342,38 +371,12 @@ class H323Gatekeeper : public H225_RAS
     PString  localId;
     RegistrationFailReasons registrationFailReason;
     PMutex RegisterMutex;
-
-    class AlternateInfo : public PObject {
-        PCLASSINFO(AlternateInfo, PObject);
-      public:
-        AlternateInfo(const H225_AlternateGK & alt);
-        ~AlternateInfo();
-        H225_AlternateGK GetAlternate();
-        PBoolean IsValid() const;
-        Comparison Compare(const PObject & obj);
-        void PrintOn(ostream & strm) const;
-
-        H323TransportAddress rasAddress;
-        PString              gatekeeperIdentifier;
-        unsigned             priority;
-        enum {
-          NoRegistrationNeeded,
-          NeedToRegister,
-          Register,
-          IsRegistered,
-          RegistrationFailed
-        } registrationState;
-
-      private:
-        // Disable copy constructor and assignment
-        AlternateInfo(const AlternateInfo &);
-        AlternateInfo & operator=(const AlternateInfo &);
-    };
-    PSortedList<AlternateInfo> alternates;
-    PBoolean               alternatePermanent;
-    PSemaphore         requestMutex;
-    H235Authenticators authenticators;
-    AlternateInfo *    assignedGK;
+ 
+    H323List<AlternateInfo> alternates;
+    PBoolean                alternatePermanent;
+    PSemaphore              requestMutex;
+    H235Authenticators      authenticators;
+    AlternateInfo           assignedGK;
 
     enum {
       RequireARQ,
