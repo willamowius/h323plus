@@ -335,9 +335,9 @@ void OpalH224Handler::CreateHandlers(H323Connection & connection)
         if (!handler) continue;
 
         if (connection.OnCreateH224Handler(sessionDirection, handlers[i], handler)) {
-          handlersMutex.Wait();
+          //handlersMutex.Wait();
             m_h224Handlers.insert(pair<BYTE,H224_Handler*>(handler->GetClientID(), handler));
-          handlersMutex.Signal();
+          //handlersMutex.Signal();
         } else
             delete handler;
     }
@@ -367,7 +367,7 @@ void OpalH224Handler::StartTransmit()
   transmitBitIndex = 7;
   transmitStartTime = new PTime();
     
-  PThread::Sleep(300); // delay sending info for NAT Probs and remote can create theirs
+  PThread::Sleep(2000); // delay sending info for NAT Probs and remote can create theirs
   SendClientList();
   SendExtraCapabilities();
 }
@@ -470,12 +470,12 @@ PBoolean OpalH224Handler::SendExtraCapabilities()
   if(canTransmit == FALSE)
     return FALSE;
 
-  handlersMutex.Wait();
+  //handlersMutex.Wait();
   for (std::map<BYTE,H224_Handler*>::iterator it = m_h224Handlers.begin(); it != m_h224Handlers.end(); ++it) {
     if (it->second->IsActive(sessionDirection)) 
         it->second->SendExtraCapabilities();
   }
-  handlersMutex.Signal();
+  //handlersMutex.Signal();
     
   return TRUE;
 }
@@ -630,14 +630,14 @@ PBoolean OpalH224Handler::OnReceivedExtraCapabilities(H224_Frame & frame)
     
   BYTE clientID = (data[2] & 0x7f);
     
-  handlersMutex.Wait();
+  //handlersMutex.Wait();
   for (std::map<BYTE,H224_Handler*>::iterator it = m_h224Handlers.begin(); it != m_h224Handlers.end(); ++it) {
       if (clientID == it->first) {
         it->second->OnReceivedExtraCapabilities((data + 3), frame.GetClientDataSize() - 3);
         break;
       }
   }
-  handlersMutex.Signal();
+  //handlersMutex.Signal();
     
   return TRUE;
 }
