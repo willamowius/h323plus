@@ -640,10 +640,12 @@ void H323Gatekeeper::RegistrationTimeToLive()
     requiresDiscovery = FALSE;
   }
 
-  if (!RegistrationRequest(autoReregister)) {
+  reregisterNow = FALSE;
+  if (!RegistrationRequest(autoReregister) && (!reregisterNow || !requiresDiscovery)) {
     PTRACE(2,"RAS\tTime To Live reregistration failed, continue retrying.");
     endpoint.OnRegisterTTLFail();
   }
+  reregisterNow = TRUE;
 }
 
 
