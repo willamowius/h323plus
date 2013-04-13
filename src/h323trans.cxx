@@ -535,6 +535,7 @@ H323Transactor::Request::Request(unsigned seqNum, H323TransactionPDU & pdu)
 {
   sequenceNumber = seqNum;
   responseInfo   = NULL;
+  useAlternate = FALSE;
 }
 
 
@@ -546,6 +547,7 @@ H323Transactor::Request::Request(unsigned seqNum,
 {
   sequenceNumber = seqNum;
   responseInfo   = NULL;
+  useAlternate = FALSE;
 }
 
 
@@ -603,6 +605,13 @@ PBoolean H323Transactor::Request::Poll(H323Transactor & rasChannel)
   return FALSE;
 }
 
+void H323Transactor::Request::SetUseAlternate(PBoolean isAlternate)
+{
+	if (isAlternate) {
+		useAlternate = true;
+		responseResult = TryAlternate;
+	}
+}
 
 void H323Transactor::Request::CheckResponse(unsigned reqTag, const PASN_Choice * reason)
 {

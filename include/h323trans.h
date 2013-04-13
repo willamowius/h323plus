@@ -220,6 +220,8 @@ class H323Transactor : public PObject
         void CheckResponse(unsigned, const PASN_Choice *);
         void OnReceiveRIP(unsigned milliseconds);
 
+        void SetUseAlternate(PBoolean isAlternate);
+
         // Inter-thread transfer variables
         unsigned rejectReason;
         void   * responseInfo;
@@ -241,6 +243,8 @@ class H323Transactor : public PObject
           RequestInProgress,
           NoResponseReceived
         } responseResult;
+
+        PBoolean    useAlternate;
     };
 
   protected:

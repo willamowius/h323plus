@@ -76,6 +76,7 @@ H323Gatekeeper::H323Gatekeeper(H323EndPoint & ep, H323Transport * trans)
 {
   alternatePermanent = FALSE;
   discoveryComplete = FALSE;
+  moveAlternate = FALSE;
   registrationFailReason = UnregisteredLocally;
 
   pregrantMakeCall = pregrantAnswerCall = RequireARQ;
@@ -626,18 +627,20 @@ void H323Gatekeeper::RegistrationTimeToLive()
 {
   PTRACE(3, "RAS\tTime To Live reregistration");
 
-  if (requiresDiscovery) {
+  if (requiresDiscovery || moveAlternate) {
     PTRACE(2, "RAS\tRepeating discovery on gatekeepers request.");
 
     H323RasPDU pdu;
     Request request(SetupGatekeeperRequest(pdu), pdu);
-    if (!MakeRequest(request) || !discoveryComplete) {
+    request.SetUseAlternate(moveAlternate);
+    if (!MakeRequest(request) || (!discoveryComplete && !moveAlternate)) {
       PTRACE(2, "RAS\tRediscovery failed, retrying in 1 minute.");
       timeToLive = PTimeInterval(0, 0, 1);
       return;
-    }
-
+    } 
     requiresDiscovery = FALSE;
+    moveAlternate = FALSE;
+    return;
   }
 
   reregisterNow = FALSE;
@@ -654,7 +657,6 @@ PBoolean H323Gatekeeper::UnregistrationRequest(int reason)
   if (PAssertNULL(transport) == NULL)
     return FALSE;
 
-  PINDEX i;
   H323RasPDU pdu;
   H225_UnregistrationRequest & urq = pdu.BuildUnregistrationRequest(GetNextSequenceNumber());
 
@@ -684,18 +686,7 @@ PBoolean H323Gatekeeper::UnregistrationRequest(int reason)
   }
 
   Request request(urq.m_requestSeqNum, pdu);
-
-  PBoolean requestResult = MakeRequest(request);
-
-  for (i = 0; i < alternates.GetSize(); i++) {
-    AlternateInfo & altgk = alternates[i];
-    if (altgk.registrationState == AlternateInfo::IsRegistered) {
-      Connect(altgk.rasAddress,altgk.gatekeeperIdentifier);
-      UnregistrationRequest(reason);
-    }
-  }
-
-  if (requestResult)
+  if (MakeRequest(request))
     return TRUE;
 
   switch (request.responseResult) {
@@ -754,8 +745,13 @@ PBoolean H323Gatekeeper::OnReceiveUnregistrationRequest(const H225_Unregistratio
   registrationFailReason = UnregisteredByGatekeeper;
 //  timeToLive = 0; // zero disables lightweight RRQ
 
-  if (urq.HasOptionalField(H225_UnregistrationRequest::e_alternateGatekeeper))
+  if (urq.HasOptionalField(H225_UnregistrationRequest::e_alternateGatekeeper)) {
     SetAlternates(urq.m_alternateGatekeeper, FALSE);
+    if (alternates.GetSize() > 0) {
+        PTRACE(2, "RAS\tTry Alternate Gatekeepers");
+        moveAlternate = true;
+    }
+  }
 
   H323RasPDU response(authenticators);
   response.BuildUnregistrationConfirm(urq.m_requestSeqNum);
@@ -1797,7 +1793,7 @@ PBoolean H323Gatekeeper::MakeRequest(Request & request)
 
   PINDEX alt = 0;
   for (;;) {
-    if (H225_RAS::MakeRequest(request)) {
+    if (!request.useAlternate && H225_RAS::MakeRequest(request)) {
       if (!alternatePermanent &&
             (transport->GetRemoteAddress() != tempAddr ||
              gatekeeperIdentifier != tempIdentifier))
@@ -1856,10 +1852,10 @@ PBoolean H323Gatekeeper::MakeRequest(Request & request)
           altInfo->registrationState = AlternateInfo::IsRegistered;
           // The wanted registration is done, we can return
           if (request.requestPDU.GetChoice().GetTag() == H225_RasMessage::e_registrationRequest) {
-        if (!alternatePermanent)
-          Connect(tempAddr,tempIdentifier);
-        return TRUE;
+            if (!alternatePermanent)
+              Connect(tempAddr,tempIdentifier);
           }
+          return TRUE;
         }
         requestMutex.Wait();
       }

@@ -377,6 +377,7 @@ class H323Gatekeeper : public H225_RAS
     PSemaphore              requestMutex;
     H235Authenticators      authenticators;
     AlternateInfo           assignedGK;
+	PBoolean                moveAlternate;
 
     enum {
       RequireARQ,
