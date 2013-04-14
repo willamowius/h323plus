@@ -1865,6 +1865,7 @@ PBoolean H323Gatekeeper::MakeRequest(Request & request)
    
 H323Gatekeeper::AlternateInfo::AlternateInfo()
 {
+    H323TransportAddress(PIPSocket::Address::GetAny(4),1719).SetPDU(rasAddress);
 }
 
 H323Gatekeeper::AlternateInfo::AlternateInfo(const H225_AlternateGK & alt)
