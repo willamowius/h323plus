@@ -43,6 +43,8 @@
 
 #ifdef H323_H460P
 
+#define H460P_MAXPDUSIZE   10
+
 static struct {
   unsigned msgid;
   int preStatus;            
@@ -470,33 +472,39 @@ PBoolean H323PresenceHandler::BuildPresenceMessage(unsigned id, H323PresenceStor
           if (ok) {
             dataToSend = true;
             int sz = msgs.GetSize();
-            msgs.SetSize(sz+1);
             switch (id) {
                 case H460P_PresenceMessage::e_presenceStatus:
-                    BuildStatus(msgs[sz], ep.m_Notify, ep.m_Instruction);
+                    BuildStatus(msgs, ep.m_Notify, ep.m_Instruction, iter->first);
                     break;
                 case H460P_PresenceMessage::e_presenceInstruct:
-                    BuildInstruct(msgs[sz],ep.m_Instruction);
+                    BuildInstruct(msgs,ep.m_Instruction, iter->first);
                     break;
                 case H460P_PresenceMessage::e_presenceAuthorize:
+                    msgs.SetSize(sz+1);
                     BuildAuthorize(msgs[sz],ep.m_Authorize);
                     break;
                 case H460P_PresenceMessage::e_presenceNotify:
+                    msgs.SetSize(sz+1);
                     BuildNotify(msgs[sz], ep.m_Notify);
                     break;
                 case H460P_PresenceMessage::e_presenceRequest:
+                    msgs.SetSize(sz+1);
                     BuildRequest(msgs[sz],ep.m_Authorize);
                     break;
                 case H460P_PresenceMessage::e_presenceResponse:
+                    msgs.SetSize(sz+1);
                     BuildResponse(msgs[sz],ep.m_Authorize);
                     break;
                 case H460P_PresenceMessage::e_presenceAlive:
+                    msgs.SetSize(sz+1);
                     BuildAlive(msgs[sz], ep.m_Identifiers);
                     break;
                 case H460P_PresenceMessage::e_presenceRemove:
+                    msgs.SetSize(sz+1);
                     BuildRemove(msgs[sz], ep.m_Identifiers);
                     break;
                 case H460P_PresenceMessage::e_presenceAlert:
+                    msgs.SetSize(sz+1);
                     BuildAlert(msgs[sz], ep.m_Notify);
                     break;
                 default:
@@ -516,9 +524,19 @@ PBoolean H323PresenceHandler::BuildPresenceMessage(unsigned id, H323PresenceStor
 
 PBoolean H323PresenceHandler::BuildPresenceElement(unsigned msgtag, PASN_OctetString & pdu)
 {
+    list<PASN_OctetString> raw;
+    if (BuildPresenceElement(msgtag, raw) && raw.size() > 0) {
+        pdu = raw.front();
+        raw.clear();
+        return true;
+    }
+    return false;
+}
+
+PBoolean H323PresenceHandler::BuildPresenceElement(unsigned msgtag, list<PASN_OctetString> & pdu)
+{
     bool success = false;
-    H460P_PresenceElement element;
-    H460P_ArrayOf_PresenceMessage & msgs = element.m_message;
+    H460P_ArrayOf_PresenceMessage msgs;
     H323PresenceStore & store = GetPresenceStoreLocked(msgtag);
     
     if (RASMessage_attributes[msgtag].preStatus >0)
@@ -542,8 +560,27 @@ PBoolean H323PresenceHandler::BuildPresenceElement(unsigned msgtag, PASN_OctetSt
 
     success = (msgs.GetSize() > 0);
     if (success) {
-        PTRACE(6,"PRES\tPDU to send\n" << element);
-        pdu.EncodeSubType(element);
+        H460P_PresenceElement subElement;
+        H460P_ArrayOf_PresenceMessage & subMsgs = subElement.m_message;
+        PASN_OctetString subPDU;
+        int sz = 0;
+        subMsgs.SetSize(sz);
+        for (PINDEX i=0; i < msgs.GetSize(); ++i) {
+            sz = subMsgs.GetSize();
+            subMsgs.SetSize(sz+1);
+            subMsgs[sz] = msgs[i];
+            if (subMsgs.GetSize() >= H460P_MAXPDUSIZE) {
+                subPDU.EncodeSubType(subElement);
+                pdu.push_back(subPDU);
+                PTRACE(6,"PRES\tPDU sz=" << pdu.size() << "\n" << subElement);
+                subMsgs.SetSize(0);
+            }
+        }
+        if (subMsgs.GetSize() > 0) {
+            subPDU.EncodeSubType(subElement);
+            pdu.push_back(subPDU);
+            PTRACE(6,"PRES\tPDU sz=" << pdu.size() << "\n" << subElement);
+        }
     }
 
     PresenceStoreUnLock(msgtag);
@@ -574,26 +611,15 @@ PBoolean H323PresenceHandler::BuildPresenceMessage(unsigned id, const H225_Endpo
     switch (id) {
         case H460P_PresenceMessage::e_presenceStatus:
             if (BuildNotification(ep,Pep) || BuildInstructions(ep,Pep))  {       
-                for(i= Pep.begin(); i != Pep.end(); ++i) {
-                    sz = msgs.GetSize();
-                    msgs.SetSize(sz+1);
-                    H460P_PresenceStatus & xm = BuildStatus(msgs[sz], i->second.m_Notify, i->second.m_Instruction);
-                    if (xm.m_alias.GetSize() == 0) {
-                        xm.m_alias.SetSize(1);
-                        xm.m_alias[0] = i->first;
-                    }
-                }
+                for(i= Pep.begin(); i != Pep.end(); ++i)
+                    BuildStatus(msgs, i->second.m_Notify, i->second.m_Instruction, i->first);
                 dataToSend = true;
             }
             break;
         case H460P_PresenceMessage::e_presenceInstruct:
             if (BuildInstructions(ep,Pep)) {
-                for(i= Pep.begin(); i != Pep.end(); ++i) {
-                    sz = msgs.GetSize();
-                    msgs.SetSize(sz+1);
-                    H460P_PresenceInstruct & xm = BuildInstruct(msgs[sz], i->second.m_Instruction);
-                    xm.m_alias = i->first;
-                }
+                for(i= Pep.begin(); i != Pep.end(); ++i)
+                    BuildInstruct(msgs, i->second.m_Instruction, i->first);
                 dataToSend = true;
             }
             break;
@@ -692,9 +718,19 @@ PBoolean H323PresenceHandler::BuildPresenceMessage(unsigned id, const H225_Trans
 
 PBoolean H323PresenceHandler::BuildPresenceElement(unsigned msgtag,const H225_EndpointIdentifier & ep, PASN_OctetString & pdu)
 {
+    list<PASN_OctetString> raw;
+    if (BuildPresenceElement(msgtag, ep, raw) && raw.size() > 0) {
+        pdu = raw.front();
+        raw.clear();
+        return true;
+    }
+    return false;
+}
+
+PBoolean H323PresenceHandler::BuildPresenceElement(unsigned msgtag, const H225_EndpointIdentifier & ep, list<PASN_OctetString> & pdu)
+{
     bool success = false;
-    H460P_PresenceElement element;
-    H460P_ArrayOf_PresenceMessage & msgs = element.m_message;
+    H460P_ArrayOf_PresenceMessage msgs;
     
     if (RASMessage_attributes[msgtag].preStatus >0)
         BuildPresenceMessage(H460P_PresenceMessage::e_presenceStatus,ep,msgs);
@@ -707,18 +743,35 @@ PBoolean H323PresenceHandler::BuildPresenceElement(unsigned msgtag,const H225_En
 
     success = (msgs.GetSize() > 0);
     if (success) {
-        PTRACE(6,"PRES\tPDU to send to " << ep << "\n" << element);
-        pdu.EncodeSubType(element);
+        H460P_PresenceElement subElement;
+        H460P_ArrayOf_PresenceMessage & subMsgs = subElement.m_message;
+        for (PINDEX i=0; i < msgs.GetSize(); ++i) {
+            subMsgs.SetSize(1);
+            subMsgs[0] = msgs[i];
+            PASN_OctetString subPDU;
+            subPDU.EncodeSubType(subElement);
+            pdu.push_back(subPDU);
+            PTRACE(6,"PRES\tPDU Message " << i << "\n" << subElement);
+        }
     }
-
     return success;
 }
 
 PBoolean H323PresenceHandler::BuildPresenceElement(unsigned msgtag,const H225_TransportAddress & ip,PASN_OctetString & pdu)
 {
+    list<PASN_OctetString> raw;
+    if (BuildPresenceElement(msgtag, ip, raw) && raw.size() > 0) {
+        pdu = raw.front();
+        raw.clear();
+        return true;
+    }
+    return false;
+}
+
+PBoolean H323PresenceHandler::BuildPresenceElement(unsigned msgtag, const H225_TransportAddress & ip, list<PASN_OctetString> & pdu)
+{
     bool success = false;
-    H460P_PresenceElement element;
-    H460P_ArrayOf_PresenceMessage & msgs = element.m_message;
+    H460P_ArrayOf_PresenceMessage msgs;
     
     if (RASMessage_attributes[msgtag].preRequest >0)
         BuildPresenceMessage(H460P_PresenceMessage::e_presenceRequest,ip,msgs);
@@ -733,8 +786,29 @@ PBoolean H323PresenceHandler::BuildPresenceElement(unsigned msgtag,const H225_Tr
 
     success = (msgs.GetSize() > 0);
     if (success) {
-        PTRACE(6,"PRES\tPDU to send to " << ip << "\n" << element);
-        pdu.EncodeSubType(element);
+        H460P_PresenceElement subElement;
+        H460P_ArrayOf_PresenceMessage & subMsgs = subElement.m_message;
+        PASN_OctetString subPDU;
+        int sz = 0;
+        subMsgs.SetSize(sz);
+        for (PINDEX i=0; i < msgs.GetSize(); ++i) {
+            sz = subMsgs.GetSize();
+            subMsgs.SetSize(sz+1);
+            subMsgs[sz] = msgs[i];
+            if (subMsgs.GetSize() >= H460P_MAXPDUSIZE) {
+                PASN_OctetString subPDU;
+                subPDU.EncodeSubType(subElement);
+                pdu.push_back(subPDU);
+                PTRACE(6,"PRES\tPDU sz=" << pdu.size() << " to " << H323TransportAddress(ip) << "\n" << subElement);
+                subMsgs.SetSize(0);
+            }
+        }
+        if (subMsgs.GetSize() > 0) {
+            PASN_OctetString subPDU;
+            subPDU.EncodeSubType(subElement);
+            pdu.push_back(subPDU);
+            PTRACE(6,"PRES\tPDU sz=" << pdu.size() << " to " << H323TransportAddress(ip) << "\n" << subElement);
+        }
     }
 
     return success;
@@ -755,38 +829,62 @@ class H323PresenceMsg  : public H460P_PresenceMessage
 };
 
 
-H460P_PresenceStatus &  H323PresenceHandler::BuildStatus(H460P_PresenceMessage & msg, 
+H460P_PresenceStatus &  H323PresenceHandler::BuildStatus(H460P_ArrayOf_PresenceMessage & msg, 
                         const H323PresenceNotifications & notify,
-                        const H323PresenceInstructions & inst)
+                        const H323PresenceInstructions & inst,
+                        const H225_AliasAddress & alias)
 {
     H323PresenceMsg<H460P_PresenceStatus> m;
     H460P_PresenceStatus & pdu = m.Build(H460P_PresenceMessage::e_presenceStatus);
     pdu.m_notification = notify.m_notification;
     PStringList aliases;
     notify.GetAliasList(aliases);
-    for (PINDEX i=0; i<aliases.GetSize(); ++i) {
-        int sz = pdu.m_alias.GetSize();
-        pdu.m_alias.SetSize(sz+1);
-        H323SetAliasAddress(aliases[i],pdu.m_alias[sz]);
+    if (aliases.GetSize() > 0) {
+        for (PINDEX i=0; i<aliases.GetSize(); ++i) {
+            int sz = pdu.m_alias.GetSize();
+            pdu.m_alias.SetSize(sz+1);
+            H323SetAliasAddress(aliases[i],pdu.m_alias[sz]);
+        }
+    } else {
+        pdu.m_alias.SetSize(1);
+        pdu.m_alias[0] = alias;
     }
+    int sz = msg.GetSize();
+    msg.SetSize(sz+1);
+    msg[sz] = *(H460P_PresenceMessage *)m.Clone();
 
-    if (inst.GetSize() > 0) {
-        pdu.IncludeOptionalField(H460P_PresenceStatus::e_instruction);
-        pdu.m_instruction = inst.m_instruction;
-    }
+    if (inst.GetSize() > 0)
+        BuildInstruct(msg, inst, alias);
 
-    msg = *(H460P_PresenceMessage *)m.Clone();
-    return msg;
+    return msg[sz];
 }
 
-H460P_PresenceInstruct &  H323PresenceHandler::BuildInstruct(H460P_PresenceMessage & msg, const H323PresenceInstructions & inst)
+H460P_PresenceInstruct &  H323PresenceHandler::BuildInstruct(H460P_ArrayOf_PresenceMessage & msg, const H323PresenceInstructions & inst, const H225_AliasAddress & alias)
 {
     H323PresenceMsg<H460P_PresenceInstruct> m;
     H460P_PresenceInstruct & pdu = m.Build(H460P_PresenceMessage::e_presenceInstruct);
-    pdu = inst;
+    pdu.m_alias = alias;
 
-    msg = *(H460P_PresenceMessage *)m.Clone();
-    return msg;
+    for (PINDEX j=0; j < inst.GetSize(); ++j) {
+       int sz = pdu.m_instruction.GetSize();
+       pdu.m_instruction.SetSize(sz+1);
+       pdu.m_instruction[sz] = inst[j];
+
+       if (pdu.m_instruction.GetSize() == H460P_MAXPDUSIZE) {
+           int psz = msg.GetSize();
+           msg.SetSize(psz+1);
+           msg[psz] = *(H460P_PresenceMessage *)m.Clone();
+           pdu.m_instruction.SetSize(0);
+       }
+    }
+
+    int fsz = msg.GetSize();
+    if (pdu.m_instruction.GetSize() > 0) {
+        msg.SetSize(fsz+1);
+        msg[fsz] = *(H460P_PresenceMessage *)m.Clone();
+    }
+
+    return msg[fsz];
 }
 
 H460P_PresenceAuthorize &  H323PresenceHandler::BuildAuthorize(H460P_PresenceMessage & msg, const H323PresenceSubscriptions & subs)

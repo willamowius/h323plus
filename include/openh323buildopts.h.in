@@ -141,7 +141,7 @@
 // Presence Feature
 #undef H323_H460P
 #ifdef H323_H460P
-   #define H323_H460P_VER 2
+   #define H323_H460P_VER 3
 #endif
 // Registration Priority Feature
 #undef H323_H460PRE

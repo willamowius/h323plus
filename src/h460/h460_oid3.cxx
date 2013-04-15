@@ -382,9 +382,17 @@ PBoolean H460_FeatureOID3::OnSendRegistrationRequest(H225_FeatureDescriptor & pd
         return false;
 
     H460_FeatureOID feat = H460_FeatureOID(OID_3); 
-    PASN_OctetString raw;
-    if (handler->BuildPresenceElement(H225_RasMessage::e_registrationRequest, raw))  
-        feat.Add(OID3_ID,H460_FeatureContent(raw));
+    list<PASN_OctetString> raw;
+    if (handler->BuildPresenceElement(H225_RasMessage::e_registrationRequest, raw)) {
+        if (raw.size() > 0) {
+            PASN_OctetString data = raw.front();
+            feat.Add(OID3_ID,H460_FeatureContent(data));
+            raw.pop_front();
+            if (raw.size() > 0) {
+                PTRACE(2,"OID3\tERROR: Too many elements for RRQ");
+            }
+        }
+    }
 
     pdu = feat;
     return true;
@@ -412,10 +420,16 @@ PBoolean H460_FeatureOID3::OnSendServiceControlIndication(H225_FeatureDescriptor
 
     H460_FeatureOID feat = H460_FeatureOID(OID_3); 
 
-    PASN_OctetString raw;
+    list<PASN_OctetString> raw;
     if (handler->BuildPresenceElement(H225_RasMessage::e_serviceControlIndication, raw)) {
-       feat.Add(OID3_ID,H460_FeatureContent(raw));
-       pdu = feat;
+        if (raw.size() > 0) {
+            PASN_OctetString data = raw.front();
+            feat.Add(OID3_ID,H460_FeatureContent(data));
+            raw.pop_front();
+            if (raw.size() > 0) {
+                PTRACE(2,"OID3\tERROR: Too many elements for SCI");
+            }
+        }
        return true;
     }
 

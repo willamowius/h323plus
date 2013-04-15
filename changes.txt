@@ -2,6 +2,8 @@
 ===============================================================================
 H323plus 1.25.0 - 1.25.x
 ===============================================================================
+Update Presence System to Version 3. (1.25.2)
+Update Alternate and Assigned Gatekeeper code. Removing buggy pointers
 Added H.224 Factory loader moved to H224 subdirectory
 Added T.140 Support
 Added H.284 <New> far end motor control
