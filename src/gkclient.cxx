@@ -1894,7 +1894,7 @@ PObject::Comparison H323Gatekeeper::AlternateInfo::Compare(const PObject & obj)
 H225_AlternateGK H323Gatekeeper::AlternateInfo::GetAlternate()
 {
     H225_AlternateGK gk;
-    rasAddress = gk.m_rasAddress;
+    gk.m_rasAddress = rasAddress;
     gk.m_gatekeeperIdentifier = gatekeeperIdentifier;
     gk.m_priority = priority;
     gk.m_needToRegister = registrationState;
