@@ -497,6 +497,10 @@ H323EndPoint::H323EndPoint()
 #ifdef H323_H460
   disableH460 = false;
 
+#ifdef H323_H46017
+  m_registeredWithH46017 = false;	// set to true when gatekeeper accepts it
+#endif
+
 #ifdef H323_H46018
   m_h46018enabled = true;
 #endif
@@ -3369,40 +3373,43 @@ H460_FeatureSet * H323EndPoint::GetGatekeeperFeatures()
 
 void H323EndPoint::LoadBaseFeatureSet()
 {
-
 #ifdef H323_H460
   features.AttachEndPoint(this);
   features.LoadFeatureSet(H460_Feature::FeatureBase);
 #endif
-
 }
 
 #ifdef H323_H46017
 PBoolean H323EndPoint::H46017CreateConnection(const PString & gatekeeper, PBoolean useSRV)
 {
+   m_registeredWithH46017 = false;
    registrationTimeToLive = PTimeInterval(0, 19);
-   H460_FeatureStd17 * m_h46017 = (H460_FeatureStd17 *)features.GetFeature(17);
+   H460_FeatureStd17 * h46017 = (H460_FeatureStd17 *)features.GetFeature(17);
 
-   if(!m_h46017) {
+   if(!h46017) {
        PTRACE(4, "Can't create H.460.17 feature - plugin loaded ?");
        return false;
    }
 
-   if(!m_h46017->Initialise(gatekeeper, useSRV)) {
+   if(!h46017->Initialise(gatekeeper, useSRV)) {
        PTRACE(4, "H.460.17 Gatekeeper connection failed");
        return false;
    }
+   m_registeredWithH46017 = true;	// TODO: reset when switching to another gatekeeper
 
 #ifdef H323_H46026
-     H460_FeatureStd26 * m_h46026 = (H460_FeatureStd26 *)features.GetFeature(26);
-     if (m_h46026) 
-         m_h46026->AttachHandler(m_h46017->GetHandler());
+     H460_FeatureStd26 * h46026 = (H460_FeatureStd26 *)features.GetFeature(26);
+     if (h46026) {
+         h46026->AttachHandler(h46017->GetHandler());
 
-     PNatMethod_H46026 * natMethod = (PNatMethod_H46026 *)natMethods->LoadNatMethod("H46026");
-     if (natMethods) {
-         natMethod->AttachEndPoint(this);
-         natMethod->AttachHandler(m_h46017->GetHandler());
-         natMethods->AddMethod(natMethod);
+       PNatMethod_H46026 * natMethod = NULL;
+       if (natMethods)
+         natMethod = (PNatMethod_H46026 *)natMethods->LoadNatMethod("H46026");
+       if (natMethod) {
+           natMethod->AttachEndPoint(this);
+           natMethod->AttachHandler(h46017->GetHandler());
+           natMethods->AddMethod(natMethod);
+       }
      }
 #endif
    return true;

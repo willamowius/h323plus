@@ -2025,6 +2025,8 @@ class H323EndPoint : public PObject
                                const PString & gatekeeper,   ///< Gatekeeper IP/URL (incl port if not SRV) to connect to
                                PBoolean useSRV = true        ///< Whether to use h323rs._tcp SRV records to resolve
                                );
+
+    PBoolean RegisteredWithH46017() const { return m_registeredWithH46017; }
 #endif
 
 #ifdef H323_H46018
@@ -2790,6 +2792,10 @@ class H323EndPoint : public PObject
 #ifdef H323_H460
     H460_FeatureSet features;
     PBoolean disableH460;
+
+#ifdef H323_H46017
+    PBoolean m_registeredWithH46017;
+#endif
 
 #ifdef H323_H46018
     PBoolean m_h46018enabled;

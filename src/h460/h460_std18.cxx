@@ -186,7 +186,11 @@ void H460_FeatureStd19::AttachEndPoint(H323EndPoint * _ep)
     EP = _ep; 
     // We only enable IF the gatekeeper supports H.460.18/.17
     H460_FeatureSet * gkfeat = EP->GetGatekeeperFeatures();
-    if (gkfeat && (gkfeat->HasFeature(18) || gkfeat->HasFeature(17))) {
+    if ((gkfeat && gkfeat->HasFeature(18))
+#ifdef H323_H46017
+		 || (EP && EP->RegisteredWithH46017())
+#endif
+	) {
         isEnabled = true;
     } else {
         PTRACE(4,"Std19\tH.460.19 disabled as GK does not support H.460.17 or .18");
