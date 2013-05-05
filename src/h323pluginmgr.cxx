@@ -1781,6 +1781,9 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
                 frameHeader->height = videoIn->GetGrabHeight();
                 sendIntra = true;  // Send a FPU when setting flow control.
             }
+        } else if (videoIn->GetVideoReader() && videoIn->GetVideoReader()->GetCaptureMode() == 0) {
+                frameHeader->width  = videoIn->GetGrabWidth();
+                frameHeader->height = videoIn->GetGrabHeight();
         }
 #endif
         flowRequest = 0;
@@ -2033,15 +2036,17 @@ PBoolean H323PluginVideoCodec::SetFrameSize(int _width, int _height,int _sar_wid
         return FALSE;
     }
 
+    mediaFormat.SetOptionInteger(OpalVideoFormat::FrameWidthOption,_width); 
+    mediaFormat.SetOptionInteger(OpalVideoFormat::FrameHeightOption,_height); 
+    if (_width * _height > frameWidth * frameHeight)
+        UpdatePluginOptions(codec,context,GetWritableMediaFormat());
+
     frameWidth  = _width;
     frameHeight = _height;
     sarWidth    = _sar_width;
     sarHeight   = _sar_height;
 
     PTRACE(3,"PLUGIN\tResize to w:" << frameWidth << " h:" << frameHeight); 
-
-    mediaFormat.SetOptionInteger(OpalVideoFormat::FrameWidthOption,frameWidth); 
-    mediaFormat.SetOptionInteger(OpalVideoFormat::FrameHeightOption,frameHeight); 
 
     bytesPerFrame = (frameHeight * frameWidth * 3)/2;
 
