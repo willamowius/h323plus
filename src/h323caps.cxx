@@ -1549,6 +1549,7 @@ H323ExtendedVideoCapability::H323ExtendedVideoCapability(
 {
     table.SetSize(0);
     SetCapabilityDirection(H323Capability::e_NoDirection);
+    rtpPayloadType = (RTP_DataFrame::PayloadTypes)98;   // TODO: FIX ME Make sure not conflict with video channel... SH
 }
 
 PBoolean H323ExtendedVideoCapability::OnSendingPDU(H245_Capability & cap) const
@@ -1861,11 +1862,11 @@ PBoolean OnH239GenericMessageResponse(H239Control & ctrl, H323Connection & conne
         {
         case H239Control::h239gpChannelId:
             channelID = (PASN_Integer)param.m_parameterValue;
-            if (channelID == ctrl.GetChannelNum(H323Capability::e_Receive)) {
+ /*           if (channelID == ctrl.GetChannelNum(H323Capability::e_Receive)) {
                PTRACE(4,"H239\tRec'd Response for Receive side. Close Receive Channel!");
                ctrl.SendGenericMessage(H239Control::e_h245command, &connection, false);
                defaultSession = ctrl.GetRequestedChanNum();
-            } 
+            } */
             break;
         case H239Control::h239gpAcknowledge:
             break;
