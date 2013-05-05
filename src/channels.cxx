@@ -330,14 +330,9 @@ PBoolean H323Channel::SetInitialBandwidth()
   if (GetSessionID() == OpalMediaFormat::DefaultVideoSessionID) { 
      if (GetDirection() == H323Channel::IsTransmitter)
         connection.OnSetInitialBandwidth((H323VideoCodec *)codec);
-
-     return SetBandwidthUsed(
-        codec->GetMediaFormat().GetOptionInteger(OpalVideoFormat::MaxBitRateOption)/100);
-  } else
-#endif
-  {
-     return SetBandwidthUsed(codec->GetMediaFormat().GetBandwidth()/100);
   }
+#endif
+  return SetBandwidthUsed(codec->GetMediaFormat().GetBandwidth()/100);
 }
 
 
