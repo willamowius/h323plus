@@ -46,6 +46,7 @@
 #include <ptclib/delaychan.h>
 #include <algorithm>
 #include <queue>
+#include <limits>
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -889,7 +890,7 @@ public:
             m_StartTimeStamp = PTimer::Tick().GetMilliSeconds();
         } else if (marker && m_frameOutput) {
             m_calcClockRate = (float)(time - m_frameStartTime)/(PTimer::Tick().GetMilliSeconds() - m_StartTimeStamp);
-            if (m_calcClockRate > 100 || m_calcClockRate < 40) {
+            if (m_calcClockRate > 100 || m_calcClockRate < 40 || (m_calcClockRate == numeric_limits<unsigned int>::infinity( ))) {
                 PTRACE(4,"RTPBUF\tErroneous ClockRate: Resetting...");
                 m_calcClockRate = 90;
                 m_frameStartTime = time;
