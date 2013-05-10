@@ -262,7 +262,11 @@ static int G7221Encode (const struct PluginCodec_Definition * codec,
 
   // Do some endian swapping, if needed
   if (LittleEndian)
+#if _WIN32
+    _swab((char *)toPtr, (char *)toPtr, *toLen);
+#else
     swab(toPtr, toPtr, *toLen);
+#endif
 
   return 1;
 }
@@ -345,7 +349,11 @@ static int G7221Decode (const struct PluginCodec_Definition * codec,
 
   // Do some endian swapping, if needed
   if (LittleEndian)
+#ifdef _WIN32
+    _swab((char *)fromPtr, (char *)fromPtr, G722_1_FRAME_BYTES (Context->bitsPerSec));
+#else
     swab((void *)fromPtr, (void *)fromPtr, G722_1_FRAME_BYTES (Context->bitsPerSec));
+#endif
 
   // reinit the current word to point to the start of the buffer
   Context->bitobj.code_word_ptr = (Word16 *) fromPtr;
