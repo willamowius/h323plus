@@ -65,6 +65,7 @@
 #else
   #include <semaphore.h>
   #define STRCMPI  strcasecmp
+  #include <unistd.h>
 #endif
 
 #ifdef _MSC_VER
@@ -103,6 +104,9 @@ static struct PluginCodec_information licenseInfo =
   "ITU-T General Public License (G.191)",                      // codec license
   PluginCodec_License_NoRoyalties                              // codec license code
 };
+
+static short EndianWord = 0x1234;
+#define LittleEndian ((*(const char *)&EndianWord) == 0x34)
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -255,6 +259,11 @@ static int G7221Encode (const struct PluginCodec_Definition * codec,
  // return the number of encoded bytes to the caller
   *fromLen = codec->parm.audio.samplesPerFrame*2;
   *toLen = G722_1_FRAME_BYTES (Context->bitsPerSec);
+
+  // Do some endian swapping, if needed
+  if (LittleEndian)
+    swab(toPtr, toPtr, *toLen);
+
   return 1;
 }
 
@@ -333,6 +342,10 @@ static int G7221Decode (const struct PluginCodec_Definition * codec,
 
     if (*toLen < codec->parm.audio.samplesPerFrame*2)
         return 0;                           // Destination buffer not big enough
+
+  // Do some endian swapping, if needed
+  if (LittleEndian)
+    swab((void *)fromPtr, (void *)fromPtr, G722_1_FRAME_BYTES (Context->bitsPerSec));
 
   // reinit the current word to point to the start of the buffer
   Context->bitobj.code_word_ptr = (Word16 *) fromPtr;
