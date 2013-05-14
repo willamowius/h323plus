@@ -303,7 +303,7 @@ class H323Gatekeeper : public H225_RAS
         void SetAlternate(const H225_AlternateGK & alt);
         PBoolean IsValid() const;
         static PBoolean IsValid(const H225_AlternateGK & alt);
-        Comparison Compare(const PObject & obj);
+        Comparison Compare(const PObject & obj) const;
         void PrintOn(ostream & strm) const;
 
         H225_TransportAddress rasAddress;

@@ -1880,7 +1880,7 @@ H323Gatekeeper::AlternateInfo::~AlternateInfo ()
 }
 
 
-PObject::Comparison H323Gatekeeper::AlternateInfo::Compare(const PObject & obj)
+PObject::Comparison H323Gatekeeper::AlternateInfo::Compare(const PObject & obj) const
 {
   PAssert(PIsDescendant(&obj, H323Gatekeeper), PInvalidCast);
   unsigned otherPriority = ((const AlternateInfo & )obj).priority;
