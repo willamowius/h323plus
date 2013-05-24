@@ -449,14 +449,14 @@ void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, const PString & fi
             if (i->second)
                 dhmap.insert(pair<PString, H235_DiffieHellman*>(i->first, (H235_DiffieHellman*)i->second->Clone()));
             else
-                dhmap.insert(pair<PString, H235_DiffieHellman*>(i->first, NULL));
+                dhmap.insert(pair<PString, H235_DiffieHellman*>(i->first, (H235_DiffieHellman*)NULL));
             i++;
         }    
         return;
     }
 
     PStringArray FilePaths;
-    dhmap.insert(pair<PString, H235_DiffieHellman*>(OID_H235V3,NULL));
+    dhmap.insert(pair<PString, H235_DiffieHellman*>(OID_H235V3, (H235_DiffieHellman*)NULL));
 
     PINDEX k=0;
     if (!filePath.IsEmpty()) {
@@ -506,7 +506,7 @@ void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, const PString & fi
                                          H235_DHParameters[i].dh_g, H235_DHParameters[i].sz,
                                          H235_DHParameters[i].send)) );
         } else if (H235_DHParameters[i].sz == 0) {
-           dhmap.insert(pair<PString, H235_DiffieHellman*>(H235_DHParameters[i].parameterOID, NULL));
+           dhmap.insert(pair<PString, H235_DiffieHellman*>(H235_DHParameters[i].parameterOID, (H235_DiffieHellman*)NULL));
         } else
            continue;  // Ignore ciphers greater that cipherlength
       }
