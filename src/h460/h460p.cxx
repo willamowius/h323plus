@@ -882,9 +882,9 @@ H460P_PresenceInstruct &  H323PresenceHandler::BuildInstruct(H460P_ArrayOf_Prese
     if (pdu.m_instruction.GetSize() > 0) {
         msg.SetSize(fsz+1);
         msg[fsz] = *(H460P_PresenceMessage *)m.Clone();
+        fsz++;
     }
-
-    return msg[fsz];
+    return msg[fsz-1];
 }
 
 H460P_PresenceAuthorize &  H323PresenceHandler::BuildAuthorize(H460P_PresenceMessage & msg, const H323PresenceSubscriptions & subs)
