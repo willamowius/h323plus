@@ -153,9 +153,9 @@ PBoolean H323SecureRTPChannel::OnSendingPDU(H245_OpenLogicalChannel & open) cons
             if (m_encryption->CreateSession(true)) {
                 open.IncludeOptionalField(H245_OpenLogicalChannel::e_encryptionSync);
                 BuildEncryptionSync(open.m_encryptionSync,*this,*m_encryption);
-                connection.OnMediaEncryption(GetSessionID(), GetDirection(), CipherString(m_algorithm));
             }
         }
+        connection.OnMediaEncryption(GetSessionID(), GetDirection(), CipherString(m_algorithm));
        return true;
   }
   return false;
