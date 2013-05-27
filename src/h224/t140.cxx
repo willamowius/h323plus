@@ -43,7 +43,7 @@
 #define T140_BS 0x0008          // Back Space: Erases the last entered character.
 #define T140_NEWLINE 0x2028     // Line separator.
 
-#define T140_PACKETCOUNT 1 // 3
+#define T140_PACKETCOUNT 3
 
 #include <h224/h224.h>
 
