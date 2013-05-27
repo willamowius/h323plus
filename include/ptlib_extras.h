@@ -763,7 +763,7 @@ protected:
 
 public:
     H323_FrameBuffer()
-    : PThread(10000, NoAutoDeleteThread), m_threadRunning(false),
+    : PThread(10000, NoAutoDeleteThread, HighestPriority), m_threadRunning(false),
       m_frameMarker(0), m_frameOutput(false), m_frameStartTime(0), 
       m_StartTimeStamp(0), m_calcClockRate(90),
       m_packetReceived(0), m_oddTimeCount(0), m_lateThreshold(5.0), m_increaseBuffer(false),
@@ -782,6 +782,11 @@ public:
         m_threadRunning=true;
         Resume();
     }
+
+	PBoolean IsRunning() 
+	{
+		return m_threadRunning;
+	}
 
     virtual void FrameOut(PBYTEArray & /*frame*/, PInt64 /*receiveTime*/, unsigned /*clock*/, PBoolean /*fup*/, PBoolean /*flow*/) {};
 

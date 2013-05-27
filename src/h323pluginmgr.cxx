@@ -1868,20 +1868,23 @@ PBoolean H323PluginVideoCodec::Open(H323Connection & connection) {
 PBoolean H323PluginVideoCodec::Write(const BYTE * buffer, unsigned length, const RTP_DataFrame & src, unsigned & written)
 {
 #ifdef H323_FRAMEBUFFER
-    if (m_frameBuffer.FrameIn(src.GetSequenceNumber(), src.GetTimestamp(), src.GetMarker(), src.GetPayloadSize(), src)) {
-        written = length;
-        return true;
-    }
-    return false;
-#else
+    if (m_frameBuffer.IsRunning()) {
+        if (m_frameBuffer.FrameIn(src.GetSequenceNumber(), src.GetTimestamp(), src.GetMarker(), src.GetPayloadSize(), src)) {
+            written = length;
+            return true;
+        } else
+            return false;
+    } else
+#endif
+    {
         rtpInformation.m_recvTime = PTimer::Tick().GetMilliSeconds();
         rtpInformation.m_timeStamp = src.GetTimestamp();
         rtpInformation.m_clockRate = 90000;
         CalculateRTPSendTime(src.GetTimestamp(), rtpInformation.m_clockRate, rtpInformation.m_sendTime);
         rtpInformation.m_frame = &src;
 
-    return WriteInternal(buffer, length, src, written, rtpInformation);
-#endif
+        return WriteInternal(buffer, length, src, written, rtpInformation);
+    }
 }
 
 PBoolean H323PluginVideoCodec::WriteInternal(const BYTE * /*buffer*/, unsigned length, const RTP_DataFrame & src, 
