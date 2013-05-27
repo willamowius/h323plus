@@ -3124,7 +3124,7 @@ class H323Connection : public PObject
 
 #ifdef H323_FRAMEBUFFER
     void EnableVideoFrameBuffer(PBoolean enable); 
-....PBoolean HasVideoFrameBuffer();
+    PBoolean HasVideoFrameBuffer();
 #endif
 
   protected:
