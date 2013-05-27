@@ -733,7 +733,7 @@ PBoolean H245NegLogicalChannel::HandleOpen(const H245_OpenLogicalChannel & pdu)
 
 PBoolean H245NegLogicalChannel::HandleOpenAck(const H245_OpenLogicalChannelAck & pdu)
 {
-  replyTimer.Stop();
+  replyTimer.Stop(false);
   PWaitAndSignal wait(mutex);
 
   PTRACE(3, "H245\tReceived open channel ack: " << channelNumber << ", state=" << state);
@@ -744,7 +744,6 @@ PBoolean H245NegLogicalChannel::HandleOpenAck(const H245_OpenLogicalChannelAck &
                                                "Ack unknown channel");
     case e_AwaitingEstablishment :
       state = e_Established;
-      replyTimer.Stop();
 
       if (!channel->OnReceivedAckPDU(pdu))
         return CloseWhileLocked();
@@ -793,7 +792,6 @@ PBoolean H245NegLogicalChannel::HandleOpenConfirm(const H245_OpenLogicalChannelC
       return connection.OnControlProtocolError(H323Connection::e_LogicalChannel,
                                                "Confirm established channel");
     case e_AwaitingConfirmation :
-      replyTimer.Stop();
       state = e_Established;
       // Channel was already opened when OLC sent, if have error here it is
       // somthing other than an asymmetric codec conflict, so close it down.
