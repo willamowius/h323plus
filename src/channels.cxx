@@ -962,10 +962,12 @@ void H323_RTPChannel::Transmit()
       sendPacket = TRUE;
     }
 
-    filterMutex.Wait();
-    for (PINDEX i = 0; i < filters.GetSize(); i++)
-      filters[i](frame, (INT)&sendPacket);
-    filterMutex.Signal();
+    if (isAudio) {
+        filterMutex.Wait();
+        for (PINDEX i = 0; i < filters.GetSize(); i++)
+          filters[i](frame, (INT)&sendPacket);
+        filterMutex.Signal();
+    }
 
     if (sendPacket || (silent && frame.GetPayloadSize() > 0)) {
       // Send the frame of coded data we have so far to RTP transport
@@ -1071,15 +1073,18 @@ void H323_RTPChannel::Receive()
   // UniDirectional Channel NAT support
   SendUniChannelBackProbe();
 
-  PBoolean allowRtpPayloadChange = codec->GetMediaFormat().GetDefaultSessionID() == OpalMediaFormat::DefaultAudioSessionID;
+  PBoolean isAudio = codec->GetMediaFormat().GetDefaultSessionID() == OpalMediaFormat::DefaultAudioSessionID;
+  PBoolean allowRtpPayloadChange = isAudio;
 
   RTP_DataFrame frame;
   while (ReadFrame(rtpTimestamp, frame)) {
 
-    filterMutex.Wait();
-    for (PINDEX i = 0; i < filters.GetSize(); i++)
-      filters[i](frame, 0);
-    filterMutex.Signal();
+    if (isAudio) {
+      filterMutex.Wait();
+      for (PINDEX i = 0; i < filters.GetSize(); i++)
+        filters[i](frame, 0);
+      filterMutex.Signal();
+    }
 
     int size = frame.GetPayloadSize();
     rtpTimestamp = frame.GetTimestamp();
