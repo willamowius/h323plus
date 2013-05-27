@@ -1404,16 +1404,16 @@ PBoolean H46019UDPSocket::DoPseudoRead(int & selectStatus)
    if (m_recvMultiplexID == 0)
        return false;
 
-   PAdaptiveDelay selectBlock;
-   while (rtpSocket && m_multiBuffer == 0) {
-       selectBlock.Delay(2);
-       if (m_shutDown) break;
+   if (rtpSocket) {
+	   while (!m_shutDown && m_multiBuffer == 0)
+          selectBlock.Delay(3);
    }
 
    if (m_shutDown)
        selectStatus += PSocket::Interrupted;
    else
        selectStatus += ((m_multiBuffer > 0) ? (rtpSocket ? -1 : -2) : 0);
+
    return rtpSocket;
 }
 

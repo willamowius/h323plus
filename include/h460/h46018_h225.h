@@ -770,6 +770,7 @@ private:
     PBoolean    m_h46024b;
 #endif
 
+	PAdaptiveDelay selectBlock;
     bool rtpSocket;
 
 };
