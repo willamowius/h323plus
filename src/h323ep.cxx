@@ -371,12 +371,8 @@ H323EndPoint::H323EndPoint()
 #endif
 
 #ifdef H323_AUDIO_CODECS
-#ifndef H323_FRAMEBUFFER
   minAudioJitterDelay = 50;  // milliseconds
-#else
-  minAudioJitterDelay = 100;  // milliseconds
-#endif
-  maxAudioJitterDelay = 250; // milliseconds
+  maxAudioJitterDelay = 250;  // milliseconds
 #endif
 
   autoCallForward = TRUE;
@@ -535,6 +531,10 @@ H323EndPoint::H323EndPoint()
 
 #ifdef H323_GNUGK
   gnugk = NULL;
+#endif
+
+#ifdef H323_FRAMEBUFFER
+  useVideoBuffer = false;
 #endif
 
   m_useH225KeepAlive = PFalse;
@@ -3469,6 +3469,27 @@ PBoolean H323EndPoint::H46023IsEnabled()
     return m_h46023enabled; 
 }
 #endif  // H323_H46023
+
+#ifdef H323_FRAMEBUFFER
+void H323EndPoint::EnableVideoFrameBuffer(PBoolean enable)
+{
+    if (useVideoBuffer == enable)
+        return;
+
+    // Increase the min Jitter delay
+    if (enable)
+        minAudioJitterDelay = minAudioJitterDelay + 50;  // milliseconds
+    else
+        minAudioJitterDelay = minAudioJitterDelay - 50;  // milliseconds
+
+    useVideoBuffer = enable;
+}
+
+PBoolean H323EndPoint::HasVideoFrameBuffer()
+{
+    return useVideoBuffer;
+}
+#endif
 
 #ifdef H323_UPnP
 void H323EndPoint::SetUPnP(PBoolean active)

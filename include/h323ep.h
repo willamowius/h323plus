@@ -2232,6 +2232,11 @@ class H323EndPoint : public PObject
     void SetAECEnabled(PBoolean enabled)  { enableAEC = enabled; }
 #endif
 
+#ifdef H323_FRAMEBUFFER
+    void EnableVideoFrameBuffer(PBoolean enable); 
+    PBoolean HasVideoFrameBuffer();
+#endif
+
 #ifdef H323_UPnP
     /**Set UPnP
       */
@@ -2831,6 +2836,10 @@ class H323EndPoint : public PObject
 
 #ifdef H323_GNUGK
     GNUGK_Feature * gnugk;
+#endif
+
+#ifdef H323_FRAMEBUFFER
+    PBoolean useVideoBuffer;
 #endif
 
     void RegInvokeReRegistration();

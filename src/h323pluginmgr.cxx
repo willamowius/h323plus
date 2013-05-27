@@ -1859,7 +1859,7 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
 PBoolean H323PluginVideoCodec::Open(H323Connection & connection) {
 
 #ifdef H323_FRAMEBUFFER
-    if (direction == Decoder) 
+    if (direction == Decoder && connection.HasVideoFrameBuffer()) 
         m_frameBuffer.SetCodec(this);
 #endif
     return H323VideoCodec::Open(connection);

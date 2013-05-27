@@ -3122,6 +3122,11 @@ class H323Connection : public PObject
 
 #endif
 
+#ifdef H323_FRAMEBUFFER
+    void EnableVideoFrameBuffer(PBoolean enable); 
+....PBoolean HasVideoFrameBuffer();
+#endif
+
   protected:
     /**Internal function to check if call established.
        This checks all the criteria for establishing a call an initiating the
