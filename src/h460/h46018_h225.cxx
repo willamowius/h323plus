@@ -54,8 +54,8 @@
 #include <ptclib/cypher.h>
 #include <ptclib/delaychan.h>
 
-#define H46024A_MAX_PROBE_COUNT  10
-#define H46024A_PROBE_INTERVAL  150
+#define H46024A_MAX_PROBE_COUNT  15
+#define H46024A_PROBE_INTERVAL  200
 
 PCREATE_NAT_PLUGIN(H46019);
 
