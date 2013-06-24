@@ -136,7 +136,7 @@ HEADER_FILES	+= $(OH323_INCDIR)/gccpdu.h \
                    $(OH323_INCDIR)/h230/h230.h 
 
 SOURCES		    += $(OH323_SRCDIR)/gccpdu.cxx \
-                   $(OH323_INCDIR)/h230/OID2.cxx
+                   $(OH323_SRCDIR)/h230/OID2.cxx
 
 COMMON_SOURCES	+= $(OH323_SRCDIR)/h230/h230.cxx
 endif
@@ -184,7 +184,7 @@ ifdef H323_H350
 HEADER_FILES    += $(OH323_INCDIR)/h350/h350.h \
                    $(OH323_INCDIR)/h350/h350_service.h
 
-SOURCES		    += $(OH323_INCDIR)/h350/h350_service.cxx
+SOURCES		    += $(OH323_SRCDIR)/h350/h350_service.cxx
 COMMON_SOURCES  += $(OH323_SRCDIR)/h350/h350.cxx
 endif
 
