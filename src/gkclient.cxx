@@ -586,7 +586,7 @@ PBoolean H323Gatekeeper::OnReceiveRegistrationConfirm(const H225_RegistrationCon
     PString NATaddr = rcf.m_nonStandardData.m_data.AsString();
     if (!NATaddr.IsEmpty()) {
       if (NATaddr.Left(4) == "NAT=") {
-        endpoint.OnGatekeeperNATDetect(NATaddr.Right(NATaddr.GetLength()-4),endpointIdentifier.GetValue(),gkRouteAddress);
+        endpoint.OnGatekeeperNATDetect(PIPSocket::Address(NATaddr.Right(NATaddr.GetLength()-4)),endpointIdentifier.GetValue(),gkRouteAddress);
       } else {
         endpoint.OnGatekeeperOpenNATDetect(endpointIdentifier.GetValue(),gkRouteAddress);
       }

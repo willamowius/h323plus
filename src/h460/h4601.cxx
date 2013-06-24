@@ -354,7 +354,7 @@ H460_FeatureContent H460_FeatureParameter::operator=( const PString & value )
         PStringArray Cmd = value.Tokenise(":", FALSE);    
 
         if (Cmd.GetSize() == 2) {    // Parameter is an Address
-            H323TransportAddress * add = new H323TransportAddress(Cmd[0],(short)Cmd[1].AsUnsigned());    // BUG: leak ?
+            H323TransportAddress * add = new H323TransportAddress(PIPSocket::Address(Cmd[0]),(short)Cmd[1].AsUnsigned());    // BUG: leak ?
             m_content = H460_FeatureContent(*add);
         }
     }
