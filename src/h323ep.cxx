@@ -1899,9 +1899,9 @@ PBoolean H323EndPoint::ParsePartyName(const PString & _remoteParty,
   if (!address)
     return TRUE;
 
-  // We have a gk and user did not explicitly supply a host, so lets
+  // We do not have a gk and user did not explicitly supply a host, so lets
   // do a check to see if it is an IP address or hostname
-  if (alias.FindOneOf("$.:[") != P_MAX_INDEX) {
+  if (gatekeeper == NULL && alias.FindOneOf("$.:[") != P_MAX_INDEX) {
     H323TransportAddress test = alias;
     PIPSocket::Address ip;
     if (test.GetIpAddress(ip) && ip.IsValid() && !ip.IsAny()) {
