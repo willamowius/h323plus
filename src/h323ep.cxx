@@ -1900,15 +1900,17 @@ PBoolean H323EndPoint::ParsePartyName(const PString & _remoteParty,
     return TRUE;
 
   // We do not have a gk and user did not explicitly supply a host, so lets
-  // do a check to see if it is an IP address or hostname
-  if (gatekeeper == NULL && alias.FindOneOf("$.:[") != P_MAX_INDEX) {
-    H323TransportAddress test = alias;
-    PIPSocket::Address ip;
-    if (test.GetIpAddress(ip) && ip.IsValid() && !ip.IsAny()) {
-      // The alias was a valid internet address, use it as such
-      alias = PString::Empty();
-      address = test;
-    }
+  // do a check to see if it is a valid IP address or hostname if not registered.
+  if (alias.FindOneOf("$.:[") != P_MAX_INDEX && (gatekeeper == NULL || 
+      alias.FindRegEx(PRegularExpression("^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+$", PRegularExpression::Extended)) != P_MAX_INDEX || // IPv4
+     (alias.Left(1) == "[" && alias.Right(1) == "]" && alias.FindRegEx(PRegularExpression("\\]:[0-9]+$", PRegularExpression::Extended)) != P_MAX_INDEX))) {  // IPv6
+       H323TransportAddress test = alias;
+	   PIPSocket::Address ip;
+       if (test.GetIpAddress(ip) && ip.IsValid() && !ip.IsAny()) {
+          // The alias was a valid internet address, use it as such
+          alias = PString::Empty();
+          address = test;
+       }
   }
 
   return TRUE;
