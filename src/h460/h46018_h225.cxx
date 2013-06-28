@@ -52,7 +52,6 @@
 #include <h460/h46018.h>
 #include <ptclib/random.h>
 #include <ptclib/cypher.h>
-#include <ptclib/delaychan.h>
 
 #define H46024A_MAX_PROBE_COUNT  15
 #define H46024A_PROBE_INTERVAL  200
@@ -1734,52 +1733,54 @@ PBoolean H46019UDPSocket::WriteTo(const void * buf, PINDEX len, const Address & 
 #ifdef H323_H46024A
 PBoolean H46019UDPSocket::ReceivedProbePacket(const RTP_ControlFrame & frame, bool & probe, bool & success)
 {
+    if (frame.GetPayloadType() != RTP_ControlFrame::e_ApplDefined) {
+        // Not a probe packet ignore
+        return false;  
+    }
 
-   success = false;
-  
-   //Inspect the probe packet
-   if (frame.GetPayloadType() == RTP_ControlFrame::e_ApplDefined) {
+    if (m_CUIrem.IsEmpty()) {
+        PTRACE(4, "H46024A\ts" << m_Session <<" Probe received too early. local not setup. IGNORING!");
+        return false;
+    }
 
-       int cstate = GetProbeState();
-       if (cstate == e_notRequired) {
-           PTRACE(6, "H46024A\ts:" << m_Session <<" received RTCP probe packet. LOGIC ERROR!");
-           return true;  
-       }
+    //Inspect the probe packet
+    success = false;
+    int cstate = GetProbeState();
+    if (cstate == e_notRequired) {
+        PTRACE(6, "H46024A\ts:" << m_Session <<" received RTCP probe packet. LOGIC ERROR!");
+        return false;  
+    }
 
-       if (cstate > e_probing) {
-           PTRACE(6, "H46024A\ts:" << m_Session <<" received RTCP probe packet. IGNORING! Already authenticated.");
-           return true;  
-       }
+    if (cstate > e_probing) {
+        PTRACE(6, "H46024A\ts:" << m_Session <<" received RTCP probe packet. IGNORING! Already authenticated.");
+        return false;
+    }
 
-       probe = (frame.GetCount() > 0);
-       PTRACE(4, "H46024A\ts:" << m_Session <<" RTCP Probe " << (probe ? "Reply" : "Request") << " received.");    
+    probe = (frame.GetCount() > 0);
+    PTRACE(4, "H46024A\ts:" << m_Session <<" RTCP Probe " << (probe ? "Reply" : "Request") << " received.");
 
-        BYTE * data = frame.GetPayloadPtr();
-        PBYTEArray bytes(20);
-        memcpy(bytes.GetPointer(),data+12, 20);
-        PMessageDigest::Result bin_digest;
-        PMessageDigestSHA1::Encode(m_CallId.AsString() + m_CUI, bin_digest);
-        PBYTEArray val(bin_digest.GetPointer(),bin_digest.GetSize());
+    BYTE * data = frame.GetPayloadPtr();
+    PBYTEArray bytes(20);
+    memcpy(bytes.GetPointer(),data+12, 20);
+    PMessageDigest::Result bin_digest;
+    PMessageDigestSHA1::Encode(m_CallId.AsString() + m_CUI, bin_digest);
+    PBYTEArray val(bin_digest.GetPointer(),bin_digest.GetSize());
 
-        if (bytes == val) {
-          if (probe)  // We have a reply
-              SetProbeState(e_verify_sender);
-          else 
-             SetProbeState(e_verify_receiver);
+    if (bytes != val) {
+        PTRACE(4, "H46024A\ts" << m_Session <<" RTCP Probe " << (probe ? "Reply" : "Request") << " verify FAILURE");
+        return false;
+    }
 
-          m_Probe.Stop();
-          PTRACE(4, "H46024A\ts" << m_Session <<" RTCP Probe " << (probe ? "Reply" : "Request") << " verified.");
-          if (!m_CUIrem.IsEmpty())
-            success = true;
-          else {
-              PTRACE(4, "H46024A\ts" << m_Session <<" Remote not ready.");
-          }
-        } else {
-          PTRACE(4, "H46024A\ts" << m_Session <<" RTCP Probe " << (probe ? "Reply" : "Request") << " verify FAILURE");    
-        }
-        return true;
-   } else 
-      return false;
+    if (probe)  // We have a reply
+        SetProbeState(e_verify_sender);
+    else 
+        SetProbeState(e_verify_receiver);
+
+    m_Probe.Stop();
+    PTRACE(4, "H46024A\ts" << m_Session <<" RTCP Probe " << (probe ? "Reply" : "Request") << " verified.");
+    success = true;
+
+    return true;
 }
 #endif
 
