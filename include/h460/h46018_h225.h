@@ -649,7 +649,7 @@ class H46019UDPSocket : public PUDPSocket
 #if defined(H323_H46024A) || defined(H323_H46024B)
 
     enum  probe_state {
-        e_notRequired,        ///< Polling has not started
+        e_notRequired,        ///< Polling not required
         e_initialising,        ///< We are initialising (local set but remote not)
         e_idle,                ///< Idle (waiting for first packet from remote)
         e_probing,            ///< Probing for direct route
@@ -658,6 +658,8 @@ class H46019UDPSocket : public PUDPSocket
         e_wait,                ///< we are waiting for direct media (to set address)
         e_direct            ///< we are going direct to detected address
     };
+
+    PString ProbeState(probe_state state);
 
     struct probe_packet {
         PUInt16b    Length;        // Length

@@ -781,11 +781,9 @@ unsigned ResolveSession(muxSocketMap & socMap, unsigned muxID, PBoolean rtp, con
                PNatMethod_H46019::RegisterSocket(rtp,muxID, mapSocket);
                PNatMethod_H46019::UnregisterSocket(rtp, eraseID);
                return muxID;
-          } else
-             return 0;
-        } else {
-           return DetectSourceAddress(socMap, addr, port);
+          }
         }
+        return DetectSourceAddress(socMap, addr, port);
 }
 
 void CloseAllSessions(muxSocketMap & socMap) 
@@ -872,15 +870,21 @@ void PNatMethod_H46019::ReadThread(PThread &, INT)
                  it = rtpSocketMap.find(multiplexID);
                  if (it == rtpSocketMap.end()) {
                      unsigned badMUXid = multiplexID;
-                     PTRACE(2,"H46019M\tReceived RTP packet with unknown MUX ID "
-                                        << badMUXid << " " << addr << ":" << port);
                      unsigned rightMUXid=0;
                      unsigned detected = ResolveSession(rtpSocketMap, badMUXid, true, addr, port, rightMUXid);
-                      if (!detected) continue;
-                      it = rtpSocketMap.find(detected);
-                      if (it == rtpSocketMap.end())  continue;
+                     if (!detected) {
+                          PTRACE(2,"H46019M\tReceived RTP packet with unknown MUX ID " << badMUXid << " " << addr << ":" << port);
+                          continue;
+                     }
+                     it = rtpSocketMap.find(detected);
+                     if (it == rtpSocketMap.end()) continue;
 
-                      PTRACE(2,"H46019M\tERROR: Recover Receive Multiplex Session " << rightMUXid  << " incorrectly sent as " << badMUXid);
+                     if (rightMUXid == 0) {
+                          PTRACE(2,"H46019M\tERROR: Receive UnMultiplex Packet " << " " << addr << ":" << port);
+                          ((H46019UDPSocket *)it->second)->WriteMultiplexBuffer(buffer.GetPointer(), actRead, addr, port);
+                           continue;
+                     }
+                     PTRACE(2,"H46019M\tERROR: Recover Receive Multiplex Session " << rightMUXid  << " incorrectly sent as " << badMUXid);
                  } 
                  break;
                }
@@ -1466,15 +1470,39 @@ PBoolean H46019UDPSocket::GetPeerAddress(PIPSocketAddressAndPort & addr)
 #endif
 
 #ifdef H323_H46024A
+
+
+PString H46019UDPSocket::ProbeState(probe_state state)
+{
+    PString probeString = PString();
+    switch (state) {
+        case e_notRequired:      probeString = "NotRequred";  break;
+        case e_initialising:     probeString = "Initialising";  break;  
+        case e_idle:             probeString = "Ready";  break;
+        case e_probing:          probeString = "Probing";  break;
+        case e_verify_receiver:  probeString = "ReceiveVerified";  break;   
+        case e_verify_sender:    probeString = "SendVerified";  break;
+        case e_wait:             probeString = "WaitingForPacket";  break;
+        case e_direct:           probeString = "Direct";  break;
+    };
+    return probeString;
+}
+
 void H46019UDPSocket::SetProbeState(probe_state newstate)
 {
     PWaitAndSignal m(probeMutex);
 
-    PTRACE(4,"H46024\tChanging state for " << m_Session << " from " << m_state << " to " << newstate);
+    if (m_state >= newstate) {
+        PTRACE(4,"H46024\ts:" << m_Session << (rtpSocket ? " RTP " : " RTCP ") << "current state not changed from " << ProbeState(m_state));
+        return;
+    }
+
+    PTRACE(4,"H46024\ts:" << m_Session << (rtpSocket ? " RTP " : " RTCP ") << " changing state from " << ProbeState(m_state) 
+        << " to " << ProbeState(newstate));
 
     m_state = newstate;
 }
-    
+
 int H46019UDPSocket::GetProbeState() const
 {
     PWaitAndSignal m(probeMutex);
@@ -1605,13 +1633,15 @@ void H46019UDPSocket::ProbeReceived(bool probe, const PIPSocket::Address & addr,
 
     if (probe) {
         m_Handler.H46024ADirect(true,m_Token);  //< Tell remote to wait for connection
-    } else {
+    } else if (addr.IsValid() && !addr.IsLoopback() && !addr.IsAny()) {
         RTP_ControlFrame reply;
         reply.SetSize(4+sizeof(probe_packet));
         BuildProbe(reply, false);
         if (SendRTCPFrame(reply,addr,port,m_altMuxID)) {
-            PTRACE(4, "H46024A\tRTCP Reply packet sent: " << addr << ":" << port);    
+            PTRACE(4, "H46024A\tRTCP Reply packet sent: " << addr << ":" << port);
         }
+    } else {
+        PTRACE(4, "H46024A\tRTCP Reply packet invalid Address: " << addr);
     }
 
 }
@@ -1739,7 +1769,7 @@ PBoolean H46019UDPSocket::ReceivedProbePacket(const RTP_ControlFrame & frame, bo
     }
 
     if (m_CUIrem.IsEmpty()) {
-        PTRACE(4, "H46024A\ts" << m_Session <<" Probe received too early. local not setup. IGNORING!");
+        PTRACE(4, "H46024A\ts:" << m_Session <<" Probe received too early. local not setup. IGNORING!");
         return false;
     }
 
@@ -1767,17 +1797,17 @@ PBoolean H46019UDPSocket::ReceivedProbePacket(const RTP_ControlFrame & frame, bo
     PBYTEArray val(bin_digest.GetPointer(),bin_digest.GetSize());
 
     if (bytes != val) {
-        PTRACE(4, "H46024A\ts" << m_Session <<" RTCP Probe " << (probe ? "Reply" : "Request") << " verify FAILURE");
+        PTRACE(4, "H46024A\ts:" << m_Session <<" RTCP Probe " << (probe ? "Reply" : "Request") << " verify FAILURE");
         return false;
     }
 
+    PTRACE(4, "H46024A\ts:" << m_Session <<" RTCP Probe " << (probe ? "Reply" : "Request") << " verified.");
     if (probe)  // We have a reply
         SetProbeState(e_verify_sender);
     else 
         SetProbeState(e_verify_receiver);
 
     m_Probe.Stop();
-    PTRACE(4, "H46024A\ts" << m_Session <<" RTCP Probe " << (probe ? "Reply" : "Request") << " verified.");
     success = true;
 
     return true;
