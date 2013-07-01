@@ -1219,7 +1219,7 @@ static int encoder_set_options(
   }
     
 
-    if (cusMBPS > 0 && SetLevelMBPS(level, cusMBPS, cusMFS) && SetLevelMFS(level,cusMFS)) {
+    if ((cusMBPS > 0 || cusMFS > 0) && SetLevelMBPS(level, cusMBPS, cusMFS) && SetLevelMFS(level,cusMFS)) {
         unsigned max_rate = (cusMBPS * 500) / (cusMFS * 256);
         if (frameRate > max_rate) // don't force frame rate to maximum possible, if application set a lower value
 	        frameRate = max_rate;
