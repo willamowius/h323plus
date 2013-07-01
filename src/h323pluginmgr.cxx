@@ -2033,11 +2033,12 @@ PBoolean H323PluginVideoCodec::SetFrameSize(int _width, int _height,int _sar_wid
         return FALSE;
         
     // TODO MAN: this might not be codec for non H.264 codec
-    if ((_width*_height > maxWidth * maxHeight)) 
-    {
-        PTRACE(3, "PLUGIN\tERROR: Frame Size " << _width << "x" << _height  << " exceeds codec limits (" << maxWidth << "x" << maxHeight << ")"); 
-        return FALSE;
-    }
+	// TODO Need to set the actual MaxWidth and MaxHeight For now qwe accept any size recev'd
+    //if ((_width*_height > maxWidth * maxHeight)) 
+    //{
+    //    PTRACE(3, "PLUGIN\tERROR: Frame Size " << _width << "x" << _height  << " exceeds codec limits (" << maxWidth << "x" << maxHeight << ")"); 
+    //    return FALSE;
+    //}
 
     mediaFormat.SetOptionInteger(OpalVideoFormat::FrameWidthOption,_width); 
     mediaFormat.SetOptionInteger(OpalVideoFormat::FrameHeightOption,_height); 
