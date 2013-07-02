@@ -619,7 +619,7 @@ static int setFrameSizeAndRate(unsigned _level, bool stdaspect, unsigned & w, un
 	
 	unsigned maxMB = 0;
 	unsigned maxMBsec = 0;
-    GetLevelLimits(_level, maxMB, maxMBsec, h264level);
+	if (!GetLevelLimits(_level, maxMB, maxMBsec, h264level)) return 0;
 	if (!maxMB) return 0;
 
 	int j=0;
@@ -639,14 +639,20 @@ static int setFrameSizeAndRate(unsigned _level, bool stdaspect, unsigned & w, un
 	return 1;
 }
 
-static int SetLevelMBPS(unsigned & level, unsigned maxMBs, unsigned & maxMB )
+static int SetLevelMBPS(unsigned & level, unsigned & maxMBs, unsigned & maxMB )
 {
 	int j=0;
-    if (maxMB == 0) {
-      while (h264_levels[j].level_idc) {
-          if (level <= h264_levels[j].h241_level) {
-            maxMB = h264_levels[j].frame_size/256 + 1;
-            break;
+	if (maxMBs == 0 || maxMB == 0) {
+		while (h264_levels[j].level_idc) {
+		  if (level <= h264_levels[j].h241_level) {
+			if (maxMBs == 0) {
+				maxMBs = h264_levels[j].mbps/500 +1;
+				return 1;
+			}
+			if (maxMB == 0) {
+				maxMB = h264_levels[j].frame_size/256 + 1;
+			    break;
+			}
           } else 
              j++;
       }
@@ -1031,16 +1037,15 @@ int encoder_formats(
     }
 
     inputFormats fmt;
-    context->GetInputFormat(fmt);	// TODO: check return value
-
-    TRACE(2,"Adjusted w " << fmt.w << " h " << fmt.h << " r " << fmt.r); 
-
-	context->Lock();
-	context->SetFrameWidth(fmt.w);
-	context->SetFrameHeight(fmt.h);
-	context->SetFrameRate(fmt.r); 
-	context->ApplyOptions();
-	context->Unlock();
+	if (context->GetInputFormat(fmt)) {
+		TRACE(2,"Adjusted w " << fmt.w << " h " << fmt.h << " r " << fmt.r); 
+		context->Lock();
+		context->SetFrameWidth(fmt.w);
+		context->SetFrameHeight(fmt.h);
+		context->SetFrameRate(fmt.r); 
+		context->ApplyOptions();
+		context->Unlock();
+	}
 
 	for (int i = 0; options[i] != NULL; i += 2) {
       if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_TIME) == 0)
@@ -1094,7 +1099,6 @@ TRACE(4, "H264\tFLOW\tAdjust to bitrate: " << targetBitrate);
 
     // do the matching of frame width/height/rate to bitrate 
     bool matchedtoInput = false;
-    context->SetMaxMBPS(targetBitrate/kbtoMBPS);
     inputFormats fmt;
     if (context->GetInputFormat(fmt)) {
         frameWidth = fmt.w; 
@@ -1230,14 +1234,12 @@ static int encoder_set_options(
 	TRACE(1, "H264\tCap\tProfile and Level: " << profile << ";" << constraints << ";" << level);
 
     unsigned maxMB =0; unsigned maxMBPS = 0;
-    if (cusMBPS > 0 && cusMFS > 0) {
-       maxMB = cusMFS * 256;
-       maxMBPS = cusMBPS * 500;
-    } else
-       GetLevelLimits(level,maxMB,maxMBPS,h264level);
-
-    context->SetMaxMB(maxMB);
-    context->SetMaxMBPS(maxMBPS);
+	if (GetLevelLimits(level,maxMB,maxMBPS,h264level)) {
+        if (cusMBPS > 0) maxMBPS = cusMBPS * 500; 
+	    if (cusMFS > 0)  maxMB = cusMFS * 256;
+        context->SetMaxMB(maxMB);
+        context->SetMaxMBPS(maxMBPS);
+	}
 
 	// Adjust to level sent in the signalling
 	if (!setFrameSizeAndRate(level,stdAspect,frameWidth,frameHeight,frameRate,h264level) || !adjust_bitrate_to_level(targetBitrate, h264level)) {
@@ -1277,7 +1279,6 @@ static int encoder_set_options(
 
 	// Set the Values in the codec
         context->SetTargetBitrate((unsigned) (targetBitrate / 1000) );
-        context->SetMaxMBPS(targetBitrate/kbtoMBPS);
         context->SetProfileLevel(profile, constraints, h264level); 
 	    context->SetFrameHeight(frameHeight);
 	    context->SetFrameWidth(frameWidth);

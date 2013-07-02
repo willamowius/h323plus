@@ -111,8 +111,8 @@ struct inputFormats
 };
 
     // Settings
-static double minFPS   = 9.0;       // Minimum FPS allowed
-static double minSpeedFPS = 19;     // Minimum speed for Emphasis Speed
+static double minFPS   = 13.5;       // Minimum FPS allowed
+static double minSpeedFPS = 20;     // Minimum speed for Emphasis Speed
 static double kbtoMBPS = 12.2963;   // Magical Conversion factor from kb/s to MBPS
 
 class H264EncoderContext 
