@@ -9197,6 +9197,43 @@ PObject * H225_CallCreditServiceControl_billingMode::Clone() const
 }
 
 
+
+#ifndef PASN_NOPRINTON
+const static PASN_Names Names_H225_CallCreditServiceControl_callStartingPoint[]={
+      {"alerting",0}
+     ,{"connect",1}
+};
+#endif
+//
+// CallCreditServiceControl_callStartingPoint
+//
+
+H225_CallCreditServiceControl_callStartingPoint::H225_CallCreditServiceControl_callStartingPoint(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Choice(tag, tagClass, 2, TRUE
+#ifndef PASN_NOPRINTON
+    ,(const PASN_Names *)Names_H225_CallCreditServiceControl_callStartingPoint,2
+#endif
+)
+{
+}
+
+
+PBoolean H225_CallCreditServiceControl_callStartingPoint::CreateObject()
+{
+  choice = (tag <= e_connect) ? new PASN_Null() : NULL;
+  return choice != NULL;
+}
+
+
+PObject * H225_CallCreditServiceControl_callStartingPoint::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H225_CallCreditServiceControl_callStartingPoint::Class()), PInvalidCast);
+#endif
+  return new H225_CallCreditServiceControl_callStartingPoint(*this);
+}
+
+
 #endif // if ! H323_DISABLE_H225
 
 

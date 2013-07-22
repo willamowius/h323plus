@@ -1604,7 +1604,8 @@ RegistrationConfirm ::= SEQUENCE --(RCF)
         genericData                     SEQUENCE OF GenericData OPTIONAL,
         assignedGatekeeper              AlternateGK OPTIONAL,
         rehomingModel                   RehomingModel OPTIONAL,
-        transportQOS                    TransportQOS OPTIONAL
+        transportQOS                    TransportQOS OPTIONAL,
+        language                        SEQUENCE OF IA5String(SIZE (1..32)) OPTIONAL
 }
 
 RegistrationReject ::= SEQUENCE --(RRJ)
@@ -2003,7 +2004,8 @@ LocationConfirm ::= SEQUENCE --(LCF)
         circuitInfo                     CircuitInfo OPTIONAL,
         serviceControl                  SEQUENCE OF ServiceControlSession OPTIONAL,
         modifiedSrcInfo                 SEQUENCE OF AliasAddress OPTIONAL,
-        bandWidth                       BandWidth OPTIONAL
+        bandWidth                       BandWidth OPTIONAL,
+        language                        SEQUENCE OF IA5String(SIZE (1..32)) OPTIONAL
 }
 
 LocationReject ::= SEQUENCE --(LRJ)

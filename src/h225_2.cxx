@@ -12,43 +12,6 @@
 
 #if ! H323_DISABLE_H225
 
-
-#ifndef PASN_NOPRINTON
-const static PASN_Names Names_H225_CallCreditServiceControl_callStartingPoint[]={
-      {"alerting",0}
-     ,{"connect",1}
-};
-#endif
-//
-// CallCreditServiceControl_callStartingPoint
-//
-
-H225_CallCreditServiceControl_callStartingPoint::H225_CallCreditServiceControl_callStartingPoint(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Choice(tag, tagClass, 2, TRUE
-#ifndef PASN_NOPRINTON
-    ,(const PASN_Names *)Names_H225_CallCreditServiceControl_callStartingPoint,2
-#endif
-)
-{
-}
-
-
-PBoolean H225_CallCreditServiceControl_callStartingPoint::CreateObject()
-{
-  choice = (tag <= e_connect) ? new PASN_Null() : NULL;
-  return choice != NULL;
-}
-
-
-PObject * H225_CallCreditServiceControl_callStartingPoint::Clone() const
-{
-#ifndef PASN_LEANANDMEAN
-  PAssert(IsClass(H225_CallCreditServiceControl_callStartingPoint::Class()), PInvalidCast);
-#endif
-  return new H225_CallCreditServiceControl_callStartingPoint(*this);
-}
-
-
 //
 // ArrayOf_EnumeratedParameter
 //
@@ -395,6 +358,39 @@ PObject * H225_ArrayOf_RasUsageSpecification::Clone() const
 
 
 //
+// RegistrationConfirm_language
+//
+
+H225_RegistrationConfirm_language::H225_RegistrationConfirm_language(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Array(tag, tagClass)
+{
+}
+
+
+PASN_Object * H225_RegistrationConfirm_language::CreateObject() const
+{
+  PASN_IA5String * obj = new PASN_IA5String;
+  obj->SetConstraints(PASN_Object::FixedConstraint, 1, 32);
+  return obj;
+}
+
+
+PASN_IA5String & H225_RegistrationConfirm_language::operator[](PINDEX i) const
+{
+  return (PASN_IA5String &)array[i];
+}
+
+
+PObject * H225_RegistrationConfirm_language::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H225_RegistrationConfirm_language::Class()), PInvalidCast);
+#endif
+  return new H225_RegistrationConfirm_language(*this);
+}
+
+
+//
 // RegistrationRejectReason_invalidTerminalAliases
 //
 
@@ -649,6 +645,39 @@ PObject * H225_LocationRequest_language::Clone() const
   PAssert(IsClass(H225_LocationRequest_language::Class()), PInvalidCast);
 #endif
   return new H225_LocationRequest_language(*this);
+}
+
+
+//
+// LocationConfirm_language
+//
+
+H225_LocationConfirm_language::H225_LocationConfirm_language(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Array(tag, tagClass)
+{
+}
+
+
+PASN_Object * H225_LocationConfirm_language::CreateObject() const
+{
+  PASN_IA5String * obj = new PASN_IA5String;
+  obj->SetConstraints(PASN_Object::FixedConstraint, 1, 32);
+  return obj;
+}
+
+
+PASN_IA5String & H225_LocationConfirm_language::operator[](PINDEX i) const
+{
+  return (PASN_IA5String &)array[i];
+}
+
+
+PObject * H225_LocationConfirm_language::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H225_LocationConfirm_language::Class()), PInvalidCast);
+#endif
+  return new H225_LocationConfirm_language(*this);
 }
 
 
@@ -8954,7 +8983,7 @@ PObject * H225_CircuitIdentifier::Clone() const
 //
 
 H225_RegistrationConfirm::H225_RegistrationConfirm(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Sequence(tag, tagClass, 3, TRUE, 20)
+  : PASN_Sequence(tag, tagClass, 3, TRUE, 21)
 {
   IncludeOptionalField(e_willRespondToIRR);
   IncludeOptionalField(e_maintainConnection);
@@ -9016,6 +9045,8 @@ void H225_RegistrationConfirm::PrintOn(ostream & strm) const
     strm << setw(indent+16) << "rehomingModel = " << setprecision(indent) << m_rehomingModel << '\n';
   if (HasOptionalField(e_transportQOS))
     strm << setw(indent+15) << "transportQOS = " << setprecision(indent) << m_transportQOS << '\n';
+  if (HasOptionalField(e_language))
+    strm << setw(indent+11) << "language = " << setprecision(indent) << m_language << '\n';
   strm << setw(indent-1) << setprecision(indent-2) << "}";
 }
 #endif
@@ -9125,6 +9156,8 @@ PBoolean H225_RegistrationConfirm::Decode(PASN_Stream & strm)
     return FALSE;
   if (!KnownExtensionDecode(strm, e_transportQOS, m_transportQOS))
     return FALSE;
+  if (!KnownExtensionDecode(strm, e_language, m_language))
+    return FALSE;
 
   return UnknownExtensionsDecode(strm);
 }
@@ -9164,6 +9197,7 @@ void H225_RegistrationConfirm::Encode(PASN_Stream & strm) const
   KnownExtensionEncode(strm, e_assignedGatekeeper, m_assignedGatekeeper);
   KnownExtensionEncode(strm, e_rehomingModel, m_rehomingModel);
   KnownExtensionEncode(strm, e_transportQOS, m_transportQOS);
+  KnownExtensionEncode(strm, e_language, m_language);
 
   UnknownExtensionsEncode(strm);
 }
@@ -11250,7 +11284,7 @@ PObject * H225_LocationRequest::Clone() const
 //
 
 H225_LocationConfirm::H225_LocationConfirm(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Sequence(tag, tagClass, 1, TRUE, 17)
+  : PASN_Sequence(tag, tagClass, 1, TRUE, 18)
 {
 }
 
@@ -11299,6 +11333,8 @@ void H225_LocationConfirm::PrintOn(ostream & strm) const
     strm << setw(indent+18) << "modifiedSrcInfo = " << setprecision(indent) << m_modifiedSrcInfo << '\n';
   if (HasOptionalField(e_bandWidth))
     strm << setw(indent+12) << "bandWidth = " << setprecision(indent) << m_bandWidth << '\n';
+  if (HasOptionalField(e_language))
+    strm << setw(indent+11) << "language = " << setprecision(indent) << m_language << '\n';
   strm << setw(indent-1) << setprecision(indent-2) << "}";
 }
 #endif
@@ -11385,6 +11421,8 @@ PBoolean H225_LocationConfirm::Decode(PASN_Stream & strm)
     return FALSE;
   if (!KnownExtensionDecode(strm, e_bandWidth, m_bandWidth))
     return FALSE;
+  if (!KnownExtensionDecode(strm, e_language, m_language))
+    return FALSE;
 
   return UnknownExtensionsDecode(strm);
 }
@@ -11416,6 +11454,7 @@ void H225_LocationConfirm::Encode(PASN_Stream & strm) const
   KnownExtensionEncode(strm, e_serviceControl, m_serviceControl);
   KnownExtensionEncode(strm, e_modifiedSrcInfo, m_modifiedSrcInfo);
   KnownExtensionEncode(strm, e_bandWidth, m_bandWidth);
+  KnownExtensionEncode(strm, e_language, m_language);
 
   UnknownExtensionsEncode(strm);
 }

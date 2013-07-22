@@ -4061,6 +4061,24 @@ class H225_ArrayOf_RasUsageSpecification : public PASN_Array
 
 
 //
+// RegistrationConfirm_language
+//
+
+class H225_RegistrationConfirm_language : public PASN_Array
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H225_RegistrationConfirm_language, PASN_Array);
+#endif
+  public:
+    H225_RegistrationConfirm_language(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    PASN_Object * CreateObject() const;
+    PASN_IA5String & operator[](PINDEX i) const;
+    PObject * Clone() const;
+};
+
+
+//
 // RegistrationRejectReason_invalidTerminalAliases
 //
 
@@ -4182,6 +4200,24 @@ class H225_LocationRequest_language : public PASN_Array
 #endif
   public:
     H225_LocationRequest_language(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    PASN_Object * CreateObject() const;
+    PASN_IA5String & operator[](PINDEX i) const;
+    PObject * Clone() const;
+};
+
+
+//
+// LocationConfirm_language
+//
+
+class H225_LocationConfirm_language : public PASN_Array
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H225_LocationConfirm_language, PASN_Array);
+#endif
+  public:
+    H225_LocationConfirm_language(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
 
     PASN_Object * CreateObject() const;
     PASN_IA5String & operator[](PINDEX i) const;
@@ -7028,7 +7064,8 @@ class H225_RegistrationConfirm : public PASN_Sequence
       e_genericData,
       e_assignedGatekeeper,
       e_rehomingModel,
-      e_transportQOS
+      e_transportQOS,
+      e_language
     };
 
     H225_RequestSeqNum m_requestSeqNum;
@@ -7058,6 +7095,7 @@ class H225_RegistrationConfirm : public PASN_Sequence
     H225_AlternateGK m_assignedGatekeeper;
     H225_RehomingModel m_rehomingModel;
     H225_TransportQOS m_transportQOS;
+    H225_RegistrationConfirm_language m_language;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);
@@ -7767,7 +7805,8 @@ class H225_LocationConfirm : public PASN_Sequence
       e_circuitInfo,
       e_serviceControl,
       e_modifiedSrcInfo,
-      e_bandWidth
+      e_bandWidth,
+      e_language
     };
 
     H225_RequestSeqNum m_requestSeqNum;
@@ -7791,6 +7830,7 @@ class H225_LocationConfirm : public PASN_Sequence
     H225_ArrayOf_ServiceControlSession m_serviceControl;
     H225_ArrayOf_AliasAddress m_modifiedSrcInfo;
     H225_BandWidth m_bandWidth;
+    H225_LocationConfirm_language m_language;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);
