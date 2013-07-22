@@ -131,6 +131,22 @@ class H235_KeyMaterial : public PASN_BitString
 
 
 //
+// KeyMaterialExt
+//
+
+class H235_KeyMaterialExt : public PASN_BitString
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H235_KeyMaterialExt, PASN_BitString);
+#endif
+  public:
+    H235_KeyMaterialExt(unsigned tag = UniversalBitString, TagClass tagClass = UniversalTagClass);
+
+    PObject * Clone() const;
+};
+
+
+//
 // NonStandardParameter
 //
 
@@ -167,6 +183,38 @@ class H235_DHset : public PASN_Sequence
 #endif
   public:
     H235_DHset(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    PASN_BitString m_halfkey;
+    PASN_BitString m_modSize;
+    PASN_BitString m_generator;
+
+    PINDEX GetDataLength() const;
+    PBoolean Decode(PASN_Stream & strm);
+    void Encode(PASN_Stream & strm) const;
+#ifndef PASN_NOPRINTON
+    void PrintOn(ostream & strm) const;
+#endif
+    Comparison Compare(const PObject & obj) const;
+    PObject * Clone() const;
+};
+
+
+//
+// DHsetExt
+//
+
+class H235_DHsetExt : public PASN_Sequence
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H235_DHsetExt, PASN_Sequence);
+#endif
+  public:
+    H235_DHsetExt(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    enum OptionalFields {
+      e_modSize,
+      e_generator
+    };
 
     PASN_BitString m_halfkey;
     PASN_BitString m_modSize;
@@ -906,6 +954,7 @@ class H235_H235CertificateSignature : public PASN_Sequence
 
 class H235_KeyMaterial;
 class H235_V3KeySyncMaterial;
+class H235_KeyMaterialExt;
 
 class H235_H235Key : public PASN_Choice
 {
@@ -919,7 +968,8 @@ class H235_H235Key : public PASN_Choice
       e_secureChannel,
       e_sharedSecret,
       e_certProtectedKey,
-      e_secureSharedSecret
+      e_secureSharedSecret,
+      e_secureChannelExt
     };
 
 #if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
@@ -945,6 +995,12 @@ class H235_H235Key : public PASN_Choice
 #else
     operator H235_V3KeySyncMaterial &();
     operator const H235_V3KeySyncMaterial &() const;
+#endif
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+    operator H235_KeyMaterialExt &() const;
+#else
+    operator H235_KeyMaterialExt &();
+    operator const H235_KeyMaterialExt &() const;
 #endif
 
     PBoolean CreateObject();
@@ -976,7 +1032,8 @@ class H235_ClearToken : public PASN_Sequence
       e_eckasdhkey,
       e_sendersID,
       e_h235Key,
-      e_profileInfo
+      e_profileInfo,
+      e_dhkeyext
     };
 
     PASN_ObjectId m_tokenOID;
@@ -992,6 +1049,7 @@ class H235_ClearToken : public PASN_Sequence
     H235_Identifier m_sendersID;
     H235_H235Key m_h235Key;
     H235_ArrayOf_ProfileElement m_profileInfo;
+    H235_DHsetExt m_dhkeyext;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);
