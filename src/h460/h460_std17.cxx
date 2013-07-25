@@ -1228,7 +1228,7 @@ PBoolean H46026UDPSocket::BuildTunnelMediaPacket(const void * buf, PINDEX len)
         information.m_genericData.SetSize(1);
         H225_GenericData & data = information.m_genericData[0];
 
-        H460_FeatureStd feat = H460_FeatureStd(17);
+        H460_FeatureStd feat = H460_FeatureStd(26);
         PASN_OctetString encFrame;
         encFrame.EncodeSubType(*m_frame);
         feat.Add(1,H460_FeatureContent(encFrame));
