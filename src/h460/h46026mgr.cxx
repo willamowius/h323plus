@@ -522,7 +522,7 @@ PBoolean H46026ChannelManager::SocketOut(BYTE * data, PINDEX len)
         if (m_socketQueue.size() > 0) {
             m_currentPacketTime = nowTime + m_socketQueue.top().second.delay;
             len = m_socketQueue.top().first.GetSize();
-            memcpy(data,m_socketQueue.top().first.GetPointer(), len);
+            memcpy(data, m_socketQueue.top().first, len);
             m_socketQueue.pop();
             gotPacket = true;
         } else {
