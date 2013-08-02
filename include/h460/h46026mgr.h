@@ -136,6 +136,7 @@ public:
         Pointer autoDeletes if not deleted and set to NULL by implementer.
      */
     virtual void SignalMsgIn(Q931 * /*pdu*/);
+    virtual void SignalMsgIn(const PString & /*callid*/, Q931 * /*pdu*/) {};
 
     /* Retrieve an RTP/RTCP Frame. The sessionID is the id of the session
      */
@@ -156,8 +157,8 @@ public:
 
     /* Post an RTP/RTCP Frame. Need to specify the basic packet type, sessionID and whether RTP or RTCP packet
      */
-    PBoolean RTPFrameOut(const PString & callId, PacketTypes id, PINDEX sessionId, PBoolean rtp, BYTE * data, PINDEX len);
-    PBoolean RTPFrameOut(const PString & callId, PacketTypes id, PINDEX sessionId, PBoolean rtp, PBYTEArray & data);
+    PBoolean RTPFrameOut(unsigned crv, const PString & callId, PacketTypes id, PINDEX sessionId, PBoolean rtp, BYTE * data, PINDEX len);
+    PBoolean RTPFrameOut(unsigned crv, const PString & callId, PacketTypes id, PINDEX sessionId, PBoolean rtp, PBYTEArray & data);
 
     /* Collect an incoming to send to the socket.
         if the function return 
@@ -181,7 +182,7 @@ protected:
     PBoolean WriteQueue(const Q931 & msg, const socketOrder::MessageHeader & prior);
     PBoolean WriteQueue(const PBYTEArray & data, const socketOrder::MessageHeader & prior);
 
-    PBoolean PackageFrame(PBoolean rtp, const PString & callId, PacketTypes id, PINDEX sessionId, H46026_UDPFrame & data);
+    PBoolean PackageFrame(PBoolean rtp, unsigned crv, const PString & callId, PacketTypes id, PINDEX sessionId, H46026_UDPFrame & data);
     H46026UDPBuffer * GetRTPBuffer(const PString & callId, int sessionId);
 
     PBoolean ProcessQueue();
