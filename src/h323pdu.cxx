@@ -631,6 +631,9 @@ H225_Setup_UUIE & H323SignalPDU::BuildSetup(const H323Connection & connection,
   if (SetH225Version(connection, setup.m_protocolIdentifier) < 3) {
     setup.RemoveOptionalField(H225_Setup_UUIE::e_multipleCalls);
     setup.RemoveOptionalField(H225_Setup_UUIE::e_maintainConnection);
+  } else if (connection.IsMaintainedConnection()) {
+    setup.IncludeOptionalField(H225_Setup_UUIE::e_maintainConnection);
+    setup.m_maintainConnection = true;   
   }
 
   setup.IncludeOptionalField(H225_Setup_UUIE::e_sourceAddress);
@@ -707,6 +710,9 @@ H225_CallProceeding_UUIE &
   if (SetH225Version(connection, proceeding.m_protocolIdentifier) < 3) {
     proceeding.RemoveOptionalField(H225_CallProceeding_UUIE::e_multipleCalls);
     proceeding.RemoveOptionalField(H225_CallProceeding_UUIE::e_maintainConnection);
+  } else if (connection.IsMaintainedConnection()) {
+    proceeding.IncludeOptionalField(H225_CallProceeding_UUIE::e_maintainConnection);
+    proceeding.m_maintainConnection = true;   
   }
 
   proceeding.m_callIdentifier.m_guid = connection.GetCallIdentifier();
@@ -739,6 +745,9 @@ H225_Connect_UUIE & H323SignalPDU::BuildConnect(const H323Connection & connectio
   if (SetH225Version(connection, connect.m_protocolIdentifier) < 3) {
     connect.RemoveOptionalField(H225_Connect_UUIE::e_multipleCalls);
     connect.RemoveOptionalField(H225_Connect_UUIE::e_maintainConnection);
+  } else if (connection.IsMaintainedConnection()) {
+    connect.IncludeOptionalField(H225_Connect_UUIE::e_maintainConnection);
+    connect.m_maintainConnection = true;   
   }
   connect.m_callIdentifier.m_guid = connection.GetCallIdentifier();
   connect.m_conferenceID = connection.GetConferenceIdentifier();
@@ -788,6 +797,9 @@ H225_Alerting_UUIE & H323SignalPDU::BuildAlerting(const H323Connection & connect
   if (SetH225Version(connection, alerting.m_protocolIdentifier) < 3) {
     alerting.RemoveOptionalField(H225_Alerting_UUIE::e_multipleCalls);
     alerting.RemoveOptionalField(H225_Alerting_UUIE::e_maintainConnection);
+  } else if (connection.IsMaintainedConnection()) {
+    alerting.IncludeOptionalField(H225_Alerting_UUIE::e_maintainConnection);
+    alerting.m_maintainConnection = true;   
   }
 
   alerting.m_callIdentifier.m_guid = connection.GetCallIdentifier();

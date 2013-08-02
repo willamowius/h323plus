@@ -599,6 +599,12 @@ H323Connection::H323Connection(H323EndPoint & ep,
   m_h4609enabled = false;
   m_h4609Final = false;
 #endif
+#ifdef H323_H46017
+  m_maintainConnection = ep.RegisteredWithH46017();
+#else
+  m_maintainConnection = false;
+#endif
+
 #ifdef H323_H46018
   m_H46019CallReceiver = false;
   m_H46019enabled = false;
@@ -7321,6 +7327,11 @@ PBoolean H323Connection::HasVideoFrameBuffer()
     return endpoint.HasVideoFrameBuffer();
 }
 #endif
+
+PBoolean H323Connection::IsMaintainedConnection() const
+{ 
+   return m_maintainConnection;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 

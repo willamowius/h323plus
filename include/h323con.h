@@ -3127,6 +3127,10 @@ class H323Connection : public PObject
     PBoolean HasVideoFrameBuffer();
 #endif
 
+    /** Whether the current connection is a maintained Signalling connection
+      */
+    PBoolean IsMaintainedConnection() const;
+
   protected:
     /**Internal function to check if call established.
        This checks all the criteria for establishing a call an initiating the
@@ -3356,6 +3360,8 @@ class H323Connection : public PObject
 #ifdef H323_H248
     H323Dictionary<POrdinalKey, H323ServiceControlSession> serviceControlSessions;
 #endif
+
+    PBoolean m_maintainConnection;
 
 #ifdef H323_H460
     PBoolean disableH460;

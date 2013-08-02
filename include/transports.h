@@ -41,6 +41,9 @@
 #include <ptlib/sockets.h>
 #include "ptlib_extras.h"
 
+#ifdef H323_TLS
+#include <ptclib/pssl.h>
+#endif
 
 class H225_Setup_UUIE;
 class H225_TransportAddress;
@@ -285,6 +288,23 @@ void H323SetTransportAddresses(
    A "transport" is an object that listens for incoming connections on the
    particular transport.
  */
+#ifdef H323_TLS
+class H323Transport : public PSSLChannel
+{
+  PCLASSINFO(H323Transport, PSSLChannel);
+
+  public:
+  /**@name Construction */
+  //@{
+    /**Create a new transport channel.
+     */
+    H323Transport(H323EndPoint & endpoint,
+                  PSSLContext * context = NULL,   ///< Context for SSL channel
+                  PBoolean autoDeleteContext = false  ///< Flag for context to be automatically deleted.
+    );
+    ~H323Transport();
+  //@}
+#else
 class H323Transport : public PIndirectChannel
 {
   PCLASSINFO(H323Transport, PIndirectChannel);
@@ -297,7 +317,7 @@ class H323Transport : public PIndirectChannel
     H323Transport(H323EndPoint & endpoint);
     ~H323Transport();
   //@}
-
+#endif
   /**@name Overrides from PObject */
   //@{
     virtual void PrintOn(
@@ -333,6 +353,22 @@ class H323Transport : public PIndirectChannel
     PBoolean ConnectTo(
       const H323TransportAddress & address
     ) { return SetRemoteAddress(address) && Connect(); }
+
+
+    /**Low level read from the channel.
+     */
+    virtual PBoolean Read(
+      void * buf,   ///< Pointer to a block of memory to receive the read bytes.
+      PINDEX len    ///< Maximum number of bytes to read into the buffer.
+    );
+
+    /**Low level write to the channel. 
+     */
+    virtual PBoolean Write(
+      const void * buf, ///< Pointer to a block of memory to write.
+      PINDEX len        ///< Number of bytes to write.
+    );
+
 
     /**Close the channel.
       */
@@ -505,6 +541,10 @@ class H323Transport : public PIndirectChannel
     H323EndPoint & endpoint;    /// Endpoint that owns the listener.
     PThread      * thread;      /// Thread handling the transport
     PBoolean canGetInterface;
+
+#ifdef H323_TLS
+    PBoolean    isSecure;
+#endif
 };
 
 
@@ -522,10 +562,15 @@ class H323TransportIP : public H323Transport
   public:
     /**Create a new transport channel.
      */
+
     H323TransportIP(
       H323EndPoint & endpoint,    ///<  H323 End Point object
       PIPSocket::Address binding, ///<  Local interface to use
       WORD remPort                ///<  Remote port to use
+#ifdef H323_TLS
+      ,PSSLContext * context = NULL,   ///< Context for SSL channel
+      PBoolean autoDeleteContext = false  ///< Flag for context to be automatically deleted.
+#endif
     );
 
     /**Get the transport dependent name of the local endpoint.
@@ -649,6 +694,10 @@ class H323TransportTCP : public H323TransportIP
       H323EndPoint & endpoint,    ///<  H323 End Point object
       PIPSocket::Address binding = PIPSocket::GetDefaultIpAny(), ///<  Local interface to use
       PBoolean listen = FALSE         ///<  Flag for need to wait for remote to connect
+#ifdef H323_TLS
+      ,PSSLContext * context = NULL,   ///< Context for SSL channel
+      PBoolean autoDeleteContext = false  ///< Flag for context to be automatically deleted.
+#endif
     );
 
     /**Destroy transport channel.

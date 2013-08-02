@@ -67,6 +67,10 @@
 #include "h460/h460_std23.h"
 #endif
 
+#ifdef H323_H46026
+#include "h460/h460_std26.h"
+#endif
+
 #ifdef H323_UPnP
 #include "h460/upnpcp.h"
 #endif
@@ -495,6 +499,7 @@ H323EndPoint::H323EndPoint()
 
 #ifdef H323_H46017
   m_registeredWithH46017 = false;	// set to true when gatekeeper accepts it
+  m_h46017Transport = NULL;
 #endif
 
 #ifdef H323_H46018
@@ -1418,6 +1423,12 @@ H323Connection * H323EndPoint::InternalMakeCall(const PString & trasferFromToken
     PTRACE(2, "H323\tCould not parse \"" << remoteParty << '"');
     return NULL;
   }
+
+#ifdef H323_H46017
+  // If H.460.17 use the existing H.460.17 Transport
+  if (transport == NULL && RegisteredWithH46017())
+      transport = GetH46017Transport();
+#endif
 
   if (transport == NULL) {
     // Restriction: the call must be made on the same transport as the one
@@ -3385,20 +3396,20 @@ void H323EndPoint::LoadBaseFeatureSet()
 PBoolean H323EndPoint::H46017CreateConnection(const PString & gatekeeper, PBoolean useSRV)
 {
    m_registeredWithH46017 = false;
-   registrationTimeToLive = PTimeInterval(0, 19);
    H460_FeatureStd17 * h46017 = (H460_FeatureStd17 *)features.GetFeature(17);
-
    if(!h46017) {
        PTRACE(4, "Can't create H.460.17 feature - plugin loaded ?");
        return false;
    }
 
-   if(!h46017->Initialise(gatekeeper, useSRV)) {
+   registrationTimeToLive = PTimeInterval(0, 19);
+   m_registeredWithH46017 = h46017->Initialise(gatekeeper, useSRV, m_h46017Transport);
+   if (!m_registeredWithH46017) {
        PTRACE(4, "H.460.17 Gatekeeper connection failed");
        return false;
    }
-   m_registeredWithH46017 = true;	// TODO: reset when switching to another gatekeeper
 
+   // We are registered so we need to create the media tunnelling. 
 #ifdef H323_H46026
      H460_FeatureStd26 * h46026 = (H460_FeatureStd26 *)features.GetFeature(26);
      if (h46026) {

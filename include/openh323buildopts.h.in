@@ -103,6 +103,7 @@
   #ifdef H323_H235
     #undef H323_H235_AES256
   #endif
+  #undef H323_TLS
 #endif
 #ifdef P_VIDEO
 #undef H323_H239

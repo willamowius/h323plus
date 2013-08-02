@@ -776,8 +776,13 @@ void H323Listener::PrintOn(ostream & strm) const
 
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef H323_TLS
+H323Transport::H323Transport(H323EndPoint & end, PSSLContext * context, PBoolean autoDeleteContext)
+  : PSSLChannel(context, autoDeleteContext), endpoint(end), isSecure(context != NULL)
+#else
 H323Transport::H323Transport(H323EndPoint & end)
   : endpoint(end)
+#endif
 {
   thread = NULL;
   canGetInterface = FALSE;
@@ -799,6 +804,25 @@ void H323Transport::PrintOn(ostream & strm) const
   strm << "if=" << GetLocalAddress() << ']';
 }
 
+PBoolean H323Transport::Read(void * buf, PINDEX len)
+{
+#ifdef H323_TLS
+    if (isSecure)
+        return PSSLChannel::Read(buf,len);
+    else
+#endif
+        return PIndirectChannel::Read(buf,len);
+}
+
+PBoolean H323Transport::Write(const void * buf, PINDEX len)
+{
+#ifdef H323_TLS
+    if (isSecure)
+        return PSSLChannel::Write(buf,len);
+    else
+#endif
+        return PIndirectChannel::Write(buf,len);
+}
 
 PBoolean H323Transport::Close()
 {
@@ -1124,8 +1148,13 @@ void H323ListenerTCP::Main()
 
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef H323_TLS
+H323TransportIP::H323TransportIP(H323EndPoint & end, PIPSocket::Address binding, WORD remPort, PSSLContext * context, PBoolean autoDeleteContext)
+  : H323Transport(end, context, autoDeleteContext),
+#else
 H323TransportIP::H323TransportIP(H323EndPoint & end, PIPSocket::Address binding, WORD remPort)
   : H323Transport(end),
+#endif
     localAddress(binding),
     remoteAddress(0)
 {
@@ -1196,10 +1225,20 @@ void H323TransportIP::SetUpTransportPDU(H245_TransportAddress & pdu, unsigned po
 
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef H323_TLS
+H323TransportTCP::H323TransportTCP(H323EndPoint & end,
+                                   PIPSocket::Address binding,
+                                   PBoolean listen,
+                                   PSSLContext * context, 
+                                   PBoolean autoDeleteContext
+                                   )
+  : H323TransportIP(end, binding, H323EndPoint::DefaultTcpPort, context, autoDeleteContext)
+#else
 H323TransportTCP::H323TransportTCP(H323EndPoint & end,
                                    PIPSocket::Address binding,
                                    PBoolean listen)
   : H323TransportIP(end, binding, H323EndPoint::DefaultTcpPort)
+#endif
 {
   h245listener = NULL;
 
