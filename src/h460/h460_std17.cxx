@@ -85,25 +85,6 @@ static PBoolean FindRoutes(const PString & domain, std::vector<LookupRecord> & r
   return routes.size() != 0;
 }
 
-#define CallIdentifier(name) \
-if (pdu.GetQ931().GetMessageType() == Q931::name##Msg) { \
-    const H225_##name##_UUIE & msg = pdu.m_h323_uu_pdu.m_h323_message_body; \
-    return msg.m_callIdentifier.m_guid.AsString(); \
-}
-
-PString GetCallIdentifer(const H323SignalPDU & pdu)
-{
-    CallIdentifier(Setup)
-    CallIdentifier(Alerting)
-    CallIdentifier(CallProceeding)
-    CallIdentifier(Connect)
-    CallIdentifier(Progress)
-    CallIdentifier(ReleaseComplete)
-    CallIdentifier(Information)
-    CallIdentifier(Facility)
-    return PString();
-}
-
 ///////////////////////////////////////////////////////////////////////////////////
 // Must Declare for Factory Loader.
 H460_FEATURE(Std17);
@@ -402,20 +383,20 @@ PBoolean H46017Transport::HandleH46017RAS(const H323SignalPDU & pdu)
 PBoolean H46017Transport::HandleH46017SignallingPDU(unsigned crv, H323SignalPDU & pdu)
 {
   H323Connection * connection = NULL;
-  PString callid = GetCallIdentifer(pdu);
+  //PString callid = GetCallIdentifer(pdu);
   if ((pdu.GetQ931().GetMessageType() == Q931::SetupMsg))
       connection = HandleH46017SetupPDU(pdu);
   else {
     connectionsMutex.Wait();
     for (PINDEX i = 0; i < endpoint.GetConnections().GetSize(); i++) {
         H323Connection & conn = endpoint.GetConnections().GetDataAt(i);
-        if (conn.GetCallIdentifier().AsString() == callid)
+        if (conn.GetCallReference() == crv)
             connection = &conn;
     }
     connectionsMutex.Signal();
   }
   if (!connection) {
-      PTRACE(2, "H46017\tConnection " << callid << " not found or could not process. Q931 not processed.");
+      PTRACE(2, "H46017\tConnection " << crv << " not found or could not process. Q931 not processed.");
       return true;
   }   
   if (!connection->HandleReceivedSignalPDU(true, pdu)) {
@@ -531,6 +512,7 @@ PBoolean H46017Transport::Close()
 void H46017Transport::CleanUpOnTermination()
 {
   // Do nothing at the end of a call. This is a permanent connection
+  PTRACE(4, "H46017\tIgnore cleanup of H46017 NAT channel.");  
 }
 
 PBoolean H46017Transport::IsOpen () const
