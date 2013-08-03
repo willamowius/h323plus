@@ -529,7 +529,7 @@ class H323Transport : public PIndirectChannel
 
     /**Wait for associated thread to terminate.
       */
-    void CleanUpOnTermination();
+    virtual void CleanUpOnTermination();
 
     /**Get Error Code
        Default calls PChannel::GetErrorCode(ErrorGroup group)
