@@ -163,14 +163,15 @@ const static struct {
     const BYTE * dh_p;
     const BYTE * dh_g;
     unsigned     sz;
+    unsigned     cipher;
     unsigned     send;
 } H235_DHParameters[] = {
 #ifdef H323_H235_AES256
-     { OID_DH4096,  DH4096_P, DH4096_G, DH4096_SZ, 0 },
-     { OID_DH2048,  DH2048_P, DH2048_G, DH2048_SZ, 0 },
+     { OID_DH4096,  DH4096_P, DH4096_G, DH4096_SZ, 256, 0 },
+     { OID_DH2048,  DH2048_P, DH2048_G, DH2048_SZ, 256, 0 },
 #endif
-     { OID_DH1024,  DH1024_P, DH1024_G, DH1024_SZ, 1 },
-     { OID_H235V3,  NULL    , NULL    , DHNULL   , 0 }
+     { OID_DH1024,  DH1024_P, DH1024_G, DH1024_SZ, 128, 1 },
+     { OID_H235V3,  NULL    , NULL    , DHNULL , 0  , 0 }
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -209,7 +210,7 @@ const static struct {
     const char * DHparameters;
 } H235_Algorithms[] = {
 #ifdef H323_H235_AES256
-//   { ID_AES256, OID_DH4096 },
+    { ID_AES256, OID_DH4096 },
     { ID_AES256, OID_DH2048 },
  // { ID_AES192, OID_DH2048 },
 #endif

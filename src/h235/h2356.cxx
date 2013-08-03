@@ -114,12 +114,12 @@ void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, const PString & fi
     // if not loaded from File then create.
     for (PINDEX i = 0; i < PARRAYSIZE(H235_DHParameters); ++i) {
       if (dhmap.find(H235_DHParameters[i].parameterOID) == dhmap.end()) {
-        if (H235_DHParameters[i].sz > 0 && H235_DHParameters[i].sz <= cipherlength) {
+        if (H235_DHParameters[i].sz > 0 && H235_DHParameters[i].cipher <= cipherlength) {
            dhmap.insert(pair<PString, H235_DiffieHellman*>(H235_DHParameters[i].parameterOID,
                   new H235_DiffieHellman(H235_DHParameters[i].dh_p, H235_DHParameters[i].sz,
                                          H235_DHParameters[i].dh_g, H235_DHParameters[i].sz,
                                          H235_DHParameters[i].send)) );
-        } else if (H235_DHParameters[i].sz == 0) {
+        } else if (H235_DHParameters[i].cipher == 0) {
            dhmap.insert(pair<PString, H235_DiffieHellman*>(H235_DHParameters[i].parameterOID, (H235_DiffieHellman*)NULL));
         } else
            continue;  // Ignore ciphers greater that cipherlength
