@@ -93,19 +93,6 @@ void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, const PString & fi
           if (PFile::Exists(dhFile)) 
               FilePaths.AppendString(dhFile);
       }
-    } else {
-      char * env = ::getenv("H323_H235_DH");
-      if (env != NULL) {
-        const char * token = strtok(env, ";");
-          while (token != NULL) {
-            PFilePath dhFile = PString(token);
-            if (PFile::Exists(dhFile)) 
-              FilePaths.AppendString(dhFile);
-            else
-              PTRACE(1, "Error: DH key file not found: " << dhFile);
-            token = strtok(NULL, ";");
-          }
-      }
     }
   
     int i=0;
