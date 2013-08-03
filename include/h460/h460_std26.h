@@ -1,6 +1,6 @@
 
 /*
- * h460_std26.cxx
+ * h460_std26.h
  *
  * H46026 Media Tunneling class.
  *
