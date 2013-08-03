@@ -121,6 +121,9 @@ PBoolean ReadEncryptionSync(const H245_EncryptionSync & sync, H323SecureRTPChann
         case H235_H235Key::e_secureChannel:
             PTRACE(4,"H235Key\tSecureChannel not supported");
             return false;
+        case H235_H235Key::e_secureChannelExt:
+            PTRACE(4,"H235Key\tSecureChannelExt not supported");
+            return false;
         case H235_H235Key::e_sharedSecret:
             PTRACE(4,"H235Key\tShared Secret not supported");
             return false;

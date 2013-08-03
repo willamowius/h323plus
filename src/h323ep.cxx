@@ -42,6 +42,10 @@
 #include "h323ep.h"
 #include "h323pdu.h"
 
+#ifdef H323_H235
+#include "h235/h2356.h"
+#endif
+
 #ifdef H323_H450
 #include "h450/h450pdu.h"
 #endif

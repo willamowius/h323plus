@@ -46,7 +46,6 @@
 #include "h235auth.h"
 #ifdef H323_H235
 #include "h235/h235caps.h"
-#include "h235/h2356.h"
 #else
 #include "h323caps.h"
 #endif

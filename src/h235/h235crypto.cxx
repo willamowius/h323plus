@@ -43,8 +43,7 @@
 #include "h323con.h"
 #include "h235/h235crypto.h"
 #include "h235/h235caps.h"
-#include "h235/h2351.h"
-#include "h235/h2356.h"
+#include "h235/h235support.h"
 #include <openssl/rand.h>
 
 #include "rtp.h"

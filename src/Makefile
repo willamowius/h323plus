@@ -156,10 +156,12 @@ HEADER_FILES	+= $(OH323_INCDIR)/h235/h2351.h \
                    $(OH323_INCDIR)/h235/h2356.h \
                    $(OH323_INCDIR)/h235/h235caps.h \
                    $(OH323_INCDIR)/h235/h235chan.h \
+                   $(OH323_INCDIR)/h235/h235support.h \
                    $(OH323_INCDIR)/h235/h235crypto.h
 COMMON_SOURCES	+= $(OH323_SRCDIR)/h235/h2356.cxx \
                    $(OH323_SRCDIR)/h235/h235caps.cxx \
                    $(OH323_SRCDIR)/h235/h235chan.cxx \
+                   $(OH323_SRCDIR)/h235/h235support.cxx \
                    $(OH323_SRCDIR)/h235/h235crypto.cxx
 endif
 
