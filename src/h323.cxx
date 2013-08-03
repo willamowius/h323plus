@@ -651,7 +651,9 @@ H323Connection::~H323Connection()
 #ifdef H323_T38
   delete t38handler;
 #endif
-  delete signallingChannel;
+  if (!m_maintainConnection)
+    delete signallingChannel;
+
   delete controlChannel;
   delete alertingPDU;
   delete connectPDU;
