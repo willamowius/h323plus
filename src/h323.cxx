@@ -6657,8 +6657,8 @@ void H323Connection::MonitorCallStatus()
 
 #ifdef P_STUN
 
-H323Connection::SessionInformation::SessionInformation(const OpalGloballyUniqueID & id, const PString & token, unsigned session, const H323Connection * conn)
-: m_callID(id), m_callToken(token), m_sessionID(session), m_recvMultiID(0), m_sendMultiID(0), m_connection(conn)
+H323Connection::SessionInformation::SessionInformation(const OpalGloballyUniqueID & id, unsigned crv, const PString & token, unsigned session, const H323Connection * conn)
+: m_callID(id), m_crv(crv), m_callToken(token), m_sessionID(session), m_recvMultiID(0), m_sendMultiID(0), m_connection(conn)
 {
 
 #ifdef H323_H46019M
@@ -6674,6 +6674,11 @@ H323Connection::SessionInformation::SessionInformation(const OpalGloballyUniqueI
 #else
     m_CUI = PString();
 #endif
+}
+
+unsigned H323Connection::SessionInformation::GetCallReference()
+{
+    return m_crv;
 }
 
 const PString & H323Connection::SessionInformation::GetCallToken()
@@ -6698,7 +6703,7 @@ unsigned H323Connection::SessionInformation::GetRecvMultiplexID() const
 
 H323Connection::SessionInformation * H323Connection::BuildSessionInformation(unsigned sessionID) const
 {
-    return new SessionInformation(GetCallIdentifier(),GetCallToken(),sessionID, this);
+    return new SessionInformation(GetCallIdentifier(),GetCallReference(),GetCallToken(),sessionID, this);
 }
 
 const OpalGloballyUniqueID & H323Connection::SessionInformation::GetCallIdentifer()

@@ -2827,7 +2827,9 @@ class H323Connection : public PObject
     class SessionInformation : public PObject
     {
         public:
-            SessionInformation(const OpalGloballyUniqueID & id, const PString & token, unsigned session, const H323Connection * connection);
+            SessionInformation(const OpalGloballyUniqueID & id, unsigned crv, const PString & token, unsigned session, const H323Connection * connection);
+
+            unsigned GetCallReference();
 
             const PString & GetCallToken();
 
@@ -2845,6 +2847,7 @@ class H323Connection : public PObject
 
         protected:
             OpalGloballyUniqueID m_callID;
+            unsigned m_crv;
             PString m_callToken;
             unsigned m_sessionID;
             unsigned m_recvMultiID;
