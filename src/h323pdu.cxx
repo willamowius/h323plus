@@ -682,6 +682,21 @@ H225_Setup_UUIE & H323SignalPDU::BuildSetup(const H323Connection & connection,
   return setup;
 }
 
+#ifdef H323_H46017
+void H323SignalPDU::LoadTunneledQ931(const Q931 & q931)
+{
+  SetQ931(q931);
+
+  PPER_Stream strm = q931pdu.GetIE(Q931::UserUserIE);
+  if (!Decode(strm)) {
+    PTRACE(1, "H225\tRead error: PER decode failure in Q.931 User-User Information Element,");
+    m_h323_uu_pdu.m_h323_message_body.SetTag(H225_H323_UU_PDU_h323_message_body::e_empty);
+    return;
+  }
+  PTRACE(5 ,"H225\t", "Tunneled PDU\n" << *this);
+}
+#endif
+
 #ifndef DISABLE_CALLAUTH
 void H323SignalPDU::InsertCryptoTokensSetup(const H323Connection & connection, H225_Setup_UUIE & setup)
 {

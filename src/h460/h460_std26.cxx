@@ -49,36 +49,7 @@
 #include <h460/h460.h> 
 #include <h460/h46026.h>
 #include <h460/h460_std26.h>
-#include <h460/h46026mgr.h>
-
 #include <h460/h460_std17.h>
-
-#undef PACKET_ANALYSIS
-#undef LOCAL_FASTUPDATE
-
-#define REC_FRAME_RATE       15.0
-#define REC_FRAME_TIME       (1.0/REC_FRAME_RATE) * 1000
-#define MAX_STACK_DESCRETION  REC_FRAME_TIME * 2
-#define FAST_UPDATE_INTERVAL  REC_FRAME_TIME * 3
-
-/////////////////////////////////////////////////////////////////////////////////
-
-#ifdef PACKET_ANALYSIS
-static void AnalysePacket(PBoolean out, int session, const RTP_DataFrame & frame)
-{
-    PTRACE(1, "RTP\t" << (out ? "> " : "< ")
-           << " s=" << session
-           << " ver=" << frame.GetVersion()
-           << " pt=" << frame.GetPayloadType()
-           << " psz=" << frame.GetPayloadSize()
-           << " m=" << frame.GetMarker()
-           << " x=" << frame.GetExtension()
-           << " seq=" << frame.GetSequenceNumber()
-           << " ts=" << frame.GetTimestamp()
-           << " src=" << frame.GetSyncSource()
-           << " ccnt=" << frame.GetContribSrcCount());
-}
-#endif // PACKET_ANALYSIS
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -88,7 +59,7 @@ PBoolean H460_FeatureStd26::isSupported = false;
 H460_FeatureStd26::H460_FeatureStd26()
 : H460_FeatureStd(26), EP(NULL), CON(NULL), handler(NULL), isEnabled(false)
 {
-  	 FeatureCategory = FeatureSupported;
+       FeatureCategory = FeatureSupported;
 }
 
 H460_FeatureStd26::~H460_FeatureStd26()
@@ -118,10 +89,19 @@ int H460_FeatureStd26::GetPurpose()
 }
 
 
-void H460_FeatureStd26::AttachHandler(H46017Handler * m_handler)
+void H460_FeatureStd26::AttachH46017(H46017Handler * m_handler, H323Transport * transport)
 {
     handler = m_handler;
+
+    if (PIsDescendant(transport,H46017Transport))
+        ((H46017Transport *)transport)->SetTunnel(&h46026mgr);
+
     isSupported = true;
+}
+
+H46026Tunnel * H460_FeatureStd26::GetTunnel()
+{
+    return &h46026mgr;
 }
 
 PBoolean H460_FeatureStd26::FeatureAdvertised(int mtype)
@@ -145,11 +125,11 @@ PBoolean H460_FeatureStd26::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
     if (!handler)  // if no h46017 handler then no H460.26 support.
         return false;
 
-	// Build Message
+    // Build Message
     H460_FeatureStd feat = H460_FeatureStd(26); 
     pdu = feat;
 
-	return true;
+    return true;
 }
 
 void H460_FeatureStd26::OnReceiveAdmissionConfirm(const H225_FeatureDescriptor & pdu)
@@ -170,7 +150,7 @@ PBoolean H460_FeatureStd26::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
     if (!isEnabled)
         return false;
 
-	// Build Message
+    // Build Message
     H460_FeatureStd feat = H460_FeatureStd(26); 
     pdu = feat;
    
@@ -190,11 +170,11 @@ PBoolean H460_FeatureStd26::OnSendCallProceeding_UUIE(H225_FeatureDescriptor & p
     if (!isEnabled)
         return false;
 
-	// Build Message
+    // Build Message
     H460_FeatureStd feat = H460_FeatureStd(26); 
     pdu = feat;
 
-	return true;
+    return true;
 }
 
 void H460_FeatureStd26::OnReceiveCallProceeding_UUIE(const H225_FeatureDescriptor & pdu)
@@ -207,11 +187,11 @@ PBoolean H460_FeatureStd26::OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu)
     if (!isEnabled)
         return false;
 
-	// Build Message
+    // Build Message
     H460_FeatureStd feat = H460_FeatureStd(26); 
     pdu = feat;
 
-	return true;
+    return true;
 }
 
 void H460_FeatureStd26::OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pdu)
@@ -224,11 +204,11 @@ PBoolean H460_FeatureStd26::OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu)
     if (!isEnabled)
         return false;
 
-	// Build Message
+    // Build Message
     H460_FeatureStd feat = H460_FeatureStd(26); 
     pdu = feat;
 
-	return true;
+    return true;
 }
 
 void H460_FeatureStd26::OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor & pdu)
@@ -287,10 +267,10 @@ void PNatMethod_H46026::AttachEndPoint(H323EndPoint * ep)
 
 bool PNatMethod_H46026::IsAvailable(const PIPSocket::Address&) 
 { 
-    return (handler && handler->IsH46026Tunnel()); 
+    return (handler != NULL); 
 }
 
-void PNatMethod_H46026::AttachHandler(H46017Handler * m_handler)
+void PNatMethod_H46026::AttachManager(H46026Tunnel * m_handler)
 {
     handler = m_handler;
 }
@@ -320,70 +300,46 @@ PBoolean PNatMethod_H46026::CreateSocketPair(
     return TRUE;
 }
 
-void PNatMethod_H46026::SetInformationHeader(PUDPSocket & data, PUDPSocket & control, 
-                                         H323Connection::SessionInformation * info)
-{
-    if (!handler || handler->GetEndPoint() == NULL)
-        return;
-
-    const H323Transport * transport = NULL;
-    H323SignalPDU informationMsg;
-    H323Connection * connection = PRemoveConst(H323Connection, info->GetConnection());
-    if (connection != NULL) {
-        informationMsg.BuildInformation(*connection);
-        transport = connection->GetSignallingChannel();
-    }
-
-    ((H46026UDPSocket &)data).SetInformationHeader(informationMsg, transport);
-    ((H46026UDPSocket &)control).SetInformationHeader(informationMsg, transport);
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-H46026UDPSocket::H46026UDPSocket(H46017Handler & _handler, H323Connection::SessionInformation * info, bool _rtpSocket)
-: m_transport(NULL), m_Session(info->GetSessionID()), rtpSocket(_rtpSocket), m_frameCount(0), m_payloadSize(0), m_frame(NULL), shutDown(false)
+H46026UDPSocket::H46026UDPSocket(H46026Tunnel & _handler, H323Connection::SessionInformation * info, bool _rtpSocket)
+: m_transport(_handler), m_crv(info->GetCallReference()), m_session(info->GetSessionID()), m_rtpSocket(_rtpSocket), m_shutdown(false)
 {
 }
 
 H46026UDPSocket::~H46026UDPSocket()
 {
-    shutDown = true;
-    writeMutex.Wait();
-      while (!rtpQueue.empty()) {
-        delete rtpQueue.front();
-        rtpQueue.pop();
-      }
-    writeMutex.Signal();
-    delete m_frame;
+   PWaitAndSignal m(m_rtpMutex);
+
+   PTRACE(4, "Closing c: " << m_crv << " s: " << m_session
+                << " "  << (m_rtpSocket ? "RTP" : "RTCP"));
+
+   m_shutdown = true;
+   while (!m_rtpQueue.empty()) {
+       delete m_rtpQueue.front();
+       m_rtpQueue.pop();
+   }
 }
 
-void H46026UDPSocket::SetInformationHeader(const H323SignalPDU & _InformationMsg, const H323Transport * _transport)
+PBoolean H46026UDPSocket::WriteBuffer(const PBYTEArray & buffer)
 {
-    msg = _InformationMsg;
-    m_transport = (H46017Transport *)PRemoveConst(H323Transport,_transport);
-}
+    PWaitAndSignal m(m_rtpMutex);
 
-PBoolean H46026UDPSocket::WriteBuffer(const void * buf, PINDEX len)
-{
-    PWaitAndSignal m(writeMutex);
-    
-    if (!shutDown) {
-         rtpQueue.push(new PBYTEArray((BYTE *)buf,len));
-         return true;
-    } else
-         return false;
+    if (!m_shutdown)
+        m_rtpQueue.push(new PBYTEArray((const BYTE *)buffer,buffer.GetSize()));
+    return true;
 }
 
 PBoolean H46026UDPSocket::DoPseudoRead(int & selectStatus)
 {
-   PAdaptiveDelay selectBlock;
-   while (rtpSocket && rtpQueue.size() == 0) {
-       selectBlock.Delay(2);
-       if (shutDown) break;
+   while (m_rtpSocket && m_rtpQueue.size() == 0) {
+       m_selectBlock.Delay(2);
+       if (m_shutdown) break;
    }
 
-   selectStatus += ((rtpQueue.size() > 0) ? (rtpSocket ? -1 : -2) : 0);
-   return rtpSocket;
+   bool isData = (!m_shutdown && m_rtpQueue.size() > 0);
+   selectStatus += ( isData ? (m_rtpSocket ? -1 : -2) : 0);
+   return isData;
 }
 
 PBoolean H46026UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD & port)
@@ -391,27 +347,25 @@ PBoolean H46026UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD 
     addr = "0.0.0.0";
     port = 0;
 
-    while (!shutDown) {
-      if (rtpQueue.empty()) {
-        PThread::Sleep(5);
-        continue;
-      }
-
-      writeMutex.Wait();
-        PBYTEArray * rtp = rtpQueue.front();
-        rtpQueue.pop();
-      writeMutex.Signal();
-        buf = rtp->GetPointer();
-        len = rtp->GetSize();
-        break;
+    if (m_shutdown || m_rtpQueue.size() == 0) {
+        PTRACE(4, "ReadFrom Error c: " << m_crv << " s: " << m_session << " "  << (m_rtpSocket ? "RTP" : "RTCP"));
+        return false;
     }
 
+    m_rtpMutex.Wait();
+      PBYTEArray * rtp = m_rtpQueue.front();
+      m_rtpQueue.pop();
+    m_rtpMutex.Signal();
+
+     buf = rtp->GetPointer();
+     len = rtp->GetSize();
     return true;
 }
 
 PBoolean H46026UDPSocket::WriteTo(const void * buf, PINDEX len, const Address & /*addr*/, WORD /*port*/)
 {
     // Write here....
+    m_transport.FrameToSend(m_crv,m_session,m_rtpSocket,(const BYTE *)buf,len);
     return true;
 }
 
@@ -435,4 +389,106 @@ void H46026UDPSocket::SetRemoteAddress(const H245_TransportAddress & add)
    // Ignore!
 }
 
-#endif // H323_H46026
+//////////////////////////////////////////////////////////////////////////////////////
+
+H46026PortPairs::H46026PortPairs()
+: rtp(NULL), rtcp(NULL)
+{
+}
+
+H46026PortPairs::H46026PortPairs(H46026UDPSocket* _rtp, H46026UDPSocket* _rtcp)
+: rtp(_rtp), rtcp(_rtcp)
+{
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+H46026Tunnel::H46026Tunnel()
+: m_transport(NULL)
+{
+
+}
+    
+H46026Tunnel::~H46026Tunnel()
+{
+}
+
+void H46026Tunnel::AttachTransport(H46017Transport * transport)
+{
+    m_transport = transport;
+}
+
+void H46026Tunnel::RegisterSocket(unsigned crv, int sessionId, H46026UDPSocket* rtp, H46026UDPSocket* rtcp)
+{
+    PWaitAndSignal m(m_socketMutex);
+
+    H46026CallSocket::iterator r = m_socketMap.find(crv);
+    if (r != m_socketMap.end()) {
+        H46026SocketMap::iterator c = r->second.find(sessionId);
+        if (c != r->second.end()) {
+            return;
+        }
+    }
+    m_socketMap[crv][sessionId] = H46026PortPairs(rtp,rtcp);
+}
+
+void H46026Tunnel::UnRegisterSocket(unsigned crv, int sessionId)
+{
+    PWaitAndSignal m(m_socketMutex);
+
+    H46026CallSocket::iterator r = m_socketMap.find(crv);
+    if (r != m_socketMap.end()) {
+        int sz = r->second.size();
+        H46026SocketMap::iterator c = r->second.find(sessionId);
+        if (c != r->second.end()) {
+            r->second.erase(c);
+        }
+        if (sz == 1) {
+            m_socketMap.erase(r);
+            BufferRelease(crv);
+        }
+    }
+}
+
+void H46026Tunnel::SignalToSend(const Q931 & _q931)
+{
+    SignalMsgOut(_q931);
+}
+
+void H46026Tunnel::SignalMsgIn(const Q931 & _q931)
+{
+  if (m_transport && !m_transport->HandleH46017PDU(_q931)) {
+      PTRACE(4,"H46026\tIncoming Signal PDU not handled");
+  }
+}
+
+void H46026Tunnel::RTPFrameIn(unsigned crv, PINDEX sessionId, PBoolean rtp, const PBYTEArray & data)
+{
+    PWaitAndSignal m(m_socketMutex);
+
+    H46026CallSocket::iterator r = m_socketMap.find(crv);
+    if (r != m_socketMap.end()) {
+        H46026SocketMap::iterator c = r->second.find(sessionId);
+        if (c != r->second.end()) {
+            if (rtp)
+                c->second.rtp->WriteBuffer(data);
+            else
+                c->second.rtcp->WriteBuffer(data);
+        }
+    }
+}
+
+void H46026Tunnel::FrameToSend(unsigned crv, int sessionId, bool rtp, const BYTE * buf, PINDEX len)
+{
+    H46026ChannelManager::PacketTypes type;
+    if (sessionId == 1) type = H46026ChannelManager::e_Audio;
+    else if (sessionId == 2) type = H46026ChannelManager::e_Video;
+    else if (sessionId == 3) type = H46026ChannelManager::e_Data;
+    else type = H46026ChannelManager::e_extVideo;
+
+    RTPFrameOut(crv,type,sessionId,rtp,buf,len);
+}
+
+#endif  // H323_H46026
+
+

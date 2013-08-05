@@ -116,7 +116,7 @@ void H460_FeatureStd17::AttachConnection(H323Connection * _con)
 
 }
 
-int H460_FeatureStd17::GetPurpose()	
+int H460_FeatureStd17::GetPurpose()    
 { 
     if (isEnabled)
       return FeatureRas;
@@ -348,20 +348,36 @@ PBoolean H46017Transport::HandleH46017Socket()
           }
 #ifdef H323_H46026 
           if (m_h46026tunnel) {
-              //return m_socketMgr->SocketIn(rpdu.GetQ931());
+              m_socketMgr->SocketIn(rpdu.GetQ931());
+              continue;
           } else 
 #endif
           {
-              // Inspect the signalling message to see if RAS
-              if (HandleH46017RAS(rpdu)) 
-                  continue;
-              else if (HandleH46017SignallingPDU(rpdu.GetQ931().GetCallReference(),rpdu))
+              if (HandleH46017PDU(rpdu.GetQ931()))
                   continue;
           }
 
           PTRACE(5,"H46017\tMessage not Handled!");
       }
   }
+}
+
+PBoolean H46017Transport::HandleH46017PDU(const Q931 & q931)
+{
+    H323SignalPDU pdu;
+    pdu.LoadTunneledQ931(q931);
+    return HandleH46017PDU(pdu);
+}
+
+PBoolean H46017Transport::HandleH46017PDU(H323SignalPDU & pdu)
+{
+    // Inspect the signalling message to see if RAS
+     if (HandleH46017RAS(pdu)) 
+         return true;
+     else if (HandleH46017SignallingPDU(pdu.GetQ931().GetCallReference(),pdu))
+         return true;
+     else
+         return false;
 }
 
 PBoolean H46017Transport::HandleH46017RAS(const H323SignalPDU & pdu)
@@ -470,11 +486,6 @@ PBoolean H46017Transport::Connect()
     if (!H323TransportTCP::Connect())
         return false;
 
-#ifdef H323_H46026 
-    if (m_h46026tunnel && !m_socketWrite)
-        m_socketWrite = PThread::Create(PCREATE_NOTIFIER(SocketWrite), 0, PThread::AutoDeleteThread);
-#endif
-
     return true;
 }
 
@@ -498,14 +509,9 @@ PBoolean H46017Transport::Close()
 { 
    PWaitAndSignal m(shutdownMutex);
 
-#ifdef H323_H46026
-    if (m_socketWrite)
-        delete m_socketWrite;
-#endif
-
-   PTRACE(4, "H46017\tClosing H46017 NAT channel.");    
    closeTransport = TRUE;
 
+   PTRACE(4, "H46017\tClosing H46017 NAT channel.");   
    return H323TransportTCP::Close(); 
 }
 
@@ -537,16 +543,44 @@ PBoolean H46017Transport::WriteTunnel(H323SignalPDU & msg)
 
 #ifdef H323_H46026
     if (m_h46026tunnel) {
-        return false; // m_socketMgr->SignalMsgOut(msg.GetQ931());
+        m_socketMgr->SignalToSend(msg.GetQ931());
+        return true;
     } else
 #endif
         return msg.Write(*this,NULL);
 }
 
 #ifdef H323_H46026
+void H46017Transport::SetTunnel(H46026Tunnel * mgr)
+{
+    m_socketMgr = mgr;
+    m_socketMgr->AttachTransport(this);
+
+    if (!m_socketWrite)
+        m_socketWrite = PThread::Create(PCREATE_NOTIFIER(SocketWrite), 0, PThread::AutoDeleteThread);
+
+    m_h46026tunnel = true;
+}
+
 void H46017Transport::SocketWrite(PThread &, INT)
 {
- 
+    PBYTEArray tpkt(10004);  // 10K buffer with RFC1006 Header
+    tpkt[0] = 3;
+    tpkt[1] = 0;
+
+    PINDEX sz = 0;
+    int packetLength = 0;
+    while (!closeTransport) {
+        if (m_socketMgr->SocketOut(tpkt.GetPointer()+4,sz)) {
+            packetLength = sz + 4;
+            tpkt[2] = (BYTE)(packetLength >> 8);
+            tpkt[3] = (BYTE)packetLength;
+            Write((const BYTE *)tpkt, packetLength);
+        } else {
+            PThread::Sleep(2);
+        }
+    }
+    tpkt.SetSize(0);
     PTRACE(2,"H46017\tTunnel Write Thread ended");
 }
 #endif

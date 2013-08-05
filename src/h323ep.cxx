@@ -3417,14 +3417,14 @@ PBoolean H323EndPoint::H46017CreateConnection(const PString & gatekeeper, PBoole
 #ifdef H323_H46026
      H460_FeatureStd26 * h46026 = (H460_FeatureStd26 *)features.GetFeature(26);
      if (h46026) {
-         h46026->AttachHandler(h46017->GetHandler());
+         h46026->AttachH46017(h46017->GetHandler(), m_h46017Transport);
 
        PNatMethod_H46026 * natMethod = NULL;
        if (natMethods)
          natMethod = (PNatMethod_H46026 *)natMethods->LoadNatMethod("H46026");
        if (natMethod) {
            natMethod->AttachEndPoint(this);
-           natMethod->AttachHandler(h46017->GetHandler());
+           natMethod->AttachManager(h46026->GetTunnel());
            natMethods->AddMethod(natMethod);
        }
      }

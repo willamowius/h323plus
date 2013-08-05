@@ -284,6 +284,9 @@ class H323SignalPDU : public H225_H323_UserInformation
     void InsertCryptoTokensSetup(const H323Connection & connection, H225_Setup_UUIE & setup);
 #endif
 
+#ifdef H323_H46017
+    void LoadTunneledQ931(const Q931 & q931);
+#endif
 
   protected:
     // Even though we generally deal with the H323 protocol (H225) it is

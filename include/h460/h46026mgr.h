@@ -74,7 +74,7 @@ public:
      };
 
      struct MessageHeader {
-        PString callId;
+        unsigned crv;
         int sessionId;
         int priority;
         int delay;
@@ -92,7 +92,7 @@ typedef std::priority_queue< std::pair<PBYTEArray, socketOrder::MessageHeader >,
         std::vector< std::pair<PBYTEArray, socketOrder::MessageHeader> >, socketOrder > H46026SocketQueue;
 
 typedef std::map<int,H46026UDPBuffer*> H46026CallMap;
-typedef std::map<PString, H46026CallMap >  H46026RTPBuffer;
+typedef std::map<unsigned, H46026CallMap >  H46026RTPBuffer;
 
 //-------------------------------------------------------------------------------
 
@@ -128,24 +128,22 @@ public:
     /** Clear Buffers */
     /* Call this is clear the channel buffers at the end of a call */
     /* This MUST be called at the end of a call */
-    void BufferRelease(const PString & callId);
+    void BufferRelease(unsigned crv);
 
     /** Events */
     /* Retrieve a Signal Message. Note RAS messages are included.
-        Implementor should delete Q931 pointer.
-        Pointer autoDeletes if not deleted and set to NULL by implementer.
      */
-    virtual void SignalMsgIn(Q931 * /*pdu*/);
-    virtual void SignalMsgIn(const PString & /*callid*/, Q931 * /*pdu*/) {};
+    virtual void SignalMsgIn(const Q931 & /*pdu*/);
+    virtual void SignalMsgIn(unsigned /*crv*/, const Q931 & /*pdu*/) {};
 
     /* Retrieve an RTP/RTCP Frame. The sessionID is the id of the session
      */
-    virtual void RTPFrameIn(const PString & /*callId*/, PINDEX /*sessionId*/, PBoolean /*rtp*/, PBYTEArray /*data*/);
-    virtual void RTPFrameIn(const PString & /*callId*/, PINDEX /*sessionId*/, PBoolean /*rtp*/, BYTE * /*data*/, PINDEX /*len*/) {};
+    virtual void RTPFrameIn(unsigned /*crv*/, PINDEX /*sessionId*/, PBoolean /*rtp*/, const PBYTEArray & /*data*/);
+    virtual void RTPFrameIn(unsigned /*crv*/, PINDEX /*sessionId*/, PBoolean /*rtp*/, const BYTE * /*data*/, PINDEX /*len*/) {};
 
     /* Fast Picture Update Required on the non-tunneled side.
      */
-    virtual void FastUpdatePictureRequired(const PString & /*callId*/, PINDEX /*sessionId*/) {};
+    virtual void FastUpdatePictureRequired(unsigned /*crv*/, PINDEX /*sessionId*/) {};
 
 
     /* Methods */
@@ -157,8 +155,8 @@ public:
 
     /* Post an RTP/RTCP Frame. Need to specify the basic packet type, sessionID and whether RTP or RTCP packet
      */
-    PBoolean RTPFrameOut(unsigned crv, const PString & callId, PacketTypes id, PINDEX sessionId, PBoolean rtp, BYTE * data, PINDEX len);
-    PBoolean RTPFrameOut(unsigned crv, const PString & callId, PacketTypes id, PINDEX sessionId, PBoolean rtp, PBYTEArray & data);
+    PBoolean RTPFrameOut(unsigned crv, PacketTypes id, PINDEX sessionId, PBoolean rtp, const BYTE * data, PINDEX len);
+    PBoolean RTPFrameOut(unsigned crv, PacketTypes id, PINDEX sessionId, PBoolean rtp, PBYTEArray & data);
 
     /* Collect an incoming to send to the socket.
         if the function return 
@@ -167,8 +165,8 @@ public:
         WARNING: This function does not block and returns immediately if false.
         Best practise would be to call from a threaded loop and use PThread::Sleep
      */
-    PBoolean SocketOut(BYTE * data, PINDEX len);
-    PBoolean SocketOut(PBYTEArray & data);
+    PBoolean SocketOut(BYTE * data, PINDEX & len);
+    PBoolean SocketOut(PBYTEArray & data, PINDEX & len);
 
     /* Receiving from the socket */
     /* Process an incoming message from the socket.
@@ -176,14 +174,14 @@ public:
      */
     PBoolean SocketIn(const BYTE * data, PINDEX len);
     PBoolean SocketIn(const PBYTEArray & data);
-    PBoolean SocketIn(Q931 * q931);
+    PBoolean SocketIn(const Q931 & q931);
 
 protected:
     PBoolean WriteQueue(const Q931 & msg, const socketOrder::MessageHeader & prior);
     PBoolean WriteQueue(const PBYTEArray & data, const socketOrder::MessageHeader & prior);
 
-    PBoolean PackageFrame(PBoolean rtp, unsigned crv, const PString & callId, PacketTypes id, PINDEX sessionId, H46026_UDPFrame & data);
-    H46026UDPBuffer * GetRTPBuffer(const PString & callId, int sessionId);
+    PBoolean PackageFrame(PBoolean rtp, unsigned crv, PacketTypes id, PINDEX sessionId, H46026_UDPFrame & data);
+    H46026UDPBuffer * GetRTPBuffer(unsigned crv, int sessionId);
 
     PBoolean ProcessQueue();
 

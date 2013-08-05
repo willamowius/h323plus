@@ -59,64 +59,30 @@
 
 const unsigned H46026_ProtocolID[] = { 0,0,8,2250,0,H225_PROTOCOL_VERSION };
 
-H225_CallIdentifier StringToCallId(PString CallId)
-{
-	H225_CallIdentifier result;
-	CallId.Replace("-", "", true);
-	CallId.Replace(" ", "", true);
-	OpalGloballyUniqueID tmp_guid(CallId);
-	result.m_guid = tmp_guid;
-	return result;
-}
-
-PString CallIdToString(const H225_GloballyUniqueID& id)
-{
-	if (id.GetSize() < 16)
-		return "Invalid";
-		
-	PString idstr;
-					
-	for (int j = 0, i = 0; j < 4; j++) {
-		const unsigned hex = ((unsigned)(id[i])<<24) | ((unsigned)(id[i+1])<<16) 
-			| ((unsigned)(id[i+2])<<8) | ((unsigned)(id[i+3]));
-		i += 4;
-
-		idstr += PString(PString::Unsigned, (long)hex, 16);
-		if (j < 3)
-			idstr += ' ';
-	}
-
-	return idstr;
-}
-
 bool GetInfoUUIE(const Q931 & q931, H225_H323_UserInformation & uuie)
 {
-	if (q931.HasIE(Q931::UserUserIE)) {
-		PPER_Stream strm(q931.GetIE(Q931::UserUserIE));
-		if (uuie.Decode(strm))
-			return true;
-	}
-	return false;
+    if (q931.HasIE(Q931::UserUserIE)) {
+        PPER_Stream strm(q931.GetIE(Q931::UserUserIE));
+        if (uuie.Decode(strm))
+            return true;
+    }
+    return false;
 }
 
 void SetInfoUUIE(Q931 & q931, const H225_H323_UserInformation & uuie)
 {
-	PPER_Stream strm;
-	uuie.Encode(strm);
-	strm.CompleteEncoding();
-	q931.SetIE(Q931::UserUserIE, strm);
+    PPER_Stream strm;
+    uuie.Encode(strm);
+    strm.CompleteEncoding();
+    q931.SetIE(Q931::UserUserIE, strm);
 }
 
-void BuildRTPFrame(Q931 & q931, H225_H323_UserInformation & uuie, unsigned crv, const PString & callId, H46026_UDPFrame & data)
+void BuildRTPFrame(Q931 & q931, H225_H323_UserInformation & uuie, unsigned crv, H46026_UDPFrame & data)
 {
     // Set the RTP Payload
     PASN_OctetString & val = uuie.m_h323_uu_pdu.m_genericData[0].m_parameters[0].m_content;
     val.SetSize(0); // remove any existing contents
     val.EncodeSubType(data);
-
-    // Set the Call Identifier
-    H225_Information_UUIE & info = uuie.m_h323_uu_pdu.m_h323_message_body;
-    info.m_callIdentifier = StringToCallId(callId);
 
     // Build the Q931 Message
     q931.BuildInformation(crv, true);
@@ -125,7 +91,7 @@ void BuildRTPFrame(Q931 & q931, H225_H323_UserInformation & uuie, unsigned crv, 
     data.m_frame.SetSize(0);
 }
 
-PBoolean ReadRTPFrame(const Q931 & q931, PString & callId, H46026_UDPFrame & data)
+PBoolean ReadRTPFrame(const Q931 & q931, H46026_UDPFrame & data)
 {
     H225_H323_UserInformation uuie;
     if (!GetInfoUUIE(q931, uuie)) {
@@ -148,7 +114,7 @@ PBoolean ReadRTPFrame(const Q931 & q931, PString & callId, H46026_UDPFrame & dat
         PTRACE(2,"H46026\tERROR BAD Media Frame ID");
         return false;
     }
-	PASN_Integer & asnInt = id;
+    PASN_Integer & asnInt = id;
     if (asnInt.GetValue() != 26) {
         PTRACE(2,"H46026\tERROR Wrong Media Frame ID " << asnInt.GetValue());
         return false;
@@ -158,7 +124,7 @@ PBoolean ReadRTPFrame(const Q931 & q931, PString & callId, H46026_UDPFrame & dat
         PTRACE(2,"H46026\tERROR BAD Media Parameter ID");
         return false;
     }
-	PASN_Integer & pInt = pid;
+    PASN_Integer & pInt = pid;
     if (pInt.GetValue() != 1) {
         PTRACE(2,"H46026\tERROR Wrong Media Parameter ID " << pInt.GetValue());
         return false;
@@ -171,16 +137,12 @@ PBoolean ReadRTPFrame(const Q931 & q931, PString & callId, H46026_UDPFrame & dat
         return false;
     }
 
-    // Set the Call Identifier
-    H225_Information_UUIE & info = uuie.m_h323_uu_pdu.m_h323_message_body;
-    callId = CallIdToString(info.m_callIdentifier.m_guid);
-
     return true;
 }
 
-void ClearBufferEntries(H46026RTPBuffer & rtpBuffer, const PString callId)
+void ClearBufferEntries(H46026RTPBuffer & rtpBuffer, unsigned crv)
 {
-    if (callId.IsEmpty()) {
+    if (crv == 0) {
         for (H46026RTPBuffer::iterator i = rtpBuffer.begin(); i != rtpBuffer.end(); ++i) {
             for (H46026CallMap::iterator j = i->second.begin(); j != i->second.end(); ++j) {
                 delete j->second;
@@ -189,7 +151,7 @@ void ClearBufferEntries(H46026RTPBuffer & rtpBuffer, const PString callId)
         }
         rtpBuffer.clear();
     } else {
-        H46026RTPBuffer::iterator r = rtpBuffer.find(callId);
+        H46026RTPBuffer::iterator r = rtpBuffer.find(crv);
         if (r != rtpBuffer.end()) {
             for (H46026CallMap::iterator j = r->second.begin(); j != r->second.end(); ++j) {
                 delete j->second;
@@ -234,7 +196,7 @@ H46026_UDPFrame & H46026UDPBuffer::GetBuffer()
 void H46026UDPBuffer::ClearBuffer()
 {
     m_size = 0;
-    m_data.SetSize(0);
+    m_data.m_frame.SetSize(0);
 }
 
 PINDEX H46026UDPBuffer::GetSize()
@@ -273,38 +235,36 @@ H46026ChannelManager::H46026ChannelManager()
     H225_GenericData & gen = m_uuie.m_h323_uu_pdu.m_genericData[0];
     H225_GenericIdentifier & id = gen.m_id;
         id.SetTag(H225_GenericIdentifier::e_standard);
-		PASN_Integer & asnInt = id;
-		asnInt.SetValue(26); 
+        PASN_Integer & asnInt = id;
+        asnInt.SetValue(26); 
     gen.IncludeOptionalField(H225_GenericData::e_parameters);
     gen.m_parameters.SetSize(1);
     H225_EnumeratedParameter & param = gen.m_parameters[0];
         H225_GenericIdentifier & pid = param.m_id;
         pid.SetTag(H225_GenericIdentifier::e_standard);
-		PASN_Integer & pInt = pid;
-		pInt.SetValue(1);
+        PASN_Integer & pInt = pid;
+        pInt.SetValue(1);
     param.IncludeOptionalField(H225_EnumeratedParameter::e_content);
     param.m_content.SetTag(H225_Content::e_raw);
     // param.m_content is set in BuildRTPFrame
-    
-    m_uuie.m_h323_uu_pdu.m_h323_message_body.SetTag(H225_H323_UU_PDU_h323_message_body::e_information);
-	m_uuie.m_h323_uu_pdu.m_h245Tunneling = TRUE;
-    H225_Information_UUIE & infoUUIE = m_uuie.m_h323_uu_pdu.m_h323_message_body;
-    infoUUIE.m_protocolIdentifier.SetValue(H46026_ProtocolID, PARRAYSIZE(H46026_ProtocolID));
-    // infoUUIE.m_callIdentifier is set in BuildRTPFrame
+
+    m_uuie.m_h323_uu_pdu.m_h323_message_body.SetTag(H225_H323_UU_PDU_h323_message_body::e_empty);
+    m_uuie.m_h323_uu_pdu.m_h245Tunneling = TRUE;
+ 
 }
 
 H46026ChannelManager::~H46026ChannelManager()
 {
     PWaitAndSignal m(m_queueMutex);
 
-    ClearBufferEntries(m_rtpBuffer, PString());
+    ClearBufferEntries(m_rtpBuffer, 0);
     while (!m_socketQueue.empty())
         m_socketQueue.pop();
 }
 
- void H46026ChannelManager::RTPFrameIn(const PString & callId, PINDEX sessionId, PBoolean rtp, PBYTEArray data) 
+ void H46026ChannelManager::RTPFrameIn(unsigned crv, PINDEX sessionId, PBoolean rtp, const PBYTEArray & data) 
  {
-     return RTPFrameIn(callId, sessionId, rtp, data.GetPointer(), data.GetSize());
+     return RTPFrameIn(crv, sessionId, rtp, (const BYTE *)data, data.GetSize());
  }
 
  void H46026ChannelManager::SetPipeBandwidth(unsigned bps)
@@ -312,16 +272,16 @@ H46026ChannelManager::~H46026ChannelManager()
      m_mbps = double(bps);
  }
 
-void H46026ChannelManager::BufferRelease(const PString & callId)
+void H46026ChannelManager::BufferRelease(unsigned crv)
 {
-    ClearBufferEntries(m_rtpBuffer, callId);
+    ClearBufferEntries(m_rtpBuffer, crv);
 }
 
 PBoolean H46026ChannelManager::SignalMsgOut(const Q931 & pdu)
 {
     socketOrder::MessageHeader prior;
     prior.sessionId = 0;
-    prior.callId = PString();
+    prior.crv = 0;
     prior.priority = socketOrder::Priority_High;
     prior.packTime = PTimer::Tick().GetMilliSeconds();
     prior.delay = PACKETDELAY(pdu.GetIE(Q931::UserUserIE).GetSize(),m_mbps);
@@ -333,7 +293,7 @@ PBoolean H46026ChannelManager::SignalMsgOut(const BYTE * data, PINDEX len)
     PBYTEArray msg(data,len);
     socketOrder::MessageHeader prior;
     prior.sessionId = 0;
-    prior.callId = PString();
+    prior.crv = 0;
     prior.priority = socketOrder::Priority_High;
     prior.packTime = PTimer::Tick().GetMilliSeconds();
     prior.delay = PACKETDELAY(len,m_mbps);
@@ -341,26 +301,26 @@ PBoolean H46026ChannelManager::SignalMsgOut(const BYTE * data, PINDEX len)
 }
 
 
-H46026UDPBuffer * H46026ChannelManager::GetRTPBuffer(const PString & callId, int sessionId)
+H46026UDPBuffer * H46026ChannelManager::GetRTPBuffer(unsigned crv, int sessionId)
 {
-    H46026RTPBuffer::iterator r = m_rtpBuffer.find(callId);
+    H46026RTPBuffer::iterator r = m_rtpBuffer.find(crv);
     if (r != m_rtpBuffer.end()) {
         H46026CallMap::iterator c = r->second.find(sessionId);
         return c->second;
     }
-    m_rtpBuffer[callId][sessionId] = new H46026UDPBuffer(sessionId,true);
-    return m_rtpBuffer[callId][sessionId];
+    m_rtpBuffer[crv][sessionId] = new H46026UDPBuffer(sessionId,true);
+    return m_rtpBuffer[crv][sessionId];
 }
 
-PBoolean H46026ChannelManager::PackageFrame(PBoolean rtp, unsigned crv, const PString & callId, PacketTypes id, PINDEX sessionId, H46026_UDPFrame & data)
+PBoolean H46026ChannelManager::PackageFrame(PBoolean rtp, unsigned crv, PacketTypes id, PINDEX sessionId, H46026_UDPFrame & data)
 {
     // Build Packet
     Q931 mediaPDU;
-    BuildRTPFrame(mediaPDU, m_uuie, crv, callId, data);
+    BuildRTPFrame(mediaPDU, m_uuie, crv, data);
 
     // Set metadata
     socketOrder::MessageHeader prior;
-    prior.callId = callId;
+    prior.crv = crv;
     prior.sessionId = sessionId;
     if (rtp) {
         switch (id) {
@@ -385,18 +345,18 @@ PBoolean H46026ChannelManager::PackageFrame(PBoolean rtp, unsigned crv, const PS
     return WriteQueue(mediaPDU, prior);
 }
 
-PBoolean H46026ChannelManager::RTPFrameOut(unsigned crv, const PString & callId, PacketTypes id, PINDEX sessionId, PBoolean rtp, PBYTEArray & data)
+PBoolean H46026ChannelManager::RTPFrameOut(unsigned crv, PacketTypes id, PINDEX sessionId, PBoolean rtp, PBYTEArray & data)
 {
-    return RTPFrameOut(crv, callId, id, sessionId, rtp, data.GetPointer() , data.GetSize());
+    return RTPFrameOut(crv, id, sessionId, rtp, data.GetPointer() , data.GetSize());
 }
 
-PBoolean H46026ChannelManager::RTPFrameOut(unsigned crv, const PString & callId, PacketTypes id, PINDEX sessionId, PBoolean rtp, BYTE * data, PINDEX len)
+PBoolean H46026ChannelManager::RTPFrameOut(unsigned crv, PacketTypes id, PINDEX sessionId, PBoolean rtp, const BYTE * data, PINDEX len)
 {
     PWaitAndSignal m(m_writeMutex);
 
     H46026_MediaFrame msg(data,len);
     if (rtp) {
-        H46026UDPBuffer * m_buffer = GetRTPBuffer(callId,sessionId);
+        H46026UDPBuffer * m_buffer = GetRTPBuffer(crv,sessionId);
         if (!m_buffer) return false;
 
         PBoolean toSend = false;
@@ -409,7 +369,7 @@ PBoolean H46026ChannelManager::RTPFrameOut(unsigned crv, const PString & callId,
             case e_Video:
             case e_extVideo:
                 if (m_buffer->GetSize() + len > MAX_VIDEO_PAYLOAD) {
-                    PackageFrame(rtp,crv,callId,id,sessionId,m_buffer->GetBuffer());
+                    PackageFrame(rtp,crv,id,sessionId,m_buffer->GetBuffer());
                 }
                 m_buffer->SetFrame(msg);
                 toSend = msg.GetMarker();
@@ -420,13 +380,13 @@ PBoolean H46026ChannelManager::RTPFrameOut(unsigned crv, const PString & callId,
                 toSend = true;
         }
         if (toSend)
-            return PackageFrame(rtp,crv,callId,id,sessionId,m_buffer->GetBuffer());
+            return PackageFrame(rtp,crv,id,sessionId,m_buffer->GetBuffer());
         else
             return ProcessQueue();
     } else {
        H46026UDPBuffer m_data(sessionId,rtp);
        m_data.SetFrame(msg);
-       return PackageFrame(rtp,crv,callId,id,sessionId,m_data.GetBuffer());
+       return PackageFrame(rtp,crv,id,sessionId,m_data.GetBuffer());
     }
     return true; 
 }
@@ -449,12 +409,12 @@ PBoolean H46026ChannelManager::ProcessQueue()
     if (dropPacket) {
 
         PTRACE(5,"H46026\tPossible pipe blockage detected. Delay " << stackTime << " Dropping video frames...");
-        PString callId = m_socketQueue.top().second.callId;
+        unsigned crv = m_socketQueue.top().second.crv;
         PINDEX sessionId = m_socketQueue.top().second.sessionId;
         while (m_socketQueue.size()>0 && m_socketQueue.top().second.priority == socketOrder::Priority_Discretion) {
             m_socketQueue.pop();
         }
-        FastUpdatePictureRequired(callId, sessionId);
+        FastUpdatePictureRequired(crv, sessionId);
         // TODO: Flow Control based on the Time in the queue (stackTime) - SH
     }
 
@@ -473,47 +433,41 @@ PBoolean H46026ChannelManager::SocketIn(const BYTE * data, PINDEX len)
 
 PBoolean H46026ChannelManager::SocketIn(const PBYTEArray & data)
 {
-	Q931 * q931pdu = new Q931();
-	if (!q931pdu->Decode(data)) {
-		PTRACE(1, "H46026\tERROR DECODING Q.931!");
-		delete q931pdu;
-		q931pdu = NULL;
-		return false;
-	} else
+    Q931 q931pdu;
+    if (!q931pdu.Decode(data)) {
+        PTRACE(1, "H46026\tERROR DECODING Q.931!");
+        return false;
+    } else
         return SocketIn(q931pdu);
 }
 
-PBoolean H46026ChannelManager::SocketIn(Q931 * q931)
+PBoolean H46026ChannelManager::SocketIn(const Q931 & q931)
 {
     PString callId = PString();
     H46026_UDPFrame frameData;
 
-    if ((q931->GetMessageType() == Q931::InformationMsg) && ReadRTPFrame(*q931, callId, frameData)) {
+    if ((q931.GetMessageType() == Q931::InformationMsg) && ReadRTPFrame(q931, frameData)) {
         for (PINDEX i=0; i < frameData.m_frame.GetSize(); ++i) {
             PASN_OctetString & data = frameData.m_frame[i];
-            RTPFrameIn(callId, frameData.m_sessionId.GetValue(), frameData.m_dataFrame, data.GetValue());
+            RTPFrameIn(q931.GetCallReference(), frameData.m_sessionId.GetValue(), frameData.m_dataFrame, data.GetValue());
         }
     } else
         SignalMsgIn(q931);
 
-    if (q931)
-       delete q931;
-
     return true;
 }
 
-void H46026ChannelManager::SignalMsgIn(Q931 * pdu)
+void H46026ChannelManager::SignalMsgIn(const Q931 & pdu)
 {
-    PString callref = pdu->GetCallReference();
-    SignalMsgIn(callref,pdu);
+    SignalMsgIn(pdu.GetCallReference(),pdu);
 }
 
-PBoolean H46026ChannelManager::SocketOut(PBYTEArray & data)
+PBoolean H46026ChannelManager::SocketOut(PBYTEArray & data, PINDEX & len)
 {
-    return SocketOut(data.GetPointer(), data.GetSize());
+    return SocketOut(data.GetPointer(), len);
 }
 
-PBoolean H46026ChannelManager::SocketOut(BYTE * data, PINDEX len)
+PBoolean H46026ChannelManager::SocketOut(BYTE * data, PINDEX & len)
 {
     if (!m_socketPacketReady)
         return false;

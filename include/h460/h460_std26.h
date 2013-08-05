@@ -44,6 +44,57 @@
 #pragma once
 
 #include <ptlib/plugin.h>
+#include <map>
+#include <queue>
+
+#include <h460/h46026mgr.h>
+
+/////////////////////////////////////////////////////////////////////////////////
+
+class H46026UDPSocket;
+class H46026PortPairs 
+{
+public:
+    H46026PortPairs();
+    H46026PortPairs(H46026UDPSocket* _rtp, H46026UDPSocket* _rtcp);
+
+    H46026UDPSocket* rtp;
+    H46026UDPSocket* rtcp;
+};
+
+/////////////////////////////////////////////////////////////////////////////////
+
+typedef std::map<int, H46026PortPairs >  H46026SocketMap;
+typedef std::map<unsigned, H46026SocketMap> H46026CallSocket;
+
+class H46017Transport;
+class H46026Tunnel : public H46026ChannelManager
+{
+public:
+    H46026Tunnel();
+    ~H46026Tunnel();
+
+    void AttachTransport(H46017Transport * transport);
+
+    void RegisterSocket(unsigned crv, int sessionId, H46026UDPSocket* rtp, H46026UDPSocket* rtcp);
+    void UnRegisterSocket(unsigned crv, int sessionId);
+
+    void SignalToSend(const Q931 & _q931);
+    void FrameToSend(unsigned crv, int sessionId, bool rtp, const BYTE * buf, PINDEX len);
+
+    // overrides
+    virtual void SignalMsgIn(const Q931 & /*q931*/);
+    virtual void RTPFrameIn(unsigned /*crv*/, PINDEX /*sessionId*/, PBoolean /*rtp*/, const PBYTEArray & /*data*/);
+
+protected:
+    H46026CallSocket        m_socketMap;
+    PMutex                  m_socketMutex;
+
+    H46017Transport *       m_transport;
+
+};
+
+/////////////////////////////////////////////////////////////////////////////////
 
 class H46017Handler;
 class H46017Transport;
@@ -63,12 +114,12 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("Std26"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("TCPTunneling-H.460.26"); };
     static int GetPurpose();
-	static PStringArray GetIdentifier() { return PStringArray("26"); };
+    static PStringArray GetIdentifier() { return PStringArray("26"); };
 
-	virtual PBoolean FeatureAdvertised(int mtype);
-	virtual PBoolean CommonFeature() { return isEnabled; }
+    virtual PBoolean FeatureAdvertised(int mtype);
+    virtual PBoolean CommonFeature() { return isEnabled; }
 
-	// Messages
+    // Messages
     virtual PBoolean OnSendAdmissionRequest(H225_FeatureDescriptor & pdu);
     virtual void OnReceiveAdmissionConfirm(const H225_FeatureDescriptor & pdu);
 
@@ -84,13 +135,16 @@ public:
     virtual PBoolean OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu);
     virtual void OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor & pdu);
 
-    void AttachHandler(H46017Handler * m_handler);
+    void AttachH46017(H46017Handler * m_handler, H323Transport * transport);
+
+    H46026Tunnel * GetTunnel();
 
 private:
     H323EndPoint * EP;
     H323Connection * CON;
 
-	H46017Handler * handler;			///< handler
+    H46026Tunnel h46026mgr;             ///< Channel Manager
+    H46017Handler * handler;            ///< handler
     PBoolean isEnabled;
     static PBoolean isSupported;
 };
@@ -104,74 +158,66 @@ private:
 
 class PNatMethod_H46026  : public PNatMethod
 {
-	PCLASSINFO(PNatMethod_H46026,PNatMethod);
+    PCLASSINFO(PNatMethod_H46026,PNatMethod);
 
 public:
 
   /**@name Construction */
   //@{
-	/** Default Contructor
-	*/
-	PNatMethod_H46026();
+    /** Default Contructor
+    */
+    PNatMethod_H46026();
 
-	/** Deconstructor
-	*/
-	~PNatMethod_H46026();
+    /** Deconstructor
+    */
+    ~PNatMethod_H46026();
   //@}
 
   /**@name General Functions */
   //@{
    void AttachEndPoint(H323EndPoint * ep);
 
-   void AttachHandler(H46017Handler * m_handler);
+   void AttachManager(H46026Tunnel * m_handler);
 
    virtual PBoolean GetExternalAddress(
       PIPSocket::Address & externalAddress, /// External address of router
       const PTimeInterval & maxAge = 1000   /// Maximum age for caching
-	  );
+      );
 
-	/**  CreateSocketPair
-		Create the UDP Socket pair (does nothing)
-	*/
+    /**  CreateSocketPair
+        Create the UDP Socket pair (does nothing)
+    */
    virtual PBoolean CreateSocketPair(
-	  PUDPSocket * & /*socket1*/,			///< Created DataSocket
-      PUDPSocket * & /*socket2*/,			///< Created ControlSocket
+      PUDPSocket * & /*socket1*/,            ///< Created DataSocket
+      PUDPSocket * & /*socket2*/,            ///< Created ControlSocket
       const PIPSocket::Address & /*binding*/
       ) {  return false; }
 
   /**  CreateSocketPair
-		Create the UDP Socket pair
+        Create the UDP Socket pair
   */
     virtual PBoolean CreateSocketPair(
       PUDPSocket * & socket1,
       PUDPSocket * & socket2,
-	  const PIPSocket::Address & binding,  
-	  void * userData
+      const PIPSocket::Address & binding,  
+      void * userData
     );
 
-  /** SetStatusHeader
-      Build the RTP wrapper message
-    */
-     void SetInformationHeader(PUDPSocket & data,                        ///< Data Socket
-                          PUDPSocket & control,                          ///< Control Socket
-					      H323Connection::SessionInformation * info      ///< Socket Information
-                          );
-
   /**  isAvailable.
-		Returns whether the Nat Method is ready and available in
-		assisting in NAT Traversal. The principal is function is
-		to allow the EP to detect various methods and if a method
-		is detected then this method is available for NAT traversal
-		The Order of adding to the PNstStrategy determines which method
-		is used
+        Returns whether the Nat Method is ready and available in
+        assisting in NAT Traversal. The principal is function is
+        to allow the EP to detect various methods and if a method
+        is detected then this method is available for NAT traversal
+        The Order of adding to the PNstStrategy determines which method
+        is used
   */
    virtual bool IsAvailable(const PIPSocket::Address&);
 
    void SetAvailable() {};
 
     /** Activate
-		Active/DeActivate the method on a call by call basis
-	 */
+        Active/DeActivate the method on a call by call basis
+     */
    virtual void Activate(bool act)  { active = act; }
 
 #if PTLIB_VER > 2120
@@ -188,21 +234,21 @@ public:
     virtual bool GetServerAddress(
       PIPSocket::Address & address,   ///< Address of server
       WORD & port                     ///< Port server is using.
-	  ) const { return false; }
+      ) const { return false; }
 
     virtual bool GetInterfaceAddress(
       PIPSocket::Address & internalAddress
-	  ) const { return false; }
+      ) const { return false; }
 
     virtual PBoolean CreateSocket(
       PUDPSocket * & socket,
       const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny(),
       WORD localPort = 0
-	  ) { return false; }
+      ) { return false; }
 
     virtual RTPSupportTypes GetRTPSupport(
       PBoolean force = PFalse    ///< Force a new check
-	  )  { return RTPSupported; }
+      )  { return RTPSupported; }
   //@}
 
 #if PTLIB_VER >= 2110
@@ -221,8 +267,8 @@ protected:
 
 
 protected:
-	PBoolean active;					///< Whether the method is active for call
-	H46017Handler * handler;			///< handler
+    PBoolean active;            ///< Whether the method is active for call
+    H46026Tunnel * handler;        ///< Socket Handler
 
 };
 
@@ -240,24 +286,17 @@ class H46026UDPSocket : public PUDPSocket
   public:
   /**@name Construction/Deconstructor */
   //@{
-	/** create a UDP Socket Fully Nat Supported
-		ready for H323plus to Call.
-	*/
-    H46026UDPSocket(H46017Handler & _handler, H323Connection::SessionInformation * info, bool _rtpSocket);
+    /** create a UDP Socket Fully Nat Supported
+        ready for H323plus to Call.
+    */
+    H46026UDPSocket(H46026Tunnel & _handler, H323Connection::SessionInformation * info, bool _rtpSocket);
 
-	/** Deconstructor to reallocate Socket and remove any exiting
-		allocated NAT ports, 
-	*/
-	~H46026UDPSocket();
+    /** Deconstructor to reallocate Socket and remove any exiting
+        allocated NAT ports, 
+    */
+    ~H46026UDPSocket();
 
    //@}
-
-	/**@name Functions */
-	//@{
-    /**Set Information header
-        Set the RTP wrapper message
-      */
-    void SetInformationHeader(const H323SignalPDU & _informationMsg, const H323Transport * _transport);
 
   // Overrides from class PIPDatagramSocket.
     /** Read a datagram from a remote computer.
@@ -284,7 +323,7 @@ class H46026UDPSocket : public PUDPSocket
       WORD port           // Port to which the datagram is sent.
     );
 
-    PBoolean WriteBuffer(const void * buf, PINDEX len);
+    PBoolean WriteBuffer(const PBYTEArray & buffer);
     PBoolean DoPseudoRead(int & selectStatus);
 
     void GetLocalAddress(H245_TransportAddress & add);
@@ -294,21 +333,17 @@ class H46026UDPSocket : public PUDPSocket
 
    //@}
 
-
 private:
-	H46017Transport * m_transport;
-	unsigned m_Session;						///< Current Session ie 1-Audio 2-video
-    bool rtpSocket;
+    H46026Tunnel &          m_transport;
+    unsigned                m_crv;
+    unsigned                m_session;      ///< Current Session ie 1-Audio 2-video
+    bool                    m_rtpSocket;
 
-    // tunnel data containers
-    int m_frameCount;
-    int m_payloadSize;
-    H46026_UDPFrame * m_frame;
-    H323SignalPDU msg;
+    RTPQueue                m_rtpQueue;
+    PMutex                  m_rtpMutex;
+    bool                    m_shutdown;
 
-    RTPQueue rtpQueue;
-    PMutex writeMutex;
-    PBoolean shutDown;
+    PAdaptiveDelay          m_selectBlock;
 };
 
 #endif // H_H460_FeatureStd26

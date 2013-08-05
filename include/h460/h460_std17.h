@@ -66,9 +66,9 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("Std17"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("NatTraversal-H.460.17"); };
     static int GetPurpose();
-	static PStringArray GetIdentifier() { return PStringArray("17"); };
+    static PStringArray GetIdentifier() { return PStringArray("17"); };
 
-	virtual PBoolean CommonFeature() { return isEnabled; }
+    virtual PBoolean CommonFeature() { return isEnabled; }
 
     static PBoolean IsEnabled()  { return isEnabled; }
 
@@ -98,7 +98,7 @@ private:
 
 ////////////////////////////////////////////////////////////////////////
  #ifdef H323_H46026
-class H46026ChannelManager;
+class H46026Tunnel;
 #endif
 class H46017Handler;
 class H46017Transport  : public H323TransportTCP
@@ -107,27 +107,33 @@ class H46017Transport  : public H323TransportTCP
 
   public:
 
-	enum PDUType {
-		e_raw
-	};
+    enum PDUType {
+        e_raw
+    };
 
     /**Create a new transport channel.
      */
     H46017Transport(
       H323EndPoint & endpoint,        /// H323 End Point object
       PIPSocket::Address binding,     /// Bind Interface
-	  H46017Handler * feat		      /// Feature
+      H46017Handler * feat              /// Feature
 #ifdef H323_TLS
       ,PSSLContext * context = NULL,   ///< Context for SSL channel
       PBoolean autoDeleteContext = false  ///< Flag for context to be automatically deleted.
 #endif
     );
 
-	~H46017Transport();
+    ~H46017Transport();
 
-	/**Handle the H46017 Socket
-	  */
-	PBoolean HandleH46017Socket();
+    /**Handle the H46017 Socket
+      */
+    PBoolean HandleH46017Socket();
+
+
+    /**Handle incoming H46017 PDU
+      */
+    PBoolean HandleH46017PDU(const Q931 & q931);
+    PBoolean HandleH46017PDU(H323SignalPDU & pdu);
 
     /**Write a protocol data unit from the transport.
        This will write using the transports mechanism for PDU boundaries, for
@@ -156,14 +162,17 @@ class H46017Transport  : public H323TransportTCP
        example UDP is a single Read() call, while for TCP there is a TPKT
        header that indicates the size of the PDU.
       */
-	virtual PBoolean ReadPDU(
+    virtual PBoolean ReadPDU(
          PBYTEArray & pdu  /// PDU to Read
-	);
+    );
 
-	void ConnectionLost(PBoolean established);
+    void ConnectionLost(PBoolean established);
 
-	PBoolean IsConnectionLost() const;
+    PBoolean IsConnectionLost() const;
 
+#ifdef H323_H46026
+    void SetTunnel(H46026Tunnel * mgr);
+#endif
 
 // Overrides
     /**Connect to the remote party.
@@ -176,43 +185,43 @@ class H46017Transport  : public H323TransportTCP
 
     virtual PBoolean IsListening() const;
 
-	virtual PBoolean IsOpen () const;
+    virtual PBoolean IsOpen () const;
 
-	PBoolean CloseTransport() { return closeTransport; };
+    PBoolean CloseTransport() { return closeTransport; };
 
     virtual void CleanUpOnTermination();
 
   protected:
 
-	/**Handle the H46017 Signalling
-	  */
-	PBoolean HandleH46017SignallingPDU(unsigned crv, H323SignalPDU & pdu);
+    /**Handle the H46017 Signalling
+      */
+    PBoolean HandleH46017SignallingPDU(unsigned crv, H323SignalPDU & pdu);
 
-	/**Handle the H46017 SetupPDU
-	  */
+    /**Handle the H46017 SetupPDU
+      */
     H323Connection * HandleH46017SetupPDU(H323SignalPDU & pdu);
 
-	/**Handle the H46017 Tunnelled RAS
-	  */
+    /**Handle the H46017 Tunnelled RAS
+      */
     PBoolean HandleH46017RAS(const H323SignalPDU & pdu);
 
 
     PBoolean WriteTunnel(H323SignalPDU & msg);
 
-	 PMutex connectionsMutex;
-	 PMutex WriteMutex;
-	 PMutex shutdownMutex;
+     PMutex connectionsMutex;
+     PMutex WriteMutex;
+     PMutex shutdownMutex;
 
-	 PTimeInterval ReadTimeOut;
+     PTimeInterval ReadTimeOut;
 
-	 H46017Handler * Feature;
+     H46017Handler * Feature;
 
-	 PBoolean   remoteShutDown;
-	 PBoolean	closeTransport;
+     PBoolean   remoteShutDown;
+     PBoolean    closeTransport;
 
  #ifdef H323_H46026
      PBoolean   m_h46026tunnel;
-     H46026ChannelManager * m_socketMgr;
+     H46026Tunnel * m_socketMgr;
 
      PThread * m_socketWrite;
      PDECLARE_NOTIFIER(PThread, H46017Transport, SocketWrite);
@@ -226,22 +235,22 @@ class H46017RasTransport;
 class H46017Handler : public PObject  
 {
 
-	PCLASSINFO(H46017Handler, PObject);
+    PCLASSINFO(H46017Handler, PObject);
 
 public:
-	H46017Handler(H323EndPoint & _ep, 
-		const H323TransportAddress & _remoteAddress
-		);
+    H46017Handler(H323EndPoint & _ep, 
+        const H323TransportAddress & _remoteAddress
+        );
 
-	~H46017Handler();
+    ~H46017Handler();
 
     H323EndPoint * GetEndPoint();
 
-	PBoolean CreateNewTransport(H323Transport * transport);
+    PBoolean CreateNewTransport(H323Transport * transport);
 
-	PBoolean ReRegister(const PString & newid);
+    PBoolean ReRegister(const PString & newid);
 
-	PBoolean IsOpen() { return openTransport; }
+    PBoolean IsOpen() { return openTransport; }
 
     PBoolean IsConnectionLost() const { return connectionlost; }
     void SetConnectionLost(PBoolean newVal) { connectionlost = newVal; }
@@ -265,14 +274,14 @@ public:
 #endif
 
 private:
-	H323EndPoint & ep;
+    H323EndPoint & ep;
     H46017Transport * curtransport;
     H46017RasTransport * ras;
 
-	H323TransportAddress remoteAddress;
+    H323TransportAddress remoteAddress;
     PIPSocket::Address localBindAddress;
 
-	PBoolean connectionlost;
+    PBoolean connectionlost;
     PBoolean openTransport;
     PBoolean callEnded;
 
