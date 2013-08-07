@@ -457,6 +457,15 @@ class H323Transport : public PIndirectChannel
     virtual PBoolean WritePDU(
       const PBYTEArray & pdu  ///<  PDU to write
     ) = 0;
+
+    /**Write a protocol data unit from the transport.
+       This will write using the transports mechanism for PDU boundaries, for
+       example UDP is a single Write() call, while for TCP there is a TPKT
+       header that indicates the size of the PDU.
+      */
+    virtual PBoolean WriteSignalPDU(
+      const H323SignalPDU & /*pdu*/  /// PDU to write
+    ) { return false; }
   //@}
 
   /**@name Signalling Channel */
