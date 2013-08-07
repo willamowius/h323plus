@@ -281,7 +281,7 @@ PBoolean H46026ChannelManager::SignalMsgOut(const Q931 & pdu)
 {
     socketOrder::MessageHeader prior;
     prior.sessionId = 0;
-    prior.crv = 0;
+    prior.crv = pdu.GetCallReference();
     prior.priority = socketOrder::Priority_High;
     prior.packTime = PTimer::Tick().GetMilliSeconds();
     prior.delay = PACKETDELAY(pdu.GetIE(Q931::UserUserIE).GetSize(),m_mbps);

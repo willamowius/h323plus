@@ -919,6 +919,19 @@ PBoolean H323Connection::WriteSignalPDU(H323SignalPDU & pdu)
     if (gk != NULL)
       gk->InfoRequestResponse(*this, pdu.m_h323_uu_pdu, TRUE);
 
+#ifdef H323_H46017
+    if (m_maintainConnection) {
+        if (!pdu.GetQ931().HasIE(Q931::UserUserIE) && pdu.m_h323_uu_pdu.m_h323_message_body.IsValid())
+              pdu.BuildQ931();
+
+        if (!signallingChannel->WriteSignalPDU(pdu)) {
+            PTRACE(2,"H225\tERROR: Signalling Channel Failure: PDU was not sent!");
+            return HandleSignalChannelFailure();
+        }
+        return true;
+    }
+#endif
+
     // We don't have to take down the call if the signalling channel fails.
     // We may want to wait until the media fails or the local hangs up.
     if (!pdu.Write(*signallingChannel,this)) {
@@ -2460,7 +2473,7 @@ H323Connection::CallEndReason H323Connection::SendSignalSetup(const PString & al
     setup.m_tokens[last].m_nonStandard.m_data = gkAccessTokenData;
   }
 
-  if (!signallingChannel->SetRemoteAddress(gatekeeperRoute)) {
+  if (!signallingChannel->IsOpen() && !signallingChannel->SetRemoteAddress(gatekeeperRoute)) {
     PTRACE(1, "H225\tInvalid "
            << (gatekeeperRoute != address ? "gatekeeper" : "user")
            << " supplied address: \"" << gatekeeperRoute << '"');
@@ -2474,9 +2487,11 @@ H323Connection::CallEndReason H323Connection::SendSignalSetup(const PString & al
   // Release the mutex as can deadlock trying to clear call during connect.
   Unlock();
 
-  signallingChannel->SetWriteTimeout(100);
-
-  PBoolean connectFailed = !signallingChannel->Connect();
+  PBoolean connectFailed = false;
+  if (!signallingChannel->IsOpen()) {
+    signallingChannel->SetWriteTimeout(100);
+    connectFailed = !signallingChannel->Connect();
+  }
 
   // Lock while checking for shutting down.
   if (!Lock())
@@ -2597,7 +2612,8 @@ if (setup.m_conferenceGoal.GetTag() == H225_Setup_UUIE_conferenceGoal::e_create)
     lastPDUWasH245inSETUP = TRUE;
 
   // Set timeout for remote party to answer the call
-  signallingChannel->SetReadTimeout(endpoint.GetSignallingChannelCallTimeout());
+  if (!m_maintainConnection)
+    signallingChannel->SetReadTimeout(endpoint.GetSignallingChannelCallTimeout());
 
   return NumCallEndReasons;
 }

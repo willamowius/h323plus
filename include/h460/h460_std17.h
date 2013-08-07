@@ -74,12 +74,12 @@ public:
 
     //////////////////////
     // Public Function  call..
-    virtual PBoolean Initialise(const PString & remoteAddr = PString(), PBoolean srv = true, H323Transport * transport = NULL);
+    virtual PBoolean Initialise(const PString & remoteAddr = PString(), PBoolean srv = true);
 
     H46017Handler * GetHandler() { return m_handler; }
 
 protected:
-    PBoolean InitialiseTunnel(const H323TransportAddress & remoteAddr, H323Transport * transport);
+    PBoolean InitialiseTunnel(const H323TransportAddress & remoteAddr);
 
 
 private:
@@ -246,7 +246,7 @@ public:
 
     H323EndPoint * GetEndPoint();
 
-    PBoolean CreateNewTransport(H323Transport * transport);
+    PBoolean CreateNewTransport();
 
     PBoolean ReRegister(const PString & newid);
 

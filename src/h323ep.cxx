@@ -1508,7 +1508,15 @@ H323Connection * H323EndPoint::InternalMakeCall(const PString & trasferFromToken
 
   PTRACE(3, "H323\tCreated new connection: " << newToken);
 
-  new H225CallThread(*this, *connection, *transport, alias, address);
+#ifdef H323_H46017
+  if (RegisteredWithH46017()) {
+    H323Connection::CallEndReason reason = connection->SendSignalSetup(alias, address);
+    if (reason != H323Connection::NumCallEndReasons)
+      connection->ClearCall(reason);
+  } else
+#endif
+      new H225CallThread(*this, *connection, *transport, alias, address);
+
   return connection;
 }
 
@@ -3407,22 +3415,25 @@ PBoolean H323EndPoint::H46017CreateConnection(const PString & gatekeeper, PBoole
    }
 
    registrationTimeToLive = PTimeInterval(0, 19);
-   m_registeredWithH46017 = h46017->Initialise(gatekeeper, useSRV, m_h46017Transport);
+   m_registeredWithH46017 = h46017->Initialise(gatekeeper, useSRV);
    if (!m_registeredWithH46017) {
        PTRACE(4, "H.460.17 Gatekeeper connection failed");
        return false;
    }
 
+   m_h46017Transport = h46017->GetHandler()->GetTransport();
+
    // We are registered so we need to create the media tunnelling. 
 #ifdef H323_H46026
      H460_FeatureStd26 * h46026 = (H460_FeatureStd26 *)features.GetFeature(26);
      if (h46026) {
-         h46026->AttachH46017(h46017->GetHandler(), m_h46017Transport);
+         h46026->AttachH46017(h46017->GetHandler());
 
        PNatMethod_H46026 * natMethod = NULL;
        if (natMethods)
          natMethod = (PNatMethod_H46026 *)natMethods->LoadNatMethod("H46026");
        if (natMethod) {
+           h46026->AttachNatMethod(natMethod);
            natMethod->AttachEndPoint(this);
            natMethod->AttachManager(h46026->GetTunnel());
            natMethods->AddMethod(natMethod);

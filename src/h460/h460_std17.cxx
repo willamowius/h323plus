@@ -124,20 +124,22 @@ int H460_FeatureStd17::GetPurpose()
       return FeatureBase; 
 }
 
-PBoolean H460_FeatureStd17::Initialise(const PString & remoteAddr, PBoolean srv, H323Transport * transport)
+PBoolean H460_FeatureStd17::Initialise(const PString & remoteAddr, PBoolean srv)
 {
 
  if (!srv) {  // We are not doing SRV lookup
     H323TransportAddress rem(remoteAddr);
-    if (!InitialiseTunnel(rem, transport)) {
+    if (!InitialiseTunnel(rem)) {
          PTRACE(2,"H46017\tTunnel to " << rem << " Failed!"); 
          return false;
     }
+    if (!m_handler)
+        return false;
 #ifdef H323_H46018
     EP->H46018Enable(false);
 #endif
     isEnabled = true;
-    return (m_handler && m_handler->RegisterGatekeeper());
+    return (m_handler->RegisterGatekeeper());
 
  } else {
     std::vector<LookupRecord> routes;
@@ -152,7 +154,7 @@ PBoolean H460_FeatureStd17::Initialise(const PString & remoteAddr, PBoolean srv,
        const LookupRecord & rec = *r;
        H323TransportAddress rem(rec.addr,rec.port);
 
-       if (!InitialiseTunnel(rem, transport)) {
+       if (!InitialiseTunnel(rem)) {
          PTRACE(2,"H46017\tTunnel to " << rem << " Failed!"); 
          continue;
        }
@@ -172,12 +174,12 @@ PBoolean H460_FeatureStd17::Initialise(const PString & remoteAddr, PBoolean srv,
 }
 
 
-PBoolean H460_FeatureStd17::InitialiseTunnel(const H323TransportAddress & remoteAddr, H323Transport * transport)
+PBoolean H460_FeatureStd17::InitialiseTunnel(const H323TransportAddress & remoteAddr)
 {
     if (!m_handler)
        m_handler = new H46017Handler(*EP, remoteAddr);
 
-    return m_handler->CreateNewTransport(transport);
+    return m_handler->CreateNewTransport();
 }
 
 
@@ -457,10 +459,11 @@ PBoolean H46017Transport::WritePDU(const PBYTEArray & pdu)
 
 PBoolean H46017Transport::WriteSignalPDU( const H323SignalPDU & pdu )
 {
+PTRACE(4, "TUNNEL\tSending PDU\t" << pdu);
 
     PPER_Stream strm;
-    pdu.Encode(strm);
-    strm.CompleteEncoding();
+    const Q931 & q931 = pdu.GetQ931();
+    q931.Encode(strm);
 
     if (WritePDU(strm))
         return true;
@@ -558,8 +561,6 @@ void H46017Transport::SetTunnel(H46026Tunnel * mgr)
 
     if (!m_socketWrite)
         m_socketWrite = PThread::Create(PCREATE_NOTIFIER(SocketWrite), 0, PThread::AutoDeleteThread);
-
-    m_h46026tunnel = true;
 }
 
 void H46017Transport::SocketWrite(PThread &, INT)
@@ -616,7 +617,7 @@ H46017Handler::~H46017Handler()
 }
 
 
-PBoolean H46017Handler::CreateNewTransport(H323Transport * transport)
+PBoolean H46017Handler::CreateNewTransport()
 {
     PTRACE(5, "H46017\tCreating Transport.");
 

@@ -57,7 +57,7 @@ H460_FEATURE(Std26);
 
 PBoolean H460_FeatureStd26::isSupported = false;
 H460_FeatureStd26::H460_FeatureStd26()
-: H460_FeatureStd(26), EP(NULL), CON(NULL), handler(NULL), isEnabled(false)
+: H460_FeatureStd(26), EP(NULL), CON(NULL), handler(NULL), method(NULL), isEnabled(false)
 {
        FeatureCategory = FeatureSupported;
 }
@@ -89,14 +89,20 @@ int H460_FeatureStd26::GetPurpose()
 }
 
 
-void H460_FeatureStd26::AttachH46017(H46017Handler * m_handler, H323Transport * transport)
+void H460_FeatureStd26::AttachH46017(H46017Handler * m_handler)
 {
     handler = m_handler;
 
-    if (PIsDescendant(transport,H46017Transport))
+    H323Transport * transport = m_handler->GetTransport();
+    if (transport && PIsDescendant(transport,H46017Transport))
         ((H46017Transport *)transport)->SetTunnel(&h46026mgr);
 
     isSupported = true;
+}
+
+void H460_FeatureStd26::AttachNatMethod(PNatMethod_H46026 * _method)
+{
+    method = _method;
 }
 
 H46026Tunnel * H460_FeatureStd26::GetTunnel()
@@ -136,6 +142,9 @@ void H460_FeatureStd26::OnReceiveAdmissionConfirm(const H225_FeatureDescriptor &
 {
    if (handler)
        handler->SetH46026Tunnel(true);
+
+   if (method)
+       method->Activate(true);
 
    CON->H46026SetMediaTunneled();
    FeatureCategory = FeatureNeeded;
@@ -267,7 +276,7 @@ void PNatMethod_H46026::AttachEndPoint(H323EndPoint * ep)
 
 bool PNatMethod_H46026::IsAvailable(const PIPSocket::Address&) 
 { 
-    return (handler != NULL); 
+    return active; 
 }
 
 void PNatMethod_H46026::AttachManager(H46026Tunnel * m_handler)

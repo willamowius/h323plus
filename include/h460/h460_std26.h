@@ -98,6 +98,7 @@ protected:
 
 class H46017Handler;
 class H46017Transport;
+class PNatMethod_H46026;
 class H460_FeatureStd26 : public H460_FeatureStd 
 {
     PCLASSINFO(H460_FeatureStd26,H460_FeatureStd);
@@ -110,6 +111,8 @@ public:
     // Universal Declarations Every H460 Feature should have the following
     virtual void AttachEndPoint(H323EndPoint * _ep);
     virtual void AttachConnection(H323Connection * _con);
+
+    void AttachNatMethod(PNatMethod_H46026 * _method);
 
     static PStringArray GetFeatureName() { return PStringArray("Std26"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("TCPTunneling-H.460.26"); };
@@ -135,7 +138,7 @@ public:
     virtual PBoolean OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu);
     virtual void OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor & pdu);
 
-    void AttachH46017(H46017Handler * m_handler, H323Transport * transport);
+    void AttachH46017(H46017Handler * m_handler);
 
     H46026Tunnel * GetTunnel();
 
@@ -145,6 +148,7 @@ private:
 
     H46026Tunnel h46026mgr;             ///< Channel Manager
     H46017Handler * handler;            ///< handler
+    PNatMethod_H46026 * method;
     PBoolean isEnabled;
     static PBoolean isSupported;
 };
@@ -178,6 +182,7 @@ public:
    void AttachEndPoint(H323EndPoint * ep);
 
    void AttachManager(H46026Tunnel * m_handler);
+
 
    virtual PBoolean GetExternalAddress(
       PIPSocket::Address & externalAddress, /// External address of router
