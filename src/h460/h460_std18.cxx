@@ -228,7 +228,6 @@ PBoolean H460_FeatureStd19::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
     }
 #endif
 
-    CON->H46019Enabled();
     H460_FeatureStd feat = H460_FeatureStd(19); 
 #ifdef H323_H46019M
     if (EP->H46019MIsSending())
