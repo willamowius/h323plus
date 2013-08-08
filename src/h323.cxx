@@ -53,6 +53,7 @@
 #include "h460/h4601.h"
 
 #ifdef H323_H46018
+#include "h460/h460_std18.h"
 #include "h460/h46018_h225.h"
 #include "h460/h46019.h"
 #endif
@@ -6803,6 +6804,16 @@ void H323Connection::H46024BEnabled()
 void H323Connection::H46026SetMediaTunneled()
 {
     m_H46026enabled = true;
+#ifdef H323_H46018
+    if (features->HasFeature(19)) {
+        H460_Feature * feat = features->GetFeature(19);
+        if (feat) {
+            PTRACE(4,"H46026\tDisabling H.460.19 support for call");
+            ((H460_FeatureStd19 *)feat)->SetAvailable(false);
+        }
+    }
+    m_H46019enabled = false;
+#endif
 }
 
 PBoolean H323Connection::H46026IsMediaTunneled()
