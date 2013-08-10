@@ -1265,7 +1265,7 @@ static int encoder_set_options(
 		  if (STRCMPI(options[i], PLUGINCODEC_OPTION_TARGET_BIT_RATE) == 0)
 			 options[i+1] = num2str(targetBitrate);	
 		  if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_TIME) == 0)
-			 options[i+1] = framerate > 0 ? num2str(H264_CLOCKRATE/frameRate) : num2str(3000);
+			 options[i+1] = frameRate > 0 ? num2str(H264_CLOCKRATE/frameRate) : num2str(3000);
 		  if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_HEIGHT) == 0)
 			 options[i+1] = num2str(frameHeight);
 		  if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_WIDTH) == 0)
