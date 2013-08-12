@@ -356,37 +356,37 @@ PBoolean H46026ChannelManager::RTPFrameOut(unsigned crv, PacketTypes id, PINDEX 
 
     H46026_MediaFrame msg(data,len);
     if (rtp) {
-        H46026UDPBuffer * m_buffer = GetRTPBuffer(crv,sessionId);
-        if (!m_buffer) return false;
+        H46026UDPBuffer * buffer = GetRTPBuffer(crv,sessionId);
+        if (!buffer) return false;
 
         PBoolean toSend = false;
         switch (id) {
             case e_Audio: 
-                m_buffer->SetFrame(msg);
-                if (m_buffer->GetPacketCount() >= MAX_AUDIO_FRAMES)
+                buffer->SetFrame(msg);
+                if (buffer->GetPacketCount() >= MAX_AUDIO_FRAMES)
                     toSend = true;
                 break;
             case e_Video:
             case e_extVideo:
-                if (m_buffer->GetSize() + len > MAX_VIDEO_PAYLOAD) {
-                    PackageFrame(rtp,crv,id,sessionId,m_buffer->GetBuffer());
+                if (buffer->GetSize() + len > MAX_VIDEO_PAYLOAD) {
+                    PackageFrame(rtp, crv, id, sessionId, buffer->GetBuffer());
                 }
-                m_buffer->SetFrame(msg);
+                buffer->SetFrame(msg);
                 toSend = msg.GetMarker();
                 break;
             case e_Data:
             default:
-                m_buffer->SetFrame(msg);
+                buffer->SetFrame(msg);
                 toSend = true;
         }
         if (toSend)
-            return PackageFrame(rtp,crv,id,sessionId,m_buffer->GetBuffer());
+            return PackageFrame(rtp, crv, id, sessionId, buffer->GetBuffer());
         else
             return ProcessQueue();
     } else {
-       H46026UDPBuffer m_data(sessionId,rtp);
-       m_data.SetFrame(msg);
-       return PackageFrame(rtp,crv,id,sessionId,m_data.GetBuffer());
+       H46026UDPBuffer data(sessionId,rtp);
+       data.SetFrame(msg);
+       return PackageFrame(rtp, crv, id, sessionId, data.GetBuffer());
     }
     return true; 
 }
