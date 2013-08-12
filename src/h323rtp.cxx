@@ -259,8 +259,18 @@ PBoolean H323_RTP_UDP::OnReceivedPDU(H323_RTPChannel & channel,
     ok = TRUE;
   }
 
-  // TODO - Need to detect whether a H.460.26 call.H.460.26 
-  // does not have either media or mediaControl parameters - SH
+  // Need to detect whether a H.460.26 call.H.460.26 
+  // H.460.26 does not have either media or mediaControl parameters - SH
+  // if we don't check it and set ok=TRUE, the OLC will get rejected - JW
+  if (param.HasOptionalField(H245_H2250LogicalChannelParameters::e_transportCapability)
+      && param.m_transportCapability.HasOptionalField(H245_TransportCapability::e_mediaChannelCapabilities)) {
+    for (PINDEX i = 0; i < param.m_transportCapability.m_mediaChannelCapabilities.GetSize(); i++) {
+      H245_MediaChannelCapability & cap = param.m_transportCapability.m_mediaChannelCapabilities[i];
+      if (cap.HasOptionalField(H245_MediaChannelCapability::e_mediaTransport)
+          && (cap.m_mediaTransport.GetTag() == H245_MediaTransportType::e_ip_TCP) )
+        ok = TRUE;
+    }
+  }
 
   if (param.HasOptionalField(H245_H2250LogicalChannelParameters::e_mediaChannel)) {
     if (ok && channel.GetDirection() == H323Channel::IsReceiver)
