@@ -259,7 +259,7 @@ PBoolean H323_RTP_UDP::OnReceivedPDU(H323_RTPChannel & channel,
     ok = TRUE;
   }
 
-  // Need to detect whether a H.460.26 call.H.460.26 
+  // Need to detect whether a H.460.26 call.
   // H.460.26 does not have either media or mediaControl parameters - SH
   // if we don't check it and set ok=TRUE, the OLC will get rejected - JW
   if (param.HasOptionalField(H245_H2250LogicalChannelParameters::e_transportCapability)
@@ -328,6 +328,7 @@ PBoolean H323_RTP_UDP::OnReceivedAckPDU(H323_RTPChannel & channel,
     }
   }
 
+  // TODO: Need to detect whether a H.460.26 call.
   if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaControlChannel)) {
     PTRACE(1, "RTP_UDP\tNo mediaControlChannel specified");
     return FALSE;
@@ -337,6 +338,7 @@ PBoolean H323_RTP_UDP::OnReceivedAckPDU(H323_RTPChannel & channel,
   if (!ExtractTransport(param.m_mediaControlChannel, FALSE, errorCode))
     return FALSE;
 
+  // TODO: Need to detect whether a H.460.26 call.
   if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel)) {
     PTRACE(1, "RTP_UDP\tNo mediaChannel specified");
     return FALSE;
