@@ -299,18 +299,21 @@ H323Channel * H323SecureRealTimeCapability::CreateChannel(H323Connection & conne
   if (!caps || !caps->GetDiffieHellMan())
     return connection.CreateRealTimeLogicalChannel(*this, dir, sessionID, param, nrtpqos);
 
-
   RTP_Session * session = NULL;              // Session
-
-  if (param != NULL && param->HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaControlChannel)) {
-    session = connection.UseSession(param->m_sessionID, param->m_mediaControlChannel, dir, nrtpqos);
-  } else {
+  if (
+#ifdef H323_H46026
+     connection.H46026IsMediaTunneled() ||
+#endif
+     !param || !param->HasOptionalField(H245_H2250LogicalChannelParameters::e_mediaControlChannel)) {
     // Make a fake transport address from the connection so gets initialised with
     // the transport type (IP, IPX, multicast etc).
     H245_TransportAddress addr;
     connection.GetControlChannel().SetUpTransportPDU(addr, H323Transport::UseLocalTSAP);
     session = connection.UseSession(sessionID, addr, dir, nrtpqos);
+  } else {
+    session = connection.UseSession(param->m_sessionID, param->m_mediaControlChannel, dir, nrtpqos);
   }
+
   if (!session)
     return NULL;
 

@@ -521,6 +521,9 @@ PBoolean H323FileTransferChannel::OnReceivedPDU(const H245_H2250LogicalChannelPa
     
     ok = TRUE;
   }
+
+  if (IsMediaTunneled())
+      ok = true;
     
   if (param.HasOptionalField(H245_H2250LogicalChannelParameters::e_dynamicRTPPayloadType)) {
     SetDynamicRTPPayloadType(param.m_dynamicRTPPayloadType);
@@ -537,23 +540,24 @@ PBoolean H323FileTransferChannel::OnReceivedPDU(const H245_H2250LogicalChannelPa
 PBoolean H323FileTransferChannel::OnReceivedAckPDU(const H245_H2250LogicalChannelAckParameters & param)
 {
   if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_sessionID)) {
+      return false;
   }
     
-  if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaControlChannel)) {
-    return FALSE;
-  }
-    
-  unsigned errorCode;
-  if (!ExtractTransport(param.m_mediaControlChannel, FALSE, errorCode)) {
-    return FALSE;
-  }
-    
-  if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel)) {
-    return FALSE;
-  }
-    
-  if (!ExtractTransport(param.m_mediaChannel, TRUE, errorCode)) {
-    return FALSE;
+  if (!IsMediaTunneled()) {
+      if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaControlChannel)) {
+        return FALSE;
+      }       
+      unsigned errorCode;
+      if (!ExtractTransport(param.m_mediaControlChannel, FALSE, errorCode)) {
+        return FALSE;
+      }
+       
+      if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel)) {
+        return FALSE;
+      } 
+      if (!ExtractTransport(param.m_mediaChannel, TRUE, errorCode)) {
+        return FALSE;
+      }
   }
     
   if (param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_dynamicRTPPayloadType)) {

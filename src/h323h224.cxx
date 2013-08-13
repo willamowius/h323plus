@@ -368,10 +368,7 @@ PBoolean H323_H224Channel::OnSendingPDU(H245_H2250LogicalChannelParameters & par
     H323TransportAddress mediaAddress(rtpSession.GetLocalAddress(), rtpSession.GetLocalDataPort());
     param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel);
     mediaAddress.SetPDU(param.m_mediaChannel);
-    
-  }    else{
-
-  }
+  }  
     
   // Set dynamic payload type, if is one
   int rtpPayloadType = GetDynamicRTPPayloadType();
@@ -433,6 +430,9 @@ PBoolean H323_H224Channel::OnReceivedPDU(const H245_H2250LogicalChannelParameter
     }
     ok = TRUE;
   }
+
+  if (IsMediaTunneled())
+    ok = TRUE;
     
   if (param.HasOptionalField(H245_H2250LogicalChannelParameters::e_dynamicRTPPayloadType)) {
     SetDynamicRTPPayloadType(param.m_dynamicRTPPayloadType);
@@ -451,21 +451,21 @@ PBoolean H323_H224Channel::OnReceivedAckPDU(const H245_H2250LogicalChannelAckPar
   if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_sessionID)) {
   }
     
-  if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaControlChannel)) {
-    return FALSE;
-  }
-    
-  unsigned errorCode;
-  if (!ExtractTransport(param.m_mediaControlChannel, FALSE, errorCode)) {
-    return FALSE;
-  }
-    
-  if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel)) {
-    return FALSE;
-  }
-    
-  if (!ExtractTransport(param.m_mediaChannel, TRUE, errorCode)) {
-    return FALSE;
+  if (!IsMediaTunneled()) {
+      if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaControlChannel)) {
+        return FALSE;
+      }     
+      unsigned errorCode;
+      if (!ExtractTransport(param.m_mediaControlChannel, FALSE, errorCode)) {
+        return FALSE;
+      }
+        
+      if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel)) {
+        return FALSE;
+      }
+      if (!ExtractTransport(param.m_mediaChannel, TRUE, errorCode)) {
+        return FALSE;
+      }
   }
     
   if (param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_dynamicRTPPayloadType)) {

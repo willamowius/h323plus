@@ -184,6 +184,12 @@ H323Channel::H323Channel(H323Connection & conn, const H323Capability & cap)
   terminating = FALSE;
   opened = FALSE;
   paused = FALSE;
+
+#ifdef H323_H46026
+  mediaTunneled = conn.H46026IsMediaTunneled();
+#else
+  mediaTunneled = FALSE;
+#endif
 }
 
 
@@ -457,6 +463,7 @@ H323_RealTimeChannel::H323_RealTimeChannel(H323Connection & connection,
                                            const H323Capability & capability,
                                            Directions direction)
   : H323UnidirectionalChannel(connection, capability, direction)
+
 {
   rtpPayloadType = RTP_DataFrame::IllegalPayloadType;
 }
@@ -1269,14 +1276,16 @@ PBoolean H323_ExternalRTPChannel::OnSendingPDU(H245_H2250LogicalChannelParameter
   param.IncludeOptionalField(H245_H2250LogicalChannelParameters::e_silenceSuppression);
   param.m_silenceSuppression = FALSE;
 
-  // unicast must have mediaControlChannel
-  param.IncludeOptionalField(H245_H2250LogicalChannelParameters::e_mediaControlChannel);
-  externalMediaControlAddress.SetPDU(param.m_mediaControlChannel);
+  // unicast must have mediaControlChannel unless tunneled
+  if (!IsMediaTunneled()) {
+      param.IncludeOptionalField(H245_H2250LogicalChannelParameters::e_mediaControlChannel);
+      externalMediaControlAddress.SetPDU(param.m_mediaControlChannel);
 
-  if (receiver) {
-    // set mediaChannel
-    param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel);
-    externalMediaAddress.SetPDU(param.m_mediaChannel);
+      if (receiver) {
+        // set mediaChannel
+        param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel);
+        externalMediaAddress.SetPDU(param.m_mediaChannel);
+      }
   }
 
   return TRUE;
@@ -1285,13 +1294,15 @@ PBoolean H323_ExternalRTPChannel::OnSendingPDU(H245_H2250LogicalChannelParameter
 
 void H323_ExternalRTPChannel::OnSendOpenAck(H245_H2250LogicalChannelAckParameters & param) const
 {
-  // set mediaControlChannel
-  param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaControlChannel);
-  externalMediaControlAddress.SetPDU(param.m_mediaControlChannel);
+  if (!IsMediaTunneled()) {
+      // set mediaControlChannel
+      param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaControlChannel);
+      externalMediaControlAddress.SetPDU(param.m_mediaControlChannel);
 
-  // set mediaChannel
-  param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel);
-  externalMediaAddress.SetPDU(param.m_mediaChannel);
+      // set mediaChannel
+      param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel);
+      externalMediaAddress.SetPDU(param.m_mediaChannel);
+  }
 }
 
 
@@ -1305,7 +1316,7 @@ PBoolean H323_ExternalRTPChannel::OnReceivedPDU(const H245_H2250LogicalChannelPa
     return FALSE;
   }
 
-  if (!param.HasOptionalField(H245_H2250LogicalChannelParameters::e_mediaControlChannel)) {
+  if (!IsMediaTunneled() && !param.HasOptionalField(H245_H2250LogicalChannelParameters::e_mediaControlChannel)) {
     PTRACE(1, "LogChan\tNo mediaControlChannel specified");
     errorCode = H245_OpenLogicalChannelReject_cause::e_unspecified;
     return FALSE;
@@ -1331,23 +1342,23 @@ PBoolean H323_ExternalRTPChannel::OnReceivedAckPDU(const H245_H2250LogicalChanne
     PTRACE(1, "LogChan\twarning: Ack for invalid session: " << param.m_sessionID);
   }
 
-  if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaControlChannel)) {
-    PTRACE(1, "LogChan\tNo mediaControlChannel specified");
-    return FALSE;
+  if (!IsMediaTunneled()
+      if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaControlChannel)) {
+        PTRACE(1, "LogChan\tNo mediaControlChannel specified");
+        return FALSE;
+      }
+      remoteMediaControlAddress = param.m_mediaControlChannel;
+      if (remoteMediaControlAddress.IsEmpty())
+        return FALSE;
+
+      if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel)) {
+        PTRACE(1, "LogChan\tNo mediaChannel specified");
+        return FALSE;
+      }
+      remoteMediaAddress = param.m_mediaChannel;
+      if (remoteMediaAddress.IsEmpty())
+        return FALSE;
   }
-
-  remoteMediaControlAddress = param.m_mediaControlChannel;
-  if (remoteMediaControlAddress.IsEmpty())
-    return FALSE;
-
-  if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel)) {
-    PTRACE(1, "LogChan\tNo mediaChannel specified");
-    return FALSE;
-  }
-
-  remoteMediaAddress = param.m_mediaChannel;
-  if (remoteMediaAddress.IsEmpty())
-    return FALSE;
 
   return TRUE;
 }
@@ -1504,11 +1515,13 @@ void H323DataChannel::OnSendOpenAck(const H245_OpenLogicalChannel & /*open*/,
        ack.IncludeOptionalField(H245_OpenLogicalChannel::e_genericInformation);
   }
 
-  param->IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel);
-  if (listener != NULL)
-    listener->SetUpTransportPDU(param->m_mediaChannel, connection.GetControlChannel());
-  else
-    transport->SetUpTransportPDU(param->m_mediaChannel, H323Transport::UseLocalTSAP);
+  if (!IsMediaTunneled()) {
+      param->IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel);
+      if (listener != NULL)
+        listener->SetUpTransportPDU(param->m_mediaChannel, connection.GetControlChannel());
+      else
+        transport->SetUpTransportPDU(param->m_mediaChannel, H323Transport::UseLocalTSAP);
+  }
 }
 
 
@@ -1553,7 +1566,7 @@ PBoolean H323DataChannel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & ac
 {
   PTRACE(3, "LogChan\tOnReceivedAckPDU");
 
-  const H245_TransportAddress * address;
+  const H245_TransportAddress * address = NULL;
 
   if (separateReverseChannel) {
       PTRACE(3, "LogChan\tseparateReverseChannels");
@@ -1570,12 +1583,13 @@ PBoolean H323DataChannel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & ac
 
     const H245_H2250LogicalChannelAckParameters & param = ack.m_forwardMultiplexAckParameters;
 
-    if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel)) {
-      PTRACE(1, "LogChan\tNo media channel address provided");
-      return FALSE;
+    if (!IsMediaTunneled()) {
+        if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel)) {
+          PTRACE(1, "LogChan\tNo media channel address provided");
+          return FALSE;
+        }
+        address = &param.m_mediaChannel;
     }
-
-    address = &param.m_mediaChannel;
 
     if (ack.HasOptionalField(H245_OpenLogicalChannelAck::e_reverseLogicalChannelParameters)) {
       PTRACE(3, "LogChan\treverseLogicalChannelParameters set");
@@ -1597,9 +1611,12 @@ PBoolean H323DataChannel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & ac
 
     const H245_H2250LogicalChannelParameters & param = ack.m_reverseLogicalChannelParameters.m_multiplexParameters;
 
-    if (!param.HasOptionalField(H245_H2250LogicalChannelParameters::e_mediaChannel)) {
-      PTRACE(1, "LogChan\tNo media channel address provided");
-      return FALSE;
+    if (!IsMediaTunneled()) {
+        if (!param.HasOptionalField(H245_H2250LogicalChannelParameters::e_mediaChannel)) {
+          PTRACE(1, "LogChan\tNo media channel address provided");
+          return FALSE;
+        }
+        address = &param.m_mediaChannel;
     }
 
     if (ack.HasOptionalField(H245_OpenLogicalChannelAck::e_genericInformation) && 
@@ -1607,8 +1624,6 @@ PBoolean H323DataChannel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & ac
         PTRACE(1, "LogChan\tOnReceivedPDUAck Invalid Generic Parameters");
         return FALSE;
     }
-
-    address = &param.m_mediaChannel;
   }
 
   if (!CreateTransport()) {
@@ -1616,8 +1631,8 @@ PBoolean H323DataChannel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & ac
     return FALSE;
   }
 
-  if (!transport->ConnectTo(*address)) {
-    PTRACE(1, "LogChan\tCould not connect to remote transport address: " << *address);
+  if (!address || !transport->ConnectTo(*address)) {
+    PTRACE(1, "LogChan\tCould not connect to remote transport address: ");
     return FALSE;
   }
 

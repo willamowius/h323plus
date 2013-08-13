@@ -330,6 +330,10 @@ class H323Channel : public PObject
     void SetPause(
       PBoolean pause   ///< New pause flag
     ) { paused = pause; }
+
+   /** Is Media Tunneled
+     */
+    PBoolean IsMediaTunneled() const { return mediaTunneled; }
   //@}
 
   protected:
@@ -344,6 +348,7 @@ class H323Channel : public PObject
     PBoolean                   opened;
     PBoolean                   paused;
     PBoolean                   terminating;
+    PBoolean                   mediaTunneled;
 
   private:
     unsigned bandwidthUsed;

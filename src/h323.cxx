@@ -4631,14 +4631,18 @@ H323Channel * H323Connection::CreateRealTimeLogicalChannel(const H323Capability 
 {
   RTP_Session * session = NULL;
 
-  if (param != NULL && param->HasOptionalField(H245_H2250LogicalChannelParameters::e_mediaControlChannel))
+  if (
+#ifdef H323_H46026
+     H46026IsMediaTunneled() ||
+#endif
+     !param || !param->HasOptionalField(H245_H2250LogicalChannelParameters::e_mediaControlChannel)) {
+        // Make a fake transmprt address from the connection so gets initialised with
+        // the transport type (IP, IPX, multicast etc).
+        H245_TransportAddress addr;
+        GetControlChannel().SetUpTransportPDU(addr, H323Transport::UseLocalTSAP);
+        session = UseSession(sessionID, addr, dir, rtpqos);
+  } else {
     session = UseSession(param->m_sessionID, param->m_mediaControlChannel, dir, rtpqos);
-  else {
-    // Make a fake transmprt address from the connection so gets initialised with
-    // the transport type (IP, IPX, multicast etc).
-    H245_TransportAddress addr;
-    GetControlChannel().SetUpTransportPDU(addr, H323Transport::UseLocalTSAP);
-    session = UseSession(sessionID, addr, dir, rtpqos);
   }
 
   if (session == NULL)
