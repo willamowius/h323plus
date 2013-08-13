@@ -693,7 +693,7 @@ void H323SignalPDU::LoadTunneledQ931(const Q931 & q931)
     m_h323_uu_pdu.m_h323_message_body.SetTag(H225_H323_UU_PDU_h323_message_body::e_empty);
     return;
   }
-  PTRACE(5 ,"H225\tTunneled PDU\n" << *this);
+  PTRACE(5 ,"H225\tRead Tunneled PDU\n" << *this);
 }
 #endif
 
