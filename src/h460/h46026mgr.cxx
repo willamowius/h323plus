@@ -225,7 +225,7 @@ PBoolean H46026_MediaFrame::GetMarker()
 //-------------------------------------------
 
 H46026ChannelManager::H46026ChannelManager()
-:  m_mbps(MAX_VIDEO_KBPS), m_socketPacketReady(false), m_currentPacketTime(0)
+:  m_mbps(MAX_VIDEO_KBPS), m_socketPacketReady(false), m_currentPacketTime(0), m_pktCounter(0)
 {
 
 // Initialise the Information PDU RTP Message structure.
@@ -280,6 +280,7 @@ void H46026ChannelManager::BufferRelease(unsigned crv)
 PBoolean H46026ChannelManager::SignalMsgOut(const Q931 & pdu)
 {
     socketOrder::MessageHeader prior;
+    prior.id = NextPacketCounter();
     prior.sessionId = 0;
     prior.crv = pdu.GetCallReference();
     prior.priority = socketOrder::Priority_High;
@@ -292,6 +293,7 @@ PBoolean H46026ChannelManager::SignalMsgOut(const BYTE * data, PINDEX len)
 {
     PBYTEArray msg(data,len);
     socketOrder::MessageHeader prior;
+    prior.id = NextPacketCounter();
     prior.sessionId = 0;
     prior.crv = 0;
     prior.priority = socketOrder::Priority_High;
@@ -306,7 +308,8 @@ H46026UDPBuffer * H46026ChannelManager::GetRTPBuffer(unsigned crv, int sessionId
     H46026RTPBuffer::iterator r = m_rtpBuffer.find(crv);
     if (r != m_rtpBuffer.end()) {
         H46026CallMap::iterator c = r->second.find(sessionId);
-        return c->second;
+        if (c != r->second.end())
+            return c->second;
     }
     m_rtpBuffer[crv][sessionId] = new H46026UDPBuffer(sessionId,true);
     return m_rtpBuffer[crv][sessionId];
@@ -337,6 +340,7 @@ PBoolean H46026ChannelManager::PackageFrame(PBoolean rtp, unsigned crv, PacketTy
         }
     } else
         prior.priority = socketOrder::Priority_Low;
+    prior.id = NextPacketCounter();
     prior.packTime = PTimer::Tick().GetMilliSeconds();
     prior.delay = PACKETDELAY(mediaPDU.GetIE(Q931::UserUserIE).GetSize(),m_mbps);   
     // int((mediaPDU.GetIE(Q931::UserUserIE).GetSize() / MAX_PIPE_SHAPING) * 1000.0);
@@ -425,6 +429,15 @@ PBoolean H46026ChannelManager::ProcessQueue()
     return true;
 }
 
+unsigned H46026ChannelManager::NextPacketCounter()
+{
+    m_pktCounter++;
+    if (m_pktCounter > 65500)
+        m_pktCounter = 1;
+
+    return m_pktCounter;
+}
+
 PBoolean H46026ChannelManager::SocketIn(const BYTE * data, PINDEX len)
 {
     PBYTEArray buffer(data,len);
@@ -479,6 +492,7 @@ PBoolean H46026ChannelManager::SocketOut(BYTE * data, PINDEX & len)
     PBoolean gotPacket = false;
     m_queueMutex.Wait();
         if (m_socketQueue.size() > 0) {
+            PTRACE(6,"H46026\tSend " << m_socketQueue.top().second.id << " delay " << m_socketQueue.top().second.delay);
             m_currentPacketTime = nowTime + m_socketQueue.top().second.delay;
             len = m_socketQueue.top().first.GetSize();
             memcpy(data, (const BYTE *)m_socketQueue.top().first, len);
@@ -494,6 +508,7 @@ PBoolean H46026ChannelManager::SocketOut(BYTE * data, PINDEX & len)
 
 PBoolean H46026ChannelManager::WriteQueue(const Q931 & msg, const socketOrder::MessageHeader & prior)
 {
+    PTRACE(6,"H46026\tPack " << prior.id << " type " << msg.GetMessageTypeName());
     PBYTEArray data;
     msg.Encode(data);
     return WriteQueue(data, prior);

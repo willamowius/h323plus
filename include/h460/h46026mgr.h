@@ -74,6 +74,7 @@ public:
      };
 
      struct MessageHeader {
+        unsigned id;
         unsigned crv;
         int sessionId;
         int priority;
@@ -185,10 +186,13 @@ protected:
 
     PBoolean ProcessQueue();
 
+    unsigned NextPacketCounter();
+
 private:
     double                     m_mbps;
     PBoolean                   m_socketPacketReady;
     PInt64                     m_currentPacketTime;
+    unsigned                   m_pktCounter;
 
     H225_H323_UserInformation  m_uuie;
     H46026RTPBuffer            m_rtpBuffer;
