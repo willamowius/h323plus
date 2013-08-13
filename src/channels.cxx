@@ -1342,7 +1342,7 @@ PBoolean H323_ExternalRTPChannel::OnReceivedAckPDU(const H245_H2250LogicalChanne
     PTRACE(1, "LogChan\twarning: Ack for invalid session: " << param.m_sessionID);
   }
 
-  if (!IsMediaTunneled()
+  if (!IsMediaTunneled()) {
       if (!param.HasOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaControlChannel)) {
         PTRACE(1, "LogChan\tNo mediaControlChannel specified");
         return FALSE;
