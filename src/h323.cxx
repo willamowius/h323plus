@@ -2558,6 +2558,9 @@ if (setup.m_conferenceGoal.GetTag() == H225_Setup_UUIE_conferenceGoal::e_create)
     switch (localCapabilities[i].GetMainType()) {
       case H323Capability::e_Audio :
       case H323Capability::e_UserInput :
+      case H323Capability::e_GenericControl :
+      case H323Capability::e_ConferenceControl :
+      case H323Capability::e_Security :
         break;
 
       default : // Is video or other data (eg T.120)
