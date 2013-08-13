@@ -59,7 +59,7 @@
 
 const unsigned H46026_ProtocolID[] = { 0,0,8,2250,0,H225_PROTOCOL_VERSION };
 
-bool GetInfoUUIE(const Q931 & q931, H225_H323_UserInformation & uuie)
+static bool GetInfoUUIE(const Q931 & q931, H225_H323_UserInformation & uuie)
 {
     if (q931.HasIE(Q931::UserUserIE)) {
         PPER_Stream strm(q931.GetIE(Q931::UserUserIE));
@@ -69,7 +69,7 @@ bool GetInfoUUIE(const Q931 & q931, H225_H323_UserInformation & uuie)
     return false;
 }
 
-void SetInfoUUIE(Q931 & q931, const H225_H323_UserInformation & uuie)
+static void SetInfoUUIE(Q931 & q931, const H225_H323_UserInformation & uuie)
 {
     PPER_Stream strm;
     uuie.Encode(strm);
@@ -77,7 +77,7 @@ void SetInfoUUIE(Q931 & q931, const H225_H323_UserInformation & uuie)
     q931.SetIE(Q931::UserUserIE, strm);
 }
 
-void BuildRTPFrame(Q931 & q931, H225_H323_UserInformation & uuie, unsigned crv, H46026_UDPFrame & data)
+static void BuildRTPFrame(Q931 & q931, H225_H323_UserInformation & uuie, unsigned crv, H46026_UDPFrame & data)
 {
     // Set the RTP Payload
     PASN_OctetString & val = uuie.m_h323_uu_pdu.m_genericData[0].m_parameters[0].m_content;
@@ -91,7 +91,7 @@ void BuildRTPFrame(Q931 & q931, H225_H323_UserInformation & uuie, unsigned crv, 
     data.m_frame.SetSize(0);
 }
 
-PBoolean ReadRTPFrame(const Q931 & q931, H46026_UDPFrame & data)
+static PBoolean ReadRTPFrame(const Q931 & q931, H46026_UDPFrame & data)
 {
     H225_H323_UserInformation uuie;
     if (!GetInfoUUIE(q931, uuie)) {
@@ -140,7 +140,7 @@ PBoolean ReadRTPFrame(const Q931 & q931, H46026_UDPFrame & data)
     return true;
 }
 
-void ClearBufferEntries(H46026RTPBuffer & rtpBuffer, unsigned crv)
+static void ClearBufferEntries(H46026RTPBuffer & rtpBuffer, unsigned crv)
 {
     if (crv == 0) {
         for (H46026RTPBuffer::iterator i = rtpBuffer.begin(); i != rtpBuffer.end(); ++i) {
