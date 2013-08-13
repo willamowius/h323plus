@@ -262,7 +262,7 @@ H46017Transport::H46017Transport(H323EndPoint & endpoint,
    : H323TransportTCP(endpoint,binding), 
 #endif
      ReadTimeOut(PMaxTimeInterval), 
-     Feature(feat), remoteShutDown(false), closeTransport(false)
+     Feature(feat), remoteShutDown(false), closeTransport(false), m_signalProcess(NULL)
  #ifdef H323_H46026
      ,m_h46026tunnel(false), m_socketMgr(NULL), m_socketWrite(NULL)
 #endif
@@ -376,7 +376,7 @@ PBoolean H46017Transport::HandleH46017PDU(H323SignalPDU & pdu)
     // Inspect the signalling message to see if RAS
      if (HandleH46017RAS(pdu)) 
          return true;
-     else if (HandleH46017SignallingPDU(pdu.GetQ931().GetCallReference(),pdu))
+     else if (HandleH46017SignalPDU(pdu))
          return true;
      else
          return false;
@@ -396,12 +396,43 @@ PBoolean H46017Transport::HandleH46017RAS(const H323SignalPDU & pdu)
        return true;
     }
     return false;
-} 
+}
+
+// Unfortunately we have to put the signalling messages onto a seperate thread
+// as the messages may block for several seconds.
+PBoolean H46017Transport::HandleH46017SignalPDU(H323SignalPDU & pdu)
+{
+    if (!m_signalProcess) {
+        m_signalProcess = PThread::Create(PCREATE_NOTIFIER(SignalProcess), 0,
+                    PThread::AutoDeleteThread,
+                    PThread::NormalPriority,
+                    "h46017signal:%x");
+    }
+    signalMutex.Wait();
+    recdpdu.push(pdu);
+    signalMutex.Signal();
+    msgRecd.Signal();
+    return true;
+}
+
+void H46017Transport::SignalProcess(PThread &, INT)
+{
+    H323SignalPDU pdu;
+    while (!closeTransport) {
+        msgRecd.Wait();
+        while (!closeTransport && !recdpdu.empty()) {
+            signalMutex.Wait();
+                pdu = recdpdu.front();
+                recdpdu.pop();
+            signalMutex.Signal();
+            HandleH46017SignallingPDU(pdu.GetQ931().GetCallReference(),pdu);
+        }
+    }
+}
 
 PBoolean H46017Transport::HandleH46017SignallingPDU(unsigned crv, H323SignalPDU & pdu)
 {
   H323Connection * connection = NULL;
-  //PString callid = GetCallIdentifer(pdu);
   if ((pdu.GetQ931().GetMessageType() == Q931::SetupMsg))
       connection = HandleH46017SetupPDU(pdu);
   else {
@@ -459,7 +490,7 @@ PBoolean H46017Transport::WritePDU(const PBYTEArray & pdu)
 
 PBoolean H46017Transport::WriteSignalPDU( const H323SignalPDU & pdu )
 {
-PTRACE(4, "TUNNEL\tSending PDU\t" << pdu);
+PTRACE(4, "H46017\tSending Tunnel\t" << pdu);
 
     PPER_Stream strm;
     const Q931 & q931 = pdu.GetQ931();
@@ -468,7 +499,7 @@ PTRACE(4, "TUNNEL\tSending PDU\t" << pdu);
     if (WritePDU(strm))
         return true;
  
-   PTRACE(1, "TUNNEL\tWrite PDU failed ("
+   PTRACE(1, "H46017\tTunnel write failed ("
          << GetErrorNumber(PChannel::LastWriteError)
          << "): " << GetErrorText(PChannel::LastWriteError));
 
@@ -513,6 +544,13 @@ PBoolean H46017Transport::Close()
    PWaitAndSignal m(shutdownMutex);
 
    closeTransport = TRUE;
+
+   signalMutex.Wait();
+   while (!recdpdu.empty()) {
+        recdpdu.pop();
+   }
+   signalMutex.Signal();
+   msgRecd.Signal();
 
    PTRACE(4, "H46017\tClosing H46017 NAT channel.");   
    return H323TransportTCP::Close(); 

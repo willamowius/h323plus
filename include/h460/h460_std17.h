@@ -193,18 +193,21 @@ class H46017Transport  : public H323TransportTCP
 
   protected:
 
-    /**Handle the H46017 Signalling
-      */
-    PBoolean HandleH46017SignallingPDU(unsigned crv, H323SignalPDU & pdu);
-
     /**Handle the H46017 SetupPDU
       */
     H323Connection * HandleH46017SetupPDU(H323SignalPDU & pdu);
 
     /**Handle the H46017 Tunnelled RAS
       */
+    PBoolean HandleH46017SignalPDU(H323SignalPDU & pdu);
+
+    /**Handle the H46017 Tunnelled RAS
+      */
     PBoolean HandleH46017RAS(const H323SignalPDU & pdu);
 
+    /**Handle the H46017 Signalling on Signal Process Thread.
+      */
+    PBoolean HandleH46017SignallingPDU(unsigned crv, H323SignalPDU & pdu);
 
     PBoolean WriteTunnel(H323SignalPDU & msg);
 
@@ -218,6 +221,12 @@ class H46017Transport  : public H323TransportTCP
 
      PBoolean   remoteShutDown;
      PBoolean    closeTransport;
+
+     PSyncPoint  msgRecd;
+     PMutex signalMutex;
+     std::queue<H323SignalPDU>  recdpdu;
+     PThread * m_signalProcess;
+     PDECLARE_NOTIFIER(PThread, H46017Transport, SignalProcess);
 
  #ifdef H323_H46026
      PBoolean   m_h46026tunnel;
