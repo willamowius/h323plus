@@ -342,13 +342,16 @@ PBoolean H46026UDPSocket::WriteBuffer(const PBYTEArray & buffer)
 PBoolean H46026UDPSocket::DoPseudoRead(int & selectStatus)
 {
    while (m_rtpSocket && m_rtpQueue.size() == 0) {
-       m_selectBlock.Delay(2);
+       m_selectBlock.Delay(3);
        if (m_shutdown) break;
    }
 
-   bool isData = (!m_shutdown && m_rtpQueue.size() > 0);
-   selectStatus += ( isData ? (m_rtpSocket ? -1 : -2) : 0);
-   return isData;
+   if (m_shutdown)
+       selectStatus += PSocket::Interrupted;
+   else
+       selectStatus += ((m_rtpQueue.size() > 0) ? (m_rtpSocket ? -1 : -2) : 0);
+
+   return m_rtpSocket;
 }
 
 PBoolean H46026UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD & port)
