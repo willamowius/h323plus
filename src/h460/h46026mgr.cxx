@@ -109,7 +109,7 @@ static PBoolean ReadRTPFrame(const Q931 & q931, H46026_UDPFrame & data)
             PTRACE(2,"H46026\tERROR BAD Media Frame structure");
             return false;
     }
-    H225_GenericIdentifier & id = uuie.m_h323_uu_pdu.m_genericData[0].m_parameters[0].m_id;
+    H225_GenericIdentifier & id = uuie.m_h323_uu_pdu.m_genericData[0].m_id;
     if (id.GetTag() != H225_GenericIdentifier::e_standard) {
         PTRACE(2,"H46026\tERROR BAD Media Frame ID");
         return false;
