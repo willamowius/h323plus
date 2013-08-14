@@ -418,14 +418,21 @@ PBoolean H46017Transport::HandleH46017SignalPDU(H323SignalPDU & pdu)
 void H46017Transport::SignalProcess(PThread &, INT)
 {
     H323SignalPDU pdu;
+    PBoolean dataToProcess = false;
     while (!closeTransport) {
         msgRecd.Wait();
         while (!closeTransport && !recdpdu.empty()) {
             signalMutex.Wait();
+            if (!recdpdu.empty()) {
                 pdu = recdpdu.front();
+                dataToProcess = true;
                 recdpdu.pop();
+            }
             signalMutex.Signal();
-            HandleH46017SignallingPDU(pdu.GetQ931().GetCallReference(),pdu);
+            if (dataToProcess) {
+                HandleH46017SignallingPDU(pdu.GetQ931().GetCallReference(),pdu);
+                dataToProcess = false;
+            }
         }
     }
 }
@@ -599,6 +606,8 @@ void H46017Transport::SetTunnel(H46026Tunnel * mgr)
 
     if (!m_socketWrite)
         m_socketWrite = PThread::Create(PCREATE_NOTIFIER(SocketWrite), 0, PThread::AutoDeleteThread);
+
+    m_h46026tunnel = true;
 }
 
 void H46017Transport::SocketWrite(PThread &, INT)
