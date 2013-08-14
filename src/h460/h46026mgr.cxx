@@ -88,7 +88,6 @@ static void BuildRTPFrame(Q931 & q931, H225_H323_UserInformation & uuie, unsigne
     q931.BuildInformation(crv, true);
     q931.SetCallState(Q931::CallState_CallInitiated);
     SetInfoUUIE(q931,uuie);
-    data.m_frame.SetSize(0);
 }
 
 static PBoolean ReadRTPFrame(const Q931 & q931, H46026_UDPFrame & data)
@@ -159,6 +158,28 @@ static void ClearBufferEntries(H46026RTPBuffer & rtpBuffer, unsigned crv)
             r->second.clear();
             rtpBuffer.erase(r);
         }
+    }
+}
+
+static PString H46026PriorityAsString(int priority)
+{
+    switch (priority) {
+        case socketOrder::Priority_Critical:  return "Critical(Audio)";
+        case socketOrder::Priority_Discretion:  return "Descretion(Video)";
+        case socketOrder::Priority_High:  return "High(Signal)";        
+        case socketOrder::Priority_Low: return "Low(RTCP)";
+        default: return "Unknown";
+    }
+}
+
+static PString H46026MediaTypeAsString(int type)
+{
+    switch (type) {
+        case H46026ChannelManager::e_Audio:    return "Audio";
+        case H46026ChannelManager::e_Video:    return "Video";
+        case H46026ChannelManager::e_Data:     return "Data";
+        case H46026ChannelManager::e_extVideo: return "Content";
+        default: return "Unknown";
     }
 }
 
@@ -343,7 +364,10 @@ PBoolean H46026ChannelManager::PackageFrame(PBoolean rtp, unsigned crv, PacketTy
     prior.id = NextPacketCounter();
     prior.packTime = PTimer::Tick().GetMilliSeconds();
     prior.delay = PACKETDELAY(mediaPDU.GetIE(Q931::UserUserIE).GetSize(),m_mbps);   
-    // int((mediaPDU.GetIE(Q931::UserUserIE).GetSize() / MAX_PIPE_SHAPING) * 1000.0);
+
+    PTRACE(6,"H46026\tMedia Frame #" << prior.id << " " << H46026MediaTypeAsString(id) << " d: " << prior.delay << " p: " << H46026PriorityAsString(prior.priority) << "\n" << data);
+    // Zero data
+    data.m_frame.SetSize(0);
 
     // Write to the output Queue
     return WriteQueue(mediaPDU, prior);
