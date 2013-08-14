@@ -246,7 +246,7 @@ PBoolean H323_H224Channel::OnSendingPDU(H245_OpenLogicalChannel & open) const
             
     return OnSendingPDU(open.m_reverseLogicalChannelParameters.m_multiplexParameters);
     
-  }    else {
+  } else {
       
     open.m_forwardLogicalChannelParameters.m_multiplexParameters.SetTag(
         H245_OpenLogicalChannel_forwardLogicalChannelParameters_multiplexParameters::e_h2250LogicalChannelParameters);
@@ -377,7 +377,20 @@ PBoolean H323_H224Channel::OnSendingPDU(H245_H2250LogicalChannelParameters & par
     param.IncludeOptionalField(H245_H2250LogicalChannelParameters::e_dynamicRTPPayloadType);
     param.m_dynamicRTPPayloadType = rtpPayloadType;
   }
-    
+
+  param.IncludeOptionalField(H245_H2250LogicalChannelParameters::e_transportCapability);
+  H245_TransportCapability & cap = param.m_transportCapability;
+    cap.IncludeOptionalField(H245_TransportCapability::e_mediaChannelCapabilities); 
+    H245_ArrayOf_MediaChannelCapability & mediaCaps = cap.m_mediaChannelCapabilities;
+    mediaCaps.SetSize(1);
+    H245_MediaChannelCapability & mediaCap = mediaCaps[0];
+    mediaCap.IncludeOptionalField(H245_MediaChannelCapability::e_mediaTransport);
+    H245_MediaTransportType & transport = mediaCap.m_mediaTransport;
+    if (rtpSession.GetLocalDataPort() > 0)
+        transport.SetTag(H245_MediaTransportType::e_ip_UDP);
+    else
+        transport.SetTag(H245_MediaTransportType::e_ip_TCP);
+
   return TRUE;
 }
 
