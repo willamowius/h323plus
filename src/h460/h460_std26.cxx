@@ -371,11 +371,35 @@ PBoolean H46026UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD 
 
      buf = rtp->GetPointer();
      len = rtp->GetSize();
+
+	// sanity check on incoming RTP frame
+	unsigned int version = 0;	// RTP version
+	unsigned int seq = 0;
+	if (len >= 1)
+		version = (((int)((const BYTE *)buf)[0] & 0xc0) >> 6);
+	if (len >= 4)
+		seq = ((int)((const BYTE *)buf)[2] * 256) + (int)((const BYTE *)buf)[3];
+	if (((version != 2) || (seq == 0)) && (len > 200)) {	// use len > 200 to skip RTCP packets
+		PTRACE(0, "H46026\tInvalid incoming RTP frame: version=" << version << " seq=" << seq << " len=" << len);
+	}
+	PTRACE(0, "ReadFrom: Incoming RTP: len=" << len); // TODO remove once we see incoming frames
+
     return true;
 }
 
 PBoolean H46026UDPSocket::WriteTo(const void * buf, PINDEX len, const Address & /*addr*/, WORD /*port*/)
 {
+	// sanity check on outgoing RTP frame
+	unsigned int version = 0;	// RTP version
+	unsigned int seq = 0;
+	if (len >= 1)
+		version = (((int)((const BYTE *)buf)[0] & 0xc0) >> 6);
+	if (len >= 4)
+		seq = ((int)((const BYTE *)buf)[2] * 256) + (int)((const BYTE *)buf)[3];
+	if (((version != 2) || (seq == 0)) && (len > 200)) {	// use len > 200 to skip RTCP packets
+		PTRACE(0, "H46026\tInvalid outgoing RTP frame: version=" << version << " seq=" << seq << " len=" << len);
+	}
+
     // Write here....
     m_transport.FrameToSend(m_crv,m_session,m_rtpSocket,(const BYTE *)buf,len);
     return true;
