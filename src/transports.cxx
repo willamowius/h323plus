@@ -824,6 +824,16 @@ PBoolean H323Transport::Write(const void * buf, PINDEX len)
         return PIndirectChannel::Write(buf,len);
 }
 
+PBoolean H323Transport::OnOpen()
+{
+#ifdef H323_TLS
+    if (isSecure)
+        return PSSLChannel::OnOpen();
+    else
+#endif
+        return PIndirectChannel::OnOpen();
+}
+
 PBoolean H323Transport::Close()
 {
   PTRACE(3, "H323\tH323Transport::Close");

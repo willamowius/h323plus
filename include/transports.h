@@ -369,6 +369,16 @@ class H323Transport : public PIndirectChannel
       PINDEX len        ///< Number of bytes to write.
     );
 
+    /**This callback is executed when the Open() function is called with
+       open channels. It may be used by descendent channels to do any
+       handshaking required by the protocol that channel embodies.
+
+       The default behaviour is to simply return TRUE.
+
+       @return
+       Returns TRUE if the protocol handshaking is successful.
+     */
+    virtual PBoolean OnOpen();
 
     /**Close the channel.
       */
