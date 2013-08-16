@@ -496,6 +496,7 @@ H323EndPoint::H323EndPoint()
   SetEPSecurityPolicy(SecNone);
   SetEPCredentials(PString(),PString());
   isSecureCall = FALSE;
+  m_disableMD5Authenticators = FALSE;
 #endif
 
 #ifdef H323_H460
@@ -1086,12 +1087,22 @@ H235Authenticators H323EndPoint::CreateAuthenticators()
   PINDEX i=0;
   if (gkAuthenticatorOrder.GetSize() > 0) {
       for (i = 0; i < gkAuthenticatorOrder.GetSize(); ++i) {
-        if (orgAuths.GetStringsIndex(gkAuthenticatorOrder[i]) != P_MAX_INDEX)
-            auths.AppendString(gkAuthenticatorOrder[i]);
+        if (orgAuths.GetStringsIndex(gkAuthenticatorOrder[i]) != P_MAX_INDEX) {
+            if (m_disableMD5Authenticators && ((gkAuthenticatorOrder[i] == "MD5") || (gkAuthenticatorOrder[i] == "CAT"))) {
+                PTRACE(3, "H235\tAuthenticator disabled: " << gkAuthenticatorOrder[i]);
+            } else {
+                auths.AppendString(gkAuthenticatorOrder[i]);
+            }
+         }
       }
       for (i = 0; i < orgAuths.GetSize(); ++i) {
-        if (gkAuthenticatorOrder.GetStringsIndex(orgAuths[i]) == P_MAX_INDEX)
-            auths.AppendString(orgAuths[i]);
+        if (gkAuthenticatorOrder.GetStringsIndex(orgAuths[i]) == P_MAX_INDEX) {
+            if (m_disableMD5Authenticators && ((orgAuths[i] == "MD5") || (orgAuths[i] == "CAT"))) {
+                PTRACE(3, "H235\tAuthenticator disabled: " << orgAuths[i]);
+            } else {
+                auths.AppendString(orgAuths[i]);
+            }
+        }
       }
   } else 
       auths = orgAuths;
@@ -1099,6 +1110,11 @@ H235Authenticators H323EndPoint::CreateAuthenticators()
 
     for (i = 0; i < auths.GetSize(); ++i) {
         H235Authenticator * Auth = PFactory<H235Authenticator>::CreateInstance(auths[i]);
+        if (m_disableMD5Authenticators && ((PString("MD5") == Auth->GetName()) || (PString("CAT") == Auth->GetName()))) {
+          PTRACE(3, "H235\tAuthenticator disabled: " << Auth->GetName());
+          delete Auth;
+          continue;
+        }
         if ((Auth->GetApplication() == H235Authenticator::GKAdmission) ||
             (Auth->GetApplication() == H235Authenticator::AnyApplication)) 
                         authenticators.Append(Auth);
@@ -1119,6 +1135,11 @@ H235Authenticators H323EndPoint::CreateEPAuthenticators()
      PFactory<H235Authenticator>::KeyList_T::const_iterator r;
       for (r = keyList.begin(); r != keyList.end(); ++r) {
         H235Authenticator * Auth = PFactory<H235Authenticator>::CreateInstance(*r);
+        if (m_disableMD5Authenticators && ((PString("MD5") == Auth->GetName()) || (PString("CAT") == Auth->GetName()))) {
+          PTRACE(3, "H235\tAuthenticator disabled: " << Auth->GetName());
+          delete Auth;
+          continue;
+        }
         if ((Auth->GetApplication() == H235Authenticator::EPAuthentication ||
              Auth->GetApplication() == H235Authenticator::AnyApplication)) {
              if (GetEPCredentials(password, username)) {

@@ -1112,6 +1112,10 @@ class H323EndPoint : public PObject
      virtual PBoolean OnCallAuthentication(const PString & username,  ///* UserName of Caller
                                         PString & password         ///* Password related to caller
                                         );
+
+     /** Disable all authenticators using insecure MD5 hashing
+       */
+     virtual void DisableMD5Authenticators() { m_disableMD5Authenticators = TRUE; }
  //@}
 #endif
 
@@ -2793,6 +2797,7 @@ class H323EndPoint : public PObject
     PBoolean isSecureCall;               /// Flag to Specify Call to make is Authenticated.
     EPSecurityPolicy CallAuthPolicy;   /// Incoming Call Authentication acceptance level
     H235AuthenticatorList EPAuthList;  /// List of Usernames & Password to check incoming call Against                   
+    PBoolean m_disableMD5Authenticators; /// Disable MD5 based authenticatos (MD5 + CAT)
 #endif
 
 #ifdef H323_H460
