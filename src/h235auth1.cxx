@@ -106,7 +106,6 @@ static void hmac_sha (const unsigned char*    k,      /* secret key */
         unsigned char    key[SHA_DIGESTSIZE] ;
         char    buf[SHA_BLOCKSIZE] ;
         int     i ;
-        unsigned outlen = 0;
 
         const EVP_MD * sha1 = EVP_sha1();
 
@@ -117,7 +116,7 @@ static void hmac_sha (const unsigned char*    k,      /* secret key */
                 EVP_MD_CTX_init(&tctx);
                 EVP_DigestInit_ex(&tctx, sha1, NULL);
                 EVP_DigestUpdate(&tctx, k, lk);
-                EVP_DigestFinal_ex(&tctx, key, &outlen);
+                EVP_DigestFinal_ex(&tctx, key, NULL);
                 EVP_MD_CTX_cleanup(&tctx);
 
                 k = key ;
@@ -136,7 +135,7 @@ static void hmac_sha (const unsigned char*    k,      /* secret key */
         EVP_DigestUpdate(&ictx, buf, SHA_BLOCKSIZE) ;
         EVP_DigestUpdate(&ictx, d, ld) ;
 
-        EVP_DigestFinal_ex(&ictx, isha, &outlen) ;
+        EVP_DigestFinal_ex(&ictx, isha, NULL) ;
         EVP_MD_CTX_cleanup(&ictx);
 
         /**** Outer Digest ****/
@@ -152,7 +151,7 @@ static void hmac_sha (const unsigned char*    k,      /* secret key */
         EVP_DigestUpdate(&octx, buf, SHA_BLOCKSIZE) ;
         EVP_DigestUpdate(&octx, isha, SHA_DIGESTSIZE) ;
 
-        EVP_DigestFinal_ex(&octx, osha, &outlen);
+        EVP_DigestFinal_ex(&octx, osha, NULL);
         EVP_MD_CTX_cleanup(&octx);
 
         /* truncate and print the results */
@@ -164,12 +163,14 @@ static void hmac_sha (const unsigned char*    k,      /* secret key */
 static void SHA1(const unsigned char * data, unsigned len, unsigned char * hash)
 {
   const EVP_MD * sha1 = EVP_sha1();
-  unsigned outlen = 0; // ignore, will always be SHA_DIGESTSIZE
   EVP_MD_CTX ctx;
   EVP_MD_CTX_init(&ctx);
-  EVP_DigestInit_ex(&ctx, sha1, NULL);
-  EVP_DigestUpdate(&ctx, data, len);
-  EVP_DigestFinal_ex(&ctx, hash, &outlen);
+  if (EVP_DigestInit_ex(&ctx, sha1, NULL)) {
+    EVP_DigestUpdate(&ctx, data, len);
+    EVP_DigestFinal_ex(&ctx, hash, NULL);
+  } else {
+    PTRACE(1, "H235\tOpenSSH SHA1 implementation failed");
+  }
   EVP_MD_CTX_cleanup(&ctx);
 }
 
