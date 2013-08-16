@@ -31,7 +31,7 @@
 
 #if P_SSL
 
-#include <openssl/sha.h>
+#include <openssl/evp.h>
 
 #include "h235auth.h"
 #include "h323pdu.h"
@@ -101,19 +101,24 @@ static void hmac_sha (const unsigned char*    k,      /* secret key */
                       char*    out,             /* output buffer, at least "t" bytes */
                       int      t)
 {
-        SHA_CTX ictx, octx ;
+        EVP_MD_CTX ictx, octx;
         unsigned char    isha[SHA_DIGESTSIZE], osha[SHA_DIGESTSIZE] ;
         unsigned char    key[SHA_DIGESTSIZE] ;
         char    buf[SHA_BLOCKSIZE] ;
         int     i ;
+        unsigned outlen = 0;
+
+        const EVP_MD * sha1 = EVP_sha1();
 
         if (lk > SHA_BLOCKSIZE) {
 
-                SHA_CTX         tctx ;
+                EVP_MD_CTX tctx;
 
-                SHA1_Init(&tctx) ;
-                SHA1_Update(&tctx, k, lk) ;
-                SHA1_Final(key, &tctx) ;
+                EVP_MD_CTX_init(&tctx);
+                EVP_DigestInit_ex(&tctx, sha1, NULL);
+                EVP_DigestUpdate(&tctx, k, lk);
+                EVP_DigestFinal_ex(&tctx, key, &outlen);
+                EVP_MD_CTX_cleanup(&tctx);
 
                 k = key ;
                 lk = SHA_DIGESTSIZE ;
@@ -121,35 +126,51 @@ static void hmac_sha (const unsigned char*    k,      /* secret key */
 
         /**** Inner Digest ****/
 
-        SHA1_Init(&ictx) ;
+        EVP_MD_CTX_init(&ictx);
+        EVP_DigestInit_ex(&ictx, sha1, NULL);
 
         /* Pad the key for inner digest */
         for (i = 0 ; i < lk ; ++i) buf[i] = (char)(k[i] ^ 0x36);
         for (i = lk ; i < SHA_BLOCKSIZE ; ++i) buf[i] = 0x36;
 
-        SHA1_Update(&ictx, buf, SHA_BLOCKSIZE) ;
-        SHA1_Update(&ictx, d, ld) ;
+        EVP_DigestUpdate(&ictx, buf, SHA_BLOCKSIZE) ;
+        EVP_DigestUpdate(&ictx, d, ld) ;
 
-        SHA1_Final(isha, &ictx) ;
+        EVP_DigestFinal_ex(&ictx, isha, &outlen) ;
+        EVP_MD_CTX_cleanup(&ictx);
 
-        /**** Outter Digest ****/
+        /**** Outer Digest ****/
 
-        SHA1_Init(&octx) ;
+        EVP_MD_CTX_init(&octx);
+        EVP_DigestInit_ex(&octx, sha1, NULL);
 
-        /* Pad the key for outter digest */
+        /* Pad the key for outer digest */
 
         for (i = 0 ; i < lk ; ++i) buf[i] = (char)(k[i] ^ 0x5C);
         for (i = lk ; i < SHA_BLOCKSIZE ; ++i) buf[i] = 0x5C;
 
-        SHA1_Update(&octx, buf, SHA_BLOCKSIZE) ;
-        SHA1_Update(&octx, isha, SHA_DIGESTSIZE) ;
+        EVP_DigestUpdate(&octx, buf, SHA_BLOCKSIZE) ;
+        EVP_DigestUpdate(&octx, isha, SHA_DIGESTSIZE) ;
 
-        SHA1_Final(osha, &octx) ;
+        EVP_DigestFinal_ex(&octx, osha, &outlen);
+        EVP_MD_CTX_cleanup(&octx);
 
         /* truncate and print the results */
         t = t > SHA_DIGESTSIZE ? SHA_DIGESTSIZE : t ;
         truncate(osha, out, t) ;
 
+}
+
+static void SHA1(const unsigned char * data, unsigned len, unsigned char * hash)
+{
+  const EVP_MD * sha1 = EVP_sha1();
+  unsigned outlen = 0; // ignore, will always be SHA_DIGESTSIZE
+  EVP_MD_CTX ctx;
+  EVP_MD_CTX_init(&ctx);
+  EVP_DigestInit_ex(&ctx, sha1, NULL);
+  EVP_DigestUpdate(&ctx, data, len);
+  EVP_DigestFinal_ex(&ctx, hash, &outlen);
+  EVP_MD_CTX_cleanup(&ctx);
 }
 
 
