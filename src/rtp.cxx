@@ -1947,7 +1947,7 @@ PBoolean RTP_UDP::WriteData(RTP_DataFrame & frame)
 PBoolean RTP_UDP::WriteControl(RTP_ControlFrame & frame)
 {
   // Trying to send a PDU before we are set up!
-  if (remoteAddress.IsAny() || !remoteAddress.IsValid() || remoteControlPort == 0)
+  if (!mediaIsTunneled && (remoteAddress.IsAny() || !remoteAddress.IsValid() || remoteControlPort == 0))
     return true;
 
   while (!controlSocket->WriteTo(frame.GetPointer(), frame.GetCompoundSize(),
