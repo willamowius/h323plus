@@ -1756,7 +1756,7 @@ RTP_Session::SendReceiveStatus RTP_UDP::ReadDataOrControlPDU(PUDPSocket & socket
   WORD port;
 
   if (socket.ReadFrom(frame.GetPointer(), frame.GetSize(), addr, port)) {
-    if (ignoreOtherSources) {
+    if (!mediaIsTunneled && ignoreOtherSources) {
 
       // If remote address never set from higher levels, then try and figure
       // it out from the first packet received.
