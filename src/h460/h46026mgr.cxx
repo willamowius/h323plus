@@ -202,7 +202,7 @@ H46026_ArrayOf_FrameData & H46026UDPBuffer::GetData()
 void H46026UDPBuffer::SetFrame(const PBYTEArray & data)
 {
     m_size += data.GetSize();
-    int sz = m_data.GetSize();
+    int sz = m_data.m_frame.GetSize();
     m_data.m_frame.SetSize(sz+1);
     m_data.m_frame[sz].SetTag(m_rtp ? H46026_FrameData::e_rtp : H46026_FrameData::e_rtcp);
     PASN_OctetString & raw = m_data.m_frame[sz];
@@ -227,10 +227,16 @@ PINDEX H46026UDPBuffer::GetSize()
 
 PINDEX H46026UDPBuffer::GetPacketCount()
 {
-    return m_data.GetSize();
+    return m_data.m_frame.GetSize();
 }
 
 //-------------------------------------------
+
+H46026_MediaFrame::H46026_MediaFrame()
+:PBYTEArray(12)
+{
+
+}
 
 H46026_MediaFrame::H46026_MediaFrame(const BYTE * data, PINDEX len)
    :PBYTEArray(data,len)
@@ -238,9 +244,23 @@ H46026_MediaFrame::H46026_MediaFrame(const BYTE * data, PINDEX len)
 
 }
     
-PBoolean H46026_MediaFrame::GetMarker()
+PBoolean H46026_MediaFrame::GetMarker() const
 {
     return (theArray[1]&0x80) != 0;
+}
+
+void H46026_MediaFrame::PrintInfo(ostream & strm) const
+{
+strm << "ver=" << (unsigned)((theArray[0]>>6)&3) 
+<< " pt=" << (unsigned)(theArray[1]&0x7f)
+<< " psz=" << (unsigned)(GetSize() - 12)
+<< " m=" << GetMarker()
+<< " x=" << (unsigned)((theArray[0]&0x10) != 0)
+<< " seq=" << (WORD)(*(PUInt16b *)&theArray[2])
+<< " ts=" << (DWORD)(*(PUInt32b *)&theArray[4])
+<< " src=" << (DWORD)(*(PUInt32b *)&theArray[8])
+<< " ccnt=" << (unsigned)(theArray[0]&0xf)
+<< "\n";
 }
 
 //-------------------------------------------
@@ -365,7 +385,20 @@ PBoolean H46026ChannelManager::PackageFrame(PBoolean rtp, unsigned crv, PacketTy
     prior.packTime = PTimer::Tick().GetMilliSeconds();
     prior.delay = PACKETDELAY(mediaPDU.GetIE(Q931::UserUserIE).GetSize(),m_mbps);   
 
-    PTRACE(6,"H46026\tMedia Frame #" << prior.id << " " << H46026MediaTypeAsString(id) << " d: " << prior.delay << " p: " << H46026PriorityAsString(prior.priority) << "\n" << data);
+    if (rtp && PTrace::CanTrace(6)) {
+        PStringStream rtpInfo;
+        for (PINDEX i=0; i < data.m_frame.GetSize(); ++i) {
+            H46026_FrameData & frame = data.m_frame[i];
+            PASN_OctetString & fdata = frame;
+            H46026_MediaFrame & rtpData = (H46026_MediaFrame &)fdata.GetValue();
+            rtpInfo << "[" << i << "] ";
+            rtpData.PrintInfo(rtpInfo);
+        }
+        PTRACE(6,"H46026\tBuild #" << prior.id << "\n" 
+            << "Media:" << H46026MediaTypeAsString(id) << "  Delay:" << prior.delay 
+            << "ms  Priority:" << H46026PriorityAsString(prior.priority) << "\n" << rtpInfo << data);
+    }
+
     // Zero data
     data.m_frame.SetSize(0);
 
@@ -448,8 +481,6 @@ PBoolean H46026ChannelManager::ProcessQueue()
 
     m_socketPacketReady = (m_socketQueue.size() > 0);
 
-    PTRACE(6,"H46026\tP: " << m_socketQueue.top().second.priority << " pack "  << m_socketQueue.top().second.packTime  << " delay " << stackTime);
-
     return true;
 }
 
@@ -516,7 +547,7 @@ PBoolean H46026ChannelManager::SocketOut(BYTE * data, PINDEX & len)
     PBoolean gotPacket = false;
     m_queueMutex.Wait();
         if (m_socketQueue.size() > 0) {
-            PTRACE(6,"H46026\tSend " << m_socketQueue.top().second.id << " delay " << m_socketQueue.top().second.delay);
+            PTRACE(6,"H46026\tSending #" << m_socketQueue.top().second.id << " delay " << m_socketQueue.top().second.delay << "ms");
             m_currentPacketTime = nowTime + m_socketQueue.top().second.delay;
             len = m_socketQueue.top().first.GetSize();
             memcpy(data, (const BYTE *)m_socketQueue.top().first, len);
@@ -532,7 +563,7 @@ PBoolean H46026ChannelManager::SocketOut(BYTE * data, PINDEX & len)
 
 PBoolean H46026ChannelManager::WriteQueue(const Q931 & msg, const socketOrder::MessageHeader & prior)
 {
-    PTRACE(6,"H46026\tPack " << prior.id << " type " << msg.GetMessageTypeName());
+    PTRACE(6,"H46026\tPack #" << prior.id << " Type:" << msg.GetMessageTypeName());
     PBYTEArray data;
     msg.Encode(data);
     return WriteQueue(data, prior);

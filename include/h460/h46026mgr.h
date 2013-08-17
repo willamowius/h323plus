@@ -87,6 +87,8 @@ public:
            return ((p1.second.priority >= p2.second.priority) && 
                      (p1.second.packTime > p2.second.packTime));
      }
+
+     PString PriorityAsString();
 };
 
 typedef std::priority_queue< std::pair<PBYTEArray, socketOrder::MessageHeader >, 
@@ -100,8 +102,11 @@ typedef std::map<unsigned, H46026CallMap >  H46026RTPBuffer;
 class H46026_MediaFrame  : public PBYTEArray
 {
 public:
+    H46026_MediaFrame();
     H46026_MediaFrame(const BYTE * data, PINDEX len);
-    PBoolean GetMarker();
+
+    PBoolean GetMarker() const;
+    void PrintInfo(ostream & strm) const;
 };
 
 //-------------------------------------------------------------------------------
