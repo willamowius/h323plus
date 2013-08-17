@@ -183,6 +183,29 @@ static PString H46026MediaTypeAsString(int type)
     }
 }
 
+static PString H46026MediaSessionId(int type)
+{
+    switch (type) {
+        case RTP_Session::DefaultAudioSessionID:    return "Audio";
+        case RTP_Session::DefaultVideoSessionID:    return "Video";
+        case RTP_Session::DefaultH224SessionID:     return "Data";
+        default: return "Generic";
+    }
+}
+
+static PString H46026MediaFrameAnalysis(const H46026_UDPFrame & data)
+{      
+    PStringStream rtpInfo;
+    for (PINDEX i=0; i < data.m_frame.GetSize(); ++i) {
+        H46026_FrameData & frame = data.m_frame[i];
+        PASN_OctetString & fdata = frame;
+        H46026_MediaFrame & rtpData = (H46026_MediaFrame &)fdata.GetValue();
+        rtpInfo << "[" << i << "] ";
+        rtpData.PrintInfo(rtpInfo);
+    }
+    return rtpInfo;
+}
+
 //-------------------------------------------
 
 H46026UDPBuffer::H46026UDPBuffer(int sessionId, PBoolean rtp) 
@@ -385,18 +408,10 @@ PBoolean H46026ChannelManager::PackageFrame(PBoolean rtp, unsigned crv, PacketTy
     prior.packTime = PTimer::Tick().GetMilliSeconds();
     prior.delay = PACKETDELAY(mediaPDU.GetIE(Q931::UserUserIE).GetSize(),m_mbps);   
 
-    if (rtp && PTrace::CanTrace(6)) {
-        PStringStream rtpInfo;
-        for (PINDEX i=0; i < data.m_frame.GetSize(); ++i) {
-            H46026_FrameData & frame = data.m_frame[i];
-            PASN_OctetString & fdata = frame;
-            H46026_MediaFrame & rtpData = (H46026_MediaFrame &)fdata.GetValue();
-            rtpInfo << "[" << i << "] ";
-            rtpData.PrintInfo(rtpInfo);
-        }
+    if (rtp) {
         PTRACE(6,"H46026\tBuild #" << prior.id << "\n" 
             << "Media:" << H46026MediaTypeAsString(id) << "  Delay:" << prior.delay 
-            << "ms  Priority:" << H46026PriorityAsString(prior.priority) << "\n" << rtpInfo << data);
+            << "ms  Priority:" << H46026PriorityAsString(prior.priority) << "\n" << H46026MediaFrameAnalysis(data) << data);
     }
 
     // Write to the output Queue
@@ -515,6 +530,10 @@ PBoolean H46026ChannelManager::SocketIn(const Q931 & q931)
     H46026_UDPFrame frameData;
 
     if ((q931.GetMessageType() == Q931::InformationMsg) && ReadRTPFrame(q931, frameData)) {
+        if (PTrace::CanTrace(6) && frameData.m_dataFrame) {
+            PTRACE(6,"H46026\tReceived Media:" << H46026MediaSessionId(frameData.m_sessionId) 
+                << "\n" << H46026MediaFrameAnalysis(frameData) << frameData);
+        }
         for (PINDEX i=0; i < frameData.m_frame.GetSize(); ++i) {
             PASN_OctetString & data = frameData.m_frame[i];
             RTPFrameIn(q931.GetCallReference(), frameData.m_sessionId.GetValue(), frameData.m_dataFrame, data.GetValue());
