@@ -165,7 +165,7 @@ static PString H46026PriorityAsString(int priority)
 {
     switch (priority) {
         case socketOrder::Priority_Critical:  return "Critical(Audio)";
-        case socketOrder::Priority_Discretion:  return "Descretion(Video)";
+        case socketOrder::Priority_Discretion:  return "Discretion(Video)";
         case socketOrder::Priority_High:  return "High(Signal)";        
         case socketOrder::Priority_Low: return "Low(RTCP)";
         default: return "Unknown";
@@ -399,9 +399,6 @@ PBoolean H46026ChannelManager::PackageFrame(PBoolean rtp, unsigned crv, PacketTy
             << "ms  Priority:" << H46026PriorityAsString(prior.priority) << "\n" << rtpInfo << data);
     }
 
-    // Zero data
-    data.m_frame.SetSize(0);
-
     // Write to the output Queue
     return WriteQueue(mediaPDU, prior);
 }
@@ -431,6 +428,7 @@ PBoolean H46026ChannelManager::RTPFrameOut(unsigned crv, PacketTypes id, PINDEX 
             case e_extVideo:
                 if (buffer->GetSize() + len > MAX_VIDEO_PAYLOAD) {
                     PackageFrame(rtp, crv, id, sessionId, buffer->GetBuffer());
+                    buffer->ClearBuffer();
                 }
                 buffer->SetFrame(msg);
                 toSend = msg.GetMarker();
@@ -440,9 +438,11 @@ PBoolean H46026ChannelManager::RTPFrameOut(unsigned crv, PacketTypes id, PINDEX 
                 buffer->SetFrame(msg);
                 toSend = true;
         }
-        if (toSend)
-            return PackageFrame(rtp, crv, id, sessionId, buffer->GetBuffer());
-        else
+        if (toSend) {
+            PBoolean sent = PackageFrame(rtp, crv, id, sessionId, buffer->GetBuffer());  
+            buffer->ClearBuffer(); 
+            return sent;
+        } else
             return ProcessQueue();
     } else {
        H46026UDPBuffer data(sessionId,rtp);
