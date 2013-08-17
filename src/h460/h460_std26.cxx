@@ -306,6 +306,8 @@ PBoolean PNatMethod_H46026::CreateSocketPair(
     socket1 = new H46026UDPSocket(*handler,info,true);  /// Data 
     socket2 = new H46026UDPSocket(*handler,info,false);  /// Signal
 
+    handler->RegisterSocket(info->GetCallReference(), info->GetSessionID(), (H46026UDPSocket*)socket1, (H46026UDPSocket*)socket2);
+
     return TRUE;
 }
 
@@ -324,6 +326,9 @@ H46026UDPSocket::~H46026UDPSocket()
                 << " "  << (m_rtpSocket ? "RTP" : "RTCP"));
 
    m_shutdown = true;
+   if (m_rtpSocket)
+       m_transport.UnRegisterSocket(m_crv,m_session);
+
    while (!m_rtpQueue.empty()) {
        delete m_rtpQueue.front();
        m_rtpQueue.pop();
@@ -365,24 +370,11 @@ PBoolean H46026UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD 
     }
 
     m_rtpMutex.Wait();
-      PBYTEArray * rtp = m_rtpQueue.front();
+      memcpy(buf,m_rtpQueue.front()->GetPointer(), m_rtpQueue.front()->GetSize());
+      lastReadCount = m_rtpQueue.front()->GetSize();
+      delete m_rtpQueue.front();
       m_rtpQueue.pop();
     m_rtpMutex.Signal();
-
-     buf = rtp->GetPointer();
-     len = rtp->GetSize();
-
-	// sanity check on incoming RTP frame
-	unsigned int version = 0;	// RTP version
-	unsigned int seq = 0;
-	if (len >= 1)
-		version = (((int)((const BYTE *)buf)[0] & 0xc0) >> 6);
-	if (len >= 4)
-		seq = ((int)((const BYTE *)buf)[2] * 256) + (int)((const BYTE *)buf)[3];
-	if (((version != 2) || (seq == 0)) && (len > 200)) {	// use len > 200 to skip RTCP packets
-		PTRACE(0, "H46026\tInvalid incoming RTP frame: version=" << version << " seq=" << seq << " len=" << len);
-	}
-	PTRACE(0, "ReadFrom: Incoming RTP: len=" << len); // TODO remove once we see incoming frames
 
     return true;
 }
