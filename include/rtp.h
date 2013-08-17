@@ -993,7 +993,8 @@ class RTP_UDP : public RTP_Session
       PHandleAggregator * aggregator, ///< RTP aggregator
 #endif
       unsigned id,                    ///<  Session ID for RTP channel
-      PBoolean remoteIsNat = FALSE        ///<  If TRUE, we have hints the remote endpoint is behind a NAT
+      PBoolean remoteIsNat = FALSE,   ///<  If TRUE, we have hints the remote endpoint is behind a NAT
+      PBoolean mediaTunneled = FALSE  ///<  Whether media is tunneled.
     );
 
     /// Destroy the RTP
@@ -1135,6 +1136,10 @@ class RTP_UDP : public RTP_Session
     /**Whether the remote has been detected as being behind NAT.
       */
     PBoolean IsRemoteNAT()  { return remoteIsNAT; }
+
+    /**Whether the remote has been detected as being behind NAT.
+      */
+    PBoolean IsMediaTunneled()  { return mediaIsTunneled; }
   //@}
 
     int GetDataSocketHandle() const
@@ -1173,6 +1178,8 @@ class RTP_UDP : public RTP_Session
 
     PBoolean remoteIsNAT;
     unsigned successiveWrongAddresses;
+
+    PBoolean mediaIsTunneled;
 };
 
 

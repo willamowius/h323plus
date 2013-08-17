@@ -5411,7 +5411,11 @@ RTP_Session * H323Connection::UseSession(unsigned sessionID,
 #ifdef H323_RTP_AGGREGATE
                   useRTPAggregation ? endpoint.GetRTPAggregator() : NULL, 
 #endif
-                  sessionID, remoteIsNAT);
+                  sessionID, remoteIsNAT
+#ifdef H323_H46026
+                  , m_H46026enabled
+#endif
+                  );
 
   udp_session->SetUserData(new H323_RTP_UDP(*this, *udp_session, rtpqos));
   rtpSessions.AddSession(udp_session);

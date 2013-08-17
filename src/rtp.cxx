@@ -1413,7 +1413,7 @@ RTP_UDP::RTP_UDP(
 #ifdef H323_RTP_AGGREGATE
                  PHandleAggregator * _aggregator, 
 #endif
-                 unsigned id, PBoolean _remoteIsNAT)
+                 unsigned id, PBoolean _remoteIsNAT, PBoolean _mediaTunneled)
   : RTP_Session(
 #ifdef H323_RTP_AGGREGATE
   _aggregator, 
@@ -1421,7 +1421,8 @@ RTP_UDP::RTP_UDP(
   id),
     remoteAddress(0),
     remoteTransmitAddress(0),
-    remoteIsNAT(_remoteIsNAT)
+    remoteIsNAT(_remoteIsNAT),
+    mediaIsTunneled(_mediaTunneled)
 {
   remoteDataPort = 0;
   remoteControlPort = 0;
@@ -1903,7 +1904,7 @@ PBoolean RTP_UDP::PreWriteData(RTP_DataFrame & frame)
   }
 
   // Trying to send a PDU before we are set up!
-  if (remoteAddress.IsAny() || !remoteAddress.IsValid() || remoteDataPort == 0)
+  if (!mediaIsTunneled && (remoteAddress.IsAny() || !remoteAddress.IsValid() || remoteDataPort == 0))
     return TRUE;
 
   switch (OnSendData(frame)) {
