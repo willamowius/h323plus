@@ -211,10 +211,10 @@ static PString H46026MediaFrameAnalysis(const H46026_UDPFrame & data)
 H46026UDPBuffer::H46026UDPBuffer(int sessionId, PBoolean rtp) 
 { 
     m_size = 0;
-    m_data.m_sessionId.SetValue(sessionId);
-    m_data.m_dataFrame = true;
-    m_data.m_frame.SetSize(0);
     m_rtp = rtp;
+    m_data.m_sessionId.SetValue(sessionId);
+    m_data.m_dataFrame = m_rtp ? true : false;
+    m_data.m_frame.SetSize(0);
 }
 
 H46026_ArrayOf_FrameData & H46026UDPBuffer::GetData()
@@ -408,10 +408,13 @@ PBoolean H46026ChannelManager::PackageFrame(PBoolean rtp, unsigned crv, PacketTy
     prior.packTime = PTimer::Tick().GetMilliSeconds();
     prior.delay = PACKETDELAY(mediaPDU.GetIE(Q931::UserUserIE).GetSize(),m_mbps);   
 
-    if (rtp) {
-        PTRACE(6,"H46026\tBuild #" << prior.id << "\n" 
-            << "Media:" << H46026MediaTypeAsString(id) << "  Delay:" << prior.delay 
-            << "ms  Priority:" << H46026PriorityAsString(prior.priority) << "\n" << H46026MediaFrameAnalysis(data) << data);
+    if (PTrace::CanTrace(6)) {
+        PStringStream info;
+        info <<  "Build #" << prior.id << (rtp ? "\nMedia" : " Control") << ":" << H46026MediaTypeAsString(id) << "  Delay:" << prior.delay 
+            << "ms  Priority:" << H46026PriorityAsString(prior.priority);
+        if (rtp) info << "\n" << H46026MediaFrameAnalysis(data) << data;
+        else info << "\n" << data;
+        PTRACE(6,"H46026\t" << info);
     }
 
     // Write to the output Queue
