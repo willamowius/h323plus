@@ -1464,8 +1464,12 @@ PBoolean H46019UDPSocket::WriteSocket(const void * buf, PINDEX len, const Addres
 #ifdef H323_H46019M
 PBoolean H46019UDPSocket::GetPeerAddress(PIPSocketAddressAndPort & addr)
 {
+#if defined(H323_H46024A) || defined(H323_H46024B)
     addr.SetAddress(m_remAddr,m_remPort);
     return true;
+#else
+    return false;
+#endif
 }
 #endif
 
