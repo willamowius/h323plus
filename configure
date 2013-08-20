@@ -4605,35 +4605,23 @@ else
 $as_echo "$as_me: Disabling File Transfer" >&6;}
 fi
 
-
-
-
 # Check whether --enable-aec was given.
 if test "${enable_aec+set}" = set; then :
-  enableval=$enable_aec; enable_aec=$enableval
-else
+  enableval=$enable_aec;
+fi
+
+if test "${enable_aec}x" = "x" ; then
   enable_aec=$default_aec
-
 fi
+if test "$enable_aec" = "yes" ; then
+  H323_AEC=1
+  $as_echo "#define H323_AEC 1" >>confdefs.h
 
-
-if test "$enable_aec" = "no" ; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: AEC disabled" >&5
-$as_echo "$as_me: AEC disabled" >&6;}
 else
-  if test "x${H323_AEC}" = "x1" ; then
-
-$as_echo "#define H323_AEC 1" >>confdefs.h
-
-    STDCCFLAGS="$STDCCFLAGS $AEC_CFLAGS"
-    ENDLDLIBS="$ENDLDLIBS $AEC_LIBS"
-  fi
+  H323_AEC=
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling Echo Cancellation" >&5
+$as_echo "$as_me: Disabling H.460 Compat Feature" >&6;}
 fi
-
-
-
-
-
 
 
 ac_aux_dir=
