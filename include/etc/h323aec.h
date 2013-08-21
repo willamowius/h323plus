@@ -1,5 +1,5 @@
 /*
- * h323_aec.h
+ * h323aec.h
  *
  * Acoustic Echo Cancellation for the h323plus Library.
  *
@@ -47,6 +47,8 @@ extern "C" {
 #include <speex/speex_echo.h>
 #include <speex/speex_preprocess.h>
 }
+
+#include <queue>
 
 /** This class implements Acoustic Echo Cancellation
   * The principal is to copy to a buffer incoming audio.

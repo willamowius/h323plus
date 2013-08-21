@@ -609,6 +609,9 @@ INSTALL_PROGRAM
 ENDLDLIBS
 LDLIBS
 STDCCFLAGS
+SPEEX_SYSTEM
+SPEEX_LIBS
+SPEEX_CFLAGS
 H323_AEC
 H323_FILE
 H323_GNUGK
@@ -742,6 +745,8 @@ CXXFLAGS
 LDFLAGS
 LIBS
 CPPFLAGS
+SPEEX_CFLAGS
+SPEEX_LIBS
 CCC
 CC
 CFLAGS
@@ -4604,6 +4609,187 @@ else
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling File Transfer" >&5
 $as_echo "$as_me: Disabling File Transfer" >&6;}
 fi
+
+
+# Check whether --enable-localspeex was given.
+if test "${enable_localspeex+set}" = set; then
+  enableval=$enable_localspeex; localspeex=$enableval
+else
+  localspeex=
+fi
+
+          if test "x${localspeex}" = "xyes" ; then
+            { $as_echo "$as_me:$LINENO: forcing use of local Speex sources" >&5
+$as_echo "$as_me: forcing use of local Speex sources" >&6;}
+            SPEEX_SYSTEM=no
+
+          elif test "x${localspeex}" = "xno" ; then
+            { $as_echo "$as_me:$LINENO: forcing use of system Speex library" >&5
+$as_echo "$as_me: forcing use of system Speex library" >&6;}
+
+pkg_failed=no
+{ $as_echo "$as_me:$LINENO: checking for SPEEX" >&5
+$as_echo_n "checking for SPEEX... " >&6; }
+
+if test -n "$SPEEX_CFLAGS"; then
+    pkg_cv_SPEEX_CFLAGS="$SPEEX_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { ($as_echo "$as_me:$LINENO: \$PKG_CONFIG --exists --print-errors \"speex\"") >&5
+  ($PKG_CONFIG --exists --print-errors "speex") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; then
+  pkg_cv_SPEEX_CFLAGS=`$PKG_CONFIG --cflags "speex" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$SPEEX_LIBS"; then
+    pkg_cv_SPEEX_LIBS="$SPEEX_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { ($as_echo "$as_me:$LINENO: \$PKG_CONFIG --exists --print-errors \"speex\"") >&5
+  ($PKG_CONFIG --exists --print-errors "speex") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; then
+  pkg_cv_SPEEX_LIBS=`$PKG_CONFIG --libs "speex" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        SPEEX_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "speex" 2>&1`
+        else
+	        SPEEX_PKG_ERRORS=`$PKG_CONFIG --print-errors "speex" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$SPEEX_PKG_ERRORS" >&5
+
+	{ $as_echo "$as_me:$LINENO: result: no" >&5
+$as_echo "no" >&6; }
+
+                              { { $as_echo "$as_me:$LINENO: error: cannot find system speex" >&5
+$as_echo "$as_me: error: cannot find system speex" >&2;}
+   { (exit 1); exit 1; }; }
+
+elif test $pkg_failed = untried; then
+
+                              { { $as_echo "$as_me:$LINENO: error: cannot find system speex" >&5
+$as_echo "$as_me: error: cannot find system speex" >&2;}
+   { (exit 1); exit 1; }; }
+
+else
+	SPEEX_CFLAGS=$pkg_cv_SPEEX_CFLAGS
+	SPEEX_LIBS=$pkg_cv_SPEEX_LIBS
+        { $as_echo "$as_me:$LINENO: result: yes" >&5
+$as_echo "yes" >&6; }
+	SPEEX_SYSTEM=yes
+fi
+
+          else
+
+            { $as_echo "$as_me:$LINENO: checking whether system Speex or internal Speex is more recent" >&5
+$as_echo "$as_me: checking whether system Speex or internal Speex is more recent" >&6;}
+
+pkg_failed=no
+{ $as_echo "$as_me:$LINENO: checking for SPEEX" >&5
+$as_echo_n "checking for SPEEX... " >&6; }
+
+if test -n "$SPEEX_CFLAGS"; then
+    pkg_cv_SPEEX_CFLAGS="$SPEEX_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { ($as_echo "$as_me:$LINENO: \$PKG_CONFIG --exists --print-errors \"speex >= \$SPEEX_INTERNAL_VERSION\"") >&5
+  ($PKG_CONFIG --exists --print-errors "speex >= $SPEEX_INTERNAL_VERSION") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; then
+  pkg_cv_SPEEX_CFLAGS=`$PKG_CONFIG --cflags "speex >= $SPEEX_INTERNAL_VERSION" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$SPEEX_LIBS"; then
+    pkg_cv_SPEEX_LIBS="$SPEEX_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { ($as_echo "$as_me:$LINENO: \$PKG_CONFIG --exists --print-errors \"speex >= \$SPEEX_INTERNAL_VERSION\"") >&5
+  ($PKG_CONFIG --exists --print-errors "speex >= $SPEEX_INTERNAL_VERSION") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; then
+  pkg_cv_SPEEX_LIBS=`$PKG_CONFIG --libs "speex >= $SPEEX_INTERNAL_VERSION" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        SPEEX_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "speex >= $SPEEX_INTERNAL_VERSION" 2>&1`
+        else
+	        SPEEX_PKG_ERRORS=`$PKG_CONFIG --print-errors "speex >= $SPEEX_INTERNAL_VERSION" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$SPEEX_PKG_ERRORS" >&5
+
+	{ $as_echo "$as_me:$LINENO: result: no" >&5
+$as_echo "no" >&6; }
+
+                              SPEEX_SYSTEM=no
+                              { $as_echo "$as_me:$LINENO: result: internal Speex version is more recent than system Speex or system Speex not found" >&5
+$as_echo "internal Speex version is more recent than system Speex or system Speex not found" >&6; }
+
+elif test $pkg_failed = untried; then
+
+                              SPEEX_SYSTEM=no
+                              { $as_echo "$as_me:$LINENO: result: internal Speex version is more recent than system Speex or system Speex not found" >&5
+$as_echo "internal Speex version is more recent than system Speex or system Speex not found" >&6; }
+
+else
+	SPEEX_CFLAGS=$pkg_cv_SPEEX_CFLAGS
+	SPEEX_LIBS=$pkg_cv_SPEEX_LIBS
+        { $as_echo "$as_me:$LINENO: result: yes" >&5
+$as_echo "yes" >&6; }
+	SPEEX_SYSTEM=yes
+fi
+          fi
+
+          if test "x${SPEEX_SYSTEM}" = "xyes" ; then
+            SPEEX_SYSTEM_VERSION=`$PKG_CONFIG speex --modversion`
+            { $as_echo "$as_me:$LINENO: result: using system Speex version $SPEEX_SYSTEM_VERSION" >&5
+$as_echo "using system Speex version $SPEEX_SYSTEM_VERSION" >&6; }
+          fi
+
+
 
 # Check whether --enable-aec was given.
 if test "${enable_aec+set}" = set; then :
