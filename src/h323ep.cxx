@@ -520,6 +520,10 @@ H323EndPoint::H323EndPoint()
   m_h46023enabled = true;
 #endif
 
+#ifdef H323_H46026
+  m_h46026enabled = true;
+#endif
+
 #ifdef H323_UPnP
   m_UPnPenabled = false;
 #endif
@@ -3446,6 +3450,7 @@ PBoolean H323EndPoint::H46017CreateConnection(const PString & gatekeeper, PBoole
 
    // We are registered so we need to create the media tunnelling. 
 #ifdef H323_H46026
+  if (H46026IsEnabled()) {
      H460_FeatureStd26 * h46026 = (H460_FeatureStd26 *)features.GetFeature(26);
      if (h46026) {
          h46026->AttachH46017(h46017->GetHandler());
@@ -3460,6 +3465,7 @@ PBoolean H323EndPoint::H46017CreateConnection(const PString & gatekeeper, PBoole
            natMethods->AddMethod(natMethod);
        }
      }
+   }
 #endif
    return true;
 }

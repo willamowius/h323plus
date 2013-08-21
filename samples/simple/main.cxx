@@ -114,6 +114,9 @@ void SimpleH323Process::Main()
 #ifdef H323_H46018
              "-h46018disable."
 #endif
+#ifdef H323_H46026
+             "-h46026disable."
+#endif
 #ifdef P_HAS_IPV6
              "-ipv6."
 #endif
@@ -155,6 +158,9 @@ void SimpleH323Process::Main()
 #endif
 #ifdef H323_H46018
             "     --h46018disable      : Disable H.460.18.\n"
+#endif
+#ifdef H323_H46026
+            "     --h46026disable      : Disable H.460.26.\n"
 #endif
 #ifdef P_HAS_IPV6
             "     --ipv6               : Enable IPv6 Support.\n"
@@ -421,6 +427,13 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
   if (args.HasOption("h46018disable")) {
       cout << "H.460.18 is Disabled" << endl << endl;
       H46018Enable(PFalse);
+  }
+#endif
+
+#ifdef H323_H46026
+  if (args.HasOption("h46026disable")) {
+      cout << "H.460.26 is Disabled" << endl << endl;
+      H46026Enable(PFalse);
   }
 #endif
 

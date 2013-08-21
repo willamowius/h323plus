@@ -2081,6 +2081,16 @@ class H323EndPoint : public PObject
     PBoolean H46023IsEnabled();
 #endif
 
+#ifdef H323_H46026
+    /** Disable H.460.26 Feature. (By Default it is enabled)
+      */    
+    void H46026Enable(PBoolean enable) { m_h46026enabled = enable; }
+
+    /** Query whether we are using H.460.26
+      */
+    PBoolean H46026IsEnabled() const { return m_h46026enabled; }
+#endif
+
 #ifdef H323_H460P
 
     /** Get the presence handler. By default it returns NULL
@@ -2820,6 +2830,10 @@ class H323EndPoint : public PObject
 
 #ifdef H323_H46023
     PBoolean m_h46023enabled;
+#endif
+
+#ifdef H323_H46026
+    PBoolean m_h46026enabled;
 #endif
 
 #ifdef H323_UPnP
