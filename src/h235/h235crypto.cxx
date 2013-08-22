@@ -336,7 +336,7 @@ int EVP_DecryptFinal_relaxed(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
 }
 
 H235CryptoEngine::H235CryptoEngine(const PString & algorithmOID)
-:  m_algorithmOID(algorithmOID), m_initialised(false)
+:  m_algorithmOID(algorithmOID), m_operationCnt(0), m_initialised(false)
 {
 }
 
@@ -376,6 +376,7 @@ void H235CryptoEngine::SetKey(PBYTEArray key)
     EVP_CIPHER_CTX_init(&m_decryptCtx);
     EVP_DecryptInit_ex(&m_decryptCtx, cipher, NULL, key.GetPointer(), NULL);
 
+    m_operationCnt = 0;
     m_initialised = true;
 }
 
@@ -439,6 +440,7 @@ PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * i
     }
 
     ciphertext.SetSize(ciphertext_len + final_len);
+    m_operationCnt++;
     return ciphertext;
 }
 
@@ -479,6 +481,7 @@ PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data, unsigned char * i
 
 	rtpPadding = false;	// we return the real length of the decrypted data without padding
     plaintext.SetSize(plaintext_len + final_len);
+    m_operationCnt++;
     return plaintext;
 }
 
