@@ -195,7 +195,9 @@ void H235_DiffieHellman::Decode_P(const PASN_BitString & p)
 
   PWaitAndSignal m(vbMutex);
   const unsigned char * data = p.GetDataPointer();
-  dh->p=BN_bin2bn(data, p.GetDataLength() - 1, NULL);
+  if (dh->p)
+    BN_free(dh->p);
+  dh->p = BN_bin2bn(data, p.GetDataLength() - 1, NULL);
 }
 
 PBoolean H235_DiffieHellman::Encode_G(PASN_BitString & g) const
@@ -228,6 +230,8 @@ void H235_DiffieHellman::Decode_G(const PASN_BitString & g)
     return;
 
   PWaitAndSignal m(vbMutex);
+  if (dh->g)
+    BN_free(dh->g);
   dh->g = BN_bin2bn(g.GetDataPointer(), g.GetDataLength() - 1, NULL);
 }
 
@@ -258,6 +262,8 @@ void H235_DiffieHellman::Decode_HalfKey(const PASN_BitString & hk)
   PWaitAndSignal m(vbMutex);
 
   const unsigned char *data = hk.GetDataPointer();
+  if (dh->pub_key)
+    BN_free(dh->pub_key);
   dh->pub_key = BN_bin2bn(data, hk.GetDataLength() - 1, NULL);
 }
 
@@ -288,7 +294,7 @@ PBoolean H235_DiffieHellman::GenerateHalfKey()
 
 PBoolean H235_DiffieHellman::Load(const PConfig  & dhFile, const PString & section)
 {
-  if (dh != NULL) {
+  if (dh) {
     DH_free(dh);
     dh = NULL;
   }
@@ -425,3 +431,4 @@ int H235_DiffieHellman::GetKeyLength() const
 
 
 #endif  // H323_H235
+
