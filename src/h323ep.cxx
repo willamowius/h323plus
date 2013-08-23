@@ -481,6 +481,7 @@ H323EndPoint::H323EndPoint()
   channelThreadPriority     = PThread::HighestPriority;
 
   gatekeeper = NULL;
+  RegThread = NULL;
 
   connectionsActive.DisallowDeleteObjects();
 
