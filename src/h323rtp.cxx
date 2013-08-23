@@ -416,7 +416,7 @@ PBoolean H323_RTP_UDP::WriteTransportCapPDU(H245_TransportCapability & cap,
            rsvp.m_tokenRate = qos.GetTokenRate();
       rsvp.IncludeOptionalField(H245_RSVPParameters::e_bucketSize);
            rsvp.m_bucketSize = qos.GetTokenBucketSize();
-      rsvp.HasOptionalField(H245_RSVPParameters::e_peakRate);
+      rsvp.IncludeOptionalField(H245_RSVPParameters::e_peakRate);
            rsvp.m_peakRate = qos.GetPeakBandwidth();
     }
     QoSs.SetSize(1);
