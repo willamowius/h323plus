@@ -578,13 +578,17 @@ PBoolean H323SecureCapability::OnReceivedPDU(const H245_DataType & dataType,PBoo
                    ChildCapability.GetRxFramesInPacket() : ChildCapability.GetTxFramesInPacket();
                return ((H323AudioCapability &)ChildCapability).OnReceivedPDU((const H245_AudioCapability &)mediaType, packetSize, e_OLC);
             }
+            break;
+
         case H323Capability::e_Video: 
             if (mediaType.GetTag() == H245_H235Media_mediaType::e_videoData) 
                return ((H323VideoCapability &)ChildCapability).OnReceivedPDU((const H245_VideoCapability &)mediaType, e_OLC);
+            break;
 
         case H323Capability::e_Data:
             if (mediaType.GetTag() == H245_H235Media_mediaType::e_data) 
                return ((H323DataCapability &)ChildCapability).OnReceivedPDU((const H245_DataApplicationCapability &)mediaType, e_OLC);
+            break;
  
         default:
             break;
