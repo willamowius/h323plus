@@ -1904,6 +1904,7 @@ H225_AlternateGK H323Gatekeeper::AlternateInfo::GetAlternate()
 
 void H323Gatekeeper::AlternateInfo::GetAlternate(AlternateInfo & alt)
 {
+	TODO/BUG: self assignment
 	alt.rasAddress = alt.rasAddress;
     alt.gatekeeperIdentifier = alt.gatekeeperIdentifier;
     alt.priority = alt.priority;
