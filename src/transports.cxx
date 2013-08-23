@@ -638,7 +638,7 @@ H323TransportAddressArray H323GetInterfaceAddresses(const H323TransportAddress &
                                                     H323Transport * associatedTransport)
 {
   PIPSocket::Address ip;
-  WORD port;
+  WORD port = 0;
   if (!addr.GetIpAndPort(ip, port) || !ip.IsAny())
     return addr;
 
@@ -681,7 +681,7 @@ void H323SetTransportAddresses(const H323Transport & associatedTransport,
     H323TransportAddress addr = addresses[i];
 
     PIPSocket::Address ip;
-    WORD port;
+    WORD port = 0;
     if (addr.GetIpAndPort(ip, port)) {
       PIPSocket::Address remoteIP;
       if (associatedTransport.GetRemoteAddress().GetIpAddress(remoteIP)) {
@@ -1727,7 +1727,7 @@ PBoolean H323TransportUDP::ReadPDU(PBYTEArray & pdu)
       case AcceptFromLastReceivedOnly :
         if (!lastReceivedAddress.IsEmpty()) {
           PIPSocket::Address lastAddr;
-          WORD lastPort;
+          WORD lastPort = 0;
 
           if (lastReceivedAddress.GetIpAndPort(lastAddr, lastPort, "udp") &&
              (lastAddr *= address) && lastPort == port)
@@ -2037,7 +2037,7 @@ H323TransportAddress H323TransportUDP::GetLocalAddress() const
   H323TransportAddress taddr = H323TransportIP::GetLocalAddress();
   if (!lastReceivedAddress.IsEmpty()) {
     PIPSocket::Address tipAddr;
-    WORD tipPort;
+    WORD tipPort = 0;
     taddr.GetIpAndPort(tipAddr, tipPort);
     if (tipAddr == PIPSocket::Address(0)) {
       PIPSocket::Address lastRxIPAddr;

@@ -178,7 +178,7 @@ void H323Transactor::PrintOn(ostream & strm) const
     H323TransportAddress addr = transport->GetRemoteAddress();
 
     PIPSocket::Address ip;
-    WORD port;
+    WORD port = 0;
     if (addr.GetIpAndPort(ip, port)) {
       strm << PIPSocket::GetHostName(ip);
       if (port != defaultRemotePort)

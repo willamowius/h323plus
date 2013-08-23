@@ -598,7 +598,7 @@ PBoolean H323FileTransferChannel::ExtractTransport(const H245_TransportAddress &
   H323TransportAddress transAddr = pdu;
     
   PIPSocket::Address ip;
-  WORD port;
+  WORD port = 0;
   if (transAddr.GetIpAndPort(ip, port)) {
     return rtpSession.SetRemoteSocketInfo(ip, port, isDataPort);
   }
@@ -620,8 +620,8 @@ PBoolean H323FileTransferChannel::RetreiveFileInfo(const H245_GenericInformation
     
        const H245_ArrayOf_GenericParameter & params = info.m_messageContent;
 
-       int direction=0;
-       long size =0;
+       int direction = 0;
+       long size = 0;
        PString name = PString();
        for (PINDEX i =0; i < params.GetSize(); i++)
        {

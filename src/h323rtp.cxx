@@ -231,7 +231,7 @@ PBoolean H323_RTP_UDP::ExtractTransport(const H245_TransportAddress & pdu,
   H323TransportAddress transAddr = pdu;
 
   PIPSocket::Address ip;
-  WORD port;
+  WORD port = 0;
   if (transAddr.GetIpAndPort(ip, port))
     return rtp.SetRemoteSocketInfo(ip, port, isDataPort);
 

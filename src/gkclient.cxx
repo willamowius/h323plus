@@ -826,7 +826,7 @@ PBoolean H323Gatekeeper::LocationRequest(const PStringList & aliases,
 
   // sanity check the address - some Gks return address 0.0.0.0 and port 0
   PIPSocket::Address ipAddr;
-  WORD port;
+  WORD port = 0;
   return address.GetIpAndPort(ipAddr, port) && (port != 0);
 }
 
@@ -1818,7 +1818,7 @@ PBoolean H323Gatekeeper::MakeRequest(Request & request)
     
     AlternateInfo * altInfo;
     PIPSocket::Address localAddress;
-    WORD localPort;
+    WORD localPort = 0;
     do {
       if (alt >= alternates.GetSize()) {
         if (!alternatePermanent) 

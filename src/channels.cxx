@@ -1372,7 +1372,7 @@ void H323_ExternalRTPChannel::SetExternalAddress(const H323TransportAddress & da
 
   if (data.IsEmpty() || control.IsEmpty()) {
     PIPSocket::Address ip;
-    WORD port;
+    WORD port = 0;
     if (data.GetIpAndPort(ip, port))
       externalMediaControlAddress = H323TransportAddress(ip, (WORD)(port+1));
     else if (control.GetIpAndPort(ip, port))

@@ -27,6 +27,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.6  2013/01/12 20:52:00  willamowius
+ * fix logical OR
+ *
  * Revision 1.5  2011/02/20 06:55:46  shorne
  * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
  *
@@ -2341,7 +2344,7 @@ H323GatekeeperRequest::Response H323RegisteredEndPoint::OnFullRegistration(H323G
     PINDEX i;
     for (i = 0; i < signalAddresses.GetSize(); i++) {
       PIPSocket::Address ip;
-      WORD port;
+      WORD port = 0;
       if (signalAddresses[i].GetIpAndPort(ip, port)) {
         if (!ep.IsLocalAddress(ip))
           break;
@@ -2751,7 +2754,7 @@ H323GatekeeperRequest::Response H323GatekeeperListener::OnDiscovery(H323Gatekeep
   //      transport->SetUpTransportPDU(info.gcf.m_rasAddress, TRUE);
   {
     PIPSocket::Address localAddr, remoteAddr;
-    WORD localPort;
+    WORD localPort = 0;
     transport->GetLocalAddress().GetIpAndPort(localAddr, localPort);
     H323TransportAddress(info.grq.m_rasAddress).GetIpAddress(remoteAddr);
     endpoint.InternalTranslateTCPAddress(localAddr, remoteAddr);

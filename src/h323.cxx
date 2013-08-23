@@ -5864,8 +5864,8 @@ PBoolean H323Connection::OnReceiveOLCGenericInformation(unsigned sessionID,
                     if (params.HasOptionalField(H46019_TraversalParameters::e_keepAliveChannel)) {
                         H245_TransportAddress & k = params.m_keepAliveChannel;
                         RTPaddress = H323TransportAddress(k);
-                            PIPSocket::Address add; WORD port;
-                            RTPaddress.GetIpAndPort(add,port);
+                        PIPSocket::Address add; WORD port = 0;
+                        RTPaddress.GetIpAndPort(add,port);
                         RTCPaddress = H323TransportAddress(add,port+1);  // Compute the RTCP Address
                         keepAliveAddress = true;
                     }
