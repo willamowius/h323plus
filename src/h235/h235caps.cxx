@@ -527,7 +527,8 @@ PBoolean H323SecureCapability::OnSendingPDU(H245_DataType & dataType) const
     dataType.SetTag(H245_DataType::e_h235Media);
     H245_H235Media & h235Media = dataType;
     // Load the algorithm
-    secCap->OnSendingPDU(h235Media.m_encryptionAuthenticationAndIntegrity, e_OLC);
+    if (secCap)
+      secCap->OnSendingPDU(h235Media.m_encryptionAuthenticationAndIntegrity, e_OLC);
    
     H245_H235Media_mediaType & cType = h235Media.m_mediaType;
     unsigned txFramesInPacket =0;
