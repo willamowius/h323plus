@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.8  2013/01/24 11:49:47  shorne
+ * General tidy up and removal of unused code
+ *
  * Revision 1.7  2011/06/28 10:32:24  shorne
  * Fix typos in comments
  *
@@ -219,6 +222,7 @@ PBoolean H230Control::OnGeneralRequest(int request)
 	switch (request) {
 	   case H245_ConferenceRequest::e_terminalListRequest :
 		   OnTerminalListRequest();
+           break;
        case H245_ConferenceRequest::e_makeMeChair :
 		   ChairRequested(m_userID,FALSE);
 		   break;
@@ -1006,8 +1010,10 @@ PBoolean H230Control::InviteResponse(int id, const PString & calledNo, AddRespon
 	    switch (i) {
 		  case 0:
 			entry.m_value.SetValue(calledNo);
+            break;
 		  case 1:
 			entry.m_value.SetValue(PString(errCode)); 
+            break;
 		}
 		data[i] = entry;
 	  }
@@ -1037,8 +1043,10 @@ PBoolean H230Control::OnConferenceAddResponse(const GCC_ConferenceAddResponse & 
 			   switch (k.AsInteger()) {
 				case 0:
 					calledNo = entry.m_value.AsString();
+                    break;
 				case 1:
 					errCode = entry.m_value.AsString();
+                    break;
 			   }
 			  }
 			}
@@ -1631,7 +1639,7 @@ PBoolean H230Control_EndPoint::ReqUserEnquiry(list<int> node, list<userInfo> & i
 
 
 H230Control_EndPoint::H230Control_EndPoint(const PString & _h323token)
-: H230Control(_h323token)
+: H230Control(_h323token), res(NULL)
 {
 }
 
