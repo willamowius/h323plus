@@ -87,6 +87,8 @@ public:
 
     PBoolean IsMaxBlocksPerKeyReached() const { return m_operationCnt > AES_KEY_LIMIT; }
 
+    void ResetBlockCount() { m_operationCnt = 0; }
+
 protected:
     static void SetIV(unsigned char * iv, unsigned char * ivSequence, unsigned ivLen);
 
