@@ -360,7 +360,7 @@ PBoolean H235_DiffieHellman::LoadedFromFile()
 
 PBoolean H235_DiffieHellman::Save(const PFilePath & dhFile, const PString & oid)
 {
-  if (!dh && dh->pub_key)
+  if (!dh && dh->pub_key)	// TODO: checking the pub_key without dh will crash!
     return false;
 
   PConfig config(dhFile, oid);
