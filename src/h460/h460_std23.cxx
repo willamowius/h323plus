@@ -333,18 +333,19 @@ H460_FEATURE(Std23);
 H460_FeatureStd23::H460_FeatureStd23()
 : H460_FeatureStd(23)
 {
- PTRACE(6,"Std23\tInstance Created");
+  PTRACE(6,"Std23\tInstance Created");
 
- FeatureCategory = FeatureSupported;
+  FeatureCategory = FeatureSupported;
 
- EP = NULL;
- alg = false;
- isavailable = true;
- isEnabled = false;
- natType = PSTUNClient::UnknownNat;
- externalIP = PIPSocket::GetDefaultIpAny();
- useAlternate = 0;
- natNotify = false;
+  EP = NULL;
+  alg = false;
+  isavailable = true;
+  isEnabled = false;
+  natType = PSTUNClient::UnknownNat;
+  externalIP = PIPSocket::GetDefaultIpAny();
+  useAlternate = 0;
+  natNotify = false;
+  RegThread = NULL;
 }
 
 H460_FeatureStd23::~H460_FeatureStd23()
