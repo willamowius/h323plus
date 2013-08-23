@@ -166,12 +166,9 @@ class H46018Transport  : public H323TransportTCP
      PTimeInterval ReadTimeOut;
      PSyncPoint ReadMutex;
 
-     H46018Handler * Feature;
-
      PBoolean   isConnected;
      PBoolean   remoteShutDown;
      PBoolean    closeTransport;
-     
 };
 
 

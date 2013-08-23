@@ -379,7 +379,6 @@ class H323Transaction : public PObject
     PDECLARE_NOTIFIER(PThread, H323Transaction, SlowHandler);
 
     H323Transactor         & transactor;
-    unsigned                 requestSequenceNumber;
     H323TransportAddressArray replyAddresses;
     PBoolean                     fastResponseRequired;
     H323TransactionPDU     * request;
