@@ -722,12 +722,12 @@ PString H235AuthenticatorList::PasswordDecrypt(const PString &encrypt) const
 
 ///////////////////////////////////////////////////////////////////////////////
 H235AuthenticatorInfo::H235AuthenticatorInfo(PString username,PString password,PBoolean ishashed)
-    : UserName(username), Password(password), isHashed(ishashed)
+    : UserName(username), Password(password), isHashed(ishashed), Certificate(NULL)
 {
 }
 
 H235AuthenticatorInfo::H235AuthenticatorInfo(PSSLCertificate * cert)
-    : Certificate(cert)
+    : isHashed(false), Certificate(cert)
 {
 }
 ///////////////////////////////////////////////////////////////////////////////
