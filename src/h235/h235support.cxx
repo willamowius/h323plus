@@ -155,12 +155,16 @@ PBoolean H235_DiffieHellman::CheckParams() const
     switch (i) {
      case DH_CHECK_P_NOT_PRIME:
          PTRACE(1, "H235_DH\tCHECK: p value is not prime");
+         break;
      case DH_CHECK_P_NOT_SAFE_PRIME:
          PTRACE(1, "H235_DH\tCHECK: p value is not a safe prime");
+         break;
      case DH_UNABLE_TO_CHECK_GENERATOR:
          PTRACE(1, "H235_DH\tCHECK: unable to check the generator value");
+         break;
      case DH_NOT_SUITABLE_GENERATOR:
          PTRACE(1, "H235_DH\tCHECK: the g value is not a generator");
+         break;
     }
     return FALSE;
   }
