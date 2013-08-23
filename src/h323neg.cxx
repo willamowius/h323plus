@@ -684,6 +684,7 @@ PBoolean H245NegLogicalChannel::HandleOpen(const H245_OpenLogicalChannel & pdu)
 		  delete channel;
 		  channel = NULL;
 		  ok = false;
+          return false;
 	  }
 
     channel->SetNumber(channelNumber);
