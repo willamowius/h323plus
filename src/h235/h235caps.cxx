@@ -903,15 +903,16 @@ void H235Capabilities::SetDHKeyPair(const PStringList & keyOIDs, H235_DiffieHell
 
 }
 
-// TODO/BUG: this API seems wrong: was ptr to ptr intended for key ?
 void H235Capabilities::GetDHKeyPair(PStringList & keyOIDs, H235_DiffieHellman * key, PBoolean & isMaster)
 {
-    keyOIDs.SetSize(0);
     for (PINDEX i=0; i < m_algorithms.GetSize(); ++i)
          keyOIDs.AppendString(m_algorithms[i]);
 
-     if (m_DHkey)
-         key = new H235_DiffieHellman(*m_DHkey);
+    if (m_DHkey) {
+        // Create a new copy of the base diffiehellman 
+        // class for manipulation during a call
+         key = (H235_DiffieHellman *)m_DHkey->Clone();
+    }
      isMaster = m_h245Master;
 }
 
