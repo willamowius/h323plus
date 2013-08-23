@@ -45,7 +45,7 @@ extern "C" {
 }
 
 // H.235.6 says no more than 2^62 blocks, Schneier says no more than 2^32 blocks in CBC mode
-#define AES_KEY_LIMIT 4294967296	// 2^32
+#define AES_KEY_LIMIT 4294967295	// 2^32-1
 
 class H235CryptoEngine : public PObject
 {
@@ -85,14 +85,14 @@ public:
 
 	PString GetAlgorithmOID() const { return m_algorithmOID; }
 
-    PBoolean IsMaxBlocksPerKeyReached() const { return m_operationCnt >= AES_KEY_LIMIT; }
+    PBoolean IsMaxBlocksPerKeyReached() const { return m_operationCnt > AES_KEY_LIMIT; }
 
 protected:
     static void SetIV(unsigned char * iv, unsigned char * ivSequence, unsigned ivLen);
 
     EVP_CIPHER_CTX m_encryptCtx, m_decryptCtx;
     PString m_algorithmOID;    // eg. "2.16.840.1.101.3.4.1.2"
-    unsigned long m_operationCnt;
+    unsigned long long m_operationCnt;  // 8 bit integer
     PBoolean m_initialised;
 };
 
