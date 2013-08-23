@@ -307,6 +307,7 @@ H235Authenticator::ValidationResult H2356_Authenticator::ValidateTokens(const PA
                             new_dh->Decode_G(dh.m_generator);
                     } else {
                         PTRACE(4, "H2356\tDH Parameters missing.");
+                        delete new_dh;
                         return e_Absent;
                     }
                     PTRACE(4, "H2356\tSetting Encryption Algorithm " << it->first);
