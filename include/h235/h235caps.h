@@ -579,7 +579,7 @@ public:
 
     /**Get the DH KeyPair
       */
-   void GetDHKeyPair(PStringList & keyOIDs, H235_DiffieHellman * key, PBoolean & isMaster);
+   void GetDHKeyPair(PStringList & keyOIDs, H235_DiffieHellman * & key, PBoolean & isMaster);
 
     /**Get the Algorithms
          return false if no algorithms.

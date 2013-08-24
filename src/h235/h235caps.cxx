@@ -903,7 +903,7 @@ void H235Capabilities::SetDHKeyPair(const PStringList & keyOIDs, H235_DiffieHell
 
 }
 
-void H235Capabilities::GetDHKeyPair(PStringList & keyOIDs, H235_DiffieHellman * key, PBoolean & isMaster)
+void H235Capabilities::GetDHKeyPair(PStringList & keyOIDs, H235_DiffieHellman * & key, PBoolean & isMaster)
 {
     for (PINDEX i=0; i < m_algorithms.GetSize(); ++i)
          keyOIDs.AppendString(m_algorithms[i]);
