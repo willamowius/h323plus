@@ -205,7 +205,7 @@ class H263_Base_DecoderContext
 {
   public:
     H263_Base_DecoderContext(const char * prefix);
-    ~H263_Base_DecoderContext();
+    virtual ~H263_Base_DecoderContext();
 
     virtual bool DecodeFrames(const BYTE * src, unsigned & srcLen, BYTE * dst, unsigned & dstLen, unsigned int & flags) = 0;
 
@@ -231,7 +231,7 @@ class H263_RFC2190_DecoderContext : public H263_Base_DecoderContext
 {
   public:
     H263_RFC2190_DecoderContext();
-    ~H263_RFC2190_DecoderContext();
+    virtual ~H263_RFC2190_DecoderContext();
     bool DecodeFrames(const BYTE * src, unsigned & srcLen, BYTE * dst, unsigned & dstLen, unsigned int & flags);
 
   protected:
@@ -244,7 +244,7 @@ class H263_RFC2429_DecoderContext : public H263_Base_DecoderContext
 {
   public:
      H263_RFC2429_DecoderContext();
-     ~H263_RFC2429_DecoderContext();
+     virtual ~H263_RFC2429_DecoderContext();
 
      bool DecodeFrames(const BYTE * src, unsigned & srcLen, BYTE * dst, unsigned & dstLen, unsigned int & flags);
   protected:
