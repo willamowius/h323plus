@@ -1801,7 +1801,7 @@ PBoolean H323Gatekeeper::MakeRequest(Request & request)
       if (!alternatePermanent &&
             (transport->GetRemoteAddress() != tempAddr ||
              gatekeeperIdentifier != tempIdentifier))
-        Connect(tempAddr, tempIdentifier);	// TODO/BUG: when using H.460.17, this sets the gatekeeperIdentifier to empty causing an error message on URQ (Inconsistent gatekeeper identifier)
+        Connect(tempAddr, tempIdentifier);
       requestMutex.Signal();
       return TRUE;
     }
