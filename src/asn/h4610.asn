@@ -1,0 +1,185 @@
+ASSET {itu-t(0) recommendation(0) h(8) 46x (0) } DEFINITIONS AUTOMATIC TAGS ::=
+
+BEGIN
+
+IMPORTS
+    AliasAddress,
+    GenericIdentifier,
+    GloballyUniqueID,
+    CallIdentifier,
+    TimeToLive
+    FROM H323-MESSAGES; -- See Rec. ITU-T H.225.0
+   
+
+--
+-- ASSETPDU
+--
+ASSETPDU ::= SEQUENCE OF ASSETMessage
+
+
+--
+-- ASSETMessage
+--
+ASSETMessage ::= SEQUENCE
+{
+    application      ApplicationIE,
+    associateToken   GloballyUniqueID              OPTIONAL,
+    callIdentifier   CallIdentifier                OPTIONAL, 
+    ...
+}
+
+--
+-- Application IE
+--
+ApplicationIE ::= CHOICE
+{
+    associateRequest    AssociateRequest,
+    associateResponse   AssociateResponse,
+    statusRequest       NULL,
+    statusResponse      SEQUENCE OF ApplicationStatus,
+    listRequest         SEQUENCE OF ApplicationStatus,
+    listResponse        SEQUENCE OF ApplicationStatus,
+    callApplist         SEQUENCE OF ApplicationAvailable,
+    preInvokeRequest    Application,
+    preInvokeResponse   ApplicationStatus,    
+    invokeRequest       ApplicationInvokeRequest,
+    invokeResponse      ApplicationInvokeResponse,
+    invoke              ApplicationInvoke,
+    invokeStartList     SEQUENCE OF ApplicationStart,
+    invokeNotify        ApplicationStatus,
+    stopRequest         SEQUENCE OF Application,
+    stopNotify          SEQUENCE OF Application,
+    callRelease         NULL,    
+    ...
+}
+
+--
+-- AssociateRequest
+--
+AssociateRequest ::= SEQUENCE
+{
+   timeToLive      TimeToLive,   -- seconds
+   ...
+}
+
+
+--
+-- AssociateResponse
+--
+AssociateResponse ::= SEQUENCE
+{
+   associateToken  GloballyUniqueID,
+   timeToLive      TimeToLive,   -- seconds
+   statusInterval  TimeToLive     OPTIONAL,   -- seconds
+   ...
+}
+
+
+--
+-- ApplicationStatus
+--
+ApplicationStatus ::= SEQUENCE
+{
+   applicationId      GenericIdentifier,
+   display            SEQUENCE OF ApplicationDisplay   OPTIONAL,
+   avatar             IA5String                        OPTIONAL,
+   state              ApplicationState                 OPTIONAL,
+   ...
+}
+
+  
+--
+-- ApplicationDisplay
+--
+ApplicationDisplay ::= SEQUENCE
+{
+    language      IA5String                 OPTIONAL,    -- RFC4646 language tag
+    display       BMPString(SIZE(1..128))
+}
+
+--
+-- ApplicationState
+--
+ApplicationState ::= CHOICE
+{
+    available      NULL,
+    unavailable    NULL,
+    inuse          NULL,   -- In use by another call
+    associated     NULL,   -- In use by this call
+    invokeFail     InvokeFailReason,
+    ...
+}
+
+--
+-- InvokeFailReason
+--
+InvokeFailReason ::= CHOICE
+{
+    unavailable    NULL,
+    inuse          NULL,   -- In use by another call
+    declined       NULL,
+    h2250Error     NULL,
+    ...
+}
+
+--
+-- Application
+--
+Application ::= SEQUENCE
+{
+   applicationId      GenericIdentifier,
+   ...
+}
+
+--
+-- ApplicationAvailable
+--
+ApplicationAvailable ::= SEQUENCE
+{
+   applicationId      GenericIdentifier,
+   aliasAddress       SEQUENCE OF AliasAddress,
+   ...
+}
+
+-- 
+-- ApplicationInvokeRequest
+--
+ApplicationInvokeRequest ::= CHOICE
+{
+   applicationId      GenericIdentifier,
+   ...
+}
+
+
+-- 
+-- ApplicationInvokeResponse
+--
+ApplicationInvokeResponse ::= CHOICE
+{
+   approved   ApplicationInvoke,
+   declined   InvokeFailReason,
+   ...
+}
+
+-- 
+-- ApplicationInvoke
+--
+ApplicationInvoke ::= SEQUENCE
+{
+   applicationId      GenericIdentifier,
+   invokeToken        GloballyUniqueID,
+   aliasAddress       SEQUENCE OF AliasAddress,
+   ...
+}
+
+--
+-- ApplicationStart
+--
+ApplicationStart ::= SEQUENCE
+{
+   applicationId      GenericIdentifier,
+   invokeToken        GloballyUniqueID,
+   ...
+}
+
+END
