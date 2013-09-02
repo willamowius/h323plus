@@ -490,6 +490,9 @@ PBoolean H323Gatekeeper::OnReceiveRegistrationConfirm(const H225_RegistrationCon
 
   registrationFailReason = RegistrationSuccessful;
 
+  if (gatekeeperIdentifier.IsEmpty())
+        gatekeeperIdentifier = rcf.m_gatekeeperIdentifier.GetValue();
+
   if (endpointIdentifier.GetValue().IsEmpty())
         endpointIdentifier = rcf.m_endpointIdentifier;
 
@@ -1769,7 +1772,8 @@ void H323Gatekeeper::Connect(const H323TransportAddress & address,
 
   transport->SetRemoteAddress(address);
   transport->Connect();
-  gatekeeperIdentifier = gkid;
+  if (!gkid.IsEmpty())
+    gatekeeperIdentifier = gkid;
 }
 
 
