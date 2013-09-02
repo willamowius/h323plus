@@ -741,7 +741,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\h224.cxx"
+				RelativePath=".\src\h224\h224.cxx"
 				>
 			</File>
 			<File
