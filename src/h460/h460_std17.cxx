@@ -763,6 +763,11 @@ H323TransportAddress H46017RasTransport::GetLocalAddress() const
     return H323TransportAddress("0.0.0.0:0");
 }
 
+H323TransportAddress H46017RasTransport::GetRemoteAddress() const
+{
+    return H323TransportAddress("0.0.0.0:0");
+}
+
 void H46017RasTransport::SetUpTransportPDU(H225_TransportAddress & pdu, PBoolean /*localTsap*/, H323Connection * /*connection*/) const
 {
   H323TransportAddress transAddr = GetLocalAddress();

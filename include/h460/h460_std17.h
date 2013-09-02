@@ -326,6 +326,8 @@ class H46017RasTransport : public H323TransportUDP
       const H323TransportAddress & address
     );
 
+    virtual H323TransportAddress GetRemoteAddress() const;
+
     virtual PBoolean Connect();
 
     /**Close the channel.
