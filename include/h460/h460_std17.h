@@ -270,6 +270,8 @@ public:
     void AttachRasTransport(H46017RasTransport * _ras);
     H46017RasTransport * GetRasTransport();
 
+    void TransportClosed();
+
     PBoolean RegisterGatekeeper();
 
 #ifdef H323_H46026

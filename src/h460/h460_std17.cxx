@@ -534,9 +534,12 @@ void H46017Transport::ConnectionLost(PBoolean established)
 {
     PWaitAndSignal m(shutdownMutex);
 
-    if (closeTransport)
+    if (closeTransport) {
+        // TODO Handle TCP socket reconnect
+        if (Feature) 
+            Feature->TransportClosed();
         return;
-
+    }
     PBoolean lost = IsConnectionLost();
     PTRACE(4,"H46017\tConnection lost " << established << " have " << lost);
 }
@@ -724,6 +727,12 @@ PBoolean H46017Handler::RegisterGatekeeper()
         return false;
 
     return true;
+}
+
+void H46017Handler::TransportClosed()
+{
+    ep.RemoveGatekeeper(H225_UnregRequestReason::e_reregistrationRequired);
+    ras = NULL;  // Torn down when gatekeeper is removed.
 }
 
 #ifdef H323_H46026
