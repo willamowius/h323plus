@@ -1938,8 +1938,12 @@ PBoolean H323Gatekeeper::AlternateInfo::IsValid() const
     PIPSocket::Address addr;
     H323TransportAddress(rasAddress).GetIpAddress(addr);
 
-    if (addr.IsValid() && !addr.IsAny() && !addr.IsLoopback()) 
-        return true;
+    if (addr.IsValid()) {
+        if (!addr.IsAny() && !addr.IsLoopback()) 
+            return true;
+        else 
+            return false;
+    }
 
     PTRACE(2,"GKALT\tAlternate Address " << addr << " is not valid. Ignoring...");
     return false;
