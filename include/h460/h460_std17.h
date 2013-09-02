@@ -359,6 +359,8 @@ class H46017RasTransport : public H323TransportUDP
 
     virtual PChannel::Errors GetErrorCode(ErrorGroup group = NumErrorGroups) const;
 
+    virtual void CleanUpOnTermination();
+
   protected:
     H46017Handler * m_handler;
 

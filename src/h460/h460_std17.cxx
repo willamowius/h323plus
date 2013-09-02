@@ -731,8 +731,8 @@ PBoolean H46017Handler::RegisterGatekeeper()
 
 void H46017Handler::TransportClosed()
 {
-    ep.RemoveGatekeeper(H225_UnregRequestReason::e_reregistrationRequired);
-    ras = NULL;  // Torn down when gatekeeper is removed.
+    if (ras)
+        ras->Close();
 }
 
 #ifdef H323_H46026
@@ -758,8 +758,7 @@ H46017RasTransport::H46017RasTransport(H323EndPoint & endpoint, H46017Handler * 
 
 H46017RasTransport::~H46017RasTransport()
 {
-    Close();
-    m_handler->AttachRasTransport(NULL);
+
 }
 
 PBoolean H46017RasTransport::SetRemoteAddress(const H323TransportAddress & /*address*/)
@@ -836,6 +835,13 @@ PChannel::Errors H46017RasTransport::GetErrorCode(ErrorGroup /*group*/) const
         return PChannel::NotOpen;
 
     return PChannel::Interrupted;
+}
+
+void H46017RasTransport::CleanUpOnTermination()
+{
+    PTRACE(4,"H46017\tRAS transport cleanup");
+    m_handler->AttachRasTransport(NULL);
+    H323Transport::CleanUpOnTermination();
 }
 
 #endif // H323_H46017
