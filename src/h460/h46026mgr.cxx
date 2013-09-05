@@ -411,10 +411,14 @@ PBoolean H46026ChannelManager::PackageFrame(PBoolean rtp, unsigned crv, PacketTy
     if (PTrace::CanTrace(6)) {
         PStringStream info;
         info <<  "Build #" << prior.id << (rtp ? "\nMedia" : " Control") << ":" << H46026MediaTypeAsString(id) << "  Delay:" << prior.delay 
-            << "ms  Priority:" << H46026PriorityAsString(prior.priority);
-        if (rtp) info << "\n" << H46026MediaFrameAnalysis(data) << data;
-        else info << "\n" << data;
-        PTRACE(6,"H46026\t" << info);
+            << "ms  Priority:" << H46026PriorityAsString(prior.priority) << "\n" << H46026MediaFrameAnalysis(data);
+        if (PTrace::CanTrace(7)) {
+            if (rtp) info  << data;
+            else info << "\n" << data;
+            PTRACE(7,"H46026\t" << info);
+        } else {
+            PTRACE(6,"H46026\t" << info);
+        }
     }
 
     // Write to the output Queue
@@ -534,8 +538,15 @@ PBoolean H46026ChannelManager::SocketIn(const Q931 & q931)
 
     if ((q931.GetMessageType() == Q931::InformationMsg) && ReadRTPFrame(q931, frameData)) {
         if (PTrace::CanTrace(6) && frameData.m_dataFrame) {
-            PTRACE(6,"H46026\tReceived Media:" << H46026MediaSessionId(frameData.m_sessionId) 
-                << "\n" << H46026MediaFrameAnalysis(frameData) << frameData);
+            PStringStream info;
+            info << "Received Media:" << H46026MediaSessionId(frameData.m_sessionId) 
+                << "\n" << H46026MediaFrameAnalysis(frameData);
+            if (PTrace::CanTrace(7)) {
+                info << "\n" << frameData;
+                PTRACE(7,"H46026\t" << info);
+            } else {
+                PTRACE(6,"H46026\t" << info);
+            }
         }
         for (PINDEX i=0; i < frameData.m_frame.GetSize(); ++i) {
             PASN_OctetString & data = frameData.m_frame[i];
