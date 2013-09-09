@@ -93,9 +93,8 @@ protected:
 
     EVP_CIPHER_CTX m_encryptCtx, m_decryptCtx;
     PString m_algorithmOID;    // eg. "2.16.840.1.101.3.4.1.2"
-    PBoolean m_initialised;
-
     PUInt64 m_operationCnt;  // 8 byte integer
+    PBoolean m_initialised;
 
 };
 
