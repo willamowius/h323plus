@@ -418,6 +418,12 @@ PBoolean H323Gatekeeper::RegistrationRequest(PBoolean autoReg)
       rrq.m_assignedGatekeeper = assignedGK.GetAlternate();
   }
 
+  PStringList lang;
+  if (endpoint.GetDefaultLanguages(lang)) {
+      H323SetLanguages(lang,rrq.m_language);
+      rrq.IncludeOptionalField(H225_RegistrationRequest::e_language);
+  }
+
   if (IsRegistered()) {
     rrq.IncludeOptionalField(H225_RegistrationRequest::e_keepAlive);
     rrq.m_keepAlive = TRUE;
@@ -575,6 +581,12 @@ PBoolean H323Gatekeeper::OnReceiveRegistrationConfirm(const H225_RegistrationCon
       PTRACE(2, "RAS\tGatekeeper removal of alias \"" << aliasesToChange[i] << '"');
       endpoint.RemoveAliasName(aliasesToChange[i]);
     }
+  }
+
+  if (rcf.HasOptionalField(H225_RegistrationConfirm::e_language)) {
+      PStringList lang;
+      H323GetLanguages(lang,rcf.m_language);
+      endpoint.OnReceiveLanguages(lang);
   }
 
 #ifdef H323_H248

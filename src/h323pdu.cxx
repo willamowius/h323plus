@@ -127,44 +127,32 @@ void H323SetLanguage(const PString & lang, PASN_IA5String & asn)
 	asn.SetValue(lang);
 }
 
-PBoolean H323SetLanguages(const PStringList & lang, H225_Setup_UUIE_language & asn)
-{
-  asn.SetSize(lang.GetSize());
-  for (PINDEX i = 0; i < asn.GetSize(); i++)
-    H323SetLanguage(lang[i], asn[i]);
-
-  return (asn.GetSize() > 0);
-}
-
-PBoolean H323SetLanguages(const PStringList & lang, H225_Connect_UUIE_language & asn)
-{
-  asn.SetSize(lang.GetSize());
-  for (PINDEX i = 0; i < asn.GetSize(); i++)
-    H323SetLanguage(lang[i], asn[i]);
-
-  return (asn.GetSize() > 0);
-}
-
 void H323GetLanguage(PStringList & lang, const PASN_IA5String & asn)
 {
     lang.AppendString(asn.GetValue());
 }
 
-PBoolean H323GetLanguages(PStringList & lang, const H225_Setup_UUIE_language & asn)
-{
-  for (PINDEX i = 0; i < asn.GetSize(); i++)
-    H323GetLanguage(lang, asn[i]);
+#define H323LANGUAGEPDU_body(pdu) \
+    PBoolean H323SetLanguages(const PStringList & lang, pdu##_language & asn) { \
+        asn.SetSize(lang.GetSize()); \
+        for (PINDEX i = 0; i < asn.GetSize(); i++) \
+            H323SetLanguage(lang[i], asn[i]); \
+        return (asn.GetSize() > 0); \
+    } \
+    PBoolean H323GetLanguages(PStringList & lang, const pdu##_language & asn) { \
+        for (PINDEX i = 0; i < asn.GetSize(); i++) \
+            H323GetLanguage(lang, asn[i]); \
+        return (lang.GetSize() > 0); \
+    }
 
-  return (lang.GetSize() > 0);
-}
+H323LANGUAGEPDU_body(H225_Setup_UUIE);
+H323LANGUAGEPDU_body(H225_Connect_UUIE);
+H323LANGUAGEPDU_body(H225_RegistrationRequest);
+H323LANGUAGEPDU_body(H225_RegistrationConfirm);
+H323LANGUAGEPDU_body(H225_AdmissionConfirm);
+H323LANGUAGEPDU_body(H225_LocationRequest);
+H323LANGUAGEPDU_body(H225_LocationConfirm);
 
-PBoolean H323GetLanguages(PStringList & lang, const H225_Connect_UUIE_language & asn)
-{
-  for (PINDEX i = 0; i < asn.GetSize(); i++)
-    H323GetLanguage(lang, asn[i]);
-
-  return (lang.GetSize() > 0);
-}
 
 PString H323GetDisplayName(const H225_ArrayOf_DisplayName & asn)
 {

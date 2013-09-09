@@ -475,11 +475,20 @@ class H323RasPDU : public H225_RasMessage, public H323TransactionPDU
 // Language support
 
 void H323SetLanguage(const PString & lang, PASN_IA5String & asn);
-PBoolean H323SetLanguages(const PStringList & lang, H225_Setup_UUIE_language & asn);
-PBoolean H323SetLanguages(const PStringList & lang, H225_Connect_UUIE_language & asn);
 void H323GetLanguage(PStringList & lang, const PASN_IA5String & asn);
-PBoolean H323GetLanguages(PStringList & lang, const H225_Setup_UUIE_language & asn);
-PBoolean H323GetLanguages(PStringList & lang, const H225_Connect_UUIE_language & asn);
+
+#define H323LANGUAGEPDU(pdu) \
+    PBoolean H323SetLanguages(const PStringList & lang, pdu##_language & asn); \
+    PBoolean H323GetLanguages(PStringList & lang, const pdu##_language & asn);
+
+H323LANGUAGEPDU(H225_Setup_UUIE);
+H323LANGUAGEPDU(H225_Connect_UUIE);
+H323LANGUAGEPDU(H225_RegistrationRequest);
+H323LANGUAGEPDU(H225_RegistrationConfirm);
+H323LANGUAGEPDU(H225_AdmissionConfirm);
+H323LANGUAGEPDU(H225_LocationRequest);
+H323LANGUAGEPDU(H225_LocationConfirm);
+
 
 PString H323GetDisplayName(const H225_ArrayOf_DisplayName & asn);
 PBoolean H323SetDisplayName(const PStringList & alias, const PStringList & lang, H225_ArrayOf_DisplayName & asn);

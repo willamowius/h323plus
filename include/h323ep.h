@@ -2587,6 +2587,10 @@ class H323EndPoint : public PObject
 
     PBoolean EnableH225KeepAlive() const { return m_useH225KeepAlive; }
     PBoolean EnableH245KeepAlive() const { return m_useH245KeepAlive; }
+
+    virtual PBoolean GetDefaultLanguages(const PStringList & /*languages*/)  { return false; }
+    virtual void OnReceiveLanguages(const PStringList & /*languages*/)  { }
+
   //@}
 
     /**
