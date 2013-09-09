@@ -45,7 +45,14 @@ extern "C" {
 }
 
 // H.235.6 says no more than 2^62 blocks, Schneier says no more than 2^32 blocks in CBC mode
-#define AES_KEY_LIMIT 4294967295	// 2^32-1
+// unsigned long long only exits if using C++99 or higher.
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 19990601L)   // Must be C99
+#define H323_C99 1
+#endif
+
+#ifdef H323_C99
+#define AES_KEY_LIMIT 4294967295ULL	// 2^32-1 unsigned long long
+#endif
 
 class H235CryptoEngine : public PObject
 {
@@ -84,18 +91,23 @@ public:
     PBYTEArray GenerateRandomKey(const PString & algorithmOID);  // Use assigned Algorithm
 
 	PString GetAlgorithmOID() const { return m_algorithmOID; }
-
+#ifdef H323_C99
     PBoolean IsMaxBlocksPerKeyReached() const { return m_operationCnt > AES_KEY_LIMIT; }
-
     void ResetBlockCount() { m_operationCnt = 0; }
+#else
+    PBoolean IsMaxBlocksPerKeyReached() const { return false; }
+    void ResetBlockCount() { }
+#endif
 
 protected:
     static void SetIV(unsigned char * iv, unsigned char * ivSequence, unsigned ivLen);
 
     EVP_CIPHER_CTX m_encryptCtx, m_decryptCtx;
     PString m_algorithmOID;    // eg. "2.16.840.1.101.3.4.1.2"
-    unsigned long long m_operationCnt;  // 8 byte integer
     PBoolean m_initialised;
+#ifdef H323_C99
+    unsigned long long m_operationCnt;  // 8 byte integer
+#endif
 };
 
 
