@@ -5,7 +5,7 @@
  *
  * H323Plus library
  *
- * Copyright (c) 2012 Jan Willamowius
+ * Copyright (c) 2012-2013 Jan Willamowius
  *
  * The contents of this file are subject to the Mozilla Public License
  * Version 1.1 (the "License"); you may not use this file except in
@@ -45,7 +45,7 @@ extern "C" {
 }
 
 // H.235.6 says no more than 2^62 blocks, Schneier says no more than 2^32 blocks in CBC mode
-#define AES_KEY_LIMIT 4294967295	// 2^32-1
+#define AES_KEY_LIMIT 4294967295U	// 2^32-1
 
 class H235CryptoEngine : public PObject
 {
