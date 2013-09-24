@@ -643,7 +643,7 @@ void BuildCallApplicationList(const H461DataStore::ApplicationMap & apps, std::l
 void MergeCallApplicationList(const H461DataStore::ApplicationList & remote, H461DataStore::ApplicationMap & apps, std::list<int> & applist)
 {
     H461DataStore::ApplicationList::const_iterator i;
-    std::list<int>::const_iterator j = applist.begin();
+    std::list<int>::iterator j = applist.begin();
     bool found = false;
     for (j = applist.begin(); j != applist.end(); ++j) {
         found = false;
@@ -1135,7 +1135,7 @@ int H461DataStore::Call_Initiate(const PString & callid, int assoc)
     
 void H461DataStore::Call_Terminate(int callID)
 {
-    CallApplicationMap::const_iterator i = m_callapplications.find(callID);
+    CallApplicationMap::iterator i = m_callapplications.find(callID);
     if (i != m_callapplications.end()) {
         m_callapplications.erase(i);
     }
@@ -1222,14 +1222,17 @@ void H461DataStore::InvokeApplication(int callid, int i, const PString & invokeT
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
 H461BUILDPDU(associateRequest)
-    pdu.m_timeToLive = m_timeToLive;
+    H225_TimeToLive & ttl = pdu.m_timeToLive;
+    ttl = (unsigned)m_timeToLive;
 }
 
 H461BUILDPDU(associateResponse)
     H323SetGUIDString(m_associates[assocID].token,pdu.m_associateToken);
-    pdu.m_timeToLive = m_timeToLive;
+    H225_TimeToLive & ttl = pdu.m_timeToLive;
+    ttl = (unsigned)m_timeToLive;
     pdu.IncludeOptionalField(msg_associateResponse::e_statusInterval);
-    pdu.m_statusInterval = m_statusInterval;
+    H225_TimeToLive & stat = pdu.m_statusInterval;
+    stat = (unsigned)m_statusInterval;
 }
 
 H461BUILDPDU(statusRequest)
