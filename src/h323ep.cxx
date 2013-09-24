@@ -534,8 +534,14 @@ H323EndPoint::H323EndPoint()
 #endif
 
 #ifdef H323_H460PRE
-	m_regPrior=0;
-	m_preempt= false;
+    m_regPrior=0;
+    m_preempt=false;
+#endif
+
+#ifdef H323_H461
+   m_ASSETEnabled=false;
+   m_h461ASSETMode=e_H461Disabled;
+   m_h461DataStore=NULL;
 #endif
 
 #endif
@@ -608,6 +614,10 @@ H323EndPoint::~H323EndPoint()
   delete presenceHandler;
 #endif
 
+#ifdef H323_H461
+  delete m_h461DataStore;
+#endif
+
   PTRACE(3, "H323\tDeleted endpoint.");
 }
 
@@ -645,7 +655,21 @@ void H323EndPoint::SetEndpointTypeInfo(H225_EndpointType & info) const
       info.m_mc = TRUE;
       if (SetGatewaySupportedProtocol(info.m_mcu.m_protocol))
           info.m_mcu.IncludeOptionalField(H225_McuInfo::e_protocol);
+      break;
+#if H323_H461
+    case e_SET_H461 :
+      info.IncludeOptionalField(H225_EndpointType::e_set);
+      info.m_set.Set(3);
+      return;
+#endif
   }
+
+#if H323_H461
+  if (m_h461ASSETMode > 0) {
+      info.IncludeOptionalField(H225_EndpointType::e_set);
+      info.m_set.Set(3);
+  }
+#endif
 }
 
 PBoolean H323EndPoint::SetGatewaySupportedProtocol(H225_ArrayOf_SupportedProtocols & protocols) const
@@ -3099,6 +3123,19 @@ PBoolean H323EndPoint::IsMCU() const
   }
 }
 
+PBoolean H323EndPoint::IsSimpleEndPoint() const
+{
+#ifdef H323_H461
+  switch (terminalType) {
+    case e_SET_H461 :
+      return TRUE;
+    default :
+      break;
+  }
+#endif
+  return FALSE;
+}
+
 #ifdef H323_AUDIO_CODECS
 
 void H323EndPoint::SetAudioJitterDelay(unsigned minDelay, unsigned maxDelay)
@@ -3728,6 +3765,41 @@ void H323EndPoint::OnNotifyPriority()
 }
 
 #endif  // H323_H460PRE
+
+#ifdef H323_H461
+void H323EndPoint::SetASSETEnabled(PBoolean success)
+{
+    m_ASSETEnabled = success;
+}
+
+PBoolean H323EndPoint::IsASSETEnabled()
+{
+    return m_ASSETEnabled;
+}
+
+void H323EndPoint::SetEndPointASSETMode(H323EndPoint::H461Mode mode)
+{
+    m_h461ASSETMode = mode;
+}
+
+H323EndPoint::H461Mode H323EndPoint::GetEndPointASSETMode()
+{
+    return m_h461ASSETMode;
+}
+
+H461DataStore * H323EndPoint::GetASSETDataStore()
+{
+    return m_h461DataStore;
+}
+
+void H323EndPoint::SetASSETDataStore(H461DataStore * dataStore)
+{
+    m_h461DataStore = dataStore;
+    if (m_h461DataStore != NULL)
+        m_ASSETEnabled = true;
+}
+
+#endif
 
 PBoolean H323EndPoint::OnFeatureInstance(int /*instType*/, const PString & /*identifer*/)
 {

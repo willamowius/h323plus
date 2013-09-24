@@ -1280,10 +1280,12 @@ PBoolean H460_FeatureSet::CreateFeatureSetPDU(H225_FeatureSet & fs, unsigned Mes
     for (PINDEX i = 0; i < Features.GetSize(); i++) {    // Iterate thro the features
        H460_Feature & feat = Features.GetDataAt(i);
 
-        if (advertise != feat.FeatureAdvertised(MessageID))
-             continue;
-
         PTRACE(6,"H460\tExamining " << feat.GetFeatureIDAsString());
+        if (advertise != feat.FeatureAdvertised(MessageID)) {
+            PTRACE(6,"H460\tIgnoring " << feat.GetFeatureIDAsString() << " not Advertised.");
+            continue;
+        }
+
         PINDEX lastPos;
         H225_FeatureDescriptor featdesc;
         if (CreateFeaturePDU(feat,featdesc,MessageID)) {

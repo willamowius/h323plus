@@ -28,7 +28,7 @@
 #define MAJOR_VERSION 1
 #define MINOR_VERSION 25
 #define BUILD_TYPE    ReleaseCode
-#define BUILD_NUMBER 3
+#define BUILD_NUMBER 4
 
 
 #endif  // _H323PLUS_VERSION_H

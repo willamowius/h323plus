@@ -269,11 +269,17 @@ class H323SignalPDU : public H225_H323_UserInformation
     );
 
 #ifdef H323_H460
-	/** When sending the H460 message in the Setup PDU you have to ensure
-	    the ARQ is received first then add the Fields to the Setup PDU
-		so we require a call back
-	  */
-	void InsertH460Setup(const H323Connection & connection, H225_Setup_UUIE & setup);
+    /** When sending the H460 message in the Setup PDU you have to ensure
+        the ARQ is received first then add the Fields to the Setup PDU
+       so we require a call back
+      */
+    PBoolean InsertH460Generic(const H323Connection & connection);
+
+    /** When sending the H460 message in the Setup PDU you have to ensure
+        the ARQ is received first then add the Fields to the Setup PDU
+        so we require a call back
+      */
+    void InsertH460Setup(const H323Connection & connection, H225_Setup_UUIE & setup);
 #endif
 
 #ifndef DISABLE_CALLAUTH

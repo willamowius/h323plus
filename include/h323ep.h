@@ -45,6 +45,11 @@
 #include "h460/h4601.h"
 #endif
 
+// Add Association Support
+#ifdef H323_H461
+#include "h460/h461_base.h"
+#endif
+
 // Add NAT Method Support
 #ifdef P_STUN
 #include <ptclib/pnat.h>
@@ -1910,7 +1915,10 @@ class H323EndPoint : public PObject
       e_MCUOnly = 160,
       e_MCUWithDataMP = 170,
       e_MCUWithAudioMP = 180,
-      e_MCUWithAVMP = 190
+      e_MCUWithAVMP = 190,
+#ifdef H323_H461
+      e_SET_H461 = 240
+#endif
     };
 
     /**Get the endpoint terminal type.
@@ -1920,6 +1928,10 @@ class H323EndPoint : public PObject
     /**Determine if endpoint is terminal type.
      */
     PBoolean IsTerminal() const;
+
+    /**Determine if SET is terminal type.
+     */
+    PBoolean IsSimpleEndPoint() const;
 
     /**Determine if endpoint is gateway type.
      */
@@ -2237,6 +2249,23 @@ class H323EndPoint : public PObject
 
 
 #endif  // H323_H460PRE
+
+#ifdef H323_H461
+    void SetASSETEnabled(PBoolean success);
+    PBoolean IsASSETEnabled();
+
+    enum H461Mode {
+        e_H461Disabled,
+        e_H461EndPoint,
+        e_H461ASSET
+    };
+
+    virtual void SetEndPointASSETMode(H461Mode mode);
+    virtual H461Mode GetEndPointASSETMode();
+
+    H461DataStore * GetASSETDataStore(); 
+    void SetASSETDataStore(H461DataStore * dataStore);
+#endif  // H323_H461
 
 #endif
 
@@ -2851,6 +2880,12 @@ class H323EndPoint : public PObject
 #ifdef H323_H460PRE
 	unsigned m_regPrior;
 	PBoolean m_preempt;
+#endif
+
+#ifdef H323_H461
+    PBoolean m_ASSETEnabled;
+    H323EndPoint::H461Mode m_h461ASSETMode;
+    H461DataStore * m_h461DataStore;
 #endif
 
 #endif

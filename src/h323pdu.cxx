@@ -636,7 +636,7 @@ H225_Setup_UUIE & H323SignalPDU::BuildSetup(const H323Connection & connection,
 #endif
   setup.m_conferenceID = connection.GetConferenceIdentifier();
 
-  if (connection.GetEndPoint().OnSendCallIndependentSupplementaryService(&connection,*this))
+  if (connection.OnSendCallIndependentSupplementaryService(*this))
       setup.m_conferenceGoal.SetTag(H225_Setup_UUIE_conferenceGoal::e_callIndependentSupplementaryService);
   else if (connection.GetEndPoint().OnConferenceInvite(TRUE,&connection,*this))
       setup.m_conferenceGoal.SetTag(H225_Setup_UUIE_conferenceGoal::e_invite);
@@ -694,6 +694,26 @@ void H323SignalPDU::InsertCryptoTokensSetup(const H323Connection & connection, H
 #endif
 
 #ifdef H323_H460
+PBoolean H323SignalPDU::InsertH460Generic(const H323Connection & connection)
+{
+    H225_FeatureSet fs;
+    if (connection.OnSendFeatureSet(H460_MessageType::e_setup,fs,false)) {
+        if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
+            m_h323_uu_pdu.IncludeOptionalField(H225_H323_UU_PDU::e_genericData);
+            H225_ArrayOf_FeatureDescriptor & fsn = fs.m_supportedFeatures;
+            H225_ArrayOf_GenericData & data = m_h323_uu_pdu.m_genericData;
+
+            for (PINDEX i=0; i < fsn.GetSize(); i++) {
+                    PINDEX lastPos = data.GetSize();
+                    data.SetSize(lastPos+1);
+                    data[lastPos] = fsn[i];
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
 void H323SignalPDU::InsertH460Setup(const H323Connection & connection, H225_Setup_UUIE & setup)
 {
    SendSetupFeatureSet(&connection,setup);

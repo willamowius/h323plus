@@ -2684,6 +2684,12 @@ class H323Connection : public PObject
       const H323SignalPDU & pdu ///< PDU from which to extract party info.
     );
 
+    /**Set the remote application for acceptance.
+      */
+    virtual PBoolean CheckRemoteApplication(
+        const H225_EndpointType & pdu ///< PDU from which to extract application info.
+    );
+
     /**Get the remote application name and version.
        This information is obtained from the sourceInfo field of the H.225
        Setup PDU or the destinationInfo of the call proceeding or alerting
@@ -2872,15 +2878,18 @@ class H323Connection : public PObject
 
 #endif
 
-#ifdef H323_H460
-    /** Disable the feature set as the remote does not support it.
-      */
-    void DisableFeatureSet(int) const;
+    /** Called when an endpoint receives a SETUP PDU with a
+        conference goal of "callIndependentSupplementaryService"
+      
+        The default behaviour is to return FALSE, which will close the connection
+     */
+    virtual PBoolean OnSendCallIndependentSupplementaryService(
+      H323SignalPDU & pdu                 ///< PDU message
+    ) const;
 
-    /** Disable Feautures on a call by call basis
-      */
-    void DisableFeatures(PBoolean disable = true);
-#endif
+    virtual PBoolean OnReceiveCallIndependentSupplementaryService(
+      const H323SignalPDU & pdu                 ///< PDU message
+    );
 
     virtual PBoolean OnSendFeatureSet(unsigned, H225_FeatureSet &, PBoolean) const;
 
@@ -2891,6 +2900,13 @@ class H323Connection : public PObject
     virtual PBoolean OnH245AddressConflict();
 
 #ifdef H323_H460
+    /** Disable the feature set as the remote does not support it.
+      */
+    void DisableFeatureSet(int) const;
+
+    /** Disable Feautures on a call by call basis
+      */
+    void DisableFeatures(PBoolean disable = true);
 
 #ifdef H323_H46018
     /** Call to set the direction of call establishment
@@ -2955,6 +2971,34 @@ class H323Connection : public PObject
     virtual void OnRemoteVendorInformation(const PString & product, const PString & version);
 #endif
 
+#ifdef H323_H461
+    enum ASSETCallType {
+        e_h461NormalCall,
+        e_h461EndpointCall,
+        e_h461AssetCall,
+        e_h461Associate
+    };
+
+    class H461MessageInfo {
+    public:
+        H461MessageInfo();
+
+        int         m_message;
+        PString     m_assocToken;
+        PString     m_callToken;
+        int         m_applicationID;
+        PString     m_invokeToken;
+        PString     m_aliasAddress;
+        bool        m_approved;
+    };
+    H461MessageInfo & H323Connection::GetH461MessageInfo();
+
+    void SetH461MessageInfo(int type, const PString & assocCallToken = PString(), const PString & assocCallIdentifier = PString(), int applicationID = -1,
+                            const PString & invokeToken = PString(), const PString & aliasAddress = PString(), bool approved = false);
+
+    void SetH461Mode(ASSETCallType mode);
+    ASSETCallType GetH461Mode() const;
+#endif
 
 #endif  // H323_H460
   //@}
@@ -3398,6 +3442,10 @@ class H323Connection : public PObject
     PBoolean m_H46026enabled;
 #endif
 
+#ifdef H323_H461
+    ASSETCallType m_H461Mode;
+    H461MessageInfo m_H461Info;
+#endif
 #endif
 
 #ifdef P_STUN

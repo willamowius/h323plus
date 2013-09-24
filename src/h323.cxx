@@ -625,6 +625,9 @@ H323Connection::H323Connection(H323EndPoint & ep,
 #ifdef H323_H46026
   m_H46026enabled = false;
 #endif
+#ifdef H323_H461
+  m_H461Mode = e_h461EndpointCall;
+#endif
 #endif
 
   nonCallConnection = FALSE;
@@ -1366,6 +1369,11 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
 
   const H225_Setup_UUIE & setup = setupPDU.m_h323_uu_pdu.m_h323_message_body;
 
+  if (!CheckRemoteApplication(setup.m_sourceInfo)) {
+        PTRACE(2,"SETUP\tRemote Application check FAILURE.");
+        return false;
+  }
+
 #ifndef DISABLE_CALLAUTH
   /// Do Authentication of Incoming Call before anything else
   if (!ReceiveAuthenticatorPDU<H225_Setup_UUIE>(this,setup, 
@@ -1390,7 +1398,7 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
       return endpoint.OnConferenceInvite(FALSE,this,setupPDU);
 
     case H225_Setup_UUIE_conferenceGoal::e_callIndependentSupplementaryService:
-      nonCallConnection = endpoint.OnReceiveCallIndependentSupplementaryService(this,setupPDU);
+      nonCallConnection = OnReceiveCallIndependentSupplementaryService(setupPDU);
       if (!nonCallConnection) return FALSE;
        break;
 
@@ -1485,10 +1493,6 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
     alertingPDU = new H323SignalPDU;
     alertingPDU->BuildAlerting(*this);
 
-if (nonCallConnection) {
-      if (!WriteSignalPDU(*alertingPDU))
-        return FALSE;
-} else {
     /** If we have a case of incoming call intrusion we should not Clear the Call*/
     {
       CallEndReason incomingCallEndReason = EndedByNoAccept;
@@ -1505,7 +1509,6 @@ if (nonCallConnection) {
 
     // send Q931 Alerting PDU
     PTRACE(3, "H225\tIncoming call accepted");
-}
 
     // Check for gatekeeper and do admission check if have one
     H323Gatekeeper * gatekeeper = endpoint.GetGatekeeper();
@@ -1547,22 +1550,21 @@ if (nonCallConnection) {
   }
 #endif
 
-  if (nonCallConnection) 
-            return TRUE;
+  if (!nonCallConnection) {
+      // See if remote endpoint wants to start fast
+      if (fastStartState != FastStartDisabled &&
+           setup.HasOptionalField(H225_Setup_UUIE::e_fastStart) &&
+           localCapabilities.GetSize() > 0) {
 
-  // See if remote endpoint wants to start fast
-  if (fastStartState != FastStartDisabled &&
-       setup.HasOptionalField(H225_Setup_UUIE::e_fastStart) &&
-       localCapabilities.GetSize() > 0) {
+        DecodeFastStartCaps(setup.m_fastStart);
+      }
 
-    DecodeFastStartCaps(setup.m_fastStart);
-  }
-
-  // Check that if we are not doing Fast Connect that we have H.245 channel info
-  if (fastStartState != FastStartResponse &&
-      setup.HasOptionalField(H225_Setup_UUIE::e_h245Address)) {
-         if (!StartControlChannel(setup.m_h245Address))
-                   return FALSE;
+      // Check that if we are not doing Fast Connect that we have H.245 channel info
+      if (fastStartState != FastStartResponse &&
+          setup.HasOptionalField(H225_Setup_UUIE::e_h245Address)) {
+             if (!StartControlChannel(setup.m_h245Address))
+                       return FALSE;
+      }
   }
 
   // Build the reply with the channels we are actually using
@@ -1638,6 +1640,47 @@ void H323Connection::SetRemoteApplication(const H225_EndpointType & pdu)
     remoteApplication = H323GetApplicationInfo(pdu.m_vendor);
     PTRACE(2, "H225\tSet remote application name: \"" << remoteApplication << '"');
   }
+}
+
+PBoolean H323Connection::CheckRemoteApplication(const H225_EndpointType & pdu)
+{
+#ifdef H323_H461
+    if (endpoint.GetEndPointASSETMode() == H323EndPoint::e_H461ASSET &&
+        (!pdu.HasOptionalField(H225_EndpointType::e_set) || !pdu.m_set[3]))
+        return false;
+#endif
+    return true;
+}
+
+PBoolean H323Connection::OnSendCallIndependentSupplementaryService(H323SignalPDU & pdu) const
+{
+    return endpoint.OnSendCallIndependentSupplementaryService(this,pdu);
+}
+
+PBoolean H323Connection::OnReceiveCallIndependentSupplementaryService(const H323SignalPDU & pdu)
+{
+#ifdef H323_H461
+    const H225_Setup_UUIE & setup = pdu.m_h323_uu_pdu.m_h323_message_body;
+    if (setup.m_sourceInfo.HasOptionalField(H225_EndpointType::e_set) && setup.m_sourceInfo.m_set[3]) {
+        H323EndPoint::H461Mode mode = endpoint.GetEndPointASSETMode();
+        if (mode == H323EndPoint::e_H461Disabled) {
+            PTRACE(4,"CON\tLogic error SET call to regular endpoint");
+            return false;
+        }
+           
+        if (pdu.m_h323_uu_pdu.HasOptionalField(H225_H323_UU_PDU::e_genericData) && pdu.m_h323_uu_pdu.m_genericData.GetSize() > 0) {
+            const H225_GenericIdentifier & id = pdu.m_h323_uu_pdu.m_genericData[0].m_id;
+            if (id.GetTag() == H225_GenericIdentifier::e_oid) {
+                const PASN_ObjectId & val = id;
+                if (val.AsString() == "0.0.8.461.0") {
+                    SetH461Mode(e_h461Associate);
+                    return true;
+                }
+            }
+        }
+    }
+#endif
+    return endpoint.OnReceiveCallIndependentSupplementaryService(this,pdu);
 }
 
 
@@ -2326,24 +2369,25 @@ void H323Connection::AnsweringCall(AnswerCallResponse response)
 #ifdef H323_H450
         h450dispatcher->AttachToConnect(*connectPDU);
 #endif
- 
-        if (h245Tunneling) {
-          // If no channels selected (or never provided) do traditional H245 start
-          if (fastStartState == FastStartDisabled) {
-            h245TunnelTxPDU = connectPDU; // Piggy back H245 on this reply
-            PBoolean ok = StartControlNegotiations();
-            h245TunnelTxPDU = NULL;
-            if (!ok)
-              break;
-          }
+        if (!nonCallConnection) {
+            if (h245Tunneling) {
+              // If no channels selected (or never provided) do traditional H245 start
+              if (fastStartState == FastStartDisabled) {
+                h245TunnelTxPDU = connectPDU; // Piggy back H245 on this reply
+                PBoolean ok = StartControlNegotiations();
+                h245TunnelTxPDU = NULL;
+                if (!ok)
+                  break;
+              }
 
-          HandleTunnelPDU(connectPDU);
-        }
-        else { // Start separate H.245 channel if not tunneling.
-          if (!StartControlChannel())
-            break;
-          connect.IncludeOptionalField(H225_Connect_UUIE::e_h245Address);
-          controlChannel->SetUpTransportPDU(connect.m_h245Address, TRUE);
+              HandleTunnelPDU(connectPDU);
+            }
+            else { // Start separate H.245 channel if not tunneling.
+              if (!StartControlChannel())
+                break;
+              connect.IncludeOptionalField(H225_Connect_UUIE::e_h245Address);
+              controlChannel->SetUpTransportPDU(connect.m_h245Address, TRUE);
+            }
         }
 
         connectedTime = PTime();
@@ -2521,8 +2565,12 @@ H323Connection::CallEndReason H323Connection::SendSignalSetup(const PString & al
 #endif
 
 #ifdef H323_H460
-   if (!disableH460)
+   if (!disableH460) {
+     if (IsNonCallConnection())
+         setupPDU.InsertH460Generic(*this);
+
      setupPDU.InsertH460Setup(*this,setup);
+   }
 #endif
 
   // Put in all the signalling addresses for link
@@ -6837,6 +6885,43 @@ PBoolean H323Connection::H46026IsMediaTunneled()
 void H323Connection::OnRemoteVendorInformation(const PString & product, const PString & version)
 {
 
+}
+#endif
+
+#ifdef H323_H461
+// Normally first message will be a listRequest. ie (4)
+H323Connection::H461MessageInfo::H461MessageInfo()
+: m_message(4), m_assocToken(PString()), m_callToken(PString()),
+  m_applicationID(-1), m_invokeToken(PString()), m_aliasAddress(PString()), m_approved(false)
+{
+
+}
+
+void H323Connection::SetH461Mode(ASSETCallType mode)
+{
+    m_H461Mode = mode;
+}
+
+H323Connection::ASSETCallType H323Connection::GetH461Mode() const
+{
+    return m_H461Mode;
+}
+
+void H323Connection::SetH461MessageInfo(int type, const PString & assocCallToken, const PString & assocCallIdentifier, int applicationID,
+                                        const PString & invokeToken, const PString & aliasAddress, bool approved )
+{
+    m_H461Info.m_message = type;
+    m_H461Info.m_assocToken = assocCallToken;
+    m_H461Info.m_callToken = assocCallIdentifier;
+    m_H461Info.m_applicationID = applicationID;
+    m_H461Info.m_invokeToken = invokeToken;
+    m_H461Info.m_aliasAddress = aliasAddress;
+    m_H461Info.m_approved = approved;
+}
+
+H323Connection::H461MessageInfo & H323Connection::GetH461MessageInfo()
+{
+    return m_H461Info;
 }
 #endif
 

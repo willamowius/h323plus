@@ -109,7 +109,7 @@
 #undef H323_H239
 #endif
 #undef H323_H248
-#undef H323_H249
+//#undef H323_H249
 #ifdef P_SNMP
 #undef H323_H341
 #endif
@@ -149,6 +149,9 @@
 // Endpoint Compatibility 
 #undef H323_H460COM
 #endif
+
+// ASSET Feature
+#undef H323_H461
 
 #undef H323_H501
 #if (PTLIB_VER > 260) && (P_STUN)
