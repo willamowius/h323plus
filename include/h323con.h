@@ -2991,7 +2991,7 @@ class H323Connection : public PObject
         PString     m_aliasAddress;
         bool        m_approved;
     };
-    H461MessageInfo & H323Connection::GetH461MessageInfo();
+    H461MessageInfo & GetH461MessageInfo();
 
     void SetH461MessageInfo(int type, const PString & assocCallToken = PString(), const PString & assocCallIdentifier = PString(), int applicationID = -1,
                             const PString & invokeToken = PString(), const PString & aliasAddress = PString(), bool approved = false);
