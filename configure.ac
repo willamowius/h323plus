@@ -183,6 +183,7 @@ default_h46018=yes
 default_h46019m=no
 default_h46023=yes
 default_h46026=no
+default_h461=no
 default_h460p=no
 default_h460pre=no
 default_h460com=no
@@ -213,6 +214,7 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_h46019m=no
   default_h46023=no
   default_h46026=no
+  default_h461=no
   default_hh460p=no
   default_h460pre=no
   default_h460com=no
@@ -695,6 +697,26 @@ else
   AC_MSG_NOTICE(Disabling H.460 Compat Feature)
 fi
 AC_SUBST(H323_H460COM)
+
+dnl ########################################################################
+dnl check for Enable H.461 ASSET Feature
+
+dnl MSWIN_DISPLAY h461,H.461 ASSET Feature
+dnl MSWIN_DEFINE  h461,H323_H461
+
+AC_ARG_ENABLE(h461,
+       [  --enable-h461         enable H.461 ASSET Feature])
+if test "${enable_h461}x" = "x" ; then
+  enable_h461=$default_h461
+fi
+if test "$enable_h461" = "yes" ; then
+  H323_H461=1
+  AC_DEFINE(H323_H461, 1)
+else
+  H323_H461=
+  AC_MSG_NOTICE(Disabling H.461 ASSET Feature)
+fi
+AC_SUBST(H323_H461)
 
 dnl ########################################################################
 dnl check for disabling H.501
