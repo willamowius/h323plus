@@ -86,18 +86,18 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\lib\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\lib\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\lib\Release\</IntDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\lib\Release\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\lib\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\lib\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\lib\Debug\</IntDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\lib\Debug\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='No Trace|Win32'">.\lib\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='No Trace|x64'">.\lib\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='No Trace|Win32'">.\lib\NoTrace\</IntDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='No Trace|x64'">.\lib\NoTrace\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">lib\vs2010\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">lib\vs2010_x64\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">lib\vs2010\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">lib\vs2010_x64\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='No Trace|Win32'">lib\vs2010\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='No Trace|x64'">.\lib\vs2010_x64\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='No Trace|Win32'">$(OutDir)$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='No Trace|x64'">$(OutDir)$(Configuration)\</IntDir>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\ptlib\include;include;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\ptlib\include;include;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\ptlib\lib;lib;$(LibraryPath)</LibraryPath>
@@ -107,7 +107,7 @@
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectName)d</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectName)d</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectName)s</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectName)s</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectName)</TargetName>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='No Trace|Win32'">..\ptlib\include;include;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='No Trace|Win32'">..\ptlib\lib;lib;$(LibraryPath)</LibraryPath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\ptlib\include;include;$(IncludePath)</IncludePath>
@@ -120,6 +120,7 @@
     <SourcePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">c:\tools;$(SourcePath)</SourcePath>
     <SourcePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">c:\tools;$(SourcePath)</SourcePath>
     <SourcePath Condition="'$(Configuration)|$(Platform)'=='No Trace|Win32'">c:\tools;$(SourcePath)</SourcePath>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='No Trace|x64'">$(ProjectName)n</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -132,20 +133,22 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ptlib.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>.\lib\Release/h323plus.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\lib\Release/</AssemblerListingLocation>
-      <ObjectFileName>.\lib\Release/</ObjectFileName>
-      <ProgramDataBaseFileName>lib\h323plus.pdb</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(IntermediateOutputPath)$(ProjectName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntermediateOutputPath)</AssemblerListingLocation>
+      <ObjectFileName>$(IntermediateOutputPath)</ObjectFileName>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>OldStyle</DebugInformationFormat>
       <DisableSpecificWarnings>4244</DisableSpecificWarnings>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <ErrorReporting>Prompt</ErrorReporting>
     </ClCompile>
     <ResourceCompile>
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>lib\h323plus.lib</OutputFile>
+      <OutputFile>$(OutDir$(ProjectName).lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
   </ItemDefinitionGroup>
@@ -160,10 +163,10 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ptlib.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>.\lib\Release/h323plus.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\lib\Release/</AssemblerListingLocation>
-      <ObjectFileName>.\lib\Release/</ObjectFileName>
-      <ProgramDataBaseFileName>lib\h323plus.pdb</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(IntermediateOutputPath)$(ProjectName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntermediateOutputPath)$(ProjectName)</AssemblerListingLocation>
+      <ObjectFileName>$(IntermediateOutputPath)$(ProjectName)</ObjectFileName>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>OldStyle</DebugInformationFormat>
@@ -173,7 +176,7 @@
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>lib\h323plus.lib</OutputFile>
+      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
   </ItemDefinitionGroup>
@@ -185,21 +188,23 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ptlib.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>.\lib\Debug/h323plus.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\lib\Debug/</AssemblerListingLocation>
-      <ObjectFileName>.\lib\Debug/</ObjectFileName>
-      <ProgramDataBaseFileName>lib\h323plusd.pdb</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(IntermediateOutputPath)$(ProjectName)d.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntermediateOutputPath)</AssemblerListingLocation>
+      <ObjectFileName>$(IntermediateOutputPath)</ObjectFileName>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName)d.pdb</ProgramDataBaseFileName>
       <BrowseInformation>true</BrowseInformation>
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4244</DisableSpecificWarnings>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <ErrorReporting>Prompt</ErrorReporting>
     </ClCompile>
     <ResourceCompile>
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>lib\h323plusd.lib</OutputFile>
+      <OutputFile>$(OutDir)$(ProjectName)d.lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
   </ItemDefinitionGroup>
@@ -211,10 +216,10 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ptlib.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>.\lib\Debug/h323plus.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\lib\Debug/</AssemblerListingLocation>
-      <ObjectFileName>.\lib\Debug/</ObjectFileName>
-      <ProgramDataBaseFileName>lib\h323plusd.pdb</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(IntermediateOutputPath)$(ProjectName)d.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntermediateOutputPath)$(ProjectName)</AssemblerListingLocation>
+      <ObjectFileName>$(IntermediateOutputPath)$(ProjectName)</ObjectFileName>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName)d.pdb</ProgramDataBaseFileName>
       <BrowseInformation>true</BrowseInformation>
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -225,7 +230,7 @@
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>lib\h323plusd.lib</OutputFile>
+      <OutputFile>$(OutDir)$(ProjectName)d.lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
   </ItemDefinitionGroup>
@@ -240,10 +245,10 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ptlib.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>.\lib\NoTrace/h323plus.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\lib\NoTrace/</AssemblerListingLocation>
-      <ObjectFileName>.\lib\NoTrace/</ObjectFileName>
-      <ProgramDataBaseFileName>lib\h323plusn.pdb</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(IntermediateOutputPath)$(ProjectName)n.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntermediateOutputPath)</AssemblerListingLocation>
+      <ObjectFileName>$(IntermediateOutputPath)</ObjectFileName>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName)n.pdb</ProgramDataBaseFileName>
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DisableSpecificWarnings>4244</DisableSpecificWarnings>
@@ -252,7 +257,7 @@
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>lib\h323plusn.lib</OutputFile>
+      <OutputFile>$(OutDir$(ProjectName)n.lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
   </ItemDefinitionGroup>
@@ -267,10 +272,10 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ptlib.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>.\lib\NoTrace/h323plus.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\lib\NoTrace/</AssemblerListingLocation>
-      <ObjectFileName>.\lib\NoTrace/</ObjectFileName>
-      <ProgramDataBaseFileName>lib\h323plusn.pdb</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(IntermediateOutputPath)$(ProjectName)n.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntermediateOutputPath)$(ProjectName)</AssemblerListingLocation>
+      <ObjectFileName>$(IntermediateOutputPath)$(ProjectName)</ObjectFileName>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName)n.pdb</ProgramDataBaseFileName>
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DisableSpecificWarnings>4244;4267</DisableSpecificWarnings>
@@ -279,7 +284,7 @@
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>lib\h323plusn.lib</OutputFile>
+      <OutputFile>$(OutDir)$(ProjectName)n.lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
   </ItemDefinitionGroup>
@@ -400,6 +405,8 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="src\h224\h224.cxx" />
+    <ClCompile Include="src\h224\h284.cxx" />
+    <ClCompile Include="src\h224\t140.cxx" />
     <ClCompile Include="src\h225ras.cxx">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
@@ -455,6 +462,7 @@
     <ClCompile Include="src\h235\h235chan.cxx" />
     <ClCompile Include="src\h235\h235crypto.cxx" />
     <ClCompile Include="src\h224\h281.cxx" />
+    <ClCompile Include="src\h235\h235support.cxx" />
     <ClCompile Include="src\h323.cxx">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
@@ -622,14 +630,23 @@
     <ClCompile Include="src\h350\h350.cxx" />
     <ClCompile Include="src\h450\h450pdu.cxx" />
     <ClCompile Include="src\h460\h4601.cxx" />
+    <ClCompile Include="src\h460\h46015.cxx" />
     <ClCompile Include="src\h460\h46018_h225.cxx" />
     <ClCompile Include="src\h460\h46024b.cxx" />
+    <ClCompile Include="src\h460\h46026.cxx" />
+    <ClCompile Include="src\h460\h46026mgr.cxx" />
+    <ClCompile Include="src\h460\h4604.cxx" />
     <ClCompile Include="src\h460\h460_oid3.cxx" />
     <ClCompile Include="src\h460\h460_oid6.cxx" />
+    <ClCompile Include="src\h460\h460_oid9.cxx" />
+    <ClCompile Include="src\h460\h460_std17.cxx" />
     <ClCompile Include="src\h460\h460_std18.cxx" />
     <ClCompile Include="src\h460\h460_std23.cxx" />
+    <ClCompile Include="src\h460\h460_std26.cxx" />
     <ClCompile Include="src\h460\h460_std9.cxx" />
     <ClCompile Include="src\h460\h460p.cxx" />
+    <ClCompile Include="src\h460\h4610.cxx" />
+    <ClCompile Include="src\h460\h461_base.cxx" />
     <ClCompile Include="src\h501pdu.cxx">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
@@ -1069,6 +1086,8 @@
     <ClInclude Include="include\guid.h" />
     <ClInclude Include="include\h224.h" />
     <ClInclude Include="include\h224handler.h" />
+    <ClInclude Include="include\h224\h284.h" />
+    <ClInclude Include="include\h224\t140.h" />
     <ClInclude Include="include\h225ras.h" />
     <ClInclude Include="include\h230\h230.h" />
     <ClInclude Include="include\h235auth.h" />
@@ -1078,7 +1097,8 @@
     <ClInclude Include="include\h235\h2356.h" />
     <ClInclude Include="include\h235\h235caps.h" />
     <ClInclude Include="include\h235\h235chan.h" />
-    <ClInclude Include="include\h235\h235con.h" />
+    <ClInclude Include="include\h235\h235crypto.h" />
+    <ClInclude Include="include\h235\h235support.h" />
     <ClInclude Include="include\h281.h" />
     <ClInclude Include="include\h281handler.h" />
     <ClInclude Include="include\h323.h" />
@@ -1100,14 +1120,23 @@
     <ClInclude Include="include\h350\h350.h" />
     <ClInclude Include="include\h450\h450pdu.h" />
     <ClInclude Include="include\h460\h4601.h" />
+    <ClInclude Include="include\h460\h46015.h" />
     <ClInclude Include="include\h460\h46018_h225.h" />
     <ClInclude Include="include\h460\h46024b.h" />
+    <ClInclude Include="include\h460\h46026.h" />
+    <ClInclude Include="include\h460\h46026mgr.h" />
+    <ClInclude Include="include\h460\h4604.h" />
     <ClInclude Include="include\h460\h460_oid3.h" />
     <ClInclude Include="include\h460\h460_oid6.h" />
+    <ClInclude Include="include\h460\h460_oid9.h" />
+    <ClInclude Include="include\h460\h460_std17.h" />
     <ClInclude Include="include\h460\h460_std18.h" />
     <ClInclude Include="include\h460\h460_std23.h" />
+    <ClInclude Include="include\h460\h460_std26.h" />
     <ClInclude Include="include\h460\h460_std9.h" />
     <ClInclude Include="include\h460\h460p.h" />
+    <ClInclude Include="include\h460\h4610.h" />
+    <ClInclude Include="include\h460\h461_base.h" />
     <ClInclude Include="include\jitter.h" />
     <ClInclude Include="include\mediafmt.h" />
     <ClInclude Include="include\opalvxml.h" />
@@ -1170,11 +1199,15 @@
     <None Include="src\asn\h4507.asn" />
     <None Include="src\asn\h4508.asn" />
     <None Include="src\asn\h4509.asn" />
+    <None Include="src\asn\h46015.asn" />
     <None Include="src\asn\h46018.asn" />
     <None Include="src\asn\h46019.asn" />
     <None Include="src\asn\h46024b.asn" />
+    <None Include="src\asn\h46026.asn" />
     <None Include="src\asn\h4609.asn" />
     <None Include="src\asn\h460pres.asn" />
+    <None Include="src\asn\h460tm.asn" />
+    <None Include="src\asn\h4610.asn" />
     <None Include="src\asn\h501.asn" />
     <None Include="src\asn\mcspdu.asn" />
     <None Include="src\asn\OID2.asn" />
