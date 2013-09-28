@@ -1090,8 +1090,8 @@ void H323FileTransferHandler::Transmit(PThread &, INT)
                      } else {
                         fileid++;
                         if (fileid > filelist.GetSize()) {
-                             OnTransferComplete();
                              ChangeState(e_completed);
+                             OnTransferComplete(master);
                              break;
                         }
                         //delete f;
@@ -1132,10 +1132,11 @@ void H323FileTransferHandler::Transmit(PThread &, INT)
                         if (shutdownTimer.GetResetTime() == 0) 
                             shutdownTimer.SetInterval(responseTimeOut);
                         else {
-                          if (shutdownTimer == 0)   // We have waited long enough without response
-                            ChangeState(e_completed);   
-                          else
-                            continue;
+                            if (shutdownTimer == 0) {  // We have waited long enough without response
+                            ChangeState(e_completed);
+                            OnTransferComplete(master);
+                            } else
+                                continue;
                         }
                      } else
                          continue;
@@ -1241,6 +1242,7 @@ void H323FileTransferHandler::Transmit(PThread &, INT)
                 packet.BuildError(ioerr,errString[ioerr]);
                 final = TRUE;
                 ChangeState(e_completed);
+                OnTransferComplete(master);
                 break;
            case e_completed:
            default:
@@ -1322,6 +1324,7 @@ void H323FileTransferHandler::Receive(PThread &, INT)
            if (errCode > 0) {
                OnError(errString);
                ChangeState(e_completed);
+               OnTransferComplete(master);
                nextFrame.Signal();
            }
        }

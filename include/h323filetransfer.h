@@ -34,6 +34,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.4  2011/10/18 13:32:30  shorne
+ * Rearranged Default Session ids so FECC is Session 3 for better interoperability.
+ *
  * Revision 1.3  2009/02/21 14:06:02  shorne
  * Major FileTransfer code review and improvement
  *
@@ -521,7 +524,7 @@ public:
   virtual void OnFileComplete(const PString & filename) {};
   virtual void OnFileProgress(const PString & filename, int Blockno, unsigned OctetsSent, PBoolean transmit) {};
   virtual void OnFileError(const PString & filename, int Blockno, PBoolean transmit) {};
-  virtual void OnTransferComplete() {};
+  virtual void OnTransferComplete(PBoolean master) {};
 
 //////////////////////////
 
