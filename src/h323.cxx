@@ -1077,7 +1077,13 @@ PBoolean H323Connection::HandleSignalPDU(H323SignalPDU & pdu)
 #endif
 
 #ifdef H323_H460
-   ReceiveFeatureData<H323SignalPDU>(this,q931.GetMessageType(),pdu);
+    if (pdu.m_h323_uu_pdu.HasOptionalField(H225_H323_UU_PDU::e_genericData)) {
+       if (q931.GetMessageType() == Q931::SetupMsg) {
+          remotePartyName = pdu.GetQ931().GetDisplayName();
+          remoteAliasNames = pdu.GetSourceAliasNames();
+       }
+       ReceiveFeatureData<H323SignalPDU>(this,q931.GetMessageType(),pdu);
+    }
 #endif
 
   // Add special code to detect if call is from a Cisco and remoteApplication needs setting
