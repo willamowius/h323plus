@@ -233,6 +233,7 @@ public:
 
     virtual void StartApplication(const PString & callToken, int i);
     virtual void StartApplication(int callid, int i, bool remote = false);
+    virtual void StartASSETApplication(int callid, int i);
 
 
     virtual void NewAssociateCall(const PString & address) {}
@@ -263,7 +264,7 @@ public:
     virtual void OnAssociateCallEnd(int i) {}   
     virtual PBoolean OnInvokeRequest(const PString & alias, const PString & display, int i) { return true; }
     virtual void OnCallApplicationList(int id, const PString & display, const PString & avatar, PBoolean available) {}
-    virtual void OnApplicationCallList(int id, const PString & remote) {}
+    virtual void OnApplicationCallList(int appid, int callid, const PString & remote) {}
 
     virtual PBoolean OnReceiveIE(Messages id, H323Connection* connection, int assoc, int callid, int appid, const PString & invokeToken, const PString & aliasAddress, bool approval);
     virtual void OnBuildIE(Messages id, H323Connection* connection, int assoc, int callid, int appid, const PString & invokeToken, const PString & aliasAddress, bool approval);

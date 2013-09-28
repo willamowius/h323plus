@@ -931,7 +931,7 @@ void H461DataStore::GetApplicationCallList(int appid)
        std::list<int>::const_iterator j = apps.begin();
        while (j != apps.end()) {
            if (*j == appid) {
-                OnApplicationCallList(i->first, i->second.remote);
+                OnApplicationCallList(appid, i->first, i->second.remote);
            }
            ++j;
        }
@@ -1202,6 +1202,19 @@ void H461DataStore::StartApplication(int callid, int i, bool remote)
     }
 }
 
+void H461DataStore::StartASSETApplication(int callid, int i) 
+{
+    CallData & data = m_callapplications[callid];
+    std::list<int> app = data.applications;
+    std::list<int>::const_iterator j = app.begin();
+    while (j != app.end()) {
+        if (*j == i)
+            MakeAssociateCall(H461DataStore::e_id_preInvokeResponse,data.associate,callid,i);
+        ++j;
+    }
+}
+
+
 void H461DataStore::InvokeApplication(int callid, int i, const PString & invokeToken, const PString & aliasAddress, bool approval) 
 {
     CallData & data = m_callapplications[callid];
@@ -1379,6 +1392,7 @@ H461RECEIVEDPDU_TAIL(preInvokeRequest)
 
 
 H461RECEIVEDPDU_HEAD(preInvokeResponse)
+    appID = FindApplicationID(assocID, GetGenericIdentifier(pdu.m_applicationId));
     UpdateApplication(assocID, pdu);
 H461RECEIVEDPDU_TAIL(preInvokeResponse)
 
