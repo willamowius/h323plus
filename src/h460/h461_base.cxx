@@ -1102,7 +1102,12 @@ void H461DataStore::OnBuildIE(Messages id, H323Connection* connection, int assoc
 
 void H461DataStore::LoadDataStoreAssociate(int id, const PString & alias, const PString & displayName, const PString & token, PInt64 expire, PBoolean alert)
 {
-
+    Associate associate;
+    associate.token = token;
+    associate.expire = expire;
+    associate.alias = alias;
+    associate.displayName = displayName;
+    m_associates.insert(AssociateMap::value_type(id,associate));
 }
 
 void H461DataStore::LoadDataStoreApplication(int id, int associate, const PString & appID, const PString & displayName, const PString & avatar, int state, PBoolean availableForCall)
