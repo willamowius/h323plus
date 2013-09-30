@@ -159,7 +159,9 @@
 #endif
 #undef H323_FILE
 
+#ifndef _WIN64
 #undef H323_AEC
+#endif
 #if defined(_MSC_VER) && (H323_AEC)
 #pragma include_alias(<speex/speex_echo.h>,            <@AEC_DIR@/include/speex/speex_echo.h>      )
 #pragma include_alias(<speex/speex_preprocess.h>,      <@AEC_DIR@/include/speex/speex_preprocess.h>)
