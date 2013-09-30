@@ -164,8 +164,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ptlib.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntermediateOutputPath)$(ProjectName).pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>$(IntermediateOutputPath)$(ProjectName)</AssemblerListingLocation>
-      <ObjectFileName>$(IntermediateOutputPath)$(ProjectName)</ObjectFileName>
+      <AssemblerListingLocation>$(IntermediateOutputPath)$(ProjectName)/</AssemblerListingLocation>
+      <ObjectFileName>$(IntermediateOutputPath)$(ProjectName)/</ObjectFileName>
       <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -217,8 +217,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ptlib.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntermediateOutputPath)$(ProjectName)d.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>$(IntermediateOutputPath)$(ProjectName)</AssemblerListingLocation>
-      <ObjectFileName>$(IntermediateOutputPath)$(ProjectName)</ObjectFileName>
+      <AssemblerListingLocation>$(IntermediateOutputPath)$(ProjectName)/</AssemblerListingLocation>
+      <ObjectFileName>$(IntermediateOutputPath)$(ProjectName)/</ObjectFileName>
       <ProgramDataBaseFileName>$(OutDir)$(ProjectName)d.pdb</ProgramDataBaseFileName>
       <BrowseInformation>true</BrowseInformation>
       <WarningLevel>Level4</WarningLevel>
@@ -273,8 +273,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ptlib.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntermediateOutputPath)$(ProjectName)n.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>$(IntermediateOutputPath)$(ProjectName)</AssemblerListingLocation>
-      <ObjectFileName>$(IntermediateOutputPath)$(ProjectName)</ObjectFileName>
+      <AssemblerListingLocation>$(IntermediateOutputPath)$(ProjectName)/</AssemblerListingLocation>
+      <ObjectFileName>$(IntermediateOutputPath)$(ProjectName)/</ObjectFileName>
       <ProgramDataBaseFileName>$(OutDir)$(ProjectName)n.pdb</ProgramDataBaseFileName>
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -321,6 +321,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="src\etc\h323aec.cxx" />
     <ClCompile Include="src\g711.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
@@ -1080,6 +1081,7 @@
   <ItemGroup>
     <ClInclude Include="include\channels.h" />
     <ClInclude Include="include\codecs.h" />
+    <ClInclude Include="include\etc\h323aec.h" />
     <ClInclude Include="include\gkclient.h" />
     <ClInclude Include="include\gkserver.h" />
     <ClInclude Include="include\gnugknat.h" />

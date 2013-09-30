@@ -62,6 +62,12 @@
     <Filter Include="Source Files\h450">
       <UniqueIdentifier>{4e1ad1b9-fdaf-4dfe-9e06-84e2181693f4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\etc">
+      <UniqueIdentifier>{bfbefbce-8cf6-415d-bc06-8ab403116f74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\etc">
+      <UniqueIdentifier>{d4593868-2211-4632-8781-89e903943240}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\channels.cxx">
@@ -373,6 +379,9 @@
     <ClCompile Include="src\h460\h46026mgr.cxx">
       <Filter>Source Files\h460</Filter>
     </ClCompile>
+    <ClCompile Include="src\etc\h323aec.cxx">
+      <Filter>Source Files\etc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\channels.h">
@@ -678,6 +687,9 @@
     </ClInclude>
     <ClInclude Include="include\h460\h46024b.h">
       <Filter>ASN Files\ASN Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\etc\h323aec.h">
+      <Filter>Header Files\etc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
