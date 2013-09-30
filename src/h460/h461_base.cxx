@@ -958,7 +958,8 @@ PBoolean H461DataStore::OnReceiveIE(Messages id, H323Connection* connection, int
     switch (id) {
        case H461DataStore::e_id_associateRequest:
            if (OnAssociateRequest(connection->GetRemotePartyAliases()[0], connection->GetRemotePartyName())) {
-               int newId = CreateNewAssociation();
+               int Id = FindValidAssociate(connection->GetRemotePartyAliases()[0]);
+               int newId = (Id > -1) ? Id : CreateNewAssociation();
                m_associates[newId].alias = connection->GetRemotePartyAliases()[0];
                m_associates[newId].displayName = connection->GetRemotePartyName();
                info.m_assocToken = m_associates[newId].token;
@@ -1078,6 +1079,7 @@ void H461DataStore::OnBuildIE(Messages id, H323Connection* connection, int assoc
 
    switch (id) {
        case H461DataStore::e_id_listResponse:
+           m_callapplications[callid].remote = connection->GetRemotePartyAliases()[0];
            UpdateAssociateCall(callid, true);
            break;
        case H461DataStore::e_id_associateRequest:
@@ -1155,6 +1157,18 @@ int H461DataStore::CreateNewAssociation()
     int id = H461ASSIGN<AssociateMap>(m_associates);
     m_associates.insert(AssociateMap::value_type(id,associate));
     return id;
+}
+
+int H461DataStore::FindValidAssociate(const PString & alias) 
+{
+    AssociateMap::const_iterator i = m_associates.begin();
+    while (i != m_associates.end()) {
+        if (i->second.alias == alias) {
+            return i->first;
+        }
+        ++i;
+    }
+    return -1;
 }
 
 PString H461DataStore::GenerateApplicationToken()
@@ -1251,6 +1265,7 @@ H461BUILDPDU(associateResponse)
     pdu.IncludeOptionalField(msg_associateResponse::e_statusInterval);
     H225_TimeToLive & stat = pdu.m_statusInterval;
     stat = (unsigned)m_statusInterval;
+    OnUpdateAssociate(assocID, m_associates[assocID], true);
 }
 
 H461BUILDPDU(statusRequest)
@@ -1272,7 +1287,7 @@ H461BUILDPDU(listResponse)
 }
 
 H461BUILDPDU(callApplist)
-    BuildApplicationAvailable(assocID, callID, connection->GetRemotePartyName(), pdu);
+    BuildApplicationAvailable(assocID, callID, m_callapplications[callID].remote, pdu);
 }
 
 H461BUILDPDU(preInvokeRequest)
@@ -1381,6 +1396,7 @@ H461RECEIVEDPDU_TAIL(listRequest)
 H461RECEIVEDPDU_HEAD(listResponse)
     H461DataStore::ApplicationList remote;
     GetApplicationStatus(pdu,remote);
+    m_callapplications[callID].remote = connection->GetRemotePartyAliases()[0];
     MergeCallApplicationList(remote, m_applications, m_callapplications[callID].applications);
     remote.clear();
 H461RECEIVEDPDU_TAIL(listResponse)

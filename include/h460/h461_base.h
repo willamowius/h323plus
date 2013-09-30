@@ -319,6 +319,7 @@ protected:
     void SendInternalFacility(H323Connection * connection, int id);
 
     int CreateNewAssociation();
+    int FindValidAssociate(const PString & alias);
     PString GenerateApplicationToken();
 
     AssociateMap        m_associates;
