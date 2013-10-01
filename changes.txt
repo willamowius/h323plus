@@ -4,6 +4,7 @@ H323plus 1.25.0 - 1.25.x
 ===============================================================================
 Fixed vs2010 Build environment
 Added H.461 Asset Support. (1.25.4)
+Update and fixes for H.460.26 (1.25.3)
 Update Presence System to Version 3. (1.25.2)
 Update Alternate and Assigned Gatekeeper code. Removing buggy pointers
 Added H.224 Factory loader moved to H224 subdirectory
