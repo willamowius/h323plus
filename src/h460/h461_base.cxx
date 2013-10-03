@@ -642,10 +642,10 @@ void BuildCallApplicationList(const H461DataStore::ApplicationMap & apps, std::l
 
 void MergeCallApplicationList(const H461DataStore::ApplicationList & remote, H461DataStore::ApplicationMap & apps, std::list<int> & applist)
 {
+    bool found = false;
     H461DataStore::ApplicationList::const_iterator i;
     std::list<int>::iterator j = applist.begin();
-    bool found = false;
-    for (j = applist.begin(); j != applist.end(); ++j) {
+    while (j != applist.end()) {
         found = false;
         for (i = remote.begin(); i != remote.end(); ++i) {
             if ((*i).id == apps[*j].id) {
@@ -654,7 +654,9 @@ void MergeCallApplicationList(const H461DataStore::ApplicationList & remote, H46
             }
         }
         if (!found)
-            applist.erase(j);
+            j = applist.erase(j);
+        else
+            ++j;
     }
 }
 
