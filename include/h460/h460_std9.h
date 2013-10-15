@@ -29,21 +29,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.4  2010/01/20 04:23:08  shorne
- * Add ability to advertise supported H.460 features in presence
- *
- * Revision 1.3  2009/09/29 07:23:03  shorne
- * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
- *
- * Revision 1.2  2009/08/28 14:36:06  shorne
- * Fixes to enable compilation with PTLIB 2.6.4
- *
- * Revision 1.1  2009/08/21 07:01:06  shorne
- * Added H.460.9 Support
- *
- *
- *
+ * $Id$
  *
  */
 
@@ -61,8 +47,6 @@
 #endif 
 
 
-class MyH323EndPoint;
-class MyH323Connection;
 class H4609_ArrayOf_RTCPMeasures;
 class H460_FeatureStd9 : public H460_FeatureStd 
 {

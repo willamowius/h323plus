@@ -29,24 +29,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.5  2011/02/20 06:55:46  shorne
- * Fixes for H.460 to allow better selection of mesasage location in PDU. Features or Generic Data. Corrected H.460.9
- *
- * Revision 1.4  2010/08/27 03:07:26  shorne
- * Fix compile warning of GCC 4.4
- *
- * Revision 1.3  2010/05/18 07:44:39  willamowius
- * add newline at end of file
- *
- * Revision 1.2  2009/09/29 07:23:03  shorne
- * Change the way unmatched features are cleaned up in call signalling. Removed advertisement of H.460.19 in Alerting and Connecting PDU
- *
- * Revision 1.1  2009/08/21 07:01:06  shorne
- * Added H.460.9 Support
- *
- *
- *
+ * $Id$
  *
  */
 
