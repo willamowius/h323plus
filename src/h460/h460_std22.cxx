@@ -100,19 +100,19 @@ void BuildFeature(int localSupport, H323EndPoint * ep, H460_FeatureStd & feat)
     if (localSupport == H323EndPoint::e_h225_tls ||
         localSupport == H323EndPoint::e_h225_tls_ipsec) {
 
-        H460_FeatureTable settings;
-        settings.AddParameter(1,H460_FeatureContent(1,8)); // Priority 1
-        settings.AddParameter(2,H460_FeatureContent(ep->GetListeners()[0].GetTransportAddress()));
-        feat.Add(1,H460_FeatureContent(settings));
+        H460_FeatureStd sets;
+        sets.Add(1,H460_FeatureContent(1,8)); // Priority 1
+        sets.Add(2,H460_FeatureContent(ep->GetListeners()[0].GetTransportAddress()));
+        feat.Add(1,H460_FeatureContent(sets.GetCurrentTable()));
     }
 
     // NOT YET Supported...
     if (localSupport == H323EndPoint::e_h225_ipsec ||
         localSupport == H323EndPoint::e_h225_tls_ipsec) {
 
-        H460_FeatureTable settings;
-        settings.AddParameter(1,H460_FeatureContent(2,8)); // Priority 2
-        feat.Add(2,H460_FeatureContent(settings));
+        H460_FeatureStd sets;
+        sets.Add(1,H460_FeatureContent(2,8)); // Priority 2
+        feat.Add(2,H460_FeatureContent(sets.GetCurrentTable()));
     }
 }
 
