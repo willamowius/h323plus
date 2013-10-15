@@ -67,6 +67,10 @@
 #include "h460/h46018_h225.h"
 #endif
 
+#ifdef H323_TLS
+#include "h460/h460_std22.h"
+#endif
+
 #ifdef H323_H46023
 #include "h460/h460_std23.h"
 #endif
@@ -548,6 +552,10 @@ H323EndPoint::H323EndPoint()
 
 #ifdef H323_AEC 
   enableAEC = false;
+#endif
+
+#ifdef H323_TLS
+  signalSec = e_h225_none;
 #endif
 
 #ifdef H323_GNUGK

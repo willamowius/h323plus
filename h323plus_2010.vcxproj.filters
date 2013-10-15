@@ -382,6 +382,9 @@
     <ClCompile Include="src\etc\h323aec.cxx">
       <Filter>Source Files\etc</Filter>
     </ClCompile>
+    <ClCompile Include="src\h460\h460_std22.cxx">
+      <Filter>Source Files\h460</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\channels.h">
@@ -690,6 +693,9 @@
     </ClInclude>
     <ClInclude Include="include\etc\h323aec.h">
       <Filter>Header Files\etc</Filter>
+    </ClInclude>
+    <ClInclude Include="include\h460\h460_std22.h">
+      <Filter>Header Files\h460</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

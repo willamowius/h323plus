@@ -2276,6 +2276,19 @@ class H323EndPoint : public PObject
     void SetAECEnabled(PBoolean enabled)  { enableAEC = enabled; }
 #endif
 
+#ifdef H323_TLS
+    enum SignalSecurity {
+        e_h225_none,
+        e_h225_tls,
+        e_h225_ipsec,     // not supported YET
+        e_h225_tls_ipsec  // not supported YET
+    };
+
+    SignalSecurity GetSignalSecurity() { return signalSec; }
+
+    void SetSignalSecurity(SignalSecurity sec) { signalSec = sec; } 
+#endif
+
 #ifdef H323_FRAMEBUFFER
     void EnableVideoFrameBuffer(PBoolean enable); 
     PBoolean HasVideoFrameBuffer();
@@ -2892,6 +2905,10 @@ class H323EndPoint : public PObject
 
 #ifdef H323_AEC
     PBoolean enableAEC;
+#endif
+
+#ifdef H323_TLS
+  SignalSecurity signalSec;
 #endif
 
 #ifdef H323_GNUGK

@@ -1230,6 +1230,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\h460\h460_std22.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\src\h460\h460_std23.cxx"
 				>
 			</File>
@@ -2148,6 +2152,10 @@
 			</File>
 			<File
 				RelativePath=".\include\h460\h460_std18.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\h460\h460_std22.h"
 				>
 			</File>
 			<File

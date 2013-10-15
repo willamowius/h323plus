@@ -148,7 +148,7 @@
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>$(OutDir$(ProjectName).lib</OutputFile>
+      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
   </ItemDefinitionGroup>
@@ -642,6 +642,7 @@
     <ClCompile Include="src\h460\h460_oid9.cxx" />
     <ClCompile Include="src\h460\h460_std17.cxx" />
     <ClCompile Include="src\h460\h460_std18.cxx" />
+    <ClCompile Include="src\h460\h460_std22.cxx" />
     <ClCompile Include="src\h460\h460_std23.cxx" />
     <ClCompile Include="src\h460\h460_std26.cxx" />
     <ClCompile Include="src\h460\h460_std9.cxx" />
@@ -1133,6 +1134,7 @@
     <ClInclude Include="include\h460\h460_oid9.h" />
     <ClInclude Include="include\h460\h460_std17.h" />
     <ClInclude Include="include\h460\h460_std18.h" />
+    <ClInclude Include="include\h460\h460_std22.h" />
     <ClInclude Include="include\h460\h460_std23.h" />
     <ClInclude Include="include\h460\h460_std26.h" />
     <ClInclude Include="include\h460\h460_std9.h" />
