@@ -52,6 +52,11 @@
 // Must Declare for Factory Loader.
 H460_FEATURE(Std22);
 
+#define Std22_TLS               1
+#define Std22_IPSec             2
+#define Std22_Priority          1
+#define Std22_Address           2
+
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -101,9 +106,10 @@ void BuildFeature(int localSupport, H323EndPoint * ep, H460_FeatureStd & feat)
         localSupport == H323EndPoint::e_h225_tls_ipsec) {
 
         H460_FeatureStd sets;
-        sets.Add(1,H460_FeatureContent(1,8)); // Priority 1
-        sets.Add(2,H460_FeatureContent(ep->GetListeners()[0].GetTransportAddress()));
-        feat.Add(1,H460_FeatureContent(sets.GetCurrentTable()));
+        sets.Add(Std22_Priority,H460_FeatureContent(1,8)); // Priority 1
+        sets.Add(Std22_Address,H460_FeatureContent(ep->GetListeners()[0].GetTransportAddress()));
+
+        feat.Add(Std22_TLS,H460_FeatureContent(sets.GetCurrentTable()));
     }
 
     // NOT YET Supported...
@@ -111,8 +117,9 @@ void BuildFeature(int localSupport, H323EndPoint * ep, H460_FeatureStd & feat)
         localSupport == H323EndPoint::e_h225_tls_ipsec) {
 
         H460_FeatureStd sets;
-        sets.Add(1,H460_FeatureContent(2,8)); // Priority 2
-        feat.Add(2,H460_FeatureContent(sets.GetCurrentTable()));
+        sets.Add(Std22_Priority,H460_FeatureContent(2,8)); // Priority 2
+
+        feat.Add(Std22_IPSec,H460_FeatureContent(sets.GetCurrentTable()));
     }
 }
 
