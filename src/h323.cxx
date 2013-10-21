@@ -1522,6 +1522,7 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
       H225_ArrayOf_AliasAddress destExtraCallInfoArray;
       H323Gatekeeper::AdmissionResponse response;
       response.destExtraCallInfo = &destExtraCallInfoArray;
+      response.languageSupport = &localLanguages;
       if (!gatekeeper->AdmissionRequest(*this, response)) {
         PTRACE(1, "H225\tGatekeeper refused admission: "
                << (response.rejectReason == UINT_MAX
@@ -2447,6 +2448,7 @@ H323Connection::CallEndReason H323Connection::SendSignalSetup(const PString & al
     H323Gatekeeper::AdmissionResponse response;
     response.transportAddress = &gatekeeperRoute;
     response.aliasAddresses = &newAliasAddresses;
+    response.languageSupport = &localLanguages;
     if (!gkAccessTokenOID)
       response.accessTokenData = &gkAccessTokenData;
     while (!gatekeeper->AdmissionRequest(*this, response, alias.IsEmpty())) {
@@ -2523,6 +2525,9 @@ H323Connection::CallEndReason H323Connection::SendSignalSetup(const PString & al
     setup.m_tokens[last].m_nonStandard.m_nonStandardIdentifier = oid2;
     setup.m_tokens[last].m_nonStandard.m_data = gkAccessTokenData;
   }
+
+  if (H323SetLanguages(localLanguages, setup.m_language))
+     setup.IncludeOptionalField(H225_Setup_UUIE::e_language);
 
   if (!signallingChannel->IsOpen() && !signallingChannel->SetRemoteAddress(gatekeeperRoute)) {
     PTRACE(1, "H225\tInvalid "

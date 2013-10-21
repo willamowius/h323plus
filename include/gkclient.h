@@ -174,6 +174,8 @@ class H323Gatekeeper : public H225_RAS
 
       H225_ArrayOf_AliasAddress * aliasAddresses; ///< DestinationInfo to use in SETUP if not empty
       H225_ArrayOf_AliasAddress * destExtraCallInfo; ///< DestinationInfo to use in SETUP if not empty
+
+      PStringList * languageSupport;
     };
 
     /**Admission request to gatekeeper.

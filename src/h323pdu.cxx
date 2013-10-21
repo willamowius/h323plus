@@ -628,9 +628,6 @@ H225_Setup_UUIE & H323SignalPDU::BuildSetup(const H323Connection & connection,
   H323SetAliasAddresses(connection.GetLocalAliasNames(), setup.m_sourceAddress);
 
 #if 0   // Interop issues with H323v7 with codian MCU comment out for now - SH
-  if (H323SetLanguages(connection.GetLocalLanguages(), setup.m_language))
-      setup.IncludeOptionalField(H225_Setup_UUIE::e_language);
-
   if (H323SetDisplayName(connection.GetLocalAliasNames(),connection.GetLocalLanguages(), setup.m_displayName))
       setup.IncludeOptionalField(H225_Setup_UUIE::e_displayName);
 #endif
@@ -776,7 +773,7 @@ H225_Connect_UUIE & H323SignalPDU::BuildConnect(const H323Connection & connectio
   connect.m_conferenceID = connection.GetConferenceIdentifier();
 
   if (H323SetLanguages(connection.GetLocalLanguages(), connect.m_language))
-     connect.IncludeOptionalField(H225_Setup_UUIE::e_language);
+     connect.IncludeOptionalField(H225_Connect_UUIE::e_language);
 
   connection.SetEndpointTypeInfo(connect.m_destinationInfo);
 

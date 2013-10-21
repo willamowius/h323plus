@@ -857,6 +857,8 @@ H323Gatekeeper::AdmissionResponse::AdmissionResponse()
 
   aliasAddresses = NULL;
   destExtraCallInfo = NULL;
+
+  languageSupport = NULL;
 }
 
 
@@ -1177,6 +1179,9 @@ PBoolean H323Gatekeeper::OnReceiveAdmissionConfirm(const H225_AdmissionConfirm &
   if (acf.HasOptionalField(H225_AdmissionConfirm::e_serviceControl))
     OnServiceControlSessions(acf.m_serviceControl, &info.connection);
 #endif
+
+  if (acf.HasOptionalField(H225_AdmissionConfirm::e_language))
+      H323GetLanguages(*info.param.languageSupport, acf.m_language);
 
   return TRUE;
 }
