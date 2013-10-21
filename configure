@@ -1380,15 +1380,15 @@ Optional Features:
   --disable-h450          disable H.450
   --disable-h460          disable H.460
   --disable-h4609         disable H.460.9
-  --disable-h46017        disable H.460.17
+  --enable-h46017         enable H.460.17
   --disable-h46018        disable H.460.18/.19
   --disable-h46019m       disable H.460.19 RTP multiplexing
   --disable-h46023        disable H.460.23/.24
-  --disable-h46026        disable H.460.26
+  --enable-h46026         enable H.460.26
   --enable-h461           enable H.461 ASSET Feature
   --enable-h460p          enable H.460 Presence
-  --enable-h460pre         enable H.460 PreEmption
-  --enable-h460com         enable H.460 Compat Feature
+  --enable-h460pre        enable H.460 PreEmption
+  --enable-h460com        enable H.460 Compat Feature
   --disable-h501          disable H.501
   --disable-t38           disable T.38
   --disable-t120          disable T.120
@@ -3922,7 +3922,7 @@ default_h460=yes
 default_h4609=yes
 default_h46017=no
 default_h46018=yes
-default_h46019m=no
+default_h46019m=yes
 default_h46023=yes
 default_h46026=no
 default_h461=no
