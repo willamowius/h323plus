@@ -280,7 +280,7 @@ void Q931::BuildConnect(int callRef)
   callReference = callRef;
   fromDestination = TRUE;
   informationElements.RemoveAll();
-  SetBearerCapabilities(TransferSpeech, 1);
+  //SetBearerCapabilities(TransferSpeech, 1); <- Codian interop issue - SH
 }
 
 void Q931::BuildConnectAck(int callRef, PBoolean fromDest)
