@@ -56,10 +56,10 @@ AC_SUBST(BUILD_NUMBER, $BUILD_NUMBER)
 
 echo "OpenH323 version is ${OPENH323_VERSION}"
 
-AC_DEFINE_UNQUOTED(OPENH323_MAJOR,   ${MAJOR_VERSION})
-AC_DEFINE_UNQUOTED(OPENH323_MINOR,   ${MINOR_VERSION})
-AC_DEFINE_UNQUOTED(OPENH323_BUILD,   ${BUILD_NUMBER})
-AC_DEFINE_UNQUOTED(OPENH323_VERSION, "$OPENH323_VERSION")
+AC_DEFINE_UNQUOTED(OPENH323_MAJOR,   ${MAJOR_VERSION}, [Major version])
+AC_DEFINE_UNQUOTED(OPENH323_MINOR,   ${MINOR_VERSION}, [Minor version])
+AC_DEFINE_UNQUOTED(OPENH323_BUILD,   ${BUILD_NUMBER},  [Build number])
+AC_DEFINE_UNQUOTED(OPENH323_VERSION, "$OPENH323_VERSION", [Full version number])
 
 dnl ########################################################################
 dnl look for ptlib, use a preference order of explicit PTLIBDIR, directory
@@ -257,7 +257,7 @@ if test "$enable_audio" = "no" ; then
   AC_MSG_NOTICE(Disabling audio functions)
   AC_SUBST(NOAUDIOCODECS, 1)
 else
-  AC_DEFINE(H323_AUDIO_CODECS, 1)
+  AC_DEFINE(H323_AUDIO_CODECS, 1, [Include audio codecs])
 
   AC_ARG_ENABLE(embeddedgsm,
          [  --enable-embeddedgsm    embed GSM codec via static linking],
@@ -270,7 +270,7 @@ else
     if test "x$GSM" != "x"; then
       ENDLDLIBS="$ENDLDLIBS -lgsm"
     fi
-    AC_DEFINE(H323_EMBEDDED_GSM)
+    AC_DEFINE(H323_EMBEDDED_GSM, , [Use embdedded GSM codec])
   fi
 fi
 
@@ -291,7 +291,7 @@ if test "$enable_video" = "no" ; then
   AC_MSG_NOTICE(Disabling video functions)
   AC_SUBST(NOVIDEO, 1)
 else
-  AC_DEFINE(H323_VIDEO, 1)
+  AC_DEFINE(H323_VIDEO, 1, [Enable H.323 video support])
 fi
 
 dnl ########################################################################
@@ -307,7 +307,7 @@ if test "${enable_h224}x" = "x" ; then
 fi
 if test "$enable_h224" = "yes" ; then
   H323_H224=1
-  AC_DEFINE(H323_H224, 1)
+  AC_DEFINE(H323_H224, 1, [Enable H.244 support])
 else
   H323_H224=
   AC_MSG_NOTICE(Disabling H.224)
@@ -327,7 +327,7 @@ if test "${enable_h230}x" = "x" ; then
 fi
 if test "$enable_h230" = "yes" ; then
   H323_H230=1
-  AC_DEFINE(H323_H230, 1)
+  AC_DEFINE(H323_H230, 1, [Enable H.230 support])
 else
   H323_H230=
   AC_MSG_NOTICE(Disabling H.230)
@@ -347,7 +347,7 @@ if test "${enable_h235}x" = "x" ; then
 fi
 if test "$enable_h235" = "yes" ; then
   H323_H235=1
-  AC_DEFINE(H323_H235, 1)
+  AC_DEFINE(H323_H235, 1, [Enable H.235 support])
 else
   H323_H235=
   AC_MSG_NOTICE(Disabling H.235.6)
@@ -371,7 +371,7 @@ if test "$enable_h235" != "yes" ; then
 fi
 if test "$enable_h235_256" = "yes" ; then
   H323_H235_AES256=1
-  AC_DEFINE(H323_H235_AES256, 1)
+  AC_DEFINE(H323_H235_AES256, 1, [Enable H.235 AES256 support])
 else
   H323_H235_AES256=
   AC_MSG_NOTICE(Disabling H.235.6 (256 bit))
@@ -391,7 +391,7 @@ if test "${enable_h239}x" = "x" ; then
 fi
 if test "$enable_h239" = "yes" ; then
   H323_H239=1
-  AC_DEFINE(H323_H239, 1)
+  AC_DEFINE(H323_H239, 1, [Enable H.239 support])
 else
   H323_H239=
   AC_MSG_NOTICE(Disabling H.239)
@@ -411,7 +411,7 @@ if test "${enable_h248}x" = "x" ; then
 fi
 if test "$enable_h248" = "yes" ; then
   H323_H248=1
-  AC_DEFINE(H323_H248, 1)
+  AC_DEFINE(H323_H248, 1, [Enable H.248 support])
 else
   H323_H248=
   AC_MSG_NOTICE(Disabling H.248)
@@ -431,7 +431,7 @@ if test "${enable_h249}x" = "x" ; then
 fi
 if test "$enable_h249" = "yes" ; then
   H323_H249=1
-  AC_DEFINE(H323_H249, 1)
+  AC_DEFINE(H323_H249, 1, [Enable H.249 support])
 else
   H323_H249=
   AC_MSG_NOTICE(Disabling H.249)
@@ -451,7 +451,7 @@ if test "${enable_h341}x" = "x" ; then
 fi
 if test "$enable_h341" = "yes" ; then
   H323_H341=1
-  AC_DEFINE(H323_H341, 1)
+  AC_DEFINE(H323_H341, 1, [Enable H.341 support])
 else
   H323_H341=
   AC_MSG_NOTICE(Disabling H.341)
@@ -471,7 +471,7 @@ if test "${enable_h350}x" = "x" ; then
 fi
 if test "$enable_h350" = "yes" ; then
   H323_H350=1
-  AC_DEFINE(H323_H350, 1)
+  AC_DEFINE(H323_H350, 1, [Enable H.350 support])
 else
   H323_H350=
   AC_MSG_NOTICE(Disabling H.350)
@@ -491,7 +491,7 @@ if test "${enable_h450}x" = "x" ; then
 fi
 if test "$enable_h450" = "yes" ; then
   H323_H450=1
-  AC_DEFINE(H323_H450, 1)
+  AC_DEFINE(H323_H450, 1, [Enable H.450 support])
 else
   H323_H450=
   AC_MSG_NOTICE(Disabling H.450)
@@ -511,7 +511,7 @@ if test "${enable_h460}x" = "x" ; then
 fi
 if test "$enable_h460" = "yes" ; then
   H323_H460=1
-  AC_DEFINE(H323_H460, 1)
+  AC_DEFINE(H323_H460, 1, [Enable H.460 support])
 else
   H323_H460=
   AC_MSG_NOTICE(Disabling H.460)
@@ -531,7 +531,7 @@ if test "${enable_h4609}x" = "x" ; then
 fi
 if test "$enable_h4609" = "yes" ; then
   H323_h4609=1
-  AC_DEFINE(H323_H4609, 1)
+  AC_DEFINE(H323_h4609, 1, [Enable H.490 support])
 else
   H323_h4609=
   AC_MSG_NOTICE(Disabling H.460.9)
@@ -551,7 +551,7 @@ if test "${enable_h46017}x" = "x" ; then
 fi
 if test "$enable_h46017" = "yes" ; then
   H323_H46017=1
-  AC_DEFINE(H323_H46017, 1)
+  AC_DEFINE(H323_H46017, 1, [Enable H.460.17 support])
 else
   H323_H46017=
   AC_MSG_NOTICE(Disabling H.460.17)
@@ -571,7 +571,7 @@ if test "${enable_h46018}x" = "x" ; then
 fi
 if test "$enable_h46018" = "yes" ; then
   H323_H46018=1
-  AC_DEFINE(H323_H46018, 1)
+  AC_DEFINE(H323_H46018, 1, [Enable H.460.18/.19 support])
 else
   H323_H46018=
   AC_MSG_NOTICE(Disabling H.460.18/.19)
@@ -591,7 +591,7 @@ if test "${enable_h46019m}x" = "x" ; then
 fi
 if test "$enable_h46019m" = "yes" ; then
   H323_H46019M=1
-  AC_DEFINE(H323_H46019M, 1)
+  AC_DEFINE(H323_H46019M, 1, [Enable H.460.19 support])
 else
   H323_H46019M=
   AC_MSG_NOTICE(Disabling H.460.19 RTP multiplexing)
@@ -611,7 +611,7 @@ if test "${enable_h46023}x" = "x" ; then
 fi
 if test "$enable_h46023" = "yes" ; then
   H323_H46023=1
-  AC_DEFINE(H323_H46023, 1)
+  AC_DEFINE(H323_H46023, 1, [Enable H.460.23 support])
 else
   H323_H46023=
   AC_MSG_NOTICE(Disabling H.460.23/.24)
@@ -631,7 +631,7 @@ if test "${enable_h46026}x" = "x" ; then
 fi
 if test "$enable_h46026" = "yes" ; then
   H323_H46026=1
-  AC_DEFINE(H323_H46026, 1)
+  AC_DEFINE(H323_H46026, 1, [Enable H.460.26 support])
 else
   H323_H46026=
   AC_MSG_NOTICE(Disabling H.460.26)
@@ -651,7 +651,7 @@ if test "${enable_h460p}x" = "x" ; then
 fi
 if test "$enable_h460p" = "yes" ; then
   H323_H460P=1
-  AC_DEFINE(H323_H460P, 1)
+  AC_DEFINE(H323_H460P, 1, [Enable H.460P support])
 else
   H323_H460P=
   AC_MSG_NOTICE(Disabling H.460 Presence)
@@ -671,7 +671,7 @@ if test "${enable_h460pre}x" = "x" ; then
 fi
 if test "$enable_h460pre" = "yes" ; then
   H323_H460PRE=1
-  AC_DEFINE(H323_H460PRE, 1)
+  AC_DEFINE(H323_H460PRE, 1, [Enable H.460PRE support])
 else
   H323_H460PRE=
   AC_MSG_NOTICE(Disabling H.460 PreEmption)
@@ -691,7 +691,7 @@ if test "${enable_h460com}x" = "x" ; then
 fi
 if test "$enable_h460com" = "yes" ; then
   H323_H460COM=1
-  AC_DEFINE(H323_H460COM, 1)
+  AC_DEFINE(H323_H460COM, 1, [Enable H.460COM support])
 else
   H323_H460COM=
   AC_MSG_NOTICE(Disabling H.460 Compat Feature)
@@ -711,7 +711,7 @@ if test "${enable_h461}x" = "x" ; then
 fi
 if test "$enable_h461" = "yes" ; then
   H323_H461=1
-  AC_DEFINE(H323_H461, 1)
+  AC_DEFINE(H323_H461, 1, [Enabling H.461 ASSET Feature])
 else
   H323_H461=
   AC_MSG_NOTICE(Disabling H.461 ASSET Feature)
@@ -731,7 +731,7 @@ if test "${enable_h501}x" = "x" ; then
 fi
 if test "$enable_h501" = "yes" ; then
   H323_H501=1
-  AC_DEFINE(H323_H501, 1)
+  AC_DEFINE(H323_H501, 1, [Enable H.501 support])
 else
   H323_H501=
   AC_MSG_NOTICE(Disabling H.501)
@@ -752,7 +752,7 @@ fi
 if test "$enable_t38" = "yes" ; then
   AC_MSG_NOTICE(Enabling T.38)
   H323_T38=1
-  AC_DEFINE(H323_T38, 1)
+  AC_DEFINE(H323_T38, 1, [Enable T.38 support])
 else
   H323_T38=
   AC_MSG_NOTICE(Disabling T.38)
@@ -775,7 +775,7 @@ if test "$enable_t120" = "no" ; then
   AC_MSG_NOTICE(Disabling T.120)
 else
   H323_T20=1
-  AC_DEFINE(H323_T120, 1)
+  AC_DEFINE(H323_T120, 1, [Enable T.120 support])
 fi
 AC_SUBST(H323_T120)
 
@@ -792,7 +792,7 @@ if test "${enable_gnugk}x" = "x" ; then
 fi
 if test "$enable_gnugk" = "yes" ; then
   H323_GNUGK=1
-  AC_DEFINE(H323_GNUGK, 1)
+  AC_DEFINE(H323_GNUGK, 1, [Enable GNU GateKeeper NAT support])
 else
   H323_GNUGK=
   AC_MSG_NOTICE(Disabling GnuGk NAT)
@@ -812,7 +812,7 @@ if test "${enable_file}x" = "x" ; then
 fi
 if test "$enable_file" = "yes" ; then
   H323_FILE=1
-  AC_DEFINE(H323_FILE, 1)
+  AC_DEFINE(H323_FILE, 1, [Enable H323 file support])
 else
   H323_FILE=
   AC_MSG_NOTICE(Disabling File Transfer)
