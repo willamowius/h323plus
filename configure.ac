@@ -665,7 +665,7 @@ dnl MSWIN_DISPLAY h460pre,H.460 PreEmption
 dnl MSWIN_DEFINE  h460pre,H323_H460PRE
 
 AC_ARG_ENABLE(h460pre,
-       [  --enable-h460pre         enable H.460 PreEmption])
+       [  --enable-h460pre        enable H.460 PreEmption])
 if test "${enable_h460pre}x" = "x" ; then
   enable_h460pre=$default_h460pre
 fi
@@ -685,7 +685,7 @@ dnl MSWIN_DISPLAY h460com,H.460 Compat Feature
 dnl MSWIN_DEFINE  h460com,H323_H460COM
 
 AC_ARG_ENABLE(h460com,
-       [  --enable-h460com         enable H.460 Compat Feature])
+       [  --enable-h460com        enable H.460 Compat Feature])
 if test "${enable_h460com}x" = "x" ; then
   enable_h460com=$default_h460com
 fi
@@ -705,7 +705,7 @@ dnl MSWIN_DISPLAY h461,H.461 ASSET Feature
 dnl MSWIN_DEFINE  h461,H323_H461
 
 AC_ARG_ENABLE(h461,
-       [  --enable-h461         enable H.461 ASSET Feature])
+       [  --enable-h461           enable H.461 ASSET Feature])
 if test "${enable_h461}x" = "x" ; then
   enable_h461=$default_h461
 fi

@@ -1399,9 +1399,9 @@ Optional Features:
   --disable-h46023        disable H.460.23/.24
   --disable-h46026        disable H.460.26
   --enable-h460p          enable H.460 Presence
-  --enable-h460pre         enable H.460 PreEmption
-  --enable-h460com         enable H.460 Compat Feature
-  --enable-h461         enable H.461 ASSET Feature
+  --enable-h460pre        enable H.460 PreEmption
+  --enable-h460com        enable H.460 Compat Feature
+  --enable-h461           enable H.461 ASSET Feature
   --disable-h501          disable H.501
   --disable-t38           disable T.38
   --disable-t120          disable T.120
