@@ -106,6 +106,7 @@ install:
 	( for dir in $(DESTDIR)$(LIBDIR) \
 		     $(DESTDIR)$(PREFIX)/include/openh323 \
 		     $(DESTDIR)$(PREFIX)/include/openh323/codec \
+		     $(DESTDIR)$(PREFIX)/include/openh323/h224 \
 		     $(DESTDIR)$(PREFIX)/include/openh323/h230 \
 		     $(DESTDIR)$(PREFIX)/include/openh323/h235 \
 		     $(DESTDIR)$(PREFIX)/include/openh323/h341 \
@@ -120,6 +121,9 @@ install:
 	done)
 	( for fn in include/codec/*.h ; do \
 		$(INSTALL) -m 444 $$fn $(DESTDIR)$(PREFIX)/include/openh323/codec ; \
+	done)
+	( for fn in include/h224/*.h ; do \
+		$(INSTALL) -m 444 $$fn $(DESTDIR)$(PREFIX)/include/openh323/h224 ; \
 	done)
 	( for fn in include/h230/*.h ; do \
 		$(INSTALL) -m 444 $$fn $(DESTDIR)$(PREFIX)/include/openh323/h230 ; \
