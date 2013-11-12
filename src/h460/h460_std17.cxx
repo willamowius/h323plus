@@ -654,8 +654,6 @@ H46017Handler::H46017Handler(H323EndPoint & _ep, const H323TransportAddress & _r
 
 H46017Handler::~H46017Handler()
 {
-    callEnded = true;
-
     if (curtransport != NULL) {
         curtransport->Close();
         curtransport = NULL;

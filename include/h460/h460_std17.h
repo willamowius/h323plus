@@ -294,7 +294,6 @@ private:
 
     PBoolean connectionlost;
     PBoolean openTransport;
-    PBoolean callEnded;
 
 #ifdef H323_H46026
     PBoolean   m_h46026tunnel;
