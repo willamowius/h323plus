@@ -639,7 +639,8 @@ void H46017Transport::SocketWrite(PThread &, INT)
 /////////////////////////////////////////////////////////////////////////////
 
 H46017Handler::H46017Handler(H323EndPoint & _ep, const H323TransportAddress & _remoteAddress)
- : ep(_ep), curtransport(NULL), ras(NULL), remoteAddress(_remoteAddress)
+ : ep(_ep), curtransport(NULL), ras(NULL), remoteAddress(_remoteAddress),
+   connectionlost(false), openTransport(false)
 #ifdef H323_H46026
    , m_h46026tunnel(false)
 #endif
