@@ -448,8 +448,8 @@ PBoolean H323Gatekeeper::RegistrationRequest(PBoolean autoReg)
 
         case H225_RegistrationRejectReason::e_fullRegistrationRequired :
           registrationFailReason = GatekeeperLostRegistration;
-          // Set timer to retry registration
-          reregisterNow = TRUE;
+          endpointIdentifier = PString();  // Reset the endpoint Identifier
+          reregisterNow = TRUE;            // Set timer to retry registration
           monitorTickle.Signal();
           break;
 
