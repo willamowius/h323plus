@@ -303,7 +303,7 @@ inline void DeleteObjectsInMap(const M & m)
 OpalH224Handler::OpalH224Handler(H323Channel::Directions dir,
                                  H323Connection & connection,
                                  unsigned sessionID)
-: canTransmit(FALSE), transmitMutex(), sessionDirection(dir)
+: session(NULL), canTransmit(FALSE), transmitMutex(), sessionDirection(dir)
 {
 
   H245_TransportAddress addr;
@@ -450,7 +450,7 @@ PBoolean OpalH224Handler::SendClientList()
     for (std::map<BYTE,H224_Handler*>::iterator it = m_h224Handlers.begin(); it != m_h224Handlers.end(); ++it) {
         if (it->second->IsActive(sessionDirection)) {
             BYTE clientID = it->first;
-            ptr[i] = (0x80 | clientID);
+            ptr[i] = (BYTE)(0x80 | clientID);
             if(clientID == 0x7e) { // extended client ID
               i += 2;
             } else if(clientID == 0x7f) { // non-standard client ID
@@ -596,7 +596,7 @@ PBoolean OpalH224Handler::OnReceivedClientList(H224_Frame & frame)
     
   while(numberOfClients > 0) {
       
-    BYTE clientID = (data[i] & 0x7f);
+    BYTE clientID = (BYTE)(data[i] & 0x7f);
 
     for (std::map<BYTE,H224_Handler*>::iterator it = m_h224Handlers.begin(); it != m_h224Handlers.end(); ++it) {
       if (clientID == it->first) {
@@ -673,7 +673,7 @@ void OpalH224Handler::TransmitFrame(H224_Frame & frame, PBoolean replay)
     }
   
     // TODO: Add Encryption Support - SH
-    if(!session->PreWriteData(*transmitFrame) || !session->WriteData(*transmitFrame)) {
+    if(!session || !session->PreWriteData(*transmitFrame) || !session->WriteData(*transmitFrame)) {
         PTRACE(3, "H224\tFailed to write encoded H.224 frame");
     } else {
         PTRACE(3, "H224\tEncoded H.224 frame sent");
