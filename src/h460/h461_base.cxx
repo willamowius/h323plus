@@ -222,7 +222,7 @@ H323Connection * H460_FeatureX1::GetConnection()
 }
 H461DataStore * H460_FeatureX1::GetDataStore()
 {
-    return m_ep->GetASSETDataStore();
+    return m_ep ? m_ep->GetASSETDataStore() : NULL;
 }
 
 //////////////////////////////////////////////////////////////////////////////////
