@@ -868,6 +868,8 @@ PObject::Comparison H323GenericCapabilityInfo::CompareInfo(const H323GenericCapa
 
 #if P_QOS
 int H323AudioCapability::DSCPvalue = PQoS::guaranteedDSCP;
+#else
+int H323AudioCapability::DSCPvalue = 0;
 #endif
 
 H323AudioCapability::H323AudioCapability(unsigned rx, unsigned tx)
@@ -1282,6 +1284,8 @@ PBoolean H323NonStandardAudioCapability::IsMatch(const PASN_Choice & subTypePDU)
 
 #if P_QOS
 int H323VideoCapability::DSCPvalue = PQoS::controlledLoadDSCP;
+#else
+int H323VideoCapability::DSCPvalue = 0;
 #endif
 
 H323VideoCapability::H323VideoCapability()
