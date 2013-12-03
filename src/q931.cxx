@@ -41,10 +41,8 @@
 
 #include <ptclib/random.h>
 
-#ifdef _WIN32
 #ifndef _Ios_Fmtflags
   #define _Ios_Fmtflags ios::fmtflags
-#endif
 #endif
 
 
