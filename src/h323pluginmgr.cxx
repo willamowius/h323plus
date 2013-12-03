@@ -2000,9 +2000,9 @@ PBoolean H323PluginVideoCodec::RenderFrame(const BYTE * buffer, void * mark)
 
 PBoolean H323PluginVideoCodec::RenderInternal(const BYTE * buffer, void * mark)
 {
-    PVideoChannel *videoOut = (PVideoChannel *)rawDataChannel; // guaranteed to be non-NULL when called from Read() or Write()
+    PVideoChannel *videoOut = (PVideoChannel *)rawDataChannel;
 
-    if (!videoOut->IsRenderOpen())
+    if (!videoOut || !videoOut->IsRenderOpen())
         return TRUE;
 
 #if PTLIB_VER >= 290
