@@ -1004,8 +1004,10 @@ void H323_RTPChannel::Transmit()
   }
 
 #if PTRACING
-  PTRACE_IF(5, codecReadAnalysis != NULL, "Codec read timing:\n" << *codecReadAnalysis);
-  delete codecReadAnalysis;
+  if (PTrace::GetLevel() >= 5) {
+      PTRACE_IF(5, codecReadAnalysis != NULL, "Codec read timing:\n" << *codecReadAnalysis);
+      delete codecReadAnalysis;
+  }
 #endif
 
   if (!terminating)
