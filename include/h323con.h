@@ -1467,6 +1467,14 @@ class H323Connection : public PObject
 		determine common languages supported.
 	  */
 	virtual PBoolean MergeLanguages(
+		const PStringList & remote,
+        PBoolean isCaller
+	);
+
+	/** Merge remote language support to the local supported languages to 
+		determine common languages supported.
+	  */
+	virtual PBoolean MergeLanguages(
 		const PStringList & remote
 	);
 

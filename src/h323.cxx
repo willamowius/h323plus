@@ -1415,7 +1415,7 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
   // Check Language Support
   if (setup.HasOptionalField(H225_Setup_UUIE::e_language)) {
       PStringList remoteLang;
-	  if (!H323GetLanguages(remoteLang, setup.m_language) || !MergeLanguages(remoteLang)) {
+	  if (!H323GetLanguages(remoteLang, setup.m_language) || !MergeLanguages(remoteLang, true)) {
 		  PTRACE(2,"SETUP\tMissing or no common language support");
 	  }
   }
@@ -1834,7 +1834,7 @@ PBoolean H323Connection::OnReceivedSignalConnect(const H323SignalPDU & pdu)
 
   if (connect.HasOptionalField(H225_Connect_UUIE::e_language)) {
 	  PStringList remoteLang;
-	  if (!H323GetLanguages(remoteLang, connect.m_language) || !MergeLanguages(remoteLang)) {
+	  if (!H323GetLanguages(remoteLang, connect.m_language) || !MergeLanguages(remoteLang, false)) {
 		  PTRACE(2,"SETUP\tMissing or no common language support");
 	  }
   }
@@ -4383,6 +4383,11 @@ PBoolean H323Connection::MergeCapabilities(unsigned sessionID, const H323Capabil
       return TRUE;
    }
    return FALSE;
+}
+
+PBoolean H323Connection::MergeLanguages(const PStringList & remote, PBoolean /*isCaller*/)
+{
+    return MergeLanguages(remote);
 }
 
 PBoolean H323Connection::MergeLanguages(const PStringList & remote)
