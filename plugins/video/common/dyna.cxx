@@ -194,7 +194,7 @@ bool DynaLink::GetFunction(const char * name, Function & func)
 #endif /* _WIN32 */
 }
 
-FFMPEGLibrary::FFMPEGLibrary(CodecID codec)
+FFMPEGLibrary::FFMPEGLibrary(FF_CodecID codec)
 {
   _codec = codec;
   if (_codec==CODEC_ID_H264)
@@ -468,7 +468,7 @@ bool FFMPEGLibrary::Load(int ver)
   return true;
 }
 
-AVCodec *FFMPEGLibrary::AvcodecFindEncoder(enum CodecID id)
+AVCodec *FFMPEGLibrary::AvcodecFindEncoder(enum FF_CodecID id)
 {
 
 #ifdef USE_DLL_AVCODEC
@@ -482,7 +482,7 @@ AVCodec *FFMPEGLibrary::AvcodecFindEncoder(enum CodecID id)
 #endif
 }
 
-AVCodec *FFMPEGLibrary::AvcodecFindDecoder(enum CodecID id)
+AVCodec *FFMPEGLibrary::AvcodecFindDecoder(enum FF_CodecID id)
 {
 
   WaitAndSignal m(processLock);

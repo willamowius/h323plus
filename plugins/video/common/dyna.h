@@ -77,15 +77,11 @@ class DynaLink
 #endif /* _WIN32 */
 };
 
-#ifndef CodecID
-#define CodecID AVCodecID
-#define CODEC_ID_H264   AV_CODEC_ID_H264
-#define CODEC_ID_H263   AV_CODEC_ID_H263
-#define CODEC_ID_H263P  AV_CODEC_ID_H263P
-#define CODEC_ID_MPEG4  AV_CODEC_ID_MPEG4
+#if FF_API_CODEC_ID
+    #define FF_CodecID AVCodecID
+#else
+    #define FF_CodecID CodecID
 #endif
-
-
 /////////////////////////////////////////////////////////////////
 //
 // define a class to interface to the FFMpeg library
@@ -94,13 +90,13 @@ class DynaLink
 class FFMPEGLibrary 
 {
   public:
-    FFMPEGLibrary(CodecID codec);
+    FFMPEGLibrary(FF_CodecID codec);
     ~FFMPEGLibrary();
 
     bool Load(int ver = 0);
 
-    AVCodec *AvcodecFindEncoder(enum CodecID id);
-    AVCodec *AvcodecFindDecoder(enum CodecID id);
+    AVCodec *AvcodecFindEncoder(enum FF_CodecID id);
+    AVCodec *AvcodecFindDecoder(enum FF_CodecID id);
     AVCodecContext *AvcodecAllocContext(AVCodec * codec = NULL);
     AVFrame *AvcodecAllocFrame(void);
     int AvcodecOpen(AVCodecContext *ctx, AVCodec *codec);
@@ -122,7 +118,7 @@ class FFMPEGLibrary
 
   protected:
 
-    CodecID _codec;
+    FF_CodecID _codec;
     char _codecString [32];
 
 #ifdef USE_DLL_AVCODEC
@@ -138,8 +134,8 @@ class FFMPEGLibrary
     AVCodec *mpeg4_decoder;
 
     void (*Favcodec_register)(AVCodec *format);
-    AVCodec *(*Favcodec_find_encoder)(enum CodecID id);
-    AVCodec *(*Favcodec_find_decoder)(enum CodecID id);
+    AVCodec *(*Favcodec_find_encoder)(enum FF_CodecID id);
+    AVCodec *(*Favcodec_find_decoder)(enum FF_CodecID id);
 #if LIBAVCODEC_VERSION_MAJOR < 55
     AVCodecContext *(*Favcodec_alloc_context)(void);
 #else
