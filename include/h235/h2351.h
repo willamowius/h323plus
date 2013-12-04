@@ -376,7 +376,7 @@ const static struct {
 } H235_Algorithms[] = {
 #ifdef H323_H235_AES256
     { ID_AES256, OID_DH4096 },
-    { ID_AES256, OID_DH2048 },
+ // { ID_AES256, OID_DH2048 },
  // { ID_AES192, OID_DH2048 },
 #endif
     { ID_AES128, OID_DH1024 }
