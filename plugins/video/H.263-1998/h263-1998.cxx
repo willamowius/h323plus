@@ -254,7 +254,7 @@ H263_Base_EncoderContext::~H263_Base_EncoderContext()
   _inputFrameBuffer = NULL;
 }
 
-bool H263_Base_EncoderContext::Open(CodecID codecId)
+bool H263_Base_EncoderContext::Open(FF_CodecID codecId)
 {
   TRACE_AND_LOG(tracer, 1, "Opening encoder");
 

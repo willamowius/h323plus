@@ -94,6 +94,12 @@ typedef unsigned char BYTE;
 #define SQCIF_WIDTH     128
 #define SQCIF_HEIGHT    96
 
+#if FF_API_CODEC_ID
+    #define FF_CodecID AVCodecID
+#else
+    #define FF_CodecID CodecID
+#endif
+
 #define MAX_YUV420P_FRAME_SIZE (((CIF16_WIDTH * CIF16_HEIGHT * 3) / 2) + (FF_INPUT_BUFFER_PADDING_SIZE*2))
 enum Annex {
     D,
@@ -122,7 +128,7 @@ class H263_Base_EncoderContext
     virtual ~H263_Base_EncoderContext();
 
     virtual bool Open() = 0;
-    virtual bool Open(CodecID codecId);
+    virtual bool Open(FF_CodecID codecId);
 
     virtual int EncodeFrames(const BYTE * src, unsigned & srcLen, BYTE * dst, unsigned & dstLen, unsigned int & flags) = 0;
     void SetMaxKeyFramePeriod (unsigned period);
