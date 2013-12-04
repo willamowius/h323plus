@@ -77,6 +77,15 @@ class DynaLink
 #endif /* _WIN32 */
 };
 
+#ifndef CodecID
+#define CodecID AVCodecID
+#define CODEC_ID_H264   AV_CODEC_ID_H264
+#define CODEC_ID_H263   AV_CODEC_ID_H263
+#define CODEC_ID_H263P  AV_CODEC_ID_H263P
+#define CODEC_ID_MPEG4  AV_CODEC_ID_MPEG4
+#endif
+
+
 /////////////////////////////////////////////////////////////////
 //
 // define a class to interface to the FFMpeg library
@@ -151,6 +160,7 @@ class FFMPEGLibrary
 #if LIBAVCODEC_VERSION_MAJOR < 53
     int (*Favcodec_decode_video)(AVCodecContext *ctx, AVFrame *pict, int *got_picture_ptr, BYTE *buf, int buf_size);
 #else
+    int (*Fav_init_packet)(AVPacket *pkt);
     int (*Favcodec_decode_video)(AVCodecContext *ctx, AVFrame *pict, int *got_picture_ptr, const AVPacket *avpkt);
 #endif
     unsigned (*Favcodec_version)(void);

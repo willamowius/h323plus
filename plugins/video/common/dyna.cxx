@@ -47,6 +47,7 @@
 
 #ifdef _MSC_VER
 #define snprintf _snprintf
+#include <string>
 #endif
 
 #ifndef PATH_SEP
@@ -58,9 +59,17 @@
 #endif
 #endif
 
+
 bool DynaLink::Open(const char *name)
 {
-  // At first we try without a path
+#ifdef _WIN32
+  // first we try the DLL path
+  std::string dllPath = Trace::GetDLLPath();
+  if (InternalOpen(dllPath.c_str(), name))
+    return true;
+#endif
+
+  // Then we try without a path
   if (InternalOpen("", name))
     return true;
 
@@ -70,10 +79,7 @@ bool DynaLink::Open(const char *name)
   char * env = ::getenv("PTLIBPLUGINDIR");
   if (env != NULL) 
     strcpy(ptlibPath, env);
-#ifdef P_DEFAULT_PLUGIN_DIR
-  else
-    strcpy(ptlibPath, P_DEFAULT_PLUGIN_DIR);
-#endif
+
   char * p = ::strtok(ptlibPath, PATH_SEP);
   while (p != NULL) {
     if (InternalOpen(p, name))
@@ -105,7 +111,7 @@ bool DynaLink::InternalOpen(const char * dir, const char *name)
     TRACE(1, _codecString << "\tDYNA\tdir '" << (dir != NULL ? dir : "(NULL)") << "', name '" << (name != NULL ? name : "(NULL)") << "' resulted in empty path");
     return false;
   }
-
+TRACE(1, "\tDYNA\tLoading " << path);
 #ifndef _WIN32
   strcat(path, ".so");
 #endif
@@ -139,7 +145,7 @@ bool DynaLink::InternalOpen(const char * dir, const char *name)
       TRACE(1, _codecString << "\tDYNA\tError loading " << path);
     }
 #else /* _WIN32 */
-    TRACE(1, _codecString << "\tDYNA\tError loading " << path);
+    TRACE(1, _codecString << "\tDYNA\tError loading '" << path << "' " << GetLastError());
 #endif /* _WIN32 */
     return false;
   } 
@@ -363,6 +369,11 @@ bool FFMPEGLibrary::Load(int ver)
     return false;
   }
 #else
+  if (!libAvcodec.GetFunction("av_init_packet", (DynaLink::Function &)Fav_init_packet)) {
+    TRACE (1, _codecString << "\tDYNA\tFailed to load av_init_packet");
+    return false;
+  }
+
   if (!libAvcodec.GetFunction("avcodec_decode_video2", (DynaLink::Function &)Favcodec_decode_video)) {
     TRACE (1, _codecString << "\tDYNA\tFailed to load avcodec_decode_video2");
     return false;
@@ -540,17 +551,15 @@ int FFMPEGLibrary::AvcodecOpen(AVCodecContext *ctx, AVCodec *codec)
         return Favcodec_open(ctx, codec);
       });
     #else
-      AVDictionary opts;
       WITH_ALIGNED_STACK({
-       return Favcodec_open(ctx, codec, opts);
+       return Favcodec_open(ctx, codec, NULL);
       });
     #endif
 #else
 #if LIBAVCODEC_VERSION_MAJOR < 55
    return avcodec_open(ctx, codec);
 #else
-   AVDictionary opts;
-   return avcodec_open2(ctx, codec, opts);
+   return avcodec_open2(ctx, codec, NULL);
 #endif
 #endif
 }
@@ -583,16 +592,18 @@ int FFMPEGLibrary::AvcodecEncodeVideo(AVCodecContext *ctx, BYTE *buf, int buf_si
     #endif
 #else
      AVPacket pkt; 
-     av_init_packet(&pkt); 
-
      int err = 0;
      int gotFrame = 0;
 #ifdef USE_DLL_AVCODEC
       WITH_ALIGNED_STACK({
+        Fav_init_packet(&pkt);
+      });
+      WITH_ALIGNED_STACK({
         err = Favcodec_encode_video(ctx, &pkt, pict, &gotFrame);
       });
 #else
-        err = avcodec_encode_video2(ctx, &pkt, pict, &gotFrame);
+      av_init_packet(&pkt);
+      err = avcodec_encode_video2(ctx, &pkt, pict, &gotFrame);
 #endif
 
    if (err || !gotFrame)
@@ -620,15 +631,18 @@ int res=0;
     #endif
 #else
      AVPacket pkt; 
-     av_init_packet(&pkt); 
      pkt.data = (uint8_t*)buf; 
      pkt.size = buf_size;
 
     #ifdef USE_DLL_AVCODEC
+       WITH_ALIGNED_STACK({
+        Fav_init_packet(&pkt);
+      });
       WITH_ALIGNED_STACK({
         res = Favcodec_decode_video(ctx, pict, got_picture_ptr, &pkt);
       });
-    #else  
+    #else 
+      av_init_packet(&pkt);
       res = avcodec_decode_video2(ctx, pict, got_picture_ptr, &pkt);
     #endif
 #endif
