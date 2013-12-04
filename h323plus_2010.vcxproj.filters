@@ -76,9 +76,6 @@
     <ClCompile Include="src\codecs.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\g711.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\gkclient.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
