@@ -566,6 +566,10 @@ H323EndPoint::H323EndPoint()
   useVideoBuffer = false;
 #endif
 
+#ifdef H323_TLS
+  m_useTLS = false;
+#endif
+
   m_useH225KeepAlive = PFalse;
   m_useH245KeepAlive = PFalse;
 
@@ -3598,6 +3602,18 @@ void H323EndPoint::SetUPnP(PBoolean active)
     m_UPnPenabled = active;
 }
 #endif  // H323_UPnP
+
+#ifdef H323_TLS
+void H323EndPoint::EnableTLS(PBoolean enable)
+{
+    m_useTLS = enable;
+}
+
+PBoolean H323EndPoint::IsTLSEnabled()
+{
+    return m_useTLS;
+}
+#endif
 
 #ifdef H323_H460P
 void H323EndPoint::PresenceSetLocalState(const PStringList & alias, presenceStates localstate, const PString & localdisplay, PBoolean updateOnly)

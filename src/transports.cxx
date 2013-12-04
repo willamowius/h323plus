@@ -778,7 +778,7 @@ void H323Listener::PrintOn(ostream & strm) const
 
 #ifdef H323_TLS
 H323Transport::H323Transport(H323EndPoint & end, PSSLContext * context, PBoolean autoDeleteContext)
-  : PSSLChannel(context, autoDeleteContext), endpoint(end), isSecure(context != NULL)
+  : PSSLChannel(context, autoDeleteContext), endpoint(end), m_secured(false)
 #else
 H323Transport::H323Transport(H323EndPoint & end)
   : endpoint(end)
@@ -807,7 +807,7 @@ void H323Transport::PrintOn(ostream & strm) const
 PBoolean H323Transport::Read(void * buf, PINDEX len)
 {
 #ifdef H323_TLS
-    if (isSecure)
+    if (m_secured)
         return PSSLChannel::Read(buf,len);
     else
 #endif
@@ -817,21 +817,28 @@ PBoolean H323Transport::Read(void * buf, PINDEX len)
 PBoolean H323Transport::Write(const void * buf, PINDEX len)
 {
 #ifdef H323_TLS
-    if (isSecure)
+    if (m_secured)
         return PSSLChannel::Write(buf,len);
     else
 #endif
         return PIndirectChannel::Write(buf,len);
 }
 
+PBoolean H323Transport::OnSocketOpen()
+{
+    return true;
+}
+
+#ifdef H323_TLS
+PBoolean H323Transport::IsTransportSecure()
+{
+    return m_secured;
+}
+#endif
+
 PBoolean H323Transport::OnOpen()
 {
-#ifdef H323_TLS
-    if (isSecure)
-        return PSSLChannel::OnOpen();
-    else
-#endif
-        return PIndirectChannel::OnOpen();
+    return OnSocketOpen();
 }
 
 PBoolean H323Transport::Close()
@@ -1285,6 +1292,15 @@ H323TransportTCP::~H323TransportTCP()
 
 PBoolean H323TransportTCP::OnOpen()
 {
+#ifdef H323_TLS
+    if (endpoint.IsTLSEnabled())
+        m_secured = PSSLChannel::OnOpen();
+#endif
+    return OnSocketOpen();
+}
+
+PBoolean H323TransportTCP::OnSocketOpen()
+{
   PIPSocket * socket = (PIPSocket *)GetReadChannel();
 
   // Get name of the remote computer for information purposes
@@ -1318,10 +1334,19 @@ PBoolean H323TransportTCP::OnOpen()
   }
 #endif //P_VXWORKS
 
+
+#ifdef H323_TLS
+  PTRACE(2, "H323TCP\tStarted connection: "
+            " secured=" << (IsTransportSecure() ? "true," : "false,") << ","
+            " host=" << remoteAddress << ':' << remotePort << ","
+            " if=" << localAddress << ':' << localPort << ","
+            " handle=" << socket->GetHandle());
+#else
   PTRACE(2, "H323TCP\tStarted connection: "
             " host=" << remoteAddress << ':' << remotePort << ","
             " if=" << localAddress << ':' << localPort << ","
             " handle=" << socket->GetHandle());
+#endif
 
   return TRUE;
 }

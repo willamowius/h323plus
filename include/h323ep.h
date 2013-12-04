@@ -2350,6 +2350,10 @@ class H323EndPoint : public PObject
 
 #endif // P_STUN
 
+#ifdef H323_TLS
+    void EnableTLS(PBoolean enable); 
+    PBoolean IsTLSEnabled();
+#endif // H323_TLS
 
     virtual PBoolean OnUnsolicitedInformation(const H323SignalPDU & /*pdu*/)
     { return FALSE; }
@@ -2919,6 +2923,10 @@ class H323EndPoint : public PObject
     PBoolean useVideoBuffer;
 #endif
 
+#ifdef H323_TLS
+    PBoolean m_useTLS;
+#endif
+
     void RegInvokeReRegistration();
     PMutex reregmutex;
     PThread  *  RegThread;
@@ -2926,6 +2934,7 @@ class H323EndPoint : public PObject
 
     PBoolean m_useH225KeepAlive;
     PBoolean m_useH245KeepAlive;
+
 };
 
 /////////////////////////////////////////////////////////////////////

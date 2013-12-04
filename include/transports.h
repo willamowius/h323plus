@@ -369,7 +369,7 @@ class H323Transport : public PIndirectChannel
       PINDEX len        ///< Number of bytes to write.
     );
 
-    /**This callback is executed when the Open() function is called with
+    /**This callback is executed when the OnOpen() function is called with
        open channels. It may be used by descendent channels to do any
        handshaking required by the protocol that channel embodies.
 
@@ -378,7 +378,7 @@ class H323Transport : public PIndirectChannel
        @return
        Returns TRUE if the protocol handshaking is successful.
      */
-    virtual PBoolean OnOpen();
+    virtual PBoolean OnSocketOpen();
 
     /**Close the channel.
       */
@@ -531,8 +531,13 @@ class H323Transport : public PIndirectChannel
    /**Whether the RAS is tunnelled AKA H.460.17
       */
     virtual PBoolean IsRASTunnelled()  { return false; }
-  //@}
 
+#ifdef H323_TLS
+   /**Whether the Transport is secured
+      */
+    PBoolean IsTransportSecure();
+#endif
+  //@}
 
   /**@name Member variable access */
   //@{
@@ -557,12 +562,23 @@ class H323Transport : public PIndirectChannel
   //@}
 
   protected:
+    /**This callback is executed when the Open() function is called with
+       open channels. It may be used by descendent channels to do any
+       handshaking required by the protocol that channel embodies.
+
+       The default behaviour is to simply return true.
+
+       @return
+       Returns true if the protocol handshaking is successful.
+     */
+    virtual PBoolean OnOpen();
+
     H323EndPoint & endpoint;    /// Endpoint that owns the listener.
     PThread      * thread;      /// Thread handling the transport
     PBoolean canGetInterface;
 
 #ifdef H323_TLS
-    PBoolean    isSecure;
+    PBoolean    m_secured;     /// Whether the channel is secure.
 #endif
 };
 
@@ -736,6 +752,17 @@ class H323TransportTCP : public H323TransportIP
       */
     virtual PBoolean Connect();
 
+    /**This callback is executed when the OnOpen() function is called with
+       open channels. It may be used by descendent channels to do any
+       handshaking required by the protocol that channel embodies.
+
+       The default behaviour is to simply return TRUE.
+
+       @return
+       Returns TRUE if the protocol handshaking is successful.
+     */
+    virtual PBoolean OnSocketOpen();
+
     /**Close the channel.
       */
     virtual PBoolean Close();
@@ -791,10 +818,10 @@ class H323TransportTCP : public H323TransportIP
        open channels. It may be used by descendent channels to do any
        handshaking required by the protocol that channel embodies.
 
-       The default behaviour is to simply return TRUE.
+       The default behaviour is to simply return true.
 
        @return
-       Returns TRUE if the protocol handshaking is successful.
+       Returns true if the protocol handshaking is successful.
      */
     virtual PBoolean OnOpen();
 
