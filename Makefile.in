@@ -31,6 +31,19 @@ export OPENH323DIR=@OPENH323DIR@
 
 INSTALL=@INSTALL@
 
+###### new ptlib
+ifndef HAS_PTLIB_LIB_MAK
+export PT_LIBDIR=@PT_LIBDIR@
+export PW_LIBDIR=@PT_LIBDIR@
+export target_os=@target_os@
+export target_cpu=@target_cpu@
+export PTLIB_CXXFLAGS=@PTLIB_CXXFLAGS@
+export TARGET=@TARGET@
+export OSTYPE=@target_os@
+export PLATFORM_TYPE=@target_cpu@
+export PTLIB_LINKER_ARGS=@PTLIB_LINKER_ARGS@
+endif
+
 default :: optshared
 
 all :: bothdepend both

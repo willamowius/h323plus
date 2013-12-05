@@ -57,6 +57,33 @@ H323_GNUGK	     = @H323_GNUGK@
 H323_FILE	     = @H323_FILE@
 
 
+###### new ptlib
+ifndef HAS_PTLIB_LIB_MAK
+
+##### grab ptlib build settings
+include $(PTLIBDIR)/make/ptbuildopts.mak
+
+# compatibility with new ptlib - it's not has OPENSSL flag which cause undefined reference to `PPlugin_H235Authenticator_Std1_link()' in library
+ifdef HAS_SASL2
+HAS_OPENSSL = 1
+endif
+
+MAJOR_VERSION =@MAJOR_VERSION@
+MINOR_VERSION =@MINOR_VERSION@
+#BUILD_TYPE    =.
+BUILD_NUMBER  =@BUILD_NUMBER@
+
+#export to GK
+export target_os=@target_os@
+export target_cpu=@target_cpu@
+export OSTYPE=$(target_os)
+export PLATFORM_TYPE=$(target_cpu)
+export PTLIB_CXXFLAGS=@PTLIB_CXXFLAGS@
+export PT_LIBDIR=@PT_LIBDIR@/lib_@target_os@_@target_cpu@
+export PW_LIBDIR=@PT_LIBDIR@/lib_@target_os@_@target_cpu@
+
+endif #HAS_PTLIB_LIB_MAK
+
 ifdef LIBRARY_MAKEFILE
 include $(PTLIBDIR)/make/unix.mak
 else
@@ -86,8 +113,10 @@ STDCCFLAGS += -DPASN_NOPRINTON -DPASN_LEANANDMEAN
 OH323_SUFFIX = n
 else
 ifeq (,$(findstring PTRACING,$(STDCCFLAGS)))
+ifeq ($(HAS_PTLIB_LIB_MAK), 1)
 STDCCFLAGS += -DPTRACING
 RCFLAGS	   += -DPTRACING
+endif # HAS_PTLIB_LIB_MAK
 endif
 OH323_SUFFIX = $(OBJ_SUFFIX)
 endif # NOTRACE
@@ -103,6 +132,8 @@ STDCCFLAGS  += -I$(OH323_INCDIR)
 ifdef	OH323_SUPPRESS_H235
 STDCCFLAGS  += -DOH323_SUPPRESS_H235
 endif
+
+CFLAGS += $(STDCCFLAGS)
 
 $(TARGET) :	$(OH323_LIBDIR)/$(OH323_FILE)
 

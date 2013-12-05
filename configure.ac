@@ -63,7 +63,7 @@ AC_DEFINE_UNQUOTED(OPENH323_VERSION, "$OPENH323_VERSION", [Full version number])
 
 dnl ########################################################################
 dnl look for ptlib, use a preference order of explicit PTLIBDIR, directory
-dnl at same level, home directory, /usr/local or /usr.
+dnl at same level, home directory, /usr/local or /usr, pkgconfig.
 
 if test "${PTLIBDIR:-unset}" != "unset" ; then 	 
   AC_CHECK_HEADER(${PTLIBDIR}/version.h, HAS_PTLIB=1) 	 
@@ -109,6 +109,34 @@ if test "x$PTLIBDIR" = "x/usr/local" -o "x$PTLIBDIR" = "x/usr/"; then
   PTLIBDIR="/usr/local/share/ptlib/"
 fi
 
+AC_CHECK_FILE(${PTLIBDIR}/make/lib.mak, HAS_PTLIB_LIB_MAK=1)
+
+if test "${HAS_PTLIB_LIB_MAK:-unset}" = "unset" ; then
+  PKG_PROG_PKG_CONFIG
+  PKG_CHECK_MODULES([PTLIB], [ptlib], HAS_PTLIB=1)
+  if test ${HAS_PTLIB}x = 1x; then
+    PTLIBDIR=`${PKG_CONFIG} --variable=prefix ptlib`
+    PTVERSION=`${PKG_CONFIG} --modversion ptlib`
+    target_os=`${PKG_CONFIG} --variable=target_os ptlib`
+    target_cpu=`${PKG_CONFIG} --variable=target_cpu ptlib`
+    PTLIB_CXXFLAGS=`${PKG_CONFIG} --cflags ptlib`
+    PTLIB_LINKER_ARGS=`${PKG_CONFIG} --libs ptlib`
+    PT_LIBDIR=`${PKG_CONFIG} --variable=libdir ptlib`
+    TARGET=`${PKG_CONFIG} --variable=target ptlib`
+    PT_LIBDIR=${PTLIBDIR}
+    PT_MAJOR_VERSION=`echo $PTVERSION | cut -d'.' -f1`
+    PT_MINOR_VERSION=`echo $PTVERSION | cut -d'.' -f2`
+    PT_BUILD_NUMBER=`echo $PTVERSION | cut -d'.' -f3`
+    AC_SUBST(PT_LIBDIR)
+    AC_SUBST(target_os)
+    AC_SUBST(target_cpu)
+    AC_SUBST(PTLIB_CXXFLAGS)
+    AC_SUBST(TARGET)
+    AC_SUBST(PTLIB_LINKER_ARGS)
+    AC_SUBST(PT_LIBDIR)
+  fi
+fi
+
 echo "PTLib prefix set to.... $PTLIBDIR"
 
 if test "${PTLIB_CONFIG:-unset}" != "unset" ; then
@@ -117,12 +145,13 @@ if test "${PTLIB_CONFIG:-unset}" != "unset" ; then
   PT_MINOR_VERSION=`echo $PTVERSION | cut -d'.' -f2`
   PT_BUILD_NUMBER=`echo $PTVERSION | cut -d'.' -f3`
   
-else
+elif test "${PTVERSION:-unset}" = "unset" ; then
   PT_MAJOR_VERSION=`cat ${PTLIBDIR}/version.h | grep MAJOR_VERSION | cut -f3 -d' '`
   PT_MINOR_VERSION=`cat ${PTLIBDIR}/version.h | grep MINOR_VERSION | cut -f3 -d' '`
   PT_BUILD_NUMBER=`cat ${PTLIBDIR}/version.h | grep BUILD_NUMBER | cut -f3 -d' '`
   PTVERSION="${PT_MAJOR_VERSION}.${PT_MINOR_VERSION}.${PT_BUILD_NUMBER}"
 fi
+
 
 AC_ARG_ENABLE(versioncheck,
 		[  --disable-versioncheck  disable PTLib version check],
@@ -154,6 +183,8 @@ else
 fi
 
 AC_SUBST(PTLIBDIR)
+AC_SUBST(HAS_PTLIB_MAK)
+AC_SUBST(HAS_PTLIB_LIB_MAK)
 
 dnl ########################################################################
 dnl check for setting minimum size

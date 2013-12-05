@@ -29,6 +29,10 @@ ifndef OPENH323DIR
 OPENH323DIR=$(CURDIR)/..
 endif
 
+ifndef HAS_PTLIB_LIB_MAK
+CFLAGS += -I$(OPENH323DIR)/include 
+endif
+
 LIBRARY_MAKEFILE:=1
 
 include $(OPENH323DIR)/openh323u.mak
@@ -374,10 +378,20 @@ endif
 LDFLAGS        += -L$(PT_LIBDIR)
 SYSLIBS        += -l$(PTLIB_BASE)$(LIB_TYPE)
 
+### new ptlib
+ifndef HAS_PTLIB_LIB_MAK
+SYSLIBS        += $(PTLIB_LINKER_ARGS)
+endif
+
 LIB_BASENAME=$(OH323_BASE)
 LIB_FILENAME=$(OH323_FILE)
 
+# lib.mak does not exist since ptlib-2.12
+ifndef HAS_PTLIB_LIB_MAK
+include $(OH323_SRCDIR)/make/lib.mak
+else
 include $(PTLIBDIR)/make/lib.mak
+endif
 
 ####################################################
 
