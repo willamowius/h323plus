@@ -381,6 +381,9 @@ template <class D> class PSTLList : public PObject,
      */
      PSTLList() :disallowDeleteObjects(false) {}
 
+     PSTLList(int /*dummy*/, const PObject * /*c*/)
+        : disallowDeleteObjects(false) { }
+
      ~PSTLList() {  RemoveAll(); }
   //@}
 
@@ -701,15 +704,24 @@ template <class D> class PSTLList : public PObject,
           this->insert(std::pair<unsigned, D*>(ref,obj));
           return ref;        
       }
-
 };
 
-#define PSTLLIST(cls, D) typedef PSTLList<D> cls;
-
 #define H323List  PSTLList
-#define H323LIST  PSTLLIST
+#define H323LIST(cls, D) typedef H323List<D> cls;
 
-#endif  // PTLIB_VER < 2110
+#endif  // H323_STLDICTIONARY
+
+#define H323_DECLARELIST(cls, T) \
+  H323LIST(cls##_PTemplate, T); \
+  PDECLARE_CLASS(cls, H323List<T>) \
+  protected: \
+    cls(int dummy, const cls * c) \
+      : H323List<T>(dummy, c) { } \
+  public: \
+    cls() \
+      : H323List<T>() { } \
+    virtual PObject * Clone() const \
+      { return PNEW cls(0, this); } \
 
 
 #ifdef H323_FRAMEBUFFER
