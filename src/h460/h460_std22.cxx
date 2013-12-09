@@ -99,7 +99,7 @@ PBoolean H460_FeatureStd22::FeatureAdvertised(int mtype)
      }
 }
 
-void BuildFeature(H323TransportSecurity * transec, H323EndPoint * ep, H460_FeatureStd & feat)
+void BuildFeature(H323TransportSecurity * transec, H323EndPoint * ep, H460_FeatureStd & feat, PBoolean grq = false)
 {
 
     if (transec->IsTLSEnabled()) {
@@ -107,7 +107,8 @@ void BuildFeature(H323TransportSecurity * transec, H323EndPoint * ep, H460_Featu
         if (tls) {
             H460_FeatureStd sets;
             sets.Add(Std22_Priority,H460_FeatureContent(1,8)); // Priority 1
-            sets.Add(Std22_Address,H460_FeatureContent(tls->GetTransportAddress()));
+            if (!grq)
+                sets.Add(Std22_Address,H460_FeatureContent(tls->GetTransportAddress()));
             feat.Add(Std22_TLS,H460_FeatureContent(sets.GetCurrentTable()));
         }
     }
@@ -142,7 +143,7 @@ PBoolean H460_FeatureStd22::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu
         return false;
 
     H460_FeatureStd feat = H460_FeatureStd(22);  
-    BuildFeature(EP->GetTransportSecurity(), EP, feat);
+    BuildFeature(EP->GetTransportSecurity(), EP, feat, true);
 
     pdu = feat;
 	return true;
