@@ -129,7 +129,8 @@ class H323EndPoint : public PObject
 
   public:
     enum {
-      DefaultTcpPort = 1720
+      DefaultTcpPort = 1720,
+      DefaultTLSPort = 1300
     };
 
   /**@name Construction */
@@ -2277,17 +2278,16 @@ class H323EndPoint : public PObject
 #endif
 
 #ifdef H323_TLS
-    enum SignalSecurity {
-        e_h225_none,
-        e_h225_tls,
-        e_h225_ipsec,     // not supported YET
-        e_h225_tls_ipsec  // not supported YET
-    };
+    void EnableTLS(PBoolean enable); 
+    void EnableIPSec(PBoolean enable); 
 
-    SignalSecurity GetSignalSecurity() { return signalSec; }
-
-    void SetSignalSecurity(SignalSecurity sec) { signalSec = sec; } 
+    
+    PSSLContext * GetTransportContext();
 #endif
+
+    PBoolean IsTLSEnabled();
+    PBoolean IsIPSecEnabled();
+    H323TransportSecurity * GetTransportSecurity();
 
 #ifdef H323_FRAMEBUFFER
     void EnableVideoFrameBuffer(PBoolean enable); 
@@ -2349,11 +2349,6 @@ class H323EndPoint : public PObject
                                 ) {};
 
 #endif // P_STUN
-
-#ifdef H323_TLS
-    void EnableTLS(PBoolean enable); 
-    PBoolean IsTLSEnabled();
-#endif // H323_TLS
 
     virtual PBoolean OnUnsolicitedInformation(const H323SignalPDU & /*pdu*/)
     { return FALSE; }
@@ -2911,10 +2906,6 @@ class H323EndPoint : public PObject
     PBoolean enableAEC;
 #endif
 
-#ifdef H323_TLS
-  SignalSecurity signalSec;
-#endif
-
 #ifdef H323_GNUGK
     GNUGK_Feature * gnugk;
 #endif
@@ -2923,8 +2914,9 @@ class H323EndPoint : public PObject
     PBoolean useVideoBuffer;
 #endif
 
+    H323TransportSecurity m_transportSecurity;
 #ifdef H323_TLS
-    PBoolean m_useTLS;
+    PSSLContext * m_transportContext;
 #endif
 
     void RegInvokeReRegistration();

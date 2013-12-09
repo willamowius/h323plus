@@ -60,8 +60,6 @@ class H323Listener;
 class H323Transport;
 class H323Gatekeeper;
 
-
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /**String representation of a transport address.
@@ -189,6 +187,38 @@ PDECLARE_ARRAY(H323TransportAddressArray, H323TransportAddress)
     );
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
+/**Transport Security Information.
+ */
+
+class H323TransportSecurity {
+public:
+
+    H323TransportSecurity();
+
+    enum Method {
+        e_unsecure,
+        e_tls,
+        e_ipsec     // not supported YET
+    };
+
+    PBoolean HasSecurity();
+
+    void EnableTLS(PBoolean enable); 
+    PBoolean IsTLSEnabled();
+
+    void SetRemoteTLSAddress(const H323TransportAddress & address);
+    H323TransportAddress GetRemoteTLSAddress();
+
+    void EnableIPSec(PBoolean enable); 
+    PBoolean IsIPSecEnabled();
+
+protected:
+    int m_securityMask;
+    H323TransportAddress m_remoteTLSAddress;
+};
+
 
 /**This class describes a "listener" on a transport protocol.
    A "listener" is an object that listens for incoming connections on the
@@ -212,7 +242,8 @@ class H323Listener : public PThread
     /**Create a new listener.
      */
     H323Listener(
-      H323EndPoint & endpoint      ///<  Endpoint instance for channel
+      H323EndPoint & endpoint,     ///<  Endpoint instance for channel
+      H323TransportSecurity::Method security = H323TransportSecurity::e_unsecure
     );
   //@}
 
@@ -243,20 +274,37 @@ class H323Listener : public PThread
       */
     virtual H323TransportAddress GetTransportAddress() const = 0;
 
+    /**Create Transport.
+      */
+    virtual H323Transport * CreateTransport(const PIPSocket::Address & address) = 0;
+
     /**Set up a transport address PDU for bidirectional logical channels.
       */
     virtual PBoolean SetUpTransportPDU(
       H245_TransportAddress & pdu,         ///<  Transport addresses listening on
       const H323Transport & associatedTransport ///<  Associated transport for precendence and translation
     ) = 0;
+
+    /**Set up a transport address PDU for bidirectional logical channels.
+      */
+    H323TransportSecurity::Method GetSecurity();
   //@}
 
   protected:
     H323EndPoint & endpoint;  /// Endpoint that owns the listener.
+    H323TransportSecurity::Method   m_security;
 };
 
-
-H323LIST(H323ListenerList, H323Listener);
+H323_DECLARELIST(H323ListenerList, H323Listener)
+#ifdef DOC_PLUS_PLUS
+{
+#endif
+  public:
+	  H323Listener * GetListener() const;
+#ifdef H323_TLS
+	  H323Listener * GetTLSListener() const;
+#endif
+};
 
 
 /** Return a list of transport addresses corresponding to a listener list
@@ -662,7 +710,8 @@ class H323ListenerTCP : public H323Listener
       H323EndPoint & endpoint,    ///<  Endpoint instance for channel
       PIPSocket::Address binding, ///<  Local interface to listen on
       WORD port,                  ///<  TCP port to listen for connections
-      PBoolean exclusive = FALSE      ///<  Fail if listener port in use
+      PBoolean exclusive = FALSE,    ///<  Fail if listener port in use
+      H323TransportSecurity::Method security = H323TransportSecurity::e_unsecure ///< TransportSecurity
     );
 
     /** Destroy the listener thread.
@@ -687,6 +736,10 @@ class H323ListenerTCP : public H323Listener
     /**Get the local transport address on which this listener may be accessed.
       */
     virtual H323TransportAddress GetTransportAddress() const;
+
+    /**Create Transport.
+      */
+    virtual H323Transport * CreateTransport(const PIPSocket::Address & address);
 
     /**Set up a transport address PDU for bidirectional logical channels.
       */
@@ -715,6 +768,48 @@ class H323ListenerTCP : public H323Listener
     PBoolean exclusiveListener;
 };
 
+//////////////////////////////////////////////////////////////////////////////////
+// Transport classes for TLS
+
+#ifdef H323_TLS
+
+/**This class manages H323 connections using TLS transport.
+ */
+class H323ListenerTLS : public H323ListenerTCP
+{
+  PCLASSINFO(H323ListenerTLS, H323ListenerTCP);
+
+  public:
+    /**Create a new listener for the TCP/IP protocol.
+     */
+    H323ListenerTLS(
+      H323EndPoint & endpoint,    ///<  Endpoint instance for channel
+      PIPSocket::Address binding, ///<  Local interface to listen on
+      WORD port                   ///<  TCP port to listen for connections
+    );
+
+    /** Destroy the listener thread.
+      */
+    ~H323ListenerTLS();
+
+    /**Create Transport.
+      */
+    virtual H323Transport * CreateTransport(const PIPSocket::Address & address);
+
+    /**Set up a transport address PDU for bidirectional logical channels. return false (Not used)
+      */
+    virtual PBoolean SetUpTransportPDU(
+      H245_TransportAddress & pdu,         ///<  Transport addresses listening on
+      const H323Transport & associatedTransport ///<  Associated transport for precendence and translation
+    );
+    
+  protected:
+
+};
+
+#endif // H323_TLS
+
+/////////////////////////////////////////////////////////////////////////////////
 
 /**This class represents a particular H323 transport using TCP/IP.
  */

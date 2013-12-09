@@ -617,15 +617,17 @@ H323TransportAddressArray H323GetInterfaceAddresses(const H323ListenerList & lis
 
   PINDEX i;
   for (i = 0; i < listeners.GetSize(); i++) {
-      H323TransportAddress sigaddr(listeners[i].GetTransportAddress());
-      if (sigaddr.GetIpVersion() == rasaddr.GetIpVersion()) {
-        H323TransportAddressArray newAddrs = H323GetInterfaceAddresses(sigaddr, excludeLocalHost, associatedTransport);
-        PINDEX size  = interfaceAddresses.GetSize();
-        PINDEX nsize = newAddrs.GetSize();
-        interfaceAddresses.SetSize(size + nsize);
-        PINDEX j;
-        for (j = 0; j < nsize; j++)
-          interfaceAddresses.SetAt(size + j, new H323TransportAddress(newAddrs[j]));
+      if (listeners[i].GetSecurity() == H323TransportSecurity::e_unsecure) {
+          H323TransportAddress sigaddr(listeners[i].GetTransportAddress());
+          if (sigaddr.GetIpVersion() == rasaddr.GetIpVersion()) {
+            H323TransportAddressArray newAddrs = H323GetInterfaceAddresses(sigaddr, excludeLocalHost, associatedTransport);
+            PINDEX size  = interfaceAddresses.GetSize();
+            PINDEX nsize = newAddrs.GetSize();
+            interfaceAddresses.SetSize(size + nsize);
+            PINDEX j;
+            for (j = 0; j < nsize; j++)
+              interfaceAddresses.SetAt(size + j, new H323TransportAddress(newAddrs[j]));
+          }
       }
   }
 
@@ -686,7 +688,7 @@ void H323SetTransportAddresses(const H323Transport & associatedTransport,
       PIPSocket::Address remoteIP;
       if (associatedTransport.GetRemoteAddress().GetIpAddress(remoteIP)) {
         associatedTransport.GetEndPoint().InternalTranslateTCPAddress(ip, remoteIP);
-    associatedTransport.GetEndPoint().TranslateTCPPort(port,remoteIP);
+        associatedTransport.GetEndPoint().TranslateTCPPort(port,remoteIP);
         addr = H323TransportAddress(ip, port);
       }
     }
@@ -755,15 +757,68 @@ void H323TransportAddressArray::AppendStringCollection(const PCollection & coll)
   }
 }
 
+/////////////////////////////////////////////////////////////////////////////
+
+#define CHECKBIT(var,pos) (var & (1<<pos))
+#define SETBIT(var,pos)  var |= 1<<pos;
+#define CLEARBIT(var,pos) var &= ~(1 << pos);
+
+H323TransportSecurity::H323TransportSecurity() 
+:  m_securityMask(0)
+{
+}
+
+PBoolean H323TransportSecurity::HasSecurity()
+{
+    return (m_securityMask != 0);
+}
+
+void H323TransportSecurity::EnableTLS(PBoolean enable)
+{
+    if (enable)
+        SETBIT(m_securityMask,e_tls)
+    else
+        CLEARBIT(m_securityMask,e_tls)
+}
+
+PBoolean H323TransportSecurity::IsTLSEnabled()
+{
+    return CHECKBIT(m_securityMask,e_tls);
+}
+
+void H323TransportSecurity::SetRemoteTLSAddress(const H323TransportAddress & address)
+{
+    m_remoteTLSAddress = address;
+}
+
+H323TransportAddress H323TransportSecurity::GetRemoteTLSAddress()
+{
+    return m_remoteTLSAddress;
+}
+
+void H323TransportSecurity::EnableIPSec(PBoolean enable)
+{
+#if 0 // Not supported yet - SH
+    if (enable)
+        SETBIT(m_securityMask,e_ipsec)
+    else
+        CLEARBIT(m_securityMask,e_ipsec)
+#endif
+}
+
+PBoolean H323TransportSecurity::IsIPSecEnabled()
+{
+    return CHECKBIT(m_securityMask,e_ipsec);
+}
 
 /////////////////////////////////////////////////////////////////////////////
 
-H323Listener::H323Listener(H323EndPoint & end)
+H323Listener::H323Listener(H323EndPoint & end, H323TransportSecurity::Method security)
   : PThread(end.GetListenerThreadStackSize(),
             NoAutoDeleteThread,
             NormalPriority,
             "H323 Listener:%0x"),
-    endpoint(end)
+     endpoint(end), m_security(security)
 {
 }
 
@@ -773,6 +828,32 @@ void H323Listener::PrintOn(ostream & strm) const
   strm << "Listener[" << GetTransportAddress() << ']';
 }
 
+H323TransportSecurity::Method H323Listener::GetSecurity()
+{
+    return m_security;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+H323Listener * H323ListenerList::GetListener() const
+{ 
+    for (PINDEX i = 0; i < this->GetSize(); i++) {
+        if ((*this)[i].GetSecurity() == H323TransportSecurity::e_unsecure)
+            return &((*this)[i]);
+    }
+    return NULL;
+}
+
+#ifdef H323_TLS
+H323Listener * H323ListenerList::GetTLSListener() const
+{
+    for (PINDEX i = 0; i < this->GetSize(); i++) {
+        if ((*this)[i].GetSecurity() == H323TransportSecurity::e_tls)
+            return &((*this)[i]);
+    }
+    return NULL; 
+}
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -1058,8 +1139,9 @@ PBoolean H323Transport::DiscoverGatekeeper(H323Gatekeeper & /*gk*/,
 H323ListenerTCP::H323ListenerTCP(H323EndPoint & end,
                                  PIPSocket::Address binding,
                                  WORD port,
-                                 PBoolean exclusive)
-  : H323Listener(end),
+                                 PBoolean exclusive,
+                                 H323TransportSecurity::Method security)
+  : H323Listener(end,security),
       listener((port == 0) ? (WORD)H323EndPoint::DefaultTcpPort : port),
     localAddress(binding)
 {
@@ -1098,6 +1180,10 @@ PBoolean H323ListenerTCP::Close()
   return ok;
 }
 
+H323Transport * H323ListenerTCP::CreateTransport(const PIPSocket::Address & address)
+{
+    return new H323TransportTCP(endpoint, address);
+}
 
 H323Transport * H323ListenerTCP::Accept(const PTimeInterval & timeout)
 {
@@ -1110,7 +1196,7 @@ H323Transport * H323ListenerTCP::Accept(const PTimeInterval & timeout)
   PTCPSocket * socket = new PTCPSocket;
   if (socket->Accept(listener)) {
     unsigned m_version = GetTransportAddress().GetIpVersion();
-    H323TransportTCP * transport = new H323TransportTCP(endpoint, PIPSocket::Address::GetAny(m_version));
+    H323Transport * transport = CreateTransport(PIPSocket::Address::GetAny(m_version));
     if (transport->Open(socket))
       return transport;
 
@@ -1162,6 +1248,31 @@ void H323ListenerTCP::Main()
   }
 }
 
+/////////////////////////////////////////////////////////////////////////////
+
+#ifdef H323_TLS
+H323ListenerTLS::H323ListenerTLS(H323EndPoint & endpoint, PIPSocket::Address binding, WORD port)
+: H323ListenerTCP(endpoint, binding, port, false, H323TransportSecurity::e_tls)
+{
+
+}
+
+H323ListenerTLS::~H323ListenerTLS()
+{
+
+}
+
+H323Transport * H323ListenerTLS::CreateTransport(const PIPSocket::Address & address)
+{
+    return new H323TransportTCP(endpoint,address,false,endpoint.GetTransportContext());
+}
+
+PBoolean H323ListenerTLS::SetUpTransportPDU(H245_TransportAddress & /*pdu*/,
+                                        const H323Transport & /*associatedTransport*/)
+{
+    return false;
+}
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 

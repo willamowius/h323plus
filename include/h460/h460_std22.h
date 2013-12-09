@@ -46,7 +46,7 @@
 #pragma once
 #endif 
 
-
+class H323TransportSecurity;
 class H460_FeatureStd22 : public H460_FeatureStd 
 {
     PCLASSINFO(H460_FeatureStd22,H460_FeatureStd);
@@ -82,7 +82,7 @@ public:
 private:
     H323EndPoint * EP;
     H323Connection * CON;
-    int localSupport;
+    H323TransportSecurity m_supportedSecurity;
     PBoolean isEnabled;
 };
 

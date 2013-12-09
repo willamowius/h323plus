@@ -62,7 +62,7 @@ H460_FEATURE(Std22);
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 H460_FeatureStd22::H460_FeatureStd22()
-: H460_FeatureStd(22), EP(NULL), localSupport(0), isEnabled(false)
+: H460_FeatureStd(22), EP(NULL), isEnabled(false)
 {
   PTRACE(6,"Std22\tInstance Created");
   FeatureCategory = FeatureSupported;
@@ -77,7 +77,6 @@ void H460_FeatureStd22::AttachEndPoint(H323EndPoint * _ep)
 {
    PTRACE(6,"Std22\tEndpoint Attached");
    EP = _ep; 
-   localSupport = EP->GetSignalSecurity();
 }
 
 void H460_FeatureStd22::AttachConnection(H323Connection * _con)
@@ -100,36 +99,50 @@ PBoolean H460_FeatureStd22::FeatureAdvertised(int mtype)
      }
 }
 
-void BuildFeature(int localSupport, H323EndPoint * ep, H460_FeatureStd & feat)
+void BuildFeature(H323TransportSecurity * transec, H323EndPoint * ep, H460_FeatureStd & feat)
 {
-    if (localSupport == H323EndPoint::e_h225_tls ||
-        localSupport == H323EndPoint::e_h225_tls_ipsec) {
 
-        H460_FeatureStd sets;
-        sets.Add(Std22_Priority,H460_FeatureContent(1,8)); // Priority 1
-        sets.Add(Std22_Address,H460_FeatureContent(ep->GetListeners()[0].GetTransportAddress()));
-
-        feat.Add(Std22_TLS,H460_FeatureContent(sets.GetCurrentTable()));
+    if (transec->IsTLSEnabled()) {
+        const H323Listener * tls = ep->GetListeners().GetTLSListener();
+        if (tls) {
+            H460_FeatureStd sets;
+            sets.Add(Std22_Priority,H460_FeatureContent(1,8)); // Priority 1
+            sets.Add(Std22_Address,H460_FeatureContent(tls->GetTransportAddress()));
+            feat.Add(Std22_TLS,H460_FeatureContent(sets.GetCurrentTable()));
+        }
     }
 
-    // NOT YET Supported...
-    if (localSupport == H323EndPoint::e_h225_ipsec ||
-        localSupport == H323EndPoint::e_h225_tls_ipsec) {
-
+    // NOT YET Supported...Disabled in H323TransportSecurity.
+    if (transec->IsIPSecEnabled()) {
         H460_FeatureStd sets;
         sets.Add(Std22_Priority,H460_FeatureContent(2,8)); // Priority 2
-
         feat.Add(Std22_IPSec,H460_FeatureContent(sets.GetCurrentTable()));
+    } 
+}
+
+void ReadFeature(H323TransportSecurity * transec, H460_FeatureStd * feat)
+{
+    if (feat->Contains(Std22_TLS)) {
+        H460_FeatureParameter tlsparam = feat->Value(Std22_TLS);
+        transec->EnableTLS(true);
+        H460_FeatureStd settings;
+        settings.SetCurrentTable(tlsparam);
+        if (settings.Contains(Std22_Address))
+            transec->SetRemoteTLSAddress(settings.Value(Std22_Address));
     }
+
+    // NOT YET Supported...Disabled in H323TransportSecurity.
+    if (feat->Contains(Std22_IPSec))
+        transec->EnableIPSec(true);
 }
 
 PBoolean H460_FeatureStd22::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu)
 {
-    if (!localSupport)
+    if (!EP || !EP->GetTransportSecurity()->HasSecurity())
         return false;
 
     H460_FeatureStd feat = H460_FeatureStd(22);  
-    BuildFeature(localSupport, EP, feat);
+    BuildFeature(EP->GetTransportSecurity(), EP, feat);
 
     pdu = feat;
 	return true;
@@ -138,33 +151,35 @@ PBoolean H460_FeatureStd22::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu
 
 void H460_FeatureStd22::OnReceiveGatekeeperConfirm(const H225_FeatureDescriptor & pdu)
 {
-   H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
-   if (!feat.Contains(1)) 
-	   return;
+   H460_FeatureStd * feat = PRemoveConst(H460_FeatureStd,&(const H460_FeatureStd &)pdu);
 
-    isEnabled = true;
+   ReadFeature(&m_supportedSecurity,feat);
+
+   isEnabled = m_supportedSecurity.HasSecurity();
 }
 
 PBoolean H460_FeatureStd22::OnSendRegistrationRequest(H225_FeatureDescriptor & pdu)
 {
-    if (!localSupport)
+    if (!EP || !EP->GetTransportSecurity()->HasSecurity())
         return false;
 
     H460_FeatureStd feat = H460_FeatureStd(22);  
-    BuildFeature(localSupport, EP, feat);
+
+    if (isEnabled)
+        BuildFeature(&m_supportedSecurity, EP, feat);
+    else 
+        BuildFeature(EP->GetTransportSecurity(), EP, feat);
 
     pdu = feat;
-
 	return true;
 }
 
 void H460_FeatureStd22::OnReceiveRegistrationConfirm(const H225_FeatureDescriptor & pdu)
 {
-   H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
-   if (!feat.Contains(1)) 
-	   return;
+   H460_FeatureStd * feat = PRemoveConst(H460_FeatureStd,&(const H460_FeatureStd &)pdu);
 
-    isEnabled = true;
+   ReadFeature(&m_supportedSecurity,feat);
+   isEnabled = m_supportedSecurity.HasSecurity();
 }
 
 PBoolean H460_FeatureStd22::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
@@ -173,7 +188,7 @@ PBoolean H460_FeatureStd22::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
         return false;
 
     H460_FeatureStd feat = H460_FeatureStd(22);
-    BuildFeature(localSupport, EP, feat);
+    BuildFeature(&m_supportedSecurity, EP, feat);
     pdu = feat;
 
     return true;
@@ -181,9 +196,11 @@ PBoolean H460_FeatureStd22::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
 
 void H460_FeatureStd22::OnReceiveAdmissionConfirm(const H225_FeatureDescriptor & pdu)
 {
-   H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
-   if (!feat.Contains(1)) 
-	   return;
+   H460_FeatureStd * feat = PRemoveConst(H460_FeatureStd,&(const H460_FeatureStd &)pdu);
+
+   H323TransportSecurity m_callSecurity;
+   ReadFeature(&m_callSecurity,feat);
+
 
    // TODO: Enable Security on the call.
 }

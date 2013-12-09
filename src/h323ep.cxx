@@ -145,6 +145,21 @@ WORD H323EndPoint::defaultManufacturerCode  = 61; // Allocated by Australian Com
 
 //////////////////////////////////////////////////////////////////////////////////////
 
+#ifdef H323_TLS
+class H323_TLSContext : public PSSLContext 
+{
+  public:
+
+      /**Create a new context for SSL channels.
+       The default SSL method is TLSv1
+      */
+      H323_TLSContext() : PSSLContext(PSSLContext::TLSv1) {}
+   
+};
+#endif
+
+/////////////////////////////////////////////////////////////////////////////////////
+
 class H225CallThread : public PThread
 {
   PCLASSINFO(H225CallThread, PThread)
@@ -554,20 +569,16 @@ H323EndPoint::H323EndPoint()
   enableAEC = false;
 #endif
 
-#ifdef H323_TLS
-  signalSec = e_h225_none;
-#endif
-
 #ifdef H323_GNUGK
   gnugk = NULL;
 #endif
 
-#ifdef H323_FRAMEBUFFER
-  useVideoBuffer = false;
+#ifdef H323_TLS
+  m_transportContext = NULL;
 #endif
 
-#ifdef H323_TLS
-  m_useTLS = false;
+#ifdef H323_FRAMEBUFFER
+  useVideoBuffer = false;
 #endif
 
   m_useH225KeepAlive = PFalse;
@@ -617,6 +628,10 @@ H323EndPoint::~H323EndPoint()
 
   // Clean up any connections that the cleaner thread missed
   CleanUpConnections();
+
+#ifdef H323_TLS
+  delete m_transportContext;
+#endif
 
 #ifdef P_STUN
   delete natMethods;
@@ -3606,14 +3621,36 @@ void H323EndPoint::SetUPnP(PBoolean active)
 #ifdef H323_TLS
 void H323EndPoint::EnableTLS(PBoolean enable)
 {
-    m_useTLS = enable;
+    if (!m_transportContext)
+        m_transportContext = new H323_TLSContext();
+
+    m_transportSecurity.EnableTLS(enable);
 }
+
+void H323EndPoint::EnableIPSec(PBoolean enable)
+{
+    m_transportSecurity.EnableIPSec(enable);
+}
+
+PSSLContext * H323EndPoint::GetTransportContext() 
+{
+    return m_transportContext;
+}
+#endif
 
 PBoolean H323EndPoint::IsTLSEnabled()
 {
-    return m_useTLS;
+    return m_transportSecurity.IsTLSEnabled();
 }
-#endif
+
+PBoolean H323EndPoint::IsIPSecEnabled()
+{
+    return m_transportSecurity.IsIPSecEnabled();
+}
+
+H323TransportSecurity * H323EndPoint::GetTransportSecurity() { 
+	return &m_transportSecurity; 
+}
 
 #ifdef H323_H460P
 void H323EndPoint::PresenceSetLocalState(const PStringList & alias, presenceStates localstate, const PString & localdisplay, PBoolean updateOnly)
