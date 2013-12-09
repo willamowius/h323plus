@@ -301,23 +301,23 @@ class H235AuthenticatorInfo : public PObject
 {
     PCLASSINFO(H235AuthenticatorInfo, PObject);
 public:
-	H235AuthenticatorInfo(PString username,PString password,PBoolean ishashed);
-	H235AuthenticatorInfo(PSSLCertificate * cert);
-	PString UserName;
-	PString Password;
-	PBoolean isHashed;
-	PSSLCertificate * Certificate;
+    H235AuthenticatorInfo(PString username,PString password,PBoolean ishashed);
+    H235AuthenticatorInfo(PSSLCertificate * cert);
+    PString UserName;
+    PString Password;
+    PBoolean isHashed;
+    PSSLCertificate * Certificate;
 };
 
-PDECLARE_LIST(H235AuthenticatorList, H235AuthenticatorInfo)
+H323_DECLARELIST(H235AuthenticatorList, H235AuthenticatorInfo)
 #ifdef DOC_PLUS_PLUS
 {
 #endif
-	PBoolean HasUserName(PString UserName) const;
-	void LoadPassword(PString UserName, PString & pass) const;
-	void Add(PString username, PString password, PBoolean isHashed = FALSE);
-	PString PasswordEncrypt(const PString &clear) const;
-	PString PasswordDecrypt(const PString &encrypt) const;
+    PBoolean HasUserName(PString UserName) const;
+    void LoadPassword(PString UserName, PString & pass) const;
+    void Add(PString username, PString password, PBoolean isHashed = FALSE);
+    PString PasswordEncrypt(const PString &clear) const;
+    PString PasswordDecrypt(const PString &encrypt) const;
 };
 
 /** Dictionary of Addresses and Associated Security Info  */
