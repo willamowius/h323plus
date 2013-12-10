@@ -144,18 +144,218 @@ BYTE H323EndPoint::defaultT35Extension      = 0;
 WORD H323EndPoint::defaultManufacturerCode  = 61; // Allocated by Australian Communications Authority, Oct 2000;
 
 //////////////////////////////////////////////////////////////////////////////////////
-
+// TLS Context (This may be moved later on to its own file) - SH
 #ifdef H323_TLS
+
+extern "C" {
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#include <openssl/rand.h>
+}
+
+void tls_info_cb(const SSL * s, int where, int ret)
+{
+    const char * str = NULL;
+    int w = where & ~SSL_ST_MASK;
+
+    if (w & SSL_ST_CONNECT) str = "Connect";
+    else if (w & SSL_ST_ACCEPT) str = "Accept";
+    else str = "Undefined";
+
+    if (where & SSL_CB_LOOP) {
+        PTRACE(6, "TLS\t" << str << ": " << SSL_state_string_long(s));
+    } else if (where & SSL_CB_ALERT) {
+        str = (where & SSL_CB_READ)?"Read":"Write";
+        PTRACE(6, "TLS\tSSL3 alert " <<	str << ": " << SSL_alert_type_string_long(ret) << ":" << SSL_alert_desc_string_long(ret));
+    } else if (where & SSL_CB_EXIT) {
+        if (ret == 0)
+            PTRACE(6, str << ":failed in " << SSL_state_string_long(s));
+        else if (ret < 0) {
+            // Do nothing...
+        }
+    }
+}
+
+int tls_passwd_cb(char * buf, int size, int rwflag, void * password)
+{
+    strncpy(buf, (char *)(password), size);
+    buf[size - 1] = '\0';
+    return(strlen(buf));
+}
+
+int tls_verify_cb(int ok, X509_STORE_CTX * store)
+{
+    char data[256];
+    if (!ok) {
+        X509 * cert = X509_STORE_CTX_get_current_cert(store);
+        int depth = X509_STORE_CTX_get_error_depth(store);
+        int err = X509_STORE_CTX_get_error(store);
+
+        PTRACE(6, "TLS\tError with certificate at depth " << depth);
+        X509_NAME_oneline(X509_get_issuer_name(cert), data, 256);
+        PTRACE(6, "TLS\t  issuer  = " << data);
+        X509_NAME_oneline(X509_get_subject_name(cert), data, 256);
+        PTRACE(6, "TLS\t  subject = " << data);
+        PTRACE(6, "TLS\t  err " << err << ": " << X509_verify_cert_error_string(err));
+    }
+    return ok;
+}
+
 class H323_TLSContext : public PSSLContext 
 {
   public:
 
-      /**Create a new context for SSL channels.
-       The default SSL method is TLSv1
-      */
-      H323_TLSContext() : PSSLContext(PSSLContext::TLSv1) {}
+    /**Create a new context for SSL channels.
+    */
+    H323_TLSContext();
+
+    /**Set CA File.
+    */
+    PBoolean UseCAFile(const PFilePath & caFile);
+
+    /**Set User Certificate
+    */
+    PBoolean UseCertificate(const PFilePath & certFile);
+
+    /**Set Private key
+    */
+    PBoolean UsePrivateKey(const PFilePath & privFile, const PString & password);
+
+    /**Initialise Context
+    */
+    PBoolean Initialise();
    
+  protected:
+    PFilePath       m_certFile;
+    PFilePath       m_privKey;
+    PFilePath       m_caFile;
+
+    PString         m_passphrase;
+    PBoolean        m_useCA;
+
 };
+
+H323_TLSContext::H323_TLSContext() 
+: m_passphrase(PString()), m_useCA(false)
+{
+    // delete the default PTLIB context
+    // as it is very buggy
+    delete context;
+    context = NULL;
+
+    // Initialise the SSL engine
+    // Borrowed from GnuGk
+    if (!SSL_library_init()) {
+        PTRACE(1, "TLS\tOpenSSL init failed");
+        return;
+    }
+    SSL_load_error_strings();
+    OpenSSL_add_all_algorithms();	// needed for OpenSSL < 1.0
+    if (!RAND_status()) {
+        PTRACE(3, "TLS\tPRNG needs seeding");
+#ifdef P_LINUX
+        RAND_load_file("/dev/urandom", 1024);
+#else
+        BYTE seed[1024];
+        for (size_t i = 0; i < sizeof(seed); i++)
+            seed[i] = (BYTE)rand();
+        RAND_seed(seed, sizeof(seed));
+#endif
+    }
+
+    context = SSL_CTX_new(SSLv23_method());	
+    SSL_CTX_set_options(context, SSL_OP_NO_SSLv2);	// remove unsafe SSLv2
+    SSL_CTX_set_mode(context, SSL_MODE_AUTO_RETRY); // handle re-negotiations automatically
+
+    // no anonymous DH (ADH), no <= 64 bit (LOW), no export ciphers (EXP), no MD5 + RC4 + SHA1, no elliptic curve ciphers (ECDH + ECDSA)
+    PString cipherList = "ALL:!ADH:!LOW:!EXP:!MD5:!RC4:!SHA1:!ECDH:!ECDSA:@STRENGTH";
+    SetCipherList(cipherList);
+
+    SSL_CTX_set_info_callback(context, tls_info_cb);
+}
+
+PBoolean H323_TLSContext::UseCAFile(const PFilePath & caFile)
+{
+    if (!PFile::Exists(caFile)) {
+        PTRACE(1, "TLS\tInvalid CA file path " << caFile);
+        return false;
+    }
+
+    m_caFile = caFile;
+
+    char msg[256];
+    const char * caFilePtr = m_caFile.GetFileName().GetPointer();
+    const char * caDirPtr = m_caFile.GetDirectory().GetPointer();
+
+    if (SSL_CTX_load_verify_locations(context, caFilePtr, caDirPtr) != 1) {
+        PTRACE(1, "TLS\tError loading CA file " << m_caFile);
+        ERR_error_string(ERR_get_error(), msg);
+        PTRACE(1, "TLS\tOpenSSL error: " << msg);
+        return false;
+    }
+    m_useCA = true;
+    return true;
+}
+
+PBoolean H323_TLSContext::UseCertificate(const PFilePath & certFile)
+{
+    if (!PFile::Exists(certFile)) {
+        PTRACE(1, "TLS\tInvalid certificate file path " << certFile);
+        return false;
+    }
+
+    m_certFile = certFile;
+
+    char msg[256];
+    if (SSL_CTX_use_certificate_chain_file(context, m_certFile) != 1) {
+        PTRACE(1, "TLS\tError loading certificate file: " << m_certFile);
+        ERR_error_string(ERR_get_error(), msg);
+        PTRACE(1, "TLS\tOpenSSL error: " << msg);
+        return false;
+    }
+    return true;
+}
+    
+PBoolean H323_TLSContext::UsePrivateKey(const PFilePath & privFile, const PString & password)
+{
+    if (password.IsEmpty()) {
+        PTRACE(1, "TLS\tPassphrase cannot be NULL");
+        return false;
+    }
+
+    if (!PFile::Exists(privFile)) {
+        PTRACE(1, "TLS\tInvalid Private Key file" << privFile);
+        return false;
+    }
+
+    SSL_CTX_set_default_passwd_cb(context, tls_passwd_cb);
+    m_passphrase = password;
+    SSL_CTX_set_default_passwd_cb_userdata(context, (void *)m_passphrase.GetPointer());
+
+    m_privKey = privFile;
+    char msg[256];
+    if (SSL_CTX_use_PrivateKey_file(context, m_privKey, SSL_FILETYPE_PEM) != 1) {
+        PTRACE(1, "TLS\tError loading private key file: " << m_privKey);
+        ERR_error_string(ERR_get_error(), msg);
+        PTRACE(1, "TLS\tOpenSSL error: " << msg);
+        return false;
+    }
+    return true;
+}
+
+PBoolean H323_TLSContext::Initialise()
+{
+    if (!m_useCA) {
+        SSL_CTX_set_verify(context, SSL_VERIFY_NONE, tls_verify_cb);
+        PTRACE(4, "TLS\tInitialised: WARNING! No Peer verification (Local Cert Authority missing)");
+    } else {
+        SSL_CTX_set_verify(context, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT | SSL_VERIFY_CLIENT_ONCE, tls_verify_cb);
+        PTRACE(4, "TLS\tInitialised: Peer Certificate required.");
+    }
+	SSL_CTX_set_verify_depth(context, 5);
+    return true;
+}
+
 #endif
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -1335,7 +1535,7 @@ PBoolean H323EndPoint::StartListeners(const H323TransportAddressArray & ifaces)
       }
     }
     if (remove) {
-      PTRACE(3, "H323\tRemoving listener " << listeners[i]);
+      PTRACE(3, "H323\tRemoving " << listeners[i]);
       listeners.RemoveAt(i--);
     }
   }
@@ -1361,7 +1561,7 @@ PBoolean H323EndPoint::StartListener(const H323TransportAddress & iface)
   if (H323EndPoint::StartListener(listener))
     return TRUE;
 
-  PTRACE(1, "H323\tCould not start listener: " << iface);
+  PTRACE(1, "H323\tCould not start " << iface);
   delete listener;
   return FALSE;
 }
@@ -1373,10 +1573,11 @@ PBoolean H323EndPoint::StartListener(H323Listener * listener)
     return FALSE;
 
   for (PINDEX i = 0; i < listeners.GetSize(); i++) {
-    if (listeners[i].GetTransportAddress() == listener->GetTransportAddress()) {
-      PTRACE(2, "H323\tAlready have listener for " << *listener);
-      delete listener;
-      return TRUE;
+    if (listeners[i].GetTransportAddress() == listener->GetTransportAddress() && 
+        listeners[i].GetSecurity() == listener->GetSecurity()) {
+          PTRACE(2, "H323\tAlready have " << *listener);
+          delete listener;
+          return TRUE;
     }
   }
 
@@ -1388,7 +1589,7 @@ PBoolean H323EndPoint::StartListener(H323Listener * listener)
     return FALSE;
   }
 
-  PTRACE(3, "H323\tStarted listener " << *listener);
+  PTRACE(3, "H323\tStarted " << *listener);
   listeners.Append(listener);
   listener->Resume();
   return TRUE;
@@ -1398,7 +1599,7 @@ PBoolean H323EndPoint::StartListener(H323Listener * listener)
 PBoolean H323EndPoint::RemoveListener(H323Listener * listener)
 {
   if (listener != NULL) {
-    PTRACE(3, "H323\tRemoving listener " << *listener);
+    PTRACE(3, "H323\tRemoving " << *listener);
     return listeners.Remove(listener);
   }
 
@@ -3619,22 +3820,57 @@ void H323EndPoint::SetUPnP(PBoolean active)
 #endif  // H323_UPnP
 
 #ifdef H323_TLS
-void H323EndPoint::EnableTLS(PBoolean enable)
+PBoolean H323EndPoint::TLS_SetCAFile(const PFilePath & caFile)
 {
     if (!m_transportContext)
         m_transportContext = new H323_TLSContext();
 
-    m_transportSecurity.EnableTLS(enable);
+    return ((H323_TLSContext*)m_transportContext)->UseCAFile(caFile);
 }
 
-void H323EndPoint::EnableIPSec(PBoolean enable)
+PBoolean H323EndPoint::TLS_SetCertificate(const PFilePath & certFile)
 {
-    m_transportSecurity.EnableIPSec(enable);
+    if (!m_transportContext)
+        m_transportContext = new H323_TLSContext();
+
+    return ((H323_TLSContext*)m_transportContext)->UseCertificate(certFile);
+}
+
+PBoolean H323EndPoint::TLS_SetPrivateKey(const PFilePath & privFile, const PString & password)
+{
+    if (!m_transportContext)
+        m_transportContext = new H323_TLSContext();
+
+    return ((H323_TLSContext*)m_transportContext)->UsePrivateKey(privFile,password);
+}
+
+PBoolean H323EndPoint::TLS_Initialise()
+{
+
+    if (!m_transportContext) {
+        m_transportContext = new H323_TLSContext();
+    }
+
+    if (!((H323_TLSContext*)m_transportContext)->Initialise())
+        return false;
+
+    if (!listeners.GetTLSListener()) {
+        H323Listener * listener = new H323ListenerTLS(*this, PIPSocket::GetDefaultIpAny(), DefaultTLSPort);
+        StartListener(listener);
+    }
+    m_transportSecurity.EnableTLS(true);
+
+    return true;   
 }
 
 PSSLContext * H323EndPoint::GetTransportContext() 
 {
     return m_transportContext;
+}
+
+void H323EndPoint::EnableIPSec(PBoolean enable)
+{
+    m_transportSecurity.EnableIPSec(enable);
 }
 #endif
 

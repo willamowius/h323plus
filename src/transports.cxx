@@ -616,21 +616,22 @@ H323TransportAddressArray H323GetInterfaceAddresses(const H323ListenerList & lis
   H323TransportAddress rasaddr(associatedTransport->GetRemoteAddress());
 
   PINDEX i;
-  for (i = 0; i < listeners.GetSize(); i++) {
-      if (listeners[i].GetSecurity() == H323TransportSecurity::e_unsecure) {
-          H323TransportAddress sigaddr(listeners[i].GetTransportAddress());
-          if (sigaddr.GetIpVersion() == rasaddr.GetIpVersion()) {
-            H323TransportAddressArray newAddrs = H323GetInterfaceAddresses(sigaddr, excludeLocalHost, associatedTransport);
+  for (i = 0; i < listeners.GetSize(); i++) {      
+      H323TransportAddress sigaddr(listeners[i].GetTransportAddress());
+      if (sigaddr.GetIpVersion() == rasaddr.GetIpVersion()) {
+        H323TransportAddressArray newAddrs = H323GetInterfaceAddresses(sigaddr, excludeLocalHost, associatedTransport);
+        if (listeners[i].GetSecurity() == H323TransportSecurity::e_unsecure) {
             PINDEX size  = interfaceAddresses.GetSize();
             PINDEX nsize = newAddrs.GetSize();
             interfaceAddresses.SetSize(size + nsize);
             PINDEX j;
             for (j = 0; j < nsize; j++)
               interfaceAddresses.SetAt(size + j, new H323TransportAddress(newAddrs[j]));
-          }
+        } else if (newAddrs.GetSize() > 0) {
+            listeners[i].SetTransportAddress(newAddrs[0]);  // Set the local address for TLS/IPSEC
+        }
       }
   }
-
   return interfaceAddresses;
 }
 
@@ -768,6 +769,16 @@ H323TransportSecurity::H323TransportSecurity()
 {
 }
 
+PString H323TransportSecurity::MethodAsString(Method meth)
+{
+    switch (meth) {
+        case H323TransportSecurity::e_unsecure: return "TCP";
+        case H323TransportSecurity::e_tls: return "TLS";
+        case H323TransportSecurity::e_ipsec: return "IPSec"; 
+    };
+    return "?";
+}
+
 PBoolean H323TransportSecurity::HasSecurity()
 {
     return (m_securityMask != 0);
@@ -825,13 +836,19 @@ H323Listener::H323Listener(H323EndPoint & end, H323TransportSecurity::Method sec
 
 void H323Listener::PrintOn(ostream & strm) const
 {
-  strm << "Listener[" << GetTransportAddress() << ']';
+  strm << "Listener " << TypeAsString() << '[' << GetTransportAddress() << ']';
 }
 
 H323TransportSecurity::Method H323Listener::GetSecurity()
 {
     return m_security;
 }
+
+PString H323Listener::TypeAsString() const
+{
+    return H323TransportSecurity::MethodAsString(m_security);
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -1162,7 +1179,7 @@ PBoolean H323ListenerTCP::Open()
                                         : PSocket::CanReuseAddress))
     return TRUE;
 
-  PTRACE(1, "TCP\tListen on " << localAddress << ':' << listener.GetPort()
+  PTRACE(1, TypeAsString() << "\tListen on " << localAddress << ':' << listener.GetPort()
          << " failed: " << listener.GetErrorText());
   return FALSE;
 }
@@ -1192,7 +1209,7 @@ H323Transport * H323ListenerTCP::Accept(const PTimeInterval & timeout)
 
   listener.SetReadTimeout(timeout); // Wait for remote connect
 
-  PTRACE(4, "TCP\tWaiting on socket accept on " << GetTransportAddress());
+  PTRACE(4, TypeAsString() << "\tWaiting on socket accept on " << GetTransportAddress());
   PTCPSocket * socket = new PTCPSocket;
   if (socket->Accept(listener)) {
     unsigned m_version = GetTransportAddress().GetIpVersion();
@@ -1200,13 +1217,13 @@ H323Transport * H323ListenerTCP::Accept(const PTimeInterval & timeout)
     if (transport->Open(socket))
       return transport;
 
-    PTRACE(1, "TCP\tFailed to open transport, connection not started.");
+    PTRACE(1, TypeAsString() << "\tFailed to open transport, connection not started.");
     delete transport;
     return NULL;
   }
 
   if (socket->GetErrorCode() != PChannel::Interrupted) {
-    PTRACE(1, "TCP\tAccept error:" << socket->GetErrorText());
+    PTRACE(1, TypeAsString() << "\tAccept error:" << socket->GetErrorText());
     listener.Close();
   }
 
@@ -1217,9 +1234,13 @@ H323Transport * H323ListenerTCP::Accept(const PTimeInterval & timeout)
 
 H323TransportAddress H323ListenerTCP::GetTransportAddress() const
 {
-  return H323TransportAddress(localAddress, listener.GetPort());
+    return H323TransportAddress(localAddress, listener.GetPort());  
 }
 
+void H323ListenerTCP::SetTransportAddress(const H323TransportAddress & /*address*/)
+{
+    // Does nothing
+}
 
 PBoolean H323ListenerTCP::SetUpTransportPDU(H245_TransportAddress & pdu,
                                         const H323Transport & associatedTransport)
@@ -1239,7 +1260,7 @@ PBoolean H323ListenerTCP::SetUpTransportPDU(H245_TransportAddress & pdu,
 
 void H323ListenerTCP::Main()
 {
-  PTRACE(2, "H323\tAwaiting TCP connections on port " << listener.GetPort());
+  PTRACE(2, TypeAsString() << "\tAwaiting " << TypeAsString() << " connections on port " << listener.GetPort());
 
   while (listener.IsOpen()) {
     H323Transport * transport = Accept(PMaxTimeInterval);
@@ -1271,6 +1292,11 @@ PBoolean H323ListenerTLS::SetUpTransportPDU(H245_TransportAddress & /*pdu*/,
                                         const H323Transport & /*associatedTransport*/)
 {
     return false;
+}
+
+void H323ListenerTLS::SetTransportAddress(const H323TransportAddress & address)
+{
+    address.GetIpAddress(localAddress); 
 }
 #endif
 

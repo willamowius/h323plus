@@ -2278,9 +2278,12 @@ class H323EndPoint : public PObject
 #endif
 
 #ifdef H323_TLS
-    void EnableTLS(PBoolean enable); 
     void EnableIPSec(PBoolean enable); 
 
+    PBoolean TLS_SetCAFile(const PFilePath & caFile);
+    PBoolean TLS_SetCertificate(const PFilePath & certFile);
+    PBoolean TLS_SetPrivateKey(const PFilePath & privFile, const PString & password);
+    PBoolean TLS_Initialise(); 
     
     PSSLContext * GetTransportContext();
 #endif

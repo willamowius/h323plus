@@ -26,7 +26,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $ Id $
+ * $Id$
  *
  */
 
@@ -202,6 +202,7 @@ public:
         e_tls,
         e_ipsec     // not supported YET
     };
+    static PString MethodAsString(Method meth);
 
     PBoolean HasSecurity();
 
@@ -274,6 +275,10 @@ class H323Listener : public PThread
       */
     virtual H323TransportAddress GetTransportAddress() const = 0;
 
+    /**Set the local transport address on which this listener may be accessed.
+      */
+    virtual void SetTransportAddress(const H323TransportAddress & address) = 0;
+
     /**Create Transport.
       */
     virtual H323Transport * CreateTransport(const PIPSocket::Address & address) = 0;
@@ -285,9 +290,13 @@ class H323Listener : public PThread
       const H323Transport & associatedTransport ///<  Associated transport for precendence and translation
     ) = 0;
 
-    /**Set up a transport address PDU for bidirectional logical channels.
+    /**Get Signalling Security.
       */
     H323TransportSecurity::Method GetSecurity();
+
+    /**Listener Type as string.
+      */
+    PString TypeAsString() const;
   //@}
 
   protected:
@@ -737,6 +746,11 @@ class H323ListenerTCP : public H323Listener
       */
     virtual H323TransportAddress GetTransportAddress() const;
 
+    /**Set the local transport address on which this listener may be accessed.
+        Default does nothing...
+      */
+    virtual void SetTransportAddress(const H323TransportAddress & address);
+
     /**Create Transport.
       */
     virtual H323Transport * CreateTransport(const PIPSocket::Address & address);
@@ -802,9 +816,11 @@ class H323ListenerTLS : public H323ListenerTCP
       H245_TransportAddress & pdu,         ///<  Transport addresses listening on
       const H323Transport & associatedTransport ///<  Associated transport for precendence and translation
     );
-    
-  protected:
 
+    /**Set the local transport address on which this listener may be accessed.
+        Default sets the local address
+      */
+    virtual void SetTransportAddress(const H323TransportAddress & address);
 };
 
 #endif // H323_TLS
