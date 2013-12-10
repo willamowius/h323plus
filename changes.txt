@@ -2,6 +2,7 @@
 ===============================================================================
 H323plus 1.25.0 - 1.25.x
 ===============================================================================
+Added TLS signalling support (WIP)
 Added DH6144 and DH8192 H.235 Support
 Added Baseline H.460.22 Support
 Fixed vs2010 Build environment
