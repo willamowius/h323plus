@@ -311,6 +311,8 @@ const unsigned char DH8192_G[1024] = {
 
 #endif  // H323_H235_AES256
 
+// Some Algorithms are commented out for speed of loading and execution. - SH
+
 const char * const OID_H235V3 = "0.0.8.235.0.3.24";
 const char * const OID_DH1024 = "0.0.8.235.0.3.43";
 
@@ -330,10 +332,10 @@ const static struct {
     unsigned     send;
 } H235_DHParameters[] = {
 #ifdef H323_H235_AES256
-     { OID_DH8192,  DH8192_P, DH8192_G, DH8192_SZ, 256, 0 },
-     { OID_DH6144,  DH6144_P, DH6144_G, DH6144_SZ, 256, 0 },
+//     { OID_DH8192,  DH8192_P, DH8192_G, DH8192_SZ, 256, 0 },
+//     { OID_DH6144,  DH6144_P, DH6144_G, DH6144_SZ, 256, 0 },
      { OID_DH4096,  DH4096_P, DH4096_G, DH4096_SZ, 256, 0 },
-     { OID_DH2048,  DH2048_P, DH2048_G, DH2048_SZ, 256, 0 },
+//     { OID_DH2048,  DH2048_P, DH2048_G, DH2048_SZ, 256, 0 },
 #endif
      { OID_DH1024,  DH1024_P, DH1024_G, DH1024_SZ, 128, 1 },
      { OID_H235V3,  NULL    , NULL    , DHNULL , 0  , 0 }
