@@ -116,7 +116,6 @@ void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, const PString & fi
       if (dhmap.find(H235_DHParameters[i].parameterOID) == dhmap.end()) {
         if (H235_DHParameters[i].sz > 0 && H235_DHParameters[i].cipher <= cipherlength
             && (H235_DHParameters[i].dh_p == NULL || (H235_DHParameters[i].sz * 8) <= maxTokenLength)) {
-           PTRACE(0, "JW add " << H235_DHParameters[i].parameterOID << " max=" << maxTokenLength << " is=" << (H235_DHParameters[i].sz * 8));
            dhmap.insert(pair<PString, H235_DiffieHellman*>(H235_DHParameters[i].parameterOID,
                   new H235_DiffieHellman(H235_DHParameters[i].dh_p, H235_DHParameters[i].sz,
                                          H235_DHParameters[i].dh_g, H235_DHParameters[i].sz,
