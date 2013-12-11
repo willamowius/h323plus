@@ -282,19 +282,15 @@ PBoolean H323_TLSContext::UseCAFile(const PFilePath & caFile)
     }
 
     m_caFile = caFile;
-
     char msg[256];
-    const char * caFilePtr = m_caFile.GetFileName().GetPointer();
-    const char * caDirPtr = m_caFile.GetDirectory().GetPointer();
-
-    if (SSL_CTX_load_verify_locations(context, caFilePtr, caDirPtr) != 1) {
+    if (SSL_CTX_load_verify_locations(context, m_caFile, NULL) != 1) {
         PTRACE(1, "TLS\tError loading CA file " << m_caFile);
         ERR_error_string(ERR_get_error(), msg);
         PTRACE(1, "TLS\tOpenSSL error: " << msg);
         return false;
     }
-    m_useCA = true;
-    return true;
+    m_useCA = SSL_CTX_set_default_verify_paths(context);
+    return m_useCA;
 }
 
 PBoolean H323_TLSContext::UseCertificate(const PFilePath & certFile)
@@ -318,19 +314,16 @@ PBoolean H323_TLSContext::UseCertificate(const PFilePath & certFile)
     
 PBoolean H323_TLSContext::UsePrivateKey(const PFilePath & privFile, const PString & password)
 {
-    if (password.IsEmpty()) {
-        PTRACE(1, "TLS\tPassphrase cannot be NULL");
-        return false;
-    }
-
     if (!PFile::Exists(privFile)) {
         PTRACE(1, "TLS\tInvalid Private Key file" << privFile);
         return false;
     }
 
-    SSL_CTX_set_default_passwd_cb(context, tls_passwd_cb);
-    m_passphrase = password;
-    SSL_CTX_set_default_passwd_cb_userdata(context, (void *)m_passphrase.GetPointer());
+    if (!password) {
+        SSL_CTX_set_default_passwd_cb(context, tls_passwd_cb);
+        m_passphrase = password;
+        SSL_CTX_set_default_passwd_cb_userdata(context, (void *)m_passphrase.GetPointer());
+    }
 
     m_privKey = privFile;
     char msg[256];
@@ -3846,10 +3839,8 @@ PBoolean H323EndPoint::TLS_SetPrivateKey(const PFilePath & privFile, const PStri
 
 PBoolean H323EndPoint::TLS_Initialise()
 {
-
-    if (!m_transportContext) {
+    if (!m_transportContext)
         m_transportContext = new H323_TLSContext();
-    }
 
     if (!((H323_TLSContext*)m_transportContext)->Initialise())
         return false;
