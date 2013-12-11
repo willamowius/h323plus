@@ -62,7 +62,7 @@ public:
  
     static PStringArray GetFeatureName() { return PStringArray("Std22"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("H.225.0 Sec-H.460.22"); };
-    static int GetPurpose()	{ return FeatureRas; };
+    static int GetPurpose();
 	static PStringArray GetIdentifier() { return PStringArray("22"); };
 
     virtual PBoolean FeatureAdvertised(int mtype);
@@ -82,7 +82,6 @@ public:
 private:
     H323EndPoint * EP;
     H323Connection * CON;
-    H323TransportSecurity m_supportedSecurity;
     PBoolean isEnabled;
 };
 

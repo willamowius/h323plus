@@ -84,6 +84,11 @@ void H460_FeatureStd22::AttachConnection(H323Connection * _con)
    CON = _con;
 }
 
+int H460_FeatureStd22::GetPurpose()
+{
+    return FeatureBaseAll; 
+}
+
 PBoolean H460_FeatureStd22::FeatureAdvertised(int mtype)
 {
      switch (mtype) {
@@ -142,6 +147,8 @@ PBoolean H460_FeatureStd22::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu
     if (!EP || !EP->GetTransportSecurity()->HasSecurity())
         return false;
 
+    isEnabled = false;
+
     H460_FeatureStd feat = H460_FeatureStd(22);  
     BuildFeature(EP->GetTransportSecurity(), EP, feat, false);
 
@@ -152,11 +159,7 @@ PBoolean H460_FeatureStd22::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu
 
 void H460_FeatureStd22::OnReceiveGatekeeperConfirm(const H225_FeatureDescriptor & pdu)
 {
-   H460_FeatureStd * feat = PRemoveConst(H460_FeatureStd,&(const H460_FeatureStd &)pdu);
-
-   ReadFeature(&m_supportedSecurity,feat);
-
-   isEnabled = m_supportedSecurity.HasSecurity();
+    // Do nothing
 }
 
 PBoolean H460_FeatureStd22::OnSendRegistrationRequest(H225_FeatureDescriptor & pdu)
@@ -164,12 +167,9 @@ PBoolean H460_FeatureStd22::OnSendRegistrationRequest(H225_FeatureDescriptor & p
     if (!EP || !EP->GetTransportSecurity()->HasSecurity())
         return false;
 
+    isEnabled = false;
     H460_FeatureStd feat = H460_FeatureStd(22);  
-
-    if (isEnabled)
-        BuildFeature(&m_supportedSecurity, EP, feat);
-    else 
-        BuildFeature(EP->GetTransportSecurity(), EP, feat);
+    BuildFeature(EP->GetTransportSecurity(), EP, feat);
 
     pdu = feat;
 	return true;
@@ -177,10 +177,7 @@ PBoolean H460_FeatureStd22::OnSendRegistrationRequest(H225_FeatureDescriptor & p
 
 void H460_FeatureStd22::OnReceiveRegistrationConfirm(const H225_FeatureDescriptor & pdu)
 {
-   H460_FeatureStd * feat = PRemoveConst(H460_FeatureStd,&(const H460_FeatureStd &)pdu);
-
-   ReadFeature(&m_supportedSecurity,feat);
-   isEnabled = m_supportedSecurity.HasSecurity();
+   isEnabled = true;
 }
 
 PBoolean H460_FeatureStd22::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
@@ -189,7 +186,7 @@ PBoolean H460_FeatureStd22::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
         return false;
 
     H460_FeatureStd feat = H460_FeatureStd(22);
-    BuildFeature(&m_supportedSecurity, EP, feat, false);
+    BuildFeature(EP->GetTransportSecurity(), EP, feat, false);
     pdu = feat;
 
     return true;
