@@ -104,7 +104,7 @@ void SimpleH323Process::Main()
              "v-video::"
 #endif
              "T-h245tunneldisable."
-             "-h245setupdisable."
+             "-h245setupenable."
              "Q-h245qosdisable."
 #ifdef H323_H235
              "m-mediaenc:"
@@ -157,7 +157,7 @@ void SimpleH323Process::Main()
             "  -e --silence            : Disable transmitter silence detection.\n"
             "  -f --fast-enable        : Enable fast start.\n"
             "  -T --h245tunneldisable  : Disable H245 tunnelling.\n"
-            "     --h245setupdisable   : Disable H245 in Setup.\n"
+            "     --h245setupenable    : Enable H245 in Setup.\n"
             "  -Q --h245qosdisable     : Disable H245 QoS Exchange.\n"
 #ifdef H323_H235
             "  -m --mediaenc           : Enable Media encryption (value max cipher 128, 192 or 256).\n"
@@ -310,7 +310,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
   DisableFastStart(!args.HasOption('f'));
   DisableH245Tunneling(args.HasOption('T'));
   DisableH245QoS(args.HasOption('Q'));
-  disableH245inSetup = args.HasOption("h245setupdisable");
+  DisableH245inSetup(!args.HasOption("h245setupenable"));
 
   autoAnswer           = args.HasOption('a');
   busyForwardParty     = args.GetOptionString('B');
