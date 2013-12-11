@@ -84,7 +84,7 @@ class H2356_Authenticator : public H235Authenticator
 #if PTLIB_VER >= 2110
     static PBoolean GetAuthenticationCapabilities(Capabilities * ids);
 #endif
-    static void InitialiseCache(int cipherlength = 128);
+    static void InitialiseCache(int cipherlength = 128, unsigned maxTokenLength = 1024);
     static void RemoveCache();
 
     PBoolean IsMatch(const PString & identifier) const; 

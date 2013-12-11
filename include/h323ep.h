@@ -1148,7 +1148,8 @@ class H323EndPoint : public PObject
         This enables media encryption.
       */
      virtual void SetH235MediaEncryption(H235MediaPolicy policy,     ///< How endpoint handles Encryption
-                                         H235MediaCipher level       ///< Maximum supported Cipher
+                                         H235MediaCipher level,      ///< Maximum supported Cipher
+                                         unsigned maxTokenSize = 1024///< Maximum DH token size
                                          );
 
     /** Get Media Encryption Policy

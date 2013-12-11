@@ -1462,10 +1462,11 @@ H323Connection * H323EndPoint::MakeAuthenticatedCall(const PString & remoteParty
 #endif
 
 #ifdef H323_H235
-void H323EndPoint::SetH235MediaEncryption(H235MediaPolicy policy, H235MediaCipher level)
+void H323EndPoint::SetH235MediaEncryption(H235MediaPolicy policy, H235MediaCipher level, unsigned maxTokenSize)
 {
     H235Authenticators::SetEncryptionPolicy(policy);
     H235Authenticators::SetMaxCipherLength(level);
+    H235Authenticators::SetMaxTokenLength(maxTokenSize);
 }
 
 H323EndPoint::H235MediaPolicy H323EndPoint::GetH235MediaPolicy()
@@ -1490,13 +1491,15 @@ const PString & H323EndPoint::GetEncryptionCacheFiles()
 
 void H323EndPoint::EncryptionCacheInitialise()
 {
-    if (H235Authenticators::GetEncryptionPolicy())
-       H2356_Authenticator::InitialiseCache(H235Authenticators::GetMaxCipherLength());
+  if (H235Authenticators::GetEncryptionPolicy()) {
+       H2356_Authenticator::InitialiseCache(H235Authenticators::GetMaxCipherLength(),
+                                            H235Authenticators::GetMaxTokenLength());
+  }
 }
 
 void H323EndPoint::EncryptionCacheRemove()
 {
-    H2356_Authenticator::RemoveCache();
+  H2356_Authenticator::RemoveCache();
 }
 #endif
 

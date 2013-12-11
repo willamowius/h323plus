@@ -108,6 +108,7 @@ void SimpleH323Process::Main()
              "Q-h245qosdisable."
 #ifdef H323_H235
              "m-mediaenc:"
+             "-maxtoken:"
 #endif
 #ifdef H323_H46017
              "k-h46017:"
@@ -161,6 +162,7 @@ void SimpleH323Process::Main()
             "  -Q --h245qosdisable     : Disable H245 QoS Exchange.\n"
 #ifdef H323_H235
             "  -m --mediaenc           : Enable Media encryption (value max cipher 128, 192 or 256).\n"
+            "     --maxtoken           : Set max token size for H.235.6 (1024, 2048, 4096, ...).\n"
 #endif
 #ifdef H323_H46017
             "  -k --h46017             : Use H.460.17 Gatekeeper.\n"
@@ -493,12 +495,16 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
 #ifdef H323_H235
       if (args.HasOption('m'))  {
         H235MediaCipher ncipher = encypt128;
+        unsigned maxtoken = 1024;
 #ifdef H323_H235_AES256
         unsigned cipher = args.GetOptionString('m').AsInteger();
         if (cipher >= encypt192) ncipher = encypt192;
         if (cipher >= encypt256) ncipher = encypt256;
+        if (args.HasOption("maxtoken")) {
+          maxtoken = args.GetOptionString("maxtoken").AsInteger();
+        }
 #endif
-        SetH235MediaEncryption(encyptRequest, ncipher);
+        SetH235MediaEncryption(encyptRequest, ncipher, maxtoken);
 #ifdef H323_H235_AES256
         if (ncipher > encypt128) {
             cout << "Enabled Media Encryption AES" << ncipher << " Loading...";

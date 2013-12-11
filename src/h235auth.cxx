@@ -323,6 +323,7 @@ PBoolean H235Authenticator::GetAlgorithmDetails(const PString & /*algorithm*/,
 #ifdef H323_H235
 PINDEX   H235Authenticators::m_encryptionPolicy = 0;   // Default Encryption is disabled
 PINDEX   H235Authenticators::m_cipherLength = 128;     // Ciphers above 128 must be expressly enabled.  
+PINDEX   H235Authenticators::m_maxTokenLength = 1024;  // Tokens longer than 1024 bits must be expressly enabled.  
 PString  H235Authenticators::m_dhFile=PString();
 #endif
 
@@ -643,6 +644,16 @@ PINDEX H235Authenticators::GetMaxCipherLength()
 void H235Authenticators::SetMaxCipherLength(PINDEX cipher)
 {
     m_cipherLength = cipher;
+}
+
+PINDEX H235Authenticators::GetMaxTokenLength()
+{
+    return m_maxTokenLength;
+}
+    
+void H235Authenticators::SetMaxTokenLength(PINDEX len)
+{
+    m_maxTokenLength = len;
 }
 
 void H235Authenticators::SetEncryptionPolicy(PINDEX policy)

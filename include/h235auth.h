@@ -284,6 +284,10 @@ PDECLARE_LIST(H235Authenticators, H235Authenticator)
     static void SetMaxCipherLength(PINDEX cipher);
     static PINDEX GetMaxCipherLength();
 
+    // maximum token length in bits
+    static void SetMaxTokenLength(PINDEX len);
+    static PINDEX GetMaxTokenLength();
+
     static PString & GetDHParameterFile();
     static void SetDHParameterFile(const PString & filePaths);
 
@@ -292,6 +296,7 @@ PDECLARE_LIST(H235Authenticators, H235Authenticator)
 
     static PINDEX m_encryptionPolicy;
     static PINDEX m_cipherLength;
+    static PINDEX m_maxTokenLength;
     static PString m_dhFile;
 #endif
 

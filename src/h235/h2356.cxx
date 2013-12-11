@@ -68,7 +68,7 @@ inline void DeleteObjectsInMap(const M & m)
     std::for_each(m.begin(), m.end(), deletepair<PAIR>());
 }
 
-void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, const PString & filePath = PString(), unsigned cipherlength = P_MAX_INDEX)
+void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, const PString & filePath = PString(), unsigned cipherlength = P_MAX_INDEX, unsigned maxTokenLength = 1024)
 {
     if (dhcache.size() > 0) {
         H235_DHMap::iterator i = dhcache.begin();
@@ -114,7 +114,9 @@ void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, const PString & fi
     // if not loaded from File then create.
     for (PINDEX i = 0; i < PARRAYSIZE(H235_DHParameters); ++i) {
       if (dhmap.find(H235_DHParameters[i].parameterOID) == dhmap.end()) {
-        if (H235_DHParameters[i].sz > 0 && H235_DHParameters[i].cipher <= cipherlength) {
+        if (H235_DHParameters[i].sz > 0 && H235_DHParameters[i].cipher <= cipherlength
+            && (H235_DHParameters[i].dh_p == NULL || (H235_DHParameters[i].sz * 8) <= maxTokenLength)) {
+           PTRACE(0, "JW add " << H235_DHParameters[i].parameterOID << " max=" << maxTokenLength << " is=" << (H235_DHParameters[i].sz * 8));
            dhmap.insert(pair<PString, H235_DiffieHellman*>(H235_DHParameters[i].parameterOID,
                   new H235_DiffieHellman(H235_DHParameters[i].dh_p, H235_DHParameters[i].sz,
                                          H235_DHParameters[i].dh_g, H235_DHParameters[i].sz,
@@ -148,7 +150,7 @@ H2356_Authenticator::H2356_Authenticator()
 
     m_algOIDs.SetSize(0);
     if (m_enabled) {
-        LoadH235_DHMap(m_dhLocalMap, m_dhCachedMap, H235Authenticators::GetDHParameterFile(), H235Authenticators::GetMaxCipherLength());
+        LoadH235_DHMap(m_dhLocalMap, m_dhCachedMap, H235Authenticators::GetDHParameterFile(), H235Authenticators::GetMaxCipherLength(), H235Authenticators::GetMaxTokenLength());
         InitialiseSecurity(); // make sure m_algOIDs gets filled
     }
 }
@@ -178,9 +180,9 @@ PBoolean H2356_Authenticator::GetAuthenticationCapabilities(H235Authenticator::C
 }
 #endif
 
-void H2356_Authenticator::InitialiseCache(int cipherlength)
+void H2356_Authenticator::InitialiseCache(int cipherlength, unsigned maxTokenLength)
 {
-   LoadH235_DHMap(m_dhCachedMap, m_dhCachedMap, H235Authenticators::GetDHParameterFile(), cipherlength);
+   LoadH235_DHMap(m_dhCachedMap, m_dhCachedMap, H235Authenticators::GetDHParameterFile(), cipherlength, maxTokenLength);
 }
 
 void H2356_Authenticator::RemoveCache()
