@@ -118,6 +118,13 @@ void SimpleH323Process::Main()
 #ifdef H323_H46026
              "-h46026disable."
 #endif
+#ifdef H323_TLS
+            "-tls."
+            "-tls-cafile:"
+            "-tls-cert:"
+            "-tls-privkey:"
+            "-tls-passphrase:"
+#endif
 #ifdef P_HAS_IPV6
              "-ipv6."
 #endif
@@ -163,6 +170,13 @@ void SimpleH323Process::Main()
 #endif
 #ifdef H323_H46026
             "     --h46026disable      : Disable H.460.26.\n"
+#endif
+#ifdef H323_TLS
+            "     --tls                : TLS Enabled (must be set for TLS).\n"
+            "     --tls-cafile         : TLS Certificate Authority File.\n"
+            "     --tls-cert           : TLS Certificate File.\n"
+            "     --tls-privkey        : TLS Private Key File.\n"
+            "     --tls-passphrase     : TLS Private Key PassPhrase.\n"
 #endif
 #ifdef P_HAS_IPV6
             "     --ipv6               : Enable IPv6 Support.\n"
@@ -331,7 +345,6 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
 
   localLanguages.AppendString("en-us");
   
-
   if (!SetSoundDevice(args, "sound", PSoundChannel::Recorder))
     return FALSE;
   if (!SetSoundDevice(args, "sound", PSoundChannel::Player))
@@ -450,7 +463,6 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
 
 #endif
 /////////////////////////////////////////
-
 // List all the available Features
       PStringArray natmethods = PNatStrategy::GetRegisteredList();
 
@@ -487,19 +499,19 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
         if (cipher >= encypt256) ncipher = encypt256;
 #endif
         SetH235MediaEncryption(encyptRequest, ncipher);
-        cout << "Media Encryption AES" << ncipher << " enabled." << endl;
 #ifdef H323_H235_AES256
         if (ncipher > encypt128) {
-            cout << "Initialising Encryption Seed Cache: ";
+            cout << "Enabled Media Encryption AES" << ncipher << " Loading..." << endl;
             EncryptionCacheInitialise();
             cout << "ok.." << endl;
-        }
+        } else
 #endif
+            cout << "Enabled Media Encryption AES" << ncipher << endl;
       }
 #endif
 
 ////////////////////////////////////////
- 
+
   // Start the listener thread for incoming calls.
   PString iface = args.GetOptionString('i');
   PString listenPort = args.GetOptionString('x');
@@ -537,6 +549,26 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
     return FALSE;
   }
 
+#ifdef H323_TLS   // Initialise TLS
+    bool useTLS = args.HasOption("tls");
+    if (useTLS) {
+        if (args.HasOption("tls-cafile"))
+        useTLS = TLS_SetCAFile(args.GetOptionString("tls-cafile"));
+        if (useTLS && args.HasOption("tls-cert"))
+            useTLS = TLS_SetCertificate(args.GetOptionString("tls-cert"));
+        if (useTLS && args.HasOption("tls-privkey")) {
+            PString passphrase = PString();
+            if (args.HasOption("tls-passphrase"))
+                passphrase = args.GetOptionString("tls-passphrase");
+            useTLS = TLS_SetPrivateKey(args.GetOptionString("tls-privkey"), passphrase);
+        }
+        if (useTLS && TLS_Initialise()) {
+            cout << "Enabled TLS signal security." << endl;
+        } else {
+            cerr << "Could not enable TLS signal security." << endl;
+        }
+    }
+#endif
 #ifdef P_HAS_IPV6
   if (args.HasOption("ipv6") && PIPSocket::IsIpAddressFamilyV6Supported())
     PIPSocket::SetDefaultIpAddressFamilyV6();
@@ -553,6 +585,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
        PString gk17 = args.GetOptionString('k');
        if (H46017CreateConnection(gk17, false)) {
            cout << "Using H.460.17 Gatekeeper Tunneling." << endl;
+           SetInitialBandwidth(384000);
            return true;
        }
        cout << "H.460.17 Gatekeeper Tunneling Failed." << endl;
