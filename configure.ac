@@ -220,6 +220,7 @@ default_t120=yes
 default_gnugk=yes
 default_file=yes
 default_aec=no
+default_tls=yes
 
 if test "${enable_minsize}x" = "yesx" ; then
   default_audio=yes
@@ -251,6 +252,7 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_gnugk=no
   default_file=no
   default_aec=no
+  default_tls=no
 fi
 
 
@@ -872,6 +874,26 @@ else
   fi
 fi
 AC_SUBST(H323_AEC)
+
+dnl ########################################################################
+dnl check for disabling TLS support
+
+dnl MSWIN_DISPLAY file,TLS
+dnl MSWIN_DEFINE  file,H323_TLS
+
+AC_ARG_ENABLE(file,
+       [  --disable-tls           disable TLS support])
+if test "${enable_tls}x" = "x" ; then
+  enable_tls=$default_file
+fi
+if test "$enable_tls" = "yes" ; then
+  H323_TLS=1
+  AC_DEFINE(H323_TLS, 1, [Enable TLS support])
+else
+  H323_FILE=
+  AC_MSG_NOTICE(Disabling TLS support)
+fi
+AC_SUBST(H323_TLS)
 
 dnl ########################################################################
 dnl make directives

@@ -55,6 +55,7 @@ H323_T120	     = @H323_T120@
 H323_AEC	     = @H323_AEC@
 H323_GNUGK	     = @H323_GNUGK@
 H323_FILE	     = @H323_FILE@
+H323_TLS	     = @H323_TLS@
 
 
 ###### new ptlib

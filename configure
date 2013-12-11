@@ -629,6 +629,7 @@ INSTALL_PROGRAM
 ENDLDLIBS
 LDLIBS
 STDCCFLAGS
+H323_TLS
 H323_AEC
 H323_FILE
 H323_GNUGK
@@ -663,7 +664,6 @@ HAS_PTLIB_LIB_MAK
 HAS_PTLIB_MAK
 PTLIBDIR
 PTLIB_LINKER_ARGS
-TARGET
 PTLIB_CXXFLAGS
 target_cpu
 target_os
@@ -1426,6 +1426,7 @@ Optional Features:
   --disable-gnugk         disable GnuGk NAT
   --disable-file          disable File Transfer
   --enable-aec            enable Acoustic Echo Cancellation
+  --disable-tls           disable TLS support
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -4124,12 +4125,10 @@ fi
     PTLIB_CXXFLAGS=`${PKG_CONFIG} --cflags ptlib`
     PTLIB_LINKER_ARGS=`${PKG_CONFIG} --libs ptlib`
     PT_LIBDIR=`${PKG_CONFIG} --variable=libdir ptlib`
-    TARGET=`${PKG_CONFIG} --variable=target ptlib`
     PT_LIBDIR=${PTLIBDIR}
     PT_MAJOR_VERSION=`echo $PTVERSION | cut -d'.' -f1`
     PT_MINOR_VERSION=`echo $PTVERSION | cut -d'.' -f2`
     PT_BUILD_NUMBER=`echo $PTVERSION | cut -d'.' -f3`
-
 
 
 
@@ -4232,6 +4231,7 @@ default_t120=yes
 default_gnugk=yes
 default_file=yes
 default_aec=no
+default_tls=yes
 
 if test "${enable_minsize}x" = "yesx" ; then
   default_audio=yes
@@ -4263,6 +4263,7 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_gnugk=no
   default_file=no
   default_aec=no
+  default_tls=no
 fi
 
 
@@ -4987,6 +4988,28 @@ $as_echo "#define H323_AEC 1" >>confdefs.h
     STDCCFLAGS="$STDCCFLAGS $AEC_CFLAGS"
     ENDLDLIBS="$ENDLDLIBS $AEC_LIBS"
   fi
+fi
+
+
+
+
+# Check whether --enable-file was given.
+if test "${enable_file+set}" = set; then :
+  enableval=$enable_file;
+fi
+
+if test "${enable_tls}x" = "x" ; then
+  enable_tls=$default_file
+fi
+if test "$enable_tls" = "yes" ; then
+  H323_TLS=1
+
+$as_echo "#define H323_TLS 1" >>confdefs.h
+
+else
+  H323_FILE=
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling TLS support" >&5
+$as_echo "$as_me: Disabling TLS support" >&6;}
 fi
 
 
