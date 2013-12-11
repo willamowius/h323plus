@@ -600,10 +600,8 @@ class H460_Feature : public H225_FeatureDescriptor
 
 
     enum {
+      FeatureBaseAll   =0,        ///< Create Startup use RAS and Signal
       FeatureBase      =4,        ///< Create Startup use only Startup
-      FeatureBaseAll   =5,        ///< Create Startup use RAS and Signal
-      FeatureBaseRas   =6,        ///< Create Startup use RAS
-      FeatureBaseSignal=7,          ///< Create Base use Signal
       FeatureRas       =8,        ///< Create Registering GK
       FeaturePresence  =10,       ///< Create Call Setup/Advertise in Presence
       FeatureSignal    =16        ///< Create Call Setup
@@ -765,7 +763,7 @@ class H460_Feature : public H225_FeatureDescriptor
     /** Get the purpose of the the Feature whether for Signalling,RAS or both. This determines
         when the class is instantized
       */
-    static int GetPurpose()    { return FeatureBase; };
+    static int GetPurpose()    { return FeatureBaseAll; };
 
     /** Get the Feature Identifier
       */
@@ -1187,13 +1185,12 @@ template <class className> class H460PluginServiceDescriptor : public PDevicePlu
     virtual bool  ValidateDeviceName(const PString & deviceName, int userData) const 
     { 
          PStringArray devices = className::GetFeatureName(); 
-         if ((deviceName == devices[0]) &&
-             (className::GetPurpose() >= userData) && 
-             (className::GetPurpose() < userData*2)) {
-
+         if (deviceName == devices[0]) {
+             int use = className::GetPurpose();
+             if (use == H460_Feature::FeatureBaseAll || use == userData) 
                 return true; 
-         } else
-                return false;
+         } 
+         return false;
     } 
 };
 
