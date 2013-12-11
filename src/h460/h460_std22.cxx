@@ -40,7 +40,7 @@
 
 #include <h323ep.h>
 #include <h323con.h>
-#include <h460/h460_Std22.h>
+#include <h460/h460_std22.h>
 #include <h460/h4609.h>
 #include <h460/h460.h>
 
