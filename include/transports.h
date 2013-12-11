@@ -207,7 +207,7 @@ public:
     PBoolean HasSecurity();
 
     void EnableTLS(PBoolean enable); 
-    PBoolean IsTLSEnabled();
+    PBoolean IsTLSEnabled() const;
 
     void SetRemoteTLSAddress(const H323TransportAddress & address);
     H323TransportAddress GetRemoteTLSAddress();
@@ -589,6 +589,10 @@ class H323Transport : public PIndirectChannel
       */
     virtual PBoolean IsRASTunnelled()  { return false; }
 
+   /**Initialise Security
+      */
+    virtual PBoolean InitialiseSecurity(H323TransportSecurity * /*security*/) { return false; }
+
 #ifdef H323_TLS
    /**Whether the Transport is secured
       */
@@ -764,7 +768,6 @@ class H323ListenerTCP : public H323Listener
 
     WORD GetListenerPort() const { return listener.GetPort(); }
 
-
   protected:
     /**Handle incoming H.323 connections and dispatch them in new threads
        based on the H323Transport class. This is defined in the descendent
@@ -923,6 +926,9 @@ class H323TransportTCP : public H323TransportIP
       */
     virtual PBoolean IsListening() const;
 
+    /**Initialise Transport Security.
+      */
+    virtual PBoolean InitialiseSecurity(H323TransportSecurity * security);
 
   protected:
     /**This callback is executed when the Open() function is called with

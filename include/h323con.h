@@ -3066,6 +3066,15 @@ class H323Connection : public PObject
   //@}
 #endif
 
+#ifdef H323_TLS
+  /**@name Signalling Security */
+  //@{
+    /** Set Signalling Security
+     */
+    virtual void SetSignallingSecurity(const H323TransportSecurity & m_callSecurity);
+  //@}
+#endif
+
 #ifdef H323_H248
   /**@name Call Service Control Session */
   //@{
@@ -3460,6 +3469,8 @@ class H323Connection : public PObject
     PMutex NATSocketMutex;
     std::map<unsigned,NAT_Sockets> m_NATSockets;
 #endif
+
+    H323TransportSecurity m_transportSecurity;
 
 };
 

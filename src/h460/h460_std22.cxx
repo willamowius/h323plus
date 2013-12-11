@@ -199,8 +199,8 @@ void H460_FeatureStd22::OnReceiveAdmissionConfirm(const H225_FeatureDescriptor &
    H323TransportSecurity m_callSecurity;
    ReadFeature(&m_callSecurity,feat);
 
-
-   // TODO: Enable Security on the call.
+   if (CON)
+       CON->SetSignallingSecurity(m_callSecurity);
 }
 
 #ifdef _MSC_VER

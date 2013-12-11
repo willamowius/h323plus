@@ -796,7 +796,7 @@ void H323TransportSecurity::EnableTLS(PBoolean enable)
         CLEARBIT(m_securityMask,e_tls)
 }
 
-PBoolean H323TransportSecurity::IsTLSEnabled()
+PBoolean H323TransportSecurity::IsTLSEnabled() const
 {
     return CHECKBIT(m_securityMask,e_tls);
 }
@@ -970,7 +970,6 @@ PBoolean H323Transport::Close()
 
 PBoolean H323Transport::HandleSignallingSocket(H323SignalPDU & pdu)
 {
-
   for (;;) {
       H323SignalPDU rpdu;
       if (!rpdu.Read(*this)) { 
@@ -1442,7 +1441,7 @@ H323TransportTCP::~H323TransportTCP()
 PBoolean H323TransportTCP::OnOpen()
 {
 #ifdef H323_TLS
-    if (context)
+    if (ssl)  // have valid SSL session
         m_secured = PSSLChannel::OnOpen();
 #endif
     return OnSocketOpen();
@@ -1514,6 +1513,31 @@ PBoolean H323TransportTCP::Close()
 PBoolean H323TransportTCP::SetRemoteAddress(const H323TransportAddress & address)
 {
   return address.GetIpAndPort(remoteAddress, remotePort, "tcp");
+}
+
+PBoolean H323TransportTCP::InitialiseSecurity(H323TransportSecurity * security)
+{
+#ifdef H323_TLS
+    if (!security->IsTLSEnabled())
+        return true;
+
+    if (context)
+        return true;
+   		
+    context = endpoint.GetTransportContext();
+    if (!context) {
+		PTRACE(1, "TLS\tError No Context");
+		return false;
+    }
+        
+    ssl = SSL_new(*context);
+    if (!ssl) {
+		PTRACE(1, "TLS\tError creating SSL object");
+		return false;
+	}
+	SSL_set_fd(ssl, GetHandle()); 
+#endif
+    return true;
 }
 
 PBoolean H323TransportTCP::ExtractPDU(const PBYTEArray & pdu, PINDEX & pduLen)

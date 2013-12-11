@@ -2529,6 +2529,15 @@ H323Connection::CallEndReason H323Connection::SendSignalSetup(const PString & al
   if (H323SetLanguages(localLanguages, setup.m_language))
      setup.IncludeOptionalField(H225_Setup_UUIE::e_language);
 
+  if (gatekeeper != NULL) {
+      if (signallingChannel->InitialiseSecurity(&m_transportSecurity) &&
+          !m_transportSecurity.GetRemoteTLSAddress().IsEmpty()) {
+          gatekeeperRoute = m_transportSecurity.GetRemoteTLSAddress();
+          PTRACE(4, "H225\tChanged remote address to secure " << gatekeeperRoute);
+      }
+  } else
+    signallingChannel->InitialiseSecurity(endpoint.GetTransportSecurity());
+    
   if (!signallingChannel->IsOpen() && !signallingChannel->SetRemoteAddress(gatekeeperRoute)) {
     PTRACE(1, "H225\tInvalid "
            << (gatekeeperRoute != address ? "gatekeeper" : "user")
@@ -7022,6 +7031,13 @@ void H323Connection::OnMediaEncryption(unsigned session, H323Channel::Directions
 {
     endpoint.OnMediaEncryption(session, dir, cipher);
 }
+#endif
+
+#ifdef H323_TLS
+ void H323Connection::SetSignallingSecurity(const H323TransportSecurity & m_callSecurity)
+ {
+     m_transportSecurity = m_callSecurity;
+ }
 #endif
 
 #ifdef H323_SIGNAL_AGGREGATE
