@@ -183,6 +183,7 @@ H46018Transport::H46018Transport(H323EndPoint & endpoint,
 #else
 H46018Transport::H46018Transport(H323EndPoint & endpoint, 
                                  PIPSocket::Address binding
+                )
    : H323TransportTCP(endpoint, binding)
 #endif
 {
