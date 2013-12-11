@@ -501,9 +501,9 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
         SetH235MediaEncryption(encyptRequest, ncipher);
 #ifdef H323_H235_AES256
         if (ncipher > encypt128) {
-            cout << "Enabled Media Encryption AES" << ncipher << " Loading..." << endl;
+            cout << "Enabled Media Encryption AES" << ncipher << " Loading...";
             EncryptionCacheInitialise();
-            cout << "ok.." << endl;
+            cout << "ok." << endl;
         } else
 #endif
             cout << "Enabled Media Encryption AES" << ncipher << endl;
