@@ -49,6 +49,10 @@
  #endif
 #endif
 
+#ifdef H323_TLS
+#include <openssl/ssl.h>
+#endif
+
 // TCP KeepAlive 
 static int KeepAliveInterval = 19;
 
@@ -875,13 +879,21 @@ H323Listener * H323ListenerList::GetTLSListener() const
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef H323_TLS
-H323Transport::H323Transport(H323EndPoint & end, PSSLContext * context, PBoolean autoDeleteContext)
-  : PSSLChannel(context, autoDeleteContext), endpoint(end), m_secured(false)
+H323Transport::H323Transport(H323EndPoint & end, PSSLContext * _context, PBoolean autoDeleteContext)
+  : PSSLChannel(_context, autoDeleteContext), endpoint(end), m_secured(false)
+{
+    if (!_context) {  // Delete the context that was autoCreated in PSSLChannel. - Very Annoying - SH
+        SSL_shutdown(ssl);
+        SSL_free(ssl);
+        ssl = NULL;
+        delete context;
+        context = NULL;
+    }
 #else
 H323Transport::H323Transport(H323EndPoint & end)
   : endpoint(end)
-#endif
 {
+#endif
   thread = NULL;
   canGetInterface = FALSE;
 }
@@ -1430,7 +1442,7 @@ H323TransportTCP::~H323TransportTCP()
 PBoolean H323TransportTCP::OnOpen()
 {
 #ifdef H323_TLS
-    if (endpoint.IsTLSEnabled())
+    if (context)
         m_secured = PSSLChannel::OnOpen();
 #endif
     return OnSocketOpen();
