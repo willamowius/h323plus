@@ -826,6 +826,12 @@ PBoolean H323TransportSecurity::IsIPSecEnabled()
     return CHECKBIT(m_securityMask,e_ipsec);
 }
 
+void H323TransportSecurity::Reset()
+{
+    m_securityMask = 0;
+    m_remoteTLSAddress = H323TransportAddress();
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 H323Listener::H323Listener(H323EndPoint & end, H323TransportSecurity::Method security)

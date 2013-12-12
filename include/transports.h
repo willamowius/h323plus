@@ -215,6 +215,8 @@ public:
     void EnableIPSec(PBoolean enable); 
     PBoolean IsIPSecEnabled();
 
+    void Reset();
+
 protected:
     int m_securityMask;
     H323TransportAddress m_remoteTLSAddress;
