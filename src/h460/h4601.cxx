@@ -1382,9 +1382,10 @@ PTRACE(6,"H460\tRead FeatureSet " << PTracePDU(MessageID) << " PDU");
 
       H460_FeatureID ID;
 
-      if (fs.HasOptionalField(H225_FeatureSet::e_neededFeatures)) {
+      if (fs.HasOptionalField(H225_FeatureSet::e_neededFeatures) 
+          && fs.m_neededFeatures.GetSize()>0) {
         const H225_ArrayOf_FeatureDescriptor & fsn = fs.m_neededFeatures;
-          for (PINDEX i=0; i < fsn.GetSize(); i++) {
+          for (PINDEX i=fsn.GetSize()-1; i >= 0; --i) {  // iterate backwards
               H225_FeatureDescriptor & fd = fsn[i];
               ID = GetFeatureIDPDU(fd);
 
@@ -1393,9 +1394,10 @@ PTRACE(6,"H460\tRead FeatureSet " << PTracePDU(MessageID) << " PDU");
           }
       }
 
-      if (fs.HasOptionalField(H225_FeatureSet::e_desiredFeatures)) {
+      if (fs.HasOptionalField(H225_FeatureSet::e_desiredFeatures) 
+          && fs.m_desiredFeatures.GetSize()>0) {
         const H225_ArrayOf_FeatureDescriptor & fsd = fs.m_desiredFeatures;
-          for (PINDEX i=0; i < fsd.GetSize(); i++) {
+          for (PINDEX i=fsd.GetSize()-1; i >= 0; --i) {  // iterate backwards
               H225_FeatureDescriptor & fd = fsd[i];
               ID = GetFeatureIDPDU(fd);
 
@@ -1404,9 +1406,10 @@ PTRACE(6,"H460\tRead FeatureSet " << PTracePDU(MessageID) << " PDU");
           }
       }
 
-      if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
+      if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures) 
+          && fs.m_supportedFeatures.GetSize()>0) {
         const H225_ArrayOf_FeatureDescriptor & fss = fs.m_supportedFeatures; 
-          for (PINDEX i=0; i < fss.GetSize(); i++) {
+          for (PINDEX i=fss.GetSize()-1; i >= 0; --i) {  // iterate backwards
               H225_FeatureDescriptor & fd = fss[i];    
               ID = GetFeatureIDPDU(fd);
 
