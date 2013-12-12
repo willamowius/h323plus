@@ -672,6 +672,8 @@ PBoolean H46017Handler::CreateNewTransport()
 
     curtransport = new H46017Transport(ep,
                        PIPSocket::Address::GetAny(remoteAddress.GetIpVersion()), this);
+
+    curtransport->InitialiseSecurity(&m_callSecurity);
     curtransport->SetRemoteAddress(remoteAddress);
 
     if (curtransport->Connect()) {

@@ -299,6 +299,8 @@ private:
     PBoolean   m_h46026tunnel;
 #endif
 
+   H323TransportSecurity m_callSecurity;
+
 };
 
 //////////////////////////////////////////////////////////////////////
