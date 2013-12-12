@@ -882,13 +882,6 @@ H323Listener * H323ListenerList::GetTLSListener() const
 H323Transport::H323Transport(H323EndPoint & end, PSSLContext * _context, PBoolean autoDeleteContext)
   : PSSLChannel(_context, autoDeleteContext), endpoint(end), m_secured(false)
 {
-    if (!_context) {  // Delete the context that was autoCreated in PSSLChannel. - Very Annoying - SH
-        SSL_shutdown(ssl);
-        SSL_free(ssl);
-        ssl = NULL;
-        delete context;
-        context = NULL;
-    }
 #else
 H323Transport::H323Transport(H323EndPoint & end)
   : endpoint(end)
@@ -1518,11 +1511,18 @@ PBoolean H323TransportTCP::SetRemoteAddress(const H323TransportAddress & address
 PBoolean H323TransportTCP::InitialiseSecurity(H323TransportSecurity * security)
 {
 #ifdef H323_TLS
-    if (!security->IsTLSEnabled())
-        return true;
+    // Delete any context that was autoCreated in PSSLChannel. - Very Annoying - SH
+    if (context) {
+        SSL_shutdown(ssl);
+        SSL_free(ssl);
+        ssl = NULL;
+        delete context;
+        context = NULL;
+    }
 
-    if (context)
+    if (!security->IsTLSEnabled()) {
         return true;
+    }
    		
     context = endpoint.GetTransportContext();
     if (!context) {
