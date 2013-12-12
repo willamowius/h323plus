@@ -560,6 +560,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
 #ifdef H323_TLS   // Initialise TLS
     bool useTLS = args.HasOption("tls");
     if (useTLS) {
+        DisableH245Tunneling(false);  // Tunneling must be used with TLS
         if (args.HasOption("tls-cafile"))
         useTLS = TLS_SetCAFile(args.GetOptionString("tls-cafile"));
         if (useTLS && args.HasOption("tls-cert"))
