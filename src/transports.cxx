@@ -1209,7 +1209,10 @@ PBoolean H323ListenerTCP::Close()
 
 H323Transport * H323ListenerTCP::CreateTransport(const PIPSocket::Address & address)
 {
-    return new H323TransportTCP(endpoint, address);
+    H323TransportSecurity m_callSecurity;
+    H323TransportTCP * transport = new H323TransportTCP(endpoint, address);
+    transport->InitialiseSecurity(&m_callSecurity);
+    return transport;
 }
 
 H323Transport * H323ListenerTCP::Accept(const PTimeInterval & timeout)
