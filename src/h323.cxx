@@ -3019,7 +3019,9 @@ PBoolean H323Connection::StartControlChannel(const H225_TransportAddress & h245A
   if (h245Address.GetTag() == H225_TransportAddress::e_ip6Address)
            m_version = 6;
 
+  H323TransportSecurity m_h245Security;
   controlChannel = new H323TransportTCP(endpoint, PIPSocket::Address::GetAny(m_version));
+  controlChannel->InitialiseSecurity(&m_h245Security);
   if (!controlChannel->SetRemoteAddress(h245Address)) {
     PTRACE(1, "H225\tCould not extract H245 address");
     delete controlChannel;
