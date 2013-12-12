@@ -78,6 +78,7 @@ public:
     virtual PBoolean OnSendAdmissionRequest(H225_FeatureDescriptor & pdu);
     virtual void OnReceiveAdmissionConfirm(const H225_FeatureDescriptor & pdu);
 
+    virtual void OnReceiveServiceControlIndication(const H225_FeatureDescriptor & pdu);
 
 private:
     H323EndPoint * EP;

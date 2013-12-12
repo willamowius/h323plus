@@ -43,6 +43,9 @@
 #include <h460/h460_std22.h>
 #include <h460/h4609.h>
 #include <h460/h460.h>
+#ifdef H323_H46018
+#include <h460/h460_std18.h>
+#endif
 
 
 #ifdef _MSC_VER
@@ -202,6 +205,22 @@ void H460_FeatureStd22::OnReceiveAdmissionConfirm(const H225_FeatureDescriptor &
    if (CON)
        CON->SetSignallingSecurity(m_callSecurity);
 }
+
+void H460_FeatureStd22::OnReceiveServiceControlIndication(const H225_FeatureDescriptor & pdu) 
+{
+   H460_FeatureStd * feat = PRemoveConst(H460_FeatureStd,&(const H460_FeatureStd &)pdu);
+
+   H323TransportSecurity m_callSecurity;
+   ReadFeature(&m_callSecurity,feat);
+
+#ifdef H323_H46018
+    if (EP && EP->GetGatekeeper()->GetFeatures().HasFeature(18)) {
+        H460_Feature * feat = EP->GetGatekeeper()->GetFeatures().GetFeature(18);
+        if (feat)
+            ((H460_FeatureStd18 *)feat)->SetTransportSecurity(m_callSecurity);
+    }
+#endif
+};
 
 #ifdef _MSC_VER
 #pragma warning(default : 4239)
