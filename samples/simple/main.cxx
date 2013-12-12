@@ -495,14 +495,16 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
 #ifdef H323_H235
       if (args.HasOption('m'))  {
         H235MediaCipher ncipher = encypt128;
-        unsigned maxtoken = 1024;
 #ifdef H323_H235_AES256
+        unsigned maxtoken = 2048;
         unsigned cipher = args.GetOptionString('m').AsInteger();
         if (cipher >= encypt192) ncipher = encypt192;
         if (cipher >= encypt256) ncipher = encypt256;
         if (args.HasOption("maxtoken")) {
           maxtoken = args.GetOptionString("maxtoken").AsInteger();
         }
+#else
+        unsigned maxtoken = 1024;
 #endif
         SetH235MediaEncryption(encyptRequest, ncipher, maxtoken);
 #ifdef H323_H235_AES256
