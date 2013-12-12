@@ -386,6 +386,11 @@ H46018Handler::~H46018Handler()
     EP.GetNatMethods().RemoveMethod("H46019");
 }
 
+void H46018Handler::SetTransportSecurity(const H323TransportSecurity & callSecurity)
+{
+    m_callSecurity = callSecurity;
+}
+
 PBoolean H46018Handler::CreateH225Transport(const PASN_OctetString & information)
 {
 
@@ -426,14 +431,19 @@ void H46018Handler::SocketThread(PThread &, INT)
     }
 
     H46018Transport * transport = new H46018Transport(EP, PIPSocket::Address::GetAny(m_address.GetIpVersion()));
-    transport->SetRemoteAddress(m_address);
+    transport->InitialiseSecurity(&m_callSecurity);
+    if (m_callSecurity.IsTLSEnabled() && !m_callSecurity.GetRemoteTLSAddress().IsEmpty()) {
+        transport->SetRemoteAddress(m_callSecurity.GetRemoteTLSAddress());
+        m_callSecurity.Reset();
+    } else
+        transport->SetRemoteAddress(m_address);
 
     if (transport->Connect(m_callId)) {
         PTRACE(3, "H46018\tConnected to " << transport->GetRemoteAddress());
         new H46018TransportThread(EP, transport);
         lastCallIdentifer = m_callId.AsString();
     } else {
-        PTRACE(3, "H46018\tCALL ABORTED: Failed to TCP Connect to " << transport->GetRemoteAddress());
+        PTRACE(3, "H46018\tCALL ABORTED: Failed connect to " << transport->GetRemoteAddress());
     }
 
     m_address = H323TransportAddress();

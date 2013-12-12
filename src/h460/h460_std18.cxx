@@ -92,6 +92,12 @@ void H460_FeatureStd18::AttachEndPoint(H323EndPoint * _ep)
     }
 }
 
+void H460_FeatureStd18::SetTransportSecurity(const H323TransportSecurity & callSecurity)
+{
+    if (handler)
+        handler->SetTransportSecurity(callSecurity);
+}
+
 PBoolean H460_FeatureStd18::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu) 
 { 
     if (!isEnabled)

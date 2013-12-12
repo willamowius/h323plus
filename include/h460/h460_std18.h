@@ -67,12 +67,14 @@ public:
     // Universal Declarations Every H460 Feature should have the following
     virtual void AttachEndPoint(H323EndPoint * _ep);
 
-    static PStringArray GetFeatureName() { return PStringArray("Std18"); };
-    static PStringArray GetFeatureFriendlyName() { return PStringArray("NatTraversal-H.460.18"); };
-    static int GetPurpose()	{ return FeatureRas; };
-	static PStringArray GetIdentifier() { return PStringArray("18"); };
+    static PStringArray GetFeatureName() { return PStringArray("Std18"); }
+    static PStringArray GetFeatureFriendlyName() { return PStringArray("NatTraversal-H.460.18"); }
+    static int GetPurpose()	{ return FeatureRas; }
+	static PStringArray GetIdentifier() { return PStringArray("18"); }
 
 	virtual PBoolean CommonFeature() { return isEnabled; }
+
+    void SetTransportSecurity(const H323TransportSecurity & callSecurity);
 
     /////////////////////
     // H.460.18 Messages

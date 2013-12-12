@@ -172,7 +172,7 @@ class H46018Transport  : public H323TransportTCP
 
      PBoolean   isConnected;
      PBoolean   remoteShutDown;
-     PBoolean    closeTransport;
+     PBoolean   closeTransport;
 };
 
 
@@ -202,6 +202,8 @@ class H46018Handler : public PObject
 #ifdef H323_H46024A
     void H46024ADirect(bool reply, const PString & token);
 #endif
+
+    void SetTransportSecurity(const H323TransportSecurity & callSecurity);
         
   protected:    
     H323EndPoint & EP;
@@ -219,6 +221,8 @@ class H46018Handler : public PObject
     PThread * SocketCreateThread;
     PDECLARE_NOTIFIER(PThread, H46018Handler, SocketThread);
     PBoolean m_h46018inOperation;
+
+    H323TransportSecurity m_callSecurity;
 };
 
 
