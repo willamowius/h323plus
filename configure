@@ -661,9 +661,7 @@ NOVIDEO
 NOAUDIOCODECS
 NOTRACE
 HAS_PTLIB_LIB_MAK
-HAS_PTLIB_MAK
 PTLIBDIR
-PTLIB_LINKER_ARGS
 PTLIB_CXXFLAGS
 target_cpu
 target_os
@@ -4124,13 +4122,11 @@ fi
     target_os=`${PKG_CONFIG} --variable=target_os ptlib`
     target_cpu=`${PKG_CONFIG} --variable=target_cpu ptlib`
     PTLIB_CXXFLAGS=`${PKG_CONFIG} --cflags ptlib`
-    PTLIB_LINKER_ARGS=`${PKG_CONFIG} --libs ptlib`
     PT_LIBDIR=`${PKG_CONFIG} --variable=libdir ptlib`
     PT_LIBDIR=${PTLIBDIR}
     PT_MAJOR_VERSION=`echo $PTVERSION | cut -d'.' -f1`
     PT_MINOR_VERSION=`echo $PTVERSION | cut -d'.' -f2`
     PT_BUILD_NUMBER=`echo $PTVERSION | cut -d'.' -f3`
-
 
 
 
@@ -4191,7 +4187,6 @@ $as_echo "Build version less than required $REQUIRED_PTLIB_BUILD" >&6; }
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: ok" >&5
 $as_echo "ok" >&6; }
 fi
-
 
 
 

@@ -42,7 +42,6 @@ export target_cpu=@target_cpu@
 export PTLIB_CXXFLAGS=@PTLIB_CXXFLAGS@
 export OSTYPE=@target_os@
 export PLATFORM_TYPE=@target_cpu@
-export PTLIB_LINKER_ARGS=@PTLIB_LINKER_ARGS@
 endif
 
 default :: optshared

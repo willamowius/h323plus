@@ -120,7 +120,6 @@ if test "${HAS_PTLIB_LIB_MAK:-unset}" = "unset" ; then
     target_os=`${PKG_CONFIG} --variable=target_os ptlib`
     target_cpu=`${PKG_CONFIG} --variable=target_cpu ptlib`
     PTLIB_CXXFLAGS=`${PKG_CONFIG} --cflags ptlib`
-    PTLIB_LINKER_ARGS=`${PKG_CONFIG} --libs ptlib`
     PT_LIBDIR=`${PKG_CONFIG} --variable=libdir ptlib`
     PT_LIBDIR=${PTLIBDIR}
     PT_MAJOR_VERSION=`echo $PTVERSION | cut -d'.' -f1`
@@ -130,7 +129,6 @@ if test "${HAS_PTLIB_LIB_MAK:-unset}" = "unset" ; then
     AC_SUBST(target_os)
     AC_SUBST(target_cpu)
     AC_SUBST(PTLIB_CXXFLAGS)
-    AC_SUBST(PTLIB_LINKER_ARGS)
     AC_SUBST(PT_LIBDIR)
   fi
 fi
@@ -181,7 +179,6 @@ else
 fi
 
 AC_SUBST(PTLIBDIR)
-AC_SUBST(HAS_PTLIB_MAK)
 AC_SUBST(HAS_PTLIB_LIB_MAK)
 
 dnl ########################################################################
