@@ -356,6 +356,8 @@ PBoolean GNUGKTransport::CreateNewTransport()
     H323TransportAddress remote = GetRemoteAddress();
     GNUGKTransport * transport = new GNUGKTransport(GetEndPoint(),
                                      PIPSocket::Address::GetAny(remote.GetIpVersion()),Feature,GKid);
+
+    transport->InitialiseSecurity(&m_callSecurity);
     transport->SetRemoteAddress(remote);
 
     if (transport->Connect()) {

@@ -142,6 +142,7 @@ class GNUGKTransport  : public H323TransportTCP
 	 PBoolean   remoteShutDown;
 	 PBoolean	closeTransport;
 	 
+     H323TransportSecurity m_callSecurity;
 };
 
 
