@@ -878,19 +878,19 @@ AC_SUBST(H323_AEC)
 dnl ########################################################################
 dnl check for disabling TLS support
 
-dnl MSWIN_DISPLAY file,TLS
-dnl MSWIN_DEFINE  file,H323_TLS
+dnl MSWIN_DISPLAY tls,TLS
+dnl MSWIN_DEFINE  tls,H323_TLS
 
-AC_ARG_ENABLE(file,
+AC_ARG_ENABLE(tls,
        [  --disable-tls           disable TLS support])
 if test "${enable_tls}x" = "x" ; then
-  enable_tls=$default_file
+  enable_tls=$default_tls
 fi
 if test "$enable_tls" = "yes" ; then
   H323_TLS=1
   AC_DEFINE(H323_TLS, 1, [Enable TLS support])
 else
-  H323_FILE=
+  H323_TLS=
   AC_MSG_NOTICE(Disabling TLS support)
 fi
 AC_SUBST(H323_TLS)

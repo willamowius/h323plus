@@ -768,6 +768,7 @@ enable_t120
 enable_gnugk
 enable_file
 enable_aec
+enable_tls
 '
       ac_precious_vars='build_alias
 host_alias
@@ -4993,13 +4994,13 @@ fi
 
 
 
-# Check whether --enable-file was given.
-if test "${enable_file+set}" = set; then :
-  enableval=$enable_file;
+# Check whether --enable-tls was given.
+if test "${enable_tls+set}" = set; then :
+  enableval=$enable_tls;
 fi
 
 if test "${enable_tls}x" = "x" ; then
-  enable_tls=$default_file
+  enable_tls=$default_tls
 fi
 if test "$enable_tls" = "yes" ; then
   H323_TLS=1
@@ -5007,7 +5008,7 @@ if test "$enable_tls" = "yes" ; then
 $as_echo "#define H323_TLS 1" >>confdefs.h
 
 else
-  H323_FILE=
+  H323_TLS=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling TLS support" >&5
 $as_echo "$as_me: Disabling TLS support" >&6;}
 fi
