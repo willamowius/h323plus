@@ -1298,7 +1298,11 @@ H323ListenerTLS::~H323ListenerTLS()
 
 H323Transport * H323ListenerTLS::CreateTransport(const PIPSocket::Address & address)
 {
-    return new H323TransportTCP(endpoint,address,false,endpoint.GetTransportContext());
+    H323TransportSecurity m_callSecurity;
+    m_callSecurity.EnableTLS(true);
+    H323TransportTCP * transport = new H323TransportTCP(endpoint, address);
+    transport->InitialiseSecurity(&m_callSecurity);
+    return transport;
 }
 
 PBoolean H323ListenerTLS::SetUpTransportPDU(H245_TransportAddress & /*pdu*/,
