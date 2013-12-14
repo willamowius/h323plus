@@ -1735,8 +1735,6 @@ PBoolean H323TransportTCP::Connect()
 
   PTCPSocket * socket = new PTCPSocket(remotePort);
   Open(socket);
-  if (FinaliseSecurity(socket) && !SecureConnect())
-      return false;
 
   channelPointerMutex.StartRead();
 
@@ -1771,6 +1769,9 @@ PBoolean H323TransportTCP::Connect()
   }
 
   socket->SetReadTimeout(PMaxTimeInterval);
+
+  if (FinaliseSecurity(socket) && !SecureConnect())
+      return false;
 
   channelPointerMutex.EndRead();
 
