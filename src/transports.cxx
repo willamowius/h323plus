@@ -1230,8 +1230,9 @@ H323Transport * H323ListenerTCP::Accept(const PTimeInterval & timeout)
     unsigned m_version = GetTransportAddress().GetIpVersion();
     H323Transport * transport = CreateTransport(PIPSocket::Address::GetAny(m_version));
     transport->FinaliseSecurity(socket);
-    if (transport->Open(socket))
+    if (transport->Open(socket) && transport->SecureAccept()) {
         return transport;
+    }
 
     PTRACE(1, TypeAsString() << "\tFailed to open transport, connection not started.");
     delete transport;
@@ -1449,10 +1450,7 @@ H323TransportTCP::~H323TransportTCP()
 
 PBoolean H323TransportTCP::OnOpen()
 {
-#ifdef H323_TLS
-    if (ssl && SecureAccept())
-        m_secured = PSSLChannel::OnOpen();
-#endif
+    m_secured = (ssl != NULL);
     return OnSocketOpen();
 }
 
@@ -1807,7 +1805,7 @@ PBoolean H323TransportTCP::AcceptControlChannel(H323Connection & connection)
   h245listener->SetReadTimeout(endpoint.GetControlChannelStartTimeout());
   if (h245Socket->Accept(*h245listener)) {
       FinaliseSecurity(h245Socket);
-      if (Open(h245Socket))
+      if (Open(h245Socket) && SecureAccept())
             return true;
   }
 
