@@ -69,7 +69,7 @@ public:
     virtual void AttachEndPoint(H323EndPoint * _ep);
     virtual void AttachConnection(H323Connection * _con);
 
-    static PStringArray GetFeatureName() { return PStringArray("X1"); };
+    static PStringArray GetFeatureName() { return PStringArray("OIDX1"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("ASSET"); };
     static int GetPurpose()    { return FeatureSignal; };
     static PStringArray GetIdentifier();
