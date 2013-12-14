@@ -1188,9 +1188,13 @@ PBoolean H460_FeatureSet::LoadFeatureSet(int inst, H323Connection * con)
   	 H460FeatureList::const_iterator it = featurelist.begin();
 	 while (it != featurelist.end()) {
         H460_Feature * feat = NULL;
-        if (baseSet && baseSet->HasFeature(*it->second))
-            feat = baseSet->GetFeature(*it->second);
-        else {
+        if (baseSet && baseSet->HasFeature(*it->second)) {
+            H460_Feature * tempfeat = baseSet->GetFeature(*it->second);
+            if (tempfeat->GetPurpose() == H460_Feature::FeatureBaseClone)
+                feat = (H460_Feature*)tempfeat->Clone();
+            else
+                feat = tempfeat;
+        } else {
             feat = H460_Feature::CreateFeature(it->first,inst);
             if ((feat) && (ep)) 
                 feat->AttachEndPoint(ep);

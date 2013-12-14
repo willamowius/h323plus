@@ -600,8 +600,9 @@ class H460_Feature : public H225_FeatureDescriptor
 
 
     enum {
-      FeatureBaseAll   =0,        ///< Create Startup use RAS and Signal
-      FeatureBase      =4,        ///< Create Startup use only Startup
+      FeatureBaseAll   =0,        ///< Create Startup share instance with RAS and Signal
+      FeatureBaseClone =1,        ///< Initialise Startup clone instance in RAS and Signal
+      FeatureBase      =4,        ///< Create Startup 
       FeatureRas       =8,        ///< Create Registering GK
       FeaturePresence  =10,       ///< Create Call Setup/Advertise in Presence
       FeatureSignal    =16        ///< Create Call Setup
@@ -1187,7 +1188,7 @@ template <class className> class H460PluginServiceDescriptor : public PDevicePlu
          PStringArray devices = className::GetFeatureName(); 
          if (deviceName == devices[0]) {
              int use = className::GetPurpose();
-             if (use == H460_Feature::FeatureBaseAll || use == userData) 
+             if (use == H460_Feature::FeatureBaseAll || use == H460_Feature::FeatureBaseClone || use == userData) 
                 return true; 
          } 
          return false;
