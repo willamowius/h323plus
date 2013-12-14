@@ -65,7 +65,7 @@ H460_FEATURE(Std22);
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 H460_FeatureStd22::H460_FeatureStd22()
-: H460_FeatureStd(22), EP(NULL), isEnabled(false)
+: H460_FeatureStd(22), EP(NULL), CON(NULL), isEnabled(false)
 {
   PTRACE(6,"Std22\tInstance Created");
   FeatureCategory = FeatureSupported;
@@ -89,7 +89,7 @@ void H460_FeatureStd22::AttachConnection(H323Connection * _con)
 
 int H460_FeatureStd22::GetPurpose()
 {
-    return FeatureBaseAll; 
+    return FeatureBaseClone; 
 }
 
 PBoolean H460_FeatureStd22::FeatureAdvertised(int mtype)
@@ -197,6 +197,7 @@ PBoolean H460_FeatureStd22::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
 
 void H460_FeatureStd22::OnReceiveAdmissionConfirm(const H225_FeatureDescriptor & pdu)
 {
+
    H460_FeatureStd * feat = PRemoveConst(H460_FeatureStd,&(const H460_FeatureStd &)pdu);
 
    H323TransportSecurity m_callSecurity;
