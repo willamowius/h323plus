@@ -1450,7 +1450,10 @@ H323TransportTCP::~H323TransportTCP()
 
 PBoolean H323TransportTCP::OnOpen()
 {
-    m_secured = (ssl != NULL);
+#if H323_TLS
+    if (ssl)
+        m_secured = PSSLChannel::OnOpen();
+#endif
     return OnSocketOpen();
 }
 
