@@ -51,6 +51,7 @@
 
 #ifdef H323_TLS
 #include <openssl/ssl.h>
+#include <openssl/err.h>
 #endif
 
 // TCP KeepAlive 
@@ -938,12 +939,14 @@ PBoolean H323Transport::OnSocketOpen()
     return true;
 }
 
-#ifdef H323_TLS
 PBoolean H323Transport::IsTransportSecure()
 {
+#ifdef H323_TLS
     return m_secured;
-}
+#else
+    return false;
 #endif
+}
 
 PBoolean H323Transport::OnOpen()
 {
@@ -1211,7 +1214,6 @@ H323Transport * H323ListenerTCP::CreateTransport(const PIPSocket::Address & addr
 {
     H323TransportSecurity m_callSecurity;
     H323TransportTCP * transport = new H323TransportTCP(endpoint, address);
-    transport->InitialiseSecurity(&m_callSecurity);
     return transport;
 }
 
@@ -1227,8 +1229,9 @@ H323Transport * H323ListenerTCP::Accept(const PTimeInterval & timeout)
   if (socket->Accept(listener)) {
     unsigned m_version = GetTransportAddress().GetIpVersion();
     H323Transport * transport = CreateTransport(PIPSocket::Address::GetAny(m_version));
+    transport->FinaliseSecurity(socket);
     if (transport->Open(socket))
-      return transport;
+        return transport;
 
     PTRACE(1, TypeAsString() << "\tFailed to open transport, connection not started.");
     delete transport;
@@ -1447,7 +1450,7 @@ H323TransportTCP::~H323TransportTCP()
 PBoolean H323TransportTCP::OnOpen()
 {
 #ifdef H323_TLS
-    if (ssl)  // have valid SSL session
+    if (ssl && SecureAccept())
         m_secured = PSSLChannel::OnOpen();
 #endif
     return OnSocketOpen();
@@ -1488,19 +1491,11 @@ PBoolean H323TransportTCP::OnSocketOpen()
   }
 #endif //P_VXWORKS
 
-
-#ifdef H323_TLS
   PTRACE(2, "H323TCP\tStarted connection: "
             " secured=" << (IsTransportSecure() ? "true," : "false,") << ","
             " host=" << remoteAddress << ':' << remotePort << ","
             " if=" << localAddress << ':' << localPort << ","
             " handle=" << socket->GetHandle());
-#else
-  PTRACE(2, "H323TCP\tStarted connection: "
-            " host=" << remoteAddress << ':' << remotePort << ","
-            " if=" << localAddress << ':' << localPort << ","
-            " handle=" << socket->GetHandle());
-#endif
 
   return TRUE;
 }
@@ -1531,11 +1526,11 @@ PBoolean H323TransportTCP::InitialiseSecurity(H323TransportSecurity * security)
         ssl = NULL;
         delete context;
         context = NULL;
+        autoDeleteContext = false;
     }
 
-    if (!security->IsTLSEnabled()) {
+    if (!security->IsTLSEnabled())
         return true;
-    }
    		
     context = endpoint.GetTransportContext();
     if (!context) {
@@ -1548,7 +1543,6 @@ PBoolean H323TransportTCP::InitialiseSecurity(H323TransportSecurity * security)
 		PTRACE(1, "TLS\tError creating SSL object");
 		return false;
 	}
-	SSL_set_fd(ssl, GetHandle()); 
 #endif
     return true;
 }
@@ -1661,6 +1655,77 @@ PBoolean H323TransportTCP::WritePDU(const PBYTEArray & pdu)
   return Write((const BYTE *)tpkt, packetLength);
 }
 
+PBoolean H323TransportTCP::FinaliseSecurity(PSocket * socket)
+{
+#ifdef H323_TLS
+    if (ssl && socket) {	
+        SSL_set_fd(ssl, socket->GetHandle());
+        return true;
+    }
+#endif
+    return false;
+}
+
+PBoolean H323TransportTCP::SecureConnect()
+{
+#ifdef H323_TLS
+    int ret = 0;
+    do {
+        ret = SSL_connect(ssl);
+        if (ret <= 0) {
+            char msg[256];
+            int err = SSL_get_error(ssl, ret);
+            switch (err) {
+                case SSL_ERROR_NONE:
+                    break;
+                case SSL_ERROR_SSL:
+                    ERR_error_string(ERR_get_error(), msg);
+                    PTRACE(1, "TLS\tTLS protocol error in SSL_connect(): " << err << " / " << msg);
+                    SSL_shutdown(ssl);
+                    return false;
+                    break;
+                case SSL_ERROR_SYSCALL:
+                    PTRACE(1, "TLS\tSyscall error in SSL_connect() errno=" << errno);
+                    switch (errno) {
+                        case 0:
+                            ret = 1;	// done
+                            break;
+                        case EAGAIN:
+                            break;
+                        default:
+                            ERR_error_string(ERR_get_error(), msg);
+                            PTRACE(1, "TLS\tTerminating connection: " << msg);
+                            SSL_shutdown(ssl);
+                            return false;
+                    };
+                    break;
+                case SSL_ERROR_WANT_READ:
+                    // just retry
+                    break;
+                case SSL_ERROR_WANT_WRITE:
+                    // just retry
+                    break;
+                default:
+                    ERR_error_string(ERR_get_error(), msg);
+                    PTRACE(1, "TLS\tUnknown error in SSL_connect(): " << err << " / " << msg);
+                    SSL_shutdown(ssl);
+                    return false;
+            }
+        }
+    } while (ret <= 0);
+#endif
+    return true;
+}
+
+PBoolean H323TransportTCP::SecureAccept()
+{
+#ifdef H323_TLS
+    if (ssl)
+        return PSSLChannel::Accept();
+#endif
+    return true;
+}
+
 
 PBoolean H323TransportTCP::Connect()
 {
@@ -1669,6 +1734,8 @@ PBoolean H323TransportTCP::Connect()
 
   PTCPSocket * socket = new PTCPSocket(remotePort);
   Open(socket);
+  if (FinaliseSecurity(socket) && !SecureConnect())
+      return false;
 
   channelPointerMutex.StartRead();
 
@@ -1712,7 +1779,7 @@ PBoolean H323TransportTCP::Connect()
 
 H323Transport * H323TransportTCP::CreateControlChannel(H323Connection & connection)
 {
-  H323TransportTCP * tcpTransport = new H323TransportTCP(endpoint, localAddress, TRUE);
+  H323TransportTCP * tcpTransport = new H323TransportTCP(endpoint, localAddress);
   tcpTransport->SetRemoteAddress(GetRemoteAddress());
   if (tcpTransport->IsListening()) // Listen() failed
     return tcpTransport;
@@ -1738,8 +1805,11 @@ PBoolean H323TransportTCP::AcceptControlChannel(H323Connection & connection)
   PTCPSocket * h245Socket = new PTCPSocket;
 
   h245listener->SetReadTimeout(endpoint.GetControlChannelStartTimeout());
-  if (h245Socket->Accept(*h245listener))
-    return Open(h245Socket);
+  if (h245Socket->Accept(*h245listener)) {
+      FinaliseSecurity(h245Socket);
+      if (Open(h245Socket))
+            return true;
+  }
 
   PTRACE(1, "H225\tAccept for H245 failed: " << h245Socket->GetErrorText());
   delete h245Socket;

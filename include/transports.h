@@ -595,11 +595,21 @@ class H323Transport : public PIndirectChannel
       */
     virtual PBoolean InitialiseSecurity(H323TransportSecurity * /*security*/) { return false; }
 
-#ifdef H323_TLS
+    /**Finalise Transport Security.
+      */
+    virtual PBoolean FinaliseSecurity(PSocket * /*socket*/) { return false; }
+
    /**Whether the Transport is secured
       */
     PBoolean IsTransportSecure();
-#endif
+
+    /**Do SSL Connect handshake
+      */
+    virtual PBoolean SecureConnect() { return false; }
+
+    /**Do SSL Accept handshake
+      */
+    virtual PBoolean SecureAccept() { return false; }
   //@}
 
   /**@name Member variable access */
@@ -931,6 +941,18 @@ class H323TransportTCP : public H323TransportIP
     /**Initialise Transport Security.
       */
     virtual PBoolean InitialiseSecurity(H323TransportSecurity * security);
+
+    /**Finalise Transport Security.
+      */
+    virtual PBoolean FinaliseSecurity(PSocket * socket);
+
+    /**Do SSL Connect handshake
+      */
+    virtual PBoolean SecureConnect();
+
+    /**Do SSL Accept handshake
+      */
+    virtual PBoolean SecureAccept();
 
   protected:
     /**This callback is executed when the Open() function is called with
