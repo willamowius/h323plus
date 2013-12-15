@@ -265,21 +265,13 @@ void H46017TransportThread::Main()
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef H323_TLS
+
+
 H46017Transport::H46017Transport(H323EndPoint & endpoint,
                                  PIPSocket::Address binding,
                                  H46017Handler * feat
-                                 ,PSSLContext * context, 
-                                 PBoolean autoDeleteContext
-                )
-   : H323TransportTCP(endpoint,binding,false,context,autoDeleteContext), 
-#else
-H46017Transport::H46017Transport(H323EndPoint & endpoint,
-                                 PIPSocket::Address binding,
-                                 H46017Handler * feat
-                )    
+                ) 
    : H323TransportTCP(endpoint,binding), 
-#endif
      ReadTimeOut(PMaxTimeInterval), 
      Feature(feat), remoteShutDown(false), closeTransport(false), m_signalProcess(NULL)
  #ifdef H323_H46026

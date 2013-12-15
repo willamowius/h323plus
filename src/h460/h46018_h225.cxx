@@ -173,19 +173,10 @@ H46018SignalPDU::H46018SignalPDU(const OpalGloballyUniqueID & callIdentifier)
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef H323_TLS
-H46018Transport::H46018Transport(H323EndPoint & endpoint,
-                                 PIPSocket::Address binding,
-                                 PSSLContext * context, 
-                                 PBoolean autoDeleteContext
-                )
-   : H323TransportTCP(endpoint,binding,false,context,autoDeleteContext) 
-#else
 H46018Transport::H46018Transport(H323EndPoint & endpoint, 
                                  PIPSocket::Address binding
                 )
    : H323TransportTCP(endpoint, binding)
-#endif
 {
     ReadTimeOut = PMaxTimeInterval;
     isConnected = false;

@@ -118,10 +118,6 @@ class H46017Transport  : public H323TransportTCP
       H323EndPoint & endpoint,        /// H323 End Point object
       PIPSocket::Address binding,     /// Bind Interface
       H46017Handler * feat              /// Feature
-#ifdef H323_TLS
-      ,PSSLContext * context = NULL,   ///< Context for SSL channel
-      PBoolean autoDeleteContext = false  ///< Flag for context to be automatically deleted.
-#endif
     );
 
     ~H46017Transport();
