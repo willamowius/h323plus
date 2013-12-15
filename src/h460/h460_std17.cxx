@@ -79,10 +79,25 @@ static PBoolean FindSRVRecords(std::vector<LookupRecord> & recs,
   return found;
 }
 
-static PBoolean FindRoutes(const PString & domain, std::vector<LookupRecord> & routes)
+static PBoolean FindRoutes(const PString & domain, std::vector<std::pair<LookupRecord,H323TransportSecurity> > & routes, H323TransportSecurity * sec)
 {
-  FindSRVRecords(routes, domain, "_h323rs._tcp.");
-  return routes.size() != 0;
+    std::vector<LookupRecord> secureRoute;
+    std::vector<LookupRecord>::iterator r;
+    if (sec && sec->IsTLSEnabled()) {
+        H323TransportSecurity tls;
+        tls.EnableTLS(true);
+        FindSRVRecords(secureRoute, domain, "_h323rst._tcp.");
+        for (r = secureRoute.begin(); r != secureRoute.end(); ++r)
+           routes.push_back(std::make_pair(*r,tls));
+    }
+        
+    std::vector<LookupRecord> route;
+    H323TransportSecurity unsecure;
+    FindSRVRecords(route, domain, "_h323rs._tcp.");
+    for (r = route.begin(); r != route.end(); ++r)
+       routes.push_back(std::make_pair(*r,unsecure));
+
+    return routes.size() != 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -126,10 +141,14 @@ int H460_FeatureStd17::GetPurpose()
 
 PBoolean H460_FeatureStd17::Initialise(const PString & remoteAddr, PBoolean srv)
 {
+    return Initialise(NULL, remoteAddr, srv);
+}
 
+PBoolean H460_FeatureStd17::Initialise(H323TransportSecurity * sec, const PString & remoteAddr, PBoolean srv)
+{
  if (!srv) {  // We are not doing SRV lookup
     H323TransportAddress rem(remoteAddr);
-    if (!InitialiseTunnel(rem)) {
+    if (!InitialiseTunnel(rem,*sec)) {
          PTRACE(2,"H46017\tTunnel to " << rem << " Failed!"); 
          return false;
     }
@@ -142,20 +161,22 @@ PBoolean H460_FeatureStd17::Initialise(const PString & remoteAddr, PBoolean srv)
     return (m_handler->RegisterGatekeeper());
 
  } else {
-    std::vector<LookupRecord> routes;
+    typedef std::vector<std::pair<LookupRecord,H323TransportSecurity> > type_routes;
+    type_routes routes;
 
-    if (!FindRoutes(remoteAddr,routes)) {
-        PTRACE(2,"H46017\tNo Gatekeeper SRV Records (_h323rs._tcp.) found!");
+    if (!FindRoutes(remoteAddr,routes,sec)) {
+        PTRACE(2,"H46017\tNo Gatekeeper registration SRV Records found!");
         return false;
     }
 
-    std::vector<LookupRecord>::const_iterator r;
+    type_routes::const_iterator r;
     for (r = routes.begin(); r != routes.end(); ++r) {
-       const LookupRecord & rec = *r;
+       const LookupRecord & rec = r->first;
        H323TransportAddress rem(rec.addr,rec.port);
+       const H323TransportSecurity & sec = r->second;
 
-       if (!InitialiseTunnel(rem)) {
-         PTRACE(2,"H46017\tTunnel to " << rem << " Failed!"); 
+       if (!InitialiseTunnel(rem,sec)) {
+         PTRACE(2,"H46017\t" << (sec.IsTLSEnabled() ? "TLS " : "") << "Tunnel to " << rem << " Failed!"); 
          continue;
        }
 #ifdef H323_H46018
@@ -169,17 +190,15 @@ PBoolean H460_FeatureStd17::Initialise(const PString & remoteAddr, PBoolean srv)
     }
     return false;
  }
-
-
 }
 
 
-PBoolean H460_FeatureStd17::InitialiseTunnel(const H323TransportAddress & remoteAddr)
+PBoolean H460_FeatureStd17::InitialiseTunnel(const H323TransportAddress & remoteAddr, const H323TransportSecurity & sec)
 {
     if (!m_handler)
        m_handler = new H46017Handler(*EP, remoteAddr);
 
-    return m_handler->CreateNewTransport();
+    return m_handler->CreateNewTransport(sec);
 }
 
 
@@ -666,14 +685,14 @@ H46017Handler::~H46017Handler()
 }
 
 
-PBoolean H46017Handler::CreateNewTransport()
+PBoolean H46017Handler::CreateNewTransport(const H323TransportSecurity & security)
 {
     PTRACE(5, "H46017\tCreating Transport.");
 
     curtransport = new H46017Transport(ep,
                        PIPSocket::Address::GetAny(remoteAddress.GetIpVersion()), this);
 
-    curtransport->InitialiseSecurity(&m_callSecurity);
+    curtransport->InitialiseSecurity(&security);
     curtransport->SetRemoteAddress(remoteAddress);
 
     if (curtransport->Connect()) {

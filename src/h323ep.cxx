@@ -3702,7 +3702,7 @@ PBoolean H323EndPoint::H46017CreateConnection(const PString & gatekeeper, PBoole
    }
 
    registrationTimeToLive = PTimeInterval(0, 19);
-   m_registeredWithH46017 = h46017->Initialise(gatekeeper, useSRV);
+   m_registeredWithH46017 = h46017->Initialise(&m_transportSecurity, gatekeeper, useSRV);
    if (!m_registeredWithH46017) {
        PTRACE(4, "H.460.17 Gatekeeper connection failed");
        return false;
