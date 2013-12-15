@@ -1407,7 +1407,7 @@ H323TransportTCP::H323TransportTCP(H323EndPoint & end,
                                    PSSLContext * context, 
                                    PBoolean autoDeleteContext
                                    )
-  : H323TransportIP(end, binding, H323EndPoint::DefaultTcpPort, context, autoDeleteContext)
+: H323TransportIP(end, binding, end.IsTLSEnabled() ? H323EndPoint::DefaultTLSPort : H323EndPoint::DefaultTcpPort, context, autoDeleteContext)
 #else
 H323TransportTCP::H323TransportTCP(H323EndPoint & end,
                                    PIPSocket::Address binding,
