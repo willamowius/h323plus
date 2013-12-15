@@ -593,7 +593,7 @@ class H323Transport : public PIndirectChannel
 
    /**Initialise Security
       */
-    virtual PBoolean InitialiseSecurity(H323TransportSecurity * /*security*/) { return false; }
+    virtual PBoolean InitialiseSecurity(const H323TransportSecurity * /*security*/) { return false; }
 
     /**Finalise Transport Security.
       */
@@ -940,7 +940,7 @@ class H323TransportTCP : public H323TransportIP
 
     /**Initialise Transport Security.
       */
-    virtual PBoolean InitialiseSecurity(H323TransportSecurity * security);
+    virtual PBoolean InitialiseSecurity(const H323TransportSecurity * security);
 
     /**Finalise Transport Security.
       */

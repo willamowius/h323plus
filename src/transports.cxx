@@ -1517,7 +1517,7 @@ PBoolean H323TransportTCP::SetRemoteAddress(const H323TransportAddress & address
   return address.GetIpAndPort(remoteAddress, remotePort, "tcp");
 }
 
-PBoolean H323TransportTCP::InitialiseSecurity(H323TransportSecurity * security)
+PBoolean H323TransportTCP::InitialiseSecurity(const H323TransportSecurity * security)
 {
 #ifdef H323_TLS
     // Delete any context that was autoCreated in PSSLChannel. - Very Annoying - SH
