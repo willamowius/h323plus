@@ -266,8 +266,8 @@ H323_TLSContext::H323_TLSContext()
     SSL_CTX_set_options(context, SSL_OP_NO_SSLv2);	// remove unsafe SSLv2
     SSL_CTX_set_mode(context, SSL_MODE_AUTO_RETRY); // handle re-negotiations automatically
  
-    // Set the cipher to all. Let the gatekeeper decide to limit the acceptable ciphers.
-    PString cipherList = "ALL";
+    // no anonymous DH (ADH), no <= 64 bit (LOW), no export ciphers (EXP), no MD5 + RC4, no elliptic curve ciphers (ECDH + ECDSA)
+    PString cipherList = "ALL:!ADH:!LOW:!EXP:!MD5:!RC4:!ECDH:!ECDSA:@STRENGTH";
     SetCipherList(cipherList);
 
     SSL_CTX_set_info_callback(context, tls_info_cb);
