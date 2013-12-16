@@ -213,6 +213,10 @@ class H323_TLSContext : public PSSLContext
     */
     PBoolean UseCAFile(const PFilePath & caFile);
 
+    /**Use CA Directory.
+    */
+    PBoolean UseCADirectory(const PDirectory & certDir);
+
     /**Set User Certificate
     */
     PBoolean UseCertificate(const PFilePath & certFile);
@@ -226,17 +230,12 @@ class H323_TLSContext : public PSSLContext
     PBoolean Initialise();
    
   protected:
-    PFilePath       m_certFile;
-    PFilePath       m_privKey;
-    PFilePath       m_caFile;
-
-    PString         m_passphrase;
     PBoolean        m_useCA;
 
 };
 
 H323_TLSContext::H323_TLSContext() 
-: m_passphrase(PString()), m_useCA(false)
+: m_useCA(false)
 {
     // delete the default PTLIB context
     // as it is very buggy
@@ -266,9 +265,9 @@ H323_TLSContext::H323_TLSContext()
     context = SSL_CTX_new(SSLv23_method());	
     SSL_CTX_set_options(context, SSL_OP_NO_SSLv2);	// remove unsafe SSLv2
     SSL_CTX_set_mode(context, SSL_MODE_AUTO_RETRY); // handle re-negotiations automatically
-
-    // no anonymous DH (ADH), no <= 64 bit (LOW), no export ciphers (EXP), no MD5 + RC4 + SHA1, no elliptic curve ciphers (ECDH + ECDSA)
-    PString cipherList = "ALL:!ADH:!LOW:!EXP:!MD5:!RC4:!SHA1:!ECDH:!ECDSA:@STRENGTH";
+ 
+    // Set the cipher to all. Let the gatekeeper decide to limit the acceptable ciphers.
+    PString cipherList = "ALL";
     SetCipherList(cipherList);
 
     SSL_CTX_set_info_callback(context, tls_info_cb);
@@ -281,10 +280,22 @@ PBoolean H323_TLSContext::UseCAFile(const PFilePath & caFile)
         return false;
     }
 
-    m_caFile = caFile;
     char msg[256];
-    if (SSL_CTX_load_verify_locations(context, m_caFile, NULL) != 1) {
-        PTRACE(1, "TLS\tError loading CA file " << m_caFile);
+    if (SSL_CTX_load_verify_locations(context, caFile, NULL) != 1) {
+        PTRACE(1, "TLS\tError loading CA file " << caFile);
+        ERR_error_string(ERR_get_error(), msg);
+        PTRACE(1, "TLS\tOpenSSL error: " << msg);
+        return false;
+    }
+    m_useCA = SSL_CTX_set_default_verify_paths(context);
+    return m_useCA;
+}
+
+PBoolean H323_TLSContext::UseCADirectory(const PDirectory & certDir)
+{
+    char msg[256];
+    if (SSL_CTX_load_verify_locations(context, NULL, certDir) != 1) {
+        PTRACE(1, "TLS\tError setting CA directory " << certDir);
         ERR_error_string(ERR_get_error(), msg);
         PTRACE(1, "TLS\tOpenSSL error: " << msg);
         return false;
@@ -300,11 +311,9 @@ PBoolean H323_TLSContext::UseCertificate(const PFilePath & certFile)
         return false;
     }
 
-    m_certFile = certFile;
-
     char msg[256];
-    if (SSL_CTX_use_certificate_chain_file(context, m_certFile) != 1) {
-        PTRACE(1, "TLS\tError loading certificate file: " << m_certFile);
+    if (SSL_CTX_use_certificate_chain_file(context, certFile) != 1) {
+        PTRACE(1, "TLS\tError loading certificate file: " << certFile);
         ERR_error_string(ERR_get_error(), msg);
         PTRACE(1, "TLS\tOpenSSL error: " << msg);
         return false;
@@ -321,14 +330,12 @@ PBoolean H323_TLSContext::UsePrivateKey(const PFilePath & privFile, const PStrin
 
     if (!password) {
         SSL_CTX_set_default_passwd_cb(context, tls_passwd_cb);
-        m_passphrase = password;
-        SSL_CTX_set_default_passwd_cb_userdata(context, (void *)m_passphrase.GetPointer());
+        SSL_CTX_set_default_passwd_cb_userdata(context, (void *)(PRemoveConst(PString,&password))->GetPointer());
     }
 
-    m_privKey = privFile;
     char msg[256];
-    if (SSL_CTX_use_PrivateKey_file(context, m_privKey, SSL_FILETYPE_PEM) != 1) {
-        PTRACE(1, "TLS\tError loading private key file: " << m_privKey);
+    if (SSL_CTX_use_PrivateKey_file(context, privFile, SSL_FILETYPE_PEM) != 1) {
+        PTRACE(1, "TLS\tError loading private key file: " << privFile);
         ERR_error_string(ERR_get_error(), msg);
         PTRACE(1, "TLS\tOpenSSL error: " << msg);
         return false;
@@ -3824,6 +3831,14 @@ PBoolean H323EndPoint::TLS_SetCAFile(const PFilePath & caFile)
     return ((H323_TLSContext*)m_transportContext)->UseCAFile(caFile);
 }
 
+PBoolean H323EndPoint::TLS_SetCADirectory(const PDirectory & certDir)
+{
+    if (!m_transportContext)
+        m_transportContext = new H323_TLSContext();
+
+    return ((H323_TLSContext*)m_transportContext)->UseCADirectory(certDir);
+}
+
 PBoolean H323EndPoint::TLS_SetCertificate(const PFilePath & certFile)
 {
     if (!m_transportContext)
@@ -3838,6 +3853,14 @@ PBoolean H323EndPoint::TLS_SetPrivateKey(const PFilePath & privFile, const PStri
         m_transportContext = new H323_TLSContext();
 
     return ((H323_TLSContext*)m_transportContext)->UsePrivateKey(privFile,password);
+}
+
+PBoolean H323EndPoint::TLS_SetCipherList(const PString & ciphers)
+{
+    if (!m_transportContext)
+        m_transportContext = new H323_TLSContext();
+
+    return ((H323_TLSContext*)m_transportContext)->SetCipherList(ciphers);
 }
 
 PBoolean H323EndPoint::TLS_Initialise()
