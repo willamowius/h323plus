@@ -991,6 +991,12 @@ void SimpleH323EndPoint::OnMediaEncryption(unsigned session, H323Channel::Direct
 }
 #endif
 
+#ifdef H323_TLS
+void SimpleH323EndPoint::OnSecureSignallingChannel() 
+{
+    cout << "TLS Enabled for call." << endl;
+}
+#endif
 ///////////////////////////////////////////////////////////////
 
 SimpleH323Connection::SimpleH323Connection(SimpleH323EndPoint & ep, unsigned ref)

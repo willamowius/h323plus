@@ -69,6 +69,9 @@ class SimpleH323EndPoint : public H323EndPoint
     virtual void OnMediaEncryption(unsigned session, H323Channel::Directions dir, const PString & cipher);
 #endif
 
+#ifdef H323_TLS
+    virtual void OnSecureSignallingChannel();
+#endif
     // New functions
     PBoolean Initialise(PArgList &);
     PBoolean SetSoundDevice(PArgList &, const char *, PSoundChannel::Directions);

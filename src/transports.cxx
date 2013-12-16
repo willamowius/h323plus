@@ -1492,8 +1492,12 @@ PBoolean H323TransportTCP::OnSocketOpen()
   }
 #endif //P_VXWORKS
 
+  if (m_secured)
+      endpoint.OnSecureSignallingChannel();
+
+
   PTRACE(2, "H323TCP\tStarted connection: "
-            " secured=" << (IsTransportSecure() ? "true," : "false,") << ","
+            " secured=" << (m_secured ? "true" : "false") << ","
             " host=" << remoteAddress << ':' << remotePort << ","
             " if=" << localAddress << ':' << localPort << ","
             " handle=" << socket->GetHandle());

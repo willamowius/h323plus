@@ -2286,9 +2286,11 @@ class H323EndPoint : public PObject
     PBoolean TLS_SetCertificate(const PFilePath & certDir);
     PBoolean TLS_SetPrivateKey(const PFilePath & privFile, const PString & password);
     PBoolean TLS_SetCipherList(const PString & ciphers);
-    PBoolean TLS_Initialise(); 
+    PBoolean TLS_Initialise();
     
     PSSLContext * GetTransportContext();
+
+    virtual void OnSecureSignallingChannel() {};
 #endif
 
     PBoolean IsTLSEnabled();
