@@ -47,6 +47,16 @@ extern "C" {
 // H.235.6 says no more than 2^62 blocks, Schneier says no more than 2^32 blocks in CBC mode
 #define AES_KEY_LIMIT 4294967295U	// 2^32-1
 
+// helper routines not present in OpenSSL
+int EVP_EncryptUpdate_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
+                      const unsigned char *in, int inl);
+int EVP_EncryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
+int EVP_DecryptUpdate_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
+                      const unsigned char *in, int inl);
+int EVP_DecryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
+int EVP_DecryptFinal_relaxed(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
+
+
 class H235CryptoEngine : public PObject
 {
     PCLASSINFO(H235CryptoEngine, PObject);
