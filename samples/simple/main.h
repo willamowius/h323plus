@@ -70,7 +70,7 @@ class SimpleH323EndPoint : public H323EndPoint
 #endif
 
 #ifdef H323_TLS
-    virtual void OnSecureSignallingChannel();
+    virtual void OnSecureSignallingChannel(bool isSecured);
 #endif
     // New functions
     PBoolean Initialise(PArgList &);

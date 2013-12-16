@@ -1492,8 +1492,7 @@ PBoolean H323TransportTCP::OnSocketOpen()
   }
 #endif //P_VXWORKS
 
-  if (m_secured)
-      endpoint.OnSecureSignallingChannel();
+  endpoint.OnSecureSignallingChannel(m_secured);
 
 
   PTRACE(2, "H323TCP\tStarted connection: "

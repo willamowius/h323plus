@@ -2290,7 +2290,7 @@ class H323EndPoint : public PObject
     
     PSSLContext * GetTransportContext();
 
-    virtual void OnSecureSignallingChannel() {};
+    virtual void OnSecureSignallingChannel(bool /* isSecured */) {};
 #endif
 
     PBoolean IsTLSEnabled();
