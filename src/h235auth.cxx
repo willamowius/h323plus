@@ -182,6 +182,11 @@ PBoolean H235Authenticator::PrepareTokens(PASN_Array & clearTokens,
   return TRUE;
 }
 
+PBoolean H235Authenticator::PrepareTokens(PASN_Array & clearTokens, PASN_Array & cryptoTokens, PINDEX /*max_cipherSize*/)
+{
+    return PrepareTokens(clearTokens, cryptoTokens);
+}
+
 
 H235_ClearToken * H235Authenticator::CreateClearToken()
 {
@@ -257,6 +262,11 @@ PBoolean H235Authenticator::IsSecuredPDU(unsigned, PBoolean) const
 PBoolean H235Authenticator::IsSecuredSignalPDU(unsigned, PBoolean) const
 {
   return FALSE;
+}
+
+PBoolean H235Authenticator::IsSecuredSignalPDU(unsigned signalPDU, PBoolean received, PINDEX /*max_keyLength*/) const
+{
+  return IsSecuredSignalPDU(signalPDU, received);
 }
 
 PBoolean H235Authenticator::IsActive() const
@@ -417,7 +427,9 @@ H235Authenticator::ValidationResult
 
 void H235Authenticators::PrepareSignalPDU(unsigned code,
                                     PASN_Array & clearTokens,
-                                    PASN_Array & cryptoTokens) const
+                                    PASN_Array & cryptoTokens,
+                                    PINDEX max_keyLength
+                                    ) const
 {
   // Clean out any crypto tokens in case this is a retry message
   // and we are regenerating the tokens due to possible timestamp
@@ -428,7 +440,7 @@ void H235Authenticators::PrepareSignalPDU(unsigned code,
   for (PINDEX i = 0; i < GetSize(); i++) {
     H235Authenticator & authenticator = (*this)[i];
      if (authenticator.IsSecuredSignalPDU(code, FALSE) &&
-            authenticator.PrepareTokens(clearTokens, cryptoTokens)) {
+            authenticator.PrepareTokens(clearTokens, cryptoTokens, max_keyLength)) {
             PTRACE(4, "H235EP\tPrepared SignalPDU with authenticator " << authenticator);
        }
   }

@@ -200,18 +200,18 @@ void H460_FeatureStd22::OnReceiveAdmissionConfirm(const H225_FeatureDescriptor &
 
    H460_FeatureStd * feat = PRemoveConst(H460_FeatureStd,&(const H460_FeatureStd &)pdu);
 
-   H323TransportSecurity m_callSecurity;
+   H323TransportSecurity m_callSecurity(EP);
    ReadFeature(&m_callSecurity,feat);
 
    if (CON)
-       CON->SetSignallingSecurity(m_callSecurity);
+       CON->SetTransportSecurity(m_callSecurity);
 }
 
 void H460_FeatureStd22::OnReceiveServiceControlIndication(const H225_FeatureDescriptor & pdu) 
 {
    H460_FeatureStd * feat = PRemoveConst(H460_FeatureStd,&(const H460_FeatureStd &)pdu);
 
-   H323TransportSecurity m_callSecurity;
+   H323TransportSecurity m_callSecurity(EP);
    ReadFeature(&m_callSecurity,feat);
 
 #ifdef H323_H46018

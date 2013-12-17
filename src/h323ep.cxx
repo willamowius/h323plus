@@ -3901,6 +3901,11 @@ PBoolean H323EndPoint::IsIPSecEnabled()
     return m_transportSecurity.IsIPSecEnabled();
 }
 
+void H323EndPoint::SetTLSMediaPolicy(H323TransportSecurity::Policy policy)
+{
+    m_transportSecurity.SetMediaPolicy(policy);
+}
+
 H323TransportSecurity * H323EndPoint::GetTransportSecurity() { 
 	return &m_transportSecurity; 
 }

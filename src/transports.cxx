@@ -769,9 +769,11 @@ void H323TransportAddressArray::AppendStringCollection(const PCollection & coll)
 #define SETBIT(var,pos)  var |= 1<<pos;
 #define CLEARBIT(var,pos) var &= ~(1 << pos);
 
-H323TransportSecurity::H323TransportSecurity() 
-:  m_securityMask(0)
+H323TransportSecurity::H323TransportSecurity(H323EndPoint * ep) 
+:  m_securityMask(0), m_policyMask(0)
 {
+    if (ep)
+        m_policyMask = ep->GetTransportSecurity()->GetMediaPolicy();
 }
 
 PString H323TransportSecurity::MethodAsString(Method meth)
@@ -780,6 +782,16 @@ PString H323TransportSecurity::MethodAsString(Method meth)
         case H323TransportSecurity::e_unsecure: return "TCP";
         case H323TransportSecurity::e_tls: return "TLS";
         case H323TransportSecurity::e_ipsec: return "IPSec"; 
+    };
+    return "?";
+}
+
+PString H323TransportSecurity::PolicyAsString(Policy policy)
+{
+    switch (policy) {
+        case H323TransportSecurity::e_nopolicy: return "No Transport required for Media Encryption";
+        case H323TransportSecurity::e_reqTLSMediaEncHigh: return "Signal security required for High Media Encryption";
+        case H323TransportSecurity::e_reqTLSMediaEncAll: return "Signal security required for ALL Media Encryption"; 
     };
     return "?";
 }
@@ -827,9 +839,20 @@ PBoolean H323TransportSecurity::IsIPSecEnabled()
     return CHECKBIT(m_securityMask,e_ipsec);
 }
 
+void H323TransportSecurity::SetMediaPolicy(H323TransportSecurity::Policy policy)
+{
+    m_policyMask = policy;
+}
+
+H323TransportSecurity::Policy H323TransportSecurity::GetMediaPolicy() const
+{
+    return (Policy)m_policyMask;
+}
+
 void H323TransportSecurity::Reset()
 {
     m_securityMask = 0;
+    m_policyMask = 0;
     m_remoteTLSAddress = H323TransportAddress();
 }
 

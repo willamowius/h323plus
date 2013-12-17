@@ -195,7 +195,7 @@ PDECLARE_ARRAY(H323TransportAddressArray, H323TransportAddress)
 class H323TransportSecurity {
 public:
 
-    H323TransportSecurity();
+    H323TransportSecurity(H323EndPoint * ep = NULL);
 
     enum Method {
         e_unsecure,
@@ -203,6 +203,13 @@ public:
         e_ipsec     // not supported YET
     };
     static PString MethodAsString(Method meth);
+
+    enum Policy {
+        e_nopolicy,             // no policy
+        e_reqTLSMediaEncHigh,   // require TLS to offer high media encryption
+        e_reqTLSMediaEncAll     // require TLS to offer ALL media encryption
+    };
+    static PString PolicyAsString(Policy policy);
 
     PBoolean HasSecurity();
 
@@ -215,10 +222,14 @@ public:
     void EnableIPSec(PBoolean enable); 
     PBoolean IsIPSecEnabled();
 
+    void SetMediaPolicy(Policy policy);
+    Policy GetMediaPolicy() const;
+
     void Reset();
 
 protected:
     int m_securityMask;
+    int m_policyMask;
     H323TransportAddress m_remoteTLSAddress;
 };
 

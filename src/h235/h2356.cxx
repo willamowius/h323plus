@@ -217,9 +217,10 @@ const char * H2356_Authenticator::GetName() const
 }
 
 PBoolean H2356_Authenticator::PrepareTokens(PASN_Array & clearTokens,
-                                      PASN_Array & /*cryptoTokens*/)
+                                      PASN_Array & /*cryptoTokens*/, 
+                                      PINDEX max_keyLength)
 {
-    if (!IsActive() || (m_tokenState == e_clearDisable))
+    if (!IsActive() || (m_tokenState == e_clearDisable) || (max_keyLength==0))
         return FALSE;
 
     H225_ArrayOf_ClearToken & tokens = (H225_ArrayOf_ClearToken &)clearTokens;
@@ -231,7 +232,10 @@ PBoolean H2356_Authenticator::PrepareTokens(PASN_Array & clearTokens,
         H235_ClearToken & clearToken = tokens[sz];
         clearToken.m_tokenOID = i->first;
         H235_DiffieHellman * dh = i->second;
-        if (dh && dh->GenerateHalfKey()) {
+        if (!dh || (dh->GetKeyLength() > max_keyLength)) {
+            i++; continue;
+        }
+        if (dh->GenerateHalfKey()) {
 #if 0  // For testing to generate a strong key pair - SH
             if (!dh->LoadedFromFile())
                 dh->Save("test.pem",i->first);

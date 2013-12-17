@@ -578,10 +578,27 @@ template <typename PDUType>
 static void BuildAuthenticatorPDU(PDUType & pdu, unsigned code, const H323Connection * connection)
 {
 
-H235Authenticators authenticators = connection->GetEPAuthenticators();
+  H235Authenticators authenticators = connection->GetEPAuthenticators();
+
+  int keyLengthLimit = P_MAX_INDEX;
+  const H323TransportSecurity * security = connection->GetTransportSecurity();
+  if (security && !security->IsTLSEnabled()) {
+      H323TransportSecurity::Policy policy = security->GetMediaPolicy();
+      switch (policy) {
+        case H323TransportSecurity::e_nopolicy:
+            break;
+        case H323TransportSecurity::e_reqTLSMediaEncHigh:  
+            keyLengthLimit = 128;   // 1024 bytes
+            break;
+        case H323TransportSecurity::e_reqTLSMediaEncAll:
+        default:
+            keyLengthLimit = 0; 
+            break;
+      }
+  }
 
   if (!authenticators.IsEmpty()) {
-    connection->GetEPAuthenticators().PrepareSignalPDU(code,pdu.m_tokens,pdu.m_cryptoTokens);
+    connection->GetEPAuthenticators().PrepareSignalPDU(code,pdu.m_tokens,pdu.m_cryptoTokens,keyLengthLimit);
 
     if (pdu.m_tokens.GetSize() > 0)
         pdu.IncludeOptionalField(PDUType::e_tokens);

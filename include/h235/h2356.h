@@ -91,7 +91,8 @@ class H2356_Authenticator : public H235Authenticator
 
     virtual PBoolean PrepareTokens(
       PASN_Array & clearTokens,
-      PASN_Array & cryptoTokens
+      PASN_Array & cryptoTokens,
+      PINDEX max_cipherSize
     );
 
     virtual ValidationResult ValidateTokens(

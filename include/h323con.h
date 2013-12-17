@@ -3071,7 +3071,11 @@ class H323Connection : public PObject
   //@{
     /** Set Signalling Security
      */
-    virtual void SetSignallingSecurity(const H323TransportSecurity & m_callSecurity);
+    virtual void SetTransportSecurity(const H323TransportSecurity & m_callSecurity);
+
+    /** Get Transport Security
+     */
+    const H323TransportSecurity * GetTransportSecurity() const;
   //@}
 #endif
 

@@ -107,6 +107,12 @@ class H235Authenticator : public PObject
       PASN_Array & cryptoTokens
     );
 
+    virtual PBoolean PrepareTokens(
+      PASN_Array & clearTokens,
+      PASN_Array & cryptoTokens,
+      PINDEX max_cipherSize
+    );
+
     virtual H235_ClearToken * CreateClearToken();
     virtual H225_CryptoH323Token * CreateCryptoToken();
 
@@ -160,6 +166,12 @@ class H235Authenticator : public PObject
     virtual PBoolean IsSecuredSignalPDU(
       unsigned signalPDU,
       PBoolean received
+    ) const;
+
+    virtual PBoolean IsSecuredSignalPDU(
+      unsigned signalPDU,
+      PBoolean received,
+      PINDEX max_keyLength
     ) const;
 
     virtual PBoolean IsActive() const;
@@ -256,7 +268,8 @@ PDECLARE_LIST(H235Authenticators, H235Authenticator)
     void PrepareSignalPDU(
       unsigned code,
       PASN_Array & clearTokens,
-      PASN_Array & cryptoTokens
+      PASN_Array & cryptoTokens,
+      PINDEX max_keyLength 
     ) const;
 
     H235Authenticator::ValidationResult ValidateSignalPDU(

@@ -2295,6 +2295,7 @@ class H323EndPoint : public PObject
 
     PBoolean IsTLSEnabled();
     PBoolean IsIPSecEnabled();
+    void SetTLSMediaPolicy(H323TransportSecurity::Policy policy);
     H323TransportSecurity * GetTransportSecurity();
 
 #ifdef H323_FRAMEBUFFER
