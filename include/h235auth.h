@@ -269,7 +269,7 @@ PDECLARE_LIST(H235Authenticators, H235Authenticator)
       unsigned code,
       PASN_Array & clearTokens,
       PASN_Array & cryptoTokens,
-      PINDEX max_keyLength = 0
+      PINDEX max_keyLength = P_MAX_INDEX
     ) const;
 
     H235Authenticator::ValidationResult ValidateSignalPDU(
