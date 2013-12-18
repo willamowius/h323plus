@@ -7035,7 +7035,6 @@ void H323Connection::OnMediaEncryption(unsigned session, H323Channel::Directions
 }
 #endif
 
-#ifdef H323_TLS
 void H323Connection::SetTransportSecurity(const H323TransportSecurity & m_callSecurity)
 {
     m_transportSecurity = m_callSecurity;
@@ -7045,7 +7044,6 @@ const H323TransportSecurity & H323Connection::GetTransportSecurity() const
 {
     return m_transportSecurity;
 }
-#endif
 
 #ifdef H323_SIGNAL_AGGREGATE
 

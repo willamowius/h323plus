@@ -3066,8 +3066,7 @@ class H323Connection : public PObject
   //@}
 #endif
 
-#ifdef H323_TLS
-  /**@name Signalling Security */
+  /**@name Transport Security */
   //@{
     /** Set Signalling Security
      */
@@ -3077,7 +3076,6 @@ class H323Connection : public PObject
      */
     const H323TransportSecurity & GetTransportSecurity() const;
   //@}
-#endif
 
 #ifdef H323_H248
   /**@name Call Service Control Session */
