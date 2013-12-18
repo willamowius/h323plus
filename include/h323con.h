@@ -3075,7 +3075,7 @@ class H323Connection : public PObject
 
     /** Get Transport Security
      */
-    const H323TransportSecurity * GetTransportSecurity() const;
+    const H323TransportSecurity & GetTransportSecurity() const;
   //@}
 #endif
 

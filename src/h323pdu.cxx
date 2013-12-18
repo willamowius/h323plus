@@ -581,9 +581,9 @@ static void BuildAuthenticatorPDU(PDUType & pdu, unsigned code, const H323Connec
   H235Authenticators authenticators = connection->GetEPAuthenticators();
 
   int keyLengthLimit = P_MAX_INDEX;
-  const H323TransportSecurity * security = connection->GetTransportSecurity();
-  if (security && !security->IsTLSEnabled()) {
-      H323TransportSecurity::Policy policy = security->GetMediaPolicy();
+  H323TransportSecurity security = connection->GetTransportSecurity();
+  if (!security.IsTLSEnabled()) {
+      H323TransportSecurity::Policy policy = security.GetMediaPolicy();
       switch (policy) {
         case H323TransportSecurity::e_nopolicy:
             break;
