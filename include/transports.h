@@ -661,9 +661,7 @@ class H323Transport : public PIndirectChannel
     PThread      * thread;      /// Thread handling the transport
     PBoolean canGetInterface;
 
-#ifdef H323_TLS
     PBoolean    m_secured;     /// Whether the channel is secure.
-#endif
 };
 
 

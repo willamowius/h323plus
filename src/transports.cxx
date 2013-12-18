@@ -914,7 +914,7 @@ H323Transport::H323Transport(H323EndPoint & end, PSSLContext * _context, PBoolea
 {
 #else
 H323Transport::H323Transport(H323EndPoint & end)
-  : endpoint(end)
+  : endpoint(end), m_secured(false)
 {
 #endif
   thread = NULL;
@@ -964,11 +964,7 @@ PBoolean H323Transport::OnSocketOpen()
 
 PBoolean H323Transport::IsTransportSecure()
 {
-#ifdef H323_TLS
     return m_secured;
-#else
-    return false;
-#endif
 }
 
 PBoolean H323Transport::OnOpen()
@@ -1515,8 +1511,9 @@ PBoolean H323TransportTCP::OnSocketOpen()
   }
 #endif //P_VXWORKS
 
+#ifdef H323_TLS
   endpoint.OnSecureSignallingChannel(m_secured);
-
+#endif
 
   PTRACE(2, "H323TCP\tStarted connection: "
             " secured=" << (m_secured ? "true" : "false") << ","
