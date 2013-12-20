@@ -517,7 +517,7 @@ PBYTEArray H235CryptoEngine::GenerateRandomKey(const PString & algorithmOID)
 
 H235Session::H235Session(H235Capabilities * caps, const PString & oidAlgorithm)
 : m_dh(*caps->GetDiffieHellMan()), m_context(oidAlgorithm), m_dhcontext(oidAlgorithm), 
-  m_isInitialised(false), m_isMaster(false), m_crytoMasterKey(0)
+  m_isInitialised(false), m_isMaster(false), m_crytoMasterKey(0), m_frameBuffer(0)
 {
     if (oidAlgorithm == ID_AES128) {
         m_dhkeyLen = 16;
@@ -604,6 +604,7 @@ PBoolean H235Session::ReadFrame(DWORD & /*rtpTimestamp*/, RTP_DataFrame & frame)
     frame.SetPayloadSize(m_frameBuffer.GetSize());
     memcpy(frame.GetPayloadPtr(), m_frameBuffer.GetPointer(), m_frameBuffer.GetSize());
     frame.SetPadding(padding);  // TODO: examine effect for RTP padding on codec decoding?
+    m_frameBuffer.SetSize(0);
     return true;
 }
 
@@ -618,6 +619,7 @@ PBoolean H235Session::WriteFrame(RTP_DataFrame & frame)
     frame.SetPayloadSize(m_frameBuffer.GetSize());
     memcpy(frame.GetPayloadPtr(), m_frameBuffer.GetPointer(), m_frameBuffer.GetSize());
     frame.SetPadding(padding);
+    m_frameBuffer.SetSize(0);
     return true;
 }
 
