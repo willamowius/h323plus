@@ -246,16 +246,17 @@ RTP_JitterBuffer::~RTP_JitterBuffer()
   while (oldestFrame != NULL) {
     Entry * frame = oldestFrame;
     oldestFrame = oldestFrame->next;
-    delete frame;
+    if (frame) delete frame;
   }
 
   while (freeFrames != NULL) {
     Entry * frame = freeFrames;
     freeFrames = freeFrames->next;
-    delete frame;
+    if (frame) delete frame;
   }
 
-  delete currentWriteFrame;
+  if (currentWriteFrame)
+    delete currentWriteFrame;
 
   bufferMutex.Signal();
 
