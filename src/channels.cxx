@@ -1082,7 +1082,7 @@ void H323_RTPChannel::Receive()
   // UniDirectional Channel NAT support
   SendUniChannelBackProbe();
 
-  PBoolean isAudio = false:
+  PBoolean isAudio = false;
   if (codec->GetMediaFormat().GetDefaultSessionID() == OpalMediaFormat::DefaultAudioSessionID) isAudio = true;
   PBoolean allowRtpPayloadChange = isAudio;
 
