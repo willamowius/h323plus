@@ -1586,6 +1586,7 @@ H323PluginVideoCodec::H323PluginVideoCodec(const OpalMediaFormat & fmt, Directio
     sendIntra = TRUE;
     lastPacketSent = TRUE;
     lastFrameTimeRTP = 0;
+    lastFrameTick = 0;
     frameWidth = maxWidth = mediaFormat.GetOptionInteger(OpalVideoFormat::FrameWidthOption); 
     frameHeight = maxHeight = mediaFormat.GetOptionInteger(OpalVideoFormat::FrameHeightOption);
     targetFrameTimeMs = mediaFormat.GetOptionInteger(OpalVideoFormat::FrameTimeOption);
