@@ -3866,7 +3866,7 @@ PBoolean H323EndPoint::TLS_AddCACertificate(const PString & caData)
     if (!GetTransportContext())
         return false;
 
-    return ((H323_TLSContext*)m_transportContext)->AddCACertficate(caData);
+    return ((H323_TLSContext*)m_transportContext)->AddCACertificate(caData);
 }
 
 PBoolean H323EndPoint::TLS_SetCertificate(const PFilePath & certFile)
