@@ -2283,6 +2283,7 @@ class H323EndPoint : public PObject
 
     PBoolean TLS_SetCAFile(const PFilePath & caFile);
     PBoolean TLS_SetCADirectory(const PDirectory & dir);
+    PBoolean TLS_AddCACertificate(const PString & caData);
     PBoolean TLS_SetCertificate(const PFilePath & certDir);
     PBoolean TLS_SetPrivateKey(const PFilePath & privFile, const PString & password);
     PBoolean TLS_SetCipherList(const PString & ciphers);

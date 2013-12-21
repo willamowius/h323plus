@@ -217,6 +217,10 @@ class H323_TLSContext : public PSSLContext
     */
     PBoolean UseCADirectory(const PDirectory & certDir);
 
+    /**Set CA Certificate.
+    */
+    PBoolean AddCACertificate(const PString & caData);
+
     /**Set User Certificate
     */
     PBoolean UseCertificate(const PFilePath & certFile);
@@ -239,27 +243,9 @@ H323_TLSContext::H323_TLSContext()
 {
     // delete the default PTLIB context
     // as it is very buggy
-    delete context;
-    context = NULL;
-
-    // Initialise the SSL engine
-    // Borrowed from GnuGk
-    if (!SSL_library_init()) {
-        PTRACE(1, "TLS\tOpenSSL init failed");
-        return;
-    }
-    SSL_load_error_strings();
-    OpenSSL_add_all_algorithms();	// needed for OpenSSL < 1.0
-    if (!RAND_status()) {
-        PTRACE(3, "TLS\tPRNG needs seeding");
-#ifdef P_LINUX
-        RAND_load_file("/dev/urandom", 1024);
-#else
-        BYTE seed[1024];
-        for (size_t i = 0; i < sizeof(seed); i++)
-            seed[i] = (BYTE)rand();
-        RAND_seed(seed, sizeof(seed));
-#endif
+    if (context) {
+        delete context;
+        context = NULL;
     }
 
     context = SSL_CTX_new(SSLv23_method());	
@@ -302,6 +288,20 @@ PBoolean H323_TLSContext::UseCADirectory(const PDirectory & certDir)
     }
     m_useCA = SSL_CTX_set_default_verify_paths(context);
     return m_useCA;
+}
+
+PBoolean H323_TLSContext::AddCACertificate(const PString & caData)
+{
+    if (!m_useCA)
+        return false;
+
+	BIO *mem = BIO_new(BIO_s_mem());
+	BIO_puts(mem, caData);
+	X509 *x = PEM_read_bio_X509_AUX(mem,NULL,NULL,NULL);
+    PBoolean loaded = (x && SSL_CTX_add_extra_chain_cert(context, x)); 
+
+    BIO_free(mem);
+    return loaded;
 }
 
 PBoolean H323_TLSContext::UseCertificate(const PFilePath & certFile)
@@ -3823,50 +3823,80 @@ void H323EndPoint::SetUPnP(PBoolean active)
 #endif  // H323_UPnP
 
 #ifdef H323_TLS
+H323_TLSContext * TLS_CreateContext()
+{
+    if (!SSL_library_init()) {
+        PTRACE(1, "TLS\tOpenSSL init failed");
+        return NULL;
+    }
+    SSL_load_error_strings();
+    OpenSSL_add_all_algorithms();	// needed for OpenSSL < 1.0
+    if (!RAND_status()) {
+        PTRACE(3, "TLS\tPRNG needs seeding");
+#ifdef P_LINUX
+        RAND_load_file("/dev/urandom", 1024);
+#else
+        BYTE seed[1024];
+        for (size_t i = 0; i < sizeof(seed); i++)
+            seed[i] = (BYTE)rand();
+        RAND_seed(seed, sizeof(seed));
+#endif
+    }
+    return new H323_TLSContext();
+}
+
 PBoolean H323EndPoint::TLS_SetCAFile(const PFilePath & caFile)
 {
-    if (!m_transportContext)
-        m_transportContext = new H323_TLSContext();
+    if (!GetTransportContext())
+        return false;
 
     return ((H323_TLSContext*)m_transportContext)->UseCAFile(caFile);
 }
 
 PBoolean H323EndPoint::TLS_SetCADirectory(const PDirectory & certDir)
 {
-    if (!m_transportContext)
-        m_transportContext = new H323_TLSContext();
+    if (!GetTransportContext())
+        return false;
 
     return ((H323_TLSContext*)m_transportContext)->UseCADirectory(certDir);
 }
 
+PBoolean H323EndPoint::TLS_AddCACertificate(const PString & caData)
+{
+    if (!GetTransportContext())
+        return false;
+
+    return ((H323_TLSContext*)m_transportContext)->AddCACertficate(caData);
+}
+
 PBoolean H323EndPoint::TLS_SetCertificate(const PFilePath & certFile)
 {
-    if (!m_transportContext)
-        m_transportContext = new H323_TLSContext();
+    if (!GetTransportContext())
+        return false;
 
     return ((H323_TLSContext*)m_transportContext)->UseCertificate(certFile);
 }
 
 PBoolean H323EndPoint::TLS_SetPrivateKey(const PFilePath & privFile, const PString & password)
 {
-    if (!m_transportContext)
-        m_transportContext = new H323_TLSContext();
+    if (!GetTransportContext())
+        return false;
 
     return ((H323_TLSContext*)m_transportContext)->UsePrivateKey(privFile,password);
 }
 
 PBoolean H323EndPoint::TLS_SetCipherList(const PString & ciphers)
 {
-    if (!m_transportContext)
-        m_transportContext = new H323_TLSContext();
+    if (!GetTransportContext())
+        return false;
 
     return ((H323_TLSContext*)m_transportContext)->SetCipherList(ciphers);
 }
 
 PBoolean H323EndPoint::TLS_Initialise()
 {
-    if (!m_transportContext)
-        m_transportContext = new H323_TLSContext();
+    if (!GetTransportContext())
+        return false;
 
     if (!((H323_TLSContext*)m_transportContext)->Initialise())
         return false;
@@ -3882,6 +3912,9 @@ PBoolean H323EndPoint::TLS_Initialise()
 
 PSSLContext * H323EndPoint::GetTransportContext() 
 {
+    if (!m_transportContext)
+        m_transportContext = TLS_CreateContext();
+
     return m_transportContext;
 }
 
