@@ -32,11 +32,15 @@
 #ifndef _OPENH323_BUILDOPTS_H
 #define _OPENH323_BUILDOPTS_H
 
-#include <ptlib/../../version.h>
-#if MAJOR_VERSION == 2 && MINOR_VERSION < 13
-#include <ptbuildopts.h>
-#else
+// PTLIB VERSION
+#undef  PT_MAJOR
+#undef  PT_MINOR
+#undef  PT_BUILD
+
+#if PT_MAJOR == 2 && PT_MINOR >= 13
 #include <ptlib_config.h>
+#else
+#include <ptbuildopts.h>
 #endif
 
 #if PTLIB_MAJOR == 2 && PTLIB_MINOR < 10
