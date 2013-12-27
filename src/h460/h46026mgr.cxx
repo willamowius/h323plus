@@ -471,7 +471,6 @@ PBoolean H46026ChannelManager::RTPFrameOut(unsigned crv, PacketTypes id, PINDEX 
        data.SetFrame(msg);
        return PackageFrame(rtp, crv, id, sessionId, data.GetBuffer());
     }
-    return true; 
 }
 
 PBoolean H46026ChannelManager::ProcessQueue()
