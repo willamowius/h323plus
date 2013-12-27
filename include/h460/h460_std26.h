@@ -160,9 +160,9 @@ private:
 
 //////////////////////////////////////////////////////////////////////////////
 
-class PNatMethod_H46026  : public PNatMethod
+class PNatMethod_H46026  : public H323NatMethod
 {
-    PCLASSINFO(PNatMethod_H46026,PNatMethod);
+    PCLASSINFO(PNatMethod_H46026,H323NatMethod);
 
 public:
 
@@ -225,7 +225,9 @@ public:
      */
    virtual void Activate(bool act)  { active = act; }
 
-#if PTLIB_VER > 2120
+#if PTLIB_VER >= 2130
+   virtual PCaselessString GetMethodName() const { return "H46026"; }
+#elif PTLIB_VER > 2120
    static PString GetNatMethodName() { return "H46026"; }
    virtual PString GetName() const
             { return GetNatMethodName(); }
@@ -267,7 +269,11 @@ public:
             const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny(),WORD localPort = 0)  { return false; }
     virtual void SetCredentials(const PString &, const PString &, const PString &) {}
 protected:
+#if PTLIB_VER < 2130
     virtual NatTypes InternalGetNatType(bool, const PTimeInterval &) { return UnknownNat; }
+#endif
+    virtual PNATUDPSocket * InternalCreateSocket(Component component, PObject * context)  { return NULL; }
+    virtual void InternalUpdate() {};
 #endif
 
 
@@ -285,9 +291,9 @@ PPLUGIN_STATIC_LOAD(H46026, PNatMethod);
 typedef std::queue<PBYTEArray*> RTPQueue;
 
 class H46026_UDPFrame;
-class H46026UDPSocket : public PUDPSocket
+class H46026UDPSocket : public H323UDPSocket
 {
-  PCLASSINFO(H46026UDPSocket, PUDPSocket);
+  PCLASSINFO(H46026UDPSocket, H323UDPSocket);
   public:
   /**@name Construction/Deconstructor */
   //@{

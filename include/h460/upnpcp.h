@@ -50,9 +50,9 @@
 
 class H323EndPoint;
 class UPnPThread;
-class PNatMethod_UPnP : public PNatMethod
+class PNatMethod_UPnP : public H323NatMethod
 {
-    PCLASSINFO(PNatMethod_UPnP,PNatMethod);
+    PCLASSINFO(PNatMethod_UPnP,H323NatMethod);
 
 public:
 
@@ -115,12 +115,15 @@ public:
 
    PBoolean OpenSocket(PUDPSocket & socket, PortInfo & portInfo, const PIPSocket::Address & binding) const;
 
-#if PTLIB_VER > 2120
+#if PTLIB_VER >= 2130
+   static const char * MethodName();
+   virtual PCaselessString GetMethodName() const;
+#elif PTLIB_VER > 2120
    static PString GetNatMethodName() { return "UPnP"; }
    virtual PString GetName() const
             { return GetNatMethodName(); }
 #else
-   static PStringList GetNatMethodName() {  return PStringArray("UPnP"); };
+   static PStringList GetNatMethodName() {  return PStringArray("UPnP"); }
    virtual PString GetName() const
             { return GetNatMethodName()[0]; }
 #endif
@@ -159,6 +162,7 @@ public:
 
 #if PTLIB_VER >= 2110
     virtual PString GetServer() const { return PString(); }
+#if PTLIB_VER < 2130
     virtual bool GetServerAddress(PIPSocketAddressAndPort & ) const { return false; }
     virtual NatTypes GetNatType(bool) { return UnknownNat; }
     virtual NatTypes GetNatType(const PTimeInterval &) { return UnknownNat; }
@@ -169,6 +173,9 @@ public:
     virtual void SetCredentials(const PString &, const PString &, const PString &) {}
 protected:
     virtual NatTypes InternalGetNatType(bool, const PTimeInterval &) { return UnknownNat; }
+#endif
+    virtual PNATUDPSocket * InternalCreateSocket(Component component, PObject * context)  { return NULL; }
+    virtual void InternalUpdate() {};
 #endif
 
 protected:
@@ -197,9 +204,9 @@ private:
 #endif
 
 
-class UPnPUDPSocket : public PUDPSocket
+class UPnPUDPSocket : public H323UDPSocket
 {
-  PCLASSINFO(UPnPUDPSocket, PUDPSocket);
+  PCLASSINFO(UPnPUDPSocket, H323UDPSocket);
   public:
   /**@name Construction/Deconstructor */
   //@{

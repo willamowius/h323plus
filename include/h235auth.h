@@ -519,6 +519,21 @@ typedef H2351_Authenticator H235_AuthenticatorStd1;
 #endif
 #endif
 
+#if PTLIB_VER >= 2130
+
+PCREATE_PLUGIN_DEVICE(H235Authenticator);
+#define H235SECURITY_EX(name,extra) \
+PCREATE_PLUGIN(name, H235Authenticator, H235Authenticator##name, PPlugin_H235Authenticator, \
+  virtual PStringArray GetDeviceNames(P_INT_PTR /*userData*/) const { return H235Authenticator##name::GetAuthenticatorNames(); } \
+  virtual bool  ValidateDeviceName(const PString & deviceName, int /*userData*/) const \
+    { return (deviceName == H235Authenticator##name::GetAuthenticatorNames()[0]); } \
+  virtual bool GetDeviceCapabilities(const PString & /*deviceName*/, void * caps) const \
+    { return H235Authenticator##name::GetAuthenticationCapabilities((H235Authenticator::Capabilities *)caps); } \
+extra)
+#define H235SECURITY(name) H235SECURITY_EX(name, )
+
+#else
+
 template <class className> class H235PluginServiceDescriptor : public PDevicePluginServiceDescriptor
 {
   public:
@@ -536,9 +551,10 @@ template <class className> class H235PluginServiceDescriptor : public PDevicePlu
 #endif
 };
 
-#define H235SECURITY(name)    \
+#define H235SECURITY(name) \
 static H235PluginServiceDescriptor<H235_Authenticator##name> H235_Authenticator##name##_descriptor; \
-PCREATE_PLUGIN(name, H235Authenticator, &H235_Authenticator##name##_descriptor); \
+PCREATE_PLUGIN(name, H235Authenticator, &H235_Authenticator##name##_descriptor); 
+#endif
 
 #endif
 

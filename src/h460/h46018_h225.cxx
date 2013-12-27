@@ -56,7 +56,11 @@
 #define H46024A_MAX_PROBE_COUNT  15
 #define H46024A_PROBE_INTERVAL  200
 
+#if PTLIB_VER >= 2130
+PCREATE_NAT_PLUGIN(H46019, "H.460.19");
+#else
 PCREATE_NAT_PLUGIN(H46019);
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////////
 

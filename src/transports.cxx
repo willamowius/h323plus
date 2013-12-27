@@ -1470,7 +1470,10 @@ H323TransportTCP::~H323TransportTCP()
 PBoolean H323TransportTCP::OnOpen()
 {
 #if H323_TLS
-    if (ssl)
+#if PTLIB_VER < 2130
+    ssl_st * m_ssl = ssl;
+#endif
+    if (m_ssl)
         m_secured = PSSLChannel::OnOpen();
 #endif
     return OnSocketOpen();
@@ -1544,29 +1547,37 @@ PBoolean H323TransportTCP::InitialiseSecurity(const H323TransportSecurity * secu
 {
 #ifdef H323_TLS
     // Delete any context that was autoCreated in PSSLChannel. - Very Annoying - SH
-    if (context) {
-        SSL_shutdown(ssl);
-        SSL_free(ssl);
-        ssl = NULL;
-        delete context;
-        context = NULL;
-        autoDeleteContext = false;
+#if PTLIB_VER < 2130
+    PSSLContext * m_context = context;
+    PBoolean & m_autoDeleteContext = autoDeleteContext;
+    ssl_st * m_ssl = ssl;
+#endif
+    if (m_context) {
+        SSL_shutdown(m_ssl);
+        SSL_free(m_ssl);
+        m_ssl = NULL;
+        delete m_context;
+        m_context = NULL;
+        m_autoDeleteContext = false;
     }
 
     if (!security->IsTLSEnabled())
         return true;
-   		
-    context = endpoint.GetTransportContext();
-    if (!context) {
-		PTRACE(1, "TLS\tError No Context");
-		return false;
+
+    m_context = endpoint.GetTransportContext();
+    if (!m_context) {
+        PTRACE(1, "TLS\tError No Context");
+        return false;
+    }     
+    m_ssl = SSL_new(*m_context);
+    if (!m_ssl) {
+        PTRACE(1, "TLS\tError creating SSL object");
+        return false;
     }
-        
-    ssl = SSL_new(*context);
-    if (!ssl) {
-		PTRACE(1, "TLS\tError creating SSL object");
-		return false;
-	}
+#if PTLIB_VER < 2130
+    context = m_context;
+    ssl = m_ssl;
+#endif
 #endif
     return true;
 }
@@ -1619,6 +1630,28 @@ PBoolean H323TransportTCP::ExtractPDU(const PBYTEArray & pdu, PINDEX & pduLen)
 
   return TRUE;
 }
+
+#if PTLIB_VER >= 2130
+int H323TransportTCP::ReadChar()
+{
+  BYTE c;
+  PBoolean retVal = Read(&c, 1);
+  return (retVal && lastReadCount == 1) ? c : -1;
+}
+
+PBoolean H323TransportTCP::ReadBlock(void * buf, PINDEX len)
+{
+  char * ptr = (char *)buf;
+  PINDEX numRead = 0;
+
+  while (numRead < len && Read(ptr+numRead, len - numRead))
+    numRead += lastReadCount;
+
+  lastReadCount = numRead;
+
+  return lastReadCount == len;
+}
+#endif 
 
 PBoolean H323TransportTCP::ReadPDU(PBYTEArray & pdu)
 {
@@ -1682,8 +1715,11 @@ PBoolean H323TransportTCP::WritePDU(const PBYTEArray & pdu)
 PBoolean H323TransportTCP::FinaliseSecurity(PSocket * socket)
 {
 #ifdef H323_TLS
-    if (ssl && socket) {	
-        SSL_set_fd(ssl, socket->GetHandle());
+#if PTLIB_VER < 2130
+    ssl_st * m_ssl = ssl;
+#endif
+    if (m_ssl && socket) {	
+        SSL_set_fd(m_ssl, socket->GetHandle());
         return true;
     }
 #endif
@@ -1693,19 +1729,22 @@ PBoolean H323TransportTCP::FinaliseSecurity(PSocket * socket)
 PBoolean H323TransportTCP::SecureConnect()
 {
 #ifdef H323_TLS
+#if PTLIB_VER < 2130
+    ssl_st * m_ssl = ssl;
+#endif
     int ret = 0;
     do {
-        ret = SSL_connect(ssl);
+        ret = SSL_connect(m_ssl);
         if (ret <= 0) {
             char msg[256];
-            int err = SSL_get_error(ssl, ret);
+            int err = SSL_get_error(m_ssl, ret);
             switch (err) {
                 case SSL_ERROR_NONE:
                     break;
                 case SSL_ERROR_SSL:
                     ERR_error_string(ERR_get_error(), msg);
                     PTRACE(1, "TLS\tTLS protocol error in SSL_connect(): " << err << " / " << msg);
-                    SSL_shutdown(ssl);
+                    SSL_shutdown(m_ssl);
                     return false;
                     break;
                 case SSL_ERROR_SYSCALL:
@@ -1719,7 +1758,7 @@ PBoolean H323TransportTCP::SecureConnect()
                         default:
                             ERR_error_string(ERR_get_error(), msg);
                             PTRACE(1, "TLS\tTerminating connection: " << msg);
-                            SSL_shutdown(ssl);
+                            SSL_shutdown(m_ssl);
                             return false;
                     };
                     break;
@@ -1732,7 +1771,7 @@ PBoolean H323TransportTCP::SecureConnect()
                 default:
                     ERR_error_string(ERR_get_error(), msg);
                     PTRACE(1, "TLS\tUnknown error in SSL_connect(): " << err << " / " << msg);
-                    SSL_shutdown(ssl);
+                    SSL_shutdown(m_ssl);
                     return false;
             }
         }
@@ -1744,7 +1783,10 @@ PBoolean H323TransportTCP::SecureConnect()
 PBoolean H323TransportTCP::SecureAccept()
 {
 #ifdef H323_TLS
-    if (ssl)
+#if PTLIB_VER < 2130
+    ssl_st * m_ssl = ssl;
+#endif
+    if (m_ssl)
         return PSSLChannel::Accept();
 #endif
     return true;
@@ -1950,7 +1992,7 @@ PBoolean H323TransportUDP::Connect()
 #ifdef P_STUN
   PSTUNClient * stun = endpoint.GetSTUN(remoteAddress);
   if (stun != NULL) {
-#if PTLIB_VER >= 2110
+#if (PTLIB_VER >= 2110) && (PTLIB_VER < 2130)
     if (stun->CreateSocket(PNatMethod::eComponent_Unknown,socket)) {
 #else
     if (stun->CreateSocket(socket)) {
@@ -2187,7 +2229,7 @@ PBoolean H323TransportUDP::DiscoverGatekeeper(H323Gatekeeper & gk,
 
 #ifdef P_STUN
       // Not explicitly multicast
-#if PTLIB_VER >= 2110
+#if (PTLIB_VER >= 2110) && (PTLIB_VER < 2130)
       if (stun != NULL && stun->CreateSocket(PNatMethod::eComponent_Unknown,socket)) {
 #else
       if (stun != NULL && stun->CreateSocket(socket)) {

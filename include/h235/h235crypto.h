@@ -50,10 +50,18 @@ extern "C" {
 // helper routines not present in OpenSSL
 int EVP_EncryptUpdate_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
                       const unsigned char *in, int inl);
+#if PTLIB_VER >= 2130
+int EVP_EncryptFinal_ctsA(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
+#else
 int EVP_EncryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
+#endif
 int EVP_DecryptUpdate_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
                       const unsigned char *in, int inl);
+#if PTLIB_VER >= 2130
+int EVP_DecryptFinal_ctsA(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
+#else
 int EVP_DecryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
+#endif
 int EVP_DecryptFinal_relaxed(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
 
 

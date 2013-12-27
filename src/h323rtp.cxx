@@ -96,7 +96,12 @@ H323_RTP_UDP::H323_RTP_UDP(const H323Connection & conn,
   if (conn.HasNATSupport()) {
       meth = conn.GetPreferedNatMethod(remoteAddress);
       if (meth != NULL) {
-         PTRACE(4, "RTP\tNAT Method " << meth->GetName() << " selected for call.");
+#if PTLIB_VER >= 2130
+         PString name = meth->GetMethodName(); 
+#else
+         PString name = meth->GetName();
+#endif
+         PTRACE(4, "RTP\tNAT Method " << name << " selected for call.");
       }
   }
 #endif

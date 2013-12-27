@@ -1534,14 +1534,21 @@ PBoolean RTP_UDP::Open(PIPSocket::Address _localAddress,
     H323Connection::SessionInformation * info = 
          connection.BuildSessionInformation(GetSessionID());
 
-#if PTLIB_VER > 260
+#if PTLIB_VER >= 2130
+    if (meth->CreateSocketPair(dataSocket, controlSocket, localAddress,(PObject *)info)) {
+#elif PTLIB_VER > 260
     if (meth->CreateSocketPair(dataSocket, controlSocket, localAddress,(void *)info)) {
 #else
     if (meth->CreateSocketPair(dataSocket, controlSocket, localAddress)) {
 #endif
       dataSocket->GetLocalAddress(localAddress, localDataPort);
       controlSocket->GetLocalAddress(localAddress, localControlPort);
-      PTRACE(4, "RTP\tNAT Method " << meth->GetName() << " created NAT ports " << localDataPort << " " << localControlPort);
+#if PTLIB_VER >= 2130
+      PString name = meth->GetMethodName(); 
+#else
+      PString name = meth->GetName();
+#endif
+      PTRACE(4, "RTP\tNAT Method " << name << " created NAT ports " << localDataPort << " " << localControlPort);
     }
     else
       PTRACE(1, "RTP\tNAT could not create socket pair!");
@@ -1552,11 +1559,11 @@ PBoolean RTP_UDP::Open(PIPSocket::Address _localAddress,
 
   if (dataSocket == NULL || controlSocket == NULL) {
 #if P_QOS
-    dataSocket = new PUDPSocket(dataQos);
-    controlSocket = new PUDPSocket(ctrlQos);
+    dataSocket = new H323UDPSocket(dataQos);
+    controlSocket = new H323UDPSocket(ctrlQos);
 #else
-    dataSocket = new PUDPSocket();
-    controlSocket = new PUDPSocket();
+    dataSocket = new H323UDPSocket();
+    controlSocket = new H323UDPSocket();
 #endif
     while (!dataSocket->Listen(localAddress,    1, localDataPort) ||
            !controlSocket->Listen(localAddress, 1, localControlPort)) {
@@ -1670,7 +1677,10 @@ PBoolean RTP_UDP::SetRemoteSocketInfo(PIPSocket::Address address, WORD port, PBo
 
 PBoolean RTP_UDP::PseudoRead(int & selectStatus)
 {
-#if PTLIB_VER >= 290
+#if PTLIB_VER >= 2130
+    return (((H323UDPSocket*)controlSocket)->DoPseudoRead(selectStatus) || 
+            ((H323UDPSocket*)dataSocket)->DoPseudoRead(selectStatus));
+#elif PTLIB_VER >= 290
     return (controlSocket->DoPseudoRead(selectStatus) || 
             dataSocket->DoPseudoRead(selectStatus));
 #else
@@ -1779,7 +1789,11 @@ RTP_Session::SendReceiveStatus RTP_UDP::ReadDataOrControlPDU(PUDPSocket & socket
 
       else if (remoteTransmitAddress != addr) {
 #ifdef H323_H46024A
+#if PTLIB_VER >= 2130
+          if (((H323UDPSocket&)socket).IsAlternateAddress(addr,port)) {
+#else
           if (socket.IsAlternateAddress(addr,port)) {
+#endif
                 remoteTransmitAddress = addr;
                 remoteAddress = addr;
                 appliedQOS = false;

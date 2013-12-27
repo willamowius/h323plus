@@ -1066,7 +1066,7 @@ class RTP_UDP : public RTP_Session
       BYTE ipTypeOfService,             ///<  Type of Service byte
 	  const H323Connection & connection, ///< Connection
 #ifdef P_STUN
-     PNatMethod * meth = NULL,          ///* Nat Method to use to create sockets (or NULL if no Method)
+      PNatMethod * meth = NULL,         ///< Nat Method to use to create sockets (or NULL if no Method)
 #else
       void * = NULL,                    ///<  STUN server to use createing sockets (or NULL if no STUN)
 #endif

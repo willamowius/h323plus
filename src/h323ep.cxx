@@ -103,7 +103,6 @@
 #include "t38proto.h"
 #endif
 
-#include "../version.h"
 #include "h323pluginmgr.h"
 
 #include <ptlib/sound.h>
@@ -242,21 +241,26 @@ H323_TLSContext::H323_TLSContext()
 : m_useCA(false)
 {
     // delete the default PTLIB context
-    // as it is very buggy
-    if (context) {
-        delete context;
-        context = NULL;
+#if PTLIB_VER < 2130
+    ssl_ctx_st * m_context = context;
+#endif
+
+    if (m_context) {
+        delete m_context;
+        m_context = NULL;
     }
 
-    context = SSL_CTX_new(SSLv23_method());	
-    SSL_CTX_set_options(context, SSL_OP_NO_SSLv2);	// remove unsafe SSLv2
-    SSL_CTX_set_mode(context, SSL_MODE_AUTO_RETRY); // handle re-negotiations automatically
- 
+    m_context = SSL_CTX_new(SSLv23_method());	
+    SSL_CTX_set_options(m_context, SSL_OP_NO_SSLv2);	// remove unsafe SSLv2
+    SSL_CTX_set_mode(m_context, SSL_MODE_AUTO_RETRY); // handle re-negotiations automatically
+
     // no anonymous DH (ADH), no <= 64 bit (LOW), no export ciphers (EXP), no MD5 + RC4, no elliptic curve ciphers (ECDH + ECDSA)
     PString cipherList = "ALL:!ADH:!LOW:!EXP:!MD5:!RC4:!ECDH:!ECDSA:@STRENGTH";
     SetCipherList(cipherList);
-
-    SSL_CTX_set_info_callback(context, tls_info_cb);
+    SSL_CTX_set_info_callback(m_context, tls_info_cb);
+#if PTLIB_VER < 2130
+    context = m_context;
+#endif
 }
 
 PBoolean H323_TLSContext::UseCAFile(const PFilePath & caFile)
@@ -266,27 +270,33 @@ PBoolean H323_TLSContext::UseCAFile(const PFilePath & caFile)
         return false;
     }
 
+#if PTLIB_VER < 2130
+    ssl_ctx_st * m_context = context;
+#endif
     char msg[256];
-    if (SSL_CTX_load_verify_locations(context, caFile, NULL) != 1) {
+    if (SSL_CTX_load_verify_locations(m_context, caFile, NULL) != 1) {
         PTRACE(1, "TLS\tError loading CA file " << caFile);
         ERR_error_string(ERR_get_error(), msg);
         PTRACE(1, "TLS\tOpenSSL error: " << msg);
         return false;
     }
-    m_useCA = SSL_CTX_set_default_verify_paths(context);
+    m_useCA = SSL_CTX_set_default_verify_paths(m_context);
     return m_useCA;
 }
 
 PBoolean H323_TLSContext::UseCADirectory(const PDirectory & certDir)
 {
+#if PTLIB_VER < 2130
+    ssl_ctx_st * m_context = context;
+#endif
     char msg[256];
-    if (SSL_CTX_load_verify_locations(context, NULL, certDir) != 1) {
+    if (SSL_CTX_load_verify_locations(m_context, NULL, certDir) != 1) {
         PTRACE(1, "TLS\tError setting CA directory " << certDir);
         ERR_error_string(ERR_get_error(), msg);
         PTRACE(1, "TLS\tOpenSSL error: " << msg);
         return false;
     }
-    m_useCA = SSL_CTX_set_default_verify_paths(context);
+    m_useCA = SSL_CTX_set_default_verify_paths(m_context);
     return m_useCA;
 }
 
@@ -295,11 +305,13 @@ PBoolean H323_TLSContext::AddCACertificate(const PString & caData)
     if (!m_useCA)
         return false;
 
+#if PTLIB_VER < 2130
+    ssl_ctx_st * m_context = context;
+#endif
 	BIO *mem = BIO_new(BIO_s_mem());
 	BIO_puts(mem, caData);
 	X509 *x = PEM_read_bio_X509_AUX(mem,NULL,NULL,NULL);
-    PBoolean loaded = (x && SSL_CTX_add_extra_chain_cert(context, x)); 
-
+    PBoolean loaded = (x && SSL_CTX_add_extra_chain_cert(m_context, x));
     BIO_free(mem);
     return loaded;
 }
@@ -310,9 +322,11 @@ PBoolean H323_TLSContext::UseCertificate(const PFilePath & certFile)
         PTRACE(1, "TLS\tInvalid certificate file path " << certFile);
         return false;
     }
-
+#if PTLIB_VER < 2130
+    ssl_ctx_st * m_context = context;
+#endif
     char msg[256];
-    if (SSL_CTX_use_certificate_chain_file(context, certFile) != 1) {
+    if (SSL_CTX_use_certificate_chain_file(m_context, certFile) != 1) {
         PTRACE(1, "TLS\tError loading certificate file: " << certFile);
         ERR_error_string(ERR_get_error(), msg);
         PTRACE(1, "TLS\tOpenSSL error: " << msg);
@@ -328,13 +342,16 @@ PBoolean H323_TLSContext::UsePrivateKey(const PFilePath & privFile, const PStrin
         return false;
     }
 
+#if PTLIB_VER < 2130
+    ssl_ctx_st * m_context = context;
+#endif
     if (!password) {
-        SSL_CTX_set_default_passwd_cb(context, tls_passwd_cb);
-        SSL_CTX_set_default_passwd_cb_userdata(context, (void *)(PRemoveConst(PString,&password))->GetPointer());
+        SSL_CTX_set_default_passwd_cb(m_context, tls_passwd_cb);
+        SSL_CTX_set_default_passwd_cb_userdata(m_context, (void *)(PRemoveConst(PString,&password))->GetPointer());
     }
 
     char msg[256];
-    if (SSL_CTX_use_PrivateKey_file(context, privFile, SSL_FILETYPE_PEM) != 1) {
+    if (SSL_CTX_use_PrivateKey_file(m_context, privFile, SSL_FILETYPE_PEM) != 1) {
         PTRACE(1, "TLS\tError loading private key file: " << privFile);
         ERR_error_string(ERR_get_error(), msg);
         PTRACE(1, "TLS\tOpenSSL error: " << msg);
@@ -345,14 +362,18 @@ PBoolean H323_TLSContext::UsePrivateKey(const PFilePath & privFile, const PStrin
 
 PBoolean H323_TLSContext::Initialise()
 {
+#if PTLIB_VER < 2130
+    ssl_ctx_st * m_context = context;
+#endif
+
     if (!m_useCA) {
-        SSL_CTX_set_verify(context, SSL_VERIFY_NONE, tls_verify_cb);
+        SSL_CTX_set_verify(m_context, SSL_VERIFY_NONE, tls_verify_cb);
         PTRACE(4, "TLS\tInitialised: WARNING! No Peer verification (Local Cert Authority missing)");
     } else {
-        SSL_CTX_set_verify(context, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT | SSL_VERIFY_CLIENT_ONCE, tls_verify_cb);
+        SSL_CTX_set_verify(m_context, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT | SSL_VERIFY_CLIENT_ONCE, tls_verify_cb);
         PTRACE(4, "TLS\tInitialised: Peer Certificate required.");
     }
-	SSL_CTX_set_verify_depth(context, 5);
+	SSL_CTX_set_verify_depth(m_context, 5);
     return true;
 }
 
@@ -638,7 +659,7 @@ H323EndPoint::H323EndPoint()
   udpPorts.current = udpPorts.base = udpPorts.max = 0;
 
 #ifdef P_STUN
-  natMethods = new PNatStrategy();
+  natMethods = new H323NatStrategy();
 #endif
 
 #ifdef H323_H46019M
@@ -1072,7 +1093,11 @@ void H323EndPoint::AddAllExtendedVideoCapabilities(PINDEX descriptorNum,
 
 void H323EndPoint::RemoveCapabilities(const PStringArray & codecNames)
 {
+#if PTLIB_VER > 2130
+  capabilities.Remove("dummy", codecNames);
+#else
   capabilities.Remove(codecNames);
+#endif
 }
 
 
@@ -1365,14 +1390,19 @@ H235Authenticators H323EndPoint::CreateAuthenticators()
 
 
     for (i = 0; i < auths.GetSize(); ++i) {
+#if PTLIB_VER >= 2130
+        H235Authenticator * Auth = H235Authenticator::CreateAuthenticator(auths[i]);
+#else
         H235Authenticator * Auth = PFactory<H235Authenticator>::CreateInstance(auths[i]);
+#endif
+        if (!Auth) continue;
         if (m_disableMD5Authenticators && ((PString("MD5") == Auth->GetName()) || (PString("CAT") == Auth->GetName()))) {
           PTRACE(3, "H235\tAuthenticator disabled: " << Auth->GetName());
           delete Auth;
           continue;
         }
-        if ((Auth->GetApplication() == H235Authenticator::GKAdmission) ||
-            (Auth->GetApplication() == H235Authenticator::AnyApplication)) 
+        if (Auth->GetApplication() == H235Authenticator::GKAdmission ||
+            Auth->GetApplication() == H235Authenticator::AnyApplication)
                         authenticators.Append(Auth);
     }
 
@@ -1387,10 +1417,17 @@ H235Authenticators H323EndPoint::CreateEPAuthenticators()
   PString username;
   PString password;
 
+#if PTLIB_VER >= 2130
+     PStringList auths = H235Authenticator::GetAuthenticatorList();
+      for (PINDEX i = 0; i < auths.GetSize(); ++i) {
+        H235Authenticator * Auth = H235Authenticator::CreateAuthenticator(auths[i]);
+#else
      PFactory<H235Authenticator>::KeyList_T keyList = PFactory<H235Authenticator>::GetKeyList();
      PFactory<H235Authenticator>::KeyList_T::const_iterator r;
       for (r = keyList.begin(); r != keyList.end(); ++r) {
         H235Authenticator * Auth = PFactory<H235Authenticator>::CreateInstance(*r);
+#endif
+        if (!Auth) continue;
         if (m_disableMD5Authenticators && ((PString("MD5") == Auth->GetName()) || (PString("CAT") == Auth->GetName()))) {
           PTRACE(3, "H235\tAuthenticator disabled: " << Auth->GetName());
           delete Auth;
@@ -2851,7 +2888,12 @@ PBoolean H323EndPoint::OpenAudioChannel(H323Connection & /*connection*/,
 
   if (soundChannel->Open(deviceName, isEncoding ? PSoundChannel::Recorder
                                                 : PSoundChannel::Player,
-                         1, rate, 16)) {
+                         1, rate, 16
+#if PTLIB_VER >= 2130
+                         , NULL
+#endif
+                         )) {
+
     PTRACE(3, "Codec\tOpened sound channel \"" << deviceName
            << "\" for " << (isEncoding ? "record" : "play")
            << "ing at " << rate << " samples/second using " << soundChannelBuffers
@@ -3253,7 +3295,11 @@ PBoolean H323EndPoint::SetSoundChannelRecordDevice(const PString & name)
 PBoolean H323EndPoint::SetSoundChannelPlayDriver(const PString & name)
 {
   PPluginManager & pluginMgr = PPluginManager::GetPluginManager(); 
+#if PTLIB_VER >= 2130
+  PStringList list = pluginMgr.GetPluginsProviding("PSoundChannel", false);
+#else
   PStringList list = pluginMgr.GetPluginsProviding("PSoundChannel");
+#endif
   if (list.GetValuesIndex(name) == P_MAX_INDEX)
     return FALSE;
 
@@ -3271,7 +3317,11 @@ PBoolean H323EndPoint::SetSoundChannelPlayDriver(const PString & name)
 PBoolean H323EndPoint::SetSoundChannelRecordDriver(const PString & name)
 {
   PPluginManager & pluginMgr = PPluginManager::GetPluginManager(); 
+#if PTLIB_VER >= 2130
+  PStringList list = pluginMgr.GetPluginsProviding("PSoundChannel", false);
+#else
   PStringList list = pluginMgr.GetPluginsProviding("PSoundChannel");
+#endif
   if (list.GetValuesIndex(name) == P_MAX_INDEX)
     return FALSE;
 
@@ -3406,10 +3456,16 @@ PNatMethod * H323EndPoint::GetPreferedNatMethod(const PIPSocket::Address & ip)
 
 #if PTRACING
     PNatMethod * meth = NULL;
-    const PNatList & list = natMethods->GetNATList();
+    const H323NatList & list = natMethods->GetNATList();
     if (list.GetSize() > 0) {
       for (PINDEX i=0; i < list.GetSize(); i++) {
-        PTRACE(6, "H323\tNAT Method " << i << " " << list[i].GetName() << " Ready: " << (list[i].IsAvailable(ip) ? "Yes" : "No"));   
+#if PTLIB_VER >= 2130
+        PString name = list[i].GetMethodName(); 
+#else
+        PString name = list[i].GetName();
+#endif
+        PTRACE(6, "H323\tNAT Method " << i << " " << name
+            << " Ready: " << (list[i].IsAvailable(ip) ? "Yes" : "No"));   
         if (list[i].IsAvailable(ip)) {
              meth = &list[i];
              break;
@@ -3425,7 +3481,7 @@ PNatMethod * H323EndPoint::GetPreferedNatMethod(const PIPSocket::Address & ip)
 
 }
 
-PNatStrategy & H323EndPoint::GetNatMethods() const 
+H323NatStrategy & H323EndPoint::GetNatMethods() const 
 { 
     return *natMethods; 
 }
@@ -3500,10 +3556,16 @@ void H323EndPoint::InternalTranslateTCPAddress(PIPSocket::Address & localAddr, c
         if (stun && stun->IsAvailable(remoteAddr) && stun->GetExternalAddress(localAddr)) {
            PTRACE(2,"EP\tSTUN set localIP as " << localAddr);
         } else {
-            const PNatList & list = natMethods->GetNATList();
+            const H323NatList & list = natMethods->GetNATList();
               for (PINDEX i=0; i < list.GetSize(); i++) {
+#if PTLIB_VER >= 2130
+                  PString name = list[i].GetMethodName(); 
+#else
+                  PString name = list[i].GetName();
+#endif
                   if (list[i].IsAvailable(remoteAddr) && list[i].GetExternalAddress(localAddr)) {
-                     PTRACE(2,"EP\tNATMethod " << list[i].GetName() << " rewrite localIP as " << localAddr);
+                     PTRACE(2,"EP\tNATMethod " << name
+                         << " rewrite localIP as " << localAddr);
                      break;
                   }
               }
@@ -3893,7 +3955,7 @@ PBoolean H323EndPoint::TLS_SetCipherList(const PString & ciphers)
     return ((H323_TLSContext*)m_transportContext)->SetCipherList(ciphers);
 }
 
-PBoolean H323EndPoint::TLS_Initialise()
+PBoolean H323EndPoint::TLS_Initialise(const PIPSocket::Address & binding)
 {
     if (!GetTransportContext())
         return false;
@@ -3902,7 +3964,7 @@ PBoolean H323EndPoint::TLS_Initialise()
         return false;
 
     if (!listeners.GetTLSListener()) {
-        H323Listener * listener = new H323ListenerTLS(*this, PIPSocket::GetDefaultIpAny(), DefaultTLSPort);
+        H323Listener * listener = new H323ListenerTLS(*this, binding, DefaultTLSPort);
         StartListener(listener);
     }
     m_transportSecurity.EnableTLS(true);

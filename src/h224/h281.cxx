@@ -446,6 +446,7 @@ PBoolean H281VideoSource::Decode(const BYTE *data)
 
 ////////////////////////////////
 // Must Declare for Factory Loader.
+typedef H224_H281Handler H224_HandlerH281;
 H224_HANDLER(H281);
 ///////////////////////////////
 

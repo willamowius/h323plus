@@ -118,6 +118,18 @@ protected:
 
 /////////////////////////////////////////////////////////////////////
 
+#if PTLIB_VER >= 2130
+
+PCREATE_PLUGIN_DEVICE(H224_Handler);
+#define H224_HANDLER_EX(name, extra) \
+PCREATE_PLUGIN(name, H224_Handler, H224_Handler##name, PPlugin_H224_Handler, \
+  virtual PStringArray GetDeviceNames(P_INT_PTR /*userData*/) const { return H224_Handler##name::GetHandlerName(); } \
+  virtual bool ValidateDeviceName(const PString & deviceName, int /*userData*/) const { return (deviceName == H224_Handler##name::GetHandlerName()[0]); } \
+extra)
+#define H224_HANDLER(name) H224_HANDLER_EX(name, )
+
+#else
+
 template <class className> class H224PluginServiceDescriptor : public PDevicePluginServiceDescriptor
 {
   public:
@@ -132,7 +144,8 @@ template <class className> class H224PluginServiceDescriptor : public PDevicePlu
 
 #define H224_HANDLER(name)    \
     static H224PluginServiceDescriptor<H224_##name##Handler> H224_##name##Handler_descriptor; \
-PCREATE_PLUGIN_STATIC(name, H224_Handler, &H224_##name##Handler_descriptor); \
+PCREATE_PLUGIN_STATIC(name, H224_Handler, &H224_##name##Handler_descriptor);
+#endif
 
 #include <h224/h224handler.h>
 

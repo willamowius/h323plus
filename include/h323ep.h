@@ -2287,7 +2287,7 @@ class H323EndPoint : public PObject
     PBoolean TLS_SetCertificate(const PFilePath & certDir);
     PBoolean TLS_SetPrivateKey(const PFilePath & privFile, const PString & password);
     PBoolean TLS_SetCipherList(const PString & ciphers);
-    PBoolean TLS_Initialise();
+    PBoolean TLS_Initialise(const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny());
     
     PSSLContext * GetTransportContext();
 
@@ -2351,7 +2351,7 @@ class H323EndPoint : public PObject
 
     /** Get the Nat Methods List
        */
-    PNatStrategy & GetNatMethods() const;
+    H323NatStrategy & GetNatMethods() const;
 
     virtual void NATMethodCallBack(const PString & /*NatID*/,    ///< Method Identifier
                                 PINDEX /*msgID*/,                ///< Message Identifer
@@ -2767,7 +2767,7 @@ class H323EndPoint : public PObject
     } tcpPorts, udpPorts, rtpIpPorts;
 
 #ifdef P_STUN
-    PNatStrategy * natMethods;
+    H323NatStrategy * natMethods;
 #endif
 
 #ifdef H323_H46019M

@@ -88,8 +88,11 @@
 
 //////////////////////////////////////////////////////////////////////
 
+#if PTLIB_VER >= 2130
+PCREATE_NAT_PLUGIN(H46024, "H.460.24");
+#else
 PCREATE_NAT_PLUGIN(H46024);
-
+#endif
 
 PNatMethod_H46024::PNatMethod_H46024()
 : mainThread(NULL)
@@ -272,8 +275,8 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
            muxSocket2 = new H46019MultiplexSocket(false);
            pairedPortInfo.currentPort = feat->GetEndPoint()->GetMultiplexPort()-1;
 
-#if 0
-           if (!PSTUNClient::CreateSocketPair(muxSocket1->GetSubSocket(), muxSocket2->GetSubSocket(), binding, (void *)1)) 
+#if PTLIB_VER >= 2130
+           if (!PSTUNClient::CreateSocketPair(muxSocket1->GetSubSocket(), muxSocket2->GetSubSocket(), binding, (PObject *)1)) 
 #else
            if (!PSTUNClient::CreateSocketPair(muxSocket1->GetSubSocket(), muxSocket2->GetSubSocket(), binding))
 #endif
@@ -300,12 +303,8 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
 #else
     {
 #endif
-#if (PTLIB_VER > 260)
-        pairedPortInfo.currentPort = 
-            CreateRandomPortPair(pairedPortInfo.basePort-1,pairedPortInfo.maxPort-2);
-#endif
 
-#if 0
+#if PTLIB_VER >= 2130
         if (!PSTUNClient::CreateSocketPair(socket1,socket2,binding, NULL))
 #else
         if (!PSTUNClient::CreateSocketPair(socket1,socket2,binding))
@@ -592,10 +591,15 @@ bool H460_FeatureStd23::AlternateNATMethod()
     if (natType <= PSTUNClient::ConeNat || useAlternate > 0)
         return false;
 
-    PNatList & natlist = EP->GetNatMethods().GetNATList();
+    H323NatList & natlist = EP->GetNatMethods().GetNATList();
 
     for (PINDEX i=0; i< natlist.GetSize(); i++) {
-        if (natlist[i].GetName() == "UPnP" && 
+#if PTLIB_VER >= 2130
+        PString methName = natlist[i].GetMethodName();
+#else
+        PString methName = natlist[i].GetName();
+#endif
+        if (methName == "UPnP" && 
             natlist[i].GetRTPSupport() == PSTUNClient::RTPSupported) {
             PIPSocket::Address extIP;
             natlist[i].GetExternalAddress(extIP);
@@ -604,7 +608,7 @@ bool H460_FeatureStd23::AlternateNATMethod()
                 natType = PSTUNClient::ConeNat;
                 useAlternate = 1;
                 natlist[i].Activate(true);
-                EP->NATMethodCallBack(natlist[i].GetName(),1,"Available");
+                EP->NATMethodCallBack(methName,1,"Available");
                 return true;
             } else {
                 PTRACE(4,"H46023\tUPnP Unavailable subNAT STUN: " << externalIP << " UPnP " << extIP);
@@ -834,12 +838,16 @@ void H460_FeatureStd24::SetH46019State(bool state)
 
 PBoolean H460_FeatureStd24::IsNatSendAvailable()
 {
-   PNatList & natlist = EP->GetNatMethods().GetNATList();
+   H323NatList & natlist = EP->GetNatMethods().GetNATList();
 
    PBoolean available = false;
    PINDEX i=0;
    for (i=0; i< natlist.GetSize(); i++) {
+#if PTLIB_VER >= 2130
+        if (natlist[i].GetMethodName() == "H46024") break;
+#else
         if (natlist[i].GetName() == "H46024") break;
+#endif
    }
    if (i < natlist.GetSize()) {
      PNatMethod_H46024 & meth = (PNatMethod_H46024 &)natlist[i];
@@ -860,32 +868,31 @@ PBoolean H460_FeatureStd24::IsNatSendAvailable()
 void H460_FeatureStd24::SetNATMethods(H46024NAT state)
 {
 
-    PNatList & natlist = EP->GetNatMethods().GetNATList();
+    H323NatList & natlist = EP->GetNatMethods().GetNATList();
 
-    for (PINDEX i=0; i< natlist.GetSize(); i++)
-    {
+    for (PINDEX i=0; i< natlist.GetSize(); i++) {
+#if PTLIB_VER >= 2130
+        PString name = natlist[i].GetMethodName();
+#else
+        PString name = natlist[i].GetName();
+#endif
         switch (state) {
             case H460_FeatureStd24::e_AnnexA:   // To do Annex A Implementation.
             case H460_FeatureStd24::e_AnnexB:   // To do Annex B Implementation.
             case H460_FeatureStd24::e_default:
-                if (natlist[i].GetName() == "H46024" || natlist[i].GetName() == "UPnP")
+                if (name == "H46024" || name == "UPnP")
                     natlist[i].Activate(false);
-                //else
-                //    natlist[i].Activate(true);
-
                 break;
             case H460_FeatureStd24::e_enable:
-                if (natlist[i].GetName() == "H46024" && !useAlternate)
+                if (name == "H46024" && !useAlternate)
                     natlist[i].Activate(true);
-                else if (natlist[i].GetName() == "UPnP" && useAlternate)
+                else if (name == "UPnP" && useAlternate)
                     natlist[i].Activate(true);
-//                else  if ((natlist[i].GetName() == "H46019") && CON->IsH46019Multiplexed())
-//                    natlist[i].Activate(true);
                 else
                     natlist[i].Activate(false);
                 break;
             case H460_FeatureStd24::e_disable:
-                if ((natlist[i].GetName() == "H46019") && CON->IsH46019Multiplexed())
+                if (name == "H46019" && CON->IsH46019Multiplexed())
                     natlist[i].Activate(true);
                 else
                     natlist[i].Activate(false);
@@ -897,7 +904,12 @@ void H460_FeatureStd24::SetNATMethods(H46024NAT state)
 
    PTRACE(6,"Std24\tNAT Methods " << GetH460NATString(state));
    for (PINDEX i=0; i< natlist.GetSize(); i++) {
-       PTRACE(6, "H323\tNAT Method " << i << " " << natlist[i].GetName() << " Ready: "
+#if PTLIB_VER >= 2130
+       PString name = natlist[i].GetMethodName();
+#else
+       PString name = natlist[i].GetName();
+#endif
+       PTRACE(6, "H323\tNAT Method " << i << " " << name << " Ready: "
                   << (natlist[i].IsAvailable(PIPSocket::Address::GetAny(4)) ? "Yes" : "No"));  
    }
 }

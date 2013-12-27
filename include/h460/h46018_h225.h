@@ -229,9 +229,9 @@ typedef map<PString, unsigned> muxPortMap;
 class H46019MultiplexSocket;
 #endif
 
-class PNatMethod_H46019  : public PNatMethod
+class PNatMethod_H46019  : public H323NatMethod
 {
-    PCLASSINFO(PNatMethod_H46019,PNatMethod);
+    PCLASSINFO(PNatMethod_H46019,H323NatMethod);
 
   public:
     /**@name Construction */
@@ -345,7 +345,9 @@ class PNatMethod_H46019  : public PNatMethod
     /**  GetMethodName
         Get the NAT method name 
     */
-#if PTLIB_VER > 2120
+#if PTLIB_VER >= 2130
+   virtual PCaselessString GetMethodName() const { return "H46019"; }
+#elif PTLIB_VER > 2120
    static PString GetNatMethodName() { return "H46019"; }
    virtual PString GetName() const
             { return GetNatMethodName(); }
@@ -388,7 +390,11 @@ class PNatMethod_H46019  : public PNatMethod
             const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny(),WORD localPort = 0)  { return false; }
     virtual void SetCredentials(const PString &, const PString &, const PString &) {}
 protected:
+#if PTLIB_VER < 2130
     virtual NatTypes InternalGetNatType(bool, const PTimeInterval &) { return UnknownNat; }
+#endif
+    virtual PNATUDPSocket * InternalCreateSocket(Component component, PObject * context)  { return NULL; }
+    virtual void InternalUpdate() {};
 #endif
 
 
@@ -444,7 +450,7 @@ struct  H46019MultiPacket {
 
 typedef std::queue<H46019MultiPacket> H46019MultiQueue;
 
-class H46019MultiplexSocket : public PUDPSocket
+class H46019MultiplexSocket : public H323UDPSocket
 {
   PCLASSINFO(H46019MultiplexSocket, PUDPSocket);
 
@@ -501,9 +507,9 @@ class H46019MultiplexSocket : public PUDPSocket
 };
 #endif
 
-class H46019UDPSocket : public PUDPSocket
+class H46019UDPSocket : public H323UDPSocket
 {
-    PCLASSINFO(H46019UDPSocket, PUDPSocket);
+    PCLASSINFO(H46019UDPSocket, H323UDPSocket);
   public:
     /**@name Construction/Deconstructor */
     /** create a UDP Socket Fully Nat Supported

@@ -1172,6 +1172,26 @@ class H460_FeatureSet : public PObject
 
 /////////////////////////////////////////////////////////////////////
 
+#if PTLIB_VER >= 2130
+
+PCREATE_PLUGIN_DEVICE(H460_Feature);
+#define H460_FEATURE_EX(name, extra) \
+PCREATE_PLUGIN(name, H460_Feature, H460_Feature##name, PPlugin_H460_Feature, \
+    virtual PStringArray GetDeviceNames(P_INT_PTR userData) const { \
+        return (userData == 1 ? H460_Feature##name::GetIdentifier() : H460_Feature##name::GetFeatureFriendlyName()); } \
+    virtual bool  ValidateDeviceName(const PString & deviceName, int userData) const { \
+        PStringArray devices = H460_Feature##name::GetFeatureName(); \
+        if (deviceName == devices[0]) { \
+             int use = H460_Feature##name::GetPurpose(); \
+             if (use == H460_Feature::FeatureBaseAll || use == H460_Feature::FeatureBaseClone || use == userData) \
+                return true; \
+        } \
+        return false; \
+    }; \
+extra)
+#define H460_FEATURE(name) H460_FEATURE_EX(name, )
+#else
+
 template <class className> class H460PluginServiceDescriptor : public PDevicePluginServiceDescriptor
 {
   public:
@@ -1192,12 +1212,15 @@ template <class className> class H460PluginServiceDescriptor : public PDevicePlu
                 return true; 
          } 
          return false;
-    } 
+    }
 };
 
 #define H460_FEATURE(name)    \
 static H460PluginServiceDescriptor<H460_Feature##name> H460_Feature##name##_descriptor; \
-PCREATE_PLUGIN_STATIC(name, H460_Feature, &H460_Feature##name##_descriptor); \
+PCREATE_PLUGIN(name, H460_Feature, &H460_Feature##name##_descriptor);
+#endif
+
+
 
 /////////////////////////////////////////////////////////////////////
 

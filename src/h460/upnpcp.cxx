@@ -1038,7 +1038,11 @@ HRESULT UPnPCallbacks::OnNewExternalIPAddress(const PString & extIPAddress)
 
 ////////////////////////////////////////////////////////////////////
 
+#if PTLIB_VER >= 2130
+PCREATE_NAT_PLUGIN(UPnP, "UPnP");
+#else
 PCREATE_NAT_PLUGIN(UPnP);
+#endif
 
 PNatMethod_UPnP::PNatMethod_UPnP()
 {
@@ -1062,6 +1066,18 @@ PNatMethod_UPnP::~PNatMethod_UPnP()
         delete m_pUPnP;
     }
 }
+
+#if PTLIB_VER >= 2130
+const char * PNatMethod_UPnP::MethodName()
+{
+    return PPlugin_PNatMethod_UPnP::ServiceName();
+}
+
+PCaselessString PNatMethod_UPnP::GetMethodName() const
+{
+    return MethodName();
+}
+#endif
 
 void PNatMethod_UPnP::AttachEndPoint(H323EndPoint * _ep)
 {

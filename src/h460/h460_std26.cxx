@@ -228,7 +228,11 @@ void H460_FeatureStd26::OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor &
 
 ////////////////////////////////////////////////
 
+#if PTLIB_VER >= 2130
+PCREATE_NAT_PLUGIN(H46026, "H.460.26");
+#else
 PCREATE_NAT_PLUGIN(H46026);
+#endif
     
 PNatMethod_H46026::PNatMethod_H46026()
 : active(false), handler(NULL)

@@ -2165,6 +2165,9 @@ class H323Capabilities : public PObject
        simply calls Remove() for each string in the list.
       */
     void Remove(
+#if PTLIB_VER >= 2130
+      const PString & dummy,            ///< Dummy for PTLIB v2.13 onwards
+#endif
       const PStringArray & formatNames  ///< Array of format names to remove
     );
  

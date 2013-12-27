@@ -53,14 +53,29 @@ class H460_FeatureStd23;
 class PNatMethod_H46024  : public PSTUNClient
 {
 
-    PCLASSINFO(PNatMethod_H46024, PNatMethod); 
+    PCLASSINFO(PNatMethod_H46024, PSTUNClient); 
 
     public:
         PNatMethod_H46024();
 
         ~PNatMethod_H46024();
 
-#if PTLIB_VER > 2120
+#if PTLIB_VER >= 2130
+        struct PortInfo {
+        PortInfo(WORD port = 0)
+        : basePort(port), maxPort(port), currentPort(port) {}
+            PMutex mutex;
+            WORD   basePort;
+            WORD   maxPort;
+            WORD   currentPort;
+        };
+#endif
+
+
+#if PTLIB_VER >= 2130
+        virtual PCaselessString GetMethodName() const { return "H46024"; }
+        virtual PString GetName() const { return GetMethodName(); }
+#elif PTLIB_VER > 2120
         static PString GetNatMethodName() { return "H46024"; }
         virtual PString GetName() const
                { return GetNatMethodName(); }
@@ -113,12 +128,17 @@ class PNatMethod_H46024  : public PSTUNClient
 #endif
 
 protected:
+
         // Do a NAT test
         PSTUNClient::NatTypes NATTest();
 
         void SetConnectionSockets(PUDPSocket * data,  PUDPSocket * control,  
                               H323Connection::SessionInformation * info );
 
+#if PTLIB_VER >= 2130
+        PortInfo singlePortInfo;
+        PortInfo pairedPortInfo;
+#endif
 private:
         PThread *               mainThread;
         PDECLARE_NOTIFIER(PThread, PNatMethod_H46024, MainMethod);

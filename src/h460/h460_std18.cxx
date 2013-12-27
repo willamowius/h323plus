@@ -104,11 +104,16 @@ PBoolean H460_FeatureStd18::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu
         return false;
 
     // Ignore if already manually using STUN
-    PNatStrategy & natMethods = EP->GetNatMethods();
-    const PNatList & list = natMethods.GetNATList();
+    H323NatStrategy & natMethods = EP->GetNatMethods();
+    const H323NatList & list = natMethods.GetNATList();
     if (list.GetSize() > 0) {
-      for (PINDEX i=0; i < list.GetSize(); i++) {  
-          if (list[i].GetName() == "STUN" && list[i].IsAvailable(PIPSocket::Address::GetAny(4))) {
+      for (PINDEX i=0; i < list.GetSize(); i++) {
+#if PTLIB_VER >= 2130
+          PString name = list[i].GetMethodName(); 
+#else
+          PString name = list[i].GetName();
+#endif
+          if (name == "STUN" && list[i].IsAvailable(PIPSocket::Address::GetAny(4))) {
              return false;
         }
       }
@@ -344,11 +349,16 @@ void H460_FeatureStd19::SetAvailable(bool avail)
 void H460_FeatureStd19::EnableMultiplex()
 {
     CON->H46019MultiEnabled();
-    const PNatList & list = EP->GetNatMethods().GetNATList();
+    const H323NatList & list = EP->GetNatMethods().GetNATList();
     if (list.GetSize() > 0) {
       bool h24Active= false;
-      for (PINDEX i=0; i < list.GetSize(); i++) {  
-          if (((list[i].GetName() == "H46024") || (list[i].GetName() == "UPnP")) &&
+      for (PINDEX i=0; i < list.GetSize(); i++) {
+#if PTLIB_VER >= 2130
+          PString name = list[i].GetMethodName(); 
+#else
+          PString name = list[i].GetName();
+#endif
+          if (((name == "H46024") || (name == "UPnP")) &&
               list[i].IsAvailable(PIPSocket::Address::GetAny(4))) {
                   h24Active= true;
                   break;
@@ -357,8 +367,13 @@ void H460_FeatureStd19::EnableMultiplex()
       if (h24Active) 
           return;
 
-      for (PINDEX i=0; i < list.GetSize(); i++) {  
-          if (list[i].GetName() == "H46019" &&
+      for (PINDEX i=0; i < list.GetSize(); i++) {
+#if PTLIB_VER >= 2130
+          PString name = list[i].GetMethodName(); 
+#else
+          PString name = list[i].GetName();
+#endif
+          if (name == "H46019" &&
               !list[i].IsAvailable(PIPSocket::Address::GetAny(4))) {
                   PTRACE(4,"Std19\tActivating Multiplexing for call");
                   list[i].Activate(true);

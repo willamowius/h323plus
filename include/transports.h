@@ -947,6 +947,18 @@ class H323TransportTCP : public H323TransportIP
       */
     virtual PBoolean IsListening() const;
 
+#if PTLIB_VER >= 2130
+   /** Read a single character from the channel. 
+        Casting issue in PTLIB
+     */
+    virtual int ReadChar();
+
+   /** Read len bytes into the buffer from the channel.
+        Casting issue in PTLIB
+     */
+    virtual PBoolean ReadBlock(void * buf, PINDEX len);
+#endif
+
     /**Initialise Transport Security.
       */
     virtual PBoolean InitialiseSecurity(const H323TransportSecurity * security);

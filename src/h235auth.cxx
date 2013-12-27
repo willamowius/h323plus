@@ -50,7 +50,7 @@
 
 static const char H235AuthenticatorPluginBaseClass[] = "H235Authenticator";
 
-#if PTLIB_VER >= 2110
+#if PTLIB_VER >= 2110 && PTLIB_VER < 2130
 
 template <> H235Authenticator * PDevicePluginFactory<H235Authenticator>::Worker::Create(const PDefaultPFactoryKey & type) const
 {
@@ -78,6 +78,10 @@ H235Authenticator::H235Authenticator()
 
 PStringArray H235Authenticator::GetAuthenticatorList()
 {
+#if PTLIB_VER >= 2130
+    PPluginManager * plugMgr = &PPluginManager::GetPluginManager();
+    return plugMgr->GetPluginsProviding(H235AuthenticatorPluginBaseClass, false);
+#else
     PStringArray authList;
       PFactory<H235Authenticator>::KeyList_T keyList = PFactory<H235Authenticator>::GetKeyList();
       PFactory<H235Authenticator>::KeyList_T::const_iterator r;
@@ -85,6 +89,7 @@ PStringArray H235Authenticator::GetAuthenticatorList()
            authList.AppendString(*r);
       }
     return authList;
+#endif
 }
 
 H235Authenticator * H235Authenticator::CreateAuthenticator(const PString & authname, PPluginManager * pluginMgr)
@@ -92,7 +97,11 @@ H235Authenticator * H235Authenticator::CreateAuthenticator(const PString & authn
   if (pluginMgr == NULL)
     pluginMgr = &PPluginManager::GetPluginManager();
 
-  return (H235Authenticator *)pluginMgr->CreatePluginsDeviceByName(authname, H235AuthenticatorPluginBaseClass,0);
+#if PTLIB_VER >= 2130
+  return (H235Authenticator *)pluginMgr->CreatePlugin(authname, H235AuthenticatorPluginBaseClass);
+#else
+  return (H235Authenticator *)pluginMgr->CreatePluginsDeviceByName(authname, H235AuthenticatorPluginBaseClass);
+#endif
 }
 
 #if PTLIB_VER >= 2110
@@ -757,6 +766,7 @@ H235AuthenticatorInfo::H235AuthenticatorInfo(PSSLCertificate * cert)
 
 #if PTLIB_VER >= 2110
 #ifdef P_SSL
+typedef H235AuthSimpleMD5 H235AuthenticatorMD5;
 H235SECURITY(MD5);
 #endif
 #else
@@ -999,6 +1009,7 @@ PBoolean H235AuthSimpleMD5::IsSecuredSignalPDU(unsigned signalPDU, PBoolean rece
 
 #if PTLIB_VER >= 2110
 #ifdef P_SSL
+typedef H235AuthCAT H235AuthenticatorCAT;
 H235SECURITY(CAT);
 #endif
 #else
