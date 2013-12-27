@@ -435,23 +435,23 @@ PString OpalGetVersion()
 #define BetaCode    "beta"
 #define ReleaseCode "."
 
-  return psprintf("%u.%u%s%u", MAJOR_VERSION, MINOR_VERSION, BUILD_TYPE, BUILD_NUMBER);
+  return psprintf("%u.%u%s%u", OPENH323_MAJOR, OPENH323_MINOR, OPENH323_BUILD, OPENH323_VERSION);
 }
 
 
 unsigned OpalGetMajorVersion()
 {
-  return MAJOR_VERSION;
+  return OPENH323_MAJOR;
 }
 
 unsigned OpalGetMinorVersion()
 {
-  return MINOR_VERSION;
+  return OPENH323_MINOR;
 }
 
 unsigned OpalGetBuildNumber()
 {
-  return BUILD_NUMBER;
+  return OPENH323_BUILD;
 }
 
 
