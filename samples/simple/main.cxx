@@ -345,6 +345,14 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
     }
   }
 
+  unsigned ipVer = 4;
+#ifdef P_HAS_IPV6
+  if (args.HasOption("ipv6") && PIPSocket::IsIpAddressFamilyV6Supported()) {
+    PIPSocket::SetDefaultIpAddressFamilyV6();
+    ipVer = 6;
+  }
+#endif
+
   localLanguages.AppendString("en-us");
   
   if (!SetSoundDevice(args, "sound", PSoundChannel::Recorder))
@@ -384,14 +392,6 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
               MaxVideoFrame = H323Capability::p720MPI;
           }
       }
-      cout << "  Control capabilities." << endl;
-      if (caps.controls.size() > 0) {
-        for (std::list<PVideoControlInfo>::const_iterator r = caps.controls.begin(); r != caps.controls.end(); ++r) 
-          cout << "        " << r->AsString(r->type) << ": max:" << r->max << " min:" << r->min << endl;
-      } else {
-          cout << "        No Control capabilities found." << endl;
-      }
-      cout << endl;
     } else {
       cout << "InputDevice " << devices[0] << " capabilities not Available." << endl;
     }
@@ -460,13 +460,12 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
   PresenceAddFeature(e_preVideo);
  
   PresenceAddFeatureH460();
-  PresenceSetLocalState(localAliasNames,e_preOnline, "OnLine");
 #endif
 
 #endif
 /////////////////////////////////////////
 // List all the available Features
-      PStringArray natmethods = PNatStrategy::GetRegisteredList();
+      PStringArray natmethods = H323NatStrategy::GetRegisteredList();
 
       cout << "Available NAT Methods: " << endl;
       for (PINDEX i = 0; i < natmethods.GetSize(); i++) {
@@ -532,7 +531,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
       PIPSocket::InterfaceTable interfaceTable;
       if (PIPSocket::GetInterfaceTable(interfaceTable)) {
           for (PINDEX j=0; j < interfaceTable.GetSize(); ++j) {
-              if (interfaceTable[j].GetAddress().GetVersion() == 4 && !interfaceTable[j].GetAddress().IsLoopback()) {
+              if (interfaceTable[j].GetAddress().GetVersion() == ipVer && !interfaceTable[j].GetAddress().IsLoopback()) {
                  iface = interfaceTable[j].GetAddress().AsString();
                  break;
               }
@@ -571,16 +570,13 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
                 passphrase = args.GetOptionString("tls-passphrase");
             useTLS = TLS_SetPrivateKey(args.GetOptionString("tls-privkey"), passphrase);
         }
-        if (useTLS && TLS_Initialise()) {
+
+        if (useTLS && TLS_Initialise(interfaceAddress)) {
             cout << "Enabled TLS signal security." << endl;
         } else {
             cerr << "Could not enable TLS signal security." << endl;
         }
     }
-#endif
-#ifdef P_HAS_IPV6
-  if (args.HasOption("ipv6") && PIPSocket::IsIpAddressFamilyV6Supported())
-    PIPSocket::SetDefaultIpAddressFamilyV6();
 #endif
 
   // Initialise the security info
