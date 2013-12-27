@@ -1470,7 +1470,7 @@ H323TransportTCP::~H323TransportTCP()
 PBoolean H323TransportTCP::OnOpen()
 {
 #if H323_TLS
-#if PTLIB_VER < 2130
+#if PTLIB_VER < 2120
     ssl_st * m_ssl = ssl;
 #endif
     if (m_ssl)
@@ -1547,7 +1547,7 @@ PBoolean H323TransportTCP::InitialiseSecurity(const H323TransportSecurity * secu
 {
 #ifdef H323_TLS
     // Delete any context that was autoCreated in PSSLChannel. - Very Annoying - SH
-#if PTLIB_VER < 2130
+#if PTLIB_VER < 2120
     PSSLContext * m_context = context;
     PBoolean & m_autoDeleteContext = autoDeleteContext;
     ssl_st * m_ssl = ssl;
@@ -1574,7 +1574,7 @@ PBoolean H323TransportTCP::InitialiseSecurity(const H323TransportSecurity * secu
         PTRACE(1, "TLS\tError creating SSL object");
         return false;
     }
-#if PTLIB_VER < 2130
+#if PTLIB_VER < 2120
     context = m_context;
     ssl = m_ssl;
 #endif
@@ -1715,7 +1715,7 @@ PBoolean H323TransportTCP::WritePDU(const PBYTEArray & pdu)
 PBoolean H323TransportTCP::FinaliseSecurity(PSocket * socket)
 {
 #ifdef H323_TLS
-#if PTLIB_VER < 2130
+#if PTLIB_VER < 2120
     ssl_st * m_ssl = ssl;
 #endif
     if (m_ssl && socket) {	
@@ -1729,7 +1729,7 @@ PBoolean H323TransportTCP::FinaliseSecurity(PSocket * socket)
 PBoolean H323TransportTCP::SecureConnect()
 {
 #ifdef H323_TLS
-#if PTLIB_VER < 2130
+#if PTLIB_VER < 2120
     ssl_st * m_ssl = ssl;
 #endif
     int ret = 0;
@@ -1783,7 +1783,7 @@ PBoolean H323TransportTCP::SecureConnect()
 PBoolean H323TransportTCP::SecureAccept()
 {
 #ifdef H323_TLS
-#if PTLIB_VER < 2130
+#if PTLIB_VER < 2120
     ssl_st * m_ssl = ssl;
 #endif
     if (m_ssl)

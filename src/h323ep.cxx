@@ -241,7 +241,7 @@ H323_TLSContext::H323_TLSContext()
 : m_useCA(false)
 {
     // delete the default PTLIB context
-#if PTLIB_VER < 2130
+#if PTLIB_VER < 2120
     ssl_ctx_st * m_context = context;
 #endif
 
@@ -258,7 +258,7 @@ H323_TLSContext::H323_TLSContext()
     PString cipherList = "ALL:!ADH:!LOW:!EXP:!MD5:!RC4:!ECDH:!ECDSA:@STRENGTH";
     SetCipherList(cipherList);
     SSL_CTX_set_info_callback(m_context, tls_info_cb);
-#if PTLIB_VER < 2130
+#if PTLIB_VER < 2120
     context = m_context;
 #endif
 }
@@ -270,7 +270,7 @@ PBoolean H323_TLSContext::UseCAFile(const PFilePath & caFile)
         return false;
     }
 
-#if PTLIB_VER < 2130
+#if PTLIB_VER < 2120
     ssl_ctx_st * m_context = context;
 #endif
     char msg[256];
@@ -286,7 +286,7 @@ PBoolean H323_TLSContext::UseCAFile(const PFilePath & caFile)
 
 PBoolean H323_TLSContext::UseCADirectory(const PDirectory & certDir)
 {
-#if PTLIB_VER < 2130
+#if PTLIB_VER < 2120
     ssl_ctx_st * m_context = context;
 #endif
     char msg[256];
@@ -305,7 +305,7 @@ PBoolean H323_TLSContext::AddCACertificate(const PString & caData)
     if (!m_useCA)
         return false;
 
-#if PTLIB_VER < 2130
+#if PTLIB_VER < 2120
     ssl_ctx_st * m_context = context;
 #endif
 	BIO *mem = BIO_new(BIO_s_mem());
@@ -322,7 +322,7 @@ PBoolean H323_TLSContext::UseCertificate(const PFilePath & certFile)
         PTRACE(1, "TLS\tInvalid certificate file path " << certFile);
         return false;
     }
-#if PTLIB_VER < 2130
+#if PTLIB_VER < 2120
     ssl_ctx_st * m_context = context;
 #endif
     char msg[256];
@@ -342,7 +342,7 @@ PBoolean H323_TLSContext::UsePrivateKey(const PFilePath & privFile, const PStrin
         return false;
     }
 
-#if PTLIB_VER < 2130
+#if PTLIB_VER < 2120
     ssl_ctx_st * m_context = context;
 #endif
     if (!password) {
@@ -362,7 +362,7 @@ PBoolean H323_TLSContext::UsePrivateKey(const PFilePath & privFile, const PStrin
 
 PBoolean H323_TLSContext::Initialise()
 {
-#if PTLIB_VER < 2130
+#if PTLIB_VER < 2120
     ssl_ctx_st * m_context = context;
 #endif
 
