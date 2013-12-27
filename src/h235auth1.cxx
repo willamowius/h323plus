@@ -178,7 +178,6 @@ static void SHA1(const unsigned char * data, unsigned len, unsigned char * hash)
 /////////////////////////////////////////////////////////////////////////////
 
 #if PTLIB_VER >= 2110
-typedef H2351_Authenticator H235AuthenticatorStd1;
 H235SECURITY(Std1);
 #endif
 

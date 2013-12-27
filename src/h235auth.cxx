@@ -766,7 +766,6 @@ H235AuthenticatorInfo::H235AuthenticatorInfo(PSSLCertificate * cert)
 
 #if PTLIB_VER >= 2110
 #ifdef P_SSL
-typedef H235AuthSimpleMD5 H235AuthenticatorMD5;
 H235SECURITY(MD5);
 #endif
 #else
@@ -1009,7 +1008,6 @@ PBoolean H235AuthSimpleMD5::IsSecuredSignalPDU(unsigned signalPDU, PBoolean rece
 
 #if PTLIB_VER >= 2110
 #ifdef P_SSL
-typedef H235AuthCAT H235AuthenticatorCAT;
 H235SECURITY(CAT);
 #endif
 #else

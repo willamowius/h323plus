@@ -394,7 +394,7 @@ class H235AuthSimpleMD5 : public H235Authenticator
 
 #if PTLIB_VER >= 2110 && defined(P_SSL)
 /// PFactory Loader
-typedef H235AuthSimpleMD5 H235_AuthenticatorMD5;
+typedef H235AuthSimpleMD5 H235AuthenticatorMD5;
 #ifndef _WIN32_WCE
   PPLUGIN_STATIC_LOAD(MD5,H235Authenticator);
 #endif
@@ -446,7 +446,7 @@ class H235AuthCAT : public H235Authenticator
 
 #if PTLIB_VER >= 2110 && defined(P_SSL)
 // PFactory Loader
-typedef H235AuthCAT H235_AuthenticatorCAT;
+typedef H235AuthCAT H235AuthenticatorCAT;
 #ifndef _WIN32_WCE
   PPLUGIN_STATIC_LOAD(CAT,H235Authenticator);
 #endif
@@ -512,7 +512,7 @@ typedef H2351_Authenticator H235AuthProcedure1;  // Backwards interoperability
 
 //////////////////////////////////////////////////////////////////////////////
 
-typedef H2351_Authenticator H235_AuthenticatorStd1;
+typedef H2351_Authenticator H235AuthenticatorStd1;
 #if PTLIB_VER >= 2110 && defined(P_SSL)
 #ifndef _WIN32_WCE
  PPLUGIN_STATIC_LOAD(Std1,H235Authenticator);
@@ -552,8 +552,8 @@ template <class className> class H235PluginServiceDescriptor : public PDevicePlu
 };
 
 #define H235SECURITY(name) \
-static H235PluginServiceDescriptor<H235_Authenticator##name> H235_Authenticator##name##_descriptor; \
-PCREATE_PLUGIN(name, H235Authenticator, &H235_Authenticator##name##_descriptor); 
+static H235PluginServiceDescriptor<H235Authenticator##name> H235Authenticator##name##_descriptor; \
+PCREATE_PLUGIN(name, H235Authenticator, &H235Authenticator##name##_descriptor); 
 #endif
 
 #endif

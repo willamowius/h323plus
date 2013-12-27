@@ -159,7 +159,7 @@ private:
 ////////////////////////////////////////////////////
 /// PFactory Loader
 
-typedef H2356_Authenticator H235_AuthenticatorStd6;
+typedef H2356_Authenticator H235AuthenticatorStd6;
 #if PTLIB_VER >= 2110
 #ifndef _WIN32_WCE
    PPLUGIN_STATIC_LOAD(Std6, H235Authenticator);
