@@ -23,34 +23,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.1  2007/08/06 20:50:49  shorne
- * First commit of h323plus
- *
- * Revision 1.8  2005/11/30 13:05:01  csoutheren
- * Changed tags for Doxygen
- *
- * Revision 1.7  2002/09/16 01:14:15  robertj
- * Added #define so can select if #pragma interface/implementation is used on
- *   platform basis (eg MacOS) rather than compiler, thanks Robert Monaghan.
- *
- * Revision 1.6  2002/09/03 06:19:37  robertj
- * Normalised the multi-include header prevention ifdef/define symbol.
- *
- * Revision 1.5  2002/08/05 10:03:47  robertj
- * Cosmetic changes to normalise the usage of pragma interface/implementation.
- *
- * Revision 1.4  2002/05/10 05:47:37  robertj
- * Added session ID to the data logical channel class.
- *
- * Revision 1.3  2002/02/01 01:46:50  robertj
- * Some more fixes for T.120 channel establishment, more to do!
- *
- * Revision 1.2  2002/01/09 00:21:36  robertj
- * Changes to support outgoing H.245 RequstModeChange.
- *
- * Revision 1.1  2001/07/17 04:44:29  robertj
- * Partial implementation of T.120 and T.38 logical channels.
+ * $Id$
  *
  */
 

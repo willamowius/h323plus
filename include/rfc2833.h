@@ -22,22 +22,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.1  2007/08/06 20:50:50  shorne
- * First commit of h323plus
- *
- * Revision 1.4  2005/11/30 13:05:01  csoutheren
- * Changed tags for Doxygen
- *
- * Revision 1.3  2002/09/16 01:14:15  robertj
- * Added #define so can select if #pragma interface/implementation is used on
- *   platform basis (eg MacOS) rather than compiler, thanks Robert Monaghan.
- *
- * Revision 1.2  2002/09/03 06:19:37  robertj
- * Normalised the multi-include header prevention ifdef/define symbol.
- *
- * Revision 1.1  2002/01/23 05:06:23  robertj
- * Added RFC2833 support as separate class
+ * $Id$
  *
  */
 

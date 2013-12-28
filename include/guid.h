@@ -23,29 +23,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.1  2007/08/06 20:50:48  shorne
- * First commit of h323plus
- *
- * Revision 1.6  2005/11/30 13:05:01  csoutheren
- * Changed tags for Doxygen
- *
- * Revision 1.5  2004/04/18 04:38:16  rjongbloed
- * Changed all operators that return PBoolean to return standard type bool. This is primarily
- *   for improved compatibility with std STL usage removing many warnings.
- *
- * Revision 1.4  2002/09/16 01:14:15  robertj
- * Added #define so can select if #pragma interface/implementation is used on
- *   platform basis (eg MacOS) rather than compiler, thanks Robert Monaghan.
- *
- * Revision 1.3  2002/08/05 10:03:47  robertj
- * Cosmetic changes to normalise the usage of pragma interface/implementation.
- *
- * Revision 1.2  2001/03/19 05:51:35  robertj
- * Added ! operator to do !IsNULL(), so cannot use it accidentally.
- *
- * Revision 1.1  2001/03/02 06:59:57  robertj
- * Enhanced the globally unique identifier class.
+ * $Id$
  *
  */
 

@@ -26,64 +26,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.2  2008/05/23 11:19:53  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.1  2007/08/06 20:50:50  shorne
- * First commit of h323plus
- *
- * Revision 1.15  2006/01/18 07:46:08  csoutheren
- * Initial version of RTP aggregation (disabled by default)
- *
- * Revision 1.14  2005/11/30 13:05:01  csoutheren
- * Changed tags for Doxygen
- *
- * Revision 1.13  2003/10/28 22:38:31  dereksmithies
- * Rework of jitter buffer. Many thanks to Henry Harrison of Alice Street.
- *
- * Revision 1.12ACC1.0 6th October 2003 henryh
- * Complete change to adaptive algorithm 
- *
- * Revision 1.12  2002/10/31 00:32:39  robertj
- * Enhanced jitter buffer system so operates dynamically between minimum and
- *   maximum values. Altered API to assure app writers note the change!
- *
- * Revision 1.11  2002/09/16 01:14:15  robertj
- * Added #define so can select if #pragma interface/implementation is used on
- *   platform basis (eg MacOS) rather than compiler, thanks Robert Monaghan.
- *
- * Revision 1.10  2002/09/03 05:40:18  robertj
- * Normalised the multi-include header prevention ifdef/define symbol.
- * Added buffer reset on excess buffer overruns.
- * Added ability to get buffer overruns for statistics display.
- *
- * Revision 1.9  2002/08/05 10:03:47  robertj
- * Cosmetic changes to normalise the usage of pragma interface/implementation.
- *
- * Revision 1.8  2001/09/11 00:21:21  robertj
- * Fixed missing stack sizes in endpoint for cleaner thread and jitter thread.
- *
- * Revision 1.7  2001/02/09 05:16:24  robertj
- * Added #pragma interface for GNU C++.
- *
- * Revision 1.6  2000/05/25 02:26:12  robertj
- * Added ignore of marker bits on broken clients that sets it on every RTP packet.
- *
- * Revision 1.5  2000/05/04 11:49:21  robertj
- * Added Packets Too Late statistics, requiring major rearrangement of jitter buffer code.
- *
- * Revision 1.4  2000/05/02 04:32:24  robertj
- * Fixed copyright notice comment.
- *
- * Revision 1.3  2000/04/30 03:56:14  robertj
- * More instrumentation to analyse jitter buffer operation.
- *
- * Revision 1.2  2000/03/20 20:51:13  robertj
- * Fixed possible buffer overrun problem in RTP_DataFrames
- *
- * Revision 1.1  1999/12/23 23:02:35  robertj
- * File reorganision for separating RTP from H.323 and creation of LID for VPB support.
+ * $Id$
  *
  */
 

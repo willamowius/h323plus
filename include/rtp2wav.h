@@ -22,27 +22,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.2  2008/05/23 11:20:02  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.1  2007/08/06 20:50:50  shorne
- * First commit of h323plus
- *
- * Revision 1.4  2003/01/07 07:53:00  craigs
- * Fixed problem with multi-frame G.723.1 packets
- *
- * Revision 1.3  2002/09/16 01:14:15  robertj
- * Added #define so can select if #pragma interface/implementation is used on
- *   platform basis (eg MacOS) rather than compiler, thanks Robert Monaghan.
- *
- * Revision 1.2  2002/05/23 04:22:29  robertj
- * Fixed problem with detecting correct payload type. Must
- *   wait for first non-empty packet.
- * Added virtual function so can override record start point.
- *
- * Revision 1.1  2002/05/21 02:42:58  robertj
- * Added class to allow for saving of RTP data to a WAV file.
+ * $Id$
  *
  */
 

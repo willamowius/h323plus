@@ -26,71 +26,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.6  2010/04/12 21:39:54  willamowius
- * give application access to RTP sender reports
- *
- * Revision 1.5  2009/07/03 04:14:59  shorne
- * more H.460.18/19 support
- *
- * Revision 1.4  2009/06/28 01:41:52  shorne
- * Replaced P_HAS_QOS with P_QOS (depreciated in PTLib)
- *
- * Revision 1.3  2009/06/28 00:11:03  shorne
- * Added H.460.18/19 Support
- *
- * Revision 1.2  2008/05/23 11:19:46  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.1  2007/08/06 20:50:49  shorne
- * First commit of h323plus
- *
- * Revision 1.13.2.2  2007/05/23 06:58:02  shorne
- * Nat Support for EP's nested behind same NAT
- *
- * Revision 1.13.2.1  2006/12/23 19:08:02  shorne
- * Plugin video codecs & sundry
- *
- * Revision 1.13  2006/01/26 03:44:53  shorne
- * added Transport Capability exchange
- *
- * Revision 1.12  2005/11/30 13:05:01  csoutheren
- * Changed tags for Doxygen
- *
- * Revision 1.11  2003/10/27 06:03:39  csoutheren
- * Added support for QoS
- *   Thanks to Henry Harrison of AliceStreet
- *
- * Revision 1.10  2003/02/07 00:27:59  robertj
- * Changed function to virtual to help in using external multiicast RTP stacks.
- *
- * Revision 1.9  2002/09/16 01:14:15  robertj
- * Added #define so can select if #pragma interface/implementation is used on
- *   platform basis (eg MacOS) rather than compiler, thanks Robert Monaghan.
- *
- * Revision 1.8  2002/09/03 06:19:37  robertj
- * Normalised the multi-include header prevention ifdef/define symbol.
- *
- * Revision 1.7  2002/08/05 10:03:47  robertj
- * Cosmetic changes to normalise the usage of pragma interface/implementation.
- *
- * Revision 1.6  2001/02/09 05:16:24  robertj
- * Added #pragma interface for GNU C++.
- *
- * Revision 1.5  2000/08/31 08:15:32  robertj
- * Added support for dynamic RTP payload types in H.245 OpenLogicalChannel negotiations.
- *
- * Revision 1.4  2000/05/18 11:53:34  robertj
- * Changes to support doc++ documentation generation.
- *
- * Revision 1.3  2000/05/02 04:32:24  robertj
- * Fixed copyright notice comment.
- *
- * Revision 1.2  2000/04/05 03:17:31  robertj
- * Added more RTP statistics gathering and H.245 round trip delay calculation.
- *
- * Revision 1.1  1999/12/23 23:02:35  robertj
- * File reorganision for separating RTP from H.323 and creation of LID for VPB support.
+ * $Id$
  *
  */
 

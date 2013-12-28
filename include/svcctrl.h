@@ -22,27 +22,7 @@
  * The Initial Developer of the Original Code is Equivalence Pty. Ltd.
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.4  2009/02/22 02:02:05  shorne
- * Added ability to enable SCI/SCR without needing H248 support
- *
- * Revision 1.3  2008/05/23 11:20:04  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.2  2007/08/07 22:25:46  shorne
- * update for H323_H350
- *
- * Revision 1.1  2007/08/06 20:50:50  shorne
- * First commit of h323plus
- *
- * Revision 1.2.2.1  2007/07/20 22:03:26  shorne
- * Initial H.350 Support
- *
- * Revision 1.2  2006/05/16 11:37:11  shorne
- * Added ability to detect type of service control
- *
- * Revision 1.1  2003/04/01 01:07:22  robertj
- * Split service control handlers from H.225 RAS header.
+ * $Id$
  *
  */
 

@@ -23,60 +23,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.1  2007/08/06 20:50:49  shorne
- * First commit of h323plus
- *
- * Revision 1.15  2005/11/30 13:05:01  csoutheren
- * Changed tags for Doxygen
- *
- * Revision 1.14  2002/09/16 01:14:15  robertj
- * Added #define so can select if #pragma interface/implementation is used on
- *   platform basis (eg MacOS) rather than compiler, thanks Robert Monaghan.
- *
- * Revision 1.13  2002/09/03 06:19:37  robertj
- * Normalised the multi-include header prevention ifdef/define symbol.
- *
- * Revision 1.12  2002/08/05 10:03:47  robertj
- * Cosmetic changes to normalise the usage of pragma interface/implementation.
- *
- * Revision 1.11  2002/05/15 23:30:01  robertj
- * Backed out delete of t38 handler, causes race conditions.
- *
- * Revision 1.10  2002/05/15 01:30:49  robertj
- * Added missing delete of t38 handler, thanks thsuk@digitalsis.com.
- * Changed to allow the T.35 information to be adjusted so it will work for
- *    various vendors version of the non-standard capability.
- *
- * Revision 1.9  2002/05/10 05:49:22  robertj
- * Added the max bit rate field to the data channel capability class.
- * Added session ID to the data logical channel class.
- * Added capability for old pre-v3 non-standard T.38.
- *
- * Revision 1.8  2002/01/09 00:21:36  robertj
- * Changes to support outgoing H.245 RequstModeChange.
- *
- * Revision 1.7  2002/01/01 23:27:50  craigs
- * Added CleanupOnTermination functions
- * Thanks to Vyacheslav Frolov
- *
- * Revision 1.6  2001/12/22 01:55:20  robertj
- * Removed vast quatities of redundent code that is done by ancestor class.
- *
- * Revision 1.5  2001/12/14 08:36:36  robertj
- * More implementation of T.38, thanks Adam Lazur
- *
- * Revision 1.4  2001/11/20 03:04:30  robertj
- * Added ability to reuse t38 channels with same session ID.
- *
- * Revision 1.3  2001/11/09 05:39:54  craigs
- * Added initial T.38 support thanks to Adam Lazur
- *
- * Revision 1.2  2001/07/24 02:25:57  robertj
- * Added UDP, dual TCP and single TCP modes to T.38 capability.
- *
- * Revision 1.1  2001/07/17 04:44:29  robertj
- * Partial implementation of T.120 and T.38 logical channels.
+ * $Id$
  *
  */
 

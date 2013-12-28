@@ -18,18 +18,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.1  2007/08/06 20:50:50  shorne
- * First commit of h323plus
- *
- * Revision 1.1  2006/06/22 11:07:22  shorne
- * Backport of FECC (H.224) from Opal
- *
- * Revision 1.2  2006/04/23 18:52:19  dsandras
- * Removed warnings when compiling with gcc on Linux.
- *
- * Revision 1.1  2006/04/20 16:48:17  hfriederich
- * Initial version of H.224/H.281 implementation.
+ * $Id$
  *
  */
 

@@ -33,27 +33,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.6  2008/05/23 11:20:27  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.5  2008/01/22 01:17:11  shorne
- * Fixes to the H.230 system
- *
- * Revision 1.4  2007/11/19 18:06:31  shorne
- * changed lists from PList to std::list
- *
- * Revision 1.3  2007/11/07 15:45:42  willamowius
- * linux compile fix
- *
- * Revision 1.2  2007/10/18 17:44:12  shorne
- * Small fixes during test compile
- *
- * Revision 1.1  2007/10/16 16:35:44  shorne
- * Added H.230 Support
- *
- *
- *
+ * $Id$
  *
  */
 

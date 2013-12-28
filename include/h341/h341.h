@@ -31,26 +31,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.5  2008/05/23 11:20:31  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.4  2008/01/05 11:35:59  shorne
- * More Fixes for Linux
- *
- * Revision 1.3  2008/01/05 07:11:39  shorne
- * Major overhaul of H.341 code
- *
- * Revision 1.2  2008/01/02 19:24:02  shorne
- * Removed P_SNMP check
- *
- * Revision 1.1  2007/08/06 20:50:50  shorne
- * First commit of h323plus
- *
- * Revision 1.1.2.1  2007/08/02 20:11:58  shorne
- * Added H.341 Support
- *
- *
+ * $Id$
  *
  */
 

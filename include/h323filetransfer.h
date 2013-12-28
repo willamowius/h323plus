@@ -33,20 +33,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.4  2011/10/18 13:32:30  shorne
- * Rearranged Default Session ids so FECC is Session 3 for better interoperability.
- *
- * Revision 1.3  2009/02/21 14:06:02  shorne
- * Major FileTransfer code review and improvement
- *
- * Revision 1.2  2008/05/23 11:19:38  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.1  2008/01/01 00:16:12  shorne
- * Added GnuGknat and FileTransfer support
- *
- *
+ * $Id$
  *
  */
 

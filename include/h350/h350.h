@@ -34,31 +34,6 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
- * Revision 1.8  2011/01/14 11:57:26  willamowius
- * fix H.350 compile on Linux
- *
- * Revision 1.7  2008/06/26 13:00:50  shorne
- * Fixed change from PList to PArray in PTlib
- *
- * Revision 1.6  2008/05/23 11:20:34  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.5  2008/01/05 12:05:53  shorne
- * small code tidy up
- *
- * Revision 1.4  2008/01/05 11:36:01  shorne
- * More Fixes for Linux
- *
- * Revision 1.3  2008/01/02 19:28:02  shorne
- * Removed duplicate link to plugin factory
- *
- * Revision 1.2  2008/01/02 18:57:56  willamowius
- * compile fix for macro concatenation with gcc
- *
- * Revision 1.1  2007/08/06 20:50:50  shorne
- * First commit of h323plus
- *
- *
  *
  */
 

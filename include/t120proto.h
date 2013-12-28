@@ -23,24 +23,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.1  2007/08/06 20:50:50  shorne
- * First commit of h323plus
- *
- * Revision 1.4  2002/09/16 01:14:15  robertj
- * Added #define so can select if #pragma interface/implementation is used on
- *   platform basis (eg MacOS) rather than compiler, thanks Robert Monaghan.
- *
- * Revision 1.3  2002/09/03 05:44:46  robertj
- * Normalised the multi-include header prevention ifdef/define symbol.
- * Added globally accessible functions for media format name.
- * Added standard TCP port constant.
- *
- * Revision 1.2  2002/02/01 01:47:02  robertj
- * Some more fixes for T.120 channel establishment, more to do!
- *
- * Revision 1.1  2001/07/17 04:44:29  robertj
- * Partial implementation of T.120 and T.38 logical channels.
+ * $Id$
  *
  */
 
