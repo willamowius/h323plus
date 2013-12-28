@@ -53,7 +53,7 @@ PCREATE_PROCESS(SimpleH323Process);
 ///////////////////////////////////////////////////////////////
 
 SimpleH323Process::SimpleH323Process()
-  : PProcess("H323Plus", "SimpleH323",
+  : PProcess("H323Plus", "simple",
              MAJOR_VERSION, MINOR_VERSION, BUILD_TYPE, BUILD_NUMBER)
 {
   endpoint = NULL;
