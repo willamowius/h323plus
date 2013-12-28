@@ -40,6 +40,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='No Trace|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -49,6 +50,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -58,6 +60,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -90,15 +93,15 @@
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">lib\vs2012\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">lib\vs2010_x64\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">lib\vs2012_x64\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)$(Configuration)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">lib\vs2012\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">lib\vs2010_x64\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">lib\vs2012_x64\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)$(Configuration)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='No Trace|Win32'">lib\vs2012\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='No Trace|x64'">.\lib\vs2010_x64\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='No Trace|x64'">.\lib\vs2012_x64\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='No Trace|Win32'">$(OutDir)$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='No Trace|x64'">$(OutDir)$(Configuration)\</IntDir>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\ptlib\include;include;C:\speex-1.2rc1\include;$(IncludePath)</IncludePath>
@@ -1118,6 +1121,7 @@
     <ClInclude Include="include\opalvxml.h" />
     <ClInclude Include="include\opalwavfile.h" />
     <ClInclude Include="include\peclient.h" />
+    <ClInclude Include="include\ptlib_extras.h" />
     <ClInclude Include="include\q922.h" />
     <ClInclude Include="include\q931.h" />
     <ClInclude Include="include\rfc2833.h" />
