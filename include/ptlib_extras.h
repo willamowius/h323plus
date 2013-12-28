@@ -52,6 +52,12 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#if PTLIB_VER < 2120
+#define H323_INT INT
+#else
+#define H323_INT P_INT_PTR
+#endif
+
 #ifndef H323_STLDICTIONARY
 
 #define H323Dictionary  PDictionary
@@ -290,7 +296,7 @@ template <class K, class D> class PSTLDictionary : public PObject,
 
       D * InternalRemoveResort(unsigned pos) {
           unsigned newpos = pos;
-          unsigned sz = this->size();
+          unsigned sz = (unsigned)this->size();
           D * dataPtr = NULL;
           typename std::map< unsigned, std::pair<K, D*>, PSTLSortOrder >::iterator it = this->find(pos);
           if (it == this->end()) return NULL;
@@ -329,7 +335,7 @@ template <class K, class D> class PSTLDictionary : public PObject,
       { 
           PWaitAndSignal m(dictMutex);
 
-          unsigned pos = this->size();
+          unsigned pos = (unsigned)this->size();
           DictionaryEntry entry = make_pair(key,obj);
           this->insert(pair<unsigned, std::pair<K, D*> >(pos,entry));
           return true;
@@ -414,7 +420,7 @@ template <class D> class PSTLList : public PObject,
     virtual PINDEX InsertAt(
       PINDEX index,   ///< Index position in collection to place the object.
       D * obj         ///< New object to place into the collection.
-      ) { return InternalSetAt(index,obj,false,true); }
+      ) { return InternalSetAt((unsigned)index,obj,false,true); }
 
     /**Remove the object at the specified ordinal index from the collection.
        If the AllowDeleteObjects option is set then the object is also deleted.
@@ -427,7 +433,7 @@ template <class D> class PSTLList : public PObject,
      */
     virtual D * RemoveAt(
       PINDEX index   ///< Index position in collection to place the object.
-      ) { return InternalRemoveKey(index); }
+      ) { return InternalRemoveKey((unsigned)index); }
 
 
     PBoolean Remove(
@@ -453,7 +459,7 @@ template <class D> class PSTLList : public PObject,
     virtual PBoolean SetAt(
       PINDEX index,   ///< Index position in collection to set.
       D * obj         ///< New value to place into the collection.
-      ) {  return InternalSetAt(index,obj);  }
+      ) {  return InternalSetAt((unsigned)index,obj);  }
     
     /**Set the object at the specified ordinal position to the new value. This
        will overwrite the existing entry. If the AllowDeleteObjects option is
@@ -468,7 +474,7 @@ template <class D> class PSTLList : public PObject,
     virtual PBoolean ReplaceAt(
       PINDEX index,   ///< Index position in collection to set.
       D * obj         ///< New value to place into the collection.
-      ) {  return InternalSetAt(index,obj, true);  }
+      ) {  return InternalSetAt((unsigned)index,obj, true);  }
 
     /**Get the object at the specified ordinal position. If the index was
        greater than the size of the collection then NULL is returned.
@@ -482,10 +488,10 @@ template <class D> class PSTLList : public PObject,
      */
     virtual D * GetAt(
       PINDEX index  ///< Index position in the collection of the object.
-    ) const { return InternalAt(index); }
+    ) const { return InternalAt((unsigned)index); }
 
 
-    D & operator[](PINDEX i) const { return InternalGetAt(i); }
+    D & operator[](PINDEX i) const { return InternalGetAt((unsigned)i); }
 
     /**Search the collection for the specific instance of the object. The
        object pointers are compared, not the values. A simple linear search
@@ -625,7 +631,7 @@ template <class D> class PSTLList : public PObject,
 
       D * InternalRemoveResort(unsigned pos) {
           unsigned newpos = pos;
-          unsigned sz = this->size();
+          unsigned sz = (unsigned)this->size();
           D * dataPtr = NULL;
           typename std::map< unsigned, D*, PSTLSortOrder >::iterator it = this->find(pos);
           if (it == this->end()) return NULL;
@@ -648,7 +654,7 @@ template <class D> class PSTLList : public PObject,
       };
 
       D * InternalRemoveKey(
-            PINDEX pos   ///< Key to look for in the dictionary.
+            unsigned pos   ///< Key to look for in the dictionary.
             )
       {
           PWaitAndSignal m(dictMutex);
@@ -662,19 +668,19 @@ template <class D> class PSTLList : public PObject,
       { 
           PWaitAndSignal m(dictMutex);
 
-          unsigned pos = this->size();
+          unsigned pos = (unsigned)this->size();
           this->insert(std::pair<unsigned, D*>(pos,obj));
           return pos;
       }
 
       PINDEX InternalSetAt(
-          PINDEX ref,                  ///< Index position in collection to set.
+          unsigned ref,                ///< Index position in collection to set.
           D * obj,                     ///< New value to place into the collection.
           PBoolean replace = false,
           PBoolean reorder = false
           ) 
       {         
-          if (ref >= GetSize())
+          if (ref >= (unsigned)GetSize())
               return InternalAddKey(obj);
 
           PWaitAndSignal m(dictMutex);
@@ -685,16 +691,10 @@ template <class D> class PSTLList : public PObject,
                 delete it->second;  
               this->erase(it);
           } else {
-              //for (typename std::map< unsigned, D*, PSTLSortOrder >::iterator r = this->begin(); r != this->end(); ++r) {
-              //     if (*obj == *(r->second)) {
-              //        InternalRemoveResort(r->first);
-              //        break;
-              //     }
-              //}
-              int sz = this->size();
+              unsigned sz = (unsigned)this->size();
               if (sz > 0) {
-                  int newpos = sz;
-                  for (int i = sz-1; i >= ref; --i) {
+                  unsigned newpos = sz;
+                  for (unsigned i = sz-1; i >= ref; --i) {
                      typename std::map< unsigned, D*, PSTLSortOrder >::iterator it = this->find(i);
                      D* entry =  it->second;
                      this->insert(std::pair<unsigned, D*>(newpos,entry));

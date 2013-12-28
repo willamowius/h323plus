@@ -22,20 +22,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.1  2007/08/06 20:51:08  shorne
- * First commit of h323plus
- *
- * Revision 1.3  2003/01/07 07:52:50  craigs
- * Fixed problem with multi-frame G.723.1 packets
- *
- * Revision 1.2  2002/05/23 04:22:32  robertj
- * Fixed problem with detecting correct payload type. Must
- *   wait for first non-empty packet.
- * Added virtual function so can override record start point.
- *
- * Revision 1.1  2002/05/21 02:42:58  robertj
- * Added class to allow for saving of RTP data to a WAV file.
+ * $Id$
  *
  */
 
@@ -117,7 +104,7 @@ PBoolean OpalRtpToWavFile::OnFirstPacket(RTP_DataFrame & frame)
 }
 
 
-void OpalRtpToWavFile::ReceivedPacket(RTP_DataFrame & frame, INT)
+void OpalRtpToWavFile::ReceivedPacket(RTP_DataFrame & frame,  H323_INT)
 {
   PINDEX payloadSize = frame.GetPayloadSize();
 

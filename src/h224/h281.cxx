@@ -798,7 +798,7 @@ void H224_H281Handler::OnActivatePreset(BYTE /*presetNumber*/)
   // not handled
 }
 
-void H224_H281Handler::ContinueAction(PTimer &, INT)
+void H224_H281Handler::ContinueAction(PTimer &, H323_INT)
 {
 
   if (shutDown)
@@ -809,7 +809,7 @@ void H224_H281Handler::ContinueAction(PTimer &, INT)
   m_h224Handler->TransmitClientFrame(H281_CLIENT_ID, transmitFrame);
 }
 
-void H224_H281Handler::StopActionLocally(PTimer &, INT)
+void H224_H281Handler::StopActionLocally(PTimer &, H323_INT)
 {
   requestedPanDirection = H281_Frame::NoPan;
   requestedTiltDirection = H281_Frame::NoTilt;

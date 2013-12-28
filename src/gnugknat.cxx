@@ -109,7 +109,7 @@ GNUGKTransportThread::GNUGKTransportThread(H323EndPoint & ep, GNUGKTransport * t
    Resume();
 }
 
-void GNUGKTransportThread::Ping(PTimer &, INT)
+void GNUGKTransportThread::Ping(PTimer &, H323_INT)
 { 
 
    // Fix for some PC's that fail on the runcontinuously time interval.

@@ -426,7 +426,7 @@ PBoolean H46017Transport::HandleH46017SignalPDU(H323SignalPDU & pdu)
     return true;
 }
 
-void H46017Transport::SignalProcess(PThread &, INT)
+void H46017Transport::SignalProcess(PThread &,  H323_INT)
 {
     H323SignalPDU pdu;
     PBoolean dataToProcess = false;
@@ -624,7 +624,7 @@ void H46017Transport::SetTunnel(H46026Tunnel * mgr)
     m_h46026tunnel = true;
 }
 
-void H46017Transport::SocketWrite(PThread &, INT)
+void H46017Transport::SocketWrite(PThread &,  H323_INT)
 {
     PBYTEArray tpkt(10004);  // 10K buffer with RFC1006 Header
     tpkt[0] = 3;

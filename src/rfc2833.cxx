@@ -22,24 +22,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.1  2007/08/06 20:51:07  shorne
- * First commit of h323plus
- *
- * Revision 1.4  2003/06/03 05:02:18  rjongbloed
- * Added comment and test for NULL pointer parameter.
- *
- * Revision 1.3  2002/05/08 04:39:57  robertj
- * Fixed problem with receiving RFC2833 data, was still trying to process it as
- *   codec and upsettign the channel receiver code.
- *
- * Revision 1.2  2002/02/19 06:32:38  robertj
- * Allowed for RTP filter functions to force output of packet, or prevent it
- *   from being sent overriding the n frames per packet algorithm.
- * Added more tracing.
- *
- * Revision 1.1  2002/01/23 05:06:23  robertj
- * Added RFC2833 support as separate class
+ * $Id$
  *
  */
 
@@ -156,7 +139,7 @@ void OpalRFC2833::OnEndReceive(char tone, unsigned duration, unsigned timestamp)
 }
 
 
-void OpalRFC2833::ReceivedPacket(RTP_DataFrame & frame, INT)
+void OpalRFC2833::ReceivedPacket(RTP_DataFrame & frame,  H323_INT)
 {
   if (frame.GetPayloadType() != payloadType)
     return;
@@ -213,7 +196,7 @@ void OpalRFC2833::ReceivedPacket(RTP_DataFrame & frame, INT)
 }
 
 
-void OpalRFC2833::ReceiveTimeout(PTimer &, INT)
+void OpalRFC2833::ReceiveTimeout(PTimer &,  H323_INT)
 {
   PWaitAndSignal m(mutex);
 
@@ -226,7 +209,7 @@ void OpalRFC2833::ReceiveTimeout(PTimer &, INT)
 }
 
 
-void OpalRFC2833::TransmitPacket(RTP_DataFrame & frame, INT param)
+void OpalRFC2833::TransmitPacket(RTP_DataFrame & frame,  H323_INT param)
 {
   if (transmitState == TransmitIdle)
     return;
@@ -267,7 +250,7 @@ void OpalRFC2833::TransmitPacket(RTP_DataFrame & frame, INT param)
 }
 
 
-void OpalRFC2833::TransmitEnded(PTimer &, INT)
+void OpalRFC2833::TransmitEnded(PTimer &,  H323_INT)
 {
   EndTransmit();
 }

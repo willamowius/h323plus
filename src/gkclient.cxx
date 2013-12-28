@@ -1679,7 +1679,7 @@ void H323Gatekeeper::SetPassword(const PString & password,
 }
 
 
-void H323Gatekeeper::MonitorMain(PThread &, INT)
+void H323Gatekeeper::MonitorMain(PThread &, H323_INT)
 {
   PTRACE(3, "RAS\tBackground thread started");
 
@@ -1703,7 +1703,7 @@ void H323Gatekeeper::MonitorMain(PThread &, INT)
 }
 
 
-void H323Gatekeeper::TickleMonitor(PTimer &, INT)
+void H323Gatekeeper::TickleMonitor(PTimer &, H323_INT)
 {
   monitorTickle.Signal();
 }

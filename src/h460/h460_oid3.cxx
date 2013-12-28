@@ -64,7 +64,7 @@ H460PresenceHandler::H460PresenceHandler(H323EndPoint & _ep)
     QueueTimer.RunContinuous(PRETIME * 1000); 
 }
 
-void H460PresenceHandler::dequeue(PTimer &, INT)
+void H460PresenceHandler::dequeue(PTimer &,  H323_INT)
 { 
     if (pendingMessages) {
         if (ep.GetGatekeeper() && ep.GetGatekeeper()->IsRegistered()) 

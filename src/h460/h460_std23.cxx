@@ -182,7 +182,7 @@ PSTUNClient::NatTypes PNatMethod_H46024::NATTest()
 
 int recheckTime = 300000;    // 5 minutes
 
-void PNatMethod_H46024::MainMethod(PThread &, INT)
+void PNatMethod_H46024::MainMethod(PThread &,  H323_INT)
 {
 
     while (natType == PSTUNClient::UnknownNat ||
@@ -579,7 +579,7 @@ void H460_FeatureStd23::DelayedReRegistration()
                     "regmeth23");
 }
 
-void H460_FeatureStd23::RegMethod(PThread &, INT)
+void H460_FeatureStd23::RegMethod(PThread &,  H323_INT)
 {
     PThread::Sleep(1000);
     EP->ForceGatekeeperReRegistration();  // We have an ALG so notify the gatekeeper   

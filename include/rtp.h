@@ -728,10 +728,10 @@ class RTP_Session : public PObject
 
   /**@name Functions added to RTP aggregator */
   //@{
-    virtual int GetDataSocketHandle() const
-    { return -1; }
-    virtual int GetControlSocketHandle() const
-    { return -1; }
+    virtual PINDEX GetDataSocketHandle() const
+    { return PINDEX(-1); }
+    virtual PINDEX GetControlSocketHandle() const
+    { return PINDEX(-1); }
   //@}
 
   protected:
@@ -1142,10 +1142,10 @@ class RTP_UDP : public RTP_Session
     PBoolean IsMediaTunneled()  { return mediaIsTunneled; }
   //@}
 
-    int GetDataSocketHandle() const
+    PINDEX GetDataSocketHandle() const
     { return dataSocket != NULL ? dataSocket->GetHandle() : -1; }
 
-    int GetControlSocketHandle() const
+    PINDEX GetControlSocketHandle() const
     { return controlSocket != NULL ? controlSocket->GetHandle() : -1; }
 
   protected:

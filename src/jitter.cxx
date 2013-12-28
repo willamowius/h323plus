@@ -26,7 +26,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Id $
+ * $Id$
  *
  */
 
@@ -333,7 +333,7 @@ void RTP_JitterBuffer::Resume(
   jitterThread->Resume();
 }
 
-void RTP_JitterBuffer::JitterThreadMain(PThread &, INT)
+void RTP_JitterBuffer::JitterThreadMain(PThread &,  H323_INT)
 {
   RTP_JitterBuffer::Entry * currentReadFrame;
   PBoolean markerWarning;

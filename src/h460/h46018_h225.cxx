@@ -135,7 +135,7 @@ void H46018TransportThread::ConnectionEstablished()
      m_keepAlive.RunContinuous(m_keepAliveInterval * 1000);
 }
 
-void H46018TransportThread::KeepAlive(PTimer &, INT)
+void H46018TransportThread::KeepAlive(PTimer &, H323_INT)
 {
   // Send empty RFC1006 TPKT
   BYTE tpkt[4];
@@ -418,7 +418,7 @@ PBoolean H46018Handler::CreateH225Transport(const PASN_OctetString & information
     return true;
 }
 
-void H46018Handler::SocketThread(PThread &, INT)
+void H46018Handler::SocketThread(PThread &,  H323_INT)
 {
     if (m_callId == PString()) {
         PTRACE(3, "H46018\tTCP Connect Abort: No Call identifier");
@@ -824,7 +824,7 @@ void PNatMethod_H46019::StartMultiplexListener()
                                     "GkMonitor:%x");
 }
 
-void PNatMethod_H46019::ReadThread(PThread &, INT)
+void PNatMethod_H46019::ReadThread(PThread &,  H323_INT)
 {
   
   PINDEX bufferLen = 2000;
@@ -1180,7 +1180,7 @@ void H46019UDPSocket::InitialiseKeepAlive()
     }
 }
 
-void H46019UDPSocket::Ping(PTimer &, INT)
+void H46019UDPSocket::Ping(PTimer &,  H323_INT)
 { 
     rtpSocket ? SendRTPPing(keepip,keepport) : SendRTCPPing();
 }
@@ -1613,7 +1613,7 @@ void H46019UDPSocket::BuildProbe(RTP_ControlFrame & report, bool probing)
 
 }
 
-void H46019UDPSocket::Probe(PTimer &, INT)
+void H46019UDPSocket::Probe(PTimer &,  H323_INT)
 { 
     m_probes++;
 

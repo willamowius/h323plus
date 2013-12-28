@@ -23,154 +23,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.2  2008/05/23 11:22:30  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.1  2007/08/06 20:51:07  shorne
- * First commit of h323plus
- *
- * Revision 1.45  2004/05/05 14:11:17  csoutheren
- * Fixed problems with AccessRequest returning wildcards
- *
- * Revision 1.44  2004/04/20 01:37:10  csoutheren
- * Removed uneeded mutex signal
- *
- * Revision 1.43  2004/04/14 00:32:13  csoutheren
- * Quick changes to ensure that non-specific H.501 routes are returned
- * This will need to be changed later to allow retreiving multiple routes
- * from an AccessRequest
- *
- * Revision 1.42  2004/03/29 08:13:15  csoutheren
- * Fixed problem with priorities
- *
- * Revision 1.41  2004/03/29 06:58:15  csoutheren
- * Added extra trace messages
- *
- * Revision 1.40  2004/03/29 05:35:21  csoutheren
- * Changed to use default address for descriptor if blank
- *
- * Revision 1.39  2003/05/14 03:06:22  rjongbloed
- * Added another method for removing service relationships.
- * Added virtual for handling SR requests.
- *
- * Revision 1.38  2003/05/05 08:28:25  craigs
- * Fixed lastUpdate time in descriptors
- *
- * Revision 1.37  2003/04/30 07:32:55  craigs
- * Improve handling of wildcard matches
- *
- * Revision 1.36  2003/04/30 04:55:41  craigs
- * Improved handling for nonexistent routes
- *
- * Revision 1.35  2003/04/18 15:16:43  craigs
- * Fixed problem with creation of alias keys
- *
- * Revision 1.34  2003/04/10 14:34:05  craigs
- * Fixed wild card handling
- *
- * Revision 1.33  2003/04/10 09:41:02  robertj
- * Added some more functions for converting to alias addresses.
- *
- * Revision 1.32  2003/04/10 07:05:35  craigs
- * Allowed access to endpoint type in descriptors
- *
- * Revision 1.31  2003/04/10 03:41:58  craigs
- * Allow AccessRequest to return multiple transport addresses
- *
- * Revision 1.30  2003/04/10 00:59:35  craigs
- * Added support for multiple contact addresses per template
- *
- * Revision 1.29  2003/04/09 10:47:06  craigs
- * Fixed problems
- *
- * Revision 1.28  2003/04/09 03:08:10  robertj
- * Fixed race condition in shutting down transactor (pure virtual call)
- *
- * Revision 1.27  2003/04/08 12:23:37  craigs
- * Fixed problem with descriptors not being removed when service relationships go away
- *
- * Revision 1.26  2003/04/07 05:10:50  craigs
- * Added changes to get access to descriptor creates/updates/deletes
- *
- * Revision 1.25  2003/04/02 06:06:01  robertj
- * Added versions of AddDescriptor that contain the GUID.
- * Changed default localIdentifier to be the local username of the endpoint.
- *
- * Revision 1.24  2003/04/01 05:59:33  robertj
- * Fixed H.501 transaction code setting members for m_common PDU part.
- *
- * Revision 1.23  2003/04/01 04:47:55  robertj
- * Abstracted H.225 RAS transaction processing (RIP and secondary thread) in
- *   server environment for use by H.501 peer elements.
- *
- * Revision 1.22  2003/04/01 01:18:16  robertj
- * Minor changes to AccessEquest and AddDescriptor API to allow for
- *   string arrays of aliases.
- *
- * Revision 1.21  2003/03/28 04:43:05  craigs
- * Added noCallSpecific flag for compatibility
- *
- * Revision 1.20  2003/03/28 00:30:13  craigs
- * Fixed problems with service relationship ordinals and better descriptor update access
- *
- * Revision 1.19  2003/03/27 09:23:41  craigs
- * Rewritten support for descriptors and multiple templates
- *
- * Revision 1.18  2003/03/26 00:46:29  robertj
- * Had another go at making H323Transactor being able to be created
- *   without having a listener running.
- *
- * Revision 1.17  2003/03/25 12:53:00  robertj
- * Added SetPromiscuous back in
- *
- * Revision 1.16  2003/03/25 12:01:30  craigs
- * Fixed SEGV when no interface specified for peer element
- *
- * Revision 1.15  2003/03/25 07:50:23  craigs
- * Added support for mutiple transports per descriptor
- *
- * Revision 1.14  2003/03/25 05:13:00  craigs
- * More speed enhancements
- *
- * Revision 1.13  2003/03/25 02:57:04  craigs
- * Fixed for update problems
- *
- * Revision 1.12  2003/03/25 01:59:13  robertj
- * Fixed incorrect position of delete. Would do nothing there!
- *
- * Revision 1.11  2003/03/25 01:41:02  craigs
- * Still more signficant H.501 updates
- *
- * Revision 1.10  2003/03/20 01:51:12  robertj
- * More abstraction of H.225 RAS and H.501 protocols transaction handling.
- *
- * Revision 1.9  2003/03/19 01:18:38  robertj
- * Fixed GNU warnings
- *
- * Revision 1.8  2003/03/19 01:11:37  robertj
- * GNU compatibility
- *
- * Revision 1.7  2003/03/18 13:57:53  craigs
- * More H.501 implementation
- *
- * Revision 1.6  2003/03/17 13:19:31  craigs
- * More H501 implementation
- *
- * Revision 1.5  2003/03/14 06:01:16  craigs
- * More updates
- *
- * Revision 1.4  2003/03/01 00:22:26  craigs
- * New PeerElement implementation
- *
- * Revision 1.3  2003/02/25 06:48:19  robertj
- * More work on PDU transaction abstraction.
- *
- * Revision 1.2  2003/02/21 07:23:18  robertj
- * Fixed up some comments
- *
- * Revision 1.1  2003/02/21 05:27:06  craigs
- * Initial version
+ * $Id$
  *
  */
 
@@ -394,7 +247,7 @@ void H323PeerElement::PrintOn(ostream & strm) const
   H323Transactor::PrintOn(strm);
 }
 
-void H323PeerElement::MonitorMain(PThread &, INT)
+void H323PeerElement::MonitorMain(PThread &,  H323_INT)
 {
   PTRACE(3, "PeerElement\tBackground thread started");
 
@@ -466,7 +319,7 @@ void H323PeerElement::MonitorMain(PThread &, INT)
   PTRACE(3, "PeerElement\tBackground thread ended");
 }
 
-void H323PeerElement::UpdateAllDescriptors(PThread &, INT)
+void H323PeerElement::UpdateAllDescriptors(PThread &, H323_INT)
 {
   PTRACE(2, "PeerElement\tDescriptor update thread started");
 
@@ -491,7 +344,7 @@ void H323PeerElement::UpdateAllDescriptors(PThread &, INT)
   PTRACE(2, "PeerElement\tDescriptor update thread ended");
 }
 
-void H323PeerElement::TickleMonitor(PTimer &, INT)
+void H323PeerElement::TickleMonitor(PTimer &, H323_INT)
 {
   monitorTickle.Signal();
 }

@@ -153,7 +153,7 @@ void H225TransportThread::Main()
 }
 
 
-void H225TransportThread::KeepAlive(PTimer &, INT)
+void H225TransportThread::KeepAlive(PTimer &,  H323_INT)
 {
   // Send empty RFC1006 TPKT
   BYTE tpkt[4];
@@ -223,7 +223,7 @@ void H245TransportThread::Main()
 }
 
 
-void H245TransportThread::KeepAlive(PTimer &, INT)
+void H245TransportThread::KeepAlive(PTimer &,  H323_INT)
 {
   // Send empty RFC1006 TPKT
   BYTE tpkt[4];

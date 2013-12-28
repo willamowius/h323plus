@@ -1041,7 +1041,7 @@ PBoolean Segment(PBYTEArray & lastBlock, const int size, int & segment, PBYTEArr
     return FALSE;
 }
 
-void H323FileTransferHandler::Transmit(PThread &, INT)
+void H323FileTransferHandler::Transmit(PThread &, H323_INT)
 {
     PBoolean success = TRUE;
     PBoolean datapacket = FALSE;
@@ -1172,7 +1172,7 @@ void H323FileTransferHandler::Transmit(PThread &, INT)
                         lastBlockNo++;
                         if (lastBlockNo > 99) lastBlockNo = 1;
                          lastBlock.BuildData(lastBlockNo,blockSize);
-                         int size = blockSize;
+                         PINDEX size = blockSize;
                          curFile->Read(lastBlock.GetDataPtr(),size);
                          // Wait for Bandwidth limits
                          sendwait.Delay(msBetweenBlocks);
@@ -1280,7 +1280,7 @@ void H323FileTransferHandler::Transmit(PThread &, INT)
 
 }
 
-void H323FileTransferHandler::Receive(PThread &, INT)
+void H323FileTransferHandler::Receive(PThread &, H323_INT)
 {
 
     PBoolean success = TRUE;

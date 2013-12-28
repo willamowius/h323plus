@@ -56,7 +56,7 @@ H245Negotiator::H245Negotiator(H323EndPoint & end, H323Connection & conn)
 }
 
 
-void H245Negotiator::HandleTimeout(PTimer &, INT)
+void H245Negotiator::HandleTimeout(PTimer &, H323_INT)
 {
 }
 

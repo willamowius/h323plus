@@ -23,120 +23,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.3  2010/06/24 14:13:05  willamowius
- * fix crash if H.450.2 transfer destination can't be resolved
- *
- * Revision 1.2  2008/05/23 11:23:11  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.1  2007/08/06 20:51:39  shorne
- * First commit of h323plus
- *
- * Revision 1.1.2.1  2006/12/24 05:32:55  shorne
- * File restructuring
- *
- * Revision 1.30  2006/06/27 12:35:03  csoutheren
- * Patch 1366328 - Support for H.450.3 divertingLegInformation2
- * Thanks to Norbert Bartalsky
- *
- * Revision 1.29  2006/05/16 11:38:27  shorne
- * Added DNS SRV support
- *
- * Revision 1.28  2006/01/26 03:43:06  shorne
- * Fix typo
- *
- * Revision 1.27  2005/07/12 12:28:57  csoutheren
- * Fixes for H.450 errors and return values
- * Thanks to Iker Perez San Roman
- *
- * Revision 1.26  2005/06/27 00:36:45  csoutheren
- * Added missing return after error
- * Thanks to Iker Pérez de San Román
- *
- * Revision 1.25  2005/03/10 07:01:30  csoutheren
- * Fixed problem with H.450 call identifiers not being unique across all calls on an
- *  endpoint. Thanks to Thien Nguyen
- *
- * Revision 1.24  2004/07/03 06:51:37  rjongbloed
- * Added PTRACE_PARAM() macro to fix warnings on parameters used in PTRACE
- *  macros only.
- *
- * Revision 1.23  2004/04/25 01:52:47  rjongbloed
- * Fixed GCC 3.4 warnings
- *
- * Revision 1.22  2004/02/17 09:53:54  csoutheren
- * Removed incorrect assignment of m_silentMonitoringPermitted to FALSE
- * See SourceForge bug 832371
- * Thanks to Vyacheslav E. Andrejev
- *
- * Revision 1.21  2004/02/07 03:35:56  rjongbloed
- * Fixed missing unlocks in some H.240 operations, in particular consultation transfer never being cleaned up. Thanks Sébastien Annedouche
- *
- * Revision 1.20  2003/07/15 11:22:07  csoutheren
- * Improved handling of alias addresses thanks to Federico Pinna
- *
- * Revision 1.19  2002/11/21 22:37:47  robertj
- * Fixed problems with unrecognized invoke APDU, thanks Andrea Bondavalli
- *
- * Revision 1.18  2002/10/01 06:47:39  robertj
- * Fixed GNU compiler warning
- *
- * Revision 1.17  2002/09/25 05:21:11  robertj
- * Fixed warning on no trace version.
- *
- * Revision 1.16  2002/08/05 10:03:47  robertj
- * Cosmetic changes to normalise the usage of pragma interface/implementation.
- *
- * Revision 1.15  2002/07/04 00:40:34  robertj
- * More H.450.11 call intrusion implementation, thanks Aleksandar Todorovic
- *
- * Revision 1.14  2002/06/25 09:56:07  robertj
- * Fixed GNU warnings
- *
- * Revision 1.13  2002/06/22 05:48:42  robertj
- * Added partial implementation for H.450.11 Call Intrusion
- *
- * Revision 1.12  2002/06/13 06:13:28  robertj
- * Added trace dumps for outgoing H.450 supplementary service APDU's.
- *
- * Revision 1.11  2002/02/04 07:17:56  robertj
- * Added H.450.2 Consultation Transfer, thanks Norwood Systems.
- *
- * Revision 1.10  2002/01/14 00:03:01  robertj
- * Added H.450.6
- * Added extra "failure mode" parts of H.250.2.
- * Various other bug fixes.
- *   Thanks Ben Madsen of Norwood Systems
- *
- * Revision 1.9  2001/11/19 07:40:44  robertj
- * Fixed problem with error detection & state change in Call Transfer, thanks Graeme Reid
- *
- * Revision 1.8  2001/08/27 03:59:16  robertj
- * Fixed GNU warnings.
- *
- * Revision 1.7  2001/08/16 07:49:19  robertj
- * Changed the H.450 support to be more extensible. Protocol handlers
- *   are now in separate classes instead of all in H323Connection.
- *
- * Revision 1.6  2001/08/06 03:08:57  robertj
- * Fission of h323.h to h323ep.h & h323con.h, h323.h now just includes files.
- *
- * Revision 1.5  2001/06/14 06:25:16  robertj
- * Added further H.225 PDU build functions.
- * Moved some functionality from connection to PDU class.
- *
- * Revision 1.4  2001/06/05 03:14:41  robertj
- * Upgraded H.225 ASN to v4 and H.245 ASN to v7.
- *
- * Revision 1.3  2001/05/09 04:59:04  robertj
- * Bug fixes in H.450.2, thanks Klein Stefan.
- *
- * Revision 1.2  2001/04/20 02:16:53  robertj
- * Removed GNU C++ warnings.
- *
- * Revision 1.1  2001/04/11 03:01:29  robertj
- * Added H.450.2 (call transfer), thanks a LOT to Graeme Reid & Norwood Systems
+ * $Id$
  *
  */
 
@@ -1519,7 +1406,7 @@ void H4502Handler::StopctTimer()
 }
 
 
-void H4502Handler::OnCallTransferTimeOut(PTimer &, INT)
+void H4502Handler::OnCallTransferTimeOut(PTimer &, H323_INT)
 {
   switch (ctState) {
     // CT-T3 Timeout
@@ -2548,7 +2435,7 @@ void H45011Handler::StopciTimer()
 }
 
 
-void H45011Handler::OnCallIntrudeTimeOut(PTimer &, INT)
+void H45011Handler::OnCallIntrudeTimeOut(PTimer &,  H323_INT)
 {
   switch (ciState) {
     // CI-T1 Timeout

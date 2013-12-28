@@ -5386,14 +5386,14 @@ void H323Connection::OnUserInputIndication(const H245_UserInputIndication & ind)
 }
 
 
-void H323Connection::OnUserInputInlineRFC2833(OpalRFC2833Info & info, INT)
+void H323Connection::OnUserInputInlineRFC2833(OpalRFC2833Info & info, H323_INT)
 {
   if (!info.IsToneStart())
     OnUserInputTone(info.GetTone(), info.GetDuration(), 0, info.GetTimestamp());
 }
 
 
-void H323Connection::OnUserInputInBandDTMF(H323Codec::FilterInfo & info, INT)
+void H323Connection::OnUserInputInBandDTMF(H323Codec::FilterInfo & info, H323_INT)
 {
   // This function is set up as an 'audio filter'.
   // This allows us to access the 16 bit PCM audio (at 8Khz sample rate)

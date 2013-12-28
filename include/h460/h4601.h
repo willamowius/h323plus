@@ -488,7 +488,7 @@ class H460_FeatureTable : public H225_ArrayOf_EnumeratedParameter
     /** ParameterCount
         Number of Feature Parameters in the Parameter List.
     */
-    int ParameterCount() { return GetSize(); };
+    PINDEX ParameterCount() { return GetSize(); };
 
     /** ParameterIsUnique
         return TRUE if there is only 1 instance of
