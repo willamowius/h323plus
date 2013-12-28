@@ -694,6 +694,9 @@
     <ClInclude Include="include\h460\h460_std22.h">
       <Filter>Header Files\h460</Filter>
     </ClInclude>
+    <ClInclude Include="include\ptlib_extras.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\asn\gccpdu.asn">
