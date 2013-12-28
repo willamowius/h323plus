@@ -28,8 +28,9 @@
  */
 
 #include <ptlib.h>
+#include "openh323buildopts.h"
 
-#if P_SSL
+#ifdef H323_SSL
 
 #include <openssl/evp.h>
 
@@ -586,7 +587,7 @@ PBoolean H2351_Authenticator::UseGkAndEpIdentifiers() const
 
 
 
-#endif // P_SSL
+#endif // H323_SSL
 
 
 /////////////////////////////////////////////////////////////////////////////

@@ -765,7 +765,7 @@ H235AuthenticatorInfo::H235AuthenticatorInfo(PSSLCertificate * cert)
 ///////////////////////////////////////////////////////////////////////////////
 
 #if PTLIB_VER >= 2110
-#ifdef P_SSL
+#ifdef H323_SSL
 H235SECURITY(MD5);
 #endif
 #else
@@ -1007,7 +1007,7 @@ PBoolean H235AuthSimpleMD5::IsSecuredSignalPDU(unsigned signalPDU, PBoolean rece
 ///////////////////////////////////////////////////////////////////////////////
 
 #if PTLIB_VER >= 2110
-#ifdef P_SSL
+#ifdef H323_SSL
 H235SECURITY(CAT);
 #endif
 #else
@@ -1214,7 +1214,7 @@ PBoolean H235AuthCAT::IsSecuredPDU(unsigned rasPDU, PBoolean received) const
 }
 
 // need to load into factory here otherwise doesn't load...
-#if PTLIB_VER < 2110 && defined(P_SSL)
+#if PTLIB_VER < 2110 && defined(H323_SSL)
 static PFactory<H235Authenticator>::Worker<H2351_Authenticator> factoryH2351_Authenticator("H2351_Authenticator");
 #endif
 

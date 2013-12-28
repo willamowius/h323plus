@@ -453,7 +453,7 @@ typedef H235AuthCAT H235AuthenticatorCAT;
 #endif
 
 
-#if P_SSL
+#if H323_SSL
 
 /** This class embodies the H.235 "base line" from H235.1.
 */
