@@ -103,6 +103,7 @@
 #include "t38proto.h"
 #endif
 
+#include "../version.h"
 #include "h323pluginmgr.h"
 
 #include <ptlib/sound.h>
@@ -435,23 +436,23 @@ PString OpalGetVersion()
 #define BetaCode    "beta"
 #define ReleaseCode "."
 
-  return psprintf("%u.%u%s%u", OPENH323_MAJOR, OPENH323_MINOR, OPENH323_BUILD, OPENH323_VERSION);
+  return psprintf("%u.%u%s%u", MAJOR_VERSION, MINOR_VERSION, BUILD_TYPE, BUILD_NUMBER);
 }
 
 
 unsigned OpalGetMajorVersion()
 {
-  return OPENH323_MAJOR;
+  return MAJOR_VERSION;
 }
 
 unsigned OpalGetMinorVersion()
 {
-  return OPENH323_MINOR;
+  return MINOR_VERSION;
 }
 
 unsigned OpalGetBuildNumber()
 {
-  return OPENH323_BUILD;
+  return BUILD_NUMBER;
 }
 
 
