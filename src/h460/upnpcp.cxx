@@ -1360,7 +1360,7 @@ PBoolean UPnPUDPSocket::Close()
     if (natMethod && extPort > 0)
         natMethod->RemoveUPnPMap(extPort,true);
 
-    return PUDPSocket::Close();
+    return H323UDPSocket::Close();
 }
 
 void UPnPUDPSocket::SetMasqAddress(const PIPSocket::Address & ip, WORD port)

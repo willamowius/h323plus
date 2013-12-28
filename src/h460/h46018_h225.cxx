@@ -1057,7 +1057,7 @@ PBoolean H46019MultiplexSocket::Close()
     if (m_subSocket)
         return m_subSocket->Close();
 
-    return PUDPSocket::Close();
+    return H323UDPSocket::Close();
 }
 #endif
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -1150,7 +1150,7 @@ PBoolean H46019UDPSocket::Close()
 #ifdef H323_H46019M
     m_shutDown = true;
 #endif
-    return PUDPSocket::Close();
+    return H323UDPSocket::Close();
 }
 
 void H46019UDPSocket::InitialiseKeepAlive() 

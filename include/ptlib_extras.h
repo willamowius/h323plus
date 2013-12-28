@@ -968,6 +968,14 @@ class H323UDPSocket : public PUDPSocket
         H323UDPSocket() {}
         virtual PBoolean IsAlternateAddress(const Address & /*address*/, WORD /*port*/) { return false; }
         virtual PBoolean DoPseudoRead(int & /*selectStatus*/) { return false; }
+
+        virtual PBoolean Close() {
+#ifdef P_QWAVE
+            return PIPSocket::Close();
+#else
+            return PSocket::Close();
+#endif
+        }
 };
 
 #endif // H323UDPSocket
