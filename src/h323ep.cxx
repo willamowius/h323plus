@@ -378,6 +378,12 @@ PBoolean H323_TLSContext::Initialise()
     return true;
 }
 
+#else
+
+  #ifdef _MSC_VER
+    #pragma message("TLS support DISABLED (missing OpenSSL)")
+  #endif
+
 #endif
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -4271,7 +4277,7 @@ void H323EndPoint::RegInvokeReRegistration()
                     "regmeth:%x");
 }
 
-void H323EndPoint::RegMethod(PThread &, INT)
+void H323EndPoint::RegMethod(PThread &, H323_INT)
 {
     PWaitAndSignal m(reregmutex);
 

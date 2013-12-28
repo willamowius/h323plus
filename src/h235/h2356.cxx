@@ -68,7 +68,7 @@ inline void DeleteObjectsInMap(const M & m)
     std::for_each(m.begin(), m.end(), deletepair<PAIR>());
 }
 
-void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, const PString & filePath = PString(), unsigned cipherlength = P_MAX_INDEX, unsigned maxTokenLength = 1024)
+void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, const PString & filePath = PString(), PINDEX cipherlength = P_MAX_INDEX, PINDEX maxTokenLength = 1024)
 {
     if (dhcache.size() > 0) {
         H235_DHMap::iterator i = dhcache.begin();
@@ -114,8 +114,8 @@ void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, const PString & fi
     // if not loaded from File then create.
     for (PINDEX i = 0; i < PARRAYSIZE(H235_DHParameters); ++i) {
       if (dhmap.find(H235_DHParameters[i].parameterOID) == dhmap.end()) {
-        if (H235_DHParameters[i].sz > 0 && H235_DHParameters[i].cipher <= cipherlength
-            && (H235_DHParameters[i].dh_p == NULL || (H235_DHParameters[i].sz * 8) <= maxTokenLength)) {
+        if (H235_DHParameters[i].sz > 0 && H235_DHParameters[i].cipher <= (unsigned)cipherlength
+            && (H235_DHParameters[i].dh_p == NULL || (H235_DHParameters[i].sz * 8) <= (unsigned)maxTokenLength)) {
            dhmap.insert(pair<PString, H235_DiffieHellman*>(H235_DHParameters[i].parameterOID,
                   new H235_DiffieHellman(H235_DHParameters[i].dh_p, H235_DHParameters[i].sz,
                                          H235_DHParameters[i].dh_g, H235_DHParameters[i].sz,
@@ -505,6 +505,12 @@ void H2356_Authenticator::ExportParameters(const PFilePath & path)
     i++;
   }
 }
+
+#else
+
+  #ifdef _MSC_VER
+    #pragma message("H.235 Media support DISABLED (missing OpenSSL)")
+  #endif
 
 #endif  // H323_H235
 
