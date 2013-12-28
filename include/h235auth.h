@@ -512,13 +512,6 @@ typedef H2351_Authenticator H235AuthProcedure1;  // Backwards interoperability
 
 //////////////////////////////////////////////////////////////////////////////
 
-typedef H2351_Authenticator H235AuthenticatorStd1;
-#if PTLIB_VER >= 2110 && defined(P_SSL)
-#ifndef _WIN32_WCE
- PPLUGIN_STATIC_LOAD(Std1,H235Authenticator);
-#endif
-#endif
-
 #if PTLIB_VER >= 2130
 
 PCREATE_PLUGIN_DEVICE(H235Authenticator);

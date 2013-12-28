@@ -178,6 +178,8 @@ static void SHA1(const unsigned char * data, unsigned len, unsigned char * hash)
 /////////////////////////////////////////////////////////////////////////////
 
 #if PTLIB_VER >= 2110
+typedef H2351_Authenticator H235AuthenticatorStd1;
+PPLUGIN_STATIC_LOAD(Std1,H235Authenticator);
 H235SECURITY(Std1);
 #endif
 
@@ -580,6 +582,8 @@ PBoolean H2351_Authenticator::UseGkAndEpIdentifiers() const
 {
   return TRUE;
 }
+
+
 
 
 #endif // P_SSL
