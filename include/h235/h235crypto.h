@@ -91,9 +91,17 @@ public:
       */
     PBYTEArray Encrypt(const PBYTEArray & data, unsigned char * ivSequence, bool & rtpPadding);
 
+    /** Encrypt In Place
+      */
+    PINDEX EncryptInPlace(const BYTE * inData, PINDEX inLength, BYTE * outData, unsigned char * ivSequence, bool & rtpPadding);
+
     /** Decrypt data
       */
     PBYTEArray Decrypt(const PBYTEArray & data, unsigned char * ivSequence, bool & rtpPadding);
+
+    /** Decrypt In Place
+      */
+    PINDEX DecryptInPlace(const BYTE * inData, PINDEX inLength, BYTE * outData, unsigned char * ivSequence, bool & rtpPadding);
 
     /** Generate a random key of a size suitable for the alogorithm
       */
@@ -114,6 +122,9 @@ protected:
     PUInt64 m_operationCnt;  // 8 byte integer
     PBoolean m_initialised;
 
+    unsigned char m_iv[EVP_MAX_IV_LENGTH];
+    int m_inSize;
+    int m_outSize;
 };
 
 
@@ -163,9 +174,17 @@ public:
      */
     PBoolean ReadFrame(DWORD & rtpTimestamp, RTP_DataFrame & frame);
 
+    /** Read Frame (Memory InPlace)
+      */
+    PBoolean ReadFrameInPlace(RTP_DataFrame & frame);
+
     /** Write Frame
      */
     PBoolean WriteFrame(RTP_DataFrame & frame);
+
+    /** Write Frame (Memory InPlace)
+      */
+    PBoolean WriteFrameInPlace(RTP_DataFrame & frame);
   //@}
 
 	PString GetAlgorithmOID() const { return m_context.GetAlgorithmOID(); }
@@ -181,6 +200,8 @@ private:
     int                  m_dhkeyLen;
 
     PBYTEArray           m_frameBuffer;
+    unsigned char        m_ivSequence[6];
+    PBoolean             m_padding;
 };
 
 #endif // H235CRYPTO_H

@@ -244,11 +244,11 @@ PBoolean H323SecureRTPChannel::OnReceivedAckPDU(const H245_H2250LogicalChannelAc
 
 PBoolean H323SecureRTPChannel::ReadFrame(DWORD & rtpTimestamp, RTP_DataFrame & frame)
 {
-	if (rtpSession.ReadBufferedData(rtpTimestamp, frame)) {
-		if (m_encryption && m_encryption->IsInitialised() && frame.GetPayloadSize() > 0)
-           return m_encryption->ReadFrame(rtpTimestamp,frame);
+    if (rtpSession.ReadBufferedData(rtpTimestamp, frame)) {
+        if (m_encryption && m_encryption->IsInitialised() && frame.GetPayloadSize() > 0)
+           return m_encryption->ReadFrameInPlace(frame);
         else
-		   return true;
+           return true;
 	} else 
 		return false;
 }
@@ -260,7 +260,7 @@ PBoolean H323SecureRTPChannel::WriteFrame(RTP_DataFrame & frame)
         return false;
 
     if (m_encryption && m_encryption->IsInitialised()) {
-        if (m_encryption->WriteFrame(frame))
+        if (m_encryption->WriteFrameInPlace(frame))
             return rtpSession.WriteData(frame);
         else
             return true;

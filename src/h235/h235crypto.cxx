@@ -344,7 +344,8 @@ int EVP_DecryptFinal_relaxed(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
 }
 
 H235CryptoEngine::H235CryptoEngine(const PString & algorithmOID)
-:  m_algorithmOID(algorithmOID), m_operationCnt(0), m_initialised(false)
+:  m_algorithmOID(algorithmOID), m_operationCnt(0), m_initialised(false),
+   m_inSize(0), m_outSize(0)
 {
 }
 
@@ -456,6 +457,46 @@ PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * i
     return ciphertext;
 }
 
+PINDEX H235CryptoEngine::EncryptInPlace(const BYTE * inData, PINDEX inLength, BYTE * outData, unsigned char * ivSequence, bool & rtpPadding)
+{
+
+    // max ciphertext len for a n bytes of plaintext is n + BLOCK_SIZE -1 bytes
+    m_outSize = 0;
+    m_inSize =  inLength + EVP_CIPHER_CTX_block_size(&m_encryptCtx);
+
+    SetIV(m_iv, ivSequence, EVP_CIPHER_CTX_iv_length(&m_encryptCtx));
+    EVP_EncryptInit_ex(&m_encryptCtx, NULL, NULL, NULL, m_iv);
+
+    rtpPadding = (inLength % EVP_CIPHER_CTX_block_size(&m_encryptCtx) > 0);
+    EVP_CIPHER_CTX_set_padding(&m_encryptCtx, rtpPadding ? 1 : 0);
+
+    if (!rtpPadding && (inLength % EVP_CIPHER_CTX_block_size(&m_encryptCtx) > 0)) {
+        // use cyphertext stealing
+        if (!EVP_EncryptUpdate_cts(&m_encryptCtx, outData, &m_inSize, inData, inLength)) {
+            PTRACE(1, "H235\tEVP_EncryptUpdate_cts() failed");
+        }
+#if PTLIB_VER >= 2130
+        if (!EVP_EncryptFinal_ctsA(&m_encryptCtx, outData + m_inSize, &m_outSize)) {
+#else
+        if (!EVP_EncryptFinal_cts(&m_encryptCtx, outData + m_inSize, &m_outSize)) {
+#endif
+            PTRACE(1, "H235\tEVP_EncryptFinal_cts() failed");
+        }
+    } else {
+        /* update ciphertext, ciphertext_len is filled with the length of ciphertext generated,
+         *len is the size of plaintext in bytes */
+        if (!EVP_EncryptUpdate(&m_encryptCtx, outData, &m_inSize, inData, inLength)) {
+            PTRACE(1, "H235\tEVP_EncryptUpdate() failed");
+        }
+
+        // update ciphertext with the final remaining bytes, if any use RTP padding
+        if (!EVP_EncryptFinal_ex(&m_encryptCtx, outData + m_inSize, &m_outSize)) {
+            PTRACE(1, "H235\tEVP_EncryptFinal_ex() failed");
+        }
+    }
+    return m_inSize + m_outSize;
+}
+
 PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data, unsigned char * ivSequence, bool & rtpPadding)
 {
     if (!m_initialised)
@@ -501,6 +542,42 @@ PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data, unsigned char * i
     return plaintext;
 }
 
+PINDEX H235CryptoEngine::DecryptInPlace(const BYTE * inData, PINDEX inLength, BYTE * outData, unsigned char * ivSequence, bool & rtpPadding)
+{
+
+    /* plaintext will always be equal to or lesser than length of ciphertext*/
+    m_outSize = 0;
+    m_inSize =  inLength;
+  
+    SetIV(m_iv, ivSequence, EVP_CIPHER_CTX_iv_length(&m_decryptCtx));
+    EVP_DecryptInit_ex(&m_decryptCtx, NULL, NULL, NULL, m_iv);
+
+    EVP_CIPHER_CTX_set_padding(&m_decryptCtx, rtpPadding ? 1 : 0);
+
+    if (!rtpPadding && inLength % EVP_CIPHER_CTX_block_size(&m_decryptCtx) > 0) {
+        // use cyphertext stealing
+        if (!EVP_DecryptUpdate_cts(&m_decryptCtx, outData, &m_inSize, inData, inLength)) {
+            PTRACE(1, "H235\tEVP_DecryptUpdate_cts() failed");
+        }
+#if PTLIB_VER >= 2130
+        if(!EVP_DecryptFinal_ctsA(&m_decryptCtx, outData + m_inSize, &m_outSize)) {
+#else
+        if(!EVP_DecryptFinal_cts(&m_decryptCtx, outData + m_inSize, &m_outSize)) {
+#endif
+            PTRACE(1, "H235\tEVP_DecryptFinal_cts() failed");
+        }
+    } else {
+        if (!EVP_DecryptUpdate(&m_decryptCtx, outData, &m_inSize, inData, inLength)) {
+            PTRACE(1, "H235\tEVP_DecryptUpdate() failed");
+        }
+        if (!EVP_DecryptFinal_relaxed(&m_decryptCtx, outData + m_inSize, &m_outSize)) {
+            PTRACE(1, "H235\tEVP_DecryptFinal_ex() failed - incorrect padding ?");
+        }
+    }
+	rtpPadding = false;	// we return the real length of the decrypted data without padding
+    return m_inSize + m_outSize;
+}
+
 PBYTEArray H235CryptoEngine::GenerateRandomKey()
 {
     PBYTEArray result = GenerateRandomKey(m_algorithmOID);    
@@ -533,7 +610,8 @@ PBYTEArray H235CryptoEngine::GenerateRandomKey(const PString & algorithmOID)
 
 H235Session::H235Session(H235Capabilities * caps, const PString & oidAlgorithm)
 : m_dh(*caps->GetDiffieHellMan()), m_context(oidAlgorithm), m_dhcontext(oidAlgorithm), 
-  m_isInitialised(false), m_isMaster(false), m_crytoMasterKey(0), m_frameBuffer(0)
+  m_isInitialised(false), m_isMaster(false), m_crytoMasterKey(0), 
+  m_frameBuffer(1500), m_padding(false)
 {
     if (oidAlgorithm == ID_AES128) {
         m_dhkeyLen = 16;
@@ -624,6 +702,16 @@ PBoolean H235Session::ReadFrame(DWORD & /*rtpTimestamp*/, RTP_DataFrame & frame)
     return true;
 }
 
+PBoolean H235Session::ReadFrameInPlace(RTP_DataFrame & frame)
+{
+    memcpy(m_ivSequence, frame.GetSequenceNumberPtr(), 6);
+    m_padding = frame.GetPadding();
+    frame.SetPayloadSize(m_context.DecryptInPlace(frame.GetPayloadPtr(), frame.GetPayloadSize(), m_frameBuffer.GetPointer(), m_ivSequence, m_padding));
+    memmove(frame.GetPayloadPtr(), m_frameBuffer.GetPointer(), frame.GetPayloadSize());
+    frame.SetPadding(m_padding);
+    return (frame.GetPayloadSize() > 0);
+}
+
 PBoolean H235Session::WriteFrame(RTP_DataFrame & frame)
 {
     unsigned char ivSequence[6];
@@ -637,6 +725,16 @@ PBoolean H235Session::WriteFrame(RTP_DataFrame & frame)
     frame.SetPadding(padding);
     m_frameBuffer.SetSize(0);
     return true;
+}
+
+PBoolean H235Session::WriteFrameInPlace(RTP_DataFrame & frame)
+{
+    memcpy(m_ivSequence, frame.GetSequenceNumberPtr(), 6);
+    m_padding = frame.GetPadding();
+    frame.SetPayloadSize(m_context.EncryptInPlace(frame.GetPayloadPtr(), frame.GetPayloadSize(), m_frameBuffer.GetPointer(), m_ivSequence, m_padding));
+    memmove(frame.GetPayloadPtr(), m_frameBuffer.GetPointer(), frame.GetPayloadSize());
+    frame.SetPadding(m_padding);
+    return (frame.GetPayloadSize() > 0);
 }
 
 #endif
