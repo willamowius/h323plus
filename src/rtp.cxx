@@ -205,6 +205,9 @@ BYTE * RTP_DataFrame::GetExtensionPtr() const
 
 PBoolean RTP_DataFrame::SetPayloadSize(PINDEX sz)
 {
+  if (sz == payloadSize)
+      return true;
+
   payloadSize = sz;
   return SetMinSize(GetHeaderSize()+payloadSize);
 }
