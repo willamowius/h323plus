@@ -496,11 +496,11 @@ class H46019MultiplexSocket : public H323UDPSocket
     PString GetLocalAddress();
     PBoolean GetLocalAddress(Address & addr, WORD & port);
 
-    PUDPSocket * & GetSubSocket()  { return m_subSocket; }
+    H323UDPSocket * & GetSubSocket()  { return m_subSocket; }
 
   private:
 
-    PUDPSocket              *  m_subSocket;
+    H323UDPSocket           *  m_subSocket;
     MuxType                    m_plexType;
     PMutex                     m_mutex;
 

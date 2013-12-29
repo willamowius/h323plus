@@ -970,7 +970,7 @@ class H323UDPSocket : public PUDPSocket
         virtual PBoolean DoPseudoRead(int & /*selectStatus*/) { return false; }
 
         virtual PBoolean Close() {
-#ifdef P_QWAVE
+#if 0 //P_QWAVE - QoS not supported yet
             return PIPSocket::Close();
 #else
             return PSocket::Close();
