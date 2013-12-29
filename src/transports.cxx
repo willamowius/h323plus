@@ -1233,6 +1233,7 @@ H323Transport * H323ListenerTCP::CreateTransport(const PIPSocket::Address & addr
 {
     H323TransportSecurity m_callSecurity;
     H323TransportTCP * transport = new H323TransportTCP(endpoint, address);
+    transport->InitialiseSecurity(&m_callSecurity);
     return transport;
 }
 
