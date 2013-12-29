@@ -1559,6 +1559,10 @@ PBoolean H323TransportTCP::InitialiseSecurity(const H323TransportSecurity * secu
         delete m_context;
         m_context = NULL;
         m_autoDeleteContext = false;
+#if PTLIB_VER < 2120
+        context = NULL;
+        ssl = NULL;
+#endif
     }
 
     if (!security->IsTLSEnabled())
