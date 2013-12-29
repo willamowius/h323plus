@@ -31,8 +31,10 @@
 #include <ptlib/sound.h>
 #include <h323.h>
 
+#if PTLIB_VER < 2130
 #if !defined(P_USE_STANDARD_CXX_BOOL) && !defined(P_USE_INTEGER_BOOL)
     typedef int PBoolean;
+#endif
 #endif
 
 class SimpleH323EndPoint : public H323EndPoint
