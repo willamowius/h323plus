@@ -706,10 +706,10 @@ template <class D> class PSTLList : public PObject,
                   this->erase(it);
               }
           } else {
-              unsigned sz = (unsigned)this->size();
+              unsigned sz = (unsigned)GetSize();
               if (sz > 0) {
                   unsigned newpos = sz;
-                  for (unsigned i = sz-1; i >= ref; --i) {
+                  for (unsigned i = sz; i-- > ref; ) {
                      typename std::map< unsigned, D*, PSTLSortOrder >::iterator it = this->find(i);
                      if (it != this->end()) {
                          D* entry =  it->second;
