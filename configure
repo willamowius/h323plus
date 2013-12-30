@@ -4188,7 +4188,23 @@ $as_echo "Build version less than required $REQUIRED_PTLIB_BUILD" >&6; }
 $as_echo "ok" >&6; }
 fi
 
+echo "JW $PT_MAJOR_VERSION $PT_MINOR_VERSION $PT_BUILD_NUMBER"
 
+
+
+cat >>confdefs.h <<_ACEOF
+#define PT_MAJOR_VERSION ${PT_MAJOR_VERSION}
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define PT_MINOR_VERSION ${PT_MINOR_VERSION}
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define PT_BUILD_NUMBER ${PT_BUILD_NUMBER}
+_ACEOF
 
 
 

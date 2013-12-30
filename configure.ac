@@ -178,8 +178,12 @@ else
   AC_MSG_RESULT(ok)
 fi
 
+echo "JW $PT_MAJOR_VERSION $PT_MINOR_VERSION $PT_BUILD_NUMBER"
 AC_SUBST(PTLIBDIR)
 AC_SUBST(HAS_PTLIB_LIB_MAK)
+AC_DEFINE_UNQUOTED(PT_MAJOR_VERSION, ${PT_MAJOR_VERSION}, [PTLib Major version])
+AC_DEFINE_UNQUOTED(PT_MINOR_VERSION, ${PT_MINOR_VERSION}, [PTLib Minor version])
+AC_DEFINE_UNQUOTED(PT_BUILD_NUMBER, ${PT_BUILD_NUMBER}, [PTLib Build number])
 
 dnl ########################################################################
 dnl check for setting minimum size
