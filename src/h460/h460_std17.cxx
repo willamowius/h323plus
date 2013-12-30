@@ -62,6 +62,7 @@ static PBoolean FindSRVRecords(std::vector<LookupRecord> & recs,
                     const PString & domain,
                     const PString & srv)
 {
+#if P_DNS
   PDNS::SRVRecordList srvRecords;
   PString srvLookupStr = srv + domain;
   PBoolean found = PDNS::GetRecords(srvLookupStr, srvRecords);
@@ -77,6 +78,9 @@ static PBoolean FindSRVRecords(std::vector<LookupRecord> & recs,
     }
   } 
   return found;
+#else
+  return false;
+#endif
 }
 
 static PBoolean FindRoutes(const PString & domain, std::vector<std::pair<LookupRecord,H323TransportSecurity> > & routes, H323TransportSecurity * sec)
