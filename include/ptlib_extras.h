@@ -280,6 +280,7 @@ template <class K, class D> class PSTLDictionary : public PObject,
 
           PAssert(ref < this->size(), psprintf("Index out of Bounds ref: %u sz: %u",ref,this->size()));
           typename std::map< unsigned, std::pair<K, D*>,PSTLSortOrder>::const_iterator i = this->find(ref);
+          PAssert(i != this->end(), psprintf("Item %u not found in collection sz: %u",ref,this->size()));
           return *(i->second.second);   
       };
 
@@ -291,6 +292,7 @@ template <class K, class D> class PSTLDictionary : public PObject,
 
           PAssert(ref < this->size(), psprintf("Index out of Bounds ref: %u sz: %u",ref,this->size()));
           typename std::map< unsigned, std::pair<K, D*>,PSTLSortOrder>::const_iterator i = this->find(ref);
+          PAssert(i != this->end(), psprintf("Item %u not found in collection sz: %u",ref,this->size()));
           return i->second.first;   
       }
 
@@ -308,10 +310,12 @@ template <class K, class D> class PSTLDictionary : public PObject,
           
           for (unsigned i = pos+1; i < sz; ++i) {
              typename std::map< unsigned, std::pair<K, D*>, PSTLSortOrder >::iterator j = this->find(i);
-             DictionaryEntry entry =  make_pair(j->second.first,j->second.second) ;
-             this->insert(pair<unsigned, std::pair<K, D*> >(newpos,entry));
-             newpos++;
-             this->erase(j);
+             if (j != this->end()) {
+                 DictionaryEntry entry =  make_pair(j->second.first,j->second.second) ;
+                 this->insert(pair<unsigned, std::pair<K, D*> >(newpos,entry));
+                 newpos++;
+                 this->erase(j);
+             }
           }
 
           return dataPtr;
@@ -576,6 +580,9 @@ template <class D> class PSTLList : public PObject,
       {
           PWaitAndSignal m(dictMutex);
 
+          if (data == NULL)
+              return false;
+
           typename std::map< unsigned, D* , PSTLSortOrder>::const_iterator i;
           for (i = this->begin(); i != this->end(); ++i) {
             if (i->second == data) {
@@ -665,8 +672,11 @@ template <class D> class PSTLList : public PObject,
       PINDEX InternalAddKey(
          D * obj         // New object to put into list.
          ) 
-      { 
+      {
           PWaitAndSignal m(dictMutex);
+
+          if (obj == NULL)
+              return -1;
 
           unsigned pos = (unsigned)this->size();
           this->insert(std::pair<unsigned, D*>(pos,obj));
@@ -679,7 +689,10 @@ template <class D> class PSTLList : public PObject,
           PBoolean replace = false,
           PBoolean reorder = false
           ) 
-      {         
+      {     
+          if (obj == NULL)
+              return -1;
+
           if (ref >= (unsigned)GetSize())
               return InternalAddKey(obj);
 
@@ -687,19 +700,23 @@ template <class D> class PSTLList : public PObject,
 
           if (!reorder) {
               typename std::map< unsigned, D*, PSTLSortOrder>::iterator it = this->find(ref);
-              if (replace)
-                delete it->second;  
-              this->erase(it);
+              if (it != this->end()) {
+                  if (replace) 
+                      delete it->second;  
+                  this->erase(it);
+              }
           } else {
               unsigned sz = (unsigned)this->size();
               if (sz > 0) {
                   unsigned newpos = sz;
                   for (unsigned i = sz-1; i >= ref; --i) {
                      typename std::map< unsigned, D*, PSTLSortOrder >::iterator it = this->find(i);
-                     D* entry =  it->second;
-                     this->insert(std::pair<unsigned, D*>(newpos,entry));
-                     this->erase(it);
-                     newpos--;
+                     if (it != this->end()) {
+                         D* entry =  it->second;
+                         this->insert(std::pair<unsigned, D*>(newpos,entry));
+                         this->erase(it);
+                         newpos--;
+                     }
                   }
               }
           }
