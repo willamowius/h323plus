@@ -175,11 +175,8 @@ PBoolean H323Codec::ReadRaw(void * data, PINDEX size, PINDEX & length)
   }
 
   length = rawDataChannel->GetLastReadCount();
-
   for (PINDEX i = 0; i < filters.GetSize(); i++) {
-    FilterInfo info(*this, data, size, length);
-    filters[i](info, 0);
-    length = info.bufferLength;
+      length = filters[i].ProcessFilter(data, size, length);
   }
 
   return TRUE;
@@ -198,9 +195,7 @@ PBoolean H323Codec::WriteInternal(void * data, PINDEX length, void * mark)
   }
 
   for (PINDEX i = 0; i < filters.GetSize(); i++) {
-    FilterInfo info(*this, data, length, length);
-    filters[i](info, 0);
-    length = info.bufferLength;
+      length = filters[i].ProcessFilter(data, length, length);
   }
 
 #if PTLIB_VER < 290
@@ -227,7 +222,7 @@ PBoolean H323Codec::AttachLogicalChannel(H323Channel *channel)
 void H323Codec::AddFilter(const PNotifier & notifier)
 {
   rawChannelMutex.Wait();
-  filters.Append(new PNotifier(notifier));
+  filters.Append(new FilterData(*this,notifier));
   rawChannelMutex.Signal();
 }
 

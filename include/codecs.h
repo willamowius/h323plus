@@ -284,6 +284,9 @@ class H323Codec : public PObject
     class FilterInfo : public PObject {
         PCLASSINFO(FilterInfo, PObject);
       public:
+        FilterInfo(H323Codec & c) 
+          : codec(c), buffer(NULL), bufferSize(0), bufferLength(0) {}
+
         FilterInfo(H323Codec & c, void * b, PINDEX s, PINDEX l)
           : codec(c), buffer(b), bufferSize(s), bufferLength(l) { }
 
@@ -291,6 +294,26 @@ class H323Codec : public PObject
         void      * buffer;
         PINDEX      bufferSize;
         PINDEX      bufferLength;
+    };
+
+    class FilterData : public PObject {
+        PCLASSINFO(FilterData, PObject);
+      public:
+        FilterData(H323Codec & c, const PNotifier & n)
+         : m_filterInfo(c), m_notifier(new PNotifier(n)) {}
+
+        ~FilterData() { delete m_notifier; }
+
+        PINDEX ProcessFilter(void * b, PINDEX s, PINDEX l) {
+            m_filterInfo.buffer = b;
+            m_filterInfo.bufferSize = s;
+            m_filterInfo.bufferLength = l;
+            (*m_notifier)(m_filterInfo, 0);
+            return m_filterInfo.bufferLength;
+        }
+
+        FilterInfo   m_filterInfo;
+        PNotifier  * m_notifier;
     };
 
     /**Add a filter to the codec.
@@ -351,7 +374,7 @@ class H323Codec : public PObject
 	H323_RTPInformation  rtpInformation;
     AVSync  rtpSync;
 
-    H323LIST(FilterList, PNotifier);
+    H323LIST(FilterList, FilterData);
     FilterList filters;
 };
 
