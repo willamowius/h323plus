@@ -1436,6 +1436,13 @@ class H323PluginVideoCodec : public H323VideoCodec
     mutable PTimeInterval lastFrameTick;
 	PTime   lastFUPTime;
 
+    // Regular used variables
+    int          outputDataSize;
+    unsigned int fromLen;
+    unsigned int toLen;
+    unsigned int flags;
+    int          pluginRetVal;
+
 #ifdef H323_FRAMEBUFFER
     H323PluginFrameBuffer  m_frameBuffer;
 #endif
@@ -1601,6 +1608,12 @@ H323PluginVideoCodec::H323PluginVideoCodec(const OpalMediaFormat & fmt, Directio
     bufferRTP = RTP_DataFrame(sizeof(PluginCodec_Video_FrameHeader) + maxBytesRTPFrame, TRUE);
     bytesPerFrame = (maxHeight * maxWidth * 3)/2;
 	lastFUPTime=0;
+
+    outputDataSize=2000; //1518-14-4-8-20-16; Max Ethernet packet (1518 bytes) minus 802.3/CRC, 802.3, IP, UDP headers
+    fromLen = 0;
+    toLen = 0;
+    flags = 0;
+    pluginRetVal = 0;
 
 #if PTRACING
    PTRACE(6,"Agreed Codec Options");
@@ -1818,25 +1831,25 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
     else
         lastFrameTimeRTP = 0;
 
-
+#if 0
     // get the size of the output buffer
-    int outputDataSize;
     if (!CallCodecControl(codec, context, GET_OUTPUT_DATA_SIZE_CONTROL, NULL, NULL, outputDataSize))
-      outputDataSize = 1518-14-4-8-20-16; // Max Ethernet packet (1518 bytes) minus 802.3/CRC, 802.3, IP, UDP headers
+        return false;
+#endif
 
     dst.SetMinSize(outputDataSize);
     bytesPerFrame = outputDataSize;
 
-    unsigned int fromLen = bufferRTP.GetHeaderSize() + bufferRTP.GetPayloadSize();
-    unsigned int toLen = outputDataSize;
-    unsigned int flags = sendIntra ? PluginCodec_CoderForceIFrame : 0;
+    fromLen = bufferRTP.GetHeaderSize() + bufferRTP.GetPayloadSize();
+    toLen = outputDataSize;
+    flags = sendIntra ? PluginCodec_CoderForceIFrame : 0;
 
-    int retval = (codec->codecFunction)(codec, context, 
+    pluginRetVal = (codec->codecFunction)(codec, context, 
                                         bufferRTP.GetPointer(), &fromLen,
                                         dst.GetPointer(), &toLen,
                                         &flags);
 
-    if (retval == 0) {
+    if (pluginRetVal == 0) {
         PTRACE(3,"PLUGIN\tError encoding frame from plugin " << codec->descr);
         length = 0;
         return FALSE;
@@ -1920,10 +1933,11 @@ PBoolean H323PluginVideoCodec::WriteInternal(const BYTE * /*buffer*/, unsigned l
   }
 #endif
 
+#if 0
   // get the size of the output buffer
-  int outputDataSize;
   if (!CallCodecControl(codec, context, GET_OUTPUT_DATA_SIZE_CONTROL, NULL, NULL, outputDataSize))
     return FALSE;
+#endif
 
   bufferRTP.SetMinSize(outputDataSize);
   bytesPerFrame = outputDataSize;
@@ -1932,17 +1946,17 @@ PBoolean H323PluginVideoCodec::WriteInternal(const BYTE * /*buffer*/, unsigned l
   CheckPacket(false,src);
 #endif
 
-  unsigned int fromLen = src.GetHeaderSize() + src.GetPayloadSize();
-  unsigned int toLen = bufferRTP.GetSize();
-  unsigned int flags=0;
+  fromLen = src.GetHeaderSize() + src.GetPayloadSize();
+  toLen = bufferRTP.GetSize();
+  flags=0;
 
-  int retval = (codec->codecFunction)(codec, context, 
+  pluginRetVal = (codec->codecFunction)(codec, context, 
 	                              (const BYTE *)src, &fromLen,
 	                              bufferRTP.GetPointer(toLen), &toLen,
 	                              &flags);
 
   for(;;) {
-      if (retval == 0) {
+      if (pluginRetVal == 0) {
         PTRACE(3,"PLUGIN\tError decoding frame from plugin " << codec->descr);
         return FALSE;
       }
@@ -1970,7 +1984,7 @@ PBoolean H323PluginVideoCodec::WriteInternal(const BYTE * /*buffer*/, unsigned l
         if(flags & PluginCodec_ReturnCoderMoreFrame) {
            PTRACE(6,"PLUGIN\tMore Frames to decode");
            flags=0;
-           retval = (codec->codecFunction)(codec, context, 
+           pluginRetVal = (codec->codecFunction)(codec, context, 
 	                              (const BYTE *)0, &fromLen,
 	                              bufferRTP.GetPointer(toLen), &toLen,
 	                              &flags);
