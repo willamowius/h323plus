@@ -3377,6 +3377,7 @@ class H323Connection : public PObject
     // The In-Band DTMF detector. This is used inside an audio filter which is
     // added to the audio channel.
     PDTMFDecoder                     dtmfDecoder;
+    PString                          dtmfTones;
 #endif
 
     // used to detect remote NAT endpoints

@@ -567,7 +567,9 @@ H323Connection::H323Connection(H323EndPoint & ep,
 #endif
 
   endSync = NULL;
-
+#ifdef P_DTMF
+  dtmfTones = PString();
+#endif
   remoteIsNAT = false;
   NATsupport =  true;
   sameNAT = false;
@@ -5401,11 +5403,10 @@ void H323Connection::OnUserInputInBandDTMF(H323Codec::FilterInfo & info, H323_IN
 
 #ifdef P_DTMF
   // Pass the 16 bit PCM audio through the DTMF decoder   
-  PString tones = dtmfDecoder.Decode((short *)info.buffer, info.bufferLength/sizeof(short));
-  if (!tones.IsEmpty()) {
-    PTRACE(1, "DTMF detected. " << tones);
-    PINDEX i;
-    for (i = 0; i < tones.GetLength(); i++) {
+  dtmfTones = dtmfDecoder.Decode((short *)info.buffer, info.bufferLength/sizeof(short));
+  if (!dtmfTones.IsEmpty()) {
+    PTRACE(1, "DTMF detected. " << dtmfTones);
+    for (PINDEX i = 0; i < tones.GetLength(); i++) {
 #if PTLIB_VER < 270
       OnUserInputTone(tones[i], 0, 0, 0);
 #else
