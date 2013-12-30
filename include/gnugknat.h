@@ -278,8 +278,10 @@ protected:
 #if PTLIB_VER < 2130
     virtual NatTypes InternalGetNatType(bool, const PTimeInterval &) { return UnknownNat; }
 #endif
+#if PTLIB_VER >= 2120
     virtual PNATUDPSocket * InternalCreateSocket(Component component, PObject * context)  { return NULL; }
     virtual void InternalUpdate() {};
+#endif
 #endif
 
 

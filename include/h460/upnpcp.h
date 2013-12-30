@@ -162,7 +162,6 @@ public:
 
 #if PTLIB_VER >= 2110
     virtual PString GetServer() const { return PString(); }
-#if PTLIB_VER < 2130
     virtual bool GetServerAddress(PIPSocketAddressAndPort & ) const { return false; }
     virtual NatTypes GetNatType(bool) { return UnknownNat; }
     virtual NatTypes GetNatType(const PTimeInterval &) { return UnknownNat; }
@@ -172,10 +171,13 @@ public:
             const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny(),WORD localPort = 0)  { return false; }
     virtual void SetCredentials(const PString &, const PString &, const PString &) {}
 protected:
+#if PTLIB_VER < 2130
     virtual NatTypes InternalGetNatType(bool, const PTimeInterval &) { return UnknownNat; }
 #endif
+#if PTLIB_VER >= 2120
     virtual PNATUDPSocket * InternalCreateSocket(Component component, PObject * context)  { return NULL; }
     virtual void InternalUpdate() {};
+#endif
 #endif
 
 protected:
