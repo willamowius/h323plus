@@ -5406,11 +5406,11 @@ void H323Connection::OnUserInputInBandDTMF(H323Codec::FilterInfo & info, H323_IN
   dtmfTones = dtmfDecoder.Decode((short *)info.buffer, info.bufferLength/sizeof(short));
   if (!dtmfTones.IsEmpty()) {
     PTRACE(1, "DTMF detected. " << dtmfTones);
-    for (PINDEX i = 0; i < tones.GetLength(); i++) {
+    for (PINDEX i = 0; i < dtmfTones.GetLength(); i++) {
 #if PTLIB_VER < 270
-      OnUserInputTone(tones[i], 0, 0, 0);
+      OnUserInputTone(dtmfTones[i], 0, 0, 0);
 #else
-      OnUserInputTone(tones[i], 0, 0, PDTMFDecoder::DetectTime);
+      OnUserInputTone(dtmfTones[i], 0, 0, PDTMFDecoder::DetectTime);
 #endif
     }
   }
