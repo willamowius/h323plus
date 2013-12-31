@@ -727,6 +727,9 @@ class H323_RTPChannel : public H323_RealTimeChannel
     PMutex     filterMutex;
 
     PTimeInterval silenceStartTick;
+
+    unsigned rec_written;
+    PBoolean rec_ok;
 };
 
 

@@ -345,7 +345,8 @@ int EVP_DecryptFinal_relaxed(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
 
 H235CryptoEngine::H235CryptoEngine(const PString & algorithmOID)
 :  m_algorithmOID(algorithmOID), m_operationCnt(0), m_initialised(false),
-   m_inSize(0), m_outSize(0)
+   m_inSize(0), m_outSize(0),
+   m_enc_blockSize(0), m_enc_ivLength(0), m_dec_blockSize(0), m_dec_ivLength(0)
 {
 }
 
@@ -382,8 +383,13 @@ void H235CryptoEngine::SetKey(PBYTEArray key)
   
     EVP_CIPHER_CTX_init(&m_encryptCtx);
     EVP_EncryptInit_ex(&m_encryptCtx, cipher, NULL, key.GetPointer(), NULL);
+    m_enc_blockSize =  EVP_CIPHER_CTX_block_size(&m_encryptCtx);
+    m_enc_ivLength = EVP_CIPHER_CTX_iv_length(&m_encryptCtx);
+
     EVP_CIPHER_CTX_init(&m_decryptCtx);
     EVP_DecryptInit_ex(&m_decryptCtx, cipher, NULL, key.GetPointer(), NULL);
+    m_dec_blockSize =  EVP_CIPHER_CTX_block_size(&m_decryptCtx);
+    m_dec_ivLength = EVP_CIPHER_CTX_iv_length(&m_decryptCtx);
 
     m_operationCnt = 0;
     m_initialised = true;
@@ -462,15 +468,15 @@ PINDEX H235CryptoEngine::EncryptInPlace(const BYTE * inData, PINDEX inLength, BY
 
     // max ciphertext len for a n bytes of plaintext is n + BLOCK_SIZE -1 bytes
     m_outSize = 0;
-    m_inSize =  inLength + EVP_CIPHER_CTX_block_size(&m_encryptCtx);
+    m_inSize =  inLength + m_enc_blockSize;
 
-    SetIV(m_iv, ivSequence, EVP_CIPHER_CTX_iv_length(&m_encryptCtx));
+    SetIV(m_iv, ivSequence, m_enc_ivLength);
     EVP_EncryptInit_ex(&m_encryptCtx, NULL, NULL, NULL, m_iv);
 
-    rtpPadding = (inLength % EVP_CIPHER_CTX_block_size(&m_encryptCtx) > 0);
+    rtpPadding = (inLength % m_enc_blockSize > 0);
     EVP_CIPHER_CTX_set_padding(&m_encryptCtx, rtpPadding ? 1 : 0);
 
-    if (!rtpPadding && (inLength % EVP_CIPHER_CTX_block_size(&m_encryptCtx) > 0)) {
+    if (!rtpPadding && (inLength % m_enc_blockSize > 0)) {
         // use cyphertext stealing
         if (!EVP_EncryptUpdate_cts(&m_encryptCtx, outData, &m_inSize, inData, inLength)) {
             PTRACE(1, "H235\tEVP_EncryptUpdate_cts() failed");
@@ -549,12 +555,12 @@ PINDEX H235CryptoEngine::DecryptInPlace(const BYTE * inData, PINDEX inLength, BY
     m_outSize = 0;
     m_inSize =  inLength;
   
-    SetIV(m_iv, ivSequence, EVP_CIPHER_CTX_iv_length(&m_decryptCtx));
+    SetIV(m_iv, ivSequence, m_dec_ivLength);
     EVP_DecryptInit_ex(&m_decryptCtx, NULL, NULL, NULL, m_iv);
 
     EVP_CIPHER_CTX_set_padding(&m_decryptCtx, rtpPadding ? 1 : 0);
 
-    if (!rtpPadding && inLength % EVP_CIPHER_CTX_block_size(&m_decryptCtx) > 0) {
+    if (!rtpPadding && inLength % m_dec_blockSize > 0) {
         // use cyphertext stealing
         if (!EVP_DecryptUpdate_cts(&m_decryptCtx, outData, &m_inSize, inData, inLength)) {
             PTRACE(1, "H235\tEVP_DecryptUpdate_cts() failed");

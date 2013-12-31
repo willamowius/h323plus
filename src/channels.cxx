@@ -650,7 +650,8 @@ H323_RTPChannel::H323_RTPChannel(H323Connection & conn,
                                  RTP_Session & r)
   : H323_RealTimeChannel(conn, cap, direction),
     rtpSession(r),
-    rtpCallbacks(*(H323_RTP_Session *)r.GetUserData())
+    rtpCallbacks(*(H323_RTP_Session *)r.GetUserData()),
+    rec_written(0), rec_ok(false)
 {
   PTRACE(3, "H323RTP\t" << (receiver ? "Receiver" : "Transmitter")
          << " created using session " << GetSessionID());
@@ -1110,15 +1111,13 @@ void H323_RTPChannel::Receive()
     }
 #endif
 
-    unsigned written;
-    PBoolean ok = TRUE;
+    rec_written=0;
+    rec_ok=TRUE;
     if (size == 0) {
-      ok = codec->Write(NULL, 0, frame, written);
+      rec_ok = codec->Write(NULL, 0, frame, rec_written);
       rtpTimestamp += codecFrameRate;
     } else {
       silenceStartTick = PTimer::Tick();
-
-      PBoolean isCodecPacket = TRUE;
 
       if (frame.GetPayloadType() == rtpPayloadType) {
         PTRACE_IF(2, consecutiveMismatches > 0,
@@ -1137,19 +1136,19 @@ void H323_RTPChannel::Receive()
               << ". Ignoring packet.");
       }
 
-      if (isCodecPacket && consecutiveMismatches == 0) {
+      if (consecutiveMismatches == 0) {
         const BYTE * ptr = frame.GetPayloadPtr();
-        while (ok && size > 0) {
+        while (rec_ok && size > 0) {
           /* Now write data to the codec, it is expected that the Write()
              function will maintain the Real Time aspects of the system. That
              is for GSM codec, say with a single frame, this function will take
              20 milliseconds to complete. It is very important that this occurs
              for audio codecs or the jitter buffer will not operate correctly.
            */
-          ok = codec->Write(ptr, paused ? 0 : size, frame, written);
+          rec_ok = codec->Write(ptr, paused ? 0 : size, frame, rec_written);
           rtpTimestamp += codecFrameRate;
-          size -= written != 0 ? written : size;
-          ptr += written;
+          size -= rec_written != 0 ? rec_written : size;
+          ptr += rec_written;
         }
         PTRACE_IF(1, size < 0, "H323RTP\tPayload size too small, short " << -size << " bytes.");
       }
@@ -1158,7 +1157,7 @@ void H323_RTPChannel::Receive()
     if (terminating)
       break;
 
-    if (!ok) {
+    if (!rec_ok) {
       connection.CloseLogicalChannelNumber(number);
       break;
     }

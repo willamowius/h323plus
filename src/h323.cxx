@@ -918,11 +918,11 @@ PBoolean H323Connection::WriteSignalPDU(H323SignalPDU & pdu)
 
   lastPDUWasH245inSETUP = FALSE;
 
-  if (signallingChannel != NULL && signallingChannel->IsOpen()) {
+  if (signallingChannel && signallingChannel->IsOpen()) {
     pdu.m_h323_uu_pdu.m_h245Tunneling = h245Tunneling;
 
     H323Gatekeeper * gk = endpoint.GetGatekeeper();
-    if (gk != NULL)
+    if (gk)
       gk->InfoRequestResponse(*this, pdu.m_h323_uu_pdu, TRUE);
 
 #ifdef H323_H46017
