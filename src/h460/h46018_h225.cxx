@@ -1055,7 +1055,7 @@ PBoolean H46019MultiplexSocket::WriteTo(const void *buf, PINDEX len, const Addre
 PBoolean H46019MultiplexSocket::Close()
 {
     if (m_subSocket)
-        return m_subSocket->Close();
+        return ((H323UDPSocket*)m_subSocket)->Close();
 
     return H323UDPSocket::Close();
 }
