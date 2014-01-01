@@ -1434,6 +1434,7 @@ class H323PluginVideoCodec : public H323VideoCodec
     bool         sendIntra;
 
     mutable PTimeInterval lastFrameTick;
+    mutable PTimeInterval nowFrameTick;
 	PTime   lastFUPTime;
 
     // Regular used variables
@@ -1594,6 +1595,7 @@ H323PluginVideoCodec::H323PluginVideoCodec(const OpalMediaFormat & fmt, Directio
     lastPacketSent = TRUE;
     lastFrameTimeRTP = 0;
     lastFrameTick = 0;
+    nowFrameTick = 0;
     frameWidth = maxWidth = mediaFormat.GetOptionInteger(OpalVideoFormat::FrameWidthOption); 
     frameHeight = maxHeight = mediaFormat.GetOptionInteger(OpalVideoFormat::FrameHeightOption);
     targetFrameTimeMs = mediaFormat.GetOptionInteger(OpalVideoFormat::FrameTimeOption);
@@ -1784,24 +1786,24 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
         }
 
 #if PTLIB_VER >= 290
-        PStringArray options; 
-        if (flowRequest && lastFrameTimeRTP
-			&& videoIn->FlowControl((void *)&options)	// test if implemented with empty options
-            && SetFlowControl(codec,context,mediaFormat, flowRequest)) {
-            PTRACE(4, "PLUGIN\tApplying Flow Control " << flowRequest);
-            options = LoadInputDeviceOptions(mediaFormat); 
-            if (videoIn->FlowControl((void *)&options)) {  
-                frameHeader->width  = videoIn->GetGrabWidth();
-                frameHeader->height = videoIn->GetGrabHeight();
-                sendIntra = true;  // Send a FPU when setting flow control.
+        if (flowRequest && lastFrameTimeRTP) {
+            PStringArray options;
+            if (videoIn->FlowControl((void *)&options)	// test if implemented with empty options
+                && SetFlowControl(codec,context,mediaFormat, flowRequest)) {
+                PTRACE(4, "PLUGIN\tApplying Flow Control " << flowRequest);
+                options = LoadInputDeviceOptions(mediaFormat); 
+                if (videoIn->FlowControl((void *)&options)) {  
+                    frameHeader->width  = videoIn->GetGrabWidth();
+                    frameHeader->height = videoIn->GetGrabHeight();
+                    sendIntra = true;  // Send a FPU when setting flow control.
+                }
+            } else if (videoIn->GetVideoReader() && videoIn->GetVideoReader()->GetCaptureMode() == 0) {
+                    frameHeader->width  = videoIn->GetGrabWidth();
+                    frameHeader->height = videoIn->GetGrabHeight();
             }
-        } else if (videoIn->GetVideoReader() && videoIn->GetVideoReader()->GetCaptureMode() == 0) {
-                frameHeader->width  = videoIn->GetGrabWidth();
-                frameHeader->height = videoIn->GetGrabHeight();
+            flowRequest = 0;
         }
 #endif
-        flowRequest = 0;
-
 
         if (!SetFrameSize(frameHeader->width, frameHeader->height)) {
             PTRACE(1, "PLUGIN\tFailed to resize, close down video transmission thread");
@@ -1823,10 +1825,9 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
 
         RenderFrame(data, NULL);
 
-        PTimeInterval now = PTimer::Tick();
-        if (lastFrameTick != 0)
-          lastFrameTimeRTP = (now - lastFrameTick).GetInterval()*90;
-        lastFrameTick = now;
+        nowFrameTick = PTimer::Tick();
+        lastFrameTimeRTP = (nowFrameTick - lastFrameTick).GetInterval()*90;
+        lastFrameTick = nowFrameTick;
     }
     else
         lastFrameTimeRTP = 0;
@@ -1951,25 +1952,25 @@ PBoolean H323PluginVideoCodec::WriteInternal(const BYTE * /*buffer*/, unsigned l
   flags=0;
 
   pluginRetVal = (codec->codecFunction)(codec, context, 
-	                              (const BYTE *)src, &fromLen,
-	                              bufferRTP.GetPointer(toLen), &toLen,
-	                              &flags);
+                              (const BYTE *)src, &fromLen,
+                              bufferRTP.GetPointer(toLen), &toLen,
+                              &flags);
 
   for(;;) {
-      if (pluginRetVal == 0) {
+      if (!pluginRetVal) {
         PTRACE(3,"PLUGIN\tError decoding frame from plugin " << codec->descr);
         return FALSE;
       }
 
       if (sendIntra || (flags & PluginCodec_ReturnCoderRequestIFrame)) {
-		PTime currentTime = PTime();
-		PTimeInterval lastTime = currentTime - lastFUPTime;
-		if (lastTime.GetMilliSeconds() > FASTPICTUREINTERVAL) {
-			PTRACE(6,"PLUGIN\tIFrame Request Decoder.");
-			logicalChannel->SendMiscCommand(H245_MiscellaneousCommand_type::e_videoFastUpdatePicture);
-			lastFUPTime = PTime();
-			sendIntra = false;
-		}
+        PTime currentTime = PTime();
+        PTimeInterval lastTime = currentTime - lastFUPTime;
+        if (lastTime.GetMilliSeconds() > FASTPICTUREINTERVAL) {
+            PTRACE(6,"PLUGIN\tIFrame Request Decoder.");
+            logicalChannel->SendMiscCommand(H245_MiscellaneousCommand_type::e_videoFastUpdatePicture);
+            lastFUPTime = PTime();
+            sendIntra = false;
+        }
       }
       
       if (flags & PluginCodec_ReturnCoderLastFrame) {
@@ -1979,17 +1980,17 @@ PBoolean H323PluginVideoCodec::WriteInternal(const BYTE * /*buffer*/, unsigned l
            return false;
 
         if (!RenderFrame(OPAL_VIDEO_FRAME_DATA_PTR(header), &rtp)) 
-	       return false;
+            return false;
 
         if(flags & PluginCodec_ReturnCoderMoreFrame) {
            PTRACE(6,"PLUGIN\tMore Frames to decode");
            flags=0;
            pluginRetVal = (codec->codecFunction)(codec, context, 
-	                              (const BYTE *)0, &fromLen,
-	                              bufferRTP.GetPointer(toLen), &toLen,
-	                              &flags);
+                              (const BYTE *)0, &fromLen,
+                              bufferRTP.GetPointer(toLen), &toLen,
+                              &flags);
         } else
-	       break;
+            break;
 
      } else if (toLen < (unsigned)bufferRTP.GetHeaderSize()) {
          PTRACE(6,"PLUGIN\tPartial Frame received " << codec->descr << " Ignoring rendering.");
