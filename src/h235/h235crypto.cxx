@@ -209,11 +209,7 @@ int EVP_DecryptUpdate_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
     return EVP_EncryptUpdate_cts(ctx, out, outl, in, inl);
 }
 
-#if PTLIB_VER >= 2130
-int EVP_DecryptFinal_ctsA(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
-#else
 int EVP_DecryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
-#endif
 {
     unsigned char tmp[EVP_MAX_BLOCK_LENGTH];
     int bl = ctx->cipher->block_size;
@@ -526,11 +522,7 @@ PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data, unsigned char * i
         if (!EVP_DecryptUpdate_cts(&m_decryptCtx, plaintext.GetPointer(), &plaintext_len, data.GetPointer(), data.GetSize())) {
             PTRACE(1, "H235\tEVP_DecryptUpdate_cts() failed");
         }
-#if PTLIB_VER >= 2130
-        if(!EVP_DecryptFinal_ctsA(&m_decryptCtx, plaintext.GetPointer() + plaintext_len, &final_len)) {
-#else
         if(!EVP_DecryptFinal_cts(&m_decryptCtx, plaintext.GetPointer() + plaintext_len, &final_len)) {
-#endif
             PTRACE(1, "H235\tEVP_DecryptFinal_cts() failed");
         }
     } else {
@@ -565,11 +557,7 @@ PINDEX H235CryptoEngine::DecryptInPlace(const BYTE * inData, PINDEX inLength, BY
         if (!EVP_DecryptUpdate_cts(&m_decryptCtx, outData, &m_inSize, inData, inLength)) {
             PTRACE(1, "H235\tEVP_DecryptUpdate_cts() failed");
         }
-#if PTLIB_VER >= 2130
-        if(!EVP_DecryptFinal_ctsA(&m_decryptCtx, outData + m_inSize, &m_outSize)) {
-#else
         if(!EVP_DecryptFinal_cts(&m_decryptCtx, outData + m_inSize, &m_outSize)) {
-#endif
             PTRACE(1, "H235\tEVP_DecryptFinal_cts() failed");
         }
     } else {
