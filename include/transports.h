@@ -64,7 +64,6 @@ class H323Gatekeeper;
 
 /**String representation of a transport address.
  */
-
 class H323TransportAddress : public PString
 {
   PCLASSINFO(H323TransportAddress, PString);
@@ -100,6 +99,10 @@ class H323TransportAddress : public PString
       WORD & port,
       const char * proto = "tcp"
     ) const;
+
+    /**Get Port Number.
+      */
+    WORD GetPort() const;
 
     /**Get the IP Version
        6 = IPv6  4 = IPv4
@@ -142,11 +145,16 @@ class H323TransportAddress : public PString
       H323EndPoint & endpoint   ///<  Endpoint object for transport creation.
     ) const;
 
+    /**Set the transport Address security settings
+      */
+    void SetTLS(PBoolean isTLS);
+
   protected:
     void Validate();
 
   private:
-    unsigned m_version;
+    unsigned              m_version;
+    PBoolean              m_tls;
 };
 
 
@@ -188,7 +196,6 @@ PDECLARE_ARRAY(H323TransportAddressArray, H323TransportAddress)
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
 /**Transport Security Information.
  */
 
@@ -823,7 +830,8 @@ class H323ListenerTLS : public H323ListenerTCP
     H323ListenerTLS(
       H323EndPoint & endpoint,    ///<  Endpoint instance for channel
       PIPSocket::Address binding, ///<  Local interface to listen on
-      WORD port                   ///<  TCP port to listen for connections
+      WORD port,                  ///<  TCP port to listen for connections
+      PBoolean exclusive = FALSE  ///<  Fail if listener port in use
     );
 
     /** Destroy the listener thread.

@@ -247,14 +247,14 @@ void H245TransportThread::KeepAlive(PTimer &,  H323_INT)
 static const char IpPrefix[] = "ip$";
 
 H323TransportAddress::H323TransportAddress(const char * cstr)
-  : PString(cstr)
+  : PString(cstr), m_version(4), m_tls(false)
 {
   Validate();
 }
 
 
 H323TransportAddress::H323TransportAddress(const PString & str)
-  : PString(str)
+  : PString(str), m_version(4), m_tls(false)
 {
   Validate();
 }
@@ -285,6 +285,7 @@ static PString BuildIP(const PIPSocket::Address & ip, unsigned port)
 
 H323TransportAddress::H323TransportAddress(const H225_TransportAddress & transport)
 {
+  m_tls = false;
   switch (transport.GetTag()) {
     case H225_TransportAddress::e_ipAddress :
     {
@@ -308,6 +309,7 @@ H323TransportAddress::H323TransportAddress(const H225_TransportAddress & transpo
 
 H323TransportAddress::H323TransportAddress(const H245_TransportAddress & transport)
 {
+  m_tls = false;
   switch (transport.GetTag()) {
     case H245_TransportAddress::e_unicastAddress :
     {
@@ -338,6 +340,7 @@ H323TransportAddress::H323TransportAddress(const H245_TransportAddress & transpo
 
 H323TransportAddress::H323TransportAddress(const PIPSocket::Address & ip, WORD port)
 {
+   m_tls = false;
 #if P_HAS_IPV6
    m_version = ip.GetVersion();
 #else
@@ -462,6 +465,13 @@ PBoolean H323TransportAddress::GetIpAddress(PIPSocket::Address & ip) const
   return GetIpAndPort(ip, dummy);
 }
 
+WORD H323TransportAddress::GetPort() const
+{
+  WORD port = 65535;
+  PIPSocket::Address ip;
+  GetIpAndPort(ip, port);
+  return port;
+}
 
 static PBoolean SplitAddress(const PString & addr, PString & host, PString & service)
 {
@@ -571,10 +581,19 @@ H323Listener * H323TransportAddress::CreateListener(H323EndPoint & endpoint) con
     actually have another, we hard code it for now.
    */
 
+  PBoolean useTLS = (endpoint.GetTransportSecurity()->IsTLSEnabled() && 
+                    (m_tls || GetPort() == H323EndPoint::DefaultTLSPort));
+
   PIPSocket::Address ip;
   WORD port = H323EndPoint::DefaultTcpPort;
-  if (GetIpAndPort(ip, port))
-    return new H323ListenerTCP(endpoint, ip, port, theArray[GetLength()-1] != '+');
+  if (GetIpAndPort(ip, port)) {
+#ifdef H323_TLS
+      if (useTLS)
+        return new H323ListenerTLS(endpoint, ip, port, theArray[GetLength()-1] != '+');
+      else
+#endif
+        return new H323ListenerTCP(endpoint, ip, port, theArray[GetLength()-1] != '+');
+  }
 
   return NULL;
 }
@@ -589,13 +608,26 @@ H323Listener * H323TransportAddress::CreateCompatibleListener(H323EndPoint & end
     actually have another, we hard code it for now.
    */
 
+  PBoolean useTLS = (endpoint.GetTransportSecurity()->IsTLSEnabled() && 
+                    (m_tls || GetPort() == H323EndPoint::DefaultTLSPort));
   PIPSocket::Address ip;
-  if (GetIpAddress(ip))
-    return new H323ListenerTCP(endpoint, ip, 0, FALSE);
+  WORD port = H323EndPoint::DefaultTcpPort;
+  if (GetIpAndPort(ip, port)) {
+#ifdef H323_TLS
+     if (useTLS)
+        return new H323ListenerTLS(endpoint, ip, 0);
+     else
+#endif
+        return new H323ListenerTCP(endpoint, ip, 0);
+  }
 
   return NULL;
 }
 
+void H323TransportAddress::SetTLS(PBoolean tls)
+{
+    m_tls = tls;
+}
 
 H323Transport * H323TransportAddress::CreateTransport(H323EndPoint & endpoint) const
 {
@@ -606,10 +638,16 @@ H323Transport * H323TransportAddress::CreateTransport(H323EndPoint & endpoint) c
     actually have another, we hard code it for now.
    */
 
-  if (strncmp(theArray, IpPrefix, 3) == 0)
-      return new H323TransportTCP(endpoint,PIPSocket::Address::GetAny(m_version));
-
-  return NULL;
+    if (strncmp(theArray, IpPrefix, 3) == 0) {
+        H323TransportSecurity security;
+        PBoolean useTLS = (endpoint.GetTransportSecurity()->IsTLSEnabled() && 
+                          (m_tls || GetPort() == H323EndPoint::DefaultTLSPort));
+        security.EnableTLS(useTLS);
+        H323TransportTCP * transport = new H323TransportTCP(endpoint, PIPSocket::Address::GetAny(m_version));
+        transport->InitialiseSecurity(&security);
+        return transport;
+    }
+    return NULL;
 }
 
 
@@ -1309,8 +1347,8 @@ void H323ListenerTCP::Main()
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef H323_TLS
-H323ListenerTLS::H323ListenerTLS(H323EndPoint & endpoint, PIPSocket::Address binding, WORD port)
-: H323ListenerTCP(endpoint, binding, port, false, H323TransportSecurity::e_tls)
+H323ListenerTLS::H323ListenerTLS(H323EndPoint & endpoint, PIPSocket::Address binding, WORD port, PBoolean exclusive)
+: H323ListenerTCP(endpoint, binding, port, exclusive, H323TransportSecurity::e_tls)
 {
 
 }

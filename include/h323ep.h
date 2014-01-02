@@ -2287,7 +2287,8 @@ class H323EndPoint : public PObject
     PBoolean TLS_SetCertificate(const PFilePath & certDir);
     PBoolean TLS_SetPrivateKey(const PFilePath & privFile, const PString & password);
     PBoolean TLS_SetCipherList(const PString & ciphers);
-    PBoolean TLS_Initialise(const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny());
+    PBoolean TLS_Initialise(const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny(), 
+                            WORD port = DefaultTLSPort);
     
     PSSLContext * GetTransportContext();
 

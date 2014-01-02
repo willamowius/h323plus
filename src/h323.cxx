@@ -2537,8 +2537,7 @@ H323Connection::CallEndReason H323Connection::SendSignalSetup(const PString & al
           gatekeeperRoute = m_transportSecurity.GetRemoteTLSAddress();
           PTRACE(4, "H225\tChanged remote address to secure " << gatekeeperRoute);
       }
-  } else
-    signallingChannel->InitialiseSecurity(endpoint.GetTransportSecurity());
+  } 
     
   if (!signallingChannel->IsOpen() && !signallingChannel->SetRemoteAddress(gatekeeperRoute)) {
     PTRACE(1, "H225\tInvalid "

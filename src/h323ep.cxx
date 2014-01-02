@@ -1926,12 +1926,18 @@ PBoolean H323EndPoint::ResolveCallParty(const PString & _remoteParty, PStringLis
   // if there is no gatekeeper, 
   if (gatekeeper == NULL) {
 
+    PString number = _remoteParty;
+    PString proto = "h323";
+
      //if there is no '@', and there is no URL scheme, then attempt to use ENUM
     if ((_remoteParty.Find(':') == P_MAX_INDEX) && (remoteParty.Find('@') == P_MAX_INDEX)) {
 
-    PString number = _remoteParty;
     if (number.Left(5) *= "h323:")
        number = number.Mid(5);
+    if (remoteParty.Left(6) *= "h323s:") {
+       number = number.Mid(6);
+       proto = "h323s";
+    }
 
     PINDEX i;
     for (i = 0; i < number.GetLength(); ++i)
@@ -1943,7 +1949,7 @@ PBoolean H323EndPoint::ResolveCallParty(const PString & _remoteParty, PStringLis
             str.Replace("+","");
             if ((str.Find("//1") != P_MAX_INDEX) &&
                  (str.Find('@') != P_MAX_INDEX)) {
-               remoteParty = "h323:" + number + str.Mid(str.Find('@')-1);
+               remoteParty = proto + ":" + number + str.Mid(str.Find('@')-1);
             } else {
               remoteParty = str;
           }
@@ -1967,8 +1973,8 @@ PBoolean H323EndPoint::ResolveCallParty(const PString & _remoteParty, PStringLis
    // attempt a DNS SRV lookup to detect a call signalling entry
    if (remoteParty.Find('@') != P_MAX_INDEX) {
        PString number = remoteParty;
-       if (number.Left(5) != "h323:") 
-          number = "h323:" + number;      
+       if (number.Left(5) != proto) 
+          number = proto + ":" + number;      
                
        PStringList str;
        PBoolean found = FALSE;
@@ -2029,10 +2035,19 @@ PBoolean H323EndPoint::ParsePartyName(const PString & _remoteParty,
 {
   PString remoteParty = _remoteParty;
 
+  PString proto = "h323";
+  PString number = remoteParty;
+    if (number.Left(5) *= "h323:")
+        number = number.Mid(5);
+    if (remoteParty.Left(6) *= "h323s:") {
+        proto = "h323s";
+        number = number.Mid(6);
+    }
+
   // Support [address]##[Alias] dialing
-  PINDEX hash = _remoteParty.Find("##");
+  PINDEX hash = number.Find("##");
   if (hash != P_MAX_INDEX) {
-    remoteParty = "h323:" + _remoteParty.Mid(hash+2) + "@" + _remoteParty.Left(hash);
+      remoteParty = proto + ":" + number.Mid(hash+2) + "@" + number.Left(hash);
     PTRACE(4, "H323\tConverted " << _remoteParty << " to " << remoteParty);
   }
 
@@ -2053,15 +2068,15 @@ PBoolean H323EndPoint::ParsePartyName(const PString & _remoteParty,
   }
 
   // convert the remote party string to a URL, with a default URL of "h323:"
-  PURL url(remoteParty, "h323");
+  PURL url(remoteParty, proto);
 
   // if the scheme does not match the prefix of the remote party, then
   // the URL parser got confused, so force the URL to be of type "h323"
   if ((remoteParty.Find('@') == P_MAX_INDEX) && (remoteParty.NumCompare(url.GetScheme()) != EqualTo)) {
     if (gatekeeper == NULL)
-      url.Parse("h323:@" + remoteParty);
+      url.Parse(proto + ":@" + remoteParty);
     else
-      url.Parse("h323:" + remoteParty);
+      url.Parse(proto + ":" + remoteParty);
   }
 
   // get the various parts of the name
@@ -2145,7 +2160,7 @@ PBoolean H323EndPoint::ParsePartyName(const PString & _remoteParty,
       gatewaySpecified = TRUE;
   }
 
-  else if (url.GetScheme() == "h323") {
+  else if (url.GetScheme() == proto) {
     if (type == "gw")
       gatewaySpecified = TRUE;
     else if (type == "gk")
@@ -2198,7 +2213,9 @@ PBoolean H323EndPoint::ParsePartyName(const PString & _remoteParty,
     // If URL did not have a host, but user said to use gw, or we do not have
     // a gk to do a lookup so we MUST have a host, use alias must be host
     if (address.IsEmpty()) {
-      address = alias;
+      address = alias + ":" + PString(url.GetPort());
+      if (url.GetScheme() == "h323s" && m_transportSecurity.IsTLSEnabled())
+          address.SetTLS(true);
       alias = PString::Empty();
       return TRUE;
     }
@@ -3962,7 +3979,7 @@ PBoolean H323EndPoint::TLS_SetCipherList(const PString & ciphers)
     return ((H323_TLSContext*)m_transportContext)->SetCipherList(ciphers);
 }
 
-PBoolean H323EndPoint::TLS_Initialise(const PIPSocket::Address & binding)
+PBoolean H323EndPoint::TLS_Initialise(const PIPSocket::Address & binding, WORD port)
 {
     if (!GetTransportContext())
         return false;
@@ -3970,11 +3987,12 @@ PBoolean H323EndPoint::TLS_Initialise(const PIPSocket::Address & binding)
     if (!((H323_TLSContext*)m_transportContext)->Initialise())
         return false;
 
+    m_transportSecurity.EnableTLS(true);
+
     if (!listeners.GetTLSListener()) {
-        H323Listener * listener = new H323ListenerTLS(*this, binding, DefaultTLSPort);
+        H323Listener * listener = new H323ListenerTLS(*this, binding, port);
         StartListener(listener);
     }
-    m_transportSecurity.EnableTLS(true);
 
     return true;   
 }
