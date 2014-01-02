@@ -165,7 +165,7 @@ public:
 
     /** Is Initialised
      */
-    PBoolean IsInitialised();
+    PBoolean IsInitialised() const;
 
     /** Read Frame
      */

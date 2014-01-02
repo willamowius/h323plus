@@ -44,6 +44,7 @@
 
 #include <channels.h>
 #include "h235/h235caps.h"
+#include "h235/h235crypto.h"
 
 /**This class is a derived Class for encpsulating the IETF Real Time Protocol 
    interface. It's only aim is to expose the Created UDP Data channel derive a
@@ -51,7 +52,6 @@
  */
 
 class RTP_Session;
-class H235Session;
 class H323SecureRTPChannel  : public H323_RTPChannel
 {
   PCLASSINFO(H323SecureRTPChannel, H323_RTPChannel);
@@ -185,7 +185,7 @@ class H323SecureRTPChannel  : public H323_RTPChannel
 
 protected:
     PString        m_algorithm;
-    H235Session*   m_encryption;
+    H235Session    m_encryption;
     int            m_payload;
 
 };

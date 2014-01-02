@@ -658,7 +658,7 @@ PBoolean H235Session::IsActive()
     return !IsInitialised();
 }
 
-PBoolean H235Session::IsInitialised() 
+PBoolean H235Session::IsInitialised() const
 { 
     return m_isInitialised; 
 }
