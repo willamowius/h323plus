@@ -178,7 +178,6 @@ else
   AC_MSG_RESULT(ok)
 fi
 
-echo "JW $PT_MAJOR_VERSION $PT_MINOR_VERSION $PT_BUILD_NUMBER"
 AC_SUBST(PTLIBDIR)
 AC_SUBST(HAS_PTLIB_LIB_MAK)
 AC_DEFINE_UNQUOTED(PT_MAJOR_VERSION, ${PT_MAJOR_VERSION}, [PTLib Major version])
@@ -574,7 +573,7 @@ dnl ########################################################################
 dnl check for enabling H.460.17
 
 dnl MSWIN_DISPLAY h46017,H.460.17
-dnl MSWIN_DEFINE  h46017,H323_H46017X
+dnl MSWIN_DEFINE  h46017,H323_H46017
 
 AC_ARG_ENABLE(h46017,
        [  --disable-h46017        disable H.460.17])
