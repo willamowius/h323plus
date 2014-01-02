@@ -613,7 +613,7 @@ dnl ########################################################################
 dnl check for enabling H.460.19 RTP multiplexing
 
 dnl MSWIN_DISPLAY h46019m,H.460.19 RTP multiplexing
-dnl MSWIN_DEFINE  h46019m,H323_H46019MX
+dnl MSWIN_DEFINE  h46019m,H323_H46019M
 
 AC_ARG_ENABLE(h46019m,
        [  --disable-h46019m       disable H.460.19 RTP multiplexing])
