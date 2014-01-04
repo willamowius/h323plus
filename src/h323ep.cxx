@@ -255,13 +255,14 @@ H323_TLSContext::H323_TLSContext()
     SSL_CTX_set_options(m_context, SSL_OP_NO_SSLv2);	// remove unsafe SSLv2
     SSL_CTX_set_mode(m_context, SSL_MODE_AUTO_RETRY); // handle re-negotiations automatically
 
+#if PTLIB_VER < 2120
+    context = m_context;
+#endif
+
     // no anonymous DH (ADH), no <= 64 bit (LOW), no export ciphers (EXP), no MD5 + RC4, no elliptic curve ciphers (ECDH + ECDSA)
     PString cipherList = "ALL:!ADH:!LOW:!EXP:!MD5:!RC4:!ECDH:!ECDSA:@STRENGTH";
     SetCipherList(cipherList);
     SSL_CTX_set_info_callback(m_context, tls_info_cb);
-#if PTLIB_VER < 2120
-    context = m_context;
-#endif
 }
 
 PBoolean H323_TLSContext::UseCAFile(const PFilePath & caFile)
@@ -309,12 +310,30 @@ PBoolean H323_TLSContext::AddCACertificate(const PString & caData)
 #if PTLIB_VER < 2120
     ssl_ctx_st * m_context = context;
 #endif
-	BIO *mem = BIO_new(BIO_s_mem());
-	BIO_puts(mem, caData);
-	X509 *x = PEM_read_bio_X509_AUX(mem,NULL,NULL,NULL);
-    PBoolean loaded = (x && SSL_CTX_add_extra_chain_cert(m_context, x));
+    BIO *mem = BIO_new(BIO_s_mem());
+    BIO_puts(mem, caData);
+    X509 *x = PEM_read_bio_X509_AUX(mem,NULL,NULL,NULL);
+    if (!x) {
+        PTRACE(1, "TLS\tBad Certificate read " << caData);
+        BIO_free(mem);
+        return false;
+    }
+    X509_STORE *store = SSL_CTX_get_cert_store(m_context); 
+    if (!store) {
+        PTRACE(1, "TLS\tCould not access certificate store.");
+        X509_free(x);
+        BIO_free(mem);
+        return false;
+    }
+    if (!X509_STORE_add_cert(store, x)) {
+        PTRACE(1, "TLS\tCould not add certificate to store.");
+        X509_free(x);
+        BIO_free(mem);
+        return false;
+    }
+    X509_free(x);
     BIO_free(mem);
-    return loaded;
+    return true;
 }
 
 PBoolean H323_TLSContext::UseCertificate(const PFilePath & certFile)
