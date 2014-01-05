@@ -600,12 +600,12 @@ class H460_Feature : public H225_FeatureDescriptor
 
 
     enum {
-      FeatureBaseAll   =0,        ///< Create Startup share instance with RAS and Signal
-      FeatureBaseClone =1,        ///< Initialise Startup clone instance in RAS and Signal
-      FeatureBase      =4,        ///< Create Startup 
-      FeatureRas       =8,        ///< Create Registering GK
-      FeaturePresence  =10,       ///< Create Call Setup/Advertise in Presence
-      FeatureSignal    =16        ///< Create Call Setup
+      FeatureBaseAll   =0,        ///< AutoCreate Startup share instance with RAS and Signal
+      FeatureBaseClone =2,        ///< AutoCreate Startup clone instance in RAS and Signal
+      FeatureBase      =4,        ///< AutoCreate Startup only (not used in RAS or Call Signalling)
+      FeatureRas       =8,        ///< AutoCreate RAS Only 
+      FeatureSignal    =16,       ///< AutoCreate Call Signalling Only
+      FeaturePresence  =64        ///< Manual Create in endpoint as required
     } FeatureInstance;
 
   //@}

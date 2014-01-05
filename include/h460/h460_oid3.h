@@ -146,10 +146,10 @@ public:
 
     static PStringArray GetFeatureName() { return PStringArray("OID3"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("Presence"); };
-    static int GetPurpose()	{ return FeaturePresence; };
-	static PStringArray GetIdentifier();
+    static int GetPurpose();
+    static PStringArray GetIdentifier();
 
-	virtual PBoolean CommonFeature() { return remoteSupport; }
+    virtual PBoolean CommonFeature() { return remoteSupport; }
 
     virtual PBoolean OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu);
     virtual PBoolean OnSendRegistrationRequest(H225_FeatureDescriptor & pdu);
@@ -161,8 +161,9 @@ public:
 private:
 
     PBoolean remoteSupport;
-	H460PresenceHandler * handler;
+    H460PresenceHandler * handler;
 
+    static PBoolean isLoaded;
 };
 
 #ifndef _WIN32_WCE

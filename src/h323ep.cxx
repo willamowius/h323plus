@@ -4078,6 +4078,7 @@ void H323EndPoint::PresenceAddFeatureH460()
             presenceHandler->AddEndpointH460Feature(*it->second, it->first);
             it++;
         }
+        features.LoadFeatureSet(H460_Feature::FeaturePresence);
     }
     DeleteFeatureList(plist);
 }

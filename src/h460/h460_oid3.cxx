@@ -338,7 +338,7 @@ static const char * OID3_ID = "1";
 ///////////////////////////////////////////////////////////////////////
 
 H460_FEATURE(OID3);
-
+PBoolean H460_FeatureOID3::isLoaded = false;
 H460_FeatureOID3::H460_FeatureOID3()
 : H460_FeatureOID(OID_3)
 {
@@ -351,6 +351,7 @@ H460_FeatureOID3::H460_FeatureOID3()
 
 H460_FeatureOID3::~H460_FeatureOID3()
 {
+    isLoaded = false;
 }
 
 PStringArray H460_FeatureOID3::GetIdentifier()
@@ -362,8 +363,18 @@ void H460_FeatureOID3::AttachEndPoint(H323EndPoint * _ep)
 {
     handler = _ep->GetPresenceHandler();
 
-    if (handler != NULL) 
+    if (handler != NULL) {
          handler->AttachFeature(this);
+         isLoaded = true;
+    }
+}
+
+int H460_FeatureOID3::GetPurpose()
+{ 
+    if (isLoaded)
+        return FeatureRas; 
+    else
+        return FeaturePresence; 
 }
 
 PBoolean H460_FeatureOID3::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu) 
