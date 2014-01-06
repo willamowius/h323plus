@@ -273,11 +273,9 @@ RTP_DataFrame::PayloadTypes H323SecureRTPChannel::GetRTPPayloadType() const
         int baseType = H323_RealTimeChannel::GetRTPPayloadType();
         if (baseType >= RTP_DataFrame::DynamicBase) 
             tempPayload = baseType;
-        else if (m_encryption.IsInitialised())
+        else 
             tempPayload = 120 + capability->GetMainType();
-        else
-            tempPayload = baseType;
-      
+
       PRemoveConst(H323SecureRTPChannel, this)->SetDynamicRTPPayloadType(tempPayload);
     }
     return (RTP_DataFrame::PayloadTypes)m_payload;
