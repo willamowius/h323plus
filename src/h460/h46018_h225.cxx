@@ -338,7 +338,7 @@ PBoolean H46018Transport::Close()
 
 PBoolean H46018Transport::IsOpen () const
 {
-    return H323TransportTCP::IsOpen();
+    return H323Transport::IsOpen();
 }
 
 PBoolean H46018Transport::IsListening() const

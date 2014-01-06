@@ -385,7 +385,7 @@ PBoolean GNUGKTransport::Close()
 
 PBoolean GNUGKTransport::IsOpen () const
 {
-   return H323TransportTCP::IsOpen();
+   return H323Transport::IsOpen();
 }
 
 PBoolean GNUGKTransport::IsListening() const

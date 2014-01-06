@@ -589,7 +589,7 @@ void H46017Transport::CleanUpOnTermination()
 
 PBoolean H46017Transport::IsOpen () const
 {
-   return H323TransportTCP::IsOpen();
+   return H323Transport::IsOpen();
 }
 
 PBoolean H46017Transport::IsListening() const

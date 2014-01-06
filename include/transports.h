@@ -457,6 +457,14 @@ class H323Transport : public PIndirectChannel
      */
     virtual PBoolean OnSocketOpen();
 
+    /**Determine if the channel is currently open and read and write operations
+       can be executed on it.
+
+       @return
+       true if the channel is open.
+     */
+    virtual PBoolean IsOpen() const;
+
     /**Close the channel.
       */
     virtual PBoolean Close();

@@ -1000,6 +1000,11 @@ PBoolean H323Transport::OnSocketOpen()
     return true;
 }
 
+PBoolean H323Transport::IsOpen() const
+{
+    return PIndirectChannel::IsOpen();
+}
+
 PBoolean H323Transport::IsTransportSecure()
 {
     return m_secured;
@@ -1512,8 +1517,12 @@ PBoolean H323TransportTCP::OnOpen()
 #if PTLIB_VER < 2120
     ssl_st * m_ssl = ssl;
 #endif
-    if (m_ssl)
-        m_secured = PSSLChannel::OnOpen();
+    if (m_ssl) {
+        if (!PSSLChannel::OnOpen())
+            return false;
+
+        m_secured = true;
+    }
 #endif
     return OnSocketOpen();
 }
