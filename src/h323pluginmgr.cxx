@@ -1433,8 +1433,8 @@ class H323PluginVideoCodec : public H323VideoCodec
     int          maxHeight;
     bool         sendIntra;
 
-    mutable PTimeInterval lastFrameTick;
-    mutable PTimeInterval nowFrameTick;
+    PInt64  lastFrameTick;
+    PInt64  nowFrameTick;
 	PTime   lastFUPTime;
 
     // Regular used variables
@@ -1825,8 +1825,8 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
 
         RenderFrame(data, NULL);
 
-        nowFrameTick = PTimer::Tick();
-        lastFrameTimeRTP = (nowFrameTick - lastFrameTick).GetInterval()*90;
+        nowFrameTick = PTimer::Tick().GetMilliSeconds();
+        lastFrameTimeRTP = (nowFrameTick - lastFrameTick)*90;
         lastFrameTick = nowFrameTick;
     }
     else
