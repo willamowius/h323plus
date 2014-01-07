@@ -1422,20 +1422,22 @@ class H323PluginVideoCodec : public H323VideoCodec
   protected:
     void *       context;
     PluginCodec_Definition * codec;
-    long         flowRequest;
+    int          bufferSize;
     RTP_DataFrame bufferRTP;
-    PBoolean     lastPacketSent;
+    int          maxWidth;
+    int          maxHeight;
 
     unsigned     bytesPerFrame;
     unsigned     lastFrameTimeRTP;
     unsigned     targetFrameTimeMs;
-    int          maxWidth; 
-    int          maxHeight;
+
+    long         flowRequest;
+    PBoolean     lastPacketSent;
     bool         sendIntra;
 
     PInt64  lastFrameTick;
     PInt64  nowFrameTick;
-	PTime   lastFUPTime;
+    PTime   lastFUPTime;
 
     // Regular used variables
     int          outputDataSize;
@@ -1576,46 +1578,31 @@ bool OpalPluginCodec::CodecControl(const char * name, void * parm, unsigned int 
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-H323PluginVideoCodec::H323PluginVideoCodec(const OpalMediaFormat & fmt, Direction direction, PluginCodec_Definition * _codec, const H323Capability * cap)
-      : H323VideoCodec(fmt, direction), codec(_codec), flowRequest(0)
-{ 
-    if (codec != NULL && codec->createCodec != NULL) 
-        context = (*codec->createCodec)(codec); 
-    else 
-        context = NULL; 
+#define PLUGIN_MAX_WIDTH   1920
+#define PLUGIN_MAX_HEIGHT  1200
+#define PLUGIN_RTP_HEADER_SIZE 12
+#define MAX_MTU_SIZE 2000  //1518-14-4-8-20-16; Max Ethernet packet (1518 bytes) minus 802.3/CRC, 802.3, IP, UDP headers
 
-	UpdatePluginOptions(codec,context,GetWritableMediaFormat());
+H323PluginVideoCodec::H323PluginVideoCodec(const OpalMediaFormat & fmt, Direction direction, PluginCodec_Definition * _codec, const H323Capability * cap)
+    : H323VideoCodec(fmt, direction), context(NULL), codec(_codec), 
+      bufferSize(sizeof(PluginCodec_Video_FrameHeader) + (PLUGIN_MAX_WIDTH * PLUGIN_MAX_HEIGHT * 3)/2 + PLUGIN_RTP_HEADER_SIZE), bufferRTP(bufferSize-PLUGIN_RTP_HEADER_SIZE, TRUE), 
+      maxWidth(fmt.GetOptionInteger(OpalVideoFormat::FrameWidthOption)), maxHeight(fmt.GetOptionInteger(OpalVideoFormat::FrameHeightOption)),
+      bytesPerFrame((maxHeight * maxWidth * 3)/2), lastFrameTimeRTP(0), targetFrameTimeMs(fmt.GetOptionInteger(OpalVideoFormat::FrameTimeOption)),
+      flowRequest(0), lastPacketSent(true), sendIntra(true), lastFrameTick(0), nowFrameTick(0), outputDataSize(MAX_MTU_SIZE), 
+      fromLen(0), toLen(0), flags(0), pluginRetVal(0)
+{
+    if (codec && codec->createCodec) 
+        context = (*codec->createCodec)(codec); 
+
+    frameWidth = maxWidth;
+    frameHeight = maxHeight;
+
+    UpdatePluginOptions(codec,context,GetWritableMediaFormat());
 
     if (cap) {
         OpalMediaFormat & capFmt = PRemoveConst(H323Capability, cap)->GetWritableMediaFormat();
         capFmt = GetMediaFormat();
     }
-
-    sendIntra = TRUE;
-    lastPacketSent = TRUE;
-    lastFrameTimeRTP = 0;
-    lastFrameTick = 0;
-    nowFrameTick = 0;
-    frameWidth = maxWidth = mediaFormat.GetOptionInteger(OpalVideoFormat::FrameWidthOption); 
-    frameHeight = maxHeight = mediaFormat.GetOptionInteger(OpalVideoFormat::FrameHeightOption);
-    targetFrameTimeMs = mediaFormat.GetOptionInteger(OpalVideoFormat::FrameTimeOption);
-
-    // TODO: setup sar for standard size.
-
-    // Need to allocate buffer to the maximum framesize statically
-    // and clear the memory in the destructor to avoid segfault in destructor
-    // Need the buffer to be sufficiently large enough to deal with errant endpoints sending video 
-    // too big for the capability advertised -SH
-    unsigned maxBytesRTPFrame = (1920 * 1200 * 3)/2 ;
-    bufferRTP = RTP_DataFrame(sizeof(PluginCodec_Video_FrameHeader) + maxBytesRTPFrame, TRUE);
-    bytesPerFrame = (maxHeight * maxWidth * 3)/2;
-	lastFUPTime=0;
-
-    outputDataSize=2000; //1518-14-4-8-20-16; Max Ethernet packet (1518 bytes) minus 802.3/CRC, 802.3, IP, UDP headers
-    fromLen = 0;
-    toLen = 0;
-    flags = 0;
-    pluginRetVal = 0;
 
 #if PTRACING
    PTRACE(6,"Agreed Codec Options");
@@ -1841,7 +1828,7 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
     dst.SetMinSize(outputDataSize);
     bytesPerFrame = outputDataSize;
 
-    fromLen = bufferRTP.GetHeaderSize() + bufferRTP.GetPayloadSize();
+    fromLen = bufferSize;
     toLen = outputDataSize;
     flags = sendIntra ? PluginCodec_CoderForceIFrame : 0;
 
@@ -1948,7 +1935,7 @@ PBoolean H323PluginVideoCodec::WriteInternal(const BYTE * /*buffer*/, unsigned l
 #endif
 
   fromLen = src.GetHeaderSize() + src.GetPayloadSize();
-  toLen = bufferRTP.GetSize();
+  toLen = bufferSize;
   flags=0;
 
   pluginRetVal = (codec->codecFunction)(codec, context, 
@@ -1992,7 +1979,7 @@ PBoolean H323PluginVideoCodec::WriteInternal(const BYTE * /*buffer*/, unsigned l
         } else
             break;
 
-     } else if (toLen < (unsigned)bufferRTP.GetHeaderSize()) {
+     } else if (toLen < (unsigned)PLUGIN_RTP_HEADER_SIZE) {  // No Payload
          PTRACE(6,"PLUGIN\tPartial Frame received " << codec->descr << " Ignoring rendering.");
          written = length;
          return TRUE;
