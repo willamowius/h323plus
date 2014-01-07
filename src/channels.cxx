@@ -1064,6 +1064,12 @@ void H323_RTPChannel::Receive()
                                    connection.GetMaxAudioJitterDelay()*mediaFormat.GetTimeUnits(),
                                    endpoint.GetJitterThreadStackSize());
 
+  rtpPayloadType = GetRTPPayloadType();
+  if (rtpPayloadType == RTP_DataFrame::IllegalPayloadType) {
+     PTRACE(1, "H323RTP\tTransmit " << mediaFormat << " thread ended (illegal payload type)");
+     return;
+  }
+
   // Keep time using th RTP timestamps.
   DWORD codecFrameRate = codec->GetFrameRate();
   DWORD rtpTimestamp = 0;
@@ -1073,19 +1079,14 @@ void H323_RTPChannel::Receive()
 
   // keep track of consecutive payload type mismatches
   int consecutiveMismatches = 0;
+  int payloadSize = 0;
+  PBoolean isAudio = codec->GetMediaFormat().NeedsJitterBuffer();
+  PBoolean allowRtpPayloadChange = isAudio;
 
-  rtpPayloadType = GetRTPPayloadType();
-  if (rtpPayloadType == RTP_DataFrame::IllegalPayloadType) {
-     PTRACE(1, "H323RTP\tTransmit " << mediaFormat << " thread ended (illegal payload type)");
-     return;
-  }
+  RTP_Session::SenderReport avData;
 
   // UniDirectional Channel NAT support
   SendUniChannelBackProbe();
-
-  PBoolean isAudio = false;
-  if (codec->GetMediaFormat().GetDefaultSessionID() == OpalMediaFormat::DefaultAudioSessionID) isAudio = true;
-  PBoolean allowRtpPayloadChange = isAudio;
 
   RTP_DataFrame frame;
   while (ReadFrame(rtpTimestamp, frame)) {
@@ -1097,10 +1098,9 @@ void H323_RTPChannel::Receive()
       filterMutex.Signal();
     }
 
-    int size = frame.GetPayloadSize();
+    payloadSize = frame.GetPayloadSize();
     rtpTimestamp = frame.GetTimestamp();
 
-    RTP_Session::SenderReport avData;
     if (rtpSession.AVSyncData(avData))
         codec->OnRxSenderReport(avData.rtpTimestamp, avData.realTimestamp1970);
 
@@ -1113,7 +1113,7 @@ void H323_RTPChannel::Receive()
 
     rec_written=0;
     rec_ok=TRUE;
-    if (size == 0) {
+    if (payloadSize == 0) {
       rec_ok = codec->Write(NULL, 0, frame, rec_written);
       rtpTimestamp += codecFrameRate;
     } else {
@@ -1138,19 +1138,19 @@ void H323_RTPChannel::Receive()
 
       if (consecutiveMismatches == 0) {
         const BYTE * ptr = frame.GetPayloadPtr();
-        while (rec_ok && size > 0) {
+        while (rec_ok && payloadSize > 0) {
           /* Now write data to the codec, it is expected that the Write()
              function will maintain the Real Time aspects of the system. That
              is for GSM codec, say with a single frame, this function will take
              20 milliseconds to complete. It is very important that this occurs
              for audio codecs or the jitter buffer will not operate correctly.
            */
-          rec_ok = codec->Write(ptr, paused ? 0 : size, frame, rec_written);
+          rec_ok = codec->Write(ptr, paused ? 0 : payloadSize, frame, rec_written);
           rtpTimestamp += codecFrameRate;
-          size -= rec_written != 0 ? rec_written : size;
+          payloadSize -= rec_written != 0 ? rec_written : payloadSize;
           ptr += rec_written;
         }
-        PTRACE_IF(1, size < 0, "H323RTP\tPayload size too small, short " << -size << " bytes.");
+        PTRACE_IF(1, payloadSize < 0, "H323RTP\tPayload size too small, short " << -payloadSize << " bytes.");
       }
     }
 

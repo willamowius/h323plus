@@ -493,6 +493,10 @@ class RTP_Session : public PObject
     class SenderReport : public PObject  {
         PCLASSINFO(SenderReport, PObject);
       public:
+        SenderReport() 
+        : sourceIdentifier(0), realTimestamp1970(0), 
+          rtpTimestamp(0), packetsSent(0), octetsSent(0) {}
+
         void PrintOn(ostream &) const;
 
         DWORD sourceIdentifier;
