@@ -735,13 +735,14 @@ PBoolean H323AudioCodec::SetRawDataHeld(PBoolean hold) {
 /////////////////////////////////////////////////////////////////////////////
 
 H323FramedAudioCodec::H323FramedAudioCodec(const OpalMediaFormat & fmt, Direction dir)
-  : H323AudioCodec(fmt, dir),
-    sampleBuffer(samplesPerFrame)
-{
-  bytesPerFrame = mediaFormat.GetFrameSize();
+  : H323AudioCodec(fmt, dir), 
 #ifdef H323_AEC
-  aec = NULL;
+    aec(NULL),
 #endif
+    sampleBuffer(samplesPerFrame), bytesPerFrame(mediaFormat.GetFrameSize()), 
+    readBytes(samplesPerFrame*2), writeBytes(samplesPerFrame*2), cntBytes(0)
+{
+
 }
 
 
@@ -760,22 +761,19 @@ PBoolean H323FramedAudioCodec::Read(BYTE * buffer, unsigned & length, RTP_DataFr
     return TRUE;
   }
 
-  PINDEX numBytes = samplesPerFrame*2;
-  PINDEX count;
-
 #if 0 //PTLIB_VER >= 2110
     bool lastPacket = true;
     if (rawDataChannel->SourceEncoded(lastPacket,length))
         return rawDataChannel->Read(buffer, length);
 #endif
 
-  if (!ReadRaw(sampleBuffer.GetPointer(samplesPerFrame), numBytes, count))
+  if (!ReadRaw(sampleBuffer.GetPointer(samplesPerFrame), readBytes, cntBytes))
     return FALSE;
 
 #ifdef H323_AEC
     if (aec != NULL) {
-       PTRACE(6,"AEC\tSend " << numBytes);
-       aec->Send((BYTE*)sampleBuffer.GetPointer(samplesPerFrame),(unsigned &)numBytes);
+       PTRACE(6,"AEC\tSend " << readBytes);
+       aec->Send((BYTE*)sampleBuffer.GetPointer(samplesPerFrame),(unsigned &)readBytes);
     }
 #endif
 
@@ -784,10 +782,11 @@ PBoolean H323FramedAudioCodec::Read(BYTE * buffer, unsigned & length, RTP_DataFr
     return TRUE;
   }
 
-  if (count != numBytes) {
-    PTRACE(1, "Codec\tRead truncated frame of raw data. Wanted " << numBytes << " and got "<<count);
+  if (cntBytes != readBytes) {
+    PTRACE(1, "Codec\tRead truncated frame of raw data. Wanted " << readBytes << " and got "<< cntBytes);
     return FALSE;
   }
+  cntBytes = 0;
 
   if (DetectSilence()) {
     length = 0;
@@ -804,7 +803,7 @@ PBoolean H323FramedAudioCodec::Write(const BYTE * buffer,
                                  unsigned length,
                                  const RTP_DataFrame & rtpFrame,
                                  unsigned & written
-								 )
+                                 )
 {
   PWaitAndSignal mutex(rawChannelMutex);
 
@@ -825,13 +824,12 @@ PBoolean H323FramedAudioCodec::Write(const BYTE * buffer,
         CalculateRTPSendTime(rtpInformation.m_timeStamp, rtpInformation.m_clockRate, rtpInformation.m_sendTime);
         rtpInformation.m_frame = &rtpFrame;
 
-  unsigned bytesDecoded = samplesPerFrame*2;
 
 #if 0 //PTLIB_VER >= 290
   if (rawDataChannel->DisableDecode()) {
       if (WriteRaw(rtpFrame.GetPayloadPtr(), rtpFrame.GetPayloadSize(), &rtpInformation))  {
          written = length; // pretend we wrote the data, to avoid error message
-	     return TRUE;
+         return TRUE;
       } else
          return FALSE;
   }
@@ -843,31 +841,31 @@ PBoolean H323FramedAudioCodec::Write(const BYTE * buffer,
     written = bytesPerFrame;
 
     // Decode the data
-    if (!DecodeFrame(buffer, length, written, bytesDecoded)) {
+    if (!DecodeFrame(buffer, length, written, writeBytes)) {
       written = length;
       length = 0;
     }
   }
 
-  // was memset(sampleBuffer.GetPointer(samplesPerFrame), 0, bytesDecoded);
+  // was memset(sampleBuffer.GetPointer(samplesPerFrame), 0, );
   if (length == 0)
-    DecodeSilenceFrame(sampleBuffer.GetPointer(bytesDecoded), bytesDecoded);
+    DecodeSilenceFrame(sampleBuffer.GetPointer(writeBytes), writeBytes);
 
   // Write as 16bit PCM to sound channel
   if (IsRawDataHeld) {		// If Connection om Hold 
-	PThread::Sleep(5);	// Sleep to avoid CPU Overload <--- Must be a better way but need it to work.
-	return TRUE;
+    PThread::Sleep(5);	// Sleep to avoid CPU Overload <--- Must be a better way but need it to work.
+    return TRUE;
   } else {
 #ifdef H323_AEC
-	  if (aec != NULL) {
-		  PTRACE(6,"AEC\tReceive " << bytesDecoded);
-		  aec->Receive((BYTE *)sampleBuffer.GetPointer(), bytesDecoded);
-	  }
+      if (aec != NULL) {
+         PTRACE(6,"AEC\tReceive " << writeBytes);
+         aec->Receive((BYTE *)sampleBuffer.GetPointer(), writeBytes);
+      }
 #endif
-      if (!WriteRaw(sampleBuffer.GetPointer(), bytesDecoded, &rtpInformation)) 
-		  return FALSE;
+      if (!WriteRaw(sampleBuffer.GetPointer(), writeBytes, &rtpInformation)) 
+          return FALSE;
   }
-	  return TRUE;
+      return TRUE;
 
 
 }

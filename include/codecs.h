@@ -652,6 +652,10 @@ class H323FramedAudioCodec : public H323AudioCodec
 #endif
     PShortArray sampleBuffer;
     unsigned    bytesPerFrame;
+
+    PINDEX      readBytes;
+    unsigned    writeBytes;
+    PINDEX      cntBytes;
 };
 
 
