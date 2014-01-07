@@ -666,7 +666,8 @@ PBoolean RTP_Session::PseudoRead(int & /*selectStatus*/)
 bool RTP_Session::AVSyncData(SenderReport & sender)
 {
     if (avSyncData) {
-        sender = rtpSync;
+        sender.realTimestamp = rtpSync.realTimestamp;
+        sender.rtpTimestamp = rtpSync.rtpTimestamp;
         avSyncData = false;
         return true;
     }
@@ -1052,6 +1053,11 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveControl(RTP_ControlFrame & 
           sender.rtpTimestamp = sr.rtp_ts;
           sender.packetsSent = sr.psent;
           sender.octetsSent = sr.osent;
+
+          rtpSync.realTimestamp = sender.realTimestamp;
+          rtpSync.rtpTimestamp = sender.rtpTimestamp;
+          avSyncData = true;
+
           // trace the report
           ReceiverReportArray RRs = BuildReceiverReportArray(frame, sizeof(RTP_ControlFrame::SenderReport));
           OnRxSenderReport(sender, RRs);

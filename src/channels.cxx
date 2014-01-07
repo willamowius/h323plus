@@ -1083,8 +1083,6 @@ void H323_RTPChannel::Receive()
   PBoolean isAudio = codec->GetMediaFormat().NeedsJitterBuffer();
   PBoolean allowRtpPayloadChange = isAudio;
 
-  RTP_Session::SenderReport avData;
-
   // UniDirectional Channel NAT support
   SendUniChannelBackProbe();
 
@@ -1101,8 +1099,11 @@ void H323_RTPChannel::Receive()
     payloadSize = frame.GetPayloadSize();
     rtpTimestamp = frame.GetTimestamp();
 
+#if 0  // Enable if you want A/V sync information  - SH
+    RTP_Session::SenderReport avData;
     if (rtpSession.AVSyncData(avData))
-        codec->OnRxSenderReport(avData.rtpTimestamp, avData.realTimestamp1970);
+        codec->OnRxSenderReport(avData.rtpTimestamp, avData.realTimestamp);
+#endif
 
 #if PTRACING
     if (rtpTimestamp - lastDisplayedTimestamp > RTP_TRACE_DISPLAY_RATE) {
