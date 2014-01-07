@@ -759,8 +759,8 @@ class RTP_Session : public PObject
     WORD          lastSentSequenceNumber;
     WORD          expectedSequenceNumber;
     DWORD         lastSentTimestamp;
-    PTimeInterval lastSentPacketTime;
-    PTimeInterval lastReceivedPacketTime;
+    PInt64        lastSentPacketTime;
+    PInt64        lastReceivedPacketTime;
     WORD          lastRRSequenceNumber;
     PINDEX        consecutiveOutOfOrderPackets;
 

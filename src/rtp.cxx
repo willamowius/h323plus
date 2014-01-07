@@ -504,83 +504,35 @@ void RTP_UserData::OnRxSenderReport(unsigned /*sessionID*/,
 
 RTP_Session::RTP_Session(
 #ifdef H323_RTP_AGGREGATE
-
                          PHandleAggregator * _aggregator, 
 #endif
                          unsigned id, RTP_UserData * data)
-  : canonicalName(PProcess::Current().GetUserName()),
-    toolName(PProcess::Current().GetName()),
-    reportTimeInterval(0, 12),  // Seconds
-    firstDataReceivedTime(0),
-    reportTimer(reportTimeInterval)
+  : sessionID(id), canonicalName(PProcess::Current().GetUserName()), toolName(PProcess::Current().GetName()), referenceCount(1), userData(data),
+#ifdef H323_AUDIO_CODECS
+    jitter(NULL),
+#endif
+    ignoreOtherSources(true), ignoreOtherSourcesCount(0), ignoreOtherSourceMaximum(10), ignoreOutOfOrderPackets(true),
+    syncSourceOut(PRandom::Number()), syncSourceIn(0), reportTimeInterval(0, 12), txStatisticsInterval(100), rxStatisticsInterval(100),
+    lastSentSequenceNumber((WORD)PRandom::Number()), expectedSequenceNumber(0), lastSentTimestamp(0), lastSentPacketTime(0), lastReceivedPacketTime(0),
+    lastRRSequenceNumber(0), consecutiveOutOfOrderPackets(0),
+    packetsSent(0), octetsSent(0), packetsReceived(0), octetsReceived(0), packetsLost(0), packetsOutOfOrder(0), averageSendTime(0),
+    maximumSendTime(0), minimumSendTime(0), averageReceiveTime(0), maximumReceiveTime(0), minimumReceiveTime(0), jitterLevel(0), maximumJitterLevel(0),
+    localAddress(PString()), remoteAddress(PString()), txStatisticsCount(0), rxStatisticsCount(0), averageSendTimeAccum(0), maximumSendTimeAccum(0),
+    minimumSendTimeAccum(0xffffffff), averageReceiveTimeAccum(0), maximumReceiveTimeAccum(0), minimumReceiveTimeAccum(0xffffffff), packetsLostSinceLastRR(0),
+    lastTransitTime(0), firstDataReceivedTime(0), avSyncData(false)
 #ifdef H323_RTP_AGGREGATE
-    ,aggregator(_aggregator)
+    ,aggregator(NULL)
 #endif
 {
-  sessionID = (BYTE)id;
   if (sessionID <= 0) {
       PTRACE(2,"RTP\tWARNING: Session ID <= 0 Invalid SessionID.");
   } else if (sessionID > 256) {
       PTRACE(2,"RTP\tWARNING: Session ID " << sessionID << " Invalid SessionID.");
   }
-
-  referenceCount = 1;
-  userData = data;
-
-#ifdef H323_AUDIO_CODECS
-  jitter = NULL;
-#endif
-
-  ignoreOtherSources = TRUE;
-  ignoreOtherSourcesCount = 0;
-  ignoreOtherSourceMaximum = 10;
-  ignoreOutOfOrderPackets = TRUE;
-  syncSourceOut = PRandom::Number();
-  syncSourceIn = 0;
-  txStatisticsInterval = 50; //100;  // Number of data packets between tx reports
-  rxStatisticsInterval = 50; //100;  // Number of data packets between rx reports
-  lastSentSequenceNumber = (WORD)PRandom::Number();
-  expectedSequenceNumber = 0;
-  lastRRSequenceNumber = 0;
-  consecutiveOutOfOrderPackets = 0;
-
-  packetsSent = 0;
-  octetsSent = 0;
-  packetsReceived = 0;
-  octetsReceived = 0;
-  packetsLost = 0;
-  packetsOutOfOrder = 0;
-  averageSendTime = 0;
-  maximumSendTime = 0;
-  minimumSendTime = 0;
-  averageReceiveTime = 0;
-  maximumReceiveTime = 0;
-  minimumReceiveTime = 0;
-  jitterLevel = 0;
-  maximumJitterLevel = 0;
-
-  txStatisticsCount = 0;
-  rxStatisticsCount = 0;
-  averageSendTimeAccum = 0;
-  maximumSendTimeAccum = 0;
-  minimumSendTimeAccum = 0xffffffff;
-  averageReceiveTimeAccum = 0;
-  maximumReceiveTimeAccum = 0;
-  minimumReceiveTimeAccum = 0xffffffff;
-  packetsLostSinceLastRR = 0;
-  lastTransitTime = 0;
-
-  localAddress = PString();
-  remoteAddress = PString(); 
-
-  avSyncData = false;
 }
-
 
 RTP_Session::~RTP_Session()
 {
-  userData->OnFinalStatistics(*this);
-
   PTRACE_IF(2, packetsSent != 0 || packetsReceived != 0,
             "RTP\tFinal statistics: Session " << sessionID << "\n"
             "    packetsSent       = " << packetsSent << "\n"
@@ -599,10 +551,15 @@ RTP_Session::~RTP_Session()
             "    averageJitter     = " << (jitterLevel >> 7) << "\n"
             "    maximumJitter     = " << (maximumJitterLevel >> 7)
             );
-  delete userData;
+
+  if (userData) {
+    userData->OnFinalStatistics(*this);
+    delete userData;
+  }
 
 #ifdef H323_AUDIO_CODECS
-  delete jitter;
+  if (jitter)
+    delete jitter;
 #endif
 }
 
@@ -645,7 +602,9 @@ void RTP_Session::SetToolName(const PString & name)
 
 void RTP_Session::SetUserData(RTP_UserData * data)
 {
-  delete userData;
+  if (userData)
+    delete userData;
+
   userData = data;
 }
 
@@ -767,14 +726,14 @@ void RTP_Session::AddReceiverReport(RTP_ControlFrame::ReceiverReport & receiver)
 
 RTP_Session::SendReceiveStatus RTP_Session::OnSendData(RTP_DataFrame & frame)
 {
-  PTimeInterval tick = PTimer::Tick();  // Timestamp set now
+  PInt64 tick = PTimer::Tick().GetMilliSeconds();  // Timestamp set now
 
   frame.SetSequenceNumber(++lastSentSequenceNumber);
   frame.SetSyncSource(syncSourceOut);
 
   if (packetsSent != 0 && !frame.GetMarker()) {
     // Only do statistics on subsequent packets
-    DWORD diff = (tick - lastSentPacketTime).GetInterval();
+    DWORD diff = tick - lastSentPacketTime;
 
     averageSendTimeAccum += diff;
     if (diff > maximumSendTimeAccum)
@@ -791,7 +750,7 @@ RTP_Session::SendReceiveStatus RTP_Session::OnSendData(RTP_DataFrame & frame)
   packetsSent++;
 
   // Call the statistics call-back on the first PDU with total count == 1
-  if (packetsSent == 1 && userData != NULL)
+  if (userData && packetsSent == 1)
     userData->OnTxStatistics(*this);
 
   if (!SendReport())
@@ -818,7 +777,7 @@ RTP_Session::SendReceiveStatus RTP_Session::OnSendData(RTP_DataFrame & frame)
             " minTime=" << minimumSendTime
             );
 
-  if (userData != NULL)
+  if (userData)
     userData->OnTxStatistics(*this);
 
   return e_ProcessPacket;
@@ -835,7 +794,7 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveData(const RTP_DataFrame & 
   if (frame.GetPayloadType() > RTP_DataFrame::MaxPayloadType)
     return e_IgnorePacket; // Non fatal error, just ignore
 
-  PTimeInterval tick = PTimer::Tick();  // Get timestamp now
+  PInt64 tick = PTimer::Tick().GetMilliSeconds();  // Get timestamp now
 
   // Have not got SSRC yet, so grab it now
   if (syncSourceIn == 0)
@@ -881,8 +840,7 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveData(const RTP_DataFrame & 
       consecutiveOutOfOrderPackets = 0;
       // Only do statistics on packets after first received in talk burst
       if (!frame.GetMarker()) {
-        DWORD diff = (tick - lastReceivedPacketTime).GetInterval();
-
+        DWORD diff = tick - lastReceivedPacketTime;
         averageReceiveTimeAccum += diff;
         if (diff > maximumReceiveTimeAccum)
           maximumReceiveTimeAccum = diff;
@@ -941,7 +899,7 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveData(const RTP_DataFrame & 
   }
 
   // Call the statistics call-back on the first PDU with total count == 1
-  if (packetsReceived == 1 && userData != NULL)
+  if (userData && packetsReceived == 1)
     userData->OnRxStatistics(*this);
 
   if (!SendReport())
@@ -973,7 +931,7 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveData(const RTP_DataFrame & 
             " maxJitter=" << (maximumJitterLevel >> 7)
             );
 
-  if (userData != NULL)
+  if (userData)
     userData->OnRxStatistics(*this);
 
   return e_ProcessPacket;
@@ -1171,7 +1129,8 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveControl(RTP_ControlFrame & 
 void RTP_Session::OnRxSenderReport(const SenderReport & PTRACE_PARAM(sender),
                                    const ReceiverReportArray & PTRACE_PARAM(reports))
 {
-   userData->OnRxSenderReport(sessionID,sender,reports);
+  if (userData)
+     userData->OnRxSenderReport(sessionID,sender,reports);
 
 #if PTRACING
   PTRACE(3, "RTP\tOnRxSenderReport: " << sender);
@@ -1422,20 +1381,14 @@ RTP_UDP::RTP_UDP(
   _aggregator, 
 #endif
   id),
-    remoteAddress(0),
-    remoteTransmitAddress(0),
-    remoteIsNAT(_remoteIsNAT),
-    mediaIsTunneled(_mediaTunneled)
+    localAddress(0), localDataPort(0), localControlPort(0), 
+    remoteAddress(0), remoteDataPort(0), remoteControlPort(0), 
+    remoteTransmitAddress(0), shutdownRead(false), shutdownWrite(false),
+    dataSocket(NULL), controlSocket(NULL),
+    appliedQOS(false), enableGQOS(false),
+    remoteIsNAT(_remoteIsNAT), successiveWrongAddresses(0), mediaIsTunneled(_mediaTunneled)
 {
-  remoteDataPort = 0;
-  remoteControlPort = 0;
-  shutdownRead = FALSE;
-  shutdownWrite = FALSE;
-  dataSocket = NULL;
-  controlSocket = NULL;
-  appliedQOS = FALSE;
-  enableGQOS = FALSE;
-  successiveWrongAddresses = 0;
+
 }
 
 
@@ -1445,7 +1398,9 @@ RTP_UDP::~RTP_UDP()
   Close(FALSE);
 
   delete dataSocket;
+  dataSocket = NULL;
   delete controlSocket;
+  controlSocket = NULL;
 }
 
 
@@ -1939,9 +1894,9 @@ PBoolean RTP_UDP::PreWriteData(RTP_DataFrame & frame)
 PBoolean RTP_UDP::WriteData(RTP_DataFrame & frame)
 {
 
-  while (!dataSocket->WriteTo(frame.GetPointer(),
-                             frame.GetHeaderSize()+frame.GetPayloadSize(),
-                             remoteAddress, remoteDataPort)) {
+  while (dataSocket && !dataSocket->WriteTo(frame.GetPointer(),
+            frame.GetHeaderSize()+frame.GetPayloadSize(), remoteAddress, remoteDataPort)) {
+
     switch (dataSocket->GetErrorNumber()) {
       case ECONNRESET :
       case ECONNREFUSED :
