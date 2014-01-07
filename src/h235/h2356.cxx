@@ -132,7 +132,9 @@ void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, const PString & fi
 /////////////////////////////////////////////////////////////////////////////////////
 
 #if PTLIB_VER >= 2110
+#ifdef H323_SSL
 H235SECURITY(Std6);
+#endif
 #else
 static PFactory<H235Authenticator>::Worker<H2356_Authenticator> factoryH2356_Authenticator("H2356_Authenticator");
 #endif
