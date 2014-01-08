@@ -132,7 +132,11 @@ H225_CryptoH323Token * H235PluginAuthenticator::CreateCryptoToken()
     PPER_Stream raw(&data,dataLen);
     H225_CryptoH323Token * token = new H225_CryptoH323Token;
     
-    return (token && token->Decode(raw));
+    if (token && token->Decode(raw))
+        return token;
+
+    delete token;
+    return NULL;
 }
 
 PBoolean H235PluginAuthenticator::Finalise(PBYTEArray & rawPDU)
