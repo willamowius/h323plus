@@ -531,23 +531,18 @@ PBoolean H323Transactor::CheckCryptoTokens(const H323TransactionPDU & pdu,
 /////////////////////////////////////////////////////////////////////////////
 
 H323Transactor::Request::Request(unsigned seqNum, H323TransactionPDU & pdu)
-  : requestPDU(pdu)
+ : requestPDU(pdu), rejectReason(UINT_MAX), responseInfo(NULL),   sequenceNumber(seqNum), useAlternate(FALSE)
 {
-  sequenceNumber = seqNum;
-  responseInfo   = NULL;
-  useAlternate = FALSE;
+
 }
 
 
 H323Transactor::Request::Request(unsigned seqNum,
                                  H323TransactionPDU & pdu,
                                  const H323TransportAddressArray & addresses)
-  : requestAddresses(addresses),
-    requestPDU(pdu)
+ : requestPDU(pdu), rejectReason(UINT_MAX), responseInfo(NULL),   sequenceNumber(seqNum), useAlternate(FALSE)
 {
-  sequenceNumber = seqNum;
-  responseInfo   = NULL;
-  useAlternate = FALSE;
+
 }
 
 

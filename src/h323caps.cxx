@@ -310,7 +310,7 @@ H323Channel * H323RealTimeCapability::CreateChannel(H323Connection & connection,
 H323NonStandardCapabilityInfo::H323NonStandardCapabilityInfo(CompareFuncType _compareFunc,
                                                              const BYTE * dataPtr,
                                                              PINDEX dataSize)
-  :
+  : oid(PString()),
     t35CountryCode(0),
     t35Extension(0),
     manufacturerCode(0),
@@ -326,7 +326,8 @@ H323NonStandardCapabilityInfo::H323NonStandardCapabilityInfo(const BYTE * dataPt
                                                              PINDEX dataSize,
                                                              PINDEX _offset,
                                                              PINDEX _len)
-  : t35CountryCode(H323EndPoint::defaultT35CountryCode),
+  : oid(PString()),
+    t35CountryCode(H323EndPoint::defaultT35CountryCode),
     t35Extension(H323EndPoint::defaultT35Extension),
     manufacturerCode(H323EndPoint::defaultManufacturerCode),
     nonStandardData(dataPtr, dataSize == 0 && dataPtr != NULL
@@ -344,6 +345,9 @@ H323NonStandardCapabilityInfo::H323NonStandardCapabilityInfo(const PString & _oi
                                                              PINDEX _offset,
                                                              PINDEX _len)
   : oid(_oid),
+    t35CountryCode(H323EndPoint::defaultT35CountryCode),
+    t35Extension(H323EndPoint::defaultT35Extension),
+    manufacturerCode(H323EndPoint::defaultManufacturerCode),
     nonStandardData(dataPtr, dataSize == 0 && dataPtr != NULL
                                  ? strlen((const char *)dataPtr) : dataSize),
     comparisonOffset(_offset),
@@ -360,7 +364,8 @@ H323NonStandardCapabilityInfo::H323NonStandardCapabilityInfo(BYTE country,
                                                              PINDEX dataSize,
                                                              PINDEX _offset,
                                                              PINDEX _len)
-  : t35CountryCode(country),
+  : oid(PString()),
+    t35CountryCode(country),
     t35Extension(extension),
     manufacturerCode(maufacturer),
     nonStandardData(dataPtr, dataSize == 0 && dataPtr != NULL

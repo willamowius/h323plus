@@ -59,20 +59,17 @@ OpalRFC2833::OpalRFC2833(const PNotifier & rx)
 #pragma warning(disable:4355)
 #endif
     receiveHandler(PCREATE_NOTIFIER(ReceivedPacket)),
-    transmitHandler(PCREATE_NOTIFIER(TransmitPacket))
+    transmitHandler(PCREATE_NOTIFIER(TransmitPacket)),
 #ifdef _MSC_VER
 #pragma warning(default:4355)
 #endif
+    payloadType(RTP_DataFrame::IllegalPayloadType), receiveComplete(true),
+    receivedTone(0), receivedDuration(0), receiveTimestamp(0), receiveTimer(0), transmitState(TransmitIdle),
+    transmitCode(0), transmitTimestamp(0), transmitTimer(0)
 {
   PTRACE(3, "RFC2833\tHandler created");
 
-  payloadType = RTP_DataFrame::IllegalPayloadType;
-  receiveComplete = TRUE;
-  receiveTimestamp = 0;
   receiveTimer.SetNotifier(PCREATE_NOTIFIER(ReceiveTimeout));
-
-  transmitState = TransmitIdle;
-  transmitTimestamp = 0;
   transmitTimer.SetNotifier(PCREATE_NOTIFIER(TransmitEnded));
 }
 

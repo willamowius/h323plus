@@ -75,7 +75,7 @@ class RTP_JitterBufferAnalyser : public PObject
     void PrintOn(ostream & strm) const;
 
     struct Info {
-      Info() { }
+      Info() : time(0), tick(0), depth(0), extra(PString()) { }
       DWORD         time;
       PTimeInterval tick;
       int           depth;

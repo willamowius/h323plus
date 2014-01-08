@@ -869,7 +869,7 @@ struct AdmissionRequestResponseInfo {
   AdmissionRequestResponseInfo(
     H323Gatekeeper::AdmissionResponse & r,
     H323Connection & c
-  ) : param(r), connection(c) { }
+  ) : param(r), connection(c), allocatedBandwidth(0), uuiesRequested(0) { }
 
   H323Gatekeeper::AdmissionResponse & param;
   H323Connection & connection;
@@ -1888,6 +1888,7 @@ PBoolean H323Gatekeeper::MakeRequest(Request & request)
 }
    
 H323Gatekeeper::AlternateInfo::AlternateInfo()
+:  priority(0), registrationState(NoRegistrationNeeded)
 {
     H323TransportAddress(PIPSocket::Address::GetAny(4),1719).SetPDU(rasAddress);
 }

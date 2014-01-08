@@ -1064,36 +1064,26 @@ PBoolean H46019MultiplexSocket::Close()
 
 H46019UDPSocket::H46019UDPSocket(H46018Handler & _handler, H323Connection::SessionInformation * info, bool _rtpSocket)
 : m_Handler(_handler), m_Session(info->GetSessionID()), m_Token(info->GetCallToken()),
-  m_CallId(info->GetCallIdentifer()), m_CUI(info->GetCUI()), rtpSocket(_rtpSocket)
-{
-    keeppayload = 0;
-    keepTTL = 0;
-    keepStartTime = NULL;
-
+  m_CallId(info->GetCallIdentifer()), m_CUI(info->GetCUI()),
+  keepport(0), keeppayload(0), keepTTL(0), keepseqno(0), keepStartTime(NULL),
 #ifdef H323_H46019M
-    m_recvMultiplexID = info->GetRecvMultiplexID();
-    m_sendMultiplexID = 0;
-    m_multiBuffer = 0;
-    m_shutDown = false;
+  m_recvMultiplexID(info->GetRecvMultiplexID()), m_sendMultiplexID(0), m_multiBuffer(0), m_shutDown(false),
 #endif
-
+#if defined(H323_H46024A) || defined(H323_H46024B)
+  m_CUIrem(PString()), m_locAddr(PIPSocket::GetDefaultIpAny()),  m_locPort(0),
+  m_remAddr(PIPSocket::GetDefaultIpAny()),  m_remPort(0), m_detAddr(PIPSocket::GetDefaultIpAny()),  m_detPort(0),
+  m_pendAddr(PIPSocket::GetDefaultIpAny()), m_pendPort(0), m_probes(0), SSRC(PRandom::Number()),
+#endif
+  m_altAddr(PIPSocket::GetDefaultIpAny()), m_altPort(0), m_altMuxID(0),
 #ifdef H323_H46024A
-    m_CUIrem = PString();
-    m_locAddr = PIPSocket::GetDefaultIpAny();
-    m_remAddr = PIPSocket::GetDefaultIpAny();
-    m_detAddr = PIPSocket::GetDefaultIpAny();
-    m_pendAddr= PIPSocket::GetDefaultIpAny();
-    m_state = e_notRequired;
-    SSRC = PRandom::Number();
+  m_state(e_notRequired),
 #endif
-
-    m_altAddr = PIPSocket::GetDefaultIpAny();  
-	m_altPort=0;                                           
-	m_altMuxID=0;
-
 #ifdef H323_H46024B
-    m_h46024b = false;
+  m_h46024b(false),
 #endif
+  rtpSocket(_rtpSocket)
+{
+ 
 }
 
 H46019UDPSocket::~H46019UDPSocket()

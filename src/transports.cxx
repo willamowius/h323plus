@@ -284,6 +284,7 @@ static PString BuildIP(const PIPSocket::Address & ip, unsigned port)
 
 
 H323TransportAddress::H323TransportAddress(const H225_TransportAddress & transport)
+: m_version(4)
 {
   m_tls = false;
   switch (transport.GetTag()) {
@@ -308,6 +309,7 @@ H323TransportAddress::H323TransportAddress(const H225_TransportAddress & transpo
 
 
 H323TransportAddress::H323TransportAddress(const H245_TransportAddress & transport)
+: m_version(4)
 {
   m_tls = false;
   switch (transport.GetTag()) {
@@ -331,9 +333,12 @@ H323TransportAddress::H323TransportAddress(const H245_TransportAddress & transpo
           break;
         }
 #endif
+        default:
+            break;
       }
-      break;
     }
+    default:
+        break;
   }
 }
 

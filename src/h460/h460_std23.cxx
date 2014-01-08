@@ -631,17 +631,13 @@ bool H460_FeatureStd23::UseAlternate()
 H460_FEATURE(Std24);
 
 H460_FeatureStd24::H460_FeatureStd24()
-: H460_FeatureStd(24)
+: H460_FeatureStd(24),
+  EP(NULL), CON(NULL), natconfig(H460_FeatureStd24::e_unknown), 
+  nattype(0), isEnabled(false), useAlternate(false)
 {
  PTRACE(6,"Std24\tInstance Created");
 
- EP = NULL;
- CON = NULL;
- natconfig = H460_FeatureStd24::e_unknown;
  FeatureCategory = FeatureSupported;
- isEnabled = false;
- useAlternate = false;
-
 }
 
 H460_FeatureStd24::~H460_FeatureStd24()

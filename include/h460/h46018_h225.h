@@ -730,7 +730,6 @@ class H46019UDPSocket : public H323UDPSocket
     void ProbeReceived(bool probe, const PIPSocket::Address & addr, WORD & port);
     void SetProbeState(probe_state newstate);
     int GetProbeState() const;
-    probe_state m_state;
     PMutex probeMutex;
 #endif
 
@@ -776,8 +775,12 @@ private:
     PIPSocket::Address m_altAddr;  
 	WORD m_altPort;                                           ///< supplied remote Address (as supplied in Generic Information)
 	unsigned m_altMuxID;
+
+#ifdef H323_H46024A
+    probe_state m_state;
+#endif
+
 #ifdef H323_H46024B
-    // H46024 Annex B support
     PBoolean    m_h46024b;
 #endif
 

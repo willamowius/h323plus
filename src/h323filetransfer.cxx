@@ -901,6 +901,11 @@ H323FileTransferHandler::H323FileTransferHandler(H323Connection & connection,
   transmitRunning = FALSE;
   receiveRunning = FALSE;
 
+  StartTime = NULL;
+  ioerr = H323FileIOChannel::e_NotFound;
+  currentState = e_error;
+  blockState = recOK;
+
 }
 
 H323FileTransferHandler::~H323FileTransferHandler()
@@ -1644,6 +1649,7 @@ H323FilePacket::opcodes H323FilePacket::GetPacketType() const
 ////////////////////////////////////////////////////////////////////
 
 H323FileIOChannel::H323FileIOChannel(PFilePath _file, PBoolean read)
+: fileopen(false), filesize(0), IOError(e_NotFound)
 {
     if (!CheckFile(_file,read,IOError))
         return;

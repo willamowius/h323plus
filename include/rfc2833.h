@@ -96,22 +96,22 @@ class OpalRFC2833 : public PObject {
     const PNotifier & GetTransmitHandler() const { return transmitHandler; }
 
   protected:
+    PMutex mutex;
     PDECLARE_NOTIFIER(RTP_DataFrame, OpalRFC2833, ReceivedPacket);
     PDECLARE_NOTIFIER(RTP_DataFrame, OpalRFC2833, TransmitPacket);
     PDECLARE_NOTIFIER(PTimer, OpalRFC2833, ReceiveTimeout);
     PDECLARE_NOTIFIER(PTimer, OpalRFC2833, TransmitEnded);
 
-    RTP_DataFrame::PayloadTypes payloadType;
-
-    PMutex mutex;
-
     PNotifier receiveNotifier;
+    PNotifier receiveHandler;
+    PNotifier transmitHandler;
+
+    RTP_DataFrame::PayloadTypes payloadType;
     PBoolean      receiveComplete;
     BYTE      receivedTone;
     unsigned  receivedDuration;
     unsigned  receiveTimestamp;
     PTimer    receiveTimer;
-    PNotifier receiveHandler;
 
     enum {
       TransmitIdle,
@@ -121,7 +121,6 @@ class OpalRFC2833 : public PObject {
     BYTE      transmitCode;
     unsigned  transmitTimestamp;
     PTimer    transmitTimer;
-    PNotifier transmitHandler;
 };
 
 

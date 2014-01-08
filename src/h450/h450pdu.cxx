@@ -1288,11 +1288,15 @@ void H4502Handler::TransferCall(const PString & remoteParty,
   H323TransportAddress address;
 
   PStringList Addresses;
-  endpoint.ResolveCallParty(remoteParty, Addresses);
-  if (Addresses.GetSize() > 0)
-    endpoint.ParsePartyName(Addresses[0], alias, address);
-  else
-    PTRACE(1, "H4502\tCould not resolve transfer destination " << remoteParty);
+  if (!endpoint.ResolveCallParty(remoteParty, Addresses) || (Addresses.GetSize() == 0)) {
+    PTRACE(1, "H4502\tCould not resolve call party " << remoteParty);
+    return;
+  }
+
+  if (!endpoint.ParsePartyName(Addresses[0], alias, address)) {
+    PTRACE(1, "H4502\tCould not resolve transfer party address " << remoteParty);
+    return;
+  }
 
   serviceAPDU.BuildCallTransferInitiate(currentInvokeId, callIdentity, alias, address);
   serviceAPDU.WriteFacilityPDU(connection);
@@ -1442,7 +1446,7 @@ void H4502Handler::OnCallTransferTimeOut(PTimer &, H323_INT)
 /////////////////////////////////////////////////////////////////////////////
 
 H4503Handler::H4503Handler(H323Connection & conn, H450xDispatcher & disp)
-  : H450xHandler(conn, disp)
+  : H450xHandler(conn, disp), m_diversionCounter(0), m_origdiversionReason(0), m_diversionReason(0)
 {
   dispatcher.AddOpCode(H4503_H323CallDiversionOperations::e_divertingLegInformation2, this);
    
@@ -1471,7 +1475,8 @@ void H4503Handler::OnReceivedDivertingLegInfo2(int /* linkedId*/, PASN_OctetStri
 {
   PTRACE(4, "H4503\tReceived a DivertingLegInfo2 Invoke APDU from the remote endpoint.");  
   H4503_DivertingLegInfo2Arg divertingLegInfo2Arg;
-  DecodeArguments(argument, divertingLegInfo2Arg, -1); 
+  if (!DecodeArguments(argument, divertingLegInfo2Arg, -1))
+      return;
 
   if(divertingLegInfo2Arg.HasOptionalField(H4503_DivertingLegInfo2Arg::e_originalCalledNr)) {
     //m_originalCalledNr = divertingLegInfo2Arg.m_originalCalledNr.GetTypeAsString();
@@ -1690,7 +1695,7 @@ void H4506Handler::AttachToAlerting(H323SignalPDU & pdu,
 /////////////////////////////////////////////////////////////////////////////
 
 H45011Handler::H45011Handler(H323Connection & conn, H450xDispatcher & disp)
-  : H450xHandler(conn, disp)
+  : H450xHandler(conn, disp), ciGenerateState(e_ci_gIdle), ciCICL(0), intrudingCallCICL(0)
 {
   dispatcher.AddOpCode(H45011_H323CallIntrusionOperations::e_callIntrusionRequest, this);
   dispatcher.AddOpCode(H45011_H323CallIntrusionOperations::e_callIntrusionGetCIPL, this);
@@ -1983,12 +1988,8 @@ void H45011Handler::OnReceivedCallIntrusionGetCIPL(int /*linkedId*/,
 
   H45011_CIGetCIPLOptArg ciArg;
 
-  // !!!!!!!!
-  DecodeArguments(argument, ciArg, -1);
-/*  if(!DecodeArguments(argument, ciArg, -1))
+  if (!DecodeArguments(argument, ciArg, -1))
     return;
-*/
-  
 
   // Send a FACILITY message with a callTransferIdentify return result
   // Supplementary Service PDU to the transferring endpoint.

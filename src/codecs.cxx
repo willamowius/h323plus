@@ -266,16 +266,14 @@ void H323Codec::CalculateRTPSendTime(DWORD timeStamp, unsigned rate, PInt64 & se
 #ifdef H323_VIDEO
 
 H323VideoCodec::H323VideoCodec(const OpalMediaFormat & fmt, Direction dir)
-  : H323Codec(fmt, dir)
+  : H323Codec(fmt, dir),
+    frameWidth(0), frameHeight(0), fillLevel(0), sarWidth(1), sarHeight(1),
+    videoBitRateControlModes(None), bitRateHighLimit(0), oldLength(0), oldTime(0), newTime(0),
+    targetFrameTimeMs(0), frameBytes(0), sumFrameTimeMs(0), sumAdjFrameTimeMs(0), sumFrameBytes(0),
+    videoQMax(0), videoQMin(0), videoQuality(0), frameStartTime(0), grabInterval(0), frameNum(0), 
+    packetNum(0), oldPacketNum(0), framesPerSec(0)
 {
-  frameWidth = frameHeight = 0;
-  sarWidth = sarHeight = 1;
-  targetFrameTimeMs = 0;
-  videoBitRateControlModes = None;
 
-  oldLength = 0;
-  oldTime = 0;
-  newTime = 0;
 }
 
 

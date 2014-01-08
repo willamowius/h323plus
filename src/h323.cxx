@@ -5463,8 +5463,8 @@ RTP_Session * H323Connection::UseSession(unsigned sessionID,
     return NULL;
   }
 
-  // We must have a valid sessionID  H.239 sometimes negotiates 0
-  if (sessionID < 0 || sessionID > 255) 
+  // We must have a valid sessionID  H.239 sometimes negotiates 0 so ignore
+  if (sessionID > 255) 
       return NULL;
 
   const H245_UnicastAddress & uaddr = taddr;

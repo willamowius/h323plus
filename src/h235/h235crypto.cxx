@@ -347,8 +347,10 @@ H235CryptoEngine::H235CryptoEngine(const PString & algorithmOID)
 }
 
 H235CryptoEngine::H235CryptoEngine(const PString & algorithmOID, const PBYTEArray & key)
+:  m_algorithmOID(algorithmOID), m_operationCnt(0), m_initialised(false),
+   m_inSize(0), m_outSize(0),
+   m_enc_blockSize(0), m_enc_ivLength(0), m_dec_blockSize(0), m_dec_ivLength(0)
 {
-    m_algorithmOID = algorithmOID;
     SetKey(key);
 }
 

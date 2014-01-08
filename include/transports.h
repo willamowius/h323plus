@@ -68,7 +68,7 @@ class H323TransportAddress : public PString
 {
   PCLASSINFO(H323TransportAddress, PString);
   public:
-    H323TransportAddress() { m_version = 4; }
+    H323TransportAddress() : m_version(4), m_tls(false) {}
     H323TransportAddress(const char *);
     H323TransportAddress(const PString &);
     H323TransportAddress(const H225_TransportAddress &);

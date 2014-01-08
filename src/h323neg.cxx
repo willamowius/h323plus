@@ -65,11 +65,10 @@ void H245Negotiator::HandleTimeout(PTimer &, H323_INT)
 
 H245NegMasterSlaveDetermination::H245NegMasterSlaveDetermination(H323EndPoint & end,
                                                                  H323Connection & conn)
-  : H245Negotiator(end, conn)
+  : H245Negotiator(end, conn), determinationNumber(PRandom::Number()%16777216), 
+    retryCount(1), state(e_Idle), status(e_Indeterminate)
 {
-  retryCount = 1;
-  state = e_Idle;
-  status = e_Indeterminate;
+
 }
 
 

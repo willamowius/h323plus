@@ -50,6 +50,7 @@ OpalRtpToWavFile::OpalRtpToWavFile()
 #endif
 {
   payloadType = RTP_DataFrame::IllegalPayloadType;
+  lastPayloadSize = 0;
 }
 
 
