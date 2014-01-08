@@ -58,7 +58,7 @@ static int PluginControl(Pluginh235_Definition * h235,
                                        void * context,
                                  const char * name,
                                  const char * parm, 
-							     const char * val)
+                                 const char * val)
 {
   Pluginh235_ControlDefn * controls = h235->h235Controls;
   if (controls == NULL)
@@ -77,10 +77,10 @@ H235PluginAuthenticator::H235PluginAuthenticator(Pluginh235_Definition * _def)
   : def(_def)
 {
   switch (def->flags & Pluginh235_TokenTypeMask) {
-	case Pluginh235_TokenTypecrypto:  
-            switch (def->flags & Pluginh235_TokenTypeMask) {
+    case Pluginh235_TokenTypecrypto:  
+            switch (def->flags & Pluginh235_TokenStyleMask) {
               case Pluginh235_TokenStyleHash:
-				type = H235_AuthenticationMechanism::e_pwdHash;
+                type = H235_AuthenticationMechanism::e_pwdHash;
                 break;
               case Pluginh235_TokenStyleSigned:
                 type = H235_AuthenticationMechanism::e_certSign;
@@ -92,45 +92,46 @@ H235PluginAuthenticator::H235PluginAuthenticator(Pluginh235_Definition * _def)
                 type = H235_AuthenticationMechanism::e_nonStandard;
              }
             break;
-	case Pluginh235_TokenTypeclear: 
-	        type = H235_AuthenticationMechanism::e_authenticationBES;
+    case Pluginh235_TokenTypeclear: 
+            type = H235_AuthenticationMechanism::e_authenticationBES;
             break;
-	default:
+    default:
              type = H235_AuthenticationMechanism::e_nonStandard;
-	    break;
-  }	
+        break;
+  }    
 
    SetTimestampGracePeriod(2*60*60+10);  /// 2hrs 10min
 }
 
 H235_ClearToken * H235PluginAuthenticator::CreateClearToken()
 {
-	BYTE data;
-	unsigned dataLen;
-	int ret = (*def->h235function)(def, NULL, H235_BuildClear,
-								  &data, &dataLen,NULL,0);
+    BYTE data;
+    unsigned dataLen;
+    int ret = (*def->h235function)(def, NULL, H235_BuildClear,
+                                  &data, &dataLen,NULL,0);
 
-	if (ret == 0)
-		return NULL;
+    if (ret == 0)
+        return NULL;
 
-	PPER_Stream raw(&data,dataLen);
+    PPER_Stream raw(&data,dataLen);
     H235_ClearToken * token = new H235_ClearToken;
-	token->Decode(raw);
+    token->Decode(raw);
     return token;
 }
 
 H225_CryptoH323Token * H235PluginAuthenticator::CreateCryptoToken()
 {
-	BYTE data;
-	unsigned dataLen;
-	int ret = (*def->h235function)(def, NULL, H235_BuildCrypto,
-								  &data, &dataLen,NULL,0);
-	if (ret == 0)
-		return NULL;
+    BYTE data;
+    unsigned dataLen;
+    int ret = (*def->h235function)(def, NULL, H235_BuildCrypto,
+                                  &data, &dataLen,NULL,0);
+    if (ret == 0)
+        return NULL;
 
-	PPER_Stream raw(&data,dataLen);
+    PPER_Stream raw(&data,dataLen);
     H225_CryptoH323Token * token = new H225_CryptoH323Token;
-	token->Decode(raw);
+    if (token)
+        token->Decode(raw);
     return token;
 }
 
@@ -141,7 +142,7 @@ PBoolean H235PluginAuthenticator::Finalise(PBYTEArray & rawPDU)
    int ret = (*def->h235function)(def, NULL, H235_FinaliseCrypto, data, &dataLen,NULL,0);
    
    if (ret == 0)
-	   return FALSE;
+       return FALSE;
    
    PBYTEArray newPDU(data,dataLen);
    rawPDU = newPDU;
@@ -150,14 +151,14 @@ PBoolean H235PluginAuthenticator::Finalise(PBYTEArray & rawPDU)
 
 H235Authenticator::ValidationResult H235PluginAuthenticator::ValidateClearToken(const H235_ClearToken & clearToken)
 {
-	PPER_Stream enc;
-	clearToken.Encode(enc);
+    PPER_Stream enc;
+    clearToken.Encode(enc);
 
-	BYTE * data = enc.GetPointer();
-	unsigned dataLen = enc.GetSize();
+    BYTE * data = enc.GetPointer();
+    unsigned dataLen = enc.GetSize();
 
-	int ret = (*def->h235function)(def, NULL, H235_ValidateClear,
-								  data, &dataLen,NULL,0);
+    int ret = (*def->h235function)(def, NULL, H235_ValidateClear,
+                                  data, &dataLen,NULL,0);
 
     return (H235Authenticator::ValidationResult)ret;
 }
@@ -165,16 +166,16 @@ H235Authenticator::ValidationResult H235PluginAuthenticator::ValidateClearToken(
 H235Authenticator::ValidationResult H235PluginAuthenticator::ValidateCryptoToken(const H225_CryptoH323Token & cryptoToken,
                                                                                  const PBYTEArray & rawPDU)
 {
-   	PPER_Stream enc;
-	cryptoToken.Encode(enc);
+       PPER_Stream enc;
+    cryptoToken.Encode(enc);
 
-	BYTE * data = enc.GetPointer();
-	unsigned dataLen = enc.GetSize();
-	const BYTE * raw = rawPDU;
-	unsigned rawLen = rawPDU.GetSize();
+    BYTE * data = enc.GetPointer();
+    unsigned dataLen = enc.GetSize();
+    const BYTE * raw = rawPDU;
+    unsigned rawLen = rawPDU.GetSize();
 
-	int ret = (*def->h235function)(def, NULL, H235_ValidateClear,
-								  data, &dataLen, raw, &rawLen);
+    int ret = (*def->h235function)(def, NULL, H235_ValidateClear,
+                                  data, &dataLen, raw, &rawLen);
 
     return (H235Authenticator::ValidationResult)ret;
 }
@@ -259,7 +260,7 @@ void H235PluginAuthenticator::SetTimestampGracePeriod(int grace)
 H235Authenticator::Application H235PluginAuthenticator::GetApplication()
 {
     return (H235Authenticator::Application)PluginControl(def, NULL,GET_PLUGINH235_SETTINGS, 
-		      Pluginh235_Set_Application, NULL) ;
+              Pluginh235_Set_Application, NULL) ;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -282,7 +283,7 @@ void h235PluginDeviceManager::OnLoadPlugin(PDynaLink & dll, INT code)
 {
   Pluginh235_Geth235Function geth235;
   if (!dll.GetFunction(PString(signatureFunctionName), (PDynaLink::Function &)geth235)) {
-    PTRACE(3, "H323h235\tPlugin DLL " << dll.GetName() << " is not a H235 plugin");	  
+    PTRACE(3, "H323h235\tPlugin DLL " << dll.GetName() << " is not a H235 plugin");      
     return;
   }
 
@@ -338,7 +339,7 @@ PBoolean h235PluginDeviceManager::Registerh235(unsigned int count, void * _h235L
 PBoolean h235PluginDeviceManager::Unregisterh235(unsigned int /*count*/, void * /*_h235List*/)
 {
 
-	return FALSE;
+    return FALSE;
 }
 
 static PString Createh235Name(Pluginh235_Definition * h235, unsigned int h235type)
@@ -347,17 +348,17 @@ static PString Createh235Name(Pluginh235_Definition * h235, unsigned int h235typ
 
   switch (h235type) {
       case Pluginh235_TokenStyleHash:
- 	     str  = h235->desc + PString(" {hash}");
+          str  = h235->desc + PString(" {hash}");
          break;
       case Pluginh235_TokenStyleSigned:
- 	     str  = h235->desc + PString(" {sign}");
+          str  = h235->desc + PString(" {sign}");
          break;
       case Pluginh235_TokenStyleEncrypted:
- 	     str  = h235->desc + PString(" {enc}");
+          str  = h235->desc + PString(" {enc}");
          break;
       case Pluginh235_TokenTypeclear: 
- 	     str  = h235->desc + PString(" {clear}");
-         break;	    
+          str  = h235->desc + PString(" {clear}");
+         break;
       default:
          str = h235->desc;
   }
@@ -382,32 +383,32 @@ void h235PluginDeviceManager::CreateH235Authenticator(Pluginh235_Definition * h2
 
 // Type of h235 Plugin
   switch (h235->flags & Pluginh235_TokenTypeMask) {
-	case Pluginh235_TokenTypecrypto:  
+    case Pluginh235_TokenTypecrypto:  
             switch (h235->flags & Pluginh235_TokenTypeMask) {
               case Pluginh235_TokenStyleHash:
-		        h235Name = Createh235Name(h235,Pluginh235_TokenStyleHash);
+                h235Name = Createh235Name(h235,Pluginh235_TokenStyleHash);
                 break;
               case Pluginh235_TokenStyleSigned:
-		        h235Name = Createh235Name(h235,Pluginh235_TokenStyleSigned);
+                h235Name = Createh235Name(h235,Pluginh235_TokenStyleSigned);
                 break;
               case Pluginh235_TokenStyleEncrypted:
-		        h235Name = Createh235Name(h235,Pluginh235_TokenStyleEncrypted);
+                h235Name = Createh235Name(h235,Pluginh235_TokenStyleEncrypted);
                 break;
               default:
                 h235Name = h235->desc;
              }
             break;
-	case Pluginh235_TokenTypeclear: 
-	    h235Name = Createh235Name(h235, Pluginh235_TokenTypeclear);
+    case Pluginh235_TokenTypeclear: 
+        h235Name = Createh235Name(h235, Pluginh235_TokenTypeclear);
             break;
-	default:
+    default:
             h235Name = h235->desc;
-	    break;
-  }	
-   		
+        break;
+  }    
+           
   auth = new H235PluginAuthenticator(h235);
   auth->SetName(h235Name);
-		  
+          
 
   if (auth != NULL)
      h235Factory::Register(h235Name, auth);
