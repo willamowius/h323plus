@@ -1582,11 +1582,11 @@ void H323PeerElementDescriptor::SetProtocolList(H501_ArrayOf_SupportedProtocols 
           h501Protocols.SetSize(pos+1);
           h501Protocols[pos].SetTag(H225_SupportedProtocols::e_h323);
           break;
-
-        case H323PeerElementDescriptor::Protocol_Voice:
+// TODO This needs fixing!!! - SH
+/*      case H323PeerElementDescriptor::Protocol_Voice:
           h501Protocols.SetSize(pos+1);
           h501Protocols[pos].SetTag(H225_SupportedProtocols::e_voice);
-          break;
+          break; */
 
         default:
           break;

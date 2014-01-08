@@ -82,12 +82,13 @@ H235PluginAuthenticator::H235PluginAuthenticator(Pluginh235_Definition * _def)
               case Pluginh235_TokenStyleHash:
                 type = H235_AuthenticationMechanism::e_pwdHash;
                 break;
-              case Pluginh235_TokenStyleSigned:
+                // TODO This needs fixing!!! - SH
+/*            case Pluginh235_TokenStyleSigned:
                 type = H235_AuthenticationMechanism::e_certSign;
                 break;
               case Pluginh235_TokenStyleEncrypted:
                 type = H235_AuthenticationMechanism::e_pwdSymEnc;
-                break;
+                break; */
               default:
                 type = H235_AuthenticationMechanism::e_nonStandard;
              }
@@ -130,9 +131,8 @@ H225_CryptoH323Token * H235PluginAuthenticator::CreateCryptoToken()
 
     PPER_Stream raw(&data,dataLen);
     H225_CryptoH323Token * token = new H225_CryptoH323Token;
-    if (token)
-        token->Decode(raw);
-    return token;
+    
+    return (token && token->Decode(raw));
 }
 
 PBoolean H235PluginAuthenticator::Finalise(PBYTEArray & rawPDU)
@@ -384,16 +384,17 @@ void h235PluginDeviceManager::CreateH235Authenticator(Pluginh235_Definition * h2
 // Type of h235 Plugin
   switch (h235->flags & Pluginh235_TokenTypeMask) {
     case Pluginh235_TokenTypecrypto:  
-            switch (h235->flags & Pluginh235_TokenTypeMask) {
+            switch (h235->flags & Pluginh235_TokenStyleMask) {
               case Pluginh235_TokenStyleHash:
                 h235Name = Createh235Name(h235,Pluginh235_TokenStyleHash);
                 break;
-              case Pluginh235_TokenStyleSigned:
+             // TODO This needs fixing!!! - SH
+/*            case Pluginh235_TokenStyleSigned:
                 h235Name = Createh235Name(h235,Pluginh235_TokenStyleSigned);
                 break;
               case Pluginh235_TokenStyleEncrypted:
                 h235Name = Createh235Name(h235,Pluginh235_TokenStyleEncrypted);
-                break;
+                break; */
               default:
                 h235Name = h235->desc;
              }

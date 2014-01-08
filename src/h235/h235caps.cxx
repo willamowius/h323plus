@@ -257,7 +257,7 @@ PBoolean H235SecurityCapability::IsUsable(const H323Connection & connection) con
 /////////////////////////////////////////////////////////////////////////////
 
 H323SecureRealTimeCapability::H323SecureRealTimeCapability(H323Capability & childCapability, H323Capabilities * capabilities, unsigned secNo, PBoolean active)
-                : ChildCapability(*(H323Capability *)childCapability.Clone()), m_active(active), 
+                : ChildCapability(*(H323Capability *)childCapability.Clone()), chtype(H235ChNew), m_active(active), 
                   m_capabilities(capabilities), m_secNo(secNo),  nrtpqos(NULL)
 {
     assignedCapabilityNumber = childCapability.GetCapabilityNumber();
@@ -265,7 +265,7 @@ H323SecureRealTimeCapability::H323SecureRealTimeCapability(H323Capability & chil
 
 
 H323SecureRealTimeCapability::H323SecureRealTimeCapability(RTP_QOS * _rtpqos,H323Capability & childCapability)
-                : ChildCapability(*(H323Capability *)childCapability.Clone()), m_active(false), 
+                : ChildCapability(*(H323Capability *)childCapability.Clone()), chtype(H235ChNew), m_active(false), 
                   m_capabilities(NULL), m_secNo(0), nrtpqos(_rtpqos)
 {
 }
