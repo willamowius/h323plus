@@ -1799,8 +1799,7 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
         }
 
         unsigned char * data = OPAL_VIDEO_FRAME_DATA_PTR(frameHeader);
-        unsigned byteRead = bytesPerFrame;
-        if (!rawDataChannel->Read(data, byteRead)) {
+        if (!rawDataChannel->Read(data, bytesPerFrame)) {
             PTRACE(3, "PLUGIN\tFailed to read data from video grabber");
             videoIn->EnableAccess();
             length=0;
