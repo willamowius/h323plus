@@ -279,7 +279,7 @@ unsigned H284_ControlPoint::GetControlType()
 /////////////////////////////////////////////////////////////////
 
 H284_Instruction::H284_Instruction()
-: PBYTEArray(8)
+: PBYTEArray(8), m_instType(H284_ControlPoint::e_unknown)
 {
 }
     
