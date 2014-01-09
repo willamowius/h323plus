@@ -517,7 +517,7 @@ RTP_Session::RTP_Session(
     lastRRSequenceNumber(0), consecutiveOutOfOrderPackets(0),
     packetsSent(0), octetsSent(0), packetsReceived(0), octetsReceived(0), packetsLost(0), packetsOutOfOrder(0), averageSendTime(0),
     maximumSendTime(0), minimumSendTime(0), averageReceiveTime(0), maximumReceiveTime(0), minimumReceiveTime(0), jitterLevel(0), maximumJitterLevel(0),
-    localAddress(PString()), remoteAddress(PString()), txStatisticsCount(0), rxStatisticsCount(0), averageSendTimeAccum(0), maximumSendTimeAccum(0),
+    locAddress(PString()), remAddress(PString()), txStatisticsCount(0), rxStatisticsCount(0), averageSendTimeAccum(0), maximumSendTimeAccum(0),
     minimumSendTimeAccum(0xffffffff), averageReceiveTimeAccum(0), maximumReceiveTimeAccum(0), minimumReceiveTimeAccum(0xffffffff), packetsLostSinceLastRR(0),
     lastTransitTime(0), firstDataReceivedTime(0), avSyncData(false)
 #ifdef H323_RTP_AGGREGATE
@@ -894,9 +894,9 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveData(const RTP_DataFrame & 
   octetsReceived += frame.GetPayloadSize();
   packetsReceived++;
 
-  if (rtp.GetRemoteDataPort() > 0 && localAddress.IsEmpty()) {
-      localAddress = rtp.GetLocalAddress().AsString() + ":" + PString(rtp.GetLocalDataPort());
-      remoteAddress = rtp.GetRemoteAddress().AsString() + ":" + PString(rtp.GetRemoteDataPort());
+  if (rtp.GetRemoteDataPort() > 0 && locAddress.IsEmpty()) {
+      locAddress = rtp.GetLocalAddress().AsString() + ":" + PString(rtp.GetLocalDataPort());
+      remAddress = rtp.GetRemoteAddress().AsString() + ":" + PString(rtp.GetRemoteDataPort());
   }
 
   // Call the statistics call-back on the first PDU with total count == 1

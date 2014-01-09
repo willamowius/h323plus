@@ -721,12 +721,12 @@ class RTP_Session : public PObject
 	/**
 	  * return the local Transport Address
 	  */
-	PString GetLocalTransportAddress() const { return localAddress; };
+	PString GetLocalTransportAddress() const { return locAddress; };
 
 	/**
 	  * return the remote Transport Address
 	  */
-	PString GetRemoteTransportAddress() const { return remoteAddress; };
+	PString GetRemoteTransportAddress() const { return remAddress; };
 
   //@}
 
@@ -785,8 +785,8 @@ class RTP_Session : public PObject
     DWORD maximumJitterLevel;
 
 	// Socket information
-    PString localAddress;
-    PString remoteAddress;
+    PString locAddress;
+    PString remAddress;
 
     unsigned txStatisticsCount;
     unsigned rxStatisticsCount;
