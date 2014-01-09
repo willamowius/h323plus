@@ -639,48 +639,42 @@ H460_FeatureParameter & H460_FeatureTable::operator[](PINDEX id)
 /////////////////////////////////////////////////////////////////////
 
 H460_Feature::H460_Feature()
+: FeatureCategory(FeatureSupported), FeatureInstance(FeatureBaseAll),
+  ep(NULL), con(NULL)
 {
-    ep = NULL;
-    con = NULL;
-    FeatureCategory = FeatureSupported;
+   
 }
 
-H460_Feature::H460_Feature(unsigned identifier)    
+H460_Feature::H460_Feature(unsigned identifier)
+: FeatureCategory(FeatureSupported), FeatureInstance(FeatureBaseAll),
+  ep(NULL), con(NULL)
 {
     SetFeatureID(H460_FeatureID(identifier));
-    ep = NULL;
-    con = NULL;
-    FeatureCategory = FeatureSupported;
 }
 
 H460_Feature::H460_Feature(PString identifier)
+: FeatureCategory(FeatureSupported), FeatureInstance(FeatureBaseAll),
+  ep(NULL), con(NULL)
 {
     SetFeatureID(H460_FeatureID(identifier));
-    ep = NULL;
-    con = NULL;
-    FeatureCategory = FeatureSupported;
 }
 
 H460_Feature::H460_Feature(OpalOID identifier)
+: FeatureCategory(FeatureSupported), FeatureInstance(FeatureBaseAll),
+  ep(NULL), con(NULL)
 {
     SetFeatureID(H460_FeatureID(identifier));
-    ep = NULL;
-    con = NULL;
-    FeatureCategory = FeatureSupported;
 }
 
-
 H460_Feature::H460_Feature(const H225_FeatureDescriptor & descriptor)
+: FeatureCategory(FeatureSupported), FeatureInstance(FeatureBaseAll),
+  ep(NULL), con(NULL)
 {
     SetFeatureID(descriptor.m_id);
     if (descriptor.HasOptionalField(H225_FeatureDescriptor::e_parameters)) {
         IncludeOptionalField(H225_FeatureDescriptor::e_parameters);
         m_parameters = descriptor.m_parameters;
     }  
-
-    ep = NULL;
-    con = NULL;
-    FeatureCategory = FeatureSupported;
 }
 
 PString H460_Feature::GetFeatureIDAsString()
