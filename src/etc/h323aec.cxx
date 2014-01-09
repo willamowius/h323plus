@@ -75,7 +75,10 @@ H323Aec::~H323Aec()
     m_preprocessState = NULL;
   }
 
-  m_echoBuffer.empty();
+  while (!m_echoBuffer.empty()) {
+    m_echoBuffer.front().frame.SetSize(0);
+    m_echoBuffer.pop();
+  }
 }
 
 
@@ -96,6 +99,7 @@ readwritemute.Wait();
 
   if (m_echoBuffer.size() > m_bufferSize) {
       PTRACE(5, "AEC\tRead Buffer full dropping frame!");
+      m_echoBuffer.front().frame.SetSize(0);
       m_echoBuffer.pop();
   }
 readwritemute.Signal();
@@ -140,6 +144,7 @@ void H323Aec::Send(BYTE * buffer, unsigned & length)
       m_playRecDiff = m_recTimeMax - l_frame.echoTime;
 
       while (m_playRecDiff > m_sampleTime && m_echoBuffer.size() > 0) {
+           m_echoBuffer.front().frame.SetSize(0);
            m_echoBuffer.pop();
            PTRACE(5, "AEC\tBuffer dropped too old " << m_playRecDiff << "Ms");
            if (m_echoBuffer.size() > 0) {
@@ -156,6 +161,7 @@ void H323Aec::Send(BYTE * buffer, unsigned & length)
    
       PTRACE(6,"AEC\tPlay Delta " << m_playRecDiff << " sz: " << m_echoBuffer.size());
       memcpy(echo_buf, l_frame.frame.GetPointer(), l_frame.frame.GetSize());
+      l_frame.frame.SetSize(0);
       m_echoBuffer.pop();
 
   readwritemute.Signal();
