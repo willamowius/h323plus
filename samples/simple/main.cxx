@@ -345,11 +345,9 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
     }
   }
 
-  unsigned ipVer = 4;
 #ifdef P_HAS_IPV6
   if (args.HasOption("ipv6") && PIPSocket::IsIpAddressFamilyV6Supported()) {
     PIPSocket::SetDefaultIpAddressFamilyV6();
-    ipVer = 6;
   }
 #endif
 
