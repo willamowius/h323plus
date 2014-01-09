@@ -1477,6 +1477,7 @@ H323RegisteredEndPoint::H323RegisteredEndPoint(H323GatekeeperServer & gk,
     isBehindNAT(FALSE),
     canDisplayAmountString(FALSE),
     canEnforceDurationLimit(FALSE),
+    h225Version(0),
     timeToLive(0),
     authenticators(gk.GetOwnerEndPoint().CreateAuthenticators())
 {
