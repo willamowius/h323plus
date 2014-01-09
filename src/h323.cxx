@@ -347,7 +347,6 @@ static void ReceiveFeatureSet(const H323Connection * connection, unsigned code, 
       connection->OnReceiveFeatureSet(code, pdu.m_featureSet);
 }
 
-#ifndef DISABLE_CALLAUTH
 template <typename PDUType>
 static PBoolean ReceiveAuthenticatorPDU(const H323Connection * connection, 
                                    const PDUType & pdu, unsigned code)
@@ -395,7 +394,6 @@ const char * H46024AOID = "0.0.8.460.24.1";
 #ifdef H323_H46024B
 const char * H46024BOID = "0.0.8.460.24.2";
 #endif
-#endif  // H323_H460
 
 H323Connection::H323Connection(H323EndPoint & ep,
                                unsigned ref,
@@ -411,9 +409,7 @@ H323Connection::H323Connection(H323EndPoint & ep,
     callEndTime(0),
     reverseMediaOpenTime(0),
     releaseSequence(ReleaseSequenceUnknown)
-#ifndef DISABLE_CALLAUTH
     ,EPAuthenticators(ep.CreateEPAuthenticators())
-#endif
 #ifdef H323_H460
     ,features(ep.GetFeatureSet())
 #endif
@@ -574,10 +570,8 @@ H323Connection::H323Connection(H323EndPoint & ep,
   NATsupport =  true;
   sameNAT = false;
 
-#ifndef DISABLE_CALLAUTH
   AuthenticationFailed = FALSE;
   hasAuthentication = FALSE;
-#endif
 
   // set aggregation options
 #ifdef H323_RTP_AGGREGATE
@@ -882,9 +876,7 @@ void H323Connection::AttachSignalChannel(const PString & token,
   // Set our call token for identification in endpoint dictionary
   callToken = token;
 
-#ifndef DISABLE_CALLAUTH
   SetAuthenticationConnection();
-#endif
 }
 
 void H323Connection::ChangeSignalChannel(H323Transport * channel)
@@ -976,11 +968,9 @@ PBoolean H323Connection::HandleReceivedSignalPDU(PBoolean readStatus, H323Signal
 {
   if (readStatus) {
     if (!HandleSignalPDU(pdu)) {
-#ifndef DISABLE_CALLAUTH
       if (AuthenticationFailed)
           ClearCall(EndedBySecurityDenial);
       else 
-#endif
         ClearCall(EndedByTransportFail);
       return FALSE;
     }
@@ -1382,7 +1372,6 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
         return false;
   }
 
-#ifndef DISABLE_CALLAUTH
   /// Do Authentication of Incoming Call before anything else
   if (!ReceiveAuthenticatorPDU<H225_Setup_UUIE>(this,setup, 
                             H225_H323_UU_PDU_h323_message_body::e_setup)) {
@@ -1395,7 +1384,6 @@ PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
   } else {
      hasAuthentication = TRUE;
   }
-#endif
 
   switch (setup.m_conferenceGoal.GetTag()) {
     case H225_Setup_UUIE_conferenceGoal::e_create:
@@ -1716,12 +1704,10 @@ PBoolean H323Connection::OnReceivedCallProceeding(const H323SignalPDU & pdu)
   //SetRemotePartyInfo(pdu);  - Call proceeding could be fake do not set call party info
   SetRemoteApplication(call.m_destinationInfo);
 
-#ifndef DISABLE_CALLAUTH
   if (!ReceiveAuthenticatorPDU<H225_CallProceeding_UUIE>(this,call, 
                  H225_H323_UU_PDU_h323_message_body::e_callProceeding)) {
 //          don't do anything
   }
-#endif
 
 #ifdef H323_H460
   ReceiveFeatureSet<H225_CallProceeding_UUIE>(this, H460_MessageType::e_callProceeding, call);
@@ -1779,12 +1765,10 @@ PBoolean H323Connection::OnReceivedAlerting(const H323SignalPDU & pdu)
   SetRemotePartyInfo(pdu);
   SetRemoteApplication(alert.m_destinationInfo);
 
-#ifndef DISABLE_CALLAUTH
   if (!ReceiveAuthenticatorPDU<H225_Alerting_UUIE>(this,alert, 
                          H225_H323_UU_PDU_h323_message_body::e_alerting)){
 //          don't do anything
   }
-#endif
 
 #ifdef H323_H248
    if (alert.HasOptionalField(H225_Alerting_UUIE::e_serviceControl))
@@ -1841,12 +1825,10 @@ PBoolean H323Connection::OnReceivedSignalConnect(const H323SignalPDU & pdu)
 	  }
   }
 
-#ifndef DISABLE_CALLAUTH
    if (!ReceiveAuthenticatorPDU<H225_Connect_UUIE>(this,connect, 
                          H225_H323_UU_PDU_h323_message_body::e_connect)) {
 //          don't do anything
    }
-#endif
 
 #ifdef H323_H460
   ReceiveFeatureSet<H225_Connect_UUIE>(this, H460_MessageType::e_connect, connect);
@@ -1934,12 +1916,10 @@ PBoolean H323Connection::OnReceivedFacility(const H323SignalPDU & pdu)
     return FALSE;
   const H225_Facility_UUIE & fac = pdu.m_h323_uu_pdu.m_h323_message_body;
 
-#ifndef DISABLE_CALLAUTH
   if (!ReceiveAuthenticatorPDU<H225_Facility_UUIE>(this,fac, 
                             H225_H323_UU_PDU_h323_message_body::e_facility)) {
 //          don't do anything
   }
-#endif
 
 #ifdef H323_H248
    if (fac.HasOptionalField(H225_Facility_UUIE::e_serviceControl))
@@ -2581,9 +2561,7 @@ H323Connection::CallEndReason H323Connection::SendSignalSetup(const PString & al
   connectionState = AwaitingSignalConnect;
 
  // Add CryptoTokens and H460 features if available (need to do this after the ARQ/ACF)
-#ifndef DISABLE_CALLAUTH
    setupPDU.InsertCryptoTokensSetup(*this,setup);
-#endif
 
 #ifdef H323_H460
    if (!disableH460) {
@@ -5463,8 +5441,8 @@ RTP_Session * H323Connection::UseSession(unsigned sessionID,
     return NULL;
   }
 
-  // We must have a valid sessionID  H.239 sometimes negotiates 0 so ignore
-  if (sessionID > 255) 
+  // We must have a valid sessionID  H.239 sometimes negotiates 0
+  if (sessionID < 0 || sessionID > 255) 
       return NULL;
 
   const H245_UnicastAddress & uaddr = taddr;
@@ -6995,7 +6973,6 @@ void H323Connection::DisableFeatureSet(int msgtype) const
 }
 #endif
 
-#ifndef DISABLE_CALLAUTH
 void H323Connection::SetAuthenticationConnection()
 {
      for (PINDEX i = 0; i < EPAuthenticators.GetSize(); i++) {
@@ -7024,9 +7001,8 @@ void H323Connection::OnAuthenticationFinalise(unsigned pdu,PBYTEArray & rawData)
      for (PINDEX i = 0; i < EPAuthenticators.GetSize(); i++) {
        if (EPAuthenticators[i].IsSecuredSignalPDU(pdu,FALSE))
            EPAuthenticators[i].Finalise(rawData);
-       }
+     }
 }
-#endif
 
 #ifdef H323_H235
 void H323Connection::OnMediaEncryption(unsigned session, H323Channel::Directions dir, const PString & cipher) 

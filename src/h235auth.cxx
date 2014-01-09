@@ -902,7 +902,6 @@ H235Authenticator::ValidationResult H235AuthSimpleMD5::ValidateCryptoToken(
 
   PString alias = H323GetAliasAddressString(cryptoEPPwdHash.m_alias);
 
-#ifndef DISABLE_CALLAUTH
   // If has connection then EP Authenticator so CallBack to Check SenderID and Set Password
   if (connection != NULL) { 
      if (!connection->OnCallAuthentication(alias,password)) {
@@ -911,15 +910,12 @@ H235Authenticator::ValidationResult H235AuthSimpleMD5::ValidateCryptoToken(
         return e_BadPassword;
      }
   } else {
-#endif
      if (!remoteId && alias != remoteId) {
         PTRACE(1, "H235RAS\tH235AuthSimpleMD5 alias is \"" << alias
            << "\", should be \"" << remoteId << '"');
          return e_Error;
      }
-#ifndef DISABLE_CALLAUTH
   }
-#endif
 
   // Build the clear token
   H235_ClearToken clearToken;

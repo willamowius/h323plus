@@ -411,7 +411,6 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
     return e_ReplyAttack;
   }
   
-#ifndef DISABLE_CALLAUTH
   // If has connection then EP Authenticator so CallBack to Check SenderID and Set Password
   if (connection != NULL) { 
     // Senders ID is required for signal authentication
@@ -428,8 +427,7 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
     return e_BadPassword;
     }
   } else {
-#endif
-  //verify the username
+      //verify the username
       if (!localId && crHashed.m_tokenOID[OID_VERSION_OFFSET] > 1) {
         if (!crHashed.m_hashedVals.HasOptionalField(H235_ClearToken::e_generalID)) {
           PTRACE(1, "H235RAS\tH2351_Authenticator requires general ID.");
@@ -442,9 +440,7 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
           return e_Error;
         }
      }
-#ifndef DISABLE_CALLAUTH
   }
-#endif
 
   if (!remoteId) {
     if (!crHashed.m_hashedVals.HasOptionalField(H235_ClearToken::e_sendersID)) {

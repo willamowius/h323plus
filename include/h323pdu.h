@@ -282,13 +282,11 @@ class H323SignalPDU : public H225_H323_UserInformation
     void InsertH460Setup(const H323Connection & connection, H225_Setup_UUIE & setup);
 #endif
 
-#ifndef DISABLE_CALLAUTH
-	/** When sending the Setup PDU you have to ensure
-	    the ARQ is received first then add the cryptoFields to the Setup PDU
-		so we require a call back
-	  */
+    /** When sending the Setup PDU you have to ensure
+        the ARQ is received first then add the cryptoFields to the Setup PDU
+        so we require a call back
+     */
     void InsertCryptoTokensSetup(const H323Connection & connection, H225_Setup_UUIE & setup);
-#endif
 
 #ifdef H323_H46017
     void LoadTunneledQ931(const Q931 & q931);

@@ -573,7 +573,6 @@ static void SendFeatureSet(const H323Connection * connection, unsigned code, H22
 #endif
 
 
-#ifndef DISABLE_CALLAUTH
 template <typename PDUType>
 static void BuildAuthenticatorPDU(PDUType & pdu, unsigned code, const H323Connection * connection)
 {
@@ -607,7 +606,7 @@ static void BuildAuthenticatorPDU(PDUType & pdu, unsigned code, const H323Connec
         pdu.IncludeOptionalField(PDUType::e_cryptoTokens);
   }
 }
-#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 
 H323SignalPDU::H323SignalPDU()
@@ -699,13 +698,11 @@ void H323SignalPDU::LoadTunneledQ931(const Q931 & q931)
 }
 #endif
 
-#ifndef DISABLE_CALLAUTH
 void H323SignalPDU::InsertCryptoTokensSetup(const H323Connection & connection, H225_Setup_UUIE & setup)
 {
   BuildAuthenticatorPDU<H225_Setup_UUIE>(setup,H225_H323_UU_PDU_h323_message_body::e_setup,
        &connection);
 }
-#endif
 
 #ifdef H323_H460
 PBoolean H323SignalPDU::InsertH460Generic(const H323Connection & connection)
@@ -760,12 +757,10 @@ H225_CallProceeding_UUIE &
    SendFeatureSet<H225_CallProceeding_UUIE>(&connection,H460_MessageType::e_callProceeding, m_h323_uu_pdu, proceeding);
 #endif
 
-#ifndef DISABLE_CALLAUTH
    if (connection.HasAuthentication()) {
       BuildAuthenticatorPDU<H225_CallProceeding_UUIE>(proceeding,H225_H323_UU_PDU_h323_message_body::e_callProceeding,
        &connection);
    }
-#endif
 
   return proceeding;
 }
@@ -798,10 +793,9 @@ H225_Connect_UUIE & H323SignalPDU::BuildConnect(const H323Connection & connectio
    SendFeatureSet<H225_Connect_UUIE>(&connection,H460_MessageType::e_connect, m_h323_uu_pdu,connect);
 #endif
 
-#ifndef DISABLE_CALLAUTH
    BuildAuthenticatorPDU<H225_Connect_UUIE>(connect,H225_H323_UU_PDU_h323_message_body::e_connect,
                         &connection);
-#endif
+
   return connect;
 }
 
@@ -852,10 +846,8 @@ H225_Alerting_UUIE & H323SignalPDU::BuildAlerting(const H323Connection & connect
          alerting.IncludeOptionalField(H225_Alerting_UUIE::e_serviceControl);
 #endif
 
-#ifndef DISABLE_CALLAUTH
    BuildAuthenticatorPDU<H225_Alerting_UUIE>(alerting,H225_H323_UU_PDU_h323_message_body::e_alerting,
                         &connection);
-#endif
 
   return alerting;
 }
@@ -1028,10 +1020,8 @@ H225_ReleaseComplete_UUIE &
   else
     release.IncludeOptionalField(H225_ReleaseComplete_UUIE::e_reason);
 
-#ifndef DISABLE_CALLAUTH
   BuildAuthenticatorPDU<H225_ReleaseComplete_UUIE>(release,H225_H323_UU_PDU_h323_message_body::e_releaseComplete,
        &connection);
-#endif
 
 #ifdef H323_H460
     SendFeatureSet<H225_ReleaseComplete_UUIE>(&connection,H460_MessageType::e_releaseComplete, m_h323_uu_pdu,release);
@@ -1076,10 +1066,8 @@ H225_Facility_UUIE * H323SignalPDU::BuildFacility(const H323Connection & connect
        SendFeatureSet<H225_Facility_UUIE>(&connection,H460_MessageType::e_facility, m_h323_uu_pdu,fac);
 #endif
 
-#ifndef DISABLE_CALLAUTH
   BuildAuthenticatorPDU<H225_Facility_UUIE>(fac,H225_H323_UU_PDU_h323_message_body::e_facility,
        &connection);
-#endif
 
   return &fac;
 }
@@ -1251,12 +1239,10 @@ PBoolean H323SignalPDU::Write(H323Transport & transport, H323Connection * connec
   if (!q931pdu.Encode(rawData))
     return FALSE;
 
-#ifndef DISABLE_CALLAUTH
   if (connection != NULL) {
       int tag = m_h323_uu_pdu.m_h323_message_body.GetTag();
       connection->OnAuthenticationFinalise(tag,rawData);
   }
-#endif
 
   H323TraceDumpPDU("H225", TRUE, rawData, *this, m_h323_uu_pdu.m_h323_message_body, 0, 
                    transport.GetLocalAddress(), transport.GetRemoteAddress());

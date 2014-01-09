@@ -759,12 +759,10 @@ H323EndPoint::H323EndPoint()
 
   srand((unsigned)time(NULL)+clock());
 
-#ifndef DISABLE_CALLAUTH
   SetEPSecurityPolicy(SecNone);
   SetEPCredentials(PString(),PString());
   isSecureCall = FALSE;
   m_disableMD5Authenticators = FALSE;
-#endif
 
 #ifdef H323_H460
   disableH460 = false;
@@ -1435,7 +1433,6 @@ H235Authenticators H323EndPoint::CreateAuthenticators()
     return authenticators;
 }
 
-#ifndef DISABLE_CALLAUTH
 H235Authenticators H323EndPoint::CreateEPAuthenticators() 
 {
   H235Authenticators authenticators;
@@ -1529,7 +1526,6 @@ H323Connection * H323EndPoint::MakeAuthenticatedCall(const PString & remoteParty
   SetEPCredentials(Password,UserName);
   return MakeCall(remoteParty, token, userData);
 }
-#endif
 
 #ifdef H323_H235
 void H323EndPoint::SetH235MediaEncryption(H235MediaPolicy policy, H235MediaCipher level, unsigned maxTokenSize)

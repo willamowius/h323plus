@@ -3011,7 +3011,6 @@ class H323Connection : public PObject
 #endif  // H323_H460
   //@}
 
-#ifndef DISABLE_CALLAUTH
   /**@name Endpoint Authentication */
   //@{
      /** Get Endpoint Authenticator mothods
@@ -3052,7 +3051,6 @@ class H323Connection : public PObject
     PBoolean HasAuthenticationFailed() 
        { return AuthenticationFailed; };
   //@}
-#endif
 
 #ifdef H323_H235
   /**@name Media Encryption */
@@ -3385,11 +3383,9 @@ class H323Connection : public PObject
     PBoolean NATsupport;     ///< Disable support for NATed callers
     PBoolean sameNAT;        ///< Call parties are behind the same NAT
 
-#ifndef DISABLE_CALLAUTH
     PBoolean AuthenticationFailed;
     PBoolean hasAuthentication;
     const H235Authenticators  EPAuthenticators;
-#endif
 
 #ifdef H323_AEC
     H323Aec * aec;

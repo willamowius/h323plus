@@ -574,7 +574,6 @@ class H323EndPoint : public PObject
                           ///< Associated transport for precedence and translation
     );
 
-#ifndef DISABLE_CALLAUTH
      /**Make a Authenticated call to a remote party. 
     This Function sets Security Information to be included when calling
     a EP which requires Authentication
@@ -585,8 +584,7 @@ class H323EndPoint : public PObject
                         const PString & Password,     ///* Password to Use (MUST NOT BE EMPTY)
                         PString & token,              ///* String to receive token for connection
                         void * userData = NULL        ///* user data to pass to CreateConnection
-     );                                            
-#endif    
+     );
 
      /**Make a Supplimentary call to a remote party. 
         This Function makes a Non Call supplimentary connection (lightweight call) for the purpose
@@ -1062,7 +1060,6 @@ class H323EndPoint : public PObject
     virtual void CleanUpConnections();
   //@}
 
-#ifndef DISABLE_CALLAUTH
   /**@name Caller Authentication */
   //@{
     /**Create a list of authenticators for Call Authentication.
@@ -1123,7 +1120,6 @@ class H323EndPoint : public PObject
        */
      virtual void DisableMD5Authenticators() { m_disableMD5Authenticators = TRUE; }
  //@}
-#endif
 
 #ifdef H323_H235
   /**@name Media Encryption */
@@ -2856,7 +2852,6 @@ class H323EndPoint : public PObject
     H323ConnectionsCleaner * connectionsCleaner;
     PSyncPoint               connectionsAreCleaned;
 
-#ifndef DISABLE_CALLAUTH
     // Call Authentication
     PString EPSecurityUserName;       /// Local UserName Authenticated Call 
     PString EPSecurityPassword;       /// Local Password Authenticated Call        
@@ -2864,7 +2859,6 @@ class H323EndPoint : public PObject
     EPSecurityPolicy CallAuthPolicy;   /// Incoming Call Authentication acceptance level
     H235AuthenticatorList EPAuthList;  /// List of Usernames & Password to check incoming call Against                   
     PBoolean m_disableMD5Authenticators; /// Disable MD5 based authenticatos (MD5 + CAT)
-#endif
 
 #ifdef H323_H460
     H460_FeatureSet features;
