@@ -1665,14 +1665,14 @@ class H323GatekeeperServer : public H323TransactionServer
     PStringToString passwords;
 
     // Dynamic variables
-    PMutex         mutex;
+    PMutex         mutex;    // TODO: Needs fixing already declared in H323TransactionServer
     time_t         identifierBase;
     unsigned       nextIdentifier;
-    PThread      * monitorThread;
-    PSyncPoint     monitorExit;
+    PThread      * monitorThread;  // TODO: Needs fixing already declared in H323TransactionServer
+    PSyncPoint     monitorExit;   // TODO: Needs fixing already declared in H323TransactionServer
 
     H323LIST(ListenerList, H323GatekeeperListener);
-    ListenerList listeners;
+    ListenerList listeners;   // TODO: Needs fixing already declared in H323TransactionServer
 
     H323PeerElement * peerElement;
 
