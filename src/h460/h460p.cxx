@@ -461,7 +461,7 @@ PBoolean H323PresenceHandler::BuildPresenceMessage(unsigned id, H323PresenceStor
 
     bool dataToSend = false;
     H323PresenceStore::iterator iter = store.begin();
-    while (iter != m_presenceStore.end()) {
+    while (iter != store.end()) {
         H323PresenceEndpoint & ep = iter->second;
         bool ok = false;
           if ((PresenceMessage_attributes[id].notification == 1) && (ep.m_Notify.GetSize() > 0)) ok = true;
