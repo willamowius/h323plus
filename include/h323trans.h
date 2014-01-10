@@ -293,8 +293,8 @@ class H323Transactor : public PObject
         void SetPDU(const H323TransactionPDU & pdu);
         PBoolean SendCachedResponse(H323Transport & transport);
 
-        PInt64               lastUsedTime;
-        PInt64               retirementAge;
+        PTime                lastUsedTime;
+        PTimeInterval        retirementAge;
         H323TransactionPDU * replyPDU;
     };
 
@@ -303,7 +303,7 @@ class H323Transactor : public PObject
     WORD            defaultLocalPort;
     WORD            defaultRemotePort;
     H323Transport * transport;
-    PBoolean        checkResponseCryptoTokens;
+    PBoolean            checkResponseCryptoTokens;
 
     unsigned  nextSequenceNumber;
     PMutex    nextSequenceNumberMutex;
@@ -313,7 +313,7 @@ class H323Transactor : public PObject
     Request                         * lastRequest;
 
     PMutex                pduWriteMutex;
-    list<Response>        responses;
+    PSortedList<Response> responses;
 };
 
 
