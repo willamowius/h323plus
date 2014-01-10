@@ -77,7 +77,7 @@ class RTP_JitterBufferAnalyser : public PObject
     struct Info {
       Info() : time(0), tick(0), depth(0), extra(PString()) { }
       DWORD         time;
-      PTimeInterval tick;
+      PInt64        tick;
       int           depth;
       const char *  extra;
     } in[1000], out[1000];
@@ -820,7 +820,7 @@ RTP_JitterBufferAnalyser::RTP_JitterBufferAnalyser()
 {
   inPos = outPos = 1;
   in[0].time = out[0].time = 0;
-  in[0].tick = out[0].tick = PTimer::Tick();
+  in[0].tick = out[0].tick = PTimer::Tick().GetMilliSeconds();
   in[0].depth = out[0].depth = 0;
 }
 
@@ -828,7 +828,7 @@ RTP_JitterBufferAnalyser::RTP_JitterBufferAnalyser()
 void RTP_JitterBufferAnalyser::In(DWORD time, unsigned depth, const char * extra)
 {
   if (inPos < PARRAYSIZE(in)) {
-    in[inPos].tick = PTimer::Tick();
+    in[inPos].tick = PTimer::Tick().GetMilliSeconds();
     in[inPos].time = time;
     in[inPos].depth = depth;
     in[inPos++].extra = extra;
@@ -839,7 +839,7 @@ void RTP_JitterBufferAnalyser::In(DWORD time, unsigned depth, const char * extra
 void RTP_JitterBufferAnalyser::Out(DWORD time, unsigned depth, const char * extra)
 {
   if (outPos < PARRAYSIZE(out)) {
-    out[outPos].tick = PTimer::Tick();
+    out[outPos].tick = PTimer::Tick().GetMilliSeconds();
     if (time == 0 && outPos > 0)
       out[outPos].time = out[outPos-1].time;
     else
