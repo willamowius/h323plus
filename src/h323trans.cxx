@@ -41,7 +41,7 @@
 #include <ptclib/random.h>
 
 
-static PTimeInterval ResponseRetirementAge(0, 30); // Seconds
+#define ResponseRetirementAge 30000  // 30 Seconds
 
 
 #define new PNEW
@@ -159,13 +159,14 @@ void H323Transactor::Construct()
   nextSequenceNumber = PRandom::Number()%65536;
   checkResponseCryptoTokens = TRUE;
   lastRequest = NULL;
-
-  requests.DisallowDeleteObjects();
 }
 
 
 H323Transactor::~H323Transactor()
 {
+  while (!responses.empty())
+      responses.pop_front();
+
   StopChannel();
 }
 
@@ -343,16 +344,18 @@ unsigned H323Transactor::GetNextSequenceNumber()
 
 void H323Transactor::AgeResponses()
 {
-  PTime now;
+  PInt64 now = PTimer::Tick().GetMilliSeconds();
 
   PWaitAndSignal mutex(pduWriteMutex);
 
-  for (PINDEX i = 0; i < responses.GetSize(); i++) {
-    const Response & response = responses[i];
+  list<Response>::const_iterator r = responses.begin();
+  while (r != responses.end()) {
+    const Response & response = *r;
     if ((now - response.lastUsedTime) > response.retirementAge) {
       PTRACE(4, "Trans\tRemoving cached response: " << response);
-      responses.RemoveAt(i--);
-    }
+      responses.erase(r++);
+    } else
+      r++;
   }
 }
 
@@ -366,12 +369,14 @@ PBoolean H323Transactor::SendCachedResponse(const H323TransactionPDU & pdu)
 
   PWaitAndSignal mutex(pduWriteMutex);
 
-  PINDEX idx = responses.GetValuesIndex(key);
-  if (idx != P_MAX_INDEX)
-    return responses[idx].SendCachedResponse(*transport);
-
-  responses.Append(new Response(key));
-  return FALSE;
+  std::list<Response>::iterator r = responses.begin();
+  while (r != responses.end()) {
+    if (*r == key)
+      return r->SendCachedResponse(*transport);
+      ++r;
+  }
+  responses.push_back(Response(key));
+  return false;
 }
 
 
@@ -385,10 +390,14 @@ PBoolean H323Transactor::WritePDU(H323TransactionPDU & pdu)
   PWaitAndSignal mutex(pduWriteMutex);
 
   Response key(transport->GetLastReceivedAddress(), pdu.GetSequenceNumber());
-  PINDEX idx = responses.GetValuesIndex(key);
-  if (idx != P_MAX_INDEX)
-    responses[idx].SetPDU(pdu);
-
+  std::list<Response>::iterator r = responses.begin();
+  while (r != responses.end()) {
+    if (*r == key) {
+        r->SetPDU(pdu);
+        break;
+    } else
+        ++r;
+  }
   return pdu.Write(*transport);
 }
 
@@ -690,7 +699,7 @@ void H323Transactor::Response::SetPDU(const H323TransactionPDU & pdu)
   if (replyPDU != NULL)
     replyPDU->DeletePDU();
   replyPDU = pdu.ClonePDU();
-  lastUsedTime = PTime();
+  lastUsedTime = PTimer::Tick().GetMilliSeconds();
 
   unsigned delay = pdu.GetRequestInProgressDelay();
   if (delay > 0)
@@ -712,7 +721,7 @@ PBoolean H323Transactor::Response::SendCachedResponse(H323Transport & transport)
     PTRACE(2, "Trans\tRetry made by remote before sending response: " << *this);
   }
 
-  lastUsedTime = PTime();
+  lastUsedTime = PTimer::Tick().GetMilliSeconds();
   return TRUE;
 }
 
