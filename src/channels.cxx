@@ -197,7 +197,9 @@ H323Channel::~H323Channel()
 {
   connection.UseBandwidth(bandwidthUsed, TRUE);
 
-  delete codec;
+  if (codec)
+    delete codec;
+
   delete capability;
 }
 
