@@ -1350,6 +1350,15 @@ class H323Connection : public PObject
       */
     virtual void OnSetLocalCapabilities();
 
+    /**Call back to set the local UserInput capabilities.
+       This is called just before the capabilties are required when a call
+       is begun. It is called when a SETUP PDU is received or when one is
+       about to be sent, so that the UserInput capabilities may be adjusted.
+
+       The default behaviour set the default UserInput Settings.
+      */
+    virtual void OnSetLocalUserInputCapabilities();
+
     /**Set the Bearer Capability Transfer Rate
        This will set the Transfer Rate of the Bearer Capabities.
        Default = 768kb/s
@@ -3288,6 +3297,8 @@ class H323Connection : public PObject
     PBoolean doH245inSETUP;
     PBoolean lastPDUWasH245inSETUP;
     PBoolean detectInBandDTMF;
+    PBoolean rfc2833InBandDTMF;
+    PBoolean extendedUserInput;
     PBoolean mustSendDRQ;
     PBoolean mediaWaitForConnect;
     PBoolean transmitterSidePaused;

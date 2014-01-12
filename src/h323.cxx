@@ -552,7 +552,13 @@ H323Connection::H323Connection(H323EndPoint & ep,
   h45011handler = new H45011Handler(*this, *h450dispatcher);
 #endif
 
-  rfc2833handler = new OpalRFC2833(PCREATE_NOTIFIER(OnUserInputInlineRFC2833));
+  rfc2833InBandDTMF = !ep.RFC2833InBandDTMFDisabled();
+  if (rfc2833InBandDTMF)
+    rfc2833handler = new OpalRFC2833(PCREATE_NOTIFIER(OnUserInputInlineRFC2833));
+  else
+    rfc2833handler = NULL;
+
+  extendedUserInput = !ep.ExtendedUserInputDisabled();
 
 #ifdef H323_T120
   t120handler = NULL;
@@ -644,7 +650,8 @@ H323Connection::~H323Connection()
 #ifdef H323_H450
   delete h450dispatcher;
 #endif
-  delete rfc2833handler;
+  if (rfc2833handler)
+    delete rfc2833handler;
 #ifdef H323_T120
   delete t120handler;
 #endif
@@ -2586,6 +2593,9 @@ if (setup.m_conferenceGoal.GetTag() == H225_Setup_UUIE_conferenceGoal::e_create)
   // Get the local capabilities before fast start is handled
   OnSetLocalCapabilities();
 
+  // Adjust the local userInput capabilities.
+  OnSetLocalUserInputCapabilities();
+
   // Ask the application what channels to open
   PTRACE(3, "H225\tCheck for Fast start by local endpoint");
   fastStartChannels.RemoveAll();
@@ -4133,6 +4143,14 @@ void H323Connection::OnSetLocalCapabilities()
 {
 }
 
+void H323Connection::OnSetLocalUserInputCapabilities()
+{
+    if (!rfc2833InBandDTMF)
+        localCapabilities.Remove("UserInput/RFC2833");
+
+    if (!extendedUserInput)
+        localCapabilities.Remove("UserInput/H249_*");
+}
 
 PBoolean H323Connection::IsH245Master() const
 {
@@ -4763,7 +4781,8 @@ PBoolean H323Connection::OnStartLogicalChannel(H323Channel & channel)
       PIsDescendant(&channel, H323_RTPChannel)) {
     H323_RTPChannel & rtp = (H323_RTPChannel &)channel;
     if (channel.GetNumber().IsFromRemote()) {
-      rtp.AddFilter(rfc2833handler->GetReceiveHandler());
+      if (rfc2833InBandDTMF)
+        rtp.AddFilter(rfc2833handler->GetReceiveHandler());
 
       if (detectInBandDTMF) {
         H323Codec * codec = channel.GetCodec();
@@ -4771,7 +4790,7 @@ PBoolean H323Connection::OnStartLogicalChannel(H323Channel & channel)
           codec->AddFilter(PCREATE_NOTIFIER(OnUserInputInBandDTMF));
       }
     }
-    else
+    else if (rfc2833InBandDTMF)
       rtp.AddFilter(rfc2833handler->GetTransmitHandler());
   }
 
@@ -5073,7 +5092,7 @@ void H323Connection::SendUserInput(const PString & value)
 
     case SendUserInputAsInlineRFC2833 :
       for (i = 0; i < value.GetLength(); i++)
-        rfc2833handler->SendTone(value[i], 180);
+        if (rfc2833handler) rfc2833handler->SendTone(value[i], 180);
       break;
 
     default :
@@ -5115,7 +5134,7 @@ void H323Connection::SendUserInputTone(char tone,
       break;
 
     case SendUserInputAsInlineRFC2833 :
-      rfc2833handler->SendTone(tone, duration);
+      if (rfc2833handler) rfc2833handler->SendTone(tone, duration);
       break;
 
     default :

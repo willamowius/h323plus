@@ -649,15 +649,17 @@ H323EndPoint::H323EndPoint()
   maxAudioJitterDelay = 250;  // milliseconds
 #endif
 
-  autoCallForward = TRUE;
-  disableFastStart = TRUE;
-  disableH245Tunneling = FALSE;
-  disableH245inSetup = TRUE;
-  disableH245QoS = TRUE;
-  disableDetectInBandDTMF = FALSE;
-  canDisplayAmountString = FALSE;
-  canEnforceDurationLimit = TRUE;
-  useQ931Display = FALSE;
+  autoCallForward = true;
+  disableFastStart = true;
+  disableH245Tunneling = false;
+  disableH245inSetup = true;
+  disableH245QoS = true;
+  disableDetectInBandDTMF = false;
+  disableRFC2833InBandDTMF = false;
+  disableExtendedUserInput = true;
+  canDisplayAmountString = false;
+  canEnforceDurationLimit = true;
+  useQ931Display = false;
 
 #ifdef H323_H450
   callIntrusionProtectionLevel = 3; //H45011_CIProtectionLevel::e_fullProtection;

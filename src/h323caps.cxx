@@ -2672,10 +2672,10 @@ const char * const H323_UserInputCapability::SubTypeNames[NumSubTypes] = {
   "UserInput/hookflash",
   OpalUserInputRFC2833      // "UserInput/RFC2833"
 #ifdef H323_H249
-  ,"UserInput/Navigation",
-  "UserInput/Softkey",
-  "UserInput/PointDevice",
-  "UserInput/Modal"
+  ,"UserInput/H249_Navigation",
+  "UserInput/H249_Softkey",
+  "UserInput/H249_PointDevice",
+  "UserInput/H249_Modal"
 #endif
 };
 

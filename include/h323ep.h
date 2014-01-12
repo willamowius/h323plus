@@ -1694,6 +1694,29 @@ class H323EndPoint : public PObject
       PBoolean mode ///< New default mode
     ) { disableDetectInBandDTMF = mode; } 
 
+    /**Disable RFC2833InBandDTMF.
+      */
+    PBoolean RFC2833InBandDTMFDisabled() const
+      { return disableRFC2833InBandDTMF; }
+
+    /**Set the RFC2833 flag.
+      */
+    void DisableRFC2833InBandDTMF(
+      PBoolean mode ///< New default mode
+    ) { disableRFC2833InBandDTMF = mode; }
+
+   /**Disable extended user input.
+      */
+    PBoolean ExtendedUserInputDisabled() const
+      { return disableExtendedUserInput; }
+
+    /**Set the extended user input flag.
+      */
+    void DisableExtendedUserInput(
+      PBoolean mode ///< New default mode
+    ) { disableExtendedUserInput = mode; }
+
+
     /**Get the flag indicating the endpoint can display an amount string.
       */
     PBoolean CanDisplayAmountString() const
@@ -2707,6 +2730,8 @@ class H323EndPoint : public PObject
     PBoolean        disableH245inSetup;
     PBoolean        disableH245QoS;
     PBoolean        disableDetectInBandDTMF;
+    PBoolean        disableRFC2833InBandDTMF;
+    PBoolean        disableExtendedUserInput;
     PBoolean        canDisplayAmountString;
     PBoolean        canEnforceDurationLimit;
 
