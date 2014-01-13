@@ -154,7 +154,7 @@ class Q931 : public PObject
       unsigned & transferRate,        ///<  Number of 64k B channels
       unsigned * codingStandard = NULL,
       unsigned * userInfoLayer1 = NULL
-    );
+    ) const;
 
     unsigned SetBearerTransferRate(
        unsigned bitrate             ///< Raw Bitrate in kb/s

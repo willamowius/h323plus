@@ -673,7 +673,7 @@ void Q931::SetBearerCapabilities(InformationTransferCapability capability,
 PBoolean Q931::GetBearerCapabilities(InformationTransferCapability & capability,
                                  unsigned & transferRate,
                                  unsigned * codingStandard,
-                                 unsigned * userInfoLayer1)
+                                 unsigned * userInfoLayer1) const
 {
   if (!HasIE(BearerCapabilityIE))
     return FALSE;
