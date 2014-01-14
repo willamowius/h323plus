@@ -245,7 +245,7 @@ void H323SetAliasAddress(const PString & _name, H225_AliasAddress & alias, int t
 {
   int originalTag = tag;
   PString name = _name;
-  name.Replace("$",":");  // for "ip$"
+  name.Replace("ip$","ip:");
 
   // See if alias type was explicitly specified
   if (tag < 0) {
