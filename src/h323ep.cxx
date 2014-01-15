@@ -367,7 +367,7 @@ PBoolean H323_TLSContext::UsePrivateKey(const PFilePath & privFile, const PStrin
 #endif
     if (!password) {
         SSL_CTX_set_default_passwd_cb(m_context, tls_passwd_cb);
-        SSL_CTX_set_default_passwd_cb_userdata(m_context, (void *)(PRemoveConst(PString,&password))->GetPointer());
+        SSL_CTX_set_default_passwd_cb_userdata(m_context, (void *)(const char *)password);
     }
 
     char msg[256];
