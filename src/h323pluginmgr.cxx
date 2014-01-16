@@ -1437,7 +1437,8 @@ class H323PluginVideoCodec : public H323VideoCodec
 
     PInt64  lastFrameTick;
     PInt64  nowFrameTick;
-    PTime   lastFUPTime;
+    PInt64  lastFUPTick;
+    PInt64  nowFUPTick;
 
     // Regular used variables
     int          outputDataSize;
@@ -1588,7 +1589,7 @@ H323PluginVideoCodec::H323PluginVideoCodec(const OpalMediaFormat & fmt, Directio
       bufferSize(sizeof(PluginCodec_Video_FrameHeader) + (PLUGIN_MAX_WIDTH * PLUGIN_MAX_HEIGHT * 3)/2 + PLUGIN_RTP_HEADER_SIZE), bufferRTP(bufferSize-PLUGIN_RTP_HEADER_SIZE, TRUE), 
       maxWidth(fmt.GetOptionInteger(OpalVideoFormat::FrameWidthOption)), maxHeight(fmt.GetOptionInteger(OpalVideoFormat::FrameHeightOption)),
       bytesPerFrame((maxHeight * maxWidth * 3)/2), lastFrameTimeRTP(0), targetFrameTimeMs(fmt.GetOptionInteger(OpalVideoFormat::FrameTimeOption)),
-      flowRequest(0), lastPacketSent(true), sendIntra(true), lastFrameTick(0), nowFrameTick(0), outputDataSize(MAX_MTU_SIZE), 
+      flowRequest(0), lastPacketSent(true), sendIntra(true), lastFrameTick(0), nowFrameTick(0), lastFUPTick(0), nowFUPTick(0), outputDataSize(MAX_MTU_SIZE), 
       fromLen(0), toLen(0), flags(0), pluginRetVal(0)
 {
     if (codec && codec->createCodec) {
@@ -1949,12 +1950,11 @@ PBoolean H323PluginVideoCodec::WriteInternal(const BYTE * /*buffer*/, unsigned l
       }
 
       if (sendIntra || (flags & PluginCodec_ReturnCoderRequestIFrame)) {
-        PTime currentTime = PTime();
-        PTimeInterval lastTime = currentTime - lastFUPTime;
-        if (lastTime.GetMilliSeconds() > FASTPICTUREINTERVAL) {
+        nowFUPTick = PTimer::Tick().GetMilliSeconds();
+        if ((nowFUPTick - lastFUPTick)  > FASTPICTUREINTERVAL) {
             PTRACE(6,"PLUGIN\tIFrame Request Decoder.");
             logicalChannel->SendMiscCommand(H245_MiscellaneousCommand_type::e_videoFastUpdatePicture);
-            lastFUPTime = PTime();
+            lastFUPTick = nowFUPTick;
             sendIntra = false;
         }
       }
