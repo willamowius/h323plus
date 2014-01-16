@@ -913,17 +913,17 @@ void H323Connection::ChangeSignalChannel(H323Transport * channel)
 
 PBoolean H323Connection::WriteSignalPDU(H323SignalPDU & pdu)
 {
-  PWaitAndSignal m(signallingMutex);
-
   lastPDUWasH245inSETUP = FALSE;
 
-  if (signallingChannel && signallingChannel->IsOpen()) {
+  PBoolean success = false;
+  if (signallingChannel != NULL) {
     pdu.m_h323_uu_pdu.m_h245Tunneling = h245Tunneling;
 
     H323Gatekeeper * gk = endpoint.GetGatekeeper();
     if (gk)
       gk->InfoRequestResponse(*this, pdu.m_h323_uu_pdu, TRUE);
 
+    signallingMutex.Wait();
 #ifdef H323_H46017
     if (m_maintainConnection) {
         if (!pdu.GetQ931().HasIE(Q931::UserUserIE) && pdu.m_h323_uu_pdu.m_h323_message_body.IsValid())
@@ -931,23 +931,27 @@ PBoolean H323Connection::WriteSignalPDU(H323SignalPDU & pdu)
 
         if (!signallingChannel->WriteSignalPDU(pdu)) {
             PTRACE(2,"H225\tERROR: Signalling Channel Failure: PDU was not sent!");
-            return HandleSignalChannelFailure();
-        }
-        return true;
-    }
+            success = HandleSignalChannelFailure();
+        } else
+            success = true;
+    } else
 #endif
-
-    // We don't have to take down the call if the signalling channel fails.
-    // We may want to wait until the media fails or the local hangs up.
-    if (!pdu.Write(*signallingChannel,this)) {
-        PTRACE(2,"H225\tERROR: Signalling Channel Failure: PDU was not sent!");
-        return HandleSignalChannelFailure();
-    } 
-    return TRUE;
+    {
+        // We don't have to take down the call if the signalling channel fails.
+        // We may want to wait until the media fails or the local hangs up.
+        if (!pdu.Write(*signallingChannel,this)) {
+            PTRACE(2,"H225\tERROR: Signalling Channel Failure: PDU was not sent!");
+            success = HandleSignalChannelFailure();
+        } else
+            success = true;
+    }
+    signallingMutex.Signal();
   }
 
-  ClearCall(EndedByTransportFail);
-  return FALSE;
+  if (!success)
+    ClearCall(EndedByTransportFail);
+
+  return success;
 }
 
 void H323Connection::HandleSignallingChannel()
@@ -2810,8 +2814,7 @@ void H323Connection::SendMoreDigits(const PString & digits)
     H323SignalPDU infoPDU;
     infoPDU.BuildInformation(*this);
     infoPDU.GetQ931().SetCalledPartyNumber(digits);
-    if (!WriteSignalPDU(infoPDU))
-      ClearCall(EndedByTransportFail);
+    WriteSignalPDU(infoPDU);
   }
 }
 
@@ -5171,8 +5174,7 @@ void H323Connection::SendUserInputIndicationQ931(const PString & value)
   H323SignalPDU pdu;
   pdu.BuildInformation(*this);
   pdu.GetQ931().SetKeypad(value);
-  if (!WriteSignalPDU(pdu))
-    ClearCall(EndedByTransportFail);
+  WriteSignalPDU(pdu);
 }
 
 
