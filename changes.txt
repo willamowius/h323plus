@@ -2,6 +2,8 @@
 ===============================================================================
 H323plus 1.25.0 - 1.25.x
 ===============================================================================
+Added Encryption support to the H.224 Channel and H323_ExternalRTPChannel
+Performance Memory management Improvement in audio/video processing.
 Updated to compile with PTLIB Head (1.25.5)
 Added TLS signalling support
 Added DH6144 and DH8192 H.235 Support
