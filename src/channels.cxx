@@ -44,6 +44,9 @@
 #include <ptclib/random.h>
 #include <ptclib/delaychan.h>
 
+#ifdef H323_H235
+#include <h235/h235chan.h>
+#endif
 
 #define MAX_PAYLOAD_TYPE_MISMATCHES 8
 #define RTP_TRACE_DISPLAY_RATE 16000 // 2 seconds
@@ -401,6 +404,12 @@ void H323Channel::SendMiscCommand(unsigned command)
 void H323Channel::SendFlowControlRequest(long restriction)
 { 
   connection.SendLogicalChannelFlowControl(*this, restriction); 
+}
+
+void H323Channel::ReplaceCapability(const H323Capability & cap) 
+{ 
+    delete capability;  
+    capability = (H323Capability *)cap.Clone(); 
 }
 
 
@@ -1091,7 +1100,7 @@ void H323_RTPChannel::Receive()
   RTP_DataFrame frame;
   while (ReadFrame(rtpTimestamp, frame)) {
 
-    if (isAudio) {
+    if (isAudio) {//
       filterMutex.Wait();
       for (PINDEX i = 0; i < filters.GetSize(); i++)
         filters[i](frame, 0);
@@ -1204,6 +1213,9 @@ H323_ExternalRTPChannel::H323_ExternalRTPChannel(H323Connection & connection,
                                                  Directions direction,
                                                  unsigned id)
   : H323_RealTimeChannel(connection, capability, direction)
+#ifdef H323_H235
+    ,secChannel(NULL)
+#endif
 {
   sessionID = id;
   isRunning = FALSE;
@@ -1219,6 +1231,9 @@ H323_ExternalRTPChannel::H323_ExternalRTPChannel(H323Connection & connection,
   : H323_RealTimeChannel(connection, capability, direction),
     externalMediaAddress(data),
     externalMediaControlAddress(control)
+#ifdef H323_H235
+    ,secChannel(NULL)
+#endif
 {
   sessionID = id;
   isRunning = FALSE;
@@ -1234,6 +1249,9 @@ H323_ExternalRTPChannel::H323_ExternalRTPChannel(H323Connection & connection,
   : H323_RealTimeChannel(connection, capability, direction),
     externalMediaAddress(ip, dataPort),
     externalMediaControlAddress(ip, (WORD)(dataPort+1))
+#ifdef H323_H235
+    ,secChannel(NULL)
+#endif
 {
   sessionID = id;
   isRunning = FALSE;
@@ -1400,6 +1418,33 @@ PBoolean H323_ExternalRTPChannel::GetRemoteAddress(PIPSocket::Address & ip,
     return remoteMediaAddress.GetIpAndPort(ip, dataPort);
 
   return FALSE;
+}
+
+#ifdef H323_H235
+void H323_ExternalRTPChannel::AttachSecureChannel(H323SecureChannel * channel)
+{
+    secChannel = channel;
+}
+#endif
+
+PBoolean H323_ExternalRTPChannel::OnReadFrame(RTP_DataFrame & frame)
+{
+#ifdef H323_H235
+    if (secChannel)
+        return secChannel->ReadFrame(frame);
+    else
+#endif
+        return true;
+}
+  
+PBoolean H323_ExternalRTPChannel::OnWriteFrame(RTP_DataFrame & frame)
+{
+#ifdef H323_H235
+    if (secChannel)
+        return secChannel->WriteFrame(frame);
+    else
+#endif
+        return true;
 }
 
 

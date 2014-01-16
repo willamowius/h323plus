@@ -304,16 +304,16 @@ public:
     virtual void SetCapabilityList(H323Capabilities * capabilities);
 
     /// Set the encryption active
-    void SetActive(PBoolean active);
+    virtual void SetEncryptionActive(PBoolean active);
 
     /// Is encryption active
-    PBoolean IsActive() const;
+    virtual PBoolean IsEncryptionActive() const;
 
     /// Set Algorithm
-    void SetAlgorithm(const PString & alg);
+    virtual void SetEncryptionAlgorithm(const PString & alg);
 
     /// Get Algorithm
-    const PString & GetAlgorithm() const;
+    virtual const PString & GetEncryptionAlgorithm() const;
 
     /// Get the MediaFormat for this capability.
     virtual const OpalMediaFormat & GetMediaFormat() const;
@@ -525,6 +525,84 @@ class H323SecureCapability : public H323SecureRealTimeCapability
 
   //@}
 
+};
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+/**This class describes the secure interface to a data codec that has channels based on
+   the RTP protocol.
+
+   An application may create a descendent off this class and override
+   functions as required for descibing the codec.
+ */
+
+class H323SecureDataCapability : public H323DataCapability
+{
+  PCLASSINFO(H323SecureDataCapability, H323DataCapability);
+	
+public:
+	
+    H323SecureDataCapability(H323Capability & childCapability,          ///< Child Capability
+                           enum H235ChType Ch = H235ChNew,               ///< ChannelType
+                           H323Capabilities * capabilities = NULL,    ///< Capabilities reference
+                           unsigned secNo = 0,                        ///< Security Capability No
+                           PBoolean active = false                    ///< Whether encryption is active or not
+                           );
+    ~H323SecureDataCapability();
+
+    Comparison Compare(const PObject & obj) const;
+
+    virtual PObject * Clone() const;
+
+    virtual unsigned GetSubType() const;
+
+    virtual PString GetFormatName() const;
+
+    virtual H323Channel * CreateChannel(H323Connection & connection,
+                                      H323Channel::Directions dir,
+                                      unsigned sesionID,
+                                      const H245_H2250LogicalChannelParameters * param) const;
+
+    virtual PBoolean IsMatch(const PASN_Choice & subTypePDU) const;
+    virtual PBoolean IsSubMatch(const PASN_Choice & subTypePDU) const;
+
+    virtual PBoolean IsUsable(const H323Connection & connection) const { return ChildCapability.IsUsable(connection); }
+
+    CapabilityDirection GetCapabilityDirection() const  { return ChildCapability.GetCapabilityDirection(); }
+
+    void SetCapabilityDirection(CapabilityDirection dir ) { ChildCapability.SetCapabilityDirection(dir); }
+
+    RTP_DataFrame::PayloadTypes GetPayloadType() const { return ChildCapability.GetPayloadType(); }
+
+    H323Capability & GetChildCapability() const { return ChildCapability; }
+
+    virtual PBoolean OnSendingPDU(H245_Capability & pdu) const;
+    virtual PBoolean OnReceivedPDU(const H245_Capability & pdu);
+
+    virtual PBoolean OnSendingPDU(H245_ModeElement & mode) const;
+
+    virtual PBoolean OnSendingPDU(H245_DataType & dataType) const;
+    virtual PBoolean OnReceivedPDU(const H245_DataType & dataType,PBoolean receiver);
+
+    virtual PBoolean OnSendingPDU(H245_DataMode & pdu) const;
+
+
+    virtual void SetEncryptionActive(PBoolean active);
+    virtual PBoolean IsEncryptionActive() const;
+
+    virtual void SetEncryptionAlgorithm(const PString & alg);
+    virtual const PString & GetEncryptionAlgorithm() const;
+
+    virtual void SetAssociatedCapability(unsigned _secNo);
+
+protected:
+    H323Capability & ChildCapability;    /// Child Capability
+    H235ChType chtype;                   /// Channel Type
+    PBoolean  m_active;                  /// Whether encryption is active
+    H323Capabilities * m_capabilities;   /// Capabilities list
+    unsigned  m_secNo;                   /// Security Capability
+    PString   m_algorithm;               /// Algorithm for encryption
+	
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////

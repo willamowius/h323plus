@@ -3483,10 +3483,8 @@ H323Capability * H323Capabilities::FindCapability(const H245_DataType & dataType
 #ifdef H323_H235
       case H245_DataType::e_h235Media :
       {
-       if (PIsDescendant(&capability, H323SecureCapability)) { 
-         const H245_H235Media & data = dataType;
-         checkExact = capability.IsMatch(data.m_mediaType);
-       }
+        const H245_H235Media & data = dataType;
+        checkExact = capability.IsMatch(data.m_mediaType);
         break;
       }
 #endif

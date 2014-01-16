@@ -39,6 +39,10 @@
 #include <h323con.h>
 #include <h245.h>
 
+#ifdef H323_H235
+#include <h235/h235chan.h>
+#endif
+
 
 H224_Frame::H224_Frame(PINDEX size)
 : Q922_Frame(H224_HEADER_SIZE + size)
@@ -313,6 +317,9 @@ OpalH224Handler::OpalH224Handler(H323Channel::Directions dir,
                                  H323Connection & connection,
                                  unsigned sessionID)
 : session(NULL), canTransmit(FALSE), transmitMutex(), sessionDirection(dir)
+#ifdef H323_H235
+  ,secChannel(NULL)
+#endif
 {
 
   H245_TransportAddress addr;
@@ -682,11 +689,38 @@ void OpalH224Handler::TransmitFrame(H224_Frame & frame, PBoolean replay)
     }
   
     // TODO: Add Encryption Support - SH
-    if(!session || !session->PreWriteData(*transmitFrame) || !session->WriteData(*transmitFrame)) {
+    if(!session || !session->PreWriteData(*transmitFrame) || !OnWriteFrame(*transmitFrame) || !session->WriteData(*transmitFrame)) {
         PTRACE(3, "H224\tFailed to write encoded H.224 frame");
     } else {
         PTRACE(3, "H224\tEncoded H.224 frame sent");
     }
+}
+
+#ifdef H323_H235
+void OpalH224Handler::AttachSecureChannel(H323SecureChannel * channel)
+{
+    secChannel = channel;
+}
+#endif
+
+PBoolean OpalH224Handler::OnReadFrame(RTP_DataFrame & frame)
+{
+#ifdef H323_H235
+    if (secChannel)
+        return secChannel->ReadFrame(frame);
+    else
+#endif
+        return true;
+}
+  
+PBoolean OpalH224Handler::OnWriteFrame(RTP_DataFrame & frame)
+{
+#ifdef H323_H235
+    if (secChannel)
+        return secChannel->WriteFrame(frame);
+    else
+#endif
+        return true;
 }
 
 ////////////////////////////////////
@@ -700,7 +734,7 @@ OpalH224ReceiverThread::OpalH224ReceiverThread(OpalH224Handler *theH224Handler, 
 
 OpalH224ReceiverThread::~OpalH224ReceiverThread()
 {
-	Close();
+    Close();
 }
 
 void OpalH224ReceiverThread::Main()
@@ -715,16 +749,19 @@ void OpalH224ReceiverThread::Main()
 
     if(!rtpSession.ReadBufferedData(timestamp, packet)) 
         break;
+
+    if (!h224Handler->OnReadFrame(packet))
+        continue;
  
     timestamp = packet.GetTimestamp();
-	if (timestamp == lastTimeStamp)
-		continue;
+    if (timestamp == lastTimeStamp)
+        continue;
 
     if (!h224Frame.Decode(packet.GetPayloadPtr(), packet.GetPayloadSize()) ||
         !h224Handler->OnReceivedFrame(h224Frame)) {
            PTRACE(3, "Decoding of H.224 frame failed");
     }
-	lastTimeStamp = timestamp;
+    lastTimeStamp = timestamp;
   }
 
   threadClosed = true;

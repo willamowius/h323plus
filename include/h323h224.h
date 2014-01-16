@@ -42,82 +42,85 @@
 class H323_H224Capability : public H323DataCapability
 {
   PCLASSINFO(H323_H224Capability, H323DataCapability);
-	
+
 public:
-	
+
   H323_H224Capability();
   ~H323_H224Capability();
-	
+
   Comparison Compare(const PObject & obj) const;
-	
+
   virtual PObject * Clone() const;
-	
+
   virtual unsigned GetSubType() const;
-	
+
   virtual PString GetFormatName() const;
-	
+
   virtual H323Channel * CreateChannel(H323Connection & connection,
-									  H323Channel::Directions dir,
-									  unsigned sesionID,
-									  const H245_H2250LogicalChannelParameters * param) const;
-	
+                                      H323Channel::Directions dir,
+                                      unsigned sesionID,
+                                      const H245_H2250LogicalChannelParameters * param) const;
+
   virtual PBoolean OnSendingPDU(H245_DataApplicationCapability & pdu) const;
   virtual PBoolean OnSendingPDU(H245_DataMode & pdu) const;
   virtual PBoolean OnReceivedPDU(const H245_DataApplicationCapability & pdu);
-	
+
 };
 
 /** This class implements a H.224 logical channel
  */
+class H323SecureChannel;
 class H323_H224Channel : public H323Channel
 {
   PCLASSINFO(H323_H224Channel, H323Channel);
-	
+
 public:
   H323_H224Channel(H323Connection & connection,
-				   const H323Capability & capability,
-				   Directions direction,
-				   RTP_UDP & session,
-				   unsigned sessionID);
+                   const H323Capability & capability,
+                   Directions direction,
+                   RTP_UDP & session,
+                   unsigned sessionID);
   ~H323_H224Channel();
 
   virtual unsigned GetSessionID() const;
-	
+
   virtual H323Channel::Directions GetDirection() const;
   virtual PBoolean SetInitialBandwidth();
 
   virtual void Receive();
   virtual void Transmit();
-		
+
   virtual PBoolean Open();
   virtual PBoolean Start();
   virtual void Close();
-	
+
   virtual PBoolean OnSendingPDU(H245_OpenLogicalChannel & openPDU) const;
   virtual void OnSendOpenAck(const H245_OpenLogicalChannel & openPDU, 
-							 H245_OpenLogicalChannelAck & ack) const;
+                             H245_OpenLogicalChannelAck & ack) const;
   virtual PBoolean OnReceivedPDU(const H245_OpenLogicalChannel & pdu, unsigned & errorCode);
   virtual PBoolean OnReceivedAckPDU(const H245_OpenLogicalChannelAck & pdu);
-	
+
   virtual PBoolean OnSendingPDU(H245_H2250LogicalChannelParameters & param) const;
   virtual void OnSendOpenAck(H245_H2250LogicalChannelAckParameters & param) const;
   virtual PBoolean OnReceivedPDU(const H245_H2250LogicalChannelParameters & param,
-							 unsigned & errorCode);
+                             unsigned & errorCode);
   virtual PBoolean OnReceivedAckPDU(const H245_H2250LogicalChannelAckParameters & param);
-	
+
   virtual PBoolean SetDynamicRTPPayloadType(int newType);
   RTP_DataFrame::PayloadTypes GetDynamicRTPPayloadType() const { return rtpPayloadType; }
-	
+
 //  virtual OpalMediaStream * GetMediaStream() const;
-	
+
   OpalH224Handler * GetHandler() const { return h224Handler; }
-	
+
+  virtual void SetAssociatedChannel(H323Channel * channel);
+
 protected:
-		
+
   virtual PBoolean ExtractTransport(const H245_TransportAddress & pdu,
-								PBoolean isDataPort,
-								unsigned & errorCode);
-	
+                                PBoolean isDataPort,
+                                unsigned & errorCode);
+
   unsigned sessionID;
   Directions direction;
   RTP_UDP & rtpSession;
@@ -125,6 +128,9 @@ protected:
   OpalH224Handler *h224Handler;
   RTP_DataFrame::PayloadTypes rtpPayloadType;
   
+#ifdef H323_H235
+  H323SecureChannel * secChannel;
+#endif
 };
 
 #endif // __OPAL_H323H224_H

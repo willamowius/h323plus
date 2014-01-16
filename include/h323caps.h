@@ -371,6 +371,21 @@ class H323Capability : public PObject
     ) const;
   //@}
 
+  /**@name Media Encryption */
+  //@{
+    /// Set the encryption active
+    virtual void SetEncryptionActive(PBoolean /*active*/) {}
+
+    /// Is encryption active
+    virtual PBoolean IsEncryptionActive() const  { return false; }
+
+    /// Set Algorithm
+    virtual void SetEncryptionAlgorithm(const PString & /*alg*/) {}
+
+    /// Get Algorithm
+    virtual const PString & GetEncryptionAlgorithm() const { return *(new PString()); }
+ //@}
+
   /**@name Member variable access */
   //@{
     enum CapabilityDirection {

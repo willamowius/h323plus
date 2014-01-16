@@ -68,12 +68,12 @@ PString CipherString(const PString & m_algorithmOID)
 }
 
 H323SecureRTPChannel::H323SecureRTPChannel(H323Connection & conn,
-                                 const H323SecureRealTimeCapability & cap,
+                                 const H323Capability & cap,
                                  Directions direction,
                                  RTP_Session & r
-								 )
-    : H323_RTPChannel(conn,cap,direction, r), m_algorithm(cap.GetAlgorithm()),
-      m_encryption((H235Capabilities*)conn.GetLocalCapabilitiesRef(), cap.GetAlgorithm()),
+                                 )
+    : H323_RTPChannel(conn,cap,direction, r), m_algorithm(cap.GetEncryptionAlgorithm()),
+      m_encryption((H235Capabilities*)conn.GetLocalCapabilitiesRef(), cap.GetEncryptionAlgorithm()),
       m_payload(RTP_DataFrame::IllegalPayloadType)
 {	
 }
@@ -90,7 +90,7 @@ void H323SecureRTPChannel::CleanUpOnTermination()
   return H323_RTPChannel::CleanUpOnTermination();
 }
 
-void BuildEncryptionSync(H245_EncryptionSync & sync, const H323SecureRTPChannel & chan, const H235Session & session)
+void BuildEncryptionSync(H245_EncryptionSync & sync, const H323Channel & chan, const H235Session & session)
 {     
     sync.m_synchFlag = chan.GetRTPPayloadType();
 
@@ -108,7 +108,7 @@ void BuildEncryptionSync(H245_EncryptionSync & sync, const H323SecureRTPChannel 
 }
 
 
-PBoolean ReadEncryptionSync(const H245_EncryptionSync & sync, H323SecureRTPChannel & chan, H235Session & session)
+PBoolean ReadEncryptionSync(const H245_EncryptionSync & sync, H323Channel & chan, H235Session & session)
 {
     H235_H235Key h235key;
     sync.m_h235Key.DecodeSubType(h235key);
@@ -296,6 +296,155 @@ PBoolean H323SecureRTPChannel::SetDynamicRTPPayloadType(int newType)
     return true;
 }
 
+////////////////////////////////////////////////////////////////////////////////////
+
+H323SecureChannel::H323SecureChannel(H323Connection & conn, const H323Capability & cap, H323Channel * channel)
+: H323Channel(conn,cap), m_baseChannel(channel), m_algorithm(cap.GetEncryptionAlgorithm()),
+  m_encryption((H235Capabilities*)conn.GetLocalCapabilitiesRef(), cap.GetEncryptionAlgorithm()),
+  m_payload(RTP_DataFrame::IllegalPayloadType)
+{
+    m_baseChannel->ReplaceCapability(cap);
+    m_baseChannel->SetAssociatedChannel(this);
+}
+    
+H323SecureChannel::~H323SecureChannel()
+{
+    if (m_baseChannel)
+        delete m_baseChannel;
+}
+
+H323Channel::Directions H323SecureChannel::GetDirection() const
+{
+    if (m_baseChannel)
+        return m_baseChannel->GetDirection();
+    else
+        return H323Channel::IsBidirectional;
+}
+
+PBoolean H323SecureChannel::SetInitialBandwidth()
+{
+    return (m_baseChannel && m_baseChannel->SetInitialBandwidth());
+}
+
+void H323SecureChannel::SetNumber(const H323ChannelNumber & num) 
+{ 
+    number = num;
+    if (m_baseChannel)
+        m_baseChannel->SetNumber(num);
+}
+
+void H323SecureChannel::Receive()
+{
+    if (m_baseChannel)
+        m_baseChannel->Receive();
+}
+
+void H323SecureChannel::Transmit()
+{
+    if (m_baseChannel)
+        m_baseChannel->Transmit();
+}
+    	
+
+PBoolean H323SecureChannel::Open()
+{
+    return (m_baseChannel && m_baseChannel->Open());
+}
+
+PBoolean H323SecureChannel::Start()
+{
+    return (m_baseChannel && m_baseChannel->Start());
+}
+
+void H323SecureChannel::CleanUpOnTermination()
+{
+    if (terminating)
+        return;
+
+    if (m_baseChannel)
+        m_baseChannel->CleanUpOnTermination();
+}
+
+PBoolean H323SecureChannel::OnSendingPDU(H245_OpenLogicalChannel & open) const
+{
+  PTRACE(4, "H235Chan\tOnSendingPDU");
+
+  if (m_baseChannel && m_baseChannel->OnSendingPDU(open)) {
+       if (connection.IsH245Master()) {
+            if (PRemoveConst(H235Session, &m_encryption)->CreateSession(true)) {
+                open.IncludeOptionalField(H245_OpenLogicalChannel::e_encryptionSync);
+                BuildEncryptionSync(open.m_encryptionSync,*this, m_encryption);
+            }
+        }
+       connection.OnMediaEncryption(GetSessionID(), GetDirection(), CipherString(m_algorithm));
+       return true;
+  }
+  return false;
+}
+
+void H323SecureChannel::OnSendOpenAck(const H245_OpenLogicalChannel & open, H245_OpenLogicalChannelAck & ack) const
+{
+  PTRACE(4, "H235Chan\tOnSendOpenAck");
+
+  if (m_baseChannel)
+      m_baseChannel->OnSendOpenAck(open,ack);
+
+  if (connection.IsH245Master()) {
+        if (PRemoveConst(H235Session, &m_encryption)->CreateSession(true)) {
+            ack.IncludeOptionalField(H245_OpenLogicalChannelAck::e_encryptionSync);
+            BuildEncryptionSync(ack.m_encryptionSync,*this, m_encryption);
+            connection.OnMediaEncryption(GetSessionID(), GetDirection(), CipherString(m_algorithm));
+        }
+  }
+}
+
+PBoolean H323SecureChannel::OnReceivedPDU(const H245_OpenLogicalChannel & open, unsigned & errorCode)
+{
+   PTRACE(4, "H235Chan\tOnRecievedPDU");
+
+  if (m_baseChannel && !m_baseChannel->OnReceivedPDU(open,errorCode)) 
+       return false;
+
+   if (open.HasOptionalField(H245_OpenLogicalChannel::e_encryptionSync)) {
+       if (m_encryption.CreateSession(false)) {
+           connection.OnMediaEncryption(GetSessionID(), GetDirection(), CipherString(m_algorithm));
+           return ReadEncryptionSync(open.m_encryptionSync,*this, m_encryption);
+       }
+   } 
+   return true;
+}
+
+PBoolean H323SecureChannel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & ack)
+{
+  PTRACE(3, "H235Chan\tOnReceiveOpenAck");
+
+  if (m_baseChannel && !m_baseChannel->OnReceivedAckPDU(ack))
+      return false;
+
+  if (ack.HasOptionalField(H245_OpenLogicalChannelAck::e_encryptionSync)) {
+      if (m_encryption.CreateSession(false)) {
+            connection.OnMediaEncryption(GetSessionID(), GetDirection(), CipherString(m_algorithm));
+            return ReadEncryptionSync(ack.m_encryptionSync,*this, m_encryption);
+      }
+  }
+  return true;
+}
+
+PBoolean H323SecureChannel::ReadFrame(RTP_DataFrame & frame)
+{
+    if (m_encryption.IsInitialised() && frame.GetPayloadSize() > 0)
+       return m_encryption.ReadFrameInPlace(frame);
+    else
+       return true;
+}
+
+PBoolean H323SecureChannel::WriteFrame(RTP_DataFrame & frame) 
+{
+   if (m_encryption.IsInitialised())
+       return m_encryption.WriteFrameInPlace(frame);
+   else
+       return true;
+}
 
 #endif   // H323_H235
 

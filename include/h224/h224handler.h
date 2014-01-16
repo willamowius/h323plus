@@ -74,6 +74,7 @@ private:
 
 
 class H323Connection;
+class H323SecureChannel;
 class OpalH224Handler : public PObject
 {
   PCLASSINFO(OpalH224Handler, PObject);
@@ -112,6 +113,13 @@ public:
   virtual OpalH224ReceiverThread * CreateH224ReceiverThread();
 
   H323Channel::Directions GetDirection() { return sessionDirection; }
+
+#ifdef H323_H235
+  void AttachSecureChannel(H323SecureChannel * channel);
+#endif
+
+  PBoolean OnReadFrame(RTP_DataFrame & frame);
+  PBoolean OnWriteFrame(RTP_DataFrame & frame);
     
 protected:
 
@@ -129,6 +137,10 @@ protected:
   std::map<BYTE, H224_Handler*> m_h224Handlers;
 
   H323Channel::Directions sessionDirection;
+
+#ifdef H323_H235
+  H323SecureChannel * secChannel;
+#endif
     
 private:
         

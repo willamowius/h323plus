@@ -4701,6 +4701,18 @@ H323Channel * H323Connection::CreateRealTimeLogicalChannel(const H323Capability 
                                const H245_H2250LogicalChannelParameters * param,
                                                            RTP_QOS * rtpqos)
 {
+#ifdef H323_H235
+  if (PIsDescendant(&capability,H323SecureCapability)) {
+        // Override this function to add Secure ExternalRTPChannel Support 
+        // H323Channel * extChannel = new H323_ExternalRTPChannel(*this, capability, dir, sessionID, externalIpAddress, externalPort);
+        // return new H323SecureChannel(this, capability, extChannel);
+
+        // call H323_ExternalRTPChannel::OnReadFrame(RTP_DataFrame & frame) and H323_ExternalRTPChannel::OnWriteFrame(RTP_DataFrame & frame)
+        // to encrypt and decrypt media
+      return NULL;
+  }
+#endif
+
   RTP_Session * session = NULL;
 
   if (

@@ -281,7 +281,7 @@ class H323Channel : public PObject
 
     /**Set the number of the channel.
      */
-    void SetNumber(const H323ChannelNumber & num) { number = num; }
+    virtual void SetNumber(const H323ChannelNumber & num) { number = num; }
 
     /**Get the number of the reverse channel (if present).
      */
@@ -334,6 +334,27 @@ class H323Channel : public PObject
    /** Is Media Tunneled
      */
     PBoolean IsMediaTunneled() const { return mediaTunneled; }
+
+    /**Replace the capability
+      */
+    virtual void ReplaceCapability(const H323Capability & cap);
+
+    /**Set Associated Channel
+        This can be used to set the associated encryption channel wrapper
+      */
+    virtual void SetAssociatedChannel(H323Channel * /*channel*/) {}
+
+    /**Get the active payload type used by this channel.
+       This will use the dynamic payload type configured for the channel, or
+       the fixed payload type defined by the media format.
+       */
+    virtual RTP_DataFrame::PayloadTypes GetRTPPayloadType() const { return RTP_DataFrame::IllegalPayloadType;  }
+
+    /**Set the dynamic payload type used by this channel.
+      */
+    virtual PBoolean SetDynamicRTPPayloadType(
+      int /*newType*/  ///< New RTP payload type number
+      )  { return false; }
   //@}
 
   protected:
@@ -738,6 +759,7 @@ class H323_RTPChannel : public H323_RealTimeChannel
 /**This class is for encpsulating the IETF Real Time Protocol interface as used
 by a remote host.
  */
+class H323SecureChannel;
 class H323_ExternalRTPChannel : public H323_RealTimeChannel
 {
   PCLASSINFO(H323_ExternalRTPChannel, H323_RealTimeChannel);
@@ -879,6 +901,13 @@ class H323_ExternalRTPChannel : public H323_RealTimeChannel
       WORD & dataPort
     ) const;
 
+    // Encryption Support
+#ifdef H323_H235
+    void AttachSecureChannel(H323SecureChannel * channel);
+#endif
+    PBoolean OnReadFrame(RTP_DataFrame & frame);
+    PBoolean OnWriteFrame(RTP_DataFrame & frame);
+
   protected:
     unsigned             sessionID;
     H323TransportAddress externalMediaAddress;
@@ -887,6 +916,10 @@ class H323_ExternalRTPChannel : public H323_RealTimeChannel
     H323TransportAddress remoteMediaControlAddress;
 
     PBoolean isRunning;
+
+#ifdef H323_H235
+    H323SecureChannel * secChannel;
+#endif
 };
 
 

@@ -39,6 +39,10 @@
 
 #include <h323h224.h>
 
+#ifdef H323_H235
+#include <h235/h235chan.h>
+#endif
+
 H323_H224Capability::H323_H224Capability()
 : H323DataCapability(640)
 {
@@ -128,6 +132,8 @@ PBoolean H323_H224Capability::OnReceivedPDU(const H245_DataApplicationCapability
   return TRUE;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////
+
 H323_H224Channel::H323_H224Channel(H323Connection & connection,
                                    const H323Capability & capability,
                                    H323Channel::Directions theDirection,
@@ -136,6 +142,9 @@ H323_H224Channel::H323_H224Channel(H323Connection & connection,
 : H323Channel(connection, capability),
   rtpSession(theSession),
   rtpCallbacks(*(H323_RTP_Session *)theSession.GetUserData())
+#ifdef H323_H235
+  ,secChannel(NULL)
+#endif
 {
   direction = theDirection;
   sessionID = theSessionID;
@@ -173,18 +182,23 @@ PBoolean H323_H224Channel::Open()
 
 PBoolean H323_H224Channel::Start()
 {
-  if(!Open()) {
+  if (!Open())
     return FALSE;
-  }
+
+  PTRACE(4,"H224\tStarting H.224 " << (direction == H323Channel::IsTransmitter ? "Transmitter" : "Receiver") << " Channel");
     
-  if(h224Handler == NULL) {
+  if (!h224Handler)
       h224Handler = connection.CreateH224ProtocolHandler(direction,sessionID);
-  }
 
   if (!h224Handler) {
       PTRACE(4,"H224\tError starting " << (direction == H323Channel::IsTransmitter ? "Transmitter" : "Receiver"));
       return false;
   }
+
+#ifdef H323_H235
+  if (secChannel)
+      h224Handler->AttachSecureChannel(secChannel);
+#endif
     
   if(direction == H323Channel::IsReceiver) {
     h224Handler->StartReceive();
@@ -531,6 +545,13 @@ PBoolean H323_H224Channel::ExtractTransport(const H245_TransportAddress & pdu,
   }
     
   return FALSE;
+}
+
+void H323_H224Channel::SetAssociatedChannel(H323Channel * channel)
+{
+#ifdef H323_H235
+    secChannel = (H323SecureChannel *)channel;
+#endif
 }
 
 #endif

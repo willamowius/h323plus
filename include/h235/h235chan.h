@@ -63,7 +63,7 @@ class H323SecureRTPChannel  : public H323_RTPChannel
      */
     H323SecureRTPChannel(
       H323Connection & connection,                      ///< Connection to endpoint for channel
-      const H323SecureRealTimeCapability & capability,  ///< Secure Capability channel is using
+      const H323Capability & capability,                ///< Capability channel is using
       Directions direction,                             ///< Direction of channel
       RTP_Session & rtp                                 ///< RTP session for channel    
     );
@@ -190,5 +190,48 @@ protected:
 
 };
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+// Generic Security Support
+
+class H323SecureChannel : public H323Channel
+{
+public:
+    H323SecureChannel(H323Connection & conn, const H323Capability & cap, H323Channel * baseChannel);
+    ~H323SecureChannel();
+
+    virtual void SetNumber(const H323ChannelNumber & num);
+    virtual H323Channel::Directions GetDirection() const;
+    virtual PBoolean SetInitialBandwidth();
+
+    virtual void Receive();
+    virtual void Transmit();
+    	
+    virtual PBoolean Open();
+    virtual PBoolean Start();
+
+    virtual PBoolean OnSendingPDU(H245_OpenLogicalChannel & openPDU) const;
+
+    virtual void OnSendOpenAck(const H245_OpenLogicalChannel & openPDU, H245_OpenLogicalChannelAck & ack) const;
+
+    virtual PBoolean OnReceivedPDU(const H245_OpenLogicalChannel & pdu, unsigned & errorCode);
+
+    virtual PBoolean OnReceivedAckPDU(const H245_OpenLogicalChannelAck & pdu);
+
+
+    PBoolean ReadFrame(RTP_DataFrame & frame);
+
+    PBoolean WriteFrame(RTP_DataFrame & frame);
+
+    void CleanUpOnTermination();
+
+protected:
+    H323Channel *    m_baseChannel;
+
+    PString          m_algorithm;
+    H235Session      m_encryption;
+    int              m_payload;
+
+};
 
 #endif

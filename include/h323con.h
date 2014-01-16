@@ -1577,8 +1577,14 @@ class H323Connection : public PObject
                                         const H245_H2250LogicalChannelParameters * param,
                                         RTP_QOS * rtpqos)
          {
+ #ifdef H323_H235
+           H323Channel * extChannel = new H323_ExternalRTPChannel(*this, capability, dir, sessionID,
+                                                                    externalIpAddress, externalPort)
+           return new H323SecureChannel(this, capability, extChannel);
+ #else
            return new H323_ExternalRTPChannel(*this, capability, dir, sessionID,
                                               externalIpAddress, externalPort);
+ #endif
          }
 
        An application would typically also override the OnStartLogicalChannel()
