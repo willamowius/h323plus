@@ -234,7 +234,7 @@ PBoolean H2356_Authenticator::PrepareTokens(PASN_Array & clearTokens,
         H235_ClearToken & clearToken = tokens[sz];
         clearToken.m_tokenOID = i->first;
         H235_DiffieHellman * dh = i->second;
-        if (!dh || (dh->GetKeyLength() > max_keyLength)) {
+        if (!dh || (dh->GetKeyLength() > (max_keyLength/8))) {
             i++; continue;
         }
         if (dh->GenerateHalfKey()) {
