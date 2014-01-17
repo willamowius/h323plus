@@ -1100,7 +1100,7 @@ void H323_RTPChannel::Receive()
   RTP_DataFrame frame;
   while (ReadFrame(rtpTimestamp, frame)) {
 
-    if (isAudio) {//
+    if (isAudio) {
       filterMutex.Wait();
       for (PINDEX i = 0; i < filters.GetSize(); i++)
         filters[i](frame, 0);
