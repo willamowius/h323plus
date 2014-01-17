@@ -108,8 +108,7 @@ void H460_FeatureOID9::OnReceiveAdmissionConfirm(const H225_FeatureDescriptor & 
     if (feat.Contains(VendorVerOID)) 
        m_version = (const PString &)feat.Value(VendorVerOID);
 
-    if (m_product.GetLength() > 0)
-       m_con->OnRemoteVendorInformation(m_product, m_version);
+    m_con->OnRemoteVendorInformation(m_product, m_version);
 }
 
 #endif
