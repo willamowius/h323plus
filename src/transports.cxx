@@ -905,7 +905,7 @@ H323Listener::H323Listener(H323EndPoint & end, H323TransportSecurity::Method sec
   : PThread(end.GetListenerThreadStackSize(),
             NoAutoDeleteThread,
             NormalPriority,
-            "H323 Listener:%0x"),
+            "H323" + ((security == H323TransportSecurity::e_tls) ? PString("TLS") : PString("")) + "Listener:%0x"),
      endpoint(end), m_security(security)
 {
 }
@@ -1365,7 +1365,7 @@ H323ListenerTLS::H323ListenerTLS(H323EndPoint & endpoint, PIPSocket::Address bin
 
 H323ListenerTLS::~H323ListenerTLS()
 {
-
+   Close();
 }
 
 H323Transport * H323ListenerTLS::CreateTransport(const PIPSocket::Address & address)
