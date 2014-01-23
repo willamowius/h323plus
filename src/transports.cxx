@@ -1903,7 +1903,9 @@ PBoolean H323TransportTCP::Connect()
 
 H323Transport * H323TransportTCP::CreateControlChannel(H323Connection & connection)
 {
-  H323TransportTCP * tcpTransport = new H323TransportTCP(endpoint, localAddress);
+  H323TransportSecurity m_callSecurity;
+  H323TransportTCP * tcpTransport = new H323TransportTCP(endpoint, localAddress, true);
+  tcpTransport->InitialiseSecurity(&m_callSecurity);
   tcpTransport->SetRemoteAddress(GetRemoteAddress());
   if (tcpTransport->IsListening()) // Listen() failed
     return tcpTransport;
