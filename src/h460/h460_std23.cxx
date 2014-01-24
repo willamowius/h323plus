@@ -168,7 +168,7 @@ PSTUNClient::NatTypes PNatMethod_H46024::NATTest()
 
 #ifdef H323_H46019M
     // if we have a cone NAT check the RTCP Port to see if not existing binding
-    if (testtype == PSTUNClient::ConeNat && natType == PSTUNClient::UnknownNat) {
+    if (testtype == PSTUNClient::ConeNat || natType == PSTUNClient::UnknownNat) {
         PThread::Sleep(10);
         PTRACE(4,"Std23\tCone NAT Detected rechecking. Test Port " << singlePortInfo.currentPort+1);
         PSTUNClient::NatTypes test2 = GetNatType(true);
