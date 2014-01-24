@@ -589,7 +589,7 @@ static void BuildAuthenticatorPDU(PDUType & pdu, unsigned code, const H323Connec
         case H323TransportSecurity::e_nopolicy:
             break;
         case H323TransportSecurity::e_reqTLSMediaEncHigh:  
-            keyLengthLimit = 128;   // 1024 bytes
+            keyLengthLimit = 1024; //bits
             break;
         case H323TransportSecurity::e_reqTLSMediaEncAll:
         default:
