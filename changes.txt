@@ -7,8 +7,9 @@ Performance Memory management Improvement in audio/video processing.
 Updated to compile with PTLIB Head (1.25.5)
 Added Language assignment and routing support
 Added TLS signalling support
-Added DH6144 and DH8192 H.235 Support
-Added Baseline H.460.22 Support
+Added DH6144 and DH8192 H.235 Support (support for keylength up to 8192 bits)
+Added H.460.22 Support
+Added vs2012 Build environment
 Fixed vs2010 Build environment
 Added H.461 Asset Support. (1.25.4)
 Update and fixes for H.460.26 (1.25.3)
