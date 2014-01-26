@@ -62,6 +62,7 @@ class H460PresenceHandler : public H323PresenceHandler
   public:
 
    H460PresenceHandler(H323EndPoint & _ep);
+   ~H460PresenceHandler();
 
    void AttachFeature(H460_FeatureOID3 * _feat);
 

@@ -51,17 +51,18 @@
 int PRETIME = 2;
 
 H460PresenceHandler::H460PresenceHandler(H323EndPoint & _ep)
-: ep(_ep)
+: presenceRegistration(false), pendingMessages(false), ep(_ep), feat(NULL)
 {
-     PTRACE(4,"OID3\tPresence Handler created!");
-
-    feat = NULL;
-    presenceRegistration = false;
-    pendingMessages = false;
     genericData.SetSize(0);
+    PTRACE(4,"OID3\tPresence Handler created!");
+}
 
-    QueueTimer.SetNotifier(PCREATE_NOTIFIER(dequeue));
-    QueueTimer.RunContinuous(PRETIME * 1000); 
+H460PresenceHandler::~H460PresenceHandler()
+{
+    if (QueueTimer.IsRunning())
+        QueueTimer.Stop();
+
+    genericData.SetSize(0);
 }
 
 void H460PresenceHandler::dequeue(PTimer &,  H323_INT)
@@ -78,6 +79,9 @@ void H460PresenceHandler::AttachFeature(H460_FeatureOID3 * _feat)
     feat = _feat;
     if (ep.GetGatekeeper())
         presenceRegistration = true;
+
+    QueueTimer.SetNotifier(PCREATE_NOTIFIER(dequeue));
+    QueueTimer.RunContinuous(PRETIME * 1000); 
 }
 
 void PostSubscription(H323PresenceStore & gw, const H323PresenceSubscriptions & list)
