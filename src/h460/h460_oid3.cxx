@@ -51,37 +51,34 @@
 int PRETIME = 2;
 
 H460PresenceHandler::H460PresenceHandler(H323EndPoint & _ep)
-: presenceRegistration(false), pendingMessages(false), ep(_ep), feat(NULL)
+: ep(_ep), feat(NULL)
 {
+    m_queueTimer.SetNotifier(PCREATE_NOTIFIER(dequeue));
+
     genericData.SetSize(0);
     PTRACE(4,"OID3\tPresence Handler created!");
 }
 
 H460PresenceHandler::~H460PresenceHandler()
 {
-    if (QueueTimer.IsRunning())
-        QueueTimer.Stop();
+    if (m_queueTimer.IsRunning())
+        m_queueTimer.Stop();
 
     genericData.SetSize(0);
 }
 
 void H460PresenceHandler::dequeue(PTimer &,  H323_INT)
 { 
-    if (pendingMessages) {
-        if (ep.GetGatekeeper() && ep.GetGatekeeper()->IsRegistered()) 
-             ep.GetGatekeeper()->SendServiceControlIndication();
-        pendingMessages = false;
-    }
+    PTRACE(6,"OID3\tHandling Presence Messages");
+
+    H323Gatekeeper * gk = ep.GetGatekeeper();
+    if (gk && gk->IsRegistered())
+         gk->SendServiceControlIndication();
 }
 
 void H460PresenceHandler::AttachFeature(H460_FeatureOID3 * _feat)
 {
     feat = _feat;
-    if (ep.GetGatekeeper())
-        presenceRegistration = true;
-
-    QueueTimer.SetNotifier(PCREATE_NOTIFIER(dequeue));
-    QueueTimer.RunContinuous(PRETIME * 1000); 
 }
 
 void PostSubscription(H323PresenceStore & gw, const H323PresenceSubscriptions & list)
@@ -166,7 +163,8 @@ void H460PresenceHandler::SetPresenceState(const PStringList & alias, unsigned l
         }
 
         // Add any generic data 
-        notification.AddGenericData(genericData);
+        if (genericData.GetSize() > 0)
+            notification.AddGenericData(genericData);
     }
 
     for (PINDEX i = 0; i< alias.GetSize(); ++i) {
@@ -180,8 +178,10 @@ void H460PresenceHandler::SetPresenceState(const PStringList & alias, unsigned l
         PresenceStoreUnLock();
     }
 
-    if (ep.GetGatekeeper() && ep.GetGatekeeper()->IsRegistered()) 
-        pendingMessages = true;
+    if (!m_queueTimer.IsRunning()) {
+        PTRACE(6,"OID3\tMessage Queued");
+        m_queueTimer.SetInterval(PRETIME * 1000);
+    }
 }
 
 void H460PresenceHandler::AddInstruction(const PString & epalias, 
@@ -202,8 +202,10 @@ void H460PresenceHandler::AddInstruction(const PString & epalias,
     PostInstruction(store,instruct);
     PresenceStoreUnLock();
 
-    if (ep.GetGatekeeper() && ep.GetGatekeeper()->IsRegistered() && autoSend) 
-        pendingMessages = true;
+    if (!m_queueTimer.IsRunning() && autoSend) {
+        PTRACE(6,"OID3\tMessage Queued");
+        m_queueTimer.SetInterval(PRETIME * 1000);
+    }
 }
 
 void H460PresenceHandler::AddAuthorization(const OpalGloballyUniqueID id,
@@ -225,8 +227,10 @@ void H460PresenceHandler::AddAuthorization(const OpalGloballyUniqueID id,
     PostSubscription(store,sub);
     PresenceStoreUnLock();
 
-    if (ep.GetGatekeeper() && ep.GetGatekeeper()->IsRegistered()) 
-        pendingMessages = true;
+    if (!m_queueTimer.IsRunning()) {
+        PTRACE(6,"OID3\tMessage Queued");
+        m_queueTimer.SetInterval(PRETIME * 1000);
+    }
 }
 
 PStringList & H460PresenceHandler::GetSubscriptionList()
@@ -443,8 +447,10 @@ PBoolean H460_FeatureOID3::OnSendServiceControlIndication(H225_FeatureDescriptor
             raw.pop_front();
             if (raw.size() > 0) {
                 PTRACE(2,"OID3\tERROR: Too many elements for SCI");
+                return false;
             }
         }
+       pdu = feat;
        return true;
     }
 

@@ -122,10 +122,8 @@ class H460PresenceHandler : public H323PresenceHandler
 
 	H225_ArrayOf_GenericData genericData;
 
-	PBoolean presenceRegistration;
-	PBoolean pendingMessages;
 	PDECLARE_NOTIFIER(PTimer, H460PresenceHandler, dequeue);
-	PTimer	QueueTimer;	
+	PTimer	m_queueTimer;	
 
     H323EndPoint & ep;
     H460_FeatureOID3 * feat;
