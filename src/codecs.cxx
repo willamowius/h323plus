@@ -759,7 +759,7 @@ PBoolean H323FramedAudioCodec::Read(BYTE * buffer, unsigned & length, RTP_DataFr
     return TRUE;
   }
 
-#if 0 //PTLIB_VER >= 2110
+#ifdef H323_MEDIAENCODED
     bool lastPacket = true;
     if (rawDataChannel->SourceEncoded(lastPacket,length))
         return rawDataChannel->Read(buffer, length);
@@ -823,7 +823,7 @@ PBoolean H323FramedAudioCodec::Write(const BYTE * buffer,
         rtpInformation.m_frame = &rtpFrame;
 
 
-#if 0 //PTLIB_VER >= 290
+#ifdef H323_MEDIAENCODED
   if (rawDataChannel->DisableDecode()) {
       if (WriteRaw(rtpFrame.GetPayloadPtr(), rtpFrame.GetPayloadSize(), &rtpInformation))  {
          written = length; // pretend we wrote the data, to avoid error message

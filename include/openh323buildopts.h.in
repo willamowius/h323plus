@@ -187,7 +187,11 @@
 
 #define H323_FRAMEBUFFER 1
 
-//#define H323_PACKET_TRACE 1
+#undef H323_PACKET_TRACE
+
+#if (PTLIB_VER >= 2110)
+ #undef H323_MEDIAENCODED
+#endif
 
 #endif
 

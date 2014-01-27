@@ -1738,7 +1738,7 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
     PVideoChannel *videoIn = (PVideoChannel *)rawDataChannel;
 
 
-#if 0 //PTLIB_VER >= 2110
+#ifdef H323_MEDIAENCODED
     if (videoIn->SourceEncoded(lastPacketSent,length)) {
         int maxDataSize = 1518-14-4-8-20-16; // Max Ethernet packet (1518 bytes) minus 802.3/CRC, 802.3, IP, UDP headers
         dst.SetMinSize(maxDataSize);
@@ -1911,7 +1911,7 @@ PBoolean H323PluginVideoCodec::WriteInternal(const BYTE * /*buffer*/, unsigned l
 
   rtp.m_sessionID = rtpInformation.m_sessionID;
 
-#if PTLIB_VER >= 290
+#ifdef H323_MEDIAENCODED
   if (((PVideoChannel *)rawDataChannel)->DisableDecode()) {
       if (RenderFrame(src.GetPayloadPtr(), &rtp)) {
          written = length; // pretend we wrote the data, to avoid error message

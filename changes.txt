@@ -1,7 +1,12 @@
+===============================================================================
+H323plus 1.26.0 - 1.26.x
+===============================================================================
+
 
 ===============================================================================
-H323plus 1.25.0 - 1.25.x
+H323plus 1.25.0 - 1.25.5
 ===============================================================================
+Added H323_MEDIAENCODED compile directive to support external media decode/encode
 Added Encryption support to the H.224 Channel and H323_ExternalRTPChannel
 Performance Memory management Improvement in audio/video processing.
 Updated to compile with PTLIB Head (1.25.5)
