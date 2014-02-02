@@ -422,7 +422,7 @@ class H323Capability : public PObject
     /**Get media format of the media data this class represents.
       */
     virtual const OpalMediaFormat & GetMediaFormat() const;
-    OpalMediaFormat & GetWritableMediaFormat();
+    virtual OpalMediaFormat & GetWritableMediaFormat();
 
     /// Get the payload type for the capaibility
     RTP_DataFrame::PayloadTypes GetPayloadType() const { return rtpPayloadType; }

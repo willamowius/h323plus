@@ -318,6 +318,7 @@ public:
     /// Get the MediaFormat for this capability.
     virtual const OpalMediaFormat & GetMediaFormat() const;
 
+    virtual OpalMediaFormat & GetWritableMediaFormat();
   //@}
 
 protected:

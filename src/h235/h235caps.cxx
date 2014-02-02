@@ -365,6 +365,11 @@ const OpalMediaFormat & H323SecureRealTimeCapability::GetMediaFormat() const
    return ChildCapability.GetMediaFormat();
 }
 
+OpalMediaFormat & H323SecureRealTimeCapability::GetWritableMediaFormat()
+{
+   return ChildCapability.GetWritableMediaFormat();
+}
+
 ///////////////////////////////////////////////////////////////////////////// 
 
 H323SecureCapability::H323SecureCapability(H323Capability & childCapability,
