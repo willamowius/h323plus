@@ -3905,7 +3905,7 @@ PBoolean H323EndPoint::H46023IsEnabled()
 }
 #endif  // H323_H46023
 
-#ifdef H323_H46023
+#ifdef H323_H46025
 void H323EndPoint::H46025Enable(PBoolean enable) 
 { 
     m_h46025enabled = enable;
@@ -3931,7 +3931,7 @@ bool H323EndPoint::GetGPSInformation(H323_H46025_Message::Geodetic & /*gps*/)
 {
     return false;
 }
-#endif
+#endif  // H323_H46025
 
 #ifdef H323_FRAMEBUFFER
 void H323EndPoint::EnableVideoFrameBuffer(PBoolean enable)
