@@ -333,6 +333,14 @@ void H323SecureChannel::SetNumber(const H323ChannelNumber & num)
         m_baseChannel->SetNumber(num);
 }
 
+unsigned H323SecureChannel::GetSessionID() const
+{
+    if (m_baseChannel)
+        return m_baseChannel->GetSessionID();
+    else
+        return 0;
+}
+
 void H323SecureChannel::Receive()
 {
     if (m_baseChannel)

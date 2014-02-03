@@ -202,6 +202,8 @@ public:
 
     virtual void SetNumber(const H323ChannelNumber & num);
     virtual H323Channel::Directions GetDirection() const;
+    virtual unsigned GetSessionID() const;
+
     virtual PBoolean SetInitialBandwidth();
 
     virtual void Receive();
