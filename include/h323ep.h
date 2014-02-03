@@ -45,6 +45,10 @@
 #include "h460/h4601.h"
 #endif
 
+#ifdef H323_H46025
+#include "h460/h460_std25_pidf_lo.h"
+#endif
+
 // Add Association Support
 #ifdef H323_H461
 #include "h460/h461_base.h"
@@ -2114,6 +2118,29 @@ class H323EndPoint : public PObject
     PBoolean H46023IsEnabled();
 #endif
 
+#ifdef H323_H46025
+    /** Disable H.460.25 Feature. (By Default it is disabled)
+      */    
+    void H46025Enable(PBoolean enable);
+
+    /** Query whether we are using H.460.25
+      */
+    PBoolean H46025IsEnabled();
+
+    /** Get Device Information
+      */  
+    virtual bool GetDeviceInformation(H323_H46025_Message::Device & device);
+
+    /** Get Civic Information
+      */  
+    virtual bool GetCivicInformation(H323_H46025_Message::Civic & civic);
+
+    /** Get GPS Information
+      */  
+    virtual bool GetGPSInformation(H323_H46025_Message::Geodetic & gps);
+
+#endif
+
 #ifdef H323_H46026
     /** Disable H.460.26 Feature. (By Default it is enabled)
       */    
@@ -2905,6 +2932,10 @@ class H323EndPoint : public PObject
 
 #ifdef H323_H46023
     PBoolean m_h46023enabled;
+#endif
+
+#ifdef H323_H46023
+    PBoolean m_h46025enabled;
 #endif
 
 #ifdef H323_H46026

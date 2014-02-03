@@ -24,37 +24,42 @@
 # $Id$
 #
 
-PTLIBDIR	= /home/jan/voip_compile/opalvoip-cvs/ptlib-2.12.8
+PTLIBDIR	= @PTLIBDIR@
 ifndef OPENH323DIR
-OPENH323DIR	= /home/jan/voip_compile/h323plus-cvs/h323plus
+OPENH323DIR	= @OPENH323DIR@
 endif
-STDCCFLAGS	+= 
-LDFLAGS		+= 
-LDLIBS		+= 
-ENDLDLIBS	:=  $(ENDLDLIBS)
+STDCCFLAGS	+= @STDCCFLAGS@
+LDFLAGS		+= @LDFLAGS@
+LDLIBS		+= @LDLIBS@
+ENDLDLIBS	:= @ENDLDLIBS@ $(ENDLDLIBS)
 
-NOAUDIOCODECS        = 
-NOVIDEO	             = 
-NOTRACE	             = 
-H323_H224	     = 1
-H323_H230	     = 1
-H323_H235	     = 
-H323_H239	     = 1
-H323_H248	     = 1
-H323_H249	     = 
-H323_H341	     = 1
-H323_H350	     = 1
-H323_H450	     = 1
-H323_H460        = 1
-H323_H46018      = 1
-H323_H46019M	 = 
-H323_H46023      = 1
-H323_H501	     = 1
-H323_T38	     = 1
-H323_T120	     = 
-H323_AEC	     = 
-H323_GNUGK	     = 1
-H323_FILE	     = 1
+HAS_PTLIB_LIB_MAK=@HAS_PTLIB_LIB_MAK@
+
+NOAUDIOCODECS        = @NOAUDIOCODECS@
+NOVIDEO	             = @NOVIDEO@
+NOTRACE	             = @NOTRACE@
+H323_H224	     = @H323_H224@
+H323_H230	     = @H323_H230@
+H323_H235	     = @H323_H235@
+H323_H239	     = @H323_H239@
+H323_H248	     = @H323_H248@
+H323_H249	     = @H323_H249@
+H323_H341	     = @H323_H341@
+H323_H350	     = @H323_H350@
+H323_H450	     = @H323_H450@
+H323_H460        = @H323_H460@
+H323_H46018      = @H323_H46018@
+H323_H46019M	 = @H323_H46019M@
+H323_H46023      = @H323_H46023@
+H323_H46025      = @H323_H46025@
+H323_H46026      = @H323_H46026@
+H323_H501	     = @H323_H501@
+H323_T38	     = @H323_T38@
+H323_T120	     = @H323_T120@
+H323_AEC	     = @H323_AEC@
+H323_GNUGK	     = @H323_GNUGK@
+H323_FILE	     = @H323_FILE@
+H323_TLS	     = @H323_TLS@
 
 
 ###### new ptlib
@@ -68,19 +73,19 @@ ifdef HAS_SASL2
 HAS_OPENSSL = 1
 endif
 
-MAJOR_VERSION =1
-MINOR_VERSION =25
+MAJOR_VERSION =@MAJOR_VERSION@
+MINOR_VERSION =@MINOR_VERSION@
 #BUILD_TYPE    =.
-BUILD_NUMBER  =4
+BUILD_NUMBER  =@BUILD_NUMBER@
 
 #export to GK
-export target_os=linux
-export target_cpu=x86_64
+export target_os=@target_os@
+export target_cpu=@target_cpu@
 export OSTYPE=$(target_os)
 export PLATFORM_TYPE=$(target_cpu)
-export PTLIB_CXXFLAGS=-DP_64BIT -DPTRACING=2 -D_REENTRANT -D_GNU_SOURCE=1 -fno-exceptions -I/usr/include/SDL -I/home/jan/voip_compile/opalvoip-cvs/ptlib-2.12.8/include  
-export PT_LIBDIR=/home/jan/voip_compile/opalvoip-cvs/ptlib-2.12.8/lib_linux_x86_64
-export PW_LIBDIR=/home/jan/voip_compile/opalvoip-cvs/ptlib-2.12.8/lib_linux_x86_64
+export PTLIB_CXXFLAGS=@PTLIB_CXXFLAGS@
+export PT_LIBDIR=@PT_LIBDIR@/lib_@target_os@_@target_cpu@
+export PW_LIBDIR=@PT_LIBDIR@/lib_@target_os@_@target_cpu@
 
 endif #HAS_PTLIB_LIB_MAK
 
@@ -113,13 +118,21 @@ STDCCFLAGS += -DPASN_NOPRINTON -DPASN_LEANANDMEAN
 OH323_SUFFIX = n
 else
 ifeq (,$(findstring PTRACING,$(STDCCFLAGS)))
-ifeq ($(HAS_PTLIB_LIB_MAK), 1)
+ifeq ($(HAS_PTLIB_LIB_MAK),1)
 STDCCFLAGS += -DPTRACING
 RCFLAGS	   += -DPTRACING
 endif # HAS_PTLIB_LIB_MAK
 endif
 OH323_SUFFIX = $(OBJ_SUFFIX)
 endif # NOTRACE
+
+###### new ptlib
+ifneq ($(HAS_PTLIB_LIB_MAK),1)
+PT_OBJBASE=$(PTLIB_OBJBASE)
+ifndef OH323_SUFFIX
+OH323_SUFFIX = $(OBJ_SUFFIX)
+endif # OH323_SUFFIX
+endif # HAS_PTLIB_LIB_MAK
 
 OH323_BASE  = h323_$(PLATFORM_TYPE)_$(OH323_SUFFIX)$(LIB_TYPE)
 OH323_FILE  = lib$(OH323_BASE).$(LIB_SUFFIX)
@@ -133,7 +146,9 @@ ifdef	OH323_SUPPRESS_H235
 STDCCFLAGS  += -DOH323_SUPPRESS_H235
 endif
 
+ifneq ($(HAS_PTLIB_LIB_MAK),1)
 CFLAGS += $(STDCCFLAGS)
+endif # HAS_PTLIB_LIB_MAK
 
 $(TARGET) :	$(OH323_LIBDIR)/$(OH323_FILE)
 
@@ -148,4 +163,5 @@ endif # DEBUG
 endif # LIBRARY_MAKEFILE
 
 # End of file
+
 

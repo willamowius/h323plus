@@ -610,6 +610,8 @@
     <ClCompile Include="src\h460\h460_std18.cxx" />
     <ClCompile Include="src\h460\h460_std22.cxx" />
     <ClCompile Include="src\h460\h460_std23.cxx" />
+    <ClCompile Include="src\h460\h460_std25.cxx" />
+    <ClCompile Include="src\h460\h460_std25_pidf_lo.cxx" />
     <ClCompile Include="src\h460\h460_std26.cxx" />
     <ClCompile Include="src\h460\h460_std9.cxx" />
     <ClCompile Include="src\h460\h460p.cxx" />
@@ -1102,6 +1104,8 @@
     <ClInclude Include="include\h460\h460_std18.h" />
     <ClInclude Include="include\h460\h460_std22.h" />
     <ClInclude Include="include\h460\h460_std23.h" />
+    <ClInclude Include="include\h460\h460_std25.h" />
+    <ClInclude Include="include\h460\h460_std25_pidf_lo.h" />
     <ClInclude Include="include\h460\h460_std26.h" />
     <ClInclude Include="include\h460\h460_std9.h" />
     <ClInclude Include="include\h460\h460p.h" />

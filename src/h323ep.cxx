@@ -75,6 +75,10 @@
 #include "h460/h460_std23.h"
 #endif
 
+#ifdef H323_H46025
+#include "h460/h460_std25.h"
+#endif
+
 #ifdef H323_H46026
 #include "h460/h460_std26.h"
 #endif
@@ -785,6 +789,10 @@ H323EndPoint::H323EndPoint()
 
 #ifdef H323_H46023
   m_h46023enabled = true;
+#endif
+
+#ifdef H323_H46023
+  m_h46025enabled = false;
 #endif
 
 #ifdef H323_H46026
@@ -3896,6 +3904,34 @@ PBoolean H323EndPoint::H46023IsEnabled()
     return m_h46023enabled; 
 }
 #endif  // H323_H46023
+
+#ifdef H323_H46023
+void H323EndPoint::H46025Enable(PBoolean enable) 
+{ 
+    m_h46025enabled = enable;
+}
+
+PBoolean H323EndPoint::H46025IsEnabled() 
+{ 
+    return m_h46025enabled; 
+}
+
+bool H323EndPoint::GetDeviceInformation(H323_H46025_Message::Device & device)
+{
+    device.username = GetLocalUserName();
+    return true;
+}
+
+bool H323EndPoint::GetCivicInformation(H323_H46025_Message::Civic & /*civic*/)
+{
+    return false;
+}
+
+bool H323EndPoint::GetGPSInformation(H323_H46025_Message::Geodetic & /*gps*/)
+{
+    return false;
+}
+#endif
 
 #ifdef H323_FRAMEBUFFER
 void H323EndPoint::EnableVideoFrameBuffer(PBoolean enable)

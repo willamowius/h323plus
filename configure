@@ -641,6 +641,7 @@ H323_H460COM
 H323_H460PRE
 H323_H460P
 H323_H46026
+H323_H46025
 H323_H46023
 H323_H46019M
 H323_H46018
@@ -755,6 +756,7 @@ enable_h46017
 enable_h46018
 enable_h46019m
 enable_h46023
+enable_h46025
 enable_h46026
 enable_h460p
 enable_h460pre
@@ -1414,7 +1416,8 @@ Optional Features:
   --disable-h46018        disable H.460.18/.19
   --disable-h46019m       disable H.460.19 RTP multiplexing
   --disable-h46023        disable H.460.23/.24
-  --disable-h46026        disable H.460.26
+  --enable-h46025         enable H.460.25
+  --enable-h46026         enable H.460.26
   --enable-h460p          enable H.460 Presence
   --enable-h460pre        enable H.460 PreEmption
   --enable-h460com        enable H.460 Compat Feature
@@ -4234,6 +4237,7 @@ default_h46017=no
 default_h46018=yes
 default_h46019m=no
 default_h46023=yes
+default_h46025=no
 default_h46026=no
 default_h461=no
 default_h460p=no
@@ -4266,6 +4270,7 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_h46018=no
   default_h46019m=no
   default_h46023=no
+  default_h46025=no
   default_h46026=no
   default_h461=no
   default_hh460p=no
@@ -4755,6 +4760,25 @@ else
 $as_echo "$as_me: Disabling H.460.23/.24" >&6;}
 fi
 
+
+# Check whether --enable-h46025 was given.
+if test "${enable_h46025+set}" = set; then :
+  enableval=$enable_h46025;
+fi
+
+if test "${enable_h46025}x" = "x" ; then
+  enable_h46023=$default_h46025
+fi
+if test "$enable_h46025" = "yes" ; then
+  H323_h46025=1
+
+$as_echo "#define H323_h46025 1" >>confdefs.h
+
+else
+  H323_h46025=
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460.25" >&5
+$as_echo "$as_me: Disabling H.460.25" >&6;}
+fi
 
 
 

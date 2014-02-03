@@ -382,6 +382,12 @@
     <ClCompile Include="src\h460\h460_std22.cxx">
       <Filter>Source Files\h460</Filter>
     </ClCompile>
+    <ClCompile Include="src\h460\h460_std25.cxx">
+      <Filter>Source Files\h460</Filter>
+    </ClCompile>
+    <ClCompile Include="src\h460\h460_std25_pidf_lo.cxx">
+      <Filter>Source Files\h460</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\channels.h">
@@ -696,6 +702,12 @@
     </ClInclude>
     <ClInclude Include="include\ptlib_extras.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\h460\h460_std25.h">
+      <Filter>Header Files\h460</Filter>
+    </ClInclude>
+    <ClInclude Include="include\h460\h460_std25_pidf_lo.h">
+      <Filter>Header Files\h460</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1188,6 +1188,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\h460\h460_std25.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\src\h460\h460_std25_pidf_lo.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\src\h460\h460_std26.cxx"
 				>
 			</File>
@@ -2110,6 +2118,14 @@
 			</File>
 			<File
 				RelativePath=".\include\h460\h460_std23.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\h460\h460_std25.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\h460\h460_std25_pidf_lo.h"
 				>
 			</File>
 			<File

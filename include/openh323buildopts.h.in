@@ -150,6 +150,11 @@
         #define H323_UPnP 1
     #endif
 #endif
+
+#ifdef P_EXPAT
+    #undef H323_H46025
+#endif
+
 // Presence Feature
 #undef H323_H460P
 #ifdef H323_H460P

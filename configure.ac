@@ -211,6 +211,7 @@ default_h46017=no
 default_h46018=yes
 default_h46019m=no
 default_h46023=yes
+default_h46025=no
 default_h46026=no
 default_h461=no
 default_h460p=no
@@ -243,6 +244,7 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_h46018=no
   default_h46019m=no
   default_h46023=no
+  default_h46025=no
   default_h46026=no
   default_h461=no
   default_hh460p=no
@@ -648,6 +650,25 @@ else
   AC_MSG_NOTICE(Disabling H.460.23/.24)
 fi
 AC_SUBST(H323_H46023)
+
+dnl ########################################################################
+dnl check for disabling H.460.25
+
+dnl MSWIN_DISPLAY h46025,H.460.25
+dnl MSWIN_DEFINE  h46025,H323_H46025
+
+AC_ARG_ENABLE(h46025,
+       [  --disable-h46025        disable H.460.25])
+if test "${enable_h46025}x" = "x" ; then
+  enable_h46023=$default_h46025
+fi
+if test "$enable_h46025" = "yes" ; then
+  H323_H46025=1
+  AC_DEFINE(H323_H46025, 1, [Enable H.460.25 support])
+else
+  H323_H46025=
+  AC_MSG_NOTICE(Disabling H.460.25)
+fi
 
 dnl ########################################################################
 dnl check for disabling H.460.26
