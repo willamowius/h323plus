@@ -446,14 +446,18 @@ void H235Authenticators::PrepareSignalPDU(unsigned code,
   // other endpoints and should be passed through unchanged.
   cryptoTokens.RemoveAll();
 
+#ifdef H323_H235
   PINDEX keyLength = (max_keyLength > m_maxTokenLength) ? m_maxTokenLength : max_keyLength;
+#else
+  PINDEX keyLength = 0;
+#endif
 
   for (PINDEX i = 0; i < GetSize(); i++) {
     H235Authenticator & authenticator = (*this)[i];
      if (authenticator.IsSecuredSignalPDU(code, FALSE) &&
             authenticator.PrepareTokens(clearTokens, cryptoTokens, keyLength)) {
             PTRACE(4, "H235EP\tPrepared SignalPDU with authenticator " << authenticator);
-       }
+     }
   }
 }
 
