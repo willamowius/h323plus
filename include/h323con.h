@@ -3070,6 +3070,12 @@ class H323Connection : public PObject
 #ifdef H323_H235
   /**@name Media Encryption */
   //@{
+    /** EnableCallMediaEncryption
+        Enable media encryption for this call.
+        Override this to decide whether media encryption is to be used for this call.
+     */
+    virtual PBoolean EnableCallMediaEncryption() const { return true; }
+
     /** On Media Encryption
         Fires when an encryption media session negotiated
         Fires for each encrypted media session direction
