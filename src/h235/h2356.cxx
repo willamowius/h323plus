@@ -230,7 +230,7 @@ PBoolean H2356_Authenticator::PrepareTokens(PASN_Array & clearTokens,
     H235_DHMap::iterator i = m_dhLocalMap.begin();
     while (i != m_dhLocalMap.end()) {
         H235_DiffieHellman * dh = i->second;
-        if (!dh || (dh->GetKeyLength() > (max_keyLength/8))) {
+        if (dh && (dh->GetKeyLength() > (max_keyLength/8))) {
             i++; continue;
         }
 
@@ -239,7 +239,7 @@ PBoolean H2356_Authenticator::PrepareTokens(PASN_Array & clearTokens,
         tokens.SetSize(sz+1);
         H235_ClearToken & clearToken = tokens[sz];
         clearToken.m_tokenOID = i->first;
-        if (dh->GenerateHalfKey()) {
+        if (dh && dh->GenerateHalfKey()) {
             if (dh->GetKeySize() <= 256) {  // Key Size 2048 or smaller
                 clearToken.IncludeOptionalField(H235_ClearToken::e_dhkey);
                 H235_DHset & dhkey = clearToken.m_dhkey;
