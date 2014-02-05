@@ -341,6 +341,15 @@ unsigned H323SecureChannel::GetSessionID() const
         return 0;
 }
 
+RTP_DataFrame::PayloadTypes H323SecureChannel::GetRTPPayloadType() const
+{
+    if (m_baseChannel)
+        return m_baseChannel->GetRTPPayloadType();
+    else
+        return RTP_DataFrame::IllegalPayloadType;
+}
+
+
 void H323SecureChannel::Receive()
 {
     if (m_baseChannel)

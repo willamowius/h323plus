@@ -206,6 +206,8 @@ public:
 
     virtual PBoolean SetInitialBandwidth();
 
+    virtual RTP_DataFrame::PayloadTypes GetRTPPayloadType() const;
+
     virtual void Receive();
     virtual void Transmit();
     	
