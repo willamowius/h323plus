@@ -63,7 +63,7 @@ jitter buffer target */
 
 
 
-#if PTRACING && !defined(NO_ANALYSER)
+#ifdef H323_JITTER_ANALYSER
 
 class RTP_JitterBufferAnalyser : public PObject
 {
@@ -209,7 +209,7 @@ RTP_JitterBuffer::RTP_JitterBuffer(RTP_Session & sess,
             " (" << (currentJitterTime/8) << "ms)"
             " obj=" << this);
 
-#if PTRACING && !defined(NO_ANALYSER)
+#ifdef H323_JITTER_ANALYSER
   analyser = new RTP_JitterBufferAnalyser;
 #else
   analyser = NULL;
@@ -260,7 +260,7 @@ RTP_JitterBuffer::~RTP_JitterBuffer()
 
   bufferMutex.Signal();
 
-#if PTRACING && !defined(NO_ANALYSER)
+#ifdef H323_JITTER_ANALYSER
   PTRACE(5, "Jitter buffer analysis: size=" << bufferSize
          << " time=" << currentJitterTime << '\n' << *analyser);
   delete analyser;
@@ -444,7 +444,7 @@ PBoolean RTP_JitterBuffer::OnRead(RTP_JitterBuffer::Entry * & currentReadFrame, 
     }
   }
   
-#if PTRACING && !defined(NO_ANALYSER)
+#ifdef H323_JITTER_ANALYSER
   analyser->In(currentReadFrame->GetTimestamp(), currentDepth, preBuffering ? "PreBuf" : "");
 #endif
 
@@ -531,7 +531,7 @@ PBoolean RTP_JitterBuffer::ReadData(DWORD timestamp, RTP_DataFrame & frame)
     currentJitterTime = targetJitterTime;
     
 
-#if PTRACING && !defined(NO_ANALYSER)
+#ifdef H323_JITTER_ANALYSER
     analyser->Out(0, currentDepth, "Empty");
 #endif
     return TRUE;
@@ -576,7 +576,7 @@ PBoolean RTP_JitterBuffer::ReadData(DWORD timestamp, RTP_DataFrame & frame)
     // If oldest frame has not been in the buffer long enough, don't return anything yet
     if ((PTimer::Tick() - oldestFrame->tick).GetInterval() * 8
          < currentJitterTime / 2) {
-#if PTRACING && !defined(NO_ANALYSER)
+#ifdef H323_JITTER_ANALYSER
       analyser->Out(oldestTimestamp, currentDepth, "PreBuf");
 #endif
       return TRUE;
@@ -599,7 +599,7 @@ PBoolean RTP_JitterBuffer::ReadData(DWORD timestamp, RTP_DataFrame & frame)
   
   if (shortSilence) {
     // It is not yet time for something in the buffer
-#if PTRACING && !defined(NO_ANALYSER)
+#ifdef H323_JITTER_ANALYSER
     analyser->Out(oldestTimestamp, currentDepth, "Wait");
 #endif
     lastWriteTimestamp = 0;
@@ -609,7 +609,7 @@ PBoolean RTP_JitterBuffer::ReadData(DWORD timestamp, RTP_DataFrame & frame)
 
   // Detatch oldest packet from the list, put into parking space
   currentDepth--;
-#if PTRACING && !defined(NO_ANALYSER)
+#ifdef H323_JITTER_ANALYSER
   analyser->Out(oldestTimestamp, currentDepth, timestamp >= oldestTimestamp ? "" : "Late");
 #endif
   currentWriteFrame = oldestFrame;
@@ -814,7 +814,7 @@ PBoolean RTP_JitterBuffer::ReadData(DWORD timestamp, RTP_DataFrame & frame)
 /////////////////////////////////////////////////////////////////////////////////
 
 
-#if PTRACING && !defined(NO_ANALYSER)
+#ifdef H323_JITTER_ANALYSER
 
 RTP_JitterBufferAnalyser::RTP_JitterBufferAnalyser()
 {
