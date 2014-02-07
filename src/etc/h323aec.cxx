@@ -53,7 +53,7 @@
 
 H323Aec::H323Aec(int _clock, int _sampletime, int _buffers)
   :  m_echoState(NULL), m_preprocessState(NULL), m_clockrate(_clock),
-     m_bufferTime(_sampletime*_buffers-1), m_bufferSize(_buffers),
+     m_bufferTime(_sampletime*_buffers-1), m_bufferSize(_buffers-1),
      m_sampleTime(_sampletime), m_BufferBytes(m_sampleTime*(m_clockrate/1000)),
      m_tail(TAIL * m_BufferBytes), m_playRecDiff(0)
 {
