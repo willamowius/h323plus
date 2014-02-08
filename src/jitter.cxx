@@ -328,9 +328,10 @@ void RTP_JitterBuffer::Resume(
   }
 #endif
 
-  // otherwise create a seperate thread as per the old design
-  jitterThread = PThread::Create(PCREATE_NOTIFIER(JitterThreadMain), 0, PThread::NoAutoDeleteThread, PThread::HighestPriority, "RTP Jitter:%x",  jitterStackSize);
-  jitterThread->Resume();
+  if (!jitterThread)
+    jitterThread = PThread::Create(PCREATE_NOTIFIER(JitterThreadMain), 0, PThread::NoAutoDeleteThread, PThread::HighestPriority, "RTP Jitter:%x",  jitterStackSize);
+  else
+    jitterThread->Resume();
 }
 
 void RTP_JitterBuffer::JitterThreadMain(PThread &,  H323_INT)
