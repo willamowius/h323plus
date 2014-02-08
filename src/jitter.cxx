@@ -336,6 +336,8 @@ void RTP_JitterBuffer::Resume(
 
 void RTP_JitterBuffer::JitterThreadMain(PThread &,  H323_INT)
 {
+  PThread::Sleep(25);  // yield to allow receive thread to get going.
+
   RTP_JitterBuffer::Entry * currentReadFrame;
   PBoolean markerWarning;
 
