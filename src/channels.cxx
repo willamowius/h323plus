@@ -949,7 +949,7 @@ void H323_RTPChannel::Transmit()
     if (length == 0)
       frame.SetTimestamp(rtpTimestamp);
     else {
-      silenceStartTick = PTimer::Tick().GetMilliSeconds();
+      silenceStartTick = PTimer::Tick();
 
       // If first read frame in packet, set timestamp for it
       if (frameOffset == 0)
@@ -1139,7 +1139,7 @@ void H323_RTPChannel::Receive()
       rec_ok = codec->Write(NULL, 0, frame, rec_written);
       rtpTimestamp += codecFrameRate;
     } else {
-      silenceStartTick = PTimer::Tick().GetMilliSeconds();
+      silenceStartTick = PTimer::Tick();
 
       if (frame.GetPayloadType() == rtpPayloadType) {
         PTRACE_IF(2, consecutiveMismatches > 0,
@@ -1207,12 +1207,12 @@ void H323_RTPChannel::RemoveFilter(const PNotifier & filterFunction)
 }
 
 
-PInt64 H323_RTPChannel::GetSilenceDuration() const
+PTimeInterval H323_RTPChannel::GetSilenceDuration() const
 {
   if (silenceStartTick == 0)
     return silenceStartTick;
 
-  return PTimer::Tick().GetMilliSeconds() - silenceStartTick;
+  return PTimer::Tick() - silenceStartTick;
 }
 
 

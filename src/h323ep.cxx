@@ -598,9 +598,9 @@ H323EndPoint::H323EndPoint()
     capabilityExchangeTimeout(0, 30),       // Seconds
     logicalChannelTimeout(0, 30),           // Seconds
     requestModeTimeout(0, 30),              // Seconds
-    roundTripDelayTimeout(H64(0, 10, 0)),   // Seconds
-    roundTripDelayRate(H64(0, 0, 1)),       // Minutes
-    noMediaTimeout(H64(0, 0, 5)),           // Minutes
+    roundTripDelayTimeout(0, 10),           // Seconds
+    roundTripDelayRate(0, 0, 1),            // Minutes
+    noMediaTimeout(0, 0, 5),                // Minutes
     gatekeeperRequestTimeout(0, 5),         // Seconds
     rasRequestTimeout(0, 3),                // Seconds
     registrationTimeToLive(0, 0, 1)         // Minutes
@@ -3756,17 +3756,21 @@ unsigned H323EndPoint::GetMultiplexID()
 }
 #endif
 
-PInt64 H323EndPoint::GetNoMediaTimeout() const
+const PTimeInterval & H323EndPoint::GetNoMediaTimeout() const
 {
+  PWaitAndSignal m(noMediaMutex);
+  
   return noMediaTimeout; 
 }
 
 PBoolean H323EndPoint::SetNoMediaTimeout(PTimeInterval newInterval) 
 {
+  PWaitAndSignal m(noMediaMutex);
+
   if (newInterval < 0)
     return FALSE;
 
-  noMediaTimeout = newInterval.GetMilliSeconds(); 
+  noMediaTimeout = newInterval; 
   return TRUE; 
 }
 

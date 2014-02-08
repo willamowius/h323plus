@@ -355,8 +355,6 @@ class H323Channel : public PObject
     virtual PBoolean SetDynamicRTPPayloadType(
       int /*newType*/  ///< New RTP payload type number
       )  { return false; }
-
-    virtual PInt64 GetSilenceDuration() const { return 0; }
   //@}
 
   protected:
@@ -738,7 +736,7 @@ class H323_RTPChannel : public H323_RealTimeChannel
       const PNotifier & filterFunction
     );
 
-    virtual PInt64 GetSilenceDuration() const;
+    PTimeInterval GetSilenceDuration() const;
 
 
   protected:
@@ -749,7 +747,7 @@ class H323_RTPChannel : public H323_RealTimeChannel
     FilterList filters;
     PMutex     filterMutex;
 
-    PInt64 silenceStartTick;
+    PTimeInterval silenceStartTick;
 
     unsigned rec_written;
     PBoolean rec_ok;
