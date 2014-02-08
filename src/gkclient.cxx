@@ -1596,7 +1596,6 @@ PBoolean H323Gatekeeper::OnReceiveInfoRequest(const H225_InfoRequest & irq)
 
 PBoolean H323Gatekeeper::SendServiceControlIndication()
 {
-  PTRACE(3, "RAS\tSending Empty ServiceControlIndication");
 
   H323RasPDU pdu;
   H225_ServiceControlIndication & sci = pdu.BuildServiceControlIndication(GetNextSequenceNumber());
