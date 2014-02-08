@@ -1641,6 +1641,9 @@ PBoolean RTP_UDP::SetRemoteSocketInfo(PIPSocket::Address address, WORD port, PBo
 
 PBoolean RTP_UDP::PseudoRead(int & selectStatus)
 {
+    if (!controlSocket || !dataSocket)
+        return true;
+
 #if PTLIB_VER >= 2130
     return (((H323UDPSocket*)controlSocket)->DoPseudoRead(selectStatus) || 
             ((H323UDPSocket*)dataSocket)->DoPseudoRead(selectStatus));
