@@ -58,6 +58,9 @@
 #define H323_INT P_INT_PTR
 #endif
 
+#define H64(milliseconds, seconds, minutes) \
+     minutes*60000 + seconds*1000 + milliseconds
+
 #ifndef H323_STLDICTIONARY
 
 #define H323Dictionary  PDictionary

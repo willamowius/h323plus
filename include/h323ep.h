@@ -2552,11 +2552,11 @@ class H323EndPoint : public PObject
 
     /**Get the default timeout for H245 round trip delay negotiations.
      */
-    const PTimeInterval & GetRoundTripDelayTimeout() const { return roundTripDelayTimeout; }
+    PInt64 GetRoundTripDelayTimeout() const { return roundTripDelayTimeout; }
 
     /**Get the default rate H245 round trip delay is calculated by connection.
      */
-    const PTimeInterval & GetRoundTripDelayRate() const { return roundTripDelayRate; }
+    PInt64 GetRoundTripDelayRate() const { return roundTripDelayRate; }
 
     /**Get the flag for clearing a call if the round trip delay calculation fails.
      */
@@ -2564,7 +2564,7 @@ class H323EndPoint : public PObject
 
     /**Get the amount of time with no media that should cause call to clear
      */
-    const PTimeInterval & GetNoMediaTimeout() const;
+    PInt64 GetNoMediaTimeout() const;
 
     /**Set the amount of time with no media that should cause call to clear
      */
@@ -2784,9 +2784,9 @@ class H323EndPoint : public PObject
     PTimeInterval capabilityExchangeTimeout;
     PTimeInterval logicalChannelTimeout;
     PTimeInterval requestModeTimeout;
-    PTimeInterval roundTripDelayTimeout;
-    PTimeInterval roundTripDelayRate;
-    PTimeInterval noMediaTimeout;
+    PInt64        roundTripDelayTimeout;
+    PInt64        roundTripDelayRate;
+    PInt64        noMediaTimeout;
     PTimeInterval gatekeeperRequestTimeout;
     unsigned      gatekeeperRequestRetries;
     PTimeInterval rasRequestTimeout;
@@ -2899,7 +2899,6 @@ class H323EndPoint : public PObject
     H323ConnectionDict       connectionsActive;
 
     PMutex                   connectionsMutex;
-    PMutex                   noMediaMutex;
     PStringSet               connectionsToBeCleaned;
     H323ConnectionsCleaner * connectionsCleaner;
     PSyncPoint               connectionsAreCleaned;

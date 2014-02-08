@@ -6748,16 +6748,14 @@ void H323Connection::MonitorCallStatus()
     PBoolean oneRunning = FALSE;
     PBoolean allSilent = TRUE;
     for (PINDEX i = 0; i < logicalChannels->GetSize(); i++) {
-      H323Channel * channel = logicalChannels->GetChannelAt(i);
-      if (channel != NULL && PIsDescendant(channel, H323_RTPChannel)) {
-        if (channel->IsRunning()) {
+        H323Channel * channel = logicalChannels->GetChannelAt(i);
+        if (channel && channel->IsRunning()) {
           oneRunning = TRUE;
-          if (((H323_RTPChannel *)channel)->GetSilenceDuration() < endpoint.GetNoMediaTimeout()) {
+          if (channel->GetSilenceDuration() < endpoint.GetNoMediaTimeout()) {
             allSilent = FALSE;
             break;
           }
         }
-      }
     }
     if (oneRunning && allSilent)
       ClearCall(EndedByTransportFail);

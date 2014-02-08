@@ -836,6 +836,11 @@ void H323_RTPChannel::Transmit()
     return;
   }
 
+  if (!codec) {
+    PTRACE(3, "H323RTP\tTransmit thread terminated No Codec!");
+    return;
+  }
+
   const OpalMediaFormat & mediaFormat = codec->GetMediaFormat();
 
   // Get parameters from the codec on time and data sizes
@@ -944,7 +949,7 @@ void H323_RTPChannel::Transmit()
     if (length == 0)
       frame.SetTimestamp(rtpTimestamp);
     else {
-      silenceStartTick = PTimer::Tick();
+      silenceStartTick = PTimer::Tick().GetMilliSeconds();
 
       // If first read frame in packet, set timestamp for it
       if (frameOffset == 0)
@@ -1065,6 +1070,11 @@ void H323_RTPChannel::Receive()
     return;
   }
 
+  if (!codec) {
+    PTRACE(3, "H323RTP\tReceive thread terminated No Codec!");
+    return;
+  }
+
   const OpalMediaFormat & mediaFormat = codec->GetMediaFormat();
 
   PTRACE(2, "H323RTP\tReceive " << mediaFormat << " thread started.");
@@ -1129,7 +1139,7 @@ void H323_RTPChannel::Receive()
       rec_ok = codec->Write(NULL, 0, frame, rec_written);
       rtpTimestamp += codecFrameRate;
     } else {
-      silenceStartTick = PTimer::Tick();
+      silenceStartTick = PTimer::Tick().GetMilliSeconds();
 
       if (frame.GetPayloadType() == rtpPayloadType) {
         PTRACE_IF(2, consecutiveMismatches > 0,
@@ -1197,12 +1207,12 @@ void H323_RTPChannel::RemoveFilter(const PNotifier & filterFunction)
 }
 
 
-PTimeInterval H323_RTPChannel::GetSilenceDuration() const
+PInt64 H323_RTPChannel::GetSilenceDuration() const
 {
   if (silenceStartTick == 0)
     return silenceStartTick;
 
-  return PTimer::Tick() - silenceStartTick;
+  return PTimer::Tick().GetMilliSeconds() - silenceStartTick;
 }
 
 
