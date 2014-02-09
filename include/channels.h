@@ -160,6 +160,11 @@ class H323Channel : public PObject
      */
     virtual PBoolean SetInitialBandwidth();
 
+    /**Get the amount of time (in MS) since the last frame was received
+        By default is 0
+     */
+    virtual PInt64 GetSilenceDuration() const;
+
     /**Open the channel.
        The default behaviour just calls connection.OnStartLogicalChannel() and
        if successful sets the opened member variable.
@@ -736,7 +741,7 @@ class H323_RTPChannel : public H323_RealTimeChannel
       const PNotifier & filterFunction
     );
 
-    PTimeInterval GetSilenceDuration() const;
+    virtual PInt64 GetSilenceDuration() const;
 
 
   protected:
@@ -747,7 +752,7 @@ class H323_RTPChannel : public H323_RealTimeChannel
     FilterList filters;
     PMutex     filterMutex;
 
-    PTimeInterval silenceStartTick;
+    PInt64 silenceStartTick;
 
     unsigned rec_written;
     PBoolean rec_ok;

@@ -412,6 +412,10 @@ void H323Channel::ReplaceCapability(const H323Capability & cap)
     capability = (H323Capability *)cap.Clone(); 
 }
 
+PInt64 H323Channel::GetSilenceDuration() const
+{
+    return 0;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -661,7 +665,7 @@ H323_RTPChannel::H323_RTPChannel(H323Connection & conn,
                                  RTP_Session & r)
   : H323_RealTimeChannel(conn, cap, direction),
     rtpSession(r),
-    rtpCallbacks(*(H323_RTP_Session *)r.GetUserData()),
+    rtpCallbacks(*(H323_RTP_Session *)r.GetUserData()), silenceStartTick(0),
     rec_written(0), rec_ok(false)
 {
   PTRACE(3, "H323RTP\t" << (receiver ? "Receiver" : "Transmitter")
@@ -949,7 +953,7 @@ void H323_RTPChannel::Transmit()
     if (length == 0)
       frame.SetTimestamp(rtpTimestamp);
     else {
-      silenceStartTick = PTimer::Tick();
+      silenceStartTick = PTimer::Tick().GetMilliSeconds();
 
       // If first read frame in packet, set timestamp for it
       if (frameOffset == 0)
@@ -1139,7 +1143,7 @@ void H323_RTPChannel::Receive()
       rec_ok = codec->Write(NULL, 0, frame, rec_written);
       rtpTimestamp += codecFrameRate;
     } else {
-      silenceStartTick = PTimer::Tick();
+      silenceStartTick = PTimer::Tick().GetMilliSeconds();
 
       if (frame.GetPayloadType() == rtpPayloadType) {
         PTRACE_IF(2, consecutiveMismatches > 0,
@@ -1207,12 +1211,12 @@ void H323_RTPChannel::RemoveFilter(const PNotifier & filterFunction)
 }
 
 
-PTimeInterval H323_RTPChannel::GetSilenceDuration() const
+PInt64 H323_RTPChannel::GetSilenceDuration() const
 {
   if (silenceStartTick == 0)
     return silenceStartTick;
 
-  return PTimer::Tick() - silenceStartTick;
+  return PTimer::Tick().GetMilliSeconds() - silenceStartTick;
 }
 
 
