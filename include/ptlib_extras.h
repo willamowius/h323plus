@@ -94,8 +94,9 @@ struct PSTLSortOrder {
 template <class K, class D> class PSTLDictionary : public PObject, 
                                                   public std::map< unsigned, std::pair<K, D*>, PSTLSortOrder >
 {
-  public:
      PCLASSINFO(PSTLDictionary, PObject);
+
+  public:
   /**@name Construction */
   //@{
     /**Create a new, empty, dictionary.
@@ -381,8 +382,9 @@ inline void deleteListEntries(const E & e)
 template <class D> class PSTLList : public PObject, 
                                     public std::map< unsigned, D* , PSTLSortOrder >
 {
-  public:
      PCLASSINFO(PSTLList, PObject);
+
+  public:
   /**@name Construction */
   //@{
     /**Create a new, empty, dictionary.
