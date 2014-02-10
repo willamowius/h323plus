@@ -94,7 +94,7 @@ void H323_AECBuffer::ShutDown()
     if (this->empty()) 
         return;
 
-    std::map<unsigned, H323AEC::BufferFrame>::const_iterator it;
+    std::map<unsigned, H323AEC::BufferFrame>::iterator it;
     for (it= this->begin(); it!= this->end(); ++it)
         this->erase(it++);
 }
