@@ -845,9 +845,8 @@ PBoolean H323FramedAudioCodec::Write(const BYTE * buffer,
     }
   }
 
-  // was memset(sampleBuffer.GetPointer(samplesPerFrame), 0, );
   if (length == 0)
-    DecodeSilenceFrame(sampleBuffer.GetPointer(writeBytes), writeBytes);
+    DecodeSilenceFrame(sampleBuffer.GetPointer(), writeBytes);
 
   // Write as 16bit PCM to sound channel
   if (IsRawDataHeld) {		// If Connection om Hold 
