@@ -48,7 +48,42 @@ extern "C" {
 #include <speex/speex_preprocess.h>
 }
 
-#include <queue>
+#include <map>
+
+class H323AEC {
+public:
+    struct BufferFrame {
+        BufferFrame();
+        BufferFrame(PINDEX sz);
+        ~BufferFrame();
+
+        PInt64      receiveTime;
+        PInt64      echoTime;
+        PBYTEArray  frame;
+    };
+};
+
+class H323_AECBuffer : public std::map< unsigned, H323AEC::BufferFrame >
+{
+public:
+    H323_AECBuffer();
+    ~H323_AECBuffer();
+
+    void Initialise(PINDEX size, PINDEX byteSize, PINDEX clockRate);
+    void ShutDown();
+
+    PBoolean Send(BYTE * buffer, unsigned & length);
+    void Receive(BYTE * buffer, unsigned & length);
+
+protected:
+
+    PINDEX m_bufferTime;
+    PMutex m_bufferMutex;
+
+private:
+    unsigned m_curPos;
+};
+
 
 /** This class implements Acoustic Echo Cancellation
   * The principal is to copy to a buffer incoming audio.
@@ -90,18 +125,22 @@ public:
   //@}
 
 protected:
-  PMutex readwritemute;
-  std::queue<BufferFrame>  m_echoBuffer;
+
+  H323_AECBuffer           m_echoBuffer;
 
   SpeexEchoState * m_echoState;
   SpeexPreprocessState * m_preprocessState;
+
   unsigned m_clockrate;                      // Frame Rate default 8000hz for narrowband audio
-  unsigned m_bufferTime;                     // Time between receiving and Transmitting  
-  unsigned m_bufferSize;                     // Time between receiving and Transmitting   
-  unsigned m_sampleTime;                     // Length of each sample
+  unsigned m_samplesFrame;                   // Buffer Bytes
   unsigned m_BufferBytes;                    // Buffer Bytes
+
+  H323_AECBuffer m_buffer;
+  spx_int16_t  * m_echo_buf;                 // Buffer containing the echo
+  spx_int16_t  * m_ref_buf;                  // reference recorded sound
+  spx_int16_t  * m_temp_buf;                 // temp buffer for preprocess
+
   unsigned m_tail;                           // Tail of echo to search
-  PInt64 m_playRecDiff;                      // Sync Difference between play/record frames
 
 };
 
