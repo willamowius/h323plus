@@ -1,7 +1,11 @@
 ===============================================================================
 H323plus 1.26.0 - 1.26.x
 ===============================================================================
+BUG correct possible memory corruption when creating silence frame
+BUG ensure empty DH tokens are not created if not supported due to keylength setting
+Added H323Connection::EnableCallMediaEncryption() is allow encryption to be disabled on a call-by-call basis
 new switch H323_JITTER_ANALYSER and disabled jitter buffer logging by default.
+BUG fixes for encyption support in H323_ExternalRTPChannel
 Added H460.25 Location information support (req Expat support in PTLIB) (1.26.1)
 
 ===============================================================================
