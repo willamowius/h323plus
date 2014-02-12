@@ -26,7 +26,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $ Id $
+ * $Id$
  *
  */
 
@@ -918,7 +918,16 @@ H323StreamedAudioCodec::H323StreamedAudioCodec(const OpalMediaFormat & fmt,
                                                unsigned bits)
   : H323FramedAudioCodec(fmt, dir)
 {
-  samplesPerFrame = samples;
+
+  if (samplesPerFrame != samples) {
+    samplesPerFrame = samples;
+    readBytes = samplesPerFrame*2;
+    writeBytes = samplesPerFrame*2;
+    sampleBuffer.SetSize(samplesPerFrame*2);
+    mediaFormat.SetFrameTime(samples/bits*1000);
+    mediaFormat.SetFrameSize(samplesPerFrame*2);
+  }
+
   bytesPerFrame = (samples*bits+7)/8;
   bitsPerSample = bits;
 }
