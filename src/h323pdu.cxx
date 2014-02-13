@@ -270,7 +270,7 @@ void H323SetAliasAddress(const PString & _name, H225_AliasAddress & alias, int t
 		  name = name.Mid(eps+1);
   }
 
-  if (tag < 0 || tag == 1) {
+  if (tag < 0 /*|| tag == 1*/) {  // if h323:1234567 treat as h323-id
     if (IsE164(name)) 
         tag = H225_AliasAddress::e_dialedDigits;
     else if (IsURL(name)) 
@@ -582,7 +582,9 @@ static void BuildAuthenticatorPDU(PDUType & pdu, unsigned code, const H323Connec
   H235Authenticators authenticators = connection->GetEPAuthenticators();
 
   PINDEX keyLengthLimit = P_MAX_INDEX;
+#ifdef H323_H235
   if (!connection->EnableCallMediaEncryption())
+#endif
       keyLengthLimit = 0;
 
   H323TransportSecurity security = connection->GetTransportSecurity();
