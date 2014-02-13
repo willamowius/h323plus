@@ -189,6 +189,7 @@ void H2356_Authenticator::InitialiseCache(int cipherlength, unsigned maxTokenLen
 void H2356_Authenticator::RemoveCache()
 {
    DeleteObjectsInMap(m_dhCachedMap);
+   m_dhCachedMap.clear();
 }
 
 PBoolean H2356_Authenticator::IsMatch(const PString & identifier) const 
