@@ -115,6 +115,11 @@ PBoolean H323_AECBuffer::Send(BYTE * buffer, unsigned & length)
         return false;
     }
 
+    if (length != (unsigned)entry.frame.GetSize()) {
+        PTRACE(3,"AEC\tSend buffer size " << length << " does not match receive " << entry.frame.GetSize());
+        return false;
+    }
+
     memcpy(buffer, (const void *)entry.frame, length);
     PTRACE(6,"AEC\tPlay Pos " << m_curPos << " " << entry.receiveTime << " " << PTimer::Tick().GetMilliSeconds() - entry.echoTime);
     return true;
@@ -166,7 +171,7 @@ H323Aec::H323Aec(int _clock, int _sampletime, int _buffers)
        speex_preprocess_ctl(m_preprocessState, SPEEX_PREPROCESS_SET_DENOISE, &i);
        i=0;
        speex_preprocess_ctl(m_preprocessState, SPEEX_PREPROCESS_SET_AGC, &i);
-       i=m_clockrate;
+       i=0;
        speex_preprocess_ctl(m_preprocessState, SPEEX_PREPROCESS_SET_AGC_LEVEL, &i);
        i=0;
        speex_preprocess_ctl(m_preprocessState, SPEEX_PREPROCESS_SET_DEREVERB, &i);
