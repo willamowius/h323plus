@@ -256,7 +256,7 @@ void H323SetAliasAddress(const PString & _name, H225_AliasAddress & alias, int t
           if (type == aliasAddressTypes[i].name) {
             // if name looks like h323:user@hostport treat as url-ID
             // instead of treating as h323-ID (not removing 'h323:' prefix from alias)
-            if (tag == H225_AliasAddress::e_h323_ID && IsURL(name))
+            if (aliasAddressTypes[i].tag == H225_AliasAddress::e_h323_ID && IsURL(name))
               tag = H225_AliasAddress::e_url_ID;
             else {
               tag = aliasAddressTypes[i].tag;
