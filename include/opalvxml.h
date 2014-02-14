@@ -86,7 +86,7 @@ class G7231_File_Capability : public H323AudioCapability
 //////////////////////////////////////////////////////////////////
 
 
-#if P_EXPAT
+#ifdef P_VXML
 
 class PTextToSpeech;
 
