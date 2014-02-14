@@ -254,8 +254,14 @@ void H323SetAliasAddress(const PString & _name, H225_AliasAddress & alias, int t
         PString type = name.Left(colon);
         for (PINDEX i = 0; tag < 0 && i < 5; i++) {
           if (type == aliasAddressTypes[i].name) {
-            tag = aliasAddressTypes[i].tag;
-            name = name.Mid(colon+1);
+            // if name looks like h323:user@hostport treat as url-ID
+            // instead of treating as h323-ID (not removing 'h323:' prefix from alias)
+            if (tag == H225_AliasAddress::e_h323_ID && IsURL(name))
+              tag = H225_AliasAddress::e_url_ID;
+            else {
+              tag = aliasAddressTypes[i].tag;
+              name = name.Mid(colon+1);
+            }
           }
         }
       }
@@ -270,7 +276,8 @@ void H323SetAliasAddress(const PString & _name, H225_AliasAddress & alias, int t
 		  name = name.Mid(eps+1);
   }
 
-  if (tag < 0 /*|| tag == 1*/) {  // if h323:1234567 treat as h323-id
+  // If no address type specified guess the type
+  if (tag < 0 /*|| tag == 1*/) {
     if (IsE164(name)) 
         tag = H225_AliasAddress::e_dialedDigits;
     else if (IsURL(name)) 
