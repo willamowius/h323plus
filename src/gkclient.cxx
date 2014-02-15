@@ -50,6 +50,10 @@
 #include "h460/h4601.h"
 #endif
 
+#ifdef H323_H46017
+#include "h460/h460_std17.h"
+#endif
+
 #define new PNEW
 
 
@@ -1832,11 +1836,19 @@ PBoolean H323Gatekeeper::MakeRequest(Request & request)
       return FALSE;
     }
 
-    if (request.responseResult == Request::NoResponseReceived && 
-        endpoint.GetConnections().GetSize() > 0) {
-        PTRACE(2,"GK\tRegistration no response. Unregister deferred as on call.");
-        requestMutex.Signal();
-        return TRUE;
+    if (request.responseResult == Request::NoResponseReceived) {
+#ifdef H323_H46017
+        if (transport && PIsDescendant(transport,H46017RasTransport)) {
+            PTRACE(2,"GK\tRegistration no response. H46017 Channel shutdown?");
+            requestMutex.Signal();
+            return FALSE;
+        }
+#endif
+        if (endpoint.GetConnections().GetSize() > 0) {
+            PTRACE(2,"GK\tRegistration no response. Unregister deferred as on call.");
+            requestMutex.Signal();
+            return TRUE;
+        }
     }
     
     AlternateInfo * altInfo;
