@@ -94,10 +94,10 @@ void H460_FeatureStd26::AttachH46017(H46017Handler * m_handler)
     handler = m_handler;
 
     H323Transport * transport = m_handler->GetTransport();
-    if (transport && PIsDescendant(transport,H46017Transport))
+    if (transport && PIsDescendant(transport,H46017Transport)) {
         ((H46017Transport *)transport)->SetTunnel(&h46026mgr);
-
-    isSupported = true;
+        isSupported = true;
+    }
 }
 
 void H460_FeatureStd26::AttachNatMethod(PNatMethod_H46026 * _method)
