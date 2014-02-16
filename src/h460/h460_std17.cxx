@@ -90,9 +90,12 @@ static PBoolean FindRoutes(const PString & domain, std::vector<std::pair<LookupR
     if (sec && sec->IsTLSEnabled()) {
         H323TransportSecurity tls;
         tls.EnableTLS(true);
-        FindSRVRecords(secureRoute, domain, "_h323rst._tcp.");
+        FindSRVRecords(secureRoute, domain, "_h323rs-sec._tcp.");
         for (r = secureRoute.begin(); r != secureRoute.end(); ++r)
            routes.push_back(std::make_pair(*r,tls));
+
+        if (routes.size() > 0)
+            return true;
     }
         
     std::vector<LookupRecord> route;
@@ -101,7 +104,7 @@ static PBoolean FindRoutes(const PString & domain, std::vector<std::pair<LookupR
     for (r = route.begin(); r != route.end(); ++r)
        routes.push_back(std::make_pair(*r,unsecure));
 
-    return routes.size() != 0;
+    return routes.size() > 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -203,6 +206,14 @@ PBoolean H460_FeatureStd17::InitialiseTunnel(const H323TransportAddress & remote
        m_handler = new H46017Handler(*EP, remoteAddr);
 
     return m_handler->CreateNewTransport(sec);
+}
+
+void H460_FeatureStd17::UnInitialise()
+{
+    if (m_handler) {
+        delete m_handler;
+        m_handler = NULL;
+    }
 }
 
 

@@ -77,6 +77,8 @@ public:
     virtual PBoolean Initialise(const PString & remoteAddr = PString(), PBoolean srv = true);
     virtual PBoolean Initialise(H323TransportSecurity * sec, const PString & remoteAddr = PString(), PBoolean srv = true);
 
+    virtual void UnInitialise();
+
     H46017Handler * GetHandler() { return m_handler; }
 
 protected:
