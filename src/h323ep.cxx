@@ -774,7 +774,8 @@ H323EndPoint::H323EndPoint()
   disableH460 = false;
 
 #ifdef H323_H46017
-  m_registeredWithH46017 = false;	// set to true when gatekeeper accepts it
+  m_tryingH46017 = false;           // set to true when attempting H.460.17
+  m_registeredWithH46017 = false;   // set to true when gatekeeper accepts it
   m_h46017Transport = NULL;
 #endif
 
@@ -1280,6 +1281,13 @@ PBoolean H323EndPoint::RemoveGatekeeper(int reason)
   delete gatekeeper;
   gatekeeper = NULL;
 
+#ifdef H323_H46017
+  if (m_registeredWithH46017) {
+       H460_FeatureStd17 * h46017 = (H460_FeatureStd17 *)features.GetFeature(17);
+       if(h46017)
+           h46017->UnInitialise();
+  }
+#endif
   return ok;
 }
 
@@ -3819,13 +3827,16 @@ PBoolean H323EndPoint::H46017CreateConnection(const PString & gatekeeper, PBoole
        return false;
    }
 
+   m_tryingH46017 = true;
    registrationTimeToLive = PTimeInterval(0, 19);
    m_registeredWithH46017 = h46017->Initialise(&m_transportSecurity, gatekeeper, useSRV);
    if (!m_registeredWithH46017) {
        PTRACE(4, "H.460.17 Gatekeeper connection failed");
+       m_tryingH46017 = false;
        return false;
    }
 
+   m_tryingH46017 = false;
    m_h46017Transport = h46017->GetHandler()->GetTransport();
 
    // We are registered so we need to create the media tunnelling. 

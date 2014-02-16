@@ -2068,6 +2068,7 @@ class H323EndPoint : public PObject
                                );
 
     PBoolean RegisteredWithH46017() const { return m_registeredWithH46017; }
+    PBoolean TryingWithH46017() const { return m_tryingH46017; }
     H323Transport * GetH46017Transport() { return m_h46017Transport; }
 #endif
 
@@ -2917,6 +2918,7 @@ class H323EndPoint : public PObject
     PBoolean disableH460;
 
 #ifdef H323_H46017
+    PBoolean m_tryingH46017;
     PBoolean m_registeredWithH46017;
     H323Transport * m_h46017Transport;
 #endif
