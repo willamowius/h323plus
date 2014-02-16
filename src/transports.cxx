@@ -983,8 +983,25 @@ void H323Transport::PrintOn(ostream & strm) const
 PBoolean H323Transport::Read(void * buf, PINDEX len)
 {
 #ifdef H323_TLS
-    if (m_secured)
-        return PSSLChannel::Read(buf,len);
+    if (m_secured) {
+#if PTLIB_VER < 2120
+        ssl_st * m_ssl = ssl;
+#endif
+        PBoolean ret = false;
+        do {
+            ret = PSSLChannel::Read(buf,len);
+            if (!ret) {
+                int err = SSL_get_error(m_ssl, ret);
+                switch (err) {
+                    case SSL_ERROR_WANT_READ:
+                        break;
+                    default:
+                        return false;
+                }
+            }
+        } while (!ret);
+       return true;
+    }
     else
 #endif
         return PIndirectChannel::Read(buf,len);
@@ -993,8 +1010,25 @@ PBoolean H323Transport::Read(void * buf, PINDEX len)
 PBoolean H323Transport::Write(const void * buf, PINDEX len)
 {
 #ifdef H323_TLS
-    if (m_secured)
-        return PSSLChannel::Write(buf,len);
+    if (m_secured) {
+#if PTLIB_VER < 2120
+        ssl_st * m_ssl = ssl;
+#endif
+        PBoolean ret = false;
+        do {
+            ret =  PSSLChannel::Write(buf,len);
+            if (!ret) {
+                int err = SSL_get_error(m_ssl, ret);
+                switch (err) {
+                case SSL_ERROR_WANT_WRITE:
+                        break;
+                    default:
+                        return false;
+                }
+            }
+        } while (!ret);
+       return true;
+    }
     else
 #endif
         return PIndirectChannel::Write(buf,len);
