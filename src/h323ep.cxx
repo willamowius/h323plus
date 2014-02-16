@@ -3975,18 +3975,18 @@ PBoolean H323EndPoint::H46025IsEnabled()
     return m_h46025enabled; 
 }
 
-bool H323EndPoint::GetDeviceInformation(H323_H46025_Message::Device & device)
+bool H323EndPoint::H46025DeviceInformation(H323_H46025_Message::Device & device)
 {
     device.username = GetLocalUserName();
     return true;
 }
 
-bool H323EndPoint::GetCivicInformation(H323_H46025_Message::Civic & /*civic*/)
+bool H323EndPoint::H46025CivicInformation(H323_H46025_Message::Civic & /*civic*/)
 {
     return false;
 }
 
-bool H323EndPoint::GetGPSInformation(H323_H46025_Message::Geodetic & /*gps*/)
+bool H323EndPoint::H46025GPSInformation(H323_H46025_Message::Geodetic & /*gps*/)
 {
     return false;
 }

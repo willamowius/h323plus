@@ -2142,15 +2142,15 @@ class H323EndPoint : public PObject
 
     /** Get Device Information
       */  
-    virtual bool GetDeviceInformation(H323_H46025_Message::Device & device);
+    virtual bool H46025DeviceInformation(H323_H46025_Message::Device & device);
 
     /** Get Civic Information
       */  
-    virtual bool GetCivicInformation(H323_H46025_Message::Civic & civic);
+    virtual bool H46025CivicInformation(H323_H46025_Message::Civic & civic);
 
     /** Get GPS Information
       */  
-    virtual bool GetGPSInformation(H323_H46025_Message::Geodetic & gps);
+    virtual bool H46025GPSInformation(H323_H46025_Message::Geodetic & gps);
 
 #endif
 

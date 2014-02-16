@@ -205,15 +205,15 @@ void H460_FeatureStd25::OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor &
 PBoolean H460_FeatureStd25::Build_PIDF_LO_Message(const PString & message)
 {
     H323_H46025_Message::Device device;
-    if (EP && EP->GetDeviceInformation(device)) {
+    if (EP && EP->H46025DeviceInformation(device)) {
         H323_H46025_Message myDevice(device);
 
         H323_H46025_Message::Civic civic;
-        if (EP->GetCivicInformation(civic)) 
+        if (EP->H46025CivicInformation(civic)) 
             myDevice.AddCivic(civic);
 
         H323_H46025_Message::Geodetic gps;
-        if (EP->GetGPSInformation(gps))
+        if (EP->H46025GPSInformation(gps))
             myDevice.AddGeodetic(gps);
 
         return true;
