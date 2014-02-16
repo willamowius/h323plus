@@ -1,6 +1,7 @@
 ===============================================================================
 H323plus 1.26.0 - 1.26.x
 ===============================================================================
+NEW H323EndPoint::H46023NatMethodSelection to better co-ordinate when to use NAT method. 
 BUG fixes to H.460.17 especially when using TLS transport. 
 NEW AEC Implementation using fixed size ring buffer (1.26.2)
 BUG correct possible memory corruption when creating silence frame

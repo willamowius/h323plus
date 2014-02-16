@@ -131,6 +131,11 @@ PBoolean H460_FeatureStd26::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
     if (!handler)  // if no h46017 handler then no H460.26 support.
         return false;
 
+#ifdef H323_H46023
+    if (!EP->H46023NatMethodSelection(GetFeatureName()[0]))
+        return false;
+#endif
+
     // Build Message
     H460_FeatureStd feat = H460_FeatureStd(26); 
     pdu = feat;

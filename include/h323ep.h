@@ -2117,6 +2117,18 @@ class H323EndPoint : public PObject
     /** Query whether we are using H.460.23
       */
     PBoolean H46023IsEnabled();
+
+    /** Based on the available information select the appropriate NAT Method.
+        if H.460.17 for signalling and H.460.23 NAT test == blocked then H.460.26 (tunnel in signalling)
+        if H.460.17 for signalling and H.460.23 NAT test == blocked but Alternate (UPnP) then H.460.24 (directMedia)
+    `   If H.460.17 for signalling and H.460.23 NAT test <> blocked then H.460.19 (classic H.460.18/.19)
+
+        if H.460.18 for signalling and H.460.23 NAT test <> blocked then H.460.24 available
+        if H.460.18 for signalling and H.460.23 NAT test == blocked then Media failure!
+
+        Override to change implementors logic
+      */
+    virtual PBoolean H46023NatMethodSelection(const PString & method);
 #endif
 
 #ifdef H323_H46025

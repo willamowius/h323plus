@@ -551,7 +551,7 @@ void H460_FeatureStd23::StartSTUNTest(const PString & server)
 
 bool H460_FeatureStd23::IsAvailable()
 {
-    return isavailable;
+    return isEnabled;
 }
 
 #if H323_UPnP
@@ -625,6 +625,11 @@ bool H460_FeatureStd23::UseAlternate()
     return (useAlternate == 1);
 }
 
+bool H460_FeatureStd23::IsUDPAvailable()
+{
+    return (natType < PSTUNClient::BlockedNat);
+}
+
 ///////////////////////////////////////////////////////////////////
 
 
@@ -669,6 +674,11 @@ PBoolean H460_FeatureStd24::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
     // Ignore if already not enabled or manually using STUN
     if (!isEnabled) 
         return FALSE;
+
+#ifdef H323_H46023
+    if (!EP->H46023NatMethodSelection(GetFeatureName()[0]))
+        return false;
+#endif
 
     PWaitAndSignal m(h460mute);
 

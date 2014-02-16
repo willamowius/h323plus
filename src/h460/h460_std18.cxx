@@ -232,6 +232,13 @@ PBoolean H460_FeatureStd19::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
     if (!isEnabled || !isAvailable)
         return false;
 
+#ifdef H323_H46023
+    if (!EP->H46023NatMethodSelection(GetFeatureName()[0])) {
+        isAvailable = false;
+        return false;
+    }
+#endif
+
 #ifdef H323_H46026
     if (CON->H46026IsMediaTunneled()) {
         isAvailable = false;

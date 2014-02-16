@@ -3914,6 +3914,54 @@ PBoolean H323EndPoint::H46023IsEnabled()
 { 
     return m_h46023enabled; 
 }
+
+PBoolean H323EndPoint::H46023NatMethodSelection(const PString & method)
+{
+    if (!gatekeeper)
+        return false;
+
+    H460_FeatureStd23 * h46023 = (H460_FeatureStd23 *)GetGatekeeper()->GetFeatures().GetFeature(23);
+    if (!h46023 || !h46023->IsAvailable()) {
+        PTRACE(4,"EP\tH.460.23 Not in use cannot verify media method");
+        return true;
+    }
+    PBoolean udpAvailable = h46023->IsUDPAvailable();  // Whether STUN reports UDP ports open
+
+#ifdef H323_H46017
+    if (RegisteredWithH46017()) {
+        // TODO There is a bug in GnuGk which prevents H.460.24 interworking with H.460.17 Uncomment once resolved - SH
+/*      PBoolean useAlternate = h46023->UseAlternate();    // Whether alternate (UPnP) is available
+        if (useAlternate) {
+            if (method == "Std24" || method == "Std19") {
+                PTRACE(4,"EP\tRegistered with H.460.17 and alternate available select " << method << " for media");
+                return true;
+            } else {
+                PTRACE(4,"EP\tRegistered with H.460.17 Method " << method << " disabled as using H.460.24 (alternate)" );
+                return false;
+            }
+        } else */
+        if (udpAvailable) {
+            if (method == "Std19") {
+                PTRACE(4,"EP\tRegistered with H.460.17 and UDP available select " << method << " for media");
+                return true;
+            } else {
+                PTRACE(4,"EP\tRegistered with H.460.17 Method " << method << " disabled.");
+                return false;
+            }
+        } else if (method == "Std26") {
+            PTRACE(4,"EP\tRegistered with H.460.17 and no UDP available select " << method << " for media");
+            return true;
+        } else {
+            PTRACE(4,"EP\tRegistered with H.460.17 Method " << method << " disabled as UDP Not Available" );
+            return false;
+        }
+    }
+#endif
+    if (udpAvailable)
+        return true;
+    else
+        return false;
+}
 #endif  // H323_H46023
 
 #ifdef H323_H46025

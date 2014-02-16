@@ -191,6 +191,7 @@ public:
     void OnNATTypeDetection(PSTUNClient::NatTypes type, const PIPSocket::Address & ExtIP);
 
     bool IsAvailable();
+    bool IsUDPAvailable();
 
     bool AlternateNATMethod();
     bool UseAlternate();
