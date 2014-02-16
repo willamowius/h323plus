@@ -2522,51 +2522,59 @@ H323Connection::CallEndReason H323Connection::SendSignalSetup(const PString & al
   if (H323SetLanguages(localLanguages, setup.m_language))
      setup.IncludeOptionalField(H225_Setup_UUIE::e_language);
 
-  if (gatekeeper != NULL) {
-      if (signallingChannel->InitialiseSecurity(&m_transportSecurity) &&
-          !m_transportSecurity.GetRemoteTLSAddress().IsEmpty()) {
-          gatekeeperRoute = m_transportSecurity.GetRemoteTLSAddress();
-          PTRACE(4, "H225\tChanged remote address to secure " << gatekeeperRoute);
+#ifdef H323_H46017
+  if (endpoint.RegisteredWithH46017()) {
+       Unlock();
+  } else
+#endif
+  {
+      if (gatekeeper != NULL) {
+          if (signallingChannel->InitialiseSecurity(&m_transportSecurity) &&
+              !m_transportSecurity.GetRemoteTLSAddress().IsEmpty()) {
+              gatekeeperRoute = m_transportSecurity.GetRemoteTLSAddress();
+              PTRACE(4, "H225\tChanged remote address to secure " << gatekeeperRoute);
+          }
+      } 
+        
+      if (!signallingChannel->IsOpen() && !signallingChannel->SetRemoteAddress(gatekeeperRoute)) {
+        PTRACE(1, "H225\tInvalid "
+               << (gatekeeperRoute != address ? "gatekeeper" : "user")
+               << " supplied address: \"" << gatekeeperRoute << '"');
+        connectionState = AwaitingTransportConnect;
+        return EndedByConnectFail;
+      }
+
+      // Do the transport connect
+      connectionState = AwaitingTransportConnect;
+
+
+      // Release the mutex as can deadlock trying to clear call during connect.
+      Unlock();
+
+      PBoolean connectFailed = false;
+      if (!signallingChannel->IsOpen()) {
+        signallingChannel->SetWriteTimeout(100);
+        connectFailed = !signallingChannel->Connect();
+      }
+
+      // See if transport connect failed, abort if so.
+      if (connectFailed) {
+        connectionState = NoConnectionActive;
+        switch (signallingChannel->GetErrorNumber()) {
+          case ENETUNREACH :
+            return EndedByUnreachable;
+          case ECONNREFUSED :
+            return EndedByNoEndPoint;
+          case ETIMEDOUT :
+            return EndedByHostOffline;
+        }
+        return EndedByConnectFail;
       }
   } 
-    
-  if (!signallingChannel->IsOpen() && !signallingChannel->SetRemoteAddress(gatekeeperRoute)) {
-    PTRACE(1, "H225\tInvalid "
-           << (gatekeeperRoute != address ? "gatekeeper" : "user")
-           << " supplied address: \"" << gatekeeperRoute << '"');
-    connectionState = AwaitingTransportConnect;
-    return EndedByConnectFail;
-  }
-
-  // Do the transport connect
-  connectionState = AwaitingTransportConnect;
-
-  // Release the mutex as can deadlock trying to clear call during connect.
-  Unlock();
-
-  PBoolean connectFailed = false;
-  if (!signallingChannel->IsOpen()) {
-    signallingChannel->SetWriteTimeout(100);
-    connectFailed = !signallingChannel->Connect();
-  }
 
   // Lock while checking for shutting down.
   if (!Lock())
     return EndedByCallerAbort;
-
-  // See if transport connect failed, abort if so.
-  if (connectFailed) {
-    connectionState = NoConnectionActive;
-    switch (signallingChannel->GetErrorNumber()) {
-      case ENETUNREACH :
-        return EndedByUnreachable;
-      case ECONNREFUSED :
-        return EndedByNoEndPoint;
-      case ETIMEDOUT :
-        return EndedByHostOffline;
-    }
-    return EndedByConnectFail;
-  }
 
   PTRACE(3, "H225\tSending Setup PDU");
   connectionState = AwaitingSignalConnect;
