@@ -4025,7 +4025,7 @@ static void SetRFC2833PayloadType(H323Capabilities & capabilities,
 void H323Connection::OnSendCapabilitySet(H245_TerminalCapabilitySet & /*pdu*/)
 {
   // If we originated call, then check for RFC2833 capability and set payload type
-  if (!callAnswered)
+  if (!callAnswered && rfc2833handler)
     SetRFC2833PayloadType(localCapabilities, *rfc2833handler);
 }
 
@@ -4083,7 +4083,7 @@ PBoolean H323Connection::OnReceivedCapabilitySet(const H323Capabilities & remote
         capabilityExchangeProcedure->Start(FALSE);
 
       // If we terminated call, then check for RFC2833 capability and set payload type
-      if (callAnswered)
+      if (callAnswered && rfc2833handler)
         SetRFC2833PayloadType(remoteCapabilities, *rfc2833handler);
     }
   }
@@ -4804,7 +4804,7 @@ PBoolean H323Connection::OnStartLogicalChannel(H323Channel & channel)
       PIsDescendant(&channel, H323_RTPChannel)) {
     H323_RTPChannel & rtp = (H323_RTPChannel &)channel;
     if (channel.GetNumber().IsFromRemote()) {
-      if (rfc2833InBandDTMF)
+      if (rfc2833InBandDTMF && rfc2833handler)
         rtp.AddFilter(rfc2833handler->GetReceiveHandler());
 
       if (detectInBandDTMF) {
@@ -4813,7 +4813,7 @@ PBoolean H323Connection::OnStartLogicalChannel(H323Channel & channel)
           codec->AddFilter(PCREATE_NOTIFIER(OnUserInputInBandDTMF));
       }
     }
-    else if (rfc2833InBandDTMF)
+    else if (rfc2833InBandDTMF && rfc2833handler)
       rtp.AddFilter(rfc2833handler->GetTransmitHandler());
   }
 
