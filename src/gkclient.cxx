@@ -767,7 +767,13 @@ PBoolean H323Gatekeeper::OnReceiveUnregistrationRequest(const H225_Unregistratio
   registrationFailReason = UnregisteredByGatekeeper;
 //  timeToLive = 0; // zero disables lightweight RRQ
 
-  if (urq.HasOptionalField(H225_UnregistrationRequest::e_alternateGatekeeper)) {
+  PBoolean retryRegister = true;
+#ifdef H323_H460PRE
+  if (endpoint.IsPreempted())
+      retryRegister = false;
+#endif
+
+  if (retryRegister && urq.HasOptionalField(H225_UnregistrationRequest::e_alternateGatekeeper)) {
     SetAlternates(urq.m_alternateGatekeeper, FALSE);
     if (alternates.GetSize() > 0) {
         PTRACE(2, "RAS\tTry Alternate Gatekeepers");
@@ -779,7 +785,7 @@ PBoolean H323Gatekeeper::OnReceiveUnregistrationRequest(const H225_Unregistratio
   response.BuildUnregistrationConfirm(urq.m_requestSeqNum);
   PBoolean ok = WritePDU(response);
 
-  if (autoReregister) {
+  if (retryRegister && autoReregister) {
     PTRACE(3, "RAS\tReregistering by setting timeToLive");
     reregisterNow = TRUE;
     monitorTickle.Signal();

@@ -144,6 +144,7 @@ void H460_FeatureOID6::OnReceiveUnregistrationRequest(const H225_FeatureDescript
     if (feat.Contains(preNotOID))   // Preemption notification
              EP->OnNotifyPreempt(true);
 
+    EP->SetPreempted(true);
 }
 
 #ifdef _MSC_VER

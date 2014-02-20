@@ -811,6 +811,7 @@ H323EndPoint::H323EndPoint()
 #ifdef H323_H460PRE
     m_regPrior=0;
     m_preempt=false;
+    m_preempted=false;
 #endif
 
 #ifdef H323_H461
@@ -4295,11 +4296,23 @@ PBoolean H323EndPoint::GetPreempt()
 
 void H323EndPoint::SetPreempt(PBoolean topreempt) 
 { 
-    m_preempt = topreempt; 
+    m_preempt = topreempt;
+    m_preempted = false;
+}
+
+PBoolean H323EndPoint::IsPreempted() 
+{ 
+    return m_preempted; 
+}
+
+void H323EndPoint::SetPreempted(PBoolean ispreempted) 
+{ 
+    m_preempted = ispreempted; 
 }
 
 void H323EndPoint::PreemptRegistration()
 {
+    // Pre-empt the other registration
     if (gatekeeper) {
         SetPreempt(true);
         InternalRegisterGatekeeper(gatekeeper, true);

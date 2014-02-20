@@ -2288,9 +2288,17 @@ class H323EndPoint : public PObject
       */
     PBoolean GetPreempt();
 
-    /** Set Preempt
+    /** Set to Preempt other registration
       */
     void SetPreempt(PBoolean topreempt);
+
+    /** Set this registration to be Preempted
+      */
+    void SetPreempted(PBoolean ispreempted);
+
+    /** Is this registration Preempted
+      */
+    PBoolean IsPreempted(); 
 
     /**Prempt the previous registration
       */
@@ -2967,6 +2975,7 @@ class H323EndPoint : public PObject
 #ifdef H323_H460PRE
 	unsigned m_regPrior;
 	PBoolean m_preempt;
+    PBoolean m_preempted;
 #endif
 
 #ifdef H323_H461
