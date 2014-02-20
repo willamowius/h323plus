@@ -215,10 +215,6 @@ private:
     PBoolean                 isEnabled; 
     int                      useAlternate;
 
-    // Delayed Reregistration
-    PThread  *  RegThread;
-    PDECLARE_NOTIFIER(PThread, H460_FeatureStd23, RegMethod);
-
 };
 
 // Need to declare for Factory Loader

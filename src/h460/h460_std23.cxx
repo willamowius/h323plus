@@ -344,7 +344,7 @@ H460_FeatureStd23::H460_FeatureStd23()
   externalIP = PIPSocket::GetDefaultIpAny();
   useAlternate = 0;
   natNotify = false;
-  RegThread = NULL;
+
 }
 
 H460_FeatureStd23::~H460_FeatureStd23()
@@ -572,14 +572,6 @@ bool H460_FeatureStd23::IsAlternateAvailable(PString & name)
 #endif
 
 void H460_FeatureStd23::DelayedReRegistration()
-{
-     RegThread = PThread::Create(PCREATE_NOTIFIER(RegMethod), 0,
-                    PThread::AutoDeleteThread,
-                    PThread::NormalPriority,
-                    "regmeth23");
-}
-
-void H460_FeatureStd23::RegMethod(PThread &,  H323_INT)
 {
     PThread::Sleep(1000);
     EP->ForceGatekeeperReRegistration();  // We have an ALG so notify the gatekeeper   
