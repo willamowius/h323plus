@@ -150,6 +150,12 @@ PBoolean H460_FeatureStd22::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu
     if (!EP || !EP->GetTransportSecurity()->HasSecurity())
         return false;
 
+#ifdef H323_H46017
+    // H.460.22 is incompatible with H.460.17
+    if (EP->TryingWithH46017() || EP->RegisteredWithH46017())
+        return false;
+#endif
+
     isEnabled = false;
     H460_FeatureStd feat = H460_FeatureStd(22);  
     BuildFeature(EP->GetTransportSecurity(), EP, feat, false);
