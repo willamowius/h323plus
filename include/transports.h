@@ -636,6 +636,14 @@ class H323Transport : public PIndirectChannel
     /**Do SSL Accept handshake
       */
     virtual PBoolean SecureAccept() { return false; }
+
+   /**Whether the call has been established
+     */
+    virtual PBoolean IsCallEstablished() { return m_established; }
+
+    /**Set Call established
+     */
+    virtual void SetCallEstablished() { m_established = true; }
   //@}
 
   /**@name Member variable access */
@@ -677,6 +685,7 @@ class H323Transport : public PIndirectChannel
     PBoolean canGetInterface;
 
     PBoolean    m_secured;     /// Whether the channel is secure.
+    PBoolean    m_established; /// Whether the call is established.
 };
 
 

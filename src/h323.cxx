@@ -4257,6 +4257,10 @@ void H323Connection::InternalEstablishedConnectionCheck()
     OnSelectLogicalChannels();
 
   connectionState = EstablishedConnection;
+
+  if (signallingChannel)
+      signallingChannel->SetCallEstablished();
+
   OnEstablished();
 }
 

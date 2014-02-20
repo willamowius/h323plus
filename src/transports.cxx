@@ -953,11 +953,11 @@ H323Listener * H323ListenerList::GetTLSListener() const
 
 #ifdef H323_TLS
 H323Transport::H323Transport(H323EndPoint & end, PSSLContext * _context, PBoolean autoDeleteContext)
-  : PSSLChannel(_context, autoDeleteContext), endpoint(end), m_secured(false)
+  : PSSLChannel(_context, autoDeleteContext), endpoint(end), m_secured(false), m_established(false)
 {
 #else
 H323Transport::H323Transport(H323EndPoint & end)
-  : endpoint(end), m_secured(false)
+  : endpoint(end), m_secured(false), m_established(false)
 {
 #endif
   thread = NULL;
@@ -1933,7 +1933,6 @@ PBoolean H323TransportTCP::Connect()
 
   return OnOpen();
 }
-
 
 H323Transport * H323TransportTCP::CreateControlChannel(H323Connection & connection)
 {
