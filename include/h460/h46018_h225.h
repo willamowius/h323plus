@@ -154,7 +154,7 @@ class H46018Transport  : public H323TransportTCP
 
     virtual PBoolean IsListening() const;
 
-    virtual PBoolean IsOpen () const;
+    virtual PBoolean IsOpen() const;
 
     PBoolean CloseTransport() { return closeTransport; };
 
