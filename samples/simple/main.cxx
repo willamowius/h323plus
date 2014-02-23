@@ -125,6 +125,7 @@ void SimpleH323Process::Main()
             "-tls-cert:"
             "-tls-privkey:"
             "-tls-passphrase:"
+            "-tls-listenport:"
 #endif
 #ifdef P_HAS_IPV6
              "-ipv6."
@@ -179,6 +180,7 @@ void SimpleH323Process::Main()
             "     --tls-cert           : TLS Certificate File.\n"
             "     --tls-privkey        : TLS Private Key File.\n"
             "     --tls-passphrase     : TLS Private Key PassPhrase.\n"
+            "     --tls-listenport     : TLS listen port (default: 1300).\n"
 #endif
 #ifdef P_HAS_IPV6
             "     --ipv6               : Enable IPv6 Support.\n"
@@ -568,8 +570,9 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
                 passphrase = args.GetOptionString("tls-passphrase");
             useTLS = TLS_SetPrivateKey(args.GetOptionString("tls-privkey"), passphrase);
         }
+		WORD tlsListenPort = (WORD)args.GetOptionString("tls-listenport", "1300").AsUnsigned();
 
-        if (useTLS && TLS_Initialise(interfaceAddress)) {
+        if (useTLS && TLS_Initialise(interfaceAddress, tlsListenPort)) {
             cout << "Enabled TLS signal security." << endl;
         } else {
             cerr << "Could not enable TLS signal security." << endl;
