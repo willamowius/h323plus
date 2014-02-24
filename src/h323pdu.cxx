@@ -1185,20 +1185,20 @@ PBoolean H323SignalPDU::Read(H323Transport & transport)
 {
   PBYTEArray rawData;
   if (!transport.ReadPDU(rawData)) {
-    if (transport.GetErrorCode(PChannel::LastReadError) != PChannel::Timeout) {
-        PTRACE(1, "H225\tRead error (" << transport.GetErrorNumber(PChannel::LastReadError)
-                                 << "): " << transport.GetErrorText(PChannel::LastReadError));
-         if (transport.IsCallEstablished() && !transport.IsTransportSecure()) {
+
+     PTRACE(1, "H225\tRead error (" << transport.GetErrorNumber(PChannel::LastReadError)
+                             << "): " << transport.GetErrorText(PChannel::LastReadError));
+
+    if (transport.IsCallEstablished() && !transport.IsTransportSecure() &&
+        transport.GetErrorCode(PChannel::LastReadError) != PChannel::Timeout) {
              // TODO: consult connection.HandleSignalChannelFailure() and disconnect or continue
              // this happens many minutes after the network connection is cut!
              PTRACE(1, "H225\tTCP Socket could not reconnect. Proceed without channel.");
              PThread::Sleep(100);
-         } else 
-             return false;
+             return true;
     }
-    return true;
+    return false;
   }
-
   return ProcessReadData(transport, rawData);
 }
 
