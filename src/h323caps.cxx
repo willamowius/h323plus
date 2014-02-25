@@ -2193,9 +2193,19 @@ PBoolean H323CodecExtendedVideoCapability::OnReceivedPDU(const H245_VideoCapabil
             return FALSE;
         }
         const PASN_Integer & role = param.m_parameterValue;
-        if (role.GetValue() != 1) {
-            PTRACE(4,"H239\tERROR: Unsupported Role mode " << param.m_parameterValue );
-            return FALSE;
+        switch (role.GetValue()) {
+            case 1:
+                PTRACE(4,"H239\tRole mode Presentation supported");
+                break;
+            case 2:
+                PTRACE(4,"H239\tRole mode Live supported");
+                break;
+            case 3:
+                PTRACE(4,"H239\tRole mode Live and Presentation supported");
+                break;
+            default:
+                PTRACE(4,"H239\tERROR: Unsupported Role mode " << param.m_parameterValue );
+                return FALSE;
         }
     }
   }

@@ -1,6 +1,8 @@
 ===============================================================================
 H323plus 1.26.0 - 1.26.x
 ===============================================================================
+BUG H.239 Support both presentation and live modes
+BUG Better handle TCP connection timeout or non H.323 messages sent to listener port, 
 NEW H323EndPoint::H46023NatMethodSelection to better co-ordinate when to use NAT method. 
 BUG fixes to H.460.17 especially when using TLS transport. 
 NEW AEC Implementation using fixed size ring buffer (1.26.2)
