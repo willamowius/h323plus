@@ -529,6 +529,11 @@ PBoolean H323SetRTPPacketization(
   const OpalMediaFormat & mediaFormat,
   RTP_DataFrame::PayloadTypes payloadType
 );
+PBoolean H323SetRTPPacketization(
+  const PString & mediaPacketization,
+  H245_RTPPayloadType & rtpPacketization,
+  RTP_DataFrame::PayloadTypes payloadType
+);
 PBoolean H323GetRTPPacketization(
   OpalMediaFormat & mediaFormat,
   const H245_RTPPayloadType & rtpPacketization

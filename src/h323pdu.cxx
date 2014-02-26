@@ -461,6 +461,16 @@ PBoolean H323SetRTPPacketization(H245_RTPPayloadType & rtpPacketization,
   if (mediaPacketization.IsEmpty())
     return FALSE;
 
+  if (payloadType == RTP_DataFrame::MaxPayloadType)
+    payloadType = mediaFormat.GetPayloadType();
+
+  return H323SetRTPPacketization(mediaPacketization, rtpPacketization, payloadType);
+}
+
+PBoolean H323SetRTPPacketization(const PString & mediaPacketization,
+                             H245_RTPPayloadType & rtpPacketization,
+                             RTP_DataFrame::PayloadTypes payloadType)
+{
   if (mediaPacketization.NumCompare("RFC") == PObject::EqualTo) {
     rtpPacketization.m_payloadDescriptor.SetTag(H245_RTPPayloadType_payloadDescriptor::e_rfc_number);
     ((PASN_Integer &)rtpPacketization.m_payloadDescriptor) = mediaPacketization.Mid(3).AsUnsigned();
@@ -479,9 +489,6 @@ PBoolean H323SetRTPPacketization(H245_RTPPayloadType & rtpPacketization,
     h221.m_manufacturerCode = 61;
     nonstd.m_data = mediaPacketization;
   }
-
-  if (payloadType == RTP_DataFrame::MaxPayloadType)
-    payloadType = mediaFormat.GetPayloadType();
 
   rtpPacketization.IncludeOptionalField(H245_RTPPayloadType::e_payloadType);
   rtpPacketization.m_payloadType = payloadType;

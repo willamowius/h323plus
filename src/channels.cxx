@@ -1325,6 +1325,21 @@ PBoolean H323_ExternalRTPChannel::OnSendingPDU(H245_H2250LogicalChannelParameter
       }
   }
 
+  // Set dynamic payload type, if is one
+  RTP_DataFrame::PayloadTypes rtpPayloadType = GetRTPPayloadType();
+  if (rtpPayloadType >= RTP_DataFrame::DynamicBase && rtpPayloadType <= RTP_DataFrame::MaxPayloadType) {
+    param.IncludeOptionalField(H245_H2250LogicalChannelParameters::e_dynamicRTPPayloadType);
+    param.m_dynamicRTPPayloadType = rtpPayloadType;
+  }
+
+  // Set the media packetization field if have an option to describe it.
+  PString mediaPacketization = capability->GetMediaFormat().GetOptionString(PLUGINCODEC_MEDIA_PACKETIZATION);
+  if (!mediaPacketization.IsEmpty()) {
+    param.m_mediaPacketization.SetTag(H245_H2250LogicalChannelParameters_mediaPacketization::e_rtpPayloadType);
+    if (H323SetRTPPacketization(mediaPacketization, param.m_mediaPacketization, rtpPayloadType))
+      param.IncludeOptionalField(H245_H2250LogicalChannelParameters::e_mediaPacketization);
+  }
+
   return TRUE;
 }
 
@@ -1339,6 +1354,13 @@ void H323_ExternalRTPChannel::OnSendOpenAck(H245_H2250LogicalChannelAckParameter
       // set mediaChannel
       param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_mediaChannel);
       externalMediaAddress.SetPDU(param.m_mediaChannel);
+  }
+
+  // Set dynamic payload type, if is one
+  int rtpPayloadType = GetRTPPayloadType();
+  if (rtpPayloadType >= RTP_DataFrame::DynamicBase && rtpPayloadType <= RTP_DataFrame::MaxPayloadType) {
+    param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_dynamicRTPPayloadType);
+    param.m_dynamicRTPPayloadType = rtpPayloadType;
   }
 }
 
