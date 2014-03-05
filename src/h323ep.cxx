@@ -2104,6 +2104,12 @@ PBoolean H323EndPoint::ParsePartyName(const PString & _remoteParty,
   // convert the remote party string to a URL, with a default URL of "h323:"
   PURL url(remoteParty, proto);
 
+  // If the URL schema does not match send the request to gatekeeper to route
+  if (gatekeeper != NULL && url.GetScheme() != proto) {
+     alias = url.AsString();
+     return true;
+  }
+
   // if the scheme does not match the prefix of the remote party, then
   // the URL parser got confused, so force the URL to be of type "h323"
   if ((remoteParty.Find('@') == P_MAX_INDEX) && (remoteParty.NumCompare(url.GetScheme()) != EqualTo)) {

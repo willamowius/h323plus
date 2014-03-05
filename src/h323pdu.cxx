@@ -228,15 +228,22 @@ void H323SetAliasAddress(const H323TransportAddress & address, H225_AliasAddress
   address.SetPDU(alias);
 }
 
+static int aliasAddressCount=10;
 static struct {
   const char * name;
   int tag;
-} aliasAddressTypes[5] = {
-  { "e164",  H225_AliasAddress::e_dialedDigits },
-  { "h323",  H225_AliasAddress::e_h323_ID },
-  { "url",   H225_AliasAddress::e_url_ID },
-  { "ip",    H225_AliasAddress::e_transportID },
-  { "email", H225_AliasAddress::e_email_ID },
+  int prefix;
+} aliasAddressTypes[10] = {
+  { "e164",  H225_AliasAddress::e_dialedDigits, 0 },
+  { "h323",  H225_AliasAddress::e_h323_ID, 1 },
+  { "h323s", H225_AliasAddress::e_h323_ID, 1 },
+  { "url",   H225_AliasAddress::e_url_ID, 0 },
+  { "ip",    H225_AliasAddress::e_transportID, 0 },
+  { "email", H225_AliasAddress::e_email_ID, 0 },
+  { "sip",   H225_AliasAddress::e_url_ID, 1 },
+  { "sips",  H225_AliasAddress::e_url_ID, 1 },
+  { "url",   H225_AliasAddress::e_url_ID, 0 },
+  { "xmpp",  H225_AliasAddress::e_url_ID, 1 }
 //  { "???",    H225_AliasAddresse_partyNumber },
 //  { "???",    H225_AliasAddresse_mobileUIM }
 };
@@ -252,7 +259,7 @@ void H323SetAliasAddress(const PString & _name, H225_AliasAddress & alias, int t
       PINDEX colon = name.Find(':');
       if (colon != P_MAX_INDEX && colon > 0) {
         PString type = name.Left(colon);
-        for (PINDEX i = 0; tag < 0 && i < 5; i++) {
+        for (PINDEX i = 0; tag < 0 && i < aliasAddressCount; i++) {
           if (type == aliasAddressTypes[i].name) {
             // if name looks like h323:user@hostport treat as url-ID
             // instead of treating as h323-ID (not removing 'h323:' prefix from alias)
@@ -260,7 +267,8 @@ void H323SetAliasAddress(const PString & _name, H225_AliasAddress & alias, int t
               tag = H225_AliasAddress::e_url_ID;
             else {
               tag = aliasAddressTypes[i].tag;
-              name = name.Mid(colon+1);
+              if (!aliasAddressTypes[i].prefix)
+                name = name.Mid(colon+1);
             }
           }
         }

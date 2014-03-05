@@ -1,6 +1,7 @@
 ===============================================================================
 H323plus 1.26.0 - 1.26.x
 ===============================================================================
+NEW Support for different URI schema call routing
 BUG DynamicPayloadType and MediaPacketization support in ExternalRTPChannel
 BUG H.239 Support both presentation and live modes
 BUG Better handle TCP connection timeout or non H.323 messages sent to listener port, 
