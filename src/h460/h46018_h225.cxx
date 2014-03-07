@@ -360,7 +360,6 @@ H46018Handler::H46018Handler(H323EndPoint & ep)
     PTRACE(4, "H46018\tCreating H46018 Handler.");
 
     nat = (PNatMethod_H46019 *)EP.GetNatMethods().LoadNatMethod("H46019");
-    lastCallIdentifer = PString();
     m_h46018inOperation = false;
 
     if (nat != NULL) {

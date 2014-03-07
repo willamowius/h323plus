@@ -1447,6 +1447,8 @@ H235Authenticators H323EndPoint::CreateAuthenticators()
         if (Auth->GetApplication() == H235Authenticator::GKAdmission ||
             Auth->GetApplication() == H235Authenticator::AnyApplication)
                         authenticators.Append(Auth);
+        else
+            delete Auth;
     }
 
     return authenticators;

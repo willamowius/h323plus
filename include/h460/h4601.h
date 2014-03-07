@@ -1073,6 +1073,10 @@ class H460_FeatureSet : public PObject
      */
     H460_FeatureSet(const H225_ArrayOf_GenericData & generic);
 
+    /** Deconstructor
+      */
+    ~H460_FeatureSet();
+
     /** Derive new Feature Set based on this Feature Set ie Clone this FeatureSet
       */
     H460_FeatureSet * DeriveNewFeatureSet();

@@ -928,8 +928,7 @@ PBoolean H460_Feature::FeatureList(int type, H460FeatureList & plist, H323EndPoi
          if (feat == "Std") {            // Std feature
                 plist.insert(pair<PString,H460_FeatureID*>(*(PString*)featurelist[i].Clone(), new H460_FeatureID(featurelist[i].Mid(3).AsInteger())));
          } else if (feat == "OID") {        // OID feature
-                OpalOID oidfeat(desc->GetDeviceNames(1)[0]);
-                plist.insert(pair<PString,H460_FeatureID*>(*(PString*)featurelist[i].Clone(), new H460_FeatureID(oidfeat)));
+                plist.insert(pair<PString,H460_FeatureID*>(*(PString*)featurelist[i].Clone(), new H460_FeatureID(OpalOID(desc->GetDeviceNames(1)[0]))));
          } else    {   // NonStd Feature
                 plist.insert(pair<PString,H460_FeatureID*>(*(PString*)featurelist[i].Clone(), new H460_FeatureID(feat)));
          }
@@ -1092,6 +1091,19 @@ H460_FeatureSet::H460_FeatureSet()
 {
     ep = NULL;
     baseSet = NULL;
+}
+
+H460_FeatureSet::~H460_FeatureSet()
+{
+    // Delete Objects in derived FeatureSets unless shared
+    if (baseSet) {
+        for (PINDEX i=0; i < Features.GetSize(); ++i) {
+            H460_Feature * feat = Features.GetAt(i);
+            if (feat->GetPurpose() != H460_Feature::FeatureBaseAll)
+                delete feat;
+        }
+    }
+    Features.RemoveAll();
 }
 
 H460_FeatureSet::H460_FeatureSet(H460_FeatureSet * _base)
