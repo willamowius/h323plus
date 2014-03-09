@@ -663,9 +663,13 @@ OpalMediaFormat::OpalMediaFormat(const char * search, PBoolean exact)
     }
 #else
     OpalMediaFormatFactory::KeyList_T keyList = OpalMediaFormatFactory::GetKeyList();
-    OpalMediaFormatFactory::KeyList_T::iterator r;
-       if (r->find(search))
+    OpalMediaFormatFactory::KeyList_T::const_iterator r;
+    for (r = keyList.begin(); r != keyList.end(); ++r) {
+      if (r->find(search) != std::string::npos) {
          *this = *OpalMediaFormatFactory::CreateInstance(*r);
+         break;
+      }
+    }
 #endif
   }
 }
