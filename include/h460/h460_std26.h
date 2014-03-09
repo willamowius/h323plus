@@ -117,6 +117,7 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("Std26"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("TCPTunneling-H.460.26"); };
     static int GetPurpose();
+    virtual int GetFeaturePurpose()  { return H460_FeatureStd26::GetPurpose(); } 
     static PStringArray GetIdentifier() { return PStringArray("26"); };
 
     virtual PBoolean FeatureAdvertised(int mtype);

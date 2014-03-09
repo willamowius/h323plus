@@ -173,6 +173,7 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("Std23"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("P2Pnat Detect-H.460.23"); };
     static int GetPurpose()    { return FeatureRas; };
+    virtual int GetFeaturePurpose()  { return H460_FeatureStd23::GetPurpose(); } 
     static PStringArray GetIdentifier() { return PStringArray("23"); };
 
     virtual PBoolean CommonFeature() { return isEnabled; }
@@ -244,11 +245,11 @@ public:
     virtual void AttachEndPoint(H323EndPoint * _ep);
     virtual void AttachConnection(H323Connection * _ep);
 
-    static PStringArray GetFeatureName() { return PStringArray("Std24"); };
-    static PStringArray GetFeatureFriendlyName() { return PStringArray("P2Pnat Media-H.460.24"); };
-    static int GetPurpose()    { return FeatureSignal; };
-    static PStringArray GetIdentifier() { return PStringArray("24"); };
-
+    static PStringArray GetFeatureName() { return PStringArray("Std24"); }
+    static PStringArray GetFeatureFriendlyName() { return PStringArray("P2Pnat Media-H.460.24"); }
+    static int GetPurpose()    { return FeatureSignal; }
+    virtual int GetFeaturePurpose()  { return H460_FeatureStd24::GetPurpose(); } 
+    static PStringArray GetIdentifier() { return PStringArray("24"); }
     virtual PBoolean CommonFeature() { return isEnabled; }
 
     enum NatInstruct {

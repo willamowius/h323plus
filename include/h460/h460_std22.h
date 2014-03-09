@@ -56,6 +56,8 @@ public:
     H460_FeatureStd22();
     virtual ~H460_FeatureStd22();
 
+    virtual PObject * Clone() const;
+
     // Universal Declarations Every H460 Feature should have the following
     virtual void AttachEndPoint(H323EndPoint * _ep);
     virtual void AttachConnection(H323Connection * _con);
@@ -63,6 +65,7 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("Std22"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("H.225.0 Sec-H.460.22"); };
     static int GetPurpose();
+    virtual int GetFeaturePurpose()  { return H460_FeatureStd22::GetPurpose(); } 
 	static PStringArray GetIdentifier() { return PStringArray("22"); };
 
     virtual PBoolean FeatureAdvertised(int mtype);

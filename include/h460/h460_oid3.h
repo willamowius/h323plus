@@ -146,6 +146,7 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("OID3"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("Presence"); };
     static int GetPurpose();
+    virtual int GetFeaturePurpose()  { return H460_FeatureOID3::GetPurpose(); } 
     static PStringArray GetIdentifier();
 
     virtual PBoolean CommonFeature() { return remoteSupport; }

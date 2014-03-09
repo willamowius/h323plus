@@ -68,6 +68,7 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("Std25"); }
     static PStringArray GetFeatureFriendlyName() { return PStringArray("Geographic Info-H.460.25"); }
     static int GetPurpose()	{ return FeatureSignal; }
+    virtual int GetFeaturePurpose()  { return H460_FeatureStd25::GetPurpose(); } 
 	static PStringArray GetIdentifier() { return PStringArray("25"); }
 
     virtual PBoolean FeatureAdvertised(int mtype);

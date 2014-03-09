@@ -92,6 +92,11 @@ int H460_FeatureStd22::GetPurpose()
     return FeatureBaseClone; 
 }
 
+PObject * H460_FeatureStd22::Clone() const
+{
+  return new H460_FeatureStd22(*this);
+}
+
 PBoolean H460_FeatureStd22::FeatureAdvertised(int mtype)
 {
      switch (mtype) {

@@ -563,6 +563,8 @@ class H323EndPoint;
 class H323Connection;
 class H460_Feature : public H225_FeatureDescriptor
 {
+  PCLASSINFO(H460_Feature, H225_FeatureDescriptor);
+
   public:
   /**@name Construction */
   //@{
@@ -765,6 +767,10 @@ class H460_Feature : public H225_FeatureDescriptor
         when the class is instantized
       */
     static int GetPurpose()    { return FeatureBaseAll; };
+
+    /** Get the feature purpose
+      */
+    virtual int GetFeaturePurpose()  { return H460_Feature::GetPurpose(); } 
 
     /** Get the Feature Identifier
       */

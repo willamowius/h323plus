@@ -63,6 +63,7 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("OID6"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("Registration Priority & Preemption"); };
     static int GetPurpose()    { return FeatureRas; };
+    virtual int GetFeaturePurpose()  { return H460_FeatureOID6::GetPurpose(); } 
     static PStringArray GetIdentifier();
 
     virtual PBoolean CommonFeature() { return remoteSupport; }

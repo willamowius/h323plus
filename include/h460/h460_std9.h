@@ -61,10 +61,11 @@ public:
     virtual void AttachEndPoint(H323EndPoint * _ep);
     virtual void AttachConnection(H323Connection * _con);
 
-    static PStringArray GetFeatureName() { return PStringArray("Std9"); };
-    static PStringArray GetFeatureFriendlyName() { return PStringArray("QoS Monitoring-H.460.9"); };
-    static int GetPurpose()	{ return FeatureSignal; };
-	static PStringArray GetIdentifier() { return PStringArray("9"); };
+    static PStringArray GetFeatureName() { return PStringArray("Std9"); }
+    static PStringArray GetFeatureFriendlyName() { return PStringArray("QoS Monitoring-H.460.9"); }
+    static int GetPurpose()	{ return FeatureSignal; }
+    virtual int GetFeaturePurpose()  { return H460_FeatureStd9::GetPurpose(); } 
+	static PStringArray GetIdentifier() { return PStringArray("9"); }
 
     virtual PBoolean FeatureAdvertised(int mtype);
 	virtual PBoolean CommonFeature() { return qossupport; }

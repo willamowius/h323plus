@@ -926,11 +926,11 @@ PBoolean H460_Feature::FeatureList(int type, H460FeatureList & plist, H323EndPoi
      if (desc != NULL && desc->ValidateDeviceName(featurelist[i], type)) {
          PString feat = featurelist[i].Left(3);
          if (feat == "Std") {            // Std feature
-                plist.insert(pair<PString,H460_FeatureID*>(*(PString*)featurelist[i].Clone(), new H460_FeatureID(featurelist[i].Mid(3).AsInteger())));
+                plist.insert(pair<PString,H460_FeatureID*>(featurelist[i], new H460_FeatureID(featurelist[i].Mid(3).AsInteger())));
          } else if (feat == "OID") {        // OID feature
-                plist.insert(pair<PString,H460_FeatureID*>(*(PString*)featurelist[i].Clone(), new H460_FeatureID(OpalOID(desc->GetDeviceNames(1)[0]))));
+                plist.insert(pair<PString,H460_FeatureID*>(featurelist[i], new H460_FeatureID(OpalOID(desc->GetDeviceNames(1)[0]))));
          } else    {   // NonStd Feature
-                plist.insert(pair<PString,H460_FeatureID*>(*(PString*)featurelist[i].Clone(), new H460_FeatureID(feat)));
+                plist.insert(pair<PString,H460_FeatureID*>(featurelist[i], new H460_FeatureID(feat)));
          }
      }  
    }
@@ -1099,7 +1099,7 @@ H460_FeatureSet::~H460_FeatureSet()
     if (baseSet) {
         for (PINDEX i=0; i < Features.GetSize(); ++i) {
             H460_Feature * feat = Features.GetAt(i);
-            if (feat->GetPurpose() != H460_Feature::FeatureBaseAll)
+            if (feat && (feat->GetFeaturePurpose() != H460_Feature::FeatureBaseAll))
                 delete feat;
         }
     }
@@ -1211,7 +1211,7 @@ PBoolean H460_FeatureSet::LoadFeatureSet(int inst, H323Connection * con)
         H460_Feature * feat = NULL;
         if (baseSet && baseSet->HasFeature(*it->second)) {
             H460_Feature * tempfeat = baseSet->GetFeature(*it->second);
-            if (tempfeat->GetPurpose() == H460_Feature::FeatureBaseClone)
+            if (tempfeat->GetFeaturePurpose() == H460_Feature::FeatureBaseClone)
                 feat = (H460_Feature*)tempfeat->Clone();
             else
                 feat = tempfeat;

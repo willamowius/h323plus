@@ -70,6 +70,7 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("Std18"); }
     static PStringArray GetFeatureFriendlyName() { return PStringArray("NatTraversal-H.460.18"); }
     static int GetPurpose()	{ return FeatureRas; }
+    virtual int GetFeaturePurpose()  { return H460_FeatureStd18::GetPurpose(); } 
 	static PStringArray GetIdentifier() { return PStringArray("18"); }
 
 	virtual PBoolean CommonFeature() { return isEnabled; }
@@ -123,6 +124,7 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("Std19"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("NatTraversal-H.460.19"); };
     static int GetPurpose()	{ return FeatureSignal; };
+    virtual int GetFeaturePurpose()  { return H460_FeatureStd19::GetPurpose(); } 
 	static PStringArray GetIdentifier() { return PStringArray("19"); };
 
 	virtual PBoolean CommonFeature() { return remoteSupport; }

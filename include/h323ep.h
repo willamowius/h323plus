@@ -2357,6 +2357,7 @@ class H323EndPoint : public PObject
     PBoolean TLS_Initialise(const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny(), 
                             WORD port = DefaultTLSPort);
     
+    PBoolean InitialiseTransportContext();
     PSSLContext * GetTransportContext();
 
     virtual void OnSecureSignallingChannel(bool /* isSecured */) {};

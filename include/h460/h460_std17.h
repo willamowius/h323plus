@@ -66,6 +66,7 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("Std17"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("NatTraversal-H.460.17"); };
     static int GetPurpose();
+    virtual int GetFeaturePurpose()  { return H460_FeatureStd17::GetPurpose(); } 
     static PStringArray GetIdentifier() { return PStringArray("17"); };
 
     virtual PBoolean CommonFeature() { return isEnabled; }

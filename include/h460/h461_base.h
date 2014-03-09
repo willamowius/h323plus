@@ -69,9 +69,10 @@ public:
     virtual void AttachEndPoint(H323EndPoint * _ep);
     virtual void AttachConnection(H323Connection * _con);
 
-    static PStringArray GetFeatureName() { return PStringArray("OIDX1"); };
-    static PStringArray GetFeatureFriendlyName() { return PStringArray("ASSET"); };
-    static int GetPurpose()    { return FeatureSignal; };
+    static PStringArray GetFeatureName() { return PStringArray("OIDX1"); }
+    static PStringArray GetFeatureFriendlyName() { return PStringArray("ASSET"); }
+    static int GetPurpose()    { return FeatureSignal; }
+    virtual int GetFeaturePurpose()  { return H460_FeatureX1::GetPurpose(); } 
     static PStringArray GetIdentifier();
 
     virtual PBoolean FeatureAdvertised(int mtype);
