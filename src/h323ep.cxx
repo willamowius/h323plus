@@ -252,7 +252,6 @@ H323_TLSContext::H323_TLSContext()
 
     if (m_context) {
         SSL_CTX_free(m_context);
-        delete m_context;
         m_context = NULL;
     }
 
