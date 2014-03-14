@@ -2821,12 +2821,7 @@ void H323PluginCodecManager::AddFormat(const OpalMediaFormat & fmt)
 
 OpalMediaFormat::List H323PluginCodecManager::GetMediaFormats() 
 {
-  PWaitAndSignal m(H323PluginCodecManager::GetMediaFormatMutex());
-  OpalMediaFormat::List & list = H323PluginCodecManager::GetMediaFormatList();
-  OpalMediaFormat::List copy;
-  for (PINDEX i = 0; i < list.GetSize(); i++)
-    copy.Append(new OpalMediaFormat(list[i]));
-  return copy;
+  return GetMediaFormatList();
 }
 
 OpalMediaFormat::List & H323PluginCodecManager::GetMediaFormatList()
