@@ -887,7 +887,14 @@ H323EndPoint::~H323EndPoint()
   CleanUpConnections();
 
 #ifdef H323_TLS
-  delete m_transportContext;
+  if (m_transportContext) {
+    delete m_transportContext;
+    // OpenSSL Cleanup
+    EVP_cleanup();
+    CRYPTO_cleanup_all_ex_data();
+    ERR_remove_state(0);
+    ERR_free_strings();
+  }
 #endif
 
 #ifdef P_STUN
@@ -1471,21 +1478,25 @@ H235Authenticators H323EndPoint::CreateEPAuthenticators()
       for (r = keyList.begin(); r != keyList.end(); ++r) {
         H235Authenticator * Auth = PFactory<H235Authenticator>::CreateInstance(*r);
 #endif
-        if (!Auth) continue;
+        if (Auth->GetApplication() == H235Authenticator::GKAdmission ||
+            Auth->GetApplication() == H235Authenticator::LRQOnly) {
+              delete Auth;
+              continue;
+        }
+
         if (m_disableMD5Authenticators && ((PString("MD5") == Auth->GetName()) || (PString("CAT") == Auth->GetName()))) {
           PTRACE(3, "H235\tAuthenticator disabled: " << Auth->GetName());
           delete Auth;
           continue;
         }
+
         if ((Auth->GetApplication() == H235Authenticator::EPAuthentication ||
-             Auth->GetApplication() == H235Authenticator::AnyApplication)) {
-             if (GetEPCredentials(password, username)) {
+             Auth->GetApplication() == H235Authenticator::AnyApplication) &&
+             GetEPCredentials(password, username)) {
                 Auth->SetLocalId(username);
                 Auth->SetPassword(password);
-                authenticators.Append(Auth);
-             }
-        } else
-            authenticators.Append(Auth);
+        } 
+        authenticators.Append(Auth);
       }
      SetEPCredentials(PString(),PString());    
 
