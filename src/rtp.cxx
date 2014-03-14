@@ -553,7 +553,7 @@ RTP_Session::~RTP_Session()
             );
 
   if (userData) {
-    userData->OnFinalStatistics(*this);
+    //userData->OnFinalStatistics(*this);  TODO fix sending end of call stats 
     delete userData;
   }
 
