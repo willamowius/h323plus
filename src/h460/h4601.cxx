@@ -944,6 +944,11 @@ H460_FeatureStd::H460_FeatureStd(unsigned Identifier)
 {
 }
 
+PObject * H460_FeatureStd::Clone() const
+{
+    return new H460_FeatureStd(*this);
+}
+
 void H460_FeatureStd::Add(unsigned id)
 {
     H460_FeatureID * feat_id = new H460_FeatureID(id);
@@ -985,6 +990,11 @@ H460_FeatureNonStd::H460_FeatureNonStd(PString Identifier)
     : H460_Feature(Identifier)
 {
 }
+
+PObject * H460_FeatureNonStd::Clone() const
+{
+    return new H460_FeatureNonStd(*this);
+}
     
 void H460_FeatureNonStd::Add(const PString & id)
 {
@@ -1025,6 +1035,11 @@ H460_FeatureParameter & H460_FeatureNonStd::operator[](PString id)
 H460_FeatureOID::H460_FeatureOID(OpalOID Identifier)
     : H460_Feature(Identifier)
 {
+}
+
+PObject * H460_FeatureOID::Clone() const
+{
+    return new H460_FeatureOID(*this);
 }
 
 void H460_FeatureOID::Add(const PString & id)
@@ -1098,7 +1113,7 @@ H460_FeatureSet::~H460_FeatureSet()
     // Delete Objects in derived FeatureSets unless shared
     if (baseSet) {
         for (PINDEX i=0; i < Features.GetSize(); ++i) {
-            H460_Feature * feat = Features.GetAt(i);
+            H460_Feature * feat = &Features.GetDataAt(i);
             if (feat && (feat->GetFeaturePurpose() != H460_Feature::FeatureBaseAll))
                 delete feat;
         }
@@ -1211,10 +1226,10 @@ PBoolean H460_FeatureSet::LoadFeatureSet(int inst, H323Connection * con)
         H460_Feature * feat = NULL;
         if (baseSet && baseSet->HasFeature(*it->second)) {
             H460_Feature * tempfeat = baseSet->GetFeature(*it->second);
-            if (tempfeat->GetFeaturePurpose() == H460_Feature::FeatureBaseClone)
-                feat = (H460_Feature*)tempfeat->Clone();
-            else
+            if (tempfeat->GetFeaturePurpose() == H460_Feature::FeatureBaseAll)
                 feat = tempfeat;
+            else
+                feat = (H460_Feature*)tempfeat->Clone();
         } else {
             feat = H460_Feature::CreateFeature(it->first,inst);
             if ((feat) && (ep)) 

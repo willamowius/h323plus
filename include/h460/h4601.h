@@ -915,6 +915,10 @@ class H460_FeatureStd : public H460_Feature
 
   /**@name Parameter Control */
   //@{
+    /** Clone an item
+      */
+    PObject * Clone() const;
+
     /** Add item 
     */
     void Add(unsigned id);
@@ -959,6 +963,10 @@ class H460_FeatureNonStd : public H460_Feature
 
   /**@name Parameter Control */
   //@{
+    /** Clone an item
+      */
+    PObject * Clone() const;
+
     /** Add item 
     */
     void Add(const PString & id);
@@ -1006,6 +1014,10 @@ class H460_FeatureOID : public H460_Feature
 
   /**@name Parameter Control */
   //@{
+    /** Clone an item
+      */
+    PObject * Clone() const;
+
     /** Add item 
     */
     void Add(const PString & id);
