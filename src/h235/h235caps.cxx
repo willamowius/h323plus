@@ -155,7 +155,7 @@ PBoolean H235SecurityCapability::OnSendingPDU(H245_Capability & pdu) const
 
 PBoolean H235SecurityCapability::OnSendingPDU(H245_DataType &) const
 {
-  PTRACE(1, "Codec\tCannot have Security Capability in DataType");
+  PTRACE(1, "Codec\tCannot have Security Capability in DataType. Capability " << m_capNumber);
   return FALSE;
 }
 
@@ -182,7 +182,7 @@ PBoolean H235SecurityCapability::OnReceivedPDU(const H245_Capability & pdu)
 
 PBoolean H235SecurityCapability::OnReceivedPDU(const H245_DataType &, PBoolean)
 {
-  PTRACE(1, "Codec\tCannot have Security Capability in DataType");
+  PTRACE(1, "Codec\tCannot have Security Capability in DataType. Capability " << m_capNumber);
   return FALSE;
 }
 
@@ -255,22 +255,23 @@ PBoolean H235SecurityCapability::IsUsable(const H323Connection & connection) con
 
 /////////////////////////////////////////////////////////////////////////////
 
-H323SecureRealTimeCapability::H323SecureRealTimeCapability(H323Capability & childCapability, H323Capabilities * capabilities, unsigned secNo, PBoolean active)
-                : ChildCapability(*(H323Capability *)childCapability.Clone()), chtype(H235ChNew), m_active(active), 
+H323SecureRealTimeCapability::H323SecureRealTimeCapability(H323Capability * childCapability, H323Capabilities * capabilities, unsigned secNo, PBoolean active)
+                : ChildCapability(childCapability), chtype(H235ChNew), m_active(active), 
                   m_capabilities(capabilities), m_secNo(secNo),  nrtpqos(NULL)
 {
-    assignedCapabilityNumber = childCapability.GetCapabilityNumber();
+    assignedCapabilityNumber = ChildCapability->GetCapabilityNumber();
 }
 
 
-H323SecureRealTimeCapability::H323SecureRealTimeCapability(RTP_QOS * _rtpqos,H323Capability & childCapability)
-                : ChildCapability(*(H323Capability *)childCapability.Clone()), chtype(H235ChNew), m_active(false), 
+H323SecureRealTimeCapability::H323SecureRealTimeCapability(RTP_QOS * _rtpqos,H323Capability * childCapability)
+                : ChildCapability(childCapability), chtype(H235ChNew), m_active(false), 
                   m_capabilities(NULL), m_secNo(0), nrtpqos(_rtpqos)
 {
 }
 
 H323SecureRealTimeCapability::~H323SecureRealTimeCapability()
 {
+    delete ChildCapability;
 }
 
 
@@ -296,7 +297,7 @@ H323Channel * H323SecureRealTimeCapability::CreateChannel(H323Connection & conne
   // create a standard RTP channel if we don't have a DH token
   H235Capabilities * caps = dynamic_cast<H235Capabilities*>(connection.GetLocalCapabilitiesRef());
   if (!caps || !caps->GetDiffieHellMan())
-    return connection.CreateRealTimeLogicalChannel(ChildCapability, dir, sessionID, param, nrtpqos);
+    return connection.CreateRealTimeLogicalChannel(*ChildCapability, dir, sessionID, param, nrtpqos);
 
   // Support for encrypted external RTP Channel
   H323Channel * extRTPChannel = connection.CreateRealTimeLogicalChannel(*this, dir, sessionID, param, nrtpqos);
@@ -326,13 +327,13 @@ H323Channel * H323SecureRealTimeCapability::CreateChannel(H323Connection & conne
 
 unsigned H323SecureRealTimeCapability::GetCapabilityNumber() const 
 { 
-    return ChildCapability.GetCapabilityNumber(); 
+    return ChildCapability->GetCapabilityNumber(); 
 };
 
 void H323SecureRealTimeCapability::SetCapabilityNumber(unsigned num) 
 { 
     assignedCapabilityNumber = num;
-    ChildCapability.SetCapabilityNumber(num); 
+    ChildCapability->SetCapabilityNumber(num); 
 }
 
 void H323SecureRealTimeCapability::SetCapabilityList(H323Capabilities * capabilities)
@@ -362,12 +363,12 @@ const PString & H323SecureRealTimeCapability::GetEncryptionAlgorithm() const
 
 const OpalMediaFormat & H323SecureRealTimeCapability::GetMediaFormat() const
 {
-   return ChildCapability.GetMediaFormat();
+   return ChildCapability->GetMediaFormat();
 }
 
 OpalMediaFormat & H323SecureRealTimeCapability::GetWritableMediaFormat()
 {
-   return ChildCapability.GetWritableMediaFormat();
+   return ChildCapability->GetWritableMediaFormat();
 }
 
 ///////////////////////////////////////////////////////////////////////////// 
@@ -378,14 +379,14 @@ H323SecureCapability::H323SecureCapability(H323Capability & childCapability,
                                                      unsigned secNo,
                                                      PBoolean active
                                                      )
-   : H323SecureRealTimeCapability(childCapability, capabilities, secNo, active)
+   : H323SecureRealTimeCapability((H323Capability *)childCapability.Clone(), capabilities, secNo, active)
 {
     chtype = Ch;
 }
 
 H323Capability::MainTypes H323SecureCapability::GetMainType() const
 { 
-    return ChildCapability.GetMainType();
+    return ChildCapability->GetMainType();
 }
 
 
@@ -407,29 +408,29 @@ PObject * H323SecureCapability::Clone() const
         break;
     }
 
-  return new H323SecureCapability(*(H323Capability *)ChildCapability.Clone(),ch, m_capabilities, m_secNo, m_active);
+  return new H323SecureCapability(*ChildCapability, ch, m_capabilities, m_secNo, m_active);
 }
 
 PBoolean H323SecureCapability::IsMatch(const PASN_Choice & subTypePDU) const
 {
 
     if (PIsDescendant(&subTypePDU, H245_AudioCapability) &&
-       ChildCapability.GetMainType() == H323Capability::e_Audio) { 
+       ChildCapability->GetMainType() == H323Capability::e_Audio) { 
           const H245_AudioCapability & audio = (const H245_AudioCapability &)subTypePDU;
-          return ChildCapability.IsMatch(audio);
+          return ChildCapability->IsMatch(audio);
     }
 
     if (PIsDescendant(&subTypePDU, H245_VideoCapability) &&
-       ChildCapability.GetMainType() == H323Capability::e_Video) { 
+       ChildCapability->GetMainType() == H323Capability::e_Video) { 
           const H245_VideoCapability & video = (const H245_VideoCapability &)subTypePDU;
-          return ChildCapability.IsMatch(video);
+          return ChildCapability->IsMatch(video);
     }
 
     if (PIsDescendant(&subTypePDU, H245_DataApplicationCapability_application) &&
-       ChildCapability.GetMainType() == H323Capability::e_Data) { 
+       ChildCapability->GetMainType() == H323Capability::e_Data) { 
           const H245_DataApplicationCapability_application & data = 
                          (const H245_DataApplicationCapability_application &)subTypePDU;
-          return ChildCapability.IsMatch(data);
+          return ChildCapability->IsMatch(data);
     }
 
     if (PIsDescendant(&subTypePDU, H245_H235Media_mediaType)) { 
@@ -444,17 +445,16 @@ PBoolean H323SecureCapability::IsMatch(const PASN_Choice & subTypePDU) const
 PBoolean H323SecureCapability::IsSubMatch(const PASN_Choice & subTypePDU) const
 {
     const H245_H235Media_mediaType & dataType = (const H245_H235Media_mediaType &)subTypePDU;
-
     if (dataType.GetTag() == H245_H235Media_mediaType::e_audioData &&
-       ChildCapability.GetMainType() == H323Capability::e_Audio) { 
+       ChildCapability->GetMainType() == H323Capability::e_Audio) { 
           const H245_AudioCapability & audio = dataType;
-          return ChildCapability.IsMatch(audio);
+          return ChildCapability->IsMatch(audio);
     }
 
     if (dataType.GetTag() == H245_H235Media_mediaType::e_videoData &&
-       ChildCapability.GetMainType() == H323Capability::e_Video) { 
+       ChildCapability->GetMainType() == H323Capability::e_Video) { 
           const H245_VideoCapability & video = dataType;
-          return ChildCapability.IsMatch(video);
+          return ChildCapability->IsMatch(video);
     }
 
     return false;
@@ -471,12 +471,12 @@ PObject::Comparison H323SecureCapability::Compare(const PObject & obj) const
 
   const H323SecureCapability & other = (const H323SecureCapability &)obj;
 
-  return ChildCapability.Compare(other.GetChildCapability());
+  return ChildCapability->Compare(*(other.GetChildCapability()));
 }
 
 unsigned H323SecureCapability::GetDefaultSessionID() const
 {
-    return ChildCapability.GetDefaultSessionID();
+    return ChildCapability->GetDefaultSessionID();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -484,11 +484,11 @@ unsigned H323SecureCapability::GetDefaultSessionID() const
 
 PBoolean H323SecureCapability::OnSendingPDU(H245_ModeElement & mode) const
 {
-    switch (ChildCapability.GetMainType()) {
+    switch (ChildCapability->GetMainType()) {
         case H323Capability::e_Audio:
-            return ((H323AudioCapability &)ChildCapability).OnSendingPDU(mode);
+            return ((H323AudioCapability *)ChildCapability)->OnSendingPDU(mode);
         case H323Capability::e_Video:
-            return ((H323VideoCapability &)ChildCapability).OnSendingPDU(mode);
+            return ((H323VideoCapability *)ChildCapability)->OnSendingPDU(mode);
         case H323Capability::e_Data:
         default:
             return false;
@@ -510,14 +510,14 @@ PBoolean H323SecureCapability::OnSendingPDU(H245_DataType & dataType) const
 
     if (!IsEncryptionActive()) {
         unsigned txFramesInPacket =0;
-        switch (ChildCapability.GetMainType()) {
+        switch (ChildCapability->GetMainType()) {
             case H323Capability::e_Audio:
                 dataType.SetTag(H245_DataType::e_audioData);
-                txFramesInPacket = ((H323AudioCapability &)ChildCapability).GetTxFramesInPacket();
-                return ((H323AudioCapability &)ChildCapability).OnSendingPDU((H245_AudioCapability &)dataType, txFramesInPacket, e_OLC);
+                txFramesInPacket = ((H323AudioCapability *)ChildCapability)->GetTxFramesInPacket();
+                return ((H323AudioCapability *)ChildCapability)->OnSendingPDU((H245_AudioCapability &)dataType, txFramesInPacket, e_OLC);
             case H323Capability::e_Video:
                 dataType.SetTag(H245_DataType::e_videoData); 
-                return ((H323VideoCapability &)ChildCapability).OnSendingPDU((H245_VideoCapability &)dataType, e_OLC);
+                return ((H323VideoCapability *)ChildCapability)->OnSendingPDU((H245_VideoCapability &)dataType, e_OLC);
             case H323Capability::e_Data:
             default:
                 break;
@@ -533,14 +533,14 @@ PBoolean H323SecureCapability::OnSendingPDU(H245_DataType & dataType) const
    
     H245_H235Media_mediaType & cType = h235Media.m_mediaType;
     unsigned txFramesInPacket =0;
-    switch (ChildCapability.GetMainType()) {
+    switch (ChildCapability->GetMainType()) {
         case H323Capability::e_Audio: 
             cType.SetTag(H245_H235Media_mediaType::e_audioData); 
-            txFramesInPacket = ((H323AudioCapability &)ChildCapability).GetTxFramesInPacket();
-            return ((H323AudioCapability &)ChildCapability).OnSendingPDU((H245_AudioCapability &)cType, txFramesInPacket, e_OLC);
+            txFramesInPacket = ((H323AudioCapability *)ChildCapability)->GetTxFramesInPacket();
+            return ((H323AudioCapability *)ChildCapability)->OnSendingPDU((H245_AudioCapability &)cType, txFramesInPacket, e_OLC);
         case H323Capability::e_Video: 
             cType.SetTag(H245_H235Media_mediaType::e_videoData); 
-            return ((H323VideoCapability &)ChildCapability).OnSendingPDU((H245_VideoCapability &)cType, e_OLC);
+            return ((H323VideoCapability *)ChildCapability)->OnSendingPDU((H245_VideoCapability &)cType, e_OLC);
         case H323Capability::e_Data: 
         default:
             break;
@@ -551,7 +551,7 @@ PBoolean H323SecureCapability::OnSendingPDU(H245_DataType & dataType) const
 PBoolean H323SecureCapability::OnReceivedPDU(const H245_DataType & dataType,PBoolean receiver)
 {
     if (dataType.GetTag() != H245_DataType::e_h235Media)
-        return ChildCapability.OnReceivedPDU(dataType, receiver);
+        return ChildCapability->OnReceivedPDU(dataType, receiver);
 
     const H245_H235Media & h235Media = dataType;
 
@@ -570,18 +570,18 @@ PBoolean H323SecureCapability::OnReceivedPDU(const H245_DataType & dataType,PBoo
     const H245_H235Media_mediaType & mediaType = h235Media.m_mediaType;
     unsigned packetSize = 0; 
 
-    switch (ChildCapability.GetMainType()) {
+    switch (ChildCapability->GetMainType()) {
         case H323Capability::e_Audio: 
             if (mediaType.GetTag() == H245_H235Media_mediaType::e_audioData) {
                packetSize = (receiver) ?
-                   ChildCapability.GetRxFramesInPacket() : ChildCapability.GetTxFramesInPacket();
-               return ((H323AudioCapability &)ChildCapability).OnReceivedPDU((const H245_AudioCapability &)mediaType, packetSize, e_OLC);
+                   ChildCapability->GetRxFramesInPacket() : ChildCapability->GetTxFramesInPacket();
+               return ((H323AudioCapability *)ChildCapability)->OnReceivedPDU((const H245_AudioCapability &)mediaType, packetSize, e_OLC);
             }
             break;
 
         case H323Capability::e_Video: 
             if (mediaType.GetTag() == H245_H235Media_mediaType::e_videoData) 
-               return ((H323VideoCapability &)ChildCapability).OnReceivedPDU((const H245_VideoCapability &)mediaType, e_OLC);
+               return ((H323VideoCapability *)ChildCapability)->OnReceivedPDU((const H245_VideoCapability &)mediaType, e_OLC);
             break;
 
         case H323Capability::e_Data:
@@ -597,11 +597,11 @@ PBoolean H323SecureCapability::OnReceivedPDU(const H245_DataType & dataType,PBoo
 
 PBoolean H323SecureCapability::OnSendingPDU(H245_Capability & pdu) const
 {
-    switch (ChildCapability.GetMainType()) {
+    switch (ChildCapability->GetMainType()) {
         case H323Capability::e_Audio:
-            return ((H323AudioCapability &)ChildCapability).OnSendingPDU(pdu);
+            return ((H323AudioCapability *)ChildCapability)->OnSendingPDU(pdu);
         case H323Capability::e_Video:
-            return ((H323VideoCapability &)ChildCapability).OnSendingPDU(pdu);
+            return ((H323VideoCapability *)ChildCapability)->OnSendingPDU(pdu);
         case H323Capability::e_Data:
         case H323Capability::e_UserInput:
         case H323Capability::e_ExtendVideo:
@@ -612,11 +612,11 @@ PBoolean H323SecureCapability::OnSendingPDU(H245_Capability & pdu) const
 
 PBoolean H323SecureCapability::OnReceivedPDU(const H245_Capability & pdu)
 {
-    switch (ChildCapability.GetMainType()) {
+    switch (ChildCapability->GetMainType()) {
         case H323Capability::e_Audio:
-            return ((H323AudioCapability &)ChildCapability).OnReceivedPDU(pdu);
+            return ((H323AudioCapability *)ChildCapability)->OnReceivedPDU(pdu);
         case H323Capability::e_Video:
-            return ((H323VideoCapability &)ChildCapability).OnReceivedPDU(pdu);
+            return ((H323VideoCapability *)ChildCapability)->OnReceivedPDU(pdu);
         case H323Capability::e_Data:
         case H323Capability::e_UserInput:
         case H323Capability::e_ExtendVideo:
@@ -628,22 +628,22 @@ PBoolean H323SecureCapability::OnReceivedPDU(const H245_Capability & pdu)
 
 PString H323SecureCapability::GetFormatName() const
 {
-  return ChildCapability.GetFormatName() + (m_active ? " #" : "");
+  return ChildCapability->GetFormatName() + (m_active ? " #" : "");
 }
 
 unsigned H323SecureCapability::GetSubType() const
 {
-  return ChildCapability.GetSubType();
+  return ChildCapability->GetSubType();
 }
 
 PString H323SecureCapability::GetIdentifier() const
 {
-  return ChildCapability.GetIdentifier();
+  return ChildCapability->GetIdentifier();
 }
 
 H323Codec * H323SecureCapability::CreateCodec(H323Codec::Direction direction) const
 {
-    return ChildCapability.CreateCodec(direction);
+    return ChildCapability->CreateCodec(direction);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -651,7 +651,7 @@ H323Codec * H323SecureCapability::CreateCodec(H323Codec::Direction direction) co
 
 H323SecureDataCapability::H323SecureDataCapability(H323Capability & childCapability, enum H235ChType Ch, H323Capabilities * capabilities, 
                            unsigned secNo, PBoolean active )
-: ChildCapability(*(H323Capability *)childCapability.Clone()), chtype(Ch), m_active(active), m_capabilities(capabilities), 
+: ChildCapability((H323Capability *)childCapability.Clone()), chtype(Ch), m_active(active), m_capabilities(capabilities), 
   m_secNo(secNo), m_algorithm(PString())
 {
     assignedCapabilityNumber = childCapability.GetCapabilityNumber();
@@ -659,7 +659,7 @@ H323SecureDataCapability::H323SecureDataCapability(H323Capability & childCapabil
 
 H323SecureDataCapability::~H323SecureDataCapability()
 {
-
+    delete ChildCapability;
 }
 
 void H323SecureDataCapability::SetAssociatedCapability(unsigned _secNo)
@@ -679,7 +679,7 @@ PObject::Comparison H323SecureDataCapability::Compare(const PObject & obj) const
 
   const H323SecureDataCapability & other = (const H323SecureDataCapability &)obj;
 
-  return ChildCapability.Compare(other.GetChildCapability());
+  return ChildCapability->Compare(*(other.GetChildCapability()));
 }
 	
 PObject * H323SecureDataCapability::Clone() const
@@ -698,29 +698,29 @@ PObject * H323SecureDataCapability::Clone() const
            ch = H235Channel;
         break;
     }
-    return new H323SecureDataCapability(ChildCapability, ch, m_capabilities, m_secNo, m_active);
+    return new H323SecureDataCapability(*ChildCapability, ch, m_capabilities, m_secNo, m_active);
 }
 
 
 unsigned H323SecureDataCapability::GetSubType() const
 {
-  return ChildCapability.GetSubType();
+  return ChildCapability->GetSubType();
 }
 	
 
 PString H323SecureDataCapability::GetFormatName() const
 {
-  return ChildCapability.GetFormatName() + (m_active ? " #" : "");
+  return ChildCapability->GetFormatName() + (m_active ? " #" : "");
 }
 
 
 PBoolean H323SecureDataCapability::IsMatch(const PASN_Choice & subTypePDU) const
 {
     if (PIsDescendant(&subTypePDU, H245_DataApplicationCapability_application) &&
-       ChildCapability.GetMainType() == H323Capability::e_Data) { 
+       ChildCapability->GetMainType() == H323Capability::e_Data) { 
           const H245_DataApplicationCapability_application & data = 
                          (const H245_DataApplicationCapability_application &)subTypePDU;
-          return ChildCapability.IsMatch(data);
+          return ChildCapability->IsMatch(data);
     }
 
     if (PIsDescendant(&subTypePDU, H245_H235Media_mediaType)) { 
@@ -736,9 +736,9 @@ PBoolean H323SecureDataCapability::IsSubMatch(const PASN_Choice & subTypePDU) co
     const H245_H235Media_mediaType & dataType = (const H245_H235Media_mediaType &)subTypePDU;
 
     if (dataType.GetTag() == H245_H235Media_mediaType::e_data &&
-       ChildCapability.GetMainType() == H323Capability::e_Data) { 
+       ChildCapability->GetMainType() == H323Capability::e_Data) { 
           const H245_DataApplicationCapability & data = dataType;
-          return ChildCapability.IsMatch(data.m_application);
+          return ChildCapability->IsMatch(data.m_application);
     }
     return false;
 }
@@ -771,24 +771,24 @@ H323Channel * H323SecureDataCapability::CreateChannel(H323Connection & connectio
 
     H235Capabilities * caps = dynamic_cast<H235Capabilities*>(connection.GetLocalCapabilitiesRef());
     if (!caps || !caps->GetDiffieHellMan())
-        return ChildCapability.CreateChannel(connection, dir, sessionID, param);
+        return ChildCapability->CreateChannel(connection, dir, sessionID, param);
 
-    return new H323SecureChannel(connection, *this, ChildCapability.CreateChannel(connection, dir, sessionID, param));
+    return new H323SecureChannel(connection, *this, ChildCapability->CreateChannel(connection, dir, sessionID, param));
 }
 
 PBoolean H323SecureDataCapability::OnSendingPDU(H245_Capability & pdu) const
 {
-   return ((H323DataCapability &)ChildCapability).OnSendingPDU(pdu);
+   return ((H323DataCapability *)ChildCapability)->OnSendingPDU(pdu);
 }
 
 PBoolean H323SecureDataCapability::OnReceivedPDU(const H245_Capability & pdu)
 {
-   return ((H323DataCapability &)ChildCapability).OnReceivedPDU(pdu);
+   return ((H323DataCapability *)ChildCapability)->OnReceivedPDU(pdu);
 }
 
 PBoolean H323SecureDataCapability::OnSendingPDU(H245_ModeElement & mode) const
 {
-   return ((H323DataCapability &)ChildCapability).OnSendingPDU(mode);
+   return ((H323DataCapability *)ChildCapability)->OnSendingPDU(mode);
 }
 
 PBoolean H323SecureDataCapability::OnSendingPDU(H245_DataType & dataType) const
@@ -805,7 +805,7 @@ PBoolean H323SecureDataCapability::OnSendingPDU(H245_DataType & dataType) const
     }
 
     if (!IsEncryptionActive())
-        return ((H323DataCapability &)ChildCapability).OnSendingPDU(dataType);
+        return ((H323DataCapability *)ChildCapability)->OnSendingPDU(dataType);
 
     dataType.SetTag(H245_DataType::e_h235Media);
     H245_H235Media & h235Media = dataType;
@@ -815,14 +815,14 @@ PBoolean H323SecureDataCapability::OnSendingPDU(H245_DataType & dataType) const
    
     H245_H235Media_mediaType & cType = h235Media.m_mediaType;
     cType.SetTag(H245_H235Media_mediaType::e_data);
-    return ((H323DataCapability &)ChildCapability).OnSendingPDU((H245_DataApplicationCapability &)cType, e_OLC);
+    return ((H323DataCapability *)ChildCapability)->OnSendingPDU((H245_DataApplicationCapability &)cType, e_OLC);
 }
 
 
 PBoolean H323SecureDataCapability::OnReceivedPDU(const H245_DataType & dataType, PBoolean receiver)
 {
     if (dataType.GetTag() != H245_DataType::e_h235Media)
-        return ChildCapability.OnReceivedPDU(dataType, receiver);
+        return ChildCapability->OnReceivedPDU(dataType, receiver);
 
     const H245_H235Media & h235Media = dataType;
     if (m_capabilities) {
@@ -838,7 +838,7 @@ PBoolean H323SecureDataCapability::OnReceivedPDU(const H245_DataType & dataType,
     }
     const H245_H235Media_mediaType & mediaType = h235Media.m_mediaType;
     if (mediaType.GetTag() == H245_H235Media_mediaType::e_data) 
-        return ((H323DataCapability &)ChildCapability).OnReceivedPDU((const H245_DataApplicationCapability &)mediaType, e_OLC);
+        return ((H323DataCapability *)ChildCapability)->OnReceivedPDU((const H245_DataApplicationCapability &)mediaType, e_OLC);
     else
         return false;
 }
@@ -846,7 +846,7 @@ PBoolean H323SecureDataCapability::OnReceivedPDU(const H245_DataType & dataType,
 
 PBoolean H323SecureDataCapability::OnSendingPDU(H245_DataMode & pdu) const
 {
-    return ((H323DataCapability &)ChildCapability).OnSendingPDU(pdu);
+    return ((H323DataCapability *)ChildCapability)->OnSendingPDU(pdu);
 }
 
 
@@ -1069,14 +1069,12 @@ PINDEX H235Capabilities::AddAllCapabilities(PINDEX descriptorNum,
                     num = SetCapability(descriptorNum, simultaneous, newCapability);
                     num = SetCapability(descriptorNum, simultaneous, 
                                         new H235SecurityCapability(this, newCapability->GetCapabilityNumber()));
-                    delete capability;
                     break;
                 case OpalMediaFormat::DefaultDataSessionID:
                     newCapability = new H323SecureDataCapability(*capability, H235ChNew, this);
                     num = SetCapability(descriptorNum, simultaneous, newCapability);
                     num = SetCapability(descriptorNum, simultaneous, 
                                         new H235SecurityCapability(this, newCapability->GetCapabilityNumber()));
-                    delete capability;
                     break;
                 case OpalMediaFormat::DefaultExtVideoSessionID:
                 case OpalMediaFormat::DefaultFileSessionID:
@@ -1122,11 +1120,9 @@ void H235Capabilities::GetDHKeyPair(PStringList & keyOIDs, H235_DiffieHellman * 
     for (PINDEX i=0; i < m_algorithms.GetSize(); ++i)
          keyOIDs.AppendString(m_algorithms[i]);
 
-    if (m_DHkey) {
-        // Create a new copy of the base diffiehellman 
-        // class for manipulation during a call
-         key = (H235_DiffieHellman *)m_DHkey->Clone();
-    }
+    if (m_DHkey)
+         key = m_DHkey;
+
      isMaster = m_h245Master;
 }
 

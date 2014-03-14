@@ -260,7 +260,7 @@ public:
     /**Constructor
       */
          H323SecureRealTimeCapability(
-          H323Capability & childCapability,          ///< Child Capability
+          H323Capability * childCapability,          ///< Child Capability
           H323Capabilities * capabilities = NULL,    ///< Capabilities reference
           unsigned secNo = 0,                        ///< Security Capability No
           PBoolean active = false                    ///< Whether encryption Activated
@@ -268,7 +268,7 @@ public:
 
       H323SecureRealTimeCapability(
           RTP_QOS * _rtpqos,
-          H323Capability & childCapability
+          H323Capability * childCapability
           );
 
     /**Deconstructor
@@ -322,7 +322,7 @@ public:
   //@}
 
 protected:
-    H323Capability & ChildCapability;    /// Child Capability
+    H323Capability * ChildCapability;    /// Child Capability
     H235ChType chtype;                   /// Channel Type
     PBoolean  m_active;                  /// Whether encryption is active
     H323Capabilities * m_capabilities;   /// Capabilities list
@@ -353,7 +353,7 @@ class H323SecureCapability : public H323SecureRealTimeCapability
       */
     H323SecureCapability(
         H323Capability & childCapability,          ///< Child Capability
-        enum H235ChType Ch = H235ChNew,               ///< ChannelType
+        enum H235ChType Ch = H235ChNew,            ///< ChannelType
         H323Capabilities * capabilities = NULL,    ///< Capabilities reference
         unsigned secNo = 0,                        ///< Security Capability No
         PBoolean active = false                    ///< Whether encryption is active or not
@@ -495,7 +495,7 @@ class H323SecureCapability : public H323SecureRealTimeCapability
 
     /**Get Child Capability
       */
-    H323Capability & GetChildCapability() const { return ChildCapability; }
+    H323Capability * GetChildCapability() const { return ChildCapability; }
 
     /**Validate that the capability is usable given the connection.
        This checks agains the negotiated protocol version number and remote
@@ -506,23 +506,23 @@ class H323SecureCapability : public H323SecureRealTimeCapability
       */
     virtual PBoolean IsUsable(
       const H323Connection & connection
-      ) const { return ChildCapability.IsUsable(connection); }
+      ) const { return ChildCapability->IsUsable(connection); }
   //@}
 
     /**Get the direction for this capability.
       */ 
     CapabilityDirection GetCapabilityDirection() const 
-        { return ChildCapability.GetCapabilityDirection(); }
+        { return ChildCapability->GetCapabilityDirection(); }
 
     /**Set the direction for this capability.
       */
     void SetCapabilityDirection(
       CapabilityDirection dir   /// New direction code
-    ) { ChildCapability.SetCapabilityDirection(dir); }
+    ) { ChildCapability->SetCapabilityDirection(dir); }
 
     /// Get the payload type for the capaibility
     RTP_DataFrame::PayloadTypes GetPayloadType() const 
-        { return ChildCapability.GetPayloadType(); }
+        { return ChildCapability->GetPayloadType(); }
 
   //@}
 
@@ -567,15 +567,15 @@ public:
     virtual PBoolean IsMatch(const PASN_Choice & subTypePDU) const;
     virtual PBoolean IsSubMatch(const PASN_Choice & subTypePDU) const;
 
-    virtual PBoolean IsUsable(const H323Connection & connection) const { return ChildCapability.IsUsable(connection); }
+    virtual PBoolean IsUsable(const H323Connection & connection) const { return ChildCapability->IsUsable(connection); }
 
-    CapabilityDirection GetCapabilityDirection() const  { return ChildCapability.GetCapabilityDirection(); }
+    CapabilityDirection GetCapabilityDirection() const  { return ChildCapability->GetCapabilityDirection(); }
 
-    void SetCapabilityDirection(CapabilityDirection dir ) { ChildCapability.SetCapabilityDirection(dir); }
+    void SetCapabilityDirection(CapabilityDirection dir ) { ChildCapability->SetCapabilityDirection(dir); }
 
-    RTP_DataFrame::PayloadTypes GetPayloadType() const { return ChildCapability.GetPayloadType(); }
+    RTP_DataFrame::PayloadTypes GetPayloadType() const { return ChildCapability->GetPayloadType(); }
 
-    H323Capability & GetChildCapability() const { return ChildCapability; }
+    H323Capability * GetChildCapability() const { return ChildCapability; }
 
     virtual PBoolean OnSendingPDU(H245_Capability & pdu) const;
     virtual PBoolean OnReceivedPDU(const H245_Capability & pdu);
@@ -597,7 +597,7 @@ public:
     virtual void SetAssociatedCapability(unsigned _secNo);
 
 protected:
-    H323Capability & ChildCapability;    /// Child Capability
+    H323Capability * ChildCapability;    /// Child Capability
     H235ChType chtype;                   /// Channel Type
     PBoolean  m_active;                  /// Whether encryption is active
     H323Capabilities * m_capabilities;   /// Capabilities list
