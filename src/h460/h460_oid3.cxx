@@ -380,7 +380,7 @@ void H460_FeatureOID3::AttachEndPoint(H323EndPoint * _ep)
 int H460_FeatureOID3::GetPurpose()
 { 
     if (isLoaded)
-        return FeatureRas; 
+        return FeatureBaseAll; 
     else
         return FeaturePresence; 
 }
