@@ -2221,11 +2221,11 @@ class H323Connection : public PObject
 
   /** H.460.9 Queue statistics
     */
-  void H4609QueueStats(const RTP_Session & session) const;
+  void H4609QueueStats(const RTP_Session & session);
 
   /** H.460.9 dequeue statistics
     */
-  PBoolean H4609DequeueStats(H4609Statistics & stat);
+  H4609Statistics * H4609DequeueStats();
 
   /** H.460.9 Enable statistics collection
     */
@@ -3455,7 +3455,7 @@ class H323Connection : public PObject
 #ifdef H323_H4609
     PBoolean m_h4609enabled;
     PBoolean m_h4609Final;
-    PQueue<H4609Statistics> * m_h4609Stats;
+    PQueue<H4609Statistics> m_h4609Stats;
 #endif
 
 #ifdef H323_H46018

@@ -98,12 +98,12 @@ PBoolean H460_FeatureStd9::FeatureAdvertised(int mtype)
 
 PBoolean H460_FeatureStd9::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
 {
-	// Build Message
+    // Build Message
     H460_FeatureStd feat = H460_FeatureStd(9); 
     
     pdu = feat;
 
-	return true;
+    return true;
 }
 
 void H460_FeatureStd9::OnReceiveAdmissionConfirm(const H225_FeatureDescriptor & pdu)
@@ -113,7 +113,7 @@ void H460_FeatureStd9::OnReceiveAdmissionConfirm(const H225_FeatureDescriptor & 
 
    H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
    if (feat.Contains(0)) 
-	   finalonly = true;
+       finalonly = true;
 
    CON->H4609StatsFinal(finalonly);
 }
@@ -121,146 +121,148 @@ void H460_FeatureStd9::OnReceiveAdmissionConfirm(const H225_FeatureDescriptor & 
 PBoolean H460_FeatureStd9::GenerateReport(H4609_ArrayOf_RTCPMeasures & report)
 {
 
-	H323Connection::H4609Statistics stat;
-    PBoolean hasStats = CON->H4609DequeueStats(stat);
+    H323Connection::H4609Statistics * stat = CON->H4609DequeueStats();
 
-	while (hasStats) {
+    while (stat) {
 
-	   H4609_RTCPMeasures info;
+       H4609_RTCPMeasures info;
 
-	   // RTP Information
-	   H225_TransportChannelInfo & rtp = info.m_rtpAddress;
-	    rtp.IncludeOptionalField(H225_TransportChannelInfo::e_sendAddress);
-		    stat.sendRTPaddr.SetPDU(rtp.m_sendAddress);
-	    rtp.IncludeOptionalField(H225_TransportChannelInfo::e_recvAddress);  
-		    stat.recvRTPaddr.SetPDU(rtp.m_recvAddress);
+       // RTP Information
+       H225_TransportChannelInfo & rtp = info.m_rtpAddress;
+        rtp.IncludeOptionalField(H225_TransportChannelInfo::e_sendAddress);
+            stat->sendRTPaddr.SetPDU(rtp.m_sendAddress);
+        rtp.IncludeOptionalField(H225_TransportChannelInfo::e_recvAddress);  
+            stat->recvRTPaddr.SetPDU(rtp.m_recvAddress);
 
-	   // RTCP Information
-/*	   H225_TransportChannelInfo & rtcp = info.m_rtcpAddress;
-	    rtp.IncludeOptionalField(H225_TransportChannelInfo::e_sendAddress);
-		    stat.sendRTCPaddr.SetPDU(rtp.m_sendAddress);
-	    rtp.IncludeOptionalField(H225_TransportChannelInfo::e_recvAddress);  
-		    stat.recvRTCPaddr.SetPDU(rtp.m_recvAddress);
+       // RTCP Information
+/*       H225_TransportChannelInfo & rtcp = info.m_rtcpAddress;
+        rtp.IncludeOptionalField(H225_TransportChannelInfo::e_sendAddress);
+            stat->sendRTCPaddr.SetPDU(rtp.m_sendAddress);
+        rtp.IncludeOptionalField(H225_TransportChannelInfo::e_recvAddress);  
+            stat->recvRTCPaddr.SetPDU(rtp.m_recvAddress);
 */    
-	   // Session ID
-	   info.m_sessionId.SetValue(stat.sessionid);
+       // Session ID
+       info.m_sessionId.SetValue(stat->sessionid);
 
-	   if (stat.meanEndToEndDelay > 0) {
-			info.IncludeOptionalField(H4609_RTCPMeasures::e_mediaSenderMeasures);
-			H4609_RTCPMeasures_mediaSenderMeasures & send = info.m_mediaSenderMeasures;
+       if (stat->meanEndToEndDelay > 0) {
+            info.IncludeOptionalField(H4609_RTCPMeasures::e_mediaSenderMeasures);
+            H4609_RTCPMeasures_mediaSenderMeasures & send = info.m_mediaSenderMeasures;
 
 
-		  if (stat.meanEndToEndDelay > 0) {
-			send.IncludeOptionalField(H4609_RTCPMeasures_mediaSenderMeasures::e_meanEstimatedEnd2EndDelay);
-			send.m_meanEstimatedEnd2EndDelay = stat.meanEndToEndDelay;	
-		  }
+          if (stat->meanEndToEndDelay > 0) {
+            send.IncludeOptionalField(H4609_RTCPMeasures_mediaSenderMeasures::e_meanEstimatedEnd2EndDelay);
+            send.m_meanEstimatedEnd2EndDelay = stat->meanEndToEndDelay;    
+          }
 
-		  if (stat.worstEndToEndDelay > 0) {
-			send.IncludeOptionalField(H4609_RTCPMeasures_mediaSenderMeasures::e_worstEstimatedEnd2EndDelay);
-			send.m_worstEstimatedEnd2EndDelay = stat.worstEndToEndDelay; 
-		  }
-		}
+          if (stat->worstEndToEndDelay > 0) {
+            send.IncludeOptionalField(H4609_RTCPMeasures_mediaSenderMeasures::e_worstEstimatedEnd2EndDelay);
+            send.m_worstEstimatedEnd2EndDelay = stat->worstEndToEndDelay; 
+          }
+        }
 
-		if (stat.packetsReceived > 0) {
-			info.IncludeOptionalField(H4609_RTCPMeasures::e_mediaReceiverMeasures);
-			H4609_RTCPMeasures_mediaReceiverMeasures & recv = info.m_mediaReceiverMeasures;
+        if (stat->packetsReceived > 0) {
+            info.IncludeOptionalField(H4609_RTCPMeasures::e_mediaReceiverMeasures);
+            H4609_RTCPMeasures_mediaReceiverMeasures & recv = info.m_mediaReceiverMeasures;
 
-		  if (stat.accumPacketLost > 0) {
-  			recv.IncludeOptionalField(H4609_RTCPMeasures_mediaReceiverMeasures::e_cumulativeNumberOfPacketsLost);
-			recv.m_cumulativeNumberOfPacketsLost = stat.accumPacketLost;
-		  }
-			
-		  if (stat.packetLossRate > 0) {
-			recv.IncludeOptionalField(H4609_RTCPMeasures_mediaReceiverMeasures::e_packetLostRate);
-			recv.m_packetLostRate = stat.packetLossRate;
-		  }
-			
-		  if (stat.worstJitter > 0) {
-			recv.IncludeOptionalField(H4609_RTCPMeasures_mediaReceiverMeasures::e_worstJitter);
-			recv.m_worstJitter = stat.worstJitter;
-		  }
+          if (stat->accumPacketLost > 0) {
+              recv.IncludeOptionalField(H4609_RTCPMeasures_mediaReceiverMeasures::e_cumulativeNumberOfPacketsLost);
+            recv.m_cumulativeNumberOfPacketsLost = stat->accumPacketLost;
+          }
+            
+          if (stat->packetLossRate > 0) {
+            recv.IncludeOptionalField(H4609_RTCPMeasures_mediaReceiverMeasures::e_packetLostRate);
+            recv.m_packetLostRate = stat->packetLossRate;
+          }
+            
+          if (stat->worstJitter > 0) {
+            recv.IncludeOptionalField(H4609_RTCPMeasures_mediaReceiverMeasures::e_worstJitter);
+            recv.m_worstJitter = stat->worstJitter;
+          }
 
-		  if (stat.bandwidth > 0) {
-			recv.IncludeOptionalField(H4609_RTCPMeasures_mediaReceiverMeasures::e_estimatedThroughput);
-			recv.m_estimatedThroughput = stat.bandwidth;
-		  }
+          if (stat->bandwidth > 0) {
+            recv.IncludeOptionalField(H4609_RTCPMeasures_mediaReceiverMeasures::e_estimatedThroughput);
+            recv.m_estimatedThroughput = stat->bandwidth;
+          }
 
-		  if (stat.fractionLostRate > 0) {
-			recv.IncludeOptionalField(H4609_RTCPMeasures_mediaReceiverMeasures::e_fractionLostRate);
-			recv.m_fractionLostRate = stat.fractionLostRate;
-		  }
+          if (stat->fractionLostRate > 0) {
+            recv.IncludeOptionalField(H4609_RTCPMeasures_mediaReceiverMeasures::e_fractionLostRate);
+            recv.m_fractionLostRate = stat->fractionLostRate;
+          }
 
-		  if (stat.meanJitter > 0) {
-			recv.IncludeOptionalField(H4609_RTCPMeasures_mediaReceiverMeasures::e_meanJitter);
-			recv.m_meanJitter = stat.meanJitter;
-		  }
-		}
+          if (stat->meanJitter > 0) {
+            recv.IncludeOptionalField(H4609_RTCPMeasures_mediaReceiverMeasures::e_meanJitter);
+            recv.m_meanJitter = stat->meanJitter;
+          }
+        }
 
-	   PINDEX size = report.GetSize();
-	   report.SetSize(size+1);
+       PINDEX size = report.GetSize();
+       report.SetSize(size+1);
        report[size] = info;
 
-	  // Get next call statistics record
-      hasStats = CON->H4609DequeueStats(stat);
-	}
+       delete stat;
 
-	return (report.GetSize() > 0);
+      // Get next call statistics record
+      stat = CON->H4609DequeueStats();
+    }
+
+
+    return (report.GetSize() > 0);
 }
 
 PBoolean H460_FeatureStd9::WriteStatisticsReport(H460_FeatureStd & msg, PBoolean final)
 {
-	// Generate the report
-	PBoolean success = FALSE;
-	H4609_QosMonitoringReportData qosdata;
-	if (!final) {
-		qosdata.SetTag(H4609_QosMonitoringReportData::e_periodic);
-		H4609_PeriodicQoSMonReport & rep = qosdata;
-		H4609_ArrayOf_PerCallQoSReport & percall = rep.m_perCallInfo;
-		percall.SetSize(1);
-		H4609_PerCallQoSReport & period = percall[0];
-		period.m_callReferenceValue = CON->GetCallReference();
-		period.m_conferenceID = CON->GetConferenceIdentifier();
-		period.m_callIdentifier.m_guid = CON->GetCallIdentifier();
+    // Generate the report
+    PBoolean success = FALSE;
+    H4609_QosMonitoringReportData qosdata;
+    if (!final) {
+        qosdata.SetTag(H4609_QosMonitoringReportData::e_periodic);
+        H4609_PeriodicQoSMonReport & rep = qosdata;
+        H4609_ArrayOf_PerCallQoSReport & percall = rep.m_perCallInfo;
+        percall.SetSize(1);
+        H4609_PerCallQoSReport & period = percall[0];
+        period.m_callReferenceValue = CON->GetCallReference();
+        period.m_conferenceID = CON->GetConferenceIdentifier();
+        period.m_callIdentifier.m_guid = CON->GetCallIdentifier();
         if (GenerateReport(period.m_mediaChannelsQoS)) {
           period.IncludeOptionalField(H4609_PerCallQoSReport::e_mediaChannelsQoS);
           success = true;
         }
-	} else {
-		qosdata.SetTag(H4609_QosMonitoringReportData::e_final);
-		H4609_FinalQosMonReport & rep = qosdata;
+    } else {
+        qosdata.SetTag(H4609_QosMonitoringReportData::e_final);
+        H4609_FinalQosMonReport & rep = qosdata;
         success = GenerateReport(rep.m_mediaInfo); 
-	}
+    }
 
-	if (success) {
+    if (success) {
        PTRACE(6,"Std9\tStatistics Report\n" << qosdata);
-	   PASN_OctetString rawstats;
-	   rawstats.EncodeSubType(qosdata);
-	   msg.Add(1,H460_FeatureContent(rawstats));
-	}
+       PASN_OctetString rawstats;
+       rawstats.EncodeSubType(qosdata);
+       msg.Add(1,H460_FeatureContent(rawstats));
+    }
 
-	return success;
+    return success;
 }
 
 
 PBoolean H460_FeatureStd9::OnSendInfoRequestResponseMessage(H225_FeatureDescriptor & pdu)
 {
    if (!qossupport)
-	   return false;
+       return false;
 
     H460_FeatureStd feat = H460_FeatureStd(9); 
 
-	if (WriteStatisticsReport(feat,finalonly)) {
+    if (WriteStatisticsReport(feat,finalonly)) {
         pdu = feat;
         return true;
-	}
-	return true;
+    }
+    return true;
 
 }
 
 PBoolean H460_FeatureStd9::OnSendDisengagementRequestMessage(H225_FeatureDescriptor & pdu)
 {
    if (!qossupport)
- 	 return false;
+      return false;
 
    H460_FeatureStd feat = H460_FeatureStd(9); 
 

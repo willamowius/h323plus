@@ -598,7 +598,6 @@ H323Connection::H323Connection(H323EndPoint & ep,
   features->LoadFeatureSet(H460_Feature::FeatureSignal,this);
 
 #ifdef H323_H4609
-  m_h4609Stats = NULL;
   m_h4609enabled = false;
   m_h4609Final = false;
 #endif
@@ -671,8 +670,13 @@ H323Connection::~H323Connection()
 #ifdef H323_H460
   delete features;
 #ifdef H323_H4609
-  delete m_h4609Stats;
-  m_h4609Stats = NULL;
+  if (m_h4609Stats.GetSize() > 0) {
+    H4609Statistics * stat = m_h4609Stats.Dequeue();
+    while (stat) {
+        delete stat;
+        stat = m_h4609Stats.Dequeue();
+    }
+  }
 #endif
 #endif
 #ifdef P_STUN
@@ -6224,7 +6228,7 @@ void H323Connection::OnRTPStatistics(const RTP_Session & session) const
 {
 #ifdef H323_H4609
        if (!m_h4609Final && session.GetPacketsReceived() > 0) 
-        H4609QueueStats(session);
+           (PRemoveConst(H323Connection,this))->H4609QueueStats(session);
 #endif
   endpoint.OnRTPStatistics(*this, session);
 }
@@ -6233,7 +6237,7 @@ void H323Connection::OnRTPFinalStatistics(const RTP_Session & session) const
 {
 #ifdef H323_H4609
        if (session.GetPacketsReceived() > 0) 
-        H4609QueueStats(session);
+           (PRemoveConst(H323Connection,this))->H4609QueueStats(session);
 #endif
   endpoint.OnRTPFinalStatistics(*this, session);
 }
@@ -6259,13 +6263,12 @@ H323Connection::H4609Statistics::H4609Statistics()
     sessionid = 1;
 }
 
-void H323Connection::H4609QueueStats(const RTP_Session & session) const
+void H323Connection::H4609QueueStats(const RTP_Session & session)
 {
-   if (!m_h4609enabled || (m_h4609Stats == NULL))
+   if (!m_h4609enabled)
        return;
  
     H4609Statistics * stat = new H4609Statistics();
-
     stat->sendRTPaddr  = H323TransportAddress(session.GetLocalTransportAddress());  
     stat->recvRTPaddr  = H323TransportAddress(session.GetRemoteTransportAddress());    
 //     stat->sendRTCPaddr = H323TransportAddress();  
@@ -6282,26 +6285,21 @@ void H323Connection::H4609QueueStats(const RTP_Session & session) const
     if (session.GetPacketsReceived() > 0 && session.GetAverageReceiveTime() > 0)
       stat->bandwidth  = (unsigned)((session.GetOctetsReceived()/session.GetPacketsReceived()/session.GetAverageReceiveTime())*1000);
 
-    if (m_h4609Stats)
-        m_h4609Stats->Enqueue(stat);
+    m_h4609Stats.Enqueue(stat);
 }
 
     
-PBoolean H323Connection::H4609DequeueStats(H4609Statistics & stat) 
+H323Connection::H4609Statistics * H323Connection::H4609DequeueStats() 
 {   
-    if (m_h4609Stats == NULL)
-        return false;
+    if (m_h4609Stats.GetSize() == 0)
+        return NULL;
 
-    H4609Statistics * s = m_h4609Stats->Dequeue(); 
-    if (s != NULL)
-        stat = *s;
-    return (s != NULL);
+    return (m_h4609Stats.Dequeue());
 }
 
 void H323Connection::H4609EnableStats() 
 { 
     m_h4609enabled = true; 
-    m_h4609Stats = new PQueue<H4609Statistics>;
 }
     
 void H323Connection::H4609StatsFinal(PBoolean final) 
