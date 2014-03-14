@@ -1509,7 +1509,8 @@ H323TransportTCP::H323TransportTCP(H323EndPoint & end,
                                    PSSLContext * context, 
                                    PBoolean autoDeleteContext
                                    )
-: H323TransportIP(end, binding, end.IsTLSEnabled() ? H323EndPoint::DefaultTLSPort : H323EndPoint::DefaultTcpPort, context, autoDeleteContext)
+                                   : H323TransportIP(end, binding, end.IsTLSEnabled() ? H323EndPoint::DefaultTLSPort : H323EndPoint::DefaultTcpPort, 
+                                     context ? context : end.GetTransportContext(), autoDeleteContext)
 #else
 H323TransportTCP::H323TransportTCP(H323EndPoint & end,
                                    PIPSocket::Address binding,
@@ -1621,6 +1622,14 @@ PBoolean H323TransportTCP::Close()
   if (IsListening())
     h245listener->Close();
 
+#if PTLIB_VER < 2120
+    ssl_st * m_ssl = ssl;
+#endif
+    if (m_ssl) {
+        SSL_shutdown(m_ssl);
+        m_ssl = NULL;
+    }
+
   return H323Transport::Close();
 }
 
@@ -1635,41 +1644,28 @@ PBoolean H323TransportTCP::InitialiseSecurity(const H323TransportSecurity * secu
 #ifdef H323_TLS
     // Delete any context that was autoCreated in PSSLChannel. - Very Annoying - SH
 #if PTLIB_VER < 2120
-    PSSLContext * m_context = context;
-    PBoolean & m_autoDeleteContext = autoDeleteContext;
     ssl_st * m_ssl = ssl;
 #endif
-    if (m_context) {
+    if (!security->IsTLSEnabled()) {
         SSL_shutdown(m_ssl);
         SSL_free(m_ssl);
         m_ssl = NULL;
-        delete m_context;
-        m_context = NULL;
-        m_autoDeleteContext = false;
 #if PTLIB_VER < 2120
-        context = NULL;
         ssl = NULL;
 #endif
-    }
-
-    if (!security->IsTLSEnabled())
-        return true;
-
-    m_context = endpoint.GetTransportContext();
-    if (!m_context) {
-        PTRACE(1, "TLS\tError No Context");
-        return false;
-    }     
-    m_ssl = SSL_new(*m_context);
-    if (!m_ssl) {
-        PTRACE(1, "TLS\tError creating SSL object");
-        return false;
-    }
+    } else if (!m_ssl) {
 #if PTLIB_VER < 2120
-    context = m_context;
-    ssl = m_ssl;
+        ssl = SSL_new(*context);
+        if (!ssl) {
+#else
+        m_ssl = SSL_new(*m_context);
+        if (!m_ssl) {
 #endif
-#endif
+            PTRACE(1, "TLS\tError creating SSL object");
+            return false;
+        }
+    }
+#endif // H323_TLS
     return true;
 }
 
@@ -2038,7 +2034,11 @@ H323TransportUDP::H323TransportUDP(H323EndPoint & ep,
                                    PIPSocket::Address binding,
                                    WORD local_port,
                                    WORD remote_port)
+#ifdef H323_TLS
+  : H323TransportIP(ep, binding, remote_port, ep.GetTransportContext())
+#else
   : H323TransportIP(ep, binding, remote_port)
+#endif
 {
   if (remotePort == 0)
     remotePort = H225_RAS::DefaultRasUdpPort; // For backward compatibility
