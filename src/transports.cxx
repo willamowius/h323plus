@@ -1646,7 +1646,7 @@ PBoolean H323TransportTCP::InitialiseSecurity(const H323TransportSecurity * secu
 #if PTLIB_VER < 2120
     ssl_st * m_ssl = ssl;
 #endif
-    if (!security->IsTLSEnabled()) {
+    if (m_ssl && !security->IsTLSEnabled()) {
         SSL_shutdown(m_ssl);
         SSL_free(m_ssl);
         m_ssl = NULL;
