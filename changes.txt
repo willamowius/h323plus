@@ -1,6 +1,7 @@
 ===============================================================================
 H323plus 1.26.0 - 1.26.x
 ===============================================================================
+BUG Full memory management audit with VLD (1.26.3)
 NEW Support for different URI schema call routing
 BUG DynamicPayloadType and MediaPacketization support in ExternalRTPChannel
 BUG H.239 Support both presentation and live modes
