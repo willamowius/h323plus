@@ -690,22 +690,21 @@ PBoolean H323GenericCapabilityInfo::OnSendingGenericPDU(H245_GenericCapability &
           continue;
         break;
     }
+
+    H245_GenericParameter param;
+    param.m_parameterIdentifier.SetTag(H245_ParameterIdentifier::e_standard);
+    PASN_Integer & pId = param.m_parameterIdentifier;
+    pId = genericInfo.ordinal;
  
-    H245_GenericParameter * param = new H245_GenericParameter;
-
-    param->m_parameterIdentifier.SetTag(H245_ParameterIdentifier::e_standard);
-    (PASN_Integer &)param->m_parameterIdentifier = genericInfo.ordinal;
     unsigned parameterValue = ((const OpalMediaOptionUnsigned &)option).GetValue();
-
     if (PIsDescendant(&option, OpalMediaOptionUnsigned) && parameterValue == 0)
         continue;
   
     if (PIsDescendant(&option, OpalMediaOptionBoolean)) {
-      if (!((const OpalMediaOptionBoolean &)option).GetValue()) {
-        delete param;
+      if (!((const OpalMediaOptionBoolean &)option).GetValue())
         continue; // Do not include a logical at all if it is false
-      }
-      param->m_parameterValue.SetTag(H245_ParameterValue::e_logical);
+
+      param.m_parameterValue.SetTag(H245_ParameterValue::e_logical);
     }
     else if (PIsDescendant(&option, OpalMediaOptionUnsigned)) {
       unsigned tag;
@@ -724,12 +723,13 @@ PBoolean H323GenericCapabilityInfo::OnSendingGenericPDU(H245_GenericCapability &
           break;
       }
 
-      param->m_parameterValue.SetTag(tag);
-      (PASN_Integer &)param->m_parameterValue = parameterValue;
+      param.m_parameterValue.SetTag(tag);
+      PASN_Integer & pVal = param.m_parameterValue;
+      pVal = parameterValue;
     }
     else {
-      param->m_parameterValue.SetTag(H245_ParameterValue::e_octetString);
-      PASN_OctetString & octetString = param->m_parameterValue;
+      param.m_parameterValue.SetTag(H245_ParameterValue::e_octetString);
+      PASN_OctetString & octetString = param.m_parameterValue;
       if (PIsDescendant(&option, OpalMediaOptionOctets))
         octetString = ((const OpalMediaOptionOctets &)option).GetValue();
       else
@@ -738,11 +738,15 @@ PBoolean H323GenericCapabilityInfo::OnSendingGenericPDU(H245_GenericCapability &
 
     if (genericInfo.mode == OpalMediaOption::H245GenericInfo::Collapsing) {
       pdu.IncludeOptionalField(H245_GenericCapability::e_collapsing);
-      pdu.m_collapsing.Append(param);
+      int sz = pdu.m_collapsing.GetSize();
+      pdu.m_collapsing.SetSize(sz+1);
+      pdu.m_collapsing[sz] = param;
     }
     else {
       pdu.IncludeOptionalField(H245_GenericCapability::e_nonCollapsing);
-      pdu.m_nonCollapsing.Append(param);
+      int sz = pdu.m_nonCollapsing.GetSize();
+      pdu.m_nonCollapsing.SetSize(sz+1);
+      pdu.m_nonCollapsing[sz] = param;
     }
   }
     if (pdu.m_collapsing.GetSize() > 0) 
@@ -2110,23 +2114,21 @@ PBoolean H323CodecExtendedVideoCapability::OnSendingPDU(H245_VideoCapability & p
     extend.IncludeOptionalField(H245_ExtendedVideoCapability::e_videoCapabilityExtension);
     H245_ArrayOf_GenericCapability & cape = extend.m_videoCapabilityExtension;
 
-    H245_GenericCapability gcap;
-     gcap.m_capabilityIdentifier = *(new H245_CapabilityIdentifier(H245_CapabilityIdentifier::e_standard));
-     PASN_ObjectId &object_id = gcap.m_capabilityIdentifier;
-     object_id = OpalPluginCodec_Identifer_H239_Video;
+    cape.SetSize(1);
+    H245_GenericCapability & gcap = cape[0];
+    gcap.m_capabilityIdentifier.SetTag(H245_CapabilityIdentifier::e_standard);
+    PASN_ObjectId & object_id = gcap.m_capabilityIdentifier;
+    object_id = OpalPluginCodec_Identifer_H239_Video;
 
-     // Add role
-      H245_GenericParameter * param = new H245_GenericParameter;
-      param->m_parameterIdentifier.SetTag(H245_ParameterIdentifier::e_standard);
-      (PASN_Integer &)param->m_parameterIdentifier = 1;
-      param->m_parameterValue.SetTag(H245_ParameterValue::e_booleanArray);
-      (PASN_Integer &)param->m_parameterValue = 1;  // Live presentation
-
-      gcap.IncludeOptionalField(H245_GenericCapability::e_collapsing);
-      gcap.m_collapsing.SetSize(1);
-      gcap.m_collapsing[0] = *param;
-      cape.SetSize(1);
-      cape[0] = gcap;
+    gcap.IncludeOptionalField(H245_GenericCapability::e_collapsing);
+    gcap.m_collapsing.SetSize(1);
+    H245_GenericParameter & param = gcap.m_collapsing[0];
+    param.m_parameterIdentifier.SetTag(H245_ParameterIdentifier::e_standard);
+    PASN_Integer & pId = param.m_parameterIdentifier;
+    pId = 1;
+    param.m_parameterValue.SetTag(H245_ParameterValue::e_booleanArray);
+    PASN_Integer & pVal = param.m_parameterValue;
+    pVal = 1;
 
 
     H245_ArrayOf_VideoCapability & caps = extend.m_videoCapability;
@@ -3218,7 +3220,7 @@ void H323Capabilities::Add(H323Capability * capability)
   capability->SetCapabilityNumber(MergeCapabilityNumber(table, capability->GetCapabilityNumber()));
   table.Append(capability);
 
-  PTRACE(3, "H323\tAdded capability: " << *capability);
+  OpalMediaFormat::DebugOptionList(capability->GetMediaFormat());
 }
 
 
@@ -3493,8 +3495,10 @@ H323Capability * H323Capabilities::FindCapability(const H245_DataType & dataType
 #ifdef H323_H235
       case H245_DataType::e_h235Media :
       {
+       if (capability.GetMainType() != H323Capability::e_Security) {
         const H245_H235Media & data = dataType;
         checkExact = capability.IsMatch(data.m_mediaType);
+       }
         break;
       }
 #endif
