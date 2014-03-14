@@ -601,8 +601,6 @@ template <typename PDUType>
 static void BuildAuthenticatorPDU(PDUType & pdu, unsigned code, const H323Connection * connection)
 {
 
-  H235Authenticators authenticators = connection->GetEPAuthenticators();
-
   PINDEX keyLengthLimit = P_MAX_INDEX;
 #ifdef H323_H235
   if (!connection->EnableCallMediaEncryption())
@@ -625,8 +623,9 @@ static void BuildAuthenticatorPDU(PDUType & pdu, unsigned code, const H323Connec
       }
   }
 
+  const H235Authenticators & authenticators = connection->GetEPAuthenticators();
   if (!authenticators.IsEmpty()) {
-    connection->GetEPAuthenticators().PrepareSignalPDU(code,pdu.m_tokens,pdu.m_cryptoTokens,keyLengthLimit);
+    authenticators.PrepareSignalPDU(code,pdu.m_tokens,pdu.m_cryptoTokens,keyLengthLimit);
 
     if (pdu.m_tokens.GetSize() > 0)
         pdu.IncludeOptionalField(PDUType::e_tokens);
