@@ -101,7 +101,7 @@ void SimpleH323Process::Main()
              "-sound-out:"
              "-sound-buffers:"
 #ifdef H323_VIDEO
-             "v-video::"
+             "v-video:"
 #endif
              "T-h245tunneldisable."
              "-h245setupenable."
@@ -118,6 +118,9 @@ void SimpleH323Process::Main()
 #endif
 #ifdef H323_H46026
              "-h46026disable."
+#endif
+#ifdef H323_AEC
+            "-aecdisable."
 #endif
 #ifdef H323_TLS
             "-tls."
@@ -181,6 +184,9 @@ void SimpleH323Process::Main()
             "     --tls-privkey        : TLS Private Key File.\n"
             "     --tls-passphrase     : TLS Private Key PassPhrase.\n"
             "     --tls-listenport     : TLS listen port (default: 1300).\n"
+#endif
+#ifdef H323_AEC
+            "     --aecdisable         : Disable AEC.\n"
 #endif
 #ifdef P_HAS_IPV6
             "     --ipv6               : Enable IPv6 Support.\n"
@@ -316,6 +322,13 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
   DisableH245QoS(args.HasOption('Q'));
   DisableH245inSetup(!args.HasOption("h245setupenable"));
 
+#ifdef H323_AEC
+  if (args.HasOption("aecdisable"))
+     SetAECEnabled(false);
+  else
+     SetAECEnabled(true);
+#endif
+
   autoAnswer           = args.HasOption('a');
   busyForwardParty     = args.GetOptionString('B');
 
@@ -366,6 +379,12 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
 
   PBoolean hasVideo = TRUE;
 #ifdef H323_VIDEO
+
+  PStringList drivers = PVideoInputDevice::GetDriverNames();
+  cout << "Available Video Drivers: " << endl;
+  for (PINDEX i = 0; i < drivers.GetSize(); i++)
+      cout << drivers[i] << endl;
+
   videoDriver = defVideoDriver;
   if (args.HasOption("video")) {
       videoDriver = args.GetOptionString("video");
@@ -445,6 +464,12 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
   if (args.HasOption("h46018disable")) {
       cout << "H.460.18 is Disabled" << endl << endl;
       H46018Enable(PFalse);
+  }
+#endif
+#ifdef H323_H46019M
+  else {
+      H46019MEnable(true);
+      H46019MSending(true);
   }
 #endif
 
@@ -570,7 +595,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
                 passphrase = args.GetOptionString("tls-passphrase");
             useTLS = TLS_SetPrivateKey(args.GetOptionString("tls-privkey"), passphrase);
         }
-		WORD tlsListenPort = (WORD)args.GetOptionString("tls-listenport", "1300").AsUnsigned();
+        WORD tlsListenPort = (WORD)args.GetOptionString("tls-listenport", "1300").AsUnsigned();
 
         if (useTLS && TLS_Initialise(interfaceAddress, tlsListenPort)) {
             cout << "Enabled TLS signal security." << endl;
@@ -834,7 +859,7 @@ PBoolean SimpleH323EndPoint::OpenVideoChannel(H323Connection & /*connection*/,
   for (PINDEX i = 0; i < devices.GetSize(); i++) {
     PTRACE(4, devices[i]);
     PCaselessString devName = devices[i];
-	if (devName != "*.yuv" && devName != "fake" && devName != "NULL") {
+    if (devName != "*.yuv" && devName != "fake" && devName != "NULL") {
       deviceName = devName;
       break;
     }
@@ -886,15 +911,15 @@ PBoolean SimpleH323EndPoint::OpenVideoChannel(H323Connection & /*connection*/,
   }
 #endif
 
-  if (!device->Open(deviceName, TRUE)) {
-    PTRACE(1, "Failed to open the video device \"" << deviceName << '"');
-    return FALSE;
-  }
-
   if (!device->SetFrameSize(codec.GetWidth(), codec.GetHeight()) ||
       !device->SetFrameRate(codec.GetFrameRate()) ||
       !device->SetColourFormatConverter("YUV420P")) {
-    PTRACE(1, "Failed to configure the video device \"" << deviceName << '"');
+       PTRACE(1, "Failed to configure the video device \"" << deviceName << '"');
+       return FALSE;
+  }
+
+  if (!device->Open(deviceName, TRUE)) {
+    PTRACE(1, "Failed to open the video device \"" << deviceName << '"');
     return FALSE;
   }
 
