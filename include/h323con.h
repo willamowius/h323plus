@@ -3299,6 +3299,8 @@ class H323Connection : public PObject
     PTime         connectedTime;
     PTime         callEndTime;
     PTime         reverseMediaOpenTime;
+    PInt64        noMediaTimeOut;
+    PInt64        roundTripDelayRate;
     CallEndReason callEndReason;
     unsigned      q931Cause;
     ReleaseSequence releaseSequence;

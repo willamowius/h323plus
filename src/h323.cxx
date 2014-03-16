@@ -408,6 +408,8 @@ H323Connection::H323Connection(H323EndPoint & ep,
     connectedTime(0),
     callEndTime(0),
     reverseMediaOpenTime(0),
+    noMediaTimeOut(ep.GetNoMediaTimeout().GetMilliSeconds()),
+    roundTripDelayRate(ep.GetRoundTripDelayRate().GetMilliSeconds()),
     releaseSequence(ReleaseSequenceUnknown)
     ,EPAuthenticators(ep.CreateEPAuthenticators())
 #ifdef H323_H460
@@ -6749,19 +6751,19 @@ void H323Connection::MonitorCallStatus()
   if (!Lock())
     return;
 
-  if (endpoint.GetRoundTripDelayRate() > 0 && !roundTripDelayTimer.IsRunning()) {
-    roundTripDelayTimer = endpoint.GetRoundTripDelayRate();
+  if (roundTripDelayTimer > 0 && !roundTripDelayTimer.IsRunning()) {
+    roundTripDelayTimer = roundTripDelayRate;
     StartRoundTripDelay();
   }
 
-  if (endpoint.GetNoMediaTimeout() > 0) {
+  if (noMediaTimeOut > 0) {
     PBoolean oneRunning = FALSE;
     PBoolean allSilent = TRUE;
     for (PINDEX i = 0; i < logicalChannels->GetSize(); i++) {
         H323Channel * channel = logicalChannels->GetChannelAt(i);
         if (channel && channel->IsRunning()) {
             oneRunning = TRUE;
-            if (channel->GetSilenceDuration() < endpoint.GetNoMediaTimeout().GetMilliSeconds()) {
+            if (channel->GetSilenceDuration() < noMediaTimeOut) {
                 allSilent = FALSE;
                 break;
             }
