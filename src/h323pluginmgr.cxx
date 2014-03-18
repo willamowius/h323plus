@@ -1752,6 +1752,11 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
 #endif
 
     PluginCodec_Video_FrameHeader * frameHeader = (PluginCodec_Video_FrameHeader *)bufferRTP.GetPayloadPtr();
+    if (!frameHeader) {
+        PTRACE(1,"PLUGIN\tCould not locate frame header, close down video transmission thread");
+        return false;
+    }
+
     frameHeader->x = 0;
     frameHeader->y = 0;
     frameHeader->width        = videoIn->GetGrabWidth();
@@ -1759,8 +1764,7 @@ PBoolean H323PluginVideoCodec::Read(BYTE * /*buffer*/, unsigned & length, RTP_Da
 
     if (frameHeader->width == 0 || frameHeader->height == 0) {
         PTRACE(1,"PLUGIN\tVideo grab dimension is 0, close down video transmission thread");
-        videoIn->EnableAccess();
-        return FALSE;
+        return false;
     }
 
 
@@ -1961,6 +1965,8 @@ PBoolean H323PluginVideoCodec::WriteInternal(const BYTE * /*buffer*/, unsigned l
       
       if (flags & PluginCodec_ReturnCoderLastFrame) {
         PluginCodec_Video_FrameHeader * header = (PluginCodec_Video_FrameHeader *)(bufferRTP.GetPayloadPtr());
+        if (!header)
+            return false;
 
         if (!SetFrameSize(header->width,header->height))
            return false;
