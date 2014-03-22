@@ -2656,11 +2656,11 @@ class H323Connection : public PObject
 
     /**Get the local Display name
       */
-    const PString GetDisplayName() const { return localDisplayName; }
+    virtual const PString GetDisplayName() const { return localDisplayName; }
 
 	/**Get  Local Alias Name list
 	  */
-    const PStringList & GetLocalAliasNames() const { return localAliasNames; }
+    virtual const PStringList & GetLocalAliasNames() const { return localAliasNames; }
 
     /**Get the local supported languages
 	  */
