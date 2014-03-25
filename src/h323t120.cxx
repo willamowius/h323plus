@@ -23,50 +23,7 @@
  *
  * Contributor(s): ______________________________________.
  *
- * $Log$
- * Revision 1.2  2008/05/23 11:22:11  willamowius
- * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
- *
- * Revision 1.1  2007/08/06 20:51:07  shorne
- * First commit of h323plus
- *
- * Revision 1.12  2002/11/10 08:10:43  robertj
- * Moved constants for "well known" ports to better place (OPAL change).
- *
- * Revision 1.11  2002/08/05 10:03:47  robertj
- * Cosmetic changes to normalise the usage of pragma interface/implementation.
- *
- * Revision 1.10  2002/07/02 10:02:32  robertj
- * Added H323TransportAddress::GetIpAddress() so don't have to provide port
- *   when you don't need it as in GetIpAndPort(),.
- *
- * Revision 1.9  2002/06/28 03:34:28  robertj
- * Fixed issues with address translation on gatekeeper RAS channel.
- *
- * Revision 1.8  2002/05/10 05:48:13  robertj
- * Added the max bit rate field to the data channel capability class.
- * Added session ID to the data logical channel class.
- *
- * Revision 1.7  2002/02/01 01:47:18  robertj
- * Some more fixes for T.120 channel establishment, more to do!
- *
- * Revision 1.6  2002/01/09 00:21:40  robertj
- * Changes to support outgoing H.245 RequstModeChange.
- *
- * Revision 1.5  2001/12/22 03:22:29  robertj
- * Added create protocol function to H323Connection.
- *
- * Revision 1.4  2001/09/12 07:48:05  robertj
- * Fixed various problems with tracing.
- *
- * Revision 1.3  2001/08/06 03:08:57  robertj
- * Fission of h323.h to h323ep.h & h323con.h, h323.h now just includes files.
- *
- * Revision 1.2  2001/07/18 02:27:24  robertj
- * Fixed GNU warning.
- *
- * Revision 1.1  2001/07/17 04:44:32  robertj
- * Partial implementation of T.120 and T.38 logical channels.
+ * $Id$
  *
  */
 
