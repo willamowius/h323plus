@@ -305,7 +305,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
 
   // Get local username, multiple uses of -u indicates additional aliases
   if (args.HasOption('u')) {
-    PStringArray aliases = args.GetOptionString('u').Tokenise(',');
+    PStringArray aliases = args.GetOptionString('u').Tokenise(" ,;\n");
     SetLocalUserName(aliases[0]);
     for (PINDEX i = 1; i < aliases.GetSize(); i++)
       AddAliasName(aliases[i]);
