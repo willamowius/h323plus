@@ -1,6 +1,7 @@
 ===============================================================================
 H323plus 1.26.0 - 1.26.x
 ===============================================================================
+NEW Add H.323 Annex G T.140. Disabled by default (WIP)
 BUG Full memory management audit with VLD (1.26.3)
 NEW Support for different URI schema call routing
 BUG DynamicPayloadType and MediaPacketization support in ExternalRTPChannel

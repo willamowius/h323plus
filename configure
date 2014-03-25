@@ -765,6 +765,7 @@ enable_h461
 enable_h501
 enable_t38
 enable_t120
+enable_t140
 enable_gnugk
 enable_file
 enable_aec
@@ -1424,7 +1425,8 @@ Optional Features:
   --enable-h461           enable H.461 ASSET Feature
   --disable-h501          disable H.501
   --disable-t38           disable T.38
-  --disable-t120          disable T.120
+  --enable-t120           enable T.120
+  --enable-t140           enable T.140
   --disable-gnugk         disable GnuGk NAT
   --disable-file          disable File Transfer
   --enable-aec            enable Acoustic Echo Cancellation
@@ -4243,7 +4245,8 @@ default_h461=no
 default_h460p=no
 default_h460pre=no
 default_h460com=no
-default_t120=yes
+default_t120=no
+default_t140=no
 default_gnugk=yes
 default_file=yes
 default_aec=no
@@ -4277,6 +4280,7 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_h460pre=no
   default_h460com=no
   default_t120=no
+  default_t140=no
   default_gnugk=no
   default_file=no
   default_aec=no
@@ -4951,9 +4955,31 @@ if test "$enable_t120" = "no" ; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling T.120" >&5
 $as_echo "$as_me: Disabling T.120" >&6;}
 else
-  H323_T20=1
+  H323_T120=1
 
 $as_echo "#define H323_T120 1" >>confdefs.h
+
+fi
+
+
+
+
+# Check whether --enable-t140 was given.
+if test "${enable_t140+set}" = set; then :
+  enableval=$enable_t140;
+fi
+
+if test "${enable_t140}x" = "x" ; then
+  enable_t140=$default_t140
+fi
+if test "$enable_t140" = "no" ; then
+  H323_T140=
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling T.140" >&5
+$as_echo "$as_me: Disabling T.140" >&6;}
+else
+  H323_T140=1
+
+$as_echo "#define H323_T140 1" >>confdefs.h
 
 fi
 

@@ -65,6 +65,11 @@ class PSTUNClient;
 #include <h224/h224.h>
 #endif
 
+// Add T.140 Methods
+#ifdef H323_T140
+#include <h323t140.h>
+#endif
+
 class PHandleAggregator;
 
 /* The following classes have forward references to avoid including the VERY

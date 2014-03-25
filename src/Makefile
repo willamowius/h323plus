@@ -300,6 +300,13 @@ HEADER_FILES	+= $(OH323_INCDIR)/x224.h
 COMMON_SOURCES	+= $(OH323_SRCDIR)/x224.cxx
 endif
 
+########### T.140
+
+ifdef H323_T140
+HEADER_FILES	+= $(OH323_INCDIR)/h323t140.h
+COMMON_SOURCES	+= $(OH323_SRCDIR)/h323t140.cxx
+endif
+
 ########### AEC
 
 ifdef H323_AEC

@@ -1048,6 +1048,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\h323t140.cxx"
+				>
+			</File>
+			<File
 				RelativePath="src\h323t38.cxx"
 				>
 				<FileConfiguration
@@ -2046,6 +2050,10 @@
 			</File>
 			<File
 				RelativePath="include\h323t120.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\h323t140.h"
 				>
 			</File>
 			<File

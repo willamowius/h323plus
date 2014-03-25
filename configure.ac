@@ -217,7 +217,8 @@ default_h461=no
 default_h460p=no
 default_h460pre=no
 default_h460com=no
-default_t120=yes
+default_t120=no
+default_t140=no
 default_gnugk=yes
 default_file=yes
 default_aec=no
@@ -251,6 +252,7 @@ if test "${enable_minsize}x" = "yesx" ; then
   default_h460pre=no
   default_h460com=no
   default_t120=no
+  default_t140=no
   default_gnugk=no
   default_file=no
   default_aec=no
@@ -830,6 +832,26 @@ else
   AC_DEFINE(H323_T120, 1, [Enable T.120 support])
 fi
 AC_SUBST(H323_T120)
+
+dnl ########################################################################
+dnl check for enabling T.140
+
+dnl MSWIN_DISPLAY t140,T.140
+dnl MSWIN_DEFINE  t140,H323_T140
+
+AC_ARG_ENABLE(t140,
+       [  --disable-t140          disable T.140])
+if test "${enable_t140}x" = "x" ; then
+  enable_t140=$default_t140
+fi
+if test "$enable_t140" = "no" ; then
+  H323_T140=
+  AC_MSG_NOTICE(Disabling T.140)
+else
+  H323_T140=1
+  AC_DEFINE(H323_T140, 1, [Enable T.140 support])
+fi
+AC_SUBST(H323_T140)
 
 dnl ########################################################################
 dnl check for disabling GNUGK Support

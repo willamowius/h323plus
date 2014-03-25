@@ -102,6 +102,7 @@
 
 #undef H323_T38
 #undef H323_T120
+#undef H323_T140
 #undef H323_H224
 #ifdef H323_H224
     #define H224_H281   1
