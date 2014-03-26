@@ -2443,11 +2443,12 @@ H323Connection::CallEndReason H323Connection::SendSignalSetup(const PString & al
   // Check for gatekeeper and do admission check if have one
   H323Gatekeeper * gatekeeper = endpoint.GetGatekeeper();
   H225_ArrayOf_AliasAddress newAliasAddresses;
+  PStringList callLanguages;
   if (gatekeeper != NULL) {
     H323Gatekeeper::AdmissionResponse response;
     response.transportAddress = &gatekeeperRoute;
     response.aliasAddresses = &newAliasAddresses;
-    response.languageSupport = &localLanguages;
+    response.languageSupport = &callLanguages;
     if (!gkAccessTokenOID)
       response.accessTokenData = &gkAccessTokenData;
     while (!gatekeeper->AdmissionRequest(*this, response, alias.IsEmpty())) {
@@ -2525,7 +2526,7 @@ H323Connection::CallEndReason H323Connection::SendSignalSetup(const PString & al
     setup.m_tokens[last].m_nonStandard.m_data = gkAccessTokenData;
   }
 
-  if (H323SetLanguages(localLanguages, setup.m_language))
+  if (H323SetLanguages(callLanguages.GetSize() > 0 ? callLanguages : localLanguages, setup.m_language))
      setup.IncludeOptionalField(H225_Setup_UUIE::e_language);
 
 #ifdef H323_H46017
