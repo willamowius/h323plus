@@ -129,13 +129,19 @@ void H323SetLanguage(const PString & lang, PASN_IA5String & asn)
 
 void H323GetLanguage(PStringList & lang, const PASN_IA5String & asn)
 {
-    lang.AppendString(asn.GetValue());
+    int sz = lang.GetSize();
+    PString newLang = asn.GetValue();
+    for (PINDEX i=0; i < sz;  ++i) {
+        if (newLang == lang[i])
+            return;
+    }
+    lang.AppendString(newLang);
 }
 
 #define H323LANGUAGEPDU_body(pdu) \
     PBoolean H323SetLanguages(const PStringList & lang, pdu##_language & asn) { \
         asn.SetSize(lang.GetSize()); \
-        for (PINDEX i = 0; i < asn.GetSize(); i++) \
+        for (PINDEX i = 0; i < lang.GetSize(); i++) \
             H323SetLanguage(lang[i], asn[i]); \
         return (asn.GetSize() > 0); \
     } \
