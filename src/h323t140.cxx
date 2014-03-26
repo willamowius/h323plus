@@ -48,10 +48,15 @@
 #include "h323ep.h"
 #include "h245.h"
 
+#ifdef H323_H235
+#include <h235/h235chan.h>
+#endif
+
 #define new PNEW
 
 static const char * RFC4103OID = "0.0.8.323.1.7.0";
-#define T140_MAX_BIT_RATE 192  // 6 characters per second
+#define T140_CPS 6
+#define T140_MAX_BIT_RATE 32*T140_CPS
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -116,18 +121,18 @@ PBoolean H323_RFC4103Capability::OnReceivedPDU(const H245_GenericCapability & pd
    const H245_CapabilityIdentifier & capId = pdu.m_capabilityIdentifier; 
 
    if (capId.GetTag() != H245_CapabilityIdentifier::e_standard)
-       return FALSE;
+       return false;
     
    const PASN_ObjectId & id = capId;
    if (id.AsString() != RFC4103OID)
-       return FALSE;
+       return false;
 
    if (pdu.HasOptionalField(H245_GenericCapability::e_maxBitRate)) {
       const PASN_Integer & bitRate = pdu.m_maxBitRate;
       maxBitRate = bitRate;
    }
 
-  return TRUE;
+  return true;
 }
 
 PBoolean H323_RFC4103Capability::OnSendingPDU(H245_DataApplicationCapability & pdu) const
@@ -151,12 +156,144 @@ PBoolean H323_RFC4103Capability::OnSendingPDU(H245_GenericCapability & pdu) cons
    PASN_Integer & bitRate = pdu.m_maxBitRate;
    bitRate = maxBitRate;
 
-   return TRUE;
+   pdu.IncludeOptionalField(H245_GenericCapability::e_collapsing);
+   pdu.m_collapsing.SetSize(1);
+
+   H245_GenericParameter & cps = pdu.m_collapsing[0];
+   cps.m_parameterIdentifier.SetTag(H245_ParameterIdentifier::e_standard);
+   PASN_Integer & pId = (PASN_Integer &)cps.m_parameterIdentifier;
+   pId = 0;
+
+   cps.m_parameterValue.SetTag(H245_ParameterValue::e_unsignedMin);
+   PASN_Integer & pVal = (PASN_Integer &)cps.m_parameterValue;
+   pVal = T140_CPS;
+   
+   return true;
 }
 
 PBoolean H323_RFC4103Capability::OnSendingPDU(H245_DataMode & /*pdu*/) const
 {
    return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+RFC4103_Frame::RFC4103_Frame()
+{
+
+}
+    
+RFC4103_Frame::~RFC4103_Frame()
+{
+
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+H323_RFC4103Handler::H323_RFC4103Handler(H323Channel::Directions dir, H323Connection & connection, unsigned sessionID)
+:   session(NULL), receiverThread(NULL)
+#ifdef H323_H235
+    ,secChannel(NULL)
+#endif
+{
+
+  H245_TransportAddress addr;
+  connection.GetControlChannel().SetUpTransportPDU(addr, H323Transport::UseLocalTSAP);
+  session = connection.UseSession(sessionID,addr,H323Channel::IsBidirectional);
+
+}
+
+H323_RFC4103Handler::~H323_RFC4103Handler()
+{
+
+}
+
+H323_RFC4103ReceiverThread * H323_RFC4103Handler::CreateRFC4103ReceiverThread()
+{
+  return new H323_RFC4103ReceiverThread(this, *session);
+}
+
+#ifdef H323_H235
+void H323_RFC4103Handler::AttachSecureChannel(H323SecureChannel * channel)
+{
+    secChannel = channel;
+}
+#endif
+
+void H323_RFC4103Handler::StartTransmit()
+{
+
+}
+
+void H323_RFC4103Handler::StopTransmit()
+{
+
+}
+
+void H323_RFC4103Handler::StartReceive()
+{
+  if(receiverThread != NULL) {
+    PTRACE(5, "H.224 handler is already receiving");
+    return;
+  }
+    
+  receiverThread = CreateRFC4103ReceiverThread();
+  receiverThread->Resume();
+}
+
+void H323_RFC4103Handler::StopReceive()
+{
+  if(receiverThread != NULL)
+    receiverThread->Close();
+}
+
+PBoolean H323_RFC4103Handler::OnReadFrame(RTP_DataFrame & frame)
+{
+#ifdef H323_H235
+    if (secChannel)
+        return secChannel->ReadFrame(frame);
+    else
+#endif
+        return true;
+}
+
+PBoolean H323_RFC4103Handler::OnWriteFrame(RTP_DataFrame & frame)
+{
+#ifdef H323_H235
+    if (secChannel)
+        return secChannel->WriteFrame(frame);
+    else
+#endif
+        return true;
+}
+
+void H323_RFC4103Handler::TransmitFrame(RFC4103_Frame & frame, PBoolean replay)
+{
+
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+H323_RFC4103ReceiverThread::H323_RFC4103ReceiverThread(H323_RFC4103Handler *handler, RTP_Session & session)
+: PThread(10000, AutoDeleteThread, NormalPriority, "RFC4103 Receiver Thread"),
+  rfc4103Handler(handler), rtpSession(session)
+{
+
+}
+
+H323_RFC4103ReceiverThread::~H323_RFC4103ReceiverThread()
+{
+
+}
+
+void H323_RFC4103ReceiverThread::Main()
+{
+
+}
+    
+void H323_RFC4103ReceiverThread::Close()
+{
+
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -168,11 +305,67 @@ H323_RFC4103Channel::H323_RFC4103Channel(H323Connection & connection,
                                    unsigned id)
   : H323DataChannel(connection, capability, direction, id),
     rtpSession(rtp), direction(theDirection), sessionID(id),
-    rtpPayloadType((RTP_DataFrame::PayloadTypes)100)
+    rtpCallbacks(*(H323_RTP_Session *)rtp.GetUserData()), rfc4103Handler(NULL),
+#ifdef H323_H235
+    secChannel(NULL),
+#endif
+    rtpPayloadType((RTP_DataFrame::PayloadTypes)98)
 {
   PTRACE(3, "RFC4103\tCreated logical channel for RFC4103");
 }
 
+PBoolean H323_RFC4103Channel::Open()
+{
+  return H323Channel::Open();
+}
+
+PBoolean H323_RFC4103Channel::Start()
+{
+  if (!Open())
+    return false;
+
+  PTRACE(4,"RFC4103\tStarting RFC4103 " << (direction == H323Channel::IsTransmitter ? "Transmitter" : "Receiver") << " Channel");
+    
+  if (!rfc4103Handler)
+      rfc4103Handler = connection.CreateRFC4103ProtocolHandler(direction,sessionID);
+
+  if (!rfc4103Handler) {
+      PTRACE(4,"RFC4103\tError starting " << (direction == H323Channel::IsTransmitter ? "Transmitter" : "Receiver"));
+      return false;
+  }
+
+#ifdef H323_H235
+  if (secChannel)
+      rfc4103Handler->AttachSecureChannel(secChannel);
+#endif
+    
+  if(direction == H323Channel::IsReceiver) {
+    rfc4103Handler->StartReceive();
+  }    else {
+    rfc4103Handler->StartTransmit();
+  }
+    
+  return true;
+}
+
+void H323_RFC4103Channel::Close()
+{
+  if(terminating) {
+    return;
+  }
+    
+  if(rfc4103Handler != NULL) {
+    
+    if(direction == H323Channel::IsReceiver) {
+      rfc4103Handler->StopReceive();
+    } else {
+      rfc4103Handler->StopTransmit();
+    }
+
+    delete rfc4103Handler;
+  }
+    
+}
 
 void H323_RFC4103Channel::Receive()
 {
@@ -262,7 +455,7 @@ PBoolean H323_RFC4103Channel::OnSendingPDU(H245_H2250LogicalChannelParameters & 
     param.m_dynamicRTPPayloadType = rtpPayloadType;
   }
     
-  return TRUE;
+  return true;
 }
 
 
@@ -316,8 +509,8 @@ void H323_RFC4103Channel::OnSendOpenAck(H245_H2250LogicalChannelAckParameters & 
     // Set dynamic payload type, if is one
     int rtpPayloadType = GetDynamicRTPPayloadType();
     if (rtpPayloadType >= RTP_DataFrame::DynamicBase && rtpPayloadType < RTP_DataFrame::IllegalPayloadType) {
-    param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_dynamicRTPPayloadType);
-    param.m_dynamicRTPPayloadType = rtpPayloadType;
+        param.IncludeOptionalField(H245_H2250LogicalChannelAckParameters::e_dynamicRTPPayloadType);
+        param.m_dynamicRTPPayloadType = rtpPayloadType;
     }
 }
 
@@ -333,25 +526,19 @@ PBoolean H323_RFC4103Channel::OnReceivedPDU(const H245_OpenLogicalChannel & open
   const H245_DataType & dataType = reverse ? open.m_reverseLogicalChannelParameters.m_dataType
                                            : open.m_forwardLogicalChannelParameters.m_dataType;
     
-  if (!capability->OnReceivedPDU(dataType, direction)) {
-      
+  if (!capability->OnReceivedPDU(dataType, direction)) {    
     errorCode = H245_OpenLogicalChannelReject_cause::e_dataTypeNotSupported;
     return false;
   }
     
   if (reverse) {
     if (open.m_reverseLogicalChannelParameters.m_multiplexParameters.GetTag() ==
-            H245_OpenLogicalChannel_reverseLogicalChannelParameters_multiplexParameters::e_h2250LogicalChannelParameters) 
-    {
-      return OnReceivedPDU(open.m_reverseLogicalChannelParameters.m_multiplexParameters, errorCode);
-    }
-      
+        H245_OpenLogicalChannel_reverseLogicalChannelParameters_multiplexParameters::e_h2250LogicalChannelParameters) 
+            return OnReceivedPDU(open.m_reverseLogicalChannelParameters.m_multiplexParameters, errorCode);
   } else {
     if (open.m_forwardLogicalChannelParameters.m_multiplexParameters.GetTag() ==
-            H245_OpenLogicalChannel_forwardLogicalChannelParameters_multiplexParameters::e_h2250LogicalChannelParameters)
-    {
-      return OnReceivedPDU(open.m_forwardLogicalChannelParameters.m_multiplexParameters, errorCode);
-    }
+        H245_OpenLogicalChannel_forwardLogicalChannelParameters_multiplexParameters::e_h2250LogicalChannelParameters)
+            return OnReceivedPDU(open.m_forwardLogicalChannelParameters.m_multiplexParameters, errorCode);
   }
 
   errorCode = H245_OpenLogicalChannelReject_cause::e_unsuitableReverseParameters;
@@ -371,7 +558,7 @@ PBoolean H323_RFC4103Channel::OnReceivedPDU(const H245_H2250LogicalChannelParame
     
   if (param.HasOptionalField(H245_H2250LogicalChannelParameters::e_mediaControlChannel)) {        
     if (!ExtractTransport(param.m_mediaControlChannel, FALSE, errorCode))
-      return FALSE;
+      return false;
      
     ok = true;
   }
@@ -380,7 +567,7 @@ PBoolean H323_RFC4103Channel::OnReceivedPDU(const H245_H2250LogicalChannelParame
     if (ok && direction == H323Channel::IsReceiver)
       ok = true;
     else if (!ExtractTransport(param.m_mediaChannel, TRUE, errorCode))
-      return FALSE;
+      return false;
   }
 
   if (IsMediaTunneled())
@@ -400,15 +587,12 @@ PBoolean H323_RFC4103Channel::OnReceivedPDU(const H245_H2250LogicalChannelParame
 PBoolean H323_RFC4103Channel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & ack)
 {
   PTRACE(3, "RFC4103\tOnReceivedAckPDU");
-  if (!ack.HasOptionalField(H245_OpenLogicalChannelAck::e_forwardMultiplexAckParameters)) {
+  if (!ack.HasOptionalField(H245_OpenLogicalChannelAck::e_forwardMultiplexAckParameters))
     return false;
-  }
     
   if (ack.m_forwardMultiplexAckParameters.GetTag() !=
-    H245_OpenLogicalChannelAck_forwardMultiplexAckParameters::e_h2250LogicalChannelAckParameters)
-  {
-    return false;
-  }
+        H245_OpenLogicalChannelAck_forwardMultiplexAckParameters::e_h2250LogicalChannelAckParameters)
+            return false;
     
   return OnReceivedAckPDU(ack.m_forwardMultiplexAckParameters);
 }
@@ -459,6 +643,13 @@ PBoolean H323_RFC4103Channel::ExtractTransport(const H245_TransportAddress & pdu
     return rtpSession.SetRemoteSocketInfo(ip, port, isDataPort);
     
   return false;
+}
+
+void H323_RFC4103Channel::SetAssociatedChannel(H323Channel * channel)
+{
+#ifdef H323_H235
+    secChannel = (H323SecureChannel *)channel;
+#endif
 }
 
 #endif  // H323_T140

@@ -160,6 +160,85 @@ class H323_RFC4103Capability : public H323DataCapability
 };
 
 
+class H323_RFC4103Handler;
+class H323_RFC4103ReceiverThread : public PThread
+{
+  PCLASSINFO(H323_RFC4103ReceiverThread, PThread);
+    
+public:
+    
+  H323_RFC4103ReceiverThread(H323_RFC4103Handler *handler, RTP_Session & session);
+  ~H323_RFC4103ReceiverThread();
+    
+  virtual void Main();
+    
+  void Close();
+    
+private:
+        
+  H323_RFC4103Handler *rfc4103Handler;
+  RTP_Session & rtpSession;
+
+  PSyncPointAck  exitReceive;
+  PBoolean threadClosed;
+
+  unsigned lastSequenceNo;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+class RFC4103_Frame : public RTP_DataFrame
+{
+  public:
+    RFC4103_Frame();
+    ~RFC4103_Frame();
+};
+
+////////////////////////////////////////////////////////////////////////////
+
+class H323Connection;
+class H323SecureChannel;
+class H323_RFC4103Handler : public PObject
+{
+  PCLASSINFO(H323_RFC4103Handler, PObject);
+    
+public:
+    
+  H323_RFC4103Handler(H323Channel::Directions dir, H323Connection & connection, unsigned sessionID);
+  ~H323_RFC4103Handler();
+
+  RTP_Session * GetSession() const { return session; }
+  virtual H323_RFC4103ReceiverThread * CreateRFC4103ReceiverThread();
+
+#ifdef H323_H235
+  void AttachSecureChannel(H323SecureChannel * channel);
+#endif
+
+  virtual void StartTransmit();
+  virtual void StopTransmit();
+  virtual void StartReceive();
+  virtual void StopReceive();
+
+  PBoolean OnReadFrame(RTP_DataFrame & frame);
+  PBoolean OnWriteFrame(RTP_DataFrame & frame);
+    
+protected:
+
+  RTP_Session * session;
+  H323_RFC4103ReceiverThread *receiverThread;
+
+#ifdef H323_H235
+  H323SecureChannel * secChannel;
+#endif
+    
+private:
+        
+  void TransmitFrame(RFC4103_Frame & frame, PBoolean replay = false);
+    
+};
+
+
+
 /**This class describes the RFC4103 flavour of T.140 logical channel.
  */
 class H323_RFC4103Channel : public H323DataChannel
@@ -249,10 +328,16 @@ class H323_RFC4103Channel : public H323DataChannel
     );
   //@}
 
+    virtual PBoolean Open();
+    virtual PBoolean Start();
+    virtual void Close();
+
     virtual PBoolean SetDynamicRTPPayloadType(int newType);
     RTP_DataFrame::PayloadTypes GetDynamicRTPPayloadType() const { return rtpPayloadType; }
 
     virtual void HandleChannel();
+
+    virtual void SetAssociatedChannel(H323Channel * channel);
 
   protected:
 
@@ -263,6 +348,12 @@ class H323_RFC4103Channel : public H323DataChannel
     RTP_UDP & rtpSession;
     Directions direction;
     unsigned sessionID;
+    H323_RTP_Session & rtpCallbacks;
+    H323_RFC4103Handler *rfc4103Handler;
+
+#ifdef H323_H235
+    H323SecureChannel * secChannel;
+#endif
 
     RTP_DataFrame::PayloadTypes rtpPayloadType;
 

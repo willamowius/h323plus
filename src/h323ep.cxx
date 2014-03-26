@@ -3276,6 +3276,13 @@ H224_H281Handler * H323EndPoint::CreateH281ProtocolHandler(OpalH224Handler & h22
 
 #endif
 
+#ifdef H323_T140
+H323_RFC4103Handler * H323EndPoint::CreateRFC4103ProtocolHandler(H323Channel::Directions dir, H323Connection & connection, unsigned sessionID)
+{
+    return new H323_RFC4103Handler(dir, connection, sessionID);
+}
+#endif // H323_T140
+
 #ifdef H323_FILE
 PBoolean H323EndPoint::OpenFileTransferSession( const H323FileTransferList & list,
                                                 const PString & token, 

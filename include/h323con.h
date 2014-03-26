@@ -171,6 +171,10 @@ class H224_Handler;
 class H224_H281Handler;
 #endif
 
+#ifdef H323_T140
+class H323_RFC4103Handler;
+#endif
+
 class OpalRFC2833;
 class OpalRFC2833Info;
 
@@ -2509,6 +2513,14 @@ class H323Connection : public PObject
 #endif
 
 #endif  // H323_H224
+
+#ifdef H323_T140
+    /** Create an instance of the RFC4103 protocol handler.
+          
+     The default behavour returns H323Endpoint::CreateRFC4103ProtocolHandler()
+     */
+    virtual H323_RFC4103Handler * CreateRFC4103ProtocolHandler(H323Channel::Directions dir, unsigned sessionID);
+#endif // H323_T140
 
 #ifdef H323_FILE
     /** Open an File Transfer Session

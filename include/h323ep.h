@@ -1510,6 +1510,18 @@ class H323EndPoint : public PObject
 
 #endif  // H323_H224
 
+#ifdef H323_T140
+    /** Create an instance of the RFC4103 protocol handler.
+          
+     The default behavour returns a new H323_RFC4103Handler;
+     */
+    virtual H323_RFC4103Handler * CreateRFC4103ProtocolHandler(
+        H323Channel::Directions dir,
+        H323Connection & connection,
+        unsigned sessionID
+    );
+#endif // H323_T140
+
 #ifdef H323_FILE
     /** Open File Transfer Session
         Use this to initiate a file transfer.
