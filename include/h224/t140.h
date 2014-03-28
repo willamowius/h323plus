@@ -56,7 +56,7 @@ public:
         TextData        = 0,
         BackSpace       = 1,
         NewLine         = 2
-      };
+     };
 
     DataType GetDataType() const;
     void SetDataType(DataType type);
