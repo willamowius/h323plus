@@ -57,6 +57,9 @@
 static const char * RFC4103OID = "0.0.8.323.1.7.0";
 #define T140_CPS 6
 #define T140_MAX_BIT_RATE 32*T140_CPS
+#define RTP_PAYLOADTYPE  98
+#define RTP_SENDCOUNT 3
+#define RTP_SENDDELAY 300
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -179,14 +182,147 @@ PBoolean H323_RFC4103Capability::OnSendingPDU(H245_DataMode & /*pdu*/) const
 /////////////////////////////////////////////////////////////////////////////
 
 RFC4103_Frame::RFC4103_Frame()
+: RTP_DataFrame(1200), m_redundencyLevel(RTP_SENDCOUNT), m_startTime(0)
 {
-
+    T140Data data;
+    data.primaryTime = PTimer::Tick().GetMilliSeconds();
+    for (PINDEX i=0; i < RTP_SENDCOUNT; ++i) {
+        data.sendCount = RTP_SENDCOUNT -(i+1);
+        m_charBuffer.push_back(data);
+    }
+    memset(theArray+GetHeaderSize(),0,1200);
 }
     
 RFC4103_Frame::~RFC4103_Frame()
 {
 
 }
+
+void RFC4103_Frame::AddCharacters(const PString & c)
+{
+    PWaitAndSignal m(m_frameMutex);
+
+    if (m_charBuffer.back().primaryTime == 0) {
+        m_charBuffer.back().characters += c;
+        m_charBuffer.back().type = TextData;
+    }
+}
+
+PBoolean RFC4103_Frame::MoreCharacters()
+{
+    PThread::Sleep(RTP_SENDDELAY);
+
+    list<T140Data>::iterator r;
+    for (r = m_charBuffer.begin(); r != m_charBuffer.end(); r++) {
+        if (r->type != Empty)
+            return true;
+    }
+    return false;
+}
+
+PBoolean RFC4103_Frame::GetDataFrame(void * data, int & size)
+{
+    if (!MoreCharacters())
+        return false;
+
+    m_frameMutex.Wait();
+       int payloadsize = BuildFrameData();
+    m_frameMutex.Signal();
+
+    size = payloadsize + GetHeaderSize();
+    memcpy(data, *this, size);
+    memset(theArray+GetHeaderSize(),0,payloadsize);
+
+    return (size > 0);
+}
+
+void RFC4103_Frame::SetRedundencyLevel(int level)
+{
+    m_redundencyLevel = level;
+}
+    
+int RFC4103_Frame::GetRedundencyLevel()
+{
+    return m_redundencyLevel;
+}
+
+int RFC4103_Frame::BuildFrameData() 
+{
+    DWORD timeDiff;
+    PInt64 now = PTimer::Tick().GetMilliSeconds();
+
+    if (m_startTime == 0) {
+        m_startTime = now;
+        timeDiff = 0;
+    } else 
+        timeDiff = (DWORD)now - m_startTime;
+
+    SetTimestamp(timeDiff);
+
+    int header = GetHeaderSize();
+    int pos = header;
+    int pay = header + 9;
+
+    list<T140Data>::iterator r;
+    for (r = m_charBuffer.begin(); r != m_charBuffer.end(); r++) {
+        // Add the header
+        if (r->primaryTime > 0) {
+            if (r->type == Empty) {
+                r->primaryTime = now - RTP_SENDDELAY;
+                *(PUInt16b*)&theArray[pos+2] = (DWORD)0;
+            } else if (r->type == TextData)
+                *(PUInt16b*)&theArray[pos+2] = (DWORD)r->characters.GetSize()*2;
+            else
+                *(PUInt16b*)&theArray[pos+2] = (DWORD)2;
+
+            *(PUInt16b*)&theArray[pos+1] = (DWORD)(now - r->primaryTime) << 2;
+            theArray[pos] &= 0x7f;
+            theArray[pos] |= (int)100;
+            pos+=4;
+        } else {
+            theArray[pos] |= 0x80;
+            theArray[pos] |= (int)100;
+            r->primaryTime = now;
+            pos+=1;
+        }
+
+        // Add the payload
+        switch (r->type) {
+            case Empty :
+                break;
+            case BackSpace :
+                theArray[pay] = 0x00;
+                theArray[pay+1] = 0x08;
+                pay+=2;
+                break;
+            case NewLine :
+                theArray[pay] = 0x20;
+                theArray[pay+1] = 0x28;
+                pay+=2;
+                break;
+            default:
+                PString str = r->characters;
+                PWCharArray ucs2;
+                for (PINDEX i=0; i < str.GetLength(); ++i) {
+                    ucs2 = str.Mid(i,1).AsUCS2();
+                    theArray[pay] = ucs2[0];
+                    theArray[pay+1] = ucs2[1];
+                    pay+=2;
+                }
+                break;
+        }
+        r->sendCount++;
+    }
+
+    // reset Values
+    if (m_charBuffer.front().sendCount == RTP_SENDCOUNT) {
+        m_charBuffer.pop_front();
+        T140Data data;
+        m_charBuffer.push_back(data);
+    }
+    return pay;
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -196,11 +332,9 @@ H323_RFC4103Handler::H323_RFC4103Handler(H323Channel::Directions dir, H323Connec
     ,secChannel(NULL)
 #endif
 {
-
   H245_TransportAddress addr;
   connection.GetControlChannel().SetUpTransportPDU(addr, H323Transport::UseLocalTSAP);
   session = connection.UseSession(sessionID,addr,H323Channel::IsBidirectional);
-
 }
 
 H323_RFC4103Handler::~H323_RFC4103Handler()
@@ -222,11 +356,13 @@ void H323_RFC4103Handler::AttachSecureChannel(H323SecureChannel * channel)
 
 void H323_RFC4103Handler::StartTransmit()
 {
+  PWaitAndSignal m(transmitMutex);
 
 }
 
 void H323_RFC4103Handler::StopTransmit()
 {
+  PWaitAndSignal m(transmitMutex);
 
 }
 

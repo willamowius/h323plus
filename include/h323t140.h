@@ -190,8 +190,45 @@ private:
 class RFC4103_Frame : public RTP_DataFrame
 {
   public:
+
+     enum DataType {
+        Empty           = 0,
+        TextData        = 1,
+        BackSpace       = 2,
+        NewLine         = 3,
+      };
+
+    class T140Data {
+      public:
+        T140Data() { type = Empty, primaryTime= 0; sendCount = 0; }
+
+        DataType type;
+        PString  characters;
+        PInt64   primaryTime;
+        int      sendCount;
+    };
+
     RFC4103_Frame();
     ~RFC4103_Frame();
+
+    void SetRedundencyLevel(int level);
+    int GetRedundencyLevel();
+
+    void AddCharacters(const PString & c);
+
+    PBoolean MoreCharacters();
+
+    PBoolean GetDataFrame(void * data, int & size);
+
+  protected:
+    list<T140Data> m_charBuffer;
+    int            m_redundencyLevel; 
+    PMutex         m_frameMutex;
+
+    PInt64         m_startTime;
+
+  private:
+   int            BuildFrameData();
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -226,15 +263,17 @@ protected:
 
   RTP_Session * session;
   H323_RFC4103ReceiverThread *receiverThread;
+  RFC4103_Frame  transmitFrame;
 
 #ifdef H323_H235
   H323SecureChannel * secChannel;
 #endif
+
+  PMutex transmitMutex;
     
 private:
-        
   void TransmitFrame(RFC4103_Frame & frame, PBoolean replay = false);
-    
+
 };
 
 
