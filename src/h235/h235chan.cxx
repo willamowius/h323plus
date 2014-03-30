@@ -406,13 +406,12 @@ void H323SecureChannel::OnSendOpenAck(const H245_OpenLogicalChannel & open, H245
   if (m_baseChannel)
       m_baseChannel->OnSendOpenAck(open,ack);
 
-  if (connection.IsH245Master()) {
-        if (PRemoveConst(H235Session, &m_encryption)->CreateSession(true)) {
-            ack.IncludeOptionalField(H245_OpenLogicalChannelAck::e_encryptionSync);
-            BuildEncryptionSync(ack.m_encryptionSync,*this, m_encryption);
-            connection.OnMediaEncryption(GetSessionID(), GetDirection(), CipherString(m_algorithm));
-        }
-  }
+  if (connection.IsH245Master() && PRemoveConst(H235Session, &m_encryption)->CreateSession(true)) {
+        ack.IncludeOptionalField(H245_OpenLogicalChannelAck::e_encryptionSync);
+        BuildEncryptionSync(ack.m_encryptionSync,*this, m_encryption);
+        connection.OnMediaEncryption(GetSessionID(), GetDirection(), CipherString(m_algorithm));
+  } else 
+        ack.RemoveOptionalField(H245_OpenLogicalChannelAck::e_encryptionSync);
 }
 
 PBoolean H323SecureChannel::OnReceivedPDU(const H245_OpenLogicalChannel & open, unsigned & errorCode)
