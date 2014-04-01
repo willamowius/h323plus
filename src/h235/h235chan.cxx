@@ -80,6 +80,8 @@ H323SecureRTPChannel::H323SecureRTPChannel(H323Connection & conn,
 
 H323SecureRTPChannel::~H323SecureRTPChannel()
 {
+    delete capability;
+    capability = NULL;
 }
 
 void H323SecureRTPChannel::CleanUpOnTermination()

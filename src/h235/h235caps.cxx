@@ -57,6 +57,11 @@ H235SecurityCapability::H235SecurityCapability(H323Capabilities * capabilities, 
 {
 }
 
+H235SecurityCapability::~H235SecurityCapability()
+{
+   m_capList.SetSize(0);
+}
+
 PObject * H235SecurityCapability::Clone() const
 {
   return new H235SecurityCapability(*this);
@@ -773,7 +778,10 @@ H323Channel * H323SecureDataCapability::CreateChannel(H323Connection & connectio
     if (!caps || !caps->GetDiffieHellMan())
         return ChildCapability->CreateChannel(connection, dir, sessionID, param);
 
-    return new H323SecureChannel(connection, *this, ChildCapability->CreateChannel(connection, dir, sessionID, param));
+    // We create the primary channel with a clone of the child
+    // then delete the clone and replace the clone with this one 
+    // via ReplaceCapability() in the constructor of H323SecureChannel
+    return new H323SecureChannel(connection, *this, ((H323Capability *)ChildCapability->Clone())->CreateChannel(connection, dir, sessionID, param));
 }
 
 PBoolean H323SecureDataCapability::OnSendingPDU(H245_Capability & pdu) const
