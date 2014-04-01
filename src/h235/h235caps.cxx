@@ -55,11 +55,12 @@
 H235SecurityCapability::H235SecurityCapability(H323Capabilities * capabilities, unsigned capabilityNo)
 : m_capabilities(capabilities), m_capNumber(capabilityNo)
 {
+  GetMediaFormat();
 }
 
 H235SecurityCapability::~H235SecurityCapability()
 {
-   m_capList.SetSize(0);
+  m_capList.RemoveAll();
 }
 
 PObject * H235SecurityCapability::Clone() const

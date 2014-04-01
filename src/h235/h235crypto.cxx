@@ -463,6 +463,11 @@ PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * i
 
 PINDEX H235CryptoEngine::EncryptInPlace(const BYTE * inData, PINDEX inLength, BYTE * outData, unsigned char * ivSequence, bool & rtpPadding)
 {
+    if (!m_initialised) {
+        PTRACE(1, "H235\tERROR: Encryption not initialised!!");
+        memset(outData,0,inLength);
+        return inLength;
+    }
 
     // max ciphertext len for a n bytes of plaintext is n + BLOCK_SIZE -1 bytes
     m_outSize = 0;
