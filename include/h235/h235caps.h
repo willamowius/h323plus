@@ -54,9 +54,11 @@ class H235SecurityCapability  : public H323Capability
 
   /**@name Construction */
 
-    /**Create the Conference capability
+    /**Create the Security capability
       */
     H235SecurityCapability(H323Capabilities * capabilities, unsigned capabilityNo);
+    ~H235SecurityCapability();
+
   //@}
 
   /**@name Overrides from class PObject */
