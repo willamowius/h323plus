@@ -1622,6 +1622,7 @@ PBoolean H323TransportTCP::Close()
   if (IsListening())
     h245listener->Close();
 
+#if H323_TLS
 #if PTLIB_VER < 2120
     ssl_st * m_ssl = ssl;
 #endif
@@ -1629,6 +1630,7 @@ PBoolean H323TransportTCP::Close()
         SSL_shutdown(m_ssl);
         m_ssl = NULL;
     }
+#endif
 
   return H323Transport::Close();
 }
