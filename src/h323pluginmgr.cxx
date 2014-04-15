@@ -2960,7 +2960,7 @@ void H323PluginCodecManager::CreateCapabilityAndMediaFormat(
             if (
                 (fmt != NULL) && 
                 (encoderCodec->sampleRate == fmt->encoderCodec->sampleRate) &&
-                (fmt->encoderCodec->sdpFormat != NULL) &&
+                (fmt->encoderCodec->sdpFormat != NULL) && (encoderCodec->sdpFormat != NULL) &&
                 (strcasecmp(encoderCodec->sdpFormat, fmt->encoderCodec->sdpFormat) == 0)
                 ) {
               mediaFormat->SetPayloadType(fmt->GetPayloadType());
