@@ -962,11 +962,10 @@ PBoolean H323Connection::WriteSignalPDU(H323SignalPDU & pdu)
 
 void H323Connection::HandleSignallingChannel()
 {
-  PAssert(signallingChannel != NULL, PLogicError);
 
   PTRACE(2, "H225\tReading PDUs: callRef=" << callReference);
 
-  while (signallingChannel->IsOpen()) {
+  while (signallingChannel && signallingChannel->IsOpen()) {
     H323SignalPDU pdu;
     if (!HandleReceivedSignalPDU(pdu.Read(*signallingChannel), pdu))
       break;
@@ -7217,7 +7216,7 @@ PBoolean H323Connection::OnSendServiceControlSessions(
 
     PString amount;
     PBoolean credit=TRUE;
-    unsigned time;
+    unsigned time=0;
     PString url;
 
     if (!OnSendServiceControl(amount, credit,time, url) && 

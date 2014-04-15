@@ -626,6 +626,7 @@ RTP_DataFrame::PayloadTypes H323_RealTimeChannel::GetRTPPayloadType() const
   if (pt == RTP_DataFrame::IllegalPayloadType) {
     pt = capability->GetPayloadType();
     if (pt == RTP_DataFrame::IllegalPayloadType) {
+      // Clang code analyzer does not interpret the PAssertNULL correctly
       PAssertNULL(codec);
       pt = codec->GetMediaFormat().GetPayloadType();
     }

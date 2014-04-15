@@ -19,6 +19,9 @@
  * Contributor(s): ______________________________________.
  *
  * $Log$
+ * Revision 1.2  2008/05/23 11:22:31  willamowius
+ * switch BOOL to PBoolean to be able to compile with Ptlib 2.2.x
+ *
  * Revision 1.1  2007/08/06 20:51:07  shorne
  * First commit of h323plus
  *
@@ -490,6 +493,8 @@ void Q922_Frame::EncodeBit(BYTE bit,
     buffer[octetIndex] = 0;
   }
 	
+  // TODO: Clang Analysizer determines 
+  // The left expression of the compound assignment is an uninitialized value. The computed value will also be garbage
   buffer[octetIndex] |= ((bit & 0x01) << bitIndex);
 	
   // adjusting bit/byte index

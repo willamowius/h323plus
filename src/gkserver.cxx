@@ -921,9 +921,6 @@ H323GatekeeperRequest::Response H323GatekeeperCall::OnAdmission(H323GatekeeperAR
   else {
     PSafePtr<H323RegisteredEndPoint> destEP;
 
-    PBoolean denied = TRUE;
-    PBoolean noAddress = TRUE;
-
     // if no alias, convert signalling address to an alias
     if (!info.arq.HasOptionalField(H225_AdmissionRequest::e_destinationInfo) && info.arq.HasOptionalField(H225_AdmissionRequest::e_destCallSignalAddress)) {
 
@@ -932,7 +929,6 @@ H323GatekeeperRequest::Response H323GatekeeperCall::OnAdmission(H323GatekeeperAR
       H323SetAliasAddress(origTransAddr, transportAlias);
 
       if (gatekeeper.CheckAliasAddressPolicy(*endpoint, info.arq, transportAlias)) {
-        denied = FALSE;
         H323TransportAddress destAddr;
         if (TranslateAliasAddress(transportAlias,
                                   info.acf.m_destinationInfo,
@@ -948,14 +944,14 @@ H323GatekeeperRequest::Response H323GatekeeperCall::OnAdmission(H323GatekeeperAR
           }
           dstHost = destAddr;
           UnlockReadWrite();
-          noAddress = FALSE;
         }
       }
     }
 
     // if alias(es) specified, check them
     else {
-
+      PBoolean denied = true;
+      PBoolean noAddress = true;
       for (i = 0; i < info.arq.m_destinationInfo.GetSize(); i++) {
         if (gatekeeper.CheckAliasAddressPolicy(*endpoint, info.arq, info.arq.m_destinationInfo[i])) {
           denied = FALSE;

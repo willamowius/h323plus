@@ -164,15 +164,15 @@ static void hmac_sha (const unsigned char*    k,      /* secret key */
 static void SHA1(const unsigned char * data, unsigned len, unsigned char * hash)
 {
   const EVP_MD * sha1 = EVP_sha1();
-  EVP_MD_CTX ctx;
-  EVP_MD_CTX_init(&ctx);
-  if (EVP_DigestInit_ex(&ctx, sha1, NULL)) {
-    EVP_DigestUpdate(&ctx, data, len);
-    EVP_DigestFinal_ex(&ctx, hash, NULL);
+  EVP_MD_CTX * ctx = NULL;
+  EVP_MD_CTX_init(ctx);
+  if (EVP_DigestInit_ex(ctx, sha1, NULL)) {
+    EVP_DigestUpdate(ctx, data, len);
+    EVP_DigestFinal_ex(ctx, hash, NULL);
   } else {
     PTRACE(1, "H235\tOpenSSH SHA1 implementation failed");
   }
-  EVP_MD_CTX_cleanup(&ctx);
+  EVP_MD_CTX_cleanup(ctx);
 }
 
 

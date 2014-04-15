@@ -2584,6 +2584,8 @@ void H323EndPoint::CleanUpConnections()
     connectionsMutex.Signal();
 
     // Finally we get to delete it!
+    // TODO: Clang Analysizer determines a false positive
+    // Argument to 'delete' is a constant address (x), which is not memory allocated by 'new'
     delete connectionToDelete;
 
     // Get the lock again as we continue around the loop

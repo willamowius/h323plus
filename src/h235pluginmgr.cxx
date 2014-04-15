@@ -372,6 +372,7 @@ static PString Createh235Name(Pluginh235_Definition * h235, unsigned int h235typ
 
 void h235PluginDeviceManager::CreateH235Authenticator(Pluginh235_Definition * h235)
 {
+/*
   // make sure all non-timestamped codecs have the same concept of "now"
   static time_t mediaNow = time(NULL);
 
@@ -379,6 +380,7 @@ void h235PluginDeviceManager::CreateH235Authenticator(Pluginh235_Definition * h2
   time_t timeStamp = h235->info == NULL ? mediaNow : h235->info->timestamp;
   if (timeStamp > mediaNow)
     timeStamp = mediaNow;
+*/
 
 // Authenticator Name
   PString h235Name = PString(); 

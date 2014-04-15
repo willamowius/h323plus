@@ -2747,7 +2747,7 @@ void H323PluginCodecManager::RegisterStaticCodec(
 void H323PluginCodecManager::RegisterCodecs(unsigned int count, void * _codecList)
 {
   // make sure all non-timestamped codecs have the same concept of "now"
-  static time_t codecNow = ::time(NULL);
+//  static time_t codecNow = ::time(NULL);
 
   PluginCodec_Definition * codecList = (PluginCodec_Definition *)_codecList;
   unsigned i, j ;
@@ -2788,12 +2788,12 @@ void H323PluginCodecManager::RegisterCodecs(unsigned int count, void * _codecLis
             (strcmp(decoder.destFormat,   encoder.sourceFormat) == 0)
             )
           { 
-
+/*
           // deal with codec having no info, or timestamp in future
           time_t timeStamp = codecList[i].info == NULL ? codecNow : codecList[i].info->timestamp;
           if (timeStamp > codecNow)
             timeStamp = codecNow;
-
+*/
           // create the capability and media format associated with this plugin
           CreateCapabilityAndMediaFormat(&encoder, &decoder);
           found = TRUE;

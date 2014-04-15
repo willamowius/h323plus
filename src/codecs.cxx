@@ -870,6 +870,9 @@ PBoolean H323FramedAudioCodec::Write(const BYTE * buffer,
 
 unsigned H323FramedAudioCodec::GetAverageSignalLevel()
 {
+  if (!samplesPerFrame)
+      return 0;
+
   // Calculate the average signal level of this frame
   int sum = 0;
 

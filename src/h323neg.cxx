@@ -682,7 +682,6 @@ PBoolean H245NegLogicalChannel::HandleOpen(const H245_OpenLogicalChannel & pdu)
 	  if (!connection.OnOpenLogicalChannel(pdu, ack, cause, channel->GetSessionID())) {
 		  delete channel;
 		  channel = NULL;
-		  ok = false;
           return false;
 	  }
 
