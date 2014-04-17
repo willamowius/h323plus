@@ -583,7 +583,9 @@ static const char YUV420PDesc[]  = { "YUV420P" };
 
 static const char h261QCIFDesc[]  = { "H.261-QCIF" };
 static const char h261CIFDesc[]   = { "H.261-CIF" };
+#ifdef WIN32
 static const char h261720Desc[]   = { "H.261-720" };
+#endif
 static const char h261Desc[]      = { "H.261" };
 
 static const char sdpH261[]   = { "h261" };
@@ -1150,6 +1152,7 @@ static struct PluginCodec_Definition h261CodecDefn[] =
     NULL                                // h323CapabilityData
   },
 
+#ifdef WIN32
   { 
     // 720p only encoder (only CIF)
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
@@ -1224,6 +1227,7 @@ static struct PluginCodec_Definition h261CodecDefn[] =
     PluginCodec_H323VideoCodec_h261,    // h323CapabilityType 
     NULL                                // h323CapabilityData
   }
+#endif
 
 };
 
