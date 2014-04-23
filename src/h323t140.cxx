@@ -182,14 +182,9 @@ PBoolean H323_RFC4103Capability::OnSendingPDU(H245_DataMode & /*pdu*/) const
 /////////////////////////////////////////////////////////////////////////////
 
 RFC4103_Frame::RFC4103_Frame()
-: RTP_DataFrame(1200), m_redundencyLevel(RTP_SENDCOUNT), m_startTime(0)
+: RTP_DataFrame(1200), m_startTime(0)
 {
-    T140Data data;
-    data.primaryTime = PTimer::Tick().GetMilliSeconds();
-    for (PINDEX i=0; i < RTP_SENDCOUNT; ++i) {
-        data.sendCount = RTP_SENDCOUNT -(i+1);
-        m_charBuffer.push_back(data);
-    }
+    SetRedundencyLevel(RTP_SENDCOUNT);
     memset(theArray+GetHeaderSize(),0,1200);
 }
     
@@ -239,11 +234,59 @@ PBoolean RFC4103_Frame::GetDataFrame(void * data, int & size)
 void RFC4103_Frame::SetRedundencyLevel(int level)
 {
     m_redundencyLevel = level;
+
+    T140Data data;
+    data.primaryTime = PTimer::Tick().GetMilliSeconds();
+    for (PINDEX i=0; i < m_redundencyLevel; ++i) {
+        data.sendCount = m_redundencyLevel -(i+1);
+        m_charBuffer.push_back(data);
+    }
+
 }
     
 int RFC4103_Frame::GetRedundencyLevel()
 {
     return m_redundencyLevel;
+}
+
+PBoolean RFC4103_Frame::ReadDataFrame()
+{
+    int header = GetHeaderSize();
+    int pos = header;
+
+    while ((theArray[pos]&0x80) != 0) {
+        T140Data data;
+        data.primaryTime = *(PUInt16b*)&theArray[pos+1] >> 2;
+        data.sendCount = *(PUInt16b*)&theArray[pos+2];
+        m_charBuffer.push_back(data);
+        pos+=4;
+    }
+    T140Data data;
+    m_charBuffer.push_back(data);
+    pos+=1;
+
+    list<T140Data>::iterator r;
+    for (r = m_charBuffer.begin(); r != m_charBuffer.end(); r++) {
+        if (data.sendCount == 0) 
+            r->type = Empty;
+        else if ((theArray[pos] == 0x00) && (theArray[pos+1] == 0x08)) {
+            r->type = BackSpace;
+            pos+=2;
+        } else if ((theArray[pos] == 0x20) && (theArray[pos+1] == 0x28)) {
+            r->type = NewLine;
+            pos+=2;
+        } else {
+            r->type = TextData;
+            for (PINDEX i = 0; i < r->sendCount; i+=2) {
+                PWCharArray ucs2;
+                ucs2[0] = theArray[pos];
+                ucs2[1] = theArray[pos+1];
+                r->characters += PString(ucs2).Left(1);
+                pos+=2;
+            }
+        }
+    }
+    return (m_charBuffer.size() > 0);
 }
 
 int RFC4103_Frame::BuildFrameData() 
@@ -315,7 +358,7 @@ int RFC4103_Frame::BuildFrameData()
     }
 
     // reset Values
-    if (m_charBuffer.front().sendCount == RTP_SENDCOUNT) {
+    if (m_charBuffer.front().sendCount == m_redundencyLevel) {
         m_charBuffer.pop_front();
         T140Data data;
         m_charBuffer.push_back(data);

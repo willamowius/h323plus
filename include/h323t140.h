@@ -220,6 +220,8 @@ class RFC4103_Frame : public RTP_DataFrame
 
     PBoolean GetDataFrame(void * data, int & size);
 
+    PBoolean ReadDataFrame();
+
   protected:
     list<T140Data> m_charBuffer;
     int            m_redundencyLevel; 
