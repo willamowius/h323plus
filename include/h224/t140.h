@@ -114,8 +114,12 @@ protected:
     T140_Frame transmitFrame;
 };
 
-#ifndef _WIN32_WCE
-  PPLUGIN_STATIC_LOAD(T140, H224_Handler);
+#if !defined(_WIN32_WCE)
+    #if PTLIB_VER > 260
+       PPLUGIN_STATIC_LOAD(T140, H224_Handler);
+    #else
+       PWLIB_STATIC_LOAD_PLUGIN(T140, H224_Handler);
+    #endif
 #endif
 
 

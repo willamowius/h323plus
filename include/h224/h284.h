@@ -241,9 +241,11 @@ protected:
 };
 
 #ifndef _WIN32_WCE
-  PPLUGIN_STATIC_LOAD(H284, H224_Handler);
+    #if PTLIB_VER > 260
+       PPLUGIN_STATIC_LOAD(H284, H224_Handler);
+    #else
+       PWLIB_STATIC_LOAD_PLUGIN(H284, H224_Handler);
+    #endif
 #endif
-
-
 
 #endif // __H323PLUS_H284_H

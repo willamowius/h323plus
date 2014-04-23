@@ -240,7 +240,11 @@ protected:
 typedef H224_H281Handler OpalH281Handler; 
 
 #ifndef _WIN32_WCE
-PPLUGIN_STATIC_LOAD(H281, H224_Handler);
+    #if PTLIB_VER > 260
+       PPLUGIN_STATIC_LOAD(H281, H224_Handler);
+    #else
+       PWLIB_STATIC_LOAD_PLUGIN(H281, H224_Handler);
+    #endif
 #endif
 
 #endif // __OPAL_H281HANDLER_H

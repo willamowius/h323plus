@@ -97,7 +97,11 @@ private:
 
 // Need to declare for Factory Loader
 #ifndef _WIN32_WCE
-  PPLUGIN_STATIC_LOAD(Std17, H460_Feature);
+    #if PTLIB_VER > 260
+       PPLUGIN_STATIC_LOAD(Std17, H460_Feature);
+    #else
+       PWLIB_STATIC_LOAD_PLUGIN(Std17, H460_Feature);
+    #endif
 #endif
 
 ////////////////////////////////////////////////////////////////////////
