@@ -855,7 +855,6 @@ public:
                         delay = (m_buffer.top().first.m_timeStamp - lastTimeStamp)/(unsigned)m_calcClockRate;
                         if (delay <= 0 || delay > 200 || (lastTimeStamp > m_buffer.top().first.m_timeStamp)) {
                            delay = 0;
-                           lastTimeStamp = m_buffer.top().first.m_timeStamp;
                            m_RenderTimeStamp = PTimer::Tick().GetMilliSeconds();
                            fup = true;
                         } 
