@@ -1386,6 +1386,9 @@ void H323ListenerTCP::Main()
     if (transport != NULL)
       new H225TransportThread(endpoint, transport);
   }
+#ifdef P_SSL
+  ERR_remove_state(0);
+#endif
 }
 
 /////////////////////////////////////////////////////////////////////////////

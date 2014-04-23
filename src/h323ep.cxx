@@ -889,12 +889,12 @@ H323EndPoint::~H323EndPoint()
 #ifdef H323_TLS
   if (m_transportContext) {
     delete m_transportContext;
-    // OpenSSL Cleanup
-    EVP_cleanup();
-    CRYPTO_cleanup_all_ex_data();
-    ERR_remove_state(0);
-    ERR_free_strings();
   }
+  // OpenSSL Cleanup
+  EVP_cleanup();
+  CRYPTO_cleanup_all_ex_data();
+  ERR_remove_state(0);
+  ERR_free_strings();
 #endif
 
 #ifdef P_STUN
