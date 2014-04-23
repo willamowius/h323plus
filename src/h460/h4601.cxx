@@ -1777,10 +1777,8 @@ void H460_FeatureSet::DisableAllFeatures(int msgtype)
            if (feat.FeatureAdvertised(msgtype)) {
                PTRACE(4,"H460\tRemoving " << feat.GetFeatureIDAsString());
                removelist.push_back(feat.GetFeatureID());
-               // TODO: why do we have to delete some features, and not all of them ?
-               if (feat.GetFeaturePurpose() == H460_Feature::FeatureSignal) {
+               if (feat.GetFeaturePurpose() !=  H460_Feature::FeatureBaseAll)
                  delete &feat;
-               }
            } else {
                PTRACE(4,"H460\tPreserving " << feat.GetFeatureIDAsString());
            }
