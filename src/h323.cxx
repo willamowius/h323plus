@@ -6761,7 +6761,7 @@ void H323Connection::MonitorCallStatus()
     return;
 
   if (roundTripDelayTimer > 0 && !roundTripDelayTimer.IsRunning()) {
-    roundTripDelayTimer = roundTripDelayRate;
+    roundTripDelayTimer.SetInterval(roundTripDelayRate);
     StartRoundTripDelay();
   }
 
