@@ -770,7 +770,7 @@ class H460_Feature : public H225_FeatureDescriptor
 
     /** Get the feature purpose
       */
-    virtual int GetFeaturePurpose()  { return H460_Feature::GetPurpose(); } 
+    virtual int GetFeaturePurpose()  { return GetPurpose(); } 
 
     /** Get the Feature Identifier
       */
