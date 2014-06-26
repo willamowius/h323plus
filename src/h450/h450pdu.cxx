@@ -40,6 +40,7 @@
 #include "h450/h4503.h"
 #include "h450/h4504.h"
 #include "h450/h4506.h"
+#include "h450/h4507.h"
 #include "h450/h45010.h"
 #include "h450/h45011.h"
 #include "h323pdu.h"
@@ -191,6 +192,50 @@ void H450ServiceAPDU::BuildCallWaiting(int invokeId, int numCallsWaiting)
   
   invoke.IncludeOptionalField(X880_Invoke::e_argument);
   invoke.m_argument.EncodeSubType(argument);
+}
+
+
+void H450ServiceAPDU::BuildMessageWaitIndicationActivate(int invokeId)
+{
+  X880_Invoke& invoke = BuildInvoke(invokeId, H4507_H323_MWI_Operations::e_mwiActivate);
+
+  H4507_MWIActivateArg arg;
+
+
+  PTRACE(4, "H4507\tSending supplementary service PDU argument:\n  "
+         << setprecision(2) << arg);
+
+  invoke.IncludeOptionalField(X880_Invoke::e_argument);
+  invoke.m_argument.EncodeSubType(arg);
+}
+
+void H450ServiceAPDU::BuildMessageWaitIndicationDeactivate(int invokeId)
+{
+  X880_Invoke& invoke = BuildInvoke(invokeId, H4507_H323_MWI_Operations::e_mwiDeactivate);
+
+  H4507_MWIDeactivateArg arg;
+
+
+  PTRACE(4, "H4507\tSending supplementary service PDU argument:\n  "
+         << setprecision(2) << arg);
+
+  invoke.IncludeOptionalField(X880_Invoke::e_argument);
+  invoke.m_argument.EncodeSubType(arg);
+}
+
+void H450ServiceAPDU::BuildMessageWaitIndicationInterrogate(int invokeId)
+{
+  X880_Invoke& invoke = BuildInvoke(invokeId, H4507_H323_MWI_Operations::e_mwiInterrogate);
+
+  H4507_MWIInterrogateArg arg;
+
+
+
+  PTRACE(4, "H4507\tSending supplementary service PDU argument:\n  "
+         << setprecision(2) << arg);
+
+  invoke.IncludeOptionalField(X880_Invoke::e_argument);
+  invoke.m_argument.EncodeSubType(arg);
 }
 
 
@@ -1691,6 +1736,90 @@ void H4506Handler::AttachToAlerting(H323SignalPDU & pdu,
   cwState = e_cw_Invoked;
 }
 
+
+/////////////////////////////////////////////////////////////////////////////
+
+H4507Handler::H4507Handler(H323Connection & conn, H450xDispatcher & disp)
+  : H450xHandler(conn, disp)
+{
+
+  dispatcher.AddOpCode(H4507_H323_MWI_Operations::e_mwiActivate, this);
+  dispatcher.AddOpCode(H4507_H323_MWI_Operations::e_mwiDeactivate, this);
+  dispatcher.AddOpCode(H4507_H323_MWI_Operations::e_mwiInterrogate, this);
+
+  mwiState = e_mwi_Idle;
+  mwiTimer.SetNotifier(PCREATE_NOTIFIER(OnMWITimeOut));
+
+}
+
+
+PBoolean H4507Handler::OnReceivedInvoke(int opcode,
+                                    int invokeId,
+                                    int linkedId,
+                                    PASN_OctetString *argument)
+{
+  currentInvokeId = invokeId;
+
+  switch (opcode) {
+    case H4507_H323_MWI_Operations::e_mwiActivate:
+ 
+      break;
+
+    case H4507_H323_MWI_Operations::e_mwiDeactivate:
+ 
+      break;
+
+    case H4507_H323_MWI_Operations::e_mwiInterrogate:
+ 
+      break;
+
+    default:
+      currentInvokeId = 0;
+      return FALSE;
+  }
+
+  return TRUE;
+}
+
+PBoolean H4507Handler::OnReceivedReturnResult(X880_ReturnResult & returnResult)
+{
+  PTRACE(4, "H4507\tReceived Return Result");
+  if (currentInvokeId == returnResult.m_invokeId.GetValue()) {
+    switch (mwiState) {
+        case e_mwi_Wait:
+        case e_mwi_Idle:
+        default:
+            break;
+    }
+    currentInvokeId = 0;
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+PBoolean H4507Handler::OnReceivedReturnError(int /*errorCode*/, X880_ReturnError &/*returnError*/)
+{
+    return false;
+}
+
+void H4507Handler::OnMWITimeOut(PTimer &,  H323_INT)
+{
+  switch (mwiState) {
+        case e_mwi_Wait:
+        case e_mwi_Idle:
+        default:
+            break;
+  }
+}
+
+void H4507Handler::StopmwiTimer()
+{
+  if (mwiTimer.IsRunning()){
+    mwiTimer.Stop();
+    PTRACE(4, "H4507\tStopping timer MWI-TX");
+  }
+}
 
 /////////////////////////////////////////////////////////////////////////////
 

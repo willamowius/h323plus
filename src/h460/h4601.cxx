@@ -1462,15 +1462,15 @@ PTRACE(6,"H460\tRead FeatureSet " << PTracePDU(MessageID) << " PDU");
                 RemoveUnCommonFeatures();
 }
 
-PBoolean H460_FeatureSet::SupportNonCallService(const H225_FeatureSet & fs)
+PBoolean H460_FeatureSet::SupportNonCallService(const H225_FeatureSet & fs) const
 {
     H460_FeatureID ID;
 
-	PBoolean nonCallService = false;
-	if (fs.HasOptionalField(H225_FeatureSet::e_neededFeatures)) {
+    PBoolean nonCallService = false;
+    if (fs.HasOptionalField(H225_FeatureSet::e_neededFeatures)) {
         const H225_ArrayOf_FeatureDescriptor & fsn = fs.m_neededFeatures;
           for (PINDEX i=0; i < fsn.GetSize(); i++) {
-              H225_FeatureDescriptor & fd = fsn[i];
+              const H225_FeatureDescriptor & fd = fsn[i];
               ID = GetFeatureIDPDU(fd);
               if (SupportNonCallService(ID)) {
                 nonCallService = true;
@@ -1484,7 +1484,7 @@ PBoolean H460_FeatureSet::SupportNonCallService(const H225_FeatureSet & fs)
 
         const H225_ArrayOf_FeatureDescriptor & fsd = fs.m_desiredFeatures;
           for (PINDEX i=0; i < fsd.GetSize(); i++) {
-              H225_FeatureDescriptor & fd = fsd[i];
+              const H225_FeatureDescriptor & fd = fsd[i];
               ID = GetFeatureIDPDU(fd);
               if (SupportNonCallService(ID)) {
                 nonCallService = true;
@@ -1497,7 +1497,7 @@ PBoolean H460_FeatureSet::SupportNonCallService(const H225_FeatureSet & fs)
       if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
         const H225_ArrayOf_FeatureDescriptor & fss = fs.m_supportedFeatures; 
           for (PINDEX i=0; i < fss.GetSize(); i++) {
-              H225_FeatureDescriptor & fd = fss[i];    
+              const H225_FeatureDescriptor & fd = fss[i];    
               ID = GetFeatureIDPDU(fd);
               if (SupportNonCallService(ID)) {
                 nonCallService = true;
@@ -1510,27 +1510,27 @@ PBoolean H460_FeatureSet::SupportNonCallService(const H225_FeatureSet & fs)
       return false;
 }
 
-H460_FeatureID H460_FeatureSet::GetFeatureIDPDU(H225_FeatureDescriptor & pdu)
+H460_FeatureID H460_FeatureSet::GetFeatureIDPDU(const H225_FeatureDescriptor & pdu) const
 {
     
     H460_FeatureID fid;
-    H225_GenericIdentifier & id = pdu.m_id;
+    const H225_GenericIdentifier & id = pdu.m_id;
 
       if ((id.GetTag() == H225_GenericIdentifier::e_standard)) {
-          PASN_Integer & sid = id;
+          const PASN_Integer & sid = id;
           unsigned iid = sid.GetValue();
           fid = H460_FeatureID(iid);
       } 
       
       if ((id.GetTag() == H225_GenericIdentifier::e_oid)) {
-          PASN_ObjectId & oid = id;
-          OpalOID  & aid = (OpalOID &)oid;
+          const PASN_ObjectId & oid = id;
+          const OpalOID  & aid = (const OpalOID &)oid;
           fid = H460_FeatureID(aid);
 
       }
     
       if ((id.GetTag() == H225_GenericIdentifier::e_nonStandard)) {
-          H225_GloballyUniqueID & uns = id;
+          const H225_GloballyUniqueID & uns = id;
           PString uid = uns.AsString();
           fid = H460_FeatureID(uid);
       }
@@ -1823,7 +1823,7 @@ PBoolean H460_FeatureSet::HasFeature(const H460_FeatureID & id)
     return FALSE;
 }
 
-PBoolean H460_FeatureSet::SupportNonCallService(const H460_FeatureID & id)
+PBoolean H460_FeatureSet::SupportNonCallService(const H460_FeatureID & id) const
 {
     for (PINDEX i =0; i < Features.GetSize(); i++) {
        H460_Feature & feat = Features.GetDataAt(i);

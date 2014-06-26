@@ -71,6 +71,10 @@ class H450ServiceAPDU : public X880_ROS
                                 const PString & callIdentity);
 
     void BuildCallWaiting(int invokeId, int numCallsWaiting);
+
+    void BuildMessageWaitIndicationActivate(int invokeId);
+    void BuildMessageWaitIndicationDeactivate(int invokeId);
+    void BuildMessageWaitIndicationInterrogate(int invokeId);
     
     void BuildCallIntrusionForcedRelease(int invokeId, int CICL);
     X880_ReturnResult& BuildCallIntrusionForcedReleaseResult(int invokeId);
@@ -665,6 +669,54 @@ class H4506Handler : public H450xHandler
 
   protected:
     State cwState;  // Call Waiting state of this connection
+};
+
+
+class H4507Handler : public H450xHandler
+{
+    PCLASSINFO(H4507Handler, H450xHandler);
+  public:
+    H4507Handler(
+      H323Connection & connection,
+      H450xDispatcher & dispatcher
+    );
+
+    virtual PBoolean OnReceivedInvoke(
+      int opcode,
+      int invokeId,                           ///<  InvokeId of operation (used in response)
+      int linkedId,                           ///<  InvokeId of associated operation (if any)
+      PASN_OctetString * argument             ///<  Parameters for the initiate operation
+    );
+
+    virtual PBoolean OnReceivedReturnResult(
+      X880_ReturnResult & returnResult
+    );
+
+    virtual PBoolean OnReceivedReturnError(
+      int errorCode,
+      X880_ReturnError & returnError
+    );
+
+    enum State {
+      e_mwi_Idle,
+      e_mwi_Wait
+    };
+ 
+    State GetState() const { return mwiState; }
+
+    void StartmwiTimer(const PTimeInterval value) { mwiTimer = value; }
+
+    void StopmwiTimer();
+
+    PBoolean IsmwiTimerRunning() { return mwiTimer.IsRunning(); }
+
+
+    PDECLARE_NOTIFIER(PTimer, H4507Handler, OnMWITimeOut);
+
+  protected:
+    State       mwiState;               // Call state of this connection
+    PTimer      mwiTimer;               // Timer - T1 and T2
+
 };
 
 

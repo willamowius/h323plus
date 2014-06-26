@@ -648,7 +648,7 @@ class H460_Feature : public H225_FeatureDescriptor
 
     /** Whether Supports Non-Call Supplimentary Service
      */
-       virtual PBoolean SupportNonCallService() { return false; };
+       virtual PBoolean SupportNonCallService() const { return false; };
 
     /** Initialisation
      */
@@ -1169,7 +1169,7 @@ class H460_FeatureSet : public PObject
     /** Determine whether the FeatureSet supports
         NonCallSupplimentaryServices. 
       */
-    virtual PBoolean SupportNonCallService(const H225_FeatureSet & fs);
+    virtual PBoolean SupportNonCallService(const H225_FeatureSet & fs) const;
 
   protected:
 
@@ -1177,12 +1177,12 @@ class H460_FeatureSet : public PObject
 
    void ReadFeatureSetPDU(const H225_FeatureSet & fs, unsigned MessageID, PBoolean genericData = false);
 
-   H460_FeatureID GetFeatureIDPDU(H225_FeatureDescriptor & pdu);
+   H460_FeatureID GetFeatureIDPDU(const H225_FeatureDescriptor & pdu) const;
 
    PBoolean CreateFeaturePDU(H460_Feature & Feat, H225_FeatureDescriptor & pdu, unsigned MessageID);
    void ReadFeaturePDU(H460_Feature & Feat, const H225_FeatureDescriptor & pdu, unsigned MessageID);
 
-   virtual PBoolean SupportNonCallService(const H460_FeatureID & id);
+   virtual PBoolean SupportNonCallService(const H460_FeatureID & id) const;
 
    PString PTracePDU(PINDEX id) const;
 

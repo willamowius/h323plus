@@ -3171,6 +3171,10 @@ class H323Connection : public PObject
     /** Get the connection FeatureSet
       */
     virtual H460_FeatureSet * GetFeatureSet();
+
+    /** Get the connection FeatureSet
+      */
+    PBoolean FeatureSetSupportNonCallService(const H225_FeatureSet & fs) const;
 #endif
   //@}
 

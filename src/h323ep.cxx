@@ -3174,7 +3174,7 @@ PBoolean H323EndPoint::OnSendCallIndependentSupplementaryService(const H323Conne
   H225_Setup_UUIE & setup = pdu.m_h323_uu_pdu.m_h323_message_body;
   setup.m_conferenceGoal.SetTag(H225_Setup_UUIE_conferenceGoal::e_callIndependentSupplementaryService);
 
-  PTRACE(6,"MyEP\tSending H.460 Call Independent Supplementary Service"); 
+  PTRACE(6,"EP\tSending H.460 Call Independent Supplementary Service"); 
   return true;
 
 #else
@@ -3185,52 +3185,8 @@ PBoolean H323EndPoint::OnSendCallIndependentSupplementaryService(const H323Conne
 PBoolean H323EndPoint::OnReceiveCallIndependentSupplementaryService(const H323Connection * connection, 
                                                                 const H323SignalPDU & pdu)
 {
-#ifdef H323_H450
-  if (pdu.m_h323_uu_pdu.HasOptionalField(H225_H323_UU_PDU::e_h4501SupplementaryService)) {
-      PTRACE(6,"MyEP\tReceived H.450 Call Independent Supplementary Service");
-      return true;
-  }
-#endif
-
-#ifdef H323_H460
-
-  if (disableH460)
-      return false;
-
-  H225_FeatureSet fs;
-  const H225_Setup_UUIE & setup = pdu.m_h323_uu_pdu.m_h323_message_body;
-        
-  if (setup.HasOptionalField(H225_Setup_UUIE::e_supportedFeatures)) {
-      fs.IncludeOptionalField(H225_FeatureSet::e_supportedFeatures);
-      fs.m_supportedFeatures = setup.m_supportedFeatures;
-  }
-
-  if (setup.HasOptionalField(H225_Setup_UUIE::e_neededFeatures)) {
-      fs.IncludeOptionalField(H225_FeatureSet::e_neededFeatures);
-      fs.m_supportedFeatures = setup.m_neededFeatures;
-  }
-
-  if (setup.HasOptionalField(H225_Setup_UUIE::e_desiredFeatures)) {
-      fs.IncludeOptionalField(H225_FeatureSet::e_desiredFeatures);
-      fs.m_supportedFeatures = setup.m_desiredFeatures;
-  }
-
-  H460_FeatureSet * featset = NULL;
-  H323Connection* conn = FindConnectionWithLock(connection->GetCallToken());
-  if (conn != NULL) {
-      featset = conn->GetFeatureSet();
-      conn->Unlock();
-  }
-
-  if (featset && featset->SupportNonCallService(fs)) {
-     PTRACE(6,"MyEP\tReceived H.460 Call Independent Supplementary Service");
-     return true;
-  } else 
-#endif
-  {
-    PTRACE(6,"MyEP\tRejected CallIndependentSupplementaryService as no support in EndPoint.");
+    PTRACE(2,"EP\tRejected CallIndependentSupplementaryService as no support in EndPoint.");
     return false;
-  }
 }
 
 PBoolean H323EndPoint::OnNegotiateConferenceCapabilities(const H323SignalPDU & /* setupPDU */)

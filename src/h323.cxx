@@ -289,7 +289,7 @@ const char * const H323Connection::FastStartStateNames[NumFastStartStates] = {
 };
 #endif
 #ifdef H323_H460
-static void ReceiveSetupFeatureSet(const H323Connection * connection, const H225_Setup_UUIE & pdu)
+static bool ReceiveSetupFeatureSet(const H323Connection * connection, const H225_Setup_UUIE & pdu, bool nonCall = false)
 {
     H225_FeatureSet fs;
     PBoolean hasFeaturePDU = FALSE;
@@ -315,11 +315,14 @@ static void ReceiveSetupFeatureSet(const H323Connection * connection, const H225
         hasFeaturePDU = TRUE;
     }
 
-    if (hasFeaturePDU)
+    if (hasFeaturePDU && (!nonCall || connection->FeatureSetSupportNonCallService(fs))) {
         connection->OnReceiveFeatureSet(H460_MessageType::e_setup, fs);
-    else
+        return true;
+
+    } else if (!nonCall)
         connection->DisableFeatureSet(H460_MessageType::e_setup);
 
+    return false;
 }
 
 template <typename PDUType>
@@ -1672,25 +1675,42 @@ PBoolean H323Connection::OnSendCallIndependentSupplementaryService(H323SignalPDU
 
 PBoolean H323Connection::OnReceiveCallIndependentSupplementaryService(const H323SignalPDU & pdu)
 {
-#ifdef H323_H461
-    const H225_Setup_UUIE & setup = pdu.m_h323_uu_pdu.m_h323_message_body;
-    if (setup.m_sourceInfo.HasOptionalField(H225_EndpointType::e_set) && setup.m_sourceInfo.m_set[3]) {
-        H323EndPoint::H461Mode mode = endpoint.GetEndPointASSETMode();
-        if (mode == H323EndPoint::e_H461Disabled) {
-            PTRACE(4,"CON\tLogic error SET call to regular endpoint");
-            return false;
+
+#ifdef H323_H450
+    if (pdu.m_h323_uu_pdu.HasOptionalField(H225_H323_UU_PDU::e_h4501SupplementaryService)) {
+        PTRACE(2,"CON\tReceived H.450 Call Independent Supplementary Service");
+        return h450dispatcher->HandlePDU(pdu);
+    }
+#endif
+
+#ifdef H323_H460
+    if (!disableH460) {
+        const H225_Setup_UUIE & setup = pdu.m_h323_uu_pdu.m_h323_message_body;
+        if (ReceiveSetupFeatureSet(this, setup)) {
+            PTRACE(2,"CON\tProcessed H.460 Call Independent Supplementary Service");
+            return true;
         }
-           
-        if (pdu.m_h323_uu_pdu.HasOptionalField(H225_H323_UU_PDU::e_genericData) && pdu.m_h323_uu_pdu.m_genericData.GetSize() > 0) {
-            const H225_GenericIdentifier & id = pdu.m_h323_uu_pdu.m_genericData[0].m_id;
-            if (id.GetTag() == H225_GenericIdentifier::e_oid) {
-                const PASN_ObjectId & val = id;
-                if (val.AsString() == "0.0.8.461.0") {
-                    SetH461Mode(e_h461Associate);
-                    return true;
+
+#ifdef H323_H461
+        if (setup.m_sourceInfo.HasOptionalField(H225_EndpointType::e_set) && setup.m_sourceInfo.m_set[3]) {
+            H323EndPoint::H461Mode mode = endpoint.GetEndPointASSETMode();
+            if (mode == H323EndPoint::e_H461Disabled) {
+                PTRACE(2,"CON\tLogic error SET call to regular endpoint");
+                return false;
+            }
+               
+            if (pdu.m_h323_uu_pdu.HasOptionalField(H225_H323_UU_PDU::e_genericData) && pdu.m_h323_uu_pdu.m_genericData.GetSize() > 0) {
+                const H225_GenericIdentifier & id = pdu.m_h323_uu_pdu.m_genericData[0].m_id;
+                if (id.GetTag() == H225_GenericIdentifier::e_oid) {
+                    const PASN_ObjectId & val = id;
+                    if (val.AsString() == "0.0.8.461.0") {
+                        SetH461Mode(e_h461Associate);
+                        return true;
+                    }
                 }
             }
         }
+#endif
     }
 #endif
     return endpoint.OnReceiveCallIndependentSupplementaryService(this,pdu);
@@ -7369,6 +7389,11 @@ PBoolean H323Connection::IsNonCallConnection() const
 H460_FeatureSet * H323Connection::GetFeatureSet()
 {
     return features;
+}
+
+PBoolean H323Connection::FeatureSetSupportNonCallService(const H225_FeatureSet & fs) const
+{
+    return (features && features->SupportNonCallService(fs));
 }
 #endif
 
