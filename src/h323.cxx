@@ -1686,7 +1686,7 @@ PBoolean H323Connection::OnReceiveCallIndependentSupplementaryService(const H323
 #ifdef H323_H460
     if (!disableH460) {
         const H225_Setup_UUIE & setup = pdu.m_h323_uu_pdu.m_h323_message_body;
-        if (ReceiveSetupFeatureSet(this, setup)) {
+        if (ReceiveSetupFeatureSet(this, setup, true)) {
             PTRACE(2,"CON\tProcessed H.460 Call Independent Supplementary Service");
             return true;
         }
