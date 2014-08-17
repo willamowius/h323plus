@@ -982,11 +982,11 @@ PBoolean H235AuthSimpleMD5::IsSecuredPDU(unsigned rasPDU, PBoolean received) con
 {
   switch (rasPDU) {
     case H225_RasMessage::e_registrationRequest :
-/*  case H225_RasMessage::e_unregistrationRequest :
+    case H225_RasMessage::e_unregistrationRequest :
     case H225_RasMessage::e_admissionRequest :
     case H225_RasMessage::e_disengageRequest :
     case H225_RasMessage::e_bandwidthRequest :
-    case H225_RasMessage::e_infoRequestResponse : */
+    case H225_RasMessage::e_infoRequestResponse :
       return received ? !remoteId.IsEmpty() : !localId.IsEmpty();
 
     default :
