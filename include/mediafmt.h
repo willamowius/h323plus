@@ -421,6 +421,10 @@ class OpalMediaFormat : public PCaselessString
       */
     void SetBandwidth(unsigned newbandwidth) { bandwidth = newbandwidth; }
 
+	/**Get the initial bandwidth set for the codec. Default is same as bandwidth
+	  */
+	virtual unsigned GetInitialBandwidth() const { return GetBandwidth(); }
+
     /**Get the maximum frame size in bytes. If this returns zero then the
        media format has no intrinsic maximum frame size, eg G.711 would 
        return zero but G.723.1 whoud return 24.
@@ -694,6 +698,8 @@ class OpalVideoFormat : public OpalMediaFormat
     );
 
     virtual PObject * Clone() const;
+
+	virtual unsigned GetInitialBandwidth() const;
 
     virtual bool Merge(const OpalMediaFormat & mediaFormat);
 

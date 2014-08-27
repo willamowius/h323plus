@@ -1090,6 +1090,10 @@ PObject * OpalVideoFormat::Clone() const
   return new OpalVideoFormat(*this);
 }
 
+unsigned OpalVideoFormat::GetInitialBandwidth() const 
+{ 
+	return GetOptionInteger(OpalVideoFormat::MaxBitRateOption); 
+}
 
 bool OpalVideoFormat::Merge(const OpalMediaFormat & mediaFormat)
 {
