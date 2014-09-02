@@ -2008,7 +2008,7 @@ PBoolean H323EndPoint::ResolveCallParty(const PString & _remoteParty, PStringLis
       }
     }
 
-#if P_HAS_IPV6
+#ifdef H323_IPV6
   // Again horrible code should be able to get interface listing for a given protocol - SH
   PBoolean ipv6IPv4Discover = false;
   if (PIPSocket::GetDefaultIpAddressFamily() == AF_INET6) {
@@ -2065,7 +2065,7 @@ PBoolean H323EndPoint::ResolveCallParty(const PString & _remoteParty, PStringLis
     } else {
        addresses = PStringList(remoteParty);
     }
-#if P_HAS_IPV6
+#ifdef H323_IPV6
      if (ipv6IPv4Discover)
         PIPSocket::SetDefaultIpAddressFamilyV6();
 #endif

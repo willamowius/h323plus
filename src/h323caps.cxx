@@ -2420,6 +2420,196 @@ PBoolean H323_ConferenceControlCapability::OnReceivedPDU(const H245_DataType &, 
 
 /////////////////////////////////////////////////////////////////////////////
 
+H323GenericControlCapability::H323GenericControlCapability(
+      const PString &capabilityId )
+        : H323Capability(),
+          H323GenericCapabilityInfo(capabilityId, 0)
+{
+    SetCapabilityDirection(H323Capability::e_NoDirection);
+}
+
+PBoolean H323GenericControlCapability::OnSendingPDU(H245_Capability & cap) const
+{
+      cap.SetTag(H245_Capability::e_genericControlCapability);
+      return OnSendingPDU((H245_GenericCapability &)cap, e_TCS);
+}
+
+PBoolean H323GenericControlCapability::OnReceivedPDU(const H245_Capability & cap)
+{
+  H323Capability::OnReceivedPDU(cap);
+
+  if( cap.GetTag()!= H245_Capability::e_genericControlCapability)
+    return FALSE;
+
+  return OnReceivedPDU((const H245_GenericCapability &)cap, e_TCS);
+} 
+
+PBoolean H323GenericControlCapability::OnReceivedPDU(const H245_GenericCapability & pdu, CommandType type)
+{
+  OpalMediaFormat mediaFormat = GetMediaFormat();
+  return OnReceivedGenericPDU(mediaFormat, pdu, type);
+}
+
+PBoolean H323GenericControlCapability::OnSendingPDU(H245_GenericCapability & pdu, CommandType type) const
+{
+  return OnSendingGenericPDU(pdu, GetMediaFormat(), type);
+}
+
+PObject::Comparison H323GenericControlCapability::Compare(const PObject & obj) const
+{
+  if (!PIsDescendant(&obj, H323GenericControlCapability))
+    return LessThan;
+
+  return CompareInfo((const H323GenericControlCapability &)obj);
+}
+
+H323Capability::MainTypes H323GenericControlCapability::GetMainType() const
+{
+    return H323Capability::e_GenericControl;
+}
+
+unsigned H323GenericControlCapability::GetSubType() const
+{
+    return 0; // Not used
+}
+
+PString H323GenericControlCapability::GetIdentifier() const
+{
+  PASN_ObjectId & oid = *identifier;
+  return oid.AsString();
+}
+
+unsigned H323GenericControlCapability::GetDefaultSessionID() const
+{
+    return OpalMediaFormat::NonRTPSessionID;
+}
+
+PBoolean H323GenericControlCapability::OnSendingPDU(H245_DataType & /*pdu*/) const
+{
+     return FALSE;
+}
+
+PBoolean H323GenericControlCapability::OnSendingPDU(H245_ModeElement & pdu) const
+{
+     return FALSE;
+}
+
+PBoolean H323GenericControlCapability::OnReceivedPDU(const H245_DataType & /*pdu*/, PBoolean /*receiver*/)
+{
+     return FALSE;
+}
+
+PBoolean H323GenericControlCapability::IsMatch(const PASN_Choice & subTypePDU) const
+{
+  return H323Capability::IsMatch(subTypePDU) &&
+         H323GenericCapabilityInfo::IsMatch((const H245_GenericCapability &)subTypePDU.GetObject());
+}
+
+
+H323Channel * H323GenericControlCapability::CreateChannel(
+                      H323Connection & /*connection*/,    
+                      H323Channel::Directions /*dir*/,    
+                      unsigned /*sessionID*/,             
+                      const H245_H2250LogicalChannelParameters * /*param*/
+                    ) const
+{
+    return NULL;
+}
+
+H323Codec * H323GenericControlCapability::CreateCodec(
+                            H323Codec::Direction /*direction*/
+                        ) const
+{
+    return NULL;
+}
+
+
+
+void H323GenericControlCapability::LoadGenericParameter(unsigned id, H323GenericControlCapability::ParameterType type, const PString & value, 
+                                                PBoolean collapsing, PBoolean excludeOLC, PBoolean excludeReqMode)
+{
+
+    OpalMediaOption::H245GenericInfo generic;
+    generic.ordinal = id;
+    generic.mode = collapsing ? OpalMediaOption::H245GenericInfo::Collapsing : OpalMediaOption::H245GenericInfo::NonCollapsing;
+    generic.excludeTCS = false;
+    generic.excludeOLC = excludeOLC;
+    generic.excludeReqMode = excludeReqMode;
+    generic.integerType = OpalMediaOption::H245GenericInfo::UnsignedInt;
+
+    PString name(PString::Printf, "Generic Parameter %u", id);
+
+    OpalMediaOption * mediaOption;
+    switch (type) {
+      case H323GenericControlCapability::e_logical :
+        mediaOption = new OpalMediaOptionBoolean(name, false, OpalMediaOption::NoMerge, value.AsInteger() != 0);
+        break;
+
+      case H323GenericControlCapability::e_booleanArray :
+        generic.integerType = OpalMediaOption::H245GenericInfo::BooleanArray;
+        mediaOption = new OpalMediaOptionUnsigned(name, false, OpalMediaOption::AndMerge, value.AsInteger(), 0, 255);
+        break;
+
+      case H323GenericControlCapability::e_unsigned32Min :
+        generic.integerType = OpalMediaOption::H245GenericInfo::Unsigned32;
+        // Do next case
+
+      case H323GenericControlCapability::e_unsignedMin :
+        mediaOption = new OpalMediaOptionUnsigned(name, false, OpalMediaOption::MinMerge, value.AsInteger());
+        break;
+
+      case H323GenericControlCapability::e_unsigned32Max :
+        generic.integerType = OpalMediaOption::H245GenericInfo::Unsigned32;
+        // Do next case
+
+      case H323GenericControlCapability::e_unsignedMax :
+        mediaOption = new OpalMediaOptionUnsigned(name, false, OpalMediaOption::MaxMerge, value.AsInteger());
+        break;
+
+      case H323GenericControlCapability::e_octetString :
+        mediaOption = new OpalMediaOptionString(name, false, value);
+        break;
+
+      default :
+        mediaOption = NULL;
+    }
+
+    if (mediaOption != NULL) {
+      mediaOption->SetH245Generic(generic);
+      GetWritableMediaFormat().AddOption(mediaOption);
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////
+
+#ifdef H323_IPV6
+
+static const char * IPProtocolOID = "0.0.8.245.1.3.2";  // H.245 Annex V
+
+H323_IPProtocolCapability::H323_IPProtocolCapability(PINDEX ipV4, PINDEX ipV6)
+: H323GenericControlCapability(IPProtocolOID)
+{
+  PINDEX value = ipV6*2 + ipV4;
+
+  LoadGenericParameter(1,e_booleanArray,value);
+
+}
+
+PObject * H323_IPProtocolCapability::Clone() const
+{
+  return new H323_IPProtocolCapability(*this);
+}
+
+
+PString H323_IPProtocolCapability::GetFormatName() const
+{
+  return "IPProtocol Control";
+}
+
+#endif  // H323_IPV6
+
+/////////////////////////////////////////////////////////////////////////////
+
 H323DataCapability::H323DataCapability(unsigned rate)
   : maxBitRate(rate)
 {

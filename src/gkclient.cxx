@@ -523,7 +523,7 @@ PBoolean H323Gatekeeper::OnReceiveRegistrationConfirm(const H225_RegistrationCon
   if (rcf.m_callSignalAddress.GetSize() > 0)
     gkRouteAddress = rcf.m_callSignalAddress[0];
 
-#if P_HAS_IPV6
+#ifdef H323_IPV6
   // Set to only resolve DNS addresses of the type supported by the signalling address of the gatekeeper. 
   if (PIPSocket::GetDefaultIpAddressFamily() == AF_INET6 && gkRouteAddress.GetIpVersion() != 6)
        PIPSocket::SetDefaultIpAddressFamilyV4(); 

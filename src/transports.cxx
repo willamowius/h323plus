@@ -269,7 +269,7 @@ static PString BuildIP(const PIPSocket::Address & ip, unsigned port)
   if (ip.IsAny() || !ip.IsValid())
     str << '*';
   else
-#if P_HAS_IPV6
+#ifdef H323_IPV6
   if (ip.GetVersion() == 6)
     str << '[' << ip << ']';
   else
@@ -295,7 +295,7 @@ H323TransportAddress::H323TransportAddress(const H225_TransportAddress & transpo
       m_version = 4;
       break;
     }
-#if P_HAS_IPV6
+#ifdef H323_IPV6
     case H225_TransportAddress::e_ip6Address :
     {
       const H225_TransportAddress_ip6Address & ip = transport;
@@ -324,7 +324,7 @@ H323TransportAddress::H323TransportAddress(const H245_TransportAddress & transpo
           m_version = 4;
           break;
         }
-#if P_HAS_IPV6
+#ifdef H323_IPV6
         case H245_UnicastAddress::e_iP6Address :
         {
           const H245_UnicastAddress_iP6Address & ip = unicast;
@@ -346,7 +346,7 @@ H323TransportAddress::H323TransportAddress(const H245_TransportAddress & transpo
 H323TransportAddress::H323TransportAddress(const PIPSocket::Address & ip, WORD port)
 {
    m_tls = false;
-#if P_HAS_IPV6
+#ifdef H323_IPV6
    m_version = ip.GetVersion();
 #else
    m_version = 4;
@@ -367,7 +367,7 @@ void H323TransportAddress::Validate()
 
   if (Find('$') == P_MAX_INDEX) {
     Splice(IpPrefix, 0, 0);
-#if P_HAS_IPV6
+#ifdef H323_IPV6
     if (PIPSocket::GetDefaultIpAddressFamily() == AF_INET6) {
       // If a DNS record then detect the version of the DNS record.
       PIPSocket::Address ip;
@@ -392,7 +392,7 @@ PBoolean H323TransportAddress::SetPDU(H225_TransportAddress & pdu) const
   PIPSocket::Address ip;
   WORD port = H323EndPoint::DefaultTcpPort;
   if (GetIpAndPort(ip, port)) {
-#if P_HAS_IPV6
+#ifdef H323_IPV6
     if (ip.GetVersion() == 6) {
       pdu.SetTag(H225_TransportAddress::e_ip6Address);
       H225_TransportAddress_ip6Address & addr = pdu;
@@ -424,7 +424,7 @@ PBoolean H323TransportAddress::SetPDU(H245_TransportAddress & pdu) const
 
     H245_UnicastAddress & unicast = pdu;
 
-#if P_HAS_IPV6
+#ifdef H323_IPV6
     if (ip.GetVersion() == 6) {
       unicast.SetTag(H245_UnicastAddress::e_iP6Address);
       H245_UnicastAddress_iP6Address & addr = unicast;
@@ -537,7 +537,7 @@ PBoolean H323TransportAddress::GetIpAndPort(PIPSocket::Address & ip,
   if (PIPSocket::GetHostAddress(host, ip))
      return TRUE;
 
-#if P_HAS_IPV6
+#ifdef H323_IPV6
   // This is really horrible
   // You first attempt to get an IPv6 (default) record then if the fails
   // Set the defaultIPAddress family to v4, Clear the cache then resolve the address via IPv4.
@@ -1458,7 +1458,7 @@ H323TransportAddress H323TransportIP::GetRemoteAddress() const
 PBoolean H323TransportIP::IsCompatibleTransport(const H225_TransportAddress & pdu) const
 {
   return pdu.GetTag() == H225_TransportAddress::e_ipAddress
-#if P_HAS_IPV6
+#ifdef H323_IPV6
             || pdu.GetTag() == H225_TransportAddress::e_ip6Address
 #endif
          ;
@@ -2206,7 +2206,7 @@ PBoolean H323TransportUDP::DiscoverGatekeeper(H323Gatekeeper & gk,
   PTRACE(3, "H225\tStarted gatekeeper discovery of \"" << address << '"');
 
   PIPSocket::Address destAddr;
-#if P_HAS_IPV6
+#ifdef H323_IPV6
   if (address.GetIpVersion() == 6)
       destAddr = PIPSocket::Address::GetBroadcast(6);
   else
@@ -2234,7 +2234,7 @@ PBoolean H323TransportUDP::DiscoverGatekeeper(H323Gatekeeper & gk,
   PIPSocket::Address originalLocalAddress = localAddress;
   WORD originalLocalPort = 0;
 
-#if P_HAS_IPV6
+#ifdef H323_IPV6
   // Again horrible code should be able to get interface listing for a given protocol - SH
   PBoolean ipv6IPv4Discover = false;
   if (address.GetIpVersion() == 4 && PIPSocket::GetDefaultIpAddressFamily() == AF_INET6) {
@@ -2282,7 +2282,7 @@ PBoolean H323TransportUDP::DiscoverGatekeeper(H323Gatekeeper & gk,
     InterfaceList.RemoveAll();
   }
 
-#if P_HAS_IPV6
+#ifdef H323_IPV6
   if (ipv6IPv4Discover)
       PIPSocket::SetDefaultIpAddressFamilyV6();
 #endif

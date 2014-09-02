@@ -2925,6 +2925,240 @@ class H323_ConferenceControlCapability : public H323Capability
 #endif // H323_H230
 
 
+/**This class describes the interface to an H245 "generic" control capability
+
+   An application may create a descendent off this class and override
+   functions as required for descibing the codec.
+ */
+class H323GenericControlCapability : public H323Capability,
+                                     public H323GenericCapabilityInfo
+{
+  PCLASSINFO(H323GenericControlCapability, H323Capability);
+
+  public:
+
+  /**@name Construction */
+  //@{
+    /**Create a new set of information about a generic control capability.
+      */
+    H323GenericControlCapability(
+        const PString &capabilityId     ///< capability identifier, from H245
+    );
+  //@}
+
+  /**@name Member variable access */
+  //@{
+
+    enum ParameterType {
+        /* these need to be in the same order as the choices in
+          H245_ParameterValue::Choices, as the value is just cast to that type
+        */
+        e_logical = 0,
+        e_booleanArray,
+        e_unsignedMin,
+        e_unsignedMax,
+        e_unsigned32Min,
+        e_unsigned32Max,
+        e_octetString,
+        e_genericParameter
+     };
+
+    /**Load a generic parameter
+     */
+
+    void LoadGenericParameter(unsigned id,                          ///< Parameter ID
+                              ParameterType type,                   ///< Parameter Type
+                              const PString & value,                ///< Value
+                              PBoolean collapsing = true,           ///< Whether collapsing or non-collapsing
+                              PBoolean excludeOLC = true,           ///< Not used in OLC
+                              PBoolean excludeReqMode = true        ///< Not used in REqMode
+                              );
+  //@}
+
+  /**@name Overrides from class PObject */
+  //@{
+    /**Compare two capability instances. This compares the main and sub-types
+       of the capability.
+     */
+    Comparison Compare(const PObject & obj) const;
+  //@}
+
+  /**@name Identification functions */
+  //@{
+
+    /**Get the main type of the capability.
+       Always returns e_ExtendedVideo.
+     */
+    virtual H323Capability::MainTypes GetMainType() const;
+
+    /**Get the sub-type of the capability. This is a code dependent on the
+       main type of the capability.
+
+       This returns one of the four possible combinations of mode and speed
+       using the enum values of the protocol ASN H245_AudioCapability class.
+     */
+	virtual unsigned GetSubType() const;
+
+    /**Get the OID of the capability. 
+
+       This returns a string representation of the capability OID.
+     */
+    virtual PString GetIdentifier() const;
+
+    /**Get the default RTP session.
+       This function gets the default RTP session ID for the capability
+       type. 
+       returns H323Capability::NonRTPSessionID .
+      */
+    virtual unsigned GetDefaultSessionID() const;
+
+	/** Create Channel (not used)
+	  */
+    virtual H323Channel * CreateChannel(
+      H323Connection & connection,    ///< Owner connection for channel
+      H323Channel::Directions dir,    ///< Direction of channel
+      unsigned sessionID,             ///< Session ID for RTP channel
+      const H245_H2250LogicalChannelParameters * param
+                                      ///< Parameters for channel
+    ) const;
+
+   /**Create the codec instance, allocating resources as required. Default does nothing
+     */
+    virtual H323Codec * CreateCodec(
+      H323Codec::Direction direction  ///< Direction in which this instance runs
+    ) const;
+  //@}
+    
+
+  /**@name Protocol manipulation */
+  //@{
+    /**This function is called whenever and outgoing TerminalCapabilitySet
+       PDU is being constructed for the control channel. It allows the
+       capability to set the PDU fields from information in members specific
+       to the class.
+
+       The default behaviour calls the OnSendingPDU() function with a more
+       specific PDU type.
+     */
+    virtual PBoolean OnSendingPDU(
+      H245_Capability & pdu  ///< PDU to set information on
+    ) const;
+
+    /**This function is called whenever and incoming TerminalCapabilitySet
+       PDU is received on the control channel, and a new H323Capability
+       descendent was created. This completes reading fields from the PDU
+       into the classes members.
+
+       If the function returns FALSE then the received PDU codec description
+       is not supported, so will be ignored. The default behaviour simply
+       returns TRUE.
+     */
+    virtual PBoolean OnReceivedPDU(
+      const H245_Capability & pdu  ///< PDU to get information from
+    );
+
+    /**This function is called whenever and incoming TerminalCapabilitySet
+       or OpenLogicalChannel PDU has been used to construct the control
+       channel. It allows the capability to set from the PDU fields,
+       information in members specific to the class.
+
+       The default behaviour does nothing.
+     */
+
+    virtual PBoolean OnReceivedPDU(
+      const H245_GenericCapability & cap,  ///< PDU to get information from
+      CommandType type                     ///<  Type of PDU to send in
+    );
+
+    /**This function is called whenever and outgoing TerminalCapabilitySet
+       or OpenLogicalChannel PDU is being constructed for the control channel.
+       It allows the capability to set the PDU fields from information in
+       members specific to the class.
+
+       The default behaviour does nothing.
+     */
+    virtual PBoolean OnSendingPDU(
+      H245_GenericCapability & cap,  ///< PDU to get information from
+      CommandType type               ///<  Type of PDU to send in
+    ) const;
+
+    /**This function is called whenever and outgoing OpenLogicalChannel
+       PDU is being constructed for the control channel. It allows the
+       capability to set the PDU fields from information in members specific
+       to the class.
+
+       The default behaviour is pure.
+     */
+    virtual PBoolean OnSendingPDU(
+      H245_DataType & pdu  ///< PDU to set information on
+    ) const;
+
+    /**This function is called whenever and outgoing RequestMode
+       PDU is being constructed for the control channel. It allows the
+       capability to set the PDU fields from information in members specific
+       to the class.
+
+       The default behaviour is pure.
+     */
+    virtual PBoolean OnSendingPDU(
+      H245_ModeElement & pdu  ///< PDU to set information on
+    ) const;
+
+    /**This function is called whenever and incoming OpenLogicalChannel
+       PDU has been used to construct the control channel. It allows the
+       capability to set from the PDU fields, information in members specific
+       to the class.
+
+       The default behaviour is pure.
+     */
+    virtual PBoolean OnReceivedPDU(
+      const H245_DataType & pdu,  ///< PDU to get information from
+      PBoolean receiver               ///< Is receiver OLC
+    );
+
+    /**Compare the generic part of the capability, if applicable.
+      */
+    virtual PBoolean IsMatch(
+      const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
+    ) const;
+  //@}
+
+};
+
+#ifdef H323_IPV6
+
+/* This class implements H.245 Annex V (H.245v17)
+ */
+class H323_IPProtocolCapability : public H323GenericControlCapability
+{
+  PCLASSINFO(H323_IPProtocolCapability, H323GenericControlCapability);
+
+  public:
+  /**@name Construction */
+
+    /**Create the IP Protocol capability
+      */
+	H323_IPProtocolCapability(PINDEX ipV4 = 1, PINDEX ipV6 = 0);
+  //@}
+
+  /**@name Overrides from class PObject */
+  //@{
+    /**Create a copy of the object.
+      */
+    virtual PObject * Clone() const;
+  //@}
+
+  /**@name Identification functions */
+  //@{
+    /**Get the name of this class.
+     */
+    virtual PString GetFormatName() const;
+  //@}
+
+};
+#endif
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 typedef PFactory<H323Capability, std::string> H323CapabilityFactory;

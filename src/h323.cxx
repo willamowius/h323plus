@@ -3029,7 +3029,7 @@ PBoolean H323Connection::StartControlChannel(const H225_TransportAddress & h245A
 {
   // Check that it is an IP address, all we support at the moment
   if (h245Address.GetTag() != H225_TransportAddress::e_ipAddress
-#if P_HAS_IPV6
+#ifdef H323_IPV6
         && h245Address.GetTag() != H225_TransportAddress::e_ip6Address
 #endif
       ) {
@@ -5518,7 +5518,7 @@ RTP_Session * H323Connection::UseSession(unsigned sessionID,
 
   const H245_UnicastAddress & uaddr = taddr;
   if (uaddr.GetTag() != H245_UnicastAddress::e_iPAddress
-#if P_HAS_IPV6
+#ifdef H323_IPV6
         && uaddr.GetTag() != H245_UnicastAddress::e_iP6Address
 #endif
      ) {

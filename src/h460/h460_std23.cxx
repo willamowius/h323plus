@@ -484,7 +484,7 @@ void H460_FeatureStd23::OnNATTypeDetection(PSTUNClient::NatTypes type, const PIP
 bool H460_FeatureStd23::DetectALG(const PIPSocket::Address & detectAddress)
 {
 
-#if P_HAS_IPV6
+#ifdef H323_IPV6
   // Again horrible code should be able to get interface listing for a given protocol - SH
   PBoolean ipv6IPv4Discover = false;
   if (detectAddress.GetVersion() == 4 && PIPSocket::GetDefaultIpAddressFamily() == AF_INET6) {
@@ -506,7 +506,7 @@ bool H460_FeatureStd23::DetectALG(const PIPSocket::Address & detectAddress)
             }
         }
     }
-#if P_HAS_IPV6
+#ifdef H323_IPV6
   if (ipv6IPv4Discover)
       PIPSocket::SetDefaultIpAddressFamilyV6();
 #endif

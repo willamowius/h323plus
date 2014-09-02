@@ -203,6 +203,10 @@
  #undef H323_MEDIAENCODED
 #endif
 
+#if P_HAS_IPV6
+#define H323_IPV6   1
+#endif
+
 #endif
 
 // End Of File ///////////////////////////////////////////////////////////////
