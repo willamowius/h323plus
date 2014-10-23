@@ -650,7 +650,7 @@ PBoolean H235Authenticators::GetMediaSessionInfo(PString & algorithmOID, PBYTEAr
            return auth.GetMediaSessionInfo(algorithmOID, sessionKey);
        }
    }
-   return NULL;
+   return false;
 }
 
 PString & H235Authenticators::GetDHParameterFile()
