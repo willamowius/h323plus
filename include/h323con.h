@@ -922,8 +922,8 @@ class H323Connection : public PObject
 
     struct MWIInformation {
         MWIInformation()
-        : mwiCtrId(PString()), mwitype(mwiNone),
-        mwiUser(PString()), mwiCalls(0) {}
+        : mwiCtrId(PString()), mwiUser(PString()), 
+          mwitype(mwiNone), mwiCalls(0) {}
 
         PString mwiCtrId;                          ///< Message Center ID
         PString mwiUser;                           ///< UserName for MWI service (optional by default is the endpoint alias name)
