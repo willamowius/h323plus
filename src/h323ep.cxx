@@ -667,6 +667,8 @@ H323EndPoint::H323EndPoint()
 
 #ifdef H323_H450
   callIntrusionProtectionLevel = 3; //H45011_CIProtectionLevel::e_fullProtection;
+
+  mwiMsgCentre = PString();
 #endif
 
 #ifdef H323_AUDIO_CODECS
@@ -1601,17 +1603,11 @@ void H323EndPoint::EncryptionCacheRemove()
 }
 #endif
 
-#ifdef H323_H460 
-H323Connection * H323EndPoint::MakeSupplimentaryCall (
-                        const PString & remoteParty,  ///* Remote party to call
-                        PString & token,              ///* String to receive token for connection
-                        void * userData               ///* user data to pass to CreateConnection
-                        )
+H323Connection * H323EndPoint::MakeSupplimentaryCall(const PString & remoteParty,
+                        PString & token, void * userData)
 {
-
-    return MakeCall(remoteParty, token, userData,true);
+    return MakeCall(remoteParty, token, userData, true);
 }
-#endif
 
 PBoolean H323EndPoint::StartListeners(const H323TransportAddressArray & ifaces)
 {
@@ -2440,6 +2436,27 @@ H323Connection * H323EndPoint::IntrudeCall(const PString & remoteParty,
 
 void H323EndPoint::OnReceivedInitiateReturnError()
 {
+}
+
+PBoolean H323EndPoint::OnReceivedMWI(const H323Connection::MWIInformation & mwiInfo)
+{
+    PTRACE(2,"EP\tReceived MWI for " << mwiInfo.mwiUser << " NoOfCalls " << mwiInfo.mwiCalls << " Message Ctr " << mwiInfo.mwiCtrId);
+
+    return true;
+}
+
+PBoolean H323EndPoint::OnReceivedMWIClear(const PString & user)
+{
+   PTRACE(2,"EP\tReceived MWI clear for " << user);
+
+   return true;
+}
+
+PBoolean H323EndPoint::OnReceivedMWIRequest(const PString & user)
+{
+   PTRACE(2,"EP\tReceived MWI Request for " << user);
+
+   return true;
 }
 
 #endif  // H323_H450
@@ -3808,7 +3825,7 @@ PBoolean H323EndPoint::H46017CreateConnection(const PString & gatekeeper, PBoole
    m_registeredWithH46017 = false;
    H460_FeatureStd17 * h46017 = (H460_FeatureStd17 *)features.GetFeature(17);
    if(!h46017) {
-       PTRACE(4, "Can't create H.460.17 feature - plugin loaded ?");
+       PTRACE(4, "EP\tCan't create H.460.17 feature - plugin loaded ?");
        return false;
    }
 
@@ -3816,7 +3833,7 @@ PBoolean H323EndPoint::H46017CreateConnection(const PString & gatekeeper, PBoole
    registrationTimeToLive = PTimeInterval(0, 19);
    m_registeredWithH46017 = h46017->Initialise(&m_transportSecurity, gatekeeper, useSRV);
    if (!m_registeredWithH46017) {
-       PTRACE(4, "H.460.17 Gatekeeper connection failed");
+       PTRACE(4, "EP\tH.460.17 Gatekeeper connection failed");
        m_tryingH46017 = false;
        return false;
    }

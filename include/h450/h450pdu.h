@@ -72,9 +72,11 @@ class H450ServiceAPDU : public X880_ROS
 
     void BuildCallWaiting(int invokeId, int numCallsWaiting);
 
-    void BuildMessageWaitIndicationActivate(int invokeId);
-    void BuildMessageWaitIndicationDeactivate(int invokeId);
-    void BuildMessageWaitIndicationInterrogate(int invokeId);
+    X880_Invoke & BuildMessageWaitIndicationActivate(int invokeId);
+    X880_Invoke & BuildMessageWaitIndicationDeactivate(int invokeId);
+    X880_Invoke & BuildMessageWaitIndicationInterrogate(int invokeId);
+
+    X880_ReturnResult & BuildMessageWaitIndicationResult(int invokeId, int opcode);
     
     void BuildCallIntrusionForcedRelease(int invokeId, int CICL);
     X880_ReturnResult& BuildCallIntrusionForcedReleaseResult(int invokeId);
@@ -681,11 +683,35 @@ class H4507Handler : public H450xHandler
       H450xDispatcher & dispatcher
     );
 
+    virtual void AttachToSetup(
+      H323SignalPDU & pdu
+    );
+
+    virtual void AttachToConnect(
+      H323SignalPDU & pdu
+    );
+
     virtual PBoolean OnReceivedInvoke(
       int opcode,
       int invokeId,                           ///<  InvokeId of operation (used in response)
       int linkedId,                           ///<  InvokeId of associated operation (if any)
       PASN_OctetString * argument             ///<  Parameters for the initiate operation
+    );
+
+    PBoolean OnReceiveMWIActivate(
+      PASN_OctetString * argument ///<  Parameters for the initiate operation
+    );
+ 
+    PBoolean OnReceiveMWIDeactivate(
+      PASN_OctetString * argument ///<  Parameters for the initiate operation
+    );
+
+    PBoolean OnReceiveMWIInterrogate(
+      PASN_OctetString * argument ///<  Parameters for the initiate operation
+    );
+
+    PBoolean OnReceiveMWIInterrogateResult(
+      PASN_OctetString * argument ///<  Parameters for the initiate operation
     );
 
     virtual PBoolean OnReceivedReturnResult(
@@ -704,6 +730,15 @@ class H4507Handler : public H450xHandler
  
     State GetState() const { return mwiState; }
 
+    enum Type {
+      e_mwi_typeNone,
+      e_mwi_activate,
+      e_mwi_deactivate,
+      e_mwi_interrogate,
+    };
+ 
+    Type GetType() const { return mwiType; }
+
     void StartmwiTimer(const PTimeInterval value) { mwiTimer = value; }
 
     void StopmwiTimer();
@@ -715,6 +750,7 @@ class H4507Handler : public H450xHandler
 
   protected:
     State       mwiState;               // Call state of this connection
+    Type        mwiType;                // Type of MWI action
     PTimer      mwiTimer;               // Timer - T1 and T2
 
 };

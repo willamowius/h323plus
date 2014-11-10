@@ -676,6 +676,9 @@ class H323EndPoint : public PObject
     );
 
 #ifdef H323_H450
+
+  /**@name H.450.2 Call Transfer */
+
     /**Setup the transfer of an existing call (connection) to a new remote party
        using H.450.2.  This sends a Call Transfer Setup Invoke message from the
        B-Party (transferred endpoint) to the C-Party (transferred-to endpoint).
@@ -753,6 +756,41 @@ class H323EndPoint : public PObject
       unsigned capabilityLevel,     ///< Capability level
       void * userData = NULL        ///< user data to pass to CreateConnection
     );
+
+  //@}
+
+
+  /**@name H.450.7 MWI */
+
+    /**Received a message wait indication.
+        Override to collect MWI messages.
+        default returns true.
+        return false indicates MWI rejected.
+      */
+    virtual PBoolean OnReceivedMWI(const H323Connection::MWIInformation & mwiInfo);
+
+    /**Received a message wait indication Clear.
+        Override to remove any outstanding MWIs.
+        default returns true.
+        return false indicates MWI rejected.
+      */
+    virtual PBoolean OnReceivedMWIClear(const PString & user);
+
+    /**Received a message wait indication request on a mail server (Interrogate).
+        This is used for enquiring on a mail server if 
+        there are any active messages for the served user.
+         default returns true.
+         return false indicates MWI rejected.
+      */
+    virtual PBoolean OnReceivedMWIRequest(const PString & user);
+
+    /** Get the Msg Centre name for H450.7 MWI service. */
+    const PString & GetMWIMessageCentre()  { return mwiMsgCentre; }
+
+    /** Set the MWI MessageCentre Alias Address (Required when using H323plus as videoMail server for callback) */
+    void SetMWIMessageCentre(const PString & msgCtr)  {  mwiMsgCentre = msgCtr; }
+
+  //@}
 
 #endif // H323_H450
 
@@ -1796,6 +1834,7 @@ class H323EndPoint : public PObject
 
 #ifdef H323_H450
 
+  /**@name H.450.11 Call Intrusion */
     /**Get Call Intrusion Protection Level of the end point.
       */
     unsigned GetCallIntrusionProtectionLevel() const { return callIntrusionProtectionLevel; }
@@ -1809,6 +1848,8 @@ class H323EndPoint : public PObject
     /**Called from H.450 OnReceivedInitiateReturnError
       */
     virtual void OnReceivedInitiateReturnError();
+
+  //@}
 
 #endif // H323_H450
 
@@ -2803,6 +2844,7 @@ class H323EndPoint : public PObject
 
 #ifdef H323_H450
     unsigned    callIntrusionProtectionLevel;
+    PString     mwiMsgCentre;
 #endif // H323_H450
 
     H323Connection::SendUserInputModes defaultSendUserInputMode;

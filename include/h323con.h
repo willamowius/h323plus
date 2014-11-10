@@ -913,6 +913,61 @@ class H323Connection : public PObject
       const unsigned nbOfAddWaitingCalls = 0   ///< number of additional waiting calls at the served user
     );
 
+    enum MWIType {
+      mwiNone,
+      mwiActivate,
+      mwiDeactivate,
+      mwiInterrogate
+    };
+
+    struct MWIInformation {
+        MWIInformation()
+        : mwiCtrId(PString()), mwitype(mwiNone),
+        mwiUser(PString()), mwiCalls(0) {}
+
+        PString mwiCtrId;                          ///< Message Center ID
+        PString mwiUser;                           ///< UserName for MWI service (optional by default is the endpoint alias name)
+        MWIType mwitype;                           ///< Type of MWI Call (activate, deactive, interrogate).
+        int     mwiCalls;                          ///< Number of calls awaiting (used for activate messages)
+        /* To do. Add call detail information */
+    };
+
+    /** Set the MWI Parameters
+        Use this in H323EndPoint::CreateConnection override to set the call to being a non-call supplimentary MWI
+        service with the given parameters
+      */
+    void SetMWINonCallParameters(
+        const MWIInformation & mwiInfo             ///< Message wait indication structure
+    );
+
+    /** Get the MWI Parameters
+        This is called by the H.450.7 Supplimentary service build to include the parameters in the call
+      */
+    const MWIInformation & GetMWINonCallParameters();
+
+    /**Received a message wait indication.
+        Override to collect MWI messages.
+        default calls Endpoint function of same name.
+        return false indicates MWI rejected.
+      */
+    virtual PBoolean OnReceivedMWI(const MWIInformation & mwiInfo);
+
+    /**Received a message wait indication Clear.
+        Override to remove any outstanding MWIs.
+        default calls Endpoint function of same name.
+        return false indicates MWI rejected.
+      */
+    virtual PBoolean OnReceivedMWIClear(const PString & user);
+
+
+    /**Received a message wait indication request on a mail server (Interrogate).
+        This is used for enquiring on a mail server if 
+        there are any active messages for the served user.
+        default calls Endpoint function of same name.
+        return false indicates MWI request rejected.
+      */
+    virtual PBoolean OnReceivedMWIRequest(const PString & user);
+
 #endif // H323_H450
 
     enum AnswerCallResponse {
@@ -3363,6 +3418,9 @@ class H323Connection : public PObject
     /** Call Intrusion flag and parameters */
     PBoolean     isCallIntrusion;
     unsigned callIntrusionProtectionLevel;
+
+    /** MWI parameters */
+    MWIInformation mwiInformation;
 #endif
 
     RTP_SessionManager rtpSessions;

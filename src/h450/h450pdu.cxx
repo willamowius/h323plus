@@ -194,50 +194,45 @@ void H450ServiceAPDU::BuildCallWaiting(int invokeId, int numCallsWaiting)
   invoke.m_argument.EncodeSubType(argument);
 }
 
+////////////////////////////////////////////////////////////////////////////////
 
-void H450ServiceAPDU::BuildMessageWaitIndicationActivate(int invokeId)
+X880_Invoke & H450ServiceAPDU::BuildMessageWaitIndicationActivate(int invokeId)
 {
-  X880_Invoke& invoke = BuildInvoke(invokeId, H4507_H323_MWI_Operations::e_mwiActivate);
-
-  H4507_MWIActivateArg arg;
-
-
-  PTRACE(4, "H4507\tSending supplementary service PDU argument:\n  "
-         << setprecision(2) << arg);
-
+  X880_Invoke & invoke = BuildInvoke(invokeId, H4507_H323_MWI_Operations::e_mwiActivate);
   invoke.IncludeOptionalField(X880_Invoke::e_argument);
-  invoke.m_argument.EncodeSubType(arg);
+
+  return invoke;
 }
 
-void H450ServiceAPDU::BuildMessageWaitIndicationDeactivate(int invokeId)
+X880_Invoke & H450ServiceAPDU::BuildMessageWaitIndicationDeactivate(int invokeId)
 {
-  X880_Invoke& invoke = BuildInvoke(invokeId, H4507_H323_MWI_Operations::e_mwiDeactivate);
-
-  H4507_MWIDeactivateArg arg;
-
-
-  PTRACE(4, "H4507\tSending supplementary service PDU argument:\n  "
-         << setprecision(2) << arg);
-
+  X880_Invoke & invoke = BuildInvoke(invokeId, H4507_H323_MWI_Operations::e_mwiDeactivate);
   invoke.IncludeOptionalField(X880_Invoke::e_argument);
-  invoke.m_argument.EncodeSubType(arg);
+
+  return invoke;
 }
 
-void H450ServiceAPDU::BuildMessageWaitIndicationInterrogate(int invokeId)
+X880_Invoke & H450ServiceAPDU::BuildMessageWaitIndicationInterrogate(int invokeId)
 {
-  X880_Invoke& invoke = BuildInvoke(invokeId, H4507_H323_MWI_Operations::e_mwiInterrogate);
-
-  H4507_MWIInterrogateArg arg;
-
-
-
-  PTRACE(4, "H4507\tSending supplementary service PDU argument:\n  "
-         << setprecision(2) << arg);
-
+  X880_Invoke & invoke = BuildInvoke(invokeId, H4507_H323_MWI_Operations::e_mwiInterrogate);
   invoke.IncludeOptionalField(X880_Invoke::e_argument);
-  invoke.m_argument.EncodeSubType(arg);
+  
+  return invoke;
 }
 
+X880_ReturnResult & H450ServiceAPDU::BuildMessageWaitIndicationResult(int invokeId, int opcode)
+{ 
+  
+  X880_ReturnResult& result = BuildReturnResult(invokeId);
+  result.IncludeOptionalField(X880_ReturnResult::e_result);
+  result.m_result.m_opcode.SetTag(X880_Code::e_local);
+  PASN_Integer& operation = (PASN_Integer&) result.m_result.m_opcode;
+  operation.SetValue(opcode);
+
+  return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
 
 void H450ServiceAPDU::BuildCallIntrusionForcedRelease(int invokeId,
                                                       int CICL)
@@ -1739,6 +1734,74 @@ void H4506Handler::AttachToAlerting(H323SignalPDU & pdu,
 
 /////////////////////////////////////////////////////////////////////////////
 
+// MWI functions
+
+void BuildMWIActivate(H4507_MWIActivateArg & argument, const H323Connection::MWIInformation & mwiInfo)
+{
+    H4501_ArrayOf_AliasAddress & user = argument.m_servedUserNr.m_destinationAddress; 
+    user.SetSize(1);
+    H323SetAliasAddress(mwiInfo.mwiUser,user[0]);
+
+    argument.m_basicService = H4507_BasicService::e_unrestrictedDigitalInformation;
+
+    if (!mwiInfo.mwiCtrId) {
+        argument.IncludeOptionalField(H4507_MWIActivateArg::e_msgCentreId);
+        argument.m_msgCentreId.SetTag(H4507_MsgCentreId::e_partyNumber);
+        H225_AliasAddress & msgId = (H225_AliasAddress &)argument.m_msgCentreId;
+        H323SetAliasAddress(mwiInfo.mwiCtrId, msgId);
+    }
+
+    if (mwiInfo.mwiCalls > 0) {
+        argument.IncludeOptionalField(H4507_MWIActivateArg::e_nbOfMessages);
+        argument.m_nbOfMessages = mwiInfo.mwiCalls;
+    }
+
+    // TODO Add message details here.
+}
+ 
+void BuildMWIDeactivate(H4507_MWIDeactivateArg & argument, const H323Connection::MWIInformation & mwiInfo)
+{
+    H4501_ArrayOf_AliasAddress & user = argument.m_servedUserNr.m_destinationAddress; 
+    user.SetSize(1);
+    H323SetAliasAddress(mwiInfo.mwiUser,user[0]);
+
+    argument.m_basicService = H4507_BasicService::e_unrestrictedDigitalInformation;
+}
+
+void BuildMWIInterrogate(H4507_MWIInterrogateArg & argument, const H323Connection::MWIInformation & mwiInfo)
+{
+    H4501_ArrayOf_AliasAddress & user = argument.m_servedUserNr.m_destinationAddress; 
+    user.SetSize(1);
+    H323SetAliasAddress(mwiInfo.mwiUser,user[0]);
+
+    argument.m_basicService = H4507_BasicService::e_unrestrictedDigitalInformation;
+}
+
+
+void BuildMWIInterrogateResult(H4507_MWIInterrogateRes & response, const H323Connection::MWIInformation & mwiInfo)
+{
+    response.SetSize(1);
+    H4507_MWIInterrogateResElt & argument = response[0];
+    argument.m_basicService = H4507_BasicService::e_unrestrictedDigitalInformation;
+
+    if (!mwiInfo.mwiCtrId) {
+        argument.IncludeOptionalField(H4507_MWIInterrogateResElt::e_msgCentreId);
+        argument.m_msgCentreId.SetTag(H4507_MsgCentreId::e_partyNumber);
+        H225_AliasAddress & msgId = (H225_AliasAddress &)argument.m_msgCentreId;
+        H323SetAliasAddress(mwiInfo.mwiCtrId, msgId);
+    }
+
+    if (mwiInfo.mwiCalls > 0) {
+        argument.IncludeOptionalField(H4507_MWIInterrogateResElt::e_nbOfMessages);
+        argument.m_nbOfMessages = mwiInfo.mwiCalls;
+    }
+
+    // TODO Add message details here.
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
 H4507Handler::H4507Handler(H323Connection & conn, H450xDispatcher & disp)
   : H450xHandler(conn, disp)
 {
@@ -1747,11 +1810,106 @@ H4507Handler::H4507Handler(H323Connection & conn, H450xDispatcher & disp)
   dispatcher.AddOpCode(H4507_H323_MWI_Operations::e_mwiDeactivate, this);
   dispatcher.AddOpCode(H4507_H323_MWI_Operations::e_mwiInterrogate, this);
 
-  mwiState = e_mwi_Idle;
+  mwiState = e_mwi_Idle;  // default value;
+  mwiType  = e_mwi_typeNone;  // default value;
   mwiTimer.SetNotifier(PCREATE_NOTIFIER(OnMWITimeOut));
 
 }
 
+void H4507Handler::AttachToSetup(H323SignalPDU & pdu)
+{
+  // Is a non call Supplimentary Service
+  if (!connection.IsNonCallConnection())
+      return;
+
+ // Do we need to attach a MWI APDU?
+  H323Connection::MWIInformation mwiInfo;
+  mwiInfo = connection.GetMWINonCallParameters();
+
+  mwiType  = (Type)mwiInfo.mwitype;
+  if (mwiType == e_mwi_typeNone)
+     return;
+
+  H450ServiceAPDU serviceAPDU;
+
+  // Store the outstanding invokeID associated with this connection
+  currentInvokeId = dispatcher.GetNextInvokeId();
+
+  switch (mwiType) {
+      case e_mwi_activate: 
+        {
+            X880_Invoke & invoke = serviceAPDU.BuildMessageWaitIndicationActivate(currentInvokeId);
+            H4507_MWIActivateArg arg;
+            BuildMWIActivate(arg, mwiInfo);
+            PTRACE(6,"H4507\tActivate Invoke\n" << arg);
+            invoke.m_argument.EncodeSubType(arg);
+        }
+        break;
+      case e_mwi_deactivate:
+        {
+            X880_Invoke & invoke = serviceAPDU.BuildMessageWaitIndicationDeactivate(currentInvokeId);
+            H4507_MWIDeactivateArg arg;
+            BuildMWIDeactivate(arg, mwiInfo);
+            PTRACE(6,"H4507\tDectivate Invoke\n" << arg);
+            invoke.m_argument.EncodeSubType(arg);
+        }
+        break;
+      case e_mwi_interrogate:
+        {
+            X880_Invoke & invoke = serviceAPDU.BuildMessageWaitIndicationInterrogate(currentInvokeId);
+            H4507_MWIInterrogateArg arg;
+            BuildMWIInterrogate(arg, mwiInfo);
+            PTRACE(6,"H4507\tInterrogate Invoke\n" << arg);
+            invoke.m_argument.EncodeSubType(arg);
+        }
+        break;
+  }
+  serviceAPDU.AttachSupplementaryServiceAPDU(pdu);
+
+  mwiState = e_mwi_Wait;
+}
+
+void H4507Handler::AttachToConnect(H323SignalPDU & pdu)
+{
+  // Is a non call Supplimentary Service
+  if (!connection.IsNonCallConnection())
+      return;
+
+ // Do we need to attach a MWI APDU?
+  if (mwiState != e_mwi_Wait)
+     return;
+
+  H450ServiceAPDU serviceAPDU;
+  PPER_Stream resultStream;
+
+  H323Connection::MWIInformation mwiInfo;
+  mwiInfo = connection.GetMWINonCallParameters();
+
+  switch (mwiType) {
+      case e_mwi_activate: 
+          serviceAPDU.BuildMessageWaitIndicationResult(currentInvokeId, H4507_H323_MWI_Operations::e_mwiActivate);
+        break;
+      case e_mwi_deactivate:
+          serviceAPDU.BuildMessageWaitIndicationResult(currentInvokeId, H4507_H323_MWI_Operations::e_mwiDeactivate);
+        break;
+      case e_mwi_interrogate:
+        {
+            X880_ReturnResult & result = serviceAPDU.BuildMessageWaitIndicationResult(currentInvokeId, H4507_H323_MWI_Operations::e_mwiInterrogate);
+            H4507_MWIInterrogateRes mwiIntRes;
+            BuildMWIInterrogateResult(mwiIntRes, mwiInfo);
+            PTRACE(6,"H4507\tInterrogate result\n" << mwiIntRes);
+            mwiIntRes.Encode(resultStream);
+            resultStream.CompleteEncoding();
+            result.m_result.m_result.SetValue(resultStream);
+        }
+        break;
+  }
+
+  serviceAPDU.AttachSupplementaryServiceAPDU(pdu);
+
+  mwiState = e_mwi_Idle;
+  mwiTimer.Stop();
+}
 
 PBoolean H4507Handler::OnReceivedInvoke(int opcode,
                                     int invokeId,
@@ -1760,53 +1918,176 @@ PBoolean H4507Handler::OnReceivedInvoke(int opcode,
 {
   currentInvokeId = invokeId;
 
+  PBoolean success = false;
   switch (opcode) {
     case H4507_H323_MWI_Operations::e_mwiActivate:
- 
+      success = OnReceiveMWIActivate(argument);
       break;
 
     case H4507_H323_MWI_Operations::e_mwiDeactivate:
- 
+      success = OnReceiveMWIDeactivate(argument);
       break;
 
     case H4507_H323_MWI_Operations::e_mwiInterrogate:
- 
+      success = OnReceiveMWIInterrogate(argument);
       break;
 
     default:
       currentInvokeId = 0;
-      return FALSE;
+      return false;
   }
 
-  return TRUE;
+  if (!success)
+      SendReturnError(H4507_MessageWaitingIndicationErrors::e_undefined);
+
+  return true;
 }
 
 PBoolean H4507Handler::OnReceivedReturnResult(X880_ReturnResult & returnResult)
 {
-  PTRACE(4, "H4507\tReceived Return Result");
-  if (currentInvokeId == returnResult.m_invokeId.GetValue()) {
-    switch (mwiState) {
-        case e_mwi_Wait:
-        case e_mwi_Idle:
-        default:
+    if (mwiState != e_mwi_Wait) {
+        PTRACE(4, "H4507\tERROR Received Return Result when not waiting on one.");
+        return false;
+    }
+
+    if (currentInvokeId != returnResult.m_invokeId.GetValue()) {
+        PTRACE(4, "H4507\tERROR Received Return Result for " << returnResult.m_invokeId.GetValue() 
+          << " when waiting on " << currentInvokeId);
+        return false;
+    }
+
+    if (!returnResult.HasOptionalField(X880_ReturnResult::e_result) ||
+        returnResult.m_result.m_opcode.GetTag() != X880_Code::e_local) {
+        PTRACE(4, "H4507\tERROR Received Return Result not processed.");
+        return false;
+    }
+
+    PASN_Integer & operation = (PASN_Integer&)returnResult.m_result.m_opcode;
+    int opcode = operation.GetValue();
+
+    if (opcode != mwiType) {
+        PTRACE(4, "H4507\tERROR Received Return Result wrong message. Wanted " << mwiType << " got " << opcode);
+        return false;
+    }
+
+    switch (opcode) {
+        case H4507_H323_MWI_Operations::e_mwiActivate:
+            break;
+
+        case H4507_H323_MWI_Operations::e_mwiDeactivate:
+            break;
+
+        case H4507_H323_MWI_Operations::e_mwiInterrogate:
+            if (!OnReceiveMWIInterrogateResult(&returnResult.m_result.m_result)) {
+                PTRACE(4, "H4507\tERROR Interrogate Response Rejected");
+                return false;
+            }
             break;
     }
     currentInvokeId = 0;
-    return TRUE;
-  }
+    mwiState = e_mwi_Idle;
+    mwiTimer.Stop();
+    return true;
 
-  return FALSE;
 }
 
-PBoolean H4507Handler::OnReceivedReturnError(int /*errorCode*/, X880_ReturnError &/*returnError*/)
+
+PBoolean H4507Handler::OnReceiveMWIActivate(PASN_OctetString * argument)
 {
-    return false;
+    H4507_MWIActivateArg mwiArg;
+    if (!DecodeArguments(argument, mwiArg, -1))
+        return false;
+
+    H323Connection::MWIInformation mwiInfo;
+
+    H4501_ArrayOf_AliasAddress & user = mwiArg.m_servedUserNr.m_destinationAddress; 
+    if (user.GetSize() > 0)
+        mwiInfo.mwiUser = H323GetAliasAddressString(user[0]);
+
+    PString msgCtr = PString();
+    if (mwiArg.HasOptionalField(H4507_MWIActivateArg::e_msgCentreId) && 
+        mwiArg.m_msgCentreId.GetTag() == H4507_MsgCentreId::e_partyNumber) {
+            H225_AliasAddress & msgId = (H225_AliasAddress &)mwiArg.m_msgCentreId;
+            mwiInfo.mwiCtrId = H323GetAliasAddressString(msgId);
+    }
+
+    if (mwiArg.HasOptionalField(H4507_MWIActivateArg::e_nbOfMessages))
+        mwiInfo.mwiCalls = mwiArg.m_nbOfMessages;
+
+    return connection.OnReceivedMWI(mwiInfo);
+}
+ 
+PBoolean H4507Handler::OnReceiveMWIDeactivate(PASN_OctetString * argument)
+{
+    H4507_MWIDeactivateArg mwiArg;
+    if (!DecodeArguments(argument, mwiArg, -1))
+        return false;
+
+    PString servedUser = PString();
+    H4501_ArrayOf_AliasAddress & user = mwiArg.m_servedUserNr.m_destinationAddress; 
+    if (user.GetSize() > 0)
+        servedUser = H323GetAliasAddressString(user[0]);
+
+    return connection.OnReceivedMWIClear(servedUser);
+}
+
+PBoolean H4507Handler::OnReceiveMWIInterrogate(PASN_OctetString * argument)
+{
+    H4507_MWIInterrogateArg mwiArg;
+    if (!DecodeArguments(argument, mwiArg, -1))
+        return false;
+
+    PString servedUser = PString();
+    H4501_ArrayOf_AliasAddress & user = mwiArg.m_servedUserNr.m_destinationAddress; 
+    if (user.GetSize() > 0)
+        servedUser = H323GetAliasAddressString(user[0]);
+
+    return connection.OnReceivedMWIRequest(servedUser);
+}
+
+PBoolean H4507Handler::OnReceiveMWIInterrogateResult( PASN_OctetString * argument)
+{
+    H4507_MWIInterrogateRes response;
+
+    PPER_Stream resultStream(*argument);
+    if (!response.Decode(resultStream))
+        return false;
+
+    if (response.GetSize() == 0)
+        return false;
+
+    PTRACE(6,"H4507\tInterrogate result\n" << response); 
+
+    H323Connection::MWIInformation mwiInfo;
+
+    const H4507_MWIInterrogateResElt & mwiArg = response[0];
+    if (mwiArg.HasOptionalField(H4507_MWIInterrogateResElt::e_msgCentreId) && 
+        mwiArg.m_msgCentreId.GetTag() == H4507_MsgCentreId::e_partyNumber) {
+            H225_AliasAddress & msgId = (H225_AliasAddress &)mwiArg.m_msgCentreId;
+            mwiInfo.mwiCtrId = H323GetAliasAddressString(msgId);
+    }
+
+    if (mwiArg.HasOptionalField(H4507_MWIInterrogateResElt::e_nbOfMessages))
+        mwiInfo.mwiCalls = mwiArg.m_nbOfMessages;
+
+    return connection.OnReceivedMWI(mwiInfo);
+}
+
+
+PBoolean H4507Handler::OnReceivedReturnError(int errorCode, X880_ReturnError &/*returnError*/)
+{
+    PTRACE(4, "H4507\tERROR Code " << errorCode << " response received.");
+    mwiState = e_mwi_Idle;
+    mwiTimer.Stop();
+    return true;
 }
 
 void H4507Handler::OnMWITimeOut(PTimer &,  H323_INT)
 {
   switch (mwiState) {
         case e_mwi_Wait:
+            connection.ClearCall();
+            break;
         case e_mwi_Idle:
         default:
             break;

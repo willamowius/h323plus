@@ -440,6 +440,9 @@ H323Connection::H323Connection(H323EndPoint & ep,
   isConsultationTransfer = FALSE;
   isCallIntrusion = FALSE;
   callIntrusionProtectionLevel = endpoint.GetCallIntrusionProtectionLevel();
+
+  mwiInformation.mwiCtrId = ep.GetMWIMessageCentre();
+  mwiInformation.mwiUser = ep.GetLocalUserName();
 #endif
 
   switch (options&H245TunnelingOptionMask) {
@@ -4022,6 +4025,34 @@ void H323Connection::SetIntrusionNotAuthorized()
 void H323Connection::SendCallWaitingIndication(const unsigned nbOfAddWaitingCalls)
 {
   h4506handler->AttachToAlerting(*alertingPDU, nbOfAddWaitingCalls);
+}
+
+void H323Connection::SetMWINonCallParameters(const H323Connection::MWIInformation & mwiInfo)
+{
+    SetNonCallConnection();
+
+    // Replace the default information
+    mwiInformation = mwiInfo;
+}
+
+const H323Connection::MWIInformation & H323Connection::GetMWINonCallParameters()
+{
+    return mwiInformation;
+}
+
+PBoolean H323Connection::OnReceivedMWI(const MWIInformation & mwiInfo)
+{
+    return endpoint.OnReceivedMWI(mwiInfo);
+}
+
+PBoolean H323Connection::OnReceivedMWIClear(const PString & user)
+{
+    return endpoint.OnReceivedMWIClear(user);
+}
+
+PBoolean H323Connection::OnReceivedMWIRequest(const PString & user)
+{
+    return endpoint.OnReceivedMWIRequest(user);
 }
 
 #endif // H323_H450
