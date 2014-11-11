@@ -2452,7 +2452,7 @@ PBoolean H323EndPoint::OnReceivedMWIClear(const PString & user)
    return true;
 }
 
-PBoolean H323EndPoint::OnReceivedMWIRequest(const PString & user)
+PBoolean H323EndPoint::OnReceivedMWIRequest(H323Connection * /*connection*/, const PString & user)
 {
    PTRACE(2,"EP\tReceived MWI Request for " << user);
 

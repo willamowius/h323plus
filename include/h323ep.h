@@ -779,10 +779,16 @@ class H323EndPoint : public PObject
     /**Received a message wait indication request on a mail server (Interrogate).
         This is used for enquiring on a mail server if 
         there are any active messages for the served user.
-         default returns true.
-         return false indicates MWI rejected.
+        An implementer may populate a H323Connection::MWInformation struct and call
+        H323Connection::SetMWINonCallParameters to set the interrogate reply
+        default returns true. if SetMWINonCallParameters called the connect message 
+        will contain a reply msg to the caller.
+        return false indicates MWI rejected.
       */
-    virtual PBoolean OnReceivedMWIRequest(const PString & user);
+    virtual PBoolean OnReceivedMWIRequest(
+        H323Connection * connection,   ///< Connection the request came in on
+        const PString & user           ///< User request made for
+    );
 
     /** Get the Msg Centre name for H450.7 MWI service. */
     const PString & GetMWIMessageCentre()  { return mwiMsgCentre; }

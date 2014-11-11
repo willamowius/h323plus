@@ -4052,7 +4052,7 @@ PBoolean H323Connection::OnReceivedMWIClear(const PString & user)
 
 PBoolean H323Connection::OnReceivedMWIRequest(const PString & user)
 {
-    return endpoint.OnReceivedMWIRequest(user);
+    return endpoint.OnReceivedMWIRequest(this, user);
 }
 
 #endif // H323_H450
