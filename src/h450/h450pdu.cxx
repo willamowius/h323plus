@@ -1836,6 +1836,9 @@ void H4507Handler::AttachToSetup(H323SignalPDU & pdu)
   currentInvokeId = dispatcher.GetNextInvokeId();
 
   switch (mwiType) {
+      case e_mwi_typeNone: 
+		// ignore
+        break;
       case e_mwi_activate: 
         {
             X880_Invoke & invoke = serviceAPDU.BuildMessageWaitIndicationActivate(currentInvokeId);
@@ -1886,6 +1889,8 @@ void H4507Handler::AttachToConnect(H323SignalPDU & pdu)
   mwiInfo = connection.GetMWINonCallParameters();
 
   switch (mwiType) {
+      case e_mwi_typeNone: 
+		// ignore
       case e_mwi_activate: 
           serviceAPDU.BuildMessageWaitIndicationResult(currentInvokeId, H4507_H323_MWI_Operations::e_mwiActivate);
         break;
