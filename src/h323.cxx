@@ -388,7 +388,6 @@ PBYTEArray strm;
 const char * H46018OID = "0.0.8.460.18.0.1";
 const char * H46019OID = "0.0.8.460.19.0.1";
 const unsigned defH46019payload = 127;
-const unsigned defH46019TTL = 20;
 #endif
 
 #ifdef H323_H46024A
@@ -5544,7 +5543,7 @@ RTP_Session * H323Connection::UseSession(unsigned sessionID,
   }
 
   // We must have a valid sessionID  H.239 sometimes negotiates 0
-  if (sessionID < 0 || sessionID > 255) 
+  if (sessionID > 255) 
       return NULL;
 
   const H245_UnicastAddress & uaddr = taddr;
