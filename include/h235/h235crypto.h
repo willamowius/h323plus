@@ -115,8 +115,6 @@ protected:
     PBoolean m_initialised;
 
     unsigned char m_iv[EVP_MAX_IV_LENGTH];
-    int m_inSize;
-    int m_outSize;
 
     int m_enc_blockSize;
     int m_enc_ivLength;
