@@ -53,6 +53,10 @@
 #include <ptclib/random.h>
 #include <ptclib/cypher.h>
 
+#define H46019_KEEPALIVE_TIME       19   // Sec between keepalive messages
+#define H46019_KEEPALIVE_COUNT      3    // Number of probes per message
+#define H46019_KEEPALIVE_INTERVAL   100  // ms between each probe
+
 #define H46024A_MAX_PROBE_COUNT  15
 #define H46024A_PROBE_INTERVAL  200
 
@@ -98,7 +102,7 @@ H46018TransportThread::H46018TransportThread(H323EndPoint & ep, H46018Transport 
 {  
 
     isConnected = false;
-    m_keepAliveInterval = 19;
+    m_keepAliveInterval = H46019_KEEPALIVE_TIME;
 
     // Start the Thread
     Resume();
@@ -1171,7 +1175,12 @@ void H46019UDPSocket::InitialiseKeepAlive()
 
 void H46019UDPSocket::Ping(PTimer &,  H323_INT)
 { 
-    rtpSocket ? SendRTPPing(keepip,keepport) : SendRTCPPing();
+    PINDEX i=0;
+    while (i<H46019_KEEPALIVE_COUNT && Keep.IsRunning()) {
+        if (i>0) PThread::Sleep(H46019_KEEPALIVE_INTERVAL);
+        rtpSocket ? SendRTPPing(keepip,keepport) : SendRTCPPing();
+        i++;
+    }
 }
 
 void H46019UDPSocket::SendRTPPing(const PIPSocket::Address & ip, const WORD & port, unsigned id) {
