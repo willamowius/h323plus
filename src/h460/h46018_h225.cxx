@@ -1068,7 +1068,7 @@ PBoolean H46019MultiplexSocket::Close()
 H46019UDPSocket::H46019UDPSocket(H46018Handler & _handler, H323Connection::SessionInformation * info, bool _rtpSocket)
 : m_Handler(_handler), m_Session(info->GetSessionID()), m_Token(info->GetCallToken()),
   m_CallId(info->GetCallIdentifer()), m_CUI(info->GetCUI()),
-  keepport(0), keeppayload(0), keepTTL(0), keepseqno(0), keepStartTime(NULL),
+  keepport(0), keeppayload(0), keepTTL(0), keepseqno(0), keepStartTime(NULL), initialKeep(NULL),
 #ifdef H323_H46019M
   m_recvMultiplexID(info->GetRecvMultiplexID()), m_sendMultiplexID(0), m_multiBuffer(0), m_shutDown(false),
 #endif
@@ -1162,10 +1162,13 @@ void H46019UDPSocket::InitialiseKeepAlive()
         PTRACE(4,"H46019UDP\tStart " << (rtpSocket ? "RTP" : "RTCP") << " pinging " 
                         << keepip << ":" << keepport << " every " << keepTTL << " secs.");
 
-        rtpSocket ? SendRTPPing(keepip,keepport) : SendRTCPPing();
-
         Keep.SetNotifier(PCREATE_NOTIFIER(Ping));
-        Keep.RunContinuous(keepTTL * 1000); 
+        Keep.RunContinuous(keepTTL * 1000);   // This will fire at keepTTL sec time.
+
+        //  To start before keepTTL interval do a number of special probes to ensure the gatekeeper
+        //  is reached to allow media to flow properly.
+        initialKeep = PThread::Create(PCREATE_NOTIFIER(StartKeepAlives), 0, PThread::AutoDeleteThread); 
+
     } else {
         PTRACE(2,"H46019UDP\t"  << (rtpSocket ? "RTP" : "RTCP") << " PING NOT Ready " 
                         << keepip << ":" << keepport << " - " << keepTTL << " secs.");
@@ -1173,14 +1176,21 @@ void H46019UDPSocket::InitialiseKeepAlive()
     }
 }
 
-void H46019UDPSocket::Ping(PTimer &,  H323_INT)
+void H46019UDPSocket::StartKeepAlives(PThread &,  H323_INT)
 { 
+    // Send a number of keep alive probes to ensure at least one reaches the gatekeeper.
+    // This thread MUST terminate prior to Ping timer firing at keepTTL (default 19 sec).
     PINDEX i=0;
     while (i<H46019_KEEPALIVE_COUNT && Keep.IsRunning()) {
         if (i>0) PThread::Sleep(H46019_KEEPALIVE_INTERVAL);
         rtpSocket ? SendRTPPing(keepip,keepport) : SendRTCPPing();
         i++;
     }
+}
+
+void H46019UDPSocket::Ping(PTimer &,  H323_INT)
+{ 
+    rtpSocket ? SendRTPPing(keepip,keepport) : SendRTCPPing();
 }
 
 void H46019UDPSocket::SendRTPPing(const PIPSocket::Address & ip, const WORD & port, unsigned id) {

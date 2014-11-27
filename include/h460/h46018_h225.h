@@ -748,6 +748,9 @@ private:
     WORD keepseqno;                            ///< KeepAlive sequence number
     PTime * keepStartTime;                    ///< KeepAlive start time for TimeStamp.
 
+    PThread * initialKeep;                    ///< Initial keepalive thread.
+    PDECLARE_NOTIFIER(PThread, H46019UDPSocket, StartKeepAlives); ///< First keep alives handling
+
     PDECLARE_NOTIFIER(PTimer, H46019UDPSocket, Ping);    ///< Timer to notify to poll for External IP
     PTimer    Keep;                                        ///< Polling Timer
 
