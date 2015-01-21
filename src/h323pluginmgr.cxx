@@ -2641,6 +2641,12 @@ PMutex & H323PluginCodecManager::GetMediaFormatMutex()
 H323PluginCodecManager::H323PluginCodecManager(PPluginManager * _pluginMgr)
  : PPluginModuleManager(PLUGIN_CODEC_GET_CODEC_FN_STR, _pluginMgr)
 {
+  // this code runs before the application is able to set the trace level
+  char * debug_level = getenv ("PTLIB_TRACE_CODECS");
+  if (debug_level != NULL) {
+    PTrace::SetLevel(atoi(debug_level));
+  }
+
   // instantiate all of the media formats
   {
     OpalMediaFormatFactory::KeyList_T keyList = OpalMediaFormatFactory::GetKeyList();
