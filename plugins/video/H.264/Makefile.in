@@ -20,6 +20,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.8  2012/04/04 15:00:59  shorne
+# fix for missing endif
+#
 # Revision 1.7  2012/04/03 18:14:44  shorne
 # Static codec loading. Added VGA definition(disabled) Added EmphasisSpeed Added changing NAL Size
 #
@@ -102,7 +105,7 @@ GPLDIR      = ./gpl
 PLUGINDIR	= ../../
 OBJDIR	= ./obj
 WIN32=@WIN32@
-STATICBUILD=no
+STATICBUILD=@X264_LINK_STATIC@
 SUBDIRS		+= gpl
 
 BASENAME=h264
