@@ -48,7 +48,8 @@ X264Library X264Lib;
 #endif
 
 static void logCallbackX264 (void * /*priv*/, int level, const char *fmt, va_list arg) {
-  char buffer[512];
+  const unsigned BUFSIZE = 2048;
+  char buffer[BUFSIZE];
   int severity = 0;
   switch (level) {
     case X264_LOG_NONE:    severity = 1; break;
@@ -59,7 +60,7 @@ static void logCallbackX264 (void * /*priv*/, int level, const char *fmt, va_lis
     default:               severity = 4; break;
   }
   sprintf(buffer, "H264\tx264\t"); 
-  vsprintf(buffer + strlen (buffer), fmt, arg);
+  vsnprintf(buffer + strlen(buffer), BUFSIZE - strlen(buffer), fmt, arg);
   if (strlen(buffer) > 0)
     buffer[strlen(buffer)-1] = 0;
   if (severity == 4)
@@ -72,9 +73,7 @@ X264EncoderContext::X264EncoderContext()
 : _codec(NULL), _txH264Frame(NULL), _PFramesSinceLastIFrame(0),
   _IFrameInterval(0), _frameCounter(0), _fastUpdateRequested(false)
 {
-#ifndef X264_LINK_STATIC
     Initialise();
-#endif
 }
 
 X264EncoderContext::~X264EncoderContext()
