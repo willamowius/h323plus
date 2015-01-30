@@ -770,6 +770,33 @@ H235AuthenticatorInfo::H235AuthenticatorInfo(PSSLCertificate * cert)
 }
 ///////////////////////////////////////////////////////////////////////////////
 
+H235AuthenticatorTime::H235AuthenticatorTime()
+: m_localTimeStart(time(NULL)), m_localStartTick(clock()), m_adjustedTime(0)
+{
+}
+
+
+PUInt32b H235AuthenticatorTime::GetLocalTime()
+{
+    clock_t localNowTick = clock();
+    PUInt32b timeFromStart = (m_localStartTick - localNowTick) / CLOCKS_PER_SEC;
+
+    return m_localTimeStart + timeFromStart;
+}
+
+
+PUInt32b H235AuthenticatorTime::GetTime()
+{
+    return GetLocalTime() + m_adjustedTime;
+}
+
+void H235AuthenticatorTime::SetAdjustedTime(time_t remoteTime)
+{
+    m_adjustedTime = remoteTime - GetLocalTime();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 #if PTLIB_VER >= 2110
 #ifdef H323_SSL
 H235SECURITY(MD5);
@@ -1219,5 +1246,131 @@ PBoolean H235AuthCAT::IsSecuredPDU(unsigned rasPDU, PBoolean received) const
 #if PTLIB_VER < 2110 && defined(H323_SSL)
 static PFactory<H235Authenticator>::Worker<H2351_Authenticator> factoryH2351_Authenticator("H2351_Authenticator");
 #endif
+
+/////////////////////////////////////////////////////////////////////////////
+
+#if PTLIB_VER >= 2110
+#ifdef H323_SSL
+H235SECURITY(TSS);
+#endif
+#else
+static PFactory<H235Authenticator>::Worker<H235AuthenticatorTSS> factoryH235AuthTSS("TimeSync");
+#endif
+
+static const char OID_TSS[] = "0.0.8.235.0.4.79";
+
+H235AuthenticatorTSS::H235AuthenticatorTSS()
+{
+    usage = GKAdmission;         /// To be used for GKAdmission
+}
+
+
+PObject * H235AuthenticatorTSS::Clone() const
+{
+  return new H235AuthenticatorTSS(*this);
+}
+
+
+const char * H235AuthenticatorTSS::GetName() const
+{
+  return "TimeSync";
+}
+
+PStringArray H235AuthenticatorTSS::GetAuthenticatorNames()
+{
+    return PStringArray("TimeSync");
+}
+
+
+#if PTLIB_VER >= 2110
+PBoolean H235AuthenticatorTSS::GetAuthenticationCapabilities(H235Authenticator::Capabilities * ids)
+{
+      H235Authenticator::Capability cap;
+        cap.m_identifier = OID_TSS;
+        cap.m_cipher     = "TSS";
+        cap.m_description= "TimeSync";
+       ids->capabilityList.push_back(cap);
+    
+    return true;
+}
+#endif
+
+
+H235_ClearToken * H235AuthenticatorTSS::CreateClearToken()
+{
+  if (!IsActive())
+    return NULL;
+
+  H235_ClearToken * clearToken = new H235_ClearToken;
+
+  // Insert time stamp
+  clearToken->m_tokenOID = OID_TSS;
+  clearToken->IncludeOptionalField(H235_ClearToken::e_timeStamp);
+  clearToken->m_timeStamp = (int)time(NULL);
+
+  return clearToken;
+}
+
+
+H235Authenticator::ValidationResult
+        H235AuthenticatorTSS::ValidateClearToken(const H235_ClearToken & clearToken)
+{
+    if (!IsActive())
+        return e_Disabled;
+
+    if (clearToken.m_tokenOID != OID_TSS)
+        return e_Absent;
+
+    if (!clearToken.HasOptionalField(H235_ClearToken::e_timeStamp))
+        return e_InvalidTime;
+
+    
+    PUInt32b timeStamp = (DWORD)clearToken.m_timeStamp;
+
+    // Todo: Store it away.
+
+    return e_OK;
+}
+
+
+PBoolean H235AuthenticatorTSS::IsCapability(const H235_AuthenticationMechanism & mechanism,
+                                     const PASN_ObjectId & /*algorithmOID*/)
+{
+    const H235_AuthenticationMechanism & mech = mechanism;
+    if (mechanism.GetTag() != H235_AuthenticationMechanism::e_keyExch)
+        return FALSE;
+
+    const PASN_ObjectId & oid = mech;
+
+    return (oid == OID_TSS);
+}
+
+
+PBoolean H235AuthenticatorTSS::SetCapability(H225_ArrayOf_AuthenticationMechanism & mechanisms,
+                                H225_ArrayOf_PASN_ObjectId & /*algorithmOIDs*/)
+{
+    int sz = mechanisms.GetSize();
+    mechanisms.SetSize(sz+1);
+    H235_AuthenticationMechanism & mech = mechanisms[sz];
+    mech.SetTag(H235_AuthenticationMechanism::e_keyExch);
+    PASN_ObjectId & oid = mech;
+    oid = OID_TSS;
+    return TRUE;
+}
+
+
+PBoolean H235AuthenticatorTSS::IsSecuredPDU(unsigned rasPDU, PBoolean /*received*/) const
+{
+    switch (rasPDU) {
+        case H225_RasMessage::e_gatekeeperConfirm :
+        case H225_RasMessage::e_gatekeeperReject :
+            return TRUE;
+        default :
+            return FALSE;
+    }
+}
+
+
+
 
 /////////////////////////////////////////////////////////////////////////////

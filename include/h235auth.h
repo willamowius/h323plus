@@ -333,6 +333,35 @@ H323_DECLARELIST(H235AuthenticatorList, H235AuthenticatorInfo)
 /** Dictionary of Addresses and Associated Security Info  */
 H323DICTIONARY(H235AuthenticatorDict,PString,H235AuthenticatorInfo);
 
+
+/* This class is a device independent Time class that is used with H.235 Authentication mechanisms
+   It replaces the local time function to support remote gatekeeper synchronisation and ensures security
+   is not effected if the user changes the local device time while the device is running. */
+
+class H235AuthenticatorTime : public PObject
+{
+    PCLASSINFO(H235AuthenticatorTime, PObject);
+
+  public:
+    H235AuthenticatorTime();
+
+    /* GetLocalTime : Returns the local calculated time */
+    PUInt32b GetLocalTime();
+
+    /* GetTime : Returns the calculated synchronised time */
+    PUInt32b GetTime();
+
+    /* GetTime : Adjust the time to synchronise with remote time */
+    void SetAdjustedTime(time_t remoteTime);
+
+  protected:
+    time_t      m_localTimeStart;   ///< Local time at class instance.
+    clock_t     m_localStartTick;   ///< Local Tick count at class instance.
+    PInt64      m_adjustedTime;     ///< Adjusted time for remote synchronisation.
+
+};
+
+
 /** This class embodies a simple MD5 based authentication.
     The users password is concatenated with the 4 byte timestamp and 4 byte
     random fields and an MD5 generated and sent/verified
@@ -441,7 +470,55 @@ typedef H235AuthCAT H235AuthenticatorCAT;
 #endif
 #endif
 
+//////////////////////////////////////////////////////////////////////////////
 
+/** This class is used for Time Stamp Synchronisation between the gatekeeper
+    and the endpoint
+*/
+class H235AuthenticatorTSS : public H235Authenticator
+{
+    PCLASSINFO(H235AuthenticatorTSS, H235Authenticator);
+  public:
+    H235AuthenticatorTSS();
+
+    PObject * Clone() const;
+
+    virtual const char * GetName() const;
+
+    static PStringArray GetAuthenticatorNames();
+#if PTLIB_VER >= 2110
+    static PBoolean GetAuthenticationCapabilities(Capabilities * ids);
+#endif
+
+    virtual H235_ClearToken * CreateClearToken();
+
+    virtual ValidationResult ValidateClearToken(
+      const H235_ClearToken & clearToken
+    );
+
+    virtual PBoolean IsCapability(
+      const H235_AuthenticationMechanism & mechansim,
+      const PASN_ObjectId & algorithmOID
+    );
+
+    virtual PBoolean SetCapability(
+      H225_ArrayOf_AuthenticationMechanism & mechansim,
+      H225_ArrayOf_PASN_ObjectId & algorithmOIDs
+    );
+
+    virtual PBoolean IsSecuredPDU(
+      unsigned rasPDU,
+      PBoolean received
+    ) const;
+};
+
+#if PTLIB_VER >= 2110 && defined(P_SSL)
+#ifndef _WIN32_WCE
+  PPLUGIN_STATIC_LOAD(TSS,H235Authenticator);
+#endif
+#endif
+
+//////////////////////////////////////////////////////////////////////////////
 #if H323_SSL
 
 /** This class embodies the H.235 "base line" from H235.1.
