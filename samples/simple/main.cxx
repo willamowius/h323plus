@@ -360,11 +360,15 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
     }
   }
 
+#if PTLIB_VER >= 2110
   unsigned ipVer = 4;
+#endif
 #ifdef P_HAS_IPV6
   if (args.HasOption("ipv6") && PIPSocket::IsIpAddressFamilyV6Supported()) {
     PIPSocket::SetDefaultIpAddressFamilyV6();
+#if PTLIB_VER >= 2110
     ipVer = 6;
+#endif
   }
 #endif
 
