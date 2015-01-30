@@ -552,7 +552,7 @@ PBoolean H2351_Authenticator::SetCapability(H225_ArrayOf_AuthenticationMechanism
   return AddCapability(H235_AuthenticationMechanism::e_pwdHash, OID_U, mechanisms, algorithmOIDs);
 }
 
-PBoolean H2351_Authenticator::IsSecuredPDU(unsigned rasPDU, PBoolean received) const
+PBoolean H2351_Authenticator::IsSecuredPDU(unsigned /*rasPDU*/, PBoolean /*received*/) const
 {
   return true; // must secure all RAS messages
 }
