@@ -1495,7 +1495,19 @@ H235Authenticators H323EndPoint::CreateEPAuthenticators()
         if ((Auth->GetApplication() == H235Authenticator::EPAuthentication ||
              Auth->GetApplication() == H235Authenticator::AnyApplication) &&
              GetEPCredentials(password, username)) {
-                Auth->SetLocalId(username);
+                if ((PString(Auth->GetName()) == "H.235.1") && IsRegisteredWithGatekeeper()) {
+                  H323Gatekeeper * gk = GetGatekeeper();
+                  if (gk) {
+                    Auth->SetLocalId(gk->GetEndpointIdentifier());
+                    PString gkID = gk->GetName();
+                    PINDEX at = gkID.Find('@');
+					if (at != P_MAX_INDEX)
+						gkID = gkID.Left(at);
+                    Auth->SetRemoteId(gkID);
+                  }
+                } else {
+                  Auth->SetLocalId(username);
+                }
                 Auth->SetPassword(password);
         } 
         authenticators.Append(Auth);

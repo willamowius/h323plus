@@ -86,14 +86,14 @@ class H235Authenticator : public PObject
     static H235Authenticator * CreateAuthenticatorByID(const PString & identifier
                                                  );
 
-    static PBoolean GetAuthenticatorCapabilities(const PString & deviceName,                 
-                                                Capabilities * caps, 
+    static PBoolean GetAuthenticatorCapabilities(const PString & deviceName,
+                                                Capabilities * caps,
                                                 PPluginManager * pluginMgr = NULL);
 #endif
 
 #ifdef H323_H235
-    
-    virtual PBoolean GetMediaSessionInfo(PString & algorithmOID, PBYTEArray & sessionKey); 
+
+    virtual PBoolean GetMediaSessionInfo(PString & algorithmOID, PBYTEArray & sessionKey);
 #endif
 
     virtual const char * GetName() const = 0;
@@ -158,15 +158,9 @@ class H235Authenticator : public PObject
 
     virtual PBoolean UseGkAndEpIdentifiers() const;
 
-    virtual PBoolean IsSecuredPDU(
-      unsigned rasPDU,
-      PBoolean received
-    ) const;
+    virtual PBoolean IsSecuredPDU(unsigned rasPDU, PBoolean received) const;
 
-    virtual PBoolean IsSecuredSignalPDU(
-      unsigned signalPDU,
-      PBoolean received
-    ) const;
+    virtual PBoolean IsSecuredSignalPDU(unsigned signalPDU, PBoolean received) const;
 
     virtual PBoolean IsSecuredSignalPDU(
       unsigned signalPDU,
@@ -176,10 +170,8 @@ class H235Authenticator : public PObject
 
     virtual PBoolean IsActive() const;
 
-    virtual void Enable(
-      PBoolean enab = TRUE
-    ) { enabled = enab; }
-    virtual void Disable() { enabled = FALSE; }
+    virtual void Enable(PBoolean enab = true) { enabled = enab; }
+    virtual void Disable() { enabled = false; }
 
     virtual const PString & GetRemoteId() const { return remoteId; }
     virtual void SetRemoteId(const PString & id) { remoteId = id; }
@@ -210,7 +202,7 @@ class H235Authenticator : public PObject
     virtual PBoolean GetAlgorithmDetails(const PString & algorithm,   ///< Algorithm OID
                                          PString & sslName,           ///< SSL Description
                                          PString & description        ///< Human Description
-                                         ); 
+                                         );
 
     virtual void ExportParameters(const PFilePath & /*path*/) {}  // export Parameters to file
 
@@ -223,21 +215,21 @@ class H235Authenticator : public PObject
       H225_ArrayOf_PASN_ObjectId & algorithmOIDs
     );
 
-    PBoolean     enabled;
+    PBoolean enabled;
 
     PString  remoteId;      // ID of remote entity
     PString  localId;       // ID of local entity
     PString  password;      // shared secret
 
     unsigned sentRandomSequenceNumber;
-    unsigned lastRandomSequenceNumber;
+    //unsigned lastRandomSequenceNumber;
+    int lastRandomSequenceNumber;	// using int now, because with unsigned 2 consecutive negative values within the same timestamp caused abort
     unsigned lastTimestamp;
     int      timestampGracePeriod;
 
-    Application usage;	       ///* Authenticator's Application 
+    Application usage;	       ///* Authenticator's Application
     H323Connection * connection;   ///* CallToken of the Connection for EP Authentication
     PMutex mutex;
-
 };
 
 
@@ -339,7 +331,7 @@ H323_DECLARELIST(H235AuthenticatorList, H235AuthenticatorInfo)
 };
 
 /** Dictionary of Addresses and Associated Security Info  */
-H323DICTIONARY(H235AuthenticatorDict,PString,H235AuthenticatorInfo); 
+H323DICTIONARY(H235AuthenticatorDict,PString,H235AuthenticatorInfo);
 
 /** This class embodies a simple MD5 based authentication.
     The users password is concatenated with the 4 byte timestamp and 4 byte
@@ -438,10 +430,7 @@ class H235AuthCAT : public H235Authenticator
       H225_ArrayOf_PASN_ObjectId & algorithmOIDs
     );
 
-    virtual PBoolean IsSecuredPDU(
-      unsigned rasPDU,
-      PBoolean received
-    ) const;
+    virtual PBoolean IsSecuredPDU(unsigned rasPDU, PBoolean received) const;
 };
 
 #if PTLIB_VER >= 2110 && defined(P_SSL)
@@ -476,9 +465,7 @@ class H2351_Authenticator : public H235Authenticator
 
     virtual H225_CryptoH323Token * CreateCryptoToken();
 
-    virtual PBoolean Finalise(
-      PBYTEArray & rawPDU
-    );
+    virtual PBoolean Finalise(PBYTEArray & rawPDU);
 
     virtual ValidationResult ValidateCryptoToken(
       const H225_CryptoH323Token & cryptoToken,
@@ -495,17 +482,18 @@ class H2351_Authenticator : public H235Authenticator
       H225_ArrayOf_PASN_ObjectId & algorithmOIDs
     );
 
-    virtual PBoolean IsSecuredPDU(
-      unsigned rasPDU,
-      PBoolean received
-    ) const;
+    virtual PBoolean IsSecuredPDU(unsigned rasPDU, PBoolean received) const;
 
-    virtual PBoolean IsSecuredSignalPDU(
-      unsigned rasPDU,
-      PBoolean received
-    ) const;
+    virtual PBoolean IsSecuredSignalPDU(unsigned rasPDU, PBoolean received) const;
 
     virtual PBoolean UseGkAndEpIdentifiers() const;
+
+    virtual void RequireGeneralID(bool value) { m_requireGeneralID = value; }
+    virtual void FullQ931Checking(bool value) { m_fullQ931Checking = value; }
+
+protected:
+    PBoolean m_requireGeneralID;
+    PBoolean m_fullQ931Checking;
 };
 
 typedef H2351_Authenticator H235AuthProcedure1;  // Backwards interoperability
@@ -531,12 +519,12 @@ template <class className> class H235PluginServiceDescriptor : public PDevicePlu
 {
   public:
     virtual PObject *   CreateInstance(int /*userData*/) const { return new className; }
-    virtual PStringArray GetDeviceNames(int /*userData*/) const { 
-               return className::GetAuthenticatorNames(); 
+    virtual PStringArray GetDeviceNames(int /*userData*/) const {
+               return className::GetAuthenticatorNames();
     }
-    virtual bool  ValidateDeviceName(const PString & deviceName, int /*userData*/) const { 
+    virtual bool  ValidateDeviceName(const PString & deviceName, int /*userData*/) const {
             return (deviceName == className::GetAuthenticatorNames()[0]);
-    } 
+    }
 #if PTLIB_VER >= 2110
     virtual bool GetDeviceCapabilities(const PString & /*deviceName*/, void * capabilities) const {
         return className::GetAuthenticationCapabilities((H235Authenticator::Capabilities *)capabilities);
@@ -546,7 +534,7 @@ template <class className> class H235PluginServiceDescriptor : public PDevicePlu
 
 #define H235SECURITY(name) \
 static H235PluginServiceDescriptor<H235Authenticator##name> H235Authenticator##name##_descriptor; \
-PCREATE_PLUGIN(name, H235Authenticator, &H235Authenticator##name##_descriptor); 
+PCREATE_PLUGIN(name, H235Authenticator, &H235Authenticator##name##_descriptor);
 #endif
 
 #endif

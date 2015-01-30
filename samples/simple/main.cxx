@@ -223,7 +223,7 @@ void SimpleH323Process::Main()
     cout << "Waiting for incoming calls for \"" << endpoint->GetLocalUserName() << "\"\n";
   else {
     cout << "Initiating call to \"" << args[0] << "\"\n";
-    endpoint->MakeCall(args[0], endpoint->currentCallToken);
+      endpoint->MakeCall(args[0], endpoint->currentCallToken);
   }
   cout << "Press X to exit." << endl;
 
@@ -611,6 +611,8 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
   if (args.HasOption('p')) {
     SetGatekeeperPassword(args.GetOptionString('p'));
     cout << "Enabling H.235 security access to gatekeeper." << endl;
+    // also set password for H.235.1 on Q.931 messages
+    SetEPCredentials(GetLocalUserName(), args.GetOptionString('p')); // locsl user name should probably be replaced by endpointID by framework
   }
 
 #ifdef H323_H46017

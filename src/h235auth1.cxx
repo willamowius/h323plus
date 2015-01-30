@@ -186,7 +186,10 @@ H235SECURITY(Std1);
 
 H2351_Authenticator::H2351_Authenticator()
 {
-    usage = GKAdmission;  // Can be used either for GKAdmission (not EPAuthentication)
+  usage = AnyApplication; // Can be used either for GKAdmission or EPAuthenticstion
+  m_requireGeneralID = true;
+  //m_fullQ931Checking = true; // H.235.1 clause 13.2 requires full Q.931 checking
+  m_fullQ931Checking = false; // remain compatible with old versions for now
 }
 
 
@@ -215,18 +218,29 @@ PStringArray H2351_Authenticator::GetAuthenticatorNames()
 #if PTLIB_VER >= 2110
 PBoolean H2351_Authenticator::GetAuthenticationCapabilities(H235Authenticator::Capabilities * ids)
 {
-      H235Authenticator::Capability cap;
-        cap.m_identifier = OID_A;
-        cap.m_cipher     = "H2351";
-        cap.m_description= "h2351";
-       ids->capabilityList.push_back(cap);
-    return true;
+  H235Authenticator::Capability cap;
+  cap.m_identifier = OID_A;
+  cap.m_cipher     = "H2351";
+  cap.m_description= "h2351";
+  ids->capabilityList.push_back(cap);
+  return true;
 }
 #endif
 
 PBoolean H2351_Authenticator::IsMatch(const PString & identifier) const 
 { 
-    return (identifier == PString(OID_A)); 
+  return (identifier == PString(OID_A)); 
+}
+
+PString AsString(BYTE* data, unsigned size) {
+	PString result;
+	unsigned i = 0;
+	while (i < size) {
+		result.sprintf("%0x", data[i]);
+		result += " ";
+		i++;	
+	}
+	return result;
 }
 
 H225_CryptoH323Token * H2351_Authenticator::CreateCryptoToken()
@@ -247,7 +261,7 @@ H225_CryptoH323Token * H2351_Authenticator::CreateCryptoToken()
   // tokenOID = "A"
   cryptoHashedToken.m_tokenOID = OID_A;
   
-  //ClearToken
+  // ClearToken
   H235_ClearToken & clearToken = cryptoHashedToken.m_hashedVals;
   
   // tokenOID = "T"
@@ -269,7 +283,7 @@ H225_CryptoH323Token * H2351_Authenticator::CreateCryptoToken()
   clearToken.IncludeOptionalField(H235_ClearToken::e_random);
   clearToken.m_random = ++sentRandomSequenceNumber;
 
-  //H235_HASHED
+  // H235_HASHED
   H235_HASHED<H235_EncodedGeneralToken> & encodedToken = cryptoHashedToken.m_token;
   
   //  algorithmOID = "U"
@@ -354,7 +368,6 @@ static PBoolean CheckOID(const PASN_ObjectId & oid1, const PASN_ObjectId & oid2)
   return TRUE;
 }
 
-
 H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
                                             const H225_CryptoH323Token & cryptoToken,
                                             const PBYTEArray & rawPDU)
@@ -405,7 +418,7 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
   
   //verify the randomnumber
   if (lastTimestamp == crHashed.m_hashedVals.m_timeStamp &&
-      lastRandomSequenceNumber == crHashed.m_hashedVals.m_random) {
+      lastRandomSequenceNumber == (int)crHashed.m_hashedVals.m_random) {
     //a message with this timespamp and the same random number was already verified
     PTRACE(1, "H235RAS\tConsecutive messages with the same random and timestamp");
     return e_ReplyAttack;
@@ -427,19 +440,24 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
     return e_BadPassword;
     }
   } else {
-      //verify the username
-      if (!localId && crHashed.m_tokenOID[OID_VERSION_OFFSET] > 1) {
-        if (!crHashed.m_hashedVals.HasOptionalField(H235_ClearToken::e_generalID)) {
-          PTRACE(1, "H235RAS\tH2351_Authenticator requires general ID.");
-          return e_Error;
-        }
+     //verify the username
+     if (!localId && crHashed.m_tokenOID[OID_VERSION_OFFSET] > 1) {
+       // H.235.0v4 clause 8.2 says generalID "should" be included, but doesn't require it
+       // H.235.1v4 clause 14 says generalID "shall" be included in ClearTokens, when the information is available
+       // AudioCodes 4.6 and Innovaphone v6-v9 don't include a generalID
+       if (m_requireGeneralID) {
+         if (!crHashed.m_hashedVals.HasOptionalField(H235_ClearToken::e_generalID)) {
+           PTRACE(1, "H235RAS\tH2351_Authenticator requires general ID.");
+           return e_Error;
+         }
   
-        if (crHashed.m_hashedVals.m_generalID.GetValue() != localId) {
+         if (crHashed.m_hashedVals.m_generalID.GetValue() != localId) {
            PTRACE(1, "H235RAS\tGeneral ID is \"" << crHashed.m_hashedVals.m_generalID.GetValue()
                  << "\", should be \"" << localId << '"');
-          return e_Error;
+           return e_Error;
         }
-     }
+      }
+    }
   }
 
   if (!remoteId) {
@@ -514,7 +532,7 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
     
     char key[HASH_SIZE];
     hmac_sha(secretkey, 20, asnPtr, asnLen, key, HASH_SIZE);
-    
+
     /****
     * step 6
     * compare the two keys
@@ -559,6 +577,11 @@ PBoolean H2351_Authenticator::IsSecuredPDU(unsigned /*rasPDU*/, PBoolean /*recei
 
 PBoolean H2351_Authenticator::IsSecuredSignalPDU(unsigned signalPDU, PBoolean received) const
 {
+  // H.235.1 clause 13.2 says all signalling PDUs shall be secured.
+  if (m_fullQ931Checking) {
+    return TRUE;
+  }
+
   switch (signalPDU) {
     case H225_H323_UU_PDU_h323_message_body::e_setup:       
       return received ? !remoteId.IsEmpty() : !localId.IsEmpty();
@@ -572,8 +595,6 @@ PBoolean H2351_Authenticator::UseGkAndEpIdentifiers() const
 {
   return TRUE;
 }
-
-
 
 
 #endif // H323_SSL

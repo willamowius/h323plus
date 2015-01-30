@@ -193,7 +193,7 @@ PBoolean H235Authenticator::PrepareTokens(PASN_Array & clearTokens,
 
 PBoolean H235Authenticator::PrepareTokens(PASN_Array & clearTokens, PASN_Array & cryptoTokens, PINDEX /*max_cipherSize*/)
 {
-    return PrepareTokens(clearTokens, cryptoTokens);
+  return PrepareTokens(clearTokens, cryptoTokens);
 }
 
 
@@ -1130,7 +1130,7 @@ H235Authenticator::ValidationResult
 
   //verify the randomnumber
   if (lastTimestamp == clearToken.m_timeStamp &&
-      lastRandomSequenceNumber == clearToken.m_random) {
+      lastRandomSequenceNumber == (int)clearToken.m_random) {
     //a message with this timespamp and the same random number was already verified
     PTRACE(1, "H235RAS\tConsecutive messages with the same random and timestamp");
     return e_ReplyAttack;
