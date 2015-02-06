@@ -72,10 +72,11 @@ public:
 };
 
 template <class M>
-inline void DeleteObjectsInMap(const M & m)
+inline void DeleteObjectsInMap(M & m)
 {
     typedef typename M::value_type PAIR;
     std::for_each(m.begin(), m.end(), deletepair<PAIR>());
+	m.clear(); // delete pointers to deleted objects
 }
 
 ////////////////////////////////////////////////////////////////////
