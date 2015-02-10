@@ -67,7 +67,6 @@ bool X264Library::Load()
     if (GetFunction(fktname, (Function &)Xx264_encoder_open)) {
       TRACE (2, "H264\tDYNA\tLoaded " << fktname);
       open_found = true;
-      break;
     }
   }
   if (!open_found) {
@@ -79,6 +78,7 @@ bool X264Library::Load()
       if (GetFunction(fktname, (Function &)Xx264_encoder_open)) {
         TRACE (2, "H264\tDYNA\tLoaded " << fktname);
         open_found = true;
+        break;
       }
     }
   }
