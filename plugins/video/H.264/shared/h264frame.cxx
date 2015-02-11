@@ -418,7 +418,7 @@ bool H264Frame::DeencapsulateSTAP (RTPFrame & frame, unsigned int & /*flags*/) {
     curSTAP += 2;
     // then the header, followed by the body.  We'll add the header
     // in the AddDataToEncodedFrame - that's why the nal body is dptr + 1
-    TRACE_UP(4, "H264\tDeencap\tDeencapsulating an NAL unit of " << len << " bytes (type " << (int)(*curSTAP && 0x1f) << ") from STAP");
+    TRACE_UP(4, "H264\tDeencap\tDeencapsulating an NAL unit of " << len << " bytes (type " << (int)(*curSTAP & 0x1f) << ") from STAP");
     AddDataToEncodedFrame(curSTAP + 1,  len - 1, *curSTAP, 1);
     curSTAP += len;
     if ((len + 2) > curSTAPLen)
