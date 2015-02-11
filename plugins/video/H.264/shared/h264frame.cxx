@@ -547,8 +547,12 @@ void H264Frame::AddDataToEncodedFrame (uint8_t *data, uint32_t dataLen, uint8_t 
     if (_NALs) _NALs[_numberOfNALsInFrame - 1].length += dataLen;
   }
 
-  TRACE_UP (4, "H264\tDeencap\tReserved memory for  " <<_numberOfNALsReserved <<" NALs, Inframe/current: "<< _numberOfNALsInFrame <<" Offset: "
-    <<_NALs[_numberOfNALsInFrame-1].offset << " Length: "<< _NALs[_numberOfNALsInFrame-1].length << " Type: "<< (int)(_NALs[_numberOfNALsInFrame-1].type));
+  if (_NALs) {
+    TRACE_UP (4, "H264\tDeencap\tReserved memory for  " <<_numberOfNALsReserved <<" NALs, Inframe/current: "<< _numberOfNALsInFrame <<" Offset: "
+      <<_NALs[_numberOfNALsInFrame-1].offset << " Length: "<< _NALs[_numberOfNALsInFrame-1].length << " Type: "<< (int)(_NALs[_numberOfNALsInFrame-1].type));
+  } else {
+    TRACE_UP (4, "H264\tDeencap\t_NALs is NULL");
+  }
 
   memcpy(currentPositionInFrame, data, dataLen);
   _encodedFrameLen += dataLen + headerLen;

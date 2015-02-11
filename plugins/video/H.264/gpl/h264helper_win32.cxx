@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
   status = 1;
 #endif
 
-  if (status == 0) {
+  if (status == 0 || x264 == NULL) {
     TRACE (1, "H264\tIPC\tCP: Failed to load dynamic library - exiting"); 
     closeAndExit();
   }
@@ -289,6 +289,7 @@ int main(int argc, char *argv[])
           readStream(stream, (LPVOID)&headerLen, sizeof(headerLen));
           readStream(stream, (LPVOID)&dst, headerLen);
           readStream(stream, (LPVOID)&flags, sizeof(flags));   
+          // fall through intended
       case ENCODE_FRAMES_BUFFERED:     
           ret = (x264->EncodeFrames( src,  srcLen, dst, dstLen, flags));
           writeStream(stream,(LPCVOID)&msg, sizeof(msg));

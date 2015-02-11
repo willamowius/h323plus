@@ -29,6 +29,17 @@ X264Library::X264Library()
 {
   _dynamicLibrary = NULL;
   _isLoaded = false;
+  // initialize function pointer to NULL before we load the shared library
+  Xx264_encoder_open = NULL;
+  Xx264_param_default = NULL;
+  Xx264_encoder_encode = NULL;
+  Xx264_nal_encode = NULL;
+  Xx264_encoder_reconfig = NULL;
+  Xx264_encoder_headers = NULL;
+  Xx264_encoder_close = NULL;
+#if X264_BUILD >= 98
+  Xx264_picture_init = NULL;
+#endif
 }
 
 X264Library::~X264Library()
