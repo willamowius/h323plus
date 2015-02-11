@@ -144,7 +144,9 @@ H264EncoderContext::H264EncoderContext()
   AddInputFormat(fmt4cif);
   AddInputFormat(fmtcif);
 
-  emphasisSpeed=false;
+  emphasisSpeed = false;
+  maxMBPS = 0;
+  maxMB = 0;
 }
 
 H264EncoderContext::~H264EncoderContext()
@@ -246,7 +248,7 @@ int H264EncoderContext::GetInputFormat(inputFormats & fmt)
     if (emphasisSpeed) minfps = minSpeedFPS;  // Emphasis speed not quality. (Higher Framerate/Lower Framesize)
 
     for (std::list<inputFormats>::const_iterator r=videoInputFormats.begin(); r!=videoInputFormats.end(); ++r) {
-        if (r->mb <= maxMB && maxMBPS/r->mb > minfps) {
+        if ((r->mb <= maxMB) && ((maxMBPS / (double)r->mb) > minfps)) {
            fmt = *r;
            unsigned r = maxMBPS/fmt.mb + 1;
            if (fmt.r > r) fmt.r = r;
@@ -307,6 +309,8 @@ H264DecoderContext::H264DecoderContext()
   _frameFPUInt = 300;  // Auto request IFrame every 300 frames (every 10 secs at 30 fps)
   _skippedFrameCounter = 0;
   _rxH264Frame = new H264Frame();
+  _context = NULL;
+  _outputFrame = NULL;
 
   if ((_codec = FFMPEGLibraryInstance.AvcodecFindDecoder(CODEC_ID_H264)) == NULL) {
     TRACE(1, "H264\tDecoder\tCodec not found for decoder");
@@ -692,13 +696,17 @@ static int setLevel(unsigned w, unsigned h, unsigned r, unsigned & level, unsign
 	uint32_t nbMBsPerFrame = w * h / 256;
 	uint32_t nbMBsPerSec = nbMBsPerFrame * r;
 
-	unsigned j=0;
+	unsigned j = 0;
 	level = 0;
     while (h264_levels[j].level_idc) {
 		if ((nbMBsPerFrame <= h264_levels[j].frame_size) && (nbMBsPerSec <= h264_levels[j].mbps)) {
-			level = h264_levels[j-1].h241_level;
-			h264level = h264_levels[j-1].level_idc;
-			break;
+			// JW: avoid illegal memory access of element -1 if j == 0
+            // TODO: check the upper limit of the array
+            if (j > 0) {
+		  		level = h264_levels[j-1].h241_level;
+				h264level = h264_levels[j-1].level_idc;
+				break;
+		  }
 		}
 		j++;
     }
@@ -953,8 +961,10 @@ static int to_customised_options(const struct PluginCodec_Definition * codec, vo
 	      frameWidth = atoi(option[i+1]);
 	  if (STRCMPI(option[i], PLUGINCODEC_OPTION_FRAME_HEIGHT) == 0)
 	      frameHeight = atoi(option[i+1]);
-	  if (STRCMPI(option[i], PLUGINCODEC_OPTION_FRAME_TIME) == 0)
-	      frameRate = (unsigned)(H264_CLOCKRATE / atoi(option[i+1]));
+	  if (STRCMPI(option[i], PLUGINCODEC_OPTION_FRAME_TIME) == 0) {
+          int frameTime = atoi(option[i+1]);
+	      frameRate = (frameTime == 0) ? 0 : (unsigned)(H264_CLOCKRATE / frameTime);
+      }
 	  if (STRCMPI(option[i], PLUGINCODEC_OPTION_TARGET_BIT_RATE) == 0)
 	      targetBitrate = atoi(option[i+1]);
 	}
@@ -1021,8 +1031,11 @@ int encoder_formats(
            while (token) {
              switch (j) {
                case 0: f.w = atoi(token);
+                       break;
                case 1: f.h = atoi(token);
+                       break;
                case 2: f.r = atoi(token);
+                       break;
              }
              token = strtok(NULL,",");
              j++;
@@ -1186,8 +1199,10 @@ static int encoder_set_options(
       }
       if (STRCMPI(options[i], PLUGINCODEC_OPTION_TARGET_BIT_RATE) == 0)
          targetBitrate = atoi(options[i+1]);
-      if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_TIME) == 0)
-         frameRate = (unsigned)(H264_CLOCKRATE / atoi(options[i+1]));
+      if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_TIME) == 0) {
+         int frameTime = atoi(options[i+1]);
+         frameRate = (frameTime == 0) ? 0 : (unsigned)(H264_CLOCKRATE / frameTime);
+      }
       if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_HEIGHT) == 0)
          frameHeight = atoi(options[i+1]);
       if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_WIDTH) == 0)

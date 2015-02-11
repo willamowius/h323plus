@@ -341,7 +341,7 @@ bool H264EncCtx::checkGplProcessExists (const char * dir)
 {
   fstream fin;
   memset(gplProcess, 0, sizeof(gplProcess));
-  strncpy(gplProcess, dir, sizeof(gplProcess));
+  strncpy(gplProcess, dir, sizeof(gplProcess)-1);
   if (gplProcess[strlen(gplProcess)-1] != DIR_SEPERATOR[0]) 
     strcat(gplProcess, DIR_SEPERATOR);
   strcat(gplProcess, GPL_PROCESS_FILENAME);
