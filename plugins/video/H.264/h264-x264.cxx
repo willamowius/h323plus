@@ -781,11 +781,13 @@ static int adjust_to_level (unsigned & width, unsigned & height, unsigned & fram
     }
   }
 
-// Correct macroblocks per second
+  if (frameTime == 0)
+    return 0;
+  // Correct macroblocks per second
   uint32_t nbMBsPerSecond = width * height / 256 * (90000 / frameTime);
   TRACE(4, "H264\tCap\tMB/s: " << nbMBsPerSecond << "(" << h264_levels[i].mbps << ")");
   if (nbMBsPerSecond > h264_levels[i].mbps)
-    frameTime =  (unsigned) (90000 / 256 * width  * height / h264_levels[i].mbps );
+    frameTime = (unsigned) (90000 / 256 * width  * height / h264_levels[i].mbps );
 
   adjust_bitrate_to_level (targetBitrate, level, i);
   return 1;
@@ -1233,12 +1235,12 @@ static int encoder_set_options(
       if (STRCMPI(options[i], PLUGINCODEC_OPTION_MAXNALSIZE) == 0)
          maxNALSize = atoi(options[i+1]);
       if (STRCMPI(options[i], PLUGINCODEC_OPTION_ASPECT) == 0)
-		 stdAspect = (STRCMPI(options[i+1],"2") == 0);  // 2 is scale to stdSize
+		 stdAspect = (STRCMPI(options[i+1], "2") == 0);  // 2 is scale to stdSize
 	}
   }
     
 
-    if ((cusMBPS > 0 || cusMFS > 0) && SetLevelMBPS(level, cusMBPS, cusMFS) && SetLevelMFS(level,cusMFS)) {
+    if (cusMBPS > 0 && cusMFS > 0 && SetLevelMBPS(level, cusMBPS, cusMFS) && SetLevelMFS(level, cusMFS)) {
         unsigned max_rate = (cusMBPS * 500) / (cusMFS * 256);
         if (frameRate > max_rate) // don't force frame rate to maximum possible, if application set a lower value
 	        frameRate = max_rate;
@@ -1249,7 +1251,7 @@ static int encoder_set_options(
 	TRACE(1, "H264\tCap\tProfile and Level: " << profile << ";" << constraints << ";" << level);
 
     unsigned maxMB =0; unsigned maxMBPS = 0;
-	if (GetLevelLimits(level,maxMB,maxMBPS,h264level)) {
+	if (GetLevelLimits(level, maxMB, maxMBPS, h264level)) {
         if (cusMBPS > 0) maxMBPS = cusMBPS * 500; 
 	    if (cusMFS > 0)  maxMB = cusMFS * 256;
         context->SetMaxMB(maxMB);
