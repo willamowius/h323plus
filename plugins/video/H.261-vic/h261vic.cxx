@@ -176,6 +176,7 @@ class H261EncoderContext
       videoEncoder = new P64Encoder(DEFAULT_ENCODER_QUALITY, DEFAULT_FILL_LEVEL);
       forceIFrame = false;
       videoQuality = DEFAULT_ENCODER_QUALITY;
+      lastTimeStamp = 0;
     }
 
     ~H261EncoderContext()
