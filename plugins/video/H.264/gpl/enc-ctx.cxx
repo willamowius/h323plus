@@ -410,7 +410,7 @@ int X264EncoderContext::EncodeFrames(const unsigned char * src, unsigned & srcLe
   _inputFrame.img.i_stride[1] = 
   _inputFrame.img.i_stride[2] = (int) ( header->width / 2 );
   _inputFrame.img.plane[2] = (uint8_t *)(_inputFrame.img.plane[1] + (int)(_inputFrame.img.i_stride[1] *header->height/2));
-  _inputFrame.i_type = (wantIFrame || (flags && forceIFrame)) ? X264_TYPE_IDR : X264_TYPE_AUTO;
+  _inputFrame.i_type = (wantIFrame || (flags & forceIFrame)) ? X264_TYPE_IDR : X264_TYPE_AUTO;
   _inputFrame.i_pts = _frameCounter;	// x264 needs a time reference
 
 #if X264_BUILD > 79
