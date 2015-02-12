@@ -999,6 +999,7 @@ H263_Base_DecoderContext::H263_Base_DecoderContext(const char * _prefix)
 {
   _frameCount = 0;
   _outputFrame = NULL;
+  _context = NULL;
 
   if ((_codec = FFMPEGLibraryInstance.AvcodecFindDecoder(CODEC_ID_H263)) == NULL) {
     TRACE_AND_LOG(tracer, 1, "Codec not found for decoder");
