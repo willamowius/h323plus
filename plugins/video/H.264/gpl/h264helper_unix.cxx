@@ -31,11 +31,6 @@
 #ifndef X264_LINK_STATIC
 #include "x264loader_unix.h"
 #endif
-// TODO: we should dynamically adjust this buffer size to the max frame size used
-//#define MAX_FRAME_SIZE 1382412  // 720p 
-//#define MAX_FRAME_SIZE 1474572  // 1280x768 H.239 
-//#define MAX_FRAME_SIZE 3110412	// 1080p
-#define MAX_FRAME_SIZE 3317772	// 1920 x 1152 H.239
 
 std::ifstream dlStream;
 std::ofstream ulStream;
@@ -43,11 +38,12 @@ std::ofstream ulStream;
 unsigned msg;
 unsigned val;
 
-unsigned srcLen;
-unsigned dstLen;
+unsigned srcLen = 0;
+unsigned dstLen = 0;
 unsigned headerLen;
-unsigned char src [MAX_FRAME_SIZE];
-unsigned char dst [MAX_FRAME_SIZE];
+unsigned frameBufferSize = 0;
+unsigned char * src = NULL;
+unsigned char * dst  = NULL;
 unsigned flags;
 int ret;
 
@@ -228,9 +224,18 @@ int main(int argc, char *argv[])
       break;
     case ENCODE_FRAMES:
         readStream(dlStream, (char*)&srcLen, sizeof(srcLen));
-        readStream(dlStream, (char*)&src, srcLen);
+		if (srcLen > frameBufferSize) {
+          // only grow, never shrink, memory isn't given back to OS anyway
+          TRACE (1, "H264\tIPC\tGrowing frame buffer to " << srcLen);
+          free(src);
+          free(dst);
+          frameBufferSize = srcLen;
+          src = (unsigned char*)malloc(frameBufferSize);
+          dst = (unsigned char*)malloc(frameBufferSize);
+        }
+        readStream(dlStream, (char*)src, srcLen);
         readStream(dlStream, (char*)&headerLen, sizeof(headerLen));
-        readStream(dlStream, (char*)&dst, headerLen);
+        readStream(dlStream, (char*)dst, headerLen);
         readStream(dlStream, (char*)&flags, sizeof(flags));
         // fall through intended
     case ENCODE_FRAMES_BUFFERED:
@@ -238,7 +243,7 @@ int main(int argc, char *argv[])
           ret = (x264->EncodeFrames( src,  srcLen, dst, dstLen, flags));
           writeStream(ulStream,(char*)&msg, sizeof(msg));
           writeStream(ulStream,(char*)&dstLen, sizeof(dstLen));
-          writeStream(ulStream,(char*)&dst, dstLen);
+          writeStream(ulStream,(char*)dst, dstLen);
           writeStream(ulStream,(char*)&flags, sizeof(flags));
           writeStream(ulStream,(char*)&ret, sizeof(ret));
           flushStream(ulStream);
