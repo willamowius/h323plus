@@ -31,7 +31,7 @@
 
 Bitstream::Bitstream ()
 {
-  _data.ptr = NULL;
+  SetBytes(NULL, 0, 0, 0);
 }
 
 void Bitstream::SetBytes (uint8_t* data, uint32_t dataLen, uint8_t sbits, uint8_t ebits)
@@ -123,6 +123,7 @@ H263PFrame::H263PFrame (uint32_t maxFrameSize)
   _timestamp = 0;
   _maxPayloadSize = 1400;
   _maxFrameSize = maxFrameSize;
+  _minPayloadSize = 0;
 
   _encodedFrame.ptr = (uint8_t*) malloc(maxFrameSize);
   _picHeader.ptr = (uint8_t*) malloc(MAX_HEADER_SIZE);

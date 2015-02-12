@@ -113,6 +113,20 @@ static int FindGBSC(const unsigned char * base, int len, int & sbit)
 RFC2190Packetizer::RFC2190Packetizer()
 {
   m_buffer = NULL;
+  m_bufferSize = 0;
+  m_bufferLen = 0;
+  TR = 0;
+  frameSize = 0;
+  iFrame = true;
+  annexD = 0;
+  annexE = 0;
+  annexF = 0;
+  annexG = 0;
+  pQuant = 0;
+  cpm = 0;
+  macroblocksPerGOB = 0;
+  timestamp = 0;
+  fragPtr = NULL;
 }
 
 RFC2190Packetizer::~RFC2190Packetizer()
@@ -335,6 +349,7 @@ int RFC2190Packetizer::GetPacket(RTPFrame & outputFrame, unsigned int & flags)
 RFC2190Depacketizer::RFC2190Depacketizer()
 {
   NewFrame();
+  lastSequence = 0;
 }
 
 void RFC2190Depacketizer::NewFrame()

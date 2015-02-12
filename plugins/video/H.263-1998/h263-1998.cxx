@@ -239,6 +239,12 @@ H263_Base_EncoderContext::H263_Base_EncoderContext(const char * _prefix)
 #endif
 { 
   _inputFrameBuffer = NULL;
+  _codec = NULL;
+  _inputFrame = NULL;
+  _frameCount = 0;
+  _width = 0;
+  _height= 0;
+  m_targetBitRate = 0;
 
   if (!FFMPEGLibraryInstance.IsLoaded()){
     return;
@@ -567,6 +573,8 @@ int H263_Base_EncoderContext::GetInputFormat(inputFormats & fmt, unsigned maxWid
 H263_RFC2190_EncoderContext::H263_RFC2190_EncoderContext()
   : H263_Base_EncoderContext("RFC2190")
 {
+  currentMb = 0;
+  currentBytes = 0;
 }
 
 H263_RFC2190_EncoderContext::~H263_RFC2190_EncoderContext()
@@ -741,9 +749,9 @@ int H263_RFC2190_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
   _inputFrame->data[1] = _inputFrame->data[0] + size;
   _inputFrame->data[2] = _inputFrame->data[1] + (size / 4);
 #if LIBAVCODEC_VERSION_MAJOR < 54
-  _inputFrame->pict_type = (flags && forceIFrame) ? FF_I_TYPE : 0;
+  _inputFrame->pict_type = (flags & forceIFrame) ? FF_I_TYPE : 0;
 #else
-  _inputFrame->pict_type = (flags && forceIFrame) ? AV_PICTURE_TYPE_I : AV_PICTURE_TYPE_NONE;
+  _inputFrame->pict_type = (flags & forceIFrame) ? AV_PICTURE_TYPE_I : AV_PICTURE_TYPE_NONE;
 #endif
 
   currentMb = 0;
@@ -954,9 +962,9 @@ int H263_RFC2429_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
   _inputFrame->data[1] = _inputFrame->data[0] + size;
   _inputFrame->data[2] = _inputFrame->data[1] + (size / 4);
 #if LIBAVCODEC_VERSION_MAJOR < 54
-  _inputFrame->pict_type = (flags && forceIFrame) ? FF_I_TYPE : 0;
+  _inputFrame->pict_type = (flags & forceIFrame) ? FF_I_TYPE : 0;
 #else
-  _inputFrame->pict_type = (flags && forceIFrame) ? AV_PICTURE_TYPE_I : AV_PICTURE_TYPE_NONE;
+  _inputFrame->pict_type = (flags & forceIFrame) ? AV_PICTURE_TYPE_I : AV_PICTURE_TYPE_NONE;
 #endif
  
   _txH263PFrame->BeginNewFrame();
@@ -989,6 +997,9 @@ H263_Base_DecoderContext::H263_Base_DecoderContext(const char * _prefix)
   , tracer(_prefix, false)
 #endif
 {
+  _frameCount = 0;
+  _outputFrame = NULL;
+
   if ((_codec = FFMPEGLibraryInstance.AvcodecFindDecoder(CODEC_ID_H263)) == NULL) {
     TRACE_AND_LOG(tracer, 1, "Codec not found for decoder");
     return;
@@ -1766,8 +1777,11 @@ int encoder_formats(
            while (token) {
              switch (j) {
                case 0: f.w = atoi(token);
+                       break;
                case 1: f.h = atoi(token);
+                       break;
                case 2: f.r = atoi(token);
+                       break;
              }
              token = strtok(NULL,",");
              j++;
