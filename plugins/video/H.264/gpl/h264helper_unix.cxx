@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
   writeStream(ulStream,(char*)&status, sizeof(status)); 
   flushStream(ulStream);
 
-  if (status == 0 || x264 == NULL) {
+  if (status == 0) {
     TRACE (1, "H264\tIPC\tCP: Failed to load dynamic library - exiting"); 
     closeAndExit();
   }
@@ -143,55 +143,88 @@ int main(int argc, char *argv[])
       break;
     case H264ENCODERCONTEXT_DELETE:
         delete x264;
+        x264 = NULL;
         writeStream(ulStream,(char*)&msg, sizeof(msg)); 
         flushStream(ulStream);
       break;
     case APPLY_OPTIONS:
-        x264->ApplyOptions ();
-        writeStream(ulStream,(char*)&msg, sizeof(msg)); 
-        flushStream(ulStream);
+        if (x264) {
+          x264->ApplyOptions ();
+          writeStream(ulStream,(char*)&msg, sizeof(msg)); 
+          flushStream(ulStream);
+        } else {
+          TRACE (1, "H264\tIPC\tCodec not created, yet");
+        }
       break;
     case SET_TARGET_BITRATE:
         readStream(dlStream, (char*)&val, sizeof(val));
-        x264->SetTargetBitrate (val);
-        writeStream(ulStream,(char*)&msg, sizeof(msg)); 
-        flushStream(ulStream);
+        if (x264) {
+          x264->SetTargetBitrate (val);
+          writeStream(ulStream,(char*)&msg, sizeof(msg)); 
+          flushStream(ulStream);
+        } else {
+          TRACE (1, "H264\tIPC\tCodec not created, yet");
+        }
       break;
     case SET_FRAME_RATE:
         readStream(dlStream, (char*)&val, sizeof(val));
-        x264->SetFrameRate (val);
-        writeStream(ulStream,(char*)&msg, sizeof(msg)); 
-        flushStream(ulStream);
+        if (x264) {
+          x264->SetFrameRate (val);
+          writeStream(ulStream,(char*)&msg, sizeof(msg)); 
+          flushStream(ulStream);
+        } else {
+          TRACE (1, "H264\tIPC\tCodec not created, yet");
+        }
       break;
     case SET_FRAME_WIDTH:
         readStream(dlStream, (char*)&val, sizeof(val));
-        x264->SetFrameWidth (val);
-        writeStream(ulStream,(char*)&msg, sizeof(msg)); 
-        flushStream(ulStream);
+        if (x264) {
+          x264->SetFrameWidth (val);
+          writeStream(ulStream,(char*)&msg, sizeof(msg)); 
+          flushStream(ulStream);
+        } else {
+          TRACE (1, "H264\tIPC\tCodec not created, yet");
+        }
       break;
     case SET_FRAME_HEIGHT:
         readStream(dlStream, (char*)&val, sizeof(val));
-        x264->SetFrameHeight (val);
-        writeStream(ulStream,(char*)&msg, sizeof(msg)); 
-        flushStream(ulStream);
+        if (x264) {
+          x264->SetFrameHeight (val);
+          writeStream(ulStream,(char*)&msg, sizeof(msg)); 
+          flushStream(ulStream);
+        } else {
+          TRACE (1, "H264\tIPC\tCodec not created, yet");
+        }
       break;
     case SET_MAX_KEY_FRAME_PERIOD:
         readStream(dlStream, (char*)&val, sizeof(val));
-        x264->SetMaxKeyFramePeriod (val);
-        writeStream(ulStream,(char*)&msg, sizeof(msg)); 
-        flushStream(ulStream);
+        if (x264) {
+          x264->SetMaxKeyFramePeriod (val);
+          writeStream(ulStream,(char*)&msg, sizeof(msg)); 
+          flushStream(ulStream);
+        } else {
+          TRACE (1, "H264\tIPC\tCodec not created, yet");
+        }
       break;
     case SET_TSTO:
         readStream(dlStream, (char*)&val, sizeof(val));
-        x264->SetTSTO (val);
-        writeStream(ulStream,(char*)&msg, sizeof(msg)); 
-        flushStream(ulStream);
+        if (x264) {
+          x264->SetTSTO (val);
+          writeStream(ulStream,(char*)&msg, sizeof(msg)); 
+          flushStream(ulStream);
+        } else {
+          TRACE (1, "H264\tIPC\tCodec not created, yet");
+        }
       break;
     case SET_PROFILE_LEVEL:
         readStream(dlStream, (char*)&val, sizeof(val));
-        x264->SetProfileLevel (val);
-        writeStream(ulStream,(char*)&msg, sizeof(msg)); 
-        flushStream(ulStream);
+        if (x264) {
+          x264->SetProfileLevel (val);
+          writeStream(ulStream,(char*)&msg, sizeof(msg)); 
+          flushStream(ulStream);
+        } else {
+          TRACE (1, "H264\tIPC\tCodec not created, yet");
+        }
       break;
     case ENCODE_FRAMES:
         readStream(dlStream, (char*)&srcLen, sizeof(srcLen));
@@ -201,30 +234,46 @@ int main(int argc, char *argv[])
         readStream(dlStream, (char*)&flags, sizeof(flags));
         // fall through intended
     case ENCODE_FRAMES_BUFFERED:
-        ret = (x264->EncodeFrames( src,  srcLen, dst, dstLen, flags));
-        writeStream(ulStream,(char*)&msg, sizeof(msg));
-        writeStream(ulStream,(char*)&dstLen, sizeof(dstLen));
-        writeStream(ulStream,(char*)&dst, dstLen);
-        writeStream(ulStream,(char*)&flags, sizeof(flags));
-        writeStream(ulStream,(char*)&ret, sizeof(ret));
-        flushStream(ulStream);
+        if (x264) {
+          ret = (x264->EncodeFrames( src,  srcLen, dst, dstLen, flags));
+          writeStream(ulStream,(char*)&msg, sizeof(msg));
+          writeStream(ulStream,(char*)&dstLen, sizeof(dstLen));
+          writeStream(ulStream,(char*)&dst, dstLen);
+          writeStream(ulStream,(char*)&flags, sizeof(flags));
+          writeStream(ulStream,(char*)&ret, sizeof(ret));
+          flushStream(ulStream);
+        } else {
+          TRACE (1, "H264\tIPC\tCodec not created, yet");
+        }
       break;
     case SET_MAX_FRAME_SIZE:
         readStream(dlStream, (char*)&val, sizeof(val));
-        x264->SetMaxRTPFrameSize (val);
-        writeStream(ulStream,(char*)&msg, sizeof(msg)); 
-        flushStream(ulStream);
+        if (x264) {
+          x264->SetMaxRTPFrameSize (val);
+          writeStream(ulStream,(char*)&msg, sizeof(msg)); 
+           flushStream(ulStream);
+        } else {
+          TRACE (1, "H264\tIPC\tCodec not created, yet");
+        }
       break;
     case FASTUPDATE_REQUESTED:
-        x264->fastUpdateRequested();
-        writeStream(ulStream,(char*)&msg, sizeof(msg)); 
-        flushStream(ulStream);
+        if (x264) {
+          x264->fastUpdateRequested();
+          writeStream(ulStream,(char*)&msg, sizeof(msg)); 
+          flushStream(ulStream);
+        } else {
+          TRACE (1, "H264\tIPC\tCodec not created, yet");
+        }
       break;
 	case SET_MAX_NALSIZE:
         readStream(dlStream, (char*)&val, sizeof(val));
-        x264->SetMaxNALSize (val);
-        writeStream(ulStream,(char*)&msg, sizeof(msg)); 
-        flushStream(ulStream);
+        if (x264) {
+          x264->SetMaxNALSize (val);
+          writeStream(ulStream,(char*)&msg, sizeof(msg)); 
+          flushStream(ulStream);
+        } else {
+          TRACE (1, "H264\tIPC\tCodec not created, yet");
+        }
       break;
 	default:
       break;
