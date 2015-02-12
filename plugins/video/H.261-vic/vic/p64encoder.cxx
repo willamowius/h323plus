@@ -12,6 +12,9 @@
 /************ Change log
  *
  * $Log$
+ * Revision 1.4  2012/09/13 09:22:10  willamowius
+ * avoid uninitialized compare
+ *
  * Revision 1.3  2011/01/10 21:41:36  willamowius
  * revert: call PreIncEncodeSetup() again
  *
@@ -87,9 +90,6 @@ P64Encoder::P64Encoder(int quant_level,int fillLevel)
   vid_frame   = new VideoFrame(WIDTH,HEIGHT);
   pre_vid     = new Pre_Vid_Coder();
   pre_vid->SetBackgroundFill(fillLevel);
-  //vid_frame2  = new VideoFrame(WIDTH,HEIGHT); //testing
-  //pre_vid2    = new Pre_Vid_Coder(); //testing
-  //pre_vid2->SetBackgroundFill(fillLevel); //testing
 }
 
 
@@ -99,8 +99,6 @@ P64Encoder::~P64Encoder(){
   delete vid_frame;
   delete h261_edr; 
   delete trans;
-  //delete pre_vid2; //testing
-  //delete vid_frame2; //testing
 }
 
 void P64Encoder::SetQualityLevel(int qLevel)
@@ -111,12 +109,10 @@ void P64Encoder::SetQualityLevel(int qLevel)
 void P64Encoder::SetBackgroundFill(int idle)
 {
   pre_vid->SetBackgroundFill(idle);
-  //pre_vid2->SetBackgroundFill(idle); //testing
 }
 
 void P64Encoder::SetSize(int width,int height) {
   vid_frame->SetSize(width,height);
-  //vid_frame2->SetSize(width,height); //testing
 }
 
 void P64Encoder::ProcessOneFrame() {

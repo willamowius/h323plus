@@ -9,6 +9,9 @@
 /************ Change log
  *
  * $Log$
+ * Revision 1.1  2010/02/24 02:19:22  shorne
+ * First commit of h323plus mirror
+ *
  * Revision 1.2  2006/07/31 09:09:22  csoutheren
  * Checkin of validated codec used during development
  *
@@ -175,10 +178,6 @@ protected:
   H261PixelEncoder *h261_edr;
   VideoFrame       *vid_frame;
   Pre_Vid_Coder    *pre_vid;
-
-  VideoFrame       *vid_frame2; // for testing
-  Pre_Vid_Coder    *pre_vid2; // for testing
-
 };
 
 
