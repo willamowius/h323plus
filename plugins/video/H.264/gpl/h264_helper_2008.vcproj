@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="h264_helper"
 	ProjectGUID="{49E1DA1D-0BAD-4DCD-A4B1-D048A548D53B}"
 	RootNamespace="h264_helper"
@@ -68,6 +68,8 @@
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(intDir)/x264plugin_helper.pdb"
 				SubSystem="1"
+				OptimizeReferences="1"
+				EnableCOMDATFolding="0"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="1"
@@ -143,7 +145,7 @@
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
-				OptimizeReferences="2"
+				OptimizeReferences="1"
 				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
