@@ -109,7 +109,14 @@ void H450ServiceAPDU::BuildCallTransferInitiate(int invokeId,
 
   H4502_CTInitiateArg argument;
 
-  argument.m_callIdentity = callIdentity;
+  if (callIdentity.IsEmpty()) {
+    // a callIdentity of size 0 is allowed according to the H.450.2 ASN,
+    // but if we encode an empty string, Wireshark (and other devices, eg. Innovaphone) consider the packet malformed
+    // could also be an encoder bug - JW
+    argument.m_callIdentity = " ";
+  } else {
+    argument.m_callIdentity = callIdentity;
+  }
 
   H4501_ArrayOf_AliasAddress& aliasAddress = argument.m_reroutingNumber.m_destinationAddress;
 
@@ -118,7 +125,6 @@ void H450ServiceAPDU::BuildCallTransferInitiate(int invokeId,
     aliasAddress.SetSize(2);
 
     // Set the alias
-    aliasAddress[1].SetTag(H225_AliasAddress::e_dialedDigits);	// TODO: can't this also be another alias type ???
     H323SetAliasAddress(alias, aliasAddress[1]);
 
     // Set the transport
@@ -136,7 +142,6 @@ void H450ServiceAPDU::BuildCallTransferInitiate(int invokeId,
     }
     else {
       // Set the alias, no transport
-      aliasAddress[0].SetTag(H225_AliasAddress::e_dialedDigits);
       H323SetAliasAddress(alias, aliasAddress[0]);
     }
   }
