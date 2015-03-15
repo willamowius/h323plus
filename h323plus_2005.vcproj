@@ -1330,6 +1330,57 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\h323t140.cxx"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Windows Mobile 6 Professional SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						PreprocessorDefinitions=""
+						BrowseInformation="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Windows Mobile 6 Professional SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						PreprocessorDefinitions=""
+						BrowseInformation="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="No Trace|Windows Mobile 6 Professional SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="src\h323t38.cxx"
 				>
 				<FileConfiguration
@@ -2387,6 +2438,10 @@
 			</File>
 			<File
 				RelativePath="include\h323t120.h"
+				>
+			</File>
+			<File
+				RelativePath="include\h323t140.h"
 				>
 			</File>
 			<File
