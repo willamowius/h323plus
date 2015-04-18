@@ -633,6 +633,7 @@ H323_TLS
 H323_AEC
 H323_FILE
 H323_GNUGK
+H323_T140
 H323_T120
 H323_T38
 H323_H501
@@ -641,7 +642,6 @@ H323_H460COM
 H323_H460PRE
 H323_H460P
 H323_H46026
-H323_H46025
 H323_H46023
 H323_H46019M
 H323_H46018
@@ -1417,16 +1417,16 @@ Optional Features:
   --disable-h46018        disable H.460.18/.19
   --disable-h46019m       disable H.460.19 RTP multiplexing
   --disable-h46023        disable H.460.23/.24
-  --enable-h46025         enable H.460.25
-  --enable-h46026         enable H.460.26
+  --disable-h46025        disable H.460.25
+  --disable-h46026        disable H.460.26
   --enable-h460p          enable H.460 Presence
   --enable-h460pre        enable H.460 PreEmption
   --enable-h460com        enable H.460 Compat Feature
   --enable-h461           enable H.461 ASSET Feature
   --disable-h501          disable H.501
   --disable-t38           disable T.38
-  --enable-t120           enable T.120
-  --enable-t140           enable T.140
+  --disable-t120          disable T.120
+  --disable-t140          disable T.140
   --disable-gnugk         disable GnuGk NAT
   --disable-file          disable File Transfer
   --enable-aec            enable Acoustic Echo Cancellation
@@ -3756,7 +3756,8 @@ else
   ;;
   *)
   as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in /usr/local/bin
+as_dummy="/usr/local/bin:/usr/bin"
+for as_dir in $as_dummy
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
@@ -3919,6 +3920,7 @@ if test "${HAS_PTLIB_LIB_MAK:-unset}" = "unset" ; then
 
 
 
+
 if test "x$ac_cv_env_PKG_CONFIG_set" != "xset"; then
 	if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
@@ -4047,6 +4049,7 @@ if test -n "$PTLIB_CFLAGS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_PTLIB_CFLAGS=`$PKG_CONFIG --cflags "ptlib" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -4063,6 +4066,7 @@ if test -n "$PTLIB_LIBS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_PTLIB_LIBS=`$PKG_CONFIG --libs "ptlib" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -4082,9 +4086,9 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        PTLIB_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "ptlib" 2>&1`
+	        PTLIB_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "ptlib" 2>&1`
         else
-	        PTLIB_PKG_ERRORS=`$PKG_CONFIG --print-errors "ptlib" 2>&1`
+	        PTLIB_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "ptlib" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$PTLIB_PKG_ERRORS" >&5
@@ -4764,6 +4768,8 @@ $as_echo "$as_me: Disabling H.460.23/.24" >&6;}
 fi
 
 
+
+
 # Check whether --enable-h46025 was given.
 if test "${enable_h46025+set}" = set; then :
   enableval=$enable_h46025;
@@ -4773,12 +4779,12 @@ if test "${enable_h46025}x" = "x" ; then
   enable_h46023=$default_h46025
 fi
 if test "$enable_h46025" = "yes" ; then
-  H323_h46025=1
+  H323_H46025=1
 
-$as_echo "#define H323_h46025 1" >>confdefs.h
+$as_echo "#define H323_H46025 1" >>confdefs.h
 
 else
-  H323_h46025=
+  H323_H46025=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460.25" >&5
 $as_echo "$as_me: Disabling H.460.25" >&6;}
 fi
@@ -4954,7 +4960,7 @@ if test "$enable_t120" = "no" ; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling T.120" >&5
 $as_echo "$as_me: Disabling T.120" >&6;}
 else
-  H323_T120=1
+  H323_T20=1
 
 $as_echo "#define H323_T120 1" >>confdefs.h
 

@@ -79,7 +79,7 @@ if test "${HAS_PTLIB:-unset}" = "unset" ; then
       PTLIBDIR="${HOME}/ptlib"
     else
       if test "${HAS_PTLIB:-unset}" = "unset" ; then
-        AC_PATH_PROG(PTLIB_CONFIG, ptlib-config, , /usr/local/bin)
+        AC_PATH_PROG(PTLIB_CONFIG, ptlib-config, , /usr/local/bin:/usr/bin)
       else
         if test "${PTLIB_CONFIG:-unset}" = "unset" ; then
           AC_PATH_PROG(PTLIB_CONFIG, ptlib-config, , /usr/share/ptlib/make/)
