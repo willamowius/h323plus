@@ -59,7 +59,7 @@ extern "C" {
 H235_DiffieHellman::H235_DiffieHellman(const PConfig  & dhFile, const PString & section)
 : dh(NULL), m_remKey(NULL), m_toSend(true), m_keySize(0), m_loadFromFile(false)
 {
-  if (Load(dhFile,section))
+  if (Load(dhFile, section))
     m_keySize = BN_num_bytes(dh->pub_key);
 }
 
@@ -180,12 +180,14 @@ PBoolean H235_DiffieHellman::Encode_P(PASN_BitString & p) const
     return false;
 
   unsigned char * data = (unsigned char *)OPENSSL_malloc(BN_num_bytes(dh->p));
-  memset(data, 0, BN_num_bytes(dh->p));
   if (data != NULL) {
+    memset(data, 0, BN_num_bytes(dh->p));
     if (BN_bn2bin(dh->p, data) > 0) {
        p.SetData(BN_num_bits(dh->p), data);
     } else {
       PTRACE(1, "H235_DH\tFailed to encode P");
+      OPENSSL_free(data);
+      return false;
     }
   }
   OPENSSL_free(data);
@@ -216,12 +218,14 @@ PBoolean H235_DiffieHellman::Encode_G(PASN_BitString & g) const
 
   // G is padded out to the length of P
   unsigned char * data = (unsigned char *)OPENSSL_malloc(len_p);
-  memset(data, 0, len_p);
   if (data != NULL) {
+    memset(data, 0, len_p);
     if (BN_bn2bin(dh->g, data + len_p - len_g) > 0) {
        g.SetData(bits_p, data);
     } else {
       PTRACE(1, "H235_DH\tFailed to encode G");
+      OPENSSL_free(data);
+      return false;
     }
   }
   OPENSSL_free(data);
@@ -329,7 +333,7 @@ PBoolean H235_DiffieHellman::Load(const PConfig  & dhFile, const PString & secti
     PBYTEArray temp(1);
     memcpy(temp.GetPointer(), data.GetPointer(), 1);
     memset(data.GetPointer(), 0, data.GetSize());
-    memcpy(data.GetPointer() + data.GetSize()-1, temp.GetPointer(),1);
+    memcpy(data.GetPointer() + data.GetSize()-1, temp.GetPointer(), 1);
     dh->g = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
   } else 
     ok = false;
