@@ -324,6 +324,7 @@ PBoolean H235_DiffieHellman::Load(const PConfig  & dhFile, const PString & secti
     str = dhFile.GetString(section, "PRIME", "");
     PBase64::Decode(str, data);
     dh->p = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
+    ok = ok && (BN_num_bytes(dh->p) > 0);
   } else 
     ok = false;
 
@@ -335,6 +336,7 @@ PBoolean H235_DiffieHellman::Load(const PConfig  & dhFile, const PString & secti
     memset(data.GetPointer(), 0, data.GetSize());
     memcpy(data.GetPointer() + data.GetSize()-1, temp.GetPointer(), 1);
     dh->g = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
+    ok = ok && (BN_num_bytes(dh->g) > 0);
   } else 
     ok = false;
 
@@ -342,6 +344,7 @@ PBoolean H235_DiffieHellman::Load(const PConfig  & dhFile, const PString & secti
     str = dhFile.GetString(section, "PUBLIC", "");
     PBase64::Decode(str, data);
     dh->pub_key = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
+    ok = ok && (BN_num_bytes(dh->pub_key) > 0);
   } else 
     ok = false;
   
@@ -349,6 +352,7 @@ PBoolean H235_DiffieHellman::Load(const PConfig  & dhFile, const PString & secti
     str = dhFile.GetString(section, "PRIVATE", "");
     PBase64::Decode(str, data);
     dh->priv_key = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
+    ok = ok && (BN_num_bytes(dh->priv_key) > 0);
   } else 
     ok = false;
 
