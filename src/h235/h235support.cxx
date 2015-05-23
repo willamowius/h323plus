@@ -248,10 +248,15 @@ void H235_DiffieHellman::Encode_HalfKey(PASN_BitString & hk) const
   int len_key = BN_num_bytes(dh->pub_key);
   int bits_p = BN_num_bits(dh->p);
 
+  if (len_key > len_p) {
+    PTRACE(1, "H235_DH\tFailed to encode halfkey: len key > len prime");
+    return;
+  }
+
   // halfkey is padded out to the length of P
   unsigned char * data = (unsigned char *)OPENSSL_malloc(len_p);
-  memset(data, 0, len_p);
-  if (data != NULL){
+  if (data != NULL) {
+    memset(data, 0, len_p);
     if (BN_bn2bin(dh->pub_key, data + len_p - len_key) > 0) {
        hk.SetData(bits_p, data);
     } else {
