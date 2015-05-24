@@ -59,8 +59,12 @@ extern "C" {
 H235_DiffieHellman::H235_DiffieHellman(const PConfig  & dhFile, const PString & section)
 : dh(NULL), m_remKey(NULL), m_toSend(true), m_keySize(0), m_loadFromFile(false)
 {
-  if (Load(dhFile, section))
+  if (Load(dhFile, section)) {
+    if (dh->pub_key == NULL) {
+      GenerateHalfKey();
+    }
     m_keySize = BN_num_bytes(dh->pub_key);
+  }
 }
 
 H235_DiffieHellman::H235_DiffieHellman(const BYTE * pData, PINDEX pSize,
@@ -287,9 +291,6 @@ void H235_DiffieHellman::SetRemoteKey(bignum_st * remKey)
 
 PBoolean H235_DiffieHellman::GenerateHalfKey()
 {
-  if (m_loadFromFile)
-    return true;
-
   if (dh && dh->pub_key)
     return true;
 
