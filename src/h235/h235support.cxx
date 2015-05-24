@@ -345,16 +345,14 @@ PBoolean H235_DiffieHellman::Load(const PConfig  & dhFile, const PString & secti
     PBase64::Decode(str, data);
     dh->pub_key = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
     ok = ok && (BN_num_bytes(dh->pub_key) > 0);
-  } else 
-    ok = false;
+  }
   
   if (dhFile.HasKey(section, "PRIVATE")) {
     str = dhFile.GetString(section, "PRIVATE", "");
     PBase64::Decode(str, data);
     dh->priv_key = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
     ok = ok && (BN_num_bytes(dh->priv_key) > 0);
-  } else 
-    ok = false;
+  }
 
   if (ok /*&& CheckParams()*/) 
     m_loadFromFile = true;
