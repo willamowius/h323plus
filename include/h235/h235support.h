@@ -72,6 +72,13 @@ public:
     );
 
     /**Create a set of Diffie-Hellman parameters from file.
+       Data must be stored in INI format with the section being the OID of the Algorithm
+        Parameter names are as below and all values are base64 encoded. eg:
+           [ALG OID]
+           PRIME=
+           GENERATOR=
+           PUBLIC=  <optional>
+           PRIVATE= <optional>
       */
     H235_DiffieHellman(
         const PConfig  & dhFile,                ///< Config file

@@ -1211,14 +1211,41 @@ class H323EndPoint : public PObject
       */
     H235MediaCipher GetH235MediaCipher();
 
-    /** Set Encryption Cache File Paths (can be multiple file paths)
+    /** H235SetDiffieHellmanFiles Set DH prameters from File (can be multiple file paths seperated by ;)
         Data must be stored in INI format with the section being the OID of the Algorith
         Parameter names are as below and all values are base64 encoded. eg:
-           [ALG OID]
+           [OID]
            PRIME=
            GENERATOR=
-           PUBLIC=
-           PRIVATE= 
+
+       Default Parameters are replaced with the OID is one of
+            1024bit "0.0.8.235.0.3.43"
+            2048bit "0.0.8.235.0.3.45"
+            4096bit "0.0.8.235.0.3.47"
+            6144bit "0.0.8.235.0.4.77"
+            8192bit "0.0.8.235.0.4.78"
+       Default operation calls SetEncryptionCacheFiles();
+      */
+    virtual void H235SetDiffieHellmanFiles(const PString & file);
+
+    /** Set Encryption Cache File Paths (can be multiple file paths seperated by ;)
+        Data must be stored in INI format with the section being the OID of the Algorith
+        Parameter names are as below and all values are base64 encoded. eg:
+           [OID]
+           PRIME=
+           GENERATOR=
+           PUBLIC=  <optional>
+           PRIVATE= <optional>
+
+       Default Parameters are replaced with the OID is one of
+            1024bit "0.0.8.235.0.3.43"
+            2048bit "0.0.8.235.0.3.45"
+            4096bit "0.0.8.235.0.3.47"
+            6144bit "0.0.8.235.0.4.77"
+            8192bit "0.0.8.235.0.4.78"
+
+        This function call should only be called by the implementer directly for testing purposes 
+        use H235SetDiffieHellmanFiles in production.
       */
     virtual void SetEncryptionCacheFiles(const PString & cachefile);
 
