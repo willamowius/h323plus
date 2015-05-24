@@ -86,22 +86,22 @@ void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, const PString & fi
     PStringArray FilePaths;
     dhmap.insert(pair<PString, H235_DiffieHellman*>(OID_H235V3, (H235_DiffieHellman*)NULL));
 
-    PINDEX k=0;
     if (!filePath.IsEmpty()) {
       PStringArray temp = filePath.Tokenise(';');
-      for (k=0; k < temp.GetSize(); ++k) {
-          PFilePath dhFile = PString(temp[k]);
-          if (PFile::Exists(dhFile)) 
-              FilePaths.AppendString(dhFile);
+      for (PINDEX k = 0; k < temp.GetSize(); ++k) {
+        PFilePath dhFile = PString(temp[k]);
+        if (PFile::Exists(dhFile)) {
+            FilePaths.AppendString(dhFile);
+        }
       }
     }
   
-    int i=0;
-    for (PINDEX k=0; k < FilePaths.GetSize(); ++k) {
-        PConfig cfg(FilePaths[k],PString());
+    int i = 0;
+    for (PINDEX k = 0; k < FilePaths.GetSize(); ++k) {
+        PConfig cfg(FilePaths[k], PString());
         PStringArray oidList(cfg.GetSections());
-        for (PINDEX j=0; j < oidList.GetSize(); ++j) {  
-            H235_DiffieHellman * dh = new H235_DiffieHellman(cfg,oidList[j]);
+        for (PINDEX j = 0; j < oidList.GetSize(); ++j) {  
+            H235_DiffieHellman * dh = new H235_DiffieHellman(cfg, oidList[j]);
             if (dh->LoadedFromFile()) {
                 dhmap.insert(pair<PString, H235_DiffieHellman*>(oidList[j], dh));
                 i++;
