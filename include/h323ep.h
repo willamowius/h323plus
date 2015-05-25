@@ -1218,7 +1218,7 @@ class H323EndPoint : public PObject
            PRIME=
            GENERATOR=
 
-       Default Parameters are replaced with the OID is one of
+       Default Parameters are replaced if OID is one of
             1024bit "0.0.8.235.0.3.43"
             2048bit "0.0.8.235.0.3.45"
             4096bit "0.0.8.235.0.3.47"
@@ -1237,7 +1237,7 @@ class H323EndPoint : public PObject
            PUBLIC=  <optional>
            PRIVATE= <optional>
 
-       Default Parameters are replaced with the OID is one of
+       Default Parameters are replaced if OID is one of
             1024bit "0.0.8.235.0.3.43"
             2048bit "0.0.8.235.0.3.45"
             4096bit "0.0.8.235.0.3.47"
@@ -1252,6 +1252,19 @@ class H323EndPoint : public PObject
     /** Get Encryption Cache File Path (can be mulitple file paths)
       */
     virtual const PString & GetEncryptionCacheFiles();
+
+    /** Load custom DiffieHellman Parameters for media encryption
+
+       Default Parameters are replaced if OID is one of
+            1024bit "0.0.8.235.0.3.43"
+            2048bit "0.0.8.235.0.3.45"
+            4096bit "0.0.8.235.0.3.47"
+            6144bit "0.0.8.235.0.4.77"
+            8192bit "0.0.8.235.0.4.78"
+      */
+    virtual void LoadDiffieHellmanParameters(const PString & oid, 
+                                             const PBYTEArray & pData, 
+                                             const PBYTEArray & gData);
 
     /**Initialise Encryption cache 
        Use this to create the encryption information at Startup rather than at the

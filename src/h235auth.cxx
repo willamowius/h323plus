@@ -663,6 +663,21 @@ void H235Authenticators::SetDHParameterFile(const PString & filePaths)
     m_dhFile = filePaths;
 }
 
+void H235Authenticators::LoadDHData(const PString & oid, const PBYTEArray & pData, const PBYTEArray & gData)
+{
+    DH_Data data;
+        data.m_OID = oid;
+        data.m_pData = pData;
+        data.m_gData = gData;
+
+    m_dhData.push_back(data);
+}
+
+H235Authenticators::DH_DataList & H235Authenticators::GetDHDataList()
+{
+    return m_dhData;
+}
+
 PINDEX H235Authenticators::GetMaxCipherLength()
 {
     return m_cipherLength;

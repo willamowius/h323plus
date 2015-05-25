@@ -69,7 +69,7 @@ inline void DeleteObjectsInMap(M & m)
 	m.clear(); // delete pointers to deleted objects
 }
 
-void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, const PString & filePath = PString(), PINDEX cipherlength = P_MAX_INDEX, PINDEX maxTokenLength = 1024)
+void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, H235Authenticators::DH_DataList & customData, const PString & filePath = PString(), PINDEX cipherlength = P_MAX_INDEX, PINDEX maxTokenLength = 1024)
 {
     if (dhcache.size() > 0) {
         H235_DHMap::iterator i = dhcache.begin();
@@ -86,6 +86,17 @@ void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, const PString & fi
     PStringArray FilePaths;
     dhmap.insert(pair<PString, H235_DiffieHellman*>(OID_H235V3, (H235_DiffieHellman*)NULL));
 
+    // Load from memory vendor supplied keys
+    if (customData.size() > 0) {
+        H235Authenticators::DH_DataList::iterator r;
+        for (r = customData.begin(); r != customData.end(); ++r) {
+            dhmap.insert(pair<PString, H235_DiffieHellman*>(r->m_OID,
+            new H235_DiffieHellman(r->m_pData.GetPointer(), r->m_pData.GetSize(),
+                                   r->m_gData, r->m_gData.GetSize(), true)));
+        }
+    }
+
+    // Load from vendor supplied filePath
     if (!filePath.IsEmpty()) {
       PStringArray temp = filePath.Tokenise(';');
       for (PINDEX k = 0; k < temp.GetSize(); ++k) {
@@ -96,6 +107,7 @@ void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, const PString & fi
       }
     }
   
+    // Load default DH keypairs
     int i = 0;
     for (PINDEX k = 0; k < FilePaths.GetSize(); ++k) {
         PConfig cfg(FilePaths[k], PString());
@@ -152,7 +164,7 @@ H2356_Authenticator::H2356_Authenticator()
 
     m_algOIDs.SetSize(0);
     if (m_enabled) {
-        LoadH235_DHMap(m_dhLocalMap, m_dhCachedMap, H235Authenticators::GetDHParameterFile(), H235Authenticators::GetMaxCipherLength(), H235Authenticators::GetMaxTokenLength());
+        LoadH235_DHMap(m_dhLocalMap, m_dhCachedMap, H235Authenticators::GetDHDataList(), H235Authenticators::GetDHParameterFile(), H235Authenticators::GetMaxCipherLength(), H235Authenticators::GetMaxTokenLength());
         InitialiseSecurity(); // make sure m_algOIDs gets filled
     }
 }
@@ -184,7 +196,7 @@ PBoolean H2356_Authenticator::GetAuthenticationCapabilities(H235Authenticator::C
 
 void H2356_Authenticator::InitialiseCache(int cipherlength, unsigned maxTokenLength)
 {
-   LoadH235_DHMap(m_dhCachedMap, m_dhCachedMap, H235Authenticators::GetDHParameterFile(), cipherlength, maxTokenLength);
+   LoadH235_DHMap(m_dhCachedMap, m_dhCachedMap, H235Authenticators::GetDHDataList(), H235Authenticators::GetDHParameterFile(), cipherlength, maxTokenLength);
 }
 
 void H2356_Authenticator::RemoveCache()

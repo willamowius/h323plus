@@ -1606,6 +1606,12 @@ const PString & H323EndPoint::GetEncryptionCacheFiles()
     return H235Authenticators::GetDHParameterFile();
 }
 
+void H323EndPoint::LoadDiffieHellmanParameters(const PString & oid, 
+                                               const PBYTEArray & pData, const PBYTEArray & gData)
+{
+    H235Authenticators::LoadDHData(oid, pData, gData);
+}
+
 void H323EndPoint::EncryptionCacheInitialise()
 {
   if (H235Authenticators::GetEncryptionPolicy()) {

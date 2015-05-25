@@ -272,6 +272,16 @@ PDECLARE_LIST(H235Authenticators, H235Authenticator)
     ) const;
 
 #ifdef H323_H235
+    struct DH_Data {
+        DH_Data() 
+         : m_gData(0) {};
+
+        PString     m_OID;
+        PBYTEArray  m_pData;
+        PBYTEArray  m_gData;
+    };
+    typedef list<DH_Data> DH_DataList;
+
     PBoolean CreateAuthenticators(const PASN_Array & clearTokens, const PASN_Array & cryptoTokens);
     PBoolean CreateAuthenticators(H235Authenticator::Application usage);
     PBoolean CreateAuthenticator(const PString & name);
@@ -296,6 +306,9 @@ PDECLARE_LIST(H235Authenticators, H235Authenticator)
     static PString & GetDHParameterFile();
     static void SetDHParameterFile(const PString & filePaths);
 
+    static void LoadDHData(const PString & oid, const PBYTEArray & pData, const PBYTEArray & gData);
+    static DH_DataList & GetDHDataList();
+
  protected:
     void CreateAuthenticatorsByID(const PStringArray & identifiers);
 
@@ -303,6 +316,7 @@ PDECLARE_LIST(H235Authenticators, H235Authenticator)
     static PINDEX m_cipherLength;
     static PINDEX m_maxTokenLength;
     static PString m_dhFile;
+    static DH_DataList m_dhData;
 #endif
 
 };
@@ -336,7 +350,7 @@ H323DICTIONARY(H235AuthenticatorDict,PString,H235AuthenticatorInfo);
 
 /* This class is a device independent Time class that is used with H.235 Authentication mechanisms
    It replaces the local time function to support remote gatekeeper synchronisation and ensures security
-   is not effected if the user changes the local device time while the device is running. */
+   is not effected if the user changes the local device time while the application is running. */
 
 class H235AuthenticatorTime : public PObject
 {
