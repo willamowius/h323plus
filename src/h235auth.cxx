@@ -344,6 +344,7 @@ PINDEX   H235Authenticators::m_encryptionPolicy = 0;   // Default Encryption is 
 PINDEX   H235Authenticators::m_cipherLength = 128;     // Ciphers above 128 must be expressly enabled.  
 PINDEX   H235Authenticators::m_maxTokenLength = 1024;  // Tokens longer than 1024 bits must be expressly enabled.  
 PString  H235Authenticators::m_dhFile=PString();
+H235Authenticators::DH_DataList H235Authenticators::m_dhData;
 #endif
 
 void H235Authenticators::PreparePDU(H323TransactionPDU & pdu,
