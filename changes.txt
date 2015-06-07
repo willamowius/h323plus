@@ -1,6 +1,7 @@
 ===============================================================================
 H323plus 1.26.6 - 1.26.x
 ===============================================================================
+Added Allow implementers to supply thier own DH Parameters for Signaling Encryption (TLS)
 Added Allow implementers to supply thier own DH parameters for media encryption
 NEW Add H.450.7 Support (WIP) (1.26.6)
 

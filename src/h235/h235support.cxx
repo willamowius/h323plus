@@ -50,6 +50,7 @@
 extern "C" {
 #include <openssl/err.h>
 #include <openssl/dh.h>
+#include <openssl/pem.h>
 #include <openssl/bn.h>
 };
 
@@ -65,6 +66,21 @@ H235_DiffieHellman::H235_DiffieHellman(const PConfig  & dhFile, const PString & 
     }
     m_keySize = BN_num_bytes(dh->pub_key);
   }
+}
+
+H235_DiffieHellman::H235_DiffieHellman(const PFilePath & dhPKCS3)
+: dh(NULL), m_remKey(NULL), m_toSend(true), m_keySize(0), m_loadFromFile(false)
+{
+    FILE *paramfile;
+    paramfile = fopen(dhPKCS3, "r");
+    if (paramfile) {
+        dh = PEM_read_DHparams(paramfile, NULL, NULL, NULL);
+        fclose(paramfile);
+        if (dh) {
+            m_keySize = BN_num_bits(dh->p);
+            m_loadFromFile = true;
+        }
+    }
 }
 
 H235_DiffieHellman::H235_DiffieHellman(const BYTE * pData, PINDEX pSize,

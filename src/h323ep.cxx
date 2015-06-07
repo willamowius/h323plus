@@ -233,6 +233,14 @@ class H323_TLSContext : public PSSLContext
     */
     PBoolean UsePrivateKey(const PFilePath & privFile, const PString & password);
 
+    /**Set custom DiffieHellman parameters from a PEM encoded PKCS#3 file
+    */
+    PBoolean SetDHParameters(const PFilePath & pkcs3);
+
+    /**Set custom DiffieHellman parameters from implemeter
+    */
+    PBoolean SetDHParameters(const PBYTEArray & dh_p, const PBYTEArray & dh_g);
+
     /**Initialise Context
     */
     PBoolean Initialise();
@@ -382,6 +390,58 @@ PBoolean H323_TLSContext::UsePrivateKey(const PFilePath & privFile, const PStrin
         return false;
     }
     return true;
+}
+
+PBoolean H323_TLSContext::SetDHParameters(const PFilePath & pkcs3)
+{
+
+ DH *dh = NULL;
+ FILE *paramfile;
+ paramfile = fopen(pkcs3, "r");
+ if (paramfile) {
+   dh = PEM_read_DHparams(paramfile, NULL, NULL, NULL);
+   fclose(paramfile);
+ } else {
+   return false;
+ }
+ if (dh == NULL)
+    return false;
+
+#if PTLIB_VER < 2120
+ ssl_ctx_st * m_context = context;
+#endif
+
+ if (SSL_CTX_set_tmp_dh(m_context, dh) != 1) {
+    DH_free(dh);
+    return false;
+ }
+
+ SSL_CTX_set_options(m_context, SSL_OP_SINGLE_DH_USE);  // Generate a new DH Session key on every connection
+ return true;
+}
+
+PBoolean H323_TLSContext::SetDHParameters(const PBYTEArray & dh_p, const PBYTEArray & dh_g)
+{
+  DH *dh = DH_new();
+  if (dh == NULL) {
+    PTRACE(2, "TLS\tFailed to allocate DH");
+    return false;
+  };
+
+  dh->p = BN_bin2bn(dh_p, dh_p.GetSize(), NULL);
+  dh->g = BN_bin2bn(dh_g, dh_g.GetSize(), NULL);
+
+#if PTLIB_VER < 2120
+  ssl_ctx_st * m_context = context;
+#endif
+
+ if (SSL_CTX_set_tmp_dh(m_context, dh) != 1) {
+    DH_free(dh);
+    return false;
+ }
+
+ SSL_CTX_set_options(m_context, SSL_OP_SINGLE_DH_USE);  // Generate a new DH Session key on every connection
+ return true;
 }
 
 PBoolean H323_TLSContext::Initialise()
@@ -4092,6 +4152,22 @@ PBoolean H323EndPoint::TLS_SetCipherList(const PString & ciphers)
         return false;
 
     return ((H323_TLSContext*)m_transportContext)->SetCipherList(ciphers);
+}
+
+PBoolean H323EndPoint::TLS_SetDHParameters(const PFilePath & pkcs3)
+{
+    if (!InitialiseTransportContext())
+        return false;
+
+    return ((H323_TLSContext*)m_transportContext)->SetDHParameters(pkcs3);
+}
+
+PBoolean H323EndPoint::TLS_SetDHParameters(const PBYTEArray & dh_p, const PBYTEArray & dh_g)
+{
+    if (!InitialiseTransportContext())
+        return false;
+
+    return ((H323_TLSContext*)m_transportContext)->SetDHParameters(dh_p,dh_g);
 }
 
 PBoolean H323EndPoint::TLS_Initialise(const PIPSocket::Address & binding, WORD port)

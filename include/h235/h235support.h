@@ -85,6 +85,12 @@ public:
         const PString & section                 ///< section of config file
     );
 
+    /**Create a set of Diffie-Hellman parameters from a PKCS#3 file.
+      */
+    H235_DiffieHellman(
+        const PFilePath  & dhPKCS3              ///< PKCS#3 file
+    );
+
     /**Create a copy of the Diffie-Hellman parameters. from 
        H235_DiffieHellman structure
       */
