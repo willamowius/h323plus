@@ -996,7 +996,7 @@ void H323_RTPChannel::Transmit()
     if (isAudio) {
         filterMutex.Wait();
         for (PINDEX i = 0; i < filters.GetSize(); i++)
-          filters[i](frame, (INT)&sendPacket);
+          filters[i](frame, (H323_INT)&sendPacket);
         filterMutex.Signal();
     }
 
