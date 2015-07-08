@@ -586,8 +586,10 @@ H323Listener * H323TransportAddress::CreateListener(H323EndPoint & endpoint) con
     actually have another, we hard code it for now.
    */
 
+#ifdef H323_TLS
   PBoolean useTLS = (endpoint.GetTransportSecurity()->IsTLSEnabled() && 
                     (m_tls || GetPort() == H323EndPoint::DefaultTLSPort));
+#endif
 
   PIPSocket::Address ip;
   WORD port = H323EndPoint::DefaultTcpPort;
@@ -613,8 +615,11 @@ H323Listener * H323TransportAddress::CreateCompatibleListener(H323EndPoint & end
     actually have another, we hard code it for now.
    */
 
+#ifdef H323_TLS
   PBoolean useTLS = (endpoint.GetTransportSecurity()->IsTLSEnabled() && 
                     (m_tls || GetPort() == H323EndPoint::DefaultTLSPort));
+#endif
+
   PIPSocket::Address ip;
   WORD port = H323EndPoint::DefaultTcpPort;
   if (GetIpAndPort(ip, port)) {

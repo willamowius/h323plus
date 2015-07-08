@@ -438,7 +438,11 @@ H235Authenticator::ValidationResult
 void H235Authenticators::PrepareSignalPDU(unsigned code,
                                     PASN_Array & clearTokens,
                                     PASN_Array & cryptoTokens,
+#ifdef H323_H235
                                     PINDEX max_keyLength
+#else
+                                    PINDEX /*max_keyLength*/   // Not required
+#endif
                                     ) const
 {
   // Clean out any crypto tokens in case this is a retry message
