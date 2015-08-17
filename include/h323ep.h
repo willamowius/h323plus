@@ -2054,6 +2054,10 @@ class H323EndPoint : public PObject
      */
     TerminalTypes GetTerminalType() const { return terminalType; }
 
+    /**Set the endpoint terminal type.
+    */
+    void SetTerminalType(TerminalTypes type);
+
     /**Determine if endpoint is terminal type.
      */
     PBoolean IsTerminal() const;
@@ -2966,6 +2970,7 @@ class H323EndPoint : public PObject
     WORD manufacturerCode;
 
     TerminalTypes terminalType;
+    PBoolean rewriteParsePartyName;
 
 #ifdef H323_H450
 

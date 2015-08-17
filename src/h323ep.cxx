@@ -738,6 +738,7 @@ H323EndPoint::H323EndPoint()
   defaultSendUserInputMode = H323Connection::SendUserInputAsString;
 
   terminalType = e_TerminalOnly;
+  rewriteParsePartyName = true;
   initialBandwidth = 100000; // Standard 10base LAN in 100's of bits/sec
   clearCallOnRoundTripFail = FALSE;
 
@@ -1540,7 +1541,7 @@ H235Authenticators H323EndPoint::CreateEPAuthenticators()
       for (r = keyList.begin(); r != keyList.end(); ++r) {
         H235Authenticator * Auth = PFactory<H235Authenticator>::CreateInstance(*r);
 #endif
-        if (Auth->GetApplication() == H235Authenticator::GKAdmission ||
+        if (Auth == NULL || Auth->GetApplication() == H235Authenticator::GKAdmission ||
             Auth->GetApplication() == H235Authenticator::LRQOnly) {
               delete Auth;
               continue;
@@ -2169,19 +2170,27 @@ PBoolean H323EndPoint::ParsePartyName(const PString & _remoteParty,
         proto = "h323s";
         number = number.Mid(6);
     }
+    if (remoteParty.Left(11) *= "h323cs-sec:") {
+        proto = "h323s";
+        number = number.Mid(11);
+    }
 
-  // Support [address]##[Alias] dialing
-  PINDEX hash = number.Find("##");
-  if (hash != P_MAX_INDEX) {
-      remoteParty = proto + ":" + number.Mid(hash+2) + "@" + number.Left(hash);
-    PTRACE(4, "H323\tConverted " << _remoteParty << " to " << remoteParty);
-  }
+    if (rewriteParsePartyName) {
+        // Support [address]##[Alias] dialing
+        PINDEX hash = number.Find("##");
+        if (hash != P_MAX_INDEX) {
+            remoteParty = proto + ":" + number.Mid(hash + 2) + "@" + number.Left(hash);
+            PTRACE(4, "H323\tConverted " << _remoteParty << " to " << remoteParty);
+        }
 
-  PINDEX phash = _remoteParty.Find("#");
-  if (phash != P_MAX_INDEX) {
-	remoteParty.Replace("#","%");
-    PTRACE(4, "H323\tAdjusted " << remoteParty);
-  }
+        /*
+          PINDEX phash = _remoteParty.Find("#");
+          if (phash != P_MAX_INDEX) {
+            remoteParty.Replace("#","%");
+            PTRACE(4, "H323\tAdjusted " << remoteParty);
+          }
+        */
+    }
 
   //check if IPv6 address
   PINDEX ipv6 = remoteParty.Find("::");
@@ -3486,6 +3495,13 @@ void H323EndPoint::SetSoundChannelBufferDepth(unsigned depth)
 #endif  // P_AUDIO
 
 #endif  // H323_AUDIO_CODECS
+
+
+void H323EndPoint::SetTerminalType(TerminalTypes type) 
+{
+    terminalType = type;
+    rewriteParsePartyName = (terminalType < e_GatewayOnly);
+}
 
 
 PBoolean H323EndPoint::IsTerminal() const
