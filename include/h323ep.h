@@ -814,7 +814,7 @@ class H323EndPoint : public PObject
        where the default alias is the same as the host, the default transport
        is "ip" and the default port is 1720.
       */
-    PBoolean ParsePartyName(
+    virtual PBoolean ParsePartyName(
       const PString & party,          ///< Party name string.
       PString & alias,                ///< Parsed alias name
       H323TransportAddress & address  ///< Parsed transport address
