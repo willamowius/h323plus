@@ -2187,6 +2187,24 @@ PBoolean H323Connection::ForwardCall(const PString & forwardParty)
   return WriteSignalPDU(redirectPDU);
 }
 
+PBoolean H323Connection::ForwardCall(const H225_ArrayOf_AliasAddress & alternativeAliasAddresses, const H323TransportAddress & alternativeAddress)
+{
+  H323SignalPDU redirectPDU;
+  H225_Facility_UUIE * fac = redirectPDU.BuildFacility(*this, FALSE, H225_FacilityReason::e_callForwarded);
+
+  if (!alternativeAddress) {
+    fac->IncludeOptionalField(H225_Facility_UUIE::e_alternativeAddress);
+    alternativeAddress.SetPDU(fac->m_alternativeAddress);
+  }
+
+  if (alternativeAliasAddresses.GetSize() > 0) {
+    fac->IncludeOptionalField(H225_Facility_UUIE::e_alternativeAliasAddress);
+    fac->m_alternativeAliasAddress = alternativeAliasAddresses;
+  }
+
+  return WriteSignalPDU(redirectPDU);
+}
+
 
 PBoolean H323Connection::RouteCallToMC(const PString & forwardParty, const H225_ConferenceIdentifier & confID)
 {
@@ -2217,6 +2235,27 @@ PBoolean H323Connection::RouteCallToMC(const PString & forwardParty, const H225_
     fac->IncludeOptionalField(H225_Facility_UUIE::e_alternativeAliasAddress);
     fac->m_alternativeAliasAddress.SetSize(1);
     H323SetAliasAddress(alias, fac->m_alternativeAliasAddress[0]);
+  }
+
+  fac->IncludeOptionalField(H225_Facility_UUIE::e_conferenceID);
+  fac->m_conferenceID = confID;
+
+  return WriteSignalPDU(redirectPDU);
+}
+
+PBoolean H323Connection::RouteCallToMC(const H225_ArrayOf_AliasAddress & alternativeAliasAddresses, const H323TransportAddress & alternativeAddress, const H225_ConferenceIdentifier & confID)
+{
+  H323SignalPDU redirectPDU;
+  H225_Facility_UUIE * fac = redirectPDU.BuildFacility(*this, FALSE, H225_FacilityReason::e_routeCallToMC);
+
+  if (!alternativeAddress) {
+    fac->IncludeOptionalField(H225_Facility_UUIE::e_alternativeAddress);
+    alternativeAddress.SetPDU(fac->m_alternativeAddress);
+  }
+
+  if (alternativeAliasAddresses.GetSize() > 0) {
+    fac->IncludeOptionalField(H225_Facility_UUIE::e_alternativeAliasAddress);
+    fac->m_alternativeAliasAddress = alternativeAliasAddresses;
   }
 
   fac->IncludeOptionalField(H225_Facility_UUIE::e_conferenceID);

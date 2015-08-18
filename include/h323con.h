@@ -671,11 +671,26 @@ class H323Connection : public PObject
       const PString & forwardParty   ///< Party to forward call to
     );
 
+    /**Forward incoming call to specified address.
+      */
+    virtual PBoolean ForwardCall(
+      const H225_ArrayOf_AliasAddress & alternativeAliasAddresses,
+      const H323TransportAddress & alternativeAddress
+    );
+
     /**Forward call to MC.
       */
     virtual PBoolean RouteCallToMC(
       const PString & forwardParty,   ///< Party to forward call to
       const H225_ConferenceIdentifier & confID    /// conference to join
+    );
+
+    /**Forward call to MC.
+      */
+    virtual PBoolean RouteCallToMC(
+      const H225_ArrayOf_AliasAddress & alternativeAliasAddresses,
+      const H323TransportAddress & alternativeAddress,
+      const H225_ConferenceIdentifier & confID
     );
 
 #ifdef H323_H450
