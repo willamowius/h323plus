@@ -330,16 +330,22 @@ PBoolean Q931::Decode(const PBYTEArray & data)
 
   protocolDiscriminator = data[0];
 
-  if (data[1] != 2) // Call reference must be 2 bytes long
+  unsigned callRefLen = data[1];
+  if (callRefLen > 2) // Call reference is usually 2 bytes long, Innovaphone sends 0 for H.460.17
     return FALSE;
 
-  callReference = ((data[2]&0x7f) << 8) | data[3];
-  fromDestination = (data[2]&0x80) != 0;
+  if (callRefLen == 2) {
+    callReference = ((data[2]&0x7f) << 8) | data[3];
+    fromDestination = (data[2]&0x80) != 0;
+  } else {
+    callReference = 0;
+    fromDestination = false;
+  }
 
-  messageType = (MsgTypes)data[4];
+  messageType = (MsgTypes)data[2+callRefLen];
 
   // Have preamble, start getting the informationElements into buffers
-  PINDEX offset = 5;
+  PINDEX offset = 3+callRefLen;
   while (offset < data.GetSize()) {
     // Get field discriminator
     int discriminator = data[offset++];
