@@ -331,7 +331,7 @@ PBoolean Q931::Decode(const PBYTEArray & data)
   protocolDiscriminator = data[0];
 
   unsigned callRefLen = data[1];
-  if (callRefLen > 2) // Call reference is usually 2 bytes long, Innovaphone sends 0 for H.460.17
+  if (callRefLen > 2) // Call reference is usually 2 bytes long, Innovaphone sends 0 length for H.460.17 (supposed to get fixed in r12)
     return FALSE;
 
   if (callRefLen == 2) {
