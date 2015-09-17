@@ -1293,7 +1293,7 @@ PObject * H235AuthenticatorTSS::Clone() const
 
 const char * H235AuthenticatorTSS::GetName() const
 {
-  return GetAuthenticatorNames()[0];
+  return "TSS";
 }
 
 PStringArray H235AuthenticatorTSS::GetAuthenticatorNames()
