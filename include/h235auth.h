@@ -222,8 +222,7 @@ class H235Authenticator : public PObject
     PString  password;      // shared secret
 
     unsigned sentRandomSequenceNumber;
-    //unsigned lastRandomSequenceNumber;
-    int lastRandomSequenceNumber;	// using int now, because with unsigned 2 consecutive negative values within the same timestamp caused abort
+    unsigned lastRandomSequenceNumber;
     unsigned lastTimestamp;
     int      timestampGracePeriod;
 
@@ -581,10 +580,12 @@ class H2351_Authenticator : public H235Authenticator
 
     virtual void RequireGeneralID(bool value) { m_requireGeneralID = value; }
     virtual void FullQ931Checking(bool value) { m_fullQ931Checking = value; }
+    virtual void VerifyRandomNumber(bool value) { m_verifyRandomNumber = value; }
 
 protected:
     PBoolean m_requireGeneralID;
     PBoolean m_fullQ931Checking;
+    PBoolean m_verifyRandomNumber;
 };
 
 typedef H2351_Authenticator H235AuthProcedure1;  // Backwards interoperability

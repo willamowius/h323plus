@@ -190,6 +190,7 @@ H2351_Authenticator::H2351_Authenticator()
   m_requireGeneralID = true;
   //m_fullQ931Checking = true; // H.235.1 clause 13.2 requires full Q.931 checking
   m_fullQ931Checking = false; // remain compatible with old versions for now
+  m_verifyRandomNumber = true; // switch off check for possible bug in ASN decoder
 }
 
 
@@ -418,10 +419,14 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
   
   //verify the randomnumber
   if (lastTimestamp == crHashed.m_hashedVals.m_timeStamp &&
-      lastRandomSequenceNumber == (int)crHashed.m_hashedVals.m_random) {
+      lastRandomSequenceNumber == crHashed.m_hashedVals.m_random) {
     //a message with this timespamp and the same random number was already verified
-    PTRACE(1, "H235RAS\tConsecutive messages with the same random and timestamp");
-    return e_ReplyAttack;
+    if (m_verifyRandomNumber) {
+      // Innovaphone r6 - r11 sometimes sends random numbers with the high bit set that are all decoded into -1 by H323Plus
+      // thus this check fails even is the numbers on the wire are different - this might be a bug in the PTLib ASN decoder TODO
+      PTRACE(1, "H235RAS\tConsecutive messages with the same random and timestamp");
+      return e_ReplyAttack;
+    }
   }
   
   // If has connection then EP Authenticator so CallBack to Check SenderID and Set Password
@@ -444,7 +449,7 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
      if (!localId && crHashed.m_tokenOID[OID_VERSION_OFFSET] > 1) {
        // H.235.0v4 clause 8.2 says generalID "should" be included, but doesn't require it
        // H.235.1v4 clause 14 says generalID "shall" be included in ClearTokens, when the information is available
-       // AudioCodes 4.6 and Innovaphone v6-v9 don't include a generalID
+       // AudioCodes 4.6 and Innovaphone v6-v11 don't include a generalID
        if (m_requireGeneralID) {
          if (!crHashed.m_hashedVals.HasOptionalField(H235_ClearToken::e_generalID)) {
            PTRACE(1, "H235RAS\tH2351_Authenticator requires general ID.");
