@@ -1177,7 +1177,7 @@ H235Authenticator::ValidationResult
 
   //verify the randomnumber
   if (lastTimestamp == clearToken.m_timeStamp &&
-      lastRandomSequenceNumber == (int)clearToken.m_random) {
+      lastRandomSequenceNumber == clearToken.m_random) {
     //a message with this timespamp and the same random number was already verified
     PTRACE(1, "H235RAS\tConsecutive messages with the same random and timestamp");
     return e_ReplyAttack;
@@ -1344,10 +1344,8 @@ H235Authenticator::ValidationResult
     if (!clearToken.HasOptionalField(H235_ClearToken::e_timeStamp))
         return e_InvalidTime;
 
-    
-    PUInt32b timeStamp = (DWORD)clearToken.m_timeStamp;
-
     // Todo: Store it away.
+    //PUInt32b timeStamp = (DWORD)clearToken.m_timeStamp;
 
     return e_OK;
 }
