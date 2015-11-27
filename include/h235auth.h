@@ -579,11 +579,13 @@ class H2351_Authenticator : public H235Authenticator
     virtual PBoolean UseGkAndEpIdentifiers() const;
 
     virtual void RequireGeneralID(bool value) { m_requireGeneralID = value; }
+    virtual void CheckSendersID(bool value) { m_checkSendersID = value; }
     virtual void FullQ931Checking(bool value) { m_fullQ931Checking = value; }
     virtual void VerifyRandomNumber(bool value) { m_verifyRandomNumber = value; }
 
 protected:
     PBoolean m_requireGeneralID;
+    PBoolean m_checkSendersID;
     PBoolean m_fullQ931Checking;
     PBoolean m_verifyRandomNumber;
 };

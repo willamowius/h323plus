@@ -188,6 +188,7 @@ H2351_Authenticator::H2351_Authenticator()
 {
   usage = AnyApplication; // Can be used either for GKAdmission or EPAuthenticstion
   m_requireGeneralID = true;
+  m_checkSendersID = true;
   //m_fullQ931Checking = true; // H.235.1 clause 13.2 requires full Q.931 checking
   m_fullQ931Checking = false; // remain compatible with old versions for now
   m_verifyRandomNumber = true; // switch off check for possible bug in ASN decoder
@@ -466,12 +467,12 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
   }
 
   if (!remoteId) {
-    if (!crHashed.m_hashedVals.HasOptionalField(H235_ClearToken::e_sendersID)) {
+    if (!crHashed.m_hashedVals.HasOptionalField(H235_ClearToken::e_sendersID) && m_checkSendersID) {
       PTRACE(1, "H235RAS\tH2351_Authenticator requires senders ID.");
       return e_Error;
     }
   
-    if (crHashed.m_hashedVals.m_sendersID.GetValue() != remoteId) {
+    if (crHashed.m_hashedVals.m_sendersID.GetValue() != remoteId && m_checkSendersID) {
       PTRACE(1, "H235RAS\tSenders ID is \"" << crHashed.m_hashedVals.m_sendersID.GetValue()
              << "\", should be \"" << remoteId << '"');
       return e_Error;
@@ -577,6 +578,7 @@ PBoolean H2351_Authenticator::SetCapability(H225_ArrayOf_AuthenticationMechanism
 
 PBoolean H2351_Authenticator::IsSecuredPDU(unsigned /*rasPDU*/, PBoolean /*received*/) const
 {
+  // TODO: should we exclude lightweight RRQ/RCF ?
   return true; // must secure all RAS messages
 }
 
