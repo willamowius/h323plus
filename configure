@@ -3887,7 +3887,7 @@ fi
 if test "x$PTLIBDIR" = "x/usr" -o "x$PTLIBDIR" = "x/usr/"; then
   PTLIBDIR="/usr/share/ptlib/"
 fi
-if test "x$PTLIBDIR" = "x/usr/local" -o "x$PTLIBDIR" = "x/usr/"; then
+if test "x$PTLIBDIR" = "x/usr/local" -o "x$PTLIBDIR" = "x/usr/local/"; then
   PTLIBDIR="/usr/local/share/ptlib/"
 fi
 
