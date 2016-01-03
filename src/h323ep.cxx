@@ -1907,6 +1907,7 @@ H323Connection * H323EndPoint::InternalMakeCall(const PString & trasferFromToken
   connectionsMutex.Wait();
 
   unsigned lastReference;
+  PString adjustedToken = PString();
   if (newToken.IsEmpty()) {
     do {
       lastReference = Q931::GenerateCallReference();
@@ -1917,7 +1918,6 @@ H323Connection * H323EndPoint::InternalMakeCall(const PString & trasferFromToken
     lastReference = newToken.Mid(newToken.Find('/')+1).AsUnsigned();
 
     // Move old connection on token to new value and flag for removal
-    PString adjustedToken;
     unsigned tieBreaker = 0;
     do {
       adjustedToken = newToken + "-replaced";
@@ -1931,8 +1931,14 @@ H323Connection * H323EndPoint::InternalMakeCall(const PString & trasferFromToken
 
   connection = CreateConnection(lastReference, userData, transport, NULL);
   if (connection == NULL) {
-    PTRACE(1, "H323\tCreateConnection returned NULL");
-    connectionsMutex.Signal();
+    PTRACE(2, "H323\tCreateConnection returned NULL");
+    if (!adjustedToken.IsEmpty())  {
+        connectionsMutex.Wait();
+        connectionsActive.SetAt(newToken, connectionsActive.RemoveAt(adjustedToken));
+        connectionsToBeCleaned -= adjustedToken;
+        PTRACE(3, "H323\tOverwriting call " << adjustedToken << ", renamed to " << newToken);
+        connectionsMutex.Signal();
+    }
     return NULL;
   }
   connection->SetRemotePartyName(remoteParty);
