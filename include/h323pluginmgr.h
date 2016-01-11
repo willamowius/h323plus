@@ -101,7 +101,9 @@ class H323PluginCodecManager : public PPluginModuleManager
     
 };
 
+#ifdef _FACTORY_LOAD
 static PFactory<PPluginModuleManager>::Worker<H323PluginCodecManager> h323PluginCodecManagerFactory("h323PluginCodecManager", true);
+#endif
 
 //////////////////////////////////////////////////////
 //

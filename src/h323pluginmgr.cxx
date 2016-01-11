@@ -34,6 +34,7 @@
 #include <ptlib.h>
 #include <ptlib/video.h>
 #include <h323.h>
+#define _FACTORY_LOAD  1
 #include <h323pluginmgr.h>
 #include <codec/opalplugin.h>
 #include <opalwavfile.h>
