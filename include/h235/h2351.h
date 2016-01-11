@@ -312,14 +312,31 @@ const unsigned char DH8192_G[1024] = {
 #endif  // H323_H235_AES256
 
 const char * const OID_H235V3 = "0.0.8.235.0.3.24";
+const char * const OID_DH512  = "0.0.8.235.0.3.40";
 const char * const OID_DH1024 = "0.0.8.235.0.3.43";
 
 #ifdef H323_H235_AES256
+const char * const OID_DH1536 = "0.0.8.235.0.3.44";
 const char * const OID_DH2048 = "0.0.8.235.0.3.45";
 const char * const OID_DH4096 = "0.0.8.235.0.3.47";
 const char * const OID_DH6144 = "0.0.8.235.0.4.77";
 const char * const OID_DH8192 = "0.0.8.235.0.4.78";
 #endif
+
+const static struct {
+    const char * parameterOID;
+    unsigned     sz;
+} H235_DHCustom[] = {
+#ifdef H323_H235_AES256
+    { OID_DH8192,  8192 },
+    { OID_DH6144,  6144 },
+    { OID_DH4096,  4096 },
+    { OID_DH2048,  2048 },
+    { OID_DH1536,  1536 },
+#endif
+    { OID_DH1024,  1024 },
+    { OID_DH512,    512 }
+};
 
 const static struct {
     const char * parameterOID;
@@ -379,9 +396,10 @@ const static struct {
     { ID_AES256, OID_DH6144 },
     { ID_AES256, OID_DH4096 },
     { ID_AES256, OID_DH2048 },
-    { ID_AES192, OID_DH2048 },
+    { ID_AES256, OID_DH1536 },
 #endif
-    { ID_AES128, OID_DH1024 }
+    { ID_AES128, OID_DH1024 },
+    { ID_AES128, OID_DH512  }
 };
 
 #endif  // _H2351_H

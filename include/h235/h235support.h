@@ -152,6 +152,9 @@ public:
       const PString & oid                        ///< OID section
     );
 
+    /**Generate Diffie-Hellman Prime and Generator */
+    static void Generate(PINDEX  keyLength, PINDEX  keyGenerator, PStringToString & parameters);
+
 //@}
 
 /**@name Encoding for the H245 Stream */
@@ -169,12 +172,23 @@ public:
     /** decode Public Half Key */
       void Decode_HalfKey(const PASN_BitString & hk);
 
+    /**Set the Half key received from remote. */
+    void SetRemoteHalfKey(const PASN_BitString & hk);
+
+    /**Set the Prime and Generator to that received from remote. */
+    void SetDHReceived(const PASN_BitString & p, const PASN_BitString & g);
 //@}
 
 /**@name Miscellaneous */
 //@{
     /**Whether to send Prime and Generator. */
     PBoolean GetToSend() const { return m_toSend; }
+
+    /**Whether a half key was received from remote. */
+    PBoolean ReceivedFromRemote() const { return m_wasReceived; }
+
+    /**Whether to Prime and Generator was received from remote. */
+    PBoolean DHReceived() const { return m_wasDHReceived; }
 
     /**Get the key size */
     int GetKeySize() const { return m_keySize; }
@@ -189,7 +203,9 @@ public:
 
     dh_st * dh;                       /// Local DiffieHellman
     bignum_st * m_remKey;             /// Remote Public Key
-    PBoolean m_toSend;                /// Whether P & G are transmitted
+    PBoolean m_toSend;                /// Whether parameters are to be transmitted
+    PBoolean m_wasReceived;           /// Whether the halfkey was received.
+    PBoolean m_wasDHReceived;         /// Whether P & G was received from remote
     int m_keySize;                    /// Key Size
 
     PBoolean m_loadFromFile;          /// Whether the settings have been loaded from file

@@ -58,7 +58,7 @@ extern "C" {
 // Diffie Hellman
 
 H235_DiffieHellman::H235_DiffieHellman(const PConfig  & dhFile, const PString & section)
-: dh(NULL), m_remKey(NULL), m_toSend(true), m_keySize(0), m_loadFromFile(false)
+: dh(NULL), m_remKey(NULL), m_toSend(true), m_wasReceived(false), m_wasDHReceived(false), m_keySize(0), m_loadFromFile(false)
 {
   if (Load(dhFile, section)) {
     if (dh->pub_key == NULL) {
@@ -69,7 +69,7 @@ H235_DiffieHellman::H235_DiffieHellman(const PConfig  & dhFile, const PString & 
 }
 
 H235_DiffieHellman::H235_DiffieHellman(const PFilePath & dhPKCS3)
-: dh(NULL), m_remKey(NULL), m_toSend(true), m_keySize(0), m_loadFromFile(false)
+: dh(NULL), m_remKey(NULL), m_toSend(true), m_wasReceived(false), m_wasDHReceived(false), m_keySize(0), m_loadFromFile(false)
 {
     FILE *paramfile;
     paramfile = fopen(dhPKCS3, "r");
@@ -86,7 +86,7 @@ H235_DiffieHellman::H235_DiffieHellman(const PFilePath & dhPKCS3)
 H235_DiffieHellman::H235_DiffieHellman(const BYTE * pData, PINDEX pSize,
                                      const BYTE * gData, PINDEX gSize, 
                                      PBoolean send)
-: m_remKey(NULL), m_toSend(send), m_keySize(pSize), m_loadFromFile(false)
+: m_remKey(NULL), m_toSend(send), m_wasReceived(false), m_wasDHReceived(false), m_keySize(pSize), m_loadFromFile(false)
 {
   dh = DH_new();
   if (dh == NULL) {
@@ -130,7 +130,8 @@ static DH * DH_dup(const DH * dh)
 }
 
 H235_DiffieHellman::H235_DiffieHellman(const H235_DiffieHellman & diffie)
-: m_remKey(NULL), m_toSend(diffie.GetToSend()), m_keySize(diffie.GetKeySize()), m_loadFromFile(diffie.LoadFile())
+: m_remKey(NULL), m_toSend(diffie.GetToSend()), m_wasReceived(ReceivedFromRemote()), m_wasDHReceived(diffie.DHReceived()), 
+  m_keySize(diffie.GetKeySize()), m_loadFromFile(diffie.LoadFile())
 {
   dh = DH_dup(diffie);
 }
@@ -144,6 +145,8 @@ H235_DiffieHellman & H235_DiffieHellman::operator=(const H235_DiffieHellman & ot
     dh = DH_dup(other);
     m_remKey = NULL;
     m_toSend = other.GetToSend();
+    m_wasReceived = ReceivedFromRemote();
+    m_wasDHReceived = other.DHReceived();
     m_keySize = other.GetKeySize();
     m_loadFromFile = other.LoadFile();
   }
@@ -228,27 +231,45 @@ void H235_DiffieHellman::Decode_P(const PASN_BitString & p)
 
 PBoolean H235_DiffieHellman::Encode_G(PASN_BitString & g) const
 {
-  if (!m_toSend)
-    return false;
+    if (!m_toSend)
+        return false;
 
-  PWaitAndSignal m(vbMutex);
-  int len_p = BN_num_bytes(dh->p);
-  int len_g = BN_num_bytes(dh->g);
-  int bits_p = BN_num_bits(dh->p);
+    PWaitAndSignal m(vbMutex);
+    int len_p = BN_num_bytes(dh->p);
+    int len_g = BN_num_bytes(dh->g);
+    int bits_p = BN_num_bits(dh->p);
+    int bits_g = BN_num_bits(dh->g);
 
-  // G is padded out to the length of P
-  unsigned char * data = (unsigned char *)OPENSSL_malloc(len_p);
-  if (data != NULL) {
-    memset(data, 0, len_p);
-    if (BN_bn2bin(dh->g, data + len_p - len_g) > 0) {
-       g.SetData(bits_p, data);
-    } else {
-      PTRACE(1, "H235_DH\tFailed to encode G");
-      OPENSSL_free(data);
-      return false;
-    }
-  }
-  OPENSSL_free(data);
+    if (len_p <= 128) { // Key lengths <= 1024 bits
+        // Backwards compatibility G is padded out to the length of P
+        unsigned char * data = (unsigned char *)OPENSSL_malloc(len_p);
+        if (data != NULL) {
+            memset(data, 0, len_p);
+            if (BN_bn2bin(dh->g, data + len_p - len_g) > 0) {
+                g.SetData(bits_p, data);
+            }
+            else {
+                PTRACE(1, "H235_DH\tFailed to encode G");
+                OPENSSL_free(data);
+                return false;
+            }
+        }
+        OPENSSL_free(data);
+   } else {
+        unsigned char * data = (unsigned char *)OPENSSL_malloc(len_g);
+        if (data != NULL) {
+            memset(data, 0, len_g);
+            if (BN_bn2bin(dh->g, data) > 0) {
+                g.SetData(8, data);
+            }
+            else {
+                PTRACE(1, "H235_DH\tFailed to encode P");
+                OPENSSL_free(data);
+                return false;
+            }
+        }
+        OPENSSL_free(data);
+    }  
   return true;
 }
 
@@ -305,6 +326,17 @@ void H235_DiffieHellman::SetRemoteKey(bignum_st * remKey)
   m_remKey = remKey;
 }
 
+void H235_DiffieHellman::SetRemoteHalfKey(const PASN_BitString & hk)
+{
+  const unsigned char *data = hk.GetDataPointer();
+  if (m_remKey)
+    BN_free(m_remKey);
+  m_remKey = BN_bin2bn(data, hk.GetDataLength() - 1, NULL);
+
+  if (m_remKey)
+    m_wasReceived = true; 
+}
+
 PBoolean H235_DiffieHellman::GenerateHalfKey()
 {
   if (dh && dh->pub_key)
@@ -320,6 +352,15 @@ PBoolean H235_DiffieHellman::GenerateHalfKey()
   }
 
   return TRUE;
+}
+
+void H235_DiffieHellman::SetDHReceived(const PASN_BitString & p, const PASN_BitString & g) 
+{
+    PTRACE(4, "H235\tReplacing local DH parameters with those of remote");
+
+    Decode_P(p);
+    Decode_G(g);
+    m_wasDHReceived = true; 
 }
 
 PBoolean H235_DiffieHellman::Load(const PConfig  & dhFile, const PString & section)
@@ -459,6 +500,50 @@ bignum_st * H235_DiffieHellman::GetPublicKey() const
 int H235_DiffieHellman::GetKeyLength() const
 {
   return m_keySize;
+}
+
+void H235_DiffieHellman::Generate(PINDEX  keyLength, PINDEX  keyGenerator, PStringToString & parameters)
+{
+    PString lOID;
+    for (PINDEX i = 0; i < PARRAYSIZE(H235_DHCustom); ++i) {
+        if (H235_DHCustom[i].sz == keyLength) {
+            lOID = H235_DHCustom[i].parameterOID;
+            break;
+        }
+    }
+
+    if (lOID.IsEmpty())
+        return;
+
+    dh_st * vdh = DH_new();
+    if (!DH_generate_parameters_ex(vdh, keyLength, keyGenerator, NULL)) {
+        cout << "Error generating Key Pair\n";
+        DH_free(vdh);
+        vdh = NULL;
+        return;
+    }
+
+    parameters.SetAt("OID", lOID);
+
+    PString str = PString();
+    int len = BN_num_bytes(vdh->p);
+    unsigned char * data = (unsigned char *)OPENSSL_malloc(len);
+
+    if (data != NULL && BN_bn2bin(vdh->p, data) > 0) {
+        str = PBase64::Encode(data, len, "");
+        parameters.SetAt("PRIME", str);
+    }
+    OPENSSL_free(data);
+
+    len = BN_num_bytes(vdh->g);
+    data = (unsigned char *)OPENSSL_malloc(len);
+    if (data != NULL && BN_bn2bin(vdh->g, data) > 0) {
+        str = PBase64::Encode(data, len, "");
+        parameters.SetAt("GENERATOR", str);
+    }
+    OPENSSL_free(data);
+
+    DH_free(vdh);
 }
 
 

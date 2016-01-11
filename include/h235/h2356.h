@@ -147,7 +147,6 @@ private:
 
     static H235_DHMap                m_dhCachedMap;
     H235_DHMap                       m_dhLocalMap;
-    H235_DHMap                       m_dhRemoteMap;
 
     PBoolean                         m_enabled;
     PBoolean                         m_active;
