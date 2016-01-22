@@ -2018,7 +2018,7 @@ H323CodecExtendedVideoCapability::~H323CodecExtendedVideoCapability()
 
 void H323CodecExtendedVideoCapability::AddCapability(const PString & cap)
 {
-    extCapabilities.Add(H323ExtendedVideoFactory::CreateInstance(cap));
+    extCapabilities.Add((H323Capability*)H323ExtendedVideoFactory::CreateInstance(cap)->Clone());
 }
 
 PString H323CodecExtendedVideoCapability::GetFormatName() const
