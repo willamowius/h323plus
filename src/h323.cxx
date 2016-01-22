@@ -2472,6 +2472,8 @@ void H323Connection::AnsweringCall(AnswerCallResponse response)
 H323Connection::CallEndReason H323Connection::SendSignalSetup(const PString & alias,
                                                               const H323TransportAddress & address)
 {
+  CallEndReason reason = NumCallEndReasons;
+
   // Start the call, first state is asking gatekeeper
   connectionState = AwaitingGatekeeperAdmission;
 
@@ -2629,19 +2631,25 @@ H323Connection::CallEndReason H323Connection::SendSignalSetup(const PString & al
         connectionState = NoConnectionActive;
         switch (signallingChannel->GetErrorNumber()) {
           case ENETUNREACH :
-            return EndedByUnreachable;
+            reason = EndedByUnreachable;
+            break;
           case ECONNREFUSED :
-            return EndedByNoEndPoint;
+            reason = EndedByNoEndPoint;
+            break;
           case ETIMEDOUT :
-            return EndedByHostOffline;
+            reason = EndedByHostOffline;
+            break;
+          default:
+             reason = EndedByConnectFail;
         }
-        return EndedByConnectFail;
       }
   } 
 
   // Lock while checking for shutting down.
   if (!Lock())
     return EndedByCallerAbort;
+  else if (reason != NumCallEndReasons)
+    return reason;
 
   PTRACE(3, "H225\tSending Setup PDU");
   connectionState = AwaitingSignalConnect;
@@ -2755,7 +2763,7 @@ if (setup.m_conferenceGoal.GetTag() == H225_Setup_UUIE_conferenceGoal::e_create)
   if (!m_maintainConnection)
     signallingChannel->SetReadTimeout(endpoint.GetSignallingChannelCallTimeout());
 
-  return NumCallEndReasons;
+  return reason;
 }
 
 void H323Connection::NatDetection(const PIPSocket::Address & srcAddress, const PIPSocket::Address & sigAddress)
