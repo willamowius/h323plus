@@ -2721,6 +2721,8 @@ class H323CodecExtendedVideoCapability : public H323ExtendedVideoCapability
 
 	virtual void AddCapability(const PString & cap);
 
+    virtual void AddCapability(H323Capability * capability);
+
     virtual PBoolean OnReceivedGenericPDU(
 		const H245_GenericCapability &pdu
 	);
