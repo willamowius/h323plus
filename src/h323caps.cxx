@@ -1649,11 +1649,13 @@ void H323ExtendedVideoCapability::AddAllCapabilities(
         PINDEX num = P_MAX_INDEX;
         for (r = extCaps.begin(); r != extCaps.end(); ++r) {
            H323Capability * childCap = H323ExtendedVideoFactory::CreateInstance(*r);
-           H323CodecExtendedVideoCapability * extCapability = (H323CodecExtendedVideoCapability *)capability->Clone();
-           extCapability->AddCapability(childCap);   
-           delete childCap;
-           num = basecapabilities.SetCapability(descriptorNum, simultaneous,extCapability);
-           simultaneous = num;
+           if (childCap != NULL) {
+               H323CodecExtendedVideoCapability * extCapability = (H323CodecExtendedVideoCapability *)capability->Clone();
+               extCapability->AddCapability(childCap);
+               num = basecapabilities.SetCapability(descriptorNum, simultaneous, extCapability);
+               simultaneous = num;
+               delete childCap;
+           }
         }
     simultaneous = P_MAX_INDEX;
     basecapabilities.SetCapability(descriptorNum, simultaneous,new H323ControlExtendedVideoCapability());
