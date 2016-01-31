@@ -3466,14 +3466,19 @@ void H323Capabilities::Remove(H323Capability * capability)
       for (PINDEX inner = 0; inner < set[outer][middle].GetSize(); inner++) {
         if (set[outer][middle][inner].GetCapabilityNumber() == capabilityNumber) {
           set[outer][middle].RemoveAt(inner);
+          --inner; // RemoveAt() moves remaining content down 1 position
           break;
         }
       }
-      if (set[outer][middle].GetSize() == 0)
+      if (set[outer][middle].GetSize() == 0) {
         set[outer].RemoveAt(middle);
+        --middle; // RemoveAt() moves remaining content down 1 position
+      }
     }
-    if (set[outer].GetSize() == 0)
+    if (set[outer].GetSize() == 0) {
       set.RemoveAt(outer);
+      --outer; // RemoveAt() moves remaining content down 1 position
+    }
   }
 
 #ifdef H323_H235
