@@ -2719,7 +2719,7 @@ class H323CodecExtendedVideoCapability : public H323ExtendedVideoCapability
 
     virtual PObject * Clone() const;
 
-	virtual void AddCapability(const PString & cap);
+	P_DEPRECATED virtual void AddCapability(const PString & cap);
 
     virtual void AddCapability(H323Capability * capability);
 
