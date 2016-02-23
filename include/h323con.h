@@ -2919,7 +2919,7 @@ class H323Connection : public PObject
        0 - Just this connection
        n - n plus this connection
      */
-    const int GetRemoteCallWaiting() const { return remoteCallWaiting; }
+    int GetRemoteCallWaiting() const { return remoteCallWaiting; }
 
     /**Set the enforced duration limit for the call.
        This starts a timer that will automatically shut down the call when it
