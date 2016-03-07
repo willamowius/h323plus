@@ -108,7 +108,7 @@ PBoolean H460_FeatureOID1::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
   PBoolean imcall = m_ep->IsIMCall();
 
   // Build Message
-  H460_FeatureOID & feat = H460_FeatureOID(baseOID); 
+  H460_FeatureOID feat = H460_FeatureOID(baseOID); 
 
   // Is a IM session call
   if (imcall) {
@@ -153,7 +153,7 @@ void H460_FeatureOID1::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
 PBoolean H460_FeatureOID1::OnSendCallProceeding_UUIE(H225_FeatureDescriptor & pdu) 
 { 
     if (remoteSupport) {
-      H460_FeatureOID & feat = H460_FeatureOID(baseOID); 
+      H460_FeatureOID feat = H460_FeatureOID(baseOID); 
       pdu = feat;
     }
 
@@ -170,7 +170,7 @@ PBoolean H460_FeatureOID1::OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu)
 { 
     if (remoteSupport) {
       // Build Message
-      H460_FeatureOID & feat = H460_FeatureOID(baseOID); 
+      H460_FeatureOID feat = H460_FeatureOID(baseOID); 
 
       // Signal to say ready for message
       if (m_con->IMCall())
@@ -213,7 +213,7 @@ PBoolean H460_FeatureOID1::OnSendFacility_UUIE(H225_FeatureDescriptor & pdu)
         return false;
 
     // Build Message
-    H460_FeatureOID & feat = H460_FeatureOID(baseOID); 
+    H460_FeatureOID feat = H460_FeatureOID(baseOID); 
     PBoolean contents = false;
 
     // Open and Closing Session
@@ -302,8 +302,8 @@ PBoolean H460_FeatureOID1::OnSendReleaseComplete_UUIE(H225_FeatureDescriptor & p
            m_ep->IMSessionClosed(callToken);
 	    sessionOpen = false;
 
-	// Build Message
-        H460_FeatureOID & feat = H460_FeatureOID(baseOID); 
+        // Build Message
+        H460_FeatureOID feat = H460_FeatureOID(baseOID); 
         feat.Add(OpenOID,H460_FeatureContent(sessionOpen));
         pdu = feat;
         return true;
@@ -330,7 +330,7 @@ PBoolean H460_FeatureOID1::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
 { 
    if (m_con->IMCall())   // Message in an IM Call
    {
-       H460_FeatureOID & feat = H460_FeatureOID(baseOID); 
+       H460_FeatureOID feat = H460_FeatureOID(baseOID); 
        feat.Add(typeOID,H460_FeatureContent(1,8));   // 1 specify Instant Message Call
        pdu = feat;
 	   return true;
