@@ -1164,6 +1164,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\h460\h460_oid1.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\src\h460\h460_oid3.cxx"
 				>
 			</File>
@@ -2098,6 +2102,10 @@
 			</File>
 			<File
 				RelativePath=".\include\h460\h46026mgr.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\h460\h460_oid1.h"
 				>
 			</File>
 			<File

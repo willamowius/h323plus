@@ -121,7 +121,7 @@
 #undef H323_H239
 #endif
 #undef H323_H248
-#undef H323_H249
+//#undef H323_H249
 #ifdef P_SNMP
 #undef H323_H341
 #endif
@@ -155,6 +155,9 @@
 #ifdef P_EXPAT
     #undef H323_H46025
 #endif
+
+// Text message option
+#undef H323_H460IM
 
 // Presence Feature
 #undef H323_H460P

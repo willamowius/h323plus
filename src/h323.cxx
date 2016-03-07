@@ -604,6 +604,13 @@ H323Connection::H323Connection(H323EndPoint & ep,
   disableH460 = ep.FeatureSetDisabled();
   features->LoadFeatureSet(H460_Feature::FeatureSignal,this);
 
+#ifdef H323_H460IM
+  m_IMsupport = false;
+  m_IMsession = false;
+  m_IMcall = false;
+  m_IMmsg = PString();
+#endif
+
 #ifdef H323_H4609
   m_h4609enabled = false;
   m_h4609Final = false;
@@ -6345,6 +6352,50 @@ void H323Connection::OnRxSenderReport(unsigned sessionID, const RTP_Session::Sen
         const RTP_Session::ReceiverReportArray & recv) const
 {
 }
+
+#ifdef H323_H460IM
+
+PBoolean H323Connection::IMSupport()
+{
+    return m_IMsupport;
+}
+
+void H323Connection::SetIMSupport(PBoolean state)
+{
+    m_IMsupport = state;
+}
+
+PBoolean H323Connection::IMSession()
+{
+    return m_IMsession;
+}
+
+void H323Connection::SetIMSession(PBoolean state)
+{
+    m_IMsession = state;
+}
+
+PBoolean H323Connection::IMCall()
+{
+    return m_IMcall;
+}
+
+void H323Connection::SetIMCall(PBoolean state)
+{
+    m_IMcall = state;
+}
+
+const PString & H323Connection::IMMsg()
+{
+    return m_IMmsg;
+}
+
+void H323Connection::SetIMMsg(const PString & msg)
+{
+    m_IMmsg = msg;
+}
+
+#endif
 
 #ifdef H323_H4609
 

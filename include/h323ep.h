@@ -1220,6 +1220,7 @@ class H323EndPoint : public PObject
 
        Default Parameters are replaced if OID is one of
             1024bit "0.0.8.235.0.3.43"
+            1536bit "0.0.8.235.0.3.44"
             2048bit "0.0.8.235.0.3.45"
             4096bit "0.0.8.235.0.3.47"
             6144bit "0.0.8.235.0.4.77"
@@ -1239,6 +1240,7 @@ class H323EndPoint : public PObject
 
        Default Parameters are replaced if OID is one of
             1024bit "0.0.8.235.0.3.43"
+            1536bit "0.0.8.235.0.3.44"
             2048bit "0.0.8.235.0.3.45"
             4096bit "0.0.8.235.0.3.47"
             6144bit "0.0.8.235.0.4.77"
@@ -1257,6 +1259,7 @@ class H323EndPoint : public PObject
 
        Default Parameters are replaced if OID is one of
             1024bit "0.0.8.235.0.3.43"
+            1536bit "0.0.8.235.0.3.44"
             2048bit "0.0.8.235.0.3.45"
             4096bit "0.0.8.235.0.3.47"
             6144bit "0.0.8.235.0.4.77"
@@ -2272,6 +2275,73 @@ class H323EndPoint : public PObject
     PBoolean H46026IsEnabled() const { return m_h46026enabled; }
 #endif
 
+#ifdef H323_H460IM
+
+    /** Main call to open IM session
+      */
+    virtual PBoolean IMMakeCall(const PString & number,
+        PBoolean session,
+        PString & token,
+        const PString & msg = PString());
+
+    PBoolean IsIMCall() { return m_IMcall;  }
+    void SetIMCall(PBoolean state) { m_IMcall = state; }
+
+    virtual void IMSend(const PString & msg);
+    virtual void IMWrite(PBoolean start);
+    virtual void IMCloseSession();
+
+    // Internal 
+    virtual void IMWriteFacility(H323Connection * connection);
+    virtual void IMOpenSession(const PString & token);
+    virtual void IMClearConnection(const PString & token);
+    virtual void IMSupport(const PString & token);
+    virtual void IMSessionInvite(const PString & username);
+
+    // Call backs
+    virtual PBoolean IMWriteEvent(PBoolean & state);
+
+    // Events
+    virtual void IMSessionDetails(const PString & token,
+        const PString & number,
+        const PString & CallerID,
+        const PString & enc
+        );
+
+    virtual void IMSessionOpen(const PString & token);
+    virtual void IMSessionClosed(const PString & token);
+    virtual void IMSessionWrite(const PString & token, PBoolean state);
+    virtual void IMSessionError(const PString & token, int reason = 0);
+
+    /** An IM Message has been received */
+    virtual void IMReceived(const PString & token, const PString & msg, PBoolean session = TRUE);
+
+    /** An alert a message has been successfully sent */
+    virtual void IMSent(const PString & token, PBoolean success, int reason = 0);
+
+    virtual PBoolean IMisDisabled() { return m_IMdisable; };
+
+
+    // Events to pass out.
+    enum {
+        uiIMIdle = 0,
+        uiIMOpen = 1,
+        uiIMClose = 2,
+        uiIMStartWrite = 3,
+        uiIMEndWrite = 4,
+        uiIMQuick = 5
+    } uiIMstate;
+
+    // Events to the user
+    virtual void OnIMSessionState(const PString & session, const short & state) {};
+    virtual void OnIMReceived(const PString & session, const PString & message) {};
+    virtual void OnIMSent(const PString & session, PBoolean success, const short & errcode) {};
+    virtual void OnIMSessionDetails(const PString & token, const PString & number,
+        const PString & CallerID, const PString & enc) {};
+    virtual void OnIMSessionError(const PString & token, const short & reason) {};
+
+#endif
+
 #ifdef H323_H460P
 
     /** Get the presence handler. By default it returns NULL
@@ -3079,6 +3149,20 @@ class H323EndPoint : public PObject
 
 #ifdef H323_UPnP
     PBoolean m_UPnPenabled;
+#endif
+
+#ifdef H323_H460IM
+    PBoolean m_IMdisable;
+    PBoolean m_IMcall;
+    PBoolean m_IMsession;
+    PBoolean m_IMwriteevent;
+    PString m_IMmsg;
+    PStringList m_IMsessions;
+    PMutex m_IMmutex;
+
+    // Multipoint Text functions
+    short m_IMMultiMode;
+    PBoolean m_IMmodeSent;
 #endif
 
 #ifdef H323_H460P

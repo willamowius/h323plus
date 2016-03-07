@@ -87,6 +87,10 @@
 #include "h460/upnpcp.h"
 #endif
 
+#ifdef H323_H460IM
+#include "h460/h460_oid1.h"
+#endif
+
 #ifdef H323_H460P
 #include "h460/h460_oid3.h"
 #endif
@@ -264,8 +268,9 @@ H323_TLSContext::H323_TLSContext()
     }
 
     m_context = SSL_CTX_new(SSLv23_method());	
-    SSL_CTX_set_options(m_context, SSL_OP_NO_SSLv2);	// remove unsafe SSLv2
-    SSL_CTX_set_mode(m_context, SSL_MODE_AUTO_RETRY); // handle re-negotiations automatically
+    SSL_CTX_set_options(m_context, SSL_OP_NO_SSLv2);	// remove unsafe SSLv2 (eg. due to DROWN)
+    SSL_CTX_set_options(m_context, SSL_OP_NO_SSLv3);	// remove unsafe SSLv3 (eg. due to POODLE)
+    SSL_CTX_set_mode(m_context, SSL_MODE_AUTO_RETRY);   // handle re-negotiations automatically
 
 #if PTLIB_VER < 2120
     context = m_context;
@@ -865,6 +870,15 @@ H323EndPoint::H323EndPoint()
 
 #ifdef H323_UPnP
   m_UPnPenabled = false;
+#endif
+
+#ifdef H323_H460IM
+  m_IMdisable   = true;
+  m_IMcall      = false;
+  m_IMsession   = false;
+  m_IMwriteevent = false;
+  m_IMmsg       = PString();
+  m_IMdisable   = false;
 #endif
 
 #ifdef H323_H460P
@@ -4268,6 +4282,243 @@ void H323EndPoint::SetTLSMediaPolicy(H323TransportSecurity::Policy policy)
 H323TransportSecurity * H323EndPoint::GetTransportSecurity() { 
 	return &m_transportSecurity; 
 }
+
+#ifdef H323_H460IM
+
+void H323EndPoint::IMSupport(const PString & token)
+{
+    PWaitAndSignal m(m_IMmutex);
+
+    m_IMsessions.AppendString(token);
+}
+
+void H323EndPoint::IMReceived(const PString & token, const PString & msg, PBoolean session)
+{
+
+    PString addr = PString();
+    if (!session) {
+
+        H323Connection * connection = FindConnectionWithLock(token);
+        if (connection != NULL) {
+            IMSessionDetails(token, connection->GetRemotePartyName(),
+                connection->GetRemotePartyName(),
+                ""
+                );
+            connection->Unlock();
+        }
+
+        OnIMSessionState(token, uiIMQuick);
+    }
+
+    OnIMReceived(token, msg);
+}
+
+PBoolean H323EndPoint::IMMakeCall(const PString & number, PBoolean session, PString & token, const PString & msg)
+{
+    PWaitAndSignal m(m_IMmutex);
+
+    m_IMcall = true;         // Is an IM Call
+    m_IMsession = session;   // Start an IM Session
+
+    if (!session) {
+        PTRACE(4, "IM\tCall not a session");
+        m_IMmsg = msg;          // Message to send and disconnect	
+    }
+
+    if (!MakeSupplimentaryCall(number, token)) {
+        m_IMcall = false;         
+        m_IMsession = false;   
+        return false;
+    }
+
+    return true;
+
+}
+
+void H323EndPoint::IMSend(const PString & msg)
+{
+    PWaitAndSignal m(m_IMmutex);
+
+    if (m_IMdisable)
+        return;
+
+    if (msg.GetLength() == 0)
+        return;
+
+    for (PINDEX i = 0; i < m_IMsessions.GetSize(); i++)
+    {
+        H323Connection * connection = FindConnectionWithLock(m_IMsessions[i]);
+        if (connection != NULL) {
+            if (connection->IMSession()) {
+                connection->SetIMMsg(msg);
+                IMWriteFacility(connection);
+            } 
+            connection->Unlock();
+        }
+    }
+}
+
+void H323EndPoint::IMOpenSession(const PString & token)
+{
+    PWaitAndSignal m(m_IMmutex);
+
+    H323Connection * connection = FindConnectionWithLock(token);
+    if (connection != NULL) {
+        if (!connection->IMSupport())
+            IMSessionError(token, H323Connection::EndedByNoFeatureSupport);
+        else {
+            connection->SetIMSession(true);
+            IMWriteFacility(connection);
+        }
+        connection->Unlock();
+    }
+    else {
+        IMSessionError(token, H323Connection::EndedByNoUser);
+    } 
+}
+
+void H323EndPoint::IMCloseSession()
+{
+    PWaitAndSignal m(m_IMmutex);
+
+    for (PINDEX i = 0; i < m_IMsessions.GetSize(); i++)
+    {
+        H323Connection * connection = FindConnectionWithLock(m_IMsessions[i]);
+        if (connection != NULL) {
+            if (connection->IMSession()) {
+                connection->SetIMSession(false);
+                IMWriteFacility(connection);
+                connection->Unlock();
+            } 
+        }
+    }
+}
+
+void H323EndPoint::IMClearConnection(const PString & token)
+{
+    PWaitAndSignal m(m_IMmutex);
+
+    for (PINDEX i = 0; i < m_IMsessions.GetSize(); i++)
+    {
+        if (m_IMsessions[i] == token)
+#if PTLIB_VER >= 2110
+            m_IMsessions.Remove(&token);
+#else
+            m_IMsessions.RemoveAt(i);
+#endif
+    }
+}
+
+
+void H323EndPoint::IMSessionOpen(const PString & token)
+{
+    PWaitAndSignal m(m_IMmutex);
+
+    H323Connection * connection = FindConnectionWithLock(token);
+
+    PString addr = PString();
+    if (connection != NULL) {
+        IMSessionDetails(token, connection->GetRemotePartyNumber(),
+            connection->GetRemotePartyName(),
+            ""
+            );
+        connection->Unlock(); 
+    }
+
+    OnIMSessionState(token, uiIMOpen);
+
+}
+
+void H323EndPoint::IMSessionClosed(const PString & token)
+{
+    OnIMSessionState(token, uiIMClose);
+}
+
+
+void H323EndPoint::IMWrite(PBoolean start)
+{
+    PWaitAndSignal m(m_IMmutex);
+
+    if (start)
+        uiIMstate = uiIMStartWrite;
+    else
+        uiIMstate = uiIMEndWrite;
+
+    m_IMwriteevent = true;
+
+    for (PINDEX i = 0; i < m_IMsessions.GetSize(); i++)
+    {
+        H323Connection * connection = FindConnectionWithLock(m_IMsessions[i]);
+        if (connection != NULL) {
+            if (connection->IMSession())
+                IMWriteFacility(connection); 
+            connection->Unlock();
+        }
+    }
+
+    m_IMwriteevent = false;
+    uiIMstate = uiIMIdle;
+}
+
+PBoolean H323EndPoint::IMWriteEvent(PBoolean & state)
+{
+    if (m_IMwriteevent) {
+        switch (uiIMstate) {
+        case uiIMStartWrite:
+            state = true;
+            return true;
+        case uiIMEndWrite:
+            state = false;
+            return true;
+        default:
+            return false;
+        }
+    }
+    return false;
+}
+
+void H323EndPoint::IMWriteFacility(H323Connection * connection)
+{
+    if (connection != NULL) {
+        H323SignalPDU facilityPDU;
+        facilityPDU.BuildFacility(*connection, false, H225_FacilityReason::e_featureSetUpdate);
+        connection->WriteSignalPDU(facilityPDU);
+    }
+}
+
+void H323EndPoint::IMSessionInvite(const PString & username)
+{
+    PString token = PString();
+    IMMakeCall(username, true, token);
+}
+
+void H323EndPoint::IMSessionError(const PString & token, int reason)
+{
+    OnIMSessionError(token, reason);
+}
+
+void H323EndPoint::IMSent(const PString & token, PBoolean success, int reason)
+{
+    OnIMSent(token, success, reason);
+}
+
+void H323EndPoint::IMSessionDetails(const PString & token,
+    const PString & number,
+    const PString & CallerID,
+    const PString & enc)
+{
+    OnIMSessionDetails(token, number, CallerID, enc);
+}
+
+void H323EndPoint::IMSessionWrite(const PString & token, PBoolean state)
+{
+    if (state)
+        OnIMSessionState(token, uiIMStartWrite);
+    else
+        OnIMSessionState(token, uiIMEndWrite);
+}
+
+#endif
 
 #ifdef H323_H460P
 void H323EndPoint::PresenceSetLocalState(const PStringList & alias, presenceStates localstate, const PString & localdisplay, PBoolean updateOnly)

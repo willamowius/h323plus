@@ -2270,6 +2270,34 @@ class H323Connection : public PObject
                         PBoolean isAck
                         ) const;
 
+#ifdef H323_H460IM
+
+    /* Whether the call has IM support */
+    PBoolean IMSupport();
+
+    /* Set call IM Support */
+    void SetIMSupport(PBoolean state);
+
+    /* Whether there is a current IM session */
+    PBoolean IMSession();
+
+    /* Set whether there is a current IM session */
+    void SetIMSession(PBoolean state);
+
+    /* Whether this is an IM call only. There is other media flows */
+    PBoolean IMCall();
+
+    /* Set call to being an IM call only */
+    void SetIMCall(PBoolean state);
+
+    /* Get the IM message to send */
+    const PString & IMMsg();
+
+    /* Set the IM message to send */
+    void SetIMMsg(const PString & msg);
+
+#endif
+
 #ifdef H323_H4609
   /** H.460.9 Call Statistics
     */
@@ -3000,6 +3028,12 @@ class H323Connection : public PObject
 
     virtual void OnReceiveFeatureSet(unsigned, const H225_FeatureSet &, PBoolean = false) const;
 
+    /** Set the call answered flag.
+        This will stop the call negotiating process. 
+        This is used for long term non-call supplimentary services where there is no media
+      */
+    void SetCallAnswered() { callAnswered = TRUE; }
+
     /** On resolving H.245 Address conflict
       */
     virtual PBoolean OnH245AddressConflict();
@@ -3542,6 +3576,13 @@ class H323Connection : public PObject
 #ifdef H323_H460
     PBoolean disableH460;
     H460_FeatureSet       * features;
+
+#ifdef H323_H460IM
+    PBoolean m_IMsupport;
+    PBoolean m_IMsession;
+    PBoolean m_IMcall;
+    PString  m_IMmsg;
+#endif
 
 #ifdef H323_H4609
     PBoolean m_h4609enabled;

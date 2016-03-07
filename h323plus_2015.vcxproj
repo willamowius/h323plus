@@ -109,9 +109,9 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='No Trace|x64'">lib\vs2015\$(Platform)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='No Trace|Win32'">$(OutDir)$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='No Trace|x64'">$(OutDir)$(Configuration)\</IntDir>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\ptlib\include;include;C:\speex-1.2rc1\include;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\ptlib_2_14_3\include;..\ptlib_2_14_3\lib\$(Platform)\include;include;C:\speex-1.2rc1\include;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\ptlib\include;include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\ptlib\lib;lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\ptlib_2_14_3\lib;lib;$(LibraryPath)</LibraryPath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\ptlib\lib;lib;$(LibraryPath)</LibraryPath>
     <SourcePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">c:\tools;$(SourcePath)</SourcePath>
     <SourcePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">c:\tools;$(SourcePath)</SourcePath>
@@ -658,6 +658,7 @@
     <ClCompile Include="src\h460\h46026.cxx" />
     <ClCompile Include="src\h460\h46026mgr.cxx" />
     <ClCompile Include="src\h460\h4604.cxx" />
+    <ClCompile Include="src\h460\h460_oid1.cxx" />
     <ClCompile Include="src\h460\h460_oid3.cxx" />
     <ClCompile Include="src\h460\h460_oid6.cxx" />
     <ClCompile Include="src\h460\h460_oid9.cxx" />
@@ -1167,6 +1168,7 @@
     <ClInclude Include="include\h460\h46026.h" />
     <ClInclude Include="include\h460\h46026mgr.h" />
     <ClInclude Include="include\h460\h4604.h" />
+    <ClInclude Include="include\h460\h460_oid1.h" />
     <ClInclude Include="include\h460\h460_oid3.h" />
     <ClInclude Include="include\h460\h460_oid6.h" />
     <ClInclude Include="include\h460\h460_oid9.h" />

@@ -385,6 +385,9 @@
     <ClCompile Include="src\h323t140.cxx">
       <Filter>Source Files\h224</Filter>
     </ClCompile>
+    <ClCompile Include="src\h460\h460_oid1.cxx">
+      <Filter>Source Files\h460</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\channels.h">
@@ -702,6 +705,9 @@
     </ClInclude>
     <ClInclude Include="include\h323t140.h">
       <Filter>Header Files\h224</Filter>
+    </ClInclude>
+    <ClInclude Include="include\h460\h460_oid1.h">
+      <Filter>Header Files\h460</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
