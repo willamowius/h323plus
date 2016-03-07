@@ -2277,17 +2277,39 @@ class H323EndPoint : public PObject
 
 #ifdef H323_H460IM
 
+    /** Main function to enable the feature
+     */
+    PBoolean EnableIM() { m_IMenabled = true; };
+
+    /** Callback from the H460 feature to check if the 
+        feature is enabled
+      */
+    PBoolean IMisDisabled() { return !m_IMenabled; };
+
+	/** Internal Flag to indicate the current call is an IM call
+      */
+    PBoolean IsIMCall() { return m_IMcall;  }
+
+	/** Internal Flag to set the current call as an IM call
+      */
+    void SetIMCall(PBoolean state) { m_IMcall = state; }
+
     /** Main call to open IM session
       */
     virtual PBoolean IMMakeCall(const PString & number,
-        PBoolean session,
+        PBoolean session,  // set to true if persistent
         PString & token,
         const PString & msg = PString());
 
-    PBoolean IsIMCall() { return m_IMcall;  }
-    void SetIMCall(PBoolean state) { m_IMcall = state; }
-
+	/** Send a message
+      */
     virtual void IMSend(const PString & msg);
+
+    /** An IM Message has been received 
+      */
+    virtual void IMReceived(const PString & token, const PString & msg, PBoolean session = TRUE);
+
+
     virtual void IMWrite(PBoolean start);
     virtual void IMCloseSession();
 
@@ -2313,14 +2335,9 @@ class H323EndPoint : public PObject
     virtual void IMSessionWrite(const PString & token, PBoolean state);
     virtual void IMSessionError(const PString & token, int reason = 0);
 
-    /** An IM Message has been received */
-    virtual void IMReceived(const PString & token, const PString & msg, PBoolean session = TRUE);
 
     /** An alert a message has been successfully sent */
     virtual void IMSent(const PString & token, PBoolean success, int reason = 0);
-
-    virtual PBoolean IMisDisabled() { return m_IMdisable; };
-
 
     // Events to pass out.
     enum {
@@ -3152,7 +3169,7 @@ class H323EndPoint : public PObject
 #endif
 
 #ifdef H323_H460IM
-    PBoolean m_IMdisable;
+    PBoolean m_IMenabled;
     PBoolean m_IMcall;
     PBoolean m_IMsession;
     PBoolean m_IMwriteevent;
