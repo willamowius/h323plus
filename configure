@@ -638,6 +638,7 @@ H323_T120
 H323_T38
 H323_H501
 H323_H461
+H323_H460IM
 H323_H460COM
 H323_H460PRE
 H323_H460P
@@ -761,6 +762,7 @@ enable_h46026
 enable_h460p
 enable_h460pre
 enable_h460com
+enable_h460im
 enable_h461
 enable_h501
 enable_t38
@@ -1422,6 +1424,7 @@ Optional Features:
   --enable-h460p          enable H.460 Presence
   --enable-h460pre        enable H.460 PreEmption
   --enable-h460com        enable H.460 Compat Feature
+  --enable-h460im        enable H.460 Text Message
   --enable-h461           enable H.461 ASSET Feature
   --disable-h501          disable H.501
   --disable-t38           disable T.38
@@ -4874,6 +4877,28 @@ else
   H323_H460COM=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460 Compat Feature" >&5
 $as_echo "$as_me: Disabling H.460 Compat Feature" >&6;}
+fi
+
+
+
+
+# Check whether --enable-h460im was given.
+if test "${enable_h460im+set}" = set; then :
+  enableval=$enable_h460im;
+fi
+
+if test "${enable_h460im}x" = "x" ; then
+  enable_h460im=$default_h460im
+fi
+if test "$enable_h460im" = "yes" ; then
+  H323_H460IM=1
+
+$as_echo "#define H323_H460IM 1" >>confdefs.h
+
+else
+  H323_H460IM=
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460 Text Message" >&5
+$as_echo "$as_me: Disabling H.460 Text Message" >&6;}
 fi
 
 

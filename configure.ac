@@ -753,6 +753,26 @@ fi
 AC_SUBST(H323_H460COM)
 
 dnl ########################################################################
+dnl check for Enable H.460 Text Message
+
+dnl MSWIN_DISPLAY h460im,H.460 Text Message
+dnl MSWIN_DEFINE  h460im,H323_H460IM
+
+AC_ARG_ENABLE(h460im,
+       [  --enable-h460im        enable H.460 Text Message])
+if test "${enable_h460im}x" = "x" ; then
+  enable_h460im=$default_h460im
+fi
+if test "$enable_h460im" = "yes" ; then
+  H323_H460IM=1
+  AC_DEFINE(H323_H460IM, 1, [Enable H.460IM support])
+else
+  H323_H460IM=
+  AC_MSG_NOTICE(Disabling H.460 Text Message)
+fi
+AC_SUBST(H323_H460IM)
+
+dnl ########################################################################
 dnl check for Enable H.461 ASSET Feature
 
 dnl MSWIN_DISPLAY h461,H.461 ASSET Feature
