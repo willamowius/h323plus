@@ -1098,14 +1098,21 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveControl(RTP_ControlFrame & 
 
       case RTP_ControlFrame::e_Goodbye :
         if (size >= 4) {
-          PString str;
-          unsigned count = frame.GetCount()*4;
-          if (size > count)
-            str = PString((const char *)(payload+count+1), payload[count]);
+          PString reason;
+          unsigned count = frame.GetCount()*4; // bytes with SSRCs before optional reason
+          if (size > count) {
+            // verify that RTCP packed is indeed as long as length byte indicates
+            if (size >= payload[count] + sizeof(DWORD) /*SSRC*/ + sizeof(unsigned char) /* length */) {
+              reason = PString((const char *)(payload+count+1), payload[count]);
+            } else {
+              PTRACE(2, "RTP\tGoodbye packet invalid");
+            }
+          }
           PDWORDArray sources(count);
-          for (PINDEX i = 0; i < (PINDEX)count; i++)
+          for (PINDEX i = 0; i < (PINDEX)frame.GetCount(); i++) {
             sources[i] = ((const PUInt32b *)payload)[i];
-          OnRxGoodbye(sources, str);
+          }
+          OnRxGoodbye(sources, reason);
         }
         else {
           PTRACE(2, "RTP\tGoodbye packet truncated");
