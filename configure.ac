@@ -759,7 +759,7 @@ dnl MSWIN_DISPLAY h460im,H.460 Text Message
 dnl MSWIN_DEFINE  h460im,H323_H460IM
 
 AC_ARG_ENABLE(h460im,
-       [  --enable-h460im        enable H.460 Text Message])
+       [  --enable-h460im         enable H.460 Text Message])
 if test "${enable_h460im}x" = "x" ; then
   enable_h460im=$default_h460im
 fi
