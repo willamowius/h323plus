@@ -1209,6 +1209,7 @@ PBoolean H323SignalPDU::Read(H323Transport & transport)
      PTRACE(1, "H225\tRead error (" << transport.GetErrorNumber(PChannel::LastReadError)
                              << "): " << transport.GetErrorText(PChannel::LastReadError));
 
+/* always return false when an error occurs
     if (transport.IsCallEstablished() && !transport.IsTransportSecure() &&
         transport.GetErrorCode(PChannel::LastReadError) != PChannel::Timeout) {
              // TODO: consult connection.HandleSignalChannelFailure() and disconnect or continue
@@ -1217,6 +1218,7 @@ PBoolean H323SignalPDU::Read(H323Transport & transport)
              PThread::Sleep(100);
              return true;
     }
+*/
     return false;
   }
   return ProcessReadData(transport, rawData);
