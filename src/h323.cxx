@@ -989,6 +989,11 @@ void H323Connection::HandleSignallingChannel()
   if (controlChannel == NULL)
     endSessionReceived.Signal();
 
+  // if the signalling thread ends, make sure we end the call if it hasn't been done, yet
+  // otherwise we have error conditions where the connection is never deleted
+  if (!endSessionSent)
+    ClearCall(EndedByTransportFail);
+
   PTRACE(2, "H225\tSignal channel closed.");
 }
 
