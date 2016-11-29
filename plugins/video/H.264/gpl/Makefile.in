@@ -1,5 +1,5 @@
 #
-# Makefile for GSM 06.10
+# Makefile for H.264 helper
 #
 # Copyright (C) 2004 Post Increment, All Rights Reserved
 #
@@ -20,6 +20,9 @@
 # Contributor(s): ______________________________________.
 #
 # $Log$
+# Revision 1.4  2015/01/22 08:56:10  willamowius
+# make sure "make install" updates the helper
+#
 # Revision 1.3  2010/09/26 13:32:34  willamowius
 # optional define
 #

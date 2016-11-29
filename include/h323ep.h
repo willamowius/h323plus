@@ -1127,7 +1127,7 @@ class H323EndPoint : public PObject
         NOTE: Returns FALSE is EPSecurityPassword.IsEmpty()
        */
     virtual PBoolean GetEPCredentials(PString & password,   ///* Password to use for call
-                                  PString & username    ///* Username to use for call
+                                  PString & username        ///* Username to use for call
                                   );
 
      /** Set the Password and UserName for EPAuthentication for Connection
@@ -2678,7 +2678,7 @@ class H323EndPoint : public PObject
      */
     WORD GetUDPPortMax() const { return udpPorts.max; }
 
-    /**Set the TCP port number base and max for H.245 channels.
+    /**Set the UDP port number base and max for RAS channels.
      */
     void SetUDPPorts(unsigned udpBase, unsigned udpMax);
 
