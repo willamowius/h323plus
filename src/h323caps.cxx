@@ -2225,7 +2225,7 @@ PBoolean H323CodecExtendedVideoCapability::OnReceivedPDU(const H245_VideoCapabil
       // Get a Common Video Capability list
       const H245_ArrayOf_VideoCapability & caps = extend.m_videoCapability;
         for (PINDEX i = 0; i < caps.GetSize(); i++) {
-            H323Capability * capability = extCapabilities.FindCapability(H323Capability::e_Video, caps[i], NULL);
+            H323Capability * capability = extCapabilities.FindCapability(H323Capability::e_Video, caps[i], NULL, 0);
             if (capability != NULL) {
               H323VideoCapability * copy = (H323VideoCapability *)capability->Clone();
               if (copy->OnReceivedPDU(caps[i],e_TCS))
@@ -3609,7 +3609,7 @@ H323Capability * H323Capabilities::FindCapability(const H245_Capability & cap) c
       if (audio.GetTag() == H245_AudioCapability::e_genericAudioCapability)
           return FindCapability(H323Capability::e_Audio, audio, audio);
       else
-          return FindCapability(H323Capability::e_Audio, audio, NULL);
+          return FindCapability(H323Capability::e_Audio, audio, NULL, 0);
     }
 
     case H245_Capability::e_receiveVideoCapability :
@@ -3622,7 +3622,7 @@ H323Capability * H323Capabilities::FindCapability(const H245_Capability & cap) c
       else if (video.GetTag() == H245_VideoCapability::e_extendedVideoCapability)
         return FindCapability(true,video);
       else
-        return FindCapability(H323Capability::e_Video, video, NULL);
+        return FindCapability(H323Capability::e_Video, video, NULL, 0);
     }
 
     case H245_Capability::e_receiveDataApplicationCapability :
@@ -3630,7 +3630,7 @@ H323Capability * H323Capabilities::FindCapability(const H245_Capability & cap) c
     case H245_Capability::e_receiveAndTransmitDataApplicationCapability :
     {
       const H245_DataApplicationCapability & data = cap;
-      return FindCapability(H323Capability::e_Data, data.m_application, NULL);
+      return FindCapability(H323Capability::e_Data, data.m_application, NULL, 0);
     }
 
     case H245_Capability::e_receiveUserInputCapability :
@@ -3641,7 +3641,7 @@ H323Capability * H323Capabilities::FindCapability(const H245_Capability & cap) c
       if (ui.GetTag() == H245_UserInputCapability::e_genericUserInputCapability)
         return FindCapability(H323Capability::e_UserInput, ui, ui);
       else
-        return FindCapability(H323Capability::e_UserInput, ui, NULL);
+        return FindCapability(H323Capability::e_UserInput, ui, NULL, 0);
     }
 
     case H245_Capability::e_receiveRTPAudioTelephonyEventCapability :
@@ -3758,7 +3758,8 @@ H323Capability * H323Capabilities::FindCapability(const H245_ModeElement & modeE
       H245_AudioCapability::e_genericAudioCapability,
       H245_AudioCapability::e_g729Extensions
         };
-        return FindCapability(H323Capability::e_Audio, audio, AudioSubTypes);
+        const unsigned tableElements = (sizeof(AudioSubTypes) / sizeof(unsigned const));
+        return FindCapability(H323Capability::e_Audio, audio, AudioSubTypes, tableElements);
       }
 
     case H245_ModeElementType::e_videoMode :
@@ -3772,7 +3773,8 @@ H323Capability * H323Capabilities::FindCapability(const H245_ModeElement & modeE
       H245_VideoCapability::e_is11172VideoCapability,
       H245_VideoCapability::e_genericVideoCapability
         };
-        return FindCapability(H323Capability::e_Video, video, VideoSubTypes);
+        const unsigned tableElements = (sizeof(VideoSubTypes) / sizeof(unsigned const));
+        return FindCapability(H323Capability::e_Video, video, VideoSubTypes, tableElements);
       }
 
     case H245_ModeElementType::e_dataMode :
@@ -3794,7 +3796,8 @@ H323Capability * H323Capabilities::FindCapability(const H245_ModeElement & modeE
       H245_DataApplicationCapability_application::e_t38fax,
       H245_DataApplicationCapability_application::e_genericDataCapability
         };
-        return FindCapability(H323Capability::e_Data, data.m_application, DataSubTypes);
+        const unsigned tableElements = (sizeof(DataSubTypes) / sizeof(unsigned const));
+        return FindCapability(H323Capability::e_Data, data.m_application, DataSubTypes, tableElements);
       }
 
     default :
@@ -3869,7 +3872,7 @@ H323Capability * H323Capabilities::FindCapability(bool, const H245_ExtendedVideo
             if (vidCap.GetTag() == H245_VideoCapability::e_genericVideoCapability)
                newCap = ((H323ExtendedVideoCapability &)capability).GetCapabilities().FindCapability(H323Capability::e_Video, vidCap, vidCap);
             else  
-               newCap = ((H323ExtendedVideoCapability &)capability).GetCapabilities().FindCapability(H323Capability::e_Video, vidCap, NULL);
+               newCap = ((H323ExtendedVideoCapability &)capability).GetCapabilities().FindCapability(H323Capability::e_Video, vidCap, NULL, 0);
 
             if (newCap)
                 return &capability;
@@ -3882,10 +3885,11 @@ H323Capability * H323Capabilities::FindCapability(bool, const H245_ExtendedVideo
 
 H323Capability * H323Capabilities::FindCapability(H323Capability::MainTypes mainType,
                                                   const PASN_Choice & subTypePDU,
-                                                  const unsigned * translationTable) const
+                                                  const unsigned * translationTable,
+                                                  unsigned tableElements) const
 {
-    unsigned int subTypeID = subTypePDU.GetTag();
-  if (subTypePDU.GetTag() != 0) {
+  unsigned int subTypeID = subTypePDU.GetTag();
+  if (subTypePDU.GetTag() != 0 && subTypeID < tableElements) {
     if (translationTable != NULL)
       subTypeID = translationTable[subTypeID];
     return FindCapability(mainType, subTypeID);
