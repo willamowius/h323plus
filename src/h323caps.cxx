@@ -3889,8 +3889,8 @@ H323Capability * H323Capabilities::FindCapability(H323Capability::MainTypes main
                                                   unsigned tableElements) const
 {
   unsigned int subTypeID = subTypePDU.GetTag();
-  if (subTypePDU.GetTag() != 0 && subTypeID < tableElements) {
-    if (translationTable != NULL)
+  if (subTypePDU.GetTag() != 0) {
+    if (translationTable != NULL && subTypeID < tableElements)
       subTypeID = translationTable[subTypeID];
     return FindCapability(mainType, subTypeID);
   }
