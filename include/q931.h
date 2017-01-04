@@ -106,6 +106,7 @@ class Q931 : public PObject
     static unsigned GenerateCallReference();
     unsigned GetCallReference() const { return callReference; }
     PBoolean IsFromDestination() const { return fromDestination; }
+    void SetFromDestination(PBoolean fromDest) { fromDestination = fromDest; }
     MsgTypes GetMessageType() const { return messageType; }
 
     enum InformationElementCodes {
@@ -305,14 +306,14 @@ class Q931 : public PObject
     PString GetKeypad() const;
 
     enum ProgressIndication {
-       ProgressNotEndToEndISDN      = 1,      // Call is not end-to-end ISDN; 
-                                              // further call progress information may be available in-band  
-       ProgressDestinationNonISDN   = 2,      // Destination address is non ISDN  
-       ProgressOriginNotISDN        = 3,      // Origination address is non ISDN  
-       ProgressReturnedToISDN       = 4,      // Call has returned to the ISDN 
-       ProgressServiceChange        = 5,      // Interworking has occurred and has 
+       ProgressNotEndToEndISDN      = 1,      // Call is not end-to-end ISDN;
+                                              // further call progress information may be available in-band
+       ProgressDestinationNonISDN   = 2,      // Destination address is non ISDN
+       ProgressOriginNotISDN        = 3,      // Origination address is non ISDN
+       ProgressReturnedToISDN       = 4,      // Call has returned to the ISDN
+       ProgressServiceChange        = 5,      // Interworking has occurred and has
                                               // resulted in a telecommunication service change
-       ProgressInbandInformationAvailable = 8 // In-band information or an appropriate pattern is now available.   
+       ProgressInbandInformationAvailable = 8 // In-band information or an appropriate pattern is now available.
     };
 
     void SetProgressIndicator(
