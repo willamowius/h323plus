@@ -1270,9 +1270,7 @@ static PFactory<H235Authenticator>::Worker<H2351_Authenticator> factoryH2351_Aut
 /////////////////////////////////////////////////////////////////////////////
 
 #if PTLIB_VER >= 2110
-#ifdef H323_SSL
 H235SECURITY(TSS);
-#endif
 #else
 static PFactory<H235Authenticator>::Worker<H235AuthenticatorTSS> factoryH235AuthTSS("TimeSync");
 #endif
@@ -1344,7 +1342,7 @@ H235Authenticator::ValidationResult
     if (!clearToken.HasOptionalField(H235_ClearToken::e_timeStamp))
         return e_InvalidTime;
 
-    // Todo: Store it away.
+    // Todo: compare with current time and call application callback if no match
     //PUInt32b timeStamp = (DWORD)clearToken.m_timeStamp;
 
     return e_OK;
@@ -1367,6 +1365,9 @@ PBoolean H235AuthenticatorTSS::IsCapability(const H235_AuthenticationMechanism &
 PBoolean H235AuthenticatorTSS::SetCapability(H225_ArrayOf_AuthenticationMechanism & mechanisms,
                                 H225_ArrayOf_PASN_ObjectId & /*algorithmOIDs*/)
 {
+    if (!IsActive())
+        return FALSE;
+
     int sz = mechanisms.GetSize();
     mechanisms.SetSize(sz+1);
     H235_AuthenticationMechanism & mech = mechanisms[sz];
