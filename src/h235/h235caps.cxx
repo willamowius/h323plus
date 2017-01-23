@@ -494,7 +494,9 @@ PBoolean H323SecureCapability::OnSendingPDU(H245_ModeElement & mode) const
         case H323Capability::e_Audio:
             return ((H323AudioCapability *)ChildCapability)->OnSendingPDU(mode);
         case H323Capability::e_Video:
+#ifdef H323_VIDEO
             return ((H323VideoCapability *)ChildCapability)->OnSendingPDU(mode);
+#endif // H323_VIDEO
         case H323Capability::e_Data:
         default:
             return false;
@@ -522,8 +524,10 @@ PBoolean H323SecureCapability::OnSendingPDU(H245_DataType & dataType) const
                 txFramesInPacket = ((H323AudioCapability *)ChildCapability)->GetTxFramesInPacket();
                 return ((H323AudioCapability *)ChildCapability)->OnSendingPDU((H245_AudioCapability &)dataType, txFramesInPacket, e_OLC);
             case H323Capability::e_Video:
+#ifdef H323_VIDEO
                 dataType.SetTag(H245_DataType::e_videoData); 
                 return ((H323VideoCapability *)ChildCapability)->OnSendingPDU((H245_VideoCapability &)dataType, e_OLC);
+#endif // H323_VIDEO
             case H323Capability::e_Data:
             default:
                 break;
@@ -545,8 +549,10 @@ PBoolean H323SecureCapability::OnSendingPDU(H245_DataType & dataType) const
             txFramesInPacket = ((H323AudioCapability *)ChildCapability)->GetTxFramesInPacket();
             return ((H323AudioCapability *)ChildCapability)->OnSendingPDU((H245_AudioCapability &)cType, txFramesInPacket, e_OLC);
         case H323Capability::e_Video: 
+#ifdef H323_VIDEO
             cType.SetTag(H245_H235Media_mediaType::e_videoData); 
             return ((H323VideoCapability *)ChildCapability)->OnSendingPDU((H245_VideoCapability &)cType, e_OLC);
+#endif // H323_VIDEO
         case H323Capability::e_Data: 
         default:
             break;
@@ -586,9 +592,11 @@ PBoolean H323SecureCapability::OnReceivedPDU(const H245_DataType & dataType,PBoo
             break;
 
         case H323Capability::e_Video: 
+#ifdef H323_VIDEO
             if (mediaType.GetTag() == H245_H235Media_mediaType::e_videoData) 
                return ((H323VideoCapability *)ChildCapability)->OnReceivedPDU((const H245_VideoCapability &)mediaType, e_OLC);
             break;
+#endif // H323_VIDEO
 
         case H323Capability::e_Data:
         default:
@@ -607,7 +615,9 @@ PBoolean H323SecureCapability::OnSendingPDU(H245_Capability & pdu) const
         case H323Capability::e_Audio:
             return ((H323AudioCapability *)ChildCapability)->OnSendingPDU(pdu);
         case H323Capability::e_Video:
+#ifdef H323_VIDEO
             return ((H323VideoCapability *)ChildCapability)->OnSendingPDU(pdu);
+#endif // H323_VIDEO
         case H323Capability::e_Data:
         case H323Capability::e_UserInput:
         case H323Capability::e_ExtendVideo:
@@ -622,7 +632,9 @@ PBoolean H323SecureCapability::OnReceivedPDU(const H245_Capability & pdu)
         case H323Capability::e_Audio:
             return ((H323AudioCapability *)ChildCapability)->OnReceivedPDU(pdu);
         case H323Capability::e_Video:
+#ifdef H323_VIDEO
             return ((H323VideoCapability *)ChildCapability)->OnReceivedPDU(pdu);
+#endif // H323_VIDEO
         case H323Capability::e_Data:
         case H323Capability::e_UserInput:
         case H323Capability::e_ExtendVideo:
