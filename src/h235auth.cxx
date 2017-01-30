@@ -818,9 +818,7 @@ void H235AuthenticatorTime::SetAdjustedTime(time_t remoteTime)
 ///////////////////////////////////////////////////////////////////////////////
 
 #if PTLIB_VER >= 2110
-#ifdef H323_SSL
 H235SECURITY(MD5);
-#endif
 #else
 static PFactory<H235Authenticator>::Worker<H235AuthSimpleMD5> factoryH235AuthSimpleMD5("SimpleMD5");
 #endif
@@ -1056,9 +1054,7 @@ PBoolean H235AuthSimpleMD5::IsSecuredSignalPDU(unsigned signalPDU, PBoolean rece
 ///////////////////////////////////////////////////////////////////////////////
 
 #if PTLIB_VER >= 2110
-#ifdef H323_SSL
 H235SECURITY(CAT);
-#endif
 #else
 static PFactory<H235Authenticator>::Worker<H235AuthCAT> factoryH235AuthCAT("SimpleCAT");
 #endif
