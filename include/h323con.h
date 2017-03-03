@@ -3545,7 +3545,7 @@ class H323Connection : public PObject
     PChannel * SwapHoldMediaChannels(PChannel * newChannel,unsigned sessionId);
 
     PTimedMutex outerMutex;
-    PMutex innerMutex;
+    PTimedMutex innerMutex;
 
   public:
     PBoolean StartHandleControlChannel();
