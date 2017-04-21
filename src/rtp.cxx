@@ -1909,6 +1909,10 @@ PBoolean RTP_UDP::PreWriteData(RTP_DataFrame & frame)
 
 PBoolean RTP_UDP::WriteData(RTP_DataFrame & frame)
 {
+  // Trying to send a PDU before we are set up!, check in PreWriteData() isn't enough
+  if (!mediaIsTunneled && (remoteAddress.IsAny() || !remoteAddress.IsValid() || remoteDataPort == 0)) {
+    return true;
+  }
 
   while (dataSocket && !dataSocket->WriteTo(frame.GetPointer(),
             frame.GetHeaderSize()+frame.GetPayloadSize(), remoteAddress, remoteDataPort)) {
@@ -1935,8 +1939,9 @@ PBoolean RTP_UDP::WriteData(RTP_DataFrame & frame)
 PBoolean RTP_UDP::WriteControl(RTP_ControlFrame & frame)
 {
   // Trying to send a PDU before we are set up!
-  if (!mediaIsTunneled && (remoteAddress.IsAny() || !remoteAddress.IsValid() || remoteControlPort == 0))
+  if (!mediaIsTunneled && (remoteAddress.IsAny() || !remoteAddress.IsValid() || remoteControlPort == 0)) {
     return true;
+  }
 
   while (!controlSocket->WriteTo(frame.GetPointer(), frame.GetCompoundSize(),
                                 remoteAddress, remoteControlPort)) {
