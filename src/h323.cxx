@@ -738,11 +738,7 @@ int H323Connection::TryLock()
 
 void H323Connection::Unlock()
 {
-  // calling Signal() on a mutex that isn't locked is causing an assert,
-  // so we make sure it is locked before the Signal()
-  innerMutex.Wait(0);
   innerMutex.Signal();
-  outerMutex.Wait(0);
   outerMutex.Signal();
 }
 
