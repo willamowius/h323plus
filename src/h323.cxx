@@ -979,7 +979,11 @@ void H323Connection::HandleSignallingChannel()
 
   while (signallingChannel && signallingChannel->IsOpen()) {
     H323SignalPDU pdu;
-    if (!HandleReceivedSignalPDU(pdu.Read(*signallingChannel), pdu))
+    PBoolean readStatus = pdu.Read(*signallingChannel);
+	// skip keep-alives
+    if (readStatus && pdu.GetQ931().GetMessageType() == 0)
+      continue;
+    if (!HandleReceivedSignalPDU(readStatus, pdu))
       break;
   }
 
