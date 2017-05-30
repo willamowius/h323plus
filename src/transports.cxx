@@ -1106,7 +1106,13 @@ PBoolean H323Transport::HandleFirstSignallingChannelPDU(PThread * thread)
     return FALSE;
   }
 
-  unsigned callReference = pdu.GetQ931().GetCallReference();
+  const Q931 &firstQ931PDU = pdu.GetQ931();
+  if (firstQ931PDU.GetMessageType() != Q931::SetupMsg) {
+    PTRACE(1, "H225\tFirst PDU is not a Setup, connection not started.");
+    return FALSE;
+  }
+ 
+  unsigned callReference = firstQ931PDU.GetCallReference();
   PTRACE(3, "H225\tIncoming call, first PDU: callReference=" << callReference);
 
   // Get a new (or old) connection from the endpoint
