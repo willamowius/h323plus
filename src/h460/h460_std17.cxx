@@ -270,7 +270,6 @@ void H46017TransportThread::Main()
         } else {
             PTRACE(3, "H46017\tConnection ReEstablished");
             transport->ConnectionLost(FALSE);
-            ret = TRUE;            // Signal that the connection has been ReEstablished.
         }
       } 
   }
