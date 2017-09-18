@@ -1959,7 +1959,7 @@ H323Connection * H323EndPoint::InternalMakeCall(const PString & trasferFromToken
   if (supplimentary) 
       connection->SetNonCallConnection();     
 
-  connection->Lock();
+  (void)connection->Lock();
 
   connectionsMutex.Wait();
   connectionsActive.SetAt(newToken, connection);

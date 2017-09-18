@@ -1143,7 +1143,7 @@ PBoolean H323Transport::HandleFirstSignallingChannelPDU(PThread * thread)
     return FALSE;
   }
 
-  connection->Lock();
+  (void)connection->Lock();
 
   // handle the first PDU
   if (connection->HandleSignalPDU(pdu)) {
