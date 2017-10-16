@@ -788,9 +788,9 @@ void H323Transaction::SlowHandler(PThread &, H323_INT)
   while (HandlePDU())
     ;
 
-  delete this;
-
   PTRACE(3, "Trans\tEnded slow PDU handler thread.");
+
+  delete this;
 }
 
 
