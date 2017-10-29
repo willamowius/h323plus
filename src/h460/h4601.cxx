@@ -505,11 +505,13 @@ H460_FeatureParameter::operator OpalGloballyUniqueID ()
 
 H460_FeatureTable::H460_FeatureTable()
 {
+    SetConstraintBounds(PASN_Object::FixedConstraint, 1, 512);
     SetSize(0);
 }
 
 H460_FeatureTable::H460_FeatureTable(const H225_ArrayOf_EnumeratedParameter & Xparams)
 {
+    SetConstraintBounds(PASN_Object::FixedConstraint, 1, 512);
 //    OnReceivedPDU(Xparams);
 }
 
