@@ -633,12 +633,12 @@ void H46017Transport::SetTunnel(H46026Tunnel * mgr)
     m_socketMgr->AttachTransport(this);
 
     if (!m_socketWrite)
-        m_socketWrite = PThread::Create(PCREATE_NOTIFIER(SocketWrite), 0, PThread::AutoDeleteThread);
+        m_socketWrite = PThread::Create(PCREATE_NOTIFIER(SocketWrite), 0, PThread::AutoDeleteThread, PThread::NormalPriority, "H.460.26 Writer");
 
     m_h46026tunnel = true;
 }
 
-void H46017Transport::SocketWrite(PThread &,  H323_INT)
+void H46017Transport::SocketWrite(PThread &, H323_INT)
 {
     PBYTEArray tpkt(10004);  // 10K buffer with RFC1006 Header
     tpkt[0] = 3;

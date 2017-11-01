@@ -416,7 +416,7 @@ PBoolean H46018Handler::CreateH225Transport(const PASN_OctetString & information
     // We throw the socket creation onto another thread as with UMTS networks it may take several 
     // seconds to actually create the connection and we don't want to wait before signalling back
     // to the gatekeeper. This also speeds up connection time which is also nice :) - SH
-    SocketCreateThread = PThread::Create(PCREATE_NOTIFIER(SocketThread), 0, PThread::AutoDeleteThread);
+    SocketCreateThread = PThread::Create(PCREATE_NOTIFIER(SocketThread), 0, PThread::AutoDeleteThread, PThread::NormalPriority, "SocketCreator");
 
     return true;
 }
@@ -1167,7 +1167,7 @@ void H46019UDPSocket::InitialiseKeepAlive()
 
         //  To start before keepTTL interval do a number of special probes to ensure the gatekeeper
         //  is reached to allow media to flow properly.
-        initialKeep = PThread::Create(PCREATE_NOTIFIER(StartKeepAlives), 0, PThread::AutoDeleteThread); 
+        initialKeep = PThread::Create(PCREATE_NOTIFIER(StartKeepAlives), 0, PThread::AutoDeleteThread, PThread::NormalPriority, "Initial KeepAlive Thread"); 
 
     } else {
         PTRACE(2,"H46019UDP\t"  << (rtpSocket ? "RTP" : "RTCP") << " PING NOT Ready " 

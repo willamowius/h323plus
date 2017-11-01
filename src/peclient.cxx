@@ -300,7 +300,7 @@ void H323PeerElement::MonitorMain(PThread &,  H323_INT)
               !localServiceOrdinals.Contains(descriptor->creator)
              )
             ) {
-          PThread::Create(PCREATE_NOTIFIER(UpdateAllDescriptors), 0, PThread::AutoDeleteThread, PThread::NormalPriority);
+          PThread::Create(PCREATE_NOTIFIER(UpdateAllDescriptors), 0, PThread::AutoDeleteThread, PThread::NormalPriority, "PeerUpdater");
           break;
         }
       }

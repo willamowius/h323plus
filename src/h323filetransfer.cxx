@@ -926,8 +926,8 @@ PBoolean H323FileTransferHandler::Start(H323Channel::Directions direction)
 
       StartTime = new PTime();
       transmitFrame.SetPayloadType(rtpPayloadType);
-      TransmitThread = PThread::Create(PCREATE_NOTIFIER(Transmit), 0, PThread::AutoDeleteThread); 
-      ReceiveThread = PThread::Create(PCREATE_NOTIFIER(Receive), 0, PThread::AutoDeleteThread);
+      TransmitThread = PThread::Create(PCREATE_NOTIFIER(Transmit), 0, PThread::AutoDeleteThread, PThread::NormalPriority, "FileTransmit"); 
+      ReceiveThread = PThread::Create(PCREATE_NOTIFIER(Receive), 0, PThread::AutoDeleteThread, PThread::NormalPriority, "FileReceive");
 
 
   return TRUE;
