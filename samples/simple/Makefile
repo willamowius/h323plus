@@ -11,5 +11,7 @@ ifndef OPENH323DIR
 OPENH323DIR=$(CURDIR)/../..
 endif
 
+STDCCFLAGS += -Wno-unused-variable
+
 include $(OPENH323DIR)/openh323u.mak
 
