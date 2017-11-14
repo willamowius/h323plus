@@ -141,6 +141,7 @@ void SimpleH323Process::Main()
 #endif
              "x-listenport:"
              "u-user:"
+             "S-sleep."
           , FALSE);
 
 
@@ -208,6 +209,7 @@ void SimpleH323Process::Main()
             "  -o --output             : File for trace output, default is stderr.\n"
 #endif
             "  -x --listenport         : Listening port (default 1720).\n"
+            "  -S --sleep              : Sleep instead of listening for commands on STDIN.\n"
             "  -h --help               : This help message.\n"
             << endl;
     return;
@@ -231,6 +233,14 @@ void SimpleH323Process::Main()
     cout << "Initiating call to \"" << args[0] << "\"\n";
       endpoint->MakeCall(args[0], endpoint->currentCallToken);
   }
+
+  if (args.HasOption('S')) {
+    // sleep infinitely, usefull for testing purposes
+    for (;;) {
+      PThread::Sleep(1000);
+    }
+  }
+
   cout << "Press X to exit." << endl;
 
   // Simplest possible user interface
