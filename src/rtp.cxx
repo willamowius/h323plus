@@ -314,7 +314,7 @@ void RTP_MultiDataFrame::SetRTPPayload(RTP_DataFrame & frame)
 }
 
 PBoolean RTP_MultiDataFrame::IsValidRTPPayload(PBoolean muxed) const
-{  
+{
     PINDEX mux_header = muxed ? GetMultiHeaderSize() : 0;
 
     // Simple sanity check for RTP version
@@ -408,6 +408,7 @@ RTP_ControlFrame::SourceDescription & RTP_ControlFrame::AddSourceDescription(DWO
 }
 
 
+// TODO: this method produces invalid packets, if the data size needs padding
 RTP_ControlFrame::SourceDescription::Item &
         RTP_ControlFrame::AddSourceDescriptionItem(SourceDescription & sdes,
                                                    unsigned type,
@@ -504,7 +505,7 @@ void RTP_UserData::OnRxSenderReport(unsigned /*sessionID*/,
 
 RTP_Session::RTP_Session(
 #ifdef H323_RTP_AGGREGATE
-                         PHandleAggregator * _aggregator, 
+                         PHandleAggregator * _aggregator,
 #endif
                          unsigned id, RTP_UserData * data)
   : sessionID(id), canonicalName(PProcess::Current().GetUserName()), toolName(PProcess::Current().GetName()), referenceCount(1), userData(data),
@@ -553,7 +554,7 @@ RTP_Session::~RTP_Session()
             );
 
   if (userData) {
-    //userData->OnFinalStatistics(*this);  TODO fix sending end of call stats 
+    //userData->OnFinalStatistics(*this);  TODO fix sending end of call stats
     delete userData;
   }
 
@@ -918,7 +919,7 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveData(const RTP_DataFrame & 
   averageReceiveTimeAccum = 0;
   maximumReceiveTimeAccum = 0;
   minimumReceiveTimeAccum = 0xffffffff;
-  
+
   PTRACE(2, "RTP\tReceive statistics: "
             " packets=" << packetsReceived <<
             " octets=" << octetsReceived <<
@@ -969,8 +970,7 @@ PBoolean RTP_Session::SendReport()
     report.SetPayloadType(RTP_ControlFrame::e_SenderReport);
     report.SetPayloadSize(sizeof(RTP_ControlFrame::SenderReport));
 
-    RTP_ControlFrame::SenderReport * sender =
-                              (RTP_ControlFrame::SenderReport *)report.GetPayloadPtr();
+    RTP_ControlFrame::SenderReport * sender = (RTP_ControlFrame::SenderReport *)report.GetPayloadPtr();
     sender->ssrc = syncSourceOut;
     PTime now;
     sender->ntp_sec = now.GetTimeInSeconds()+SecondsFrom1900to1970; // Convert from 1970 to 1900
@@ -999,8 +999,9 @@ PBoolean RTP_Session::SendReport()
   report.WriteNextCompound();
 
   RTP_ControlFrame::SourceDescription & sdes = report.AddSourceDescription(syncSourceOut);
-  report.AddSourceDescriptionItem(sdes, RTP_ControlFrame::e_CNAME, canonicalName);
-  report.AddSourceDescriptionItem(sdes, RTP_ControlFrame::e_TOOL, toolName);
+  // TODO: adding variable length names disabled until we handle padding correctly
+  //report.AddSourceDescriptionItem(sdes, RTP_ControlFrame::e_CNAME, canonicalName);
+  //report.AddSourceDescriptionItem(sdes, RTP_ControlFrame::e_TOOL, toolName);
 
   // Wait a fuzzy amount of time so things don't get into lock step
   int interval = (int)reportTimeInterval.GetMilliSeconds();
@@ -1013,8 +1014,7 @@ PBoolean RTP_Session::SendReport()
 }
 
 
-static RTP_Session::ReceiverReportArray
-                BuildReceiverReportArray(const RTP_ControlFrame & frame, PINDEX offset)
+static RTP_Session::ReceiverReportArray BuildReceiverReportArray(const RTP_ControlFrame & frame, PINDEX offset)
 {
   RTP_Session::ReceiverReportArray reports;
 
@@ -1386,16 +1386,16 @@ static void SetMinBufferSize(PUDPSocket & sock, int buftype)
 
 RTP_UDP::RTP_UDP(
 #ifdef H323_RTP_AGGREGATE
-                 PHandleAggregator * _aggregator, 
+                 PHandleAggregator * _aggregator,
 #endif
                  unsigned id, PBoolean _remoteIsNAT, PBoolean _mediaTunneled)
   : RTP_Session(
 #ifdef H323_RTP_AGGREGATE
-  _aggregator, 
+  _aggregator,
 #endif
   id),
-    localAddress(0), localDataPort(0), localControlPort(0), 
-    remoteAddress(0), remoteDataPort(0), remoteControlPort(0), 
+    localAddress(0), localDataPort(0), localControlPort(0),
+    remoteAddress(0), remoteDataPort(0), remoteControlPort(0),
     remoteTransmitAddress(0), shutdownRead(false), shutdownWrite(false),
     dataSocket(NULL), controlSocket(NULL),
     appliedQOS(false), enableGQOS(false),
@@ -1454,12 +1454,12 @@ void RTP_UDP::EnableGQoS(PBoolean success)
 #if P_QOS
 PQoS & RTP_UDP::GetQOS()
 {
-    if (dataSocket != NULL) 
+    if (dataSocket != NULL)
        return dataSocket->GetQoSSpec();
-    else if (controlSocket != NULL) 
+    else if (controlSocket != NULL)
        return controlSocket->GetQoSSpec();
     else
-       return *new PQoS(); 
+       return *new PQoS();
 }
 #endif
 
@@ -1480,7 +1480,7 @@ PBoolean RTP_UDP::Open(PIPSocket::Address _localAddress,
 #endif
 				   )
 {
-  // save local address 
+  // save local address
   localAddress = _localAddress;
 
   localDataPort    = (WORD)(portBase&0xfffe);
@@ -1502,7 +1502,7 @@ PBoolean RTP_UDP::Open(PIPSocket::Address _localAddress,
 
 #ifdef P_STUN
   if (meth != NULL) {
-    H323Connection::SessionInformation * info = 
+    H323Connection::SessionInformation * info =
          connection.BuildSessionInformation(GetSessionID());
 
 #if PTLIB_VER >= 2130
@@ -1515,7 +1515,7 @@ PBoolean RTP_UDP::Open(PIPSocket::Address _localAddress,
       dataSocket->GetLocalAddress(localAddress, localDataPort);
       controlSocket->GetLocalAddress(localAddress, localControlPort);
 #if PTLIB_VER >= 2130
-      PString name = meth->GetMethodName(); 
+      PString name = meth->GetMethodName();
 #else
       PString name = meth->GetName();
 #endif
@@ -1568,7 +1568,7 @@ PBoolean RTP_UDP::Open(PIPSocket::Address _localAddress,
   PTRACE(2, "RTP_UDP\tSession " << sessionID << " created: "
          << localAddress << ':' << localDataPort << '-' << localControlPort
          << " ssrc=" << syncSourceOut);
-  
+
   return TRUE;
 }
 
@@ -1652,10 +1652,10 @@ PBoolean RTP_UDP::PseudoRead(int & selectStatus)
         return true;
 
 #if PTLIB_VER >= 2130
-    return (((H323UDPSocket*)controlSocket)->DoPseudoRead(selectStatus) || 
+    return (((H323UDPSocket*)controlSocket)->DoPseudoRead(selectStatus) ||
             ((H323UDPSocket*)dataSocket)->DoPseudoRead(selectStatus));
 #elif PTLIB_VER >= 290
-    return (controlSocket->DoPseudoRead(selectStatus) || 
+    return (controlSocket->DoPseudoRead(selectStatus) ||
             dataSocket->DoPseudoRead(selectStatus));
 #else
     return false;
@@ -1773,7 +1773,7 @@ RTP_Session::SendReceiveStatus RTP_UDP::ReadDataOrControlPDU(PUDPSocket & socket
                 appliedQOS = false;
                 if (fromDataChannel) {
                     remoteDataPort = port;
-                    // Fixes to makes sure sync,stats and jitter don't get screwed up 
+                    // Fixes to makes sure sync,stats and jitter don't get screwed up
                     syncSourceIn = ((RTP_DataFrame &)frame).GetSyncSource();
                     expectedSequenceNumber = ((RTP_DataFrame &)frame).GetSequenceNumber();
 #ifdef H323_AUDIO_CODECS
@@ -1800,12 +1800,12 @@ RTP_Session::SendReceiveStatus RTP_UDP::ReadDataOrControlPDU(PUDPSocket & socket
             appliedQOS = false;
                if (fromDataChannel) {
                     remoteDataPort = port;
-                    // Fixes to makes sure sync,stats and jitter don't get screwed up 
+                    // Fixes to makes sure sync,stats and jitter don't get screwed up
                     syncSourceIn = ((RTP_DataFrame &)frame).GetSyncSource();
                     expectedSequenceNumber = ((RTP_DataFrame &)frame).GetSequenceNumber();
 #ifdef H323_AUDIO_CODECS
                     if (jitter != NULL)  jitter->ResetFirstWrite();
-#endif                 
+#endif
                } else
                  remoteControlPort = port;
           }
@@ -1813,7 +1813,7 @@ RTP_Session::SendReceiveStatus RTP_UDP::ReadDataOrControlPDU(PUDPSocket & socket
     }
     successiveWrongAddresses=0;
 
-    if (!remoteAddress.IsAny() && remoteAddress.IsValid() && !appliedQOS) 
+    if (!remoteAddress.IsAny() && remoteAddress.IsValid() && !appliedQOS)
       ApplyQOS(remoteAddress);
 
     return RTP_Session::e_ProcessPacket;
@@ -1903,7 +1903,7 @@ PBoolean RTP_UDP::PreWriteData(RTP_DataFrame & frame)
     case e_AbortTransport :
       return FALSE;
   }
- 
+
   return TRUE;
 }
 
