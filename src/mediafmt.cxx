@@ -845,7 +845,11 @@ bool OpalMediaFormat::GetOptionBoolean(const PString & name, bool dflt) const
   if (option == NULL)
     return dflt;
 
-  return PDownCast(OpalMediaOptionBoolean, option)->GetValue();
+  OpalMediaOptionBoolean * optionBoolean = PDownCast(OpalMediaOptionBoolean, option);
+  if (optionBoolean == NULL) {
+      return false;
+  }
+  return optionBoolean->GetValue();
 }
 
 
@@ -858,7 +862,11 @@ bool OpalMediaFormat::SetOptionBoolean(const PString & name, bool value)
   if (option == NULL)
     return false;
 
-  PDownCast(OpalMediaOptionBoolean, option)->SetValue(value);
+  OpalMediaOptionBoolean * optionBoolean = PDownCast(OpalMediaOptionBoolean, option);
+  if (optionBoolean == NULL) {
+    return false;
+  }
+  optionBoolean->SetValue(value);
   return true;
 }
 
@@ -914,7 +922,11 @@ double OpalMediaFormat::GetOptionReal(const PString & name, double dflt) const
   if (option == NULL)
     return dflt;
 
-  return PDownCast(OpalMediaOptionReal, option)->GetValue();
+  OpalMediaOptionReal * optionReal = PDownCast(OpalMediaOptionReal, option);
+  if (optionReal == NULL) {
+    return 0.0;
+  }
+  return optionReal->GetValue();
 }
 
 
@@ -927,7 +939,11 @@ bool OpalMediaFormat::SetOptionReal(const PString & name, double value)
   if (option == NULL)
     return false;
 
-  PDownCast(OpalMediaOptionReal, option)->SetValue(value);
+  OpalMediaOptionReal * optionReal = PDownCast(OpalMediaOptionReal, option);
+  if (optionReal == NULL) {
+    return false;
+  }
+  optionReal->SetValue(value);
   return true;
 }
 
@@ -939,7 +955,11 @@ PINDEX OpalMediaFormat::GetOptionEnum(const PString & name, PINDEX dflt) const
   if (option == NULL)
     return dflt;
 
-  return PDownCast(OpalMediaOptionEnum, option)->GetValue();
+  OpalMediaOptionEnum * optionEnum = PDownCast(OpalMediaOptionEnum, option);
+  if (optionEnum == NULL) {
+    return 0;
+  }
+  return optionEnum->GetValue();
 }
 
 
@@ -952,7 +972,10 @@ bool OpalMediaFormat::SetOptionEnum(const PString & name, PINDEX value)
   if (option == NULL)
     return false;
 
-  PDownCast(OpalMediaOptionEnum, option)->SetValue(value);
+  OpalMediaOptionEnum * optionEnum = PDownCast(OpalMediaOptionEnum, option);
+  if (optionEnum == NULL) {
+    return false;
+  }
   return true;
 }
 
@@ -964,7 +987,11 @@ PString OpalMediaFormat::GetOptionString(const PString & name, const PString & d
   if (option == NULL)
     return dflt;
 
-  return PDownCast(OpalMediaOptionString, option)->GetValue();
+  OpalMediaOptionString * optionString = PDownCast(OpalMediaOptionString, option);
+  if (optionString == NULL) {
+    return "";
+  }
+  return optionString->GetValue();
 }
 
 
@@ -977,7 +1004,11 @@ bool OpalMediaFormat::SetOptionString(const PString & name, const PString & valu
   if (option == NULL)
     return false;
 
-  PDownCast(OpalMediaOptionString, option)->SetValue(value);
+  OpalMediaOptionString* optionString = PDownCast(OpalMediaOptionString, option);
+  if (optionString == NULL) {
+    return false;
+  }
+  optionString->SetValue(value);
   return true;
 }
 
