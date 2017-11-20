@@ -1379,6 +1379,7 @@ PBoolean H230Control::OnReceivePACKResponse(const PASN_OctetString & rawpdu)
 
         PTRACE(4,"H230PACK\tReading " << u->m_Number);
 		userlist.push_back(*u);
+		delete u;
 	}
 
 	if (userlist.size() > 0)
