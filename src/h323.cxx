@@ -916,7 +916,7 @@ void H323Connection::ChangeSignalChannel(H323Transport * channel)
     signallingChannel = channel;
       controlMutex.Wait();
         H323Transport * oldControl = controlChannel;
-        StartControlChannel();
+        (void)StartControlChannel();
       controlMutex.Signal();
   signallingMutex.Signal();
 
