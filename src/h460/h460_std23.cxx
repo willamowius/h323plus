@@ -814,6 +814,7 @@ void H460_FeatureStd24::HandleNATInstruction(NatInstruct _config)
                 break;
             case H460_FeatureStd24::e_noassist:
                 PTRACE(4,"Std24\tNAT Call direct");
+				// fallthrough intended
             default:
                 PTRACE(4,"Std24\tNo Assist: H.460.24 DISABLED.");
                 CON->DisableNATSupport();
