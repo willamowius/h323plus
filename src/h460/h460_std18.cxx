@@ -193,20 +193,24 @@ H460_FeatureStd19::~H460_FeatureStd19()
 
 void H460_FeatureStd19::AttachEndPoint(H323EndPoint * _ep)
 {
-    PTRACE(6,"Std19\tEndPoint Attached");
-    EP = _ep; 
-    // We only enable IF the gatekeeper supports H.460.18/.17
-    H460_FeatureSet * gkfeat = EP->GetGatekeeperFeatures();
-    if ((gkfeat && gkfeat->HasFeature(18))
+	PTRACE(6,"Std19\tEndPoint Attached");
+	EP = _ep;
+	if (EP) {
+    	// We only enable IF the gatekeeper supports H.460.18/.17
+	    H460_FeatureSet * gkfeat = _ep->GetGatekeeperFeatures();
+    	if ((gkfeat && gkfeat->HasFeature(18))
 #ifdef H323_H46017
-		 || (EP && EP->RegisteredWithH46017())
+		 	|| (EP->RegisteredWithH46017())
 #endif
-	) {
-        isEnabled = true;
-    } else {
-        PTRACE(4,"Std19\tH.460.19 disabled as GK does not support H.460.17 or .18");
-        isEnabled = false;
-    }
+		) {
+        	isEnabled = true;
+    	} else {
+        	PTRACE(4,"Std19\tH.460.19 disabled as GK does not support H.460.17 or .18");
+        	isEnabled = false;
+    	}
+	} else {
+       	isEnabled = false;
+	}
 }
 
 void H460_FeatureStd19::AttachConnection(H323Connection * _con)
