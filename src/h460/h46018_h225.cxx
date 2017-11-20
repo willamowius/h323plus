@@ -196,26 +196,23 @@ H46018Transport::~H46018Transport()
 
 PBoolean H46018Transport::HandleH46018SignallingSocket(H323SignalPDU & pdu)
 {
-    for (;;) {
-      if (!IsOpen())
-          return false;
-
-      H323SignalPDU rpdu;
-      if (!rpdu.Read(*this)) {
-              PTRACE(3, "H46018\tSocket Read Failure");
-              if (GetErrorNumber(PChannel::LastReadError) == 0) {
-             PTRACE(3, "H46018\tRemote SHUT DOWN or Intermediary Shutdown!");
-              remoteShutDown = true;
-              }
+    if (!IsOpen())
         return false;
-      } else if (rpdu.GetQ931().GetMessageType() == Q931::SetupMsg) {
-              pdu = rpdu;
-              return true;
-      } else {
-          PTRACE(3, "H46018\tUnknown PDU Received");
-              return false;
-      }
 
+    H323SignalPDU rpdu;
+    if (!rpdu.Read(*this)) {
+        PTRACE(3, "H46018\tSocket Read Failure");
+        if (GetErrorNumber(PChannel::LastReadError) == 0) {
+            PTRACE(3, "H46018\tRemote SHUT DOWN or Intermediary Shutdown!");
+            remoteShutDown = true;
+         }
+        return false;
+    } else if (rpdu.GetQ931().GetMessageType() == Q931::SetupMsg) {
+        pdu = rpdu;
+        return true;
+    } else {
+       PTRACE(3, "H46018\tUnknown PDU Received");
+       return false;
     }
 }
 
