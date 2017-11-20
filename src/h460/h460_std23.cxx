@@ -321,7 +321,7 @@ void PNatMethod_H46024::SetConnectionSockets(PUDPSocket * data, PUDPSocket * con
                                              H323Connection::SessionInformation * info)
 {
     H323Connection * connection = PRemoveConst(H323Connection, info->GetConnection());
-    if (connection != NULL)
+    if (connection != NULL && info != NULL)
         connection->SetRTPNAT(info->GetSessionID(),data,control);
 }
 
