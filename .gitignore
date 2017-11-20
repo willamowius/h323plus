@@ -5,6 +5,7 @@ config.log
 config.cache
 config.status
 Makefile
+openh323u.mak
 lib
 obj_*_*_*_s
 obj_*_*_*_d_s
