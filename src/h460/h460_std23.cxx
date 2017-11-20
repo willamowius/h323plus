@@ -312,7 +312,7 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
              return false;
     }
 
-    SetConnectionSockets(socket1,socket2,info);
+    SetConnectionSockets(socket1, socket2, info);
     return true;
 }
 
@@ -320,9 +320,11 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
 void PNatMethod_H46024::SetConnectionSockets(PUDPSocket * data, PUDPSocket * control, 
                                              H323Connection::SessionInformation * info)
 {
-    H323Connection * connection = PRemoveConst(H323Connection, info->GetConnection());
-    if (connection != NULL && info != NULL)
-        connection->SetRTPNAT(info->GetSessionID(),data,control);
+    if (info != NULL) {
+        H323Connection * connection = PRemoveConst(H323Connection, info->GetConnection());
+        if (connection != NULL)
+            connection->SetRTPNAT(info->GetSessionID(), data,control);
+    }
 }
 
 //////////////////////////////////////////////////////////////////////
