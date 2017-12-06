@@ -54,7 +54,7 @@
 #include <openssl/err.h>
 #endif
 
-// TCP KeepAlive 
+// TCP KeepAlive
 static int KeepAliveInterval = 19;
 
 class H225TransportThread : public PThread
@@ -76,7 +76,7 @@ class H225TransportThread : public PThread
     H323Transport * transport;
 
     PDECLARE_NOTIFIER(PTimer, H225TransportThread, KeepAlive);
-    PTimer    m_keepAlive;                                
+    PTimer    m_keepAlive;
     PBoolean useKeepAlive;
 };
 
@@ -102,7 +102,7 @@ class H245TransportThread : public PThread
 #endif
 
     PDECLARE_NOTIFIER(PTimer, H245TransportThread, KeepAlive);
-    PTimer    m_keepAlive;            
+    PTimer    m_keepAlive;
 };
 
 
@@ -210,7 +210,7 @@ void H245TransportThread::Main()
   if (transport.AcceptControlChannel(connection)) {
 #ifdef H323_SIGNAL_AGGREGATE
     // if the endpoint is using signalling aggregation, we need to add this connection
-    // to the signalling aggregator. 
+    // to the signalling aggregator.
     if (useAggregator) {
       connection.AggregateControlChannel(&transport);
       SetAutoDelete(AutoDeleteThread);
@@ -372,7 +372,7 @@ void H323TransportAddress::Validate()
       // If a DNS record then detect the version of the DNS record.
       PIPSocket::Address ip;
       WORD port = H323EndPoint::DefaultTcpPort;
-      if (GetIpAndPort(ip, port)) 
+      if (GetIpAndPort(ip, port))
          m_version = ip.GetVersion();
     }
 #endif
@@ -544,7 +544,7 @@ PBoolean H323TransportAddress::GetIpAndPort(PIPSocket::Address & ip,
   // This really needs to be cleaned up in PTLIB  - SH
   if (PIPSocket::GetDefaultIpAddressFamily() == AF_INET6) {
       PTRACE(3, "H323\tCould not resolve IPv6 Address for : \"" << host << '"' << " Trying IPv4:");
-      PIPSocket::SetDefaultIpAddressFamilyV4(); 
+      PIPSocket::SetDefaultIpAddressFamilyV4();
       PIPSocket::ClearNameCache();  // clear the IPv6 record
       bool success = PIPSocket::GetHostAddress(host, ip);
       PIPSocket::SetDefaultIpAddressFamilyV6();
@@ -587,7 +587,7 @@ H323Listener * H323TransportAddress::CreateListener(H323EndPoint & endpoint) con
    */
 
 #ifdef H323_TLS
-  PBoolean useTLS = (endpoint.GetTransportSecurity()->IsTLSEnabled() && 
+  PBoolean useTLS = (endpoint.GetTransportSecurity()->IsTLSEnabled() &&
                     (m_tls || GetPort() == H323EndPoint::DefaultTLSPort));
 #endif
 
@@ -616,7 +616,7 @@ H323Listener * H323TransportAddress::CreateCompatibleListener(H323EndPoint & end
    */
 
 #ifdef H323_TLS
-  PBoolean useTLS = (endpoint.GetTransportSecurity()->IsTLSEnabled() && 
+  PBoolean useTLS = (endpoint.GetTransportSecurity()->IsTLSEnabled() &&
                     (m_tls || GetPort() == H323EndPoint::DefaultTLSPort));
 #endif
 
@@ -650,7 +650,7 @@ H323Transport * H323TransportAddress::CreateTransport(H323EndPoint & endpoint) c
 
     if (strncmp(theArray, IpPrefix, 3) == 0) {
         H323TransportSecurity security;
-        PBoolean useTLS = (endpoint.GetTransportSecurity()->IsTLSEnabled() && 
+        PBoolean useTLS = (endpoint.GetTransportSecurity()->IsTLSEnabled() &&
                           (m_tls || GetPort() == H323EndPoint::DefaultTLSPort));
         security.EnableTLS(useTLS);
         H323TransportTCP * transport = new H323TransportTCP(endpoint, PIPSocket::Address::GetAny(m_version));
@@ -669,7 +669,7 @@ H323TransportAddressArray H323GetInterfaceAddresses(const H323ListenerList & lis
   H323TransportAddress rasaddr(associatedTransport->GetRemoteAddress());
 
   PINDEX i;
-  for (i = 0; i < listeners.GetSize(); i++) {      
+  for (i = 0; i < listeners.GetSize(); i++) {
       H323TransportAddress sigaddr(listeners[i].GetTransportAddress());
       if (sigaddr.GetIpVersion() == rasaddr.GetIpVersion()) {
         H323TransportAddressArray newAddrs = H323GetInterfaceAddresses(sigaddr, excludeLocalHost, associatedTransport);
@@ -817,7 +817,7 @@ void H323TransportAddressArray::AppendStringCollection(const PCollection & coll)
 #define SETBIT(var,pos)  var |= 1<<pos;
 #define CLEARBIT(var,pos) var &= ~(1 << pos);
 
-H323TransportSecurity::H323TransportSecurity(H323EndPoint * ep) 
+H323TransportSecurity::H323TransportSecurity(H323EndPoint * ep)
 :  m_securityMask(0), m_policyMask(0)
 {
     if (ep)
@@ -829,7 +829,7 @@ PString H323TransportSecurity::MethodAsString(Method meth)
     switch (meth) {
         case H323TransportSecurity::e_unsecure: return "TCP";
         case H323TransportSecurity::e_tls: return "TLS";
-        case H323TransportSecurity::e_ipsec: return "IPSec"; 
+        case H323TransportSecurity::e_ipsec: return "IPSec";
     };
     return "?";
 }
@@ -839,7 +839,7 @@ PString H323TransportSecurity::PolicyAsString(Policy policy)
     switch (policy) {
         case H323TransportSecurity::e_nopolicy: return "No Transport required for Media Encryption";
         case H323TransportSecurity::e_reqTLSMediaEncHigh: return "Signal security required for High Media Encryption";
-        case H323TransportSecurity::e_reqTLSMediaEncAll: return "Signal security required for ALL Media Encryption"; 
+        case H323TransportSecurity::e_reqTLSMediaEncAll: return "Signal security required for ALL Media Encryption";
     };
     return "?";
 }
@@ -935,7 +935,7 @@ PString H323Listener::TypeAsString() const
 /////////////////////////////////////////////////////////////////////////////
 
 H323Listener * H323ListenerList::GetListener() const
-{ 
+{
     for (PINDEX i = 0; i < this->GetSize(); i++) {
         if ((*this)[i].GetSecurity() == H323TransportSecurity::e_unsecure)
             return &((*this)[i]);
@@ -950,7 +950,7 @@ H323Listener * H323ListenerList::GetTLSListener() const
         if ((*this)[i].GetSecurity() == H323TransportSecurity::e_tls)
             return &((*this)[i]);
     }
-    return NULL; 
+    return NULL;
 }
 #endif
 
@@ -1080,18 +1080,18 @@ PBoolean H323Transport::HandleSignallingSocket(H323SignalPDU & pdu)
 {
   for (;;) {
       H323SignalPDU rpdu;
-      if (!rpdu.Read(*this)) { 
+      if (!rpdu.Read(*this)) {
             return FALSE;
       }
       else if ((rpdu.GetQ931().GetMessageType() == Q931::InformationMsg) &&
               endpoint.OnUnsolicitedInformation(rpdu)) {
            // Handle unsolicited Information Message
                 ;
-      } 
+      }
     else {
           pdu = rpdu;
           return TRUE;
-      }    
+      }
   }
 }
 
@@ -1111,7 +1111,7 @@ PBoolean H323Transport::HandleFirstSignallingChannelPDU(PThread * thread)
     PTRACE(1, "H225\tFirst PDU is not a Setup, connection not started.");
     return FALSE;
   }
- 
+
   unsigned callReference = firstQ931PDU.GetCallReference();
   PTRACE(3, "H225\tIncoming call, first PDU: callReference=" << callReference);
 
@@ -1120,7 +1120,7 @@ PBoolean H323Transport::HandleFirstSignallingChannelPDU(PThread * thread)
   if (connection == NULL) {
     PTRACE(1, "H225\tEndpoint could not create connection, "
               "sending release complete PDU: callRef=" << callReference);
-   
+
     H323SignalPDU releaseComplete;
     Q931 &q931PDU = releaseComplete.GetQ931();
     q931PDU.BuildReleaseComplete(callReference, TRUE);
@@ -1150,7 +1150,7 @@ PBoolean H323Transport::HandleFirstSignallingChannelPDU(PThread * thread)
 
 #ifdef H323_SIGNAL_AGGREGATE
     // if the endpoint is using signalling aggregation, we need to add this connection
-    // to the signalling aggregator. 
+    // to the signalling aggregator.
     if (connection != NULL && endpoint.GetSignallingAggregator() != NULL) {
       connection->AggregateSignalChannel(this);
       connection->Unlock();
@@ -1158,9 +1158,9 @@ PBoolean H323Transport::HandleFirstSignallingChannelPDU(PThread * thread)
     }
 #endif
 
-    // If aggregation is not being used, then this thread is attached to the transport, 
-    // which is in turn attached to the connection so everything from gets cleaned up by the 
-    // H323 cleaner thread from now on. So thread must not auto delete and the "transport" 
+    // If aggregation is not being used, then this thread is attached to the transport,
+    // which is in turn attached to the connection so everything from gets cleaned up by the
+    // H323 cleaner thread from now on. So thread must not auto delete and the "transport"
     // variable is not deleted either
     PAssert(PIsDescendant(thread, H225TransportThread), PInvalidCast);
     PBoolean keepAlive = false;
@@ -1364,7 +1364,7 @@ H323Transport * H323ListenerTCP::Accept(const PTimeInterval & timeout)
 
 H323TransportAddress H323ListenerTCP::GetTransportAddress() const
 {
-    return H323TransportAddress(localAddress, listener.GetPort());  
+    return H323TransportAddress(localAddress, listener.GetPort());
 }
 
 void H323ListenerTCP::SetTransportAddress(const H323TransportAddress & /*address*/)
@@ -1433,7 +1433,7 @@ PBoolean H323ListenerTLS::SetUpTransportPDU(H245_TransportAddress & /*pdu*/,
 
 void H323ListenerTLS::SetTransportAddress(const H323TransportAddress & address)
 {
-    address.GetIpAddress(localAddress); 
+    address.GetIpAddress(localAddress);
 }
 #endif
 
@@ -1479,11 +1479,11 @@ PBoolean H323TransportIP::IsCompatibleTransport(const H225_TransportAddress & pd
 void H323TransportIP::SetUpTransportPDU(H225_TransportAddress & pdu, PBoolean localTsap,H323Connection * connection) const
 {
   H323TransportAddress transAddr;
-  if (!localTsap) 
+  if (!localTsap)
     transAddr = H323TransportAddress(remoteAddress, remotePort);
   else {
     H323TransportAddress tAddr = GetLocalAddress();
-    PIPSocket::Address ipAddr; 
+    PIPSocket::Address ipAddr;
     tAddr.GetIpAddress(ipAddr);
     endpoint.InternalTranslateTCPAddress(ipAddr, remoteAddress,connection);
     WORD tPort = localPort;
@@ -1520,10 +1520,10 @@ void H323TransportIP::SetUpTransportPDU(H245_TransportAddress & pdu, unsigned po
 H323TransportTCP::H323TransportTCP(H323EndPoint & end,
                                    PIPSocket::Address binding,
                                    PBoolean listen,
-                                   PSSLContext * context, 
+                                   PSSLContext * context,
                                    PBoolean autoDeleteContext
                                    )
-                                   : H323TransportIP(end, binding, end.IsTLSEnabled() ? H323EndPoint::DefaultTLSPort : H323EndPoint::DefaultTcpPort, 
+                                   : H323TransportIP(end, binding, end.IsTLSEnabled() ? H323EndPoint::DefaultTLSPort : H323EndPoint::DefaultTcpPort,
                                      context ? context : end.GetTransportContext(), autoDeleteContext)
 #else
 H323TransportTCP::H323TransportTCP(H323EndPoint & end,
@@ -1602,8 +1602,8 @@ PBoolean H323TransportTCP::OnSocketOpen()
     PTRACE(1, "H323TCP\tSetOption(TCP_NODELAY) failed: " << socket->GetErrorText());
   }
 
-  //if (!socket->SetOption(IP_TOS, endpoint.GetTcpIpTypeofService(), IPPROTO_IP)) { 
-  //  PTRACE(1, "H323TCP\tSetOption(IP_TOS) failed: " << socket->GetErrorText()); 
+  //if (!socket->SetOption(IP_TOS, endpoint.GetTcpIpTypeofService(), IPPROTO_IP)) {
+  //  PTRACE(1, "H323TCP\tSetOption(IP_TOS) failed: " << socket->GetErrorText());
   //}
 
 
@@ -1754,7 +1754,7 @@ PBoolean H323TransportTCP::ReadBlock(void * buf, PINDEX len)
 
   return lastReadCount == len;
 }
-#endif 
+#endif
 
 PBoolean H323TransportTCP::ReadPDU(PBYTEArray & pdu)
 {
@@ -1821,7 +1821,7 @@ PBoolean H323TransportTCP::FinaliseSecurity(PSocket * socket)
 #if PTLIB_VER < 2120
     ssl_st * m_ssl = ssl;
 #endif
-    if (m_ssl && socket) {	
+    if (m_ssl && socket) {
         SSL_set_fd(m_ssl, socket->GetHandle());
         return true;
     }
@@ -1967,7 +1967,8 @@ PBoolean H323TransportTCP::AcceptControlChannel(H323Connection & connection)
     return TRUE;
 
   if (h245listener == NULL) {
-    PAssertAlways(PLogicError);
+    PTRACE(1, "H225\tLogicError, no H.245 listener");
+    // TODO: actively end the call here ?
     return FALSE;
   }
 
@@ -2267,9 +2268,9 @@ PBoolean H323TransportUDP::DiscoverGatekeeper(H323Gatekeeper & gk,
     for (i = 0; i < InterfaceList.GetSize(); i++) {
       if (InterfaceList[i].GetAddress() == localAddress) {
         PTRACE(3, "RAS\tGatekeeper local interface set: " << localAddress.AsString(true));
-        interfaces.Append(new PIPSocket::InterfaceEntry(InterfaceList[i].GetName(), 
-                                                        InterfaceList[i].GetAddress(), 
-                                                        InterfaceList[i].GetNetMask(), 
+        interfaces.Append(new PIPSocket::InterfaceEntry(InterfaceList[i].GetName(),
+                                                        InterfaceList[i].GetAddress(),
+                                                        InterfaceList[i].GetNetMask(),
                                                         InterfaceList[i].GetMACAddress()));
       }
     }
@@ -2278,9 +2279,9 @@ PBoolean H323TransportUDP::DiscoverGatekeeper(H323Gatekeeper & gk,
     for (i = 0; i < InterfaceList.GetSize(); i++) {
       if (!InterfaceList[i].GetAddress().IsLoopback() &&
            InterfaceList[i].GetAddress().GetVersion() == destAddr.GetVersion()) {
-            interfaces.Append(new PIPSocket::InterfaceEntry(InterfaceList[i].GetName(), 
-                                                            InterfaceList[i].GetAddress(), 
-                                                            InterfaceList[i].GetNetMask(), 
+            interfaces.Append(new PIPSocket::InterfaceEntry(InterfaceList[i].GetName(),
+                                                            InterfaceList[i].GetAddress(),
+                                                            InterfaceList[i].GetNetMask(),
                                                             InterfaceList[i].GetMACAddress()));
       }
     }
@@ -2295,7 +2296,7 @@ PBoolean H323TransportUDP::DiscoverGatekeeper(H323Gatekeeper & gk,
   if (interfaces.IsEmpty())
     interfaces.Append(new PIPSocket::InterfaceEntry("", localAddress, PIPSocket::Address(0xffffffff), ""));
 
-  
+
 
 #ifdef P_STUN
   PSTUNClient * stun = endpoint.GetSTUN(remoteAddress);
@@ -2480,7 +2481,7 @@ PBoolean H323TransportUDP::DiscoverGatekeeper(H323Gatekeeper & gk,
 
 H323TransportAddress H323TransportUDP::GetLocalAddress() const
 {
-  if (canGetInterface && !lastReceivedInterface.IsLoopback()) 
+  if (canGetInterface && !lastReceivedInterface.IsLoopback())
     return H323TransportAddress(lastReceivedInterface, interfacePort);
 
   // check for special case of local interface, which means the PDU came from the same machine
