@@ -144,16 +144,16 @@ PBoolean H323Codec::CloseRawDataChannel()
 {
   if (rawDataChannel == NULL)
     return FALSE;
-  
+
   PBoolean closeOK = rawDataChannel->Close();
-  
+
   if (deleteChannel) {
      delete rawDataChannel;
      rawDataChannel = NULL;
   }
-  
+
   return closeOK;
-}  
+}
 
 
 PBoolean H323Codec::IsRawDataChannelNative() const
@@ -226,7 +226,7 @@ void H323Codec::AddFilter(const PNotifier & notifier)
   rawChannelMutex.Signal();
 }
 
-PBoolean H323Codec::SetRawDataHeld(PBoolean /*hold*/) 
+PBoolean H323Codec::SetRawDataHeld(PBoolean /*hold*/)
 {
 	return FALSE;
 }
@@ -270,7 +270,7 @@ H323VideoCodec::H323VideoCodec(const OpalMediaFormat & fmt, Direction dir)
     frameWidth(0), frameHeight(0), fillLevel(0), sarWidth(1), sarHeight(1),
     videoBitRateControlModes(None), bitRateHighLimit(0), oldLength(0), oldTime(0), newTime(0),
     targetFrameTimeMs(0), frameBytes(0), sumFrameTimeMs(0), sumAdjFrameTimeMs(0), sumFrameBytes(0),
-    videoQMax(0), videoQMin(0), videoQuality(0), frameStartTime(0), grabInterval(0), frameNum(0), 
+    videoQMax(0), videoQMin(0), videoQuality(0), frameStartTime(0), grabInterval(0), frameNum(0),
     packetNum(0), oldPacketNum(0), framesPerSec(0)
 {
 
@@ -290,7 +290,7 @@ PBoolean H323VideoCodec::Open(H323Connection & connection)
 #ifdef H323_H239
   if (rtpInformation.m_sessionID != OpalMediaFormat::DefaultVideoSessionID)
     return connection.OpenExtendedVideoChannel(direction == Encoder, *this);
-  else 
+  else
 #endif
     return connection.OpenVideoChannel(direction == Encoder, *this);
 }
@@ -436,7 +436,7 @@ void H323VideoCodec::OnVideoNotDecodedMBs(unsigned PTRACE_PARAM(firstMB),
 
 void H323VideoCodec::Close()
 {
-  PWaitAndSignal mutex1(videoHandlerActive);  
+  PWaitAndSignal mutex1(videoHandlerActive);
 
   CloseRawDataChannel();
 }
@@ -445,7 +445,7 @@ void H323VideoCodec::Close()
 PBoolean H323VideoCodec::SetMaxBitRate(unsigned bitRate)
 {
   PTRACE(1,"Set bitRateHighLimit for video to " << bitRate << " bps");
-        
+
   bitRateHighLimit = bitRate;
 
   if (0 == bitRateHighLimit) // disable bitrate control
@@ -472,8 +472,8 @@ void H323VideoCodec::SetEmphasisSpeed(bool /*speed*/)
 
 }
 
-void H323VideoCodec::SetMaxPayloadSize(int /*maxSize*/) 
-{ 
+void H323VideoCodec::SetMaxPayloadSize(int /*maxSize*/)
+{
 
 }
 
@@ -721,23 +721,23 @@ unsigned H323AudioCodec::GetAverageSignalLevel()
   return UINT_MAX;
 }
 
-PBoolean H323AudioCodec::SetRawDataHeld(PBoolean hold) { 
-	
+PBoolean H323AudioCodec::SetRawDataHeld(PBoolean hold) {
+
   PTimedMutex m;
 	m.Wait(50);    // wait for 50ms to avoid current locks
-	IsRawDataHeld = hold; 
+	IsRawDataHeld = hold;
 	m.Wait(50); 	// wait for 50ms to avoid any further locks
 	return TRUE;
-} 
+}
 
 /////////////////////////////////////////////////////////////////////////////
 
 H323FramedAudioCodec::H323FramedAudioCodec(const OpalMediaFormat & fmt, Direction dir)
-  : H323AudioCodec(fmt, dir), 
+  : H323AudioCodec(fmt, dir),
 #ifdef H323_AEC
     aec(NULL),
 #endif
-    sampleBuffer(samplesPerFrame), bytesPerFrame(mediaFormat.GetFrameSize()), 
+    sampleBuffer(samplesPerFrame), bytesPerFrame(mediaFormat.GetFrameSize()),
     readBytes(samplesPerFrame*2), writeBytes(samplesPerFrame*2), cntBytes(0)
 {
 
@@ -814,7 +814,7 @@ PBoolean H323FramedAudioCodec::Write(const BYTE * buffer,
   written = 0;
 
   // Prepare AVSync Information
-  rtpInformation.m_frameLost = (lastSequence > 0) ? rtpFrame.GetSequenceNumber() -lastSequence-1 : 0; 
+  rtpInformation.m_frameLost = (lastSequence > 0) ? rtpFrame.GetSequenceNumber() -lastSequence-1 : 0;
         lastSequence = rtpFrame.GetSequenceNumber();
         rtpInformation.m_recvTime = PTimer::Tick().GetMilliSeconds();
         rtpInformation.m_timeStamp = rtpFrame.GetTimestamp();
@@ -849,7 +849,7 @@ PBoolean H323FramedAudioCodec::Write(const BYTE * buffer,
     DecodeSilenceFrame(sampleBuffer.GetPointer(), writeBytes);
 
   // Write as 16bit PCM to sound channel
-  if (IsRawDataHeld) {		// If Connection om Hold 
+  if (IsRawDataHeld) {		// If Connection om Hold
     PThread::Sleep(5);	// Sleep to avoid CPU Overload <--- Must be a better way but need it to work.
     return TRUE;
   } else {
@@ -859,7 +859,7 @@ PBoolean H323FramedAudioCodec::Write(const BYTE * buffer,
          aec->Receive((BYTE *)sampleBuffer.GetPointer(), writeBytes);
       }
 #endif
-      if (!WriteRaw(sampleBuffer.GetPointer(), writeBytes, &rtpInformation)) 
+      if (!WriteRaw(sampleBuffer.GetPointer(), writeBytes, &rtpInformation))
           return FALSE;
   }
       return TRUE;
@@ -906,7 +906,7 @@ PBoolean H323FramedAudioCodec::DecodeFrame(const BYTE * /*buffer*/,
   return FALSE;
 }
 
-#ifdef H323_AEC 
+#ifdef H323_AEC
 void H323FramedAudioCodec::AttachAEC(H323Aec * _aec)
 {
   aec = _aec;
@@ -962,7 +962,7 @@ PBoolean H323StreamedAudioCodec::EncodeFrame(BYTE * buffer, unsigned &)
             *buffer = (BYTE)(encoded >> 3);
             position++;
             break;
-          case 2: 
+          case 2:
             *buffer |= (encoded << 2);
             position++;
             break;
@@ -1016,7 +1016,7 @@ PBoolean H323StreamedAudioCodec::EncodeFrame(BYTE * buffer, unsigned &)
             *buffer |= (encoded << 3);
             position++;
             break;
-          case 2: 
+          case 2:
             *buffer++ |= (encoded << 6);
             *buffer = (BYTE)(encoded >> 2);
             position++;
@@ -1047,7 +1047,7 @@ PBoolean H323StreamedAudioCodec::EncodeFrame(BYTE * buffer, unsigned &)
       break;
 
     case 2:
-      for (i = 0; i < (PINDEX)samplesPerFrame; i++) 
+      for (i = 0; i < (PINDEX)samplesPerFrame; i++)
       {
         switch(position)
         {
@@ -1072,10 +1072,10 @@ PBoolean H323StreamedAudioCodec::EncodeFrame(BYTE * buffer, unsigned &)
       break;
 
     default :
-      PAssertAlways("Unsupported bit size");
+      PTRACE(1, "Codec\tUnsupported bit size");
       return FALSE;
   }
-  
+
   return TRUE;
 }
 
@@ -1086,12 +1086,12 @@ PBoolean H323StreamedAudioCodec::DecodeFrame(const BYTE * buffer,
                                          unsigned & decodedBytes)
 {
   unsigned i;
-  
+
   short * sampleBufferPtr = sampleBuffer.GetPointer(samplesPerFrame);
   short * out = sampleBufferPtr;
   unsigned short position = 0;
   unsigned remaining = 0;
-  
+
   switch (bitsPerSample) {
     case 8 :
       for (i = 0; i < length; i++)
@@ -1178,25 +1178,25 @@ PBoolean H323StreamedAudioCodec::DecodeFrame(const BYTE * buffer,
       break;
 
     case 2:
-      for (i = 0; i < length; i++) 
+      for (i = 0; i < length; i++)
       {
         *out++ = Decode(*buffer & 3);
         *out++ = Decode((*buffer >> 2) & 3);
         *out++ = Decode((*buffer >> 4) & 3);
         *out++ = Decode((*buffer >> 6) & 3);
         buffer++;
-      
+
       }
       break;
 
     default :
-      PAssertAlways("Unsupported bit size");
+      PTRACE(1, "Codec\tUnsupported bit size");
       return FALSE;
   }
 
   written = length;
   decodedBytes = (out - sampleBufferPtr)*2;
-  
+
   return TRUE;
 }
 

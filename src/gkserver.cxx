@@ -1098,7 +1098,7 @@ PBoolean H323GatekeeperCall::Disengage(int reason)
     ok = rasChannel->DisengageRequest(*this, reason);
   else {
     // Can't do DRQ as have no RAS channel to use (probably logic error)
-    PAssertAlways("Tried to disengage call we did not receive ARQ for!");
+    PTRACE(1, "RAS\tTried to disengage call we did not receive ARQ for!");
     ok = FALSE;
   }
 
@@ -1255,7 +1255,7 @@ PBoolean H323GatekeeperCall::OnHeartbeat()
   // Can't do IRQ as have no RAS channel to use (probably logic error)
   if (rasChannel == NULL) {
     UnlockReadOnly();
-    PAssertAlways("Timeout on heartbeat for call we did not receive ARQ for!");
+    PTRACE(1, "RAS\tTimeout on heartbeat for call we did not receive ARQ for!");
     return FALSE;
   }
 
@@ -1274,8 +1274,8 @@ PBoolean H323GatekeeperCall::OnHeartbeat()
   // Return TRUE if got a resonse, ie client does not do unsolicited IRR's
   // otherwise did not get a response from client so return FALSE and
   // (probably) disengage the call.
-  PBoolean response = CheckTimeSince(lastInfoResponse, infoResponseRate); 
-  
+  PBoolean response = CheckTimeSince(lastInfoResponse, infoResponseRate);
+
   UnlockReadOnly();
 
   return response;
@@ -1287,7 +1287,7 @@ PString H323GatekeeperCall::GetCallCreditAmount() const
 {
   if (endpoint != NULL)
     return endpoint->GetCallCreditAmount();
-  
+
   return PString::Empty();
 }
 
@@ -1344,7 +1344,7 @@ PBoolean H323GatekeeperCall::SendServiceControlSession(const H323ServiceControlS
   // Send SCI to endpoint(s)
   if (rasChannel == NULL || endpoint == NULL) {
     // Can't do SCI as have no RAS channel to use (probably logic error)
-    PAssertAlways("Tried to do SCI to call we did not receive ARQ for!");
+    PTRACE(1, "RAS\tTried to do SCI to call we did not receive ARQ for!");
     return FALSE;
   }
 
@@ -1506,12 +1506,12 @@ void H323RegisteredEndPoint::AddCall(H323GatekeeperCall * call)
 {
   if (call == NULL) {
     PTRACE(1, "RAS\tCould not add NULL call to endpoint " << *this);
-    return; 
+    return;
   }
 
   if (!LockReadWrite()) {
     PTRACE(1, "RAS\tCould not add call " << *call << ", lock failed on endpoint " << *this);
-    return; 
+    return;
   }
 
   if (activeCalls.GetObjectsIndex(call) == P_MAX_INDEX)
@@ -1530,7 +1530,7 @@ PBoolean H323RegisteredEndPoint::RemoveCall(H323GatekeeperCall * call)
 
   if (!LockReadWrite()) {
     PTRACE(1, "RAS\tCould not remove call " << *call << ", lock failed on endpoint " << *this);
-    return FALSE; 
+    return FALSE;
   }
 
   PBoolean ok = activeCalls.Remove(call);
@@ -1541,7 +1541,7 @@ PBoolean H323RegisteredEndPoint::RemoveCall(H323GatekeeperCall * call)
 }
 
 void H323RegisteredEndPoint::RemoveAlias(const PString & alias)
-{ 
+{
   if (!LockReadWrite()) {
     PTRACE(1, "RAS\tCould not remove alias \"" << alias << "\", lock failed on endpoint " << *this);
     return;
@@ -1550,7 +1550,7 @@ void H323RegisteredEndPoint::RemoveAlias(const PString & alias)
   // remove the aliases from the list inside the endpoint
   PINDEX idx;
   while ((idx = aliases.GetValuesIndex(alias)) != P_MAX_INDEX)
-    aliases.RemoveAt(idx); 
+    aliases.RemoveAt(idx);
 
   // remove the aliases from the list in the gatekeeper
   gatekeeper.RemoveAlias(*this, alias);
@@ -1606,7 +1606,7 @@ H323GatekeeperRequest::Response H323RegisteredEndPoint::OnRegistration(H323Gatek
 
   if (!LockReadWrite()) {
     PTRACE(1, "RAS\tRRQ rejected, lock failed on endpoint " << *this);
-    return H323GatekeeperRequest::Reject; 
+    return H323GatekeeperRequest::Reject;
   }
 
   rasChannel = &info.GetRasChannel();
@@ -1877,7 +1877,7 @@ PBoolean H323RegisteredEndPoint::Unregister(int reason)
     ok = rasChannel->UnregistrationRequest(*this, reason);
   else {
     // Can't do DRQ as have no RAS channel to use (probably logic error)
-    PAssertAlways("Tried to unregister endpoint we did not receive RRQ for!");
+    PTRACE(1, "RAS\tTried to unregister endpoint we did not receive RRQ for!");
     ok = FALSE;
   }
 
@@ -1893,7 +1893,7 @@ H323GatekeeperRequest::Response H323RegisteredEndPoint::OnInfoResponse(H323Gatek
 
   if (!LockReadWrite()) {
     PTRACE(1, "RAS\tIRR rejected, lock failed on endpoint " << *this);
-    return H323GatekeeperRequest::Reject; 
+    return H323GatekeeperRequest::Reject;
   }
 
   lastInfoResponse = PTime();
@@ -1904,7 +1904,7 @@ H323GatekeeperRequest::Response H323RegisteredEndPoint::OnInfoResponse(H323Gatek
     PTRACE(2, "RAS\tIRR for call-id endpoint does not know about");
     return H323GatekeeperRequest::Confirm;
   }
-    
+
 
   if (!info.irr.HasOptionalField(H225_InfoRequestResponse::e_perCallInfo)) {
     // Special case for Innovaphone clients that do not contain a perCallInfo
@@ -1913,7 +1913,7 @@ H323GatekeeperRequest::Response H323RegisteredEndPoint::OnInfoResponse(H323Gatek
       H225_InfoRequestResponse_perCallInfo_subtype fakeCallInfo;
       if (!LockReadOnly()) {
         PTRACE(1, "RAS\tIRR rejected, lock failed on endpoint " << *this);
-        return H323GatekeeperRequest::Reject; 
+        return H323GatekeeperRequest::Reject;
       }
       for (PINDEX i = 0; i < activeCalls.GetSize(); i++)
         activeCalls[i].OnInfoResponse(info, fakeCallInfo);
@@ -1926,7 +1926,7 @@ H323GatekeeperRequest::Response H323RegisteredEndPoint::OnInfoResponse(H323Gatek
 
   if (!LockReadOnly()) {
     PTRACE(1, "RAS\tIRR rejected, lock failed on endpoint " << *this);
-    return H323GatekeeperRequest::Reject; 
+    return H323GatekeeperRequest::Reject;
   }
 
   for (PINDEX i = 0; i < info.irr.m_perCallInfo.GetSize(); i++) {
@@ -1983,7 +1983,7 @@ PBoolean H323RegisteredEndPoint::OnTimeToLive()
   // Can't do IRQ as have no RAS channel to use (probably logic error)
   if (rasChannel == NULL) {
     UnlockReadOnly();
-    PAssertAlways("Timeout on time to live for endpoint we did not receive RRQ for!");
+    PTRACE(1, "RAS\tTimeout on time to live for endpoint we did not receive RRQ for!");
     return FALSE;
   }
 
@@ -2028,7 +2028,7 @@ PBoolean H323RegisteredEndPoint::SendServiceControlSession(const H323ServiceCont
   // Send SCI to endpoint(s)
   if (rasChannel == NULL) {
     // Can't do SCI as have no RAS channel to use (probably logic error)
-    PAssertAlways("Tried to do SCI to endpoint we did not receive RRQ for!");
+    PTRACE(1, "RAS\tTried to do SCI to endpoint we did not receive RRQ for!");
     return FALSE;
   }
 
@@ -2078,9 +2078,9 @@ PBoolean H323RegisteredEndPoint::AddServiceControlSession(const H323ServiceContr
 
 
 PBoolean H323RegisteredEndPoint::CanReceiveRIP() const
-{ 
+{
   // H225v1 does not support RIP
-  // neither does NetMeeting, even though it says it is H225v2. 
+  // neither does NetMeeting, even though it says it is H225v2.
   return (h225Version > 1) && (applicationInfo.Find("netmeeting") == P_MAX_INDEX);
 }
 
@@ -2091,8 +2091,8 @@ PBoolean H323RegisteredEndPoint::OnSendDescriptorForEndpoint(
         H225_EndpointType & terminalType,             // terminal type
         H225_ArrayOf_AliasAddress & transportAddresses  // transport addresses
       )
-{ 
-  return gatekeeper.OnSendDescriptorForEndpoint(*this, aliases, terminalType, transportAddresses); 
+{
+  return gatekeeper.OnSendDescriptorForEndpoint(*this, aliases, terminalType, transportAddresses);
 }
 
 #endif
