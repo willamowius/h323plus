@@ -1967,8 +1967,7 @@ PBoolean H323TransportTCP::AcceptControlChannel(H323Connection & connection)
     return TRUE;
 
   if (h245listener == NULL) {
-    PTRACE(1, "H225\tLogicError, no H.245 listener");
-    // TODO: actively end the call here ?
+    PTRACE(1, "H225\tLogic error, no H.245 listener");
     return FALSE;
   }
 
