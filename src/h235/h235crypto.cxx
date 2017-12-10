@@ -295,7 +295,6 @@ int EVP_DecryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
 
 int EVP_DecryptFinal_relaxed(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
 {
-    int n = 0;
     unsigned int b = 0;
     *outl = 0;
 
@@ -314,7 +313,7 @@ int EVP_DecryptFinal_relaxed(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
             return(0);
         }
         OPENSSL_assert(b <= sizeof ctx->final);
-        n=ctx->final[b-1];
+        int n=ctx->final[b-1];
         if (n == 0 || n > (int)b) {
             PTRACE(1, "H235\tDecrypt error: bad decrypt");
             return(0);
