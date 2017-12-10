@@ -23,10 +23,10 @@
  * the License for the specific language governing rights and limitations
  * under the License.
  *
- * The Original Code is derived from and used in conjunction with the 
+ * The Original Code is derived from and used in conjunction with the
  * H323Plus Project (www.h323plus.org/)
  *
- * The Initial Developer of the Original Code is 
+ * The Initial Developer of the Original Code is
  * Spranto International Pte Ltd.
  *
  * Contributor(s): ______________________________________.
@@ -34,7 +34,7 @@
  * $Id$
  *
  */
- 
+
 #include <ptlib.h>
 #include <openh323buildopts.h>
 
@@ -100,7 +100,7 @@ PBoolean H284_Frame::ReadInstructions(H224_H284Handler & handler) const
 #define H284_CPSIZE 24
 
 H284_ControlPoint::H284_ControlPoint(H224_H284Handler & handler, BYTE ctrlID)
-:     PBYTEArray(H284_CPSIZE), m_handler(handler), m_cpType(e_unknown), 
+:     PBYTEArray(H284_CPSIZE), m_handler(handler), m_cpType(e_unknown),
     m_lastInstruction(0), m_isActive(false)
 {
     theArray[0] = ctrlID;
@@ -116,7 +116,7 @@ PBoolean H284_ControlPoint::IsActive() const
     return m_isActive;
 }
 
-void H284_ControlPoint::SetData(PBoolean absolute, PBoolean viewport, unsigned step, 
+void H284_ControlPoint::SetData(PBoolean absolute, PBoolean viewport, unsigned step,
         unsigned min, unsigned max, unsigned current, unsigned vportMin, unsigned vportMax)
 {
     int sz = H284_CPSIZE;
@@ -136,7 +136,7 @@ void H284_ControlPoint::SetData(PBoolean absolute, PBoolean viewport, unsigned s
             *(PUInt32b *)&theArray[16] = (DWORD)vportMin;
             *(PUInt32b *)&theArray[20] = (DWORD)vportMax;
         }
-    } 
+    }
 
     if (!absolute) m_cpType = e_simple;
     else if (!GetStep()) m_cpType = e_absolute;
@@ -145,7 +145,7 @@ void H284_ControlPoint::SetData(PBoolean absolute, PBoolean viewport, unsigned s
     m_isActive = true;
 }
 
-void H284_ControlPoint::Set(BYTE id, PBoolean absolute, PBoolean viewport, WORD step, 
+void H284_ControlPoint::Set(BYTE id, PBoolean absolute, PBoolean viewport, WORD step,
         DWORD min, DWORD max, DWORD current, DWORD vportMin, DWORD vportMax)
 {
     theArray[0] = id;
@@ -196,12 +196,12 @@ PBoolean H284_ControlPoint::IsAbsolute() const
 {
     return ((theArray[1]&0x80) != 0);
 }
-    
+
 PBoolean H284_ControlPoint::IsViewPort() const
 {
     return ((theArray[1]&0x40) != 0);
 }
-    
+
 WORD H284_ControlPoint::GetStep() const
 {
     return *(PUInt16b *)&theArray[2];
@@ -220,7 +220,7 @@ DWORD H284_ControlPoint::GetMax() const
 
     return *(PUInt32b *)&theArray[8];
 }
-    
+
 DWORD H284_ControlPoint::GetCurrent() const
 {
     if (!IsAbsolute()) return 0;
@@ -232,14 +232,14 @@ void H284_ControlPoint::SetCurrent(DWORD newPosition)
 {
     *(PUInt32b *)&theArray[12] = newPosition;
 }
-    
+
 DWORD H284_ControlPoint::GetViewPortMin() const
 {
     if (!IsAbsolute() || !IsViewPort()) return 0;
 
     return *(PUInt32b *)&theArray[16];
 }
-    
+
 DWORD H284_ControlPoint::GetViewPortMax() const
 {
     if (!IsAbsolute() || IsViewPort()) return 0;
@@ -282,12 +282,12 @@ H284_Instruction::H284_Instruction()
 : PBYTEArray(8), m_instType(H284_ControlPoint::e_unknown)
 {
 }
-    
+
 BYTE H284_Instruction::GetControlID() const
 {
     return theArray[0];
 }
-    
+
 void H284_Instruction::SetControlID(BYTE cp)
 {
     theArray[0] = cp;
@@ -297,7 +297,7 @@ WORD H284_Instruction::GetIdentifer() const
 {
     return *(PUInt16b *)&theArray[1];
 }
-    
+
 void H284_Instruction::SetIdentifier(WORD id)
 {
    *(PUInt16b *)&theArray[1] = id;
@@ -326,7 +326,7 @@ DWORD H284_Instruction::GetPosition() const
 
     return *(PUInt32b *)&theArray[4];
 }
-    
+
 void H284_Instruction::SetPosition(DWORD position)
 {
     if (GetSize() <= 4)
@@ -339,7 +339,7 @@ int H284_Instruction::GetInstructionType()
 {
     return m_instType;
 }
-    
+
 void H284_Instruction::SetInstructionType(int newType)
 {
     m_instType = newType;
@@ -372,7 +372,7 @@ H224_H284Handler::H224_H284Handler()
 {
     m_transmitFrame.SetClientDataSize(0);
 }
-  
+
 H224_H284Handler::~H224_H284Handler()
 {
     PWaitAndSignal m(m_ctrlMutex);
@@ -399,7 +399,7 @@ PString H224_H284Handler::ControlIDAsString(BYTE id)
 };
 
 PBoolean H224_H284Handler::IsActive(H323Channel::Directions /*dir*/) const
-{ 
+{
     return (m_controlMap.size() != 0);
 }
 
@@ -438,15 +438,15 @@ H284_ControlPoint * H224_H284Handler::GetControlPoint(BYTE id)
 void H224_H284Handler::SendExtraCapabilities() const
 {
     PWaitAndSignal m(m_ctrlMutex);
-  
+
     PBYTEArray extraCaps(1200);
     int sz = 0;
     H284_ControlMap::const_iterator iter = m_controlMap.begin();
     while (iter != m_controlMap.end()) {
         H284_ControlPoint * cp = iter->second;
-        if (cp) 
+        if (cp)
             cp->Load(extraCaps.GetPointer()+sz,sz);
-        iter++;
+        ++iter;
     }
 
     extraCaps.SetSize(sz);
@@ -487,7 +487,7 @@ void H224_H284Handler::Add(ControlPointID id)
         m_controlMap.insert(std::pair<BYTE,H284_ControlPoint*>(id,cp));
 }
 
-void H224_H284Handler::Add(ControlPointID id, PBoolean absolute, PBoolean viewport, WORD step, 
+void H224_H284Handler::Add(ControlPointID id, PBoolean absolute, PBoolean viewport, WORD step,
         DWORD min, DWORD max, DWORD current, DWORD vportMin, DWORD vportMax)
 {
     PWaitAndSignal m(m_ctrlMutex);
@@ -496,7 +496,7 @@ void H224_H284Handler::Add(ControlPointID id, PBoolean absolute, PBoolean viewpo
     cp->Set(id, absolute, viewport, step, min, max, current, vportMin, vportMax);
 
     if (OnAddControlPoint(id,*cp))
-        m_controlMap.insert(std::pair<BYTE,H284_ControlPoint*>(id,cp));    
+        m_controlMap.insert(std::pair<BYTE,H284_ControlPoint*>(id,cp));
 }
 
 PBoolean H224_H284Handler::OnAddControlPoint(ControlPointID id,H284_ControlPoint & /*cp*/)
@@ -567,4 +567,4 @@ void H224_H284Handler::OnReceivedMessage(const H224_Frame & message)
 
 #endif // H224_H284
 
- 
+

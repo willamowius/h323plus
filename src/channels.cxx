@@ -218,7 +218,7 @@ unsigned H323Channel::GetSessionID() const
   return 0;
 }
 
-void H323Channel::SetSessionID(unsigned /*id*/) 
+void H323Channel::SetSessionID(unsigned /*id*/)
 {
 }
 
@@ -338,7 +338,7 @@ PBoolean H323Channel::SetInitialBandwidth()
     return TRUE;
 
 #ifdef H323_VIDEO
-  if (GetSessionID() == OpalMediaFormat::DefaultVideoSessionID) { 
+  if (GetSessionID() == OpalMediaFormat::DefaultVideoSessionID) {
      if (GetDirection() == H323Channel::IsTransmitter)
         connection.OnSetInitialBandwidth((H323VideoCodec *)codec);
   }
@@ -375,7 +375,7 @@ PBoolean H323Channel::Open()
     PTRACE(1, "LogChan\tOnStartLogicalChannel failed");
     return FALSE;
   }
-  
+
   opened = TRUE;
   return TRUE;
 }
@@ -388,7 +388,7 @@ H323Codec * H323Channel::GetCodec() const
                   GetDirection() == IsReceiver ? H323Codec::Decoder : H323Codec::Encoder);
 #ifdef H323_AUDIO_CODECS
     if (codec && PIsDescendant(codec, H323AudioCodec))
-      ((H323AudioCodec*)codec)->SetSilenceDetectionMode(endpoint.GetSilenceDetectionMode()); 
+      ((H323AudioCodec*)codec)->SetSilenceDetectionMode(endpoint.GetSilenceDetectionMode());
 #endif
   }
 
@@ -397,19 +397,19 @@ H323Codec * H323Channel::GetCodec() const
 
 
 void H323Channel::SendMiscCommand(unsigned command)
-{ 
-  connection.SendLogicalChannelMiscCommand(*this, command); 
+{
+  connection.SendLogicalChannelMiscCommand(*this, command);
 }
 
 void H323Channel::SendFlowControlRequest(long restriction)
-{ 
-  connection.SendLogicalChannelFlowControl(*this, restriction); 
+{
+  connection.SendLogicalChannelFlowControl(*this, restriction);
 }
 
-void H323Channel::ReplaceCapability(const H323Capability & cap) 
-{ 
-    delete capability;  
-    capability = (H323Capability *)cap.Clone(); 
+void H323Channel::ReplaceCapability(const H323Capability & cap)
+{
+    delete capability;
+    capability = (H323Capability *)cap.Clone();
 }
 
 PInt64 H323Channel::GetSilenceDuration() const
@@ -781,7 +781,7 @@ PBoolean H323_RTPChannel::OnReceivedAckPDU(const H245_H2250LogicalChannelAckPara
 }
 
 PBoolean H323_RTPChannel::OnReceivedAckAltPDU(const H245_ArrayOf_GenericInformation & alternate)
-{ 
+{
   return rtpCallbacks.OnReceivedAckAltPDU(*this, alternate);
 }
 
@@ -865,7 +865,7 @@ void H323_RTPChannel::Transmit()
      PTRACE(1, "H323RTP\tReceive " << mediaFormat << " thread ended (illegal payload type)");
      return;
   }
-  frame.SetPayloadType(rtpPayloadType); 
+  frame.SetPayloadType(rtpPayloadType);
 
   PTRACE(2, "H323RTP\tTransmit " << mediaFormat << " thread started:"
             " rate=" << codec->GetFrameRate() <<
@@ -902,17 +902,17 @@ void H323_RTPChannel::Transmit()
     if(isAudio)
     {
         rtpTimestamp += codec->GetFrameRate();
-    } 
+    }
     else
-    { 
+    {
        if(frame.GetMarker()) {
           // Video uses a 90khz clock. Note that framerate should really be a float.
 #ifdef H323_FIXED_VIDEOCLOCK
-           nextTimestamp = rtpTimestamp + 90000/codec->GetFrameRate(); 
+           nextTimestamp = rtpTimestamp + 90000/codec->GetFrameRate();
 #else
            PInt64 nowTime = PTimer::Tick().GetMilliSeconds();
            if (lastFrameTime == 0) {
-              nextTimestamp = rtpTimestamp + 90000/codec->GetFrameRate(); 
+              nextTimestamp = rtpTimestamp + 90000/codec->GetFrameRate();
            } else {
               nextTimestamp = rtpTimestamp + (DWORD)(90000.0*((float)(nowTime-lastFrameTime))/1000.0);
            }
@@ -1010,13 +1010,13 @@ void H323_RTPChannel::Transmit()
       // without delay
       if (!isAudio) {
          PThread::Sleep(5);
-         if (frame.GetMarker()) 
+         if (frame.GetMarker())
              rtpTimestamp = nextTimestamp;
       }
 
       // Reset flag for in talk burst
       if (isAudio)
-        frame.SetMarker(FALSE); 
+        frame.SetMarker(FALSE);
 
       frame.SetPayloadSize(maxFrameSize);
       frameOffset = 0;
@@ -1044,10 +1044,10 @@ void H323_RTPChannel::SendUniChannelBackProbe()
 {
   // When we are receiving media on a unidirectional Channel
   // we need to send media on the backchannel to ensure that
-  // we open any necessary pinholes in NAT. 
+  // we open any necessary pinholes in NAT.
    if (capability->GetCapabilityDirection() != H323Capability::e_Transmit)
         return;
-   
+
     RTP_DataFrame frame;
     frame.SetPayloadSize(0);
     frame.SetPayloadType(rtpPayloadType);
@@ -1056,7 +1056,7 @@ void H323_RTPChannel::SendUniChannelBackProbe()
 
     WORD sequenceNumber = (WORD)PRandom::Number();
     int packetCount = 4;
-  
+
     for (PINDEX i= 0; i < packetCount; ++i) {
       frame.SetSequenceNumber(++sequenceNumber);
       if (i == packetCount-1) frame.SetMarker(true);
@@ -1107,7 +1107,6 @@ void H323_RTPChannel::Receive()
 
   // keep track of consecutive payload type mismatches
   int consecutiveMismatches = 0;
-  int payloadSize = 0;
   PBoolean isAudio = codec->GetMediaFormat().NeedsJitterBuffer();
   PBoolean allowRtpPayloadChange = isAudio;
 
@@ -1124,7 +1123,7 @@ void H323_RTPChannel::Receive()
       filterMutex.Signal();
     }
 
-    payloadSize = frame.GetPayloadSize();
+    int payloadSize = frame.GetPayloadSize();
     rtpTimestamp = frame.GetTimestamp();
 
 #if 0  // Enable if you want A/V sync information  - SH
@@ -1475,7 +1474,7 @@ PBoolean H323_ExternalRTPChannel::OnReadFrame(RTP_DataFrame & frame)
 #endif
         return true;
 }
-  
+
 PBoolean H323_ExternalRTPChannel::OnWriteFrame(RTP_DataFrame & frame)
 {
 #ifdef H323_H235
@@ -1634,7 +1633,7 @@ PBoolean H323DataChannel::OnReceivedPDU(const H245_OpenLogicalChannel & open,
     return FALSE;
   }
 
-  if (open.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation) && 
+  if (open.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation) &&
       !connection.OnReceiveOLCGenericInformation(GetSessionID(),open.m_genericInformation, false)) {
         errorCode = H245_OpenLogicalChannelReject_cause::e_unspecified;
         PTRACE(2, "LogChan\tOnReceivedPDU Invalid Generic Parameters");
@@ -1708,7 +1707,7 @@ PBoolean H323DataChannel::OnReceivedAckPDU(const H245_OpenLogicalChannelAck & ac
         address = &param.m_mediaChannel;
     }
 
-    if (ack.HasOptionalField(H245_OpenLogicalChannelAck::e_genericInformation) && 
+    if (ack.HasOptionalField(H245_OpenLogicalChannelAck::e_genericInformation) &&
       !connection.OnReceiveOLCGenericInformation(GetSessionID(), ack.m_genericInformation, true)) {
         PTRACE(1, "LogChan\tOnReceivedPDUAck Invalid Generic Parameters");
         return FALSE;

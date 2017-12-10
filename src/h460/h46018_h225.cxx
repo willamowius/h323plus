@@ -771,11 +771,10 @@ unsigned ResolveMuxIDFromSourceAddress(muxSocketMap & socMap, muxPortMap & portM
 
 unsigned ResolveSession(muxSocketMap & socMap, unsigned muxID, PBoolean rtp, const PIPSocket::Address addr, WORD port, unsigned & correctMUX)
 {
-    std::map< unsigned, PUDPSocket*>::const_iterator i;
-    unsigned eraseID = 0;
-    H46019UDPSocket * mapSocket = NULL;
     if (PNatMethod_H46019::IsMultiplexed()) {   // Check the send/receive multiplex is around the wrong way
-      for (i = socMap.begin(); i != socMap.end(); ++i) {
+      H46019UDPSocket * mapSocket = NULL;
+      unsigned eraseID = 0;
+      for (std::map< unsigned, PUDPSocket*>::const_iterator i = socMap.begin(); i != socMap.end(); ++i) {
           if (((H46019UDPSocket *)i->second)->GetSendMultiplexID() == muxID) {
               mapSocket = (H46019UDPSocket *)i->second;
               eraseID = i->first;

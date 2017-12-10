@@ -47,11 +47,11 @@
 
 static struct {
   unsigned msgid;
-  int preStatus;            
-  int preInstruct;            
-  int preAuthorize;        
-  int preNotify;    
-  int preRequest;    
+  int preStatus;
+  int preInstruct;
+  int preAuthorize;
+  int preNotify;
+  int preRequest;
   int preResponse;
   int preAlive;
   int preRemove;
@@ -124,7 +124,7 @@ const char *PresName[] = {
     "Alive",
     "Remove",
     "Alert",
-    "NotRecognized"        // for new messages 
+    "NotRecognized"        // for new messages
 };
 const unsigned MaxPresTag =  H460P_PresenceMessage::e_presenceAlert;
 
@@ -150,9 +150,9 @@ const char *H323PresenceMessage::GetTagName() const
 ///////////////////////////////////////////////////////////////////
 
 
-class H323PresenceBase  
+class H323PresenceBase
 {
- public: 
+ public:
     H323PresenceBase(const H323PresenceMessage & m);
     H323PresenceBase();
     virtual ~H323PresenceBase() {};
@@ -185,7 +185,7 @@ H323PresenceBase::H323PresenceBase()
 
 }
 
-H323PresenceBase::H323PresenceBase(const H323PresenceMessage & m) 
+H323PresenceBase::H323PresenceBase(const H323PresenceMessage & m)
 : tag(m.GetTag()), handler(m.m_handler)
 {
 
@@ -261,7 +261,7 @@ bool H323PresenceBase::ReadSubscription(const H460P_ArrayOf_PresenceSubscription
 
     return true;
 }
-    
+
 bool H323PresenceBase::ReadIdentifier(const H460P_ArrayOf_PresenceIdentifier & identifier, H225_TransportAddress * ip)
 {
     if (ip == NULL)
@@ -280,10 +280,10 @@ template<class Msg>
 class H323PresencePDU : public H323PresenceBase {
   public:
 
-    H323PresencePDU(const H323PresenceMessage & m) 
+    H323PresencePDU(const H323PresenceMessage & m)
         : H323PresenceBase(m), request(m.m_recvPDU) {}
 
-    H323PresencePDU(unsigned tag) 
+    H323PresencePDU(unsigned tag)
         : request(*new Msg) {}
 
     operator Msg & () { return request; }
@@ -302,7 +302,7 @@ class H323PresenceStatus  : public H323PresencePDU<H460P_PresenceStatus>
 
   protected:
     virtual bool HandleNotification(bool opt);
-    virtual bool HandleInstruction(bool opt); 
+    virtual bool HandleInstruction(bool opt);
 };
 
 class H323PresenceInstruct  : public H323PresencePDU<H460P_PresenceInstruct>
@@ -311,8 +311,8 @@ class H323PresenceInstruct  : public H323PresencePDU<H460P_PresenceInstruct>
     H323PresenceInstruct(const H323PresenceMessage & m) : H323PresencePDU<H460P_PresenceInstruct>(m) {}
 
   protected:
-    virtual bool HandleInstruction(bool opt); 
-};    
+    virtual bool HandleInstruction(bool opt);
+};
 
 class H323PresenceAuthorize  : public H323PresencePDU<H460P_PresenceAuthorize>
 {
@@ -320,9 +320,9 @@ class H323PresenceAuthorize  : public H323PresencePDU<H460P_PresenceAuthorize>
     H323PresenceAuthorize(const H323PresenceMessage & m) : H323PresencePDU<H460P_PresenceAuthorize>(m) {}
 
   protected:
-    virtual bool HandleSubscription(bool opt); 
+    virtual bool HandleSubscription(bool opt);
 };
-        
+
 class H323PresenceNotify  : public H323PresencePDU<H460P_PresenceNotify>
 {
   public:
@@ -331,15 +331,15 @@ class H323PresenceNotify  : public H323PresencePDU<H460P_PresenceNotify>
   protected:
     virtual bool HandleNotification(bool opt);
 };
-                
+
 class H323PresenceRequest  : public H323PresencePDU<H460P_PresenceRequest>
 {
   public:
-    H323PresenceRequest(const H323PresenceMessage & m, H225_TransportAddress * ip) 
+    H323PresenceRequest(const H323PresenceMessage & m, H225_TransportAddress * ip)
         : H323PresencePDU<H460P_PresenceRequest>(m), remoteIP(ip) {}
 
   protected:
-    virtual bool HandleSubscription(bool opt); 
+    virtual bool HandleSubscription(bool opt);
 
   private:
     H225_TransportAddress * remoteIP;
@@ -348,7 +348,7 @@ class H323PresenceRequest  : public H323PresencePDU<H460P_PresenceRequest>
 class H323PresenceResponse  : public H323PresencePDU<H460P_PresenceResponse>
 {
   public:
-    H323PresenceResponse(const H323PresenceMessage & m, H225_TransportAddress * ip) 
+    H323PresenceResponse(const H323PresenceMessage & m, H225_TransportAddress * ip)
         : H323PresencePDU<H460P_PresenceResponse>(m), remoteIP(ip) {}
 
   protected:
@@ -361,7 +361,7 @@ class H323PresenceResponse  : public H323PresencePDU<H460P_PresenceResponse>
 class H323PresenceAlive  : public H323PresencePDU<H460P_PresenceAlive>
 {
   public:
-    H323PresenceAlive(const H323PresenceMessage & m, H225_TransportAddress * ip) 
+    H323PresenceAlive(const H323PresenceMessage & m, H225_TransportAddress * ip)
         : H323PresencePDU<H460P_PresenceAlive>(m), remoteIP(ip) {}
 
   protected:
@@ -374,7 +374,7 @@ class H323PresenceAlive  : public H323PresencePDU<H460P_PresenceAlive>
 class H323PresenceRemove  : public H323PresencePDU<H460P_PresenceRemove>
 {
   public:
-    H323PresenceRemove(const H323PresenceMessage & m, H225_TransportAddress * ip) 
+    H323PresenceRemove(const H323PresenceMessage & m, H225_TransportAddress * ip)
         : H323PresencePDU<H460P_PresenceRemove>(m), remoteIP(ip) {}
 
   protected:
@@ -387,7 +387,7 @@ class H323PresenceRemove  : public H323PresencePDU<H460P_PresenceRemove>
 class H323PresenceAlert  : public H323PresencePDU<H460P_PresenceAlert>
 {
   public:
-    H323PresenceAlert(const H323PresenceMessage & m, H225_TransportAddress * ip) 
+    H323PresenceAlert(const H323PresenceMessage & m, H225_TransportAddress * ip)
         : H323PresencePDU<H460P_PresenceAlert>(m), remoteIP(ip) {}
 
   protected:
@@ -407,11 +407,11 @@ bool H323PresenceHandler::ReceivedPDU(const PASN_OctetString & pdu, H225_Transpo
     H460P_PresenceElement element;
     PPER_Stream raw(pdu);
     if (!element.Decode(raw) || element.m_message.GetSize() == 0) {
-        PTRACE(2,"PRES\tError Decoding Element. Malformed or no messages."); 
+        PTRACE(2,"PRES\tError Decoding Element. Malformed or no messages.");
         return false;
     }
 
-    PTRACE(5,"PRES\tReceived PDU\n" << element); 
+    PTRACE(5,"PRES\tReceived PDU\n" << element);
 
     for (PINDEX i=0; i < element.m_message.GetSize(); i++) {
         H323PresenceMessage m;
@@ -516,7 +516,7 @@ PBoolean H323PresenceHandler::BuildPresenceMessage(unsigned id, H323PresenceStor
               if (ep.m_Instruction.GetSize() > 0) ep.m_Instruction.SetSize(0);
               if (ep.m_Identifiers.GetSize() > 0) ep.m_Identifiers.SetSize(0);
           }
-        iter++;
+        ++iter;
     }
 
     return dataToSend;
@@ -538,7 +538,7 @@ PBoolean H323PresenceHandler::BuildPresenceElement(unsigned msgtag, list<PASN_Oc
     bool success = false;
     H460P_ArrayOf_PresenceMessage msgs;
     H323PresenceStore & store = GetPresenceStoreLocked(msgtag);
-    
+
     if (RASMessage_attributes[msgtag].preStatus >0)
         BuildPresenceMessage(H460P_PresenceMessage::e_presenceStatus,store,msgs);
     if (RASMessage_attributes[msgtag].preInstruct >0)
@@ -610,7 +610,7 @@ PBoolean H323PresenceHandler::BuildPresenceMessage(unsigned id, const H225_Endpo
 
     switch (id) {
         case H460P_PresenceMessage::e_presenceStatus:
-            if (BuildNotification(ep,Pep) || BuildInstructions(ep,Pep))  {       
+            if (BuildNotification(ep,Pep) || BuildInstructions(ep,Pep))  {
                 for(i= Pep.begin(); i != Pep.end(); ++i)
                     BuildStatus(msgs, i->second.m_Notify, i->second.m_Instruction, i->first);
                 dataToSend = true;
@@ -661,7 +661,7 @@ PBoolean H323PresenceHandler::BuildPresenceMessage(unsigned id, const H225_Trans
 
     switch (id) {
         case H460P_PresenceMessage::e_presenceRequest:
-            if (BuildSubscription(true,ip,Pep)) {         
+            if (BuildSubscription(true,ip,Pep)) {
                 for(i= Pep.begin(); i != Pep.end(); ++i) {
                     sz = msgs.GetSize();
                     msgs.SetSize(sz+1);
@@ -671,7 +671,7 @@ PBoolean H323PresenceHandler::BuildPresenceMessage(unsigned id, const H225_Trans
             }
             break;
         case H460P_PresenceMessage::e_presenceResponse:
-            if (BuildSubscription(false,ip,Pep)) {         
+            if (BuildSubscription(false,ip,Pep)) {
                 for(i= Pep.begin(); i != Pep.end(); ++i) {
                     sz = msgs.GetSize();
                     msgs.SetSize(sz+1);
@@ -731,7 +731,7 @@ PBoolean H323PresenceHandler::BuildPresenceElement(unsigned msgtag, const H225_E
 {
     bool success = false;
     H460P_ArrayOf_PresenceMessage msgs;
-    
+
     if (RASMessage_attributes[msgtag].preStatus >0)
         BuildPresenceMessage(H460P_PresenceMessage::e_presenceStatus,ep,msgs);
     if (RASMessage_attributes[msgtag].preInstruct >0)
@@ -772,7 +772,7 @@ PBoolean H323PresenceHandler::BuildPresenceElement(unsigned msgtag, const H225_T
 {
     bool success = false;
     H460P_ArrayOf_PresenceMessage msgs;
-    
+
     if (RASMessage_attributes[msgtag].preRequest >0)
         BuildPresenceMessage(H460P_PresenceMessage::e_presenceRequest,ip,msgs);
     if (RASMessage_attributes[msgtag].preResponse >0)
@@ -829,7 +829,7 @@ class H323PresenceMsg  : public H460P_PresenceMessage
 };
 
 
-H460P_PresenceStatus &  H323PresenceHandler::BuildStatus(H460P_ArrayOf_PresenceMessage & msg, 
+H460P_PresenceStatus &  H323PresenceHandler::BuildStatus(H460P_ArrayOf_PresenceMessage & msg,
                         const H323PresenceNotifications & notify,
                         const H323PresenceInstructions & inst,
                         const H225_AliasAddress & alias)
@@ -906,7 +906,7 @@ H460P_PresenceNotify &  H323PresenceHandler::BuildNotify(H460P_PresenceMessage &
     msg = *(H460P_PresenceMessage *)m.Clone();
     return msg;
 }
-     
+
 H460P_PresenceRequest &  H323PresenceHandler::BuildRequest(H460P_PresenceMessage & msg, const H323PresenceSubscriptions & subs)
 {
     H323PresenceMsg<H460P_PresenceRequest> m;
@@ -916,7 +916,7 @@ H460P_PresenceRequest &  H323PresenceHandler::BuildRequest(H460P_PresenceMessage
     msg = *(H460P_PresenceMessage *)m.Clone();
     return msg;
 }
-     
+
 H460P_PresenceResponse &  H323PresenceHandler::BuildResponse(H460P_PresenceMessage & msg, const H323PresenceSubscriptions & subs)
 {
     H323PresenceMsg<H460P_PresenceResponse> m;
@@ -926,7 +926,7 @@ H460P_PresenceResponse &  H323PresenceHandler::BuildResponse(H460P_PresenceMessa
     msg = *(H460P_PresenceMessage *)m.Clone();
     return msg;;
 }
-     
+
 H460P_PresenceAlive & H323PresenceHandler::BuildAlive(H460P_PresenceMessage & msg, const H323PresenceIdentifiers & id)
 {
     H323PresenceMsg<H460P_PresenceAlive> m;
@@ -936,7 +936,7 @@ H460P_PresenceAlive & H323PresenceHandler::BuildAlive(H460P_PresenceMessage & ms
     msg = *(H460P_PresenceMessage *)m.Clone();
     return msg;
 }
-     
+
 H460P_PresenceRemove & H323PresenceHandler::BuildRemove(H460P_PresenceMessage & msg, const H323PresenceIdentifiers & id)
 {
     H323PresenceMsg<H460P_PresenceRemove> m;
@@ -946,7 +946,7 @@ H460P_PresenceRemove & H323PresenceHandler::BuildRemove(H460P_PresenceMessage & 
     msg = *(H460P_PresenceMessage *)m.Clone();
     return msg;
 }
-     
+
 H460P_PresenceAlert &  H323PresenceHandler::BuildAlert(H460P_PresenceMessage & msg, const H323PresenceNotifications & notify)
 {
     H323PresenceMsg<H460P_PresenceAlert> m;
@@ -964,7 +964,7 @@ H460P_PresenceAlert &  H323PresenceHandler::BuildAlert(H460P_PresenceMessage & m
    m_latitude(""), m_longitude(""), m_elevation("")
 {
 }
-    
+
 bool H323PresenceHandler::localeInfo::BuildLocalePDU(H460P_PresenceGeoLocation & pdu)
 {
     bool contents = false;
@@ -1020,7 +1020,7 @@ bool H323PresenceStatus::HandleNotification(bool opt)
 
 bool H323PresenceNotify::HandleNotification(bool opt)
 {
-    if (!opt) 
+    if (!opt)
         return ReadNotification(request.m_notification, request.m_alias);
 
     return false;
@@ -1034,62 +1034,62 @@ bool H323PresenceAlert::HandleNotification(bool opt)
     return false;
 }
 
-bool H323PresenceAuthorize::HandleSubscription(bool opt) 
-{ 
-    if (!opt) 
+bool H323PresenceAuthorize::HandleSubscription(bool opt)
+{
+    if (!opt)
        return ReadSubscription(request.m_subscription,request.m_alias);
 
-    return false; 
+    return false;
 }
 
-bool H323PresenceRequest::HandleSubscription(bool opt) 
-{ 
+bool H323PresenceRequest::HandleSubscription(bool opt)
+{
     if (!opt)
         return ReadSubscription(request.m_subscription,remoteIP);
 
-    return false; 
+    return false;
 }
 
-bool H323PresenceResponse::HandleSubscription(bool opt) 
-{ 
+bool H323PresenceResponse::HandleSubscription(bool opt)
+{
     if (!opt)
         return ReadSubscription(request.m_subscription,remoteIP);
 
-    return false; 
+    return false;
 }
 
-bool H323PresenceStatus::HandleInstruction(bool opt) 
-{ 
+bool H323PresenceStatus::HandleInstruction(bool opt)
+{
     bool success = false;
     if (!opt || request.HasOptionalField(H460P_PresenceStatus::e_instruction)) {
-        for (PINDEX j=0; j< request.m_alias.GetSize(); ++j) 
+        for (PINDEX j=0; j< request.m_alias.GetSize(); ++j)
             success |= ReadInstruction(request.m_instruction,request.m_alias[j]);
     }
     return success;
 }
 
-bool H323PresenceInstruct::HandleInstruction(bool opt) 
-{ 
+bool H323PresenceInstruct::HandleInstruction(bool opt)
+{
     if (!opt)
         return ReadInstruction(request.m_instruction,request.m_alias);
 
-    return false; 
+    return false;
 }
 
-bool H323PresenceAlive::HandleIdentifier(bool opt) 
-{ 
+bool H323PresenceAlive::HandleIdentifier(bool opt)
+{
    if (!opt)
        return ReadIdentifier(request.m_identifier,remoteIP);
 
-   return false; 
+   return false;
 }
 
-bool H323PresenceRemove::HandleIdentifier(bool opt) 
-{ 
+bool H323PresenceRemove::HandleIdentifier(bool opt)
+{
    if (!opt)
        return ReadIdentifier(request.m_identifier,remoteIP);
 
-   return false; 
+   return false;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -1127,8 +1127,8 @@ H323PresenceInstruction::Category  H323PresenceInstruction::GetCategory(const H4
                    if (id.GetTag() == H225_GenericIdentifier::e_oid) {
                        const PASN_ObjectId & val = id;
                        if (val.AsString() == PString(H460P_Meeting))
-                           category = H323PresenceInstruction::e_Meeting; 
-                   } 
+                           category = H323PresenceInstruction::e_Meeting;
+                   }
                }
                break;
            default:
@@ -1201,7 +1201,7 @@ PString H323PresenceInstruction::GetAlias(PString & display, PString & avatar, H
     if (palias.HasOptionalField(H460P_PresenceAlias::e_display)) {
        const H460P_PresenceDisplay & pdisp = palias.m_display;
        display = pdisp.m_display.GetValue();
-    } 
+    }
     if (palias.HasOptionalField(H460P_PresenceAlias::e_avatar)) {
        const PASN_IA5String & pav = palias.m_avatar;
        avatar = pav.GetValue();
@@ -1228,7 +1228,7 @@ void H323PresenceInstructions::Add(const H323PresenceInstruction & instruct)
     m_instruction.SetSize(size+1);
     m_instruction[size] = instruct;
 }
-    
+
 H323PresenceInstruction & H323PresenceInstructions::operator[](PINDEX i) const
 {
    return (H323PresenceInstruction &)m_instruction[i];
@@ -1239,17 +1239,17 @@ void H323PresenceInstructions::SetAlias(const PString & alias)
     if (!alias)
         H323SetAliasAddress(alias,m_alias);
 }
-    
+
 void H323PresenceInstructions::GetAlias(PString & alias)
 {
-    alias = H323GetAliasAddressString(m_alias); 
+    alias = H323GetAliasAddressString(m_alias);
 }
 
 void H323PresenceInstructions::SetSize(PINDEX newSize)
 {
     m_instruction.SetSize(newSize);
 }
-    
+
 PINDEX H323PresenceInstructions::GetSize() const
 {
     return m_instruction.GetSize();
@@ -1323,16 +1323,16 @@ H323PresenceNotification & H323PresenceNotifications::operator[](PINDEX i) const
 {
        return (H323PresenceNotification &)m_notification[i];
 }
-    
+
 void H323PresenceNotifications::SetAlias(const PString & alias)
 {
     if (!alias)
         H323SetAliasAddress(alias,m_alias);
 }
-    
+
 void H323PresenceNotifications::GetAlias(PString & alias)
 {
-    alias = H323GetAliasAddressString(m_alias); 
+    alias = H323GetAliasAddressString(m_alias);
 }
 
 void H323PresenceNotifications::SetSize(PINDEX newSize)
@@ -1346,20 +1346,20 @@ void H323PresenceNotifications::SetAliasList(const PStringList & alias)
         m_aliasList.AppendString(alias[i]);
     }
 }
-    
+
 void H323PresenceNotifications::GetAliasList(PStringList & alias) const
 {
     for (PINDEX i=0; i< m_aliasList.GetSize(); ++i) {
         alias.AppendString(m_aliasList[i]);
     }
 }
-    
+
 PINDEX H323PresenceNotifications::GetSize() const
 {
     return m_notification.GetSize();
 }
 
-void H323PresenceNotification::SetPresenceState(H323PresenceNotification::States state, 
+void H323PresenceNotification::SetPresenceState(H323PresenceNotification::States state,
                         const PString & display)
 {
     H460P_Presentity & e = m_presentity;
@@ -1424,7 +1424,7 @@ void H323PresenceNotification::AddGenericData(const H225_ArrayOf_GenericData & d
     }
 }
 
-void H323PresenceNotification::GetPresenceState(H323PresenceNotification::States & state, 
+void H323PresenceNotification::GetPresenceState(H323PresenceNotification::States & state,
                         PString & display) const
 {
     const H460P_Presentity & e = m_presentity;
@@ -1524,7 +1524,7 @@ H323PresenceSubscription & H323PresenceSubscriptions::operator[](PINDEX i) const
 {
    return (H323PresenceSubscription &)m_subscription[i];
 }
-    
+
 void H323PresenceSubscriptions::SetAlias(const PString & alias)
 {
     if (!alias)
@@ -1533,14 +1533,14 @@ void H323PresenceSubscriptions::SetAlias(const PString & alias)
 
 void H323PresenceSubscriptions::GetAlias(PString & alias)
 {
-    alias = H323GetAliasAddressString(m_alias); 
+    alias = H323GetAliasAddressString(m_alias);
 }
 
 void H323PresenceSubscriptions::SetSize(PINDEX newSize)
 {
     m_subscription.SetSize(newSize);
 }
-    
+
 PINDEX H323PresenceSubscriptions::GetSize() const
 {
     return m_subscription.GetSize();
@@ -1571,8 +1571,8 @@ void H323PresenceSubscription::SetSubscriptionDetails(const PString & subscribe,
     }
 }
 
-void H323PresenceSubscription::SetSubscriptionDetails(const H225_AliasAddress & subscribe, const H225_AliasAddress & subscriber, 
-                                                      const PString & display, const PString & avatar, 
+void H323PresenceSubscription::SetSubscriptionDetails(const H225_AliasAddress & subscribe, const H225_AliasAddress & subscriber,
+                                                      const PString & display, const PString & avatar,
                                                       H323PresenceInstruction::Category category )
 {
     m_subscribe = subscribe;
@@ -1604,7 +1604,7 @@ void H323PresenceSubscription::GetSubscriberDetails(PresenceSubscriberList & ali
         details.m_display = PString();
         details.m_avatar = PString();
         details.m_category = 100;
-        PString name = PString(); 
+        PString name = PString();
         name = H323GetAliasAddressString(pAlias.m_alias);
         if (pAlias.HasOptionalField(H460P_PresenceAlias::e_display)) {
             H460P_PresenceDisplay & disp = pAlias.m_display;
@@ -1671,7 +1671,7 @@ void H323PresenceSubscription::SetTimeToLive(int t)
     IncludeOptionalField(H460P_PresenceSubscription::e_timeToLive);
     m_timeToLive = t;
 }
-    
+
 void H323PresenceSubscription::SetSubscription(const OpalGloballyUniqueID & guid)
 {
     m_identifier.m_guid = guid;
@@ -1687,15 +1687,15 @@ void H323PresenceSubscription::MakeDecision(bool approve)
     SetApproved(approve);
 }
 
-bool H323PresenceSubscription::IsDecisionMade() 
-{ 
-    return HasOptionalField(H460P_PresenceSubscription::e_approved); 
+bool H323PresenceSubscription::IsDecisionMade()
+{
+    return HasOptionalField(H460P_PresenceSubscription::e_approved);
 }
 
 void H323PresenceSubscription::AddGenericData(const H225_ArrayOf_GenericData & data)
 {
     int sz = data.GetSize();
-    if (sz >0) 
+    if (sz >0)
         return;
 
     IncludeOptionalField(H460P_PresenceSubscription::e_genericData);

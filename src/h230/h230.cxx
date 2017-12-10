@@ -67,7 +67,7 @@
 #include "h230/h230.h"
 #include "h230/OID2.h"
 
-#ifdef H323_H230 
+#ifdef H323_H230
 
 static const char * h230OID  = "0.0.8.230.2";      // Advertised Feature
 static const char * T124OID  = "0.0.20.124.2";                // Advertised Feature
@@ -95,10 +95,10 @@ PBoolean H230Control::OnHandleConferenceRequest(const H245_ConferenceRequest & r
 
     case H245_ConferenceRequest::e_requestTerminalID :  // highjacked for chair assign
 		 return OnReceiveChairAssignRequest(req);
-    
+
 	case H245_ConferenceRequest::e_sendThisSource :  // highjacked for floor assign
 		 return OnReceiveFloorAssignRequest(req);
-       
+
  //   Not Supported
     case H245_ConferenceRequest::e_dropTerminal :
     case H245_ConferenceRequest::e_requestAllTerminalIDs :
@@ -138,7 +138,7 @@ PBoolean H230Control::ChairRequest(PBoolean revoke)
 
 	H323ControlPDU pdu;
 	H245_ConferenceRequest & req = pdu.Build(H245_RequestMessage::e_conferenceRequest);
-	if (revoke) 
+	if (revoke)
 	   req.SetTag(H245_ConferenceRequest::e_cancelMakeMeChair);
 	else
 	   req.SetTag(H245_ConferenceRequest::e_makeMeChair);
@@ -150,7 +150,7 @@ PBoolean H230Control::ChairAssign(int node)
 {
 	if (!m_ConferenceChair) {  // only a conference chair can assign another
 		PTRACE(4,"H230\tRequest denied: Not conference chair");
-		return FALSE; 
+		return FALSE;
 	}
 
 	H323ControlPDU pdu;
@@ -158,9 +158,9 @@ PBoolean H230Control::ChairAssign(int node)
 	req.SetTag(H245_ConferenceRequest::e_requestTerminalID);
 
 	H245_TerminalLabel & label = req;
-	label.m_mcuNumber = m_mcuID; 
+	label.m_mcuNumber = m_mcuID;
 	label.m_terminalNumber = node;
-	
+
     return WriteControlPDU(pdu);
 }
 
@@ -168,7 +168,7 @@ PBoolean H230Control::FloorAssign(int node)
 {
 	if (!m_ConferenceChair) {  // only a conference chair can assign another
 		PTRACE(4,"H230\tRequest denied: Not conference chair");
-		return FALSE; 
+		return FALSE;
 	}
 
 	H323ControlPDU pdu;
@@ -176,9 +176,9 @@ PBoolean H230Control::FloorAssign(int node)
 	req.SetTag(H245_ConferenceRequest::e_requestTerminalID);
 
 	H245_TerminalLabel & label = req;
-	label.m_mcuNumber = m_mcuID; 
+	label.m_mcuNumber = m_mcuID;
 	label.m_terminalNumber = node;
-	
+
     return WriteControlPDU(pdu);
 }
 
@@ -293,8 +293,8 @@ PBoolean H230Control::OnReceiveChairAssignResponse(const H245_ConferenceResponse
 	} else if (m_ConferenceChair) {
         m_ConferenceChair = FALSE;
         OnConferenceChair(FALSE);
-	} 
-	    
+	}
+
 	ChairAssigned(num);
 	return TRUE;
 }
@@ -317,7 +317,7 @@ PBoolean H230Control::OnReceiveFloorAssignResponse(const H245_ConferenceResponse
 	return TRUE;
 }
 
-PBoolean H230Control::ChairTokenResponse(int termid , const PString & name) 
+PBoolean H230Control::ChairTokenResponse(int termid , const PString & name)
 {
 	H323ControlPDU pdu;
 	H245_ConferenceResponse & resp = pdu.Build(H245_ResponseMessage::e_conferenceResponse);
@@ -328,7 +328,7 @@ PBoolean H230Control::ChairTokenResponse(int termid , const PString & name)
 	H245_TerminalNumber & number = label.m_terminalNumber;
 	number = termid;
 	H245_McuNumber & mcu = label.m_mcuNumber;
-	mcu = m_mcuID;  
+	mcu = m_mcuID;
 
     H245_TerminalID & id = chair.m_terminalID;
 	id = name;
@@ -336,19 +336,19 @@ PBoolean H230Control::ChairTokenResponse(int termid , const PString & name)
 	return WriteControlPDU(pdu);
 }
 
-PBoolean H230Control::ChairAssignResponse(int termid , const PString & termname) 
+PBoolean H230Control::ChairAssignResponse(int termid , const PString & termname)
 {
 	H323ControlPDU pdu;
 	H245_ConferenceResponse & resp = pdu.Build(H245_ResponseMessage::e_conferenceResponse);
 	resp.SetTag(H245_ConferenceResponse::e_terminalIDResponse);
 
-	H245_ConferenceResponse_terminalIDResponse & rep = resp; 
+	H245_ConferenceResponse_terminalIDResponse & rep = resp;
 
 	H245_TerminalLabel & label = rep.m_terminalLabel;
 	H245_TerminalNumber & number = label.m_terminalNumber;
 	number = termid;
 	H245_McuNumber & mcu = label.m_mcuNumber;
-	mcu = m_mcuID;  
+	mcu = m_mcuID;
 
     H245_TerminalID & id = rep.m_terminalID;
 	id.SetValue(termname);
@@ -362,13 +362,13 @@ PBoolean H230Control::FloorAssignResponse(int termid,const PString & termname)
 	H245_ConferenceResponse & resp = pdu.Build(H245_ResponseMessage::e_conferenceResponse);
 	resp.SetTag(H245_ConferenceResponse::e_conferenceIDResponse);
 
-	H245_ConferenceResponse_conferenceIDResponse & rep = resp; 
+	H245_ConferenceResponse_conferenceIDResponse & rep = resp;
 
 	H245_TerminalLabel & label = rep.m_terminalLabel;
 	H245_TerminalNumber & number = label.m_terminalNumber;
 	number = termid;
 	H245_McuNumber & mcu = label.m_mcuNumber;
-	mcu = m_mcuID;  
+	mcu = m_mcuID;
 
     H245_ConferenceID & id = rep.m_conferenceID;
 	id.SetValue(termname);
@@ -410,7 +410,7 @@ PBoolean H230Control::TerminalListResponse(list<int> node)
 	termlist.SetSize(node.size());
 	int i = 0;
 	for (list<int>::iterator r = node.begin(); r != node.end(); ++r) {
-		termlist[i].m_mcuNumber = m_mcuID;  
+		termlist[i].m_mcuNumber = m_mcuID;
         termlist[i].m_terminalNumber = *r;
 		i++;
 	}
@@ -469,7 +469,7 @@ PBoolean H230Control::ConferenceJoinedInd(int termId)
     H245_ConferenceIndication & ind = pdu.Build(H245_IndicationMessage::e_conferenceIndication);
     ind.SetTag(H245_ConferenceIndication::e_terminalJoinedConference);
     H245_TerminalLabel & terminalId = ind;
-    terminalId.m_mcuNumber      = m_mcuID;  
+    terminalId.m_mcuNumber      = m_mcuID;
     terminalId.m_terminalNumber = termId;
 
 	return WriteControlPDU(pdu);
@@ -482,7 +482,7 @@ PBoolean H230Control::ConferenceLeftInd(int termId)
     H245_ConferenceIndication & ind = pdu.Build(H245_IndicationMessage::e_conferenceIndication);
     ind.SetTag(H245_ConferenceIndication::e_terminalLeftConference);
     H245_TerminalLabel & terminalId = ind;
-    terminalId.m_mcuNumber      = m_mcuID;  
+    terminalId.m_mcuNumber      = m_mcuID;
     terminalId.m_terminalNumber = termId;
 
 	return WriteControlPDU(pdu);
@@ -493,12 +493,12 @@ PBoolean H230Control::ConferenceTokenAssign(int mcuId, int termId)
 {
 	m_userID = termId;
 	m_mcuID = mcuId;
-	
+
     H323ControlPDU pdu;
 	H245_ConferenceIndication & ind = pdu.Build(H245_IndicationMessage::e_conferenceIndication);
 	ind.SetTag(H245_ConferenceIndication::e_terminalNumberAssign);
     H245_TerminalLabel & terminalId = ind;
-    terminalId.m_mcuNumber      = m_mcuID;  
+    terminalId.m_mcuNumber      = m_mcuID;
     terminalId.m_terminalNumber = termId;
 
 	return WriteControlPDU(pdu);
@@ -521,7 +521,7 @@ PBoolean H230Control::FloorRequest()
 
 PBoolean H230Control::OnGeneralIndication(int req, const H245_TerminalLabel & label)
 {
-	const H245_McuNumber & mcu = label.m_mcuNumber; 
+	const H245_McuNumber & mcu = label.m_mcuNumber;
 	const H245_TerminalNumber & number = label.m_terminalNumber;
     int num = number;
 
@@ -547,16 +547,16 @@ PBoolean H230Control::OnGeneralIndication(int req, const H245_TerminalLabel & la
 	return TRUE;
 }
 
-void H230Control::SetLocalID(int mcu, int num) 
-{ 
+void H230Control::SetLocalID(int mcu, int num)
+{
 	m_mcuID = mcu;
-	m_userID = num; 
+	m_userID = num;
 	OnControlsEnabled(TRUE);
 }
 
-void H230Control::RemoveLocalID() 
-{ 
-	m_userID = 0; 
+void H230Control::RemoveLocalID()
+{
+	m_userID = 0;
 	OnControlsEnabled(FALSE);
 }
 
@@ -575,10 +575,10 @@ PBoolean H230Control::OnHandleGenericPDU(const H245_GenericMessage & msg)
      if (id.GetTag() != H245_CapabilityIdentifier::e_standard)
 		 return FALSE;
 
-    const PASN_ObjectId & val = id; 
+    const PASN_ObjectId & val = id;
 	PString oid = val.AsString();
-	 if ((oid != h230OID) && 
-		 (oid != T124OID) && 
+	 if ((oid != h230OID) &&
+		 (oid != T124OID) &&
 		 (oid != PACKOID)) {
 	   PTRACE(5,"H230\tReceived unknown Identifier " << oid);
 	   return FALSE;
@@ -609,8 +609,8 @@ PBoolean H230Control::OnHandleGenericPDU(const H245_GenericMessage & msg)
  		       return ReceivedT124PDU(msgid, idx, genvalue);
 			 else if (oid == PACKOID)
 			   return ReceivedPACKPDU(msgid, idx, genvalue);
-		}    
-	  } else 
+		}
+	  } else
 		  return FALSE;
 
 	return TRUE;
@@ -648,7 +648,7 @@ PBoolean H230Control::ReceivedT124PDU(unsigned msgId, unsigned paramId, const H2
 		PTRACE(4, "H230T124\tError decoding Message");
 		return FALSE;
 	}
-   
+
 	switch (pdu.GetTag()) {
 		case GCC_GCCPDU::e_request:
 			return OnReceivedT124Request(pdu);
@@ -687,7 +687,7 @@ PBoolean H230Control::OnReceivedT124Request(const GCC_RequestPDU & pdu)
 	  case GCC_RequestPDU::e_registryDeleteEntryRequest:
 	  case GCC_RequestPDU::e_registryMonitorEntryRequest:
 	  case GCC_RequestPDU::e_registryAllocateHandleRequest:
-	  case GCC_RequestPDU::e_nonStandardRequest: 
+	  case GCC_RequestPDU::e_nonStandardRequest:
 	  default:
          return FALSE;
 	}
@@ -756,18 +756,18 @@ PBoolean H230Control::OnConferenceJoinRequest(const GCC_ConferenceJoinRequest & 
 {
 	if (!m_ConferenceChair) {  // only a conference chair can request.
 		PTRACE(4,"H230T124\tRequest denied: Not conference chair");
-		return FALSE; 
+		return FALSE;
 	}
 
 	// Unimplemented instead use the add request.
-	return FALSE;	
+	return FALSE;
 }
 
 PBoolean H230Control::Invite(const PStringList & aliases)
 {
 	if (!m_ConferenceChair) {  // only a conference chair can add user
 		PTRACE(4,"H230T124\tInvite Fail: Not conference chair");
-		return FALSE; 
+		return FALSE;
 	}
 
 	GCC_RequestPDU req;
@@ -803,7 +803,7 @@ PBoolean H230Control::OnConferenceAddRequest(const GCC_ConferenceAddRequest & pd
 {
 	if (!m_ConferenceChair) {  // only a conference chair can add user
 		PTRACE(4,"H230T124\tRequest denied: Not conference chair");
-		return FALSE; 
+		return FALSE;
 	}
 
     const GCC_NetworkAddress & addr = pdu.m_networkAddress;
@@ -815,7 +815,7 @@ PBoolean H230Control::OnConferenceAddRequest(const GCC_ConferenceAddRequest & pd
 	PStringList addresses;
 	for (PINDEX i=0; i < addr.GetSize(); i++) {
 	  const GCC_NetworkAddress_subtype & ad = (GCC_NetworkAddress_subtype &)addr[i];
-	  if (ad.GetTag() == GCC_NetworkAddress_subtype::e_nonStandard) { 
+	  if (ad.GetTag() == GCC_NetworkAddress_subtype::e_nonStandard) {
 		  const GCC_NonStandardParameter & num = ad;
 		  addresses.AppendString(num.m_data.AsString());
 	  }
@@ -831,7 +831,7 @@ PBoolean H230Control::LockConference()
 {
 	if (!m_ConferenceChair) {  // only a conference chair can add user
 		PTRACE(4,"H230T124\tInvite Fail: Not conference chair");
-		return FALSE; 
+		return FALSE;
 	}
 
 	GCC_RequestPDU req;
@@ -847,7 +847,7 @@ PBoolean H230Control::OnConferenceLockRequest(const GCC_ConferenceLockRequest & 
 {
 	if (!m_ConferenceChair) {  // only a conference chair can add user
 		PTRACE(4,"H230T124\tRequest denied: Not conference chair");
-		return FALSE; 
+		return FALSE;
 	}
 
 	OnLockConference(TRUE);
@@ -858,7 +858,7 @@ PBoolean H230Control::UnLockConference()
 {
 	if (!m_ConferenceChair) {  // only a conference chair can add user
 	   PTRACE(4,"H230T124\tInvite Fail: Not conference chair");
-	   return FALSE; 
+	   return FALSE;
 	}
 
 	GCC_RequestPDU req;
@@ -874,7 +874,7 @@ PBoolean H230Control::OnConferenceUnlockRequest(const GCC_ConferenceUnlockReques
 {
 	if (!m_ConferenceChair) {  // only a conference chair can add user
 		PTRACE(4,"H230T124\tRequest denied: Not conference chair");
-		return FALSE; 
+		return FALSE;
 	}
 
 	OnLockConference(FALSE);
@@ -890,7 +890,7 @@ PBoolean H230Control::EjectUser(int node)
 {
 	if (!m_ConferenceChair) {  // only a conference chair can add user
 	   PTRACE(4,"H230T124\tInvite Fail: Not conference chair");
-	   return FALSE; 
+	   return FALSE;
 	}
 
 	GCC_RequestPDU req;
@@ -913,7 +913,7 @@ PBoolean H230Control::OnConferenceEjectUserRequest(const GCC_ConferenceEjectUser
 {
 	if (!m_ConferenceChair) {  // only a conference chair can add user
 		PTRACE(4,"H230T124\tRequest denied: Not conference chair");
-		return FALSE; 
+		return FALSE;
 	}
 
 	OnEjectUser(pdu.m_nodeToEject);
@@ -925,7 +925,7 @@ PBoolean H230Control::TransferUser(list<int> node,const PString & number)
 {
 	if (!m_ConferenceChair) {  // only a conference chair can add user
 	   PTRACE(4,"H230T124\tInvite Fail: Not conference chair");
-	   return FALSE; 
+	   return FALSE;
 	}
 
 	GCC_RequestPDU req;
@@ -957,20 +957,20 @@ PBoolean H230Control::OnConferenceTransferRequest(const GCC_ConferenceTransferRe
 {
 	if (!m_ConferenceChair) {  // only a conference chair can add user
 	   PTRACE(4,"H230T124\tInvite Fail: Not conference chair");
-	   return FALSE; 
+	   return FALSE;
 	}
 
     const GCC_ConferenceNameSelector & name = pdu.m_conferenceName;
 	PString destination = PString();
 	if (name.GetTag() == GCC_ConferenceNameSelector::e_text) {
 	          const GCC_SimpleTextString & str = name;
-			  destination = str;    
+			  destination = str;
 	}
 
     list<int> node;
 	if (pdu.HasOptionalField(GCC_ConferenceTransferRequest::e_transferringNodes)) {
         const GCC_ArrayOf_UserID & nodes = pdu.m_transferringNodes;
-		  for (PINDEX i=0; i < nodes.GetSize(); i++) 
+		  for (PINDEX i=0; i < nodes.GetSize(); i++)
 			 node.push_back(nodes[i]);
 	}
 
@@ -1012,7 +1012,7 @@ PBoolean H230Control::InviteResponse(int id, const PString & calledNo, AddRespon
 			entry.m_value.SetValue(calledNo);
             break;
 		  case 1:
-			entry.m_value.SetValue(PString(errCode)); 
+			entry.m_value.SetValue(PString(errCode));
             break;
 		}
 		data[i] = entry;
@@ -1050,7 +1050,7 @@ PBoolean H230Control::OnConferenceAddResponse(const GCC_ConferenceAddResponse & 
 			   }
 			  }
 			}
-		}  
+		}
 	}
 
 	OnInviteResponse(id,calledNo,(AddResponse)response, errCode.AsInteger());
@@ -1157,13 +1157,13 @@ PBoolean H230Control::OnConferenceTransferResponse(const GCC_ConferenceTransferR
 	PString destination = PString();
 	if (name.GetTag() == GCC_ConferenceNameSelector::e_text) {
 	          const GCC_SimpleTextString & str = name;
-			  destination = str;    
+			  destination = str;
 	}
 
     list<int> node;
 	if (pdu.HasOptionalField(GCC_ConferenceTransferRequest::e_transferringNodes)) {
         const GCC_ArrayOf_UserID & nodes = pdu.m_transferringNodes;
-		  for (PINDEX i=0; i < nodes.GetSize(); i++) 
+		  for (PINDEX i=0; i < nodes.GetSize(); i++)
 			 node.push_back(nodes[i]);
 	}
 
@@ -1194,11 +1194,11 @@ PBoolean H230Control::UserEnquiry(list<int> node)
 	H245_ArrayOf_TerminalLabel labels;
     labels.SetSize(node.size());
 	int i = 0;
-	for (list<int>::iterator r = node.begin(); r != node.end(); ++r) 
+	for (list<int>::iterator r = node.begin(); r != node.end(); ++r)
 	{
         H245_TerminalLabel id;
 		H245_McuNumber & mcu = id.m_mcuNumber;
-		mcu = m_mcuID; 
+		mcu = m_mcuID;
         H245_TerminalNumber lab = id.m_terminalNumber;
 		lab = (int)*r;
 		labels[i] = id;
@@ -1214,13 +1214,13 @@ PBoolean H230Control::UserEnquiry(list<int> node)
 PBoolean H230Control::UserEnquiryResponse(const list<userInfo> & userlist)
 {
     PASN_OctetString rawpdu;
-    
+
 	H230OID2_ParticipantList ulist;
 	H230OID2_ArrayOf_Participant & users = ulist.m_list;
 
 	users.SetSize(userlist.size());
 	int i = 0;
-	for (std::list<userInfo>::const_iterator r = userlist.begin(); r != userlist.end(); ++r) 
+	for (std::list<userInfo>::const_iterator r = userlist.begin(); r != userlist.end(); ++r)
 	{
         userInfo u = *r;
 		H230OID2_Participant & user = users[i];
@@ -1252,7 +1252,7 @@ PBoolean H230Control::SendPACKGenericRequest(int paramid,const PASN_OctetString 
 
     H245_CapabilityIdentifier & id = msg.m_messageIdentifier;
      id.SetTag(H245_CapabilityIdentifier::e_standard);
-        PASN_ObjectId & val = id; 
+        PASN_ObjectId & val = id;
         val.SetValue(PACKOID);
 
 	PASN_Integer & num = msg.m_subMessageIdentifier;
@@ -1263,7 +1263,7 @@ PBoolean H230Control::SendPACKGenericRequest(int paramid,const PASN_OctetString 
 
 	 content.SetSize(1);
 	   H245_GenericParameter & param = content[0];
-	   H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
+	   H245_ParameterIdentifier & idm = param.m_parameterIdentifier;
 	     idm.SetTag(H245_ParameterIdentifier::e_standard);
 		 PASN_Integer & idx = idm;
 		 idx = paramid;
@@ -1279,13 +1279,13 @@ PBoolean H230Control::SendPACKGenericResponse(int paramid, const PASN_OctetStrin
 {
     H323ControlPDU pdu;
     H245_GenericMessage & msg = pdu.Build(H245_ResponseMessage::e_genericResponse);
-      
+
 	msg.IncludeOptionalField(H245_GenericMessage::e_subMessageIdentifier);
     msg.IncludeOptionalField(H245_GenericMessage::e_messageContent);
 
     H245_CapabilityIdentifier & id = msg.m_messageIdentifier;
      id.SetTag(H245_CapabilityIdentifier::e_standard);
-        PASN_ObjectId & val = id; 
+        PASN_ObjectId & val = id;
         val.SetValue(PACKOID);
 
 	PASN_Integer & num = msg.m_subMessageIdentifier;
@@ -1296,7 +1296,7 @@ PBoolean H230Control::SendPACKGenericResponse(int paramid, const PASN_OctetStrin
 
 	 content.SetSize(1);
 	   H245_GenericParameter & param = content[0];
-	   H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
+	   H245_ParameterIdentifier & idm = param.m_parameterIdentifier;
 	     idm.SetTag(H245_ParameterIdentifier::e_standard);
 		 PASN_Integer & idx = idm;
 		 idx = paramid;
@@ -1337,7 +1337,7 @@ PBoolean H230Control::OnReceivePACKRequest(const PASN_OctetString & rawpdu)
 	PTRACE(5, "H230PACK\tDecoded Message " << pdu);
 
 	list<int> req;
-	for (PINDEX i =0; i < pdu.GetSize(); i++) 
+	for (PINDEX i =0; i < pdu.GetSize(); i++)
 	{
         H245_TerminalNumber lab = pdu[i].m_terminalNumber;
 		req.push_back(lab);
@@ -1347,7 +1347,7 @@ PBoolean H230Control::OnReceivePACKRequest(const PASN_OctetString & rawpdu)
     return TRUE;
 }
 
-PBoolean H230Control::OnReceivePACKResponse(const PASN_OctetString & rawpdu) 
+PBoolean H230Control::OnReceivePACKResponse(const PASN_OctetString & rawpdu)
 {
 	PPER_Stream argStream(rawpdu);
 	H230OID2_ParticipantList list;
@@ -1361,7 +1361,7 @@ PBoolean H230Control::OnReceivePACKResponse(const PASN_OctetString & rawpdu)
 	H230OID2_ArrayOf_Participant & users = list.m_list;
 
 	std::list<userInfo> userlist;
-	for (PINDEX i=0; i < users.GetSize(); ++i) 
+	for (PINDEX i=0; i < users.GetSize(); ++i)
 	{
 		userInfo * u = new userInfo();
 		H230OID2_Participant & user = users[i];
@@ -1407,7 +1407,7 @@ void H230T124PDU::BuildRequest(GCC_RequestPDU & pdu)
 	raw.EncodeSubType(pdu);
 	BuildGeneric(raw);
 }
-	
+
 void H230T124PDU::BuildResponse(GCC_ResponsePDU & pdu)
 {
 	Build(H245_ResponseMessage::e_genericResponse);
@@ -1415,7 +1415,7 @@ void H230T124PDU::BuildResponse(GCC_ResponsePDU & pdu)
 	raw.EncodeSubType(pdu);
 	BuildGeneric(raw);
 }
-	
+
 void H230T124PDU::BuildIndication(GCC_IndicationPDU & pdu)
 {
 	Build(H245_IndicationMessage::e_genericIndication);
@@ -1433,7 +1433,7 @@ void H230T124PDU::BuildGeneric(PASN_OctetString & pdu)
 
     H245_CapabilityIdentifier & id = msg.m_messageIdentifier;
      id.SetTag(H245_CapabilityIdentifier::e_standard);
-        PASN_ObjectId & val = id; 
+        PASN_ObjectId & val = id;
         val.SetValue(T124OID);
 
 	PASN_Integer & num = msg.m_subMessageIdentifier;
@@ -1444,7 +1444,7 @@ void H230T124PDU::BuildGeneric(PASN_OctetString & pdu)
 
 	 content.SetSize(1);
 	 H245_GenericParameter & param = content[0];
-	 H245_ParameterIdentifier & idm = param.m_parameterIdentifier; 
+	 H245_ParameterIdentifier & idm = param.m_parameterIdentifier;
 	     idm.SetTag(H245_ParameterIdentifier::e_standard);
 		 PASN_Integer & idx = idm;
 		 idx = 1;
@@ -1599,7 +1599,7 @@ PBoolean H230Control_EndPoint::ReqFloorAssign(int node)
 	res = new result();
 
 	if (FloorAssign(node)) {
-		responseMutex.Wait(requestTimeout); 
+		responseMutex.Wait(requestTimeout);
 		return (res->node == node);
 	}
 
@@ -1650,13 +1650,13 @@ H230Control_EndPoint::~H230Control_EndPoint()
         OnControlsEnabled(FALSE);
 }
 
-void H230Control_EndPoint::OnLockConferenceResponse(LockResponse lock) 
+void H230Control_EndPoint::OnLockConferenceResponse(LockResponse lock)
 {
 	res->errCode = lock;
     responseMutex.Signal();
 }
 
-void H230Control_EndPoint::OnUnLockConferenceResponse(LockResponse lock) 
+void H230Control_EndPoint::OnUnLockConferenceResponse(LockResponse lock)
 {
 	res->errCode = lock;
     responseMutex.Signal();
@@ -1680,7 +1680,7 @@ void H230Control_EndPoint::OnTerminalListResponse(list<int> node)
 {
 //	res->ids = node;
 //  res->errCode = 0;
-	for (list<int>::iterator r = node.begin(); r != node.end(); ++r) 
+	for (list<int>::iterator r = node.begin(); r != node.end(); ++r)
 	      ConferenceJoined(*r);
 
     responseMutex.Signal();
@@ -1717,14 +1717,14 @@ void H230Control_EndPoint::OnChairTokenResponse(int id, const PString & name)
     responseMutex.Signal();
 }
 
-void H230Control_EndPoint::OnUserEnquiryResponse(const list<userInfo> & info) 
+void H230Control_EndPoint::OnUserEnquiryResponse(const list<userInfo> & info)
 {
 //	res->info = info;
 //	res->errCode = 0;
 	std::list<userInfo>::const_iterator r = info.begin();
 	while (r != info.end()) {
 	    ConferenceJoinInfo(r->m_Token,r->m_Number,r->m_Name,r->m_vCard);
-		r++;
+		++r;
 	}
 
     responseMutex.Signal();

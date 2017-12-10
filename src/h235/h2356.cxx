@@ -92,8 +92,8 @@ void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, H235Authenticators
                 dhmap.insert(pair<PString, H235_DiffieHellman*>(i->first, (H235_DiffieHellman*)i->second->Clone()));
             else
                 dhmap.insert(pair<PString, H235_DiffieHellman*>(i->first, (H235_DiffieHellman*)NULL));
-            i++;
-        }    
+            ++i;
+        }
         return;
     }
 
@@ -227,14 +227,14 @@ void H2356_Authenticator::RemoveCache()
    m_dhCachedMap.clear();
 }
 
-PBoolean H2356_Authenticator::IsMatch(const PString & identifier) const 
-{ 
+PBoolean H2356_Authenticator::IsMatch(const PString & identifier) const
+{
     PStringArray ids;
     for (PINDEX i = 0; i < PARRAYSIZE(H235_DHParameters); ++i) {
         if (PString(H235_DHParameters[i].parameterOID) == identifier)
             return true;
     }
-    return false; 
+    return false;
 }
 
 
@@ -255,7 +255,7 @@ const char * H2356_Authenticator::GetName() const
 }
 
 PBoolean H2356_Authenticator::PrepareTokens(PASN_Array & clearTokens,
-                                      PASN_Array & /*cryptoTokens*/, 
+                                      PASN_Array & /*cryptoTokens*/,
                                       PINDEX max_keyLength)
 {
     if (!IsActive() || (m_tokenState == e_clearDisable) || (max_keyLength==0))
@@ -318,7 +318,7 @@ H235Authenticator::ValidationResult H2356_Authenticator::ValidateTokens(const PA
     if (tokens.GetSize() == 0) {
         DeleteObjectsInMap(m_dhLocalMap);
         m_tokenState = e_clearDisable;
-        return e_Disabled; 
+        return e_Disabled;
     }
 
     PString selectOID;
@@ -364,7 +364,7 @@ H235Authenticator::ValidationResult H2356_Authenticator::ValidateTokens(const PA
                 delete it->second;
                 m_dhLocalMap.erase(it++);
             } else
-                it++;
+                ++it;
         }
     } else
         DeleteObjectsInMap(m_dhLocalMap);
@@ -420,7 +420,7 @@ PBoolean H2356_Authenticator::IsActive() const
 }
 
 void H2356_Authenticator::Disable()
-{ 
+{
     m_enabled = false;
     m_active = false;
 }

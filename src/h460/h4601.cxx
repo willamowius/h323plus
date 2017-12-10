@@ -1245,7 +1245,7 @@ PBoolean H460_FeatureSet::LoadFeatureSet(int inst, H323Connection * con)
            AddFeature(feat);
            PTRACE(4,"H460\tLoaded Feature " << it->first);
         }
-        it++;
+        ++it;
       }
 
   DeleteFeatureList(featurelist);

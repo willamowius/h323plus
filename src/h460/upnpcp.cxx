@@ -85,33 +85,33 @@ class DeviceInformationContainer
 {
 public:
     DeviceInformationContainer() : Children(""), Description(""),
-        FriendlyName(""), HasChildren(""), IconURL(""), IsRootDevice(""), 
-        ManufacturerName(""), ManufacturerURL(""), ModelName(""), 
-        ModelNumber(""), ModelURL(""), ParentDevice(""), 
-        PresentationURL(""), RootDevice(""), SerialNumber(""), 
+        FriendlyName(""), HasChildren(""), IconURL(""), IsRootDevice(""),
+        ManufacturerName(""), ManufacturerURL(""), ModelName(""),
+        ModelNumber(""), ModelURL(""), ParentDevice(""),
+        PresentationURL(""), RootDevice(""), SerialNumber(""),
         Services(""), Type(""), UniqueDeviceName(""), UPC("")   { };
-    
+
     // see http://msdn.microsoft.com/library/en-us/upnp/upnp/iupnpdevice.asp
-    
-    PString Children;            // Child devices of the device. 
-    PString Description;        // Human-readable form of the summary of a device's functionality. 
-    PString FriendlyName;        // Device display name. 
-    PString HasChildren;        // Indicates whether the device has any child devices. 
+
+    PString Children;            // Child devices of the device.
+    PString Description;        // Human-readable form of the summary of a device's functionality.
+    PString FriendlyName;        // Device display name.
+    PString HasChildren;        // Indicates whether the device has any child devices.
     PString IconURL;            // URL of icon
-    PString IsRootDevice;        // Indicates whether the device is the top-most device in the device tree. 
-    PString ManufacturerName;    // Human-readable form of the manufacturer name. 
-    PString ManufacturerURL;    // URL for the manufacturer's Web site. 
-    PString ModelName;            // Human-readable form of the model name. 
-    PString ModelNumber;        // Human-readable form of the model number. 
-    PString ModelURL;            // URL for a Web page that contains model-specific information. 
-    PString ParentDevice;        // Parent of the device. 
-    PString PresentationURL;    // Presentation URL for a Web page that can be used to control the device. 
-    PString RootDevice;            // Top-most device in the device tree. 
-    PString SerialNumber;        // Human-readable form of the serial number. 
-    PString Services;            // List of services provided by the device. 
-    PString Type;                // Uniform resource identifier (URI) for the device type. 
-    PString UniqueDeviceName;    // Unique device name (UDN) of the device. 
-    PString UPC;                // Human-readable form of the product code. 
+    PString IsRootDevice;        // Indicates whether the device is the top-most device in the device tree.
+    PString ManufacturerName;    // Human-readable form of the manufacturer name.
+    PString ManufacturerURL;    // URL for the manufacturer's Web site.
+    PString ModelName;            // Human-readable form of the model name.
+    PString ModelNumber;        // Human-readable form of the model number.
+    PString ModelURL;            // URL for a Web page that contains model-specific information.
+    PString ParentDevice;        // Parent of the device.
+    PString PresentationURL;    // Presentation URL for a Web page that can be used to control the device.
+    PString RootDevice;            // Top-most device in the device tree.
+    PString SerialNumber;        // Human-readable form of the serial number.
+    PString Services;            // List of services provided by the device.
+    PString Type;                // Uniform resource identifier (URI) for the device type.
+    PString UniqueDeviceName;    // Unique device name (UDN) of the device.
+    PString UPC;                // Human-readable form of the product code.
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -119,8 +119,8 @@ public:
 class PortMappingContainer : public PObject
 {
 public:
-    PortMappingContainer() : ExternalIPAddress(""), ExternalPort(0), 
-        InternalPort(0), Protocol("UDP"), InternalClient(""), 
+    PortMappingContainer() : ExternalIPAddress(""), ExternalPort(0),
+        InternalPort(0), Protocol("UDP"), InternalClient(""),
         Enabled(true), Description("")   { };
 
     PObject * Clone() const;
@@ -129,8 +129,8 @@ public:
     WORD ExternalPort;
     WORD InternalPort;
     PString Protocol;
-    PString InternalClient;    
-    bool Enabled;    
+    PString InternalClient;
+    bool Enabled;
     PString Description;
 };
 
@@ -142,14 +142,14 @@ PObject * PortMappingContainer::Clone() const
 /////////////////////////////////////////////////////////////////////
 
 class UPnPThread;
-class UPnPCallbacks : public PObject  
+class UPnPCallbacks : public PObject
 {
 public:
     UPnPCallbacks(UPnPThread * upnp);
 
     virtual HRESULT OnNewNumberOfEntries(long lNewNumberOfEntries);
     virtual HRESULT OnNewExternalIPAddress( const PString & extIPAddress);
-    
+
 protected:
     UPnPThread * m_upnp;
 };
@@ -159,16 +159,16 @@ interface IxNATExternalIPAddressCallback : public INATExternalIPAddressCallback
     IxNATExternalIPAddressCallback(UPnPCallbacks* p ) : m_pointer( p ), m_dwRef( 0 ) { };
 
     ~IxNATExternalIPAddressCallback() { /*delete m_pointer;*/ }
-    
+
     HRESULT STDMETHODCALLTYPE NewExternalIPAddress( BSTR bstrNewExternalIPAddress ) {
-        PAssert(m_pointer != NULL,PLogicError);            
+        PAssert(m_pointer != NULL,PLogicError);
         return    m_pointer->OnNewExternalIPAddress(bstrNewExternalIPAddress);
     }
-    
+
     HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void ** ppvObject);
-    
+
     ULONG STDMETHODCALLTYPE AddRef()  {    return ++m_dwRef; }
-    
+
     ULONG STDMETHODCALLTYPE Release()  {
         if ( --m_dwRef == 0 )
             delete this;
@@ -182,7 +182,7 @@ HRESULT STDMETHODCALLTYPE IxNATExternalIPAddressCallback::QueryInterface(REFIID 
 {
     HRESULT hr = S_OK;
     *ppvObject = NULL;
-    
+
     if ( iid == IID_IUnknown ||    iid == IID_INATExternalIPAddressCallback ) {
         *ppvObject = this;
         AddRef();
@@ -194,28 +194,28 @@ HRESULT STDMETHODCALLTYPE IxNATExternalIPAddressCallback::QueryInterface(REFIID 
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-    
+
 interface IxNATNumberOfEntriesCallback : public INATNumberOfEntriesCallback
 {
     IxNATNumberOfEntriesCallback(UPnPCallbacks* p ) : m_pointer( p ), m_dwRef( 0 ) { };
 
     ~IxNATNumberOfEntriesCallback() { /*delete m_pointer;*/ }
-    
+
     HRESULT STDMETHODCALLTYPE NewNumberOfEntries( long lNewNumberOfEntries ) {
-        PAssert(m_pointer != NULL,PLogicError);            
+        PAssert(m_pointer != NULL,PLogicError);
         return m_pointer->OnNewNumberOfEntries( lNewNumberOfEntries );
     }
-    
-    HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void ** ppvObject); 
-    
+
+    HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void ** ppvObject);
+
     ULONG STDMETHODCALLTYPE AddRef()  { return ++m_dwRef; }
-    
+
     ULONG STDMETHODCALLTYPE Release() {
         if ( --m_dwRef == 0 )
             delete this;
         return m_dwRef;
     }
-    
+
     DWORD        m_dwRef;
     UPnPCallbacks*    m_pointer;
 };
@@ -224,7 +224,7 @@ HRESULT STDMETHODCALLTYPE IxNATNumberOfEntriesCallback::QueryInterface(REFIID ii
 {
     HRESULT hr = S_OK;
     *ppvObject = NULL;
-    
+
     if ( iid == IID_IUnknown ||    iid == IID_INATNumberOfEntriesCallback ) {
         *ppvObject = this;
         AddRef();
@@ -245,7 +245,7 @@ class UPnPThread : public PThread
 
     void Main();
 
-    bool CreateMap(bool pair, const PString & protocol, const PIPSocket::Address & localIP, 
+    bool CreateMap(bool pair, const PString & protocol, const PIPSocket::Address & localIP,
                 const WORD & locPort, PIPSocket::Address & extIP , WORD & extPort, PBoolean force = false);
 
     bool RemoveMap(WORD port, PBoolean udp = true);
@@ -262,10 +262,10 @@ class UPnPThread : public PThread
 protected:
     bool Initialise();
     bool DetectDevice(PStringList & devNames);
-    bool PopulateDeviceInfoContainer( IUPnPDevice* piDevice, 
+    bool PopulateDeviceInfoContainer( IUPnPDevice* piDevice,
                     DeviceInformationContainer& deviceInfo);
 
-    bool AddMapping(PortMappingContainer& newMapping);  
+    bool AddMapping(PortMappingContainer& newMapping);
     bool RemoveMapping(PortMappingContainer& newMapping);
 
     void Close();
@@ -274,13 +274,13 @@ protected:
     bool TestMapping();
 
  private:
-    IUPnPNAT*                        m_piNAT;                    
+    IUPnPNAT*                        m_piNAT;
     INATEventManager*                m_piEventManager;
 
     map<PString,PortMappingContainer *> m_piMaps;
     map<PString,PortMappingContainer *> m_piUPnPMaps;
 
-    PNatMethod_UPnP*                  m_piNatMethod;                        
+    PNatMethod_UPnP*                  m_piNatMethod;
     UPnPCallbacks*                    m_piCallbacks;
 
     PMutex                            m_MapMutex;
@@ -295,7 +295,7 @@ protected:
 UPnPThread::UPnPThread(PNatMethod_UPnP * nat)
    : PThread(1000,NoAutoDeleteThread, NormalPriority, "UPnP Thread"), m_piNatMethod(nat)
 {
-    m_piNAT = NULL;                    
+    m_piNAT = NULL;
     m_piEventManager = NULL;
     m_piCallbacks = NULL;
     m_piNewMapping = false;
@@ -322,14 +322,14 @@ bool UPnPThread::Initialise()
         PTRACE(4,"UPnP\tError initialising UPnP Instance");
         return false;
     }
-    
+
     result = m_piNAT->get_NATEventManager(&m_piEventManager);
     if (FAILED(result)) {
         PTRACE(4,"UPnP\tError UPnP EventManager..");
         SAFE_RELEASE(m_piNAT);
         return false;
     }
-    
+
     if (m_piEventManager) {
         result = m_piEventManager->put_ExternalIPAddressCallback(new IxNATExternalIPAddressCallback(m_piCallbacks));
         if (FAILED(result)) {
@@ -337,7 +337,7 @@ bool UPnPThread::Initialise()
             SAFE_RELEASE(m_piNAT);
             return false;
         }
-        
+
         result = m_piEventManager->put_NumberOfEntriesCallback(new IxNATNumberOfEntriesCallback(m_piCallbacks));
         if (FAILED(result)) {
             SAFE_RELEASE(m_piEventManager);
@@ -379,7 +379,7 @@ void UPnPThread::Main()
     Close();
 }
 
-void UPnPThread::Shutdown() 
+void UPnPThread::Shutdown()
 {
     m_piShutdown = true;
     m_ThreadSync.Signal();
@@ -387,7 +387,7 @@ void UPnPThread::Shutdown()
 
 void UPnPThread::Close()
 {
-    for each(pair<PString,PortMappingContainer*> c in m_piMaps) 
+    for each(pair<PString,PortMappingContainer*> c in m_piMaps)
        RemoveMapping(*c.second);
 
     DeleteObjectsInMap(m_piMaps);
@@ -425,20 +425,20 @@ PBoolean UPnPThread::IsMappingFree(WORD askPort, PBoolean udp)
 WORD UPnPThread::GetNextFreePort(WORD askPort, bool pair, PBoolean udp)
 {
     WORD port=0;
-    if (askPort > 0) 
+    if (askPort > 0)
         port = askPort;
     else
-        port = (udp) ? UPnPUDPBasePort : UPnPTCPBasePort; 
+        port = (udp) ? UPnPUDPBasePort : UPnPTCPBasePort;
 
     bool found = false;
     // find a free port
     while (!found) {
         PString key = PString((udp) ? "U" : "T") + PString(port);
-        if ((m_piMaps.find(key) ==  m_piMaps.end()) && 
+        if ((m_piMaps.find(key) ==  m_piMaps.end()) &&
                     (m_piUPnPMaps.find(key) == m_piUPnPMaps.end())) {
             if (pair) {
                 PString key2 = PString((udp) ? "U" : "T") + PString(port+1);
-                if ((m_piMaps.find(key2) == m_piMaps.end()) && 
+                if ((m_piMaps.find(key2) == m_piMaps.end()) &&
                     (m_piUPnPMaps.find(key2)== m_piUPnPMaps.end())) {
                         found = true;
                 } else
@@ -453,8 +453,8 @@ WORD UPnPThread::GetNextFreePort(WORD askPort, bool pair, PBoolean udp)
     return port;
 }
 
-bool UPnPThread::CreateMap(bool pair, const PString & protocol, 
-                           const PIPSocket::Address & localIP, const WORD & locPort, 
+bool UPnPThread::CreateMap(bool pair, const PString & protocol,
+                           const PIPSocket::Address & localIP, const WORD & locPort,
                            PIPSocket::Address & extIP , WORD & extPort, PBoolean force)
 {
     PWaitAndSignal m(m_MapMutex);
@@ -468,7 +468,7 @@ bool UPnPThread::CreateMap(bool pair, const PString & protocol,
        RemoveMap(extPort, false);
 
     extPort = locPort;
-    
+
     bool success = false;
     bool exit = false;
     int loop=0;
@@ -484,7 +484,7 @@ bool UPnPThread::CreateMap(bool pair, const PString & protocol,
             umap.ExternalPort = extPort + i;
 
             if (AddMapping(umap)) {
-                PTRACE(4,"UPnP\tCreated map " << protocol << " " << umap.InternalClient << ":" << umap.InternalPort 
+                PTRACE(4,"UPnP\tCreated map " << protocol << " " << umap.InternalClient << ":" << umap.InternalPort
                                                     << " to " << umap.ExternalIPAddress << ":" << umap.ExternalPort);
 
                 PString key = PString((protocol == "UDP") ? "U" : "T") + PString(umap.ExternalPort);
@@ -511,7 +511,7 @@ bool UPnPThread::CreateMap(bool pair, const PString & protocol,
 
     return success;
 }
-    
+
 bool GetNextMapping(IEnumVARIANT* piEnumerator, PortMappingContainer& mappingContainer)
 {
     // uses the enumerator to get the next mapping and fill in a mapping container structure
@@ -544,20 +544,20 @@ bool GetNextMapping(IEnumVARIANT* piEnumerator, PortMappingContainer& mappingCon
     // get external port
     long lValue = 0;
     result = piMapping->get_ExternalPort( &lValue );
-    if (FAILED(result)) {    
+    if (FAILED(result)) {
         SAFE_RELEASE(piMapping);
         return false;
     }
     mappingContainer.ExternalPort = (WORD)lValue;
-    
+
     // get internal port
     result = piMapping->get_InternalPort( &lValue );
-    if (FAILED(result)) {    
+    if (FAILED(result)) {
         SAFE_RELEASE(piMapping);
         return false;
     }
     mappingContainer.InternalPort = (WORD)lValue;
-    
+
     // get protocol
     result = piMapping->get_Protocol(&bStr);
     if (FAILED(result) || !bStr) {
@@ -579,12 +579,12 @@ bool GetNextMapping(IEnumVARIANT* piEnumerator, PortMappingContainer& mappingCon
     // determine whether it's enabled
     VARIANT_BOOL bValue = VARIANT_FALSE;
     result = piMapping->get_Enabled(&bValue);
-    if (FAILED(result)) {    
+    if (FAILED(result)) {
         SAFE_RELEASE(piMapping);
         return false;
     }
     mappingContainer.Enabled = (bValue==VARIANT_FALSE) ? false : true;
-    
+
     // get description
     result = piMapping->get_Description( &bStr );
     if (FAILED(result) || !bStr) {
@@ -593,25 +593,25 @@ bool GetNextMapping(IEnumVARIANT* piEnumerator, PortMappingContainer& mappingCon
     }
     mappingContainer.Description = bStr;
     SysFreeString(bStr);
-    
+
     SAFE_RELEASE(piMapping);
     VariantClear(&varCurMapping);
-    
+
     return true;
-    
+
 }
 
 bool UPnPThread::EnumMaps()
 {
     PWaitAndSignal m(m_MapMutex);
 
-    IStaticPortMappingCollection* piPortMappingCollection = NULL;    
-    if (FAILED(m_piNAT->get_StaticPortMappingCollection(&piPortMappingCollection) ) 
+    IStaticPortMappingCollection* piPortMappingCollection = NULL;
+    if (FAILED(m_piNAT->get_StaticPortMappingCollection(&piPortMappingCollection) )
         || (piPortMappingCollection==NULL ) ) {
             PTRACE(4,"UPnP\tError: Could not access Static Mapping Collection!");
             return false;
     }
-    
+
     IUnknown* piUnk = NULL;
     IEnumVARIANT* piEnumerator = NULL;
     if (FAILED(piPortMappingCollection->get__NewEnum(&piUnk)) || piUnk==NULL ) {
@@ -619,13 +619,13 @@ bool UPnPThread::EnumMaps()
         SAFE_RELEASE(piPortMappingCollection);
         return false;
     }
-    
+
     if (FAILED(piUnk->QueryInterface(IID_IEnumVARIANT, (void **)&piEnumerator) ) || piEnumerator==NULL ) {
         PTRACE(4,"UPnP\tError: Could not enumerate Static Mapping Collection!");
         SAFE_RELEASE(piPortMappingCollection);
         return false;
     }
- 
+
     if (FAILED(piEnumerator->Reset())) {
         PTRACE(4,"UPnP\tError: Could not reset enumeration");
         SAFE_RELEASE(piPortMappingCollection);
@@ -652,7 +652,7 @@ bool UPnPThread::AddMapping(PortMappingContainer& newMapping)
     if (!m_piNAT)
         return false;
 
-    IStaticPortMappingCollection* m_piPortMappingCollection = NULL;    
+    IStaticPortMappingCollection* m_piPortMappingCollection = NULL;
     if (FAILED(m_piNAT->get_StaticPortMappingCollection(&m_piPortMappingCollection)) || !m_piPortMappingCollection) {
         PTRACE(4,"UPnP\tError: Could not access Static Mapping Collection!");
         return false;
@@ -660,7 +660,7 @@ bool UPnPThread::AddMapping(PortMappingContainer& newMapping)
 
     bool success = false;
     IStaticPortMapping* m_piStaticPortMapping = NULL;
-    if (SUCCEEDED(m_piPortMappingCollection->Add(newMapping.ExternalPort, SysAllocString(newMapping.Protocol.AsUCS2()), 
+    if (SUCCEEDED(m_piPortMappingCollection->Add(newMapping.ExternalPort, SysAllocString(newMapping.Protocol.AsUCS2()),
         newMapping.InternalPort, SysAllocString(newMapping.InternalClient.AsUCS2()), newMapping.Enabled , SysAllocString(newMapping.Description.AsUCS2()),
         &m_piStaticPortMapping))) {
             BSTR extIP;
@@ -669,15 +669,15 @@ bool UPnPThread::AddMapping(PortMappingContainer& newMapping)
             PIPSocket::Address mapaddr(newMapping.ExternalIPAddress);
             success = (mapaddr.IsValid() && !mapaddr.IsLoopback() && !mapaddr.IsAny());
     } else {
-        PTRACE(4,"UPnP\tError: Creating Map! " << newMapping.Protocol << " " 
+        PTRACE(4,"UPnP\tError: Creating Map! " << newMapping.Protocol << " "
                   << newMapping.InternalClient << ":" << newMapping.InternalPort  << " to " << newMapping.ExternalPort );
     }
 
     m_PortOpenPace.Delay(200);
-    
+
     SAFE_RELEASE(m_piStaticPortMapping);
     SAFE_RELEASE(m_piPortMappingCollection);
-        
+
 
     return success;
 }
@@ -688,7 +688,7 @@ bool UPnPThread::RemoveMapping(PortMappingContainer& newMapping)
     if (!m_piNAT)
         return false;
 
-    IStaticPortMappingCollection* m_piPortMappingCollection = NULL;    
+    IStaticPortMappingCollection* m_piPortMappingCollection = NULL;
     if (FAILED(m_piNAT->get_StaticPortMappingCollection(&m_piPortMappingCollection)) || !m_piPortMappingCollection) {
         PTRACE(4,"UPnP\tError: Could not access Static Mapping Collection!");
         return false;
@@ -700,10 +700,10 @@ bool UPnPThread::RemoveMapping(PortMappingContainer& newMapping)
             success = true;
             PTRACE(4,"UPnP\tMap removed " << newMapping.Protocol << " " << newMapping.ExternalPort);
     }
-    
+
     SAFE_RELEASE(m_piStaticPortMapping);
     SAFE_RELEASE(m_piPortMappingCollection);
-        
+
 
     return success;
 }
@@ -722,7 +722,7 @@ void UPnPThread::SetExtIPAddress(const PString & newAddr)
 }
 
 
-bool UPnPThread::PopulateDeviceInfoContainer( IUPnPDevice* piDevice, 
+bool UPnPThread::PopulateDeviceInfoContainer( IUPnPDevice* piDevice,
                 DeviceInformationContainer& deviceInfo)
 {
 
@@ -731,7 +731,7 @@ bool UPnPThread::PopulateDeviceInfoContainer( IUPnPDevice* piDevice,
     BSTR bStr = NULL;
     VARIANT_BOOL bValue = VARIANT_FALSE;
     IUPnPDevices* piDevices = NULL;
-    
+
     result = piDevice->get_Children( &piDevices );
     hrReturn |= result;
     if ( SUCCEEDED(result) && (piDevices!=NULL) )
@@ -752,7 +752,7 @@ bool UPnPThread::PopulateDeviceInfoContainer( IUPnPDevice* piDevice,
         SAFE_RELEASE(piDevices);
         lValue = 0;
     }
-    
+
     // Get Description
     result = piDevice->get_Description( &bStr );
     hrReturn |= result;
@@ -760,12 +760,12 @@ bool UPnPThread::PopulateDeviceInfoContainer( IUPnPDevice* piDevice,
         deviceInfo.Description = bStr;
         SysFreeString(bStr);
     }
-    
+
     // Get FriendlyName
     result = piDevice->get_FriendlyName( &bStr );
     hrReturn |= result;
     if ( SUCCEEDED(result) ) {
-        deviceInfo.FriendlyName = bStr;    
+        deviceInfo.FriendlyName = bStr;
         SysFreeString(bStr);
     }
 
@@ -782,13 +782,13 @@ bool UPnPThread::PopulateDeviceInfoContainer( IUPnPDevice* piDevice,
     result = piDevice->IconURL( bStrMime, 32, 32, 8, &bStr );
     hrReturn |= result;
     if ( SUCCEEDED(result) ) {
-        deviceInfo.IconURL = bStr;    
+        deviceInfo.IconURL = bStr;
         SysFreeString(bStr);
     }
-    
+
     SysFreeString(bStrMime);
     bStrMime = NULL;
-    
+
     // Get IsRootDevice
     result = piDevice->get_IsRootDevice(&bValue);
     hrReturn |= result;
@@ -796,12 +796,12 @@ bool UPnPThread::PopulateDeviceInfoContainer( IUPnPDevice* piDevice,
         deviceInfo.IsRootDevice = (bValue==VARIANT_FALSE ? "No": "Yes");
         bValue = VARIANT_FALSE;
     }
-    
+
     // Get ManufacturerName
     result = piDevice->get_ManufacturerName(&bStr);
     hrReturn |= result;
     if ( SUCCEEDED(result) ) {
-        deviceInfo.ManufacturerName = bStr;    
+        deviceInfo.ManufacturerName = bStr;
         SysFreeString(bStr);
     }
 
@@ -809,7 +809,7 @@ bool UPnPThread::PopulateDeviceInfoContainer( IUPnPDevice* piDevice,
     result = piDevice->get_ManufacturerURL(&bStr);
     hrReturn |= result;
     if ( SUCCEEDED(result) ) {
-        deviceInfo.ManufacturerURL = bStr;    
+        deviceInfo.ManufacturerURL = bStr;
         SysFreeString(bStr);
     }
 
@@ -817,7 +817,7 @@ bool UPnPThread::PopulateDeviceInfoContainer( IUPnPDevice* piDevice,
     result = piDevice->get_ModelName(&bStr);
     hrReturn |= result;
     if (SUCCEEDED(result)) {
-        deviceInfo.ModelName = bStr;    
+        deviceInfo.ModelName = bStr;
         SysFreeString(bStr);
     }
 
@@ -825,7 +825,7 @@ bool UPnPThread::PopulateDeviceInfoContainer( IUPnPDevice* piDevice,
     result = piDevice->get_ModelNumber(&bStr);
     hrReturn |= result;
     if ( SUCCEEDED(result) ) {
-        deviceInfo.ModelNumber = bStr;    
+        deviceInfo.ModelNumber = bStr;
         SysFreeString(bStr);
     }
 
@@ -833,7 +833,7 @@ bool UPnPThread::PopulateDeviceInfoContainer( IUPnPDevice* piDevice,
     result = piDevice->get_ModelURL(&bStr);
     hrReturn |= result;
     if ( SUCCEEDED(result) ) {
-        deviceInfo.ModelURL = bStr;    
+        deviceInfo.ModelURL = bStr;
         SysFreeString(bStr);
     }
 
@@ -851,12 +851,12 @@ bool UPnPThread::PopulateDeviceInfoContainer( IUPnPDevice* piDevice,
             SAFE_RELEASE(piDev);
         }
     }
-    
+
     // Get PresentationURL
     result = piDevice->get_PresentationURL(&bStr);
     hrReturn |= result;
     if (SUCCEEDED(result)) {
-        deviceInfo.PresentationURL =  bStr;    
+        deviceInfo.PresentationURL =  bStr;
         SysFreeString(bStr);
     }
 
@@ -879,14 +879,14 @@ bool UPnPThread::PopulateDeviceInfoContainer( IUPnPDevice* piDevice,
     result = piDevice->get_SerialNumber(&bStr);
     hrReturn |= result;
     if ( SUCCEEDED(result) ) {
-        deviceInfo.SerialNumber = bStr;    
+        deviceInfo.SerialNumber = bStr;
         SysFreeString(bStr);
     }
 
     // Get Services.  Actually, we will NOT enumerate through all the services that are contained
     // in the IUPnPServices collection.  Rather, we will only get a count of services
     IUPnPServices* piServices = NULL;
-    
+
     result = piDevice->get_Services(&piServices);
     hrReturn |= result;
     if (SUCCEEDED(result) && (piServices!=NULL)) {
@@ -900,12 +900,12 @@ bool UPnPThread::PopulateDeviceInfoContainer( IUPnPDevice* piDevice,
         SAFE_RELEASE(piServices);
         lValue = 0;
     }
-    
+
     // Get Type
     result = piDevice->get_Type(&bStr);
     hrReturn |= result;
     if (SUCCEEDED(result)) {
-        deviceInfo.Type = bStr;    
+        deviceInfo.Type = bStr;
         SysFreeString(bStr);
     }
 
@@ -913,7 +913,7 @@ bool UPnPThread::PopulateDeviceInfoContainer( IUPnPDevice* piDevice,
     result = piDevice->get_UniqueDeviceName( &bStr );
     hrReturn |= result;
     if ( SUCCEEDED(result) ) {
-        deviceInfo.UniqueDeviceName = bStr;    
+        deviceInfo.UniqueDeviceName = bStr;
         SysFreeString(bStr);
     }
 
@@ -921,44 +921,44 @@ bool UPnPThread::PopulateDeviceInfoContainer( IUPnPDevice* piDevice,
     result = piDevice->get_UPC(&bStr);
     hrReturn |= result;
     if ( SUCCEEDED(result) ) {
-        deviceInfo.UPC = bStr;    
+        deviceInfo.UPC = bStr;
         SysFreeString(bStr);
     }
-    
+
     return true;
 }
 
 bool UPnPThread::DetectDevice(PStringList & devNames)
 {
-    
+
     IUPnPDeviceFinder* piDeviceFinder = NULL;
-    
-    if (FAILED( CoCreateInstance( CLSID_UPnPDeviceFinder, NULL, CLSCTX_ALL, 
+
+    if (FAILED( CoCreateInstance( CLSID_UPnPDeviceFinder, NULL, CLSCTX_ALL,
         IID_IUPnPDeviceFinder, (void**) &piDeviceFinder ) ) || ( piDeviceFinder==NULL ) ) {
         PTRACE(4,"UPnP\tError Initialising Device Finder");
         return false;
     }
-    
+
     BSTR bStrDev = SysAllocString( L"urn:schemas-upnp-org:device:InternetGatewayDevice:1" );
     IUPnPDevices* piFoundDevices = NULL;
-    
+
     if (FAILED(piDeviceFinder->FindByType(bStrDev, 0, &piFoundDevices))) {
         PTRACE(4,"UPnP\tNo IGD device found!");
         SysFreeString(bStrDev);
         return false;
     }
-    
+
     SysFreeString(bStrDev);
 
     if (!piFoundDevices) {
         PTRACE(4,"UPnP\tError IGD Device is NULL");
         return false;
     }
-    
-    HRESULT result = S_OK;    
+
+    HRESULT result = S_OK;
     IUnknown * pUnk = NULL;
     DeviceInformationContainer deviceInfo;
-    
+
     if (SUCCEEDED( piFoundDevices->get__NewEnum(&pUnk) ) && ( pUnk!=NULL ) )
     {
         IEnumVARIANT * pEnumVar = NULL;
@@ -977,7 +977,7 @@ bool UPnPThread::DetectDevice(PStringList & devNames)
                 {
                     // finally, post interval notification message and get all the needed information
                     result = PopulateDeviceInfoContainer(pDevice, deviceInfo);
-                    PTRACE(6,"UPnP\tDevice detected " << deviceInfo.FriendlyName << "\n" 
+                    PTRACE(6,"UPnP\tDevice detected " << deviceInfo.FriendlyName << "\n"
                         << deviceInfo.ManufacturerName << " " << deviceInfo.ModelName << " " << deviceInfo.ModelNumber);
                     devNames.AppendString(deviceInfo.FriendlyName);
                 }
@@ -987,20 +987,20 @@ bool UPnPThread::DetectDevice(PStringList & devNames)
         }
         pUnk->Release();
     }
-    
+
     SAFE_RELEASE(piDeviceFinder);
 
     return (devNames.GetSize() > 0);
 
 }
 
-PBoolean UPnPThread::TestMapping() 
+PBoolean UPnPThread::TestMapping()
 {
     WORD locPort,extPort=0;
     PIPSocket::Address locAddr, extAddr;
 
     PTRACE(4,"UPnP\tPerforming Port Mapping Test");
- 
+
     locAddr = PIPSocket::GetGatewayInterfaceAddress(4);
     locPort = m_piNatMethod->GetRandomPort();
     extPort = locPort;
@@ -1061,7 +1061,7 @@ PNatMethod_UPnP::~PNatMethod_UPnP()
 {
     m_pShutdown = true;
 
-    if (m_pUPnP) { 
+    if (m_pUPnP) {
         m_pUPnP->Shutdown();
         m_pUPnP->WaitForTermination(2000);
         delete m_pUPnP;
@@ -1085,7 +1085,7 @@ void PNatMethod_UPnP::AttachEndPoint(H323EndPoint * _ep)
 
   ep = _ep;
 
-  SetPortRanges(ep->GetUDPPortBase(), ep->GetUDPPortMax(), 
+  SetPortRanges(ep->GetUDPPortBase(), ep->GetUDPPortMax(),
       ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax());
 
   m_pUPnP = new UPnPThread(this);
@@ -1101,7 +1101,7 @@ PBoolean PNatMethod_UPnP::GetExternalAddress(PIPSocket::Address & externalAddres
     return available;
 }
 
-void PNatMethod_UPnP::SetConnectionSockets(PUDPSocket * data, PUDPSocket * control, 
+void PNatMethod_UPnP::SetConnectionSockets(PUDPSocket * data, PUDPSocket * control,
                                              H323Connection::SessionInformation * info)
 {
     H323Connection * connection = PRemoveConst(H323Connection, info->GetConnection());
@@ -1116,27 +1116,27 @@ PBoolean PNatMethod_UPnP::CreateSocketPair(PUDPSocket * & socket1, PUDPSocket * 
     H323Connection::SessionInformation * info = (H323Connection::SessionInformation *)userData;
 
 #ifdef H323_H46019M
-    PNatMethod_H46019 * handler = 
+    PNatMethod_H46019 * handler =
                (PNatMethod_H46019 *)ep->GetNatMethods().GetMethodByName("H46019");
 
     if (handler && info->GetRecvMultiplexID() > 0) {
         if (!handler->IsMultiplexed()) {
-           H46019MultiplexSocket * & muxSocket1 = (H46019MultiplexSocket * &)handler->GetMultiplexSocket(true); 
-           H46019MultiplexSocket * & muxSocket2 = (H46019MultiplexSocket * &)handler->GetMultiplexSocket(false); 
+           H46019MultiplexSocket * & muxSocket1 = (H46019MultiplexSocket * &)handler->GetMultiplexSocket(true);
+           H46019MultiplexSocket * & muxSocket2 = (H46019MultiplexSocket * &)handler->GetMultiplexSocket(false);
            muxSocket1 = new H46019MultiplexSocket(true);
            muxSocket2 = new H46019MultiplexSocket(false);
-           muxSocket1->GetSubSocket() = new UPnPUDPSocket(this);  /// Data 
+           muxSocket1->GetSubSocket() = new UPnPUDPSocket(this);  /// Data
            muxSocket2->GetSubSocket() = new UPnPUDPSocket(this);  /// Signal
             pairedPortInfo.basePort    = ep->GetMultiplexPort();
             pairedPortInfo.maxPort     = pairedPortInfo.basePort+100;
-            pairedPortInfo.currentPort = pairedPortInfo.basePort-1;  
+            pairedPortInfo.currentPort = pairedPortInfo.basePort-1;
                 while ((!OpenSocket(*(muxSocket1->GetSubSocket()), pairedPortInfo,binding)) ||
                        (!OpenSocket(*(muxSocket2->GetSubSocket()), pairedPortInfo,binding)) ||
                        (muxSocket2->GetSubSocket()->GetPort() != muxSocket1->GetSubSocket()->GetPort() + 1) )
                 {
                         delete muxSocket1->GetSubSocket();
                         delete muxSocket2->GetSubSocket();
-                        muxSocket1->GetSubSocket() = new UPnPUDPSocket(this);  /// Data 
+                        muxSocket1->GetSubSocket() = new UPnPUDPSocket(this);  /// Data
                         muxSocket2->GetSubSocket() = new UPnPUDPSocket(this);  /// Signal
                 }
 
@@ -1145,7 +1145,7 @@ PBoolean PNatMethod_UPnP::CreateSocketPair(PUDPSocket * & socket1, PUDPSocket * 
                 PIPSocket::Address locAddr, extAddr;
                 muxSocket1->GetLocalAddress(locAddr,locPort);
                 extPort = locPort;
-                
+
                 if (m_pUPnP->CreateMap(true,"UDP",locAddr,locPort,extAddr,extPort,true)) {
                     ((UPnPUDPSocket*)muxSocket1->GetSubSocket())->SetMasqAddress(extAddr,extPort);
                     ((UPnPUDPSocket*)muxSocket2->GetSubSocket())->SetMasqAddress(extAddr,extPort+1);
@@ -1155,18 +1155,18 @@ PBoolean PNatMethod_UPnP::CreateSocketPair(PUDPSocket * & socket1, PUDPSocket * 
                 }
 
               handler->StartMultiplexListener();  // Start Multiplexing Listening thread;
-              handler->EnableMultiplex(true); 
+              handler->EnableMultiplex(true);
         }
 
-       socket1 = new H46019UDPSocket(*handler->GetHandler(),info,true);      /// Data 
+       socket1 = new H46019UDPSocket(*handler->GetHandler(),info,true);      /// Data
        socket2 = new H46019UDPSocket(*handler->GetHandler(),info,false);     /// Signal
-       
+
        PNatMethod_H46019::RegisterSocket(true ,info->GetRecvMultiplexID(), socket1);
        PNatMethod_H46019::RegisterSocket(false,info->GetRecvMultiplexID(), socket2);
 
        SetConnectionSockets(socket1,socket2,info);
 
-    } else 
+    } else
 #endif
    {
          pairedPortInfo.basePort    = UPnPUDPBasePort;
@@ -1182,7 +1182,7 @@ PBoolean PNatMethod_UPnP::CreateSocketPair(PUDPSocket * & socket1, PUDPSocket * 
         bool ok = false;
 
         while (!ok) {
-            socket1 = new UPnPUDPSocket(this);  /// Data 
+            socket1 = new UPnPUDPSocket(this);  /// Data
             socket2 = new UPnPUDPSocket(this);  /// Signal
 
         /// Make sure we have sequential ports with matching external port
@@ -1192,7 +1192,7 @@ PBoolean PNatMethod_UPnP::CreateSocketPair(PUDPSocket * & socket1, PUDPSocket * 
             {
                     delete socket1;
                     delete socket2;
-                    socket1 = new UPnPUDPSocket(this);  /// Data 
+                    socket1 = new UPnPUDPSocket(this);  /// Data
                     socket2 = new UPnPUDPSocket(this);  /// Signal
             }
 
@@ -1201,9 +1201,8 @@ PBoolean PNatMethod_UPnP::CreateSocketPair(PUDPSocket * & socket1, PUDPSocket * 
             PIPSocket::Address locAddr, extAddr;
             socket1->GetLocalAddress(locAddr,locPort);
             extPort = locPort;
-            
-            bool upnpMapOk = false;
-            upnpMapOk = m_pUPnP->CreateMap(true,"UDP",locAddr,locPort,extAddr,extPort,true);
+
+            bool upnpMapOk = m_pUPnP->CreateMap(true,"UDP",locAddr,locPort,extAddr,extPort,true);
 
             if (upnpMapOk && socket1->GetPort() != extPort) {
                   PTRACE(3, "UPnP\tPort MisMatch " << socket1->GetPort() << " " << extPort << " Retrying!");
@@ -1266,7 +1265,7 @@ WORD PNatMethod_UPnP::GetRandomPort()
     WORD num;
     PRandom rand;
     num = (WORD)rand.Generate(UPnPUDPBasePort, UPnPUDPBasePort+1000);
-    if (num %2 != 0) 
+    if (num %2 != 0)
          num++;  // Make sure the number is even
 
     return num;
@@ -1274,7 +1273,7 @@ WORD PNatMethod_UPnP::GetRandomPort()
 
 PBoolean PNatMethod_UPnP::OnUPnPAvailable(const PString & devName)
 {
-    
+
     if (ep && ep->OnUPnPAvailable(devName, m_pExtIP, this))
         Activate(true);
     else
@@ -1284,16 +1283,16 @@ PBoolean PNatMethod_UPnP::OnUPnPAvailable(const PString & devName)
     return true;
 }
 
-bool PNatMethod_UPnP::IsAvailable(const PIPSocket::Address & addr) 
-{ 
+bool PNatMethod_UPnP::IsAvailable(const PIPSocket::Address & addr)
+{
     if (addr.GetVersion() == 6)
         return false;
 
-    return (available && active); 
+    return (available && active);
 }
 
 
-PBoolean PNatMethod_UPnP::CreateUPnPMap(bool pair, const PString & protocol, const PIPSocket::Address & localIP, 
+PBoolean PNatMethod_UPnP::CreateUPnPMap(bool pair, const PString & protocol, const PIPSocket::Address & localIP,
                                         const WORD & locPort, PIPSocket::Address & extIP , WORD & extPort, PBoolean force)
 {
     return m_pUPnP->CreateMap(pair,protocol,localIP,locPort,extIP,extPort,force);
@@ -1314,18 +1313,18 @@ void PNatMethod_UPnP::SetAvailable(const PString & devName)
     SetAvailable();
 }
 
-void PNatMethod_UPnP::SetAvailable() 
-{ 
+void PNatMethod_UPnP::SetAvailable()
+{
     if (!available) {
         available = true;
-        if (ep) 
+        if (ep)
           ep->ForceGatekeeperReRegistration();
     }
 }
 
-void PNatMethod_UPnP::Activate(bool act)  
+void PNatMethod_UPnP::Activate(bool act)
 {
-    active = act; 
+    active = act;
 }
 
 PNatMethod::RTPSupportTypes PNatMethod_UPnP::GetRTPSupport(PBoolean force)

@@ -53,7 +53,7 @@ const char * STR_AES256 = "AES256";
 const char * STR_AES192 = "AES192";
 const char * STR_AES128 = "AES128";
 
-PString CipherString(const PString & m_algorithmOID) 
+PString CipherString(const PString & m_algorithmOID)
 {
     if (m_algorithmOID == "2.16.840.1.101.3.4.1.2") {
         return STR_AES128;
@@ -75,7 +75,7 @@ H323SecureRTPChannel::H323SecureRTPChannel(H323Connection & conn,
     : H323_RTPChannel(conn,cap,direction, r), m_algorithm(cap.GetEncryptionAlgorithm()),
       m_encryption((H235Capabilities*)conn.GetLocalCapabilitiesRef(), cap.GetEncryptionAlgorithm()),
       m_payload(RTP_DataFrame::IllegalPayloadType)
-{	
+{
 }
 
 H323SecureRTPChannel::~H323SecureRTPChannel()
@@ -93,7 +93,7 @@ void H323SecureRTPChannel::CleanUpOnTermination()
 }
 
 void BuildEncryptionSync(H245_EncryptionSync & sync, const H323Channel & chan, const H235Session & session)
-{     
+{
     sync.m_synchFlag = chan.GetRTPPayloadType();
 
     PBYTEArray encryptedMediaKey;
@@ -142,7 +142,7 @@ PBoolean ReadEncryptionSync(const H245_EncryptionSync & sync, H323Channel & chan
                   return session.DecodeMediaKey(mediaKey);
                 }
             }
-    } 
+    }
     return false;
 }
 
@@ -188,7 +188,7 @@ PBoolean H323SecureRTPChannel::OnReceivedPDU(const H245_OpenLogicalChannel & ope
 {
    PTRACE(4, "H235RTP\tOnRecievedPDU");
 
-   if (!H323_RealTimeChannel::OnReceivedPDU(open,errorCode)) 
+   if (!H323_RealTimeChannel::OnReceivedPDU(open,errorCode))
        return false;
 
    if (open.HasOptionalField(H245_OpenLogicalChannel::e_encryptionSync)) {
@@ -196,7 +196,7 @@ PBoolean H323SecureRTPChannel::OnReceivedPDU(const H245_OpenLogicalChannel & ope
            connection.OnMediaEncryption(GetSessionID(), GetDirection(), CipherString(m_algorithm));
            return ReadEncryptionSync(open.m_encryptionSync,*this, m_encryption);
        }
-   } 
+   }
    return true;
 }
 
@@ -249,12 +249,12 @@ PBoolean H323SecureRTPChannel::ReadFrame(DWORD & rtpTimestamp, RTP_DataFrame & f
            return m_encryption.ReadFrameInPlace(frame);
         else
            return true;
-	} else 
+	} else
 		return false;
 }
 
 
-PBoolean H323SecureRTPChannel::WriteFrame(RTP_DataFrame & frame) 
+PBoolean H323SecureRTPChannel::WriteFrame(RTP_DataFrame & frame)
 {
     if (!rtpSession.PreWriteData(frame))
         return false;
@@ -270,12 +270,12 @@ PBoolean H323SecureRTPChannel::WriteFrame(RTP_DataFrame & frame)
 
 RTP_DataFrame::PayloadTypes H323SecureRTPChannel::GetRTPPayloadType() const
 {
-    int tempPayload=0;
     if (m_payload == RTP_DataFrame::IllegalPayloadType) {
         int baseType = H323_RealTimeChannel::GetRTPPayloadType();
-        if (baseType >= RTP_DataFrame::DynamicBase) 
+        int tempPayload = 0;
+        if (baseType >= RTP_DataFrame::DynamicBase)
             tempPayload = baseType;
-        else 
+        else
             tempPayload = 120 + capability->GetMainType();
 
       PRemoveConst(H323SecureRTPChannel, this)->SetDynamicRTPPayloadType(tempPayload);
@@ -289,8 +289,8 @@ PBoolean H323SecureRTPChannel::SetDynamicRTPPayloadType(int newType)
         return true;
 
     if (m_payload != RTP_DataFrame::IllegalPayloadType) {
-        PTRACE(1,"WARNING: Change Payload " << GetSessionID() << " " << 
-                 (GetDirection() == IsReceiver ? "Receive" : "Transmit") << 
+        PTRACE(1,"WARNING: Change Payload " << GetSessionID() << " " <<
+                 (GetDirection() == IsReceiver ? "Receive" : "Transmit") <<
                   " to " << newType << " from " << m_payload);
     }
 
@@ -308,7 +308,7 @@ H323SecureChannel::H323SecureChannel(H323Connection & conn, const H323Capability
     m_baseChannel->ReplaceCapability(cap);
     m_baseChannel->SetAssociatedChannel(this);
 }
-    
+
 H323SecureChannel::~H323SecureChannel()
 {
     if (m_baseChannel)
@@ -328,8 +328,8 @@ PBoolean H323SecureChannel::SetInitialBandwidth()
     return (m_baseChannel && m_baseChannel->SetInitialBandwidth());
 }
 
-void H323SecureChannel::SetNumber(const H323ChannelNumber & num) 
-{ 
+void H323SecureChannel::SetNumber(const H323ChannelNumber & num)
+{
     number = num;
     if (m_baseChannel)
         m_baseChannel->SetNumber(num);
@@ -363,7 +363,7 @@ void H323SecureChannel::Transmit()
     if (m_baseChannel)
         m_baseChannel->Transmit();
 }
-    	
+
 
 PBoolean H323SecureChannel::Open()
 {
@@ -412,7 +412,7 @@ void H323SecureChannel::OnSendOpenAck(const H245_OpenLogicalChannel & open, H245
         ack.IncludeOptionalField(H245_OpenLogicalChannelAck::e_encryptionSync);
         BuildEncryptionSync(ack.m_encryptionSync,*this, m_encryption);
         connection.OnMediaEncryption(GetSessionID(), GetDirection(), CipherString(m_algorithm));
-  } else 
+  } else
         ack.RemoveOptionalField(H245_OpenLogicalChannelAck::e_encryptionSync);
 }
 
@@ -420,7 +420,7 @@ PBoolean H323SecureChannel::OnReceivedPDU(const H245_OpenLogicalChannel & open, 
 {
    PTRACE(4, "H235Chan\tOnRecievedPDU");
 
-  if (m_baseChannel && !m_baseChannel->OnReceivedPDU(open,errorCode)) 
+  if (m_baseChannel && !m_baseChannel->OnReceivedPDU(open,errorCode))
        return false;
 
    if (open.HasOptionalField(H245_OpenLogicalChannel::e_encryptionSync)) {
@@ -428,7 +428,7 @@ PBoolean H323SecureChannel::OnReceivedPDU(const H245_OpenLogicalChannel & open, 
            connection.OnMediaEncryption(GetSessionID(), GetDirection(), CipherString(m_algorithm));
            return ReadEncryptionSync(open.m_encryptionSync,*this, m_encryption);
        }
-   } 
+   }
    return true;
 }
 
@@ -456,7 +456,7 @@ PBoolean H323SecureChannel::ReadFrame(RTP_DataFrame & frame)
        return true;
 }
 
-PBoolean H323SecureChannel::WriteFrame(RTP_DataFrame & frame) 
+PBoolean H323SecureChannel::WriteFrame(RTP_DataFrame & frame)
 {
    if (m_encryption.IsInitialised())
        return m_encryption.WriteFrameInPlace(frame);

@@ -68,7 +68,7 @@ H460PresenceHandler::~H460PresenceHandler()
 }
 
 void H460PresenceHandler::dequeue(PTimer &,  H323_INT)
-{ 
+{
     PTRACE(6,"OID3\tHandling Presence Messages");
 
     H323Gatekeeper * gk = ep.GetGatekeeper();
@@ -159,10 +159,10 @@ void H460PresenceHandler::SetPresenceState(const PStringList & alias, unsigned l
         list<H460P_PresenceFeature>::iterator i = EndpointFeatures.begin();
         while (i != EndpointFeatures.end()) {
             notification.AddSupportedFeature(*i);
-            i++;
+            ++i;
         }
 
-        // Add any generic data 
+        // Add any generic data
         if (genericData.GetSize() > 0)
             notification.AddGenericData(genericData);
     }
@@ -184,8 +184,8 @@ void H460PresenceHandler::SetPresenceState(const PStringList & alias, unsigned l
     }
 }
 
-void H460PresenceHandler::AddInstruction(const PString & epalias, 
-                        H323PresenceHandler::InstType instType, 
+void H460PresenceHandler::AddInstruction(const PString & epalias,
+                        H323PresenceHandler::InstType instType,
                         const PresenceInstructList & subscribe,
                         PBoolean autoSend)
 {
@@ -215,7 +215,7 @@ void H460PresenceHandler::AddAuthorization(const OpalGloballyUniqueID id,
 {
     H323PresenceSubscriptions sub;
     sub.SetAlias(epalias);
-    for (PINDEX i=0; i< subscribe.GetSize(); i++) 
+    for (PINDEX i=0; i< subscribe.GetSize(); i++)
     {
         H323PresenceSubscription subs(id);
         subs.SetSubscriptionDetails(epalias,subscribe);
@@ -243,7 +243,7 @@ PStringList & H460PresenceHandler::GetBlockList()
     return PresenceBlockList;
 }
 
-void H460PresenceHandler::OnNotification(H323PresenceHandler::MsgType tag, const H460P_PresenceNotification & notify, const H225_AliasAddress & addr) 
+void H460PresenceHandler::OnNotification(H323PresenceHandler::MsgType tag, const H460P_PresenceNotification & notify, const H225_AliasAddress & addr)
 {
     switch (tag) {
       case H323PresenceHandler::e_Notify:
@@ -253,8 +253,8 @@ void H460PresenceHandler::OnNotification(H323PresenceHandler::MsgType tag, const
           break;
     }
 }
-    
-void H460PresenceHandler::OnSubscription(H323PresenceHandler::MsgType tag, const H460P_PresenceSubscription & subscription, const H225_AliasAddress & addr) 
+
+void H460PresenceHandler::OnSubscription(H323PresenceHandler::MsgType tag, const H460P_PresenceSubscription & subscription, const H225_AliasAddress & addr)
 {
     switch (tag) {
       case H323PresenceHandler::e_Authorize:
@@ -299,7 +299,7 @@ void H460PresenceHandler::PresenceRcvAuthorization(const H225_AliasAddress & add
     ep.PresenceAuthorization(id,H323GetAliasAddressString(addr),aliases);
 
 }
-    
+
 void H460PresenceHandler::PresenceRcvInstruction(const H225_AliasAddress & addr, const H323PresenceInstruction & instruct)
 {
     PString display = PString();
@@ -378,29 +378,29 @@ void H460_FeatureOID3::AttachEndPoint(H323EndPoint * _ep)
 }
 
 int H460_FeatureOID3::GetPurpose()
-{ 
+{
     if (isLoaded)
-        return FeatureBaseAll; 
+        return FeatureBaseAll;
     else
-        return FeaturePresence; 
+        return FeaturePresence;
 }
 
-PBoolean H460_FeatureOID3::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu) 
-{ 
+PBoolean H460_FeatureOID3::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu)
+{
     if (handler == NULL)
         return false;
 
-    H460_FeatureOID feat = H460_FeatureOID(OID_3); 
+    H460_FeatureOID feat = H460_FeatureOID(OID_3);
     pdu = feat;
-    return TRUE; 
+    return TRUE;
 }
 
-PBoolean H460_FeatureOID3::OnSendRegistrationRequest(H225_FeatureDescriptor & pdu) 
-{ 
+PBoolean H460_FeatureOID3::OnSendRegistrationRequest(H225_FeatureDescriptor & pdu)
+{
     if (handler == NULL)
         return false;
 
-    H460_FeatureOID feat = H460_FeatureOID(OID_3); 
+    H460_FeatureOID feat = H460_FeatureOID(OID_3);
     list<PASN_OctetString> raw;
     if (handler->BuildPresenceElement(H225_RasMessage::e_registrationRequest, raw)) {
         if (raw.size() > 0) {
@@ -418,7 +418,7 @@ PBoolean H460_FeatureOID3::OnSendRegistrationRequest(H225_FeatureDescriptor & pd
 }
 
 
-void H460_FeatureOID3::OnReceiveRegistrationConfirm(const H225_FeatureDescriptor & pdu) 
+void H460_FeatureOID3::OnReceiveRegistrationConfirm(const H225_FeatureDescriptor & pdu)
 {
     if (handler == NULL)
         return;
@@ -432,12 +432,12 @@ void H460_FeatureOID3::OnReceiveRegistrationConfirm(const H225_FeatureDescriptor
     }
 }
 
-PBoolean H460_FeatureOID3::OnSendServiceControlIndication(H225_FeatureDescriptor & pdu) 
-{ 
+PBoolean H460_FeatureOID3::OnSendServiceControlIndication(H225_FeatureDescriptor & pdu)
+{
     if (!remoteSupport)
         return false;
 
-    H460_FeatureOID feat = H460_FeatureOID(OID_3); 
+    H460_FeatureOID feat = H460_FeatureOID(OID_3);
 
     list<PASN_OctetString> raw;
     if (handler->BuildPresenceElement(H225_RasMessage::e_serviceControlIndication, raw)) {
@@ -454,10 +454,10 @@ PBoolean H460_FeatureOID3::OnSendServiceControlIndication(H225_FeatureDescriptor
        return true;
     }
 
-    return false; 
+    return false;
 };
 
-void H460_FeatureOID3::OnReceiveServiceControlIndication(const H225_FeatureDescriptor & pdu) 
+void H460_FeatureOID3::OnReceiveServiceControlIndication(const H225_FeatureDescriptor & pdu)
 {
    H460_FeatureOID & feat = (H460_FeatureOID &)pdu;
 

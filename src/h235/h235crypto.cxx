@@ -69,7 +69,6 @@ int EVP_EncryptUpdate_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
                       const unsigned char *in, int inl)
 {
     int bl = ctx->cipher->block_size;
-    int leftover = 0;
     OPENSSL_assert(bl <= (int)sizeof(ctx->buf));
     *outl = 0;
 
@@ -113,7 +112,7 @@ int EVP_EncryptUpdate_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
         *outl += bl;
         ctx->buf_len = 0;
 
-        leftover = inl & ctx->block_mask;
+        int leftover = inl & ctx->block_mask;
         if (leftover) {
             inl -= (bl + leftover);
             memcpy(ctx->buf, &(in[(inl + bl)]), leftover);
@@ -296,9 +295,9 @@ int EVP_DecryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
 
 int EVP_DecryptFinal_relaxed(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
 {
-    int i,n;
-    unsigned int b;
-    *outl=0;
+    int n = 0;
+    unsigned int b = 0;
+    *outl = 0;
 
     b=ctx->cipher->block_size;
     if (ctx->flags & EVP_CIPH_NO_PADDING) {
@@ -322,7 +321,7 @@ int EVP_DecryptFinal_relaxed(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
         }
         // Polycom endpoints (eg. m100 and PVX) don't fill the padding propperly, so we have to disable this check
 /*
-        for (i=0; i<n; i++) {
+        for (int i=0; i<n; i++) {
             if (ctx->final[--b] != n) {
                 PTRACE(1, "H235\tDecrypt error: incorrect padding");
                 return(0);
@@ -330,7 +329,7 @@ int EVP_DecryptFinal_relaxed(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
         }
 */
         n=ctx->cipher->block_size-n;
-        for (i=0; i<n; i++)
+        for (int i=0; i<n; i++)
             out[i]=ctx->final[i];
         *outl=n;
     }
@@ -376,7 +375,7 @@ void H235CryptoEngine::SetKey(PBYTEArray key)
         PTRACE(1, "H235\tUnsupported algorithm " << m_algorithmOID);
         return;
     }
-  
+
     EVP_CIPHER_CTX_init(&m_encryptCtx);
     EVP_EncryptInit_ex(&m_encryptCtx, cipher, NULL, key.GetPointer(), NULL);
     m_enc_blockSize =  EVP_CIPHER_CTX_block_size(&m_encryptCtx);
@@ -516,7 +515,7 @@ PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data, unsigned char * i
     int plaintext_len = data.GetSize();
     int final_len = 0;
     PBYTEArray plaintext(plaintext_len);
-  
+
     SetIV(iv, ivSequence, EVP_CIPHER_CTX_iv_length(&m_decryptCtx));
     EVP_DecryptInit_ex(&m_decryptCtx, NULL, NULL, NULL, iv);
 
@@ -551,7 +550,7 @@ PINDEX H235CryptoEngine::DecryptInPlace(const BYTE * inData, PINDEX inLength, BY
     /* plaintext will always be equal to or lesser than length of ciphertext*/
     int outSize = 0;
     int inSize =  inLength;
-  
+
     SetIV(m_iv, ivSequence, m_dec_ivLength);
     EVP_DecryptInit_ex(&m_decryptCtx, NULL, NULL, NULL, m_iv);
 
@@ -583,7 +582,7 @@ PINDEX H235CryptoEngine::DecryptInPlace(const BYTE * inData, PINDEX inLength, BY
 
 PBYTEArray H235CryptoEngine::GenerateRandomKey()
 {
-    PBYTEArray result = GenerateRandomKey(m_algorithmOID);    
+    PBYTEArray result = GenerateRandomKey(m_algorithmOID);
     SetKey(result);
     return result;
 }
@@ -612,8 +611,8 @@ PBYTEArray H235CryptoEngine::GenerateRandomKey(const PString & algorithmOID)
 ///////////////////////////////////////////////////////////////////////////////////
 
 H235Session::H235Session(H235Capabilities * caps, const PString & oidAlgorithm)
-: m_dh(*caps->GetDiffieHellMan()), m_context(oidAlgorithm), m_dhcontext(oidAlgorithm), 
-  m_isInitialised(false), m_isMaster(false), m_crytoMasterKey(0), 
+: m_dh(*caps->GetDiffieHellMan()), m_context(oidAlgorithm), m_dhcontext(oidAlgorithm),
+  m_isInitialised(false), m_isMaster(false), m_crytoMasterKey(0),
   m_frameBuffer(1500), m_padding(false)
 {
     if (oidAlgorithm == ID_AES128) {
@@ -637,7 +636,7 @@ H235Session::~H235Session()
 
 void H235Session::EncodeMediaKey(PBYTEArray & key)
 {
-    PTRACE(4, "H235Key\tEncode plain media key: " << endl << hex << m_crytoMasterKey); 
+    PTRACE(4, "H235Key\tEncode plain media key: " << endl << hex << m_crytoMasterKey);
 
     bool rtpPadding = false;
     key = m_dhcontext.Encrypt(m_crytoMasterKey, NULL, rtpPadding);
@@ -668,8 +667,8 @@ PBoolean H235Session::IsActive()
 }
 
 PBoolean H235Session::IsInitialised() const
-{ 
-    return m_isInitialised; 
+{
+    return m_isInitialised;
 }
 
 PBoolean H235Session::CreateSession(PBoolean isMaster)
@@ -686,7 +685,7 @@ PBoolean H235Session::CreateSession(PBoolean isMaster)
 
     m_dhcontext.SetKey(shortSessionKey);
 
-    if (m_isMaster) 
+    if (m_isMaster)
         m_crytoMasterKey = m_context.GenerateRandomKey();
 
     m_isInitialised = true;

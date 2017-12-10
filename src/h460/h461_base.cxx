@@ -24,7 +24,7 @@
  * the License for the specific language governing rights and limitations
  * under the License.
  *
- * The Original Code is derived from and used in conjunction with the 
+ * The Original Code is derived from and used in conjunction with the
  * H323plus Project (www.h323plus.org/)
  *
  * The Initial Developer of the Original Code is ISVO (Asia) Pte Ltd.
@@ -56,12 +56,12 @@
 // Must Declare for Factory Loader.
 H460_FEATURE(X1);
 
-#define baseOID "0.0.8.461.0" 
-#define ASSETAssociate      "0" 
+#define baseOID "0.0.8.461.0"
+#define ASSETAssociate      "0"
 #define ASSETApplication    "1"
 
 H460_FeatureX1::H460_FeatureX1()
-: H460_FeatureOID(baseOID), 
+: H460_FeatureOID(baseOID),
   m_ep(NULL), m_con(NULL), m_handler(NULL), m_endpointmode(0),
   m_enabled(false), m_supported(false)
 {
@@ -86,7 +86,7 @@ void H460_FeatureX1::AttachEndPoint(H323EndPoint * _ep)
    switch (m_endpointmode) {
        case H323EndPoint::e_H461EndPoint: FeatureCategory = FeatureSupported; break;
        case H323EndPoint::e_H461ASSET: FeatureCategory = FeatureNeeded; break;
-   } 
+   }
 }
 
 void H460_FeatureX1::AttachConnection(H323Connection * _con)
@@ -133,7 +133,7 @@ PBoolean H460_FeatureX1::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
         H460_FeatureOID feat = H460_FeatureOID(OpalOID(baseOID));
         feat.Add(ASSETApplication,H460_FeatureContent(xpdu));
         pdu = feat;
-        return true; 
+        return true;
     }
     return false;
 }
@@ -147,7 +147,7 @@ void H460_FeatureX1::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
     H460_FeatureOID & feat = (H460_FeatureOID &)pdu;
     if (feat.Contains(ASSETApplication)) {
         PTRACE(6,"X1\tReceive Setup");
-        PASN_OctetString & xpdu = feat.Value(ASSETApplication); 
+        PASN_OctetString & xpdu = feat.Value(ASSETApplication);
         m_handler->HandlePDU(xpdu);
     }
 }
@@ -163,7 +163,7 @@ PBoolean H460_FeatureX1::OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu)
         H460_FeatureOID feat = H460_FeatureOID(OpalOID(baseOID));
         feat.Add(ASSETApplication,H460_FeatureContent(xpdu));
         pdu = feat;
-        return true; 
+        return true;
     }
     return false;
 }
@@ -177,7 +177,7 @@ void H460_FeatureX1::OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor & pd
     H460_FeatureOID & feat = (H460_FeatureOID &)pdu;
     if (feat.Contains(ASSETApplication)) {
         PTRACE(6,"X1\tReading Connect");
-        PASN_OctetString & xpdu = feat.Value(ASSETApplication); 
+        PASN_OctetString & xpdu = feat.Value(ASSETApplication);
         m_handler->HandlePDU(xpdu);
     }
 }
@@ -193,7 +193,7 @@ PBoolean H460_FeatureX1::OnSendFacility_UUIE(H225_FeatureDescriptor & pdu)
         H460_FeatureOID feat = H460_FeatureOID(OpalOID(baseOID));
         feat.Add(ASSETApplication,H460_FeatureContent(xpdu));
         pdu = feat;
-        return true; 
+        return true;
     }
     return false;
 }
@@ -206,7 +206,7 @@ void H460_FeatureX1::OnReceiveFacility_UUIE(const H225_FeatureDescriptor & pdu)
     H460_FeatureOID & feat = (H460_FeatureOID &)pdu;
     if (feat.Contains(ASSETApplication)) {
         PTRACE(6,"X1\tReading facility");
-        PASN_OctetString & xpdu = feat.Value(ASSETApplication); 
+        PASN_OctetString & xpdu = feat.Value(ASSETApplication);
         m_handler->HandlePDU(xpdu);
     }
 }
@@ -229,14 +229,14 @@ H461DataStore * H460_FeatureX1::GetDataStore()
 // Handler
 
 H461Handler::H461Handler(H460_FeatureX1 & feature)
-: m_feature(feature), m_connection(feature.GetConnection()), 
+: m_feature(feature), m_connection(feature.GetConnection()),
   m_mode(feature.GetMode()), m_dataStore(feature.GetDataStore())
 {
 
 }
 
 PBoolean H461Handler::BuildPDU(PASN_OctetString & pdu)
-{  
+{
     PBoolean success = true;
     H461AssetPDU element;
     H461_ASSETPDU msg;
@@ -253,7 +253,7 @@ PBoolean H461Handler::HandlePDU(const PASN_OctetString & msg)
     H461_ASSETPDU element;
     PPER_Stream raw(msg);
     if (!element.Decode(raw) || element.GetSize() == 0) {
-        PTRACE(2,"X1\tError Decoding Element. Malformed or no messages."); 
+        PTRACE(2,"X1\tError Decoding Element. Malformed or no messages.");
         return false;
     }
     return ProcessPDU(element);
@@ -290,7 +290,7 @@ PBoolean H461Handler::ProcessMessage(H461AssetPDU & msg)
 #define chk_listResponse       opt_CALL
 #define chk_callApplist        opt_BOTH
 #define chk_preInvokeRequest   opt_BOTH
-#define chk_preInvokeResponse  opt_BOTH    
+#define chk_preInvokeResponse  opt_BOTH
 #define chk_invokeRequest      opt_DEPEND
 #define chk_invokeResponse     opt_DEPEND
 #define chk_invoke             opt_BOTH
@@ -328,7 +328,7 @@ void SetToken(const PString & val, H461_ASSETMessage & pdu) {
 }
 
 void GetCallID(PString & callid, const H461_ASSETMessage & pdu) {
-    if (pdu.HasOptionalField(H461_ASSETMessage::e_callIdentifier)) 
+    if (pdu.HasOptionalField(H461_ASSETMessage::e_callIdentifier))
         callid = H323GetCallIdentifier(pdu.m_callIdentifier);
 }
 
@@ -336,7 +336,7 @@ void SetCallID(const PString & val, H461_ASSETMessage & pdu) {
     pdu.IncludeOptionalField(H461_ASSETMessage::e_callIdentifier);
     H323SetCallIdentifier(val,pdu.m_callIdentifier);
 }
-    
+
 
 #define CHECKTOKEN(name) \
 if (m_token.IsEmpty()) { \
@@ -371,8 +371,8 @@ PTRACE(6,"H461\tPDU to send " << *this);
 #define H461HANDLE(name) \
 PBoolean H461AssetPDU::Handle_##name(H323Connection* m_connection) { \
 CHECKPARAMETERS(name) \
-return m_dataStore->Received_##name(m_connection, m_token, m_callid, m_application); } 
-    
+return m_dataStore->Received_##name(m_connection, m_token, m_callid, m_application); }
+
 #define H461BUILD(name) \
 H461_ASSETMessage & H461AssetPDU::Build_##name(H323Connection* m_connection) { \
 m_dataStore->Build_##name(m_connection, m_token, m_callid, m_appID, m_invokeToken, m_aliasAddress, m_approved, m_application); \
@@ -381,14 +381,14 @@ return *this; }
 
 
 H461AssetPDU::H461AssetPDU()
-: m_handler(NULL), m_connection(NULL), m_dataStore(NULL), m_token(PString()), m_callid(PString()), m_appID(-1), 
+: m_handler(NULL), m_connection(NULL), m_dataStore(NULL), m_token(PString()), m_callid(PString()), m_appID(-1),
   m_invokeToken(PString()), m_aliasAddress(PString()), m_approved(false)
 {
 
 }
 
 H461AssetPDU::H461AssetPDU(H461_ASSETMessage & msg)
-: m_handler(NULL), m_connection(NULL), m_dataStore(NULL), m_token(PString()), m_callid(PString()), m_appID(-1), 
+: m_handler(NULL), m_connection(NULL), m_dataStore(NULL), m_token(PString()), m_callid(PString()), m_appID(-1),
   m_invokeToken(PString()), m_aliasAddress(PString()), m_approved(false)
 {
     m_application = msg.m_application;
@@ -452,7 +452,7 @@ PBoolean H461AssetPDU::ProcessMessage(H461Handler * handler)
         H461HANDLECASE(invokeNotify)
         H461HANDLECASE(stopRequest)
         H461HANDLECASE(stopNotify)
-        H461HANDLECASE(callRelease)    
+        H461HANDLECASE(callRelease)
         default: break;
     }
     return false;
@@ -485,7 +485,7 @@ H461_ASSETMessage & H461AssetPDU::BuildMessage(H461Handler * handler, PBoolean &
         H461BUILDCASE(invokeNotify)
         H461BUILDCASE(stopRequest)
         H461BUILDCASE(stopNotify)
-        H461BUILDCASE(callRelease)    
+        H461BUILDCASE(callRelease)
         default: break;
     }
     success = true;
@@ -566,7 +566,7 @@ void SetDisplay(const PString & id, H461_ArrayOf_ApplicationDisplay & display)
     display[0].m_display.SetValue(id);
 }
 
-void GetApplicationStatus(H461DataStore::Application & app, int associate, const H461_ApplicationStatus & application) 
+void GetApplicationStatus(H461DataStore::Application & app, int associate, const H461_ApplicationStatus & application)
 {
     app.associate = associate;
     app.id = GetGenericIdentifier(application.m_applicationId);
@@ -579,7 +579,7 @@ void GetApplicationStatus(H461DataStore::Application & app, int associate, const
 }
 
 
-void SetApplicationStatus(const H461DataStore::Application & app, H461_ApplicationStatus & application) 
+void SetApplicationStatus(const H461DataStore::Application & app, H461_ApplicationStatus & application)
 {
     SetGenericIdentifier(app.id, application.m_applicationId);
 
@@ -642,11 +642,10 @@ void BuildCallApplicationList(const H461DataStore::ApplicationMap & apps, std::l
 
 void MergeCallApplicationList(const H461DataStore::ApplicationList & remote, H461DataStore::ApplicationMap & apps, std::list<int> & applist)
 {
-    bool found = false;
     H461DataStore::ApplicationList::const_iterator i;
     std::list<int>::iterator j = applist.begin();
     while (j != applist.end()) {
-        found = false;
+        bool found = false;
         for (i = remote.begin(); i != remote.end(); ++i) {
             if ((*i).id == apps[*j].id) {
                 found = true;
@@ -701,7 +700,7 @@ PString H461DataStore::MessageAsString(Messages msg) {
     }
     return "Unknown Msg";
 }
-    
+
 
 /////////////////////////////////////
 //Utilities
@@ -797,10 +796,10 @@ PBoolean H461DataStore::FindApplications(DataType type, const PString & key, std
         idx = FindAssociateID(key);
         if (idx < 0) return false;
     }
- 
+
     ApplicationMap::const_iterator i = m_applications.begin();
     while (i != m_applications.end()) {
-        if ((type == H461DataStore::e_associate && i->second.associate == idx) ||          
+        if ((type == H461DataStore::e_associate && i->second.associate == idx) ||
             (type == H461DataStore::e_application && i->second.id == key))
                 id.push_back(i->first);
         ++i;
@@ -831,7 +830,7 @@ int assocID = FindAssociateID(token); int callID = FindCallData(callid); int app
 PString invokeToken = PString(); PString aliasAddress = PString(); bool approved = false;
 
 #define H461RECEIVEDPDU_TAIL(name) \
-return OnReceiveIE(e_id_##name, connection, assocID, callID, appID, invokeToken, aliasAddress, approved); } 
+return OnReceiveIE(e_id_##name, connection, assocID, callID, appID, invokeToken, aliasAddress, approved); }
 
 
 void H461DataStore::UpdateApplication(int assoc, const H461_ApplicationStatus & application)
@@ -893,7 +892,7 @@ int H461DataStore::SetApplicationAvailable(int assocID, const PString & calliden
         if (appID > -1)
             cData.applications.push_back(appID);
     }
-    
+
     int callID = H461ASSIGN<CallApplicationMap>(m_callapplications);
     m_callapplications.insert(CallApplicationMap::value_type(callID,cData));
     return callID;
@@ -969,18 +968,18 @@ PBoolean H461DataStore::OnReceiveIE(Messages id, H323Connection* connection, int
            } else
                endCall = true;
             break;
-       case H461DataStore::e_id_associateResponse: 
+       case H461DataStore::e_id_associateResponse:
            facilityMsg=true;
-           reply = true; 
+           reply = true;
            break;
-       case H461DataStore::e_id_statusRequest: 
-           reply = true; 
+       case H461DataStore::e_id_statusRequest:
+           reply = true;
            break;
-       case H461DataStore::e_id_listRequest: 
-           reply = true; 
+       case H461DataStore::e_id_listRequest:
+           reply = true;
            break;
-       case H461DataStore::e_id_preInvokeRequest: 
-           reply = true; 
+       case H461DataStore::e_id_preInvokeRequest:
+           reply = true;
            break;
        case H461DataStore::e_id_invokeRequest:
            if (OnInvokeRequest(connection->GetRemotePartyAliases()[0], connection->GetRemotePartyName(), appid)) {
@@ -1005,18 +1004,18 @@ PBoolean H461DataStore::OnReceiveIE(Messages id, H323Connection* connection, int
            } else {
                InvokeApplication(callid,appid,invokeToken,aliasAddress,approval);
                info.m_message = -1;
-           } 
+           }
            break;
 
-       case H461DataStore::e_id_invokeStartList: 
-           info.m_message = -1; 
+       case H461DataStore::e_id_invokeStartList:
+           info.m_message = -1;
            break;
        case H461DataStore::e_id_listResponse:
            UpdateAssociateCall(callid, true);
            info.m_message = -1;
            break;
        case H461DataStore::e_id_invoke:
-           MakeApplicationCall(appid, info.m_callToken, invokeToken, aliasAddress); 
+           MakeApplicationCall(appid, info.m_callToken, invokeToken, aliasAddress);
            info.m_message = -1;
            break;
        case H461DataStore::e_id_callApplist:
@@ -1043,7 +1042,7 @@ PBoolean H461DataStore::OnReceiveIE(Messages id, H323Connection* connection, int
 
     if (reply) {
         if (connection->IsConnected() || facilityMsg)
-            SendInternalFacility(connection,id+1); 
+            SendInternalFacility(connection,id+1);
         else
             info.m_message=id+1;
     }
@@ -1085,7 +1084,7 @@ void H461DataStore::OnBuildIE(Messages id, H323Connection* connection, int assoc
            UpdateAssociateCall(callid, true);
            break;
        case H461DataStore::e_id_associateRequest:
-       case H461DataStore::e_id_associateResponse: 
+       case H461DataStore::e_id_associateResponse:
        case H461DataStore::e_id_statusRequest:
        case H461DataStore::e_id_listRequest:
        case H461DataStore::e_id_preInvokeRequest:
@@ -1127,7 +1126,7 @@ void H461DataStore::LoadDataStoreApplication(int id, int associate, const PStrin
 }
 
 int H461DataStore::Call_Initiate(const PString & callid, int assoc)
-{ 
+{
     int callID = FindCallData(callid);
     if (callID > -1)
         return callID;
@@ -1136,12 +1135,12 @@ int H461DataStore::Call_Initiate(const PString & callid, int assoc)
     cData.callId = callid;
     cData.associate = assoc;
     BuildCallApplicationList(m_applications,cData.applications);
-    
+
     callID = H461ASSIGN<CallApplicationMap>(m_callapplications);
     m_callapplications.insert(CallApplicationMap::value_type(callID,cData));
     return callID;
 }
-    
+
 void H461DataStore::Call_Terminate(int callID)
 {
     CallApplicationMap::iterator i = m_callapplications.find(callID);
@@ -1161,7 +1160,7 @@ int H461DataStore::CreateNewAssociation()
     return id;
 }
 
-int H461DataStore::FindValidAssociate(const PString & alias) 
+int H461DataStore::FindValidAssociate(const PString & alias)
 {
     AssociateMap::const_iterator i = m_associates.begin();
     while (i != m_associates.end()) {
@@ -1205,7 +1204,7 @@ void H461DataStore::StartApplication(const PString & callToken, int i)
     StartApplication(callid, i);
 }
 
-void H461DataStore::StartApplication(int callid, int i, bool remote) 
+void H461DataStore::StartApplication(int callid, int i, bool remote)
 {
     CallData & data = m_callapplications[callid];
     std::list<int> app = data.applications;
@@ -1223,7 +1222,7 @@ void H461DataStore::StartApplication(int callid, int i, bool remote)
     }
 }
 
-void H461DataStore::StartASSETApplication(int callid, int i) 
+void H461DataStore::StartASSETApplication(int callid, int i)
 {
     CallData & data = m_callapplications[callid];
     std::list<int> app = data.applications;
@@ -1236,7 +1235,7 @@ void H461DataStore::StartASSETApplication(int callid, int i)
 }
 
 
-void H461DataStore::InvokeApplication(int callid, int i, const PString & invokeToken, const PString & aliasAddress, bool approval) 
+void H461DataStore::InvokeApplication(int callid, int i, const PString & invokeToken, const PString & aliasAddress, bool approval)
 {
     CallData & data = m_callapplications[callid];
     std::list<int> app = data.applications;
@@ -1254,7 +1253,7 @@ void H461DataStore::InvokeApplication(int callid, int i, const PString & invokeT
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
+
 H461BUILDPDU(associateRequest)
     H225_TimeToLive & ttl = pdu.m_timeToLive;
     ttl = (unsigned)m_timeToLive;
