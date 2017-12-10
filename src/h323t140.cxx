@@ -307,7 +307,7 @@ int RFC4103_Frame::BuildFrameData()
     int pay = header + 9;
 
     list<T140Data>::iterator r;
-    for (r = m_charBuffer.begin(); r != m_charBuffer.end(); r++) {
+    for (r = m_charBuffer.begin(); r != m_charBuffer.end(); ++r) {
         // Add the header
         if (r->primaryTime > 0) {
             if (r->type == Empty) {

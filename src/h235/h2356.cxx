@@ -435,7 +435,7 @@ void H2356_Authenticator::InitialiseSecurity()
           dhOID = i->first;
           lastKeyLength = i->second->GetKeyLength();
       }
-    i++;
+    ++i;
   }
 
   if (dhOID.IsEmpty())
@@ -533,7 +533,7 @@ void H2356_Authenticator::ExportParameters(const PFilePath & path)
       if (i->second && i->second->GetKeyLength() > 0) {
           i->second->Save(path,i->first);
       }
-    i++;
+    ++i;
   }
 }
 

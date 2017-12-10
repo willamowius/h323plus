@@ -362,8 +362,8 @@ PBoolean H323_TLSContext::UseCertificate(const PFilePath & certFile)
 #if PTLIB_VER < 2120
     ssl_ctx_st * m_context = context;
 #endif
-    char msg[256];
     if (SSL_CTX_use_certificate_chain_file(m_context, certFile) != 1) {
+    	char msg[256];
         PTRACE(1, "TLS\tError loading certificate file: " << certFile);
         ERR_error_string(ERR_get_error(), msg);
         PTRACE(1, "TLS\tOpenSSL error: " << msg);
@@ -387,8 +387,8 @@ PBoolean H323_TLSContext::UsePrivateKey(const PFilePath & privFile, const PStrin
         SSL_CTX_set_default_passwd_cb_userdata(m_context, (void *)(const char *)password);
     }
 
-    char msg[256];
     if (SSL_CTX_use_PrivateKey_file(m_context, privFile, SSL_FILETYPE_PEM) != 1) {
+    	char msg[256];
         PTRACE(1, "TLS\tError loading private key file: " << privFile);
         ERR_error_string(ERR_get_error(), msg);
         PTRACE(1, "TLS\tOpenSSL error: " << msg);
