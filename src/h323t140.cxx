@@ -266,7 +266,7 @@ PBoolean RFC4103_Frame::ReadDataFrame()
     pos+=1;
 
     list<T140Data>::iterator r;
-    for (r = m_charBuffer.begin(); r != m_charBuffer.end(); r++) {
+    for (r = m_charBuffer.begin(); r != m_charBuffer.end(); ++r) {
         if (data.sendCount == 0)
             r->type = Empty;
         else if ((theArray[pos] == 0x00) && (theArray[pos+1] == 0x08)) {

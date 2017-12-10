@@ -308,8 +308,8 @@ PBoolean H323_TLSContext::UseCADirectory(const PDirectory & certDir)
 #if PTLIB_VER < 2120
     ssl_ctx_st * m_context = context;
 #endif
-    char msg[256];
     if (SSL_CTX_load_verify_locations(m_context, NULL, certDir) != 1) {
+		char msg[256];
         PTRACE(1, "TLS\tError setting CA directory " << certDir);
         ERR_error_string(ERR_get_error(), msg);
         PTRACE(1, "TLS\tOpenSSL error: " << msg);

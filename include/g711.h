@@ -135,7 +135,6 @@ int linear2alaw(int	pcm_val)        /* 2's complement (16-bit range) */
 {
 	int		mask;	/* changed from "short" *drago* */
 	int		seg;	/* changed from "short" *drago* */
-	int		aval;
 
 	pcm_val = pcm_val >> 3;
 
@@ -154,7 +153,7 @@ int linear2alaw(int	pcm_val)        /* 2's complement (16-bit range) */
 	if (seg >= 8)		/* out of range, return maximum value. */
 		return (0x7F ^ mask);
 	else {
-		aval = seg << SEG_SHIFT;
+		int aval = seg << SEG_SHIFT;
 		if (seg < 2)
 			aval |= (pcm_val >> 1) & QUANT_MASK;
 		else
@@ -226,7 +225,6 @@ int linear2ulaw( int	pcm_val)	/* 2's complement (16-bit range) */
 {
 	int		mask;
 	int		seg;
-	int		uval;
 
 	/* Get the sign and the magnitude of the value. */
 	pcm_val = pcm_val >> 2;
@@ -249,7 +247,7 @@ int linear2ulaw( int	pcm_val)	/* 2's complement (16-bit range) */
 	if (seg >= 8)		/* out of range, return maximum value. */
 		return (0x7F ^ mask);
 	else {
-		uval = (seg << 4) | ((pcm_val >> (seg + 1)) & 0xF);
+		int uval = (seg << 4) | ((pcm_val >> (seg + 1)) & 0xF);
 		return (uval ^ mask);
 	}
 

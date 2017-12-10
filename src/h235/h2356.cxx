@@ -267,7 +267,7 @@ PBoolean H2356_Authenticator::PrepareTokens(PASN_Array & clearTokens,
     while (i != m_dhLocalMap.end()) {
         H235_DiffieHellman * dh = i->second;
         if (dh && (dh->GetKeyLength() > (max_keyLength/8))) {
-            i++; continue;
+            ++i; continue;
         }
 
         // Build the token
@@ -292,7 +292,7 @@ PBoolean H2356_Authenticator::PrepareTokens(PASN_Array & clearTokens,
                     dhkey.IncludeOptionalField(H235_DHsetExt::e_generator);
             }
         }
-        i++;
+        ++i;
     }
 
     if (m_tokenState == e_clearNone) {

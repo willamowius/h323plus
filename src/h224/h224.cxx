@@ -342,8 +342,7 @@ void OpalH224Handler::CreateHandlers(H323Connection & connection)
     PStringArray handlers = H224_Handler::GetHandlerNames();
 
     for (PINDEX i = 0; i < handlers.GetSize(); i++) {
-        H224_Handler * handler = NULL;
-        handler = connection.CreateH224Handler(sessionDirection,*this, handlers[i]);
+        H224_Handler * handler = connection.CreateH224Handler(sessionDirection, *this, handlers[i]);
         if (!handler) {
             handler = H224_Handler::CreateHandler(handlers[i]);
             if (handler) 
