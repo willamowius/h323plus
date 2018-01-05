@@ -2,8 +2,6 @@
 /*
  * h235support.h
  *
- * H46026 Media Tunneling class.
- *
  * h323plus library
  *
  * Copyright (c) 2013 Spranto Australia Pty. Ltd.
@@ -91,7 +89,7 @@ public:
         const PFilePath  & dhPKCS3              ///< PKCS#3 file
     );
 
-    /**Create a copy of the Diffie-Hellman parameters. from 
+    /**Create a copy of the Diffie-Hellman parameters. from
        H235_DiffieHellman structure
       */
     H235_DiffieHellman(
