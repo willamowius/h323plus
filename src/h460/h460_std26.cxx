@@ -46,7 +46,7 @@
 #include <h323ep.h>
 #include <h323pdu.h>
 
-#include <h460/h460.h> 
+#include <h460/h460.h>
 #include <h460/h46026.h>
 #include <h460/h460_std26.h>
 #include <h460/h460_std17.h>
@@ -117,7 +117,7 @@ PBoolean H460_FeatureStd26::FeatureAdvertised(int mtype)
         case H460_MessageType::e_admissionConfirm:
         case H460_MessageType::e_admissionReject:
         case H460_MessageType::e_setup:
-        case H460_MessageType::e_callProceeding: 
+        case H460_MessageType::e_callProceeding:
         case H460_MessageType::e_alerting:
         case H460_MessageType::e_connect:
             return true;
@@ -137,7 +137,7 @@ PBoolean H460_FeatureStd26::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
 #endif
 
     // Build Message
-    H460_FeatureStd feat = H460_FeatureStd(26); 
+    H460_FeatureStd feat = H460_FeatureStd(26);
     pdu = feat;
 
     return true;
@@ -165,9 +165,9 @@ PBoolean H460_FeatureStd26::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
         return false;
 
     // Build Message
-    H460_FeatureStd feat = H460_FeatureStd(26); 
+    H460_FeatureStd feat = H460_FeatureStd(26);
     pdu = feat;
-   
+
     return true;
 }
 
@@ -185,7 +185,7 @@ PBoolean H460_FeatureStd26::OnSendCallProceeding_UUIE(H225_FeatureDescriptor & p
         return false;
 
     // Build Message
-    H460_FeatureStd feat = H460_FeatureStd(26); 
+    H460_FeatureStd feat = H460_FeatureStd(26);
     pdu = feat;
 
     return true;
@@ -202,7 +202,7 @@ PBoolean H460_FeatureStd26::OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu)
         return false;
 
     // Build Message
-    H460_FeatureStd feat = H460_FeatureStd(26); 
+    H460_FeatureStd feat = H460_FeatureStd(26);
     pdu = feat;
 
     return true;
@@ -219,7 +219,7 @@ PBoolean H460_FeatureStd26::OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu)
         return false;
 
     // Build Message
-    H460_FeatureStd feat = H460_FeatureStd(26); 
+    H460_FeatureStd feat = H460_FeatureStd(26);
     pdu = feat;
 
     return true;
@@ -238,7 +238,7 @@ PCREATE_NAT_PLUGIN(H46026, "H.460.26");
 #else
 PCREATE_NAT_PLUGIN(H46026);
 #endif
-    
+
 PNatMethod_H46026::PNatMethod_H46026()
 : active(false), handler(NULL)
 {
@@ -283,9 +283,9 @@ void PNatMethod_H46026::AttachEndPoint(H323EndPoint * ep)
 
 }
 
-bool PNatMethod_H46026::IsAvailable(const PIPSocket::Address&) 
-{ 
-    return active; 
+bool PNatMethod_H46026::IsAvailable(const PIPSocket::Address&)
+{
+    return active;
 }
 
 void PNatMethod_H46026::AttachManager(H46026Tunnel * m_handler)
@@ -312,7 +312,7 @@ PBoolean PNatMethod_H46026::CreateSocketPair(
 
     H323Connection::SessionInformation * info = (H323Connection::SessionInformation *)userData;
 
-    socket1 = new H46026UDPSocket(*handler,info,true);  /// Data 
+    socket1 = new H46026UDPSocket(*handler,info,true);  /// Data
     socket2 = new H46026UDPSocket(*handler,info,false);  /// Signal
 
     handler->RegisterSocket(info->GetCallReference(), info->GetSessionID(), (H46026UDPSocket*)socket1, (H46026UDPSocket*)socket2);
@@ -408,7 +408,7 @@ void H46026UDPSocket::GetLocalAddress(H245_TransportAddress & add)
     H323TransportAddress ladd(m_locAddr,m_locPort);
     ladd.SetPDU(add);
 }
-    
+
 void H46026UDPSocket::SetRemoteAddress(const H245_TransportAddress & add)
 {
    // Ignore!
@@ -433,7 +433,7 @@ H46026Tunnel::H46026Tunnel()
 {
 
 }
-    
+
 H46026Tunnel::~H46026Tunnel()
 {
 }

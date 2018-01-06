@@ -3964,7 +3964,7 @@ PBoolean H323EndPoint::H46017CreateConnection(const PString & gatekeeper, PBoole
   if (H46026IsEnabled()) {
      H460_FeatureStd26 * h46026 = (H460_FeatureStd26 *)features.GetFeature(26);
      if (h46026) {
-         h46026->AttachH46017(h46017->GetHandler());
+       h46026->AttachH46017(h46017->GetHandler());
 
        PNatMethod_H46026 * natMethod = NULL;
        if (natMethods)

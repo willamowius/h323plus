@@ -209,8 +209,6 @@ H460_FeatureContent::H460_FeatureContent(const PBoolean & param)
 
 H460_FeatureContent::H460_FeatureContent(unsigned param, unsigned len)
 {
-
-
     if (len == 8) {
       SetTag(H225_Content::e_number8);
       PASN_Integer & val = *this;
@@ -343,10 +341,9 @@ H460_FeatureContent H460_FeatureParameter::operator=( const PASN_OctetString & v
 
 H460_FeatureContent H460_FeatureParameter::operator=( const PString & value )
 {
-
-// Check if url;
+    // Check if url;
     PURL * url = new PURL();    // BUG ?
-    if (url->Parse(value,"http"))   // Parameter is an Http Address
+    if (url->Parse(value, "http"))   // Parameter is an Http Address
         m_content = H460_FeatureContent(*url);
 
 
@@ -379,7 +376,6 @@ H460_FeatureContent  H460_FeatureParameter::operator=( const PBoolean & value )
 
 H460_FeatureContent  H460_FeatureParameter::operator=( const unsigned & value )
 {
-
   if (value == 0)
      m_content = H460_FeatureContent(value,32);
   else if (value < 16)
@@ -517,7 +513,7 @@ H460_FeatureTable::H460_FeatureTable(const H225_ArrayOf_EnumeratedParameter & Xp
 
 H460_FeatureParameter & H460_FeatureTable::AddParameter(const H460_FeatureID & id)
 {
-PTRACE(6, "H460\tAdd ID: " << id );
+    PTRACE(6, "H460\tAdd ID: " << id );
 
      H460_FeatureParameter param = H460_FeatureParameter(id);
      PINDEX i = GetSize();
@@ -528,11 +524,11 @@ PTRACE(6, "H460\tAdd ID: " << id );
 
 H460_FeatureParameter & H460_FeatureTable::AddParameter(const H460_FeatureID & id, const H460_FeatureContent & con)
 {
-PTRACE(6, "H460\tAdd ID: " << id  << " content " << con);
+    PTRACE(6, "H460\tAdd ID: " << id  << " content " << con);
 
-      H460_FeatureParameter & Nparam = AddParameter(id);
-      Nparam.addContent(con);
-      return Nparam;
+    H460_FeatureParameter & Nparam = AddParameter(id);
+    Nparam.addContent(con);
+    return Nparam;
 }
 
 void H460_FeatureTable::AddParameter(H225_EnumeratedParameter & Xparam)
@@ -554,7 +550,6 @@ H460_FeatureParameter & H460_FeatureTable::GetParameter(PINDEX id)
 
 H460_FeatureParameter & H460_FeatureTable::GetParameter(const H460_FeatureID & id)
 {
-
     PINDEX num = GetParameterIndex(id);
     return GetParameter(num);
 }
@@ -574,15 +569,14 @@ PINDEX H460_FeatureTable::GetParameterIndex(const H460_FeatureID & id)
     return GetSize();
 }
 
-PBoolean H460_FeatureTable::HasParameter(const H460_FeatureID & id) {
-
-PTRACE(6, "H460\tCheck has Parameter " << id);
+PBoolean H460_FeatureTable::HasParameter(const H460_FeatureID & id)
+{
+    PTRACE(6, "H460\tCheck has Parameter " << id);
 
     if (GetParameterIndex(id) < GetSize())
         return TRUE;
 
     return FALSE;
-
 }
 
 void H460_FeatureTable::RemoveParameter(PINDEX id)
@@ -601,8 +595,7 @@ void H460_FeatureTable::RemoveParameter(const H460_FeatureID & id)
 
 void H460_FeatureTable::ReplaceParameter(const H460_FeatureID & id, const H460_FeatureContent & con)
 {
-
-PTRACE(6, "H460\tReplace ID: " << id  << " content " << con);
+    PTRACE(6, "H460\tReplace ID: " << id  << " content " << con);
 
     PINDEX j = GetParameterIndex(id);
 
@@ -617,8 +610,8 @@ PTRACE(6, "H460\tReplace ID: " << id  << " content " << con);
 
 PBoolean H460_FeatureTable::ParameterIsUnique(const H460_FeatureID & id)
 {
-    PINDEX i;
-    PINDEX j =0;
+    PINDEX i = 0;
+    PINDEX j = 0;
 
     for (i = 0; i < GetSize(); i++) {
         H460_FeatureParameter & param = GetParameter(i);
@@ -677,6 +670,11 @@ H460_Feature::H460_Feature(const H225_FeatureDescriptor & descriptor)
         IncludeOptionalField(H225_FeatureDescriptor::e_parameters);
         m_parameters = descriptor.m_parameters;
     }
+}
+
+PObject * H460_Feature::Clone() const
+{
+    return new H460_Feature(*this);
 }
 
 PString H460_Feature::GetFeatureIDAsString()
@@ -759,7 +757,6 @@ H460_FeatureParameter & H460_Feature::GetFeatureParameter(PINDEX id)
        return *(new H460_FeatureParameter());    // BUG: memory leak but is never called - SH
     }
     return (H460_FeatureParameter &)m_parameters[id];
-
 }
 
 H460_FeatureParameter & H460_Feature::GetFeatureParameter(const H460_FeatureID & id)
@@ -918,7 +915,7 @@ PBoolean H460_Feature::FeatureList(int type, H460FeatureList & plist, H323EndPoi
 
    PStringList featurelist = H460_Feature::GetFeatureNames(pluginMgr);
 
-   for (PINDEX i=0; i<featurelist.GetSize(); i++) {
+   for (PINDEX i = 0; i<featurelist.GetSize(); i++) {
      if (ep && !ep->OnFeatureInstance(type,featurelist[i]))
            continue;
 
@@ -1072,12 +1069,10 @@ void H460_FeatureOID::Replace(const PString & id, const H460_FeatureContent & co
     ReplaceParameter(H460_FeatureID(OpalOID(val)),con);
 }
 
-
 PBoolean H460_FeatureOID::HasParameter(OpalOID id)
 {
     return HasFeatureParameter(H460_FeatureID(id));
 }
-
 
 H460_FeatureParameter & H460_FeatureOID::operator[](OpalOID id)
 {
@@ -1104,6 +1099,7 @@ PString H460_FeatureOID::GetBase()
 }
 
 /////////////////////////////////////////////////////////////////////
+
 H460_FeatureSet::H460_FeatureSet()
 {
     ep = NULL;
@@ -1114,7 +1110,7 @@ H460_FeatureSet::~H460_FeatureSet()
 {
     // Delete Objects in derived FeatureSets unless shared
     if (baseSet) {
-        for (PINDEX i=0; i < Features.GetSize(); ++i) {
+        for (PINDEX i = 0; i < Features.GetSize(); ++i) {
             H460_Feature * feat = &Features.GetDataAt(i);
             if (feat && (feat->GetFeaturePurpose() != H460_Feature::FeatureBaseAll))
                 delete feat;
@@ -1144,39 +1140,36 @@ H460_FeatureSet::H460_FeatureSet(const H225_ArrayOf_GenericData & generic)
     ep = NULL;
     baseSet = NULL;
 
-    for (PINDEX i=0; i < generic.GetSize(); i++) {
+    for (PINDEX i = 0; i < generic.GetSize(); i++) {
        AddFeature((H460_Feature *)&generic[i]);
     }
 }
 
 PBoolean H460_FeatureSet::ProcessFirstPDU(const H225_FeatureSet & fs)
 {
-
-PTRACE(6,"H460\tCreate Common FeatureSet");
+    PTRACE(6, "H460\tCreate Common FeatureSet");
 
     H460_FeatureSet remote = H460_FeatureSet(fs);
 
- /// Remove the features the remote does not support.
-    for (PINDEX i=Features.GetSize()-1;  i > -1;  i--) {
+    /// Remove the features the remote does not support.
+    for (PINDEX i = Features.GetSize()-1;  i > -1;  i--) {
         H460_Feature & feat = Features.GetDataAt(i);
         H460_FeatureID id = feat.GetFeatureID();
         if (!remote.HasFeature(id) && !feat.CommonFeature())
              RemoveFeature(id);
         else
-           PTRACE(4,"H460\tUse Common Feature " << id);
+           PTRACE(4, "H460\tUse Common Feature " << id);
     }
-
 
     return TRUE;
 }
 
 PBoolean H460_FeatureSet::RemoveUnCommonFeatures()
 {
+    PTRACE(4, "H460\tRemoving UnCommon Features");
 
-PTRACE(4,"H460\tRemoving UnCommon Features");
-
- /// Remove the features that have not been negotiated for the call.
-    for (PINDEX i=Features.GetSize()-1; i > -1;  i--) {
+    /// Remove the features that have not been negotiated for the call.
+    for (PINDEX i = Features.GetSize()-1; i > -1;  i--) {
         H460_Feature & feat = Features.GetDataAt(i);
         H460_FeatureID id = feat.GetFeatureID();
         if (!feat.CommonFeature())
@@ -1188,25 +1181,25 @@ PTRACE(4,"H460\tRemoving UnCommon Features");
 
 PBoolean H460_FeatureSet::CreateFeatureSet(const H225_FeatureSet & fs)
 {
-    PTRACE(6,"H460\tCreate FeatureSet from FeatureSet PDU");
+    PTRACE(6, "H460\tCreate FeatureSet from FeatureSet PDU");
 
       if (fs.HasOptionalField(H225_FeatureSet::e_neededFeatures)) {
          const H225_ArrayOf_FeatureDescriptor & fsn = fs.m_neededFeatures;
-          for (PINDEX i=0; i < fsn.GetSize(); i++) {
+          for (PINDEX i = 0; i < fsn.GetSize(); i++) {
               AddFeature((H460_Feature *)&fsn[i]);
           }
       }
 
       if (fs.HasOptionalField(H225_FeatureSet::e_desiredFeatures)) {
         const H225_ArrayOf_FeatureDescriptor & fsd = fs.m_desiredFeatures;
-          for (PINDEX i=0; i < fsd.GetSize(); i++) {
+          for (PINDEX i = 0; i < fsd.GetSize(); i++) {
               AddFeature((H460_Feature *)&fsd[i]);
           }
       }
 
       if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
         const H225_ArrayOf_FeatureDescriptor & fss = fs.m_supportedFeatures;
-          for (PINDEX i=0; i < fss.GetSize(); i++) {
+          for (PINDEX i = 0; i < fss.GetSize(); i++) {
               AddFeature((H460_Feature *)&fss[i]);
           }
       }
@@ -1216,7 +1209,6 @@ PBoolean H460_FeatureSet::CreateFeatureSet(const H225_FeatureSet & fs)
 
 PBoolean H460_FeatureSet::LoadFeatureSet(int inst, H323Connection * con)
 {
-
   if ((ep) && (ep->FeatureSetDisabled()))
      return FALSE;
 
@@ -1230,8 +1222,9 @@ PBoolean H460_FeatureSet::LoadFeatureSet(int inst, H323Connection * con)
             H460_Feature * tempfeat = baseSet->GetFeature(*it->second);
             if (tempfeat->GetFeaturePurpose() == H460_Feature::FeatureBaseAll)
                 feat = tempfeat;
-            else
-                feat = (H460_Feature*)tempfeat->Clone();
+            else {
+                feat = (H460_Feature*)(tempfeat->Clone());
+            }
         } else {
             feat = H460_Feature::CreateFeature(it->first,inst);
             if ((feat) && (ep))
@@ -1243,7 +1236,7 @@ PBoolean H460_FeatureSet::LoadFeatureSet(int inst, H323Connection * con)
                 feat->AttachConnection(con);
 
            AddFeature(feat);
-           PTRACE(4,"H460\tLoaded Feature " << it->first);
+           PTRACE(4, "H460\tLoaded Feature " << it->first);
         }
         ++it;
       }
@@ -1254,7 +1247,6 @@ PBoolean H460_FeatureSet::LoadFeatureSet(int inst, H323Connection * con)
 
 PBoolean H460_FeatureSet::LoadFeature(const PString & featid)
 {
-
     H460_Feature * newfeat = H460_Feature::CreateFeature(featid);
 
     if (newfeat != NULL)
@@ -1271,10 +1263,9 @@ H460_FeatureSet * H460_FeatureSet::DeriveNewFeatureSet()
 
 PBoolean H460_FeatureSet::AddFeature(H460_Feature * Nfeat)
 {
-
     PTRACE(4, "H460\tLoaded " << Nfeat->GetFeatureIDAsString());
 
-    return Features.SetAt(Nfeat->GetFeatureID(),Nfeat);
+    return Features.SetAt(Nfeat->GetFeatureID(), Nfeat);
 
 }
 
@@ -1315,16 +1306,16 @@ PString featureType(PINDEX id)
 
 PBoolean H460_FeatureSet::CreateFeatureSetPDU(H225_FeatureSet & fs, unsigned MessageID, PBoolean advertise)
 {
-    PTRACE(6,"H460\tCreate FeatureSet " << PTracePDU(MessageID) << " PDU");
+    PTRACE(6, "H460\tCreate FeatureSet " << PTracePDU(MessageID) << " PDU");
 
     PBoolean buildPDU = FALSE;
 
-    for (PINDEX i = 0; i < Features.GetSize(); i++) {    // Iterate thro the features
+    for (PINDEX i = 0; i < Features.GetSize(); i++) {    // Iterate thru the features
        H460_Feature & feat = Features.GetDataAt(i);
 
-        PTRACE(6,"H460\tExamining " << feat.GetFeatureIDAsString());
+        PTRACE(6, "H460\tExamining " << feat.GetFeatureIDAsString());
         if (advertise != feat.FeatureAdvertised(MessageID)) {
-            PTRACE(6,"H460\tIgnoring " << feat.GetFeatureIDAsString() << " not Advertised.");
+            PTRACE(6, "H460\tIgnoring " << feat.GetFeatureIDAsString() << " not Advertised.");
             continue;
         }
 
@@ -1333,23 +1324,22 @@ PBoolean H460_FeatureSet::CreateFeatureSetPDU(H225_FeatureSet & fs, unsigned Mes
         if (CreateFeaturePDU(feat,featdesc,MessageID)) {
 
 #if PTRACING
-          PTRACE(6,"H460\tLoading Feature " << feat.GetFeatureIDAsString() << " as "
+          PTRACE(6, "H460\tLoading Feature " << feat.GetFeatureIDAsString() << " as "
             << featureType(feat.FeatureCategory) << " feature to " << PTracePDU(MessageID)
             << " PDU\n" << featdesc );
 #endif
 
-/// For some completely silly reason the ITU decided to send/receive H460 Messages in two places,
-/// for some messages it is included in the messsage body FeatureSet (to Advertise it) and others
-/// in the genericData field (as actual information). Even though a Feature is generic data. It is beyond
-/// me to determine Why it is so. Anyway if a message is to be carried in the genericData field it is given
-/// the default category of supported.
+    /// For some completely silly reason the ITU decided to send/receive H460 Messages in two places,
+    /// for some messages it is included in the messsage body FeatureSet (to Advertise it) and others
+    /// in the genericData field (as actual information). Even though a Feature is generic data. It is beyond
+    /// me to determine Why it is so. Anyway if a message is to be carried in the genericData field it is given
+    /// the default category of supported.
 
      PINDEX cat;
      if (advertise)
          cat = feat.FeatureCategory;
      else
          cat = H460_Feature::FeatureSupported;
-
 
       buildPDU = TRUE;
        switch (cat) {            // Add it to the correct feature list
@@ -1396,7 +1386,7 @@ PBoolean H460_FeatureSet::CreateFeatureSetPDU(H225_FeatureSet & fs, unsigned Mes
     }
 
 #if PTRACING
-    PTRACE(6,"H460\tFeatureSet for " << PTracePDU(MessageID) << " PDU\n" << fs);
+    PTRACE(6, "H460\tFeatureSet for " << PTracePDU(MessageID) << " PDU\n" << fs);
 #endif
 
     return buildPDU;
@@ -1404,8 +1394,7 @@ PBoolean H460_FeatureSet::CreateFeatureSetPDU(H225_FeatureSet & fs, unsigned Mes
 
 void H460_FeatureSet::ReadFeatureSetPDU(const H225_FeatureSet & fs, unsigned MessageID, PBoolean genericData)
 {
-
-PTRACE(6,"H460\tRead FeatureSet " << PTracePDU(MessageID) << " PDU");
+    PTRACE(6, "H460\tRead FeatureSet " << PTracePDU(MessageID) << " PDU");
 
     if (!genericData) {
        // Generate Common Set of Features.
@@ -1471,7 +1460,7 @@ PBoolean H460_FeatureSet::SupportNonCallService(const H225_FeatureSet & fs) cons
     PBoolean nonCallService = false;
     if (fs.HasOptionalField(H225_FeatureSet::e_neededFeatures)) {
         const H225_ArrayOf_FeatureDescriptor & fsn = fs.m_neededFeatures;
-          for (PINDEX i=0; i < fsn.GetSize(); i++) {
+          for (PINDEX i = 0; i < fsn.GetSize(); i++) {
               const H225_FeatureDescriptor & fd = fsn[i];
               ID = GetFeatureIDPDU(fd);
               if (SupportNonCallService(ID)) {
@@ -1485,7 +1474,7 @@ PBoolean H460_FeatureSet::SupportNonCallService(const H225_FeatureSet & fs) cons
       if (fs.HasOptionalField(H225_FeatureSet::e_desiredFeatures)) {
 
         const H225_ArrayOf_FeatureDescriptor & fsd = fs.m_desiredFeatures;
-          for (PINDEX i=0; i < fsd.GetSize(); i++) {
+          for (PINDEX i = 0; i < fsd.GetSize(); i++) {
               const H225_FeatureDescriptor & fd = fsd[i];
               ID = GetFeatureIDPDU(fd);
               if (SupportNonCallService(ID)) {
@@ -1498,7 +1487,7 @@ PBoolean H460_FeatureSet::SupportNonCallService(const H225_FeatureSet & fs) cons
 
       if (fs.HasOptionalField(H225_FeatureSet::e_supportedFeatures)) {
         const H225_ArrayOf_FeatureDescriptor & fss = fs.m_supportedFeatures;
-          for (PINDEX i=0; i < fss.GetSize(); i++) {
+          for (PINDEX i = 0; i < fss.GetSize(); i++) {
               const H225_FeatureDescriptor & fd = fss[i];
               ID = GetFeatureIDPDU(fd);
               if (SupportNonCallService(ID)) {
@@ -1514,7 +1503,6 @@ PBoolean H460_FeatureSet::SupportNonCallService(const H225_FeatureSet & fs) cons
 
 H460_FeatureID H460_FeatureSet::GetFeatureIDPDU(const H225_FeatureDescriptor & pdu) const
 {
-
     H460_FeatureID fid;
     const H225_GenericIdentifier & id = pdu.m_id;
 
@@ -1542,8 +1530,7 @@ H460_FeatureID H460_FeatureSet::GetFeatureIDPDU(const H225_FeatureDescriptor & p
 
 PBoolean H460_FeatureSet::CreateFeaturePDU(H460_Feature & Feat, H225_FeatureDescriptor & pdu,unsigned MessageID)
 {
-
-PTRACE(6,"H460\tEncoding " << PTracePDU(MessageID) << " PDU for " << Feat.GetFeatureIDAsString() );
+    PTRACE(6, "H460\tEncoding " << PTracePDU(MessageID) << " PDU for " << Feat.GetFeatureIDAsString() );
 
     switch (MessageID) {
       case H460_MessageType::e_gatekeeperRequest:
@@ -1638,8 +1625,7 @@ PTRACE(6,"H460\tEncoding " << PTracePDU(MessageID) << " PDU for " << Feat.GetFea
 
 void H460_FeatureSet::ReadFeaturePDU(H460_Feature & Feat, const H225_FeatureDescriptor & pdu,unsigned MessageID)
 {
-
-PTRACE(6,"H460\tDecoding " << PTracePDU(MessageID) << " PDU for " << Feat.GetFeatureIDAsString() );
+    PTRACE(6, "H460\tDecoding " << PTracePDU(MessageID) << " PDU for " << Feat.GetFeatureIDAsString() );
 
     switch (MessageID) {
       case H460_MessageType::e_gatekeeperRequest:
@@ -1772,17 +1758,17 @@ PString H460_FeatureSet::PTracePDU(PINDEX id) const
 void H460_FeatureSet::DisableAllFeatures(int msgtype)
 {
     if (Features.GetSize() > 0) {
-        PTRACE(4,"H460\tRemoving all H.460 Features remote/Gk expected to advertise " << PTracePDU(msgtype));
+        PTRACE(4, "H460\tRemoving all H.460 Features remote/Gk expected to advertise " << PTracePDU(msgtype));
         std::list<H460_FeatureID> removelist;
-        for (PINDEX i =0; i < Features.GetSize(); i++) {
+        for (PINDEX i = 0; i < Features.GetSize(); i++) {
            H460_Feature & feat = Features.GetDataAt(i);
            if (feat.FeatureAdvertised(msgtype)) {
-               PTRACE(4,"H460\tRemoving " << feat.GetFeatureIDAsString());
+               PTRACE(4, "H460\tRemoving " << feat.GetFeatureIDAsString());
                removelist.push_back(feat.GetFeatureID());
                if (feat.GetFeaturePurpose() !=  H460_Feature::FeatureBaseAll)
                  delete &feat;
            } else {
-               PTRACE(4,"H460\tPreserving " << feat.GetFeatureIDAsString());
+               PTRACE(4, "H460\tPreserving " << feat.GetFeatureIDAsString());
            }
         }
 
@@ -1805,7 +1791,7 @@ PBoolean H460_FeatureSet::SendFeature(unsigned id, H225_FeatureSet & Message, PB
 
 void H460_FeatureSet::AttachEndPoint(H323EndPoint * _ep)
 {
-   PTRACE(4,"H460\tEndpoint Attached");
+   PTRACE(4, "H460\tEndpoint Attached");
    ep = _ep;
 }
 
@@ -1816,7 +1802,7 @@ void H460_FeatureSet::AttachBaseFeatureSet(H460_FeatureSet * _baseSet)
 
 PBoolean H460_FeatureSet::HasFeature(const H460_FeatureID & id)
 {
-    for (PINDEX i =0; i < Features.GetSize(); i++) {
+    for (PINDEX i = 0; i < Features.GetSize(); i++) {
        H460_Feature & feat = Features.GetDataAt(i);
         if (feat.GetFeatureID() == id) {
             return TRUE;
@@ -1827,7 +1813,7 @@ PBoolean H460_FeatureSet::HasFeature(const H460_FeatureID & id)
 
 PBoolean H460_FeatureSet::SupportNonCallService(const H460_FeatureID & id) const
 {
-    for (PINDEX i =0; i < Features.GetSize(); i++) {
+    for (PINDEX i = 0; i < Features.GetSize(); i++) {
        H460_Feature & feat = Features.GetDataAt(i);
         if (feat.GetFeatureID() == id) {
             return feat.SupportNonCallService();
@@ -1845,5 +1831,3 @@ H460_Feature * H460_FeatureSet::GetFeature(const H460_FeatureID & id)
 }
 
 #endif // H323_H460
-
-
