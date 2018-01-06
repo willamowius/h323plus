@@ -52,7 +52,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 class H46026UDPSocket;
-class H46026PortPairs 
+class H46026PortPairs
 {
 public:
     H46026PortPairs();
@@ -99,7 +99,7 @@ protected:
 class H46017Handler;
 class H46017Transport;
 class PNatMethod_H46026;
-class H460_FeatureStd26 : public H460_FeatureStd 
+class H460_FeatureStd26 : public H460_FeatureStd
 {
     PCLASSINFO(H460_FeatureStd26,H460_FeatureStd);
 
@@ -107,6 +107,9 @@ public:
 
     H460_FeatureStd26();
     virtual ~H460_FeatureStd26();
+
+    // must have own Clone() operation so that after cloning our FeatureAdvertised() etc. is called
+    virtual PObject * Clone() const { return new H460_FeatureStd26(*this); }
 
     // Universal Declarations Every H460 Feature should have the following
     virtual void AttachEndPoint(H323EndPoint * _ep);
@@ -117,7 +120,7 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("Std26"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("TCPTunneling-H.460.26"); };
     static int GetPurpose();
-    virtual int GetFeaturePurpose()  { return H460_FeatureStd26::GetPurpose(); } 
+    virtual int GetFeaturePurpose()  { return H460_FeatureStd26::GetPurpose(); }
     static PStringArray GetIdentifier() { return PStringArray("26"); };
 
     virtual PBoolean FeatureAdvertised(int mtype);
@@ -209,7 +212,7 @@ public:
     virtual PBoolean CreateSocketPair(
       PUDPSocket * & socket1,
       PUDPSocket * & socket2,
-      const PIPSocket::Address & binding,  
+      const PIPSocket::Address & binding,
       void * userData
     );
 
@@ -242,7 +245,7 @@ public:
             { return GetNatMethodName()[0]; }
 #endif
 
-   // All these are virtual and never used. 
+   // All these are virtual and never used.
     virtual bool GetServerAddress(
       PIPSocket::Address & address,   ///< Address of server
       WORD & port                     ///< Port server is using.
@@ -314,7 +317,7 @@ class H46026UDPSocket : public H323UDPSocket
     H46026UDPSocket(H46026Tunnel & _handler, H323Connection::SessionInformation * info, bool _rtpSocket);
 
     /** Deconstructor to reallocate Socket and remove any exiting
-        allocated NAT ports, 
+        allocated NAT ports,
     */
     ~H46026UDPSocket();
 
@@ -322,7 +325,7 @@ class H46026UDPSocket : public H323UDPSocket
 
   // Overrides from class PIPDatagramSocket.
     /** Read a datagram from a remote computer.
-       
+
        @return
        true if any bytes were sucessfully read.
      */
