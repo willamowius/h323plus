@@ -433,8 +433,14 @@ PBoolean H323_TLSContext::SetDHParameters(const PBYTEArray & dh_p, const PBYTEAr
     return false;
   };
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000
   dh->p = BN_bin2bn(dh_p, dh_p.GetSize(), NULL);
   dh->g = BN_bin2bn(dh_g, dh_g.GetSize(), NULL);
+#else
+  BIGNUM *dhp = BN_bin2bn(dh_p, dh_p.GetSize(), NULL);
+  BIGNUM *dhg = BN_bin2bn(dh_g, dh_g.GetSize(), NULL);
+  DH_set0_pqg(dh, dhp, NULL, dhg);
+#endif
 
 #if PTLIB_VER < 2120
   ssl_ctx_st * m_context = context;
@@ -969,7 +975,6 @@ H323EndPoint::~H323EndPoint()
   // OpenSSL Cleanup
   EVP_cleanup();
   CRYPTO_cleanup_all_ex_data();
-  ERR_remove_state(0);
   ERR_free_strings();
 #endif
 
