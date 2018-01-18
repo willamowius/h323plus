@@ -96,7 +96,8 @@ notrace::
 docs: 
 	doxygen h323plus_cfg.dxy
 
-install:
+install: opt
+	echo "*** 'make install' is usually a bad idea, use 'make optnoshared' and point OPENH323DIR to your source dir ***"
 	mkdir -p $(DESTDIR)$(LIBDIR)
 	rm -f $(DESTDIR)$(LIBDIR)/libh323_*_r.so*
 	$(INSTALL) -m 444 lib/$(OH323_FILE).@MAJOR_VERSION@.@MINOR_VERSION@.@BUILD_NUMBER@ $(DESTDIR)$(LIBDIR)
