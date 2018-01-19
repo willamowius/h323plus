@@ -1087,7 +1087,7 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveControl(RTP_ControlFrame & 
               descriptions[srcIdx].items.SetAt(item->type, PString(item->data, item->length));
               item = item->GetNextItem();
             }
-            sdes = (const RTP_ControlFrame::SourceDescription *)item->GetNextItem();
+            sdes = (const RTP_ControlFrame::SourceDescription *)item->GetNextItem(); // TODO: make sure we don't read over frame end
           }
           OnRxSourceDescription(descriptions);
         }
