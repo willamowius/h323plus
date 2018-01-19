@@ -436,8 +436,10 @@ static bool SetCustomisedOptions(const PluginCodec_Definition * codec,
     PluginCodec_ControlDefn * ctl = GetCodecControl(codec, SET_CODEC_CUSTOMISED_OPTIONS);
     if (ctl != NULL) {
         (*ctl->control)(codec, context ,SET_CODEC_CUSTOMISED_OPTIONS, _options, &optionsLen);
+        free(_options);
         return true;
     }
+    free(_options);
     return false;
 }
 
@@ -464,8 +466,10 @@ static bool SetCustomisedOptions(const PluginCodec_Definition * codec,
     PluginCodec_ControlDefn * ctl = GetCodecControl(codec, SET_CODEC_CUSTOMISED_OPTIONS);
     if (ctl != NULL) {
         (*ctl->control)(codec, context ,SET_CODEC_CUSTOMISED_OPTIONS, _options, &optionsLen);
+        free(_options);
         return true;
     }
+    free(_options);
     return false;
 }
 
@@ -490,13 +494,15 @@ static PBoolean SetCodecControl(const PluginCodec_Definition * codec,
   if (codecControls == NULL)
     return FALSE;
 
-    PStringArray list;
-    list += parm;
-    list += value;
-    char ** options = list.ToCharArray();
-    unsigned int optionsLen = sizeof(options);
+  PStringArray list;
+  list += parm;
+  list += value;
+  char ** options = list.ToCharArray();
+  unsigned int optionsLen = sizeof(options);
 
-  return (*codecControls->control)(codec, context, SET_CODEC_OPTIONS_CONTROL, options, &optionsLen);
+  bool result = (*codecControls->control)(codec, context, SET_CODEC_OPTIONS_CONTROL, options, &optionsLen);
+  free(options);
+  return result;
 }
 
 #if defined(H323_AUDIO_CODECS) || defined(H323_VIDEO)
@@ -545,9 +551,11 @@ static PBoolean EventCodecControl(PluginCodec_Definition * codec,
 
    char ** parms = list.ToCharArray();
    unsigned int parmsLen = sizeof(parms);
-   int retVal=0;
+   int retVal = 0;
 
-   return CallCodecControl(codec,context,EVENT_CODEC_CONTROL, parms, &parmsLen, retVal);
+   bool result = CallCodecControl(codec,context,EVENT_CODEC_CONTROL, parms, &parmsLen, retVal);
+   free(parms);
+   return result;
 }
 
 static void PopulateMediaFormatOptions(PluginCodec_Definition * _encoderCodec, OpalMediaFormat & format)
@@ -1085,14 +1093,14 @@ static bool UpdatePluginOptions(const PluginCodec_Definition * codec, void * con
       char ** _options = list.ToCharArray();
       unsigned int optionsLen = sizeof(_options);
       (*ctl->control)(codec, context, SET_CODEC_OPTIONS_CONTROL, _options, &optionsLen);
-           for (int i = 0; _options[i] != NULL; i += 2) {
-            const char * key = _options[i];
-            int val = atoi(_options[i+1]);
-            if (mediaFormat.HasOption(key))
-                mediaFormat.SetOptionInteger(key,val);
-          }
+      for (int i = 0; _options[i] != NULL; i += 2) {
+      const char * key = _options[i];
+      int val = atoi(_options[i+1]);
+      if (mediaFormat.HasOption(key))
+        mediaFormat.SetOptionInteger(key,val);
+      }
 #ifdef H323_VIDEO
-          mediaFormat.SetBandwidth(mediaFormat.GetOptionInteger(OpalVideoFormat::MaxBitRateOption));
+      mediaFormat.SetBandwidth(mediaFormat.GetOptionInteger(OpalVideoFormat::MaxBitRateOption));
 #endif
 
       free(_options);
@@ -1530,7 +1538,7 @@ static bool SetCustomLevel(const PluginCodec_Definition * codec, OpalMediaFormat
 
             _options += 2;
           }
-      //free(_options);
+      free(_options);
 #if PTRACING
       PTRACE(6, "H323\tCustom Video Format: ");
       OpalMediaFormat::DebugOptionList(mediaFormat);
@@ -1702,20 +1710,21 @@ PBoolean H323PluginVideoCodec::SetSupportedFormats(std::list<PVideoFrameInfo> & 
       unsigned int optionsLen = sizeof(_options);
       (*ctl->control)(codec, context, SET_CODEC_FORMAT_OPTIONS, _options, &optionsLen);
       for (i = 0; _options[i] != NULL; i += 2) {
-            const char * key = _options[i];
-            int val = atoi(_options[i+1]);;
-            if (mediaFormat.HasOption(key)) {
-                mediaFormat.SetOptionInteger(key,val);
-                if (strcmp(key, OpalVideoFormat::FrameWidthOption) == 0)
-                     nw = val;
-                else if (strcmp(key, OpalVideoFormat::FrameHeightOption) == 0)
-                     nh = val;
-                else if (strcmp(key, OpalVideoFormat::FrameTimeOption) == 0)
-                     targetFrameTimeMs = val;
-            }
-          }
-          SetFrameSize(nw,nh);
-          return true;
+        const char * key = _options[i];
+        int val = atoi(_options[i+1]);;
+        if (mediaFormat.HasOption(key)) {
+          mediaFormat.SetOptionInteger(key,val);
+          if (strcmp(key, OpalVideoFormat::FrameWidthOption) == 0)
+            nw = val;
+          else if (strcmp(key, OpalVideoFormat::FrameHeightOption) == 0)
+            nh = val;
+         else if (strcmp(key, OpalVideoFormat::FrameTimeOption) == 0)
+           targetFrameTimeMs = val;
+        }
+      }
+      free(_options);
+      SetFrameSize(nw,nh);
+      return true;
     } else {
        PTRACE(4,"PLUGIN\tUnable to set format options in codec");
        return false;
