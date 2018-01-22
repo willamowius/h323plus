@@ -126,7 +126,7 @@ protected:
 class RTP_DataFrame;
 class H235_DiffieHellman;
 class H235Capabilities;
-class H235Session : public  PObject
+class H235Session : public PObject
 {
      PCLASSINFO(H235Session, PObject);
 
@@ -157,7 +157,7 @@ public:
       */
     PBoolean DecodeMediaKey(PBYTEArray & key);
 
-    /** Is Active 
+    /** Is Active
       */
     PBoolean IsActive();
 
@@ -180,9 +180,13 @@ public:
     /** Write Frame (Memory InPlace)
       */
     PBoolean WriteFrameInPlace(RTP_DataFrame & frame);
-  //@}
 
 	PString GetAlgorithmOID() const { return m_context.GetAlgorithmOID(); }
+
+	/** Export crypto key for signaling-only gateways
+	  */
+	PBYTEArray GetCrytoMasterKey() const { return m_crytoMasterKey; }
+  //@}
 
 private:
     H235_DiffieHellman & m_dh;
@@ -200,4 +204,3 @@ private:
 };
 
 #endif // H235CRYPTO_H
-
