@@ -3771,7 +3771,7 @@ else
   ;;
   *)
   as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-as_dummy="/usr/local/bin:/usr/bin"
+as_dummy="/usr/local/bin:/usr/bin:/opt/local/bin"
 for as_dir in $as_dummy
 do
   IFS=$as_save_IFS
