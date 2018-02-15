@@ -740,12 +740,12 @@ unsigned DetectSourceAddress(muxSocketMap & socMap, const PIPSocket::Address add
     PIPSocketAddressAndPort daddr;
     daddr.SetAddress(addr,port);
 
-    std::map< unsigned, PUDPSocket*>::const_iterator i;
-    for (i = socMap.begin(); i != socMap.end(); ++i) {
-    PIPSocketAddressAndPort raddr;
-    i->second->GetPeerAddress(raddr);
-    if (raddr.AsString() == daddr.AsString())
-        return i->first;
+    for (std::map<unsigned, PUDPSocket*>::const_iterator i = socMap.begin(); i != socMap.end(); ++i) {
+        PIPSocketAddressAndPort raddr;
+        if (i->second)
+            i->second->GetPeerAddress(raddr);
+        if (raddr.AsString() == daddr.AsString())
+            return i->first;
     }
     return 0;
 }
