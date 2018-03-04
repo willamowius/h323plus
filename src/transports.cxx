@@ -50,6 +50,7 @@
 #endif
 
 #ifdef H323_TLS
+#include <openssl/opensslv.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #endif
@@ -1398,7 +1399,9 @@ void H323ListenerTCP::Main()
       new H225TransportThread(endpoint, transport);
   }
 #ifdef P_SSL
-  ERR_remove_state(0);
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
+  ERR_remove_thread_state(NULL);
+#endif
 #endif
 }
 

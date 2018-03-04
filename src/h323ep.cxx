@@ -156,6 +156,7 @@ WORD H323EndPoint::defaultManufacturerCode  = 61; // Allocated by Australian Com
 #ifdef H323_TLS
 
 extern "C" {
+#include <openssl/opensslv.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
@@ -270,6 +271,7 @@ H323_TLSContext::H323_TLSContext()
     m_context = SSL_CTX_new(SSLv23_method());
     SSL_CTX_set_options(m_context, SSL_OP_NO_SSLv2);	// remove unsafe SSLv2 (eg. due to DROWN)
     SSL_CTX_set_options(m_context, SSL_OP_NO_SSLv3);	// remove unsafe SSLv3 (eg. due to POODLE)
+    SSL_CTX_set_options(m_context, SSL_OP_NO_COMPRESSION);	// remove unsafe SSL compression (eg. due to CRIME)
     SSL_CTX_set_mode(m_context, SSL_MODE_AUTO_RETRY);   // handle re-negotiations automatically
 
 #if PTLIB_VER < 2120
@@ -433,8 +435,30 @@ PBoolean H323_TLSContext::SetDHParameters(const PBYTEArray & dh_p, const PBYTEAr
     return false;
   };
 
-  dh->p = BN_bin2bn(dh_p, dh_p.GetSize(), NULL);
-  dh->g = BN_bin2bn(dh_g, dh_g.GetSize(), NULL);
+  BIGNUM* p = BN_bin2bn(dh_p, dh_p.GetSize(), NULL);
+  BIGNUM* g = BN_bin2bn(dh_g, dh_g.GetSize(), NULL);
+  if (p != NULL && g != NULL)
+  {
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
+    dh->p = p;
+    dh->g = g;
+#else
+    if (!DH_set0_pqg(dh, p, NULL, g)) {
+      BN_free(g);
+      BN_free(p);
+      DH_free(dh);
+      return false;
+    }
+#endif
+  }
+  else {
+    if (g)
+      BN_free(g);
+    if (p)
+      BN_free(p);
+    DH_free(dh);
+    return false;
+  }
 
 #if PTLIB_VER < 2120
   ssl_ctx_st * m_context = context;
@@ -969,7 +993,9 @@ H323EndPoint::~H323EndPoint()
   // OpenSSL Cleanup
   EVP_cleanup();
   CRYPTO_cleanup_all_ex_data();
-  ERR_remove_state(0);
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
+  ERR_remove_thread_state(NULL);
+#endif
   ERR_free_strings();
 #endif
 

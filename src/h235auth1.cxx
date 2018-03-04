@@ -32,6 +32,7 @@
 
 #ifdef H323_SSL
 
+#include <openssl/opensslv.h>
 #include <openssl/evp.h>
 
 #include "h235auth.h"
@@ -67,6 +68,58 @@ static const BYTE SearchPattern[HASH_SIZE] = { // Must be 12 bytes
 #define SHA_BLOCKSIZE   64
 #endif
 
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
+
+namespace {
+
+class EvpMdContext
+{
+  mutable EVP_MD_CTX ctx;
+
+public:
+  EvpMdContext()
+  {
+    EVP_MD_CTX_init(&ctx);
+  }
+  ~EvpMdContext()
+  {
+    EVP_MD_CTX_cleanup(&ctx);
+  }
+  operator EVP_MD_CTX* () const
+  {
+    return &ctx;
+  }
+};
+
+} // namespace
+
+#else // (OPENSSL_VERSION_NUMBER < 0x10100000L)
+
+namespace {
+
+class EvpMdContext
+{
+  EVP_MD_CTX* ctx;
+
+public:
+  EvpMdContext()
+  {
+    ctx = EVP_MD_CTX_new();
+    OPENSSL_assert(ctx != NULL);
+  }
+  ~EvpMdContext()
+  {
+    EVP_MD_CTX_free(ctx);
+  }
+  operator EVP_MD_CTX* () const
+  {
+    return ctx;
+  }
+};
+
+} // namespace
+
+#endif // (OPENSSL_VERSION_NUMBER < 0x10100000L)
 
 #define new PNEW
 
@@ -102,7 +155,7 @@ static void hmac_sha (const unsigned char*    k,      /* secret key */
                       char*    out,             /* output buffer, at least "t" bytes */
                       int      t)
 {
-        EVP_MD_CTX ictx, octx;
+        EvpMdContext ictx, octx;
         unsigned char    isha[SHA_DIGESTSIZE], osha[SHA_DIGESTSIZE] ;
         unsigned char    key[SHA_DIGESTSIZE] ;
         char    buf[SHA_BLOCKSIZE] ;
@@ -112,13 +165,11 @@ static void hmac_sha (const unsigned char*    k,      /* secret key */
 
         if (lk > SHA_BLOCKSIZE) {
 
-                EVP_MD_CTX tctx;
+                EvpMdContext tctx;
 
-                EVP_MD_CTX_init(&tctx);
-                EVP_DigestInit_ex(&tctx, sha1, NULL);
-                EVP_DigestUpdate(&tctx, k, lk);
-                EVP_DigestFinal_ex(&tctx, key, NULL);
-                EVP_MD_CTX_cleanup(&tctx);
+                EVP_DigestInit_ex(tctx, sha1, NULL);
+                EVP_DigestUpdate(tctx, k, lk);
+                EVP_DigestFinal_ex(tctx, key, NULL);
 
                 k = key ;
                 lk = SHA_DIGESTSIZE ;
@@ -126,34 +177,30 @@ static void hmac_sha (const unsigned char*    k,      /* secret key */
 
         /**** Inner Digest ****/
 
-        EVP_MD_CTX_init(&ictx);
-        EVP_DigestInit_ex(&ictx, sha1, NULL);
+        EVP_DigestInit_ex(ictx, sha1, NULL);
 
         /* Pad the key for inner digest */
         for (i = 0 ; i < lk ; ++i) buf[i] = (char)(k[i] ^ 0x36);
         for (i = lk ; i < SHA_BLOCKSIZE ; ++i) buf[i] = 0x36;
 
-        EVP_DigestUpdate(&ictx, buf, SHA_BLOCKSIZE) ;
-        EVP_DigestUpdate(&ictx, d, ld) ;
+        EVP_DigestUpdate(ictx, buf, SHA_BLOCKSIZE) ;
+        EVP_DigestUpdate(ictx, d, ld) ;
 
-        EVP_DigestFinal_ex(&ictx, isha, NULL) ;
-        EVP_MD_CTX_cleanup(&ictx);
+        EVP_DigestFinal_ex(ictx, isha, NULL) ;
 
         /**** Outer Digest ****/
 
-        EVP_MD_CTX_init(&octx);
-        EVP_DigestInit_ex(&octx, sha1, NULL);
+        EVP_DigestInit_ex(octx, sha1, NULL);
 
         /* Pad the key for outer digest */
 
         for (i = 0 ; i < lk ; ++i) buf[i] = (char)(k[i] ^ 0x5C);
         for (i = lk ; i < SHA_BLOCKSIZE ; ++i) buf[i] = 0x5C;
 
-        EVP_DigestUpdate(&octx, buf, SHA_BLOCKSIZE) ;
-        EVP_DigestUpdate(&octx, isha, SHA_DIGESTSIZE) ;
+        EVP_DigestUpdate(octx, buf, SHA_BLOCKSIZE) ;
+        EVP_DigestUpdate(octx, isha, SHA_DIGESTSIZE) ;
 
-        EVP_DigestFinal_ex(&octx, osha, NULL);
-        EVP_MD_CTX_cleanup(&octx);
+        EVP_DigestFinal_ex(octx, osha, NULL);
 
         /* truncate and print the results */
         t = t > SHA_DIGESTSIZE ? SHA_DIGESTSIZE : t ;
@@ -164,15 +211,13 @@ static void hmac_sha (const unsigned char*    k,      /* secret key */
 static void SHA1(const unsigned char * data, unsigned len, unsigned char * hash)
 {
   const EVP_MD * sha1 = EVP_sha1();
-  EVP_MD_CTX ctx;
-  EVP_MD_CTX_init(&ctx);
-  if (EVP_DigestInit_ex(&ctx, sha1, NULL)) {
-    EVP_DigestUpdate(&ctx, data, len);
-    EVP_DigestFinal_ex(&ctx, hash, NULL);
+  EvpMdContext ctx;
+  if (EVP_DigestInit_ex(ctx, sha1, NULL)) {
+    EVP_DigestUpdate(ctx, data, len);
+    EVP_DigestFinal_ex(ctx, hash, NULL);
   } else {
     PTRACE(1, "H235\tOpenSSH SHA1 implementation failed");
   }
-  EVP_MD_CTX_cleanup(&ctx);
 }
 
 
