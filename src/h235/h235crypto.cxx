@@ -83,7 +83,7 @@ H235CryptoHelper::H235CryptoHelper()
     Reset();
 }
 
-inline void H235CryptoHelper::Reset()
+void H235CryptoHelper::Reset()
 {
     buf_len = 0;
     final_used = 0;
@@ -222,7 +222,7 @@ int H235CryptoHelper::EncryptFinalCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, i
     }
 }
 
-inline int H235CryptoHelper::DecryptUpdateCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
+int H235CryptoHelper::DecryptUpdateCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
                       const unsigned char *in, int inl)
 {
     return EncryptUpdateCTS(ctx, out, outl, in, inl);
