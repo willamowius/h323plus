@@ -5,7 +5,7 @@
  *
  * H323Plus library
  *
- * Copyright (c) 2012-2013 Jan Willamowius
+ * Copyright (c) 2012-2018 Jan Willamowius
  *
  * The contents of this file are subject to the Mozilla Public License
  * Version 1.1 (the "License"); you may not use this file except in
@@ -44,7 +44,7 @@ extern "C" {
 #include <openssl/evp.h>
 }
 
-// H.235.6 says no more than 2^62 blocks, Schneider says no more than 2^32 blocks in CBC mode
+// H.235.6 says no more than 2^62 blocks, Bruce Schneier says no more than 2^32 blocks in CBC mode
 #define AES_KEY_LIMIT 4294967295U	// 2^32-1
 
 // helper routines not present in OpenSSL
