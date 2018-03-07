@@ -2112,26 +2112,27 @@ PBoolean H323EndPoint::ResolveCallParty(const PString & _remoteParty, PStringLis
     }
 
     PINDEX i;
-    for (i = 0; i < number.GetLength(); ++i)
-       if (!isdigit(number[i]))
-        break;
-        if (i >= number.GetLength()) {
-           PString str;
-          if (PDNS::ENUMLookup(number, "E2U+h323", str)) {
+    for (i = 0; i < number.GetLength(); ++i) {
+        if (!isdigit(number[i]))
+            break;
+    }
+    if (i >= number.GetLength()) {
+        PString str;
+        if (PDNS::ENUMLookup(number, "E2U+h323", str)) {
             str.Replace("+","");
             if ((str.Find("//1") != P_MAX_INDEX) &&
                  (str.Find('@') != P_MAX_INDEX)) {
                remoteParty = proto + ":" + number + str.Mid(str.Find('@')-1);
             } else {
-              remoteParty = str;
-          }
-          PTRACE(4, "H323\tENUM converted remote party " << _remoteParty << " to " << remoteParty);
+               remoteParty = str;
+            }
+            PTRACE(4, "H323\tENUM converted remote party " << _remoteParty << " to " << remoteParty);
         } else {
-          PTRACE(4, "H323\tENUM Cannot resolve remote party " << _remoteParty);
-          return false;
+            PTRACE(4, "H323\tENUM Cannot resolve remote party " << _remoteParty);
+            return false;
         }
-      }
-    }
+     }
+   }
 
 #ifdef H323_IPV6
   // Again horrible code should be able to get interface listing for a given protocol - SH
