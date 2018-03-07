@@ -5,7 +5,7 @@
  *
  * H323Plus library
  *
- * Copyright (c) 2012-2018 Jan Willamowius
+ * Copyright (c) 2012-2013 Jan Willamowius
  *
  * The contents of this file are subject to the Mozilla Public License
  * Version 1.1 (the "License"); you may not use this file except in
@@ -44,41 +44,18 @@ extern "C" {
 #include <openssl/evp.h>
 }
 
-// H.235.6 says no more than 2^62 blocks, Bruce Schneier says no more than 2^32 blocks in CBC mode
+// H.235.6 says no more than 2^62 blocks, Schneier says no more than 2^32 blocks in CBC mode
 #define AES_KEY_LIMIT 4294967295U	// 2^32-1
 
 // helper routines not present in OpenSSL
-class H235CryptoHelper
-{
-private:
-  //! Saved partial block of input data
-  unsigned char buf[EVP_MAX_BLOCK_LENGTH];
-  //! Last processed block of output data
-  unsigned char final_buf[EVP_MAX_BLOCK_LENGTH];
-  //! Number of bytes in buf
-  int buf_len;
-  //! Indicates whether the final buffer is used
-  int final_used;
+int EVP_EncryptUpdate_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
+                      const unsigned char *in, int inl);
+int EVP_EncryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
+int EVP_DecryptUpdate_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
+                      const unsigned char *in, int inl);
+int EVP_DecryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
+int EVP_DecryptFinal_relaxed(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
 
-public:
-  H235CryptoHelper();
-
-  void Reset();
-  int EncryptUpdateCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
-                        const unsigned char *in, int inl);
-  int EncryptFinalCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
-  int DecryptUpdateCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
-                        const unsigned char *in, int inl);
-  int DecryptFinalCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
-
-  int DecryptUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
-                        const unsigned char *in, int inl);
-  int DecryptFinalRelaxed(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
-
-private:
-  H235CryptoHelper(H235CryptoHelper const&);
-  H235CryptoHelper& operator= (H235CryptoHelper const&);
-};
 
 class H235CryptoEngine : public PObject
 {
@@ -132,8 +109,7 @@ public:
 protected:
     static void SetIV(unsigned char * iv, unsigned char * ivSequence, unsigned ivLen);
 
-    EVP_CIPHER_CTX *m_encryptCtx, *m_decryptCtx;
-    H235CryptoHelper m_encryptHelper, m_decryptHelper;
+    EVP_CIPHER_CTX m_encryptCtx, m_decryptCtx;
     PString m_algorithmOID;    // eg. "2.16.840.1.101.3.4.1.2"
     PUInt64 m_operationCnt;  // 8 byte integer
     PBoolean m_initialised;
@@ -150,7 +126,7 @@ protected:
 class RTP_DataFrame;
 class H235_DiffieHellman;
 class H235Capabilities;
-class H235Session : public PObject
+class H235Session : public  PObject
 {
      PCLASSINFO(H235Session, PObject);
 
@@ -181,7 +157,7 @@ public:
       */
     PBoolean DecodeMediaKey(PBYTEArray & key);
 
-    /** Is Active
+    /** Is Active 
       */
     PBoolean IsActive();
 
@@ -204,13 +180,9 @@ public:
     /** Write Frame (Memory InPlace)
       */
     PBoolean WriteFrameInPlace(RTP_DataFrame & frame);
+  //@}
 
 	PString GetAlgorithmOID() const { return m_context.GetAlgorithmOID(); }
-
-	/** Export crypto key for signaling-only gateways
-	  */
-	PBYTEArray GetCrytoMasterKey() const { return m_crytoMasterKey; }
-  //@}
 
 private:
     H235_DiffieHellman & m_dh;
@@ -228,3 +200,4 @@ private:
 };
 
 #endif // H235CRYPTO_H
+

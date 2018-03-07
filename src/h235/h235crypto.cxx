@@ -44,11 +44,8 @@
 #include "h235/h235crypto.h"
 #include "h235/h235caps.h"
 #include "h235/h235support.h"
-extern "C" {
-#include <openssl/opensslv.h>
-#include <openssl/evp.h>
 #include <openssl/rand.h>
-}
+
 #include "rtp.h"
 
 #ifdef H323_H235_AES256
@@ -64,90 +61,70 @@ extern "C" {
 const unsigned int IV_SEQUENCE_LEN = 6;
 
 
-#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
-
-inline const unsigned char *EVP_CIPHER_CTX_iv(const EVP_CIPHER_CTX *ctx)
-{
-    return ctx->iv;
-}
-
-#endif // (OPENSSL_VERSION_NUMBER < 0x10100000L)
-
-// ciphertext stealing (CTS) code based on a OpenSSL patch by An-Cheng Huang
+// ciphertext stealing code based on a OpenSSL patch by An-Cheng Huang
 // Note: This ciphertext stealing implementation doesn't seem to always produce
 // compatible results, avoid when encrypting:
-H235CryptoHelper::H235CryptoHelper()
-{
-    memset(buf, 0, sizeof(buf));
-    memset(final_buf, 0, sizeof(final_buf));
-    Reset();
-}
 
-void H235CryptoHelper::Reset()
-{
-    buf_len = 0;
-    final_used = 0;
-}
-
-int H235CryptoHelper::EncryptUpdateCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
+int EVP_EncryptUpdate_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
                       const unsigned char *in, int inl)
 {
-    const int bl = EVP_CIPHER_CTX_block_size(ctx);
-    OPENSSL_assert(bl <= (int)sizeof(buf));
+    int bl = ctx->cipher->block_size;
+    OPENSSL_assert(bl <= (int)sizeof(ctx->buf));
     *outl = 0;
 
-    if ((buf_len + inl) <= bl) {
+    if ((ctx->buf_len + inl) <= bl) {
         /* new plaintext is no more than 1 block */
         /* copy the in data into the buffer and return */
-        memcpy(&(buf[buf_len]), in, inl);
-        buf_len += inl;
+        memcpy(&(ctx->buf[ctx->buf_len]), in, inl);
+        ctx->buf_len += inl;
+        *outl = 0;
         return 1;
     }
 
     /* more than 1 block of new plaintext available */
     /* encrypt the previous plaintext, if any */
-    if (final_used) {
-        if (!(EVP_Cipher(ctx, out, final_buf, bl))) {
+    if (ctx->final_used) {
+        if (!(ctx->cipher->do_cipher(ctx, out, ctx->final, bl))) {
           return 0;
         }
         out += bl;
         *outl += bl;
-        final_used = 0;
+        ctx->final_used = 0;
     }
 
-    /* we already know buf_len + inl must be > bl */
-    memcpy(&(buf[buf_len]), in, (bl - buf_len));
-    in += (bl - buf_len);
-    inl -= (bl - buf_len);
-    buf_len = bl;
+    /* we already know ctx->buf_len + inl must be > bl */
+    memcpy(&(ctx->buf[ctx->buf_len]), in, (bl - ctx->buf_len));
+    in += (bl - ctx->buf_len);
+    inl -= (bl - ctx->buf_len);
+    ctx->buf_len = bl;
 
     if (inl <= bl) {
-        memcpy(final_buf, buf, bl);
-        final_used = 1;
-        memcpy(buf, in, inl);
-        buf_len = inl;
+        memcpy(ctx->final, ctx->buf, bl);
+        ctx->final_used = 1;
+        memcpy(ctx->buf, in, inl);
+        ctx->buf_len = inl;
         return 1;
     } else {
-        if (!(EVP_Cipher(ctx, out, buf, bl))) {
+        if (!(ctx->cipher->do_cipher(ctx, out, ctx->buf, bl))) {
             return 0;
         }
         out += bl;
         *outl += bl;
-        buf_len = 0;
+        ctx->buf_len = 0;
 
-        int leftover = inl & (bl - 1);
+        int leftover = inl & ctx->block_mask;
         if (leftover) {
             inl -= (bl + leftover);
-            memcpy(buf, &(in[(inl + bl)]), leftover);
-            buf_len = leftover;
+            memcpy(ctx->buf, &(in[(inl + bl)]), leftover);
+            ctx->buf_len = leftover;
         } else {
             inl -= (2 * bl);
-            memcpy(buf, &(in[(inl + bl)]), bl);
-            buf_len = bl;
+             memcpy(ctx->buf, &(in[(inl + bl)]), bl);
+             ctx->buf_len = bl;
         }
-        memcpy(final_buf, &(in[inl]), bl);
-        final_used = 1;
-        if (!(EVP_Cipher(ctx, out, in, inl))) {
+        memcpy(ctx->final, &(in[inl]), bl);
+        ctx->final_used = 1;
+        if (!(ctx->cipher->do_cipher(ctx, out, in, inl))) {
             return 0;
         }
         out += inl;
@@ -157,36 +134,40 @@ int H235CryptoHelper::EncryptUpdateCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, 
     return 1;
 }
 
-int H235CryptoHelper::EncryptFinalCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
+#if PTLIB_VER >= 2130
+int EVP_EncryptFinal_ctsA(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
+#else
+int EVP_EncryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
+#endif
 {
     unsigned char tmp[EVP_MAX_BLOCK_LENGTH];
-    int bl = EVP_CIPHER_CTX_block_size(ctx);
+    int bl = ctx->cipher->block_size;
     int leftover = 0;
     *outl = 0;
 
-    if (!final_used) {
+    if (!ctx->final_used) {
         PTRACE(1, "H235\tCTS Error: expecting previous ciphertext");
         return 0;
     }
-    if (buf_len == 0) {
+    if (ctx->buf_len == 0) {
         PTRACE(1, "H235\tCTS Error: expecting previous plaintext");
         return 0;
     }
 
     /* handle leftover bytes */
-    leftover = buf_len;
+    leftover = ctx->buf_len;
 
     switch (EVP_CIPHER_CTX_mode(ctx)) {
         case EVP_CIPH_ECB_MODE: {
             /* encrypt => C_{n} plus C' */
-            if (!(EVP_Cipher(ctx, tmp, final_buf, bl))) {
+            if (!(ctx->cipher->do_cipher(ctx, tmp, ctx->final, bl))) {
                  return 0;
             }
 
             /* P_n plus C' */
-            memcpy(&(buf[leftover]), &(tmp[leftover]), (bl - leftover));
+            memcpy(&(ctx->buf[leftover]), &(tmp[leftover]), (bl - leftover));
             /* encrypt => C_{n-1} */
-            if (!(EVP_Cipher(ctx, out, buf, bl))) {
+            if (!(ctx->cipher->do_cipher(ctx, out, ctx->buf, bl))) {
                 return 0;
             }
 
@@ -196,18 +177,18 @@ int H235CryptoHelper::EncryptFinalCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, i
         }
         case EVP_CIPH_CBC_MODE: {
             /* encrypt => C_{n} plus C' */
-            if (!(EVP_Cipher(ctx, tmp, final_buf, bl))) {
+            if (!(ctx->cipher->do_cipher(ctx, tmp, ctx->final, bl))) {
                 return 0;
             }
 
             /* P_n plus 0s */
-            memset(&(buf[leftover]), 0, (bl - leftover));
+            memset(&(ctx->buf[leftover]), 0, (bl - leftover));
 
             /* note that in cbc encryption, plaintext will be xor'ed with the previous
              * ciphertext, which is what we want.
              */
             /* encrypt => C_{n-1} */
-            if (!(EVP_Cipher(ctx, out, buf, bl))) {
+            if (!(ctx->cipher->do_cipher(ctx, out, ctx->buf, bl))) {
                 return 0;
             }
 
@@ -215,49 +196,48 @@ int H235CryptoHelper::EncryptFinalCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, i
             *outl += (bl + leftover);
             return 1;
         }
-        default: {
+        default:
             PTRACE(1, "H235\tCTS Error: unsupported mode");
             return 0;
-        }
     }
 }
 
-int H235CryptoHelper::DecryptUpdateCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
+int EVP_DecryptUpdate_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
                       const unsigned char *in, int inl)
 {
-    return EncryptUpdateCTS(ctx, out, outl, in, inl);
+    return EVP_EncryptUpdate_cts(ctx, out, outl, in, inl);
 }
 
-int H235CryptoHelper::DecryptFinalCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
+int EVP_DecryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
 {
     unsigned char tmp[EVP_MAX_BLOCK_LENGTH];
-    const int bl = EVP_CIPHER_CTX_block_size(ctx);
+    int bl = ctx->cipher->block_size;
     int leftover = 0;
     *outl = 0;
 
-    if (!final_used) {
+    if (!ctx->final_used) {
         PTRACE(1, "H235\tCTS Error: expecting previous ciphertext");
         return 0;
     }
-    if (buf_len == 0) {
+    if (ctx->buf_len == 0) {
         PTRACE(1, "H235\tCTS Error: expecting previous ciphertext");
         return 0;
     }
 
     /* handle leftover bytes */
-    leftover = buf_len;
+    leftover = ctx->buf_len;
 
     switch (EVP_CIPHER_CTX_mode(ctx)) {
         case EVP_CIPH_ECB_MODE: {
             /* decrypt => P_n plus C' */
-            if (!(EVP_Cipher(ctx, tmp, final_buf, bl))) {
+            if (!(ctx->cipher->do_cipher(ctx, tmp, ctx->final, bl))) {
                 return 0;
             }
 
             /* C_n plus C' */
-            memcpy(&(buf[leftover]), &(tmp[leftover]), (bl - leftover));
+            memcpy(&(ctx->buf[leftover]), &(tmp[leftover]), (bl - leftover));
             /* decrypt => P_{n-1} */
-            if (!(EVP_Cipher(ctx, out, buf, bl))) {
+            if (!(ctx->cipher->do_cipher(ctx, out, ctx->buf, bl))) {
                 return 0;
             }
 
@@ -269,14 +249,14 @@ int H235CryptoHelper::DecryptFinalCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, i
             int i = 0;
             unsigned char C_n_minus_2[EVP_MAX_BLOCK_LENGTH];
 
-            memcpy(C_n_minus_2, EVP_CIPHER_CTX_iv(ctx), bl);
+            memcpy(C_n_minus_2, ctx->iv, bl);
 
-            /* C_n plus 0s in buf */
-            memset(&(buf[leftover]), 0, (bl - leftover));
+            /* C_n plus 0s in ctx->buf */
+            memset(&(ctx->buf[leftover]), 0, (bl - leftover));
 
-            /* final_buf is C_{n-1} */
+            /* ctx->final is C_{n-1} */
             /* decrypt => (P_n plus C')'' */
-            if (!(EVP_Cipher(ctx, tmp, final_buf, bl))) {
+            if (!(ctx->cipher->do_cipher(ctx, tmp, ctx->final, bl))) {
                 return 0;
             }
             /* XOR'ed with C_{n-2} => (P_n plus C')' */
@@ -285,18 +265,18 @@ int H235CryptoHelper::DecryptFinalCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, i
             }
             /* XOR'ed with (C_n plus 0s) => P_n plus C' */
             for (i = 0; i < bl; i++) {
-                tmp[i] = tmp[i] ^ buf[i];
+                tmp[i] = tmp[i] ^ ctx->buf[i];
             }
 
-            /* C_n plus C' in buf */
-            memcpy(&(buf[leftover]), &(tmp[leftover]), (bl - leftover));
+            /* C_n plus C' in ctx->buf */
+            memcpy(&(ctx->buf[leftover]), &(tmp[leftover]), (bl - leftover));
             /* decrypt => P_{n-1}'' */
-            if (!(EVP_Cipher(ctx, out, buf, bl))) {
+            if (!(ctx->cipher->do_cipher(ctx, out, ctx->buf, bl))) {
                 return 0;
             }
             /* XOR'ed with C_{n-1} => P_{n-1}' */
             for (i = 0; i < bl; i++) {
-                out[i] = out[i] ^ final_buf[i];
+                out[i] = out[i] ^ ctx->final[i];
             }
             /* XOR'ed with C_{n-2} => P_{n-1} */
             for (i = 0; i < bl; i++) {
@@ -307,69 +287,64 @@ int H235CryptoHelper::DecryptFinalCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, i
             *outl += (bl + leftover);
             return 1;
         }
-        default: {
+        default:
             PTRACE(1, "H235\tCTS Error: unsupported mode");
             return 0;
-        }
     }
 }
 
-int H235CryptoHelper::DecryptUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
-                      const unsigned char *in, int inl)
+int EVP_DecryptFinal_relaxed(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
 {
-    return EncryptUpdateCTS(ctx, out, outl, in, inl);
-}
-
-int H235CryptoHelper::DecryptFinalRelaxed(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl)
-{
+    unsigned int b = 0;
     *outl = 0;
 
-    const int b = EVP_CIPHER_CTX_block_size(ctx);
-    if (EVP_CIPHER_CTX_test_flags(ctx, EVP_CIPH_NO_PADDING)) {
-        if(buf_len) {
+    b=ctx->cipher->block_size;
+    if (ctx->flags & EVP_CIPH_NO_PADDING) {
+        if(ctx->buf_len) {
             PTRACE(1, "H235\tDecrypt error: data not a multiple of block length");
             return 0;
         }
+        *outl = 0;
         return 1;
     }
     if (b > 1) {
-        if (buf_len || !final_used) {
+        if (ctx->buf_len || !ctx->final_used) {
             PTRACE(1, "H235\tDecrypt error: wrong final block length");
-            return 0;
+            return(0);
         }
-        OPENSSL_assert(b <= (int)sizeof(final_buf));
-        int n = final_buf[b-1];
+        OPENSSL_assert(b <= sizeof ctx->final);
+        int n=ctx->final[b-1];
         if (n == 0 || n > (int)b) {
             PTRACE(1, "H235\tDecrypt error: bad decrypt");
-            return 0;
+            return(0);
         }
         // Polycom endpoints (eg. m100 and PVX) don't fill the padding propperly, so we have to disable this check
 /*
         for (int i=0; i<n; i++) {
-            if (final_buf[--b] != n) {
+            if (ctx->final[--b] != n) {
                 PTRACE(1, "H235\tDecrypt error: incorrect padding");
-                return 0;
+                return(0);
             }
         }
 */
-        n = b - n;
+        n=ctx->cipher->block_size-n;
         for (int i=0; i<n; i++)
-            out[i]=final_buf[i];
-        *outl = n;
+            out[i]=ctx->final[i];
+        *outl=n;
     }
-    return 1;
+    else
+        *outl=0;
+    return(1);
 }
 
 H235CryptoEngine::H235CryptoEngine(const PString & algorithmOID)
-:  m_encryptCtx(NULL), m_decryptCtx(NULL),
-   m_algorithmOID(algorithmOID), m_operationCnt(0), m_initialised(false),
+:  m_algorithmOID(algorithmOID), m_operationCnt(0), m_initialised(false),
    m_enc_blockSize(0), m_enc_ivLength(0), m_dec_blockSize(0), m_dec_ivLength(0)
 {
 }
 
 H235CryptoEngine::H235CryptoEngine(const PString & algorithmOID, const PBYTEArray & key)
-:  m_encryptCtx(NULL), m_decryptCtx(NULL),
-   m_algorithmOID(algorithmOID), m_operationCnt(0), m_initialised(false),
+:  m_algorithmOID(algorithmOID), m_operationCnt(0), m_initialised(false),
    m_enc_blockSize(0), m_enc_ivLength(0), m_dec_blockSize(0), m_dec_ivLength(0)
 {
     SetKey(key);
@@ -377,10 +352,10 @@ H235CryptoEngine::H235CryptoEngine(const PString & algorithmOID, const PBYTEArra
 
 H235CryptoEngine::~H235CryptoEngine()
 {
-    if (m_encryptCtx != NULL)
-      EVP_CIPHER_CTX_free(m_encryptCtx);
-    if (m_decryptCtx != NULL)
-      EVP_CIPHER_CTX_free(m_decryptCtx);
+    if (m_initialised) {
+        EVP_CIPHER_CTX_cleanup(&m_encryptCtx);
+        EVP_CIPHER_CTX_cleanup(&m_decryptCtx);
+    }
 }
 
 void H235CryptoEngine::SetKey(PBYTEArray key)
@@ -400,47 +375,15 @@ void H235CryptoEngine::SetKey(PBYTEArray key)
         return;
     }
 
-    m_initialised = false;
+    EVP_CIPHER_CTX_init(&m_encryptCtx);
+    EVP_EncryptInit_ex(&m_encryptCtx, cipher, NULL, key.GetPointer(), NULL);
+    m_enc_blockSize =  EVP_CIPHER_CTX_block_size(&m_encryptCtx);
+    m_enc_ivLength = EVP_CIPHER_CTX_iv_length(&m_encryptCtx);
 
-    if (m_encryptCtx == NULL) {
-      m_encryptCtx = EVP_CIPHER_CTX_new();
-      if (m_encryptCtx == NULL) {
-        PTRACE(1, "H235\tFailed to allocate EVP encrypt context");
-        return;
-      }
-    } else {
-#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
-      EVP_CIPHER_CTX_cleanup(m_encryptCtx);
-      EVP_CIPHER_CTX_init(m_encryptCtx);
-#else
-      EVP_CIPHER_CTX_reset(m_encryptCtx);
-#endif
-    }
-
-    EVP_EncryptInit_ex(m_encryptCtx, cipher, NULL, key.GetPointer(), NULL);
-    m_enc_blockSize =  EVP_CIPHER_CTX_block_size(m_encryptCtx);
-    m_enc_ivLength = EVP_CIPHER_CTX_iv_length(m_encryptCtx);
-    m_encryptHelper.Reset();
-
-    if (m_decryptCtx == NULL) {
-      m_decryptCtx = EVP_CIPHER_CTX_new();
-      if (m_decryptCtx == NULL) {
-        PTRACE(1, "H235\tFailed to allocate EVP decrypt context");
-        return;
-      }
-    } else {
-#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
-      EVP_CIPHER_CTX_cleanup(m_decryptCtx);
-      EVP_CIPHER_CTX_init(m_decryptCtx);
-#else
-      EVP_CIPHER_CTX_reset(m_decryptCtx);
-#endif
-    }
-
-    EVP_DecryptInit_ex(m_decryptCtx, cipher, NULL, key.GetPointer(), NULL);
-    m_dec_blockSize =  EVP_CIPHER_CTX_block_size(m_decryptCtx);
-    m_dec_ivLength = EVP_CIPHER_CTX_iv_length(m_decryptCtx);
-    m_decryptHelper.Reset();
+    EVP_CIPHER_CTX_init(&m_decryptCtx);
+    EVP_DecryptInit_ex(&m_decryptCtx, cipher, NULL, key.GetPointer(), NULL);
+    m_dec_blockSize =  EVP_CIPHER_CTX_block_size(&m_decryptCtx);
+    m_dec_ivLength = EVP_CIPHER_CTX_iv_length(&m_decryptCtx);
 
     m_operationCnt = 0;
     m_initialised = true;
@@ -471,37 +414,40 @@ PBYTEArray H235CryptoEngine::Encrypt(const PBYTEArray & _data, unsigned char * i
     unsigned char iv[EVP_MAX_IV_LENGTH];
 
     // max ciphertext len for a n bytes of plaintext is n + BLOCK_SIZE -1 bytes
-    int ciphertext_len = data.GetSize() + EVP_CIPHER_CTX_block_size(m_encryptCtx);
+    int ciphertext_len = data.GetSize() + EVP_CIPHER_CTX_block_size(&m_encryptCtx);
     int final_len = 0;
     PBYTEArray ciphertext(ciphertext_len);
 
-    SetIV(iv, ivSequence, EVP_CIPHER_CTX_iv_length(m_encryptCtx));
-    EVP_EncryptInit_ex(m_encryptCtx, NULL, NULL, NULL, iv);
-    m_encryptHelper.Reset();
+    SetIV(iv, ivSequence, EVP_CIPHER_CTX_iv_length(&m_encryptCtx));
+    EVP_EncryptInit_ex(&m_encryptCtx, NULL, NULL, NULL, iv);
 
     // always use padding, because our ciphertext stealing implementation
     // doesn't seem to produce compatible results
-    //rtpPadding = (data.GetSize() < EVP_CIPHER_CTX_block_size(m_encryptCtx));  // not interoperable!
-    rtpPadding = (data.GetSize() % EVP_CIPHER_CTX_block_size(m_encryptCtx) > 0);
-    EVP_CIPHER_CTX_set_padding(m_encryptCtx, rtpPadding ? 1 : 0);
+    //rtpPadding = (data.GetSize() < EVP_CIPHER_CTX_block_size(&m_encryptCtx));  // not interoperable!
+    rtpPadding = (data.GetSize() % EVP_CIPHER_CTX_block_size(&m_encryptCtx) > 0);
+    EVP_CIPHER_CTX_set_padding(&m_encryptCtx, rtpPadding ? 1 : 0);
 
-    if (!rtpPadding && (data.GetSize() % EVP_CIPHER_CTX_block_size(m_encryptCtx) > 0)) {
+    if (!rtpPadding && (data.GetSize() % EVP_CIPHER_CTX_block_size(&m_encryptCtx) > 0)) {
         // use cyphertext stealing
-        if (!m_encryptHelper.EncryptUpdateCTS(m_encryptCtx, ciphertext.GetPointer(), &ciphertext_len, data.GetPointer(), data.GetSize())) {
+        if (!EVP_EncryptUpdate_cts(&m_encryptCtx, ciphertext.GetPointer(), &ciphertext_len, data.GetPointer(), data.GetSize())) {
             PTRACE(1, "H235\tEVP_EncryptUpdate_cts() failed");
         }
-        if (!m_encryptHelper.EncryptFinalCTS(m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len)) {
+#if PTLIB_VER >= 2130
+        if (!EVP_EncryptFinal_ctsA(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len)) {
+#else
+        if (!EVP_EncryptFinal_cts(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len)) {
+#endif
             PTRACE(1, "H235\tEVP_EncryptFinal_cts() failed");
         }
     } else {
         /* update ciphertext, ciphertext_len is filled with the length of ciphertext generated,
          *len is the size of plaintext in bytes */
-        if (!EVP_EncryptUpdate(m_encryptCtx, ciphertext.GetPointer(), &ciphertext_len, data.GetPointer(), data.GetSize())) {
+        if (!EVP_EncryptUpdate(&m_encryptCtx, ciphertext.GetPointer(), &ciphertext_len, data.GetPointer(), data.GetSize())) {
             PTRACE(1, "H235\tEVP_EncryptUpdate() failed");
         }
 
         // update ciphertext with the final remaining bytes, if any use RTP padding
-        if (!EVP_EncryptFinal_ex(m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len)) {
+        if (!EVP_EncryptFinal_ex(&m_encryptCtx, ciphertext.GetPointer() + ciphertext_len, &final_len)) {
             PTRACE(1, "H235\tEVP_EncryptFinal_ex() failed");
         }
     }
@@ -524,29 +470,32 @@ PINDEX H235CryptoEngine::EncryptInPlace(const BYTE * inData, PINDEX inLength, BY
     int inSize =  inLength + m_enc_blockSize;
 
     SetIV(m_iv, ivSequence, m_enc_ivLength);
-    EVP_EncryptInit_ex(m_encryptCtx, NULL, NULL, NULL, m_iv);
-    m_encryptHelper.Reset();
+    EVP_EncryptInit_ex(&m_encryptCtx, NULL, NULL, NULL, m_iv);
 
     rtpPadding = (inLength % m_enc_blockSize > 0);
-    EVP_CIPHER_CTX_set_padding(m_encryptCtx, rtpPadding ? 1 : 0);
+    EVP_CIPHER_CTX_set_padding(&m_encryptCtx, rtpPadding ? 1 : 0);
 
     if (!rtpPadding && (inLength % m_enc_blockSize > 0)) {
         // use cyphertext stealing
-        if (!m_encryptHelper.EncryptUpdateCTS(m_encryptCtx, outData, &inSize, inData, inLength)) {
+        if (!EVP_EncryptUpdate_cts(&m_encryptCtx, outData, &inSize, inData, inLength)) {
             PTRACE(1, "H235\tEVP_EncryptUpdate_cts() failed");
         }
-        if (!m_encryptHelper.EncryptFinalCTS(m_encryptCtx, outData + inSize, &outSize)) {
+#if PTLIB_VER >= 2130
+        if (!EVP_EncryptFinal_ctsA(&m_encryptCtx, outData + inSize, &outSize)) {
+#else
+        if (!EVP_EncryptFinal_cts(&m_encryptCtx, outData + inSize, &outSize)) {
+#endif
             PTRACE(1, "H235\tEVP_EncryptFinal_cts() failed");
         }
     } else {
         /* update ciphertext, ciphertext_len is filled with the length of ciphertext generated,
          *len is the size of plaintext in bytes */
-        if (!EVP_EncryptUpdate(m_encryptCtx, outData, &inSize, inData, inLength)) {
+        if (!EVP_EncryptUpdate(&m_encryptCtx, outData, &inSize, inData, inLength)) {
             PTRACE(1, "H235\tEVP_EncryptUpdate() failed");
         }
 
         // update ciphertext with the final remaining bytes, if any use RTP padding
-        if (!EVP_EncryptFinal_ex(m_encryptCtx, outData + inSize, &outSize)) {
+        if (!EVP_EncryptFinal_ex(&m_encryptCtx, outData + inSize, &outSize)) {
             PTRACE(1, "H235\tEVP_EncryptFinal_ex() failed");
         }
     }
@@ -566,25 +515,24 @@ PBYTEArray H235CryptoEngine::Decrypt(const PBYTEArray & _data, unsigned char * i
     int final_len = 0;
     PBYTEArray plaintext(plaintext_len);
 
-    SetIV(iv, ivSequence, EVP_CIPHER_CTX_iv_length(m_decryptCtx));
-    EVP_DecryptInit_ex(m_decryptCtx, NULL, NULL, NULL, iv);
-    m_decryptHelper.Reset();
+    SetIV(iv, ivSequence, EVP_CIPHER_CTX_iv_length(&m_decryptCtx));
+    EVP_DecryptInit_ex(&m_decryptCtx, NULL, NULL, NULL, iv);
 
-    EVP_CIPHER_CTX_set_padding(m_decryptCtx, rtpPadding ? 1 : 0);
+    EVP_CIPHER_CTX_set_padding(&m_decryptCtx, rtpPadding ? 1 : 0);
 
-    if (!rtpPadding && data.GetSize() % EVP_CIPHER_CTX_block_size(m_decryptCtx) > 0) {
+    if (!rtpPadding && data.GetSize() % EVP_CIPHER_CTX_block_size(&m_decryptCtx) > 0) {
         // use cyphertext stealing
-        if (!m_decryptHelper.DecryptUpdateCTS(m_decryptCtx, plaintext.GetPointer(), &plaintext_len, data.GetPointer(), data.GetSize())) {
+        if (!EVP_DecryptUpdate_cts(&m_decryptCtx, plaintext.GetPointer(), &plaintext_len, data.GetPointer(), data.GetSize())) {
             PTRACE(1, "H235\tEVP_DecryptUpdate_cts() failed");
         }
-        if(!m_decryptHelper.DecryptFinalCTS(m_decryptCtx, plaintext.GetPointer() + plaintext_len, &final_len)) {
+        if(!EVP_DecryptFinal_cts(&m_decryptCtx, plaintext.GetPointer() + plaintext_len, &final_len)) {
             PTRACE(1, "H235\tEVP_DecryptFinal_cts() failed");
         }
     } else {
-        if (!m_decryptHelper.DecryptUpdate(m_decryptCtx, plaintext.GetPointer(), &plaintext_len, data.GetPointer(), data.GetSize())) {
+        if (!EVP_DecryptUpdate(&m_decryptCtx, plaintext.GetPointer(), &plaintext_len, data.GetPointer(), data.GetSize())) {
             PTRACE(1, "H235\tEVP_DecryptUpdate() failed");
         }
-        if (!m_decryptHelper.DecryptFinalRelaxed(m_decryptCtx, plaintext.GetPointer() + plaintext_len, &final_len)) {
+        if (!EVP_DecryptFinal_relaxed(&m_decryptCtx, plaintext.GetPointer() + plaintext_len, &final_len)) {
             PTRACE(1, "H235\tEVP_DecryptFinal_ex() failed - incorrect padding ?");
         }
     }
@@ -603,27 +551,26 @@ PINDEX H235CryptoEngine::DecryptInPlace(const BYTE * inData, PINDEX inLength, BY
     int inSize =  inLength;
 
     SetIV(m_iv, ivSequence, m_dec_ivLength);
-    EVP_DecryptInit_ex(m_decryptCtx, NULL, NULL, NULL, m_iv);
-    m_decryptHelper.Reset();
+    EVP_DecryptInit_ex(&m_decryptCtx, NULL, NULL, NULL, m_iv);
 
-    EVP_CIPHER_CTX_set_padding(m_decryptCtx, rtpPadding ? 1 : 0);
+    EVP_CIPHER_CTX_set_padding(&m_decryptCtx, rtpPadding ? 1 : 0);
 
     if (!rtpPadding && inLength % m_dec_blockSize > 0) {
         // use cyphertext stealing
-        if (!m_decryptHelper.DecryptUpdateCTS(m_decryptCtx, outData, &inSize, inData, inLength)) {
+        if (!EVP_DecryptUpdate_cts(&m_decryptCtx, outData, &inSize, inData, inLength)) {
             PTRACE(1, "H235\tEVP_DecryptUpdate_cts() failed");
 			return 0;	// no usable payload
         }
-        if(!m_decryptHelper.DecryptFinalCTS(m_decryptCtx, outData + inSize, &outSize)) {
+        if(!EVP_DecryptFinal_cts(&m_decryptCtx, outData + inSize, &outSize)) {
             PTRACE(1, "H235\tEVP_DecryptFinal_cts() failed");
 			return 0;	// no usable payload
         }
     } else {
-        if (!m_decryptHelper.DecryptUpdate(m_decryptCtx, outData, &inSize, inData, inLength)) {
+        if (!EVP_DecryptUpdate(&m_decryptCtx, outData, &inSize, inData, inLength)) {
             PTRACE(1, "H235\tEVP_DecryptUpdate() failed");
 			return 0;	// no usable payload
         }
-        if (!m_decryptHelper.DecryptFinalRelaxed(m_decryptCtx, outData + inSize, &outSize)) {
+        if (!EVP_DecryptFinal_relaxed(&m_decryptCtx, outData + inSize, &outSize)) {
             PTRACE(1, "H235\tEVP_DecryptFinal_ex() failed - incorrect padding ?");
 			return 0;	// no usable payload
         }
