@@ -71,9 +71,9 @@ class H323PluginCodecManager : public PPluginModuleManager
 	static void Reboot();
 /*
     H323Capability * CreateCapability(
-          const PString & _mediaFormat, 
+          const PString & _mediaFormat,
           const PString & _baseName,
-                 unsigned maxFramesPerPacket, 
+                 unsigned maxFramesPerPacket,
                  unsigned recommendedFramesPerPacket,
                  unsigned _pluginSubType);
 */
@@ -98,7 +98,8 @@ class H323PluginCodecManager : public PPluginModuleManager
     };
     typedef vector<CapabilityListCreateEntry> CapabilityCreateListType;
     CapabilityCreateListType capabilityCreateList;
-    
+
+    bool m_skipRedefinitions;
 };
 
 #if (PTLIB_VAR < 2140) || defined(_FACTORY_LOAD)
@@ -136,7 +137,7 @@ class OpalFactoryCodec : public PObject {
                              void * to,        ///< pointer to the destination buffer, which contains the output of the  conversion
 		                 unsigned * toLen,     ///< Number of available bytes in the destination buffer
                      unsigned int * flag       ///< Typically, this is not used.
-		       ) = 0;  
+		       ) = 0;
 
     /** Return the  sampleRate field of PluginCodec_Definition for this codec*/
     virtual unsigned int GetSampleRate() const = 0;

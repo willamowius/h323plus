@@ -2649,12 +2649,17 @@ PMutex & H323PluginCodecManager::GetMediaFormatMutex()
 }
 
 H323PluginCodecManager::H323PluginCodecManager(PPluginManager * _pluginMgr)
- : PPluginModuleManager(PLUGIN_CODEC_GET_CODEC_FN_STR, _pluginMgr)
+ : PPluginModuleManager(PLUGIN_CODEC_GET_CODEC_FN_STR, _pluginMgr), m_skipRedefinitions(false)
 {
   // this code runs before the application is able to set the trace level
   char * debug_level = getenv ("PTLIB_TRACE_CODECS");
   if (debug_level != NULL) {
     PTrace::SetLevel(atoi(debug_level));
+  }
+  // skip plugin codecs that re-define built-in codecs (default is to overwrite)
+  char * codec_redefine = getenv ("PTLIB_SKIP_CODEC_REDEFINITION");
+  if (codec_redefine != NULL) {
+    m_skipRedefinitions = true;
   }
 
   // instantiate all of the media formats
@@ -2916,6 +2921,10 @@ void H323PluginCodecManager::CreateCapabilityAndMediaFormat(
     OpalMediaFormat existingFormat(fmtName, TRUE);
     if (existingFormat.IsValid()) {
       PTRACE(5, "H323PLUGIN\tMedia format " << fmtName << " already exists");
+      if (m_skipRedefinitions) {
+        PTRACE(3, "H323PLUGIN\tSkipping new definition of " << fmtName);
+        return;
+      }
       H323PluginCodecManager::AddFormat(existingFormat);
     } else {
       PTRACE(5, "H323PLUGIN\tCreating new media format " << fmtName);
