@@ -1382,7 +1382,7 @@ PBoolean H230Control::OnReceivePACKResponse(const PASN_OctetString & rawpdu)
 		delete u;
 	}
 
-	if (userlist.size() > 0)
+	if (!userlist.empty())
        OnUserEnquiryResponse(userlist);
 
     return TRUE;

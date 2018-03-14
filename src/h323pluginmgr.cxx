@@ -1686,7 +1686,7 @@ void H323PluginVideoCodec::OnFlowControl(long bitRateRestriction)
 PBoolean H323PluginVideoCodec::SetSupportedFormats(std::list<PVideoFrameInfo> & info)
 {
     PluginCodec_ControlDefn * ctl = GetCodecControl(codec, SET_CODEC_FORMAT_OPTIONS);
-    if (ctl != NULL && info.size() > 0) {
+    if (ctl != NULL && !info.empty()) {
       int i = 0;
       PStringArray list(info.size()*2 + mediaFormat.GetOptionCount()*2);
       for (std::list<PVideoFrameInfo>::const_iterator r = info.begin(); r != info.end(); ++r) {

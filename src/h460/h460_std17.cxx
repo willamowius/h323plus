@@ -46,7 +46,7 @@
 #include <h323pdu.h>
 #include <h460/h460_std17.h>
 #ifdef H323_H46026
- #include <h460/h460_std26.h> 
+ #include <h460/h460_std26.h>
 #endif
 
 #include <ptclib/pdns.h>
@@ -76,14 +76,14 @@ static PBoolean FindSRVRecords(std::vector<LookupRecord> & recs,
       recPtr = srvRecords.GetNext();
       PTRACE(4, "H323\tFound " << rec.addr << ":" << rec.port << " with SRV " << srv << " for domain " << domain);
     }
-  } 
+  }
   return found;
 #else
   return false;
 #endif
 }
 
-static PBoolean FindRoutes(const PString & domain, std::vector<std::pair<LookupRecord,H323TransportSecurity> > & routes, H323TransportSecurity * sec)
+static PBoolean FindRoutes(const PString & domain, std::vector<std::pair<LookupRecord, H323TransportSecurity> > & routes, H323TransportSecurity * sec)
 {
     std::vector<LookupRecord> secureRoute;
     std::vector<LookupRecord>::iterator r;
@@ -97,7 +97,7 @@ static PBoolean FindRoutes(const PString & domain, std::vector<std::pair<LookupR
         if (routes.size() > 0)
             return true;
     }
-        
+
     std::vector<LookupRecord> route;
     H323TransportSecurity unsecure;
     FindSRVRecords(route, domain, "_h323rs._tcp.");
@@ -138,12 +138,12 @@ void H460_FeatureStd17::AttachConnection(H323Connection * _con)
 
 }
 
-int H460_FeatureStd17::GetPurpose()    
-{ 
+int H460_FeatureStd17::GetPurpose()
+{
     if (isEnabled)
       return FeatureRas;
     else
-      return FeatureBase; 
+      return FeatureBase;
 }
 
 PBoolean H460_FeatureStd17::Initialise(const PString & remoteAddr, PBoolean srv)
@@ -156,7 +156,7 @@ PBoolean H460_FeatureStd17::Initialise(H323TransportSecurity * sec, const PStrin
  if (!srv) {  // We are not doing SRV lookup
     H323TransportAddress rem(remoteAddr);
     if (!InitialiseTunnel(rem,*sec)) {
-         PTRACE(2,"H46017\tTunnel to " << rem << " Failed!"); 
+         PTRACE(2,"H46017\tTunnel to " << rem << " Failed!");
          return false;
     }
     if (!m_handler)
@@ -171,7 +171,7 @@ PBoolean H460_FeatureStd17::Initialise(H323TransportSecurity * sec, const PStrin
     typedef std::vector<std::pair<LookupRecord,H323TransportSecurity> > type_routes;
     type_routes routes;
 
-    if (!FindRoutes(remoteAddr,routes,sec)) {
+    if (!FindRoutes(remoteAddr, routes, sec)) {
         PTRACE(2,"H46017\tNo Gatekeeper registration SRV Records found!");
         return false;
     }
@@ -183,7 +183,7 @@ PBoolean H460_FeatureStd17::Initialise(H323TransportSecurity * sec, const PStrin
        const H323TransportSecurity & sec = r->second;
 
        if (!InitialiseTunnel(rem,sec)) {
-         PTRACE(2,"H46017\t" << (sec.IsTLSEnabled() ? "TLS " : "") << "Tunnel to " << rem << " Failed!"); 
+         PTRACE(2,"H46017\t" << (sec.IsTLSEnabled() ? "TLS " : "") << "Tunnel to " << rem << " Failed!");
          continue;
        }
 #ifdef H323_H46018
@@ -239,7 +239,7 @@ class H46017TransportThread : public PThread
 H46017TransportThread::H46017TransportThread(H323EndPoint & ep, H46017Transport * t)
   : PThread(ep.GetSignallingThreadStackSize(), AutoDeleteThread, NormalPriority, "H46017:%0x"),
     transport(t)
-{  
+{
 
    transport->AttachThread(this);
 
@@ -271,7 +271,7 @@ void H46017TransportThread::Main()
             PTRACE(3, "H46017\tConnection ReEstablished");
             transport->ConnectionLost(FALSE);
         }
-      } 
+      }
   }
 
   PTRACE(3, "H46017\tTransport Closed");
@@ -284,9 +284,9 @@ void H46017TransportThread::Main()
 H46017Transport::H46017Transport(H323EndPoint & endpoint,
                                  PIPSocket::Address binding,
                                  H46017Handler * feat
-                ) 
-   : H323TransportTCP(endpoint,binding), 
-     ReadTimeOut(PMaxTimeInterval), 
+                )
+   : H323TransportTCP(endpoint,binding),
+     ReadTimeOut(PMaxTimeInterval),
      Feature(feat), remoteShutDown(false), closeTransport(false), m_signalProcess(NULL)
  #ifdef H323_H46026
      ,m_h46026tunnel(false), m_socketMgr(NULL), m_socketWrite(NULL)
@@ -304,10 +304,10 @@ PBoolean FindH46017RAS(const H225_H323_UU_PDU & pdu, std::list<PBYTEArray> & ras
 {
     if (pdu.HasOptionalField(H225_H323_UU_PDU::e_genericData)) {
        const H225_ArrayOf_GenericData & data = pdu.m_genericData;
-        for (PINDEX i=0; i < data.GetSize(); i++) {
+        for (PINDEX i = 0; i < data.GetSize(); i++) {
             if (data[i].m_id == H460_FeatureID(17)) {
                H460_Feature feat((const H225_FeatureDescriptor &)data[i]);
-               for (PINDEX i=0; i< feat.GetParameterCount(); ++i) {
+               for (PINDEX i = 0; i< feat.GetParameterCount(); ++i) {
                    H460_FeatureParameter & param = feat.GetFeatureParameter(i);
                    if (param.ID() == 1 && param.hasContent()) {
                      PASN_OctetString raw = param;
@@ -317,7 +317,7 @@ PBoolean FindH46017RAS(const H225_H323_UU_PDU & pdu, std::list<PBYTEArray> & ras
             }
         }
     }
-    return (ras.size() > 0);
+    return (!ras.empty());
 }
 
 PBoolean H46017Transport::WriteRasPDU(const PBYTEArray & pdu)
@@ -335,15 +335,15 @@ PBoolean H46017Transport::WriteRasPDU(const PBYTEArray & pdu)
   gdata.SetSize(sz+1);
   H225_GenericData & data = gdata[sz];
 
-        H460_FeatureStd feat = H460_FeatureStd(17);
-        PASN_OctetString encFrame;
-        encFrame.SetValue(pdu);
-        feat.Add(1,H460_FeatureContent(encFrame));
-        data = feat;
-        
+  H460_FeatureStd feat = H460_FeatureStd(17);
+  PASN_OctetString encFrame;
+  encFrame.SetValue(pdu);
+  feat.Add(1,H460_FeatureContent(encFrame));
+  data = feat;
+
  rasPDU.BuildQ931();
 
- PTRACE(6,"H46017\tSend " << rasPDU);
+ PTRACE(6, "H46017\tSend " << rasPDU);
  return WriteTunnel(rasPDU);
 }
 
@@ -356,7 +356,7 @@ PBoolean H46017Transport::HandleH46017Socket()
           return false;
 
       H323SignalPDU rpdu;
-      if (!rpdu.Read(*this)) { 
+      if (!rpdu.Read(*this)) {
             PTRACE(3, "H46017\tSocket Read Failure");
             if (GetErrorNumber(PChannel::LastReadError) == 0) {
               PTRACE(3, "H46017\tRemote SHUT DOWN or Intermediary Shutdown!");
@@ -373,11 +373,11 @@ PBoolean H46017Transport::HandleH46017Socket()
               PTRACE(6,"H46017\tEscape received. Ignoring...");
               continue;
           }
-#ifdef H323_H46026 
+#ifdef H323_H46026
           if (m_h46026tunnel) {
               m_socketMgr->SocketIn(rpdu.GetQ931());
               continue;
-          } else 
+          } else
 #endif
           {
               if (HandleH46017PDU(rpdu.GetQ931()))
@@ -399,7 +399,7 @@ PBoolean H46017Transport::HandleH46017PDU(const Q931 & q931)
 PBoolean H46017Transport::HandleH46017PDU(H323SignalPDU & pdu)
 {
     // Inspect the signalling message to see if RAS
-     if (HandleH46017RAS(pdu)) 
+     if (HandleH46017RAS(pdu))
          return true;
      else if (HandleH46017SignalPDU(pdu))
          return true;
@@ -410,11 +410,10 @@ PBoolean H46017Transport::HandleH46017PDU(H323SignalPDU & pdu)
 PBoolean H46017Transport::HandleH46017RAS(const H323SignalPDU & pdu)
 {
     std::list<PBYTEArray> ras;
-    if ((pdu.GetQ931().GetMessageType() == Q931::FacilityMsg) &&
-                           FindH46017RAS(pdu.m_h323_uu_pdu,ras)) {
-       H46017RasTransport * rasTransport = Feature->GetRasTransport(); 
+    if ((pdu.GetQ931().GetMessageType() == Q931::FacilityMsg) && FindH46017RAS(pdu.m_h323_uu_pdu, ras)) {
+       H46017RasTransport * rasTransport = Feature->GetRasTransport();
        for (std::list<PBYTEArray>::iterator r = ras.begin(); r != ras.end(); ++r) {
-           if (!rasTransport->ReceivedPDU(*r)) 
+           if (!rasTransport->ReceivedPDU(*r))
               return false;
        }
        ras.clear();
@@ -440,7 +439,7 @@ PBoolean H46017Transport::HandleH46017SignalPDU(H323SignalPDU & pdu)
     return true;
 }
 
-void H46017Transport::SignalProcess(PThread &,  H323_INT)
+void H46017Transport::SignalProcess(PThread &, H323_INT)
 {
     H323SignalPDU pdu;
     PBoolean dataToProcess = false;
@@ -455,7 +454,7 @@ void H46017Transport::SignalProcess(PThread &,  H323_INT)
             }
             signalMutex.Signal();
             if (dataToProcess) {
-                HandleH46017SignallingPDU(pdu.GetQ931().GetCallReference(),pdu);
+                HandleH46017SignallingPDU(pdu.GetQ931().GetCallReference(), pdu);
                 dataToProcess = false;
             }
         }
@@ -479,7 +478,7 @@ PBoolean H46017Transport::HandleH46017SignallingPDU(unsigned crv, H323SignalPDU 
   if (!connection) {
       PTRACE(2, "H46017\tConnection " << crv << " not found or could not process. Q931 not processed.");
       return true;
-  }   
+  }
   if (!connection->HandleReceivedSignalPDU(true, pdu)) {
       PTRACE(2, "H46017\tMessage not processed dropping call.");
   }
@@ -530,21 +529,21 @@ PTRACE(4, "H46017\tSending Tunnel\t" << pdu);
 
     if (WritePDU(strm))
         return true;
- 
+
    PTRACE(1, "H46017\tTunnel write failed ("
          << GetErrorNumber(PChannel::LastWriteError)
          << "): " << GetErrorText(PChannel::LastWriteError));
 
     return false;
 }
-    
+
 PBoolean H46017Transport::ReadPDU(PBYTEArray & pdu)
 {
     return H323TransportTCP::ReadPDU(pdu);
 }
 
-PBoolean H46017Transport::Connect() 
-{ 
+PBoolean H46017Transport::Connect()
+{
     if (closeTransport)
         return true;
 
@@ -561,7 +560,7 @@ void H46017Transport::ConnectionLost(PBoolean established)
 
     if (closeTransport) {
         // TODO Handle TCP socket reconnect
-        if (Feature) 
+        if (Feature)
             Feature->TransportClosed();
         return;
     }
@@ -569,13 +568,13 @@ void H46017Transport::ConnectionLost(PBoolean established)
     PTRACE(4,"H46017\tConnection lost " << established << " have " << lost);
 }
 
-PBoolean H46017Transport::IsConnectionLost() const  
-{ 
-    return Feature->IsConnectionLost(); 
+PBoolean H46017Transport::IsConnectionLost() const
+{
+    return Feature->IsConnectionLost();
 }
 
-PBoolean H46017Transport::Close() 
-{ 
+PBoolean H46017Transport::Close()
+{
    PWaitAndSignal m(shutdownMutex);
 
    closeTransport = TRUE;
@@ -587,14 +586,14 @@ PBoolean H46017Transport::Close()
    signalMutex.Signal();
    msgRecd.Signal();
 
-   PTRACE(4, "H46017\tClosing H46017 NAT channel.");   
-   return H323TransportTCP::Close(); 
+   PTRACE(4, "H46017\tClosing H46017 NAT channel.");
+   return H323TransportTCP::Close();
 }
 
 void H46017Transport::CleanUpOnTermination()
 {
   // Do nothing at the end of a call. This is a permanent connection
-  PTRACE(4, "H46017\tIgnore cleanup of H46017 NAT channel.");  
+  PTRACE(4, "H46017\tIgnore cleanup of H46017 NAT channel.");
 }
 
 PBoolean H46017Transport::IsOpen () const
@@ -603,7 +602,7 @@ PBoolean H46017Transport::IsOpen () const
 }
 
 PBoolean H46017Transport::IsListening() const
-{      
+{
   if (h245listener == NULL)
     return FALSE;
 
@@ -671,7 +670,7 @@ H46017Handler::H46017Handler(H323EndPoint & _ep, const H323TransportAddress & _r
 #endif
 {
     PTRACE(4, "H46017\tCreating H46017 Feature.");
-    
+
     PIPSocket::Address remAddr;
     remoteAddress.GetIpAddress(remAddr);
     localBindAddress = PIPSocket::GetRouteInterfaceAddress(remAddr);
@@ -695,8 +694,7 @@ PBoolean H46017Handler::CreateNewTransport(const H323TransportSecurity & securit
 {
     PTRACE(5, "H46017\tCreating Transport.");
 
-    curtransport = new H46017Transport(ep,
-                       PIPSocket::Address::GetAny(remoteAddress.GetIpVersion()), this);
+    curtransport = new H46017Transport(ep, PIPSocket::Address::GetAny(remoteAddress.GetIpVersion()), this);
 
     curtransport->InitialiseSecurity(&security);
     curtransport->SetRemoteAddress(remoteAddress);
@@ -706,17 +704,17 @@ PBoolean H46017Handler::CreateNewTransport(const H323TransportSecurity & securit
         new H46017TransportThread(curtransport->GetEndPoint(), curtransport);
         openTransport = true;
         return TRUE;
-    } 
-     
+    }
+
     PTRACE(3, "H46017\tTransport Failure " << curtransport->GetRemoteAddress());
     delete curtransport;
     curtransport = NULL;
     return FALSE;
 }
 
-H323EndPoint * H46017Handler::GetEndPoint() 
-{ 
-    return &ep; 
+H323EndPoint * H46017Handler::GetEndPoint()
+{
+    return &ep;
 }
 
 H323TransportAddress H46017Handler::GetTunnelBindAddress() const
@@ -735,7 +733,7 @@ void H46017Handler::AttachRasTransport(H46017RasTransport * _ras)
     if (!ras)
         curtransport->Close();
 }
-   
+
 H46017RasTransport * H46017Handler::GetRasTransport()
 {
     return ras;
@@ -833,7 +831,7 @@ PBoolean H46017RasTransport::ReceivedPDU(const PBYTEArray & pdu)
 PBoolean H46017RasTransport::ReadPDU(PBYTEArray & pdu)
 {
     msgRecd.Wait();
-    if (shutdown) 
+    if (shutdown)
       return false;
 
     pdu = recdpdu;
@@ -850,9 +848,9 @@ PBoolean H46017RasTransport::DiscoverGatekeeper(H323Gatekeeper & /*gk*/, H323Ras
     return true;
 }
 
-PBoolean H46017RasTransport::IsRASTunnelled()  
-{ 
-    return true; 
+PBoolean H46017RasTransport::IsRASTunnelled()
+{
+    return true;
 }
 
 PChannel::Errors H46017RasTransport::GetErrorCode(ErrorGroup /*group*/) const
@@ -871,9 +869,3 @@ void H46017RasTransport::CleanUpOnTermination()
 }
 
 #endif // H323_H46017
-
-
-
-
-
-
