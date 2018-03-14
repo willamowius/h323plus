@@ -94,7 +94,7 @@ static PBoolean FindRoutes(const PString & domain, std::vector<std::pair<LookupR
         for (r = secureRoute.begin(); r != secureRoute.end(); ++r)
            routes.push_back(std::make_pair(*r,tls));
 
-        if (routes.size() > 0)
+        if (!routes.empty())
             return true;
     }
 
@@ -104,7 +104,7 @@ static PBoolean FindRoutes(const PString & domain, std::vector<std::pair<LookupR
     for (r = route.begin(); r != route.end(); ++r)
        routes.push_back(std::make_pair(*r,unsecure));
 
-    return routes.size() > 0;
+    return !routes.empty();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////

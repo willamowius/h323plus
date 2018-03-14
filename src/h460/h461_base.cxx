@@ -804,7 +804,7 @@ PBoolean H461DataStore::FindApplications(DataType type, const PString & key, std
                 id.push_back(i->first);
         ++i;
     }
-    return (id.size() > 0);
+    return (!id.empty());
 }
 
 
@@ -907,7 +907,7 @@ bool H461DataStore::FindCallAssociates(int callID, std::list<int> & assoc)
         ++i;
     }
     assoc.unique();
-    return (assoc.size() > 0);
+    return (!assoc.empty());
 }
 
 void H461DataStore::GetCallApplicationList(const PString & call)

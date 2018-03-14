@@ -23,7 +23,7 @@
  * the License for the specific language governing rights and limitations
  * under the License.
  *
- * The Original Code is derived from and used in conjunction with the 
+ * The Original Code is derived from and used in conjunction with the
  * H323Plus Project (www.h323plus.org/)
  *
  * The Initial Developer of the Original Code is ISVO (Asia) Pte Ltd.
@@ -99,9 +99,9 @@ static PBoolean ReadRTPFrame(const Q931 & q931, H46026_UDPFrame & data)
     }
 
     // sanity checks.
-    if ((!uuie.m_h323_uu_pdu.HasOptionalField(H225_H323_UU_PDU::e_genericData)) || 
-        (uuie.m_h323_uu_pdu.m_genericData.GetSize() == 0) || 
-        (!uuie.m_h323_uu_pdu.m_genericData[0].HasOptionalField(H225_GenericData::e_parameters)) || 
+    if ((!uuie.m_h323_uu_pdu.HasOptionalField(H225_H323_UU_PDU::e_genericData)) ||
+        (uuie.m_h323_uu_pdu.m_genericData.GetSize() == 0) ||
+        (!uuie.m_h323_uu_pdu.m_genericData[0].HasOptionalField(H225_GenericData::e_parameters)) ||
         (uuie.m_h323_uu_pdu.m_genericData[0].m_parameters.GetSize() == 0) ||
         (!uuie.m_h323_uu_pdu.m_genericData[0].m_parameters[0].HasOptionalField(H225_EnumeratedParameter::e_content))
         ) {
@@ -166,7 +166,7 @@ static PString H46026PriorityAsString(int priority)
     switch (priority) {
         case socketOrder::Priority_Critical:  return "Critical(Audio)";
         case socketOrder::Priority_Discretion:  return "Discretion(Video)";
-        case socketOrder::Priority_High:  return "High(Signal)";        
+        case socketOrder::Priority_High:  return "High(Signal)";
         case socketOrder::Priority_Low: return "Low(RTCP)";
         default: return "Unknown";
     }
@@ -194,9 +194,9 @@ static PString H46026MediaSessionId(int type)
 }
 
 static PString H46026MediaFrameAnalysis(const H46026_UDPFrame & data)
-{      
+{
     PStringStream rtpInfo;
-    for (PINDEX i=0; i < data.m_frame.GetSize(); ++i) {
+    for (PINDEX i = 0; i < data.m_frame.GetSize(); ++i) {
         H46026_FrameData & frame = data.m_frame[i];
         PASN_OctetString & fdata = frame;
         H46026_MediaFrame & rtpData = (H46026_MediaFrame &)fdata.GetValue();
@@ -208,12 +208,12 @@ static PString H46026MediaFrameAnalysis(const H46026_UDPFrame & data)
 
 //-------------------------------------------
 
-H46026UDPBuffer::H46026UDPBuffer(int sessionId, PBoolean rtp) 
-{ 
+H46026UDPBuffer::H46026UDPBuffer(int sessionId, PBoolean rtp)
+{
     m_size = 0;
     m_rtp = rtp;
     m_data.m_sessionId.SetValue(sessionId);
-    m_data.m_dataFrame = m_rtp ? true : false;
+    m_data.m_dataFrame = m_rtp;
     m_data.m_frame.SetSize(0);
 }
 
@@ -262,11 +262,11 @@ H46026_MediaFrame::H46026_MediaFrame()
 }
 
 H46026_MediaFrame::H46026_MediaFrame(const BYTE * data, PINDEX len)
-   :PBYTEArray(data,len)
+   : PBYTEArray(data, len)
 {
 
 }
-    
+
 PBoolean H46026_MediaFrame::GetMarker() const
 {
     return (theArray[1]&0x80) != 0;
@@ -274,16 +274,16 @@ PBoolean H46026_MediaFrame::GetMarker() const
 
 void H46026_MediaFrame::PrintInfo(ostream & strm) const
 {
-strm << "ver=" << (unsigned)((theArray[0]>>6)&3) 
-<< " pt=" << (unsigned)(theArray[1]&0x7f)
-<< " psz=" << (unsigned)(GetSize() - 12)
-<< " m=" << GetMarker()
-<< " x=" << (unsigned)((theArray[0]&0x10) != 0)
-<< " seq=" << (WORD)(*(PUInt16b *)&theArray[2])
-<< " ts=" << (DWORD)(*(PUInt32b *)&theArray[4])
-<< " src=" << (DWORD)(*(PUInt32b *)&theArray[8])
-<< " ccnt=" << (unsigned)(theArray[0]&0xf)
-<< "\n";
+    strm << "ver=" << (unsigned)((theArray[0]>>6)&3)
+    << " pt=" << (unsigned)(theArray[1]&0x7f)
+    << " psz=" << (unsigned)(GetSize() - 12)
+    << " m=" << GetMarker()
+    << " x=" << (unsigned)((theArray[0]&0x10) != 0)
+    << " seq=" << (WORD)(*(PUInt16b *)&theArray[2])
+    << " ts=" << (DWORD)(*(PUInt32b *)&theArray[4])
+    << " src=" << (DWORD)(*(PUInt32b *)&theArray[8])
+    << " ccnt=" << (unsigned)(theArray[0]&0xf)
+    << "\n";
 }
 
 //-------------------------------------------
@@ -292,7 +292,7 @@ H46026ChannelManager::H46026ChannelManager()
 :  m_mbps(MAX_VIDEO_KBPS), m_socketPacketReady(false), m_currentPacketTime(0), m_pktCounter(0)
 {
 
-// Initialise the Information PDU RTP Message structure.
+    // Initialise the Information PDU RTP Message structure.
     H225_H323_UU_PDU & info = m_uuie.m_h323_uu_pdu;
     info.IncludeOptionalField(H225_H323_UU_PDU::e_genericData);
     info.m_genericData.SetSize(1);
@@ -300,7 +300,7 @@ H46026ChannelManager::H46026ChannelManager()
     H225_GenericIdentifier & id = gen.m_id;
         id.SetTag(H225_GenericIdentifier::e_standard);
         PASN_Integer & asnInt = id;
-        asnInt.SetValue(26); 
+        asnInt.SetValue(26);
     gen.IncludeOptionalField(H225_GenericData::e_parameters);
     gen.m_parameters.SetSize(1);
     H225_EnumeratedParameter & param = gen.m_parameters[0];
@@ -314,7 +314,7 @@ H46026ChannelManager::H46026ChannelManager()
 
     m_uuie.m_h323_uu_pdu.m_h323_message_body.SetTag(H225_H323_UU_PDU_h323_message_body::e_empty);
     m_uuie.m_h323_uu_pdu.m_h245Tunneling = TRUE;
- 
+
 }
 
 H46026ChannelManager::~H46026ChannelManager()
@@ -326,7 +326,7 @@ H46026ChannelManager::~H46026ChannelManager()
         m_socketQueue.pop();
 }
 
- void H46026ChannelManager::RTPFrameIn(unsigned crv, PINDEX sessionId, PBoolean rtp, const PBYTEArray & data) 
+ void H46026ChannelManager::RTPFrameIn(unsigned crv, PINDEX sessionId, PBoolean rtp, const PBYTEArray & data)
  {
      return RTPFrameIn(crv, sessionId, rtp, (const BYTE *)data, data.GetSize());
  }
@@ -349,7 +349,7 @@ PBoolean H46026ChannelManager::SignalMsgOut(const Q931 & pdu)
     prior.crv = pdu.GetCallReference();
     prior.priority = socketOrder::Priority_High;
     prior.packTime = PTimer::Tick().GetMilliSeconds();
-    prior.delay = PACKETDELAY(pdu.GetIE(Q931::UserUserIE).GetSize(),m_mbps);
+    prior.delay = PACKETDELAY(pdu.GetIE(Q931::UserUserIE).GetSize(), m_mbps);
     return WriteQueue(pdu, prior);
 }
 
@@ -362,7 +362,7 @@ PBoolean H46026ChannelManager::SignalMsgOut(const BYTE * data, PINDEX len)
     prior.crv = 0;
     prior.priority = socketOrder::Priority_High;
     prior.packTime = PTimer::Tick().GetMilliSeconds();
-    prior.delay = PACKETDELAY(len,m_mbps);
+    prior.delay = PACKETDELAY(len, m_mbps);
     return WriteQueue(msg, prior);
 }
 
@@ -375,7 +375,7 @@ H46026UDPBuffer * H46026ChannelManager::GetRTPBuffer(unsigned crv, int sessionId
         if (c != r->second.end())
             return c->second;
     }
-    m_rtpBuffer[crv][sessionId] = new H46026UDPBuffer(sessionId,true);
+    m_rtpBuffer[crv][sessionId] = new H46026UDPBuffer(sessionId, true);
     return m_rtpBuffer[crv][sessionId];
 }
 
@@ -391,12 +391,12 @@ PBoolean H46026ChannelManager::PackageFrame(PBoolean rtp, unsigned crv, PacketTy
     prior.sessionId = sessionId;
     if (rtp) {
         switch (id) {
-            case e_Audio: 
-                prior.priority = socketOrder::Priority_Critical; 
+            case e_Audio:
+                prior.priority = socketOrder::Priority_Critical;
                 break;
             case e_Video:
             case e_extVideo:
-                prior.priority = socketOrder::Priority_Discretion; 
+                prior.priority = socketOrder::Priority_Discretion;
                 break;
             case e_Data:
             default:
@@ -406,11 +406,11 @@ PBoolean H46026ChannelManager::PackageFrame(PBoolean rtp, unsigned crv, PacketTy
         prior.priority = socketOrder::Priority_Low;
     prior.id = NextPacketCounter();
     prior.packTime = PTimer::Tick().GetMilliSeconds();
-    prior.delay = PACKETDELAY(mediaPDU.GetIE(Q931::UserUserIE).GetSize(),m_mbps);   
+    prior.delay = PACKETDELAY(mediaPDU.GetIE(Q931::UserUserIE).GetSize(), m_mbps);
 
     if (PTrace::CanTrace(6)) {
         PStringStream info;
-        info <<  "Build #" << prior.id << (rtp ? "\nMedia" : " Control") << ":" << H46026MediaTypeAsString(id) << "  Delay:" << prior.delay 
+        info <<  "Build #" << prior.id << (rtp ? "\nMedia" : " Control") << ":" << H46026MediaTypeAsString(id) << "  Delay:" << prior.delay
             << "ms  Priority:" << H46026PriorityAsString(prior.priority) << "\n" << H46026MediaFrameAnalysis(data);
         if (PTrace::CanTrace(7)) {
             if (rtp) info  << data;
@@ -434,14 +434,14 @@ PBoolean H46026ChannelManager::RTPFrameOut(unsigned crv, PacketTypes id, PINDEX 
 {
     PWaitAndSignal m(m_writeMutex);
 
-    H46026_MediaFrame msg(data,len);
+    H46026_MediaFrame msg(data, len);
     if (rtp) {
-        H46026UDPBuffer * buffer = GetRTPBuffer(crv,sessionId);
+        H46026UDPBuffer * buffer = GetRTPBuffer(crv, sessionId);
         if (!buffer) return false;
 
         PBoolean toSend = false;
         switch (id) {
-            case e_Audio: 
+            case e_Audio:
                 buffer->SetFrame(msg);
                 if (buffer->GetPacketCount() >= MAX_AUDIO_FRAMES)
                     toSend = true;
@@ -461,13 +461,13 @@ PBoolean H46026ChannelManager::RTPFrameOut(unsigned crv, PacketTypes id, PINDEX 
                 toSend = true;
         }
         if (toSend) {
-            PBoolean sent = PackageFrame(rtp, crv, id, sessionId, buffer->GetBuffer());  
-            buffer->ClearBuffer(); 
+            PBoolean sent = PackageFrame(rtp, crv, id, sessionId, buffer->GetBuffer());
+            buffer->ClearBuffer();
             return sent;
         } else
             return ProcessQueue();
     } else {
-       H46026UDPBuffer data(sessionId,rtp);
+       H46026UDPBuffer data(sessionId, rtp);
        data.SetFrame(msg);
        return PackageFrame(rtp, crv, id, sessionId, data.GetBuffer());
     }
@@ -485,7 +485,7 @@ PBoolean H46026ChannelManager::ProcessQueue()
     PInt64 nowTime = PTimer::Tick().GetMilliSeconds();
     PInt64 stackTime = nowTime - m_socketQueue.top().second.packTime;
 
-    PBoolean dropPacket = ((m_socketQueue.top().second.priority == socketOrder::Priority_Discretion) && 
+    PBoolean dropPacket = ((m_socketQueue.top().second.priority == socketOrder::Priority_Discretion) &&
             (stackTime > MAX_STACK_DESCRETION));
 
     if (dropPacket) {
@@ -500,7 +500,7 @@ PBoolean H46026ChannelManager::ProcessQueue()
         // TODO: Flow Control based on the Time in the queue (stackTime) - SH
     }
 
-    m_socketPacketReady = (m_socketQueue.size() > 0);
+    m_socketPacketReady = (!m_socketQueue.empty());
 
     return true;
 }
@@ -538,13 +538,13 @@ PBoolean H46026ChannelManager::SocketIn(const Q931 & q931)
     if ((q931.GetMessageType() == Q931::InformationMsg) && ReadRTPFrame(q931, frameData)) {
         if (PTrace::CanTrace(6) && frameData.m_dataFrame) {
             PStringStream info;
-            info << "Received Media:" << H46026MediaSessionId(frameData.m_sessionId) 
+            info << "Received Media:" << H46026MediaSessionId(frameData.m_sessionId)
                 << "\n" << H46026MediaFrameAnalysis(frameData);
             if (PTrace::CanTrace(7)) {
                 info << "\n" << frameData;
-                PTRACE(7,"H46026\t" << info);
+                PTRACE(7, "H46026\t" << info);
             } else {
-                PTRACE(6,"H46026\t" << info);
+                PTRACE(6, "H46026\t" << info);
             }
         }
         for (PINDEX i=0; i < frameData.m_frame.GetSize(); ++i) {
@@ -559,7 +559,7 @@ PBoolean H46026ChannelManager::SocketIn(const Q931 & q931)
 
 void H46026ChannelManager::SignalMsgIn(const Q931 & pdu)
 {
-    SignalMsgIn(pdu.GetCallReference(),pdu);
+    SignalMsgIn(pdu.GetCallReference(), pdu);
 }
 
 PBoolean H46026ChannelManager::SocketOut(PBYTEArray & data, PINDEX & len)
@@ -578,7 +578,7 @@ PBoolean H46026ChannelManager::SocketOut(BYTE * data, PINDEX & len)
 
     PBoolean gotPacket = false;
     m_queueMutex.Wait();
-        if (m_socketQueue.size() > 0) {
+        if (!m_socketQueue.empty()) {
             PTRACE(6,"H46026\tSending #" << m_socketQueue.top().second.id << " delay " << m_socketQueue.top().second.delay << "ms");
             m_currentPacketTime = nowTime + m_socketQueue.top().second.delay;
             len = m_socketQueue.top().first.GetSize();

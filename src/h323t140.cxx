@@ -286,7 +286,7 @@ PBoolean RFC4103_Frame::ReadDataFrame()
             }
         }
     }
-    return (m_charBuffer.size() > 0);
+    return (!m_charBuffer.empty());
 }
 
 int RFC4103_Frame::BuildFrameData()

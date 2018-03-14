@@ -85,7 +85,7 @@ PBoolean IsSupportedOID(const PString & oid, unsigned cipherlength)
 
 void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, H235Authenticators::DH_DataList & customData, const PString & filePath = PString(), PINDEX cipherlength = P_MAX_INDEX, PINDEX maxTokenLength = 1024)
 {
-    if (dhcache.size() > 0) {
+    if (!dhcache.empty()) {
         H235_DHMap::iterator i = dhcache.begin();
         while (i != dhcache.end()) {
             if (i->second)
@@ -98,7 +98,7 @@ void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, H235Authenticators
     }
 
     // Load from memory vendor supplied keys
-    if (customData.size() > 0) {
+    if (!customData.empty()) {
         H235Authenticators::DH_DataList::iterator r;
         for (r = customData.begin(); r != customData.end(); ++r) {
             if (IsSupportedOID(r->m_OID, cipherlength)) {

@@ -933,7 +933,7 @@ PBoolean H460_Feature::FeatureList(int type, H460FeatureList & plist, H323EndPoi
          }
      }
    }
-   return (plist.size() > 0);
+   return (!plist.empty());
 }
 
 /////////////////////////////////////////////////////////////////////
