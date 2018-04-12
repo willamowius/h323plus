@@ -110,7 +110,7 @@ PBoolean H235Authenticator::GetAuthenticatorCapabilities(const PString & deviceN
 {
   if (pluginMgr == NULL)
     pluginMgr = &PPluginManager::GetPluginManager();
-  
+
   return pluginMgr->GetPluginsDeviceCapabilities(H235AuthenticatorPluginBaseClass,"",deviceName, caps);
 }
 
@@ -331,7 +331,7 @@ PBoolean H235Authenticator::GetAlgorithms(PStringList & /*algorithms*/) const
     return false;
 }
 
-PBoolean H235Authenticator::GetAlgorithmDetails(const PString & /*algorithm*/, 
+PBoolean H235Authenticator::GetAlgorithmDetails(const PString & /*algorithm*/,
                                     PString & /*sslName*/, PString & /*description*/)
 {
     return false;
@@ -341,8 +341,8 @@ PBoolean H235Authenticator::GetAlgorithmDetails(const PString & /*algorithm*/,
 
 #ifdef H323_H235
 PINDEX   H235Authenticators::m_encryptionPolicy = 0;   // Default Encryption is disabled must be one of the H235MediaPolicy values
-PINDEX   H235Authenticators::m_cipherLength = 128;     // Ciphers above 128 must be expressly enabled.  
-PINDEX   H235Authenticators::m_maxTokenLength = 1024;  // Tokens longer than 1024 bits must be expressly enabled.  
+PINDEX   H235Authenticators::m_cipherLength = 128;     // Ciphers above 128 must be expressly enabled.
+PINDEX   H235Authenticators::m_maxTokenLength = 1024;  // Tokens longer than 1024 bits must be expressly enabled.
 PString  H235Authenticators::m_dhFile=PString();
 H235Authenticators::DH_DataList H235Authenticators::m_dhData;
 #endif
@@ -473,45 +473,42 @@ H235Authenticator::ValidationResult
                                             const PASN_Array & cryptoTokens,
                                             const PBYTEArray & rawPDU) const
 {
-
   H235Authenticator::ValidationResult finalresult = H235Authenticator::e_Absent;
- 
+
   for (PINDEX i = 0; i < GetSize(); i++) {
     H235Authenticator & authenticator = (*this)[i];
     if (authenticator.IsSecuredSignalPDU(code, TRUE)) {
+      H235Authenticator::ValidationResult result = authenticator.ValidateTokens(clearTokens, cryptoTokens, rawPDU);
+      switch (result) {
+        case H235Authenticator::e_OK :
+          PTRACE(4, "H235EP\tAuthenticator " << authenticator << " succeeded");
+          finalresult = result;
+          break;
 
-        H235Authenticator::ValidationResult result = authenticator.ValidateTokens(clearTokens, cryptoTokens, rawPDU);
-          switch (result) {
-            case H235Authenticator::e_OK :
-              PTRACE(4, "H235EP\tAuthenticator " << authenticator << " succeeded");
-              finalresult = result;
-              break;
-
-            case H235Authenticator::e_Absent :
-              PTRACE(4, "H235EP\tAuthenticator " << authenticator << " absent from PDU");
-              authenticator.Disable();
+        case H235Authenticator::e_Absent :
+          PTRACE(4, "H235EP\tAuthenticator " << authenticator << " absent from PDU");
+          authenticator.Disable();
 #ifdef H323_H235
-              if (authenticator.GetApplication() == H235Authenticator::MediaEncryption)
-                  return (H235Authenticators::GetEncryptionPolicy() < 2) ? H235Authenticator::e_Absent : H235Authenticator::e_Failed;
+          if (authenticator.GetApplication() == H235Authenticator::MediaEncryption)
+            return (H235Authenticators::GetEncryptionPolicy() < 2) ? H235Authenticator::e_Absent : H235Authenticator::e_Failed;
 #endif
-              break;
+          break;
 
-            case H235Authenticator::e_Disabled :
-              PTRACE(4, "H235EP\tAuthenticator " << authenticator << " disabled");
-              break;
+          case H235Authenticator::e_Disabled :
+            PTRACE(4, "H235EP\tAuthenticator " << authenticator << " disabled");
+            break;
 
-            default : // Various other failure modes
-              PTRACE(4, "H235EP\tAuthenticator " << authenticator << " failed: " << (int)result);
-                if (finalresult != H235Authenticator::e_OK) 
-                                    finalresult = result;
-              break;
-          }    
+          default : // Various other failure modes
+            PTRACE(4, "H235EP\tAuthenticator " << authenticator << " failed: " << (int)result);
+            if (finalresult != H235Authenticator::e_OK)
+              finalresult = result;
+            break;
+      }
 
     } else {
         authenticator.Disable();
     }
-
-  }
+  } // for
 
   return finalresult;
 }
@@ -541,7 +538,7 @@ PStringArray GetIdentifiers(const PASN_Array & clearTokens, const PASN_Array & c
             break;
          }
          const H235_CryptoToken_cryptoHashedToken & cryptoHashedToken = nestedCryptoToken;
-         ids.AppendString(cryptoHashedToken.m_tokenOID.AsString());    
+         ids.AppendString(cryptoHashedToken.m_tokenOID.AsString());
       }
   }
   return ids;
@@ -554,7 +551,7 @@ PBoolean H235Authenticators::CreateAuthenticators(H235Authenticator::Application
   for (r = keyList.begin(); r != keyList.end(); ++r) {
     H235Authenticator * Auth = PFactory<H235Authenticator>::CreateInstance(*r);
     if (Auth && (Auth->GetApplication() == usage ||
-                 Auth->GetApplication() == H235Authenticator::AnyApplication)) 
+                 Auth->GetApplication() == H235Authenticator::AnyApplication))
            this->Append(Auth);
     else
            delete Auth;
@@ -567,7 +564,7 @@ PBoolean H235Authenticators::CreateAuthenticators(const PASN_Array & clearTokens
 {
     if (clearTokens.GetSize() == 0 && cryptoTokens.GetSize() == 0)
         return false;
-    
+
     PStringArray identifiers = GetIdentifiers(clearTokens, cryptoTokens);
     for (PINDEX i = 0; i < identifiers.GetSize(); ++i) {
        PBoolean found = false;
@@ -575,7 +572,7 @@ PBoolean H235Authenticators::CreateAuthenticators(const PASN_Array & clearTokens
            H235Authenticator & auth = (*this)[j];
            if (auth.IsMatch(identifiers[i]))  {
                found = true;
-               break; 
+               break;
            }
        }
        if (!found) {
@@ -592,7 +589,7 @@ PBoolean H235Authenticators::CreateAuthenticator(const PString & name)
 {
    H235Authenticator * newAuth = H235Authenticator::CreateAuthenticator(name);
 
-   if (!newAuth) 
+   if (!newAuth)
      return false;
 
    this->Append(newAuth);
@@ -632,7 +629,7 @@ PBoolean H235Authenticators::GetAlgorithms(PStringList & algorithms) const
            }
        }
    }
-   return found; 
+   return found;
 }
 
 PBoolean H235Authenticators::GetAlgorithmDetails(const PString & algorithm, PString & sslName, PString & description)
@@ -640,7 +637,7 @@ PBoolean H235Authenticators::GetAlgorithmDetails(const PString & algorithm, PStr
    for (PINDEX j=0; j< this->GetSize(); ++j) {
        H235Authenticator & auth = (*this)[j];
        if (auth.GetApplication() == H235Authenticator::MediaEncryption)  {
-           if (auth.GetAlgorithmDetails(algorithm, sslName, description)) 
+           if (auth.GetAlgorithmDetails(algorithm, sslName, description))
               return true;
        }
    }
@@ -687,7 +684,7 @@ PINDEX H235Authenticators::GetMaxCipherLength()
 {
     return m_cipherLength;
 }
-    
+
 void H235Authenticators::SetMaxCipherLength(PINDEX cipher)
 {
     m_cipherLength = cipher;
@@ -697,7 +694,7 @@ PINDEX H235Authenticators::GetMaxTokenLength()
 {
     return m_maxTokenLength;
 }
-    
+
 void H235Authenticators::SetMaxTokenLength(PINDEX len)
 {
     m_maxTokenLength = len;
@@ -734,7 +731,7 @@ void H235AuthenticatorList::LoadPassword(PString UserName, PString & pass) const
         if (UserName == info.UserName) {
             if (info.isHashed) {
                 pass = PasswordDecrypt(info.Password);
-            } else 
+            } else
                 pass = info.Password;
         }
     }
@@ -756,12 +753,12 @@ PString H235AuthenticatorList::PasswordEncrypt(const PString &clear) const
     int keyFilled = 0;
 
     const PString key = AuthenticatorListHashKey;
-    
+
     PTEACypher::Key thekey;
     memset(&thekey, keyFilled, sizeof(PTEACypher::Key));
     memcpy(&thekey, (const char *)key, min(sizeof(PTEACypher::Key), size_t(key.GetLength())));
     PTEACypher cypher(thekey);
-    return cypher.Encode(clear);    
+    return cypher.Encode(clear);
 }
 
 PString H235AuthenticatorList::PasswordDecrypt(const PString &encrypt) const
@@ -775,7 +772,7 @@ PString H235AuthenticatorList::PasswordDecrypt(const PString &encrypt) const
     memset(&thekey, keyFilled, sizeof(PTEACypher::Key));
     memcpy(&thekey, (const char *)key, min(sizeof(PTEACypher::Key), size_t(key.GetLength())));
     PTEACypher cypher(thekey);
-    return cypher.Decode(encrypt);    
+    return cypher.Decode(encrypt);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -855,14 +852,14 @@ PBoolean H235AuthSimpleMD5::GetAuthenticationCapabilities(H235Authenticator::Cap
         cap.m_cipher     = "MD5";
         cap.m_description= "md5";
        ids->capabilityList.push_back(cap);
-    
+
     return true;
 }
 #endif
 
-PBoolean H235AuthSimpleMD5::IsMatch(const PString & identifier) const 
-{ 
-    return (identifier == PString(OID_MD5)); 
+PBoolean H235AuthSimpleMD5::IsMatch(const PString & identifier) const
+{
+    return (identifier == PString(OID_MD5));
 }
 
 static PWCharArray GetUCS2plusNULL(const PString & str)
@@ -952,9 +949,9 @@ H235Authenticator::ValidationResult H235AuthSimpleMD5::ValidateCryptoToken(
   PString alias = H323GetAliasAddressString(cryptoEPPwdHash.m_alias);
 
   // If has connection then EP Authenticator so CallBack to Check SenderID and Set Password
-  if (connection != NULL) { 
+  if (connection != NULL) {
      if (!connection->OnCallAuthentication(alias,password)) {
-        PTRACE(1, "H235EP\tH235AuthSimpleMD5 Authentication Fail UserName \"" << alias 
+        PTRACE(1, "H235EP\tH235AuthSimpleMD5 Authentication Fail UserName \"" << alias
                << "\", not Authorised. \"");
         return e_BadPassword;
      }
@@ -1042,7 +1039,7 @@ PBoolean H235AuthSimpleMD5::IsSecuredPDU(unsigned rasPDU, PBoolean received) con
 PBoolean H235AuthSimpleMD5::IsSecuredSignalPDU(unsigned signalPDU, PBoolean received) const
 {
   switch (signalPDU) {
-    case H225_H323_UU_PDU_h323_message_body::e_setup:       
+    case H225_H323_UU_PDU_h323_message_body::e_setup:
       return received ? !remoteId.IsEmpty() : !localId.IsEmpty();
 
     default :
@@ -1092,7 +1089,7 @@ PBoolean H235AuthCAT::GetAuthenticationCapabilities(H235Authenticator::Capabilit
         cap.m_cipher     = "CAT";
         cap.m_description= "cat";
        ids->capabilityList.push_back(cap);
-    
+
     return true;
 }
 #endif
@@ -1165,7 +1162,7 @@ H235Authenticator::ValidationResult
   PTime now;
   int deltaTime = now.GetTimeInSeconds() - clearToken.m_timeStamp;
   if (PABS(deltaTime) > timestampGracePeriod) {
-    PTRACE(1, "H235RAS\tInvalid timestamp ABS(" << now.GetTimeInSeconds() << '-' 
+    PTRACE(1, "H235RAS\tInvalid timestamp ABS(" << now.GetTimeInSeconds() << '-'
            << (int)clearToken.m_timeStamp << ") > " << timestampGracePeriod);
     //the time has elapsed
     return e_InvalidTime;
@@ -1212,7 +1209,7 @@ H235Authenticator::ValidationResult
     // save the values for the next call
     lastRandomSequenceNumber = clearToken.m_random;
     lastTimestamp = clearToken.m_timeStamp;
-  
+
     return e_OK;
   }
 
@@ -1304,7 +1301,7 @@ PBoolean H235AuthenticatorTSS::GetAuthenticationCapabilities(H235Authenticator::
         cap.m_cipher     = "TSS";
         cap.m_description= "TimeSync";
        ids->capabilityList.push_back(cap);
-    
+
     return true;
 }
 #endif
