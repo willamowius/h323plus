@@ -84,7 +84,7 @@ H235_DiffieHellman::H235_DiffieHellman(const PFilePath & dhPKCS3)
 }
 
 H235_DiffieHellman::H235_DiffieHellman(const BYTE * pData, PINDEX pSize,
-                                     const BYTE * gData, PINDEX gSize, 
+                                     const BYTE * gData, PINDEX gSize,
                                      PBoolean send)
 : m_remKey(NULL), m_toSend(send), m_wasReceived(false), m_wasDHReceived(false), m_keySize(pSize), m_loadFromFile(false)
 {
@@ -130,7 +130,7 @@ static DH * DH_dup(const DH * dh)
 }
 
 H235_DiffieHellman::H235_DiffieHellman(const H235_DiffieHellman & diffie)
-: m_remKey(NULL), m_toSend(diffie.GetToSend()), m_wasReceived(ReceivedFromRemote()), m_wasDHReceived(diffie.DHReceived()), 
+: m_remKey(NULL), m_toSend(diffie.GetToSend()), m_wasReceived(ReceivedFromRemote()), m_wasDHReceived(diffie.DHReceived()),
   m_keySize(diffie.GetKeySize()), m_loadFromFile(diffie.LoadFile())
 {
   dh = DH_dup(diffie);
@@ -157,6 +157,8 @@ H235_DiffieHellman::~H235_DiffieHellman()
 {
   if (dh)
     DH_free(dh);
+  if (m_remKey)
+    BN_free(m_remKey);
 }
 
 PObject * H235_DiffieHellman::Clone() const
@@ -166,7 +168,7 @@ PObject * H235_DiffieHellman::Clone() const
 
 PBoolean H235_DiffieHellman::CheckParams() const
 {
-  // TODO: FIX so it actually checks the whole DH 
+  // TODO: FIX so it actually checks the whole DH
   // including the strength of the DH Public/Private key pair - SH
   // currently it only checks p and g which are supplied by the standard
 
@@ -269,7 +271,7 @@ PBoolean H235_DiffieHellman::Encode_G(PASN_BitString & g) const
             }
         }
         OPENSSL_free(data);
-    }  
+    }
   return true;
 }
 
@@ -334,7 +336,7 @@ void H235_DiffieHellman::SetRemoteHalfKey(const PASN_BitString & hk)
   m_remKey = BN_bin2bn(data, hk.GetDataLength() - 1, NULL);
 
   if (m_remKey)
-    m_wasReceived = true; 
+    m_wasReceived = true;
 }
 
 PBoolean H235_DiffieHellman::GenerateHalfKey()
@@ -354,13 +356,13 @@ PBoolean H235_DiffieHellman::GenerateHalfKey()
   return TRUE;
 }
 
-void H235_DiffieHellman::SetDHReceived(const PASN_BitString & p, const PASN_BitString & g) 
+void H235_DiffieHellman::SetDHReceived(const PASN_BitString & p, const PASN_BitString & g)
 {
     PTRACE(4, "H235\tReplacing local DH parameters with those of remote");
 
     Decode_P(p);
     Decode_G(g);
-    m_wasDHReceived = true; 
+    m_wasDHReceived = true;
 }
 
 PBoolean H235_DiffieHellman::Load(const PConfig  & dhFile, const PString & section)
@@ -383,7 +385,7 @@ PBoolean H235_DiffieHellman::Load(const PConfig  & dhFile, const PString & secti
     PBase64::Decode(str, data);
     dh->p = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
     ok = ok && (BN_num_bytes(dh->p) > 0);
-  } else 
+  } else
     ok = false;
 
   if (dhFile.HasKey(section, "GENERATOR")) {
@@ -395,7 +397,7 @@ PBoolean H235_DiffieHellman::Load(const PConfig  & dhFile, const PString & secti
     memcpy(data.GetPointer() + data.GetSize()-1, temp.GetPointer(), 1);
     dh->g = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
     ok = ok && (BN_num_bytes(dh->g) > 0);
-  } else 
+  } else
     ok = false;
 
   if (dhFile.HasKey(section, "PUBLIC")) {
@@ -404,7 +406,7 @@ PBoolean H235_DiffieHellman::Load(const PConfig  & dhFile, const PString & secti
     dh->pub_key = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
     ok = ok && (BN_num_bytes(dh->pub_key) > 0);
   }
-  
+
   if (dhFile.HasKey(section, "PRIVATE")) {
     str = dhFile.GetString(section, "PRIVATE", "");
     PBase64::Decode(str, data);
@@ -412,17 +414,17 @@ PBoolean H235_DiffieHellman::Load(const PConfig  & dhFile, const PString & secti
     ok = ok && (BN_num_bytes(dh->priv_key) > 0);
   }
 
-  if (ok /*&& CheckParams()*/) 
+  if (ok /*&& CheckParams()*/)
     m_loadFromFile = true;
   else {
     DH_free(dh);
     dh = NULL;
-  } 
-    
+  }
+
   return m_loadFromFile;
 }
 
-PBoolean H235_DiffieHellman::LoadedFromFile() 
+PBoolean H235_DiffieHellman::LoadedFromFile()
 {
   return m_loadFromFile;
 }
@@ -435,7 +437,7 @@ PBoolean H235_DiffieHellman::Save(const PFilePath & dhFile, const PString & oid)
   PConfig config(dhFile, oid);
   PString str = PString();
   int len = BN_num_bytes(dh->pub_key);
-  unsigned char * data = (unsigned char *)OPENSSL_malloc(len); 
+  unsigned char * data = (unsigned char *)OPENSSL_malloc(len);
 
   if (data != NULL && BN_bn2bin(dh->p, data) > 0) {
     str = PBase64::Encode(data, len, "");
@@ -443,21 +445,21 @@ PBoolean H235_DiffieHellman::Save(const PFilePath & dhFile, const PString & oid)
   }
   OPENSSL_free(data);
 
-  data = (unsigned char *)OPENSSL_malloc(len); 
+  data = (unsigned char *)OPENSSL_malloc(len);
   if (data != NULL && BN_bn2bin(dh->g, data) > 0) {
     str = PBase64::Encode(data, len, "");
     config.SetString("GENERATOR",str);
   }
   OPENSSL_free(data);
 
-  data = (unsigned char *)OPENSSL_malloc(len); 
+  data = (unsigned char *)OPENSSL_malloc(len);
   if (data != NULL && BN_bn2bin(dh->pub_key, data) > 0) {
     str = PBase64::Encode(data, len, "");
     config.SetString("PUBLIC",str);
   }
   OPENSSL_free(data);
 
-  data = (unsigned char *)OPENSSL_malloc(len); 
+  data = (unsigned char *)OPENSSL_malloc(len);
   if (data != NULL && BN_bn2bin(dh->priv_key, data) > 0) {
     PString str = PBase64::Encode(data, len, "");
     config.SetString("PRIVATE",str);
