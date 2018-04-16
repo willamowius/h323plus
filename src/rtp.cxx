@@ -1044,11 +1044,11 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveControl(RTP_ControlFrame & 
 
     switch (frame.GetPayloadType()) {
       case RTP_ControlFrame::e_SenderReport :
-        if (size >= (sizeof(RTP_ControlFrame::SenderReport)+frame.GetCount()*sizeof(RTP_ControlFrame::ReceiverReport))) {
+        if (size >= (sizeof(RTP_ControlFrame::SenderReport)+frame.GetCount() * sizeof(RTP_ControlFrame::ReceiverReport))) {
           SenderReport sender;
           const RTP_ControlFrame::SenderReport & sr = *(const RTP_ControlFrame::SenderReport *)payload;
           sender.sourceIdentifier = sr.ssrc;
-          sender.realTimestamp = PTime(sr.ntp_sec-SecondsFrom1900to1970, sr.ntp_frac/4294);
+          sender.realTimestamp = PTime(sr.ntp_sec-SecondsFrom1900to1970, sr.ntp_frac / 4294);
           sender.realTimestamp1970 = sr.ntp_sec-SecondsFrom1900to1970;
           sender.rtpTimestamp = sr.rtp_ts;
           sender.packetsSent = sr.psent;
@@ -1068,26 +1068,35 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveControl(RTP_ControlFrame & 
         break;
 
       case RTP_ControlFrame::e_ReceiverReport :
-        if (size >= (frame.GetCount()*sizeof(RTP_ControlFrame::ReceiverReport)))
-          OnRxReceiverReport(*(const PUInt32b *)payload,
-                                      BuildReceiverReportArray(frame, sizeof(PUInt32b)));
+        if (size >= (frame.GetCount() * sizeof(RTP_ControlFrame::ReceiverReport)))
+          OnRxReceiverReport(*(const PUInt32b *)payload, BuildReceiverReportArray(frame, sizeof(PUInt32b)));
         else {
           PTRACE(2, "RTP\tReceiverReport packet truncated");
         }
         break;
 
       case RTP_ControlFrame::e_SourceDescription :
-        if (size >= frame.GetCount()*sizeof(RTP_ControlFrame::SourceDescription)) {
+        if (size >= frame.GetCount() * sizeof(RTP_ControlFrame::SourceDescription)) {
+          unsigned parsedBytes = 0; // bytes parsed so far
           SourceDescriptionArray descriptions;
           const RTP_ControlFrame::SourceDescription * sdes = (const RTP_ControlFrame::SourceDescription *)payload;
           for (PINDEX srcIdx = 0; srcIdx < (PINDEX)frame.GetCount(); srcIdx++) {
+            if (parsedBytes >= size) {
+              PTRACE(2, "RTP\tSourceDescription packet truncated");
+              break;
+            }
             descriptions.SetAt(srcIdx, new SourceDescription(sdes->src));
             const RTP_ControlFrame::SourceDescription::Item * item = sdes->item;
             while (item->type != RTP_ControlFrame::e_END) {
               descriptions[srcIdx].items.SetAt(item->type, PString(item->data, item->length));
+              parsedBytes += item->length + 2;
+              if (parsedBytes >= size) {
+                PTRACE(2, "RTP\tSourceDescription packet truncated");
+                break;
+              }
               item = item->GetNextItem();
             }
-            sdes = (const RTP_ControlFrame::SourceDescription *)item->GetNextItem(); // TODO: make sure we don't read over frame end
+            sdes = (const RTP_ControlFrame::SourceDescription *)item->GetNextItem();
           }
           OnRxSourceDescription(descriptions);
         }
@@ -1099,7 +1108,7 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveControl(RTP_ControlFrame & 
       case RTP_ControlFrame::e_Goodbye :
         if (size >= 4) {
           PString reason;
-          unsigned count = frame.GetCount()*4; // bytes with SSRCs before optional reason
+          unsigned count = frame.GetCount() * 4; // bytes with SSRCs before optional reason
           if (size > count) {
             // verify that RTCP packed is indeed as long as length byte indicates
             if (size >= payload[count] + sizeof(DWORD) /*SSRC*/ + sizeof(unsigned char) /* length */) {
@@ -1122,8 +1131,7 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveControl(RTP_ControlFrame & 
       case RTP_ControlFrame::e_ApplDefined :
         if (size >= 4) {
           PString str((const char *)(payload+4), 4);
-          OnRxApplDefined(str, frame.GetCount(), *(const PUInt32b *)payload,
-                          payload+8, frame.GetPayloadSize()-8);
+          OnRxApplDefined(str, frame.GetCount(), *(const PUInt32b *)payload, payload+8, frame.GetPayloadSize()-8);
         }
         else {
           PTRACE(2, "RTP\tApplDefined packet truncated");
