@@ -408,13 +408,19 @@ RTP_ControlFrame::SourceDescription & RTP_ControlFrame::AddSourceDescription(DWO
 }
 
 
-// TODO: this method produces invalid packets, if the data size needs padding
+// TODO: this method produces invalid packets, if the data size needs packet padding
+//       thus data currently gets padded
 RTP_ControlFrame::SourceDescription::Item &
         RTP_ControlFrame::AddSourceDescriptionItem(SourceDescription & sdes,
                                                    unsigned type,
                                                    const PString & data)
 {
-  PINDEX dataLength = data.GetLength();
+  // pad data string to avoid need for broken packet padding
+  PString sizedData = data;
+  while (sizedData.GetLength() < 2 || ((sizedData.GetLength() - 2) % 4 != 0))
+    sizedData += ' ';
+
+  PINDEX dataLength = sizedData.GetLength();
   SetPayloadSize(GetPayloadSize()+sizeof(SourceDescription::Item)+dataLength-1);
 
   SourceDescription::Item * item = sdes.item;
@@ -423,7 +429,7 @@ RTP_ControlFrame::SourceDescription::Item &
 
   item->type = (BYTE)type;
   item->length = (BYTE)dataLength;
-  memcpy(item->data, (const char *)data, item->length);
+  memcpy(item->data, (const char *)sizedData, item->length);
 
   item->GetNextItem()->type = e_END;
   return *item;
@@ -999,9 +1005,8 @@ PBoolean RTP_Session::SendReport()
   report.WriteNextCompound();
 
   RTP_ControlFrame::SourceDescription & sdes = report.AddSourceDescription(syncSourceOut);
-  // TODO: adding variable length names disabled until we handle padding correctly
-  //report.AddSourceDescriptionItem(sdes, RTP_ControlFrame::e_CNAME, canonicalName);
-  //report.AddSourceDescriptionItem(sdes, RTP_ControlFrame::e_TOOL, toolName);
+  report.AddSourceDescriptionItem(sdes, RTP_ControlFrame::e_CNAME, canonicalName);
+  report.AddSourceDescriptionItem(sdes, RTP_ControlFrame::e_TOOL, toolName);
 
   // Wait a fuzzy amount of time so things don't get into lock step
   int interval = (int)reportTimeInterval.GetMilliSeconds();
