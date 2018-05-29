@@ -48,11 +48,86 @@
 #include <ptclib/cypher.h>
 
 extern "C" {
+#include <openssl/opensslv.h>
 #include <openssl/err.h>
 #include <openssl/dh.h>
 #include <openssl/pem.h>
 #include <openssl/bn.h>
 };
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+
+inline void DH_get0_pqg(const DH *dh,
+                 const BIGNUM **p, const BIGNUM **q, const BIGNUM **g)
+{
+    if (p != NULL)
+        *p = dh->p;
+    if (q != NULL)
+        *q = dh->q;
+    if (g != NULL)
+        *g = dh->g;
+}
+
+inline int DH_set0_pqg(DH *dh, BIGNUM *p, BIGNUM *q, BIGNUM *g)
+{
+    /* If the fields p and g in d are NULL, the corresponding input
+     * parameters MUST be non-NULL.  q may remain NULL.
+     */
+    if ((dh->p == NULL && p == NULL)
+        || (dh->g == NULL && g == NULL))
+        return 0;
+
+    if (p != NULL) {
+        BN_free(dh->p);
+        dh->p = p;
+    }
+    if (q != NULL) {
+        BN_free(dh->q);
+        dh->q = q;
+    }
+    if (g != NULL) {
+        BN_free(dh->g);
+        dh->g = g;
+    }
+
+    if (q != NULL) {
+        dh->length = BN_num_bits(q);
+    }
+
+    return 1;
+}
+
+inline void DH_get0_key(const DH *dh, const BIGNUM **pub_key, const BIGNUM **priv_key)
+{
+    if (pub_key != NULL)
+        *pub_key = dh->pub_key;
+    if (priv_key != NULL)
+        *priv_key = dh->priv_key;
+}
+
+inline int DH_set0_key(DH *dh, BIGNUM *pub_key, BIGNUM *priv_key)
+{
+    /* If the field pub_key in dh is NULL, the corresponding input
+     * parameters MUST be non-NULL.  The priv_key field may
+     * be left NULL.
+     */
+    if (dh->pub_key == NULL && pub_key == NULL)
+        return 0;
+
+    if (pub_key != NULL) {
+        BN_free(dh->pub_key);
+        dh->pub_key = pub_key;
+    }
+    if (priv_key != NULL) {
+        BN_free(dh->priv_key);
+        dh->priv_key = priv_key;
+    }
+
+    return 1;
+}
+
+#endif // OPENSSL_VERSION_NUMBER < 0x10100000L
+
 
 ////////////////////////////////////////////////////////////////////////////////////
 // Diffie Hellman
@@ -61,10 +136,13 @@ H235_DiffieHellman::H235_DiffieHellman(const PConfig  & dhFile, const PString & 
 : dh(NULL), m_remKey(NULL), m_toSend(true), m_wasReceived(false), m_wasDHReceived(false), m_keySize(0), m_loadFromFile(false)
 {
   if (Load(dhFile, section)) {
-    if (dh->pub_key == NULL) {
+    const BIGNUM *pub_key = NULL;
+    DH_get0_key(dh, &pub_key, NULL);
+    if (pub_key == NULL) {
       GenerateHalfKey();
+      DH_get0_key(dh, &pub_key, NULL);
     }
-    m_keySize = BN_num_bytes(dh->pub_key);
+    m_keySize = BN_num_bytes(pub_key);
   }
 }
 
@@ -77,7 +155,9 @@ H235_DiffieHellman::H235_DiffieHellman(const PFilePath & dhPKCS3)
         dh = PEM_read_DHparams(paramfile, NULL, NULL, NULL);
         fclose(paramfile);
         if (dh) {
-            m_keySize = BN_num_bits(dh->p);
+            const BIGNUM* dh_p = NULL;
+            DH_get0_pqg(dh, &dh_p, NULL, NULL);
+            m_keySize = BN_num_bits(dh_p);
             m_loadFromFile = true;
         }
     }
@@ -94,13 +174,18 @@ H235_DiffieHellman::H235_DiffieHellman(const BYTE * pData, PINDEX pSize,
     return;
   };
 
-    dh->p = BN_bin2bn(pData, pSize, NULL);
-    dh->g = BN_bin2bn(gData, gSize, NULL);
-    if (dh->p != NULL && dh->g != NULL) {
+    BIGNUM* p = BN_bin2bn(pData, pSize, NULL);
+    BIGNUM* g = BN_bin2bn(gData, gSize, NULL);
+    if (p != NULL && g != NULL) {
+        DH_set0_pqg(dh, p, NULL, g);
         GenerateHalfKey();
         return;
     }
 
+    if (g)
+        BN_free(g);
+    if (p)
+        BN_free(p);
     PTRACE(1, "H235_DH\tFailed to generate half key");
     DH_free(dh);
     dh = NULL;
@@ -115,16 +200,24 @@ static DH * DH_dup(const DH * dh)
   if (ret == NULL)
     return NULL;
 
-  if (dh->p)
-    ret->p = BN_dup(dh->p);
-  if (dh->q)
-    ret->q = BN_dup(dh->q);
-  if (dh->g)
-    ret->g = BN_dup(dh->g);
-  if (dh->pub_key)
-    ret->pub_key = BN_dup(dh->pub_key);
-  if (dh->priv_key)
-    ret->priv_key = BN_dup(dh->priv_key);
+  const BIGNUM *p = NULL, *q = NULL, *g = NULL;
+  DH_get0_pqg(dh, &p, &q, &g);
+
+  if (p)
+    p = BN_dup(p);
+  if (q)
+    q = BN_dup(q);
+  if (g)
+    g = BN_dup(g);
+  DH_set0_pqg(ret, const_cast< BIGNUM* >(p), const_cast< BIGNUM* >(q), const_cast< BIGNUM* >(g));
+
+  const BIGNUM *pub_key = NULL, *priv_key = NULL;
+  DH_get0_key(dh, &pub_key, &priv_key);
+  if (pub_key)
+    pub_key = BN_dup(pub_key);
+  if (priv_key)
+    priv_key = BN_dup(priv_key);
+  DH_set0_key(ret, const_cast< BIGNUM* >(pub_key), const_cast< BIGNUM* >(priv_key));
 
   return ret;
 }
@@ -204,11 +297,14 @@ PBoolean H235_DiffieHellman::Encode_P(PASN_BitString & p) const
   if (!m_toSend)
     return false;
 
-  unsigned char * data = (unsigned char *)OPENSSL_malloc(BN_num_bytes(dh->p));
+  const BIGNUM *dh_p = NULL;
+  DH_get0_pqg(dh, &dh_p, NULL, NULL);
+
+  unsigned char * data = (unsigned char *)OPENSSL_malloc(BN_num_bytes(dh_p));
   if (data != NULL) {
-    memset(data, 0, BN_num_bytes(dh->p));
-    if (BN_bn2bin(dh->p, data) > 0) {
-       p.SetData(BN_num_bits(dh->p), data);
+    memset(data, 0, BN_num_bytes(dh_p));
+    if (BN_bn2bin(dh_p, data) > 0) {
+       p.SetData(BN_num_bits(dh_p), data);
     } else {
       PTRACE(1, "H235_DH\tFailed to encode P");
       OPENSSL_free(data);
@@ -225,10 +321,7 @@ void H235_DiffieHellman::Decode_P(const PASN_BitString & p)
     return;
 
   PWaitAndSignal m(vbMutex);
-  const unsigned char * data = p.GetDataPointer();
-  if (dh->p)
-    BN_free(dh->p);
-  dh->p = BN_bin2bn(data, p.GetDataLength() - 1, NULL);
+  DH_set0_pqg(dh, BN_bin2bn(p.GetDataPointer(), p.GetDataLength() - 1, NULL), NULL, NULL);
 }
 
 PBoolean H235_DiffieHellman::Encode_G(PASN_BitString & g) const
@@ -237,17 +330,21 @@ PBoolean H235_DiffieHellman::Encode_G(PASN_BitString & g) const
         return false;
 
     PWaitAndSignal m(vbMutex);
-    int len_p = BN_num_bytes(dh->p);
-    int len_g = BN_num_bytes(dh->g);
-    int bits_p = BN_num_bits(dh->p);
-    //int bits_g = BN_num_bits(dh->g); // unused
+
+    const BIGNUM *dh_p = NULL, *dh_g = NULL;
+    DH_get0_pqg(dh, &dh_p, NULL, &dh_g);
+
+    int len_p = BN_num_bytes(dh_p);
+    int len_g = BN_num_bytes(dh_g);
+    int bits_p = BN_num_bits(dh_p);
+    //int bits_g = BN_num_bits(dh_g); // unused
 
     if (len_p <= 128) { // Key lengths <= 1024 bits
         // Backwards compatibility G is padded out to the length of P
         unsigned char * data = (unsigned char *)OPENSSL_malloc(len_p);
         if (data != NULL) {
             memset(data, 0, len_p);
-            if (BN_bn2bin(dh->g, data + len_p - len_g) > 0) {
+            if (BN_bn2bin(dh_g, data + len_p - len_g) > 0) {
                 g.SetData(bits_p, data);
             }
             else {
@@ -261,7 +358,7 @@ PBoolean H235_DiffieHellman::Encode_G(PASN_BitString & g) const
         unsigned char * data = (unsigned char *)OPENSSL_malloc(len_g);
         if (data != NULL) {
             memset(data, 0, len_g);
-            if (BN_bn2bin(dh->g, data) > 0) {
+            if (BN_bn2bin(dh_g, data) > 0) {
                 g.SetData(8, data);
             }
             else {
@@ -281,9 +378,7 @@ void H235_DiffieHellman::Decode_G(const PASN_BitString & g)
     return;
 
   PWaitAndSignal m(vbMutex);
-  if (dh->g)
-    BN_free(dh->g);
-  dh->g = BN_bin2bn(g.GetDataPointer(), g.GetDataLength() - 1, NULL);
+  DH_set0_pqg(dh, NULL, NULL, BN_bin2bn(g.GetDataPointer(), g.GetDataLength() - 1, NULL));
 }
 
 
@@ -291,9 +386,14 @@ void H235_DiffieHellman::Encode_HalfKey(PASN_BitString & hk) const
 {
   PWaitAndSignal m(vbMutex);
 
-  int len_p = BN_num_bytes(dh->p);
-  int len_key = BN_num_bytes(dh->pub_key);
-  int bits_p = BN_num_bits(dh->p);
+  const BIGNUM *dh_p = NULL;
+  DH_get0_pqg(dh, &dh_p, NULL, NULL);
+  const BIGNUM *pub_key = NULL;
+  DH_get0_key(dh, &pub_key, NULL);
+
+  int len_p = BN_num_bytes(dh_p);
+  int len_key = BN_num_bytes(pub_key);
+  int bits_p = BN_num_bits(dh_p);
 
   if (len_key > len_p) {
     PTRACE(1, "H235_DH\tFailed to encode halfkey: len key > len prime");
@@ -304,7 +404,7 @@ void H235_DiffieHellman::Encode_HalfKey(PASN_BitString & hk) const
   unsigned char * data = (unsigned char *)OPENSSL_malloc(len_p);
   if (data != NULL) {
     memset(data, 0, len_p);
-    if (BN_bn2bin(dh->pub_key, data + len_p - len_key) > 0) {
+    if (BN_bn2bin(pub_key, data + len_p - len_key) > 0) {
        hk.SetData(bits_p, data);
     } else {
       PTRACE(1, "H235_DH\tFailed to encode halfkey");
@@ -318,9 +418,7 @@ void H235_DiffieHellman::Decode_HalfKey(const PASN_BitString & hk)
   PWaitAndSignal m(vbMutex);
 
   const unsigned char *data = hk.GetDataPointer();
-  if (dh->pub_key)
-    BN_free(dh->pub_key);
-  dh->pub_key = BN_bin2bn(data, hk.GetDataLength() - 1, NULL);
+  DH_set0_key(dh, BN_bin2bn(data, hk.GetDataLength() - 1, NULL), NULL);
 }
 
 void H235_DiffieHellman::SetRemoteKey(bignum_st * remKey)
@@ -341,8 +439,12 @@ void H235_DiffieHellman::SetRemoteHalfKey(const PASN_BitString & hk)
 
 PBoolean H235_DiffieHellman::GenerateHalfKey()
 {
-  if (dh && dh->pub_key)
-    return true;
+  if (dh) {
+    const BIGNUM *pub_key = NULL;
+    DH_get0_key(dh, &pub_key, NULL);
+    if (pub_key)
+      return true;
+  }
 
   PWaitAndSignal m(vbMutex);
 
@@ -378,13 +480,14 @@ PBoolean H235_DiffieHellman::Load(const PConfig  & dhFile, const PString & secti
 
   PString str;
   PBYTEArray data;
+  BIGNUM *dh_p = NULL, *dh_g = NULL, *pub_key = NULL, *priv_key = NULL;
 
   PBoolean ok = true;
   if (dhFile.HasKey(section, "PRIME")) {
     str = dhFile.GetString(section, "PRIME", "");
     PBase64::Decode(str, data);
-    dh->p = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
-    ok = ok && (BN_num_bytes(dh->p) > 0);
+    dh_p = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
+    ok = ok && (BN_num_bytes(dh_p) > 0);
   } else
     ok = false;
 
@@ -395,28 +498,54 @@ PBoolean H235_DiffieHellman::Load(const PConfig  & dhFile, const PString & secti
     memcpy(temp.GetPointer(), data.GetPointer(), 1);
     memset(data.GetPointer(), 0, data.GetSize());
     memcpy(data.GetPointer() + data.GetSize()-1, temp.GetPointer(), 1);
-    dh->g = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
-    ok = ok && (BN_num_bytes(dh->g) > 0);
+    dh_g = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
+    ok = ok && (BN_num_bytes(dh_g) > 0);
   } else
     ok = false;
 
   if (dhFile.HasKey(section, "PUBLIC")) {
     str = dhFile.GetString(section, "PUBLIC", "");
     PBase64::Decode(str, data);
-    dh->pub_key = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
-    ok = ok && (BN_num_bytes(dh->pub_key) > 0);
+    pub_key = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
+    ok = ok && (BN_num_bytes(pub_key) > 0);
   }
 
   if (dhFile.HasKey(section, "PRIVATE")) {
     str = dhFile.GetString(section, "PRIVATE", "");
     PBase64::Decode(str, data);
-    dh->priv_key = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
-    ok = ok && (BN_num_bytes(dh->priv_key) > 0);
+    priv_key = BN_bin2bn(data.GetPointer(), data.GetSize(), NULL);
+    ok = ok && (BN_num_bytes(priv_key) > 0);
+  }
+
+  if (ok) {
+    if (DH_set0_pqg(dh, dh_p, NULL, dh_g)) {
+      dh_p = NULL;
+      dh_g = NULL;
+    } else {
+      ok = false;
+    }
+  }
+
+  if (ok) {
+    if (DH_set0_key(dh, pub_key, priv_key)) {
+      pub_key = NULL;
+      priv_key = NULL;
+    } else {
+      ok = false;
+    }
   }
 
   if (ok /*&& CheckParams()*/)
     m_loadFromFile = true;
   else {
+    if (priv_key)
+      BN_free(priv_key);
+    if (pub_key)
+      BN_free(pub_key);
+    if (dh_g)
+      BN_free(dh_g);
+    if (dh_p)
+      BN_free(dh_p);
     DH_free(dh);
     dh = NULL;
   }
@@ -431,36 +560,44 @@ PBoolean H235_DiffieHellman::LoadedFromFile()
 
 PBoolean H235_DiffieHellman::Save(const PFilePath & dhFile, const PString & oid)
 {
-  if (!dh || !dh->pub_key)
+  if (!dh)
     return false;
+
+  const BIGNUM *pub_key = NULL, *priv_key = NULL;
+  DH_get0_key(dh, &pub_key, &priv_key);
+  if (!pub_key)
+    return false;
+
+  const BIGNUM *dh_p = NULL, *dh_g = NULL;
+  DH_get0_pqg(dh, &dh_p, NULL, &dh_g);
 
   PConfig config(dhFile, oid);
   PString str = PString();
-  int len = BN_num_bytes(dh->pub_key);
+  int len = BN_num_bytes(pub_key);
   unsigned char * data = (unsigned char *)OPENSSL_malloc(len);
 
-  if (data != NULL && BN_bn2bin(dh->p, data) > 0) {
+  if (data != NULL && BN_bn2bin(dh_p, data) > 0) {
     str = PBase64::Encode(data, len, "");
     config.SetString("PRIME",str);
   }
   OPENSSL_free(data);
 
   data = (unsigned char *)OPENSSL_malloc(len);
-  if (data != NULL && BN_bn2bin(dh->g, data) > 0) {
+  if (data != NULL && BN_bn2bin(dh_g, data) > 0) {
     str = PBase64::Encode(data, len, "");
     config.SetString("GENERATOR",str);
   }
   OPENSSL_free(data);
 
   data = (unsigned char *)OPENSSL_malloc(len);
-  if (data != NULL && BN_bn2bin(dh->pub_key, data) > 0) {
+  if (data != NULL && BN_bn2bin(pub_key, data) > 0) {
     str = PBase64::Encode(data, len, "");
     config.SetString("PUBLIC",str);
   }
   OPENSSL_free(data);
 
   data = (unsigned char *)OPENSSL_malloc(len);
-  if (data != NULL && BN_bn2bin(dh->priv_key, data) > 0) {
+  if (data != NULL && BN_bn2bin(priv_key, data) > 0) {
     PString str = PBase64::Encode(data, len, "");
     config.SetString("PRIVATE",str);
   }
@@ -496,7 +633,9 @@ PBoolean H235_DiffieHellman::ComputeSessionKey(PBYTEArray & SessionKey)
 
 bignum_st * H235_DiffieHellman::GetPublicKey() const
 {
-  return dh->pub_key;
+  const BIGNUM *pub_key = NULL;
+  DH_get0_key(dh, &pub_key, NULL);
+  return const_cast< BIGNUM* >(pub_key);
 }
 
 int H235_DiffieHellman::GetKeyLength() const
@@ -527,19 +666,22 @@ void H235_DiffieHellman::Generate(PINDEX keyLength, PINDEX keyGenerator, PString
 
     parameters.SetAt("OID", lOID);
 
+    const BIGNUM *vdh_p = NULL, *vdh_g = NULL;
+    DH_get0_pqg(vdh, &vdh_p, NULL, &vdh_g);
+
     PString str = PString();
-    int len = BN_num_bytes(vdh->p);
+    int len = BN_num_bytes(vdh_p);
     unsigned char * data = (unsigned char *)OPENSSL_malloc(len);
 
-    if (data != NULL && BN_bn2bin(vdh->p, data) > 0) {
+    if (data != NULL && BN_bn2bin(vdh_p, data) > 0) {
         str = PBase64::Encode(data, len, "");
         parameters.SetAt("PRIME", str);
     }
     OPENSSL_free(data);
 
-    len = BN_num_bytes(vdh->g);
+    len = BN_num_bytes(vdh_g);
     data = (unsigned char *)OPENSSL_malloc(len);
-    if (data != NULL && BN_bn2bin(vdh->g, data) > 0) {
+    if (data != NULL && BN_bn2bin(vdh_g, data) > 0) {
         str = PBase64::Encode(data, len, "");
         parameters.SetAt("GENERATOR", str);
     }
