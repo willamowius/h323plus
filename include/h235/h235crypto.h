@@ -44,18 +44,48 @@ extern "C" {
 #include <openssl/evp.h>
 }
 
-// H.235.6 says no more than 2^62 blocks, Schneier says no more than 2^32 blocks in CBC mode
+// H.235.6 says no more than 2^62 blocks, Bruce Schneier says no more than 2^32 blocks in CBC mode
 #define AES_KEY_LIMIT 4294967295U	// 2^32-1
 
 // helper routines not present in OpenSSL
-int EVP_EncryptUpdate_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
-                      const unsigned char *in, int inl);
-int EVP_EncryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
-int EVP_DecryptUpdate_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
-                      const unsigned char *in, int inl);
-int EVP_DecryptFinal_cts(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
-int EVP_DecryptFinal_relaxed(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
+class H235CryptoHelper
+{
+private:
+  //! Saved partial block of input data
+  unsigned char buf[EVP_MAX_BLOCK_LENGTH];
+  //! Last processed block of output data
+  unsigned char final_buf[EVP_MAX_BLOCK_LENGTH];
+  //! Number of bytes in buf
+  int buf_len;
+  //! Indicates whether the final buffer is used
+  int final_used;
 
+public:
+  H235CryptoHelper();
+
+  void Reset();
+
+  // Ciphertext stealing (CTS) methods
+  int EncryptUpdateCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
+                       const unsigned char *in, int inl);
+  int EncryptFinalCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
+  int DecryptUpdateCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
+                       const unsigned char *in, int inl);
+  int DecryptFinalCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
+
+  // Relaxed decryption that doesn't verify contents of the padding in the last decrypted block
+  int DecryptUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
+                    const unsigned char *in, int inl);
+  int DecryptFinalRelaxed(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
+
+private:
+  H235CryptoHelper(H235CryptoHelper const&);
+  H235CryptoHelper& operator= (H235CryptoHelper const&);
+
+  // Encryption algorithm only used as part of the decryption implementation
+  int EncryptUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
+                    const unsigned char *in, int inl);
+};
 
 class H235CryptoEngine : public PObject
 {
@@ -101,7 +131,7 @@ public:
 
     PBYTEArray GenerateRandomKey(const PString & algorithmOID);  // Use assigned Algorithm
 
-	PString GetAlgorithmOID() const { return m_algorithmOID; }
+    PString GetAlgorithmOID() const { return m_algorithmOID; }
 
     PBoolean IsMaxBlocksPerKeyReached() const { return m_operationCnt > AES_KEY_LIMIT; }
     void ResetBlockCount() { m_operationCnt = 0; }
@@ -109,7 +139,8 @@ public:
 protected:
     static void SetIV(unsigned char * iv, unsigned char * ivSequence, unsigned ivLen);
 
-    EVP_CIPHER_CTX m_encryptCtx, m_decryptCtx;
+    EVP_CIPHER_CTX *m_encryptCtx, *m_decryptCtx;
+    H235CryptoHelper m_encryptHelper, m_decryptHelper;
     PString m_algorithmOID;    // eg. "2.16.840.1.101.3.4.1.2"
     PUInt64 m_operationCnt;  // 8 byte integer
     PBoolean m_initialised;
@@ -182,7 +213,7 @@ public:
     PBoolean WriteFrameInPlace(RTP_DataFrame & frame);
   //@}
 
-	PString GetAlgorithmOID() const { return m_context.GetAlgorithmOID(); }
+    PString GetAlgorithmOID() const { return m_context.GetAlgorithmOID(); }
 
 private:
     H235_DiffieHellman & m_dh;
