@@ -5,7 +5,7 @@
  *
  * H323Plus library
  *
- * Copyright (c) 2012-2013 Jan Willamowius
+ * Copyright (c) 2012-2018 Jan Willamowius
  *
  * The contents of this file are subject to the Mozilla Public License
  * Version 1.1 (the "License"); you may not use this file except in
@@ -50,16 +50,6 @@ extern "C" {
 // helper routines not present in OpenSSL
 class H235CryptoHelper
 {
-private:
-  //! Saved partial block of input data
-  unsigned char buf[EVP_MAX_BLOCK_LENGTH];
-  //! Last processed block of output data
-  unsigned char final_buf[EVP_MAX_BLOCK_LENGTH];
-  //! Number of bytes in buf
-  int buf_len;
-  //! Indicates whether the final buffer is used
-  int final_used;
-
 public:
   H235CryptoHelper();
 
@@ -85,6 +75,17 @@ private:
   // Encryption algorithm only used as part of the decryption implementation
   int EncryptUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
                     const unsigned char *in, int inl);
+
+private:
+  //! Saved partial block of input data
+  unsigned char buf[EVP_MAX_BLOCK_LENGTH];
+  //! Last processed block of output data
+  unsigned char final_buf[EVP_MAX_BLOCK_LENGTH];
+  //! Number of bytes in buf
+  int buf_len;
+  //! Indicates whether the final buffer is used
+  int final_used;
+
 };
 
 class H235CryptoEngine : public PObject

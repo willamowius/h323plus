@@ -5,7 +5,7 @@
  *
  * H323Plus library
  *
- * Copyright (c) 2012 Jan Willamowius
+ * Copyright (c) 2012-2018 Jan Willamowius
  *
  * The contents of this file are subject to the Mozilla Public License
  * Version 1.1 (the "License"); you may not use this file except in
@@ -79,6 +79,7 @@ inline const unsigned char *EVP_CIPHER_CTX_iv(const EVP_CIPHER_CTX *ctx)
 // EncryptUpdate, DecryptUpdate and DecryptFinalRelaxed implementation is based
 // on the code from OpenSSL. These functions are implemented here for the sake of
 // a workaround for some broken terminals in DecryptFinalRelaxed.
+
 H235CryptoHelper::H235CryptoHelper()
 {
     memset(buf, 0, sizeof(buf));
@@ -86,7 +87,7 @@ H235CryptoHelper::H235CryptoHelper()
     Reset();
 }
 
-inline void H235CryptoHelper::Reset()
+void H235CryptoHelper::Reset()
 {
     buf_len = 0;
     final_used = 0;
@@ -278,7 +279,7 @@ int H235CryptoHelper::EncryptUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out, int
     return 1;
 }
 
-inline int H235CryptoHelper::DecryptUpdateCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
+int H235CryptoHelper::DecryptUpdateCTS(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
                       const unsigned char *in, int inl)
 {
     return EncryptUpdateCTS(ctx, out, outl, in, inl);
