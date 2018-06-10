@@ -65,7 +65,7 @@ ostream & operator<<(ostream & strm, Q931::InformationElementCodes ie)
     { Q931::CalledPartyNumberIE,    "Called-Party-Number"   },
     { Q931::RedirectingNumberIE,    "Redirecting-Number"    },
     { Q931::ChannelIdentificationIE,"Channel-Identification"},
-    { Q931::UserUserIE,             "User-User"             } 
+    { Q931::UserUserIE,             "User-User"             }
   };
   static const POrdinalToString IENames(PARRAYSIZE(IENamesInit), IENamesInit);
 
@@ -138,7 +138,7 @@ ostream & operator<<(ostream & strm, Q931::CauseValues cause)
     { Q931::OnlyRestrictedDigitalBearerCapAvailable, "Only restricted digital bearer cap available" },
     { Q931::ServiceOrOptionNotImplemented,    "Service or option not implemented" },
     { Q931::IdentifiedChannelNonExistent,     "IdentifiedChannelNonExistent"      },
-    { Q931::CallIdentifyNotSuspendedCall,     "CallIdentifyNotSuspendedCall"      }, 
+    { Q931::CallIdentifyNotSuspendedCall,     "CallIdentifyNotSuspendedCall"      },
     { Q931::CallIdentifyInUse,                "CallIdentifyInUse"                 },
     { Q931::NoCallSuspended,                  "NoCallSuspended"                   },
     { Q931::ClearedRequestedCallIdentity,     "ClearedRequestedCallIdentity"      },
@@ -335,8 +335,8 @@ PBoolean Q931::Decode(const PBYTEArray & data)
     return FALSE;
 
   if (callRefLen == 2) {
-    callReference = ((data[2]&0x7f) << 8) | data[3];
-    fromDestination = (data[2]&0x80) != 0;
+    callReference = ((data[2] & 0x7f) << 8) | data[3];
+    fromDestination = (data[2] & 0x80) != 0;
   } else {
     callReference = 0;
     fromDestination = false;
@@ -353,7 +353,7 @@ PBoolean Q931::Decode(const PBYTEArray & data)
     PBYTEArray * item = new PBYTEArray;
 
     // For discriminator with high bit set there is no data
-    if ((discriminator&0x80) == 0) {
+    if ((discriminator & 0x80) == 0) {
       int len = data[offset++];
 
       if (discriminator == UserUserIE) {
@@ -608,7 +608,7 @@ void Q931::RemoveIE(InformationElementCodes ie)
 
 unsigned Q931::SetBearerTransferRate(unsigned bitrate)
 {
-   unsigned rawTransferRate = bitrate/64000;
+   unsigned rawTransferRate = bitrate / 64000;
 
    if      (rawTransferRate <= 2)  return rawTransferRate;
    else if (rawTransferRate <= 6)  return  6;
@@ -624,7 +624,7 @@ void Q931::SetBearerCapabilities(InformationTransferCapability capability,
 {
   BYTE data[4];
   PINDEX size = 1;
-  data[0] = (BYTE)(0x80 | ((codingStandard&3) << 5) | (capability&31));
+  data[0] = (BYTE)(0x80 | ((codingStandard & 3) << 5) | (capability & 31));
 
   switch (codingStandard) {
     case 0 :  // ITU-T standardized coding
@@ -690,7 +690,7 @@ PBoolean Q931::GetBearerCapabilities(InformationTransferCapability & capability,
 
   capability = (InformationTransferCapability)data[0];
   if (codingStandard != NULL)
-    *codingStandard = (data[0] >> 5)&3;
+    *codingStandard = (data[0] >> 5) & 3;
 
   PINDEX nextByte = 2;
   switch (data[1]) {
@@ -712,7 +712,7 @@ PBoolean Q931::GetBearerCapabilities(InformationTransferCapability & capability,
     case 0x18 :
       if (data.GetSize() < 3)
         return FALSE;
-      transferRate = data[2]&0x7f;
+      transferRate = data[2] & 0x7f;
       nextByte = 3;
       break;
     default :
@@ -720,7 +720,7 @@ PBoolean Q931::GetBearerCapabilities(InformationTransferCapability & capability,
   }
 
   if (userInfoLayer1 != NULL)
-    *userInfoLayer1 = data.GetSize() > nextByte && ((data[nextByte]>>5)&3) == 1 ? (data[nextByte]&0x1f) : 0;
+    *userInfoLayer1 = data.GetSize() > nextByte && ((data[nextByte] >> 5) & 3) == 1 ? (data[nextByte] & 0x1f) : 0;
 
   return TRUE;
 }
@@ -729,7 +729,7 @@ PBoolean Q931::GetBearerCapabilities(InformationTransferCapability & capability,
 void Q931::SetCause(CauseValues value, unsigned standard, unsigned location)
 {
   PBYTEArray data(2);
-  data[0] = (BYTE)(0x80 | ((standard&3) << 5) | (location&15));
+  data[0] = (BYTE)(0x80 | ((standard & 3) << 5) | (location & 15));
   data[1] = (BYTE)(0x80 | value);
   SetIE(CauseIE, data);
 }
@@ -745,18 +745,18 @@ Q931::CauseValues Q931::GetCause(unsigned * standard, unsigned * location) const
     return ErrorInCauseIE;
 
   if (standard != NULL)
-    *standard = (data[0] >> 5)&3;
+    *standard = (data[0] >> 5) & 3;
   if (location != NULL)
     *location = data[0]&15;
 
-  if ((data[0]&0x80) != 0)
-    return (CauseValues)(data[1]&0x7f);
+  if ((data[0] & 0x80) != 0)
+    return (CauseValues)(data[1] & 0x7f);
 
   // Allow for optional octet
   if (data.GetSize() < 3)
     return ErrorInCauseIE;
 
-  return (CauseValues)(data[2]&0x7f);
+  return (CauseValues)(data[2] & 0x7f);
 }
 
 
@@ -767,7 +767,7 @@ void Q931::SetCallState(CallStates value, unsigned standard)
 
   // Call State as per Q.931 section 4.5.7
   PBYTEArray data(1);
-  data[0] = (BYTE)(((standard&3) << 6) | value);
+  data[0] = (BYTE)(((standard & 3) << 6) | value);
   SetIE(CallStateIE, data);
 }
 
@@ -782,9 +782,9 @@ Q931::CallStates Q931::GetCallState(unsigned * standard) const
     return CallState_ErrorInIE;
 
   if (standard != NULL)
-    *standard = (data[0] >> 6)&3;
+    *standard = (data[0] >> 6) & 3;
 
-  return (CallStates)(data[0]&0x3f);
+  return (CallStates)(data[0] & 0x3f);
 }
 
 
@@ -834,8 +834,8 @@ void Q931::SetProgressIndicator(unsigned description,
                                 unsigned location)
 {
   PBYTEArray data(2);
-  data[0] = (BYTE)(0x80+((codingStandard&0x03)<<5)+(location&0x0f));
-  data[1] = (BYTE)(0x80+(description&0x7f));
+  data[0] = (BYTE)(0x80+((codingStandard & 0x03) << 5)+(location & 0x0f));
+  data[1] = (BYTE)(0x80+(description & 0x7f));
   SetIE(ProgressIndicatorIE, data);
 }
 
@@ -907,7 +907,7 @@ static PBYTEArray SetNumberIE(const PString & number,
       bytes[1] = (BYTE)(0x80|((presentation&3)<<5)|(screening&3));
       memcpy(bytes.GetPointer()+2, (const char *)number, len);
     }
-  } 
+  }
   else {
     // If octet 3b is present, then octet 3a must also be present!
     if (presentation == -1 || screening == -1) {
@@ -1142,7 +1142,7 @@ void Q931::SetChannelIdentification(unsigned interfaceType,
     }
     if (channelNumber == 0) { // D channel
       bytes[0] = 0x80 | 0x04;
-    }    
+    }
     if (channelNumber > 0) { // B channel
       bytes[0] = (BYTE)(0x80 | ((preferredOrExclusive & 0x01) << 3) | (channelNumber & 0x03));
     }
@@ -1156,7 +1156,7 @@ void Q931::SetChannelIdentification(unsigned interfaceType,
     }
     if (channelNumber == 0) { // D channel
       bytes[0] = 0x80 | 0x04 | 0x20;
-    }    
+    }
     if (channelNumber > 0) { // B channel
       bytes.SetSize(3);
 
