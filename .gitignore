@@ -6,6 +6,7 @@ config.cache
 config.status
 Makefile
 openh323u.mak
+h323plus_cfg.dxy
 lib
 obj_*_*_*_s
 obj_*_*_*_d_s

@@ -969,6 +969,7 @@ AC_PROG_INSTALL
 
 AC_CONFIG_FILES(openh323u.mak)
 AC_CONFIG_FILES(Makefile)
+AC_CONFIG_FILES(h323plus_cfg.dxy)
 
 
 dnl ########################################################################

@@ -12,12 +12,12 @@
 H323Plus is an Open Source class library for the development of applications
 using the H.323 protocol for multi-media communications over
 packet based networks. It continues the development of OpenH323 under the old API.
-It uses the PWLib library to provide platform independence, and
+It uses the PTLib library to provide platform independence, and
 makes extensive use of the C++ techniques of inheritance and polymorphism.
 
 This document is intended as reference guide, not a tutorial. For examples
 of using H323Plus, see the sample programs provided in the samples directory.
-A tutorial on using PWLib and OpenH323/H323Plus is also available at http://toncar.cz/openh323/tut/ .
+A tutorial on using PTLib and OpenH323/H323Plus is also available at http://toncar.cz/openh323/tut/ .
 
 Last updated 19 January, 2010
 

@@ -5249,6 +5249,8 @@ ac_config_files="$ac_config_files openh323u.mak"
 
 ac_config_files="$ac_config_files Makefile"
 
+ac_config_files="$ac_config_files h323plus_cfg.dxy"
+
 
 
 
@@ -5954,6 +5956,7 @@ do
   case $ac_config_target in
     "openh323u.mak") CONFIG_FILES="$CONFIG_FILES openh323u.mak" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+    "h323plus_cfg.dxy") CONFIG_FILES="$CONFIG_FILES h323plus_cfg.dxy" ;;
     "include/openh323buildopts.h") CONFIG_HEADERS="$CONFIG_HEADERS include/openh323buildopts.h" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
