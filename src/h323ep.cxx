@@ -3453,9 +3453,10 @@ PBoolean H323EndPoint::RemoveAliasName(const PString & name)
   if (pos == P_MAX_INDEX)
     return FALSE;
 
-  PAssert(localAliasNames.GetSize() > 1, "Must have at least one AliasAddress!");
-  if (localAliasNames.GetSize() < 2)
+  if (localAliasNames.GetSize() < 2) {
+    PTRACE(1, "Error: Must have at least one AliasAddress!");
     return FALSE;
+  }
 
 #if PTLIB_VER >= 2110
   localAliasNames.Remove(&name);
