@@ -3425,9 +3425,10 @@ PBoolean H323EndPoint::OpenFileTransferChannel(H323Connection & connection,
 
 void H323EndPoint::SetLocalUserName(const PString & name)
 {
-  PAssert(!name, "Must have non-empty string in AliasAddress!");
-  if (name.IsEmpty())
+  if (name.IsEmpty()) {
+    PTRACE(1, "Error: Must have non-empty string in AliasAddress!");
     return;
+  }
 
   localAliasNames.RemoveAll();
   localAliasNames.SetSize(0);
@@ -3437,7 +3438,10 @@ void H323EndPoint::SetLocalUserName(const PString & name)
 
 PBoolean H323EndPoint::AddAliasName(const PString & name)
 {
-  PAssert(!name, "Must have non-empty string in AliasAddress!");
+  if (name.IsEmpty()) {
+    PTRACE(1, "Error: Must have non-empty string in AliasAddress!");
+    return FALSE;
+  }
 
   if (localAliasNames.GetValuesIndex(name) != P_MAX_INDEX)
     return FALSE;
