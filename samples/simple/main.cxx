@@ -35,7 +35,7 @@
 #include "main.h"
 #include "../../version.h"
 
-#if defined(_MSC_VER) 
+#if defined(_MSC_VER)
  #if PTLIB_VER > 280
    #define defVideoDriver "DirectShow"
  #else
@@ -204,7 +204,7 @@ void SimpleH323Process::Main()
 #ifdef H323_VIDEO
             "  -v --video device       : Select video input/output device.\n"
 #endif
-#if PTRACING 
+#if PTRACING
             "  -t --trace              : Enable trace, use multiple times for more detail.\n"
             "  -o --output             : File for trace output, default is stderr.\n"
 #endif
@@ -273,12 +273,12 @@ void SimpleH323Process::Main()
 #ifdef H323_H239
         else if (cmd == "S") {
           if (connection->OpenH239Channel())
-              cout << "Application Session Open.." << endl;
+              cout << "H.239 session open.." << endl;
           else
-              cout << "Application Open Error: Remote may not support Feature!" << endl;
+              cout << "H.239 open error: Remote may not support feature!" << endl;
         } else if (cmd == "E") {
           if (connection->CloseH239Channel())
-              cout << "Application Session Closed.." << endl;
+              cout << "H.239 session closed.." << endl;
         }
 #endif
         else
@@ -317,7 +317,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
   PPluginManager & pluginMgr = PPluginManager::GetPluginManager();
   pluginMgr.LoadPluginDirectory(DefaultDir);
 #endif
-  
+
 
   // Get local username, multiple uses of -u indicates additional aliases
   if (args.HasOption('u')) {
@@ -389,7 +389,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
 #endif
 
   localLanguages.AppendString("en-us");
-  
+
   if (!SetSoundDevice(args, "sound", PSoundChannel::Recorder))
     return FALSE;
   if (!SetSoundDevice(args, "sound", PSoundChannel::Player))
@@ -427,7 +427,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
       cout << "Video Device " << devices[0] << " capabilities." << endl;
       cout << "  Grabber capabilities." << endl;
       for (std::list<PVideoFrameInfo>::const_iterator r = caps.framesizes.begin(); r != caps.framesizes.end(); ++r) {
-          cout << "        w: " << r->GetFrameWidth() << " h: " << r->GetFrameHeight() << " fmt: " 
+          cout << "        w: " << r->GetFrameWidth() << " h: " << r->GetFrameHeight() << " fmt: "
                << r->GetColourFormat() << " fps: " << r->GetFrameRate() << endl;
           if ((r->GetFrameWidth() >= 1280) && (r->GetFrameHeight() >= 720)) {
               MaxVideoFrame = H323Capability::p720MPI;
@@ -450,7 +450,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
   if (!hasVideo)
     RemoveCapability(H323Capability::e_Video);
 #ifdef H323_VIDEO
-  else 
+  else
     SetVideoFrameSize(MaxVideoFrame);
 #endif
 
@@ -505,7 +505,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
 #ifdef H323_H460P
   PresenceAddFeature(e_preAudio);
   PresenceAddFeature(e_preVideo);
- 
+
   PresenceAddFeatureH460();
 #endif
 
@@ -529,7 +529,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
 #if PTLIB_VER >= 2110
           H235Authenticator::Capabilities caps;
           if (H235Authenticator::GetAuthenticatorCapabilities(security[i],&caps)) {
-             for (list<H235Authenticator::Capability>::iterator j = 
+             for (list<H235Authenticator::Capability>::iterator j =
                        caps.capabilityList.begin(); j != caps.capabilityList.end(); ++j) {
                  cout << "   " << j->m_identifier << " " << j->m_cipher << " " << j->m_description << endl;
               }
@@ -678,7 +678,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
         cout << "\nGatekeeper found: " << *gatekeeper << endl;
       else {
         cerr << "\nNo gatekeeper found." << endl;
-        if (args.HasOption('r')) 
+        if (args.HasOption('r'))
           return FALSE;
       }
     }
@@ -903,7 +903,7 @@ PBoolean SimpleH323EndPoint::OpenVideoChannel(H323Connection & /*connection*/,
 #if PTLIB_VER >= 2110
   if (isEncoding) {
       PVideoInputDevice::Capabilities videoCaps;
-      if (((PVideoInputDevice *)device)->GetDeviceCapabilities(deviceName,deviceDriver,&videoCaps)) {
+      if (((PVideoInputDevice *)device)->GetDeviceCapabilities(deviceName, deviceDriver, &videoCaps)) {
           codec.SetSupportedFormats(videoCaps.framesizes);
       } else {
         // set fixed list of resolutions for drivers that don't provide a list
@@ -989,17 +989,17 @@ PBoolean SimpleH323EndPoint::OpenExtendedVideoChannel(H323Connection & connectio
   if (deviceName.IsEmpty())
     deviceName = isEncoding ? "fake" : "NULL";
 
-  PVideoDevice * device = isEncoding ? (PVideoDevice *)PVideoInputDevice::CreateOpenedDevice(deviceDriver,deviceName)
-                                     : (PVideoDevice *)PVideoOutputDevice::CreateOpenedDevice(deviceDriver,deviceName);
+  PVideoDevice * device = isEncoding ? (PVideoDevice *)PVideoInputDevice::CreateOpenedDevice(deviceDriver, deviceName)
+                                     : (PVideoDevice *)PVideoOutputDevice::CreateOpenedDevice(deviceDriver, deviceName);
 
   if (isEncoding) {
       PVideoInputDevice::Capabilities videoCaps;
-      if (((PVideoInputDevice *)device)->GetDeviceCapabilities(deviceName,deviceDriver,&videoCaps))
+      if (((PVideoInputDevice *)device)->GetDeviceCapabilities(deviceName, deviceDriver, &videoCaps))
           codec.SetSupportedFormats(videoCaps.framesizes);
   }
 
   if (!device->SetColourFormatConverter("YUV420P") ||
-      !device->SetFrameSizeConverter(codec.GetWidth(), codec.GetHeight(),PVideoFrameInfo::eScale)) {
+      !device->SetFrameSizeConverter(codec.GetWidth(), codec.GetHeight(), PVideoFrameInfo::eScale)) {
     PTRACE(1, "Failed to open or configure the video device \"" << deviceName << '"');
     return FALSE;
   }
@@ -1013,7 +1013,7 @@ PBoolean SimpleH323EndPoint::OpenExtendedVideoChannel(H323Connection & connectio
 
   return codec.AttachChannel(channel,TRUE);
 }
-#endif // H323_H239 
+#endif // H323_H239
 #endif // H323_VIDEO
 
 #ifdef H323_UPnP
@@ -1027,7 +1027,7 @@ PBoolean SimpleH323EndPoint::OnUPnPAvailable(const PString & device, const PIPSo
 
 #ifdef H323_H460P
 void SimpleH323EndPoint::PresenceInstruction(const PString & locAlias,
-                                    unsigned type, 
+                                    unsigned type,
                                     const PString & subAlias,
                                     const PString & subDisplay)
 {
@@ -1036,14 +1036,14 @@ void SimpleH323EndPoint::PresenceInstruction(const PString & locAlias,
 #endif
 
 #ifdef H323_H235
-void SimpleH323EndPoint::OnMediaEncryption(unsigned session, H323Channel::Directions dir, const PString & cipher) 
+void SimpleH323EndPoint::OnMediaEncryption(unsigned session, H323Channel::Directions dir, const PString & cipher)
 {
     cout << "Media Encryption " << session << " " << dir << " " << cipher << endl;
 }
 #endif
 
 #ifdef H323_TLS
-void SimpleH323EndPoint::OnSecureSignallingChannel(bool isSecured) 
+void SimpleH323EndPoint::OnSecureSignallingChannel(bool isSecured)
 {
 	// at this point an endpoint could refuse a call with non-secured signalling connection
     cout << "TLS " << (isSecured ? "" : "NOT") << " enabled for call." << endl;
@@ -1080,7 +1080,7 @@ PBoolean SimpleH323Connection::OnStartLogicalChannel(H323Channel & channel)
       break;
   }
 
-  cout << channel.GetCapability() << endl;  
+  cout << channel.GetCapability() << endl;
 
   return TRUE;
 }

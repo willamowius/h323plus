@@ -52,11 +52,11 @@ class SimpleH323EndPoint : public H323EndPoint
     virtual PBoolean OnConnectionForwarded(H323Connection &, const PString &, const H323SignalPDU &);
     virtual void OnConnectionEstablished(H323Connection & connection, const PString & token);
     virtual void OnConnectionCleared(H323Connection & connection, const PString & clearedCallToken);
-    virtual PBoolean OpenAudioChannel(H323Connection &, PBoolean, unsigned, H323AudioCodec &);
+    virtual PBoolean OpenAudioChannel(H323Connection & connection, PBoolean isEncoding, unsigned bufferSize, H323AudioCodec & codec);
 #ifdef H323_VIDEO
-	virtual PBoolean OpenVideoChannel(H323Connection &, PBoolean, H323VideoCodec &);
+	virtual PBoolean OpenVideoChannel(H323Connection & connection, PBoolean isEncoding, H323VideoCodec & codec);
 #ifdef H323_H239
-	virtual PBoolean OpenExtendedVideoChannel(H323Connection &, PBoolean,H323VideoCodec &);
+	virtual PBoolean OpenExtendedVideoChannel(H323Connection & connection, PBoolean isEncoding, H323VideoCodec & codec);
 #endif
 #endif
 #ifdef H323_UPnP
@@ -64,7 +64,7 @@ class SimpleH323EndPoint : public H323EndPoint
 #endif
 
 #ifdef H323_H460P
-    virtual void PresenceInstruction(const PString & locAlias,unsigned type, 
+    virtual void PresenceInstruction(const PString & locAlias,unsigned type,
                                      const PString & subAlias, const PString & subDisplay);
 #endif
 #ifdef H323_H235
