@@ -289,7 +289,7 @@ class H323Connection : public PObject
     );
 
    /**
-      * called when an ACF is received from a gatekeeper. 
+      * called when an ACF is received from a gatekeeper.
       *
       * By default, this calls the matching function on the endpoint
       */
@@ -298,7 +298,7 @@ class H323Connection : public PObject
     );
 
    /**
-      * called when an ARJ is received from a gatekeeper. 
+      * called when an ARJ is received from a gatekeeper.
       *
       * By default, this calls the matching function on the endpoint
       */
@@ -706,7 +706,7 @@ class H323Connection : public PObject
     );
 
     /**Transfer the call through consultation so the remote party in the primary call is connected to
-       the called party in the second call using H.450.2.  This sends a Call Transfer Identify Invoke 
+       the called party in the second call using H.450.2.  This sends a Call Transfer Identify Invoke
        message from the A-Party (transferring endpoint) to the C-Party (transferred-to endpoint).
      */
     void ConsultationTransfer(
@@ -717,14 +717,14 @@ class H323Connection : public PObject
      */
     virtual void OnReceivedInitiateReturnError();
 
-    /**Handle the reception of a callTransferSetupInvoke APDU whilst a secondary call exists.  This 
-       method checks whether the secondary call is still waiting for a callTransferSetupInvoke APDU and 
+    /**Handle the reception of a callTransferSetupInvoke APDU whilst a secondary call exists.  This
+       method checks whether the secondary call is still waiting for a callTransferSetupInvoke APDU and
        proceeds to clear the call if the call identies match.
        This is an internal function and it is not expected the user will call
        it directly.
      */
     virtual void HandleConsultationTransfer(
-      const PString & callIdentity, /**Call Identity of secondary call 
+      const PString & callIdentity, /**Call Identity of secondary call
                                        received in SETUP Message. */
       H323Connection & incoming     ///< Connection upon which SETUP PDU was received.
     );
@@ -753,7 +753,7 @@ class H323Connection : public PObject
     int GetCallTransferInvokeId();
 
     /**Handle the failure of a call transfer operation at the Transferred Endpoint.  This method is
-       used to handle the following transfer failure cases that can occur at the Transferred Endpoint. 
+       used to handle the following transfer failure cases that can occur at the Transferred Endpoint.
        The cases are:
        Reception of an Admission Reject
        Reception of a callTransferSetup return error APDU.
@@ -772,14 +772,14 @@ class H323Connection : public PObject
     );
 
     /**Callback to indicate a successful transfer through consultation.  The paramter passed is a
-       reference to the existing connection between the Transferring endpoint and Transferred-to 
+       reference to the existing connection between the Transferring endpoint and Transferred-to
        endpoint.
      */
     virtual void OnConsultationTransferSuccess(
       H323Connection & secondaryCall  ///< Secondary call for consultation
     );
 
-     /**Set the call linkage associated with the current call. This is used to include the callToken which is 
+     /**Set the call linkage associated with the current call. This is used to include the callToken which is
       requesting this connection. ie. Call Transfer. This information can be used for billing systems
       to correctly charge the correct party for Transferred or forwarded calls.
        */
@@ -787,7 +787,7 @@ class H323Connection : public PObject
         H225_AdmissionRequest & arq   ///< Admission Request PDU
       );
 
-     /**Set the call linkage associated with the current call. This is used to detect the callToken which has 
+     /**Set the call linkage associated with the current call. This is used to detect the callToken which has
       requesting this connection. ie. Call Transfer. This information can be used for billing systems
       to correctly charge the correct party for Transferred or forwarded calls.
      */
@@ -797,19 +797,19 @@ class H323Connection : public PObject
 
     /**Retrieves the redirecting number(s) and additional call diversion information (div. counter
        and div. reason) as of an incoming redirected call, currently only according to H.450.3 call diversion
-       supplementary service 
+       supplementary service
     */
 
     PBoolean GetRedirectingNumber(
-      PString &originalCalledNr,               
+      PString &originalCalledNr,
       PString &lastDivertingNr,
-      int &divCounter, 
+      int &divCounter,
       int &originaldivReason,
       int &divReason);
 
-    /**Place the call on hold, suspending all media channels (H.450.4).  Note it is the responsibility 
+    /**Place the call on hold, suspending all media channels (H.450.4).  Note it is the responsibility
        of the application layer to delete the MOH Channel if music on hold is provided to the remote
-       endpoint.  So far only Local Hold has been implemented. 
+       endpoint.  So far only Local Hold has been implemented.
      */
     void HoldCall(
       PBoolean localHold   ///< true for Local Hold, false for Remote Hold
@@ -818,7 +818,7 @@ class H323Connection : public PObject
     /**Retrieve the call from hold, activating all media channels (H.450.4).
        This method examines the call hold state and performs the necessary
        actions required to retrieve a Near-end or Remote-end call on hold.
-       NOTE: Only Local Hold is implemented so far. 
+       NOTE: Only Local Hold is implemented so far.
     */
     void RetrieveCall();
 
@@ -842,11 +842,11 @@ class H323Connection : public PObject
       PChannel * videoChannel
     );
 
-    /**CallBack when Call is put on hold. This allows the device to release the 
+    /**CallBack when Call is put on hold. This allows the device to release the
        Local Input device to be used for another active connection
       */
     virtual PChannel *  OnCallHold(PBoolean IsEncoder,     ///* Direction
-                               unsigned sessionId,     ///* Session Id 
+                               unsigned sessionId,     ///* Session Id
                                unsigned bufferSize,    ///* Size of each sound buffer (Audio)
                                PChannel * channel);    ///* Channel being Held
 
@@ -854,7 +854,7 @@ class H323Connection : public PObject
        to be reattached to the Held Channel.
        */
     virtual PChannel *  OnCallRetrieve(PBoolean IsEncoder,  ///* Direction
-                               unsigned sessionId,      ///* Session Id    
+                               unsigned sessionId,      ///* Session Id
                                unsigned bufferSize,     ///* Size of each sound buffer (Audio)
                                PChannel * channel);    ///* Channel being Held
 
@@ -937,7 +937,7 @@ class H323Connection : public PObject
 
     struct MWIInformation {
         MWIInformation()
-        : mwiCtrId(PString()), mwiUser(PString()), 
+        : mwiCtrId(PString()), mwiUser(PString()),
           mwitype(mwiNone), mwiCalls(0) {}
 
         PString mwiCtrId;                          ///< Message Center ID
@@ -976,7 +976,7 @@ class H323Connection : public PObject
 
 
     /**Received a message wait indication request on a mail server (Interrogate).
-        This is used for enquiring on a mail server if 
+        This is used for enquiring on a mail server if
         there are any active messages for the served user.
         default calls Endpoint function of same name.
         return false indicates MWI request rejected.
@@ -1029,7 +1029,7 @@ class H323Connection : public PObject
     virtual AnswerCallResponse OnAnswerCall(
       const PString & callerName,       ///< Name of caller
       const H323SignalPDU & setupPDU,   ///< Received setup PDU
-      H323SignalPDU & connectPDU        ///< Connect PDU to send. 
+      H323SignalPDU & connectPDU        ///< Connect PDU to send.
     );
 
     /**Indicate the result of answering an incoming call.
@@ -1454,7 +1454,7 @@ class H323Connection : public PObject
 
     /**Set the Payload Size
        This will set the RTP Payloadsize limit.
-       By Default it is 1400. 
+       By Default it is 1400.
       */
     void SetMaxPayloadSize(
         H323Capability::MainTypes captype,      ///< Capability Type
@@ -1465,7 +1465,7 @@ class H323Connection : public PObject
        This will weigh frame rate over frame size
       */
      void SetEmphasisSpeed(
-         H323Capability::MainTypes captype,     ///< Capability Type 
+         H323Capability::MainTypes captype,     ///< Capability Type
          bool speed                             ///< Payload size
      );
 
@@ -1473,7 +1473,7 @@ class H323Connection : public PObject
        The default behaviour does nothing.
       */
     virtual void OnSendH245_OpenLogicalChannel(
-        H245_OpenLogicalChannel & /*open*/, 
+        H245_OpenLogicalChannel & /*open*/,
         PBoolean /*forward*/
         ) { }
 
@@ -1512,7 +1512,7 @@ class H323Connection : public PObject
 
        If fastStartState is FastStartInitiate, then the local endpoint has
        initiated a call and is asking the application if fast start semantics
-       are to be used. If so it is expected that the function call 
+       are to be used. If so it is expected that the function call
        OpenLogicalChannel() for all the channels that it wishes to be able to
        be use. A subset (possibly none!) of these would actually be started
        when the remote endpoint replies.
@@ -1546,7 +1546,7 @@ class H323Connection : public PObject
         H323Capability * remote           ///< remote Capability
     );
 
-	/** Merge remote language support to the local supported languages to 
+	/** Merge remote language support to the local supported languages to
 		determine common languages supported.
 	  */
 	virtual PBoolean MergeLanguages(
@@ -1554,7 +1554,7 @@ class H323Connection : public PObject
         PBoolean isCaller
 	);
 
-	/** Merge remote language support to the local supported languages to 
+	/** Merge remote language support to the local supported languages to
 		determine common languages supported.
 	  */
 	virtual PBoolean MergeLanguages(
@@ -1564,7 +1564,7 @@ class H323Connection : public PObject
 	/** Event fires when a common language is determined
 		Implementers should override this function to notify the
 		user the language of the remote caller.
-		returning FALSE drops the call with reason  
+		returning FALSE drops the call with reason
 	  */
 	virtual PBoolean OnCommonLanguages(const PStringList & lang);
 
@@ -1713,7 +1713,7 @@ class H323Connection : public PObject
     );
 
     /** Initial Flow Restrictions
-       
+
        This is called when the channel has been openAck and allows the receiver
        to specify flow control restrictions.
       */
@@ -1779,7 +1779,7 @@ class H323Connection : public PObject
 
     /** On Receiving a H.239 Control Request
         Return False to reject the request to open channel.
-        Set Delay to delay opening the channel. 
+        Set Delay to delay opening the channel.
         Calling OnH239ControlRequest() will invoke
     */
     virtual PBoolean AcceptH239ControlRequest(PBoolean & delay);
@@ -1806,7 +1806,7 @@ class H323Connection : public PObject
            unsigned /*role*/,                           ///< role 1-Presentation 2-Live
            const H323ChannelNumber & /*channelnum*/     ///< Channel number of just opened channel
     ) const {};
-    
+
     /** Close an Extended Video Session matching the channel number
         This will close the Extended Video matching the channel number (if open)
      */
@@ -1827,8 +1827,16 @@ class H323Connection : public PObject
 
     virtual PBoolean SendH239GenericResponse(PBoolean response);
 
+    /**Get the RTP session ID to be used for H.239
+     */
+    virtual unsigned GetExtVideoRTPSessionID() const;
+
+    /**Set the RTP session ID to be used for H.239, when it is received from the H.245 master
+     */
+    virtual void SetExtVideoRTPSessionID(unsigned id) { h239SessionID = id; }
+
     H245NegLogicalChannels * GetLogicalChannels();
-        
+
 #endif // H323_H239
 
 #endif // NO_H323_VIDEO
@@ -1981,7 +1989,7 @@ class H323Connection : public PObject
 
     /**When gatekeeper setting the bandwidth, OnSetBandwidthAvailable
        provides a method to notify the implementor of the bandwidth change
-       and how much available bandwidth is available for the call. 
+       and how much available bandwidth is available for the call.
        Note Bandwidth is in bits/sec
       */
     virtual PBoolean OnSetBandwidthAvailable(
@@ -2135,24 +2143,24 @@ class H323Connection : public PObject
 #ifdef H323_H249
 
     /**Send a user input indication to the remote endpoint.
-       This sends a H.249 Annex A Navigation user input. 
+       This sends a H.249 Annex A Navigation user input.
       */
     virtual void SendUserInputIndicationNavigate(
         H323_UserInputCapability::NavigateKeyID keyID
     );
 
     /**Send a user input indication to the remote endpoint.
-       This Receives/Sends a H.249 Annex A Navigation user input. 
+       This Receives/Sends a H.249 Annex A Navigation user input.
       */
     virtual void OnUserInputIndicationNavigate(
         const H245_ArrayOf_GenericParameter & contents
     );
-    
+
     /**Send a user input indication to the remote endpoint.
-       This Receives/Sends a H.249 Annex B Softkey user input. 
+       This Receives/Sends a H.249 Annex B Softkey user input.
       */
     virtual void SendUserInputIndicationSoftkey(
-        unsigned key, 
+        unsigned key,
         const PString & keyName = PString()
     );
 
@@ -2161,11 +2169,11 @@ class H323Connection : public PObject
     );
 
     /**Send a user input indication to the remote endpoint.
-       This Receives/Sends a H.249 Annex C Point Device user input. 
+       This Receives/Sends a H.249 Annex C Point Device user input.
       */
     virtual void SendUserInputIndicationPointDevice(
-                        unsigned x,              ///< X coord 
-                        unsigned y,              ///< Y coord 
+                        unsigned x,              ///< X coord
+                        unsigned y,              ///< Y coord
                         unsigned button=0,       ///< Mouse Button 1 = left 2 = right
                         unsigned buttonstate=0,  ///< Button state 1 = button down 2 = button up
                         unsigned clickcount=0    ///< ClickCount 1 = sigle click 2= doubleclick
@@ -2174,16 +2182,16 @@ class H323Connection : public PObject
     virtual void OnUserInputIndicationPointDevice(
         const H245_ArrayOf_GenericParameter & contents
     );
-    
+
     /**Send a user input indication to the remote endpoint.
-       This Receives/Sends a H.249 Annex D Softkey user input. 
+       This Receives/Sends a H.249 Annex D Softkey user input.
       */
     virtual void SendUserInputIndicationModal();
 
     virtual void OnUserInputIndicationModal(
         const H245_ArrayOf_GenericParameter & contents
     );
-    
+
 #endif
 
 
@@ -2192,7 +2200,7 @@ class H323Connection : public PObject
        SendUserInput() function or a full DTMF emulation user input using the
        SendUserInputTone() function.
 
-       An application could do more sophisticated usage by filling in the 
+       An application could do more sophisticated usage by filling in the
        H245_UserInputIndication structure directly ans using this function.
       */
     virtual void SendUserInputIndication(
@@ -2248,16 +2256,16 @@ class H323Connection : public PObject
     );
 
     virtual void UpdateSession(
-        unsigned oldSessionID, 
+        unsigned oldSessionID,
         unsigned newSessionID
     );
 
-    /**Received OLC Generic Information. This is used to supply alternate RTP 
+    /**Received OLC Generic Information. This is used to supply alternate RTP
        destination information in the generic information field in the OLC for the
        purpose of probing for an alternate route to the remote party.
       */
-    virtual PBoolean OnReceiveOLCGenericInformation(unsigned sessionID, 
-                        const H245_ArrayOf_GenericInformation & alternate, 
+    virtual PBoolean OnReceiveOLCGenericInformation(unsigned sessionID,
+                        const H245_ArrayOf_GenericInformation & alternate,
                         PBoolean isAck
                         ) const;
 
@@ -2301,7 +2309,7 @@ class H323Connection : public PObject
 #ifdef H323_H4609
   /** H.460.9 Call Statistics
     */
-    class  H4609Statistics  : public PObject 
+    class  H4609Statistics  : public PObject
     {
      public:
         H4609Statistics();
@@ -2351,7 +2359,7 @@ class H323Connection : public PObject
     ) const;
 
     /**Callback from the RTP session for statistics monitoring.
-       This is called at the end of the RTP session indicating that the statistics 
+       This is called at the end of the RTP session indicating that the statistics
        of the call
 
        The default behaviour calls H323EndPoint::OnFinalRTPStatistics().
@@ -2407,8 +2415,8 @@ class H323Connection : public PObject
     /** Disable NAT Support for allocation of RTP sockets
       */
     void DisableNATSupport();
-    
-    /** Set the information that the call parties are 
+
+    /** Set the information that the call parties are
         behind the same NAT device
       */
     void SetSameNAT() { sameNAT = true; };
@@ -2419,7 +2427,7 @@ class H323Connection : public PObject
 
 #ifdef P_STUN
     /** GetPreferedNatMethod
-        returns the NATMethod to use for a call 
+        returns the NATMethod to use for a call
         by default calls the H323Endpoint function of the same name
       */
     virtual PNatMethod * GetPreferedNatMethod(const PIPSocket::Address & ip) const;
@@ -2430,7 +2438,7 @@ class H323Connection : public PObject
       */
     virtual void SetRTPNAT(unsigned sessionid, PUDPSocket * _rtp, PUDPSocket * _rtcp);
 
-    /** Set NAT Channel in effect 
+    /** Set NAT Channel in effect
       */
     void SetNATChannelActive(unsigned sessionid);
 
@@ -2525,7 +2533,7 @@ class H323Connection : public PObject
 
        Note that if the application overrides this and returns a pointer to a
        heap variable (using new) then it is the responsibility of the creator
-       to subsequently delete the object. The user of this function (the 
+       to subsequently delete the object. The user of this function (the
        H323_T120Channel class) will not do so.
 
        The default behavour returns H323Endpoint::CreateT120ProtocolHandler()
@@ -2541,7 +2549,7 @@ class H323Connection : public PObject
 
        Note that if the application overrides this and returns a pointer to a
        heap variable (using new) then it is the responsibility of the creator
-       to subsequently delete the object. The user of this function (the 
+       to subsequently delete the object. The user of this function (the
        H323_T38Channel class) will not do so.
 
        The default behavour returns H323Endpoint::CreateT38ProtocolHandler()
@@ -2560,11 +2568,11 @@ class H323Connection : public PObject
 
     /** Create an instance of the H.224 protocol handler.
         This is called when the subsystem requires that a H.224 channel be established.
-          
+
         Note that if the application overrides this it should return a pointer
         to a heap variable (using new) as it will be automatically deleted when
         the H323Connection is deleted.
-     
+
         The default behaviour calls the OpalEndpoint function of the same name if
         there is not already a H.224 handler associated with this connection. If there
         is already such a H.224 handler associated, this instance is returned instead.
@@ -2600,11 +2608,11 @@ class H323Connection : public PObject
         *** Use OnCreateH224Handler function call instead ***
 
         This is called when the subsystem requires that a H.224 channel be established.
-          
+
         Note that if the application overrides this it should return a pointer
         to a heap variable (using new) as it will be automatically deleted when
         the associated H.224 handler is deleted.
-          
+
      The default behavour returns H323Endpoint::CreateH281ProtocolHandler()
      */
     virtual H224_H281Handler *CreateH281ProtocolHandler(OpalH224Handler & h224Handler);
@@ -2614,7 +2622,7 @@ class H323Connection : public PObject
 
 #ifdef H323_T140
     /** Create an instance of the RFC4103 protocol handler.
-          
+
      The default behavour returns H323Endpoint::CreateRFC4103ProtocolHandler()
      */
     virtual H323_RFC4103Handler * CreateRFC4103ProtocolHandler(H323Channel::Directions dir, unsigned sessionID);
@@ -2631,7 +2639,7 @@ class H323Connection : public PObject
 
 
     /** Close the File Transfer Session
-        Use this to close the file transfer session. 
+        Use this to close the file transfer session.
 
      */
      PBoolean CloseFileTransferSession(unsigned num  ///< Channel number
@@ -2639,7 +2647,7 @@ class H323Connection : public PObject
 
     /** Create an instance of the File Transfer handler.
         This is called when the subsystem requires that a a file transfer channel be established.
-          
+
         The default behaviour calls the OnCreateFileTransferHandler function of the same name if
         there is not already a file transfer handler associated with this connection. If there
         is already such a file transfer handler associated, this instance is returned instead.
@@ -2667,16 +2675,16 @@ class H323Connection : public PObject
     /** Open a File Transfer Channel.
         This is called when the subsystem requires that a File Transfer channel be established.
 
-        An implementer should override this function to facilitate file transfer. 
+        An implementer should override this function to facilitate file transfer.
         If transmitting, list of files should be populated to notify the channel which files to read.
         If receiving, the list of files should be altered to include path information for the storage
         of received files.
-        
-        The default behaviour returns FALSE to indicate File Transfer is not implemented. 
+
+        The default behaviour returns FALSE to indicate File Transfer is not implemented.
       */
       virtual PBoolean OpenFileTransferChannel( PBoolean isEncoder,                        ///< direction of channel
                                                 H323FileTransferList & filelist            ///< Transfer File List
-                                         ); 
+                                         );
 #endif
 
     /**Get separate H.235 authentication for the connection.
@@ -2841,7 +2849,7 @@ class H323Connection : public PObject
     virtual void SetRemoteApplication(
       const H225_EndpointType & pdu ///< PDU from which to extract application info.
     );
-    
+
     /**Get the local capability table for this connection.
      */
     const H323Capabilities & GetLocalCapabilities() const { return localCapabilities; }
@@ -2959,7 +2967,7 @@ class H323Connection : public PObject
 
 #ifdef P_STUN
 
-    /**Session Information 
+    /**Session Information
         This contains session information which is passed to the socket handler
         when creating RTP socket pairs.
       */
@@ -2982,7 +2990,7 @@ class H323Connection : public PObject
 
             const PString & GetCUI();
 
-            const H323Connection * GetConnection(); 
+            const H323Connection * GetConnection();
 
         protected:
             OpalGloballyUniqueID m_callID;
@@ -2998,10 +3006,10 @@ class H323Connection : public PObject
 
     SessionInformation * BuildSessionInformation(unsigned sessionID) const;
 
-    class NAT_Sockets 
+    class NAT_Sockets
     {
       public:
-        NAT_Sockets() 
+        NAT_Sockets()
         { rtp = NULL; rtcp = NULL; isActive = false; }
 
         PUDPSocket * rtp;
@@ -3013,7 +3021,7 @@ class H323Connection : public PObject
 
     /** Called when an endpoint receives a SETUP PDU with a
         conference goal of "callIndependentSupplementaryService"
-      
+
         The default behaviour is to return FALSE, which will close the connection
      */
     virtual PBoolean OnSendCallIndependentSupplementaryService(
@@ -3029,7 +3037,7 @@ class H323Connection : public PObject
     virtual void OnReceiveFeatureSet(unsigned, const H225_FeatureSet &, PBoolean = false) const;
 
     /** Set the call answered flag.
-        This will stop the call negotiating process. 
+        This will stop the call negotiating process.
         This is used for long term non-call supplimentary services where there is no media
       */
     void SetCallAnswered() { callAnswered = TRUE; }
@@ -3149,16 +3157,16 @@ class H323Connection : public PObject
     const H235Authenticators & GetEPAuthenticators() const;
 
     /** Set Authentication to support Validation CallBack
-    OnCallAuthentication is called when a EPAuthentication CryptoToken 
+    OnCallAuthentication is called when a EPAuthentication CryptoToken
     is Validated.
       */
     virtual void SetAuthenticationConnection();
 
     /** EP Authentication CallBack to check username and get Password
     for Call Authentication. By Default it calls the corresponding
-    Endpoint Function. 
+    Endpoint Function.
       */
-    virtual PBoolean OnCallAuthentication(const PString & username, 
+    virtual PBoolean OnCallAuthentication(const PString & username,
                                       PString & password);
 
     /** EP Authentication CallBack to allow the connection to approve the authentication
@@ -3179,7 +3187,7 @@ class H323Connection : public PObject
 
     /** Whether the Authentication has Failed
       */
-    PBoolean HasAuthenticationFailed() 
+    PBoolean HasAuthenticationFailed()
        { return AuthenticationFailed; };
   //@}
 
@@ -3228,9 +3236,9 @@ class H323Connection : public PObject
         const H225_ArrayOf_ServiceControlSession & serviceControl  ///< Service control PDU
         );
 
-    /** On Send Call Credit 
+    /** On Send Call Credit
       */
-    virtual void OnReceiveServiceControl(const PString & amount,    ///< Current Balance 
+    virtual void OnReceiveServiceControl(const PString & amount,    ///< Current Balance
                                          PBoolean credit,               ///< Debit or Credit
                                          const unsigned & timelimit,///< Time Remaining
                                          const PString & url,        ///< url for TopUp
@@ -3240,7 +3248,7 @@ class H323Connection : public PObject
 
     /** On Receive Call Credit
      */
-    virtual PBoolean OnSendServiceControl(PString & amount,          ///< Current Balance 
+    virtual PBoolean OnSendServiceControl(PString & amount,          ///< Current Balance
                                       PBoolean credit,               ///< Debit or Credit
                                       unsigned & timelimit,      ///< Time Remaining
                                       PString & url         ///< url for TopUp
@@ -3327,7 +3335,7 @@ class H323Connection : public PObject
 #endif
 
 #ifdef H323_FRAMEBUFFER
-    void EnableVideoFrameBuffer(PBoolean enable); 
+    void EnableVideoFrameBuffer(PBoolean enable);
     PBoolean HasVideoFrameBuffer();
 #endif
 
@@ -3539,7 +3547,7 @@ class H323Connection : public PObject
     H323Aec * aec;
 #endif
 
-    PBoolean nonCallConnection; 
+    PBoolean nonCallConnection;
 
   private:
     PChannel * SwapHoldMediaChannels(PChannel * newChannel,unsigned sessionId);
@@ -3566,6 +3574,10 @@ class H323Connection : public PObject
     H323AggregatedH2x5Handle * signalAggregator;
     H323AggregatedH2x5Handle * controlAggregator;
 #endif
+
+#ifdef H323_H239
+    unsigned h239SessionID;
+#endif // H323_H239
 
 #ifdef H323_H248
     H323Dictionary<POrdinalKey, H323ServiceControlSession> serviceControlSessions;

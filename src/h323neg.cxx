@@ -65,7 +65,7 @@ void H245Negotiator::HandleTimeout(PTimer &, H323_INT)
 
 H245NegMasterSlaveDetermination::H245NegMasterSlaveDetermination(H323EndPoint & end,
                                                                  H323Connection & conn)
-  : H245Negotiator(end, conn), state(e_Idle), determinationNumber(PRandom::Number()%16777216), 
+  : H245Negotiator(end, conn), state(e_Idle), determinationNumber(PRandom::Number()%16777216),
     retryCount(1), status(e_Indeterminate)
 {
 
@@ -608,7 +608,7 @@ PBoolean H245NegLogicalChannel::OpenWhileLocked(const H323Capability & capabilit
 				val.SetValue(roleLabel);
 	  PINDEX sz = cape.GetSize();
 	  cape.SetSize(sz+1);
-      cape[sz] = gcap; 
+      cape[sz] = gcap;
   }
 #endif
 */
@@ -675,7 +675,7 @@ PBoolean H245NegLogicalChannel::HandleOpen(const H245_OpenLogicalChannel & pdu)
   PBoolean ok = FALSE;
 
   unsigned cause = H245_OpenLogicalChannelReject_cause::e_unspecified;
-    
+
   channel = connection.CreateLogicalChannel(pdu, FALSE, cause);
 
   if (channel != NULL) {
@@ -746,9 +746,9 @@ PBoolean H245NegLogicalChannel::HandleOpenAck(const H245_OpenLogicalChannelAck &
 
       if (!channel->OnReceivedAckPDU(pdu))
         return CloseWhileLocked();
-      
+
       // If extended Video channel, then send Channel Active
-      if (channel->GetCapability().GetMainType() == H323Capability::e_Video && 
+      if (channel->GetCapability().GetMainType() == H323Capability::e_Video &&
 		 channel->GetCapability().GetSubType() == H245_VideoCapability::e_extendedVideoCapability) {
          H323ControlPDU reply;
          reply.BuildLogicalChannelActive(channelNumber);

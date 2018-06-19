@@ -414,6 +414,9 @@ H323Connection::H323Connection(H323EndPoint & ep,
     roundTripDelayRate(ep.GetRoundTripDelayRate().GetMilliSeconds()),
     releaseSequence(ReleaseSequenceUnknown)
     ,EPAuthenticators(ep.CreateEPAuthenticators())
+#ifdef H323_H239
+    ,h239SessionID(0)
+#endif
 #ifdef H323_H460
     ,features(ep.GetFeatureSet())
 #endif
@@ -4714,8 +4717,8 @@ H323Channel * H323Connection::CreateLogicalChannel(const H245_OpenLogicalChannel
                                                    PBoolean startingFast,
                                                    unsigned & errorCode)
 {
-  const H245_H2250LogicalChannelParameters * param;
-  const H245_DataType * dataType;
+  const H245_H2250LogicalChannelParameters * param = NULL;
+  const H245_DataType * dataType = NULL;
   H323Channel::Directions direction;
 
   if (startingFast && open.HasOptionalField(H245_OpenLogicalChannel::e_reverseLogicalChannelParameters)) {
@@ -4750,6 +4753,17 @@ H323Channel * H323Connection::CreateLogicalChannel(const H245_OpenLogicalChannel
   }
 
   unsigned sessionID = param->m_sessionID;
+  if (sessionID == 0) {
+    if (IsH245Master()) {
+      // as master we assign the session ID
+      sessionID = GetExtVideoRTPSessionID();
+      const_cast<H245_H2250LogicalChannelParameters *>(param)->m_sessionID = sessionID; // TODO: make PDU (open) non-const all the way ?
+      PTRACE(2, "H323\tAssigned RTP session ID " << sessionID);
+    } else {
+      PTRACE(2, "H323\tCreateLogicalChannel - received RTP session ID 0 as slave");
+      return NULL;
+    }
+  }
 
 #ifdef H323_VIDEO
 #ifdef H323_H239
@@ -4760,13 +4774,13 @@ H323Channel * H323Connection::CreateLogicalChannel(const H245_OpenLogicalChannel
     H323ChannelNumber channelnum = H323ChannelNumber(open.m_forwardLogicalChannelNumber, TRUE);
 
     const H245_ArrayOf_GenericInformation & cape = open.m_genericInformation;
-    for (PINDEX i=0; i<cape.GetSize(); i++) {
+    for (PINDEX i = 0; i < cape.GetSize(); i++) {
        const H245_GenericMessage & gcap = cape[i];
        const PASN_ObjectId & object_id = gcap.m_messageIdentifier;
        if (object_id.AsString() == OpalPluginCodec_Identifer_H239_Video) {
            if (gcap.HasOptionalField(H245_GenericMessage::e_messageContent)) {
                const H245_ArrayOf_GenericParameter & params = gcap.m_messageContent;
-               for (PINDEX j=0; j<params.GetSize(); j++) {
+               for (PINDEX j = 0; j < params.GetSize(); j++) {
                    const H245_GenericParameter & content = params[j];
                    const H245_ParameterValue & paramval = content.m_parameterValue;
                    if (paramval.GetTag() == H245_ParameterValue::e_booleanArray) {
@@ -4775,7 +4789,7 @@ H323Channel * H323Connection::CreateLogicalChannel(const H245_OpenLogicalChannel
                    }
                }
            }
-          OnReceivedExtendedVideoSession(roleLabel,channelnum);
+          OnReceivedExtendedVideoSession(roleLabel, channelnum);
        }
     }
   }
@@ -4816,9 +4830,18 @@ H323Channel * H323Connection::CreateLogicalChannel(const H245_OpenLogicalChannel
     return NULL;
   }
 
+#ifdef H323_H239
+  if ((channel->GetCapability().GetMainType() == H323Capability::e_Video)
+      && (channel->GetCapability().GetSubType() == H245_VideoCapability::e_extendedVideoCapability)
+      && !IsH245Master()) {
+    // as slave remember the session ID for H.239 that the master has used
+    SetExtVideoRTPSessionID(sessionID);
+  }
+#endif // H323_H239
+
   if (startingFast &&
       open.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation))
-          OnReceiveOLCGenericInformation(sessionID,open.m_genericInformation, false);
+          OnReceiveOLCGenericInformation(sessionID, open.m_genericInformation, false);
 
   if (!channel->SetInitialBandwidth())
     errorCode = H245_OpenLogicalChannelReject_cause::e_insufficientBandwidth;
@@ -4838,7 +4861,7 @@ H323Channel * H323Connection::CreateRealTimeLogicalChannel(const H323Capability 
                                                            RTP_QOS * rtpqos)
 {
 #ifdef H323_H235
-  if (PIsDescendant(&capability,H323SecureCapability)) {
+  if (PIsDescendant(&capability, H323SecureCapability)) {
         // Override this function to add Secure ExternalRTPChannel Support
         // H323Channel * extChannel = new H323_ExternalRTPChannel(*this, capability, dir, sessionID, externalIpAddress, externalPort);
         // return new H323SecureChannel(this, capability, extChannel);
@@ -4862,7 +4885,7 @@ H323Channel * H323Connection::CreateRealTimeLogicalChannel(const H323Capability 
         GetControlChannel().SetUpTransportPDU(addr, H323Transport::UseLocalTSAP);
         session = UseSession(sessionID, addr, dir, rtpqos);
   } else {
-    session = UseSession(param->m_sessionID, param->m_mediaControlChannel, dir, rtpqos);
+    session = UseSession(sessionID, param->m_mediaControlChannel, dir, rtpqos);
   }
 
   if (session == NULL)
@@ -7623,8 +7646,7 @@ PBoolean H323Connection::OpenExtendedVideoSession(H323ChannelNumber & num, int d
         PTRACE(3, "H323\tApplication Available " << *remoteCapability);
 
         for (PINDEX j = 0; j < remoteCapability->GetSize(); j++) {
-          // SessionID must be 0 becouse otherwise Tandberg will reject the OLC.
-          if (logicalChannels->Open(remoteCapability[j], defaultSession ,num)) {
+          if (logicalChannels->Open(remoteCapability[j], defaultSession, num)) {
              applicationOpen = TRUE;
              break;
           } else {
@@ -7641,7 +7663,7 @@ PBoolean H323Connection::OpenExtendedVideoSession(H323ChannelNumber & num, int d
 
 PBoolean H323Connection::CloseExtendedVideoSession(const H323ChannelNumber & num)
 {
-    CloseLogicalChannel(num,num.IsFromRemote());
+    CloseLogicalChannel(num, num.IsFromRemote());
     return TRUE;
 }
 
@@ -7649,6 +7671,16 @@ PBoolean H323Connection::OpenExtendedVideoChannel(PBoolean isEncoding,H323VideoC
 {
    return endpoint.OpenExtendedVideoChannel(*this, isEncoding, codec);
 }
+
+unsigned H323Connection::GetExtVideoRTPSessionID() const
+{
+  if (IsH245Master()) {
+    return 32;  // TODO: make a constant ?
+  } else {
+    return h239SessionID;
+  }
+}
+
 #endif  // H323_H239
 #endif  // NO_H323_VIDEO
 
