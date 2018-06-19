@@ -1770,7 +1770,7 @@ void BuildH239GenericMessageIndication(H239Control & ctrl, H323Connection & conn
 }
 
 void BuildH239GenericMessageResponse(H239Control & ctrl, H323Connection & connection,
-                                     H323ControlPDU& pdu, H239Control::H239SubMessages submesId,
+                                     H323ControlPDU & pdu, H239Control::H239SubMessages submesId,
                                      PBoolean approved)
 {
     H245_GenericMessage & cap = pdu.Build(H245_ResponseMessage::e_genericResponse);
@@ -1798,7 +1798,7 @@ void BuildH239GenericMessageResponse(H239Control & ctrl, H323Connection & connec
    }
 }
 
-void BuildH239GenericMessageRequest(H239Control & ctrl, H323Connection & connection, H323ControlPDU& pdu, H239Control::H239SubMessages submesId)
+void BuildH239GenericMessageRequest(H239Control & ctrl, H323Connection & connection, H323ControlPDU & pdu, H239Control::H239SubMessages submesId)
 {
     H245_GenericMessage & cap = pdu.Build(H245_RequestMessage::e_genericRequest);
 
@@ -1821,7 +1821,7 @@ void BuildH239GenericMessageRequest(H239Control & ctrl, H323Connection & connect
     buildGenericInteger(msg[2], H239Control::h239gpSymmetryBreaking, 4);
 }
 
-void BuildH239GenericMessageCommand(H239Control & ctrl, H323Connection & connection, H323ControlPDU& pdu, H239Control::H239SubMessages submesId, PBoolean option)
+void BuildH239GenericMessageCommand(H239Control & ctrl, H323Connection & connection, H323ControlPDU & pdu, H239Control::H239SubMessages submesId, PBoolean option)
 {
     H245_GenericMessage & cap = pdu.Build(H245_CommandMessage::e_genericCommand);
 
@@ -1886,6 +1886,7 @@ PBoolean OnH239GenericMessageResponse(H239Control & ctrl, H323Connection & conne
             } */
             break;
         case H239Control::h239gpAcknowledge:
+            ctrl.SendGenericMessage(H239Control::e_h245indication, &connection); // send OwnerIndication
             break;
         case H239Control::h239gpReject:
             connection.OpenExtendedVideoSessionDenied();
@@ -1939,15 +1940,17 @@ PBoolean H323ControlExtendedVideoCapability::SendGenericMessage(h245MessageType 
    H323ControlPDU pdu;
      switch (msgtype) {
         case e_h245request:
-            BuildH239GenericMessageRequest(*this,*connection,pdu,H239Control::e_presentationTokenRequest);
+            BuildH239GenericMessageRequest(*this,* connection, pdu, H239Control::e_presentationTokenRequest);
             break;
         case e_h245response:
-            BuildH239GenericMessageResponse(*this,*connection,pdu,H239Control::e_presentationTokenResponse,option);
+            BuildH239GenericMessageResponse(*this, *connection, pdu, H239Control::e_presentationTokenResponse, option);
             break;
         case e_h245command:
-            BuildH239GenericMessageCommand(*this, *connection, pdu, H239Control::e_presentationTokenRelease,option);
+            BuildH239GenericMessageCommand(*this, *connection, pdu, H239Control::e_presentationTokenRelease, option);
             break;
         case e_h245indication:
+            BuildH239GenericMessageIndication(*this, *connection, pdu, H239Control::e_presentationTokenIndicateOwner);
+            break;
         default:
             return true;
      }
@@ -1960,11 +1963,11 @@ PBoolean H323ControlExtendedVideoCapability::HandleGenericMessage(h245MessageTyp
 {
      switch (type) {
         case e_h245request:
-            return OnH239GenericMessageRequest(*this,*con,*pdu);
+            return OnH239GenericMessageRequest(*this, *con, *pdu);
         case e_h245response:
-            return OnH239GenericMessageResponse(*this,*con,*pdu);
+            return OnH239GenericMessageResponse(*this, *con, *pdu);
         case e_h245command:
-            return OnH239GenericMessageCommand(*this,*con,*pdu);
+            return OnH239GenericMessageCommand(*this, *con, *pdu);
         case e_h245indication:
         default:
             return true;
