@@ -1766,7 +1766,7 @@ void BuildH239GenericMessageIndication(H239Control & ctrl, H323Connection & conn
     H245_ArrayOf_GenericParameter & msg = cap.m_messageContent;
     msg.SetSize(2);
     buildGenericInteger(msg[0], H239Control::h239gpTerminalLabel, 0);
-    buildGenericInteger(msg[1], H239Control::h239gpChannelId, connection.GetLogicalChannels()->GetLastChannelNumber()+1); // TODO: better way to find H.239 channel number ?
+    buildGenericInteger(msg[1], H239Control::h239gpChannelId, ctrl.GetRequestedChanNum());
 }
 
 void BuildH239GenericMessageResponse(H239Control & ctrl, H323Connection & connection,
