@@ -3998,7 +3998,7 @@ PBoolean H323Capabilities::SetVideoFrameSize(H323Capability::CapabilityFrameSize
                 }
             }
 #if PTLIB_VER >= 2130
-            Remove("",genericCaps);
+            Remove("", genericCaps);
 #else
             Remove(genericCaps);
 #endif
