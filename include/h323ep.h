@@ -170,7 +170,7 @@ class H323EndPoint : public PObject
         H225_ArrayOf_SupportedProtocols & protocols
     ) const;
 
-   /**Set the gateway prefixes 
+   /**Set the gateway prefixes
       Override this to set the acceptable prefixes to the gatekeeper
       */
     virtual PBoolean OnSetGatewayPrefixes(
@@ -225,7 +225,7 @@ class H323EndPoint : public PObject
       H323Capability * cap  ///< New capability specification
     );
 
-    /**Manually remove capability type. This removes the specified Capability type out of the 
+    /**Manually remove capability type. This removes the specified Capability type out of the
        default capability list.
       */
     PBoolean RemoveCapability(
@@ -235,15 +235,15 @@ class H323EndPoint : public PObject
 #ifdef H323_VIDEO
     /**Set the Video Frame Size. This is used for capabilities
        that use 1 definition for all Video Frame Sizes. This will remove all capabilities
-       not matching the specified Frame Size and send a message to the remaining video capabilities 
+       not matching the specified Frame Size and send a message to the remaining video capabilities
        to set the maximum framesize allowed to the specified value
       */
-    PBoolean SetVideoFrameSize(H323Capability::CapabilityFrameSize frameSize, 
+    PBoolean SetVideoFrameSize(H323Capability::CapabilityFrameSize frameSize,
                           int frameUnits = 1
     );
 
-    /**Set the Video Encoder size and rate. 
-        This is used for generic Video Capabilities to set the appropriate level for a given encoder 
+    /**Set the Video Encoder size and rate.
+        This is used for generic Video Capabilities to set the appropriate level for a given encoder
         frame size and rate.
       */
     PBoolean SetVideoEncoder(unsigned frameWidth, unsigned frameHeight, unsigned frameRate);
@@ -494,20 +494,20 @@ class H323EndPoint : public PObject
       */
     virtual void  OnRegistrationReject();
 
-    /**Called when Unregistered by Gatekeeper 
+    /**Called when Unregistered by Gatekeeper
      */
-    virtual void OnUnRegisterRequest(); 
+    virtual void OnUnRegisterRequest();
 
-    /**Called when reply Unregister to Gatekeeper 
+    /**Called when reply Unregister to Gatekeeper
      */
-    virtual void OnUnRegisterConfirm(); 
+    virtual void OnUnRegisterConfirm();
 
-    /**Called when TTL registration fails 
+    /**Called when TTL registration fails
      */
     virtual void OnRegisterTTLFail();
 
     /**When an IP address change has been detected
-       This will remove the listener and gatekeeper 
+       This will remove the listener and gatekeeper
        and bind to the new detected IP address
      */
     virtual PBoolean OnDetectedIPChange(PIPSocket::Address newIP = PIPSocket::Address::GetAny(4));
@@ -583,7 +583,7 @@ class H323EndPoint : public PObject
                           ///< Associated transport for precedence and translation
     );
 
-     /**Make a Authenticated call to a remote party. 
+     /**Make a Authenticated call to a remote party.
     This Function sets Security Information to be included when calling
     a EP which requires Authentication
        */
@@ -595,7 +595,7 @@ class H323EndPoint : public PObject
                         void * userData = NULL        ///* user data to pass to CreateConnection
      );
 
-     /**Make a Supplimentary call to a remote party. 
+     /**Make a Supplimentary call to a remote party.
         This Function makes a Non Call supplimentary connection (lightweight call) for the purpose
         of delivering H.450 & H.460 non call content such as instant messaging and messagebank messages
        */
@@ -603,7 +603,7 @@ class H323EndPoint : public PObject
                         const PString & remoteParty,  ///* Remote party to call
                         PString & token,              ///* String to receive token for connection
                         void * userData = NULL        ///* user data to pass to CreateConnection
-      );                                                    
+      );
 
     /**Make a call to a remote party. An appropriate transport is determined
        from the remoteParty parameter. The general form for this parameter is
@@ -666,7 +666,7 @@ class H323EndPoint : public PObject
        remoteParty description.
 
        This function returns almost immediately with the call occurring in a
-       new background thread. However the call will not progress very far 
+       new background thread. However the call will not progress very far
      */
     H323Connection * MakeCallLocked(
       const PString & remoteParty,     ///< Remote party to call
@@ -732,7 +732,7 @@ class H323EndPoint : public PObject
     );
 
     /**Place the call on hold, suspending all media channels (H.450.4)
-    * NOTE: Only Local Hold is implemented so far. 
+    * NOTE: Only Local Hold is implemented so far.
     */
     void HoldCall(
       const PString & token,        ///< Existing connection to be transferred
@@ -777,11 +777,11 @@ class H323EndPoint : public PObject
     virtual PBoolean OnReceivedMWIClear(const PString & user);
 
     /**Received a message wait indication request on a mail server (Interrogate).
-        This is used for enquiring on a mail server if 
+        This is used for enquiring on a mail server if
         there are any active messages for the served user.
         An implementer may populate a H323Connection::MWInformation struct and call
         H323Connection::SetMWINonCallParameters to set the interrogate reply
-        default returns true. if SetMWINonCallParameters called the connect message 
+        default returns true. if SetMWINonCallParameters called the connect message
         will contain a reply msg to the caller.
         return false indicates MWI rejected.
       */
@@ -800,11 +800,11 @@ class H323EndPoint : public PObject
 
 #endif // H323_H450
 
-    /** Use DNS SRV and ENUM to resolve all the possible addresses a call party 
+    /** Use DNS SRV and ENUM to resolve all the possible addresses a call party
        can be found. Only effective if not registered with Gatekeeper
       */
     PBoolean ResolveCallParty(
-      const PString & _remoteParty, 
+      const PString & _remoteParty,
       PStringList & addresses
     );
 
@@ -831,7 +831,7 @@ class H323EndPoint : public PObject
     );
 
      /**Clearing a current connection.
-        A connection is being cleared callback. This can be used for PBX applications 
+        A connection is being cleared callback. This can be used for PBX applications
         to reallocate the line early without waiting for the cleaner thread to clean-up
         the connection.
        */
@@ -945,7 +945,7 @@ class H323EndPoint : public PObject
     );
 
    /**
-      * Callback for ACF sent back from gatekeeper. 
+      * Callback for ACF sent back from gatekeeper.
       */
     virtual void OnReceivedACF(
       H323Connection & conn,
@@ -953,7 +953,7 @@ class H323EndPoint : public PObject
     );
 
    /**
-      * Callback for ARJ sent back from  gatekeeper. 
+      * Callback for ARJ sent back from  gatekeeper.
       */
     virtual void OnReceivedARJ(
       H323Connection & conn,
@@ -982,7 +982,7 @@ class H323EndPoint : public PObject
       H323Connection & connection,    ///< Connection that was established
       const PString & callerName,       ///< Name of caller
       const H323SignalPDU & setupPDU,   ///< Received setup PDU
-      H323SignalPDU & connectPDU        ///< Connect PDU to send. 
+      H323SignalPDU & connectPDU        ///< Connect PDU to send.
     );
 
     /**Call back for remote party being alerted.
@@ -1084,7 +1084,7 @@ class H323EndPoint : public PObject
        The default behaviour simply returns TRUE.
       */
     virtual PBoolean OnOutgoingCall(
-        H323Connection & conn, 
+        H323Connection & conn,
         const H323SignalPDU & connectPDU
     );
 
@@ -1118,8 +1118,8 @@ class H323EndPoint : public PObject
     /**Create a list of authenticators for Call Authentication.
        To Create a list of Autheniticators the Endpoint MUST have
        set EPSecurityPassword (via SetEPCredentials()) and either
-       set CallAuthPolicy (via SetEPSecurityPolicy()) or set 
-       isSecureCall to TRUE (via MakeAuthenticatedCall()) 
+       set CallAuthPolicy (via SetEPSecurityPolicy()) or set
+       isSecureCall to TRUE (via MakeAuthenticatedCall())
       */
      virtual H235Authenticators CreateEPAuthenticators();
 
@@ -1139,7 +1139,7 @@ class H323EndPoint : public PObject
      enum EPSecurityPolicy
      {
          SecNone,           ///* Default: Do Not Include Call Authenication
-         SecRequest,        ///* Request Authentication but Accept if Missing/Fail 
+         SecRequest,        ///* Request Authentication but Accept if Missing/Fail
          SecRequired        ///* Calls are Rejected with EndedBySecurityDenial if Authenitication fails.
      };
 
@@ -1147,7 +1147,7 @@ class H323EndPoint : public PObject
        */
      virtual void SetEPSecurityPolicy(EPSecurityPolicy policy);
 
-     /** Get the EP Security Policy 
+     /** Get the EP Security Policy
        */
      virtual EPSecurityPolicy GetEPSecurityPolicy();
 
@@ -1156,10 +1156,10 @@ class H323EndPoint : public PObject
        */
      H235AuthenticatorList GetAuthenticatorList();
 
-     /** Call Authentication Call Back 
+     /** Call Authentication Call Back
      This fires for all the Authentication Methods created by
-     CreateEPAuthenticators() The Function Supplies the Name of 
-     the Authentication process and the supplied SenderID (Username) 
+     CreateEPAuthenticators() The Function Supplies the Name of
+     the Authentication process and the supplied SenderID (Username)
      and this is then check against EPAuthList to:
      1. Check if the username exists and if so
      2. Return the password in the clear to validate.
@@ -1180,7 +1180,7 @@ class H323EndPoint : public PObject
      enum H235MediaPolicy
      {
          encyptNone = 0,           ///< Default: Do Not Include Media Encryption
-         encyptRequest = 1,        ///< Request Encryption but Accept if Missing/Fail 
+         encyptRequest = 1,        ///< Request Encryption but Accept if Missing/Fail
          encyptRequired = 2        ///< Calls are Rejected with EndedBySecurityDenial if no Media Encryption.
      };
 
@@ -1188,11 +1188,11 @@ class H323EndPoint : public PObject
      {
          encypt128 = 128             ///< Default: AES128
 #ifdef H323_H235_AES256
-         ,encypt192 = 192,           ///< AES192 
+         ,encypt192 = 192,           ///< AES192
          encypt256  = 256            ///< AES256
 #endif
      };
-    
+
     /** Enable Media Encryption
         This enables media encryption.
       */
@@ -1246,7 +1246,7 @@ class H323EndPoint : public PObject
             6144bit "0.0.8.235.0.4.77"
             8192bit "0.0.8.235.0.4.78"
 
-        This function call should only be called by the implementer directly for testing purposes 
+        This function call should only be called by the implementer directly for testing purposes
         use H235SetDiffieHellmanFiles in production.
       */
     virtual void SetEncryptionCacheFiles(const PString & cachefile);
@@ -1265,19 +1265,19 @@ class H323EndPoint : public PObject
             6144bit "0.0.8.235.0.4.77"
             8192bit "0.0.8.235.0.4.78"
       */
-    virtual void LoadDiffieHellmanParameters(const PString & oid, 
-                                             const PBYTEArray & pData, 
+    virtual void LoadDiffieHellmanParameters(const PString & oid,
+                                             const PBYTEArray & pData,
                                              const PBYTEArray & gData);
 
-    /**Initialise Encryption cache 
+    /**Initialise Encryption cache
        Use this to create the encryption information at Startup rather than at the
        start of every call. This speeds up call establishment for high media encryption
        sessions. MUST Call EncryptionCacheRemove() to cleanup cache
       */
     virtual void EncryptionCacheInitialise();
 
-    /**Remove Encryption cache 
-       Use this to remove the encryption information 
+    /**Remove Encryption cache
+       Use this to remove the encryption information
       */
     virtual void EncryptionCacheRemove();
 
@@ -1285,8 +1285,8 @@ class H323EndPoint : public PObject
         Fires when an encryption session negotiated
         Fires for each media session direction
      */
-    virtual void OnMediaEncryption(unsigned /*session*/, 
-                                H323Channel::Directions /*dir*/, 
+    virtual void OnMediaEncryption(unsigned /*session*/,
+                                H323Channel::Directions /*dir*/,
                                 const PString & /*cipher*/
                                 ) {};
   //@}
@@ -1369,7 +1369,7 @@ class H323EndPoint : public PObject
     ) const;
 
    /**Callback from the RTP session for statistics monitoring.
-       This is called at the end of the RTP session indicating that the statistics 
+       This is called at the end of the RTP session indicating that the statistics
        of the call
 
        The default behaviour does nothing.
@@ -1413,9 +1413,9 @@ class H323EndPoint : public PObject
         const PString & gkIdentifier,                ///< Identifier at the gatekeeper
         H323TransportAddress & gkRouteAddress  ///< Gatekeeper Route Address
         );
-        
+
      /**Call back from GK admission confirm to notify the Endpoint it is not detected as being NAT
-    (GNUGK Gatekeeper) The default does nothing. Override this to notify the user they are not NAT 
+    (GNUGK Gatekeeper) The default does nothing. Override this to notify the user they are not NAT
     so they can confirm that it is true.
      */
     virtual void OnGatekeeperOpenNATDetect(
@@ -1429,8 +1429,8 @@ class H323EndPoint : public PObject
     virtual void NATLostConnection(PBoolean lost);
 #endif
 
-    /** Call back for GK assigned aliases returned from the gatekeeper in the RCF. 
-        The default returns FALSE which appends the new aliases to the existing alias list. 
+    /** Call back for GK assigned aliases returned from the gatekeeper in the RCF.
+        The default returns FALSE which appends the new aliases to the existing alias list.
         By overriding this function and returning TRUE overrides the default operation
       */
     virtual PBoolean OnGatekeeperAliases(
@@ -1442,7 +1442,7 @@ class H323EndPoint : public PObject
   /**@name Service Control */
   //@{
     /**Call back for HTTP based Service Control.
-       An application may override this to use an HTTP link to display 
+       An application may override this to use an HTTP link to display
        call information/CDR's or Billing information.
 
        The default behaviour does nothing.
@@ -1454,7 +1454,7 @@ class H323EndPoint : public PObject
     );
 
     /**Call back for Call Credit Service Control.
-       An application may override this to display call credit Information. 
+       An application may override this to display call credit Information.
 
        The default behaviour does nothing.
       */
@@ -1547,16 +1547,16 @@ class H323EndPoint : public PObject
 
     /** Create an instance of the H.224 protocol handler.
         This is called when the subsystem requires that a H.224 channel be established.
-        
+
         Note that if the application overrides this it should return a pointer to a
         heap variable (using new) as it will be automatically deleted when the Connection
         is deleted.
-        
+
         The default behaviour creates a new OpalH224Handler.
       */
     virtual OpalH224Handler * CreateH224ProtocolHandler(
       H323Channel::Directions dir,
-      H323Connection & connection, 
+      H323Connection & connection,
       unsigned sessionID
     ) const;
 
@@ -1569,13 +1569,13 @@ class H323EndPoint : public PObject
      The default behavour returns false
       */
     virtual PBoolean OnCreateH224Handler(
-        H323Channel::Directions dir, 
+        H323Channel::Directions dir,
         const H323Connection & connection,
-        const PString & id, 
+        const PString & id,
         H224_Handler * m_handler
     ) const;
 
-    
+
 #ifdef H224_H281
     /** Create an instance of the H.281 protocol handler.
 
@@ -1583,11 +1583,11 @@ class H323EndPoint : public PObject
         *** Use OnCreateH224Handler function call instead ***
 
         This is called when the subsystem requires that a H.224 channel be established.
-        
+
         Note that if the application overrides this it should return a pointer to a
         heap variable (using new) as it will be automatically deleted when the Connection
         is deleted.
-        
+
         The default behaviour creates a new OpalH281Handler.
       */
     virtual H224_H281Handler * CreateH281ProtocolHandler(
@@ -1599,7 +1599,7 @@ class H323EndPoint : public PObject
 
 #ifdef H323_T140
     /** Create an instance of the RFC4103 protocol handler.
-          
+
      The default behavour returns a new H323_RFC4103Handler;
      */
     virtual H323_RFC4103Handler * CreateRFC4103ProtocolHandler(
@@ -1622,17 +1622,17 @@ class H323EndPoint : public PObject
     /** Open a File Transfer Channel.
         This is called when the subsystem requires that a File Transfer channel be established.
 
-        An implementer should override this function to facilitate file transfer. 
+        An implementer should override this function to facilitate file transfer.
         If transmitting, list of files should be populated to notify the channel which files to read.
         If receiving, the list of files should be altered to include path information for the storage
         of received files.
-        
-        The default behaviour returns FALSE to indicate File Transfer is not implemented. 
+
+        The default behaviour returns FALSE to indicate File Transfer is not implemented.
       */
     virtual PBoolean OpenFileTransferChannel(H323Connection & connection,         ///< Connection
                                            PBoolean isEncoder,                    ///< direction of channel
                                            H323FileTransferList & filelist        ///< Transfer File List
-                                           ); 
+                                           );
 #endif
   //@}
 
@@ -1640,7 +1640,7 @@ class H323EndPoint : public PObject
   //@{
     /** Called when an endpoint receives a SETUP PDU with a
         conference goal of "invite"
-      
+
         The default behaviour is to return FALSE, which will close the connection
      */
     virtual PBoolean OnConferenceInvite(
@@ -1651,7 +1651,7 @@ class H323EndPoint : public PObject
 
     /** Called when an endpoint receives a SETUP PDU with a
         conference goal of "callIndependentSupplementaryService"
-      
+
         The default behaviour is to return FALSE, which will close the connection
      */
     virtual PBoolean OnSendCallIndependentSupplementaryService(
@@ -1666,7 +1666,7 @@ class H323EndPoint : public PObject
 
     /** Called when an endpoint receives a SETUP PDU with a
         conference goal of "capability_negotiation"
-      
+
         The default behaviour is to return FALSE, which will close the connection
      */
     virtual PBoolean OnNegotiateConferenceCapabilities(
@@ -1692,7 +1692,7 @@ class H323EndPoint : public PObject
        defaults to the logged in user as obtained from the
        PProcess::GetUserName() function.
      */
-    virtual const PString & GetLocalUserName() const 
+    virtual const PString & GetLocalUserName() const
         { return localAliasNames.GetSize() > 0 ? localAliasNames[0] : *(new PString()); }
 
     /**Add an alias name to be used for the local end of any connections. If
@@ -1705,7 +1705,7 @@ class H323EndPoint : public PObject
       const PString & name  ///< New alias name to add
     );
 
-    /**Remove an alias name used for the local end of any connections. 
+    /**Remove an alias name used for the local end of any connections.
        defaults to an empty list.
      */
     PBoolean RemoveAliasName(
@@ -1756,7 +1756,7 @@ class H323EndPoint : public PObject
       */
     void DisableFastStart(
       PBoolean mode ///< New default mode
-    ) { disableFastStart = mode; } 
+    ) { disableFastStart = mode; }
 
     /**Get the default H.245 tunneling mode.
       */
@@ -1767,7 +1767,7 @@ class H323EndPoint : public PObject
       */
     void DisableH245Tunneling(
       PBoolean mode ///< New default mode
-    ) { disableH245Tunneling = mode; } 
+    ) { disableH245Tunneling = mode; }
 
     /**Get the default H.245 tunneling mode.
       */
@@ -1778,7 +1778,7 @@ class H323EndPoint : public PObject
       */
     void DisableH245inSetup(
       PBoolean mode ///< New default mode
-    ) { disableH245inSetup = mode; } 
+    ) { disableH245inSetup = mode; }
 
     /** Get the default H.245 QoS mode.
       */
@@ -1789,7 +1789,7 @@ class H323EndPoint : public PObject
       */
     void DisableH245QoS(
       PBoolean mode ///< New default mode
-    ) { disableH245QoS = mode; } 
+    ) { disableH245QoS = mode; }
 
     /**Get the detect in-band DTMF flag.
       */
@@ -1800,7 +1800,7 @@ class H323EndPoint : public PObject
       */
     void DisableDetectInBandDTMF(
       PBoolean mode ///< New default mode
-    ) { disableDetectInBandDTMF = mode; } 
+    ) { disableDetectInBandDTMF = mode; }
 
     /**Disable RFC2833InBandDTMF.
       */
@@ -1834,7 +1834,7 @@ class H323EndPoint : public PObject
       */
     void SetCanDisplayAmountString(
       PBoolean mode ///< New default mode
-    ) { canDisplayAmountString = mode; } 
+    ) { canDisplayAmountString = mode; }
 
     /**Get the flag indicating the call will automatically clear after a time.
       */
@@ -1845,7 +1845,7 @@ class H323EndPoint : public PObject
       */
     void SetCanEnforceDurationLimit(
       PBoolean mode ///< New default mode
-    ) { canEnforceDurationLimit = mode; } 
+    ) { canEnforceDurationLimit = mode; }
 
 #ifdef H323_RTP_AGGREGATE
     /**Set the RTP aggregation size
@@ -1960,7 +1960,7 @@ class H323EndPoint : public PObject
       */
     void SetSilenceDetectionMode(
       H323AudioCodec::SilenceDetectionMode mode ///< New default mode
-    ) { defaultSilenceDetection = mode; } 
+    ) { defaultSilenceDetection = mode; }
 
 #endif  // H323_AUDIO_CODECS
 
@@ -2110,7 +2110,7 @@ class H323EndPoint : public PObject
 
     /**Set the BitRate to appear in the BearerCapabilities for Setup messages
      */
-    virtual void OnBearerCapabilityTransferRate(unsigned & bitRate) 
+    virtual void OnBearerCapabilityTransferRate(unsigned & bitRate)
         { if (initialBandwidth > bitRate) bitRate = initialBandwidth; }
 
 #ifdef H323_VIDEO
@@ -2131,7 +2131,7 @@ class H323EndPoint : public PObject
     H460_FeatureSet * GetGatekeeperFeatures();
 #endif
 
-    /**Load the Base FeatureSet usually called when you initialise the endpoint prior to 
+    /**Load the Base FeatureSet usually called when you initialise the endpoint prior to
        registering with a gatekeeper.
       */
     virtual void LoadBaseFeatureSet();
@@ -2160,7 +2160,7 @@ class H323EndPoint : public PObject
     /** Disable all FeatureSets. Use this for pre H323v4 interoperability
       */
     void FeatureSetDisable()  {  disableH460 = TRUE;  }
-        
+
     /** Feature Callback
       */
     virtual void FeatureCallBack(const PString & FeatID,        ///< Feature Identifier
@@ -2186,7 +2186,7 @@ class H323EndPoint : public PObject
 #ifdef H323_H46018
 
     /** Disable H.460.18 Feature. (By Default it is enabled)
-      */    
+      */
     void H46018Enable(PBoolean enable);
 
     /** Query whether we are using H.460.18
@@ -2204,7 +2204,7 @@ class H323EndPoint : public PObject
 
 #ifdef H323_H46019M
     /** Disable H.460.19 Multiplex Feature. (By Default it is enabled)
-      */    
+      */
     void H46019MEnable(PBoolean enable);
 
     /** Query whether we are using H.460.19 Multiplexing
@@ -2212,7 +2212,7 @@ class H323EndPoint : public PObject
     PBoolean H46019MIsEnabled();
 
     /** Enable H.460.19 Multiplex Send. (By Default it is disabled)
-      */ 
+      */
     void H46019MSending(PBoolean enable);
 
     /** Query whether we are using H.460.19 Multiplex Sending (H.460.19M Must be enabled)
@@ -2222,7 +2222,7 @@ class H323EndPoint : public PObject
 
 #ifdef H323_H46023
     /** Disable H.460.23 Feature. (By Default it is enabled)
-      */    
+      */
     void H46023Enable(PBoolean enable);
 
     /** Query whether we are using H.460.23
@@ -2244,7 +2244,7 @@ class H323EndPoint : public PObject
 
 #ifdef H323_H46025
     /** Disable H.460.25 Feature. (By Default it is disabled)
-      */    
+      */
     void H46025Enable(PBoolean enable);
 
     /** Query whether we are using H.460.25
@@ -2252,22 +2252,22 @@ class H323EndPoint : public PObject
     PBoolean H46025IsEnabled();
 
     /** Get Device Information
-      */  
+      */
     virtual bool H46025DeviceInformation(H323_H46025_Message::Device & device);
 
     /** Get Civic Information
-      */  
+      */
     virtual bool H46025CivicInformation(H323_H46025_Message::Civic & civic);
 
     /** Get GPS Information
-      */  
+      */
     virtual bool H46025GPSInformation(H323_H46025_Message::Geodetic & gps);
 
 #endif
 
 #ifdef H323_H46026
     /** Disable H.460.26 Feature. (By Default it is enabled)
-      */    
+      */
     void H46026Enable(PBoolean enable) { m_h46026enabled = enable; }
 
     /** Query whether we are using H.460.26
@@ -2281,7 +2281,7 @@ class H323EndPoint : public PObject
      */
     void EnableIM() { m_IMenabled = true; };
 
-    /** Callback from the H460 feature to check if the 
+    /** Callback from the H460 feature to check if the
         feature is enabled
       */
     PBoolean IMisDisabled() { return !m_IMenabled; };
@@ -2305,7 +2305,7 @@ class H323EndPoint : public PObject
       */
     virtual void IMSend(const PString & msg);
 
-    /** An IM Message has been received 
+    /** An IM Message has been received
       */
     virtual void IMReceived(const PString & token, const PString & msg, PBoolean session = TRUE);
 
@@ -2313,7 +2313,7 @@ class H323EndPoint : public PObject
     virtual void IMWrite(PBoolean start);
     virtual void IMCloseSession();
 
-    // Internal 
+    // Internal
     virtual void IMWriteFacility(H323Connection * connection);
     virtual void IMOpenSession(const PString & token);
     virtual void IMClearConnection(const PString & token);
@@ -2365,7 +2365,7 @@ class H323EndPoint : public PObject
         Implementor must create an instance of the presencehandler
         to enable presence
       */
-    H460PresenceHandler * GetPresenceHandler()  { return presenceHandler; }  
+    H460PresenceHandler * GetPresenceHandler()  { return presenceHandler; }
 
 	enum presenceStates {
         e_preHidden,
@@ -2379,7 +2379,7 @@ class H323EndPoint : public PObject
         e_preGeneric
 	};
 
-    /** Set the local Presence State. 
+    /** Set the local Presence State.
         Calling this will enable Presence in the endpoint
       */
     void PresenceSetLocalState(const PStringList & alias, presenceStates localstate, const PString & localdisplay = PString(), PBoolean updateOnly = false);
@@ -2414,53 +2414,53 @@ class H323EndPoint : public PObject
 
     void PresenceSetLocale(const presenceLocale & info);
 
-    /** Set Presence Instructions. 
+    /** Set Presence Instructions.
       */
-    void PresenceSetInstruction(const PString & epalias, 
-                                unsigned type, 
-                                const PString & alias, 
+    void PresenceSetInstruction(const PString & epalias,
+                                unsigned type,
+                                const PString & alias,
                                 const PString & display);
 
-    void PresenceSetInstruction(const PString & epalias, 
-                                unsigned type, 
+    void PresenceSetInstruction(const PString & epalias,
+                                unsigned type,
                                 const PStringList & list,
                                  PBoolean autoSend = true);
 
-    /** Submit Presence Authorizations. 
+    /** Submit Presence Authorizations.
       */
-    void PresenceSendAuthorization(const OpalGloballyUniqueID & id, 
+    void PresenceSendAuthorization(const OpalGloballyUniqueID & id,
                                     const PString & epalias,
-                                    PBoolean approved, 
+                                    PBoolean approved,
                                     const PStringList & subscribe);
 
     /** Received Notifications
       */
     virtual void PresenceNotification(const PString & locAlias,
                                     const PString & subAlias,
-                                    unsigned state, 
+                                    unsigned state,
                                     const PString & display);
 
     /** Received Instructions
       */
     virtual void PresenceInstruction(const PString & locAlias,
-                                    unsigned type, 
+                                    unsigned type,
                                     const PString & subAlias,
                                     const PString & subDisplay);
 
     virtual void PresenceInstruction(const PString & locAlias,
-                                    unsigned type, 
+                                    unsigned type,
                                     const PString & subAlias,
                                     const PString & subDisplay,
                                     const PString & subAvatar
                                     );
 
     virtual void PresenceInstruction(const PString & locAlias,
-                                    unsigned type, 
+                                    unsigned type,
                                     const PString & subAlias,
                                     const PString & subDisplay,
                                     const PString & subAvatar,
-                                    unsigned category 
-                                    );  
+                                    unsigned category
+                                    );
 
     /** Received Request for authorization
       */
@@ -2479,7 +2479,7 @@ class H323EndPoint : public PObject
       */
     void SetRegistrationPriority(unsigned value);
 
-    /** Get Pre-emption status 
+    /** Get Pre-emption status
       */
     PBoolean GetPreempt();
 
@@ -2493,7 +2493,7 @@ class H323EndPoint : public PObject
 
     /** Is this registration Preempted
       */
-    PBoolean IsPreempted(); 
+    PBoolean IsPreempted();
 
     /**Prempt the previous registration
       */
@@ -2527,7 +2527,7 @@ class H323EndPoint : public PObject
     virtual void SetEndPointASSETMode(H461Mode mode);
     virtual H461Mode GetEndPointASSETMode();
 
-    H461DataStore * GetASSETDataStore(); 
+    H461DataStore * GetASSETDataStore();
     void SetASSETDataStore(H461DataStore * dataStore);
 #endif  // H323_H461
 
@@ -2541,7 +2541,7 @@ class H323EndPoint : public PObject
 #endif
 
 #ifdef H323_TLS
-    void EnableIPSec(PBoolean enable); 
+    void EnableIPSec(PBoolean enable);
 
     PBoolean TLS_SetCAFile(const PFilePath & caFile);
     PBoolean TLS_SetCADirectory(const PDirectory & dir);
@@ -2551,9 +2551,9 @@ class H323EndPoint : public PObject
     PBoolean TLS_SetCipherList(const PString & ciphers);
     PBoolean TLS_SetDHParameters(const PFilePath & pkcs3);
     PBoolean TLS_SetDHParameters(const PBYTEArray & dh_p, const PBYTEArray & dh_g);
-    PBoolean TLS_Initialise(const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny(), 
+    PBoolean TLS_Initialise(const PIPSocket::Address & binding = PIPSocket::GetDefaultIpAny(),
                             WORD port = DefaultTLSPort);
-    
+
     PBoolean InitialiseTransportContext();
     PSSLContext * GetTransportContext();
 
@@ -2566,7 +2566,7 @@ class H323EndPoint : public PObject
     H323TransportSecurity * GetTransportSecurity();
 
 #ifdef H323_FRAMEBUFFER
-    void EnableVideoFrameBuffer(PBoolean enable); 
+    void EnableVideoFrameBuffer(PBoolean enable);
     PBoolean HasVideoFrameBuffer();
 #endif
 
@@ -2582,8 +2582,8 @@ class H323EndPoint : public PObject
     /**On UPnP detected and tested.
        return true to make available.
       */
-    virtual PBoolean OnUPnPAvailable(const PString & device, 
-                             const PIPSocket::Address & publicIP, 
+    virtual PBoolean OnUPnPAvailable(const PString & device,
+                             const PIPSocket::Address & publicIP,
                              PNatMethod_UPnP * nat);
 #endif
 
@@ -2608,11 +2608,11 @@ class H323EndPoint : public PObject
       */
     virtual PBoolean STUNNatType(int /*type*/) { return FALSE; };
 
-    /** Retrieve the first available 
+    /** Retrieve the first available
         NAT Traversal Techniques
      */
     PNatMethod * GetPreferedNatMethod(
-        const PIPSocket::Address & address = 0 
+        const PIPSocket::Address & address = 0
     );
 
     /** Get the Nat Methods List
@@ -2649,8 +2649,8 @@ class H323EndPoint : public PObject
 
     /**Provide TCP Port translation hook
      */
-    virtual void TranslateTCPPort( 
-        WORD & /*ListenPort*/,                     ///* Local listening port 
+    virtual void TranslateTCPPort(
+        WORD & /*ListenPort*/,                     ///* Local listening port
         const PIPSocket::Address & /*remoteAddr*/  ///* Remote address
     ) { };
 
@@ -2825,7 +2825,7 @@ class H323EndPoint : public PObject
 
     /**Sent flag to indicate whether to send GRQ on gatekeeper registration
      */
-    void SetSendGRQ(PBoolean v) 
+    void SetSendGRQ(PBoolean v)
     { sendGRQ = v; }
 
 #ifdef H323_H450
@@ -3084,7 +3084,7 @@ class H323EndPoint : public PObject
 
     H323CallIdentityDict secondaryConnectionsActive;
 
-    mutable PAtomicInteger nextH450CallIdentity; 
+    mutable PAtomicInteger nextH450CallIdentity;
             /// Next available callIdentity for H450 Transfer operations via consultation.
 
 #endif // H323_H450
@@ -3126,11 +3126,11 @@ class H323EndPoint : public PObject
     PSyncPoint               connectionsAreCleaned;
 
     // Call Authentication
-    PString EPSecurityUserName;       /// Local UserName Authenticated Call 
-    PString EPSecurityPassword;       /// Local Password Authenticated Call        
+    PString EPSecurityUserName;       /// Local UserName Authenticated Call
+    PString EPSecurityPassword;       /// Local Password Authenticated Call
     PBoolean isSecureCall;               /// Flag to Specify Call to make is Authenticated.
     EPSecurityPolicy CallAuthPolicy;   /// Incoming Call Authentication acceptance level
-    H235AuthenticatorList EPAuthList;  /// List of Usernames & Password to check incoming call Against                   
+    H235AuthenticatorList EPAuthList;  /// List of Usernames & Password to check incoming call Against
     PBoolean m_disableMD5Authenticators; /// Disable MD5 based authenticatos (MD5 + CAT)
 
 #ifdef H323_H460
@@ -3178,8 +3178,8 @@ class H323EndPoint : public PObject
     PMutex m_IMmutex;
 
     // Multipoint Text functions
-    short m_IMMultiMode;
-    PBoolean m_IMmodeSent;
+    //short m_IMMultiMode;
+    //PBoolean m_IMmodeSent;
 #endif
 
 #ifdef H323_H460P
