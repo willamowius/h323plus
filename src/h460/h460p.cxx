@@ -1695,7 +1695,7 @@ bool H323PresenceSubscription::IsDecisionMade()
 void H323PresenceSubscription::AddGenericData(const H225_ArrayOf_GenericData & data)
 {
     int sz = data.GetSize();
-    if (sz >0)
+    if (sz >0)  // TODO/BUG: below loop can never run if we exit at greater zero
         return;
 
     IncludeOptionalField(H460P_PresenceSubscription::e_genericData);
