@@ -22,11 +22,11 @@
 
 #if _MSC_VER
 #pragma once
-#endif 
+#endif
 
 class MyH323EndPoint;
 class MyH323Connection;
-class H460_FeatureOID1 : public H460_FeatureOID 
+class H460_FeatureOID1 : public H460_FeatureOID
 {
     PCLASSINFO(H460_FeatureOID1,H460_FeatureOID);
 
@@ -46,7 +46,7 @@ public:
 
 	virtual PBoolean CommonFeature() { return remoteSupport; }
 
-    virtual PBoolean SupportNonCallService();
+    virtual PBoolean SupportNonCallService() const;
 
     // H.323 Message Manuipulation
         // Advertise the Feature
@@ -54,7 +54,7 @@ public:
     virtual void OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu);
 
     virtual PBoolean OnSendCallProceeding_UUIE(H225_FeatureDescriptor & pdu);
-    virtual void OnReceiveCallProceeding_UUIE(const H225_FeatureDescriptor & pdu); 
+    virtual void OnReceiveCallProceeding_UUIE(const H225_FeatureDescriptor & pdu);
 
     virtual PBoolean OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu);
     virtual void OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pdu);
@@ -65,10 +65,10 @@ public:
 
 	// Release Complete
     virtual PBoolean OnSendReleaseComplete_UUIE(H225_FeatureDescriptor & pdu);
-    virtual void OnReceiveReleaseComplete_UUIE(const H225_FeatureDescriptor & pdu);  
+    virtual void OnReceiveReleaseComplete_UUIE(const H225_FeatureDescriptor & pdu);
 
 	virtual PBoolean OnSendAdmissionRequest(H225_FeatureDescriptor & pdu);
-	
+
 
 private:
 	PString callToken;      // Call

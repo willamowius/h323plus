@@ -455,7 +455,7 @@ void H323_RFC4103Handler::TransmitFrame(RFC4103_Frame & frame, PBoolean replay)
 
 H323_RFC4103ReceiverThread::H323_RFC4103ReceiverThread(H323_RFC4103Handler *handler, RTP_Session & session)
 : PThread(10000, AutoDeleteThread, NormalPriority, "RFC4103 Receiver Thread"),
-  rfc4103Handler(handler), rtpSession(session)
+  rfc4103Handler(handler), rtpSession(session), threadClosed(false), lastSequenceNo(0)
 {
 
 }
@@ -482,7 +482,7 @@ H323_RFC4103Channel::H323_RFC4103Channel(H323Connection & connection,
                                    Directions theDirection,
                                    RTP_UDP & rtp,
                                    unsigned id)
-  : H323DataChannel(connection, capability, direction, id),
+  : H323DataChannel(connection, capability, theDirection, id),
     rtpSession(rtp), direction(theDirection), sessionID(id),
     rtpCallbacks(*(H323_RTP_Session *)rtp.GetUserData()), rfc4103Handler(NULL),
 #ifdef H323_H235

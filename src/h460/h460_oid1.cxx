@@ -31,7 +31,7 @@
 #include "h460/h460tm.h"
 
 static const char * baseOID  = "1.3.6.1.4.1.17090.0.1";      // Advertised Feature
-static const char * typeOID  = "1";                          // Type 1-IM session 
+static const char * typeOID  = "1";                          // Type 1-IM session
 //static const char * encOID   = "3";                          // Support Encryption
 static const char * OpenOID  = "4";                          // Message Session open/close
 static const char * MsgOID   = "5";                          // Message contents
@@ -64,6 +64,8 @@ H460_FeatureOID1::H460_FeatureOID1()
  remoteSupport = false;
  callToken = PString();
  sessionOpen = false;
+ m_ep = NULL;
+ m_con = NULL;
 
  FeatureCategory = FeatureSupported;
 
@@ -89,15 +91,15 @@ void H460_FeatureOID1::AttachConnection(H323Connection * _con)
 {
    m_con = _con;
    callToken = _con->GetCallToken();
-   _con->DisableH245inSETUP();     // We don't have H.245 in Setup with Text Messaging  
+   _con->DisableH245inSETUP();     // We don't have H.245 in Setup with Text Messaging
 }
 
-PBoolean H460_FeatureOID1::SupportNonCallService() 
-{ 
-	return true; 
+PBoolean H460_FeatureOID1::SupportNonCallService() const
+{
+	return true;
 }
 
-PBoolean H460_FeatureOID1::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu) 
+PBoolean H460_FeatureOID1::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
 {
 
   if (m_ep->IMisDisabled())
@@ -108,23 +110,23 @@ PBoolean H460_FeatureOID1::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
   PBoolean imcall = m_ep->IsIMCall();
 
   // Build Message
-  H460_FeatureOID feat = H460_FeatureOID(baseOID); 
+  H460_FeatureOID feat = H460_FeatureOID(baseOID);
 
   // Is a IM session call
   if (imcall) {
       m_con->SetIMCall(true);
-      sessionOpen = !m_con->IMSession();            // set flag to open session 
+      sessionOpen = !m_con->IMSession();            // set flag to open session
       feat.Add(typeOID,H460_FeatureContent(1,8));   // 1 specify Instant Message Call
       m_ep->SetIMCall(false);
   }
- 
+
   // Attach PDU
   pdu = feat;
 
   return true;
 }
 
-void H460_FeatureOID1::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu) 
+void H460_FeatureOID1::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
 {
 
   if (m_ep->IMisDisabled())
@@ -146,31 +148,31 @@ void H460_FeatureOID1::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
 
    m_con->SetIMSupport(true);
    m_ep->IMSupport(callToken);
-   remoteSupport = true; 
+   remoteSupport = true;
 
 }
 
-PBoolean H460_FeatureOID1::OnSendCallProceeding_UUIE(H225_FeatureDescriptor & pdu) 
-{ 
+PBoolean H460_FeatureOID1::OnSendCallProceeding_UUIE(H225_FeatureDescriptor & pdu)
+{
     if (remoteSupport) {
-      H460_FeatureOID feat = H460_FeatureOID(baseOID); 
+      H460_FeatureOID feat = H460_FeatureOID(baseOID);
       pdu = feat;
     }
 
-	return remoteSupport; 
+	return remoteSupport;
 }
 
 
-void H460_FeatureOID1::OnReceiveCallProceeding_UUIE(const H225_FeatureDescriptor & pdu) 
+void H460_FeatureOID1::OnReceiveCallProceeding_UUIE(const H225_FeatureDescriptor & pdu)
 {
    remoteSupport = true;
 }
 
-PBoolean H460_FeatureOID1::OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu) 
-{ 
+PBoolean H460_FeatureOID1::OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu)
+{
     if (remoteSupport) {
       // Build Message
-      H460_FeatureOID feat = H460_FeatureOID(baseOID); 
+      H460_FeatureOID feat = H460_FeatureOID(baseOID);
 
       // Signal to say ready for message
       if (m_con->IMCall())
@@ -180,10 +182,10 @@ PBoolean H460_FeatureOID1::OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu)
        pdu = feat;
     }
 
-	return remoteSupport; 
+	return remoteSupport;
 }
 
-void H460_FeatureOID1::OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pdu) 
+void H460_FeatureOID1::OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pdu)
 {
    remoteSupport = true;
    m_ep->IMSupport(callToken);
@@ -191,29 +193,29 @@ void H460_FeatureOID1::OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pdu
 
    H460_FeatureOID & feat = (H460_FeatureOID &)pdu;
 
-    //   if Remote Ready for Non-Call 
-    if (feat.Contains(typeOID)) { 
+    //   if Remote Ready for Non-Call
+    if (feat.Contains(typeOID)) {
        unsigned calltype = feat.Value(typeOID);
 
        //    if IM session send facility msg
-       if (calltype == 1) {  
+       if (calltype == 1) {
          H323SignalPDU facilityPDU;
          facilityPDU.BuildFacility(*m_con, false,H225_FacilityReason::e_featureSetUpdate);
          m_con->WriteSignalPDU(facilityPDU);
        }
-    } 
+    }
 }
 
 
 // Send Message
-PBoolean H460_FeatureOID1::OnSendFacility_UUIE(H225_FeatureDescriptor & pdu) 
-{ 
+PBoolean H460_FeatureOID1::OnSendFacility_UUIE(H225_FeatureDescriptor & pdu)
+{
 
     if (!remoteSupport)
         return false;
 
     // Build Message
-    H460_FeatureOID feat = H460_FeatureOID(baseOID); 
+    H460_FeatureOID feat = H460_FeatureOID(baseOID);
     PBoolean contents = false;
 
     // Open and Closing Session
@@ -226,8 +228,8 @@ PBoolean H460_FeatureOID1::OnSendFacility_UUIE(H225_FeatureDescriptor & pdu)
 
     // If Message send as Unicode String
     PString msg = m_con->IMMsg();
-    if (msg.GetLength() > 0) {		   
-        PASN_BMPString str; 
+    if (msg.GetLength() > 0) {
+        PASN_BMPString str;
         str.SetValue(msg);
         feat.Add(MsgOID,H460_FeatureContent(str));
         m_con->SetIMMsg(PString());
@@ -240,17 +242,17 @@ PBoolean H460_FeatureOID1::OnSendFacility_UUIE(H225_FeatureDescriptor & pdu)
     if (m_con->IMCall() && !sessionOpen) {
         if (feat.Contains(MsgOID))
  		    m_ep->IMSent(callToken,true);
-	    else 
+	    else
 		    m_ep->IMSessionClosed(callToken);
 	    }
         return true;
     }
 
-    return false; 
+    return false;
 };
 
 // Receive Message
-void H460_FeatureOID1::OnReceiveFacility_UUIE(const H225_FeatureDescriptor & pdu) 
+void H460_FeatureOID1::OnReceiveFacility_UUIE(const H225_FeatureDescriptor & pdu)
 {
    H460_FeatureOID & feat = (H460_FeatureOID &)pdu;
    PBoolean open = false;
@@ -261,7 +263,7 @@ void H460_FeatureOID1::OnReceiveFacility_UUIE(const H225_FeatureDescriptor & pdu
              m_ep->IMSessionOpen(callToken);
 
              m_con->SetIMSession(true);
-             m_con->SetCallAnswered();   // Set Flag to specify call is answered 
+             m_con->SetCallAnswered();   // Set Flag to specify call is answered
 	   } else {
 		   if (m_con->IMSession()) {
                     m_ep->IMSessionClosed(callToken);
@@ -295,25 +297,25 @@ void H460_FeatureOID1::OnReceiveFacility_UUIE(const H225_FeatureDescriptor & pdu
 };
 
 // You end connection
-PBoolean H460_FeatureOID1::OnSendReleaseComplete_UUIE(H225_FeatureDescriptor & pdu) 
-{ 
+PBoolean H460_FeatureOID1::OnSendReleaseComplete_UUIE(H225_FeatureDescriptor & pdu)
+{
 	if (sessionOpen) {
 		if (m_con->IMSession())
            m_ep->IMSessionClosed(callToken);
 	    sessionOpen = false;
 
         // Build Message
-        H460_FeatureOID feat = H460_FeatureOID(baseOID); 
+        H460_FeatureOID feat = H460_FeatureOID(baseOID);
         feat.Add(OpenOID,H460_FeatureContent(sessionOpen));
         pdu = feat;
         return true;
 	}
 
-   return false; 
+   return false;
 };
 
 // Other person ends connection
-void H460_FeatureOID1::OnReceiveReleaseComplete_UUIE(const H225_FeatureDescriptor & pdu) 
+void H460_FeatureOID1::OnReceiveReleaseComplete_UUIE(const H225_FeatureDescriptor & pdu)
 {
    H460_FeatureOID & feat = (H460_FeatureOID &)pdu;
 
@@ -324,19 +326,19 @@ void H460_FeatureOID1::OnReceiveReleaseComplete_UUIE(const H225_FeatureDescripto
           m_ep->IMSessionClosed(callToken);
         }
     }
-};  
+};
 
-PBoolean H460_FeatureOID1::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu) 
-{ 
+PBoolean H460_FeatureOID1::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
+{
    if (m_con->IMCall())   // Message in an IM Call
    {
-       H460_FeatureOID feat = H460_FeatureOID(baseOID); 
+       H460_FeatureOID feat = H460_FeatureOID(baseOID);
        feat.Add(typeOID,H460_FeatureContent(1,8));   // 1 specify Instant Message Call
        pdu = feat;
 	   return true;
    }
 
-	return false; 	
+	return false;
 }
 
 #ifdef _MSC_VER
