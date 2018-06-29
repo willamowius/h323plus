@@ -23,7 +23,7 @@
  * the License for the specific language governing rights and limitations
  * under the License.
  *
- * The Original Code is derived from and used in conjunction with the 
+ * The Original Code is derived from and used in conjunction with the
  * H323Plus Project (www.h323plus.org/)
  *
  * The Initial Developer of the Original Code is ISVO (Asia) Pte Ltd.
@@ -54,9 +54,9 @@
 #endif
 
 #if _WIN32
-#pragma message("H.460.23/.24 Enabled. Contact consulting@h323plus.org for licensing terms.")
+#pragma message("H.460.23/.24 Enabled. Contact support@h323plus.org for licensing terms.")
 #else
-#warning("H.460.23/.24 Enabled. Contact consulting@h323plus.org for licensing terms.")
+#warning("H.460.23/.24 Enabled. Contact support@h323plus.org for licensing terms.")
 #endif
 
 #ifdef _MSC_VER
@@ -68,8 +68,8 @@
 #define remoteNATOID        1       // bool if endpoint has remote NAT support
 #define AnnexAOID           2       // bool if endpoint supports H.460.24 Annex A
 #define localNATOID         3       // bool if endpoint is NATed
-#define NATDetRASOID        4       // Detected RAS H225_TransportAddress 
-#define STUNServOID         5       // H225_TransportAddress of STUN Server 
+#define NATDetRASOID        4       // Detected RAS H225_TransportAddress
+#define STUNServOID         5       // H225_TransportAddress of STUN Server
 #define NATTypeOID          6       // integer 8 Endpoint NAT Type
 #define AnnexBOID           7       // bool if endpoint supports H.460.24 Annex B
 
@@ -143,7 +143,7 @@ void PNatMethod_H46024::Start(const PString & server,H460_FeatureStd23 * _feat)
     SetPortRanges(ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax(), ep->GetRtpIpPortBase(), ep->GetRtpIpPortMax());
 #endif
 
-    mainThread  = PThread::Create(PCREATE_NOTIFIER(MainMethod), 0,  
+    mainThread  = PThread::Create(PCREATE_NOTIFIER(MainMethod), 0,
                        PThread::NoAutoDeleteThread, PThread::NormalPriority, "H.460.24");
 }
 
@@ -158,7 +158,7 @@ PSTUNClient::NatTypes PNatMethod_H46024::NATTest()
     testport = (WORD)feat->GetEndPoint()->GetMultiplexPort()-1;
 #else
     PRandom rand;
-    testport = (WORD)rand.Generate(singlePortInfo.basePort , singlePortInfo.maxPort);   
+    testport = (WORD)rand.Generate(singlePortInfo.basePort , singlePortInfo.maxPort);
 #endif
 
     singlePortInfo.currentPort = testport;
@@ -220,16 +220,16 @@ bool PNatMethod_H46024::IsAvailable(const PIPSocket::Address & /*binding*/)
     return isAvailable;
 }
 
-void PNatMethod_H46024::SetAvailable() 
-{ 
+void PNatMethod_H46024::SetAvailable()
+{
     feat->GetEndPoint()->NATMethodCallBack(GetName(),1,"Available");
-    isAvailable = true; 
+    isAvailable = true;
 }
 
 void PNatMethod_H46024::Activate(bool act)
 {
     if (act && !isAvailable)  // Special case where activated but not available.
-       isAvailable = true;  
+       isAvailable = true;
 
     isActive = act;
 }
@@ -244,7 +244,7 @@ WORD PNatMethod_H46024::CreateRandomPortPair(unsigned int start, unsigned int en
     WORD num;
     PRandom rand;
     num = (WORD)rand.Generate(start,end);
-    if (num %2 != 0) 
+    if (num %2 != 0)
         num++;  // Make sure the number is even
 
     return num;
@@ -261,7 +261,7 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
 
     H323Connection::SessionInformation * info = (H323Connection::SessionInformation *)userData;
 #ifdef H323_H46019M
-    PNatMethod_H46019 * handler = 
+    PNatMethod_H46019 * handler =
                (PNatMethod_H46019 *)feat->GetEndPoint()->GetNatMethods().GetMethodByName("H46019");
 
     if (handler && info && (info->GetRecvMultiplexID() > 0)) {
@@ -269,14 +269,14 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
            // Set Multiplex ports here
            SetPortRanges(multiplexPorts.basePort, multiplexPorts.maxPort, multiplexPorts.basePort, multiplexPorts.maxPort);
 
-           H46019MultiplexSocket * & muxSocket1 = (H46019MultiplexSocket * &)handler->GetMultiplexSocket(true); 
+           H46019MultiplexSocket * & muxSocket1 = (H46019MultiplexSocket * &)handler->GetMultiplexSocket(true);
            H46019MultiplexSocket * & muxSocket2 = (H46019MultiplexSocket * &)handler->GetMultiplexSocket(false);
            muxSocket1 = new H46019MultiplexSocket(true);
            muxSocket2 = new H46019MultiplexSocket(false);
            pairedPortInfo.currentPort = feat->GetEndPoint()->GetMultiplexPort()-1;
 
 #if PTLIB_VER >= 2130
-           if (!PSTUNClient::CreateSocketPair(muxSocket1->GetSubSocket(), muxSocket2->GetSubSocket(), binding, (PObject *)1)) 
+           if (!PSTUNClient::CreateSocketPair(muxSocket1->GetSubSocket(), muxSocket2->GetSubSocket(), binding, (PObject *)1))
 #else
            if (!PSTUNClient::CreateSocketPair(muxSocket1->GetSubSocket(), muxSocket2->GetSubSocket(), binding))
 #endif
@@ -286,14 +286,14 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
            muxSocket1->GetSubSocket()->GetLocalAddress(stunAddress);
            PTRACE(1,"Std24\tMux STUN Created: " << stunAddress  << " "
                         << muxSocket1->GetSubSocket()->GetPort() << "-" << muxSocket2->GetSubSocket()->GetPort());
-           
+
            handler->StartMultiplexListener();  // Start Multiplexing Listening thread;
-           handler->EnableMultiplex(true); 
+           handler->EnableMultiplex(true);
         }
 
-       socket1 = new H46019UDPSocket(*handler->GetHandler(),info,true);      /// Data 
+       socket1 = new H46019UDPSocket(*handler->GetHandler(),info,true);      /// Data
        socket2 = new H46019UDPSocket(*handler->GetHandler(),info,false);     /// Signal
- 
+
        PNatMethod_H46019::RegisterSocket(true ,info->GetRecvMultiplexID(), socket1);
        PNatMethod_H46019::RegisterSocket(false,info->GetRecvMultiplexID(), socket2);
 
@@ -317,7 +317,7 @@ PBoolean PNatMethod_H46024::CreateSocketPair(PUDPSocket * & socket1,
 }
 
 
-void PNatMethod_H46024::SetConnectionSockets(PUDPSocket * data, PUDPSocket * control, 
+void PNatMethod_H46024::SetConnectionSockets(PUDPSocket * data, PUDPSocket * control,
                                              H323Connection::SessionInformation * info)
 {
     if (info != NULL) {
@@ -362,21 +362,21 @@ void H460_FeatureStd23::AttachEndPoint(H323EndPoint * _ep)
     isavailable = (EP->GetSTUN() == NULL);
 }
 
-PBoolean H460_FeatureStd23::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu) 
-{ 
+PBoolean H460_FeatureStd23::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu)
+{
     if (!isEnabled)
         return false;
 
     if (!isavailable)
         return FALSE;
 
-    H460_FeatureStd feat = H460_FeatureStd(23); 
+    H460_FeatureStd feat = H460_FeatureStd(23);
     pdu = feat;
-    return TRUE; 
+    return TRUE;
 }
 
-PBoolean H460_FeatureStd23::OnSendRegistrationRequest(H225_FeatureDescriptor & pdu) 
-{ 
+PBoolean H460_FeatureStd23::OnSendRegistrationRequest(H225_FeatureDescriptor & pdu)
+{
     if (!isEnabled)
         return false;
 
@@ -384,7 +384,7 @@ PBoolean H460_FeatureStd23::OnSendRegistrationRequest(H225_FeatureDescriptor & p
             return FALSE;
 
     // Build Message
-    H460_FeatureStd feat = H460_FeatureStd(23); 
+    H460_FeatureStd feat = H460_FeatureStd(23);
 
     if ((EP->GetGatekeeper() == NULL) ||
         (!EP->GetGatekeeper()->IsRegistered())) {
@@ -399,15 +399,15 @@ PBoolean H460_FeatureStd23::OnSendRegistrationRequest(H225_FeatureDescriptor & p
 #endif
     } else {
         if (alg) {
-              // We should be disabling H.460.23/.24 support but 
+              // We should be disabling H.460.23/.24 support but
               // we will disable H.460.18/.19 instead :) and say we have no NAT..
-                feat.Add(NATTypeOID,H460_FeatureContent(1,8)); 
-                feat.Add(remoteNATOID,H460_FeatureContent(false)); 
+                feat.Add(NATTypeOID,H460_FeatureContent(1,8));
+                feat.Add(remoteNATOID,H460_FeatureContent(false));
                 isavailable = false;
                 alg = false;
         } else {
             if (natNotify || AlternateNATMethod()) {
-                feat.Add(NATTypeOID,H460_FeatureContent(natType,8)); 
+                feat.Add(NATTypeOID,H460_FeatureContent(natType,8));
                 natNotify = false;
             }
         }
@@ -415,10 +415,10 @@ PBoolean H460_FeatureStd23::OnSendRegistrationRequest(H225_FeatureDescriptor & p
 
     pdu = feat;
 
-    return true; 
+    return true;
 }
 
-void H460_FeatureStd23::OnReceiveGatekeeperConfirm(const H225_FeatureDescriptor & /*pdu*/) 
+void H460_FeatureStd23::OnReceiveGatekeeperConfirm(const H225_FeatureDescriptor & /*pdu*/)
 {
     isEnabled = true;
 }
@@ -478,7 +478,7 @@ void H460_FeatureStd23::OnNATTypeDetection(PSTUNClient::NatTypes type, const PIP
         PTRACE(2,"Std23\tBAD NAT Detected: Was " << natType << " Now " << type << " Disabling H.460.23/.24");
         natType = PSTUNClient::UnknownNat;  // Leopard changed it spots (disable H.460.23/.24)
     }
-    
+
     natNotify = true;
     EP->ForceGatekeeperReRegistration();
 }
@@ -499,7 +499,7 @@ bool H460_FeatureStd23::DetectALG(const PIPSocket::Address & detectAddress)
     if (!PIPSocket::GetInterfaceTable(if_table)) {
         PTRACE(1, "Std23\tERROR: Can't get interface table");
         found = false;
-    } else {  
+    } else {
         for (PINDEX i=0; i< if_table.GetSize(); i++) {
             if (detectAddress == if_table[i].GetAddress()) {
                 PTRACE(4, "Std23\tNo Intermediary device detected between EP and GK");
@@ -576,7 +576,7 @@ bool H460_FeatureStd23::IsAlternateAvailable(PString & name)
 void H460_FeatureStd23::DelayedReRegistration()
 {
     PThread::Sleep(1000);
-    EP->ForceGatekeeperReRegistration();  // We have an ALG so notify the gatekeeper   
+    EP->ForceGatekeeperReRegistration();  // We have an ALG so notify the gatekeeper
 }
 
 bool H460_FeatureStd23::AlternateNATMethod()
@@ -593,7 +593,7 @@ bool H460_FeatureStd23::AlternateNATMethod()
 #else
         PString methName = natlist[i].GetName();
 #endif
-        if (methName == "UPnP" && 
+        if (methName == "UPnP" &&
             natlist[i].GetRTPSupport() == PSTUNClient::RTPSupported) {
             PIPSocket::Address extIP;
             natlist[i].GetExternalAddress(extIP);
@@ -631,7 +631,7 @@ H460_FEATURE(Std24);
 
 H460_FeatureStd24::H460_FeatureStd24()
 : H460_FeatureStd(24),
-  EP(NULL), CON(NULL), natconfig(H460_FeatureStd24::e_unknown), 
+  EP(NULL), CON(NULL), natconfig(H460_FeatureStd24::e_unknown),
   nattype(0), isEnabled(false), useAlternate(false)
 {
  PTRACE(6,"Std24\tInstance Created");
@@ -645,7 +645,7 @@ H460_FeatureStd24::~H460_FeatureStd24()
 
 void H460_FeatureStd24::AttachEndPoint(H323EndPoint * _ep)
 {
-   EP = _ep; 
+   EP = _ep;
     // We only enable IF the gatekeeper supports H.460.23
     H460_FeatureSet * gkfeat = EP->GetGatekeeperFeatures();
     if (gkfeat && gkfeat->HasFeature(23)) {
@@ -660,13 +660,13 @@ void H460_FeatureStd24::AttachEndPoint(H323EndPoint * _ep)
 
 void H460_FeatureStd24::AttachConnection(H323Connection * _conn)
 {
-   CON = _conn; 
+   CON = _conn;
 }
 
-PBoolean H460_FeatureStd24::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu) 
-{ 
+PBoolean H460_FeatureStd24::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
+{
     // Ignore if already not enabled or manually using STUN
-    if (!isEnabled) 
+    if (!isEnabled)
         return FALSE;
 
 #ifdef H323_H46023
@@ -685,7 +685,7 @@ PBoolean H460_FeatureStd24::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
     }
 
     pdu = feat;
-    return TRUE;  
+    return TRUE;
 }
 
 void H460_FeatureStd24::OnReceiveAdmissionConfirm(const H225_FeatureDescriptor & pdu)
@@ -694,22 +694,22 @@ void H460_FeatureStd24::OnReceiveAdmissionConfirm(const H225_FeatureDescriptor &
 
     if (feat.Contains(NATInstOID)) {
         PTRACE(6,"Std24\tReading ACF");
-        unsigned NATinst = feat.Value(NATInstOID); 
+        unsigned NATinst = feat.Value(NATInstOID);
         natconfig = (NatInstruct)NATinst;
         HandleNATInstruction(natconfig);
     }
 }
 
-void H460_FeatureStd24::OnReceiveAdmissionReject(const H225_FeatureDescriptor & pdu) 
+void H460_FeatureStd24::OnReceiveAdmissionReject(const H225_FeatureDescriptor & pdu)
 {
      PTRACE(6,"Std24\tARJ Received");
      HandleNATInstruction(H460_FeatureStd24::e_natFailure);
 }
 
 PBoolean H460_FeatureStd24::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
-{ 
+{
   // Ignore if already not enabled or manually using STUN
-  if (!isEnabled) 
+  if (!isEnabled)
         return FALSE;
 
  PTRACE(6,"Std24\tSend Setup");
@@ -717,7 +717,7 @@ PBoolean H460_FeatureStd24::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
         return FALSE;
 
     H460_FeatureStd feat = H460_FeatureStd(24);
-    
+
     int remoteconfig;
     switch (natconfig) {
         case H460_FeatureStd24::e_noassist:
@@ -741,9 +741,9 @@ PBoolean H460_FeatureStd24::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
 
     feat.Add(NATInstOID,H460_FeatureContent(remoteconfig,8));
     pdu = feat;
-    return TRUE; 
+    return TRUE;
 }
-    
+
 void H460_FeatureStd24::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
 {
 
@@ -754,7 +754,7 @@ void H460_FeatureStd24::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
      if (feat.Contains(NATInstOID)) {
       PTRACE(6,"Std24\tReceive Setup");
 
-        unsigned NATinst = feat.Value(NATInstOID); 
+        unsigned NATinst = feat.Value(NATInstOID);
         natconfig = (NatInstruct)NATinst;
         HandleNATInstruction(natconfig);
     }
@@ -763,7 +763,7 @@ void H460_FeatureStd24::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
 
 void H460_FeatureStd24::HandleNATInstruction(NatInstruct _config)
 {
-        
+
         PTRACE(4,"Std24\tNAT Instruction Received: " << _config);
         switch (_config) {
             case H460_FeatureStd24::e_localMaster:
@@ -911,7 +911,7 @@ void H460_FeatureStd24::SetNATMethods(H46024NAT state)
        PString name = natlist[i].GetName();
 #endif
        PTRACE(6, "H323\tNAT Method " << i << " " << name << " Ready: "
-                  << (natlist[i].IsAvailable(PIPSocket::Address::GetAny(4)) ? "Yes" : "No"));  
+                  << (natlist[i].IsAvailable(PIPSocket::Address::GetAny(4)) ? "Yes" : "No"));
    }
 }
 
