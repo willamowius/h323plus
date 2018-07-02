@@ -1831,10 +1831,10 @@ H323TransportAddressArray H323EndPoint::GetInterfaceAddresses(PBoolean excludeLo
 H323Connection * H323EndPoint::MakeCall(const PString & remoteParty,
                                         PString & token,
                                         void * userData,
-                                        PBoolean supplimentary
+                                        PBoolean supplementary
                                         )
 {
-  return MakeCall(remoteParty, NULL, token, userData, supplimentary);
+  return MakeCall(remoteParty, NULL, token, userData, supplementary);
 }
 
 
@@ -1842,7 +1842,7 @@ H323Connection * H323EndPoint::MakeCall(const PString & remoteParty,
                                         H323Transport * transport,
                                         PString & token,
                                         void * userData,
-                                        PBoolean supplimentary
+                                        PBoolean supplementary
                                         )
 {
   token = PString::Empty();
@@ -1860,7 +1860,7 @@ H323Connection * H323EndPoint::MakeCall(const PString & remoteParty,
                                      transport,
                                      token,
                                      userData,
-                                     supplimentary
+                                     supplementary
                                      );
     if (connection != NULL) {
         connection->Unlock();
@@ -1907,7 +1907,7 @@ H323Connection * H323EndPoint::InternalMakeCall(const PString & trasferFromToken
                                                 H323Transport * transport,
                                                 PString & newToken,
                                                 void * userData,
-                                                PBoolean supplimentary
+                                                PBoolean supplementary
                                                 )
 {
   PTRACE(2, "H323\tMaking call to: " << remoteParty);
@@ -1982,7 +1982,7 @@ H323Connection * H323EndPoint::InternalMakeCall(const PString & trasferFromToken
   }
   connection->SetRemotePartyName(remoteParty);
 
-  if (supplimentary)
+  if (supplementary)
       connection->SetNonCallConnection();
 
   (void)connection->Lock();

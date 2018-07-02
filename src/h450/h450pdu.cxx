@@ -194,7 +194,7 @@ void H450ServiceAPDU::BuildCallWaiting(int invokeId, int numCallsWaiting)
 
   PTRACE(4, "H4502\tSending supplementary service PDU argument:\n  "
          << setprecision(2) << argument);
-  
+
   invoke.IncludeOptionalField(X880_Invoke::e_argument);
   invoke.m_argument.EncodeSubType(argument);
 }
@@ -221,13 +221,13 @@ X880_Invoke & H450ServiceAPDU::BuildMessageWaitIndicationInterrogate(int invokeI
 {
   X880_Invoke & invoke = BuildInvoke(invokeId, H4507_H323_MWI_Operations::e_mwiInterrogate);
   invoke.IncludeOptionalField(X880_Invoke::e_argument);
-  
+
   return invoke;
 }
 
 X880_ReturnResult & H450ServiceAPDU::BuildMessageWaitIndicationResult(int invokeId, int opcode)
-{ 
-  
+{
+
   X880_ReturnResult& result = BuildReturnResult(invokeId);
   result.IncludeOptionalField(X880_ReturnResult::e_result);
   result.m_result.m_opcode.SetTag(X880_Code::e_local);
@@ -256,7 +256,7 @@ void H450ServiceAPDU::BuildCallIntrusionForcedRelease(int invokeId,
 X880_ReturnResult& H450ServiceAPDU::BuildCallIntrusionForcedReleaseResult(int invokeId)
 {
   PTRACE(1 ,"H450.11\tH450ServiceAPDU::BuildCallIntrusionForcedReleaseResult BEGIN");
-  
+
   X880_ReturnResult& result = BuildReturnResult(invokeId);
   result.IncludeOptionalField(X880_ReturnResult::e_result);
   result.m_result.m_opcode.SetTag(X880_Code::e_local);
@@ -294,7 +294,7 @@ void H450ServiceAPDU::BuildCallIntrusionImpending(int invokeId)
 {
   PTRACE(4, "H450.11\tBuildCallIntrusionImpending invokeId=" << invokeId);
   X880_Invoke& invoke = BuildInvoke(invokeId, H45011_H323CallIntrusionOperations::e_callIntrusionNotification);
- 
+
   H45011_CINotificationArg argument;
 
   argument.m_ciStatusInformation = H45011_CIStatusInformation::e_callIntrusionImpending;
@@ -308,7 +308,7 @@ void H450ServiceAPDU::BuildCallIntrusionForceRelesed(int invokeId)
 {
   PTRACE(4, "H450.11\tBuildCallIntrusionForceRelesed invokeId=" << invokeId);
   X880_Invoke& invoke = BuildInvoke(invokeId, H45011_H323CallIntrusionOperations::e_callIntrusionNotification);
- 
+
   H45011_CINotificationArg argument;
 
   argument.m_ciStatusInformation = H45011_CIStatusInformation::e_callForceReleased;
@@ -505,7 +505,7 @@ PBoolean H450xDispatcher::OnReceivedInvoke(X880_Invoke & invoke, H4501_Interpret
   if (invoke.m_opcode.GetTag() == X880_Code::e_local) {
     int opcode = ((PASN_Integer&) invoke.m_opcode).GetValue();
     if (!opcodeHandler.Contains(opcode)) {
-      PTRACE(2, "H4501\tInvoke of unsupported local opcode:\n  " << invoke);	  
+      PTRACE(2, "H4501\tInvoke of unsupported local opcode:\n  " << invoke);
       if (interpretation.GetTag() != H4501_InterpretationApdu::e_discardAnyUnrecognizedInvokePdu)
         SendInvokeReject(invokeId, 1 /*X880_InvokeProblem::e_unrecognisedOperation*/);
       if (interpretation.GetTag() == H4501_InterpretationApdu::e_clearCallIfAnyInvokePduNotRecognized)
@@ -855,7 +855,7 @@ void H4502Handler::AttachToReleaseComplete(H323SignalPDU & pdu)
     return;
 
   // If the SETUP message we received from the other end had a callTransferSetup APDU
-  // in it, then we need to send back a RELEASE COMPLETE PDU with a callTransferSetup 
+  // in it, then we need to send back a RELEASE COMPLETE PDU with a callTransferSetup
   // ReturnError.
   // Else normal call - clear it down
   H450ServiceAPDU serviceAPDU;
@@ -930,7 +930,7 @@ void H4502Handler::OnReceivedCallTransferIdentify(int /*linkedId*/)
     SendReturnError(H4501_GeneralErrorList::e_notAvailable);
     return;
   }
-  
+
   // Send a FACILITY message with a callTransferIdentify return result
   // Supplementary Service PDU to the transferring endpoint.
   H450ServiceAPDU serviceAPDU;
@@ -954,7 +954,7 @@ void H4502Handler::OnReceivedCallTransferIdentify(int /*linkedId*/)
   H4501_ArrayOf_AliasAddress& aliasAddress = ctIdentifyResult.m_reroutingNumber.m_destinationAddress;
 
   PString localName = connection.GetLocalPartyName();
-  if (localName.IsEmpty()) 
+  if (localName.IsEmpty())
     aliasAddress.SetSize(1);
   else {
     aliasAddress.SetSize(2);
@@ -1007,7 +1007,7 @@ void H4502Handler::OnReceivedCallTransferAbandon(int /*linkedId*/)
 void H4502Handler::OnReceivedCallTransferInitiate(int /*linkedId*/,
                                                   PASN_OctetString * argument)
 {
-  // TBD: Check Call Hold status. If call is held, it must first be 
+  // TBD: Check Call Hold status. If call is held, it must first be
   // retrieved before being transferred. -- dcassel 4/01
 
   H4502_CTInitiateArg ctInitiateArg;
@@ -1058,14 +1058,14 @@ void H4502Handler::OnReceivedCallTransferSetup(int /*linkedId*/,
     }
   }
   else { // Transfer through Consultation
-    
-    // We need to check that the call identity and destination address information match those in the 
-    // second call.  For the time being we just check that the call identities match as there does not 
+
+    // We need to check that the call identity and destination address information match those in the
+    // second call.  For the time being we just check that the call identities match as there does not
     // appear to be an elegant solution to compare the destination address information.
 
     // Get this callIdentity from our dictionary (if present)
     H323Connection *secondaryCall = endpoint.GetCallIdentityDictionary().GetAt(callIdentity);
-  
+
     if (secondaryCall != NULL)
       secondaryCall->HandleConsultationTransfer(callIdentity, connection);
     else  // Mismatched callIdentity
@@ -1119,7 +1119,7 @@ PBoolean H4502Handler::OnReceivedReturnResult(X880_ReturnResult & returnResult)
   if (currentInvokeId == returnResult.m_invokeId.GetValue()) {
     switch (ctState) {
       case e_ctAwaitInitiateResponse:
-        OnReceivedInitiateReturnResult(); 
+        OnReceivedInitiateReturnResult();
         break;
 
       case e_ctAwaitSetupResponse:
@@ -1187,8 +1187,8 @@ void H4502Handler::OnReceivedIdentifyReturnResult(X880_ReturnResult &returnResul
     PString remoteParty;
     H450ServiceAPDU::ParseEndpointAddress(ctIdentifyResult.m_reroutingNumber, remoteParty);
 
-    // Store the secondary call token on the primary connection so we can send a 
-    // callTransferAbandon invoke APDU on the secondary call at a later stage if we 
+    // Store the secondary call token on the primary connection so we can send a
+    // callTransferAbandon invoke APDU on the secondary call at a later stage if we
     // get back a callTransferInitiateReturnError
     H323Connection* primaryConnection = endpoint.FindConnectionWithLock(CallToken);
     if (primaryConnection != NULL) {
@@ -1229,7 +1229,7 @@ PBoolean H4502Handler::OnReceivedReturnError(int errorCode, X880_ReturnError &re
 
 
 void H4502Handler::OnReceivedInitiateReturnError(const bool timerExpiry)
-{ 
+{
   if (!timerExpiry) {
     // stop timer CT-T3
     StopctTimer();
@@ -1269,11 +1269,11 @@ void H4502Handler::OnReceivedSetupReturnError(int errorCode,
 {
   ctState = e_ctIdle;
   currentInvokeId = 0;
-  
+
   if (!timerExpiry) {
     // stop timer CT-T4 if it is running
     StopctTimer();
-    PTRACE(4, "H4502\tStopping timer CT-T4");  
+    PTRACE(4, "H4502\tStopping timer CT-T4");
   }
   else {
     PTRACE(3, "H4502\tTimer CT-T4 has expired on the Transferred Endpoint awaiting a response to a callTransferSetup APDU.");
@@ -1474,7 +1474,7 @@ void H4502Handler::OnCallTransferTimeOut(PTimer &, H323_INT)
         // Abort the call transfer
         ctState = e_ctIdle;
         currentInvokeId = 0;
-        PTRACE(4, "H450.2\tTimer CT-T2 has expired on the Transferred-to endpoint awaiting a callTransferSetup APDU.");  
+        PTRACE(4, "H450.2\tTimer CT-T2 has expired on the Transferred-to endpoint awaiting a callTransferSetup APDU.");
       }
       break;
 
@@ -1494,7 +1494,7 @@ H4503Handler::H4503Handler(H323Connection & conn, H450xDispatcher & disp)
   : H450xHandler(conn, disp), m_diversionCounter(0), m_origdiversionReason(0), m_diversionReason(0)
 {
   dispatcher.AddOpCode(H4503_H323CallDiversionOperations::e_divertingLegInformation2, this);
-   
+
 }
 
 PBoolean H4503Handler::OnReceivedInvoke(int opcode,
@@ -1507,7 +1507,7 @@ PBoolean H4503Handler::OnReceivedInvoke(int opcode,
     case H4503_H323CallDiversionOperations::e_divertingLegInformation2:
       OnReceivedDivertingLegInfo2(linkedId, argument);
       break;
-    
+
     default:
       currentInvokeId = 0;
       return FALSE;
@@ -1516,9 +1516,9 @@ PBoolean H4503Handler::OnReceivedInvoke(int opcode,
   return TRUE;
 }
 
-void H4503Handler::OnReceivedDivertingLegInfo2(int /* linkedId*/, PASN_OctetString * argument) 
+void H4503Handler::OnReceivedDivertingLegInfo2(int /* linkedId*/, PASN_OctetString * argument)
 {
-  PTRACE(4, "H4503\tReceived a DivertingLegInfo2 Invoke APDU from the remote endpoint.");  
+  PTRACE(4, "H4503\tReceived a DivertingLegInfo2 Invoke APDU from the remote endpoint.");
   H4503_DivertingLegInfo2Arg divertingLegInfo2Arg;
   if (!DecodeArguments(argument, divertingLegInfo2Arg, -1))
       return;
@@ -1536,27 +1536,27 @@ void H4503Handler::OnReceivedDivertingLegInfo2(int /* linkedId*/, PASN_OctetStri
 
   PTRACE(4, "H450.3\tOnReceivedDivertingLegInfo2 redirNUm=" << m_originalCalledNr);
 
-  
+
 }
 
 PBoolean H4503Handler::GetRedirectingNumber(PString &originalCalledNr, PString &lastDivertingNr, int &divCounter, int &origdivReason, int &divReason)
 {
- PBoolean bRedirAvail=false; 
+ PBoolean bRedirAvail=false;
 
  if(!m_originalCalledNr.IsEmpty()) {
-   originalCalledNr = m_originalCalledNr; 
-   bRedirAvail = true; 
+   originalCalledNr = m_originalCalledNr;
+   bRedirAvail = true;
  }
  if(!m_lastDivertingNr.IsEmpty()) {
    lastDivertingNr  = m_lastDivertingNr;
-   bRedirAvail = true; 
+   bRedirAvail = true;
  }
 
  divCounter = m_diversionCounter;
  divReason  = m_diversionReason;
  origdivReason  = m_origdiversionReason;
 
- return bRedirAvail; 
+ return bRedirAvail;
 
 }
 
@@ -1610,7 +1610,7 @@ PBoolean H4504Handler::OnReceivedInvoke(int opcode,
 
 void H4504Handler::OnReceivedLocalCallHold(int /*linkedId*/)
 {
-  PTRACE(4, "H4504\tReceived a holdNotific Invoke APDU from the remote endpoint.");  
+  PTRACE(4, "H4504\tReceived a holdNotific Invoke APDU from the remote endpoint.");
   // Optionally close our transmit channel.
 }
 
@@ -1636,11 +1636,11 @@ void H4504Handler::OnReceivedRemoteCallRetrieve(int /*linkedId*/)
 
 void H4504Handler::HoldCall(PBoolean localHold)
 {
-  // TBD: Implement Remote Hold. This implementation only does 
-  // local hold. -- dcassel 4/01. 
+  // TBD: Implement Remote Hold. This implementation only does
+  // local hold. -- dcassel 4/01.
   if (!localHold)
     return;
-  
+
   // Send a FACILITY message with a callNotific Invoke
   // Supplementary Service PDU to the held endpoint.
   PTRACE(4, "H4504\tTransmitting a holdNotific Invoke APDU to the remote endpoint.");
@@ -1650,7 +1650,7 @@ void H4504Handler::HoldCall(PBoolean localHold)
   currentInvokeId = dispatcher.GetNextInvokeId();
   serviceAPDU.BuildInvoke(currentInvokeId, H4504_CallHoldOperation::e_holdNotific);
   serviceAPDU.WriteFacilityPDU(connection);
-  
+
   // Update hold state
   holdState = e_ch_NE_Held;
 }
@@ -1669,7 +1669,7 @@ void H4504Handler::RetrieveCall()
   currentInvokeId = dispatcher.GetNextInvokeId();
   serviceAPDU.BuildInvoke(currentInvokeId, H4504_CallHoldOperation::e_retrieveNotific);
   serviceAPDU.WriteFacilityPDU(connection);
-  
+
   // Update hold state
   holdState = e_ch_Idle;
 }
@@ -1724,7 +1724,7 @@ void H4506Handler::AttachToAlerting(H323SignalPDU & pdu,
                                     unsigned numberOfCallsWaiting)
 {
   PTRACE(4, "H450.6\tAttaching a Call Waiting Invoke PDU to this Alerting message.");
-  
+
   H450ServiceAPDU serviceAPDU;
 
   // Store the call waiting invokeID associated with this connection
@@ -1743,7 +1743,7 @@ void H4506Handler::AttachToAlerting(H323SignalPDU & pdu,
 
 void BuildMWIActivate(H4507_MWIActivateArg & argument, const H323Connection::MWIInformation & mwiInfo)
 {
-    H4501_ArrayOf_AliasAddress & user = argument.m_servedUserNr.m_destinationAddress; 
+    H4501_ArrayOf_AliasAddress & user = argument.m_servedUserNr.m_destinationAddress;
     user.SetSize(1);
     H323SetAliasAddress(mwiInfo.mwiUser,user[0]);
 
@@ -1763,10 +1763,10 @@ void BuildMWIActivate(H4507_MWIActivateArg & argument, const H323Connection::MWI
 
     // TODO Add message details here.
 }
- 
+
 void BuildMWIDeactivate(H4507_MWIDeactivateArg & argument, const H323Connection::MWIInformation & mwiInfo)
 {
-    H4501_ArrayOf_AliasAddress & user = argument.m_servedUserNr.m_destinationAddress; 
+    H4501_ArrayOf_AliasAddress & user = argument.m_servedUserNr.m_destinationAddress;
     user.SetSize(1);
     H323SetAliasAddress(mwiInfo.mwiUser,user[0]);
 
@@ -1775,7 +1775,7 @@ void BuildMWIDeactivate(H4507_MWIDeactivateArg & argument, const H323Connection:
 
 void BuildMWIInterrogate(H4507_MWIInterrogateArg & argument, const H323Connection::MWIInformation & mwiInfo)
 {
-    H4501_ArrayOf_AliasAddress & user = argument.m_servedUserNr.m_destinationAddress; 
+    H4501_ArrayOf_AliasAddress & user = argument.m_servedUserNr.m_destinationAddress;
     user.SetSize(1);
     H323SetAliasAddress(mwiInfo.mwiUser,user[0]);
 
@@ -1823,7 +1823,7 @@ H4507Handler::H4507Handler(H323Connection & conn, H450xDispatcher & disp)
 
 void H4507Handler::AttachToSetup(H323SignalPDU & pdu)
 {
-  // Is a non call Supplimentary Service
+  // Is a non call Supplementary Service
   if (!connection.IsNonCallConnection())
       return;
 
@@ -1841,10 +1841,10 @@ void H4507Handler::AttachToSetup(H323SignalPDU & pdu)
   currentInvokeId = dispatcher.GetNextInvokeId();
 
   switch (mwiType) {
-      case e_mwi_typeNone: 
+      case e_mwi_typeNone:
 		// ignore
         break;
-      case e_mwi_activate: 
+      case e_mwi_activate:
         {
             X880_Invoke & invoke = serviceAPDU.BuildMessageWaitIndicationActivate(currentInvokeId);
             H4507_MWIActivateArg arg;
@@ -1879,7 +1879,7 @@ void H4507Handler::AttachToSetup(H323SignalPDU & pdu)
 
 void H4507Handler::AttachToConnect(H323SignalPDU & pdu)
 {
-  // Is a non call Supplimentary Service
+  // Is a non call Supplementary Service
   if (!connection.IsNonCallConnection())
       return;
 
@@ -1894,9 +1894,9 @@ void H4507Handler::AttachToConnect(H323SignalPDU & pdu)
   mwiInfo = connection.GetMWINonCallParameters();
 
   switch (mwiType) {
-      case e_mwi_typeNone: 
+      case e_mwi_typeNone:
 		// ignore
-      case e_mwi_activate: 
+      case e_mwi_activate:
           serviceAPDU.BuildMessageWaitIndicationResult(currentInvokeId, H4507_H323_MWI_Operations::e_mwiActivate);
         break;
       case e_mwi_deactivate:
@@ -1961,7 +1961,7 @@ PBoolean H4507Handler::OnReceivedReturnResult(X880_ReturnResult & returnResult)
     }
 
     if (currentInvokeId != returnResult.m_invokeId.GetValue()) {
-        PTRACE(4, "H4507\tERROR Received Return Result for " << returnResult.m_invokeId.GetValue() 
+        PTRACE(4, "H4507\tERROR Received Return Result for " << returnResult.m_invokeId.GetValue()
           << " when waiting on " << currentInvokeId);
         return false;
     }
@@ -2010,12 +2010,12 @@ PBoolean H4507Handler::OnReceiveMWIActivate(PASN_OctetString * argument)
 
     H323Connection::MWIInformation mwiInfo;
 
-    H4501_ArrayOf_AliasAddress & user = mwiArg.m_servedUserNr.m_destinationAddress; 
+    H4501_ArrayOf_AliasAddress & user = mwiArg.m_servedUserNr.m_destinationAddress;
     if (user.GetSize() > 0)
         mwiInfo.mwiUser = H323GetAliasAddressString(user[0]);
 
     PString msgCtr = PString();
-    if (mwiArg.HasOptionalField(H4507_MWIActivateArg::e_msgCentreId) && 
+    if (mwiArg.HasOptionalField(H4507_MWIActivateArg::e_msgCentreId) &&
         mwiArg.m_msgCentreId.GetTag() == H4507_MsgCentreId::e_partyNumber) {
             H225_AliasAddress & msgId = (H225_AliasAddress &)mwiArg.m_msgCentreId;
             mwiInfo.mwiCtrId = H323GetAliasAddressString(msgId);
@@ -2026,7 +2026,7 @@ PBoolean H4507Handler::OnReceiveMWIActivate(PASN_OctetString * argument)
 
     return connection.OnReceivedMWI(mwiInfo);
 }
- 
+
 PBoolean H4507Handler::OnReceiveMWIDeactivate(PASN_OctetString * argument)
 {
     H4507_MWIDeactivateArg mwiArg;
@@ -2034,7 +2034,7 @@ PBoolean H4507Handler::OnReceiveMWIDeactivate(PASN_OctetString * argument)
         return false;
 
     PString servedUser = PString();
-    H4501_ArrayOf_AliasAddress & user = mwiArg.m_servedUserNr.m_destinationAddress; 
+    H4501_ArrayOf_AliasAddress & user = mwiArg.m_servedUserNr.m_destinationAddress;
     if (user.GetSize() > 0)
         servedUser = H323GetAliasAddressString(user[0]);
 
@@ -2048,7 +2048,7 @@ PBoolean H4507Handler::OnReceiveMWIInterrogate(PASN_OctetString * argument)
         return false;
 
     PString servedUser = PString();
-    H4501_ArrayOf_AliasAddress & user = mwiArg.m_servedUserNr.m_destinationAddress; 
+    H4501_ArrayOf_AliasAddress & user = mwiArg.m_servedUserNr.m_destinationAddress;
     if (user.GetSize() > 0)
         servedUser = H323GetAliasAddressString(user[0]);
 
@@ -2066,12 +2066,12 @@ PBoolean H4507Handler::OnReceiveMWIInterrogateResult( PASN_OctetString * argumen
     if (response.GetSize() == 0)
         return false;
 
-    PTRACE(6,"H4507\tInterrogate result\n" << response); 
+    PTRACE(6,"H4507\tInterrogate result\n" << response);
 
     H323Connection::MWIInformation mwiInfo;
 
     const H4507_MWIInterrogateResElt & mwiArg = response[0];
-    if (mwiArg.HasOptionalField(H4507_MWIInterrogateResElt::e_msgCentreId) && 
+    if (mwiArg.HasOptionalField(H4507_MWIInterrogateResElt::e_msgCentreId) &&
         mwiArg.m_msgCentreId.GetTag() == H4507_MsgCentreId::e_partyNumber) {
             H225_AliasAddress & msgId = (H225_AliasAddress &)mwiArg.m_msgCentreId;
             mwiInfo.mwiCtrId = H323GetAliasAddressString(msgId);
@@ -2185,7 +2185,7 @@ PBoolean H45011Handler::OnReceivedInvoke(int opcode,
     case H4506_CallWaitingOperations::e_callWaiting:
       OnReceivedCallWaiting(linkedId, argument);
       break;
-    
+
     default:
       currentInvokeId = 0;
       return FALSE;
@@ -2224,7 +2224,7 @@ void H45011Handler::AttachToSetup(H323SignalPDU & pdu)
     default:
       break;
   }
-  
+
   if(ciGenerateState != e_ci_gIdle){
     // Use the call identity from the ctInitiateArg
     serviceAPDU.AttachSupplementaryServiceAPDU(pdu);
@@ -2233,7 +2233,7 @@ void H45011Handler::AttachToSetup(H323SignalPDU & pdu)
     StartciTimer(connection.GetEndPoint().GetCallIntrusionT1());
     ciState = e_ci_WaitAck;
   }
- 
+
   ciSendState = e_ci_sIdle;
   ciGenerateState = e_ci_gIdle;
 }
@@ -2606,10 +2606,10 @@ PBoolean H45011Handler::OnReceivedReturnResult(X880_ReturnResult & returnResult)
     PTRACE(4, "H450.11\tReceived Return Result Invoke ID=" << currentInvokeId);
     switch (ciState) {
       case e_ci_WaitAck:
-        OnReceivedCIRequestResult(); 
+        OnReceivedCIRequestResult();
         break;
       case e_ci_GetCIPL:
-        OnReceivedCIGetCIPLResult(returnResult); 
+        OnReceivedCIGetCIPLResult(returnResult);
         break;
       default :
         break;
@@ -2664,7 +2664,7 @@ void H45011Handler::OnReceivedCIGetCIPLResult(X880_ReturnResult & returnResult)
       // MUST RETURN ciNotification.inv (callForceRelesed) to active call (C) when releasing call !!!!!!
       ciSendState = e_ci_sAttachToReleseComplete;
       ciReturnState = e_ci_rCallForceReleased;
-      
+
       //Send Forced Release Accepted when Answering call to intruding (A)
       conn->SetForcedReleaseAccepted();
       conn->Unlock ();
@@ -2769,7 +2769,7 @@ PBoolean H45011Handler::OnReceivedGetCIPLReturnError(int PTRACE_PARAM(errorCode)
 
   ciSendState = e_ci_sAttachToReleseComplete;
   ciReturnState = e_ci_rCallForceReleased;
-      
+
   //Forced Release Accepted to send when Answering call to intruding (A)
   conn->SetForcedReleaseAccepted();
   conn->Unlock ();
@@ -2907,7 +2907,7 @@ PBoolean H45011Handler::OnReceivedReject(int PTRACE_PARAM(problemType), int PTRA
 
       //Send Ringing to  intruding (A)
       conn->AnsweringCall (conn->AnswerCallPending);
-      conn->SetForcedReleaseAccepted();  
+      conn->SetForcedReleaseAccepted();
       conn->Unlock ();
       break;
     }

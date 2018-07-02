@@ -649,7 +649,7 @@ class H460_Feature : public H225_FeatureDescriptor
       */
       virtual PBoolean FeatureAdvertised(int mtype);
 
-    /** Whether Supports Non-Call Supplimentary Service
+    /** Whether Supports Non-Call Supplementary Service
      */
        virtual PBoolean SupportNonCallService() const { return false; };
 
@@ -1170,7 +1170,7 @@ class H460_FeatureSet : public PObject
     H323EndPoint * GetEndPoint() { return ep; };
 
     /** Determine whether the FeatureSet supports
-        NonCallSupplimentaryServices.
+        NonCallSupplementaryServices.
       */
     virtual PBoolean SupportNonCallService(const H225_FeatureSet & fs) const;
 

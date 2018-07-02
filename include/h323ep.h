@@ -595,8 +595,8 @@ class H323EndPoint : public PObject
                         void * userData = NULL        ///* user data to pass to CreateConnection
      );
 
-     /**Make a Supplimentary call to a remote party.
-        This Function makes a Non Call supplimentary connection (lightweight call) for the purpose
+     /**Make a Supplementary call to a remote party.
+        This Function makes a Non Call supplementary connection (lightweight call) for the purpose
         of delivering H.450 & H.460 non call content such as instant messaging and messagebank messages
        */
       H323Connection * MakeSupplimentaryCall (
@@ -627,7 +627,7 @@ class H323EndPoint : public PObject
       const PString & remoteParty,     ///< Remote party to call
       PString & token,                 ///< String to receive token for connection
       void * userData = NULL,           ///< user data to pass to CreateConnection
-      PBoolean supplimentary = false   ///< Whether the call is a supplimentary call
+      PBoolean supplementary = false   ///< Whether the call is a supplementary call
     );
 
     /**Make a call to a remote party using the specified transport.
@@ -655,7 +655,7 @@ class H323EndPoint : public PObject
       H323Transport * transport,    ///< Transport to use for call.
       PString & token,              ///< String to receive token for connection
       void * userData = NULL,        ///< user data to pass to CreateConnection
-      PBoolean supplimentary = false   ///< Whether the call is a supplimentary call
+      PBoolean supplementary = false   ///< Whether the call is a supplementary call
     );
 
     /**Make a call to a remote party using the specified transport.
@@ -2929,7 +2929,7 @@ class H323EndPoint : public PObject
       H323Transport * transport,     /// Transport to use for call.
       PString & token,               /// String to use/receive token for connection
       void * userData,               /// user data to pass to CreateConnection
-      PBoolean supplimentary = false ///< Whether the call is a supplimentary call
+      PBoolean supplementary = false ///< Whether the call is a supplementary call
     );
 
     // Configuration variables, commonly changed

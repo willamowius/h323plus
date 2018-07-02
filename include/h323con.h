@@ -948,7 +948,7 @@ class H323Connection : public PObject
     };
 
     /** Set the MWI Parameters
-        Use this in H323EndPoint::CreateConnection override to set the call to being a non-call supplimentary MWI
+        Use this in H323EndPoint::CreateConnection override to set the call to being a non-call supplementary MWI
         service with the given parameters
       */
     void SetMWINonCallParameters(
@@ -956,7 +956,7 @@ class H323Connection : public PObject
     );
 
     /** Get the MWI Parameters
-        This is called by the H.450.7 Supplimentary service build to include the parameters in the call
+        This is called by the H.450.7 Supplementary service build to include the parameters in the call
       */
     const MWIInformation & GetMWINonCallParameters();
 
@@ -3038,7 +3038,7 @@ class H323Connection : public PObject
 
     /** Set the call answered flag.
         This will stop the call negotiating process.
-        This is used for long term non-call supplimentary services where there is no media
+        This is used for long term non-call supplementary services where there is no media
       */
     void SetCallAnswered() { callAnswered = TRUE; }
 
