@@ -7111,7 +7111,7 @@ void H323Connection::H46026SetMediaTunneled()
         }
     }
     m_H46019enabled = false;
-#endif
+#endif // H323_H46018
 }
 
 PBoolean H323Connection::H46026IsMediaTunneled()
@@ -7125,7 +7125,7 @@ void H323Connection::OnRemoteVendorInformation(const PString & product, const PS
 {
 
 }
-#endif
+#endif // H323_H460COM
 
 #ifdef H323_H461
 // Normally first message will be a listRequest. ie (4)
@@ -7162,17 +7162,14 @@ H323Connection::H461MessageInfo & H323Connection::GetH461MessageInfo()
 {
     return m_H461Info;
 }
-#endif
+#endif // H323_H461
 
 #endif   // H323_H461
 
 PBoolean H323Connection::OnH245AddressConflict()
 {
-#ifdef H323_H46018
-    return m_H46019enabled;
-#else
-    return false;
-#endif
+    // if the other side requests us to start a H.245 channel, we always do that instead of insisting that we already opened a listener
+    return true;
 }
 
 
