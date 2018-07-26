@@ -94,7 +94,9 @@ PBoolean H245NegMasterSlaveDetermination::Restart()
   PTRACE(3, "H245\tSending MasterSlaveDetermination");
 
   // Begin the Master/Slave determination procedure
-  determinationNumber = PRandom::Number()%16777216;
+  determinationNumber = PRandom::Number() % 16777216;
+  if (tryToBecomSlave)
+    determinationNumber = 0;
   replyTimer = endpoint.GetMasterSlaveDeterminationTimeout();
   state = e_Outgoing;
 
@@ -141,7 +143,7 @@ PBoolean H245NegMasterSlaveDetermination::HandleIncoming(const H245_MasterSlaveD
   else if (pdu.m_terminalType > (unsigned)endpoint.GetTerminalType())
     newStatus = e_DeterminedSlave;
   else {
-    DWORD moduloDiff = (pdu.m_statusDeterminationNumber - determinationNumber)&0xffffff;
+    DWORD moduloDiff = (pdu.m_statusDeterminationNumber - determinationNumber) & 0xffffff;
     if (moduloDiff == 0 || moduloDiff == 0x800000)
       newStatus = e_Indeterminate;
     else if (moduloDiff < 0x800000)

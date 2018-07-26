@@ -84,6 +84,8 @@ class H245NegMasterSlaveDetermination : public H245Negotiator
     PBoolean IsMaster() const     { return status == e_DeterminedMaster; }
     PBoolean IsDetermined() const { return state == e_Idle && status != e_Indeterminate; }
 
+    void SetTryToBecomeSlave(bool val = true) { tryToBecomSlave = val; }
+
   protected:
     PBoolean Restart();
 
@@ -98,6 +100,7 @@ class H245NegMasterSlaveDetermination : public H245Negotiator
 
     DWORD    determinationNumber;
     unsigned retryCount;
+    bool     tryToBecomSlave;
 
     enum MasterSlaveStatus {
       e_Indeterminate, e_DeterminedMaster, e_DeterminedSlave,
