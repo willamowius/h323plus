@@ -53,8 +53,7 @@ PCREATE_PROCESS(SimpleH323Process);
 ///////////////////////////////////////////////////////////////
 
 SimpleH323Process::SimpleH323Process()
-  : PProcess("H323Plus", "simple",
-             MAJOR_VERSION, MINOR_VERSION, BUILD_TYPE, BUILD_NUMBER)
+  : PProcess("H323Plus", "simple", MAJOR_VERSION, MINOR_VERSION, BUILD_TYPE, BUILD_NUMBER)
 {
   endpoint = NULL;
 }
@@ -221,7 +220,7 @@ void SimpleH323Process::Main()
                      PTrace::DateAndTime | PTrace::TraceLevel | PTrace::FileAndLine);
 #endif
 
-  // Create the H.323 endpoint and initialise it
+  // Create the H.323 endpoint and initialize it
   endpoint = new SimpleH323EndPoint;
   if (!endpoint->Initialise(args))
     return;
@@ -235,7 +234,7 @@ void SimpleH323Process::Main()
   }
 
   if (args.HasOption('S')) {
-    // sleep infinitely, usefull for testing purposes
+    // sleep infinitely, useful for testing purposes
     for (;;) {
       PThread::Sleep(1000);
     }
@@ -608,7 +607,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
     return FALSE;
   }
 
-#ifdef H323_TLS   // Initialise TLS
+#ifdef H323_TLS   // Initialize TLS
     bool useTLS = args.HasOption("tls");
     if (useTLS) {
         DisableH245Tunneling(false);  // Tunneling must be used with TLS
@@ -637,7 +636,7 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
     SetGatekeeperPassword(args.GetOptionString('p'));
     cout << "Enabling H.235 security access to gatekeeper." << endl;
     // also set password for H.235.1 on Q.931 messages
-    SetEPCredentials(GetLocalUserName(), args.GetOptionString('p')); // locsl user name should probably be replaced by endpointID by framework
+    SetEPCredentials(GetLocalUserName(), args.GetOptionString('p')); // local user name should probably be replaced by endpointID by framework
   }
 
 #ifdef H323_H46017
@@ -900,45 +899,31 @@ PBoolean SimpleH323EndPoint::OpenVideoChannel(H323Connection & /*connection*/,
                                      : (PVideoDevice *)PVideoOutputDevice::CreateDeviceByName(deviceName);
 
   // codec needs a list of possible formats, otherwise the frame size isn't negotiated properly
-#if PTLIB_VER >= 2110
   if (isEncoding) {
+#if PTLIB_VER >= 2110
       PVideoInputDevice::Capabilities videoCaps;
       if (((PVideoInputDevice *)device)->GetDeviceCapabilities(deviceName, deviceDriver, &videoCaps)) {
           codec.SetSupportedFormats(videoCaps.framesizes);
-      } else {
-        // set fixed list of resolutions for drivers that don't provide a list
-        PVideoInputDevice::Capabilities caps;
-        PVideoFrameInfo cap;
-        cap.SetColourFormat("YUV420P");
-        cap.SetFrameRate(30);
-        // sizes must be from largest to smallest
-        cap.SetFrameSize(1280, 720);
-        caps.framesizes.push_back(cap);
-        cap.SetFrameSize(704, 576);
-        caps.framesizes.push_back(cap);
-        cap.SetFrameSize(352, 288);
-        caps.framesizes.push_back(cap);
-        codec.SetSupportedFormats(caps.framesizes);
-      }
+      } else
+#endif // PTLIB_VER
+    {
+      // set fixed list of resolutions for PTLib < 2.11 and for drivers that don't provide a a list
+      PVideoInputDevice::Capabilities caps;
+      PVideoFrameInfo cap;
+      cap.SetColourFormat("YUV420P");
+      cap.SetFrameRate(30);
+      // sizes must be from largest to smallest
+      cap.SetFrameSize(1280, 720);
+      caps.framesizes.push_back(cap);
+      cap.SetFrameSize(704, 576);
+      caps.framesizes.push_back(cap);
+      cap.SetFrameSize(640, 400);
+      caps.framesizes.push_back(cap);
+      cap.SetFrameSize(352, 288);
+      caps.framesizes.push_back(cap);
+      codec.SetSupportedFormats(caps.framesizes);
+    }
   }
-#else
-  if (isEncoding) {
-    PVideoInputDevice::Capabilities caps;
-    PVideoFrameInfo cap;
-    cap.SetColourFormat("YUV420P");
-    cap.SetFrameRate(30);
-    // sizes must be from largest to smallest
-    cap.SetFrameSize(1280, 720);
-    caps.framesizes.push_back(cap);
-    cap.SetFrameSize(704, 576);
-    caps.framesizes.push_back(cap);
-    cap.SetFrameSize(640, 400);
-    caps.framesizes.push_back(cap);
-    cap.SetFrameSize(352, 288);
-    caps.framesizes.push_back(cap);
-    codec.SetSupportedFormats(caps.framesizes);
-  }
-#endif
 
   if (!device->SetFrameSize(codec.GetWidth(), codec.GetHeight()) ||
       !device->SetFrameRate(codec.GetFrameRate()) ||
@@ -991,45 +976,31 @@ PBoolean SimpleH323EndPoint::OpenExtendedVideoChannel(H323Connection & connectio
   PVideoDevice * device = isEncoding ? (PVideoDevice *)PVideoInputDevice::CreateOpenedDevice(deviceDriver, deviceName)
                                      : (PVideoDevice *)PVideoOutputDevice::CreateOpenedDevice(deviceDriver, deviceName);
   // codec needs a list of possible formats, otherwise the frame size isn't negotiated properly
-#if PTLIB_VER >= 2110
   if (isEncoding) {
+#if PTLIB_VER >= 2110
       PVideoInputDevice::Capabilities videoCaps;
       if (((PVideoInputDevice *)device)->GetDeviceCapabilities(deviceName, deviceDriver, &videoCaps)) {
           codec.SetSupportedFormats(videoCaps.framesizes);
-      } else {
-        // set fixed list of resolutions for drivers that don't provide a list
-        PVideoInputDevice::Capabilities caps;
-        PVideoFrameInfo cap;
-        cap.SetColourFormat("YUV420P");
-        cap.SetFrameRate(30);
-        // sizes must be from largest to smallest
-        cap.SetFrameSize(1280, 720);
-        caps.framesizes.push_back(cap);
-        cap.SetFrameSize(704, 576);
-        caps.framesizes.push_back(cap);
-        cap.SetFrameSize(352, 288);
-        caps.framesizes.push_back(cap);
-        codec.SetSupportedFormats(caps.framesizes);
-      }
+      } else
+#endif // PTLIB_VER
+    {
+      // set fixed list of resolutions for PTLib < 2.11 and for drivers that don't provide a a list
+      PVideoInputDevice::Capabilities caps;
+      PVideoFrameInfo cap;
+      cap.SetColourFormat("YUV420P");
+      cap.SetFrameRate(30);
+      // sizes must be from largest to smallest
+      cap.SetFrameSize(1280, 720);
+      caps.framesizes.push_back(cap);
+      cap.SetFrameSize(704, 576);
+      caps.framesizes.push_back(cap);
+      cap.SetFrameSize(640, 400);
+      caps.framesizes.push_back(cap);
+      cap.SetFrameSize(352, 288);
+      caps.framesizes.push_back(cap);
+      codec.SetSupportedFormats(caps.framesizes);
+    }
   }
-#else
-  if (isEncoding) {
-    PVideoInputDevice::Capabilities caps;
-    PVideoFrameInfo cap;
-    cap.SetColourFormat("YUV420P");
-    cap.SetFrameRate(30);
-    // sizes must be from largest to smallest
-    cap.SetFrameSize(1280, 720);
-    caps.framesizes.push_back(cap);
-    cap.SetFrameSize(704, 576);
-    caps.framesizes.push_back(cap);
-    cap.SetFrameSize(640, 400);
-    caps.framesizes.push_back(cap);
-    cap.SetFrameSize(352, 288);
-    caps.framesizes.push_back(cap);
-    codec.SetSupportedFormats(caps.framesizes);
-  }
-#endif
 
   if (!device->SetFrameSize(codec.GetWidth(), codec.GetHeight()) ||
       !device->SetFrameRate(codec.GetFrameRate()) ||
@@ -1084,7 +1055,7 @@ void SimpleH323EndPoint::OnMediaEncryption(unsigned session, H323Channel::Direct
 #ifdef H323_TLS
 void SimpleH323EndPoint::OnSecureSignallingChannel(bool isSecured)
 {
-	// at this point an endpoint could refuse a call with non-secured signalling connection
+	// at this point an endpoint could refuse a call with non-secured signaling connection
     cout << "TLS " << (isSecured ? "" : "NOT") << " enabled for call." << endl;
 }
 #endif
@@ -1130,7 +1101,4 @@ void SimpleH323Connection::OnUserInputString(const PString & value)
 {
   cout << "User input received: \"" << value << '"' << endl;
 }
-
-
-// End of File ///////////////////////////////////////////////////////////////
 
