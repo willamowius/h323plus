@@ -359,6 +359,10 @@ class H323Codec : public PObject
     */
     void CalculateRTPSendTime(DWORD timeStamp, unsigned rate, PInt64 & sendTime) const;
 
+   /**Get RTP session ID
+    */
+    int GetRTPSessionID() const { return rtpInformation.m_sessionID; }
+
   protected:
     Direction direction;
     OpalMediaFormat mediaFormat;
