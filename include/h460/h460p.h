@@ -264,7 +264,7 @@ struct H323PresenceEndpoint
 
 template<class Msg>
 struct Order {
-  bool operator()(Msg s1, Msg s2) const
+  bool operator()(const Msg & s1, const Msg & s2) const
   {
     return s1.Compare(s2) < 0;
   }
