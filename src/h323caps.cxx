@@ -35,6 +35,7 @@
 #endif
 
 #include <ptlib.h>
+#include <ptclib/random.h>
 
 #include "h323caps.h"
 #include "h323ep.h"
@@ -1818,7 +1819,7 @@ void BuildH239GenericMessageRequest(H239Control & ctrl, H323Connection & connect
     int channelID = connection.GetLogicalChannels()->GetLastChannelNumber()+1;
     ctrl.SetRequestedChanNum(channelID);
     buildGenericInteger(msg[1], H239Control::h239gpChannelId, channelID);
-    buildGenericInteger(msg[2], H239Control::h239gpSymmetryBreaking, 4);
+    buildGenericInteger(msg[2], H239Control::h239gpSymmetryBreaking, PRandom::Number(1, 127));
 }
 
 void BuildH239GenericMessageCommand(H239Control & ctrl, H323Connection & connection, H323ControlPDU & pdu, H239Control::H239SubMessages submesId, PBoolean option)
