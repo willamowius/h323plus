@@ -95,10 +95,13 @@ PBoolean H245NegMasterSlaveDetermination::Restart()
 
   // Begin the Master/Slave determination procedure
   determinationNumber = PRandom::Number() % 16777216;
-  if (tryToBecomSlave)
-    determinationNumber = 0;
   replyTimer = endpoint.GetMasterSlaveDeterminationTimeout();
   state = e_Outgoing;
+
+  if (tryToBecomSlave) {
+    PTRACE(3, "H245\tCheating MasterSlaveDetermination - waiting");
+    return true;
+  }
 
   H323ControlPDU pdu;
   pdu.BuildMasterSlaveDetermination(endpoint.GetTerminalType(), determinationNumber);
@@ -150,6 +153,26 @@ PBoolean H245NegMasterSlaveDetermination::HandleIncoming(const H245_MasterSlaveD
       newStatus = e_DeterminedMaster;
     else
       newStatus = e_DeterminedSlave;
+  }
+
+  if (tryToBecomSlave) {
+    if (newStatus != e_DeterminedSlave) {
+      // find a fitting determinationNumber number
+      if (pdu.m_statusDeterminationNumber < 0x800000) {
+        determinationNumber = 0x800000;
+      } else {
+        determinationNumber = 0;
+      }
+      PTRACE(3, "H245\tCheating MasterSlaveDetermination - changing determination number to " << determinationNumber);
+    }
+    // send MasterSlaveDetermination message now
+    PTRACE(3, "H245\tCheating MasterSlaveDetermination - sending");
+    H323ControlPDU pdu;
+    pdu.BuildMasterSlaveDetermination(endpoint.GetTerminalType(), determinationNumber);
+    connection.WriteControlPDU(pdu);
+
+    // voila - we are slave
+    newStatus = e_DeterminedSlave;
   }
 
   H323ControlPDU reply;
