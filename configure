@@ -4443,6 +4443,8 @@ if test "$enable_h224" = "yes" ; then
 
 $as_echo "#define H323_H224 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.224" >&5
+$as_echo "$as_me: Enabling H.224" >&6;}
 else
   H323_H224=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.224" >&5
@@ -4465,6 +4467,8 @@ if test "$enable_h230" = "yes" ; then
 
 $as_echo "#define H323_H230 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.230" >&5
+$as_echo "$as_me: Enabling H.230" >&6;}
 else
   H323_H230=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.230" >&5
@@ -4487,6 +4491,8 @@ if test "$enable_h235" = "yes" ; then
 
 $as_echo "#define H323_H235 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.235.6" >&5
+$as_echo "$as_me: Enabling H.235.6" >&6;}
 else
   H323_H235=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.235.6" >&5
@@ -4512,6 +4518,8 @@ if test "$enable_h235_256" = "yes" ; then
 
 $as_echo "#define H323_H235_AES256 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.235.6 (256 bit)" >&5
+$as_echo "$as_me: Enabling H.235.6 (256 bit)" >&6;}
 else
   H323_H235_AES256=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.235.6 (256 bit)" >&5
@@ -4534,6 +4542,8 @@ if test "$enable_h239" = "yes" ; then
 
 $as_echo "#define H323_H239 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.239" >&5
+$as_echo "$as_me: Enabling H.239" >&6;}
 else
   H323_H239=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.239" >&5
@@ -4556,6 +4566,8 @@ if test "$enable_h248" = "yes" ; then
 
 $as_echo "#define H323_H248 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.248" >&5
+$as_echo "$as_me: Enabling H.248" >&6;}
 else
   H323_H248=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.248" >&5
@@ -4578,6 +4590,8 @@ if test "$enable_h249" = "yes" ; then
 
 $as_echo "#define H323_H249 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.249" >&5
+$as_echo "$as_me: Enabling H.249" >&6;}
 else
   H323_H249=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.249" >&5
@@ -4600,6 +4614,8 @@ if test "$enable_h341" = "yes" ; then
 
 $as_echo "#define H323_H341 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.341" >&5
+$as_echo "$as_me: Enabling H.341" >&6;}
 else
   H323_H341=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.341" >&5
@@ -4622,6 +4638,8 @@ if test "$enable_h350" = "yes" ; then
 
 $as_echo "#define H323_H350 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.350" >&5
+$as_echo "$as_me: Enabling H.350" >&6;}
 else
   H323_H350=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.350" >&5
@@ -4644,6 +4662,8 @@ if test "$enable_h450" = "yes" ; then
 
 $as_echo "#define H323_H450 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.450" >&5
+$as_echo "$as_me: Enabling H.450" >&6;}
 else
   H323_H450=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.450" >&5
@@ -4666,6 +4686,8 @@ if test "$enable_h460" = "yes" ; then
 
 $as_echo "#define H323_H460 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.460" >&5
+$as_echo "$as_me: Enabling H.460" >&6;}
 else
   H323_H460=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460" >&5
@@ -4686,8 +4708,10 @@ fi
 if test "$enable_h4609" = "yes" ; then
   H323_h4609=1
 
-$as_echo "#define H323_h4609 1" >>confdefs.h
+$as_echo "#define H323_H4609 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.460.9" >&5
+$as_echo "$as_me: Enabling H.460.9" >&6;}
 else
   H323_h4609=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460.9" >&5
@@ -4710,6 +4734,8 @@ if test "$enable_h46017" = "yes" ; then
 
 $as_echo "#define H323_H46017 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.460.17" >&5
+$as_echo "$as_me: Enabling H.460.17" >&6;}
 else
   H323_H46017=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460.17" >&5
@@ -4732,6 +4758,8 @@ if test "$enable_h46018" = "yes" ; then
 
 $as_echo "#define H323_H46018 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.460.18/.19" >&5
+$as_echo "$as_me: Enabling H.460.18/.19" >&6;}
 else
   H323_H46018=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460.18/.19" >&5
@@ -4754,6 +4782,8 @@ if test "$enable_h46019m" = "yes" ; then
 
 $as_echo "#define H323_H46019M 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.460.19 RTP multiplexing" >&5
+$as_echo "$as_me: Enabling H.460.19 RTP multiplexing" >&6;}
 else
   H323_H46019M=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460.19 RTP multiplexing" >&5
@@ -4776,6 +4806,8 @@ if test "$enable_h46023" = "yes" ; then
 
 $as_echo "#define H323_H46023 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.460.23/.24" >&5
+$as_echo "$as_me: Enabling H.460.23/.24" >&6;}
 else
   H323_H46023=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460.23/.24" >&5
@@ -4798,6 +4830,8 @@ if test "$enable_h46025" = "yes" ; then
 
 $as_echo "#define H323_H46025 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.460.25" >&5
+$as_echo "$as_me: Enabling H.460.25" >&6;}
 else
   H323_H46025=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460.25" >&5
@@ -4819,6 +4853,8 @@ if test "$enable_h46026" = "yes" ; then
 
 $as_echo "#define H323_H46026 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.460.26" >&5
+$as_echo "$as_me: Enabling H.460.26" >&6;}
 else
   H323_H46026=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460.26" >&5
@@ -4841,6 +4877,8 @@ if test "$enable_h460p" = "yes" ; then
 
 $as_echo "#define H323_H460P 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.460 Presence" >&5
+$as_echo "$as_me: Enabling H.460 Presence" >&6;}
 else
   H323_H460P=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460 Presence" >&5
@@ -4863,6 +4901,8 @@ if test "$enable_h460pre" = "yes" ; then
 
 $as_echo "#define H323_H460PRE 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.460 PreEmption" >&5
+$as_echo "$as_me: Enabling H.460 PreEmption" >&6;}
 else
   H323_H460PRE=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460 PreEmption" >&5
@@ -4885,6 +4925,8 @@ if test "$enable_h460com" = "yes" ; then
 
 $as_echo "#define H323_H460COM 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.460 Compat Feature" >&5
+$as_echo "$as_me: Enabling H.460 Compat Feature" >&6;}
 else
   H323_H460COM=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460 Compat Feature" >&5
@@ -4907,6 +4949,8 @@ if test "$enable_h460im" = "yes" ; then
 
 $as_echo "#define H323_H460IM 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.460 Text Message" >&5
+$as_echo "$as_me: Enabling H.460 Text Message" >&6;}
 else
   H323_H460IM=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.460 Text Message" >&5
@@ -4929,6 +4973,8 @@ if test "$enable_h461" = "yes" ; then
 
 $as_echo "#define H323_H461 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.461 ASSET Feature" >&5
+$as_echo "$as_me: Enabling H.461 ASSET Feature" >&6;}
 else
   H323_H461=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.461 ASSET Feature" >&5
@@ -4951,6 +4997,8 @@ if test "$enable_h501" = "yes" ; then
 
 $as_echo "#define H323_H501 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling H.501" >&5
+$as_echo "$as_me: Enabling H.501" >&6;}
 else
   H323_H501=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling H.501" >&5
@@ -4975,6 +5023,8 @@ $as_echo "$as_me: Enabling T.38" >&6;}
 
 $as_echo "#define H323_T38 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling T.38" >&5
+$as_echo "$as_me: Enabling T.38" >&6;}
 else
   H323_T38=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling T.38" >&5
@@ -5001,6 +5051,8 @@ else
 
 $as_echo "#define H323_T120 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling T.120" >&5
+$as_echo "$as_me: Enabling T.120" >&6;}
 fi
 
 
@@ -5023,6 +5075,8 @@ else
 
 $as_echo "#define H323_T140 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling T.140" >&5
+$as_echo "$as_me: Enabling T.140" >&6;}
 fi
 
 
@@ -5041,6 +5095,8 @@ if test "$enable_gnugk" = "yes" ; then
 
 $as_echo "#define H323_GNUGK 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling GnuGk NAT" >&5
+$as_echo "$as_me: Enabling GnuGk NAT" >&6;}
 else
   H323_GNUGK=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling GnuGk NAT" >&5
@@ -5063,6 +5119,8 @@ if test "$enable_file" = "yes" ; then
 
 $as_echo "#define H323_FILE 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling File Transfer" >&5
+$as_echo "$as_me: Enabling File Transfer" >&6;}
 else
   H323_FILE=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling File Transfer" >&5
@@ -5091,6 +5149,8 @@ $as_echo "#define H323_AEC 1" >>confdefs.h
 
     STDCCFLAGS="$STDCCFLAGS $AEC_CFLAGS"
     ENDLDLIBS="$ENDLDLIBS $AEC_LIBS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: AEC enabled" >&5
+$as_echo "$as_me: AEC enabled" >&6;}
   fi
 fi
 
@@ -5110,6 +5170,8 @@ if test "$enable_tls" = "yes" ; then
 
 $as_echo "#define H323_TLS 1" >>confdefs.h
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Enabling TLS support" >&5
+$as_echo "$as_me: Enabling TLS support" >&6;}
 else
   H323_TLS=
   { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling TLS support" >&5
