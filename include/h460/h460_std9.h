@@ -44,11 +44,11 @@
 
 #if _MSC_VER
 #pragma once
-#endif 
+#endif
 
 
 class H4609_ArrayOf_RTCPMeasures;
-class H460_FeatureStd9 : public H460_FeatureStd 
+class H460_FeatureStd9 : public H460_FeatureStd
 {
     PCLASSINFO(H460_FeatureStd9,H460_FeatureStd);
 
@@ -64,11 +64,11 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("Std9"); }
     static PStringArray GetFeatureFriendlyName() { return PStringArray("QoS Monitoring-H.460.9"); }
     static int GetPurpose()	{ return FeatureSignal; }
-    virtual int GetFeaturePurpose()  { return H460_FeatureStd9::GetPurpose(); } 
+    virtual int GetFeaturePurpose()  { return H460_FeatureStd9::GetPurpose(); }
 	static PStringArray GetIdentifier() { return PStringArray("9"); }
 
     virtual PBoolean FeatureAdvertised(int mtype);
-	virtual PBoolean CommonFeature() { return qossupport; }
+	virtual PBoolean CommonFeature() { return m_qossupport; }
 
 	// Messages
     virtual PBoolean OnSendAdmissionRequest(H225_FeatureDescriptor & pdu);
@@ -82,10 +82,10 @@ private:
 	PBoolean GenerateReport(H4609_ArrayOf_RTCPMeasures & report);
 	PBoolean WriteStatisticsReport(H460_FeatureStd & msg, PBoolean final);
 
-    H323EndPoint * EP;
-    H323Connection * CON;
-    PBoolean qossupport;
-	PBoolean finalonly;
+    H323EndPoint * m_ep;
+    H323Connection * m_con;
+    PBoolean m_qossupport;
+	PBoolean m_finalonly;
 
 };
 
