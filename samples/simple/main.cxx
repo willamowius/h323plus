@@ -440,6 +440,11 @@ PBoolean SimpleH323EndPoint::Initialise(PArgList & args)
 
   if (MaxVideoFrame == H323Capability::p720MPI)
       cout << "High Definition Webcam detected." << endl << endl;
+
+#ifdef H323_H239
+  autoStartTransmitExtVideo = true; // without H.239 channels don't start
+#endif
+
 #else
   hasVideo = FALSE;
 #endif
