@@ -4861,7 +4861,7 @@ H323Channel * H323Connection::CreateRealTimeLogicalChannel(const H323Capability 
                                                            RTP_QOS * rtpqos)
 {
 #ifdef H323_H235
-  if (PIsDescendant(&capability, H323SecureCapability)) {
+  if (PIsDescendant(&capability, H323SecureCapability) || PIsDescendant(&capability, H323SecureExtendedCapability)) {
         // Override this function to add Secure ExternalRTPChannel Support
         // H323Channel * extChannel = new H323_ExternalRTPChannel(*this, capability, dir, sessionID, externalIpAddress, externalPort);
         // return new H323SecureChannel(this, capability, extChannel);

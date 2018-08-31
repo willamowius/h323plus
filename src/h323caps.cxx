@@ -1930,6 +1930,11 @@ H323ControlExtendedVideoCapability::H323ControlExtendedVideoCapability()
 {
 }
 
+unsigned H323ControlExtendedVideoCapability::GetDefaultSessionID() const
+{
+   return OpalMediaFormat::NonRTPSessionID;
+}
+
 PBoolean H323ControlExtendedVideoCapability::CloseChannel(H323Connection * connection, H323Capability::CapabilityDirection dir)
 {
    SendGenericMessage(H239Control::e_h245command, connection, dir == H323Capability::e_Transmit);

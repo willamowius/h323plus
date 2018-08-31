@@ -530,6 +530,265 @@ class H323SecureCapability : public H323SecureRealTimeCapability
 
 };
 
+////////////////////////////////////////////////////////////////////////////////////////
+/**This class describes the interface to a secure extended codec used to transfer data
+   via the logical channels opened and managed by the H323 control channel.
+
+   An application may create a descendent off this class and override
+   functions as required for descibing a codec.
+ */
+
+class H323SecureExtendedCapability  : public H323ExtendedVideoCapability
+{
+public:
+
+  PCLASSINFO(H323SecureExtendedCapability, H323ExtendedVideoCapability);
+
+  /**@name Constructor/Deconstructor */
+  //@{  
+    /**Constructor
+      */
+         H323SecureExtendedCapability(
+          H323Capability * childCapability,          ///< Child Capability
+          enum H235ChType Ch = H235ChNew,            ///< ChannelType
+          H323Capabilities * capabilities = NULL,    ///< Capabilities reference
+          unsigned secNo = 0,                        ///< Security Capability No
+          PBoolean active = false                    ///< Whether encryption Activated
+          );
+
+      H323SecureExtendedCapability(
+          RTP_QOS * _rtpqos,
+          H323Capability * childCapability
+          );
+
+    /**Deconstructor
+      */
+      ~H323SecureExtendedCapability();
+  //@}
+
+  /**@name Operations */
+  //@{
+    /**Create the channel instance, allocating resources as required.
+     */
+    virtual H323Channel * CreateChannel(
+      H323Connection & connection,    /// Owner connection for channel
+      H323Channel::Directions dir,    /// Direction of channel
+      unsigned sessionID,             /// Session ID for RTP channel
+      const H245_H2250LogicalChannelParameters * param
+                                      /// Parameters for channel
+    ) const;
+
+    /// Get unique capability number.
+    virtual unsigned GetCapabilityNumber() const;
+
+    /// Set unique capability number.
+    virtual void SetCapabilityNumber(unsigned num);
+
+    /// Attach QoS
+    void AttachQoS(RTP_QOS * _rtpqos);
+
+    /// Set the Associated Capability 
+    virtual void SetAssociatedCapability(unsigned  _secNo);
+
+    /// Set the Capability List
+    virtual void SetCapabilityList(H323Capabilities * capabilities);
+
+    /// Set the encryption active
+    virtual void SetEncryptionActive(PBoolean active);
+
+    /// Is encryption active
+    virtual PBoolean IsEncryptionActive() const;
+
+    /// Set Algorithm
+    virtual void SetEncryptionAlgorithm(const PString & alg);
+
+    /// Get Algorithm
+    virtual const PString & GetEncryptionAlgorithm() const;
+
+    /// Get the MediaFormat for this capability.
+    virtual const OpalMediaFormat & GetMediaFormat() const;
+
+    virtual OpalMediaFormat & GetWritableMediaFormat();
+  //@}
+
+  /**@name Overrides from class PObject */
+  //@{
+    /**Create a copy of the object.
+      */
+    virtual PObject * Clone() const;
+
+    /**Compare
+      */
+    PObject::Comparison Compare(const PObject & obj) const;
+  //@}
+
+  /**@name Identification functions */
+  //@{
+    /**Get the main type of the capability.
+       Always returns e_Audio.
+     */
+    virtual MainTypes GetMainType() const;
+
+    /**Get the sub-type of the capability. This is a code dependent on the
+       main type of the capability.
+
+       This returns one of the four possible combinations of mode and speed
+       using the enum values of the protocol ASN H245_AudioCapability class.
+     */
+    virtual unsigned GetSubType() const;
+
+    /**Get Generic Identifier 
+        Default returns PString::Empty
+     */
+    virtual PString GetIdentifier() const;
+
+    /**Get the name of the media data format this class represents.
+     */
+    virtual PString GetFormatName() const;
+  
+   /**Create the Codec */
+    H323Codec * CreateCodec(H323Codec::Direction direction) const;
+  //@}
+
+  /**@name Operations */
+  //@{
+    /**Get the default RTP session.
+       This function gets the default RTP session ID for the capability
+       type. For example audio capabilities return the value
+       RTP_Session::DefaultAudioSessionID etc.
+
+       The default behaviour returns zero, indicating it is not an RTP
+       based capability.
+      */
+    virtual unsigned GetDefaultSessionID() const;
+  //@}
+
+  /**@name Protocol manipulation */
+  //@{
+    /**This function is called whenever and outgoing TerminalCapabilitySet
+       PDU is being constructed for the control channel. It allows the
+       capability to set the PDU fields from information in members specific
+       to the class.
+
+       The default behaviour calls the OnSendingPDU() function with a more
+       specific PDU type.
+     */
+    virtual PBoolean OnSendingPDU(
+      H245_Capability & pdu  /// PDU to set information on
+    ) const;
+
+    /**This function is called whenever and outgoing OpenLogicalChannel
+       PDU is being constructed for the control channel. It allows the
+       capability to set the PDU fields from information in members specific
+       to the class.
+
+       The default behaviour calls the OnSendingPDU() function with a more
+       specific PDU type.
+     */
+    virtual PBoolean OnSendingPDU(
+      H245_DataType & pdu  /// PDU to set information on
+    ) const;
+
+    /**This function is called whenever and outgoing RequestMode
+       PDU is being constructed for the control channel. It allows the
+       capability to set the PDU fields from information in members specific
+       to the class.
+
+       The default behaviour calls the OnSendingPDU() function with a more
+       specific PDU type.
+     */
+    virtual PBoolean OnSendingPDU(
+      H245_ModeElement & pdu  /// PDU to set information on
+    ) const;
+
+    /**This function is called whenever and incoming TerminalCapabilitySet
+       PDU is received on the control channel, and a new H323Capability
+       descendent was created. This completes reading fields from the PDU
+       into the classes members.
+
+       If the function returns FALSE then the received PDU codec description
+       is not supported, so will be ignored.
+       
+       The default behaviour calls the OnReceivedPDU() that takes a
+       H245_AudioCapability and clamps the txFramesInPacket.
+     */
+
+    virtual PBoolean OnReceivedPDU(
+      const H245_Capability & pdu  /// PDU to get information from
+    );
+
+    /**This function is called whenever and incoming OpenLogicalChannel
+       PDU has been used to construct the control channel. It allows the
+       capability to set from the PDU fields, information in members specific
+       to the class.
+       
+       The default behaviour calls the OnReceivedPDU() that takes a
+       H245_AudioCapability and clamps the txFramesInPacket or
+       rxFramesInPacket.
+     */
+    virtual PBoolean OnReceivedPDU(
+      const H245_DataType & pdu,  /// PDU to get information from
+      PBoolean receiver                  /// is receiver OLC
+    );
+
+    /**Compare the sub capability.
+      */
+    virtual PBoolean IsMatch(
+      const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
+    ) const;
+
+    /**Compare the security part of the capability, if applicable.
+      */
+    virtual PBoolean IsSubMatch(
+      const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
+    ) const;
+
+    /**Get Child Capability
+      */
+    H323Capability * GetChildCapability() const { return ChildCapability; }
+
+    /**Validate that the capability is usable given the connection.
+       This checks agains the negotiated protocol version number and remote
+       application to determine if this capability should be used in TCS or
+       OLC pdus.
+
+       The default behaviour returns TRUE.
+      */
+    virtual PBoolean IsUsable(
+      const H323Connection & connection
+      ) const { return ChildCapability->IsUsable(connection); }
+
+    /**Get the capabilities
+      */
+    virtual const H323Capabilities & GetCapabilities() const;
+  //@}
+
+    /**Get the direction for this capability.
+      */ 
+    CapabilityDirection GetCapabilityDirection() const 
+        { return ChildCapability->GetCapabilityDirection(); }
+
+    /**Set the direction for this capability.
+      */
+    void SetCapabilityDirection(
+      CapabilityDirection dir   /// New direction code
+    ) { ChildCapability->SetCapabilityDirection(dir); }
+
+    /// Get the payload type for the capaibility
+    RTP_DataFrame::PayloadTypes GetPayloadType() const 
+        { return ChildCapability->GetPayloadType(); }
+
+  //@}
+
+protected:
+    H323Capability * ChildCapability;    /// Child Capability
+    H235ChType chtype;                   /// Channel Type
+    PBoolean  m_active;                  /// Whether encryption is active
+    H323Capabilities * m_capabilities;   /// Capabilities list
+    unsigned  m_secNo;                   /// Security Capability
+    RTP_QOS * nrtpqos;                   /// RTP QOS
+    PString   m_algorithm;               /// Algorithm for encryption
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////
 /**This class describes the secure interface to a data codec that has channels based on

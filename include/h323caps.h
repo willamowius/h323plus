@@ -2590,6 +2590,10 @@ class H323ExtendedVideoCapability : public H323Capability,
     virtual PBoolean IsMatch(
       const PASN_Choice & subTypePDU  ///<  sub-type PDU of H323Capability
     ) const;
+
+    /**Get the capabilities
+      */
+    virtual const H323Capabilities & GetCapabilities() const;
   //@}
 
   /**@name Operations */
@@ -2610,9 +2614,6 @@ class H323ExtendedVideoCapability : public H323Capability,
       PINDEX simultaneous     ///< The member of the SimultaneousCapabilitySet to add
     );
 
-	/**Get the capabilities
-	  */
-    const H323Capabilities & GetCapabilities() const;
   //@}
 
 protected:
@@ -2670,6 +2671,13 @@ class H323ControlExtendedVideoCapability : public H323ExtendedVideoCapability
 
    virtual PString GetFormatName() const
     { return "H.239 Control"; }
+
+   /**Get the default RTP session.
+       This function gets the default RTP session ID for the capability
+       type. 
+       returns H323Capability::NonRTPSessionID .
+      */
+   virtual unsigned GetDefaultSessionID() const;
 
    virtual PObject * Clone() const
     {
