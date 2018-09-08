@@ -755,7 +755,7 @@ unsigned ResolveMuxIDFromSourceAddress(const muxSocketMap & socMap, muxPortMap &
     PIPSocketAddressAndPort daddr;
     daddr.SetAddress(addr, port);
 
-    map<PString, unsigned>::const_iterator it = portMap.find(daddr.AsString());
+    std::map<PString, unsigned>::const_iterator it = portMap.find(daddr.AsString());
     if (it != portMap.end())
         return it->second;
 
@@ -773,7 +773,7 @@ unsigned ResolveSession(const muxSocketMap & socMap, unsigned muxID, PBoolean rt
     if (PNatMethod_H46019::IsMultiplexed()) {   // Check the send/receive multiplex is around the wrong way
       H46019UDPSocket * mapSocket = NULL;
       unsigned eraseID = 0;
-      for (map<unsigned, PUDPSocket*>::const_iterator i = socMap.begin(); i != socMap.end(); ++i) {
+      for (std::map<unsigned, PUDPSocket*>::const_iterator i = socMap.begin(); i != socMap.end(); ++i) {
           if (((H46019UDPSocket *)i->second)->GetSendMultiplexID() == muxID) {
               mapSocket = (H46019UDPSocket *)i->second;
               eraseID = i->first;
@@ -794,7 +794,7 @@ unsigned ResolveSession(const muxSocketMap & socMap, unsigned muxID, PBoolean rt
 void CloseAllSessions(const muxSocketMap & socMap)
 {
     if (PNatMethod_H46019::IsMultiplexed()) {   // Check the send/receive multiplex is around the wrong way
-        for (map<unsigned, PUDPSocket*>::const_iterator i = socMap.begin(); i != socMap.end(); ++i) {
+        for (std::map<unsigned, PUDPSocket*>::const_iterator i = socMap.begin(); i != socMap.end(); ++i) {
             i->second->Close();
         }
     }
@@ -852,7 +852,7 @@ void PNatMethod_H46019::ReadThread(PThread &, H323_INT)
     if (!muxShutdown && socket && socket->ReadFrom(buffer.GetPointer(), len, addr, port)) {
         int actRead = socket->GetLastReadCount();
         int muxHeader = buffer.GetMultiHeaderSize();
-        map<unsigned, PUDPSocket*>::const_iterator it;
+        std::map<unsigned, PUDPSocket*>::const_iterator it;
         switch (socketRead) {
             case H46019MultiplexSocket::e_rtp:
             {

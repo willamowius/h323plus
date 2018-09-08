@@ -223,8 +223,8 @@ class H46018Handler : public PObject
 
 
 #ifdef H323_H46019M
-typedef map<unsigned, PUDPSocket*> muxSocketMap;
-typedef map<PString, unsigned> muxPortMap;
+typedef std::map<unsigned, PUDPSocket*> muxSocketMap;
+typedef std::map<PString, unsigned> muxPortMap;
 
 class H46019MultiplexSocket;
 #endif
