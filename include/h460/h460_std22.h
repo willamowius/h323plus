@@ -39,17 +39,16 @@
 
 #include <h460/h4601.h>
 
-// Must call the following
 #include <ptlib/plugin.h>
 
 #if _MSC_VER
 #pragma once
-#endif 
+#endif
 
 class H323TransportSecurity;
-class H460_FeatureStd22 : public H460_FeatureStd 
+class H460_FeatureStd22 : public H460_FeatureStd
 {
-    PCLASSINFO(H460_FeatureStd22,H460_FeatureStd);
+    PCLASSINFO(H460_FeatureStd22, H460_FeatureStd);
 
 public:
 
@@ -61,15 +60,15 @@ public:
     // Universal Declarations Every H460 Feature should have the following
     virtual void AttachEndPoint(H323EndPoint * _ep);
     virtual void AttachConnection(H323Connection * _con);
- 
+
     static PStringArray GetFeatureName() { return PStringArray("Std22"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("H.225.0 Sec-H.460.22"); };
     static int GetPurpose();
-    virtual int GetFeaturePurpose()  { return H460_FeatureStd22::GetPurpose(); } 
+    virtual int GetFeaturePurpose()  { return H460_FeatureStd22::GetPurpose(); }
 	static PStringArray GetIdentifier() { return PStringArray("22"); };
 
     virtual PBoolean FeatureAdvertised(int mtype);
-	virtual PBoolean CommonFeature() { return isEnabled; }
+	virtual PBoolean CommonFeature() { return m_isEnabled; }
 
 	// Messages
     virtual PBoolean OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu);
@@ -84,9 +83,9 @@ public:
     virtual void OnReceiveServiceControlIndication(const H225_FeatureDescriptor & pdu);
 
 private:
-    H323EndPoint * EP;
-    H323Connection * CON;
-    PBoolean isEnabled;
+    H323EndPoint * m_ep;
+    H323Connection * m_con;
+    PBoolean m_isEnabled;
 };
 
 // Need to declare for Factory Loader

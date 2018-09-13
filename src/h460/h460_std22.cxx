@@ -65,9 +65,9 @@ H460_FEATURE(Std22);
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 H460_FeatureStd22::H460_FeatureStd22()
-: H460_FeatureStd(22), EP(NULL), CON(NULL), isEnabled(false)
+: H460_FeatureStd(22), m_ep(NULL), m_con(NULL), m_isEnabled(false)
 {
-  PTRACE(6,"Std22\tInstance Created");
+  PTRACE(6, "Std22\tInstance Created");
   FeatureCategory = FeatureSupported;
 }
 
@@ -78,18 +78,18 @@ H460_FeatureStd22::~H460_FeatureStd22()
 
 void H460_FeatureStd22::AttachEndPoint(H323EndPoint * _ep)
 {
-   PTRACE(6,"Std22\tEndpoint Attached");
-   EP = _ep; 
+   PTRACE(6, "Std22\tEndpoint Attached");
+   m_ep = _ep;
 }
 
 void H460_FeatureStd22::AttachConnection(H323Connection * _con)
 {
-   CON = _con;
+   m_con = _con;
 }
 
 int H460_FeatureStd22::GetPurpose()
 {
-    return FeatureBaseClone; 
+    return FeatureBaseClone;
 }
 
 PObject * H460_FeatureStd22::Clone() const
@@ -114,24 +114,23 @@ PBoolean H460_FeatureStd22::FeatureAdvertised(int mtype)
 
 void BuildFeature(H323TransportSecurity * transec, H323EndPoint * ep, H460_FeatureStd & feat, PBoolean address = true)
 {
-
     if (transec->IsTLSEnabled()) {
         const H323Listener * tls = ep->GetListeners().GetTLSListener();
-        if (tls) {
-            H460_FeatureStd sets;
-            sets.Add(Std22_Priority,H460_FeatureContent(1,8)); // Priority 1
-            if (address)
-                sets.Add(Std22_Address,H460_FeatureContent(tls->GetTransportAddress()));
-            feat.Add(Std22_TLS,H460_FeatureContent(sets.GetCurrentTable()));
-        }
+        // TODO: why is there no listener ???
+        //PTRACE(0, "JW BuildFeature TLS enabled listener=" << tls << " addr=" << address);
+        H460_FeatureStd sets;
+        sets.Add(Std22_Priority, H460_FeatureContent(1, 8)); // Priority 1
+        if (tls && address)
+            sets.Add(Std22_Address, H460_FeatureContent(tls->GetTransportAddress()));
+        feat.Add(Std22_TLS, H460_FeatureContent(sets.GetCurrentTable()));
     }
 
     // NOT YET Supported...Disabled in H323TransportSecurity.
     if (transec->IsIPSecEnabled()) {
         H460_FeatureStd sets;
-        sets.Add(Std22_Priority,H460_FeatureContent(2,8)); // Priority 2
-        feat.Add(Std22_IPSec,H460_FeatureContent(sets.GetCurrentTable()));
-    } 
+        sets.Add(Std22_Priority, H460_FeatureContent(2, 8)); // Priority 2
+        feat.Add(Std22_IPSec, H460_FeatureContent(sets.GetCurrentTable()));
+    }
 }
 
 void ReadFeature(H323TransportSecurity * transec, H460_FeatureStd * feat)
@@ -152,18 +151,18 @@ void ReadFeature(H323TransportSecurity * transec, H460_FeatureStd * feat)
 
 PBoolean H460_FeatureStd22::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu)
 {
-    if (!EP || !EP->GetTransportSecurity()->HasSecurity())
+    if (!m_ep || !m_ep->GetTransportSecurity()->HasSecurity())
         return false;
 
 #ifdef H323_H46017
     // H.460.22 is incompatible with H.460.17
-    if (EP->TryingWithH46017() || EP->RegisteredWithH46017())
+    if (m_ep->TryingWithH46017() || m_ep->RegisteredWithH46017())
         return false;
 #endif
 
-    isEnabled = false;
-    H460_FeatureStd feat = H460_FeatureStd(22);  
-    BuildFeature(EP->GetTransportSecurity(), EP, feat, false);
+    m_isEnabled = false;
+    H460_FeatureStd feat = H460_FeatureStd(22);
+    BuildFeature(m_ep->GetTransportSecurity(), m_ep, feat, false);
 
     pdu = feat;
 	return true;
@@ -177,18 +176,20 @@ void H460_FeatureStd22::OnReceiveGatekeeperConfirm(const H225_FeatureDescriptor 
 
 PBoolean H460_FeatureStd22::OnSendRegistrationRequest(H225_FeatureDescriptor & pdu)
 {
-    if (!EP || !EP->GetTransportSecurity()->HasSecurity())
+    PTRACE(0, "JW OnSendRegistrationRequest m_ep=" << m_ep << " sec=" << (m_ep ? m_ep->GetTransportSecurity()->HasSecurity() : false));
+    if (!m_ep || !m_ep->GetTransportSecurity()->HasSecurity())
         return false;
 
 #ifdef H323_H46017
     // H.460.22 is incompatible with H.460.17
-    if (EP->TryingWithH46017() || EP->RegisteredWithH46017())
+    if (m_ep->TryingWithH46017() || m_ep->RegisteredWithH46017())
         return false;
 #endif
 
-    isEnabled = false;
-    H460_FeatureStd feat = H460_FeatureStd(22);  
-    BuildFeature(EP->GetTransportSecurity(), EP, feat);
+    m_isEnabled = false;
+    PTRACE(0, "JW build for RRQ");
+    H460_FeatureStd feat = H460_FeatureStd(22);
+    BuildFeature(m_ep->GetTransportSecurity(), m_ep, feat);
 
     pdu = feat;
 	return true;
@@ -196,16 +197,16 @@ PBoolean H460_FeatureStd22::OnSendRegistrationRequest(H225_FeatureDescriptor & p
 
 void H460_FeatureStd22::OnReceiveRegistrationConfirm(const H225_FeatureDescriptor & pdu)
 {
-   isEnabled = true;
+   m_isEnabled = true;
 }
 
 PBoolean H460_FeatureStd22::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
 {
-    if (!isEnabled)
+    if (!m_isEnabled)
         return false;
 
     H460_FeatureStd feat = H460_FeatureStd(22);
-    BuildFeature(EP->GetTransportSecurity(), EP, feat, false);
+    BuildFeature(m_ep->GetTransportSecurity(), m_ep, feat, false);
     pdu = feat;
 
     return true;
@@ -216,23 +217,23 @@ void H460_FeatureStd22::OnReceiveAdmissionConfirm(const H225_FeatureDescriptor &
 
    H460_FeatureStd * feat = PRemoveConst(H460_FeatureStd,&(const H460_FeatureStd &)pdu);
 
-   H323TransportSecurity m_callSecurity(EP);
-   ReadFeature(&m_callSecurity,feat);
+   H323TransportSecurity m_callSecurity(m_ep);
+   ReadFeature(&m_callSecurity, feat);
 
-   if (CON)
-       CON->SetTransportSecurity(m_callSecurity);
+   if (m_con)
+       m_con->SetTransportSecurity(m_callSecurity);
 }
 
-void H460_FeatureStd22::OnReceiveServiceControlIndication(const H225_FeatureDescriptor & pdu) 
+void H460_FeatureStd22::OnReceiveServiceControlIndication(const H225_FeatureDescriptor & pdu)
 {
    H460_FeatureStd * feat = PRemoveConst(H460_FeatureStd,&(const H460_FeatureStd &)pdu);
 
-   H323TransportSecurity m_callSecurity(EP);
-   ReadFeature(&m_callSecurity,feat);
+   H323TransportSecurity m_callSecurity(m_ep);
+   ReadFeature(&m_callSecurity, feat);
 
 #ifdef H323_H46018
-    if (EP && EP->GetGatekeeper()->GetFeatures().HasFeature(18)) {
-        H460_Feature * feat = EP->GetGatekeeper()->GetFeatures().GetFeature(18);
+    if (m_ep && m_ep->GetGatekeeper()->GetFeatures().HasFeature(18)) {
+        H460_Feature * feat = m_ep->GetGatekeeper()->GetFeatures().GetFeature(18);
         if (feat)
             ((H460_FeatureStd18 *)feat)->SetTransportSecurity(m_callSecurity);
     }
