@@ -7634,14 +7634,14 @@ void H323Connection::OpenExtendedVideoSessionDenied()
 PBoolean H323Connection::OpenExtendedVideoSession(H323ChannelNumber & num, int defaultSession)
 {
   PBoolean applicationOpen = false;
-  // First need to check if extended video channel is openned
+  // First need to check if extended video channel is opened
   if (logicalChannels->FindChannelBySession(OpalMediaFormat::DefaultExtVideoSessionID, false) ||
-      logicalChannels->FindChannelBySession(defaultSession, false)) {// is openned
-    PTRACE(3, "Extended video channel is openned, no need open it");
+      logicalChannels->FindChannelBySession(defaultSession, false)) {// is opened
+    PTRACE(3, "Extended video channel is opened, no need open it");
     return true;
   }
 
-  // extended video channel is not openned, try to open it
+  // extended video channel is not opened, try to open it
   for (PINDEX i = 0; i < localCapabilities.GetSize(); i++) {
     H323Capability & localCapability = localCapabilities[i];
     if ((localCapability.GetMainType() == H323Capability::e_Video) &&
@@ -7650,6 +7650,7 @@ PBoolean H323Connection::OpenExtendedVideoSession(H323ChannelNumber & num, int d
       if (remoteCapability != NULL) {
         PTRACE(3, "H323\tApplication Available " << *remoteCapability);
 
+#ifdef H323_H235
         H323SecureExtendedCapability* secureCap = dynamic_cast<H323SecureExtendedCapability*>(remoteCapability);
         if (secureCap) { // this is case of H.235
           if (logicalChannels->Open(*secureCap, defaultSession, num)) {
@@ -7658,7 +7659,9 @@ PBoolean H323Connection::OpenExtendedVideoSession(H323ChannelNumber & num, int d
           } else {
              PTRACE(2, "H323\tApplication OpenLogicalChannel failed: " << *secureCap);
           }
-        } else { // this is case of normal
+        } else
+#endif
+        { // this is case of normal
           for (PINDEX j = 0; j < remoteCapability->GetSize(); j++) {
             if (logicalChannels->Open(remoteCapability[j], defaultSession, num)) {
                applicationOpen = TRUE;
