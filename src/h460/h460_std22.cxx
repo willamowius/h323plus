@@ -116,8 +116,6 @@ void BuildFeature(H323TransportSecurity * transec, H323EndPoint * ep, H460_Featu
 {
     if (transec->IsTLSEnabled()) {
         const H323Listener * tls = ep->GetListeners().GetTLSListener();
-        // TODO: why is there no listener ???
-        //PTRACE(0, "JW BuildFeature TLS enabled listener=" << tls << " addr=" << address);
         H460_FeatureStd sets;
         sets.Add(Std22_Priority, H460_FeatureContent(1, 8)); // Priority 1
         if (tls && address)
