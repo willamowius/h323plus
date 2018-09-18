@@ -10,7 +10,7 @@ Website: https://www.h323plus.org
 
 Support: https://www.willamowius.com
 
-API documentation: https://www.h323plus.org/api/v1_26_0/annotated.html
+API documentation: https://www.h323plus.org/api/annotated.html
 
 Tutorial: http://toncar.cz/openh323/tut/
 
