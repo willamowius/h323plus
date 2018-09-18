@@ -64,7 +64,7 @@ extern "C" {
 // the IV sequence is always 6 bytes long (2 bytes seq number + 4 bytes timestamp)
 const unsigned int IV_SEQUENCE_LEN = 6;
 
-#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L) || defined(LIBRESSL_VERSION_NUMBER)
 
 inline const unsigned char *EVP_CIPHER_CTX_iv(const EVP_CIPHER_CTX *ctx)
 {
@@ -503,7 +503,7 @@ void H235CryptoEngine::SetKey(PBYTEArray key)
         return;
       }
     } else {
-#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L) || defined(LIBRESSL_VERSION_NUMBER)
       EVP_CIPHER_CTX_cleanup(m_encryptCtx);
       EVP_CIPHER_CTX_init(m_encryptCtx);
 #else
@@ -523,7 +523,7 @@ void H235CryptoEngine::SetKey(PBYTEArray key)
         return;
       }
     } else {
-#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L) || defined(LIBRESSL_VERSION_NUMBER)
       EVP_CIPHER_CTX_cleanup(m_decryptCtx);
       EVP_CIPHER_CTX_init(m_decryptCtx);
 #else

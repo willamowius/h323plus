@@ -1399,7 +1399,7 @@ void H323ListenerTCP::Main()
       new H225TransportThread(endpoint, transport);
   }
 #ifdef P_SSL
-#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L) || defined(LIBRESSL_VERSION_NUMBER)
   ERR_remove_thread_state(NULL);
 #endif
 #endif

@@ -439,7 +439,7 @@ PBoolean H323_TLSContext::SetDHParameters(const PBYTEArray & dh_p, const PBYTEAr
   BIGNUM* g = BN_bin2bn(dh_g, dh_g.GetSize(), NULL);
   if (p != NULL && g != NULL)
   {
-#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L) || defined(LIBRESSL_VERSION_NUMBER)
     dh->p = p;
     dh->g = g;
 #else
@@ -993,7 +993,7 @@ H323EndPoint::~H323EndPoint()
   // OpenSSL Cleanup
   EVP_cleanup();
   CRYPTO_cleanup_all_ex_data();
-#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L) || defined(LIBRESSL_VERSION_NUMBER)
   ERR_remove_thread_state(NULL);
 #endif
   ERR_free_strings();
