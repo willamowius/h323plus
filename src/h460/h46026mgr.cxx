@@ -57,7 +57,6 @@
 
 //-------------------------------------------
 
-const unsigned H46026_ProtocolID[] = { 0,0,8,2250,0,H225_PROTOCOL_VERSION };
 
 static bool GetInfoUUIE(const Q931 & q931, H225_H323_UserInformation & uuie)
 {

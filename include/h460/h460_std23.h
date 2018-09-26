@@ -23,7 +23,7 @@
  * the License for the specific language governing rights and limitations
  * under the License.
  *
- * The Original Code is derived from and used in conjunction with the 
+ * The Original Code is derived from and used in conjunction with the
  * H323Plus Project (www.h323plus.org/)
  *
  * The Initial Developer of the Original Code is ISVO (Asia) Pte Ltd.
@@ -53,7 +53,7 @@ class H460_FeatureStd23;
 class PNatMethod_H46024  : public PSTUNClient
 {
 
-    PCLASSINFO(PNatMethod_H46024, PSTUNClient); 
+    PCLASSINFO(PNatMethod_H46024, PSTUNClient);
 
     public:
         PNatMethod_H46024();
@@ -132,7 +132,7 @@ protected:
         // Do a NAT test
         PSTUNClient::NatTypes NATTest();
 
-        void SetConnectionSockets(PUDPSocket * data,  PUDPSocket * control,  
+        void SetConnectionSockets(PUDPSocket * data,  PUDPSocket * control,
                               H323Connection::SessionInformation * info );
 
 #if PTLIB_VER >= 2130
@@ -158,7 +158,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class H460_FeatureStd23 : public H460_FeatureStd 
+class H460_FeatureStd23 : public H460_FeatureStd
 {
     PCLASSINFO(H460_FeatureStd23, H460_FeatureStd);
 
@@ -173,7 +173,7 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("Std23"); };
     static PStringArray GetFeatureFriendlyName() { return PStringArray("P2Pnat Detect-H.460.23"); };
     static int GetPurpose()    { return FeatureRas; };
-    virtual int GetFeaturePurpose()  { return H460_FeatureStd23::GetPurpose(); } 
+    virtual int GetFeaturePurpose()  { return H460_FeatureStd23::GetPurpose(); }
     static PStringArray GetIdentifier() { return PStringArray("23"); };
 
     virtual PBoolean CommonFeature() { return isEnabled; }
@@ -200,12 +200,12 @@ public:
 protected:
     bool DetectALG(const PIPSocket::Address & detectAddress);
     void StartSTUNTest(const PString & server);
-    
+
 #ifdef H323_UPnP
     bool IsAlternateAvailable(PString & name);
 #endif
     void DelayedReRegistration();
- 
+
 private:
     H323EndPoint *            EP;
     PSTUNClient::NatTypes    natType;
@@ -213,7 +213,7 @@ private:
     PBoolean                 natNotify;
     PBoolean                 alg;
     PBoolean                 isavailable;
-    PBoolean                 isEnabled; 
+    PBoolean                 isEnabled;
     int                      useAlternate;
 
 };
@@ -232,7 +232,7 @@ private:
 
 class H323EndPoint;
 class H323Connection;
-class H460_FeatureStd24 : public H460_FeatureStd 
+class H460_FeatureStd24 : public H460_FeatureStd
 {
     PCLASSINFO(H460_FeatureStd24, H460_FeatureStd);
 
@@ -248,7 +248,7 @@ public:
     static PStringArray GetFeatureName() { return PStringArray("Std24"); }
     static PStringArray GetFeatureFriendlyName() { return PStringArray("P2Pnat Media-H.460.24"); }
     static int GetPurpose()    { return FeatureSignal; }
-    virtual int GetFeaturePurpose()  { return H460_FeatureStd24::GetPurpose(); } 
+    virtual int GetFeaturePurpose()  { return H460_FeatureStd24::GetPurpose(); }
     static PStringArray GetIdentifier() { return PStringArray("24"); }
     virtual PBoolean CommonFeature() { return isEnabled; }
 
@@ -272,7 +272,7 @@ public:
         e_enable,        // Use H.460.24 method (STUN)
         e_AnnexA,       // Disable H.460.24 method but initiate AnnexA
         e_AnnexB,        // Disable H.460.24 method but initiate AnnexB
-        e_disable        // Disable all and remote will do the NAT help        
+        e_disable        // Disable all and remote will do the NAT help
     };
 
     static PString GetH460NATString(H46024NAT method);
@@ -290,13 +290,12 @@ protected:
     void SetNATMethods(H46024NAT state);
     void SetH46019State(bool state);
     PBoolean IsNatSendAvailable();
- 
+
 private:
     H323EndPoint * EP;
     H323Connection * CON;
     NatInstruct natconfig;
     PMutex h460mute;
-    int nattype;
     bool isEnabled;
     bool useAlternate;
 
@@ -313,5 +312,5 @@ inline ostream & operator<<(ostream & strm, H460_FeatureStd24::NatInstruct metho
     #endif
 #endif
 
-#endif 
+#endif
 
