@@ -92,7 +92,7 @@ static PBoolean FindRoutes(const PString & domain, std::vector<std::pair<LookupR
         tls.EnableTLS(true);
         FindSRVRecords(secureRoute, domain, "_h323rs-sec._tcp.");
         for (r = secureRoute.begin(); r != secureRoute.end(); ++r)
-           routes.push_back(std::make_pair(*r,tls));
+           routes.push_back(std::make_pair(*r, tls));
 
         if (!routes.empty())
             return true;
@@ -155,7 +155,7 @@ PBoolean H460_FeatureStd17::Initialise(H323TransportSecurity * sec, const PStrin
 {
  if (!srv) {  // We are not doing SRV lookup
     H323TransportAddress rem(remoteAddr);
-    if (!InitialiseTunnel(rem,*sec)) {
+    if (!sec || !InitialiseTunnel(rem, *sec)) {
          PTRACE(2,"H46017\tTunnel to " << rem << " Failed!");
          return false;
     }
@@ -179,10 +179,10 @@ PBoolean H460_FeatureStd17::Initialise(H323TransportSecurity * sec, const PStrin
     type_routes::const_iterator r;
     for (r = routes.begin(); r != routes.end(); ++r) {
        const LookupRecord & rec = r->first;
-       H323TransportAddress rem(rec.addr,rec.port);
+       H323TransportAddress rem(rec.addr ,rec.port);
        const H323TransportSecurity & sec = r->second;
 
-       if (!InitialiseTunnel(rem,sec)) {
+       if (!InitialiseTunnel(rem, sec)) {
          PTRACE(2,"H46017\t" << (sec.IsTLSEnabled() ? "TLS " : "") << "Tunnel to " << rem << " Failed!");
          continue;
        }
@@ -285,7 +285,7 @@ H46017Transport::H46017Transport(H323EndPoint & endpoint,
                                  PIPSocket::Address binding,
                                  H46017Handler * feat
                 )
-   : H323TransportTCP(endpoint,binding),
+   : H323TransportTCP(endpoint, binding),
      ReadTimeOut(PMaxTimeInterval),
      Feature(feat), remoteShutDown(false), closeTransport(false), m_signalProcess(NULL)
  #ifdef H323_H46026
@@ -422,7 +422,7 @@ PBoolean H46017Transport::HandleH46017RAS(const H323SignalPDU & pdu)
     return false;
 }
 
-// Unfortunately we have to put the signalling messages onto a seperate thread
+// Unfortunately we have to put the signaling messages onto a separate thread
 // as the messages may block for several seconds.
 PBoolean H46017Transport::HandleH46017SignalPDU(H323SignalPDU & pdu)
 {
