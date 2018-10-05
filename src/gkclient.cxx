@@ -279,7 +279,7 @@ PBoolean H323Gatekeeper::OnReceiveGatekeeperConfirm(const H225_GatekeeperConfirm
       H235Authenticator & authenticator = authenticators[i];
       authenticator.Enable(authenticator.IsCapability(gcf.m_authenticationMode,
                                                       gcf.m_algorithmOID));
-      PTRACE(4,"RAS\tAuthenticator " << authenticator.GetName() 
+      PTRACE(4,"RAS\tAuthenticator " << authenticator.GetName()
                       << (authenticator.IsActive() ? " ACTIVATED" : " disabled"));
     }
   }
@@ -367,7 +367,7 @@ PBoolean H323Gatekeeper::RegistrationRequest(PBoolean autoReg)
       }
 
       H323SetTransportAddresses(*transport, listeners, rrq.m_callSignalAddress);
-  } 
+  }
 
   endpoint.SetEndpointTypeInfo(rrq.m_terminalType);
   endpoint.SetVendorIdentifierInfo(rrq.m_endpointVendor);
@@ -375,7 +375,7 @@ PBoolean H323Gatekeeper::RegistrationRequest(PBoolean autoReg)
   if (!IsRegistered()) {  // only send terminal aliases on full registration reset localId
     rrq.IncludeOptionalField(H225_RegistrationRequest::e_terminalAlias);
     H323SetAliasAddresses(endpoint.GetAliasNames(), rrq.m_terminalAlias);
-        for (PINDEX i = 0; i < authenticators.GetSize(); i++) { 
+        for (PINDEX i = 0; i < authenticators.GetSize(); i++) {
             H235Authenticator & authenticator = authenticators[i];
             if (authenticator.UseGkAndEpIdentifiers())
                 authenticator.SetLocalId(localId);
@@ -524,9 +524,9 @@ PBoolean H323Gatekeeper::OnReceiveRegistrationConfirm(const H225_RegistrationCon
     gkRouteAddress = rcf.m_callSignalAddress[0];
 
 #ifdef H323_IPV6
-  // Set to only resolve DNS addresses of the type supported by the signalling address of the gatekeeper. 
+  // Set to only resolve DNS addresses of the type supported by the signalling address of the gatekeeper.
   if (PIPSocket::GetDefaultIpAddressFamily() == AF_INET6 && gkRouteAddress.GetIpVersion() != 6)
-       PIPSocket::SetDefaultIpAddressFamilyV4(); 
+       PIPSocket::SetDefaultIpAddressFamilyV4();
 #endif
 
   willRespondToIRR = rcf.m_willRespondToIRR;
@@ -629,7 +629,7 @@ PBoolean H323Gatekeeper::OnReceiveRegistrationReject(const H225_RegistrationReje
   else if (rrj.HasOptionalField(H225_RegistrationReject::e_altGKInfo))
     SetAlternates(rrj.m_altGKInfo.m_alternateGatekeeper,
                   rrj.m_altGKInfo.m_altGKisPermanent);
-  else 
+  else
       endpoint.OnRegistrationReject();
 
   return TRUE;
@@ -656,7 +656,7 @@ void H323Gatekeeper::RegistrationTimeToLive()
       PTRACE(2, "RAS\tRediscovery failed, retrying in 1 minute.");
       timeToLive = PTimeInterval(0, 0, 1);
       return;
-    } 
+    }
     requiresDiscovery = FALSE;
     moveAlternate = FALSE;
     return;
@@ -789,7 +789,7 @@ PBoolean H323Gatekeeper::OnReceiveUnregistrationRequest(const H225_Unregistratio
     PTRACE(3, "RAS\tReregistering by setting timeToLive");
     reregisterNow = TRUE;
     monitorTickle.Signal();
-  } else 
+  } else
     timeToLive = 0; // zero disables lightweight RRQ
 
   endpoint.OnUnRegisterRequest();
@@ -920,7 +920,7 @@ PBoolean H323Gatekeeper::AdmissionRequest(H323Connection & connection,
   arq.m_callType.SetTag(H225_CallType::e_pointToPoint);
   arq.m_endpointIdentifier = endpointIdentifier;
   arq.m_answerCall = answeringCall;
-  arq.m_canMapAlias = TRUE; // Stack supports receiving a different number in the ACF 
+  arq.m_canMapAlias = TRUE; // Stack supports receiving a different number in the ACF
                             // to the one sent in the ARQ
   arq.m_willSupplyUUIEs = TRUE;
 
@@ -1062,7 +1062,7 @@ PBoolean H323Gatekeeper::AdmissionRequest(H323Connection & connection,
     if (!MakeRequest(request)) {
       response.rejectReason = request.responseResult == Request::RejectReceived
                                                 ? request.rejectReason : UINT_MAX;
-     
+
       return FALSE;
     }
   }
@@ -1217,7 +1217,7 @@ PBoolean H323Gatekeeper::OnReceiveAdmissionReject(const H225_AdmissionReject & a
 }
 
 
-static void SetRasUsageInformation(const H323Connection & connection, 
+static void SetRasUsageInformation(const H323Connection & connection,
                                    H225_RasUsageInformation & usage)
 {
   unsigned time = connection.GetAlertingTime().GetTimeInSeconds();
@@ -1328,7 +1328,7 @@ PBoolean H323Gatekeeper::BandwidthRequest(H323Connection & connection,
   SetRasUsageInformation(connection, brq.m_usageInformation);
 
   Request request(brq.m_requestSeqNum, pdu);
-  
+
   unsigned allocatedBandwidth;
   request.responseInfo = &allocatedBandwidth;
 
@@ -1674,7 +1674,7 @@ void H323Gatekeeper::OnServiceControlSessions(const H225_ArrayOf_ServiceControlS
 #endif // H323_H248
 
 
-void H323Gatekeeper::SetPassword(const PString & password, 
+void H323Gatekeeper::SetPassword(const PString & password,
                                  const PString & username)
 {
   localId = username;
@@ -1696,7 +1696,7 @@ void H323Gatekeeper::MonitorMain(PThread &, H323_INT)
     monitorTickle.Wait();
     if (monitorStop)
       break;
-    if (reregisterNow || 
+    if (reregisterNow ||
                 (!timeToLive.IsRunning() && timeToLive.GetResetTime() > 0)) {
       RegistrationTimeToLive();
       timeToLive.Reset();
@@ -1808,7 +1808,7 @@ void H323Gatekeeper::Connect(const H323TransportAddress & address,
 
 PBoolean H323Gatekeeper::MakeRequest(Request & request)
 {
-  if (PAssertNULL(transport) == NULL)
+  if (transport == NULL)
     return FALSE;
 
   // Set authenticators if not already set by caller
@@ -1834,7 +1834,7 @@ PBoolean H323Gatekeeper::MakeRequest(Request & request)
       requestMutex.Signal();
       return TRUE;
     }
-    
+
     if (request.responseResult != Request::NoResponseReceived &&
         request.responseResult != Request::TryAlternate) {
       // try alternate in those cases and see if it's successful
@@ -1856,18 +1856,18 @@ PBoolean H323Gatekeeper::MakeRequest(Request & request)
             return TRUE;
         }
     }
-    
+
     AlternateInfo * altInfo;
     PIPSocket::Address localAddress;
     WORD localPort = 0;
     do {
       if (alt >= alternates.GetSize()) {
-        if (!alternatePermanent) 
+        if (!alternatePermanent)
           Connect(tempAddr,tempIdentifier);
         requestMutex.Signal();
         return FALSE;
       }
-      
+
       altInfo = &alternates[alt++];
       transport->GetLocalAddress().GetIpAndPort(localAddress,localPort);
       transport->CleanUpOnTermination();
@@ -1879,14 +1879,14 @@ PBoolean H323Gatekeeper::MakeRequest(Request & request)
       gatekeeperIdentifier = altInfo->gatekeeperIdentifier;
       StartChannel();
     } while (altInfo->registrationState == AlternateInfo::RegistrationFailed);
-    
+
     if (altInfo->registrationState == AlternateInfo::NeedToRegister) {
       altInfo->registrationState = AlternateInfo::RegistrationFailed;
       registrationFailReason = TransportError;
       discoveryComplete = FALSE;
       H323RasPDU pdu;
       Request req(SetupGatekeeperRequest(pdu), pdu);
-      
+
       if (H225_RAS::MakeRequest(req)) {
         requestMutex.Signal(); // avoid deadlock...
         if (RegistrationRequest(autoReregister)) {
@@ -1903,7 +1903,7 @@ PBoolean H323Gatekeeper::MakeRequest(Request & request)
     }
   }
 }
-   
+
 H323Gatekeeper::AlternateInfo::AlternateInfo()
 :  priority(0), registrationState(NoRegistrationNeeded)
 {
@@ -1977,9 +1977,9 @@ PBoolean H323Gatekeeper::AlternateInfo::IsValid() const
     H323TransportAddress(rasAddress).GetIpAddress(addr);
 
     if (addr.IsValid()) {
-        if (!addr.IsAny() && !addr.IsLoopback()) 
+        if (!addr.IsAny() && !addr.IsLoopback())
             return true;
-        else 
+        else
             return false;
     }
 
@@ -1993,7 +1993,7 @@ PBoolean H323Gatekeeper::AlternateInfo::IsValid(const H225_AlternateGK & alt)
     PIPSocket::Address addr;
     taddr.GetIpAddress(addr);
 
-    if (addr.IsValid() && !addr.IsAny() && !addr.IsLoopback()) 
+    if (addr.IsValid() && !addr.IsAny() && !addr.IsLoopback())
         return true;
 
     return false;
