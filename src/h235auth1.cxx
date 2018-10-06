@@ -143,8 +143,8 @@ static void truncate(unsigned char*    d1,    /* data to be truncated */
                      char*             d2,    /* truncated data */
                      int               len)   /* length in bytes to keep */
 {
-        int     i ;
-        for (i = 0 ; i < len ; i++) d2[i] = d1[i];
+  for (int i = 0; i < len; i++)
+    d2[i] = d1[i];
 }
 
 /* Function to compute the digest */
@@ -156,10 +156,10 @@ static void hmac_sha (const unsigned char*    k,      /* secret key */
                       int      t)
 {
         EvpMdContext ictx, octx;
-        unsigned char    isha[SHA_DIGESTSIZE], osha[SHA_DIGESTSIZE] ;
-        unsigned char    key[SHA_DIGESTSIZE] ;
-        char    buf[SHA_BLOCKSIZE] ;
-        int     i ;
+        unsigned char isha[SHA_DIGESTSIZE], osha[SHA_DIGESTSIZE];
+        unsigned char key[SHA_DIGESTSIZE];
+        char buf[SHA_BLOCKSIZE];
+        int i;
 
         const EVP_MD * sha1 = EVP_sha1();
 
@@ -171,8 +171,12 @@ static void hmac_sha (const unsigned char*    k,      /* secret key */
                 EVP_DigestUpdate(tctx, k, lk);
                 EVP_DigestFinal_ex(tctx, key, NULL);
 
-                k = key ;
-                lk = SHA_DIGESTSIZE ;
+                k = key;
+                lk = SHA_DIGESTSIZE;
+        } else {
+            // for lk <= SHA_BLOCKSIZE k remains uninitialized, but would get used below
+            PTRACE(1, "H235\thmac_sha failed");
+            return;
         }
 
         /**** Inner Digest ****/
@@ -183,10 +187,10 @@ static void hmac_sha (const unsigned char*    k,      /* secret key */
         for (i = 0 ; i < lk ; ++i) buf[i] = (char)(k[i] ^ 0x36);
         for (i = lk ; i < SHA_BLOCKSIZE ; ++i) buf[i] = 0x36;
 
-        EVP_DigestUpdate(ictx, buf, SHA_BLOCKSIZE) ;
+        EVP_DigestUpdate(ictx, buf, SHA_BLOCKSIZE);
         EVP_DigestUpdate(ictx, d, ld) ;
 
-        EVP_DigestFinal_ex(ictx, isha, NULL) ;
+        EVP_DigestFinal_ex(ictx, isha, NULL);
 
         /**** Outer Digest ****/
 
@@ -197,14 +201,14 @@ static void hmac_sha (const unsigned char*    k,      /* secret key */
         for (i = 0 ; i < lk ; ++i) buf[i] = (char)(k[i] ^ 0x5C);
         for (i = lk ; i < SHA_BLOCKSIZE ; ++i) buf[i] = 0x5C;
 
-        EVP_DigestUpdate(octx, buf, SHA_BLOCKSIZE) ;
-        EVP_DigestUpdate(octx, isha, SHA_DIGESTSIZE) ;
+        EVP_DigestUpdate(octx, buf, SHA_BLOCKSIZE);
+        EVP_DigestUpdate(octx, isha, SHA_DIGESTSIZE);
 
         EVP_DigestFinal_ex(octx, osha, NULL);
 
         /* truncate and print the results */
-        t = t > SHA_DIGESTSIZE ? SHA_DIGESTSIZE : t ;
-        truncate(osha, out, t) ;
+        t = t > SHA_DIGESTSIZE ? SHA_DIGESTSIZE : t;
+        truncate(osha, out, t);
 
 }
 
@@ -274,9 +278,9 @@ PBoolean H2351_Authenticator::GetAuthenticationCapabilities(H235Authenticator::C
 }
 #endif
 
-PBoolean H2351_Authenticator::IsMatch(const PString & identifier) const 
-{ 
-  return (identifier == PString(OID_A)); 
+PBoolean H2351_Authenticator::IsMatch(const PString & identifier) const
+{
+  return (identifier == PString(OID_A));
 }
 
 PString AsString(BYTE* data, unsigned size) {
@@ -285,7 +289,7 @@ PString AsString(BYTE* data, unsigned size) {
 	while (i < size) {
 		result.sprintf("%0x", data[i]);
 		result += " ";
-		i++;	
+		i++;
 	}
 	return result;
 }
@@ -307,13 +311,13 @@ H225_CryptoH323Token * H2351_Authenticator::CreateCryptoToken()
 
   // tokenOID = "A"
   cryptoHashedToken.m_tokenOID = OID_A;
-  
+
   // ClearToken
   H235_ClearToken & clearToken = cryptoHashedToken.m_hashedVals;
-  
+
   // tokenOID = "T"
   clearToken.m_tokenOID  = OID_T;
-  
+
   if (!remoteId) {
     clearToken.IncludeOptionalField(H235_ClearToken::e_generalID);
     clearToken.m_generalID = remoteId;
@@ -323,7 +327,7 @@ H225_CryptoH323Token * H2351_Authenticator::CreateCryptoToken()
     clearToken.IncludeOptionalField(H235_ClearToken::e_sendersID);
     clearToken.m_sendersID = localId;
   }
-  
+
   clearToken.IncludeOptionalField(H235_ClearToken::e_timeStamp);
   clearToken.m_timeStamp = (int)PTime().GetTimeInSeconds();
 
@@ -332,7 +336,7 @@ H225_CryptoH323Token * H2351_Authenticator::CreateCryptoToken()
 
   // H235_HASHED
   H235_HASHED<H235_EncodedGeneralToken> & encodedToken = cryptoHashedToken.m_token;
-  
+
   //  algorithmOID = "U"
   encodedToken.m_algorithmOID = OID_U;
 
@@ -363,34 +367,34 @@ PBoolean H2351_Authenticator::Finalise(PBYTEArray & rawPDU)
       break;
     }
   }
-  
+
   if (foundat == -1) {
     //Can't find the search pattern in the ASN1 packet.
     PTRACE(2, "H235RAS\tPDU not prepared for H2351_Authenticator");
     return FALSE;
   }
-  
+
   // Zero out the search pattern
   memset(&rawPDU[foundat], 0, HASH_SIZE);
 
  /*******
-  * 
+  *
   * generate a HMAC-SHA1 key over the hole message
   * and save it in at (step 3) located position.
   * in the asn1 packet.
   */
-  
+
   char key[HASH_SIZE];
- 
+
   /** make a SHA1 hash before send to the hmac_sha1 */
   unsigned char secretkey[20];
-  
+
   SHA1(password, password.GetLength(), secretkey);
 
   hmac_sha(secretkey, 20, rawPDU.GetPointer(), rawPDU.GetSize(), key, HASH_SIZE);
-  
+
   memcpy(&rawPDU[foundat], key, HASH_SIZE);
-  
+
   PTRACE(4, "H235RAS\tH2351_Authenticator hashing completed: \"" << password << '"');
   return TRUE;
 }
@@ -424,45 +428,45 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
     PTRACE(4, "H235\tNo nested crypto token!");
     return e_Absent;
   }
-  
+
   const H235_CryptoToken & crNested = cryptoToken;
   if (crNested.GetTag() != H235_CryptoToken::e_cryptoHashedToken) {
     PTRACE(4, "H235\tNo crypto hash token!");
     return e_Absent;
   }
-  
+
   const H235_CryptoToken_cryptoHashedToken & crHashed = crNested;
-  
+
   //verify the crypto OIDs
-  
+
   // "A" indicates that the whole messages is used for authentication.
   if (!CheckOID(crHashed.m_tokenOID, OID_A)) {
     PTRACE(2, "H235RAS\tH2351_Authenticator requires all fields are hashed, got OID " << crHashed.m_tokenOID);
     return e_Absent;
   }
-  
+
   // "T" indicates that the hashed token of the CryptoToken is used for authentication.
   if (!CheckOID(crHashed.m_hashedVals.m_tokenOID, OID_T)) {
     PTRACE(2, "H235RAS\tH2351_Authenticator requires ClearToken, got OID " << crHashed.m_hashedVals.m_tokenOID);
     return e_Absent;
   }
-  
+
   // "U" indicates that the HMAC-SHA1-96 alorigthm is used.
   if (!CheckOID(crHashed.m_token.m_algorithmOID, OID_U)) {
     PTRACE(2, "H235RAS\tH2351_Authenticator requires HMAC-SHA1-96, got OID " << crHashed.m_token.m_algorithmOID);
     return e_Absent;
   }
-  
+
   //first verify the timestamp
   PTime now;
   int deltaTime = (int)now.GetTimeInSeconds() - crHashed.m_hashedVals.m_timeStamp;
   if (PABS(deltaTime) > timestampGracePeriod) {
-    PTRACE(1, "H235RAS\tInvalid timestamp ABS(" << now.GetTimeInSeconds() << '-' 
+    PTRACE(1, "H235RAS\tInvalid timestamp ABS(" << now.GetTimeInSeconds() << '-'
            << (int)crHashed.m_hashedVals.m_timeStamp << ") > " << timestampGracePeriod);
     //the time has elapsed
     return e_InvalidTime;
   }
-  
+
   //verify the randomnumber
   if (lastTimestamp == crHashed.m_hashedVals.m_timeStamp &&
       lastRandomSequenceNumber == crHashed.m_hashedVals.m_random) {
@@ -474,9 +478,9 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
       return e_ReplyAttack;
     }
   }
-  
+
   // If has connection then EP Authenticator so CallBack to Check SenderID and Set Password
-  if (connection != NULL) { 
+  if (connection != NULL) {
     // Senders ID is required for signal authentication
     if (!crHashed.m_hashedVals.HasOptionalField(H235_ClearToken::e_sendersID)) {
       PTRACE(1, "H235RAS\tH2351_Authenticator requires senders ID.");
@@ -486,7 +490,7 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
     localId = crHashed.m_hashedVals.m_sendersID.GetValue();
     remoteId = PString::Empty();
     if (!connection->OnCallAuthentication(localId,password)) {
-    PTRACE(1, "H235EP\tH2351_Authenticator Authentication Fail UserName \""  
+    PTRACE(1, "H235EP\tH2351_Authenticator Authentication Fail UserName \""
             << localId << "\", not Authorised. \"");
     return e_BadPassword;
     }
@@ -501,7 +505,7 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
            PTRACE(1, "H235RAS\tH2351_Authenticator requires general ID.");
            return e_Error;
          }
-  
+
          if (crHashed.m_hashedVals.m_generalID.GetValue() != localId) {
            PTRACE(1, "H235RAS\tGeneral ID is \"" << crHashed.m_hashedVals.m_generalID.GetValue()
                  << "\", should be \"" << localId << '"');
@@ -516,7 +520,7 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
       PTRACE(1, "H235RAS\tH2351_Authenticator requires senders ID.");
       return e_Error;
     }
-  
+
     if (crHashed.m_hashedVals.m_sendersID.GetValue() != remoteId && m_checkSendersID) {
       PTRACE(1, "H235RAS\tSenders ID is \"" << crHashed.m_hashedVals.m_sendersID.GetValue()
              << "\", should be \"" << remoteId << '"');
@@ -524,26 +528,26 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
     }
   }
 
-  
+
   /****
   * step 1
   * extract the variable hash and save it
   *
   */
   BYTE RV[HASH_SIZE];
-  
+
   if (crHashed.m_token.m_hash.GetSize() != HASH_SIZE*8) {
     PTRACE(2, "H235RAS\tH2351_Authenticator requires a hash!");
     return e_Error;
   }
-  
+
   const unsigned char *data = crHashed.m_token.m_hash.GetDataPointer();
   memcpy(RV, data, HASH_SIZE);
-  
+
   unsigned char secretkey[20];
   SHA1(password, password.GetLength(), secretkey);
-   
-  
+
+
   /****
   * step 4
   * lookup the variable int the orginal ASN1 packet
@@ -551,7 +555,7 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
   */
   PINDEX foundat = 0;
   bool found = false;
-  
+
   const BYTE * asnPtr = rawPDU;
   PINDEX asnLen = rawPDU.GetSize();
   while (foundat < asnLen - HASH_SIZE) {
@@ -562,7 +566,7 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
         break;
       }
     }
-    
+
     if (!found) {
       if (foundat != 0)
         break;
@@ -570,17 +574,17 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
       PTRACE(2, "H235RAS\tH2351_Authenticator could not locate embedded hash!");
       return e_Error;
     }
-    
+
     found = false;
-    
+
     memset((BYTE *)asnPtr+foundat, 0, HASH_SIZE);
-    
+
     /****
     * step 5
     * generate a HMAC-SHA1 key over the hole packet
     *
     */
-    
+
     char key[HASH_SIZE];
     hmac_sha(secretkey, 20, asnPtr, asnLen, key, HASH_SIZE);
 
@@ -589,11 +593,11 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
     * compare the two keys
     *
     */
-    if (memcmp(key, RV, HASH_SIZE) == 0) { // Keys are the same !! Ok 
+    if (memcmp(key, RV, HASH_SIZE) == 0) { // Keys are the same !! Ok
       // save the values for the next call
       lastRandomSequenceNumber = crHashed.m_hashedVals.m_random;
       lastTimestamp = crHashed.m_hashedVals.m_timeStamp;
-  
+
       return e_OK;
     }
 
@@ -635,7 +639,7 @@ PBoolean H2351_Authenticator::IsSecuredSignalPDU(unsigned signalPDU, PBoolean re
   }
 
   switch (signalPDU) {
-    case H225_H323_UU_PDU_h323_message_body::e_setup:       
+    case H225_H323_UU_PDU_h323_message_body::e_setup:
       return received ? !remoteId.IsEmpty() : !localId.IsEmpty();
 
     default :
