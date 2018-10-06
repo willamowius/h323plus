@@ -733,7 +733,7 @@ H323Channel * H323SecureExtendedCapability::CreateChannel(H323Connection & conne
     session = connection.UseSession(param->m_sessionID, param->m_mediaControlChannel, dir, nrtpqos);
   }
 
-  if (!session) 
+  if (!session)
     return NULL;
 
   return new H323SecureRTPChannel(connection, *this, dir, *session);
@@ -1019,7 +1019,7 @@ H323Codec * H323SecureExtendedCapability::CreateCodec(H323Codec::Direction direc
     return ChildCapability->CreateCodec(direction);
 }
 
-const H323Capabilities & H323SecureExtendedCapability::GetCapabilities() const 
+const H323Capabilities & H323SecureExtendedCapability::GetCapabilities() const
 {
     H323ExtendedVideoCapability* extCap = dynamic_cast<H323ExtendedVideoCapability*>(ChildCapability);
     if (extCap)
@@ -1456,18 +1456,21 @@ PINDEX H235Capabilities::AddAllCapabilities(PINDEX descriptorNum,
                 case OpalMediaFormat::DefaultAudioSessionID:
                 case OpalMediaFormat::DefaultVideoSessionID:
                     newCapability = new H323SecureCapability(*capability, H235ChNew, this);
+                    // TODO: assigning to num twice doesn't make sense
                     num = SetCapability(descriptorNum, simultaneous, newCapability);
                     num = SetCapability(descriptorNum, simultaneous,
                                         new H235SecurityCapability(this, newCapability->GetCapabilityNumber()));
                     break;
                 case OpalMediaFormat::DefaultDataSessionID:
                     newCapability = new H323SecureDataCapability(*capability, H235ChNew, this);
+                    // TODO: assigning to num twice doesn't make sense
                     num = SetCapability(descriptorNum, simultaneous, newCapability);
                     num = SetCapability(descriptorNum, simultaneous,
                                         new H235SecurityCapability(this, newCapability->GetCapabilityNumber()));
                     break;
                 case OpalMediaFormat::DefaultExtVideoSessionID:
                     newCapability = new H323SecureExtendedCapability((H323Capability *)capability->Clone(), H235ChNew, this);
+                    // TODO: assigning to num twice doesn't make sense
                     num = SetCapability(descriptorNum, simultaneous, newCapability);
                     num = SetCapability(descriptorNum, simultaneous,
                                         new H235SecurityCapability(this, newCapability->GetCapabilityNumber()));
