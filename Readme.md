@@ -8,7 +8,7 @@ License: MPL
 
 Website: https://www.h323plus.org
 
-Support: https://www.willamowius.com
+Support: https://www.willamowius.com/h323plus-support.html
 
 API documentation: https://www.h323plus.org/api/annotated.html
 
