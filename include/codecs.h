@@ -363,6 +363,8 @@ class H323Codec : public PObject
     */
     int GetRTPSessionID() const { return rtpInformation.m_sessionID; }
 
+    H323Channel * GetLogicalChannel() { return logicalChannel; }
+
   protected:
     Direction direction;
     OpalMediaFormat mediaFormat;

@@ -437,6 +437,8 @@ class H323Capability : public PObject
     friend ostream & operator<<(ostream & o , CapabilityDirection d);
 #endif
 
+    void SetMediaFormatOptionInteger(const PString & name, int val) { mediaFormat.SetOptionInteger(name, val); }
+
   protected:
     unsigned assignedCapabilityNumber;  /// Unique ID assigned to capability
     CapabilityDirection capabilityDirection;
@@ -574,6 +576,9 @@ class H323GenericCapabilityInfo
     PBoolean IsMatch(
       const H245_GenericCapability & param  ///< Non standard field in PDU received
     ) const;
+
+    void SetMaxBitRate(unsigned bitrate) { maxBitRate = bitrate; }
+
   protected:
     virtual PBoolean OnSendingGenericPDU(
       H245_GenericCapability & pdu,
