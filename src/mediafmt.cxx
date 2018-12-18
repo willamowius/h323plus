@@ -963,7 +963,7 @@ PINDEX OpalMediaFormat::GetOptionEnum(const PString & name, PINDEX dflt) const
 }
 
 
-bool OpalMediaFormat::SetOptionEnum(const PString & name, PINDEX value)
+bool OpalMediaFormat::SetOptionEnum(const PString & name, PINDEX /* value */)
 {
   PWaitAndSignal m(media_format_mutex);
   options.MakeUnique();
