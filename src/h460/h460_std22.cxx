@@ -174,7 +174,6 @@ void H460_FeatureStd22::OnReceiveGatekeeperConfirm(const H225_FeatureDescriptor 
 
 PBoolean H460_FeatureStd22::OnSendRegistrationRequest(H225_FeatureDescriptor & pdu)
 {
-    PTRACE(0, "JW OnSendRegistrationRequest m_ep=" << m_ep << " sec=" << (m_ep ? m_ep->GetTransportSecurity()->HasSecurity() : false));
     if (!m_ep || !m_ep->GetTransportSecurity()->HasSecurity())
         return false;
 
@@ -185,7 +184,6 @@ PBoolean H460_FeatureStd22::OnSendRegistrationRequest(H225_FeatureDescriptor & p
 #endif
 
     m_isEnabled = false;
-    PTRACE(0, "JW build for RRQ");
     H460_FeatureStd feat = H460_FeatureStd(22);
     BuildFeature(m_ep->GetTransportSecurity(), m_ep, feat);
 
