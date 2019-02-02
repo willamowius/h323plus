@@ -1,4 +1,4 @@
-![](https://www.h323plus.org/images/h323plus.png)
+![H323Plus logo](https://www.h323plus.org/images/h323plus.png)
 ## H323Plus
 
 ### Development framework for H.323 applications like softphones or gateways
@@ -15,5 +15,5 @@ API documentation: https://www.h323plus.org/api/annotated.html
 
 Tutorial: http://toncar.cz/openh323/tut/
 
-![](https://img.shields.io/twitter/follow/h323.svg?style=social)
+[![Follow @h323 on Twitter](https://img.shields.io/twitter/follow/h323.svg?style=social)](https://twitter.com/intent/follow?screen_name=h323)
 
