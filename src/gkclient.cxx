@@ -1433,6 +1433,36 @@ PBoolean H323Gatekeeper::SendUnsolicitedIRR(H225_InfoRequestResponse & irr,
   return WritePDU(response);
 }
 
+// convert a socket IP address into an H225 transport address
+static H225_TransportAddress SocketToH225TransportAddr(const PIPSocket::Address & Addr, WORD Port)
+{
+	H225_TransportAddress Result;
+
+	if (Addr.GetVersion() == 6) {
+		Result.SetTag(H225_TransportAddress::e_ip6Address);
+		H225_TransportAddress_ip6Address & ResultIP = Result;
+		for (int i = 0; i < 16; ++i)
+			ResultIP.m_ip[i] = Addr[i];
+		ResultIP.m_port = Port;
+	} else {
+		Result.SetTag(H225_TransportAddress::e_ipAddress);
+		H225_TransportAddress_ipAddress & ResultIP = Result;
+		for (int i = 0; i < 4; ++i)
+			ResultIP.m_ip[i] = Addr[i];
+		ResultIP.m_port = Port;
+	}
+
+	return Result;
+}
+
+// convert a H.323 transport address into an H225 transport address
+static H225_TransportAddress H323ToH225TransportAddress(const H323TransportAddress & h323addr)
+{
+	PIPSocket::Address ip;
+	WORD port = 0;
+    h323addr.GetIpAndPort(ip, port);
+	return SocketToH225TransportAddr(ip, port);
+}
 
 static void AddInfoRequestResponseCall(H225_InfoRequestResponse & irr,
                                        const H323Connection & connection)
@@ -1465,9 +1495,19 @@ static void AddInfoRequestResponseCall(H225_InfoRequestResponse & irr,
     session->OnSendRasInfo(info.m_video[0]);
   }
 
+  info.m_h245.IncludeOptionalField(H225_TransportChannelInfo::e_recvAddress);
+  info.m_h245.IncludeOptionalField(H225_TransportChannelInfo::e_sendAddress);
   const H323Transport & controlChannel = connection.GetControlChannel();
   controlChannel.SetUpTransportPDU(info.m_h245.m_recvAddress, TRUE);
   controlChannel.SetUpTransportPDU(info.m_h245.m_sendAddress, FALSE);
+
+  const H323Transport * sig = connection.GetSignallingChannel();
+  if (sig) {
+    info.m_callSignaling.IncludeOptionalField(H225_TransportChannelInfo::e_recvAddress);
+    info.m_callSignaling.IncludeOptionalField(H225_TransportChannelInfo::e_sendAddress);
+    info.m_callSignaling.m_recvAddress = H323ToH225TransportAddress(sig->GetLocalAddress());
+    info.m_callSignaling.m_sendAddress = H323ToH225TransportAddress(sig->GetRemoteAddress());
+  }
 
   info.m_callType.SetTag(H225_CallType::e_pointToPoint);
   info.m_bandWidth = connection.GetBandwidthUsed();
