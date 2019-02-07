@@ -97,7 +97,7 @@ H323_RTP_UDP::H323_RTP_UDP(const H323Connection & conn,
       meth = conn.GetPreferedNatMethod(remoteAddress);
       if (meth != NULL) {
 #if PTLIB_VER >= 2130
-         PString name = meth->GetMethodName(); 
+         PString name = meth->GetMethodName();
 #else
          PString name = meth->GetName();
 #endif
@@ -349,7 +349,7 @@ PBoolean H323_RTP_UDP::OnReceivedAckPDU(H323_RTPChannel & channel,
 PBoolean H323_RTP_UDP::OnReceivedAckAltPDU(H323_RTPChannel & channel,
       const H245_ArrayOf_GenericInformation & alternate)
 {
-    return connection.OnReceiveOLCGenericInformation(channel.GetSessionID(),alternate, true);
+    return connection.OnReceiveOLCGenericInformation(channel.GetSessionID(), alternate, true);
 }
 
 void H323_RTP_UDP::OnSendRasInfo(H225_RTPSession & info)
@@ -360,20 +360,28 @@ void H323_RTP_UDP::OnSendRasInfo(H225_RTPSession & info)
 
   const H323Transport & transport = connection.GetControlChannel();
 
-  transport.SetUpTransportPDU(info.m_rtpAddress.m_recvAddress, rtp.GetLocalDataPort());
-  H323TransportAddress ta1(rtp.GetRemoteAddress(), rtp.GetRemoteDataPort());
-  ta1.SetPDU(info.m_rtpAddress.m_sendAddress);
+  info.m_rtpAddress.IncludeOptionalField(H225_TransportChannelInfo::e_recvAddress);
+  H323TransportAddress rtp_recv(rtp.GetRemoteAddress(), rtp.GetRemoteDataPort());
+  rtp_recv.SetPDU(info.m_rtpAddress.m_recvAddress);
 
-  transport.SetUpTransportPDU(info.m_rtcpAddress.m_recvAddress, rtp.GetLocalControlPort());
-  H323TransportAddress ta2(rtp.GetRemoteAddress(), rtp.GetRemoteDataPort());
-  ta2.SetPDU(info.m_rtcpAddress.m_sendAddress);
+  info.m_rtpAddress.IncludeOptionalField(H225_TransportChannelInfo::e_sendAddress);
+  H323TransportAddress rtp_send(rtp.GetLocalAddress(), rtp.GetLocalDataPort());
+  rtp_send.SetPDU(info.m_rtpAddress.m_sendAddress);
+
+  info.m_rtcpAddress.IncludeOptionalField(H225_TransportChannelInfo::e_recvAddress);
+  H323TransportAddress rtcp_recv(rtp.GetRemoteAddress(), rtp.GetRemoteControlPort());
+  rtcp_recv.SetPDU(info.m_rtcpAddress.m_recvAddress);
+
+  info.m_rtcpAddress.IncludeOptionalField(H225_TransportChannelInfo::e_sendAddress);
+  H323TransportAddress rtcp_send(rtp.GetLocalAddress(), rtp.GetLocalControlPort());
+  rtcp_send.SetPDU(info.m_rtcpAddress.m_sendAddress);
 }
 
 #if P_QOS
-PBoolean H323_RTP_UDP::WriteTransportCapPDU(H245_TransportCapability & cap, 
+PBoolean H323_RTP_UDP::WriteTransportCapPDU(H245_TransportCapability & cap,
                                             const H323_RTPChannel & channel) const
 {
-    cap.IncludeOptionalField(H245_TransportCapability::e_mediaChannelCapabilities); 
+    cap.IncludeOptionalField(H245_TransportCapability::e_mediaChannelCapabilities);
     H245_ArrayOf_MediaChannelCapability & mediaCaps = cap.m_mediaChannelCapabilities;
     mediaCaps.SetSize(1);
     H245_MediaChannelCapability & mediaCap = mediaCaps[0];
@@ -387,7 +395,7 @@ PBoolean H323_RTP_UDP::WriteTransportCapPDU(H245_TransportCapability & cap,
 
     PQoS & qos = rtp.GetQOS();
     int m_dscp = qos.GetDSCP();
-    if (m_dscp == 0) 
+    if (m_dscp == 0)
         return true;
 
     cap.IncludeOptionalField(H245_TransportCapability::e_qOSCapabilities);
@@ -402,22 +410,22 @@ PBoolean H323_RTP_UDP::WriteTransportCapPDU(H245_TransportCapability & cap,
        PASN_Integer & dscp = Cap.m_dscpValue;
        dscp = m_dscp;
 
-    if (PUDPSocket::SupportQoS(rtp.GetLocalAddress())) {        
+    if (PUDPSocket::SupportQoS(rtp.GetLocalAddress())) {
       Cap.IncludeOptionalField(H245_QOSCapability::e_rsvpParameters);
-      H245_RSVPParameters & rsvp = Cap.m_rsvpParameters; 
+      H245_RSVPParameters & rsvp = Cap.m_rsvpParameters;
 
       if (channel.GetDirection() == H323Channel::IsReceiver) {   /// If Reply don't have to send body
           rtp.EnableGQoS(TRUE);
           return true;
       }
-      rsvp.IncludeOptionalField(H245_RSVPParameters::e_qosMode); 
+      rsvp.IncludeOptionalField(H245_RSVPParameters::e_qosMode);
         H245_QOSMode & mode = rsvp.m_qosMode;
-          if (qos.GetServiceType() == SERVICETYPE_GUARANTEED) 
-             mode.SetTag(H245_QOSMode::e_guaranteedQOS); 
-          else 
-             mode.SetTag(H245_QOSMode::e_controlledLoad); 
-        
-      rsvp.IncludeOptionalField(H245_RSVPParameters::e_tokenRate); 
+          if (qos.GetServiceType() == SERVICETYPE_GUARANTEED)
+             mode.SetTag(H245_QOSMode::e_guaranteedQOS);
+          else
+             mode.SetTag(H245_QOSMode::e_controlledLoad);
+
+      rsvp.IncludeOptionalField(H245_RSVPParameters::e_tokenRate);
            rsvp.m_tokenRate = qos.GetTokenRate();
       rsvp.IncludeOptionalField(H245_RSVPParameters::e_bucketSize);
            rsvp.m_bucketSize = qos.GetTokenBucketSize();
@@ -432,8 +440,8 @@ PBoolean H323_RTP_UDP::WriteTransportCapPDU(H245_TransportCapability & cap,
 void H323_RTP_UDP::ReadTransportCapPDU(const H245_TransportCapability & cap,
                                                     H323_RTPChannel & channel)
 {
-    if (!cap.HasOptionalField(H245_TransportCapability::e_qOSCapabilities)) 
-        return;    
+    if (!cap.HasOptionalField(H245_TransportCapability::e_qOSCapabilities))
+        return;
 
 
     const H245_ArrayOf_QOSCapability QoSs = cap.m_qOSCapabilities;
@@ -451,15 +459,15 @@ void H323_RTP_UDP::ReadTransportCapPDU(const H245_TransportCapability & cap,
         if (PUDPSocket::SupportQoS(rtp.GetLocalAddress())) {
             if (!QoS.HasOptionalField(H245_QOSCapability::e_rsvpParameters)) {
                 PTRACE(4,"TRANS\tDisabling GQoS");
-                rtp.EnableGQoS(FALSE);  
+                rtp.EnableGQoS(FALSE);
                 return;
             }
-        
-            const H245_RSVPParameters & rsvp = QoS.m_rsvpParameters; 
+
+            const H245_RSVPParameters & rsvp = QoS.m_rsvpParameters;
             if (channel.GetDirection() != H323Channel::IsReceiver) {
                 rtp.EnableGQoS(TRUE);
                 return;
-            }      
+            }
             if (rsvp.HasOptionalField(H245_RSVPParameters::e_qosMode)) {
                     const H245_QOSMode & mode = rsvp.m_qosMode;
                     if (mode.GetTag() == H245_QOSMode::e_guaranteedQOS) {
@@ -470,12 +478,12 @@ void H323_RTP_UDP::ReadTransportCapPDU(const H245_TransportCapability & cap,
                         qos.SetDSCP(PQoS::controlledLoadDSCP);
                     }
             }
-            if (rsvp.HasOptionalField(H245_RSVPParameters::e_tokenRate)) 
+            if (rsvp.HasOptionalField(H245_RSVPParameters::e_tokenRate))
                 qos.SetAvgBytesPerSec(rsvp.m_tokenRate);
             if (rsvp.HasOptionalField(H245_RSVPParameters::e_bucketSize))
                 qos.SetMaxFrameBytes(rsvp.m_bucketSize);
             if (rsvp.HasOptionalField(H245_RSVPParameters::e_peakRate))
-                qos.SetPeakBytesPerSec(rsvp.m_peakRate);    
+                qos.SetPeakBytesPerSec(rsvp.m_peakRate);
         }
     }
 }
