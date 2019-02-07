@@ -5104,6 +5104,7 @@ void H323Connection::OnLogicalChannelJitter(H323Channel * channel,
 }
 
 
+// TODO: the bandwidth value returned here is wrong, usually, 1280
 unsigned H323Connection::GetBandwidthUsed() const
 {
   unsigned used = 0;
