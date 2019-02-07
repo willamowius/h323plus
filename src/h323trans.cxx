@@ -823,7 +823,7 @@ H323TransactionServer::H323TransactionServer(H323EndPoint & ep)
   : ownerEndPoint(ep)
 {
   usingAllInterfaces = FALSE;
-  monitorThread = NULL;	// TODO: is this thread used anywhere ?
+  monitorThread = NULL;
 }
 
 
