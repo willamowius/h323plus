@@ -1498,15 +1498,15 @@ static void AddInfoRequestResponseCall(H225_InfoRequestResponse & irr,
   info.m_h245.IncludeOptionalField(H225_TransportChannelInfo::e_recvAddress);
   info.m_h245.IncludeOptionalField(H225_TransportChannelInfo::e_sendAddress);
   const H323Transport & controlChannel = connection.GetControlChannel();
-  controlChannel.SetUpTransportPDU(info.m_h245.m_recvAddress, TRUE);
-  controlChannel.SetUpTransportPDU(info.m_h245.m_sendAddress, FALSE);
+  controlChannel.SetUpTransportPDU(info.m_h245.m_recvAddress, false);
+  controlChannel.SetUpTransportPDU(info.m_h245.m_sendAddress, true);
 
   const H323Transport * sig = connection.GetSignallingChannel();
   if (sig) {
     info.m_callSignaling.IncludeOptionalField(H225_TransportChannelInfo::e_recvAddress);
     info.m_callSignaling.IncludeOptionalField(H225_TransportChannelInfo::e_sendAddress);
-    info.m_callSignaling.m_recvAddress = H323ToH225TransportAddress(sig->GetLocalAddress());
-    info.m_callSignaling.m_sendAddress = H323ToH225TransportAddress(sig->GetRemoteAddress());
+    info.m_callSignaling.m_recvAddress = H323ToH225TransportAddress(sig->GetRemoteAddress());
+    info.m_callSignaling.m_sendAddress = H323ToH225TransportAddress(sig->GetLocalAddress());
   }
 
   info.m_callType.SetTag(H225_CallType::e_pointToPoint);
