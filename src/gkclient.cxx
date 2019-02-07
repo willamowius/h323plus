@@ -1440,6 +1440,8 @@ static void AddInfoRequestResponseCall(H225_InfoRequestResponse & irr,
   irr.IncludeOptionalField(H225_InfoRequestResponse::e_perCallInfo);
 
   PINDEX sz = irr.m_perCallInfo.GetSize();
+  if (sz > 100) // don't include more than 100 calls in IRR to keep message size reasonable
+    return;
   if (!irr.m_perCallInfo.SetSize(sz+1))
     return;
 
@@ -1451,18 +1453,21 @@ static void AddInfoRequestResponseCall(H225_InfoRequestResponse & irr,
   info.IncludeOptionalField(H225_InfoRequestResponse_perCallInfo_subtype::e_originator);
   info.m_originator = !connection.HadAnsweredCall();
 
-  H323_RTP_Session * session = connection.GetSessionCallbacks(RTP_Session::DefaultAudioSessionID);
-  if (session != NULL) {
-    info.IncludeOptionalField(H225_InfoRequestResponse_perCallInfo_subtype::e_audio);
-    info.m_audio.SetSize(1);
-    session->OnSendRasInfo(info.m_audio[0]);
-  }
+  // include details RTP info only for the first 10 calls to keep message size reasonable
+  if (sz <= 10) {
+    H323_RTP_Session * session = connection.GetSessionCallbacks(RTP_Session::DefaultAudioSessionID);
+    if (session != NULL) {
+      info.IncludeOptionalField(H225_InfoRequestResponse_perCallInfo_subtype::e_audio);
+      info.m_audio.SetSize(1);
+      session->OnSendRasInfo(info.m_audio[0]);
+    }
 
-  session = connection.GetSessionCallbacks(RTP_Session::DefaultVideoSessionID);
-  if (session != NULL) {
-    info.IncludeOptionalField(H225_InfoRequestResponse_perCallInfo_subtype::e_video);
-    info.m_video.SetSize(1);
-    session->OnSendRasInfo(info.m_video[0]);
+    session = connection.GetSessionCallbacks(RTP_Session::DefaultVideoSessionID);
+    if (session != NULL) {
+      info.IncludeOptionalField(H225_InfoRequestResponse_perCallInfo_subtype::e_video);
+      info.m_video.SetSize(1);
+      session->OnSendRasInfo(info.m_video[0]);
+    }
   }
 
   info.m_h245.IncludeOptionalField(H225_TransportChannelInfo::e_recvAddress);
