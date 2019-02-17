@@ -113,35 +113,36 @@ void BuildEncryptionSync(H245_EncryptionSync & sync, const H323Channel & chan, c
 PBoolean ReadEncryptionSync(const H245_EncryptionSync & sync, H323Channel & chan, H235Session & session)
 {
     H235_H235Key h235key;
-    sync.m_h235Key.DecodeSubType(h235key);
 
-    chan.SetDynamicRTPPayloadType(sync.m_synchFlag);
+    if (sync.m_h235Key.DecodeSubType(h235key)) {
+        chan.SetDynamicRTPPayloadType(sync.m_synchFlag);
 
-    switch (h235key.GetTag()) {
-        case H235_H235Key::e_secureChannel:
-            PTRACE(4,"H235Key\tSecureChannel not supported");
-            return false;
-        case H235_H235Key::e_secureChannelExt:
-            PTRACE(4,"H235Key\tSecureChannelExt not supported");
-            return false;
-        case H235_H235Key::e_sharedSecret:
-            PTRACE(4,"H235Key\tShared Secret not supported");
-            return false;
-        case H235_H235Key::e_certProtectedKey:
-            PTRACE(4,"H235Key\tProtected Key not supported");
-            return false;
-        case H235_H235Key::e_secureSharedSecret:
-            {
-                const H235_V3KeySyncMaterial & v3data = h235key;
-                if (!v3data.HasOptionalField(H235_V3KeySyncMaterial::e_algorithmOID)) {
-                    // the algo is required, but is really redundant
-                    PTRACE(3, "H235\tWarning: No algo set in encryptionSync");
+        switch (h235key.GetTag()) {
+            case H235_H235Key::e_secureChannel:
+                PTRACE(4,"H235Key\tSecureChannel not supported");
+                return false;
+            case H235_H235Key::e_secureChannelExt:
+                PTRACE(4,"H235Key\tSecureChannelExt not supported");
+                return false;
+            case H235_H235Key::e_sharedSecret:
+                PTRACE(4,"H235Key\tShared Secret not supported");
+                return false;
+            case H235_H235Key::e_certProtectedKey:
+                PTRACE(4,"H235Key\tProtected Key not supported");
+                return false;
+            case H235_H235Key::e_secureSharedSecret:
+                {
+                    const H235_V3KeySyncMaterial & v3data = h235key;
+                    if (!v3data.HasOptionalField(H235_V3KeySyncMaterial::e_algorithmOID)) {
+                        // the algo is required, but is really redundant
+                        PTRACE(3, "H235\tWarning: No algo set in encryptionSync");
+                    }
+                    if (v3data.HasOptionalField(H235_V3KeySyncMaterial::e_encryptedSessionKey)) {
+                      PBYTEArray mediaKey = v3data.m_encryptedSessionKey;
+                      return session.DecodeMediaKey(mediaKey);
+                    }
                 }
-                if (v3data.HasOptionalField(H235_V3KeySyncMaterial::e_encryptedSessionKey)) {
-                  PBYTEArray mediaKey = v3data.m_encryptedSessionKey;
-                  return session.DecodeMediaKey(mediaKey);
-                }
-            }
+        }
     }
     return false;
 }

@@ -5757,24 +5757,24 @@ bool GetUnsignedGenericMessage(unsigned id, const H245_ArrayOf_GenericParameter 
 
 bool GetStringGenericOctetString(unsigned id, const H245_ArrayOf_GenericParameter & params, PString & str)
 {
-   for (PINDEX i=0; i < params.GetSize(); i++)
-   {
-      const H245_GenericParameter & param = params[i];
-      const H245_ParameterIdentifier & idm = param.m_parameterIdentifier;
-      if (idm.GetTag() == H245_ParameterIdentifier::e_standard) {
-         const PASN_Integer & idx = idm;
-          if (idx == id) {
-             const H245_ParameterValue & genvalue = params[i].m_parameterValue;
-             if (genvalue.GetTag() == H245_ParameterValue::e_octetString) {
-                   const PASN_OctetString & valg = genvalue;
-                   PASN_IA5String data;
-                   valg.DecodeSubType(data);
-                   str = data;
-                   return true;
-             }
-         }
-      }
-   }
+    for (PINDEX i = 0; i < params.GetSize(); i++) {
+        const H245_GenericParameter & param = params[i];
+        const H245_ParameterIdentifier & idm = param.m_parameterIdentifier;
+        if (idm.GetTag() == H245_ParameterIdentifier::e_standard) {
+            const PASN_Integer & idx = idm;
+            if (idx == id) {
+                const H245_ParameterValue & genvalue = params[i].m_parameterValue;
+                if (genvalue.GetTag() == H245_ParameterValue::e_octetString) {
+                    const PASN_OctetString & valg = genvalue;
+                    PASN_IA5String data;
+                    if (valg.DecodeSubType(data)) {
+                        str = data;
+                        return true;
+                    }
+                }
+            }
+        }
+    }
     PTRACE(4,"H46024A\tError finding String parameter " << id);
     return false;
 }
@@ -5803,25 +5803,25 @@ bool GetUnsignedGeneric(unsigned id, const H245_ArrayOf_GenericParameter & param
 
 bool GetTransportGenericOctetString(unsigned id, const H245_ArrayOf_GenericParameter & params, H323TransportAddress & str)
 {
-   for (PINDEX i=0; i < params.GetSize(); i++)
-   {
-      const H245_GenericParameter & param = params[i];
-      const H245_ParameterIdentifier & idm = param.m_parameterIdentifier;
-      if (idm.GetTag() == H245_ParameterIdentifier::e_standard) {
-         const PASN_Integer & idx = idm;
-          if (idx == id) {
-             const H245_ParameterValue & genvalue = params[i].m_parameterValue;
-             if (genvalue.GetTag() == H245_ParameterValue::e_octetString) {
-                   const PASN_OctetString & valg = genvalue;
-                   H245_TransportAddress addr;
-                   valg.DecodeSubType(addr);
-                   str = H323TransportAddress(addr);
-                   return true;
-             }
-         }
-      }
-   }
-   return false;
+    for (PINDEX i = 0; i < params.GetSize(); i++) {
+        const H245_GenericParameter & param = params[i];
+        const H245_ParameterIdentifier & idm = param.m_parameterIdentifier;
+        if (idm.GetTag() == H245_ParameterIdentifier::e_standard) {
+            const PASN_Integer & idx = idm;
+            if (idx == id) {
+                const H245_ParameterValue & genvalue = params[i].m_parameterValue;
+                if (genvalue.GetTag() == H245_ParameterValue::e_octetString) {
+                    const PASN_OctetString & valg = genvalue;
+                    H245_TransportAddress addr;
+                    if (valg.DecodeSubType(addr)) {
+                        str = H323TransportAddress(addr);
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
 }
 
 H245_GenericParameter & BuildGenericOctetString(H245_GenericParameter & param, unsigned id, const PASN_Object & data)
@@ -5899,14 +5899,14 @@ bool DecodeH46024BRequest(unsigned id, const H245_ArrayOf_GenericParameter & par
              const H245_ParameterValue & genvalue = params[i].m_parameterValue;
              if (genvalue.GetTag() == H245_ParameterValue::e_octetString) {
                     const PASN_OctetString & xval = genvalue;
-                    xval.DecodeSubType(val);
-                    return true;
+                    if (xval.DecodeSubType(val))
+                      return true;
              }
           }
       }
    }
-    PTRACE(4,"H46024B\tError finding H46024BRequest " << id);
-    return false;
+   PTRACE(4,"H46024B\tError finding H46024BRequest " << id);
+   return false;
 }
 
 void BuildH46024BResponse(H323ControlPDU & pdu)
