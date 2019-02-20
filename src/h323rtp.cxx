@@ -358,8 +358,6 @@ void H323_RTP_UDP::OnSendRasInfo(H225_RTPSession & info)
   info.m_ssrc = rtp.GetSyncSourceOut();
   info.m_cname = rtp.GetCanonicalName();
 
-  const H323Transport & transport = connection.GetControlChannel();
-
   info.m_rtpAddress.IncludeOptionalField(H225_TransportChannelInfo::e_recvAddress);
   H323TransportAddress rtp_recv(rtp.GetRemoteAddress(), rtp.GetRemoteDataPort());
   rtp_recv.SetPDU(info.m_rtpAddress.m_recvAddress);
