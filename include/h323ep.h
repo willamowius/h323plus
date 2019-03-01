@@ -1769,12 +1769,12 @@ class H323EndPoint : public PObject
       PBoolean mode ///< New default mode
     ) { disableH245Tunneling = mode; }
 
-    /**Get the default H.245 tunneling mode.
+    /**Check if H.245 messages are sent in Setup.
       */
     PBoolean IsH245inSetupDisabled() const
       { return disableH245inSetup; }
 
-    /**Set the default H.245 tunneling mode.
+    /**Set the default for sending H.245 in Setup.
       */
     void DisableH245inSetup(
       PBoolean mode ///< New default mode
