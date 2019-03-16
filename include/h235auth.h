@@ -52,7 +52,7 @@ class PSSLCertificate;
 #include <ptlib/pluginmgr.h>
 #include <list>
 
-/** This abtract class embodies an H.235 authentication mechanism.
+/** This abstract class embodies an H.235 authentication mechanism.
     NOTE: descendants must have a Clone() function for correct operation.
 */
 #ifdef H323_H235
@@ -204,7 +204,7 @@ class H235Authenticator : public PObject
                                          PString & description        ///< Human Description
                                          );
 
-    virtual void ExportParameters(const PFilePath & /*path*/) {}  // export Parameters to file
+    virtual void ExportParameters(const PFilePath & /*path*/) { }  // export Parameters to file
 
 
   protected:
@@ -272,8 +272,8 @@ PDECLARE_LIST(H235Authenticators, H235Authenticator)
 
 #ifdef H323_H235
     struct DH_Data {
-        DH_Data() 
-         : m_gData(0) {};
+        DH_Data()
+         : m_gData(0) { };
 
         PString     m_OID;
         PBYTEArray  m_pData;
