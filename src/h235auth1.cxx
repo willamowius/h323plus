@@ -173,10 +173,6 @@ static void hmac_sha (const unsigned char*    k,      /* secret key */
 
                 k = key;
                 lk = SHA_DIGESTSIZE;
-        } else {
-            // for lk <= SHA_BLOCKSIZE k remains uninitialized, but would get used below
-            PTRACE(1, "H235\thmac_sha failed");
-            return;
         }
 
         /**** Inner Digest ****/
