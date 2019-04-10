@@ -77,7 +77,7 @@ negotiations.
 \section classes Class hierarchy
 
 H323Plus provides a rich class hierarchy that allows access to most of the functions
-requires for H.323 endponts. The list below is not intended an exhaustive list of the
+requires for H.323 endpoints. The list below is not intended an exhaustive list of the
 classes available (which is available here) but is good starting point for finding out
 more information on the various functions available
 
@@ -89,7 +89,7 @@ more information on the various functions available
 \li H323Codec - the base class for all codecs. See also H323AudioCode and H323VideoCodec
 \li H323SignalPDU - the base class for all H.323 Protocol Data Units (PDU)
 \li H323DataPDU - the base class for all H.323 Protocol Data Units (PDU)
-\li H323GatekeeperServer - implements a H.323 Gatekeeper, i.e. a server for H.225 RAS protocl
+\li H323GatekeeperServer - implements a H.323 Gatekeeper, i.e. a server for H.225 RAS protocol
 
 \subsection daattypes Data types
 \li H225_AliasAddress - defines a H.225 aliasAddress object
