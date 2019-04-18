@@ -1884,9 +1884,11 @@ PBoolean H323Gatekeeper::MakeRequest(Request & request)
       }
 
       altInfo = &alternates[alt++];
-      transport->GetLocalAddress().GetIpAndPort(localAddress,localPort);
-      transport->CleanUpOnTermination();
-      delete transport;
+      if (transport) {
+        transport->GetLocalAddress().GetIpAndPort(localAddress,localPort);
+        transport->CleanUpOnTermination();
+        delete transport;
+      }
 
       transport = new H323TransportUDP(endpoint,localAddress,localPort);
       transport->SetRemoteAddress (altInfo->rasAddress);
