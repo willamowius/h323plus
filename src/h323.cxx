@@ -4753,6 +4753,9 @@ H323Channel * H323Connection::CreateLogicalChannel(const H245_OpenLogicalChannel
   }
 
   unsigned sessionID = param->m_sessionID;
+
+#ifdef H323_VIDEO
+#ifdef H323_H239
   if (sessionID == 0) {
     if (IsH245Master()) {
       // as master we assign the session ID
@@ -4765,8 +4768,6 @@ H323Channel * H323Connection::CreateLogicalChannel(const H245_OpenLogicalChannel
     }
   }
 
-#ifdef H323_VIDEO
-#ifdef H323_H239
   if (!startingFast &&
       open.HasOptionalField(H245_OpenLogicalChannel::e_genericInformation)) {  // check for extended Video OLC
 
