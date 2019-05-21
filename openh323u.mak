@@ -24,41 +24,41 @@
 # $Id$
 #
 
-PTLIBDIR	= /home/jan/tmp/2.2/ptlib
+PTLIBDIR	= @PTLIBDIR@
 ifndef OPENH323DIR
-OPENH323DIR	= /home/jan/tmp/2.2/h323plus
+OPENH323DIR	= @OPENH323DIR@
 endif
-STDCCFLAGS	+= 
-LDFLAGS		+= 
-LDLIBS		+= 
-ENDLDLIBS	:=  $(ENDLDLIBS)
+STDCCFLAGS	+= @STDCCFLAGS@
+LDFLAGS		+= @LDFLAGS@
+LDLIBS		+= @LDLIBS@
+ENDLDLIBS	:= @ENDLDLIBS@ $(ENDLDLIBS)
 
-HAS_PTLIB_LIB_MAK=1
+HAS_PTLIB_LIB_MAK=@HAS_PTLIB_LIB_MAK@
 
-NOAUDIOCODECS        = 
-NOVIDEO	             = 
-NOTRACE	             = 
-H323_H224	     = 1
-H323_H230	     = 1
-H323_H235	     = 
-H323_H239	     = 
-H323_H248	     = 1
-H323_H249	     = 
-H323_H341	     = 1
-H323_H350	     = 1
-H323_H450	     = 1
-H323_H460        = 1
-H323_H46018      = 1
-H323_H46019M	 = 1
-H323_H46023      = 1
-H323_H501	     = 1
-H323_T38	     = 1
-H323_T120	     = 
-H323_T140	     = 
-H323_AEC	     = 
-H323_GNUGK	     = 1
-H323_FILE	     = 1
-H323_TLS	     = 1
+NOAUDIOCODECS        = @NOAUDIOCODECS@
+NOVIDEO	             = @NOVIDEO@
+NOTRACE	             = @NOTRACE@
+H323_H224	     = @H323_H224@
+H323_H230	     = @H323_H230@
+H323_H235	     = @H323_H235@
+H323_H239	     = @H323_H239@
+H323_H248	     = @H323_H248@
+H323_H249	     = @H323_H249@
+H323_H341	     = @H323_H341@
+H323_H350	     = @H323_H350@
+H323_H450	     = @H323_H450@
+H323_H460        = @H323_H460@
+H323_H46018      = @H323_H46018@
+H323_H46019M	 = @H323_H46019M@
+H323_H46023      = @H323_H46023@
+H323_H501	     = @H323_H501@
+H323_T38	     = @H323_T38@
+H323_T120	     = @H323_T120@
+H323_T140	     = @H323_T140@
+H323_AEC	     = @H323_AEC@
+H323_GNUGK	     = @H323_GNUGK@
+H323_FILE	     = @H323_FILE@
+H323_TLS	     = @H323_TLS@
 
 
 ###### new ptlib
@@ -72,19 +72,19 @@ ifdef HAS_SASL2
 HAS_OPENSSL = 1
 endif
 
-MAJOR_VERSION =1
-MINOR_VERSION =27
+MAJOR_VERSION =@MAJOR_VERSION@
+MINOR_VERSION =@MINOR_VERSION@
 #BUILD_TYPE    =.
-BUILD_NUMBER  =1
+BUILD_NUMBER  =@BUILD_NUMBER@
 
 #export to GK
-export target_os=
-export target_cpu=
+export target_os=@target_os@
+export target_cpu=@target_cpu@
 export OSTYPE=$(target_os)
 export PLATFORM_TYPE=$(target_cpu)
-export PTLIB_CXXFLAGS=
-export PT_LIBDIR=/lib__
-export PW_LIBDIR=/lib__
+export PTLIB_CXXFLAGS=@PTLIB_CXXFLAGS@
+export PT_LIBDIR=@PT_LIBDIR@/lib_@target_os@_@target_cpu@
+export PW_LIBDIR=@PT_LIBDIR@/lib_@target_os@_@target_cpu@
 
 endif #HAS_PTLIB_LIB_MAK
 
