@@ -112,22 +112,25 @@ PBoolean H460_FeatureStd22::FeatureAdvertised(int mtype)
      }
 }
 
-void BuildFeature(H323TransportSecurity * transec, H323EndPoint * ep, H460_FeatureStd & feat, PBoolean address = true)
+void BuildFeature(H323TransportSecurity * transec, H323EndPoint * ep, H460_FeatureStd & feat, PBoolean include_params = true)
 {
     if (transec->IsTLSEnabled()) {
         const H323Listener * tls = ep->GetListeners().GetTLSListener();
-        H460_FeatureStd sets;
-        sets.Add(Std22_Priority, H460_FeatureContent(1, 8)); // Priority 1
-        if (tls && address)
+        if (tls && include_params) {
+            H460_FeatureStd sets;
+            sets.Add(Std22_Priority, H460_FeatureContent(1, 8)); // Priority 1
             sets.Add(Std22_Address, H460_FeatureContent(tls->GetTransportAddress()));
-        feat.Add(Std22_TLS, H460_FeatureContent(sets.GetCurrentTable()));
+            feat.Add(Std22_TLS, H460_FeatureContent(sets.GetCurrentTable()));
+        }
     }
 
     // NOT YET Supported...Disabled in H323TransportSecurity.
     if (transec->IsIPSecEnabled()) {
         H460_FeatureStd sets;
-        sets.Add(Std22_Priority, H460_FeatureContent(2, 8)); // Priority 2
-        feat.Add(Std22_IPSec, H460_FeatureContent(sets.GetCurrentTable()));
+        if (include_params) {
+            sets.Add(Std22_Priority, H460_FeatureContent(2, 8)); // Priority 2
+            feat.Add(Std22_IPSec, H460_FeatureContent(sets.GetCurrentTable()));
+        }
     }
 }
 
@@ -185,6 +188,7 @@ PBoolean H460_FeatureStd22::OnSendRegistrationRequest(H225_FeatureDescriptor & p
 
     m_isEnabled = false;
     H460_FeatureStd feat = H460_FeatureStd(22);
+    // TODO: omit parameters on lightweight RRQ
     BuildFeature(m_ep->GetTransportSecurity(), m_ep, feat);
 
     pdu = feat;
