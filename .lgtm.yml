@@ -5,12 +5,13 @@ extraction:
       - libssl-dev
     configure:
       command:
-      - git clone https://github.com/willamowius/ptlib.git
-      - cd ptlib
-      - export PTLIBDIR=.
-      - ./configure --enable-ipv6 --disable-odbc --disable-sdl --disable-lua --disable-expat
-      - make optnoshared
-      - cd ..
-      - ./configure --enable-h235 --enable-h46017 --enable-h46026 --enable-h46019m
-      - make optnoshared
+      - "wget -q -O ptlib.zip https://github.com/willamowius/ptlib/archive/master.zip"
+      - "unzip ptlib.zip"
+      - "cd ptlib-master"
+      - "export PTLIBDIR=$(pwd)"
+      - "./configure --enable-ipv6 --disable-odbc --disable-sdl --disable-lua --disable-expat"
+      - "make optnoshared"
+      - "cd .."
+      - "./configure --enable-h235 --enable-h46017 --enable-h46026 --enable-h46019m"
+      - "VERBOSE=1 make optnoshared"
 
