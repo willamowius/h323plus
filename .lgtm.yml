@@ -1,0 +1,10 @@
+extraction:
+  cpp:
+    prepare:
+      packages:
+      - libssl-dev
+      - ptlib
+configure:
+        command:
+        - ./configure --enable-h235 --enable-h46017 --enable-h46026 --enable-h46019m
+
