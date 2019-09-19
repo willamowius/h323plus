@@ -3,8 +3,14 @@ extraction:
     prepare:
       packages:
       - libssl-dev
-      - willamowius/ptlib
     configure:
       command:
+      - git clone https://github.com/willamowius/ptlib.git
+      - cd ptlib
+      - export PTLIBDIR=.
+      - ./configure --enable-ipv6 --disable-odbc --disable-sdl --disable-lua --disable-expat
+      - make optnoshared
+      - cd ..
       - ./configure --enable-h235 --enable-h46017 --enable-h46026 --enable-h46019m
+      - make optnoshared
 
