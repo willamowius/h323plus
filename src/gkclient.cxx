@@ -297,6 +297,12 @@ PBoolean H323Gatekeeper::OnReceiveGatekeeperConfirm(const H225_GatekeeperConfirm
 
   if (gcf.HasOptionalField(H225_GatekeeperConfirm::e_assignedGatekeeper)) {
     SetAssignedGatekeeper(gcf.m_assignedGatekeeper);
+  }
+  // switch if we are assigned to another gatekeeper, stay if its already the right one
+  H323TransportAddress assignedGKIP(assignedGK.rasAddress); // convert H225_TransportAddress into H323TransportAddress
+  if (gcf.HasOptionalField(H225_GatekeeperConfirm::e_assignedGatekeeper) && assignedGKIP != locatedAddress) {
+    // TODO: we still might have to register with this gatekeeper, because the assigned gatekeeper might be down
+    // TODO: start a background thread to check assigned gatekeeper availability, unless re-homing model is server-based
     PTRACE(2, "RAS\tAssigned Gatekeeper redirected " << assignedGK);
     // This will force the gatekeeper to register to the assigned Gatekeeper.
     if (lastRequest->responseInfo != NULL) {
