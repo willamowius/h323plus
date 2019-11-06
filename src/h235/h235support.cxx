@@ -615,6 +615,10 @@ PBoolean H235_DiffieHellman::ComputeSessionKey(PBYTEArray & SessionKey)
 
   int len = DH_size(dh);
   unsigned char * buf = (unsigned char *)OPENSSL_malloc(len);
+  if (buf == NULL) {
+    PTRACE(2, "H235_DH\tERROR allocating memory!");
+    return false;
+  }
 
   int out = DH_compute_key(buf, m_remKey, dh);
   if (out <= 0) {
