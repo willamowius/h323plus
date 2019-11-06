@@ -23,7 +23,7 @@
  * the License for the specific language governing rights and limitations
  * under the License.
  *
- * The Original Code is derived from and used in conjunction with the 
+ * The Original Code is derived from and used in conjunction with the
  * H323plus Project (www.h323plus.org/)
  *
  * The Initial Developer of the Original Code is ISVO (Asia) Pte Ltd.
@@ -61,7 +61,7 @@
 
 
 H323_H341Server::H323_H341Server(WORD listenPort)
-: PSNMPServer(PIPSocket::GetDefaultIpAny(), listenPort)   
+: PSNMPServer(PIPSocket::GetDefaultIpAny(), listenPort)
 {
 
 }
@@ -82,7 +82,7 @@ static PBoolean ValidateOID(H323_H341Server::messagetype reqType,
     do {
      for (Iter = varlist.begin(); Iter != varlist.end(); ++Iter) {
        for (PINDEX i = 0; i< PARRAYSIZE(H341_Field); i++) {
-          if (H341_Field[i].oid != Iter->first) 
+          if (H341_Field[i].oid != Iter->first)
 			   continue;
 
 	      found = TRUE;
@@ -92,26 +92,26 @@ static PBoolean ValidateOID(H323_H341Server::messagetype reqType,
 			  if (H341_Field[i].access == H341_NoAccess) {
 				  PTRACE(4,"H341\tAttribute request FAILED: No permitted access " << Iter->first );
                   errCode = PSNMP::GenErr;
-                  return FALSE;    
+                  return FALSE;
               }
               break;
             case H323_H341Server::e_set:
               if (H341_Field[i].access == H341_ReadOnly) {
 				  PTRACE(4,"H341\tAttribute set FAILED: Read Only " << Iter->first );
                   errCode = PSNMP::ReadOnly;
-                  return FALSE;    
+                  return FALSE;
               }
               break;
             default:   // Unknown request
 			  PTRACE(4,"H341\tGENERAL FAILURE: Unknown request");
               errCode = PSNMP::GenErr;
-              return FALSE;    
+              return FALSE;
 		  }
-             
+
 		  if (Iter->second.GetTag() != (unsigned)H341_Field[i].type ) {
 			  PTRACE(4,"H341\tAttribute FAILED Not valid field type " << Iter->first);
               errCode = PSNMP::BadValue;
-              return FALSE;    
+              return FALSE;
 		  }
 		  break;
 	   }
@@ -120,7 +120,7 @@ static PBoolean ValidateOID(H323_H341Server::messagetype reqType,
 	} while (Iter != varlist.end() && !found);
 
 	if (!found) {
-	   	PTRACE(4,"H341\tRequest FAILED: Not valid attribute " << Iter->first);
+	   	PTRACE(4,"H341\tRequest FAILED: Attribute not found");
         errCode = PSNMP::NoSuchName;
         return FALSE;
 	}
