@@ -1816,7 +1816,14 @@ void BuildH239GenericMessageRequest(H239Control & ctrl, H323Connection & connect
     H245_ArrayOf_GenericParameter & msg = cap.m_messageContent;
     msg.SetSize(3);
     buildGenericInteger(msg[0], H239Control::h239gpTerminalLabel, 0);
-    int channelID = connection.GetLogicalChannels()->GetLastChannelNumber()+1;
+    int channelID = 0;
+    if (submesId == H239Control::e_presentationTokenRequest)
+      channelID = ctrl.GetChannelNum (H323Capability::e_Transmit);
+    // TODO:
+    // - else if (submesId == H239Control::e_flowControlReleaseRequest)
+    // -  channelID = ctrl.GetChannelNum (H323Capability::e_Receive);
+    if (!channelID)
+      channelID = connection.GetLogicalChannels()->GetLastChannelNumber()+1;
     ctrl.SetRequestedChanNum(channelID);
     buildGenericInteger(msg[1], H239Control::h239gpChannelId, channelID);
     buildGenericInteger(msg[2], H239Control::h239gpSymmetryBreaking, PRandom::Number(1, 127));
