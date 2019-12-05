@@ -1613,8 +1613,8 @@ class H323Connection : public PObject
     virtual PBoolean OnOpenLogicalChannel(
       const H245_OpenLogicalChannel & openPDU,            ///< Received PDU for the channel open
       H245_OpenLogicalChannelAck & ackPDU,                ///< PDU to send for acknowledgement
-      unsigned & errorCode,                                ///< Error to return if refused
-      const unsigned & channelNumber = 0                ///< Channel Number to open
+      unsigned & errorCode,                               ///< Error to return if refused
+      const unsigned & sessionID = 0                      ///< Session ID for the channel 
     );
 
     /**Callback for when a logical channel conflict has occurred.
