@@ -1103,8 +1103,10 @@ PBoolean H323Connection::HandleSignalPDU(H323SignalPDU & pdu)
 #ifdef H323_H450
   // Check for presence of supplementary services
   if (pdu.m_h323_uu_pdu.HasOptionalField(H225_H323_UU_PDU::e_h4501SupplementaryService)) {
-    if (!h450dispatcher->HandlePDU(pdu)) // Process H4501SupplementaryService APDU
+    if (!h450dispatcher->HandlePDU(pdu)) { // Process H4501SupplementaryService APDU
+      Unlock();
       return FALSE;
+    }
   }
 #endif
 
