@@ -29,7 +29,7 @@
 #define MINOR_VERSION 27
 #define BUILD_TYPE    ReleaseCode
 // only use single digit build numbers or the H323PLUS_VER macro breaks
-#define BUILD_NUMBER 1
+#define BUILD_NUMBER 2
 
 
 #endif  // _H323PLUS_VERSION_H
