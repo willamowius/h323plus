@@ -2982,7 +2982,7 @@
 					Name="VCCustomBuildTool"
 					Description="Configuring Build Options"
 					CommandLine=".\configure --exclude-env=VSNET_PWLIB_CONFIGURE_EXCLUDE_DIRS&#x0D;&#x0A;"
-					AdditionalDependencies="configure.in;"
+					AdditionalDependencies="configure.ac;"
 					Outputs=".\include\openh323buildopts.h"
 				/>
 			</FileConfiguration>
@@ -2993,7 +2993,7 @@
 					Name="VCCustomBuildTool"
 					Description="Configuring Build Options"
 					CommandLine=".\configure --exclude-env=VSNET_PWLIB_CONFIGURE_EXCLUDE_DIRS&#x0D;&#x0A;"
-					AdditionalDependencies="configure.in;"
+					AdditionalDependencies="configure.ac;"
 					Outputs=".\include\openh323buildopts.h"
 				/>
 			</FileConfiguration>
@@ -3015,7 +3015,7 @@
 					Name="VCCustomBuildTool"
 					Description="Configuring Build Options"
 					CommandLine=".\configure --exclude-env=VSNET_PWLIB_CONFIGURE_EXCLUDE_DIRS&#x0D;&#x0A;"
-					AdditionalDependencies="configure.in;"
+					AdditionalDependencies="configure.ac;"
 					Outputs=".\include\openh323buildopts.h"
 				/>
 			</FileConfiguration>
