@@ -2327,7 +2327,7 @@ PBoolean H323TransportUDP::DiscoverGatekeeper(H323Gatekeeper & gk,
     if (j < i)
       continue;
 
-    PUDPSocket * socket;
+    PUDPSocket * socket = NULL;
 
     static PIPSocket::Address MulticastRasAddress(224, 0, 1, 41);
     if (destAddr != MulticastRasAddress) {
