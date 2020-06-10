@@ -486,7 +486,7 @@ void Q931::PrintOn(ostream & strm) const
 
       strm << dec << setfill(' ')
            << '\n'
-           << setw(indent+2) << "}\n";
+           << setw(indent+2) << setprecision(indent-2) << "}\n";
     }
   }
 
