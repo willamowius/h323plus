@@ -500,12 +500,6 @@ class H460_FeatureTable : public H225_ArrayOf_EnumeratedParameter
 
     /** Operator
     */
-    inline H460_FeatureParameter & operator[](
-      PINDEX id  ///* Index position in the collection of the object.
-    ) const { return operator[](id); };
-
-    /** Operator
-    */
     H460_FeatureParameter & operator[](
       PINDEX id  ///* Index position in the collection of the object.
     );
@@ -702,20 +696,12 @@ class H460_Feature : public H225_FeatureDescriptor
 
     /** Accessing the Parameters
     */
-    inline H460_FeatureParameter & operator()(
-      PINDEX id  //* Index position in the collection of the object.
-    ) const { return operator()(id); };
-
     H460_FeatureParameter & operator()(
       PINDEX id  ///* Index position in the collection of the object.
     );
 
     /** Accessing the Parameters
     */
-    inline H460_FeatureParameter & operator[](
-      const H460_FeatureID & id  //< FeatureID of the object.
-    ) const { return operator()(id); };
-
     H460_FeatureParameter & operator()(
       const H460_FeatureID & id  ///< FeatureID of the object.
     );
@@ -991,12 +977,6 @@ class H460_FeatureNonStd : public H460_Feature
 
     /** Operator
     */
-    inline H460_FeatureParameter & operator[](
-      PString id  ///* Index position in the collection of the object.
-    ) const { return operator[](id); };
-
-    /** Operator
-    */
     H460_FeatureParameter & operator[](
       PString id  ///* Index position in the collection of the object.
     );
@@ -1047,12 +1027,6 @@ class H460_FeatureOID : public H460_Feature
     H460_FeatureParameter & Value(const PString & id);
 
   //@}
-
-    /** Operator
-    */
-    inline H460_FeatureParameter & operator[](
-      OpalOID id  ///* Index position in the collection of the object.
-    ) const { return operator[](id); };
 
     /** Operator
     */
