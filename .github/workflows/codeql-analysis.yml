@@ -48,7 +48,7 @@ jobs:
        ./configure --enable-ipv6 --disable-odbc --disable-sdl --disable-lua --disable-expat
        make optnoshared
        cd ../h323plus
-       ./configure --enable-h235 --enable-h46017 --enable-h46026 --enable-h46019m
+       ./configure --enable-h235 --enable-h235-256 --enable-h46017 --enable-h46026 --enable-h46019m --enable-h249 --enable-h46025 --enable-h460p --enable-h460pre --enable-h460com --enable-h460im --enable-h461 --enable-t120  --enable-t140 --enable-aec
        make optnoshared
        
     - name: Perform CodeQL Analysis
