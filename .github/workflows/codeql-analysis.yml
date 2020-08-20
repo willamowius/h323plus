@@ -47,7 +47,7 @@ jobs:
        cd ptlib
        ./configure --enable-ipv6 --disable-odbc --disable-sdl --disable-lua --disable-expat
        make optnoshared
-       cd h323plus
+       cd ../h323plus
        ./configure --enable-h235 --enable-h46017 --enable-h46026 --enable-h46019m
        make optnoshared
        
