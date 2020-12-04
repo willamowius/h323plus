@@ -189,7 +189,7 @@ public:
       */
     PBoolean DecodeMediaKey(PBYTEArray & key);
 
-    /** Is Active 
+    /** Is Active
       */
     PBoolean IsActive();
 
@@ -215,6 +215,10 @@ public:
   //@}
 
     PString GetAlgorithmOID() const { return m_context.GetAlgorithmOID(); }
+
+    /** Export crypto key for signaling-only gateways
+	  */
+	PBYTEArray GetCrytoMasterKey() const { return m_crytoMasterKey; }
 
 private:
     H235_DiffieHellman & m_dh;
