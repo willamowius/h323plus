@@ -339,7 +339,8 @@ RTP_ControlFrame::RTP_ControlFrame(PINDEX sz)
 {
   compoundOffset = 0;
   compoundSize = 0;
-  theArray[0] = '\x80'; // Set version 2
+  if (sz > 0)
+    theArray[0] = '\x80'; // Set version 2
 }
 
 

@@ -1352,9 +1352,9 @@ PBoolean H46019UDPSocket::WriteMultiplexBuffer(const void * buf, PINDEX len, con
     m_multiMutex.Signal();
     m_multiBuffer++;
 
-    if (!rtpSocket) {
+    if (!rtpSocket && len > 0) {
         RTP_ControlFrame frame(len);
-        memcpy(frame.GetPointer(),buf,len);
+        memcpy(frame.GetPointer(), buf, len);
         if (frame.GetPayloadType() == RTP_ControlFrame::e_ApplDefined) {
             PTRACE(6, "H46024A\tReading RTCP Probe Packet.");
             PBYTEArray tempData;
