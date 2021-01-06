@@ -50,7 +50,7 @@ class PNatMethod;
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-// 
+//
 // class to hold the QoS definitions for an RTP channel
 
 #if P_QOS
@@ -269,7 +269,7 @@ class RTP_ControlFrame : public PBYTEArray
       PUInt32b ntp_frac;
       PUInt32b rtp_ts;    /* RTP timestamp */
       PUInt32b psent;     /* packets sent */
-      PUInt32b osent;     /* octets sent */ 
+      PUInt32b osent;     /* octets sent */
     };
 
     enum DescriptionTypes {
@@ -340,7 +340,7 @@ class RTP_MultiControlFrame : public PBYTEArray
 };
 
 
-/**This class is for encpsulating the IETF Real Time Protocol interface.
+/**This class is for encapsulating the IETF Real Time Protocol interface.
  */
 class RTP_UDP;
 class RTP_UserData;
@@ -383,7 +383,7 @@ class RTP_Session : public PObject
        and the ReadBufferedData() function simply calls ReadData(). Once a
        jitter buffer has been created it cannot be removed, though its size
        may be adjusted.
-       
+
        If the jitterDelay paramter is zero, it destroys the jitter buffer
        attached to this RTP session.
       */
@@ -493,8 +493,8 @@ class RTP_Session : public PObject
     class SenderReport : public PObject  {
         PCLASSINFO(SenderReport, PObject);
       public:
-        SenderReport() 
-        : sourceIdentifier(0), realTimestamp1970(0), 
+        SenderReport()
+        : sourceIdentifier(0), realTimestamp1970(0),
           rtpTimestamp(0), packetsSent(0), octetsSent(0) {}
 
         void PrintOn(ostream &) const;
@@ -844,7 +844,7 @@ class RTP_UserData : public PObject
     ) const;
 
     /**Callback from the RTP session for statistics monitoring.
-       This is called at the end of a call to indicating 
+       This is called at the end of a call to indicating
 	   that the statistics of the call.
 
        The default behaviour does nothing.
@@ -868,7 +868,7 @@ class RTP_UserData : public PObject
 
 
 
-/**This class is for encpsulating the IETF Real Time Protocol interface.
+/**This class is for encapsulating the IETF Real Time Protocol interface.
  */
 class RTP_SessionManager : public PObject
 {
@@ -919,7 +919,7 @@ class RTP_SessionManager : public PObject
       unsigned sessionID    ///<  Session ID to release.
     );
 
-    /**Move the session. 
+    /**Move the session.
      */
     void MoveSession(
       unsigned oldSessionID,    ///<  Session ID from.

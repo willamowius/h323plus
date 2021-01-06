@@ -81,7 +81,7 @@ class H323ChannelNumber : public PObject
     H323ChannelNumber & operator++(int);
     operator unsigned() const { return number; }
     PBoolean IsFromRemote() const { return fromRemote; }
-    
+
   protected:
     unsigned number;
     PBoolean     fromRemote;
@@ -202,7 +202,7 @@ class H323Channel : public PObject
     /**Fill out the OpenLogicalChannel PDU for the particular channel type.
      */
     virtual PBoolean OnSendingPDU(
-      H245_OpenLogicalChannel & openPDU  ///< Open PDU to send. 
+      H245_OpenLogicalChannel & openPDU  ///< Open PDU to send.
     ) const = 0;
 
     /**This is called when request to create a channel is received from a
@@ -271,7 +271,7 @@ class H323Channel : public PObject
        Typically, used to indicate a problem in the received video stream.
     */
     void SendMiscCommand(unsigned command);
-    
+
     /**
        Send a flow control request to the remote
     */
@@ -467,7 +467,7 @@ class H323BidirectionalChannel : public H323Channel
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/**This class is for encpsulating the IETF Real Time Protocol interface.
+/**This class is for encapsulating the IETF Real Time Protocol interface.
  */
 class H245_DataType;
 class H323_RealTimeChannel : public H323UnidirectionalChannel
@@ -491,7 +491,7 @@ class H323_RealTimeChannel : public H323UnidirectionalChannel
     /**Fill out the OpenLogicalChannel PDU for the particular channel type.
      */
     virtual PBoolean OnSendingPDU(
-      H245_OpenLogicalChannel & openPDU  ///< Open PDU to send. 
+      H245_OpenLogicalChannel & openPDU  ///< Open PDU to send.
     ) const;
 
     /**This is called when request to create a channel is received from a
@@ -540,7 +540,7 @@ class H323_RealTimeChannel : public H323UnidirectionalChannel
       H245_DataType & /*dataType*/,                 ///< DataType Information
       H245_H2250LogicalChannelParameters & param    ///< Open PDU to send.
     ) const { return OnSendingPDU(param); }
-    
+
     /**Alternate RTP port information for Same NAT
       */
     virtual PBoolean OnSendingAltPDU(
@@ -607,7 +607,7 @@ class H323_RealTimeChannel : public H323UnidirectionalChannel
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/**This class is for encpsulating the IETF Real Time Protocol interface.
+/**This class is for encapsulating the IETF Real Time Protocol interface.
  */
 class H323_RTPChannel : public H323_RealTimeChannel
 {
@@ -672,13 +672,13 @@ class H323_RTPChannel : public H323_RealTimeChannel
       */
     virtual void SendUniChannelBackProbe();
 
-    /** Read a DataFrame 
+    /** Read a DataFrame
       */
     virtual PBoolean ReadFrame(DWORD & rtpTimestamp,     ///< TimeStamp
                                RTP_DataFrame & frame     ///< RTP data frame
         );
 
-    /** Write a DataFrame 
+    /** Write a DataFrame
       */
     virtual PBoolean WriteFrame(RTP_DataFrame & frame     ///< RTP data frame
         );
@@ -761,7 +761,7 @@ class H323_RTPChannel : public H323_RealTimeChannel
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/**This class is for encpsulating the IETF Real Time Protocol interface as used
+/**This class is for encapsulating the IETF Real Time Protocol interface as used
 by a remote host.
  */
 class H323SecureChannel;
@@ -972,7 +972,7 @@ class H323DataChannel : public H323UnidirectionalChannel
     /**Fill out the OpenLogicalChannel PDU for the particular channel type.
      */
     virtual PBoolean OnSendingPDU(
-      H245_OpenLogicalChannel & openPDU  ///< Open PDU to send. 
+      H245_OpenLogicalChannel & openPDU  ///< Open PDU to send.
     ) const;
 
     /**This is called when request to create a channel is received from a

@@ -46,7 +46,7 @@
 #include "h235/h235caps.h"
 #include "h235/h235crypto.h"
 
-/**This class is a derived Class for encpsulating the IETF Real Time Protocol 
+/**This class is a derived Class for encapsulating the IETF Real Time Protocol
    interface. It's only aim is to expose the Created UDP Data channel derive a
    new class for binding to the OpenSSL TLS system.
  */
@@ -57,7 +57,7 @@ class H323SecureRTPChannel  : public H323_RTPChannel
   PCLASSINFO(H323SecureRTPChannel, H323_RTPChannel);
 
   public:
-  /**@name Construction/Deconstructor */
+  /**@name Construction/Destruction */
   //@{
     /**Create a new channel.
      */
@@ -65,7 +65,7 @@ class H323SecureRTPChannel  : public H323_RTPChannel
       H323Connection & connection,                      ///< Connection to endpoint for channel
       const H323Capability & capability,                ///< Capability channel is using
       Directions direction,                             ///< Direction of channel
-      RTP_Session & rtp                                 ///< RTP session for channel    
+      RTP_Session & rtp                                 ///< RTP session for channel
     );
 
     /**Destroy Class.
@@ -85,7 +85,7 @@ class H323SecureRTPChannel  : public H323_RTPChannel
     /**Fill out the OpenLogicalChannel PDU for the particular channel type.
      */
     virtual PBoolean OnSendingPDU(
-      H245_OpenLogicalChannel & openPDU  /// Open PDU to send. 
+      H245_OpenLogicalChannel & openPDU  /// Open PDU to send.
     ) const;
 
     /**This is called when request to create a channel is received from a
@@ -210,7 +210,7 @@ public:
 
     virtual void Receive();
     virtual void Transmit();
-    	
+
     virtual PBoolean Open();
     virtual PBoolean Start();
 

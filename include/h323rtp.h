@@ -56,7 +56,7 @@ class H245_TransportCapability;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/**This class is for encpsulating the IETF Real Time Protocol interface.
+/**This class is for encapsulating the IETF Real Time Protocol interface.
  */
 class H323_RTP_Session : public RTP_UserData
 {
@@ -85,7 +85,7 @@ class H323_RTP_Session : public RTP_UserData
     ) const;
 
     /**Callback from the RTP session for statistics monitoring.
-       This is called at the end of a call to indicating 
+       This is called at the end of a call to indicating
 	   that the statistics of the call.
 
        The default behaviour calls H323Connection::OnFinalStatistics().
@@ -262,7 +262,7 @@ class H323_RTP_UDP : public H323_RTP_Session
     /**This is called when a gatekeeper wants to get status information from
        the endpoint.
 
-       The default behaviour calls the ancestor functon and then fills in the 
+       The default behaviour calls the ancestor functon and then fills in the
        transport fields.
      */
     virtual void OnSendRasInfo(
@@ -288,7 +288,7 @@ class H323_RTP_UDP : public H323_RTP_Session
         );
   //@}
 #endif
-  
+
   protected:
     virtual PBoolean ExtractTransport(
       const H245_TransportAddress & pdu,

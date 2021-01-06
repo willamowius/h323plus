@@ -718,7 +718,7 @@ class H460_Feature : public H225_FeatureDescriptor
       */
     void SetCurrentTable(H460_FeatureTable & table);
 
-    /** Set the curernt Feature Table from Parameter
+    /** Set the current Feature Table from Parameter
       */
     void SetCurrentTable(H460_FeatureParameter & param);
 
@@ -752,8 +752,8 @@ class H460_Feature : public H225_FeatureDescriptor
       */
     static PStringArray GetFeatureFriendlyName() { return PStringArray("empty"); };
 
-    /** Get the purpose of the the Feature whether for Signalling,RAS or both. This determines
-        when the class is instantized
+    /** Get the purpose of the the Feature whether for Signalling, RAS or both. This determines
+        when the class is instantiated
       */
     static int GetPurpose()    { return FeatureBaseAll; };
 
