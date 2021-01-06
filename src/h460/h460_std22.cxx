@@ -89,7 +89,7 @@ void H460_FeatureStd22::AttachConnection(H323Connection * _con)
 
 int H460_FeatureStd22::GetPurpose()
 {
-    return FeatureBaseClone;
+    return FeatureBase;
 }
 
 PObject * H460_FeatureStd22::Clone() const
