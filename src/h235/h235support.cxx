@@ -223,7 +223,7 @@ static DH * DH_dup(const DH * dh)
 }
 
 H235_DiffieHellman::H235_DiffieHellman(const H235_DiffieHellman & diffie)
-: m_remKey(NULL), m_toSend(diffie.GetToSend()), m_wasReceived(ReceivedFromRemote()), m_wasDHReceived(diffie.DHReceived()),
+: m_remKey(NULL), m_toSend(diffie.GetToSend()), m_wasReceived(diffie.ReceivedFromRemote()), m_wasDHReceived(diffie.DHReceived()),
   m_keySize(diffie.GetKeySize()), m_loadFromFile(diffie.LoadFile())
 {
   dh = DH_dup(diffie);
