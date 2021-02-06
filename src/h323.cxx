@@ -3955,7 +3955,7 @@ PChannel * H323Connection::SwapHoldMediaChannels(PChannel * newChannel,unsigned 
     if (!channel) {
          PTRACE(4, "H4504\tLogical Channel " << i << " Empty or closed! Session ID: " << sessionId);
         // Fire off to ensure if channel is being Held that it is retrieved in derived application
-         OnCallRetrieve(TRUE,sessionId,0,newChannel);
+         OnCallRetrieve(TRUE,sessionId, 0, newChannel);
          return NULL;
     }
 
@@ -3965,7 +3965,11 @@ PChannel * H323Connection::SwapHoldMediaChannels(PChannel * newChannel,unsigned 
 
       H323_RTPChannel * chan2 = reinterpret_cast<H323_RTPChannel*>(channel);
 
-      H323Codec & codec = *channel->GetCodec();
+      H323Codec * c = channel->GetCodec();
+      if (!c) {
+          return NULL;
+      }
+      H323Codec & codec = *c;
       PChannel * rawChannel = codec.GetRawDataChannel();
       unsigned frameRate = codec.GetFrameRate()*2;
 
@@ -3974,10 +3978,10 @@ PChannel * H323Connection::SwapHoldMediaChannels(PChannel * newChannel,unsigned 
           if (IsCallOnHold()) {
              PTRACE(4, "H4504\tHold Media OnHold Transmit " << i);
           existingTransmitChannel = codec.SwapChannel(newChannel);
-              existingTransmitChannel = OnCallHold(TRUE,session_id,frameRate,existingTransmitChannel);
+              existingTransmitChannel = OnCallHold(TRUE,session_id, frameRate, existingTransmitChannel);
           } else {
              PTRACE(4, "H4504\tRetrieve Media OnHold Transmit " << i);
-         existingTransmitChannel = codec.SwapChannel(OnCallRetrieve(TRUE,session_id,frameRate,existingTransmitChannel));
+         existingTransmitChannel = codec.SwapChannel(OnCallRetrieve(TRUE, session_id, frameRate, existingTransmitChannel));
           }
         }
         else {
@@ -3986,25 +3990,25 @@ PChannel * H323Connection::SwapHoldMediaChannels(PChannel * newChannel,unsigned 
               PTRACE(4, "H4504\tHold Transmit " << i);
               chan2->SetPause(TRUE);
               if (codec.SetRawDataHeld(TRUE))
-                codec.SwapChannel(OnCallHold(TRUE,session_id,frameRate,rawChannel));
+                codec.SwapChannel(OnCallHold(TRUE, session_id, frameRate, rawChannel));
            } else {
               PTRACE(4, "H4504\tRetreive Transmit " << i);
-              codec.SwapChannel(OnCallRetrieve(TRUE,session_id,frameRate,rawChannel));
+              codec.SwapChannel(OnCallRetrieve(TRUE, session_id, frameRate, rawChannel));
               if (codec.SetRawDataHeld(FALSE))
                 chan2->SetPause(FALSE);
            }
         }
       }
       else {
-        // Enable/mute the receive channel depending on whether the remote endis held
+        // Enable/mute the receive channel depending on whether the remote end is held
           if (IsCallOnHold()) {
             PTRACE(4, "H4504\tHold Receive " << i);
             chan2->SetPause(TRUE);
              if (codec.SetRawDataHeld(TRUE))
-                 codec.SwapChannel(OnCallHold(FALSE,session_id,frameRate,rawChannel));
+                 codec.SwapChannel(OnCallHold(FALSE, session_id, frameRate, rawChannel));
           } else {
              PTRACE(4, "H4504\tRetrieve Receive " << i);
-             codec.SwapChannel(OnCallRetrieve(FALSE,session_id,frameRate,rawChannel));
+             codec.SwapChannel(OnCallRetrieve(FALSE, session_id, frameRate, rawChannel));
              if (codec.SetRawDataHeld(FALSE))
                  chan2->SetPause(FALSE);
           }
