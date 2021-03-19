@@ -128,8 +128,8 @@ class H323FileTransferList;
    The main thing this class embodies is the capabilities of the application,
    that is the codecs and protocols it is capable of.
 
-   An application may create a descendent off this class and overide the
-   CreateConnection() function, if they require a descendent of H323Connection
+   An application may create a descendant off this class and overide the
+   CreateConnection() function, if they require a descendant of H323Connection
    to be created. This would be quite likely in most applications.
  */
 class H323EndPoint : public PObject
@@ -420,7 +420,7 @@ class H323EndPoint : public PObject
 
     /**Create a gatekeeper.
        This allows the application writer to have the gatekeeper as a
-       descendent of the H323Gatekeeper in order to add functionality to the
+       descendant of the H323Gatekeeper in order to add functionality to the
        base capabilities in the library.
 
        The default creates an instance of the H323Gatekeeper class.

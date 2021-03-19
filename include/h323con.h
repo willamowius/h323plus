@@ -1067,8 +1067,8 @@ class H323Connection : public PObject
        alter the request before transmission to the other endpoint.
 
        The default behaviour simply returns TRUE. Note that this is usually
-       overridden by the transport dependent descendent class, eg the
-       H323ConnectionTCP descendent fills in the destCallSignalAddress field
+       overridden by the transport dependent descendant class, eg the
+       H323ConnectionTCP descendant fills in the destCallSignalAddress field
        with the TCP/IP data. Therefore if you override this in your
        application make sure you call the ancestor function.
      */
@@ -1494,7 +1494,7 @@ class H323Connection : public PObject
   //@{
     /**Call back to select logical channels to start.
 
-       This function must be defined by the descendent class. It is used
+       This function must be defined by the descendant class. It is used
        to select the logical channels to be opened between the two endpoints.
        There are three ways in which this may be called: when a "fast start"
        has been initiated by the local endpoint (via SendSignalSetup()
@@ -1614,7 +1614,7 @@ class H323Connection : public PObject
       const H245_OpenLogicalChannel & openPDU,            ///< Received PDU for the channel open
       H245_OpenLogicalChannelAck & ackPDU,                ///< PDU to send for acknowledgement
       unsigned & errorCode,                               ///< Error to return if refused
-      const unsigned & sessionID = 0                      ///< Session ID for the channel 
+      const unsigned & sessionID = 0                      ///< Session ID for the channel
     );
 
     /**Callback for when a logical channel conflict has occurred.

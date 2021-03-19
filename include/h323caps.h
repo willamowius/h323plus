@@ -89,7 +89,7 @@ class H323Capabilities;
    several instances of the actualy codec managing the conversion of an
    individual stream of data.
 
-   An application may create a descendent off this class and override
+   An application may create a descendant off this class and override
    functions as required for describing a codec that it implements.
  */
 class OpalFactoryCodec;
@@ -152,7 +152,7 @@ class H323Capability : public PObject
      */
     virtual unsigned  GetSubType()  const = 0;
 
-	/**Get Generic Identifier 
+	/**Get Generic Identifier
 		Default returns PString::Empty
 	 */
     virtual PString GetIdentifier() const;
@@ -180,12 +180,12 @@ class H323Capability : public PObject
     )
     { return Create(name); }
 
-	/** 
+	/**
 	  *Create a factory codec instance based on the codec name
 	  */
 	static OpalFactoryCodec * CreateCodec(MainTypes ctype, PBoolean isEncoder, const PString & name);
 
-	/** 
+	/**
 	  *List all the codecs loaded in the plugin factory
 	  */
     static void CodecListing(MainTypes ctype, PBoolean isEncoder, PStringList & listing);
@@ -240,8 +240,8 @@ class H323Capability : public PObject
        The default behaviour returns False.
      */
 	 virtual PBoolean SetMaxFrameSize(
-		   CapabilityFrameSize /*framesize*/, 
-		   int /*frameUnits*/) 
+		   CapabilityFrameSize /*framesize*/,
+		   int /*frameUnits*/)
 	 { return FALSE; };
 
     /**Set the custom encoder size.
@@ -249,8 +249,8 @@ class H323Capability : public PObject
        The default behaviour returns False.
      */
 	 virtual PBoolean SetCustomEncode(
-		 unsigned /*width*/, 
-		 unsigned /*height*/, 
+		 unsigned /*width*/,
+		 unsigned /*height*/,
 		 unsigned /*rate*/)
 	 { return FALSE; };
 
@@ -259,9 +259,9 @@ class H323Capability : public PObject
          This is used to set the individual MPI values for a capability.
      */
 	 virtual PBoolean SetMPIValue(
-		   const PString & /*param*/, 
-		   int /*value*/, 
-		   PBoolean /*zero*/ ) 
+		   const PString & /*param*/,
+		   int /*value*/,
+		   PBoolean /*zero*/ )
 	 { return FALSE; };
 
     /**Create the channel instance, allocating resources as required.
@@ -327,12 +327,12 @@ class H323Capability : public PObject
 
     /**This function is called whenever and incoming TerminalCapabilitySet
        PDU is received on the control channel, and a new H323Capability
-       descendent was created. This completes reading fields from the PDU
+       descendant was created. This completes reading fields from the PDU
        into the classes members.
 
        If the function returns FALSE then the received PDU codec description
        is not supported, so will be ignored.
-       
+
          The default behaviour sets the capabilityDirection member variable
          from the PDU and then returns TRUE. Note that this means it is very
          important to call the ancestor function when overriding.
@@ -398,7 +398,7 @@ class H323Capability : public PObject
     };
 
     /**Get the direction for this capability.
-      */ 
+      */
     CapabilityDirection GetCapabilityDirection() const { return capabilityDirection; }
 
     /**Set the direction for this capability.
@@ -443,7 +443,7 @@ class H323Capability : public PObject
     unsigned assignedCapabilityNumber;  /// Unique ID assigned to capability
     CapabilityDirection capabilityDirection;
     RTP_DataFrame::PayloadTypes rtpPayloadType;
-    
+
   private:
     OpalMediaFormat mediaFormat;
 };
@@ -454,7 +454,7 @@ class H323Capability : public PObject
    transfer data via the logical channels opened and managed by the H323
    control channel.
 
-   It is expected that an application makes a descendent off
+   It is expected that an application makes a descendant off
    H323NonStandardAudioCapability or H323NonStandardVideoCapability which
    multiply inherit from this class.
  */
@@ -558,7 +558,7 @@ class H323NonStandardCapabilityInfo
    transfer data via the logical channels opened and managed by the H323
    control channel.
 
-   It is expected that an application makes a descendent off
+   It is expected that an application makes a descendant off
    H323GenericAudioCapability or H323GenericVideoCapability which
    multiply inherit from this class.
  */
@@ -600,12 +600,12 @@ class H323GenericCapabilityInfo
     unsigned                    maxBitRate;
 };
 
-    
+
 /**This class describes the interface to a codec that has channels based on
    the RTP protocol.
 
-   An application may create a descendent off this class and override
-   functions as required for descibing the codec.
+   An application may create a descendant off this class and override
+   functions as required for describing the codec.
  */
 class H323RealTimeCapability : public H323Capability
 {
@@ -641,8 +641,8 @@ class H323RealTimeCapability : public H323Capability
 /**This class describes the interface to an audio codec used to transfer data
    via the logical channels opened and managed by the H323 control channel.
 
-   An application may create a descendent off this class and override
-   functions as required for descibing the codec.
+   An application may create a descendant off this class and override
+   functions as required for describing the codec.
  */
 class H323AudioCapability : public H323RealTimeCapability
 {
@@ -712,7 +712,7 @@ class H323AudioCapability : public H323RealTimeCapability
 
 	/** Get the current Audio DSCP value
 	  */
-	static int GetDSCPvalue(); 
+	static int GetDSCPvalue();
 
   /**@name Protocol manipulation */
   //@{
@@ -784,12 +784,12 @@ class H323AudioCapability : public H323RealTimeCapability
 
     /**This function is called whenever and incoming TerminalCapabilitySet
        PDU is received on the control channel, and a new H323Capability
-       descendent was created. This completes reading fields from the PDU
+       descendant was created. This completes reading fields from the PDU
        into the classes members.
 
        If the function returns FALSE then the received PDU codec description
        is not supported, so will be ignored.
-       
+
        The default behaviour calls the OnReceivedPDU() that takes a
        H245_AudioCapability and clamps the txFramesInPacket.
      */
@@ -801,7 +801,7 @@ class H323AudioCapability : public H323RealTimeCapability
        PDU has been used to construct the control channel. It allows the
        capability to set from the PDU fields, information in members specific
        to the class.
-       
+
        The default behaviour calls the OnReceivedPDU() that takes a
        H245_AudioCapability and clamps the txFramesInPacket or
        rxFramesInPacket.
@@ -841,8 +841,8 @@ class H323AudioCapability : public H323RealTimeCapability
    transfer data via the logical channels opened and managed by the H323
    control channel.
 
-   An application may create a descendent off this class and override
-   functions as required for descibing the codec.
+   An application may create a descendant off this class and override
+   functions as required for describing the codec.
  */
 class H323NonStandardAudioCapability : public H323AudioCapability,
                                        public H323NonStandardCapabilityInfo
@@ -987,8 +987,8 @@ class H323NonStandardAudioCapability : public H323AudioCapability,
    transfer data via the logical channels opened and managed by the H323
    control channel.
 
-   An application may create a descendent off this class and override
-   functions as required for descibing the codec.
+   An application may create a descendant off this class and override
+   functions as required for describing the codec.
  */
 class H323GenericAudioCapability : public H323AudioCapability,
 				   public H323GenericCapabilityInfo
@@ -1026,7 +1026,7 @@ class H323GenericAudioCapability : public H323AudioCapability,
      */
     virtual unsigned GetSubType() const;
 
-    /**Get the OID of the capability. 
+    /**Get the OID of the capability.
 
        This returns a string representation of the capability OID.
      */
@@ -1090,8 +1090,8 @@ class H323GenericAudioCapability : public H323AudioCapability,
 /**This class describes the interface to a video codec used to transfer data
    via the logical channels opened and managed by the H323 control channel.
 
-   An application may create a descendent off this class and override
-   functions as required for descibing a codec.
+   An application may create a descendant off this class and override
+   functions as required for describing a codec.
  */
 class H323VideoCapability : public H323RealTimeCapability
 {
@@ -1131,7 +1131,7 @@ class H323VideoCapability : public H323RealTimeCapability
 
 	/** Get the current Video DSCP value
 	  */
-	static int GetDSCPvalue(); 
+	static int GetDSCPvalue();
   //@}
 
   /**@name Protocol manipulation */
@@ -1201,7 +1201,7 @@ class H323VideoCapability : public H323RealTimeCapability
 
     /**This function is called whenever and incoming TerminalCapabilitySet
        PDU is received on the control channel, and a new H323Capability
-       descendent was created. This completes reading fields from the PDU
+       descendant was created. This completes reading fields from the PDU
        into the classes members.
 
        If the function returns FALSE then the received PDU codec description
@@ -1249,8 +1249,8 @@ class H323VideoCapability : public H323RealTimeCapability
    transfer data via the logical channels opened and managed by the H323
    control channel.
 
-   An application may create a descendent off this class and override
-   functions as required for descibing the codec.
+   An application may create a descendant off this class and override
+   functions as required for describing the codec.
  */
 class H323NonStandardVideoCapability : public H323VideoCapability,
                                        public H323NonStandardCapabilityInfo
@@ -1372,8 +1372,8 @@ class H323NonStandardVideoCapability : public H323VideoCapability,
    transfer data via the logical channels opened and managed by the H323
    control channel.
 
-   An application may create a descendent off this class and override
-   functions as required for descibing the codec.
+   An application may create a descendant off this class and override
+   functions as required for describing the codec.
  */
 class H323GenericVideoCapability : public H323VideoCapability,
                                    public H323GenericCapabilityInfo
@@ -1408,7 +1408,7 @@ class H323GenericVideoCapability : public H323VideoCapability,
      */
     virtual unsigned GetSubType() const;
 
-    /**Get the OID of the capability. 
+    /**Get the OID of the capability.
 
        This returns a string representation of the capability OID.
      */
@@ -1469,8 +1469,8 @@ class H323GenericVideoCapability : public H323VideoCapability,
 /**This class describes the interface to a data channel used to transfer data
    via the logical channels opened and managed by the H323 control channel.
 
-   An application may create a descendent off this class and override
-   functions as required for descibing a codec.
+   An application may create a descendant off this class and override
+   functions as required for describing a codec.
  */
 class H323DataCapability : public H323Capability
 {
@@ -1580,7 +1580,7 @@ class H323DataCapability : public H323Capability
 
     /**This function is called whenever and incoming TerminalCapabilitySet
        PDU is received on the control channel, and a new H323Capability
-       descendent was created. This completes reading fields from the PDU
+       descendant was created. This completes reading fields from the PDU
        into the classes members.
 
        If the function returns FALSE then the received PDU codec description
@@ -1628,8 +1628,8 @@ class H323DataCapability : public H323Capability
    transfer data via the logical channels opened and managed by the H323
    control channel.
 
-   An application may create a descendent off this class and override
-   functions as required for descibing the codec.
+   An application may create a descendant off this class and override
+   functions as required for describing the codec.
  */
 class H323NonStandardDataCapability : public H323DataCapability,
                                       public H323NonStandardCapabilityInfo
@@ -1966,7 +1966,7 @@ class H323_UserInputCapability : public H323Capability
 
     /**This function is called whenever and incoming TerminalCapabilitySet
        PDU is received on the control channel, and a new H323Capability
-       descendent was created. This completes reading fields from the PDU
+       descendant was created. This completes reading fields from the PDU
        into the classes members.
 
        If the function returns FALSE then the received PDU codec description
@@ -2010,7 +2010,7 @@ class H323_UserInputCapability : public H323Capability
 
   protected:
     SubTypes subType;
-    
+
 #ifdef H323_H249
 	PString subTypeOID;
 #endif
@@ -2190,9 +2190,9 @@ class H323Capabilities : public PObject
 #endif
       const PStringArray & formatNames  ///< Array of format names to remove
     );
- 
+
 #ifdef H323_H235
-    /**Remove security capability associated with a given media capability 
+    /**Remove security capability associated with a given media capability
       */
     void RemoveSecure(
        unsigned capabilityNumber  ///< Associated capability number
@@ -2203,7 +2203,7 @@ class H323Capabilities : public PObject
       */
     void RemoveAll();
 
-	/**Manually remove Capability type. This removes the specified Capability type out of the 
+	/**Manually remove Capability type. This removes the specified Capability type out of the
 	   default capability list.
 	  */
 	PBoolean RemoveCapability(H323Capability::MainTypes capabilityType);
@@ -2211,15 +2211,15 @@ class H323Capabilities : public PObject
 #ifdef H323_VIDEO
 	/**Set the Video Frame Size. This is used for capabilities
 	   that use 1 definition for all Video Frame Sizes. This will remove all capabilities
-	   not matching the specified Frame Size and send a message to the remaining video capabilities 
+	   not matching the specified Frame Size and send a message to the remaining video capabilities
 	   to set the maximum framesize allowed to the specified value
 	  */
-	PBoolean SetVideoFrameSize(H323Capability::CapabilityFrameSize frameSize, 
+	PBoolean SetVideoFrameSize(H323Capability::CapabilityFrameSize frameSize,
 		                  int frameUnits
 	);
 
-	/**Set the Video Encoder size and rate. 
-		This is used for generic Video Capabilities to set the appropriate level for a given encoder 
+	/**Set the Video Encoder size and rate.
+		This is used for generic Video Capabilities to set the appropriate level for a given encoder
 		frame size and rate.
 	  */
     PBoolean SetVideoEncoder(unsigned frameWidth, unsigned frameHeight, unsigned frameRate);
@@ -2333,7 +2333,7 @@ class H323Capabilities : public PObject
        NULL if no capability meeting the criteria was found
       */
     H323Capability * FindCapability(
-        bool,                                         ///< PlaceHolder             
+        bool,                                         ///< PlaceHolder
         const H245_ExtendedVideoCapability & gen      ///< extVideo cap
     ) const;
 
@@ -2481,7 +2481,7 @@ class H323ExtendedVideoCapability : public H323Capability,
 
     /**Get the default RTP session.
        This function gets the default RTP session ID for the capability
-       type. 
+       type.
        returns H323Capability::DefaultExtVideoSessionID .
       */
     virtual unsigned GetDefaultSessionID() const;
@@ -2502,7 +2502,7 @@ class H323ExtendedVideoCapability : public H323Capability,
       H323Codec::Direction direction  ///< Direction in which this instance runs
     ) const;
   //@}
-    
+
 
   /**@name Protocol manipulation */
   //@{
@@ -2520,7 +2520,7 @@ class H323ExtendedVideoCapability : public H323Capability,
 
     /**This function is called whenever and incoming TerminalCapabilitySet
        PDU is received on the control channel, and a new H323Capability
-       descendent was created. This completes reading fields from the PDU
+       descendant was created. This completes reading fields from the PDU
        into the classes members.
 
        If the function returns FALSE then the received PDU codec description
@@ -2609,7 +2609,7 @@ class H323ExtendedVideoCapability : public H323Capability,
     H323Capability * GetAt(PINDEX i) const;
 
 	/** Get Number of matching Capabilities */
-	PINDEX GetSize() const; 
+	PINDEX GetSize() const;
 
 	/**Add All Capabilities
 	  */
@@ -2679,7 +2679,7 @@ class H323ControlExtendedVideoCapability : public H323ExtendedVideoCapability
 
    /**Get the default RTP session.
        This function gets the default RTP session ID for the capability
-       type. 
+       type.
        returns H323Capability::NonRTPSessionID .
       */
    virtual unsigned GetDefaultSessionID() const;
@@ -2691,12 +2691,12 @@ class H323ControlExtendedVideoCapability : public H323ExtendedVideoCapability
 
    PBoolean CloseChannel(H323Connection * connection, H323Capability::CapabilityDirection dir);
 
-   PBoolean SendGenericMessage(h245MessageType msgtype, 
-                           H323Connection * connection, 
+   PBoolean SendGenericMessage(h245MessageType msgtype,
+                           H323Connection * connection,
                            PBoolean approved=false);
 
-   PBoolean HandleGenericMessage(h245MessageType msgtype, 
-                             H323Connection * connection, 
+   PBoolean HandleGenericMessage(h245MessageType msgtype,
+                             H323Connection * connection,
                        const H245_ArrayOf_GenericParameter * pdu);
 
    H323ChannelNumber & GetChannelNum(H323Capability::CapabilityDirection dir);
@@ -2763,8 +2763,8 @@ class H323CodecExtendedVideoCapability : public H323ExtendedVideoCapability
     ) const;
 
     virtual PBoolean OnReceivedPDU(
-      const H245_DataType & pdu,  
-      PBoolean receiver               
+      const H245_DataType & pdu,
+      PBoolean receiver
     );
 
     virtual PBoolean OnSendingPDU(
@@ -2807,7 +2807,7 @@ class H323_ConferenceControlCapability : public H323Capability
       */
     H323_ConferenceControlCapability();
 
-	H323_ConferenceControlCapability( 
+	H323_ConferenceControlCapability(
 			       PBoolean chairControls,
 	               PBoolean T124Extension
 				   );
@@ -2897,7 +2897,7 @@ class H323_ConferenceControlCapability : public H323Capability
 
     /**This function is called whenever and incoming TerminalCapabilitySet
        PDU is received on the control channel, and a new H323Capability
-       descendent was created. This completes reading fields from the PDU
+       descendant was created. This completes reading fields from the PDU
        into the classes members.
 
        If the function returns FALSE then the received PDU codec description
@@ -2943,8 +2943,8 @@ class H323_ConferenceControlCapability : public H323Capability
 
 /**This class describes the interface to an H245 "generic" control capability
 
-   An application may create a descendent off this class and override
-   functions as required for descibing the codec.
+   An application may create a descendant off this class and override
+   functions as required for describing the codec.
  */
 class H323GenericControlCapability : public H323Capability,
                                      public H323GenericCapabilityInfo
@@ -3015,7 +3015,7 @@ class H323GenericControlCapability : public H323Capability,
      */
 	virtual unsigned GetSubType() const;
 
-    /**Get the OID of the capability. 
+    /**Get the OID of the capability.
 
        This returns a string representation of the capability OID.
      */
@@ -3023,7 +3023,7 @@ class H323GenericControlCapability : public H323Capability,
 
     /**Get the default RTP session.
        This function gets the default RTP session ID for the capability
-       type. 
+       type.
        returns H323Capability::NonRTPSessionID .
       */
     virtual unsigned GetDefaultSessionID() const;
@@ -3044,7 +3044,7 @@ class H323GenericControlCapability : public H323Capability,
       H323Codec::Direction direction  ///< Direction in which this instance runs
     ) const;
   //@}
-    
+
 
   /**@name Protocol manipulation */
   //@{
@@ -3062,7 +3062,7 @@ class H323GenericControlCapability : public H323Capability,
 
     /**This function is called whenever and incoming TerminalCapabilitySet
        PDU is received on the control channel, and a new H323Capability
-       descendent was created. This completes reading fields from the PDU
+       descendant was created. This completes reading fields from the PDU
        into the classes members.
 
        If the function returns FALSE then the received PDU codec description

@@ -59,8 +59,8 @@ class H323Connection;
    used to transfer data via the logical channels opened and managed by the
    H323 control channel.
 
-   An application may create a descendent off this class and override
-   functions as required for descibing a codec.
+   An application may create a descendant off this class and override
+   functions as required for describing a codec.
  */
 class H323Codec : public PObject
 {
@@ -102,8 +102,8 @@ class H323Codec : public PObject
        drive them have been started. This is primarily used to delay allocation
        of resources until the last millisecond.
 
-       A descendent class may be created by the application and it may cast
-       the connection parameter to the application defined descendent of 
+       A descendant class may be created by the application and it may cast
+       the connection parameter to the application defined descendant of
        H323Connection to obtain information needed to open the codec.
 
        The default behaviour does nothing.
@@ -212,7 +212,7 @@ class H323Codec : public PObject
 
     /**Attach the raw data channel for use by codec.
        Note the channel provided will be deleted on destruction of the codec.
-       
+
        The channel connects the codec (audio or video) with hardware to read/write data.
        Thus, the video codec provides a pointer to the data, which the renderer/grabber
        then accesses to display/grab the image from/to.
@@ -284,7 +284,7 @@ class H323Codec : public PObject
     class FilterInfo : public PObject {
         PCLASSINFO(FilterInfo, PObject);
       public:
-        FilterInfo(H323Codec & c) 
+        FilterInfo(H323Codec & c)
           : codec(c), buffer(NULL), bufferSize(0), bufferLength(0) {}
 
         FilterInfo(H323Codec & c, void * b, PINDEX s, PINDEX l)
@@ -341,7 +341,7 @@ class H323Codec : public PObject
       const PNotifier & notifier
     );
 
-   /**SetRawDataHeld is called when the cuurent call has been held and the raw 
+   /**SetRawDataHeld is called when the cuurent call has been held and the raw
          data channel has been swapped out and released.
     */
     virtual PBoolean SetRawDataHeld(PBoolean hold );
@@ -368,7 +368,7 @@ class H323Codec : public PObject
   protected:
     Direction direction;
     OpalMediaFormat mediaFormat;
-    
+
     H323Channel * logicalChannel; // sends messages from receive codec to tx codec.
 
     PChannel * rawDataChannel;  // connection to the hardware for reading/writing data.
@@ -390,8 +390,8 @@ class H323Codec : public PObject
 /**This class defines a codec class that will use the standard platform PCM
    output device.
 
-   An application may create a descendent off this class and override
-   functions as required for descibing a specific codec.
+   An application may create a descendant off this class and override
+   functions as required for describing a specific codec.
  */
 class H323Aec;
 class H323AudioCodec : public H323Codec
@@ -401,7 +401,7 @@ class H323AudioCodec : public H323Codec
   public:
     /** Create a new audio codec.
         This opens the standard PCM audio output device, for input and output
-        and allows descendent codec classes to do audio I/O after
+        and allows descendant codec classes to do audio I/O after
         decoding/encoding.
       */
     H323AudioCodec(
@@ -470,7 +470,7 @@ class H323AudioCodec : public H323Codec
       unsigned * currentThreshold = NULL  ///< Current signal/silence threshold
     ) const;
 
-    
+
     /** for codecs which support it, this sets the quality level of the
         transmitted audio.
         In order to have consistency between different codecs, the qlevel
@@ -483,7 +483,7 @@ class H323AudioCodec : public H323Codec
      * transmitted audio.
      */
     virtual int GetTxQualityLevel(int /*qlevel*/) { return 1; }
-    
+
     /**Check frame for a talk burst.
        This does the deadband calculations on the average signal levels
        returned by the GetAverageSignalLevel() function and based on the
@@ -501,12 +501,12 @@ class H323AudioCodec : public H323Codec
       */
     virtual unsigned GetAverageSignalLevel();
 
-   /**SetRawDataHeld is called when the call has been held and the raw 
+   /**SetRawDataHeld is called when the call has been held and the raw
       data channel has been swapped out and released for another connection.
       */
     virtual PBoolean SetRawDataHeld(PBoolean hold);
 
-#ifdef H323_AEC	
+#ifdef H323_AEC
 	/** Attach Acoustic Echo Cancellation.
 	*/
 	virtual void AttachAEC(
@@ -539,8 +539,8 @@ class H323AudioCodec : public H323Codec
    input block of n samples is encoded to exactly the same sized compressed
    data, eg G.711, GSM etc.
 
-   An application may create a descendent off this class and override
-   functions as required for descibing a specific codec.
+   An application may create a descendant off this class and override
+   functions as required for describing a specific codec.
  */
 class H323Aec;
 class H323FramedAudioCodec : public H323AudioCodec
@@ -550,7 +550,7 @@ class H323FramedAudioCodec : public H323AudioCodec
   public:
     /** Create a new audio codec.
         This opens the standard PCM audio output device, for input and output
-        and allows descendent codec classes to do audio I/O after
+        and allows descendant codec classes to do audio I/O after
         decoding/encoding.
       */
     H323FramedAudioCodec(
@@ -644,7 +644,7 @@ class H323FramedAudioCodec : public H323AudioCodec
     )
     { memset(buffer, 0, length); }
 
-#ifdef H323_AEC	
+#ifdef H323_AEC
     /** Attach Acoustic Echo Cancellation.
     */
     virtual void AttachAEC(
@@ -653,7 +653,7 @@ class H323FramedAudioCodec : public H323AudioCodec
 #endif
 
   protected:
-#ifdef H323_AEC	
+#ifdef H323_AEC
     H323Aec * aec;     // Acoustic Echo Canceller
 #endif
     PShortArray sampleBuffer;
@@ -670,8 +670,8 @@ class H323FramedAudioCodec : public H323AudioCodec
    16 bit PCM sample is encoded to 8 bits or less of encoded data and no
    blocking of PCM data is required, eg G.711, G.721 etc.
 
-   An application may create a descendent off this class and override
-   functions as required for descibing a specific codec.
+   An application may create a descendant off this class and override
+   functions as required for describing a specific codec.
  */
 class H323StreamedAudioCodec : public H323FramedAudioCodec
 {
@@ -680,7 +680,7 @@ class H323StreamedAudioCodec : public H323FramedAudioCodec
   public:
     /** Create a new audio codec.
         This opens the standard PCM audio output device, for input and output
-        and allows descendent codec classes to do audio I/O after
+        and allows descendant codec classes to do audio I/O after
         decoding/encoding.
       */
     H323StreamedAudioCodec(
@@ -732,8 +732,8 @@ class H323StreamedAudioCodec : public H323FramedAudioCodec
 /**This class defines a codec class that will use the standard platform image
    output device.
 
-   An application may create a descendent off this class and override
-   functions as required for descibing a specific codec.
+   An application may create a descendant off this class and override
+   functions as required for describing a specific codec.
  */
 class H323VideoCodec : public H323Codec
 {
@@ -742,7 +742,7 @@ class H323VideoCodec : public H323Codec
   public:
     /** Create a new video codec.
         This opens the standard image output device, for input and output
-        and allows descendent codec classes to do video I/O after
+        and allows descendant codec classes to do video I/O after
         decoding/encoding.
       */
     H323VideoCodec(
@@ -840,22 +840,22 @@ class H323VideoCodec : public H323Codec
       unsigned temporalReference
     );
 
-    /**Process a request for a new frame, 
+    /**Process a request for a new frame,
        as part of the picture has been lost.
     */
     virtual void OnLostPartialPicture();
 
-    /**Process a request for a new frame, 
+    /**Process a request for a new frame,
        as the entire picture has been lost.
     */
     virtual void OnLostPicture();
 
     /** Get width of video
-     */ 
+     */
     virtual unsigned GetWidth() const { return frameWidth; }
 
     /** Get height of video
-     */ 
+     */
     virtual unsigned GetHeight() const { return frameHeight; }
 
     /** Get width of sample aspect ratio
@@ -880,10 +880,10 @@ class H323VideoCodec : public H323Codec
      */
     virtual void SetTxMaxQuality(int qlevel) {videoQMax = qlevel; }
 
-    /**number of blocks (that haven't changed) transmitted with each 
+    /**number of blocks (that haven't changed) transmitted with each
        frame. These blocks fill in the background */
     virtual void SetBackgroundFill(int idle) {fillLevel= idle; }
- 
+
     enum BitRateModeBits {
       None                = 0x00,
       DynamicVideoQuality = 0x01,
@@ -955,9 +955,9 @@ class H323VideoCodec : public H323Codec
        This message is sent via the H245 Logical Channel.
     */
     void SendMiscCommand(unsigned command);
- 
-   /** 
-       Returns the number of frames transmitted or received so far. 
+
+   /**
+       Returns the number of frames transmitted or received so far.
    */
     virtual int GetFrameNum() { return frameNum; }
 
@@ -990,11 +990,11 @@ class H323VideoCodec : public H323Codec
     int videoQuality; // current video encode quality setting, 1..31
     PTimeInterval frameStartTime;
     PTimeInterval grabInterval;
-    
+
     int frameNum, packetNum, oldPacketNum;
     int framesPerSec;
 
-    PMutex  videoHandlerActive;    
+    PMutex  videoHandlerActive;
 };
 
 #endif // NO_H323_VIDEO

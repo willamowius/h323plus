@@ -165,7 +165,7 @@ class H235SecurityCapability  : public H323Capability
 
     /**This function is called whenever and incoming TerminalCapabilitySet
        PDU is received on the control channel, and a new H323Capability
-       descendent was created. This completes reading fields from the PDU
+       descendant was created. This completes reading fields from the PDU
        into the classes members.
 
        If the function returns FALSE then the received PDU codec description
@@ -241,8 +241,8 @@ class H235SecurityCapability  : public H323Capability
 /**This class describes the secure interface to a codec that has channels based on
    the RTP protocol.
 
-   An application may create a descendent off this class and override
-   functions as required for descibing the codec.
+   An application may create a descendant off this class and override
+   functions as required for describing the codec.
  */
 
 enum H235ChType {
@@ -258,7 +258,7 @@ public:
   PCLASSINFO(H323SecureRealTimeCapability, H323Capability);
 
   /**@name Constructor/Deconstructor */
-  //@{  
+  //@{
     /**Constructor
       */
          H323SecureRealTimeCapability(
@@ -299,7 +299,7 @@ public:
     /// Attach QoS
     void AttachQoS(RTP_QOS * _rtpqos);
 
-    /// Set the Associated Capability 
+    /// Set the Associated Capability
     virtual void SetAssociatedCapability(unsigned  _secNo);
 
     /// Set the Capability List
@@ -340,8 +340,8 @@ protected:
 /**This class describes the interface to a secure codec used to transfer data
    via the logical channels opened and managed by the H323 control channel.
 
-   An application may create a descendent off this class and override
-   functions as required for descibing a codec.
+   An application may create a descendant off this class and override
+   functions as required for describing a codec.
  */
 class H323SecureCapability : public H323SecureRealTimeCapability
 {
@@ -351,7 +351,7 @@ class H323SecureCapability : public H323SecureRealTimeCapability
   /**@name Construction */
   //@{
 
-    /**Create an encrypted audio based capability 
+    /**Create an encrypted audio based capability
       */
     H323SecureCapability(
         H323Capability & childCapability,          ///< Child Capability
@@ -389,7 +389,7 @@ class H323SecureCapability : public H323SecureRealTimeCapability
      */
     virtual unsigned GetSubType() const;
 
-    /**Get Generic Identifier 
+    /**Get Generic Identifier
         Default returns PString::Empty
      */
     virtual PString GetIdentifier() const;
@@ -397,7 +397,7 @@ class H323SecureCapability : public H323SecureRealTimeCapability
     /**Get the name of the media data format this class represents.
      */
     virtual PString GetFormatName() const;
-  
+
    /**Create the Codec */
     H323Codec * CreateCodec(H323Codec::Direction direction) const;
   //@}
@@ -455,12 +455,12 @@ class H323SecureCapability : public H323SecureRealTimeCapability
 
     /**This function is called whenever and incoming TerminalCapabilitySet
        PDU is received on the control channel, and a new H323Capability
-       descendent was created. This completes reading fields from the PDU
+       descendant was created. This completes reading fields from the PDU
        into the classes members.
 
        If the function returns FALSE then the received PDU codec description
        is not supported, so will be ignored.
-       
+
        The default behaviour calls the OnReceivedPDU() that takes a
        H245_AudioCapability and clamps the txFramesInPacket.
      */
@@ -473,7 +473,7 @@ class H323SecureCapability : public H323SecureRealTimeCapability
        PDU has been used to construct the control channel. It allows the
        capability to set from the PDU fields, information in members specific
        to the class.
-       
+
        The default behaviour calls the OnReceivedPDU() that takes a
        H245_AudioCapability and clamps the txFramesInPacket or
        rxFramesInPacket.
@@ -500,7 +500,7 @@ class H323SecureCapability : public H323SecureRealTimeCapability
     H323Capability * GetChildCapability() const { return ChildCapability; }
 
     /**Validate that the capability is usable given the connection.
-       This checks agains the negotiated protocol version number and remote
+       This checks against the negotiated protocol version number and remote
        application to determine if this capability should be used in TCS or
        OLC pdus.
 
@@ -512,8 +512,8 @@ class H323SecureCapability : public H323SecureRealTimeCapability
   //@}
 
     /**Get the direction for this capability.
-      */ 
-    CapabilityDirection GetCapabilityDirection() const 
+      */
+    CapabilityDirection GetCapabilityDirection() const
         { return ChildCapability->GetCapabilityDirection(); }
 
     /**Set the direction for this capability.
@@ -522,8 +522,8 @@ class H323SecureCapability : public H323SecureRealTimeCapability
       CapabilityDirection dir   /// New direction code
     ) { ChildCapability->SetCapabilityDirection(dir); }
 
-    /// Get the payload type for the capaibility
-    RTP_DataFrame::PayloadTypes GetPayloadType() const 
+    /// Get the payload type for the capability
+    RTP_DataFrame::PayloadTypes GetPayloadType() const
         { return ChildCapability->GetPayloadType(); }
 
   //@}
@@ -534,8 +534,8 @@ class H323SecureCapability : public H323SecureRealTimeCapability
 /**This class describes the interface to a secure extended codec used to transfer data
    via the logical channels opened and managed by the H323 control channel.
 
-   An application may create a descendent off this class and override
-   functions as required for descibing a codec.
+   An application may create a descendant off this class and override
+   functions as required for describing a codec.
  */
 
 class H323SecureExtendedCapability  : public H323ExtendedVideoCapability
@@ -545,7 +545,7 @@ public:
   PCLASSINFO(H323SecureExtendedCapability, H323ExtendedVideoCapability);
 
   /**@name Constructor/Deconstructor */
-  //@{  
+  //@{
     /**Constructor
       */
          H323SecureExtendedCapability(
@@ -587,7 +587,7 @@ public:
     /// Attach QoS
     void AttachQoS(RTP_QOS * _rtpqos);
 
-    /// Set the Associated Capability 
+    /// Set the Associated Capability
     virtual void SetAssociatedCapability(unsigned  _secNo);
 
     /// Set the Capability List
@@ -637,7 +637,7 @@ public:
      */
     virtual unsigned GetSubType() const;
 
-    /**Get Generic Identifier 
+    /**Get Generic Identifier
         Default returns PString::Empty
      */
     virtual PString GetIdentifier() const;
@@ -645,7 +645,7 @@ public:
     /**Get the name of the media data format this class represents.
      */
     virtual PString GetFormatName() const;
-  
+
    /**Create the Codec */
     H323Codec * CreateCodec(H323Codec::Direction direction) const;
   //@}
@@ -703,12 +703,12 @@ public:
 
     /**This function is called whenever and incoming TerminalCapabilitySet
        PDU is received on the control channel, and a new H323Capability
-       descendent was created. This completes reading fields from the PDU
+       descendant was created. This completes reading fields from the PDU
        into the classes members.
 
        If the function returns FALSE then the received PDU codec description
        is not supported, so will be ignored.
-       
+
        The default behaviour calls the OnReceivedPDU() that takes a
        H245_AudioCapability and clamps the txFramesInPacket.
      */
@@ -721,7 +721,7 @@ public:
        PDU has been used to construct the control channel. It allows the
        capability to set from the PDU fields, information in members specific
        to the class.
-       
+
        The default behaviour calls the OnReceivedPDU() that takes a
        H245_AudioCapability and clamps the txFramesInPacket or
        rxFramesInPacket.
@@ -764,8 +764,8 @@ public:
   //@}
 
     /**Get the direction for this capability.
-      */ 
-    CapabilityDirection GetCapabilityDirection() const 
+      */
+    CapabilityDirection GetCapabilityDirection() const
         { return ChildCapability->GetCapabilityDirection(); }
 
     /**Set the direction for this capability.
@@ -775,7 +775,7 @@ public:
     ) { ChildCapability->SetCapabilityDirection(dir); }
 
     /// Get the payload type for the capaibility
-    RTP_DataFrame::PayloadTypes GetPayloadType() const 
+    RTP_DataFrame::PayloadTypes GetPayloadType() const
         { return ChildCapability->GetPayloadType(); }
 
   //@}
@@ -794,16 +794,16 @@ protected:
 /**This class describes the secure interface to a data codec that has channels based on
    the RTP protocol.
 
-   An application may create a descendent off this class and override
-   functions as required for descibing the codec.
+   An application may create a descendant off this class and override
+   functions as required for describing the codec.
  */
 
 class H323SecureDataCapability : public H323DataCapability
 {
   PCLASSINFO(H323SecureDataCapability, H323DataCapability);
-	
+
 public:
-	
+
     H323SecureDataCapability(H323Capability & childCapability,          ///< Child Capability
                            enum H235ChType Ch = H235ChNew,               ///< ChannelType
                            H323Capabilities * capabilities = NULL,    ///< Capabilities reference
@@ -864,7 +864,7 @@ protected:
     H323Capabilities * m_capabilities;   /// Capabilities list
     unsigned  m_secNo;                   /// Security Capability
     PString   m_algorithm;               /// Algorithm for encryption
-	
+
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -898,7 +898,7 @@ public:
                    H323Capability * capability       ///< capability to add
                    );
 
-    H323Capability * CopySecure(PINDEX descriptorNum,             ///< The member of the capabilityDescriptor to add 
+    H323Capability * CopySecure(PINDEX descriptorNum,             ///< The member of the capabilityDescriptor to add
                                 PINDEX simultaneous,              ///< The member of the SimultaneousCapabilitySet to add
                                 const H323Capability & capability ///< capability to copy
                                 );
@@ -934,7 +934,7 @@ public:
     PBoolean IsH235Codec(const PString & name);
 
 protected:
-    H235_DiffieHellman * m_DHkey; 
+    H235_DiffieHellman * m_DHkey;
     PStringList          m_algorithms;
     PBoolean             m_h245Master;
 

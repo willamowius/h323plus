@@ -2733,7 +2733,7 @@ void H323EndPoint::CleanUpConnections()
     H323Connection * connectionToDelete = connectionsActive.RemoveAt(token);
 
     // Unlock the structures yet again to avoid possible race conditions when
-    // deleting the connection as well as the delte of a conncetion descendent
+    // deleting the connection as well as the delte of a conncetion descendant
     // is application writer dependent and may cause deadlocks or just consume
     // lots of time.
     connectionsMutex.Signal();

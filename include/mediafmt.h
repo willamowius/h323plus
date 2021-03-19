@@ -192,7 +192,7 @@ class OpalMediaOptionValue : public OpalMediaOption
 
     virtual Comparison CompareValue(const OpalMediaOption & option) const {
 	  if (!PIsDescendant(&option, OpalMediaOptionValue)) {
-		  PTRACE(6,"MediaOpt\t" << option.GetName() << " not compared! Not descendent of OpalMediaOptionValue");
+		  PTRACE(6,"MediaOpt\t" << option.GetName() << " not compared! Not descendant of OpalMediaOptionValue");
 		  return GreaterThan;
 	  }
       const OpalMediaOptionValue * otherOption = PDownCast(const OpalMediaOptionValue, &option);
@@ -209,7 +209,7 @@ class OpalMediaOptionValue : public OpalMediaOption
       const OpalMediaOption & option
     ) {
 	  if (!PIsDescendant(&option, OpalMediaOptionValue)) {
-		  PTRACE(6,"MediaOpt\t" << option.GetName() << " not assigned! Not descendent of OpalMediaOptionValue");
+		  PTRACE(6,"MediaOpt\t" << option.GetName() << " not assigned! Not descendant of OpalMediaOptionValue");
 		  return;
 	  }
       const OpalMediaOptionValue * otherOption = PDownCast(const OpalMediaOptionValue, &option);
@@ -426,7 +426,7 @@ class OpalMediaFormat : public PCaselessString
 	virtual unsigned GetInitialBandwidth() const { return GetBandwidth(); }
 
     /**Get the maximum frame size in bytes. If this returns zero then the
-       media format has no intrinsic maximum frame size, eg G.711 would 
+       media format has no intrinsic maximum frame size, eg G.711 would
        return zero but G.723.1 whoud return 24.
       */
     PINDEX GetFrameSize() const { return frameSize; }
@@ -450,7 +450,7 @@ class OpalMediaFormat : public PCaselessString
       AudioTimeUnits = 8,  ///<  8kHz sample rate
       VideoTimeUnits = 90  ///<  90kHz sample rate
     };
- 
+
     /**Get the list of media formats that have been registered.
       */
     static List GetRegisteredMediaFormats();
@@ -483,7 +483,7 @@ class OpalMediaFormat : public PCaselessString
       time_t timeStamp = 0    ///<  timestamp (for versioning)
 
     );
-    
+
     bool GetOptionValue(
       const PString & name,   ///<  Option name
       PString & value         ///<  String to receive option value
@@ -636,13 +636,13 @@ class OpalMediaFormat : public PCaselessString
       PBoolean overwrite = FALSE
     );
 
-    
-    /** 
+
+    /**
       * Remove all options
       */
-    void RemoveAllOptions() 
+    void RemoveAllOptions()
     { options.RemoveAll(); }
-    
+
     /**
       * Determine if media format has the specified option.
       */
@@ -766,7 +766,7 @@ extern char OpalGSM0610[];
 //
 // Originally, the following inplace code was used instead of this macro:
 //
-// static PAbstractSingletonFactory<OpalMediaFormat, 
+// static PAbstractSingletonFactory<OpalMediaFormat,
 //     OpalStaticMediaFormatTemplate<
 //          OpalPCM16,
 //          OpalMediaFormat::DefaultAudioSessionID,
@@ -777,7 +777,7 @@ extern char OpalGSM0610[];
 //          8, // 1 millisecond
 //          OpalMediaFormat::AudioTimeUnits,
 //          0
-//     > 
+//     >
 // > opalPCM16Factory(OpalPCM16);
 //
 // This used the following macro:

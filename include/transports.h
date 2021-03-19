@@ -220,13 +220,13 @@ public:
 
     PBoolean HasSecurity();
 
-    void EnableTLS(PBoolean enable); 
+    void EnableTLS(PBoolean enable);
     PBoolean IsTLSEnabled() const;
 
     void SetRemoteTLSAddress(const H323TransportAddress & address);
     H323TransportAddress GetRemoteTLSAddress();
 
-    void EnableIPSec(PBoolean enable); 
+    void EnableIPSec(PBoolean enable);
     PBoolean IsIPSecEnabled();
 
     void SetMediaPolicy(Policy policy);
@@ -247,10 +247,10 @@ protected:
 
    The Main() function is used to handle incoming H.323 connections and
    dispatch them in new threads based on the actual H323Transport class. This
-   is defined in the descendent class that knows what the low level transport
+   is defined in the descendant class that knows what the low level transport
    is, eg H323ListenerIP for the TCP/IP protocol.
 
-   An application may create a descendent off this class and override
+   An application may create a descendant off this class and override
    functions as required for operating the channel protocol.
  */
 class H323Listener : public PThread
@@ -439,7 +439,7 @@ class H323Transport : public PIndirectChannel
       PINDEX len    ///< Maximum number of bytes to read into the buffer.
     );
 
-    /**Low level write to the channel. 
+    /**Low level write to the channel.
      */
     virtual PBoolean Write(
       const void * buf, ///< Pointer to a block of memory to write.
@@ -447,7 +447,7 @@ class H323Transport : public PIndirectChannel
     );
 
     /**This callback is executed when the OnOpen() function is called with
-       open channels. It may be used by descendent channels to do any
+       open channels. It may be used by descendant channels to do any
        handshaking required by the protocol that channel embodies.
 
        The default behaviour is to simply return TRUE.
@@ -540,7 +540,7 @@ class H323Transport : public PIndirectChannel
        into valid PDUs.
       */
     virtual PBoolean ExtractPDU(
-      const PBYTEArray & pdu, 
+      const PBYTEArray & pdu,
       PINDEX & len
     ) = 0;
 
@@ -670,7 +670,7 @@ class H323Transport : public PIndirectChannel
 
   protected:
     /**This callback is executed when the Open() function is called with
-       open channels. It may be used by descendent channels to do any
+       open channels. It may be used by descendant channels to do any
        handshaking required by the protocol that channel embodies.
 
        The default behaviour is to simply return true.
@@ -775,7 +775,7 @@ class H323ListenerTCP : public H323Listener
     /** Destroy the listener thread.
       */
     ~H323ListenerTCP();
-    
+
   // Overrides from H323Listener
     /** Open the listener.
       */
@@ -815,7 +815,7 @@ class H323ListenerTCP : public H323Listener
 
   protected:
     /**Handle incoming H.323 connections and dispatch them in new threads
-       based on the H323Transport class. This is defined in the descendent
+       based on the H323Transport class. This is defined in the descendant
        class that knows what the low level transport is, eg H323ListenerIP
        for the TCP/IP protocol.
 
@@ -913,7 +913,7 @@ class H323TransportTCP : public H323TransportIP
     virtual PBoolean Connect();
 
     /**This callback is executed when the OnOpen() function is called with
-       open channels. It may be used by descendent channels to do any
+       open channels. It may be used by descendant channels to do any
        handshaking required by the protocol that channel embodies.
 
        The default behaviour is to simply return TRUE.
@@ -939,10 +939,10 @@ class H323TransportTCP : public H323TransportIP
     /**Extract a protocol data unit from the transport
       */
     PBoolean ExtractPDU(
-      const PBYTEArray & pdu, 
+      const PBYTEArray & pdu,
       PINDEX & len
     );
- 
+
     /**Write a protocol data unit from the transport.
        This will write using the transports mechanism for PDU boundaries, for
        example UDP is a single Write() call, while for TCP there is a TPKT
@@ -973,7 +973,7 @@ class H323TransportTCP : public H323TransportIP
     virtual PBoolean IsListening() const;
 
 #if PTLIB_VER >= 2130
-   /** Read a single character from the channel. 
+   /** Read a single character from the channel.
         Casting issue in PTLIB
      */
     virtual int ReadChar();
@@ -1002,7 +1002,7 @@ class H323TransportTCP : public H323TransportIP
 
   protected:
     /**This callback is executed when the Open() function is called with
-       open channels. It may be used by descendent channels to do any
+       open channels. It may be used by descendant channels to do any
        handshaking required by the protocol that channel embodies.
 
        The default behaviour is to simply return true.
@@ -1083,10 +1083,10 @@ class H323TransportUDP : public H323TransportIP
     /**Extract a protocol data unit from the transport
       */
     PBoolean ExtractPDU(
-      const PBYTEArray & pdu, 
+      const PBYTEArray & pdu,
       PINDEX & len
     );
- 
+
     /**Write a protocol data unit from the transport.
        This will write using the transports mechanism for PDU boundaries, for
        example UDP is a single Write() call, while for TCP there is a TPKT

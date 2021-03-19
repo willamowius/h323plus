@@ -91,7 +91,7 @@ class H323ChannelNumber : public PObject
 /**This class describes a logical channel between the two endpoints. They may
    be created and deleted as required in the H245 protocol.
 
-   An application may create a descendent off this class and override
+   An application may create a descendant off this class and override
    functions as required for operating the channel protocol.
  */
 class H323Channel : public PObject
@@ -388,7 +388,7 @@ H323LIST(H323LogicalChannelList, H323Channel);
 /**This class describes a unidirectional logical channel between the two
    endpoints. They may be created and deleted as required in the H245 protocol.
 
-   An application may create a descendent off this class and override
+   An application may create a descendant off this class and override
    functions as required for operating the channel protocol.
  */
 class H323UnidirectionalChannel : public H323Channel
@@ -430,7 +430,7 @@ class H323UnidirectionalChannel : public H323Channel
 /**This class describes a bidirectional logical channel between the two
    endpoints. They may be created and deleted as required in the H245 protocol.
 
-   An application may create a descendent off this class and override
+   An application may create a descendant off this class and override
    functions as required for operating the channel protocol.
  */
 class H323BidirectionalChannel : public H323Channel
@@ -933,7 +933,7 @@ class H323_ExternalRTPChannel : public H323_RealTimeChannel
 /**This class describes a data logical channel between the two endpoints.
    They may be created and deleted as required in the H245 protocol.
 
-   An application may create a descendent off this class and override
+   An application may create a descendant off this class and override
    functions as required for operating the channel protocol.
  */
 class H323DataChannel : public H323UnidirectionalChannel
