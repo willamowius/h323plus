@@ -38,7 +38,7 @@ extern "C" {
 #include <time.h>
 
 // indicator the this is h323plus version of the plugin codec
-#define h323pluslib          1 
+#define h323pluslib          1
 
 #ifdef _MSC_VER
 #pragma warning(disable:4201)
@@ -175,7 +175,7 @@ enum PluginCodec_CoderFlags {
 enum PluginCodec_ReturnCoderFlags {
   PluginCodec_ReturnCoderLastFrame      = 1,    // indicates when video codec returns last data for frame
   PluginCodec_ReturnCoderIFrame         = 2,    // indicates when video returns I frame
-  PluginCodec_ReturnCoderRequestIFrame  = 4,    // indicates when video decoder request I frame for resync
+  PluginCodec_ReturnCoderRequestIFrame  = 4,    // indicates when video decoder request I frame for re-sync
   PluginCodec_ReturnCoderBufferTooSmall = 8,    // indicates when output buffer is not large enough to receive
                                                 // the data, another call to get_output_data_size is required
   PluginCodec_ReturnCoderMoreFrame      = 16    // indicates that the decoder need to output more frame
@@ -315,7 +315,7 @@ struct PluginCodec_Definition {
                                            // b6:   0 = dynamic RTP,  1 = explicit RTP
                                            // b7:   0 = no share RTP, 1 = share RTP
 
-  const char * descr;                       // text decription
+  const char * descr;                       // text description
 
   const char * sourceFormat;               // source format
   const char * destFormat;                 // destination format
@@ -358,7 +358,7 @@ struct PluginCodec_Definition {
 
   // end of version 1 fields
 
-  // NOTE!!!!! Due to an error in judgement, you cannot add ANY more fields
+  // NOTE!!!!! Due to an error in judgment, you cannot add ANY more fields
   // to this structure without an API version change!!!!
 };
 
@@ -394,18 +394,18 @@ struct PluginCodec_H323GenericParameterDefinition
      version 3 and earlier. We hope that all those implementations just used
      zero and one (a good bet) and thus the below bit fields will be backward
      compatible, putting the parameter in all three PDU types.
-   */ 
-#ifndef SOLARIS   
+   */
+#ifndef SOLARIS
   struct {
-#endif  
+#endif
     int collapsing:1; /* boolean */
     int excludeTCS:1;
     int excludeOLC:1;
     int excludeReqMode:1;
     int readOnly:1;
-#ifndef SOLARIS    
+#ifndef SOLARIS
   };
-#endif  
+#endif
 
   unsigned int id;
 
