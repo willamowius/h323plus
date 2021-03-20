@@ -18,13 +18,13 @@
  * ITU-T 7/14kHz Audio Coder (G.722.1) AKA Polycom 'Siren'
  * SDP usage described in RFC 5577
  * H.245 capabilities defined in G.722.1 Annex A & H.245 Appendix VIII
- * This implementation employs ITU-T G.722.1 (2005-05) fixed point reference 
+ * This implementation employs ITU-T G.722.1 (2005-05) fixed point reference
  * code, release 2.1 (2008-06)
  * This implements only standard bit rates 24000 & 32000 at 16kHz (Siren7)
  * sampling rate, not extended modes or 32000 sampling rate (Siren14).
  * G.722.1 does not implement any silence handling (VAD/CNG)
  * Static variables are not used, so multiple instances can run simultaneously.
- * G.722.1 is patented by Polycom, but is royalty-free if you follow their 
+ * G.722.1 is patented by Polycom, but is royalty-free if you follow their
  * license terms. See:
  * http://www.polycom.com/company/about_us/technology/siren14_g7221c/faq.html
  *
@@ -94,7 +94,7 @@ static struct PluginCodec_information licenseInfo =
   "Copyright (c) 2009 Nimajin Software Consulting",            // source code copyright
   "None",                                                      // source code license
   PluginCodec_License_None,                                    // source code license
-    
+
   "ITU-T 7/14kHz Audio Coder (G.722.1 Annex C)",               // codec description
   "Polycom, Inc.",                                             // codec author
   "2.1  2008-06-26",				                           // codec version
@@ -111,8 +111,8 @@ static short EndianWord = 0x1234;
 /////////////////////////////////////////////////////////////////////////////
 
 
-#define FORMAT_NAME_G722_1_16_24K  "G.722.1-24k"   // text decription and mediaformat name
-#define FORMAT_NAME_G722_1_16_32K  "G.722.1-32k"   // text decription and mediaformat name
+#define FORMAT_NAME_G722_1_16_24K  "G.722.1-24k"   // text description and mediaformat name
+#define FORMAT_NAME_G722_1_16_32K  "G.722.1-32k"   // text description and mediaformat name
 #define FORMAT_NAME_G722_1c        "G.722.1c"
 #define RTP_NAME_G722_1  "G7221"                // MIME name rfc's 3047, 5577
 
@@ -149,13 +149,13 @@ typedef struct
 #define PLUGINCODEC_OPTION_SUPPORTMODE			"Generic Parameter 2"
 
 static int encoder_set_options(
-      const struct PluginCodec_Definition * codec, 
-      void * _context, 
-      const char *, 
-      void * parm, 
+      const struct PluginCodec_Definition * codec,
+      void * _context,
+      const char *,
+      void * parm,
       unsigned * parmLen)
 {
-  if (_context == NULL || parmLen == NULL || *parmLen != sizeof(const char **)) 
+  if (_context == NULL || parmLen == NULL || *parmLen != sizeof(const char **))
     return 0;
 
   G7221EncoderContext * context = (G7221EncoderContext *)_context;
@@ -195,7 +195,7 @@ static int encoder_set_options(
         if (options == NULL) return 0;
         for (int i = 0; options[i] != NULL; i += 2) {
 	      if (STRCMPI(options[i], PLUGINCODEC_OPTION_MAX_BIT_RATE) == 0)
-		     options[i+1] = num2str(maxBitRate);	
+		     options[i+1] = num2str(maxBitRate);
 	    }
     }
 
@@ -213,7 +213,7 @@ static void * G7221EncoderCreate (const struct PluginCodec_Definition * codec)
 
   Context->sampleRate = codec->sampleRate;
   Context->bitsPerSec = codec->bitsPerSec;
-  
+
   // initialize the mlt history buffer
   for (i = 0; i < codec->parm.audio.samplesPerFrame; i++)
     Context->history[i] = 0;
@@ -228,11 +228,11 @@ static void G7221EncoderDestroy (const struct PluginCodec_Definition * codec, vo
 }
 
 
-static int G7221Encode (const struct PluginCodec_Definition * codec, 
+static int G7221Encode (const struct PluginCodec_Definition * codec,
                                                        void * context,
-                                                 const void * fromPtr, 
+                                                 const void * fromPtr,
                                                    unsigned * fromLen,
-                                                       void * toPtr,         
+                                                       void * toPtr,
                                                    unsigned * toLen,
                                                unsigned int * flag)
 {
@@ -240,7 +240,7 @@ static int G7221Encode (const struct PluginCodec_Definition * codec,
   G7221EncoderContext * Context = (G7221EncoderContext *) context;
   if (Context == NULL)
     return 0;
-  
+
   if (*fromLen < codec->parm.audio.samplesPerFrame)
     return 0;                           // Source is not a full frame
 
@@ -249,13 +249,13 @@ static int G7221Encode (const struct PluginCodec_Definition * codec,
 
   // Convert input samples to rmlt coefs
   Context->mag_shift = samples_to_rmlt_coefs ((Word16 *) fromPtr, Context->history, Context->mlt_coefs, *fromLen/2);
-  
+
   // Encode the mlt coefs
   encoder (G722_1_FRAME_BITS (Context->bitsPerSec), NUMBER_OF_REGIONS, Context->mlt_coefs, Context->mag_shift, (Word16 *) toPtr);
- 
+
  for (i = 0; i < (short)codec->parm.audio.samplesPerFrame; i++)
      ((Word16 *) toPtr) [i] =ntohs(((Word16 *)toPtr)[i]);
- 
+
  // return the number of encoded bytes to the caller
   *fromLen = codec->parm.audio.samplesPerFrame*2;
   *toLen = G722_1_FRAME_BYTES (Context->bitsPerSec);
@@ -306,11 +306,11 @@ static void * G7221DecoderCreate (const struct PluginCodec_Definition * codec)
 
   // initialize the coefs history
   for (i = 0; i < codec->parm.audio.samplesPerFrame; i++)
-    Context->old_decoder_mlt_coefs[i] = 0;    
+    Context->old_decoder_mlt_coefs[i] = 0;
 
   for (i = 0; i < (codec->parm.audio.samplesPerFrame >> 1); i++)
     Context->old_samples[i] = 0;
-    
+
   // initialize the random number generator
   Context->randobj.seed0 = 1;
   Context->randobj.seed1 = 1;
@@ -327,11 +327,11 @@ static void G7221DecoderDestroy (const struct PluginCodec_Definition * codec, vo
 }
 
 
-static int G7221Decode (const struct PluginCodec_Definition * codec, 
+static int G7221Decode (const struct PluginCodec_Definition * codec,
                                                        void * context,
-                                                 const void * fromPtr, 
+                                                 const void * fromPtr,
                                                    unsigned * fromLen,
-                                                       void * toPtr,         
+                                                       void * toPtr,
                                                    unsigned * toLen,
                                                unsigned int * flag)
 {
@@ -340,7 +340,7 @@ static int G7221Decode (const struct PluginCodec_Definition * codec,
     if (Context == NULL)
         return 0;
     //printf("Decode: FromLen->%i ToLen->%i\n", *fromLen, *toLen);
-    
+
     if (*fromLen < G722_1_FRAME_BYTES (Context->bitsPerSec))
         return 0;                           // Source is not a full frame
 
@@ -360,22 +360,22 @@ static int G7221Decode (const struct PluginCodec_Definition * codec,
   Context->bitobj.current_word = *((Word16 *) fromPtr);
   Context->bitobj.code_bit_count = 0;
   Context->bitobj.number_of_bits_left = G722_1_FRAME_BITS(Context->bitsPerSec);
-  
+
   for (i = 0; i < (short)*fromLen/2; i++)
       ((Word16 *) fromPtr) [i] =ntohs(((Word16 *)fromPtr)[i]);
-   
+
   // process the out_words into decoder_mlt_coefs
   decoder (&Context->bitobj, &Context->randobj, NUMBER_OF_REGIONS, \
                 Context->decoder_mlt_coefs, &Context->mag_shift, &Context->old_mag_shift, \
                 Context->old_decoder_mlt_coefs, Context->frame_error_flag);
-  
+
   // convert the decoder_mlt_coefs to samples
   rmlt_coefs_to_samples (Context->decoder_mlt_coefs, Context->old_samples, (Word16 *) toPtr, codec->parm.audio.samplesPerFrame, Context->mag_shift);
 
   //For ITU testing, off the 2 lsbs.
   for (i = 0; i < (short)codec->parm.audio.samplesPerFrame; i++)
     ((Word16 *) toPtr) [i] &= 0xFFFC;
-   
+
     // return the number of decoded bytes to the caller
   *fromLen = G722_1_FRAME_BYTES (Context->bitsPerSec);
   *toLen = codec->parm.audio.samplesPerFrame*2;
@@ -449,14 +449,14 @@ static struct PluginCodec_Option * const OptionTable32k[] =
 
 
 static int get_codec_options (const struct PluginCodec_Definition * defn,
-                                                             void * context, 
+                                                             void * context,
                                                        const char * name,
                                                              void * parm,
                                                          unsigned * parmLen)
 {
   if (parm == NULL || parmLen == NULL || *parmLen != sizeof(struct PluginCodec_Option **))
     return 0;
-   
+
   if (defn->sampleRate == G722_1_32K_SAMPLING_RATE) {
       *(struct PluginCodec_Option const * const * *)parm = OptionTable32k;
   }
@@ -465,11 +465,11 @@ static int get_codec_options (const struct PluginCodec_Definition * defn,
           *(struct PluginCodec_Option const * const * *)parm = OptionTable1632k;
       else
           *(struct PluginCodec_Option const * const * *)parm = OptionTable1624k;
-      
+
   }
   //*(struct PluginCodec_Option const * const * *)parm = (defn->sampleRate == G722_1_16K_SAMPLING_RATE)? OptionTable1632k : OptionTable32k;
-  
-  
+
+
   *parmLen = 0;
 
   return 1;
@@ -477,7 +477,7 @@ static int get_codec_options (const struct PluginCodec_Definition * defn,
 
 
 // Options are read-only, so set_codec_options not implemented
-// get_codec_options returns pointers to statics, and toCustomized and 
+// get_codec_options returns pointers to statics, and toCustomized and
 // toNormalized are not implemented, so free_codec_options is not necessary
 
 static struct PluginCodec_ControlDefn G7221Controls[] =
@@ -503,7 +503,7 @@ static unsigned int G7221_32_MAXBITRATE = 32000;
 static const struct PluginCodec_H323GenericParameterDefinition prefix##_h323params[] = \
 { \
    {{1,0,0,0,0},1,PluginCodec_H323GenericParameterDefinition::PluginCodec_GenericParameter_unsignedMin, {prefix##_FRAMES}}, \
-    NULL \
+    0 \
 }; \
 static struct PluginCodec_H323GenericCodecData prefix##_Cap = \
 { \
@@ -536,7 +536,7 @@ static struct PluginCodec_H323GenericCodecData prefix##_Cap = \
     prefix##_MAXBITRATE, \
     2, \
     prefix##_h323params \
-}; 
+};
 
 //G7221cPLUGIN_CODEC(G7221c);
 
@@ -574,7 +574,7 @@ static struct PluginCodec_Definition G7221CodecDefn[] =
         PluginCodec_H323Codec_generic,          // h323CapabilityType
         &G7221_32_Cap                           // h323CapabilityData
     },
-    { 
+    {
         // G.722.1 16kHz, 32 kbps decoder
         PLUGIN_CODEC_VERSION_OPTIONS,           // codec API version
         &licenseInfo,                           // license information
@@ -636,7 +636,7 @@ static struct PluginCodec_Definition G7221CodecDefn[] =
         PluginCodec_H323Codec_generic,          // h323CapabilityType
         &G7221_24_Cap                           // h323CapabilityData
     },
-    { 
+    {
         // G.722.1 16kHz, 24 kbps decoder
         PLUGIN_CODEC_VERSION_OPTIONS,           // codec API version
         &licenseInfo,                           // license information
@@ -668,7 +668,7 @@ static struct PluginCodec_Definition G7221CodecDefn[] =
         &G7221_24_Cap                           // h323CapabilityData
     },
 #if 0
-    { 
+    {
         // G.722.1 32kHz encoder
         PLUGIN_CODEC_VERSION_OPTIONS,           // codec API version
         &licenseInfo,                           // license information
@@ -699,7 +699,7 @@ static struct PluginCodec_Definition G7221CodecDefn[] =
         PluginCodec_H323Codec_generic,          // h323CapabilityType
         &G7221c_Cap                             // h323CapabilityData
       },
-      { 
+      {
         // G.722.1 32kHz decoder
         PLUGIN_CODEC_VERSION_OPTIONS,           // codec API version
         &licenseInfo,                           // license information
