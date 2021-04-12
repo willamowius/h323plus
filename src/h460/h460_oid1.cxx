@@ -68,7 +68,6 @@ H460_FeatureOID1::H460_FeatureOID1()
  m_con = NULL;
 
  FeatureCategory = FeatureSupported;
-
 }
 
 H460_FeatureOID1::~H460_FeatureOID1()
@@ -147,7 +146,6 @@ void H460_FeatureOID1::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
    m_con->SetIMSupport(true);
    m_ep->IMSupport(callToken);
    remoteSupport = true;
-
 }
 
 PBoolean H460_FeatureOID1::OnSendCallProceeding_UUIE(H225_FeatureDescriptor & pdu)
@@ -159,7 +157,6 @@ PBoolean H460_FeatureOID1::OnSendCallProceeding_UUIE(H225_FeatureDescriptor & pd
 
 	return remoteSupport;
 }
-
 
 void H460_FeatureOID1::OnReceiveCallProceeding_UUIE(const H225_FeatureDescriptor & pdu)
 {
@@ -204,11 +201,9 @@ void H460_FeatureOID1::OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pdu
     }
 }
 
-
 // Send Message
 PBoolean H460_FeatureOID1::OnSendFacility_UUIE(H225_FeatureDescriptor & pdu)
 {
-
     if (!remoteSupport)
         return false;
 
@@ -247,7 +242,7 @@ PBoolean H460_FeatureOID1::OnSendFacility_UUIE(H225_FeatureDescriptor & pdu)
     }
 
     return false;
-};
+}
 
 // Receive Message
 void H460_FeatureOID1::OnReceiveFacility_UUIE(const H225_FeatureDescriptor & pdu)
@@ -291,8 +286,7 @@ void H460_FeatureOID1::OnReceiveFacility_UUIE(const H225_FeatureDescriptor & pdu
    } else if (!m_con->IMSession()) {
        m_con->ClearCall();    // Send Release Complete
    }
-
-};
+}
 
 // You end connection
 PBoolean H460_FeatureOID1::OnSendReleaseComplete_UUIE(H225_FeatureDescriptor & pdu)
@@ -310,7 +304,7 @@ PBoolean H460_FeatureOID1::OnSendReleaseComplete_UUIE(H225_FeatureDescriptor & p
 	}
 
    return false;
-};
+}
 
 // Other person ends connection
 void H460_FeatureOID1::OnReceiveReleaseComplete_UUIE(const H225_FeatureDescriptor & pdu)
@@ -324,7 +318,7 @@ void H460_FeatureOID1::OnReceiveReleaseComplete_UUIE(const H225_FeatureDescripto
           m_ep->IMSessionClosed(callToken);
         }
     }
-};
+}
 
 PBoolean H460_FeatureOID1::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
 {
@@ -344,4 +338,3 @@ PBoolean H460_FeatureOID1::OnSendAdmissionRequest(H225_FeatureDescriptor & pdu)
 #endif
 
 #endif
-
