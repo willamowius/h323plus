@@ -101,8 +101,7 @@ PBoolean H460_FeatureOID1::SupportNonCallService() const
 
 PBoolean H460_FeatureOID1::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
 {
-
-  if (m_ep->IMisDisabled())
+  if (!m_ep || m_ep->IMisDisabled())
 	  return false;
 
   // Set Call Token
@@ -128,8 +127,7 @@ PBoolean H460_FeatureOID1::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
 
 void H460_FeatureOID1::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
 {
-
-  if (m_ep->IMisDisabled())
+  if (!m_ep || m_ep->IMisDisabled())
 	  return;
 
    callToken = m_con->GetCallToken();
