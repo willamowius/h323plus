@@ -31,6 +31,10 @@
 #include <ptlib/sound.h>
 #include <h323.h>
 
+#ifndef H323_AUDIO_CODECS
+#error "This sample application needs audio support enabled in H323Plus"
+#endif
+
 #if PTLIB_VER < 2130
 #if !defined(P_USE_STANDARD_CXX_BOOL) && !defined(P_USE_INTEGER_BOOL)
     typedef int PBoolean;
