@@ -392,7 +392,7 @@ int OpalG711uLaw64k20_Decoder::Encode(const void * _from, unsigned * fromLen, vo
 }
 
 
-#endif // NO_H323_AUDIO_CODECS
+#endif // H323_AUDIO_CODECS
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -484,6 +484,7 @@ bool OpalPluginCodec::SetCustomFormat(unsigned bitrate, unsigned samplerate)
     return SetCustomisedOptions(codecDefn, context, bitrate, samplerate);
 }
 
+#if defined(H323_AUDIO_CODECS) || defined(H323_VIDEO)
 static PBoolean SetCodecControl(const PluginCodec_Definition * codec,
                                                     void * context,
                                               const char * name,
@@ -505,7 +506,6 @@ static PBoolean SetCodecControl(const PluginCodec_Definition * codec,
   return result;
 }
 
-#if defined(H323_AUDIO_CODECS) || defined(H323_VIDEO)
 static PBoolean SetCodecControl(const PluginCodec_Definition * codec,
                                                     void * context,
                                               const char * name,
@@ -918,7 +918,7 @@ static H323Capability * CreateGSMCap(
   int subType
 );
 
-#endif // NO_H323_AUDIO
+#endif // H323_AUDIO_CODECS
 
 /////////////////////////////////////////////////////
 
@@ -1254,7 +1254,7 @@ class H323StreamedPluginAudioCodec : public H323StreamedAudioCodec
     PluginCodec_Definition * codec;
 };
 
-#endif //  NO_H323_AUDIO_CODECS
+#endif // H323_AUDIO_CODECS
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -1277,7 +1277,7 @@ static void CheckPacket(PBoolean encode, const RTP_DataFrame & frame)
 }
 #endif
 
-#ifdef H323_FRAMEBUFFER
+#if (defined(H323_VIDEO) || defined(H323_AUDIO_CODECS)) && defined(H323_FRAMEBUFFER)
 
 class H323PluginFrameBuffer : public H323_FrameBuffer
 {
@@ -2142,7 +2142,7 @@ class H323PluginCapabilityInfo
     PString                  mediaFormatName;
 };
 
-#ifndef NO_H323_AUDIO
+#ifdef H323_AUDIO_CODECS
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -2180,7 +2180,7 @@ class H323AudioPluginCapability : public H323AudioCapability,
             break;
           }
         }
-#endif
+#endif // H323_AUDIO_CODECS
         rtpPayloadType = OpalMediaFormat(_mediaFormat).GetPayloadType();
       }
 
@@ -2362,9 +2362,9 @@ class H323GSMPluginCapability : public H323AudioPluginCapability
     int scrambled;
 };
 
-#endif // NO_H323_AUDIO_CODECS
+#endif // H323_AUDIO_CODECS
 
-#endif // NO_H323_AUDIO
+#endif // H323_AUDIO_CODECS
 
 #ifdef  H323_VIDEO
 
@@ -2900,7 +2900,7 @@ void H323PluginCodecManager::CreateCapabilityAndMediaFormat(
       jitter = FALSE;
       break;
 #endif
-#ifndef NO_H323_AUDIO
+#ifdef H323_AUDIO_CODECS
     case PluginCodec_MediaTypeAudio:
     case PluginCodec_MediaTypeAudioStreamed:
       defaultSessionID = OpalMediaFormat::DefaultAudioSessionID;
@@ -2942,7 +2942,7 @@ void H323PluginCodecManager::CreateCapabilityAndMediaFormat(
                                   timeStamp);
           break;
 #endif
-#ifndef NO_H323_AUDIO
+#ifdef H323_AUDIO_CODECS
         case PluginCodec_MediaTypeAudio:
         case PluginCodec_MediaTypeAudioStreamed:
           mediaFormat = new OpalPluginAudioMediaFormat(
@@ -2965,7 +2965,7 @@ void H323PluginCodecManager::CreateCapabilityAndMediaFormat(
         OpalMediaFormat::List & list = H323PluginCodecManager::GetMediaFormatList();
         for (PINDEX i = 0; i < list.GetSize(); i++) {
           OpalMediaFormat * opalFmt = &list[i];
-#ifndef NO_H323_AUDIO
+#ifdef H323_AUDIO_CODECS
          {
           OpalPluginAudioMediaFormat * fmt = dynamic_cast<OpalPluginAudioMediaFormat *>(opalFmt);
           if (
@@ -3033,12 +3033,12 @@ void H323PluginCodecManager::CreateCapabilityAndMediaFormat(
           cap = (*map[i].createFunc)(encoderCodec, decoderCodec, map[i].h323SubType);
         else {
           switch (encoderCodec->flags & PluginCodec_MediaTypeMask) {
-#ifndef NO_H323_AUDIO
+#ifdef H323_AUDIO_CODECS
             case PluginCodec_MediaTypeAudio:
             case PluginCodec_MediaTypeAudioStreamed:
               cap = new H323AudioPluginCapability(encoderCodec, decoderCodec, map[i].h323SubType);
               break;
-#endif // NO_H323_AUDIO
+#endif // H323_AUDIO_CODECS
 
 #ifdef H323_VIDEO
             case PluginCodec_MediaTypeVideo:
@@ -3211,7 +3211,7 @@ H323Codec * H323PluginCapabilityInfo::CreateCodec(const OpalMediaFormat & mediaF
 #ifdef H323_AUDIO_CODECS
       PTRACE(3, "H323PLUGIN\tCreating framed audio codec " << mediaFormatName << " from plugin");
       return new H323PluginFramedAudioCodec(mediaFormat, direction, codec);
-#endif  // NO_H323_AUDIO_CODECS
+#endif  // H323_AUDIO_CODECS
 
     case PluginCodec_MediaTypeAudioStreamed:
 #ifndef H323_AUDIO_CODECS

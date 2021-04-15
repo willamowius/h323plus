@@ -934,7 +934,7 @@ H323EndPoint::H323EndPoint()
   m_transportContext = NULL;
 #endif
 
-#ifdef H323_FRAMEBUFFER
+#if defined(H323_VIDEO) && defined(H323_FRAMEBUFFER)
   useVideoBuffer = false;
 #endif
 
@@ -4144,7 +4144,7 @@ bool H323EndPoint::H46025GPSInformation(H323_H46025_Message::Geodetic & /*gps*/)
 }
 #endif  // H323_H46025
 
-#ifdef H323_FRAMEBUFFER
+#if defined(H323_AUDIO_CODECS) && defined(H323_FRAMEBUFFER)
 void H323EndPoint::EnableVideoFrameBuffer(PBoolean enable)
 {
     if (useVideoBuffer == enable)

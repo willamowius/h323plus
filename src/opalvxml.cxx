@@ -54,6 +54,9 @@
 
 ///////////////////////////////////////////////////////////////
 
+
+#ifdef H323_AUDIO_CODECS
+
 G7231_File_Capability::G7231_File_Capability()
   : H323AudioCapability(8, 4)
 {
@@ -198,6 +201,8 @@ unsigned G7231_File_Codec::GetAverageSignalLevel()
   else
     return UINT_MAX;
 }
+
+#endif
 
 ///////////////////////////////////////////////////////////////
 

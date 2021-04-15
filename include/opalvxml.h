@@ -43,6 +43,9 @@
 
 //////////////////////////////////////////////////////////////////
 
+
+#ifdef H323_AUDIO_CODECS
+
 class G7231_File_Codec : public H323AudioCodec
 {
   PCLASSINFO(G7231_File_Codec, H323AudioCodec);
@@ -82,6 +85,7 @@ class G7231_File_Capability : public H323AudioCapability
     PObject * Clone() const;
 };
 
+#endif
 
 //////////////////////////////////////////////////////////////////
 

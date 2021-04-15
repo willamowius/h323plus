@@ -1258,4 +1258,4 @@ short H323_muLawCodec::DecodeSample(int sample)
 
 /////////////////////////////////////////////////////////////////////////////
 
-#endif // NO_H323_AUDIO_CODECS
+#endif // H323_AUDIO_CODECS

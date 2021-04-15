@@ -2565,7 +2565,7 @@ class H323EndPoint : public PObject
     void SetTLSMediaPolicy(H323TransportSecurity::Policy policy);
     H323TransportSecurity * GetTransportSecurity();
 
-#ifdef H323_FRAMEBUFFER
+#if defined(H323_VIDEO) && defined(H323_FRAMEBUFFER)
     void EnableVideoFrameBuffer(PBoolean enable);
     PBoolean HasVideoFrameBuffer();
 #endif
@@ -3208,7 +3208,7 @@ class H323EndPoint : public PObject
     GNUGK_Feature * gnugk;
 #endif
 
-#ifdef H323_FRAMEBUFFER
+#if defined(H323_VIDEO) && defined(H323_FRAMEBUFFER)
     PBoolean useVideoBuffer;
 #endif
 

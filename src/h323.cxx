@@ -7733,7 +7733,7 @@ PBoolean H323Connection::OpenConferenceControlSession(PBoolean & chairControl, P
 
 #endif  // H323_H230
 
-#ifdef H323_FRAMEBUFFER
+#if defined(H323_VIDEO) && defined(H323_FRAMEBUFFER)
 void H323Connection::EnableVideoFrameBuffer(PBoolean enable)
 {
     endpoint.EnableVideoFrameBuffer(enable);

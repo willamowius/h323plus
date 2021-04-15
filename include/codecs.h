@@ -724,7 +724,7 @@ class H323StreamedAudioCodec : public H323FramedAudioCodec
     unsigned bitsPerSample;
 };
 
-#endif // NO_H323_AUDIO_CODECS
+#endif // H323_AUDIO_CODECS
 
 
 #ifdef H323_VIDEO
@@ -997,7 +997,7 @@ class H323VideoCodec : public H323Codec
     PMutex  videoHandlerActive;
 };
 
-#endif // NO_H323_VIDEO
+#endif // H323_VIDEO
 
 #ifdef H323_AUDIO_CODECS
 
@@ -1061,7 +1061,7 @@ class H323_muLawCodec : public H323StreamedAudioCodec
     PBoolean sevenBit;
 };
 
-#endif // NO_H323_AUDIO_CODECS
+#endif // H323_AUDIO_CODECS
 
 
 #endif // __CODECS_H

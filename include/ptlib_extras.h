@@ -745,7 +745,7 @@ template <class D> class PSTLList : public PObject,
       { return PNEW cls(0, this); } \
 
 
-#ifdef H323_FRAMEBUFFER
+#if (defined(H323_VIDEO) || defined(H323_AUDIO_CODECS)) && defined(H323_FRAMEBUFFER)
 
 class H323FRAME {
 public:
