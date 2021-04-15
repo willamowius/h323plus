@@ -4150,11 +4150,13 @@ void H323EndPoint::EnableVideoFrameBuffer(PBoolean enable)
     if (useVideoBuffer == enable)
         return;
 
+#ifdef H323_AUDIO_CODECS
     // Increase the min Jitter delay
     if (enable)
         minAudioJitterDelay = minAudioJitterDelay + 50;  // milliseconds
     else
         minAudioJitterDelay = minAudioJitterDelay - 50;  // milliseconds
+#endif // H323_AUDIO_CODECS
 
     useVideoBuffer = enable;
 }

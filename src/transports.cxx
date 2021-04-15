@@ -1398,7 +1398,7 @@ void H323ListenerTCP::Main()
     if (transport != NULL)
       new H225TransportThread(endpoint, transport);
   }
-#ifdef P_SSL
+#ifdef H323_TLS
 #if (OPENSSL_VERSION_NUMBER < 0x10100000L) || defined(LIBRESSL_VERSION_NUMBER)
   ERR_remove_thread_state(NULL);
 #endif
