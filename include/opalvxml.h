@@ -43,6 +43,8 @@
 
 //////////////////////////////////////////////////////////////////
 
+#ifdef H323_AUDIO_CODECS
+
 class G7231_File_Codec : public H323AudioCodec
 {
   PCLASSINFO(G7231_File_Codec, H323AudioCodec);
@@ -52,7 +54,7 @@ class G7231_File_Codec : public H323AudioCodec
 
     unsigned GetBandwidth() const;
     static int GetFrameLen(int val);
-      
+
     PBoolean Read(BYTE * buffer, unsigned & length, RTP_DataFrame &);
     PBoolean Write(const BYTE * buffer, unsigned length, const RTP_DataFrame & rtp, unsigned & frames);
 
@@ -62,7 +64,7 @@ class G7231_File_Codec : public H323AudioCodec
 
   protected:
     int lastFrameLen;
-};  
+};
 
 
 class G7231_File_Capability : public H323AudioCapability
@@ -82,6 +84,7 @@ class G7231_File_Capability : public H323AudioCapability
     PObject * Clone() const;
 };
 
+#endif // H323_AUDIO_CODECS
 
 //////////////////////////////////////////////////////////////////
 
@@ -90,7 +93,7 @@ class G7231_File_Capability : public H323AudioCapability
 
 class PTextToSpeech;
 
-class OpalVXMLSession : public PVXMLSession 
+class OpalVXMLSession : public PVXMLSession
 {
   PCLASSINFO(OpalVXMLSession, PVXMLSession);
   public:
