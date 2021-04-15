@@ -54,6 +54,8 @@
 
 ///////////////////////////////////////////////////////////////
 
+#ifdef H323_AUDIO_CODECS
+
 G7231_File_Capability::G7231_File_Capability()
   : H323AudioCapability(8, 4)
 {
@@ -78,7 +80,7 @@ PBoolean G7231_File_Capability::OnSendingPDU(H245_AudioCapability & cap, unsigne
   H245_AudioCapability_g7231 & g7231 = cap;
 
   // max number of audio frames per PDU we want to send
-  g7231.m_maxAl_sduAudioFrames = packetSize; 
+  g7231.m_maxAl_sduAudioFrames = packetSize;
 
   // enable silence suppression
   g7231.m_silenceSuppression = TRUE;
@@ -122,7 +124,7 @@ PBoolean G7231_File_Codec::Read(BYTE * buffer, unsigned & length, RTP_DataFrame 
 {
   if (rawDataChannel == NULL)
     return FALSE;
-    
+
   if (!rawDataChannel->Read(buffer, 24)) {
     PTRACE(1, "G7231WAV\tRead failed");
     return FALSE;
@@ -181,8 +183,8 @@ PBoolean G7231_File_Codec::Write(const BYTE * buffer,
 
 
 unsigned G7231_File_Codec::GetBandwidth() const
-{ 
-  return G7231_BANDWIDTH; 
+{
+  return G7231_BANDWIDTH;
 }
 
 
@@ -198,6 +200,8 @@ unsigned G7231_File_Codec::GetAverageSignalLevel()
   else
     return UINT_MAX;
 }
+
+#endif // H323_AUDIO_CODECS
 
 ///////////////////////////////////////////////////////////////
 
