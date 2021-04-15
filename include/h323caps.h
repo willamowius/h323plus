@@ -636,7 +636,7 @@ class H323RealTimeCapability : public H323Capability
   //@}
 };
 
-#ifndef NO_H323_AUDIO
+#ifdef H323_AUDIO_CODECS
 
 /**This class describes the interface to an audio codec used to transfer data
    via the logical channels opened and managed by the H323 control channel.
