@@ -217,6 +217,7 @@ static void SHA1(const unsigned char * data, unsigned len, unsigned char * hash)
     EVP_DigestFinal_ex(ctx, hash, NULL);
   } else {
     PTRACE(1, "H235\tOpenSSH SHA1 implementation failed");
+    memset(hash, 0, 20); // make sure error is detectable and hash is not undefined
   }
 }
 
