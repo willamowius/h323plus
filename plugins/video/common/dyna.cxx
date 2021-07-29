@@ -4,14 +4,14 @@
  * This code is based on the following files from the OPAL project which
  * have been removed from the current build and distributions but are still
  * available in the CVS "attic"
- * 
- *    src/codecs/h263codec.cxx 
- *    include/codecs/h263codec.h 
+ *
+ *    src/codecs/h263codec.cxx
+ *    include/codecs/h263codec.h
 
- * The original files, and this version of the original code, are released under the same 
+ * The original files, and this version of the original code, are released under the same
  * MPL 1.0 license. Substantial portions of the original code were contributed
  * by Salyens and March Networks and their right to be identified as copyright holders
- * of the original code portions and any parts now included in this new copy is asserted through 
+ * of the original code portions and any parts now included in this new copy is asserted through
  * their inclusion in the copyright notices below.
  *
  * Copyright (C) 2006 Post Increment
@@ -77,8 +77,8 @@ bool DynaLink::Open(const char *name)
   char ptlibPath[1024];
   memset(ptlibPath, 0, sizeof(ptlibPath));
   char * env = ::getenv("PTLIBPLUGINDIR");
-  if (env != NULL) 
-    strcpy(ptlibPath, env);
+  if (env != NULL)
+    strncpy(ptlibPath, env, sizeof(ptlibPath));
 
   char * p = ::strtok(ptlibPath, PATH_SEP);
   while (p != NULL) {
@@ -102,7 +102,7 @@ bool DynaLink::InternalOpen(const char * dir, const char *name)
   // Copy the directory to "path" and add a separator if necessary
   if (strlen(dir) > 0) {
     strcpy(path, dir);
-    if (path[strlen(path)-1] != DIR_SEPARATOR[0]) 
+    if (path[strlen(path)-1] != DIR_SEPARATOR[0])
       strcat(path, DIR_SEPARATOR);
   }
   strcat(path, name);
@@ -140,7 +140,7 @@ TRACE(1, "\tDYNA\tLoading " << path);
     const char * err = dlerror();
     if (err != NULL) {
       TRACE(1, _codecString << "\tDYNA\tError loading " << path << " - " << err)
-    }  
+    }
     else {
       TRACE(1, _codecString << "\tDYNA\tError loading " << path);
     }
@@ -148,7 +148,7 @@ TRACE(1, "\tDYNA\tLoading " << path);
     TRACE(1, _codecString << "\tDYNA\tError loading '" << path << "' " << GetLastError());
 #endif /* _WIN32 */
     return false;
-  } 
+  }
 
   TRACE(1, _codecString << "\tDYNA\tSuccessfully loaded '" << path << "'");
   return true;
@@ -226,7 +226,7 @@ FFMPEGLibrary::~FFMPEGLibrary()
 
 bool FFMPEGLibrary::Load(int ver)
 {
-  WaitAndSignal m(processLock);      
+  WaitAndSignal m(processLock);
   if (IsLoaded())
     return true;
 #ifdef USE_DLL_AVCODEC
@@ -272,13 +272,13 @@ bool FFMPEGLibrary::Load(int ver)
       return false;
     }
   }
-  
+
   if (_codec==CODEC_ID_H263P) {
     if (!libAvcodec.GetFunction("h263_encoder", (DynaLink::Function &)Favcodec_h263_encoder)) {
       TRACE (1, _codecString << "\tDYNA\tFailed to load h263_encoder" );
       return false;
     }
-  
+
     if (!libAvcodec.GetFunction("h263p_encoder", (DynaLink::Function &)Favcodec_h263p_encoder)) {
       TRACE (1, _codecString << "\tDYNA\tFailed to load h263p_encoder" );
       return false;
@@ -306,7 +306,7 @@ bool FFMPEGLibrary::Load(int ver)
     TRACE (1, _codecString << "\tDYNA\tFailed to load register_avcodec");
     return false;
   }
-  
+
   if (!libAvcodec.GetFunction("avcodec_find_encoder", (DynaLink::Function &)Favcodec_find_encoder)) {
     TRACE (1, _codecString << "\tDYNA\tFailed to load avcodec_find_encoder");
     return false;
@@ -407,7 +407,7 @@ bool FFMPEGLibrary::Load(int ver)
     TRACE (1, _codecString << "DYYNA\tFailed to load avcodec_version");
     return false;
   }
-  
+
   if (!CHECK_AVUTIL("av_log_set_level", FAv_log_set_level)) {
     TRACE (1, _codecString << "\tDYNA\tFailed to load av_log_set_level");
     return false;
@@ -424,14 +424,14 @@ bool FFMPEGLibrary::Load(int ver)
     if (libVer != LIBAVCODEC_VERSION_INT ) {
       TRACE (1, _codecString << "\tDYNA\tWarning: compiled against libavcodec headers from version "
              << (LIBAVCODEC_VERSION_INT >> 16) << ((LIBAVCODEC_VERSION_INT>>8) & 0xff) << (LIBAVCODEC_VERSION_INT & 0xff)
-             << ", loaded " 
+             << ", loaded "
              << (libVer >> 16) << ((libVer>>8) & 0xff) << (libVer & 0xff));
     }
 
     Favcodec_init();
 
     // register only the codecs needed (to have smaller code)
-    if (_codec==CODEC_ID_H264) 
+    if (_codec==CODEC_ID_H264)
       Favcodec_register(Favcodec_h264_decoder);
 
     if (_codec==CODEC_ID_H263) {
@@ -591,7 +591,7 @@ int FFMPEGLibrary::AvcodecEncodeVideo(AVCodecContext *ctx, BYTE *buf, int buf_si
        return res;
     #endif
 #else
-     AVPacket pkt; 
+     AVPacket pkt;
      int err = 0;
      int gotFrame = 0;
 #ifdef USE_DLL_AVCODEC
@@ -630,8 +630,8 @@ int res=0;
        res = avcodec_decode_video(ctx, pict, got_picture_ptr, buf, buf_size);
     #endif
 #else
-     AVPacket pkt; 
-     pkt.data = (uint8_t*)buf; 
+     AVPacket pkt;
+     pkt.data = (uint8_t*)buf;
      pkt.size = buf_size;
 
     #ifdef USE_DLL_AVCODEC
@@ -641,7 +641,7 @@ int res=0;
       WITH_ALIGNED_STACK({
         res = Favcodec_decode_video(ctx, pict, got_picture_ptr, &pkt);
       });
-    #else 
+    #else
       av_init_packet(&pkt);
       res = avcodec_decode_video2(ctx, pict, got_picture_ptr, &pkt);
     #endif
@@ -674,7 +674,7 @@ void FFMPEGLibrary::AvSetDimensions(AVCodecContext *s, int width, int height)
     avcodec_set_dimensions(s, width, height);
 #endif
 }
-  
+
 
 void FFMPEGLibrary::AvLogSetLevel(int level)
 {
