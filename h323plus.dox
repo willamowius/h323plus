@@ -4,6 +4,7 @@
 
 \li \ref intro
 \li \ref arch
+\li \ref sec
 \li \ref classes
 \li \ref history
 
@@ -19,7 +20,7 @@ This document is intended as reference guide, not a tutorial. For examples
 of using H323Plus, see the sample programs provided in the samples directory.
 A tutorial on using PTLib and OpenH323/H323Plus is also available at http://toncar.cz/openh323/tut/ .
 
-Last updated 19 January, 2010
+Last updated 29 July, 2021
 
 Copyright (C) 1999-2003 Equivalence Pty Ltd, All right reserved 
 
@@ -73,6 +74,12 @@ descendants represents this. A typical use of one of these classes is to open
 a stream of encoded audio data. The H323Channel class would create a 
 H323Codec using the H323Capability that was passed during the protocol 
 negotiations.
+
+\section sec Security note
+
+If you use the H.263 or H.264 video plugin, you need to make sure that no attacker can
+manipulate the environment variables they see since environment variables are used to
+find and load shared libraries.
 
 \section classes Class hierarchy
 
