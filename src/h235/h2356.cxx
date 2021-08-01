@@ -157,9 +157,9 @@ void LoadH235_DHMap(H235_DHMap & dhmap, H235_DHMap & dhcache, H235Authenticators
         } else if (H235_DHParameters[i].cipher == 0) {
            dhmap.insert(pair<PString, H235_DiffieHellman*>(H235_DHParameters[i].parameterOID, (H235_DiffieHellman*)NULL));
            PTRACE(6, "H2356\tStd KeyPair " << H235_DHParameters[i].parameterOID << " loaded.");
-        } else
+        } else {
            PTRACE(6, "H2356\tStd KeyPair " << H235_DHParameters[i].parameterOID << " ignored.");
-           continue;  // Ignore ciphers greater that cipherlength
+        }
       }
     }
 
