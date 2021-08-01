@@ -106,7 +106,7 @@ H235PluginAuthenticator::H235PluginAuthenticator(Pluginh235_Definition * _def)
 
 H235_ClearToken * H235PluginAuthenticator::CreateClearToken()
 {
-    BYTE data;
+    BYTE data = 0;
     unsigned dataLen;
     int ret = (*def->h235function)(def, NULL, H235_BuildClear,
                                   &data, &dataLen,NULL,0);
@@ -122,7 +122,7 @@ H235_ClearToken * H235PluginAuthenticator::CreateClearToken()
 
 H225_CryptoH323Token * H235PluginAuthenticator::CreateCryptoToken()
 {
-    BYTE data;
+    BYTE data = 0;
     unsigned dataLen;
     int ret = (*def->h235function)(def, NULL, H235_BuildCrypto,
                                   &data, &dataLen,NULL,0);
