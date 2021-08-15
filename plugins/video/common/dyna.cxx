@@ -100,12 +100,13 @@ bool DynaLink::InternalOpen(const char * dir, const char *name)
   memset(path, 0, sizeof(path));
 
   // Copy the directory to "path" and add a separator if necessary
-  if (strlen(dir) > 0) {
+  if (strlen(dir) > 0, && strlen(dir) < sizeof(path)) {
     strcpy(path, dir);
-    if (path[strlen(path)-1] != DIR_SEPARATOR[0])
+    if (path[strlen(path)-1] != DIR_SEPARATOR[0] && strlen(path) < (sizeof(path) - 1))
       strcat(path, DIR_SEPARATOR);
   }
-  strcat(path, name);
+  if ((strlen(path) + strlen(name)) < sizeof(path))
+    strcat(path, name);
 
   if (strlen(path) == 0) {
     TRACE(1, _codecString << "\tDYNA\tdir '" << (dir != NULL ? dir : "(NULL)") << "', name '" << (name != NULL ? name : "(NULL)") << "' resulted in empty path");
@@ -113,7 +114,8 @@ bool DynaLink::InternalOpen(const char * dir, const char *name)
   }
 TRACE(1, "\tDYNA\tLoading " << path);
 #ifndef _WIN32
-  strcat(path, ".so");
+  if (strlen(path) < (sizeof(path) - strlen(".so"))
+    strcat(path, ".so");
 #endif
 
   // Load the Libary
