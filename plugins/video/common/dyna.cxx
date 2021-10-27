@@ -100,7 +100,7 @@ bool DynaLink::InternalOpen(const char * dir, const char *name)
   memset(path, 0, sizeof(path));
 
   // Copy the directory to "path" and add a separator if necessary
-  if (strlen(dir) > 0, && strlen(dir) < sizeof(path)) {
+  if (strlen(dir) > 0 && strlen(dir) < sizeof(path)) {
     strcpy(path, dir);
     if (path[strlen(path)-1] != DIR_SEPARATOR[0] && strlen(path) < (sizeof(path) - 1))
       strcat(path, DIR_SEPARATOR);
