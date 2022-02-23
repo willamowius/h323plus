@@ -109,7 +109,9 @@ if test "x$PTLIBDIR" = "x/usr/local" -o "x$PTLIBDIR" = "x/usr/local/"; then
   PTLIBDIR="/usr/local/share/ptlib/"
 fi
 
-AC_CHECK_FILE(${PTLIBDIR}/make/lib.mak, HAS_PTLIB_LIB_MAK=1)
+dnl disable check for now, as it breaks cross-compilation with autoconf 2.69
+dnl AC_CHECK_FILE(${PTLIBDIR}/make/lib.mak, HAS_PTLIB_LIB_MAK=1)
+HAS_PTLIB_LIB_MAK=1
 
 if test "${HAS_PTLIB_LIB_MAK:-unset}" = "unset" ; then
   PKG_PROG_PKG_CONFIG
