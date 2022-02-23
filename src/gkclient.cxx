@@ -2005,8 +2005,9 @@ PBoolean H323Gatekeeper::AlternateInfo::IsValid() const
         else
             return false;
     }
-
-    PTRACE(2,"GKALT\tAlternate Address " << addr << " is not valid. Ignoring...");
+    if (!addr.IsAny()) {
+        PTRACE(2,"GKALT\tAlternate Address " << addr << " is not valid. Ignoring...");
+    }
     return false;
 }
 
