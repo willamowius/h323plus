@@ -212,6 +212,7 @@ H323CallCreditServiceControl::H323CallCreditServiceControl(const PString & amt,
 
 
 H323CallCreditServiceControl::H323CallCreditServiceControl(const H225_ServiceControlDescriptor & contents)
+  : mode(PFalse)
 {
   OnReceivedPDU(contents);
 }
