@@ -1,7 +1,7 @@
 ![H323Plus logo](https://www.h323plus.org/images/h323plus.png)
 ## H323Plus
 
-###[Please give us feedback in the user survey!][https://www.h323plus.org/h323plus-survey-2022.html]
+[Please give us feedback in the user survey!](https://www.h323plus.org/h323plus-survey-2022.html)
 
 ### Development framework for H.323 applications like softphones or gateways
 
