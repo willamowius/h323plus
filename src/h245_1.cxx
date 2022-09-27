@@ -3862,6 +3862,10 @@ const static PASN_Names Names_H245_MediaTransportType[]={
      ,{"atm_AAL5_UNIDIR",2}
      ,{"atm_AAL5_BIDIR",3}
      ,{"atm_AAL5_compressed",4}
+     ,{"sctp",5}
+     ,{"udp_dtls_sctp",6}
+     ,{"tcp_dtls_sctp",7}
+     ,{"sctp_dtls",8}
 };
 #endif
 //
@@ -3871,7 +3875,7 @@ const static PASN_Names Names_H245_MediaTransportType[]={
 H245_MediaTransportType::H245_MediaTransportType(unsigned tag, PASN_Object::TagClass tagClass)
   : PASN_Choice(tag, tagClass, 4, TRUE
 #ifndef PASN_NOPRINTON
-    ,(const PASN_Names *)Names_H245_MediaTransportType,5
+    ,(const PASN_Names *)Names_H245_MediaTransportType,9
 #endif
 )
 {
@@ -3900,6 +3904,50 @@ H245_MediaTransportType::operator const H245_MediaTransportType_atm_AAL5_compres
 }
 
 
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+H245_MediaTransportType::operator H245_SctpParam &() const
+#else
+H245_MediaTransportType::operator H245_SctpParam &()
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(PAssertNULL(choice), H245_SctpParam), PInvalidCast);
+#endif
+  return *(H245_SctpParam *)choice;
+}
+
+
+H245_MediaTransportType::operator const H245_SctpParam &() const
+#endif
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(PAssertNULL(choice), H245_SctpParam), PInvalidCast);
+#endif
+  return *(H245_SctpParam *)choice;
+}
+
+
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+H245_MediaTransportType::operator H245_ArrayOf_SctpParam &() const
+#else
+H245_MediaTransportType::operator H245_ArrayOf_SctpParam &()
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(PAssertNULL(choice), H245_ArrayOf_SctpParam), PInvalidCast);
+#endif
+  return *(H245_ArrayOf_SctpParam *)choice;
+}
+
+
+H245_MediaTransportType::operator const H245_ArrayOf_SctpParam &() const
+#endif
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(PAssertNULL(choice), H245_ArrayOf_SctpParam), PInvalidCast);
+#endif
+  return *(H245_ArrayOf_SctpParam *)choice;
+}
+
+
 PBoolean H245_MediaTransportType::CreateObject()
 {
   switch (tag) {
@@ -3911,6 +3959,14 @@ PBoolean H245_MediaTransportType::CreateObject()
       return TRUE;
     case e_atm_AAL5_compressed :
       choice = new H245_MediaTransportType_atm_AAL5_compressed();
+      return TRUE;
+    case e_sctp :
+    case e_sctp_dtls :
+      choice = new H245_SctpParam();
+      return TRUE;
+    case e_udp_dtls_sctp :
+    case e_tcp_dtls_sctp :
+      choice = new H245_ArrayOf_SctpParam();
       return TRUE;
   }
 
@@ -5208,6 +5264,7 @@ const static PASN_Names Names_H245_AudioCapability[]={
      ,{"vbd",22}
      ,{"audioTelephonyEvent",23}
      ,{"audioTone",24}
+     ,{"extendedAudioCapability",25}
 };
 #endif
 //
@@ -5217,7 +5274,7 @@ const static PASN_Names Names_H245_AudioCapability[]={
 H245_AudioCapability::H245_AudioCapability(unsigned tag, PASN_Object::TagClass tagClass)
   : PASN_Choice(tag, tagClass, 14, TRUE
 #ifndef PASN_NOPRINTON
-    ,(const PASN_Names *)Names_H245_AudioCapability,25
+    ,(const PASN_Names *)Names_H245_AudioCapability,26
 #endif
 )
 {
@@ -5466,6 +5523,28 @@ H245_AudioCapability::operator const H245_NoPTAudioToneCapability &() const
 }
 
 
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+H245_AudioCapability::operator H245_ExtendedAudioCapability &() const
+#else
+H245_AudioCapability::operator H245_ExtendedAudioCapability &()
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(PAssertNULL(choice), H245_ExtendedAudioCapability), PInvalidCast);
+#endif
+  return *(H245_ExtendedAudioCapability *)choice;
+}
+
+
+H245_AudioCapability::operator const H245_ExtendedAudioCapability &() const
+#endif
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(PAssertNULL(choice), H245_ExtendedAudioCapability), PInvalidCast);
+#endif
+  return *(H245_ExtendedAudioCapability *)choice;
+}
+
+
 PBoolean H245_AudioCapability::CreateObject()
 {
   switch (tag) {
@@ -5551,6 +5630,9 @@ PBoolean H245_AudioCapability::CreateObject()
       return TRUE;
     case e_audioTone :
       choice = new H245_NoPTAudioToneCapability();
+      return TRUE;
+    case e_extendedAudioCapability :
+      choice = new H245_ExtendedAudioCapability();
       return TRUE;
   }
 
@@ -6231,6 +6313,10 @@ const static PASN_Names Names_H245_DataProtocolCapability[]={
      ,{"v76wCompression",11}
      ,{"tcp",12}
      ,{"udp",13}
+     ,{"sctp",14}
+     ,{"udp_dtls_sctp",15}
+     ,{"tcp_dtls_sctp",16}
+     ,{"sctp_dtls",17}
 };
 #endif
 //
@@ -6240,7 +6326,7 @@ const static PASN_Names Names_H245_DataProtocolCapability[]={
 H245_DataProtocolCapability::H245_DataProtocolCapability(unsigned tag, PASN_Object::TagClass tagClass)
   : PASN_Choice(tag, tagClass, 7, TRUE
 #ifndef PASN_NOPRINTON
-    ,(const PASN_Names *)Names_H245_DataProtocolCapability,14
+    ,(const PASN_Names *)Names_H245_DataProtocolCapability,18
 #endif
 )
 {
@@ -6291,6 +6377,50 @@ H245_DataProtocolCapability::operator const H245_DataProtocolCapability_v76wComp
 }
 
 
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+H245_DataProtocolCapability::operator H245_SctpParam &() const
+#else
+H245_DataProtocolCapability::operator H245_SctpParam &()
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(PAssertNULL(choice), H245_SctpParam), PInvalidCast);
+#endif
+  return *(H245_SctpParam *)choice;
+}
+
+
+H245_DataProtocolCapability::operator const H245_SctpParam &() const
+#endif
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(PAssertNULL(choice), H245_SctpParam), PInvalidCast);
+#endif
+  return *(H245_SctpParam *)choice;
+}
+
+
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+H245_DataProtocolCapability::operator H245_ArrayOf_SctpParam &() const
+#else
+H245_DataProtocolCapability::operator H245_ArrayOf_SctpParam &()
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(PAssertNULL(choice), H245_ArrayOf_SctpParam), PInvalidCast);
+#endif
+  return *(H245_ArrayOf_SctpParam *)choice;
+}
+
+
+H245_DataProtocolCapability::operator const H245_ArrayOf_SctpParam &() const
+#endif
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(PAssertNULL(choice), H245_ArrayOf_SctpParam), PInvalidCast);
+#endif
+  return *(H245_ArrayOf_SctpParam *)choice;
+}
+
+
 PBoolean H245_DataProtocolCapability::CreateObject()
 {
   switch (tag) {
@@ -6313,6 +6443,14 @@ PBoolean H245_DataProtocolCapability::CreateObject()
       return TRUE;
     case e_v76wCompression :
       choice = new H245_DataProtocolCapability_v76wCompression();
+      return TRUE;
+    case e_sctp :
+    case e_sctp_dtls :
+      choice = new H245_SctpParam();
+      return TRUE;
+    case e_udp_dtls_sctp :
+    case e_tcp_dtls_sctp :
+      choice = new H245_ArrayOf_SctpParam();
       return TRUE;
   }
 
@@ -6657,6 +6795,40 @@ PObject * H245_T38FaxTcpOptions::Clone() const
   PAssert(IsClass(H245_T38FaxTcpOptions::Class()), PInvalidCast);
 #endif
   return new H245_T38FaxTcpOptions(*this);
+}
+
+
+//
+// SCTPChunkType
+//
+
+H245_SCTPChunkType::H245_SCTPChunkType(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Integer(tag, tagClass)
+{
+  SetConstraints(PASN_Object::FixedConstraint, 0, 255);
+}
+
+
+H245_SCTPChunkType & H245_SCTPChunkType::operator=(int v)
+{
+  SetValue(v);
+  return *this;
+}
+
+
+H245_SCTPChunkType & H245_SCTPChunkType::operator=(unsigned v)
+{
+  SetValue(v);
+  return *this;
+}
+
+
+PObject * H245_SCTPChunkType::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H245_SCTPChunkType::Class()), PInvalidCast);
+#endif
+  return new H245_SCTPChunkType(*this);
 }
 
 
@@ -15805,6 +15977,39 @@ PObject * H245_Capability_h233EncryptionReceiveCapability::Clone() const
 
 
 //
+// DTLSSecurityCapability_hashFunction
+//
+
+H245_DTLSSecurityCapability_hashFunction::H245_DTLSSecurityCapability_hashFunction(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Array(tag, tagClass)
+{
+}
+
+
+PASN_Object * H245_DTLSSecurityCapability_hashFunction::CreateObject() const
+{
+  PASN_IA5String * obj = new PASN_IA5String;
+  obj->SetConstraints(PASN_Object::FixedConstraint, 1, 65535);
+  return obj;
+}
+
+
+PASN_IA5String & H245_DTLSSecurityCapability_hashFunction::operator[](PINDEX i) const
+{
+  return (PASN_IA5String &)array[i];
+}
+
+
+PObject * H245_DTLSSecurityCapability_hashFunction::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H245_DTLSSecurityCapability_hashFunction::Class()), PInvalidCast);
+#endif
+  return new H245_DTLSSecurityCapability_hashFunction(*this);
+}
+
+
+//
 // ArrayOf_VCCapability
 //
 
@@ -16531,6 +16736,37 @@ PObject * H245_MediaTransportType_atm_AAL5_compressed::Clone() const
 
 
 //
+// ArrayOf_SctpParam
+//
+
+H245_ArrayOf_SctpParam::H245_ArrayOf_SctpParam(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Array(tag, tagClass)
+{
+}
+
+
+PASN_Object * H245_ArrayOf_SctpParam::CreateObject() const
+{
+  return new H245_SctpParam;
+}
+
+
+H245_SctpParam & H245_ArrayOf_SctpParam::operator[](PINDEX i) const
+{
+  return (H245_SctpParam &)array[i];
+}
+
+
+PObject * H245_ArrayOf_SctpParam::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H245_ArrayOf_SctpParam::Class()), PInvalidCast);
+#endif
+  return new H245_ArrayOf_SctpParam(*this);
+}
+
+
+//
 // ArrayOf_QOSCapability
 //
 
@@ -17171,6 +17407,140 @@ PObject * H245_RefPictureSelection_additionalPictureMemory::Clone() const
   PAssert(IsClass(H245_RefPictureSelection_additionalPictureMemory::Class()), PInvalidCast);
 #endif
   return new H245_RefPictureSelection_additionalPictureMemory(*this);
+}
+
+
+
+#ifndef PASN_NOPRINTON
+const static PASN_Names Names_H245_RefPictureSelection_videoBackChannelSend[]={
+      {"none",0}
+     ,{"ackMessageOnly",1}
+     ,{"nackMessageOnly",2}
+     ,{"ackOrNackMessageOnly",3}
+     ,{"ackAndNackMessage",4}
+};
+#endif
+//
+// RefPictureSelection_videoBackChannelSend
+//
+
+H245_RefPictureSelection_videoBackChannelSend::H245_RefPictureSelection_videoBackChannelSend(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Choice(tag, tagClass, 5, TRUE
+#ifndef PASN_NOPRINTON
+    ,(const PASN_Names *)Names_H245_RefPictureSelection_videoBackChannelSend,5
+#endif
+)
+{
+}
+
+
+PBoolean H245_RefPictureSelection_videoBackChannelSend::CreateObject()
+{
+  choice = (tag <= e_ackAndNackMessage) ? new PASN_Null() : NULL;
+  return choice != NULL;
+}
+
+
+PObject * H245_RefPictureSelection_videoBackChannelSend::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H245_RefPictureSelection_videoBackChannelSend::Class()), PInvalidCast);
+#endif
+  return new H245_RefPictureSelection_videoBackChannelSend(*this);
+}
+
+
+
+#ifndef PASN_NOPRINTON
+const static PASN_Names Names_H245_CustomPictureFormat_pixelAspectInformation[]={
+      {"anyPixelAspectRatio",0}
+     ,{"pixelAspectCode",1}
+     ,{"extendedPAR",2}
+};
+#endif
+//
+// CustomPictureFormat_pixelAspectInformation
+//
+
+H245_CustomPictureFormat_pixelAspectInformation::H245_CustomPictureFormat_pixelAspectInformation(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Choice(tag, tagClass, 3, TRUE
+#ifndef PASN_NOPRINTON
+    ,(const PASN_Names *)Names_H245_CustomPictureFormat_pixelAspectInformation,3
+#endif
+)
+{
+}
+
+
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+H245_CustomPictureFormat_pixelAspectInformation::operator H245_CustomPictureFormat_pixelAspectInformation_pixelAspectCode &() const
+#else
+H245_CustomPictureFormat_pixelAspectInformation::operator H245_CustomPictureFormat_pixelAspectInformation_pixelAspectCode &()
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(PAssertNULL(choice), H245_CustomPictureFormat_pixelAspectInformation_pixelAspectCode), PInvalidCast);
+#endif
+  return *(H245_CustomPictureFormat_pixelAspectInformation_pixelAspectCode *)choice;
+}
+
+
+H245_CustomPictureFormat_pixelAspectInformation::operator const H245_CustomPictureFormat_pixelAspectInformation_pixelAspectCode &() const
+#endif
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(PAssertNULL(choice), H245_CustomPictureFormat_pixelAspectInformation_pixelAspectCode), PInvalidCast);
+#endif
+  return *(H245_CustomPictureFormat_pixelAspectInformation_pixelAspectCode *)choice;
+}
+
+
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+H245_CustomPictureFormat_pixelAspectInformation::operator H245_CustomPictureFormat_pixelAspectInformation_extendedPAR &() const
+#else
+H245_CustomPictureFormat_pixelAspectInformation::operator H245_CustomPictureFormat_pixelAspectInformation_extendedPAR &()
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(PAssertNULL(choice), H245_CustomPictureFormat_pixelAspectInformation_extendedPAR), PInvalidCast);
+#endif
+  return *(H245_CustomPictureFormat_pixelAspectInformation_extendedPAR *)choice;
+}
+
+
+H245_CustomPictureFormat_pixelAspectInformation::operator const H245_CustomPictureFormat_pixelAspectInformation_extendedPAR &() const
+#endif
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(PAssertNULL(choice), H245_CustomPictureFormat_pixelAspectInformation_extendedPAR), PInvalidCast);
+#endif
+  return *(H245_CustomPictureFormat_pixelAspectInformation_extendedPAR *)choice;
+}
+
+
+PBoolean H245_CustomPictureFormat_pixelAspectInformation::CreateObject()
+{
+  switch (tag) {
+    case e_anyPixelAspectRatio :
+      choice = new PASN_Boolean();
+      return TRUE;
+    case e_pixelAspectCode :
+      choice = new H245_CustomPictureFormat_pixelAspectInformation_pixelAspectCode();
+      return TRUE;
+    case e_extendedPAR :
+      choice = new H245_CustomPictureFormat_pixelAspectInformation_extendedPAR();
+      return TRUE;
+  }
+
+  choice = NULL;
+  return FALSE;
+}
+
+
+PObject * H245_CustomPictureFormat_pixelAspectInformation::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H245_CustomPictureFormat_pixelAspectInformation::Class()), PInvalidCast);
+#endif
+  return new H245_CustomPictureFormat_pixelAspectInformation(*this);
 }
 
 

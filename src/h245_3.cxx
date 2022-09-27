@@ -1292,6 +1292,115 @@ PObject * H245_TerminalCapabilitySetRelease::Clone() const
 
 
 //
+// DTLSSecurityCapability
+//
+
+H245_DTLSSecurityCapability::H245_DTLSSecurityCapability(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Sequence(tag, tagClass, 3, TRUE, 0)
+{
+  m_setupInformation.SetConstraints(PASN_Object::FixedConstraint, 1, 65535);
+  m_connectionInformation.SetConstraints(PASN_Object::FixedConstraint, 1, 65535);
+  m_fingerprint.SetConstraints(PASN_Object::FixedConstraint, 1, 65535);
+}
+
+
+#ifndef PASN_NOPRINTON
+void H245_DTLSSecurityCapability::PrintOn(ostream & strm) const
+{
+  int indent = strm.precision() + 2;
+  strm << "{\n";
+  strm << setw(indent+15) << "hashFunction = " << setprecision(indent) << m_hashFunction << '\n';
+  if (HasOptionalField(e_setupInformation))
+    strm << setw(indent+19) << "setupInformation = " << setprecision(indent) << m_setupInformation << '\n';
+  if (HasOptionalField(e_connectionInformation))
+    strm << setw(indent+24) << "connectionInformation = " << setprecision(indent) << m_connectionInformation << '\n';
+  if (HasOptionalField(e_fingerprint))
+    strm << setw(indent+14) << "fingerprint = " << setprecision(indent) << m_fingerprint << '\n';
+  strm << setw(indent-1) << setprecision(indent-2) << "}";
+}
+#endif
+
+
+PObject::Comparison H245_DTLSSecurityCapability::Compare(const PObject & obj) const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(&obj, H245_DTLSSecurityCapability), PInvalidCast);
+#endif
+  const H245_DTLSSecurityCapability & other = (const H245_DTLSSecurityCapability &)obj;
+
+  Comparison result;
+
+  if ((result = m_hashFunction.Compare(other.m_hashFunction)) != EqualTo)
+    return result;
+  if ((result = m_setupInformation.Compare(other.m_setupInformation)) != EqualTo)
+    return result;
+  if ((result = m_connectionInformation.Compare(other.m_connectionInformation)) != EqualTo)
+    return result;
+  if ((result = m_fingerprint.Compare(other.m_fingerprint)) != EqualTo)
+    return result;
+
+  return PASN_Sequence::Compare(other);
+}
+
+
+PINDEX H245_DTLSSecurityCapability::GetDataLength() const
+{
+  PINDEX length = 0;
+  length += m_hashFunction.GetObjectLength();
+  if (HasOptionalField(e_setupInformation))
+    length += m_setupInformation.GetObjectLength();
+  if (HasOptionalField(e_connectionInformation))
+    length += m_connectionInformation.GetObjectLength();
+  if (HasOptionalField(e_fingerprint))
+    length += m_fingerprint.GetObjectLength();
+  return length;
+}
+
+
+PBoolean H245_DTLSSecurityCapability::Decode(PASN_Stream & strm)
+{
+  if (!PreambleDecode(strm))
+    return FALSE;
+
+  if (!m_hashFunction.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_setupInformation) && !m_setupInformation.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_connectionInformation) && !m_connectionInformation.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_fingerprint) && !m_fingerprint.Decode(strm))
+    return FALSE;
+
+  return UnknownExtensionsDecode(strm);
+}
+
+
+void H245_DTLSSecurityCapability::Encode(PASN_Stream & strm) const
+{
+  PreambleEncode(strm);
+
+  m_hashFunction.Encode(strm);
+  if (HasOptionalField(e_setupInformation))
+    m_setupInformation.Encode(strm);
+  if (HasOptionalField(e_connectionInformation))
+    m_connectionInformation.Encode(strm);
+  if (HasOptionalField(e_fingerprint))
+    m_fingerprint.Encode(strm);
+
+  UnknownExtensionsEncode(strm);
+}
+
+
+PObject * H245_DTLSSecurityCapability::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H245_DTLSSecurityCapability::Class()), PInvalidCast);
+#endif
+  return new H245_DTLSSecurityCapability(*this);
+}
+
+
+//
 // H222Capability
 //
 
@@ -3616,6 +3725,92 @@ PObject * H245_H263ModeComboFlags::Clone() const
 
 
 //
+// ExtendedAudioCapability
+//
+
+H245_ExtendedAudioCapability::H245_ExtendedAudioCapability(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Sequence(tag, tagClass, 1, TRUE, 0)
+{
+}
+
+
+#ifndef PASN_NOPRINTON
+void H245_ExtendedAudioCapability::PrintOn(ostream & strm) const
+{
+  int indent = strm.precision() + 2;
+  strm << "{\n";
+  strm << setw(indent+18) << "audioCapability = " << setprecision(indent) << m_audioCapability << '\n';
+  if (HasOptionalField(e_audioCapabilityExtension))
+    strm << setw(indent+27) << "audioCapabilityExtension = " << setprecision(indent) << m_audioCapabilityExtension << '\n';
+  strm << setw(indent-1) << setprecision(indent-2) << "}";
+}
+#endif
+
+
+PObject::Comparison H245_ExtendedAudioCapability::Compare(const PObject & obj) const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(&obj, H245_ExtendedAudioCapability), PInvalidCast);
+#endif
+  const H245_ExtendedAudioCapability & other = (const H245_ExtendedAudioCapability &)obj;
+
+  Comparison result;
+
+  if ((result = m_audioCapability.Compare(other.m_audioCapability)) != EqualTo)
+    return result;
+  if ((result = m_audioCapabilityExtension.Compare(other.m_audioCapabilityExtension)) != EqualTo)
+    return result;
+
+  return PASN_Sequence::Compare(other);
+}
+
+
+PINDEX H245_ExtendedAudioCapability::GetDataLength() const
+{
+  PINDEX length = 0;
+  length += m_audioCapability.GetObjectLength();
+  if (HasOptionalField(e_audioCapabilityExtension))
+    length += m_audioCapabilityExtension.GetObjectLength();
+  return length;
+}
+
+
+PBoolean H245_ExtendedAudioCapability::Decode(PASN_Stream & strm)
+{
+  if (!PreambleDecode(strm))
+    return FALSE;
+
+  if (!m_audioCapability.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_audioCapabilityExtension) && !m_audioCapabilityExtension.Decode(strm))
+    return FALSE;
+
+  return UnknownExtensionsDecode(strm);
+}
+
+
+void H245_ExtendedAudioCapability::Encode(PASN_Stream & strm) const
+{
+  PreambleEncode(strm);
+
+  m_audioCapability.Encode(strm);
+  if (HasOptionalField(e_audioCapabilityExtension))
+    m_audioCapabilityExtension.Encode(strm);
+
+  UnknownExtensionsEncode(strm);
+}
+
+
+PObject * H245_ExtendedAudioCapability::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H245_ExtendedAudioCapability::Class()), PInvalidCast);
+#endif
+  return new H245_ExtendedAudioCapability(*this);
+}
+
+
+//
 // G7231AnnexCCapability
 //
 
@@ -3794,6 +3989,92 @@ PObject * H245_DataApplicationCapability::Clone() const
 
 
 //
+// ExtendedDataCapability
+//
+
+H245_ExtendedDataCapability::H245_ExtendedDataCapability(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Sequence(tag, tagClass, 1, TRUE, 0)
+{
+}
+
+
+#ifndef PASN_NOPRINTON
+void H245_ExtendedDataCapability::PrintOn(ostream & strm) const
+{
+  int indent = strm.precision() + 2;
+  strm << "{\n";
+  strm << setw(indent+17) << "dataCapability = " << setprecision(indent) << m_dataCapability << '\n';
+  if (HasOptionalField(e_dataCapabilityExtension))
+    strm << setw(indent+26) << "dataCapabilityExtension = " << setprecision(indent) << m_dataCapabilityExtension << '\n';
+  strm << setw(indent-1) << setprecision(indent-2) << "}";
+}
+#endif
+
+
+PObject::Comparison H245_ExtendedDataCapability::Compare(const PObject & obj) const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(&obj, H245_ExtendedDataCapability), PInvalidCast);
+#endif
+  const H245_ExtendedDataCapability & other = (const H245_ExtendedDataCapability &)obj;
+
+  Comparison result;
+
+  if ((result = m_dataCapability.Compare(other.m_dataCapability)) != EqualTo)
+    return result;
+  if ((result = m_dataCapabilityExtension.Compare(other.m_dataCapabilityExtension)) != EqualTo)
+    return result;
+
+  return PASN_Sequence::Compare(other);
+}
+
+
+PINDEX H245_ExtendedDataCapability::GetDataLength() const
+{
+  PINDEX length = 0;
+  length += m_dataCapability.GetObjectLength();
+  if (HasOptionalField(e_dataCapabilityExtension))
+    length += m_dataCapabilityExtension.GetObjectLength();
+  return length;
+}
+
+
+PBoolean H245_ExtendedDataCapability::Decode(PASN_Stream & strm)
+{
+  if (!PreambleDecode(strm))
+    return FALSE;
+
+  if (!m_dataCapability.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_dataCapabilityExtension) && !m_dataCapabilityExtension.Decode(strm))
+    return FALSE;
+
+  return UnknownExtensionsDecode(strm);
+}
+
+
+void H245_ExtendedDataCapability::Encode(PASN_Stream & strm) const
+{
+  PreambleEncode(strm);
+
+  m_dataCapability.Encode(strm);
+  if (HasOptionalField(e_dataCapabilityExtension))
+    m_dataCapabilityExtension.Encode(strm);
+
+  UnknownExtensionsEncode(strm);
+}
+
+
+PObject * H245_ExtendedDataCapability::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H245_ExtendedDataCapability::Class()), PInvalidCast);
+#endif
+  return new H245_ExtendedDataCapability(*this);
+}
+
+
+//
 // T38FaxUdpOptions
 //
 
@@ -3886,6 +4167,344 @@ PObject * H245_T38FaxUdpOptions::Clone() const
   PAssert(IsClass(H245_T38FaxUdpOptions::Class()), PInvalidCast);
 #endif
   return new H245_T38FaxUdpOptions(*this);
+}
+
+
+//
+// DataChannel
+//
+
+H245_DataChannel::H245_DataChannel(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Sequence(tag, tagClass, 1, TRUE, 0)
+{
+}
+
+
+#ifndef PASN_NOPRINTON
+void H245_DataChannel::PrintOn(ostream & strm) const
+{
+  int indent = strm.precision() + 2;
+  strm << "{\n";
+  if (HasOptionalField(e_dataChannelProfile))
+    strm << setw(indent+21) << "dataChannelProfile = " << setprecision(indent) << m_dataChannelProfile << '\n';
+  strm << setw(indent-1) << setprecision(indent-2) << "}";
+}
+#endif
+
+
+PObject::Comparison H245_DataChannel::Compare(const PObject & obj) const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(&obj, H245_DataChannel), PInvalidCast);
+#endif
+  const H245_DataChannel & other = (const H245_DataChannel &)obj;
+
+  Comparison result;
+
+  if ((result = m_dataChannelProfile.Compare(other.m_dataChannelProfile)) != EqualTo)
+    return result;
+
+  return PASN_Sequence::Compare(other);
+}
+
+
+PINDEX H245_DataChannel::GetDataLength() const
+{
+  PINDEX length = 0;
+  if (HasOptionalField(e_dataChannelProfile))
+    length += m_dataChannelProfile.GetObjectLength();
+  return length;
+}
+
+
+PBoolean H245_DataChannel::Decode(PASN_Stream & strm)
+{
+  if (!PreambleDecode(strm))
+    return FALSE;
+
+  if (HasOptionalField(e_dataChannelProfile) && !m_dataChannelProfile.Decode(strm))
+    return FALSE;
+
+  return UnknownExtensionsDecode(strm);
+}
+
+
+void H245_DataChannel::Encode(PASN_Stream & strm) const
+{
+  PreambleEncode(strm);
+
+  if (HasOptionalField(e_dataChannelProfile))
+    m_dataChannelProfile.Encode(strm);
+
+  UnknownExtensionsEncode(strm);
+}
+
+
+PObject * H245_DataChannel::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H245_DataChannel::Class()), PInvalidCast);
+#endif
+  return new H245_DataChannel(*this);
+}
+
+
+//
+// DataChannelProfile
+//
+
+H245_DataChannelProfile::H245_DataChannelProfile(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Sequence(tag, tagClass, 6, TRUE, 0)
+{
+  m_priority.SetConstraints(PASN_Object::FixedConstraint, 0, 65535);
+  m_label.SetConstraints(PASN_Object::FixedConstraint, 1, 65535);
+  m_protocol.SetConstraints(PASN_Object::FixedConstraint, 1, 65535);
+}
+
+
+#ifndef PASN_NOPRINTON
+void H245_DataChannelProfile::PrintOn(ostream & strm) const
+{
+  int indent = strm.precision() + 2;
+  strm << "{\n";
+  if (HasOptionalField(e_ordered))
+    strm << setw(indent+10) << "ordered = " << setprecision(indent) << m_ordered << '\n';
+  if (HasOptionalField(e_priority))
+    strm << setw(indent+11) << "priority = " << setprecision(indent) << m_priority << '\n';
+  if (HasOptionalField(e_reliabilityParm))
+    strm << setw(indent+18) << "reliabilityParm = " << setprecision(indent) << m_reliabilityParm << '\n';
+  if (HasOptionalField(e_label))
+    strm << setw(indent+8) << "label = " << setprecision(indent) << m_label << '\n';
+  if (HasOptionalField(e_protocol))
+    strm << setw(indent+11) << "protocol = " << setprecision(indent) << m_protocol << '\n';
+  if (HasOptionalField(e_genericInformation))
+    strm << setw(indent+21) << "genericInformation = " << setprecision(indent) << m_genericInformation << '\n';
+  strm << setw(indent+20) << "establishmentType = " << setprecision(indent) << m_establishmentType << '\n';
+  strm << setw(indent-1) << setprecision(indent-2) << "}";
+}
+#endif
+
+
+PObject::Comparison H245_DataChannelProfile::Compare(const PObject & obj) const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(&obj, H245_DataChannelProfile), PInvalidCast);
+#endif
+  const H245_DataChannelProfile & other = (const H245_DataChannelProfile &)obj;
+
+  Comparison result;
+
+  if ((result = m_ordered.Compare(other.m_ordered)) != EqualTo)
+    return result;
+  if ((result = m_priority.Compare(other.m_priority)) != EqualTo)
+    return result;
+  if ((result = m_reliabilityParm.Compare(other.m_reliabilityParm)) != EqualTo)
+    return result;
+  if ((result = m_label.Compare(other.m_label)) != EqualTo)
+    return result;
+  if ((result = m_protocol.Compare(other.m_protocol)) != EqualTo)
+    return result;
+  if ((result = m_genericInformation.Compare(other.m_genericInformation)) != EqualTo)
+    return result;
+  if ((result = m_establishmentType.Compare(other.m_establishmentType)) != EqualTo)
+    return result;
+
+  return PASN_Sequence::Compare(other);
+}
+
+
+PINDEX H245_DataChannelProfile::GetDataLength() const
+{
+  PINDEX length = 0;
+  if (HasOptionalField(e_ordered))
+    length += m_ordered.GetObjectLength();
+  if (HasOptionalField(e_priority))
+    length += m_priority.GetObjectLength();
+  if (HasOptionalField(e_reliabilityParm))
+    length += m_reliabilityParm.GetObjectLength();
+  if (HasOptionalField(e_label))
+    length += m_label.GetObjectLength();
+  if (HasOptionalField(e_protocol))
+    length += m_protocol.GetObjectLength();
+  if (HasOptionalField(e_genericInformation))
+    length += m_genericInformation.GetObjectLength();
+  length += m_establishmentType.GetObjectLength();
+  return length;
+}
+
+
+PBoolean H245_DataChannelProfile::Decode(PASN_Stream & strm)
+{
+  if (!PreambleDecode(strm))
+    return FALSE;
+
+  if (HasOptionalField(e_ordered) && !m_ordered.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_priority) && !m_priority.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_reliabilityParm) && !m_reliabilityParm.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_label) && !m_label.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_protocol) && !m_protocol.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_genericInformation) && !m_genericInformation.Decode(strm))
+    return FALSE;
+  if (!m_establishmentType.Decode(strm))
+    return FALSE;
+
+  return UnknownExtensionsDecode(strm);
+}
+
+
+void H245_DataChannelProfile::Encode(PASN_Stream & strm) const
+{
+  PreambleEncode(strm);
+
+  if (HasOptionalField(e_ordered))
+    m_ordered.Encode(strm);
+  if (HasOptionalField(e_priority))
+    m_priority.Encode(strm);
+  if (HasOptionalField(e_reliabilityParm))
+    m_reliabilityParm.Encode(strm);
+  if (HasOptionalField(e_label))
+    m_label.Encode(strm);
+  if (HasOptionalField(e_protocol))
+    m_protocol.Encode(strm);
+  if (HasOptionalField(e_genericInformation))
+    m_genericInformation.Encode(strm);
+  m_establishmentType.Encode(strm);
+
+  UnknownExtensionsEncode(strm);
+}
+
+
+PObject * H245_DataChannelProfile::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H245_DataChannelProfile::Class()), PInvalidCast);
+#endif
+  return new H245_DataChannelProfile(*this);
+}
+
+
+//
+// SctpParam
+//
+
+H245_SctpParam::H245_SctpParam(unsigned tag, PASN_Object::TagClass tagClass)
+  : PASN_Sequence(tag, tagClass, 5, TRUE, 0)
+{
+  m_sctpPort.SetConstraints(PASN_Object::FixedConstraint, 0, 65535);
+}
+
+
+#ifndef PASN_NOPRINTON
+void H245_SctpParam::PrintOn(ostream & strm) const
+{
+  int indent = strm.precision() + 2;
+  strm << "{\n";
+  if (HasOptionalField(e_appPPID))
+    strm << setw(indent+10) << "appPPID = " << setprecision(indent) << m_appPPID << '\n';
+  if (HasOptionalField(e_maxMessageSize))
+    strm << setw(indent+17) << "maxMessageSize = " << setprecision(indent) << m_maxMessageSize << '\n';
+  if (HasOptionalField(e_sctpExtensions))
+    strm << setw(indent+17) << "sctpExtensions = " << setprecision(indent) << m_sctpExtensions << '\n';
+  if (HasOptionalField(e_genericInformation))
+    strm << setw(indent+21) << "genericInformation = " << setprecision(indent) << m_genericInformation << '\n';
+  if (HasOptionalField(e_sctpPort))
+    strm << setw(indent+11) << "sctpPort = " << setprecision(indent) << m_sctpPort << '\n';
+  strm << setw(indent-1) << setprecision(indent-2) << "}";
+}
+#endif
+
+
+PObject::Comparison H245_SctpParam::Compare(const PObject & obj) const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(PIsDescendant(&obj, H245_SctpParam), PInvalidCast);
+#endif
+  const H245_SctpParam & other = (const H245_SctpParam &)obj;
+
+  Comparison result;
+
+  if ((result = m_appPPID.Compare(other.m_appPPID)) != EqualTo)
+    return result;
+  if ((result = m_maxMessageSize.Compare(other.m_maxMessageSize)) != EqualTo)
+    return result;
+  if ((result = m_sctpExtensions.Compare(other.m_sctpExtensions)) != EqualTo)
+    return result;
+  if ((result = m_genericInformation.Compare(other.m_genericInformation)) != EqualTo)
+    return result;
+  if ((result = m_sctpPort.Compare(other.m_sctpPort)) != EqualTo)
+    return result;
+
+  return PASN_Sequence::Compare(other);
+}
+
+
+PINDEX H245_SctpParam::GetDataLength() const
+{
+  PINDEX length = 0;
+  if (HasOptionalField(e_appPPID))
+    length += m_appPPID.GetObjectLength();
+  if (HasOptionalField(e_maxMessageSize))
+    length += m_maxMessageSize.GetObjectLength();
+  if (HasOptionalField(e_sctpExtensions))
+    length += m_sctpExtensions.GetObjectLength();
+  if (HasOptionalField(e_genericInformation))
+    length += m_genericInformation.GetObjectLength();
+  if (HasOptionalField(e_sctpPort))
+    length += m_sctpPort.GetObjectLength();
+  return length;
+}
+
+
+PBoolean H245_SctpParam::Decode(PASN_Stream & strm)
+{
+  if (!PreambleDecode(strm))
+    return FALSE;
+
+  if (HasOptionalField(e_appPPID) && !m_appPPID.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_maxMessageSize) && !m_maxMessageSize.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_sctpExtensions) && !m_sctpExtensions.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_genericInformation) && !m_genericInformation.Decode(strm))
+    return FALSE;
+  if (HasOptionalField(e_sctpPort) && !m_sctpPort.Decode(strm))
+    return FALSE;
+
+  return UnknownExtensionsDecode(strm);
+}
+
+
+void H245_SctpParam::Encode(PASN_Stream & strm) const
+{
+  PreambleEncode(strm);
+
+  if (HasOptionalField(e_appPPID))
+    m_appPPID.Encode(strm);
+  if (HasOptionalField(e_maxMessageSize))
+    m_maxMessageSize.Encode(strm);
+  if (HasOptionalField(e_sctpExtensions))
+    m_sctpExtensions.Encode(strm);
+  if (HasOptionalField(e_genericInformation))
+    m_genericInformation.Encode(strm);
+  if (HasOptionalField(e_sctpPort))
+    m_sctpPort.Encode(strm);
+
+  UnknownExtensionsEncode(strm);
+}
+
+
+PObject * H245_SctpParam::Clone() const
+{
+#ifndef PASN_LEANANDMEAN
+  PAssert(IsClass(H245_SctpParam::Class()), PInvalidCast);
+#endif
+  return new H245_SctpParam(*this);
 }
 
 
@@ -5857,7 +6476,7 @@ PObject * H245_OpenLogicalChannelConfirm::Clone() const
 //
 
 H245_H2250LogicalChannelAckParameters::H245_H2250LogicalChannelAckParameters(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Sequence(tag, tagClass, 5, TRUE, 2)
+  : PASN_Sequence(tag, tagClass, 5, TRUE, 3)
 {
   m_sessionID.SetConstraints(PASN_Object::FixedConstraint, 1, 255);
   m_dynamicRTPPayloadType.SetConstraints(PASN_Object::FixedConstraint, 96, 127);
@@ -5885,6 +6504,8 @@ void H245_H2250LogicalChannelAckParameters::PrintOn(ostream & strm) const
     strm << setw(indent+20) << "flowControlToZero = " << setprecision(indent) << m_flowControlToZero << '\n';
   if (HasOptionalField(e_portNumber))
     strm << setw(indent+13) << "portNumber = " << setprecision(indent) << m_portNumber << '\n';
+  if (HasOptionalField(e_multiplePayloadStream))
+    strm << setw(indent+24) << "multiplePayloadStream = " << setprecision(indent) << m_multiplePayloadStream << '\n';
   strm << setw(indent-1) << setprecision(indent-2) << "}";
 }
 #endif
@@ -5950,6 +6571,8 @@ PBoolean H245_H2250LogicalChannelAckParameters::Decode(PASN_Stream & strm)
     return FALSE;
   if (!KnownExtensionDecode(strm, e_portNumber, m_portNumber))
     return FALSE;
+  if (!KnownExtensionDecode(strm, e_multiplePayloadStream, m_multiplePayloadStream))
+    return FALSE;
 
   return UnknownExtensionsDecode(strm);
 }
@@ -5971,6 +6594,7 @@ void H245_H2250LogicalChannelAckParameters::Encode(PASN_Stream & strm) const
     m_dynamicRTPPayloadType.Encode(strm);
   KnownExtensionEncode(strm, e_flowControlToZero, m_flowControlToZero);
   KnownExtensionEncode(strm, e_portNumber, m_portNumber);
+  KnownExtensionEncode(strm, e_multiplePayloadStream, m_multiplePayloadStream);
 
   UnknownExtensionsEncode(strm);
 }
@@ -13721,7 +14345,7 @@ PObject * H245_T38FaxProfile::Clone() const
 //
 
 H245_EncryptionAuthenticationAndIntegrity::H245_EncryptionAuthenticationAndIntegrity(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Sequence(tag, tagClass, 3, TRUE, 1)
+  : PASN_Sequence(tag, tagClass, 3, TRUE, 2)
 {
 }
 
@@ -13739,6 +14363,8 @@ void H245_EncryptionAuthenticationAndIntegrity::PrintOn(ostream & strm) const
     strm << setw(indent+22) << "integrityCapability = " << setprecision(indent) << m_integrityCapability << '\n';
   if (HasOptionalField(e_genericH235SecurityCapability))
     strm << setw(indent+32) << "genericH235SecurityCapability = " << setprecision(indent) << m_genericH235SecurityCapability << '\n';
+  if (HasOptionalField(e_dtlsSecurityCapability))
+    strm << setw(indent+25) << "dtlsSecurityCapability = " << setprecision(indent) << m_dtlsSecurityCapability << '\n';
   strm << setw(indent-1) << setprecision(indent-2) << "}";
 }
 #endif
@@ -13790,6 +14416,8 @@ PBoolean H245_EncryptionAuthenticationAndIntegrity::Decode(PASN_Stream & strm)
     return FALSE;
   if (!KnownExtensionDecode(strm, e_genericH235SecurityCapability, m_genericH235SecurityCapability))
     return FALSE;
+  if (!KnownExtensionDecode(strm, e_dtlsSecurityCapability, m_dtlsSecurityCapability))
+    return FALSE;
 
   return UnknownExtensionsDecode(strm);
 }
@@ -13806,6 +14434,7 @@ void H245_EncryptionAuthenticationAndIntegrity::Encode(PASN_Stream & strm) const
   if (HasOptionalField(e_integrityCapability))
     m_integrityCapability.Encode(strm);
   KnownExtensionEncode(strm, e_genericH235SecurityCapability, m_genericH235SecurityCapability);
+  KnownExtensionEncode(strm, e_dtlsSecurityCapability, m_dtlsSecurityCapability);
 
   UnknownExtensionsEncode(strm);
 }
@@ -14211,7 +14840,7 @@ PObject * H245_RedundancyEncoding::Clone() const
 //
 
 H245_OpenLogicalChannelAck::H245_OpenLogicalChannelAck(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Sequence(tag, tagClass, 1, TRUE, 4)
+  : PASN_Sequence(tag, tagClass, 1, TRUE, 5)
 {
 }
 
@@ -14232,6 +14861,8 @@ void H245_OpenLogicalChannelAck::PrintOn(ostream & strm) const
     strm << setw(indent+17) << "encryptionSync = " << setprecision(indent) << m_encryptionSync << '\n';
   if (HasOptionalField(e_genericInformation))
     strm << setw(indent+21) << "genericInformation = " << setprecision(indent) << m_genericInformation << '\n';
+  if (HasOptionalField(e_dtlsSecurityCapability))
+    strm << setw(indent+25) << "dtlsSecurityCapability = " << setprecision(indent) << m_dtlsSecurityCapability << '\n';
   strm << setw(indent-1) << setprecision(indent-2) << "}";
 }
 #endif
@@ -14282,6 +14913,8 @@ PBoolean H245_OpenLogicalChannelAck::Decode(PASN_Stream & strm)
     return FALSE;
   if (!KnownExtensionDecode(strm, e_genericInformation, m_genericInformation))
     return FALSE;
+  if (!KnownExtensionDecode(strm, e_dtlsSecurityCapability, m_dtlsSecurityCapability))
+    return FALSE;
 
   return UnknownExtensionsDecode(strm);
 }
@@ -14298,6 +14931,7 @@ void H245_OpenLogicalChannelAck::Encode(PASN_Stream & strm) const
   KnownExtensionEncode(strm, e_forwardMultiplexAckParameters, m_forwardMultiplexAckParameters);
   KnownExtensionEncode(strm, e_encryptionSync, m_encryptionSync);
   KnownExtensionEncode(strm, e_genericInformation, m_genericInformation);
+  KnownExtensionEncode(strm, e_dtlsSecurityCapability, m_dtlsSecurityCapability);
 
   UnknownExtensionsEncode(strm);
 }
@@ -15538,11 +16172,12 @@ PObject * H245_H263Options::Clone() const
 //
 
 H245_H2250LogicalChannelParameters::H245_H2250LogicalChannelParameters(unsigned tag, PASN_Object::TagClass tagClass)
-  : PASN_Sequence(tag, tagClass, 10, TRUE, 3)
+  : PASN_Sequence(tag, tagClass, 10, TRUE, 4)
 {
   m_sessionID.SetConstraints(PASN_Object::FixedConstraint, 0, 255);
   m_associatedSessionID.SetConstraints(PASN_Object::FixedConstraint, 1, 255);
   m_dynamicRTPPayloadType.SetConstraints(PASN_Object::FixedConstraint, 96, 127);
+  m_nominalAudioLevel.SetConstraints(PASN_Object::FixedConstraint, 0, 63);
 }
 
 
@@ -15578,6 +16213,8 @@ void H245_H2250LogicalChannelParameters::PrintOn(ostream & strm) const
     strm << setw(indent+21) << "redundancyEncoding = " << setprecision(indent) << m_redundancyEncoding << '\n';
   if (HasOptionalField(e_source))
     strm << setw(indent+9) << "source = " << setprecision(indent) << m_source << '\n';
+  if (HasOptionalField(e_nominalAudioLevel))
+    strm << setw(indent+20) << "nominalAudioLevel = " << setprecision(indent) << m_nominalAudioLevel << '\n';
   strm << setw(indent-1) << setprecision(indent-2) << "}";
 }
 #endif
@@ -15680,6 +16317,8 @@ PBoolean H245_H2250LogicalChannelParameters::Decode(PASN_Stream & strm)
     return FALSE;
   if (!KnownExtensionDecode(strm, e_source, m_source))
     return FALSE;
+  if (!KnownExtensionDecode(strm, e_nominalAudioLevel, m_nominalAudioLevel))
+    return FALSE;
 
   return UnknownExtensionsDecode(strm);
 }
@@ -15713,6 +16352,7 @@ void H245_H2250LogicalChannelParameters::Encode(PASN_Stream & strm) const
   KnownExtensionEncode(strm, e_transportCapability, m_transportCapability);
   KnownExtensionEncode(strm, e_redundancyEncoding, m_redundancyEncoding);
   KnownExtensionEncode(strm, e_source, m_source);
+  KnownExtensionEncode(strm, e_nominalAudioLevel, m_nominalAudioLevel);
 
   UnknownExtensionsEncode(strm);
 }

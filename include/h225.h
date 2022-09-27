@@ -2578,7 +2578,7 @@ class H225_AdmissionRejectReason : public PASN_Choice
       e_collectPIN,
       e_genericDataReason,
       e_neededFeatureNotSupported,
-      e_securityErrors,
+      e_securityError,
       e_securityDHmismatch,
       e_noRouteToDestination,
       e_unallocatedNumber,

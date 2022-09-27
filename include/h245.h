@@ -1347,6 +1347,8 @@ class H245_QOSClass : public PASN_Choice
 //
 
 class H245_MediaTransportType_atm_AAL5_compressed;
+class H245_SctpParam;
+class H245_ArrayOf_SctpParam;
 
 class H245_MediaTransportType : public PASN_Choice
 {
@@ -1361,7 +1363,11 @@ class H245_MediaTransportType : public PASN_Choice
       e_ip_TCP,
       e_atm_AAL5_UNIDIR,
       e_atm_AAL5_BIDIR,
-      e_atm_AAL5_compressed
+      e_atm_AAL5_compressed,
+      e_sctp,
+      e_udp_dtls_sctp,
+      e_tcp_dtls_sctp,
+      e_sctp_dtls
     };
 
 #if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
@@ -1369,6 +1375,18 @@ class H245_MediaTransportType : public PASN_Choice
 #else
     operator H245_MediaTransportType_atm_AAL5_compressed &();
     operator const H245_MediaTransportType_atm_AAL5_compressed &() const;
+#endif
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+    operator H245_SctpParam &() const;
+#else
+    operator H245_SctpParam &();
+    operator const H245_SctpParam &() const;
+#endif
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+    operator H245_ArrayOf_SctpParam &() const;
+#else
+    operator H245_ArrayOf_SctpParam &();
+    operator const H245_ArrayOf_SctpParam &() const;
 #endif
 
     PBoolean CreateObject();
@@ -1767,6 +1785,7 @@ class H245_G729Extensions;
 class H245_VBDCapability;
 class H245_NoPTAudioTelephonyEventCapability;
 class H245_NoPTAudioToneCapability;
+class H245_ExtendedAudioCapability;
 
 class H245_AudioCapability : public PASN_Choice
 {
@@ -1775,6 +1794,14 @@ class H245_AudioCapability : public PASN_Choice
 #endif
   public:
     H245_AudioCapability(unsigned tag = 0, TagClass tagClass = UniversalTagClass);
+
+// following code added by command line option
+
+#ifndef PASN_NOPRINTON
+void PrintOn(ostream & strm) const;
+#endif
+
+// end of added code
 
     enum Choices {
       e_nonStandard,
@@ -1801,7 +1828,8 @@ class H245_AudioCapability : public PASN_Choice
       e_g729Extensions,
       e_vbd,
       e_audioTelephonyEvent,
-      e_audioTone
+      e_audioTone,
+      e_extendedAudioCapability
     };
 
 #if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
@@ -1870,10 +1898,13 @@ class H245_AudioCapability : public PASN_Choice
     operator H245_NoPTAudioToneCapability &();
     operator const H245_NoPTAudioToneCapability &() const;
 #endif
-
-#ifndef PASN_NOPRINTON
-    void PrintOn(ostream & strm) const;
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+    operator H245_ExtendedAudioCapability &() const;
+#else
+    operator H245_ExtendedAudioCapability &();
+    operator const H245_ExtendedAudioCapability &() const;
 #endif
+
     PBoolean CreateObject();
     PObject * Clone() const;
 };
@@ -2051,6 +2082,8 @@ class H245_VBDCapability : public PASN_Sequence
 
 class H245_NonStandardParameter;
 class H245_DataProtocolCapability_v76wCompression;
+class H245_SctpParam;
+class H245_ArrayOf_SctpParam;
 
 class H245_DataProtocolCapability : public PASN_Choice
 {
@@ -2074,7 +2107,11 @@ class H245_DataProtocolCapability : public PASN_Choice
       e_separateLANStack,
       e_v76wCompression,
       e_tcp,
-      e_udp
+      e_udp,
+      e_sctp,
+      e_udp_dtls_sctp,
+      e_tcp_dtls_sctp,
+      e_sctp_dtls
     };
 
 #if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
@@ -2088,6 +2125,18 @@ class H245_DataProtocolCapability : public PASN_Choice
 #else
     operator H245_DataProtocolCapability_v76wCompression &();
     operator const H245_DataProtocolCapability_v76wCompression &() const;
+#endif
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+    operator H245_SctpParam &() const;
+#else
+    operator H245_SctpParam &();
+    operator const H245_SctpParam &() const;
+#endif
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+    operator H245_ArrayOf_SctpParam &() const;
+#else
+    operator H245_ArrayOf_SctpParam &();
+    operator const H245_ArrayOf_SctpParam &() const;
 #endif
 
     PBoolean CreateObject();
@@ -2225,6 +2274,24 @@ class H245_T38FaxTcpOptions : public PASN_Sequence
     void PrintOn(ostream & strm) const;
 #endif
     Comparison Compare(const PObject & obj) const;
+    PObject * Clone() const;
+};
+
+
+//
+// SCTPChunkType
+//
+
+class H245_SCTPChunkType : public PASN_Integer
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H245_SCTPChunkType, PASN_Integer);
+#endif
+  public:
+    H245_SCTPChunkType(unsigned tag = UniversalInteger, TagClass tagClass = UniversalTagClass);
+
+    H245_SCTPChunkType & operator=(int v);
+    H245_SCTPChunkType & operator=(unsigned v);
     PObject * Clone() const;
 };
 
@@ -5717,6 +5784,24 @@ class H245_Capability_h233EncryptionReceiveCapability : public PASN_Sequence
 
 
 //
+// DTLSSecurityCapability_hashFunction
+//
+
+class H245_DTLSSecurityCapability_hashFunction : public PASN_Array
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H245_DTLSSecurityCapability_hashFunction, PASN_Array);
+#endif
+  public:
+    H245_DTLSSecurityCapability_hashFunction(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    PASN_Object * CreateObject() const;
+    PASN_IA5String & operator[](PINDEX i) const;
+    PObject * Clone() const;
+};
+
+
+//
 // ArrayOf_VCCapability
 //
 
@@ -5968,6 +6053,26 @@ class H245_MediaTransportType_atm_AAL5_compressed : public PASN_Sequence
     void PrintOn(ostream & strm) const;
 #endif
     Comparison Compare(const PObject & obj) const;
+    PObject * Clone() const;
+};
+
+
+//
+// ArrayOf_SctpParam
+//
+
+class H245_SctpParam;
+
+class H245_ArrayOf_SctpParam : public PASN_Array
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H245_ArrayOf_SctpParam, PASN_Array);
+#endif
+  public:
+    H245_ArrayOf_SctpParam(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    PASN_Object * CreateObject() const;
+    H245_SctpParam & operator[](PINDEX i) const;
     PObject * Clone() const;
 };
 
@@ -6429,6 +6534,26 @@ class H245_AudioCapability_g7231 : public PASN_Sequence
 
 
 //
+// ArrayOf_AudioCapability
+//
+
+class H245_AudioCapability;
+
+class H245_ArrayOf_AudioCapability : public PASN_Array
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H245_ArrayOf_AudioCapability, PASN_Array);
+#endif
+  public:
+    H245_ArrayOf_AudioCapability(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    PASN_Object * CreateObject() const;
+    H245_AudioCapability & operator[](PINDEX i) const;
+    PObject * Clone() const;
+};
+
+
+//
 // G7231AnnexCCapability_g723AnnexCAudioMode
 //
 
@@ -6468,6 +6593,8 @@ class H245_DataApplicationCapability_application_t84;
 class H245_DataApplicationCapability_application_nlpid;
 class H245_DataApplicationCapability_application_t38fax;
 class H245_GenericCapability;
+class H245_ArrayOf_DataChannel;
+class H245_ExtendedDataCapability;
 
 class H245_DataApplicationCapability_application : public PASN_Choice
 {
@@ -6491,7 +6618,9 @@ class H245_DataApplicationCapability_application : public PASN_Choice
       e_t30fax,
       e_t140,
       e_t38fax,
-      e_genericDataCapability
+      e_genericDataCapability,
+      e_dataChannel,
+      e_extendedDataCapability
     };
 
 #if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
@@ -6529,6 +6658,18 @@ class H245_DataApplicationCapability_application : public PASN_Choice
 #else
     operator H245_GenericCapability &();
     operator const H245_GenericCapability &() const;
+#endif
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+    operator H245_ArrayOf_DataChannel &() const;
+#else
+    operator H245_ArrayOf_DataChannel &();
+    operator const H245_ArrayOf_DataChannel &() const;
+#endif
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+    operator H245_ExtendedDataCapability &() const;
+#else
+    operator H245_ExtendedDataCapability &();
+    operator const H245_ExtendedDataCapability &() const;
 #endif
 
     PBoolean CreateObject();
@@ -6629,6 +6770,108 @@ class H245_T38FaxUdpOptions_t38FaxUdpEC : public PASN_Choice
     };
 
     PBoolean CreateObject();
+    PObject * Clone() const;
+};
+
+
+//
+// ArrayOf_DataChannelProfile
+//
+
+class H245_DataChannelProfile;
+
+class H245_ArrayOf_DataChannelProfile : public PASN_Array
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H245_ArrayOf_DataChannelProfile, PASN_Array);
+#endif
+  public:
+    H245_ArrayOf_DataChannelProfile(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    PASN_Object * CreateObject() const;
+    H245_DataChannelProfile & operator[](PINDEX i) const;
+    PObject * Clone() const;
+};
+
+
+//
+// DataChannelProfile_reliabilityParm
+//
+
+class H245_DataChannelProfile_reliabilityParm : public PASN_Choice
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H245_DataChannelProfile_reliabilityParm, PASN_Choice);
+#endif
+  public:
+    H245_DataChannelProfile_reliabilityParm(unsigned tag = 0, TagClass tagClass = UniversalTagClass);
+
+    enum Choices {
+      e_maxRetr,
+      e_maxTime
+    };
+
+    PBoolean CreateObject();
+    PObject * Clone() const;
+};
+
+
+//
+// DataChannelProfile_establishmentType
+//
+
+class H245_DataChannelProfile_establishmentType : public PASN_Choice
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H245_DataChannelProfile_establishmentType, PASN_Choice);
+#endif
+  public:
+    H245_DataChannelProfile_establishmentType(unsigned tag = 0, TagClass tagClass = UniversalTagClass);
+
+    enum Choices {
+      e_sctpStreamID,
+      e_dcep
+    };
+
+    PBoolean CreateObject();
+    PObject * Clone() const;
+};
+
+
+//
+// SctpParam_appPPID
+//
+
+class H245_SctpParam_appPPID : public PASN_Array
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H245_SctpParam_appPPID, PASN_Array);
+#endif
+  public:
+    H245_SctpParam_appPPID(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    PASN_Object * CreateObject() const;
+    PASN_Integer & operator[](PINDEX i) const;
+    PObject * Clone() const;
+};
+
+
+//
+// ArrayOf_SCTPChunkType
+//
+
+class H245_SCTPChunkType;
+
+class H245_ArrayOf_SCTPChunkType : public PASN_Array
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H245_ArrayOf_SCTPChunkType, PASN_Array);
+#endif
+  public:
+    H245_ArrayOf_SCTPChunkType(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    PASN_Object * CreateObject() const;
+    H245_SCTPChunkType & operator[](PINDEX i) const;
     PObject * Clone() const;
 };
 
@@ -8498,6 +8741,7 @@ class H245_DataProtocolCapability;
 class H245_DataMode_application_nlpid;
 class H245_DataMode_application_t38fax;
 class H245_GenericCapability;
+class H245_DataChannel;
 
 class H245_DataMode_application : public PASN_Choice
 {
@@ -8521,7 +8765,8 @@ class H245_DataMode_application : public PASN_Choice
       e_t30fax,
       e_t140,
       e_t38fax,
-      e_genericDataMode
+      e_genericDataMode,
+      e_dataChannel
     };
 
 #if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
@@ -8553,6 +8798,12 @@ class H245_DataMode_application : public PASN_Choice
 #else
     operator H245_GenericCapability &();
     operator const H245_GenericCapability &() const;
+#endif
+#if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
+    operator H245_DataChannel &() const;
+#else
+    operator H245_DataChannel &();
+    operator const H245_DataChannel &() const;
 #endif
 
     PBoolean CreateObject();
@@ -10053,6 +10304,26 @@ class H245_DataApplicationCapability_application_nlpid : public PASN_Sequence
     void PrintOn(ostream & strm) const;
 #endif
     Comparison Compare(const PObject & obj) const;
+    PObject * Clone() const;
+};
+
+
+//
+// ArrayOf_DataChannel
+//
+
+class H245_DataChannel;
+
+class H245_ArrayOf_DataChannel : public PASN_Array
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H245_ArrayOf_DataChannel, PASN_Array);
+#endif
+  public:
+    H245_ArrayOf_DataChannel(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    PASN_Object * CreateObject() const;
+    H245_DataChannel & operator[](PINDEX i) const;
     PObject * Clone() const;
 };
 
@@ -11691,6 +11962,40 @@ class H245_TerminalCapabilitySetRelease : public PASN_Sequence
 
 
 //
+// DTLSSecurityCapability
+//
+
+class H245_DTLSSecurityCapability : public PASN_Sequence
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H245_DTLSSecurityCapability, PASN_Sequence);
+#endif
+  public:
+    H245_DTLSSecurityCapability(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    enum OptionalFields {
+      e_setupInformation,
+      e_connectionInformation,
+      e_fingerprint
+    };
+
+    H245_DTLSSecurityCapability_hashFunction m_hashFunction;
+    PASN_IA5String m_setupInformation;
+    PASN_IA5String m_connectionInformation;
+    PASN_IA5String m_fingerprint;
+
+    PINDEX GetDataLength() const;
+    PBoolean Decode(PASN_Stream & strm);
+    void Encode(PASN_Stream & strm) const;
+#ifndef PASN_NOPRINTON
+    void PrintOn(ostream & strm) const;
+#endif
+    Comparison Compare(const PObject & obj) const;
+    PObject * Clone() const;
+};
+
+
+//
 // H222Capability
 //
 
@@ -12389,6 +12694,36 @@ class H245_H263ModeComboFlags : public PASN_Sequence
 
 
 //
+// ExtendedAudioCapability
+//
+
+class H245_ExtendedAudioCapability : public PASN_Sequence
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H245_ExtendedAudioCapability, PASN_Sequence);
+#endif
+  public:
+    H245_ExtendedAudioCapability(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    enum OptionalFields {
+      e_audioCapabilityExtension
+    };
+
+    H245_ArrayOf_AudioCapability m_audioCapability;
+    H245_ArrayOf_GenericCapability m_audioCapabilityExtension;
+
+    PINDEX GetDataLength() const;
+    PBoolean Decode(PASN_Stream & strm);
+    void Encode(PASN_Stream & strm) const;
+#ifndef PASN_NOPRINTON
+    void PrintOn(ostream & strm) const;
+#endif
+    Comparison Compare(const PObject & obj) const;
+    PObject * Clone() const;
+};
+
+
+//
 // G7231AnnexCCapability
 //
 
@@ -12446,6 +12781,36 @@ class H245_DataApplicationCapability : public PASN_Sequence
 
 
 //
+// ExtendedDataCapability
+//
+
+class H245_ExtendedDataCapability : public PASN_Sequence
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H245_ExtendedDataCapability, PASN_Sequence);
+#endif
+  public:
+    H245_ExtendedDataCapability(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    enum OptionalFields {
+      e_dataCapabilityExtension
+    };
+
+    H245_ArrayOf_DataApplicationCapability m_dataCapability;
+    H245_ArrayOf_GenericCapability m_dataCapabilityExtension;
+
+    PINDEX GetDataLength() const;
+    PBoolean Decode(PASN_Stream & strm);
+    void Encode(PASN_Stream & strm) const;
+#ifndef PASN_NOPRINTON
+    void PrintOn(ostream & strm) const;
+#endif
+    Comparison Compare(const PObject & obj) const;
+    PObject * Clone() const;
+};
+
+
+//
 // T38FaxUdpOptions
 //
 
@@ -12465,6 +12830,112 @@ class H245_T38FaxUdpOptions : public PASN_Sequence
     PASN_Integer m_t38FaxMaxBuffer;
     PASN_Integer m_t38FaxMaxDatagram;
     H245_T38FaxUdpOptions_t38FaxUdpEC m_t38FaxUdpEC;
+
+    PINDEX GetDataLength() const;
+    PBoolean Decode(PASN_Stream & strm);
+    void Encode(PASN_Stream & strm) const;
+#ifndef PASN_NOPRINTON
+    void PrintOn(ostream & strm) const;
+#endif
+    Comparison Compare(const PObject & obj) const;
+    PObject * Clone() const;
+};
+
+
+//
+// DataChannel
+//
+
+class H245_DataChannel : public PASN_Sequence
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H245_DataChannel, PASN_Sequence);
+#endif
+  public:
+    H245_DataChannel(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    enum OptionalFields {
+      e_dataChannelProfile
+    };
+
+    H245_ArrayOf_DataChannelProfile m_dataChannelProfile;
+
+    PINDEX GetDataLength() const;
+    PBoolean Decode(PASN_Stream & strm);
+    void Encode(PASN_Stream & strm) const;
+#ifndef PASN_NOPRINTON
+    void PrintOn(ostream & strm) const;
+#endif
+    Comparison Compare(const PObject & obj) const;
+    PObject * Clone() const;
+};
+
+
+//
+// DataChannelProfile
+//
+
+class H245_DataChannelProfile : public PASN_Sequence
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H245_DataChannelProfile, PASN_Sequence);
+#endif
+  public:
+    H245_DataChannelProfile(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    enum OptionalFields {
+      e_ordered,
+      e_priority,
+      e_reliabilityParm,
+      e_label,
+      e_protocol,
+      e_genericInformation
+    };
+
+    PASN_Boolean m_ordered;
+    PASN_Integer m_priority;
+    H245_DataChannelProfile_reliabilityParm m_reliabilityParm;
+    PASN_IA5String m_label;
+    PASN_IA5String m_protocol;
+    H245_ArrayOf_GenericInformation m_genericInformation;
+    H245_DataChannelProfile_establishmentType m_establishmentType;
+
+    PINDEX GetDataLength() const;
+    PBoolean Decode(PASN_Stream & strm);
+    void Encode(PASN_Stream & strm) const;
+#ifndef PASN_NOPRINTON
+    void PrintOn(ostream & strm) const;
+#endif
+    Comparison Compare(const PObject & obj) const;
+    PObject * Clone() const;
+};
+
+
+//
+// SctpParam
+//
+
+class H245_SctpParam : public PASN_Sequence
+{
+#ifndef PASN_LEANANDMEAN
+    PCLASSINFO(H245_SctpParam, PASN_Sequence);
+#endif
+  public:
+    H245_SctpParam(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+
+    enum OptionalFields {
+      e_appPPID,
+      e_maxMessageSize,
+      e_sctpExtensions,
+      e_genericInformation,
+      e_sctpPort
+    };
+
+    H245_SctpParam_appPPID m_appPPID;
+    PASN_Integer m_maxMessageSize;
+    H245_ArrayOf_SCTPChunkType m_sctpExtensions;
+    H245_ArrayOf_GenericInformation m_genericInformation;
+    PASN_Integer m_sctpPort;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);
@@ -13138,7 +13609,8 @@ class H245_H2250LogicalChannelAckParameters : public PASN_Sequence
       e_mediaControlChannel,
       e_dynamicRTPPayloadType,
       e_flowControlToZero,
-      e_portNumber
+      e_portNumber,
+      e_multiplePayloadStream
     };
 
     H245_ArrayOf_NonStandardParameter m_nonStandard;
@@ -13148,6 +13620,7 @@ class H245_H2250LogicalChannelAckParameters : public PASN_Sequence
     PASN_Integer m_dynamicRTPPayloadType;
     PASN_Boolean m_flowControlToZero;
     PASN_Integer m_portNumber;
+    H245_MultiplePayloadStream m_multiplePayloadStream;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);
@@ -15628,13 +16101,15 @@ class H245_EncryptionAuthenticationAndIntegrity : public PASN_Sequence
       e_encryptionCapability,
       e_authenticationCapability,
       e_integrityCapability,
-      e_genericH235SecurityCapability
+      e_genericH235SecurityCapability,
+      e_dtlsSecurityCapability
     };
 
     H245_EncryptionCapability m_encryptionCapability;
     H245_AuthenticationCapability m_authenticationCapability;
     H245_IntegrityCapability m_integrityCapability;
     H245_GenericCapability m_genericH235SecurityCapability;
+    H245_DTLSSecurityCapability m_dtlsSecurityCapability;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);
@@ -15788,7 +16263,8 @@ class H245_OpenLogicalChannelAck : public PASN_Sequence
       e_separateStack,
       e_forwardMultiplexAckParameters,
       e_encryptionSync,
-      e_genericInformation
+      e_genericInformation,
+      e_dtlsSecurityCapability
     };
 
     H245_LogicalChannelNumber m_forwardLogicalChannelNumber;
@@ -15797,6 +16273,7 @@ class H245_OpenLogicalChannelAck : public PASN_Sequence
     H245_OpenLogicalChannelAck_forwardMultiplexAckParameters m_forwardMultiplexAckParameters;
     H245_EncryptionSync m_encryptionSync;
     H245_ArrayOf_GenericInformation m_genericInformation;
+    H245_DTLSSecurityCapability m_dtlsSecurityCapability;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);
@@ -16175,7 +16652,8 @@ class H245_H2250LogicalChannelParameters : public PASN_Sequence
       e_mediaPacketization,
       e_transportCapability,
       e_redundancyEncoding,
-      e_source
+      e_source,
+      e_nominalAudioLevel
     };
 
     H245_ArrayOf_NonStandardParameter m_nonStandard;
@@ -16192,6 +16670,7 @@ class H245_H2250LogicalChannelParameters : public PASN_Sequence
     H245_TransportCapability m_transportCapability;
     H245_RedundancyEncoding m_redundancyEncoding;
     H245_TerminalLabel m_source;
+    PASN_Integer m_nominalAudioLevel;
 
     PINDEX GetDataLength() const;
     PBoolean Decode(PASN_Stream & strm);

@@ -6335,7 +6335,7 @@ const static PASN_Names Names_H225_AdmissionRejectReason[]={
      ,{"collectPIN",15}
      ,{"genericDataReason",16}
      ,{"neededFeatureNotSupported",17}
-     ,{"securityErrors",18}
+     ,{"securityError",18}
      ,{"securityDHmismatch",19}
      ,{"noRouteToDestination",20}
      ,{"unallocatedNumber",21}
@@ -6429,7 +6429,7 @@ PBoolean H225_AdmissionRejectReason::CreateObject()
     case e_routeCallToSCN :
       choice = new H225_ArrayOf_PartyNumber();
       return TRUE;
-    case e_securityErrors :
+    case e_securityError :
       choice = new H225_SecurityErrors2();
       return TRUE;
   }

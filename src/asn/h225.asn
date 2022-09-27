@@ -1,17 +1,15 @@
 --
--- Abstract Syntax Notion (ASN.1) file for H.225.0 Version 7
+-- Abstract Syntax Notion (ASN.1) file for H.225.0 Version 8
 --
--- File provided by Packetizer, Inc. - http://www.packetizer.com
--- Last Updated: 05 Nov 2009
+-- File provided by Packetizer, Inc. - https://www.packetizer.com
+-- Last Updated: 24 September 2022
 --
 -- History of changes:
---    05 Nov 2009
---        Initial H.225.0v7 ASN.1 file
+--    2022-09-24 - Initial H.225.0v8 ASN.1 file
 --
 
 H323-MESSAGES DEFINITIONS AUTOMATIC TAGS ::=
 BEGIN
-
 
 IMPORTS
                 SIGNED{},
@@ -75,8 +73,7 @@ H323-UU-PDU ::= SEQUENCE
                                                 -- each sequence of octet string is defined as one
                                                 -- H4501SupplementaryService APDU as defined in
                                                 -- Table 3/H.450.1
-
-        h245Tunneling                   BOOLEAN, -- if TRUE, tunneling of H.245 messages is enabled
+        h245Tunneling                   BOOLEAN,-- if TRUE, tunneling of H.245 messages is enabled
         h245Control                     SEQUENCE OF OCTET STRING OPTIONAL,
         nonStandardControl              SEQUENCE OF NonStandardParameter OPTIONAL,
         callLinkage                     CallLinkage OPTIONAL,
@@ -84,8 +81,8 @@ H323-UU-PDU ::= SEQUENCE
         {
                 tunnelledProtocolID     TunnelledProtocol,              -- tunnelled signalling protocol ID
                 messageContent          SEQUENCE OF OCTET STRING,       -- sequence of entire message(s)
-                tunnellingRequired      NULL OPTIONAL,  
-                nonStandardData NonStandardParameter OPTIONAL,
+                tunnellingRequired      NULL OPTIONAL,
+                nonStandardData         NonStandardParameter OPTIONAL,
                 ...
         } OPTIONAL,
         provisionalRespToH245Tunneling  NULL OPTIONAL,
@@ -155,7 +152,7 @@ Connect-UUIE ::= SEQUENCE
         fastStart               SEQUENCE OF OCTET STRING OPTIONAL,
         multipleCalls           BOOLEAN,
         maintainConnection      BOOLEAN,
-        language                SEQUENCE OF IA5String (SIZE (1..32)) OPTIONAL, -- RFC1766 language tag
+        language                SEQUENCE OF IA5String (SIZE (1..32)) OPTIONAL, -- RFC5646 language tag
         connectedAddress        SEQUENCE OF AliasAddress OPTIONAL,
         presentationIndicator   PresentationIndicator OPTIONAL,
         screeningIndicator      ScreeningIndicator OPTIONAL,
@@ -221,8 +218,8 @@ ReleaseCompleteReason ::= CHOICE
                                                 -- connection, but that the Setup may be accepted on
                                                 -- a new connection
         nonStandardReason               NonStandardParameter,
-        replaceWithConferenceInvite     ConferenceIdentifier,   -- call dropped due to subsequent 
-                                                                -- invitation to a conference 
+        replaceWithConferenceInvite     ConferenceIdentifier,   -- call dropped due to subsequent
+                                                                -- invitation to a conference
                                                                 -- (see H.323 8.4.3.8)
         genericDataReason               NULL,
         neededFeatureNotSupported       NULL,
@@ -275,7 +272,7 @@ Setup-UUIE ::= SEQUENCE
                 connectionAggregation           ScnConnectionAggregation,
                 ...
         } OPTIONAL,
-        language                        SEQUENCE OF IA5String (SIZE (1..32)) OPTIONAL, -- RFC1766 language tag
+        language                        SEQUENCE OF IA5String (SIZE (1..32)) OPTIONAL, -- RFC5646 language tag
         presentationIndicator           PresentationIndicator OPTIONAL,
         screeningIndicator              ScreeningIndicator OPTIONAL,
         serviceControl                  SEQUENCE OF ServiceControlSession OPTIONAL,
@@ -294,18 +291,18 @@ Setup-UUIE ::= SEQUENCE
 
 ScnConnectionType ::= CHOICE
 {
-        unknown         NULL,   -- should be seleceted when connection type is unknown
+        unknown         NULL,   -- should be selected when connection type is unknown
         bChannel        NULL,   -- each individual connection on the SCN is 64kbps.
-                                        -- Note that where SCN delivers 56kbps usable data, the
-                                        -- actual bandwidth allocated on SCN is still 64kbps.
+                                    -- Note that where SCN delivers 56kbps usable data, the
+                                    -- actual bandwidth allocated on SCN is still 64kbps.
         hybrid2x64      NULL,   -- each connection is a 128kbps hybrid call
         hybrid384       NULL,   -- each connection is an H0 (384kbps) hybrid call
         hybrid1536      NULL,   -- each connection is an H11 (1536kbps) hybrid call
         hybrid1920      NULL,   -- each connection is an H12 (1920kbps) hybrid call
         multirate       NULL,   -- bandwidth supplied by SCN using multirate.
-                                        -- In this case, the information transfer rate octet in the
-                                        -- bearer capability shall be set to multirate and the rate
-                                        -- multiplier octet shall denote the number of B channels.
+                                    -- In this case, the information transfer rate octet in the
+                                    -- bearer capability shall be set to multirate and the rate
+                                    -- multiplier octet shall denote the number of B channels.
         ...
 }
 
@@ -315,8 +312,8 @@ ScnConnectionAggregation ::= CHOICE
         none            NULL,   -- call produced using a single SCN connection
         h221            NULL,   -- use H.221 framing to aggregate the connections
         bonded-mode1    NULL,   -- use ISO/IEC 13871 bonding mode 1.
-                                        -- Use bonded-mode1 to signal a bonded call if the precise
-                                        -- bonding mode to be used is unknown.
+                                    -- Use bonded-mode1 to signal a bonded call if the precise
+                                    -- bonding mode to be used is unknown.
         bonded-mode2    NULL,   -- use ISO/IEC 13871 bonding mode 2
         bonded-mode3    NULL,   -- use ISO/IEC 13871 bonding mode 3
         ...
@@ -342,7 +339,7 @@ ScreeningIndicator ::= ENUMERATED
         userProvidedVerifiedAndFailed (2),
                 -- number was provided by user
                 -- equipment (or by a remote network), and the
-                -- gatekeeper has determined that the 
+                -- gatekeeper has determined that the
                 -- information is incorrect
         networkProvided (3),
                 -- number was provided by a gatekeeper
@@ -451,7 +448,7 @@ TransportAddress ::= CHOICE
         netBios                 OCTET STRING (SIZE(16)),
         nsap                    OCTET STRING (SIZE(1..20)),
         nonStandardAddress      NonStandardParameter,
-        ...     
+        ...
 }
 
 Status-UUIE ::= SEQUENCE
@@ -506,7 +503,7 @@ EndpointType ::= SEQUENCE
         mcu                     McuInfo OPTIONAL,       -- mc must be set as well
         terminal                TerminalInfo OPTIONAL,
         mc                      BOOLEAN,                -- shall not be set by itself
-        undefinedNode           BOOLEAN,        
+        undefinedNode           BOOLEAN,
         ...,
         set                     BIT STRING (SIZE(32)) OPTIONAL,
                                         -- shall not be used with mc, gatekeeper
@@ -637,13 +634,13 @@ McuInfo ::= SEQUENCE
         protocol                        SEQUENCE OF SupportedProtocols OPTIONAL
 }
 
-TerminalInfo ::= SEQUENCE 
+TerminalInfo ::= SEQUENCE
 {
         nonStandardData                 NonStandardParameter OPTIONAL,
         ...
 }
 
-GatekeeperInfo ::= SEQUENCE 
+GatekeeperInfo ::= SEQUENCE
 {
         nonStandardData                 NonStandardParameter OPTIONAL,
         ...
@@ -709,7 +706,7 @@ AliasAddress ::= CHOICE
         partyNumber             PartyNumber,
         mobileUIM               MobileUIM,
         isupNumber              IsupNumber
-}       
+}
 
 AddressPattern ::= CHOICE
 {
@@ -754,7 +751,8 @@ NumberDigits ::= IA5String (SIZE (1..128)) (FROM ("0123456789#*,"))
 
 DisplayName ::= SEQUENCE
 {
-        language                IA5String OPTIONAL,	-- RFC4646 language tag
+        language                IA5String OPTIONAL,
+                                                -- RFC5646 language tag
         name                    BMPString(SIZE(1..80))
 }
 
@@ -771,7 +769,7 @@ PublicTypeOfNumber ::= CHOICE
         abbreviatedNumber       NULL,
                                                 -- valid only for called party number at the outgoing
                                                 -- access, network substitutes appropriate number.
-...
+        ...
 }
 
 PrivateTypeOfNumber ::= CHOICE
@@ -798,16 +796,16 @@ ANSI-41-UIM ::= SEQUENCE
 {
         imsi                    TBCD-STRING (SIZE (3..16)) OPTIONAL,
         min                     TBCD-STRING (SIZE (3..16)) OPTIONAL,
-        mdn                     TBCD-STRING (SIZE (3..16)) OPTIONAL, 
+        mdn                     TBCD-STRING (SIZE (3..16)) OPTIONAL,
         msisdn                  TBCD-STRING (SIZE (3..16)) OPTIONAL,
         esn                     TBCD-STRING (SIZE (16)) OPTIONAL,
         mscid                   TBCD-STRING (SIZE (3..16)) OPTIONAL,
-        system-id CHOICE 
+        system-id CHOICE
         {
                 sid             TBCD-STRING (SIZE (1..4)),
                 mid             TBCD-STRING (SIZE (1..4)),
                 ...
-        }, 
+        },
         systemMyTypeCode        OCTET STRING (SIZE (1)) OPTIONAL,
         systemAccessType        OCTET STRING (SIZE (1)) OPTIONAL,
         qualificationInformationCode OCTET STRING (SIZE (1)) OPTIONAL,
@@ -818,14 +816,14 @@ ANSI-41-UIM ::= SEQUENCE
         -- MIN refers to Mobile Identification Number
         -- MDN refers to Mobile Directory Number
         -- MSISDN refers to Mobile Station ISDN number
-        -- ESN Refers to Electronic Serial Number 
+        -- ESN Refers to Electronic Serial Number
         -- MSCID refers to Mobile Switching Center number + Market ID or System ID
         -- SID refers to System Identification and MID refers to Market Identification
         -- SystemMyTypeCode refers to vendor identification number
         -- SystemAccessType refers to the system access type like power down registration or call
         -- origination or Short Message repsonse etc.
         -- Qualification Information Code refers to the validity
-        -- SESN Refers to SIM Electronic Serial Number for Security purposes of User Identification 
+        -- SESN Refers to SIM Electronic Serial Number for Security purposes of User Identification
         -- SOC refers to System Operator Code
 }
 
@@ -839,7 +837,7 @@ GSM-UIM ::= SEQUENCE
         vplmn                   TBCD-STRING (SIZE (1..4)) OPTIONAL,
         -- IMSI refers to International Mobile Station Identificaiton
         -- MSISDN refers to Mobile Station ISDN number
-        -- IMEI Refers to International Mobile Equipment Identification 
+        -- IMEI Refers to International Mobile Equipment Identification
         -- VPLMN or HPLMN refers to Visiting or Home Public Land Mobile Network number
         ...
 }
@@ -852,7 +850,7 @@ IsupNumber ::= CHOICE
     dataPartyNumber             IsupDigits, -- not used, value reserved.
     telexPartyNumber            IsupDigits, -- not used, value reserved.
     privateNumber               IsupPrivatePartyNumber,
-                                    -- the numbering plan is according to 
+                                    -- the numbering plan is according to
                                     -- ISO/IEC 11571.
     nationalStandardPartyNumber IsupDigits, -- not used, value reserved.
     ...
@@ -896,22 +894,22 @@ ExtendedAliasAddress ::= SEQUENCE
 }
 
 Endpoint ::= SEQUENCE
-{ 
-        nonStandardData                 NonStandardParameter OPTIONAL, 
-        aliasAddress                    SEQUENCE OF AliasAddress OPTIONAL,  
-        callSignalAddress               SEQUENCE OF TransportAddress OPTIONAL,  
-        rasAddress                      SEQUENCE OF TransportAddress OPTIONAL,  
-        endpointType                    EndpointType OPTIONAL,  
-        tokens                          SEQUENCE OF ClearToken OPTIONAL,  
+{
+        nonStandardData                 NonStandardParameter OPTIONAL,
+        aliasAddress                    SEQUENCE OF AliasAddress OPTIONAL,
+        callSignalAddress               SEQUENCE OF TransportAddress OPTIONAL,
+        rasAddress                      SEQUENCE OF TransportAddress OPTIONAL,
+        endpointType                    EndpointType OPTIONAL,
+        tokens                          SEQUENCE OF ClearToken OPTIONAL,
         cryptoTokens                    SEQUENCE OF CryptoH323Token OPTIONAL,
-        priority                        INTEGER(0..127) OPTIONAL, 
+        priority                        INTEGER(0..127) OPTIONAL,
         remoteExtensionAddress          SEQUENCE OF AliasAddress OPTIONAL,
         destExtraCallInfo               SEQUENCE OF AliasAddress OPTIONAL,
         ...,
         alternateTransportAddresses     AlternateTransportAddresses OPTIONAL,
         circuitInfo                     CircuitInfo OPTIONAL,
         featureSet                      FeatureSet OPTIONAL
-} 
+}
 
 AlternateTransportAddresses ::= SEQUENCE
 {
@@ -927,7 +925,7 @@ UseSpecifiedTransport ::= CHOICE
         ...,
         sctp                    NULL
 }
- 
+
 AlternateGK ::= SEQUENCE
 {
         rasAddress                      TransportAddress,
@@ -944,7 +942,7 @@ AltGKInfo ::=SEQUENCE
         ...
 }
 
-SecurityServiceMode ::= CHOICE 
+SecurityServiceMode ::= CHOICE
 {
         nonStandard             NonStandardParameter,
         none                    NULL,
@@ -952,7 +950,7 @@ SecurityServiceMode ::= CHOICE
         ...             -- can be extended with other specific modes
 }
 
-SecurityCapabilities ::= SEQUENCE 
+SecurityCapabilities ::= SEQUENCE
 {
         nonStandard                     NonStandardParameter OPTIONAL,
         encryption                      SecurityServiceMode,
@@ -961,7 +959,7 @@ SecurityCapabilities ::= SEQUENCE
         ...
 }
 
-SecurityErrors          ::=     CHOICE
+SecurityErrors ::= CHOICE
 {
         securityWrongSyncTime                   NULL,   -- either time server
                                                         -- problem or network delay
@@ -986,7 +984,7 @@ SecurityErrors          ::=     CHOICE
         ...
 }
 
-SecurityErrors2 ::=     CHOICE
+SecurityErrors2 ::= CHOICE
 {
         securityWrongSyncTime   NULL, -- either time server problem or network delay
         securityReplay          NULL, -- replay attack encountered
@@ -997,7 +995,7 @@ SecurityErrors2 ::=     CHOICE
         ...
 }
 
-H245Security ::= CHOICE 
+H245Security ::= CHOICE
 {
         nonStandard                     NonStandardParameter,
         noSecurity                      NULL,
@@ -1016,7 +1014,7 @@ QseriesOptions ::= SEQUENCE
         q955Full                BOOLEAN,        -- if true, indicates full support for Q.955
         q956Full                BOOLEAN,        -- if true, indicates full support for Q.956
         q957Full                BOOLEAN,        -- if true, indicates full support for Q.957
-        q954Info                Q954Details,    
+        q954Info                Q954Details,
         ...
 }
 
@@ -1034,9 +1032,9 @@ GatekeeperIdentifier    ::=     BMPString (SIZE(1..128))
 BandWidth               ::=     INTEGER (0..4294967295) -- in 100s of bits
 CallReferenceValue      ::=     INTEGER (0..65535)
 EndpointIdentifier      ::=     BMPString (SIZE(1..128))
-ProtocolIdentifier      ::=     OBJECT IDENTIFIER       
-                                        -- shall be set to  
-                                        -- {itu-t (0) recommendation (0) h (8) 2250 version (0) 7}
+ProtocolIdentifier      ::=     OBJECT IDENTIFIER
+                                        -- shall be set to
+                                        -- {itu-t (0) recommendation (0) h (8) 2250 version (0) 8}
 TimeToLive              ::=     INTEGER (1..4294967295) -- in seconds
 H248PackagesDescriptor  ::=     OCTET STRING  -- This octet string contans
                                               -- ASN.1 PER encoded H.248
@@ -1058,14 +1056,14 @@ EncryptIntAlg ::= CHOICE
         isoAlgorithm            OBJECT IDENTIFIER,      -- defined in ISO/IEC 9979
         ...
 }
-NonIsoIntegrityMechanism ::= CHOICE 
+NonIsoIntegrityMechanism ::= CHOICE
 {       -- HMAC mechanism used, no truncation, tagging may be necessary!
         hMAC-MD5                NULL,
         hMAC-iso10118-2-s       EncryptIntAlg,  -- according to ISO/IEC 10118-2 using
-                                                -- EncryptIntAlg as core block encryption algorithm 
+                                                -- EncryptIntAlg as core block encryption algorithm
                                                 -- (short MAC)
         hMAC-iso10118-2-l       EncryptIntAlg,  -- according to ISO/IEC 10118-2 using
-                                                -- EncryptIntAlg as core block encryption algorithm 
+                                                -- EncryptIntAlg as core block encryption algorithm
                                                 -- (long MAC)
         hMAC-iso10118-3 OBJECT IDENTIFIER,      -- according to ISO/IEC 10118-3 using
                                                 -- OID as hash function (OID is SHA-1,
@@ -1227,7 +1225,7 @@ CarrierInfo ::= SEQUENCE
 
 ServiceControlDescriptor ::= CHOICE
 {
-        url                             IA5String (SIZE(0..512)),       -- indicates a URL-referenced 
+        url                             IA5String (SIZE(0..512)),       -- indicates a URL-referenced
                                                                         -- protocol/resource
         signal                          H248SignalsDescriptor,
         nonStandard                     NonStandardParameter,
@@ -1317,7 +1315,7 @@ CallCreditServiceControl ::= SEQUENCE
                 credit                  NULL,
                 debit                   NULL,
                 ...
-        } OPTIONAL,     
+        } OPTIONAL,
         callDurationLimit               INTEGER (1..4294967295) OPTIONAL,     -- in seconds
         enforceCallDurationLimit        BOOLEAN OPTIONAL,
         callStartingPoint CHOICE
@@ -1397,13 +1395,13 @@ RTPSession ::= SEQUENCE
         bandwidth                       BandWidth OPTIONAL
 }
 
-RehomingModel ::= CHOICE   
+RehomingModel ::= CHOICE
 {
         gatekeeperBased                 NULL,
         endpointBased                   NULL
 }
 
-RasMessage ::= CHOICE   
+RasMessage ::= CHOICE
 {
         gatekeeperRequest               GatekeeperRequest,
         gatekeeperConfirm               GatekeeperConfirm,
@@ -1425,7 +1423,7 @@ RasMessage ::= CHOICE
         disengageReject                 DisengageReject,
         locationRequest                 LocationRequest,
         locationConfirm                 LocationConfirm,
-        locationReject                  LocationReject, 
+        locationReject                  LocationReject,
         infoRequest                     InfoRequest,
         infoRequestResponse             InfoRequestResponse,
         nonStandardMessage              NonStandardMessage,
@@ -1443,14 +1441,13 @@ RasMessage ::= CHOICE
 
 GatekeeperRequest ::= SEQUENCE --(GRQ)
 {
-        
         requestSeqNum                   RequestSeqNum,
         protocolIdentifier              ProtocolIdentifier,
         nonStandardData                 NonStandardParameter OPTIONAL,
         rasAddress                      TransportAddress,
         endpointType                    EndpointType,
         gatekeeperIdentifier            GatekeeperIdentifier OPTIONAL,
-        callServices                    QseriesOptions  OPTIONAL, 
+        callServices                    QseriesOptions  OPTIONAL,
         endpointAlias                   SEQUENCE OF AliasAddress OPTIONAL,
         ...,
         alternateEndpoints              SEQUENCE OF Endpoint OPTIONAL,
@@ -1568,7 +1565,7 @@ RegistrationConfirm ::= SEQUENCE --(RCF)
         terminalAlias                   SEQUENCE OF AliasAddress OPTIONAL,
         gatekeeperIdentifier            GatekeeperIdentifier  OPTIONAL,
         endpointIdentifier              EndpointIdentifier,
-        ...,    
+        ...,
         alternateGatekeeper             SEQUENCE OF AlternateGK OPTIONAL,
         timeToLive                      TimeToLive OPTIONAL,
         tokens                          SEQUENCE OF ClearToken OPTIONAL,
@@ -1584,11 +1581,11 @@ RegistrationConfirm ::= SEQUENCE --(RCF)
                 ...,
                 irrFrequencyInCall                      INTEGER (1..65535) OPTIONAL,
                                                                         -- in seconds; not
-                                                                        -- present if GK 
+                                                                        -- present if GK
                                                                         -- does not want IRRs
                 totalBandwidthRestriction               BandWidth OPTIONAL,
-                                                                        -- total limit for all 
--- concurrent calls
+                                                                        -- total limit for all
+                                                                        -- concurrent calls
                 alternateTransportAddresses             AlternateTransportAddresses OPTIONAL,
                 useSpecifiedTransport                   UseSpecifiedTransport OPTIONAL
         } OPTIONAL,
@@ -1605,7 +1602,8 @@ RegistrationConfirm ::= SEQUENCE --(RCF)
         assignedGatekeeper              AlternateGK OPTIONAL,
         rehomingModel                   RehomingModel OPTIONAL,
         transportQOS                    TransportQOS OPTIONAL,
-        language                        SEQUENCE OF IA5String(SIZE (1..32)) OPTIONAL
+        language                        SEQUENCE OF IA5String (SIZE (1..32)) OPTIONAL
+                                                                        -- RFC5646 language tag
 }
 
 RegistrationReject ::= SEQUENCE --(RRJ)
@@ -1627,7 +1625,7 @@ RegistrationReject ::= SEQUENCE --(RRJ)
 
 RegistrationRejectReason ::= CHOICE
 {
-        discoveryRequired               NULL,   
+        discoveryRequired               NULL,
         invalidRevision                 NULL,
         invalidCallSignalAddress        NULL,
         invalidRASAddress               NULL,   -- supplied address is invalid
@@ -1703,7 +1701,6 @@ UnregistrationConfirm ::= SEQUENCE --(UCF)
 
 UnregistrationReject ::= SEQUENCE --(URJ)
 {
-        
         requestSeqNum                   RequestSeqNum,
         rejectReason                    UnregRejectReason,
         nonStandardData                 NonStandardParameter OPTIONAL,
@@ -1737,7 +1734,7 @@ AdmissionRequest ::= SEQUENCE --(ARQ)
         destCallSignalAddress           TransportAddress OPTIONAL,
         destExtraCallInfo               SEQUENCE OF AliasAddress OPTIONAL,
         srcInfo                         SEQUENCE OF AliasAddress,
-        srcCallSignalAddress            TransportAddress OPTIONAL, 
+        srcCallSignalAddress            TransportAddress OPTIONAL,
         bandWidth                       BandWidth,
         callReferenceValue              CallReferenceValue,
         nonStandardData                 NonStandardParameter OPTIONAL,
@@ -1882,7 +1879,7 @@ AdmissionRejectReason ::= CHOICE
         collectPIN                      NULL,
         genericDataReason               NULL,
         neededFeatureNotSupported       NULL,
-        securityErrors                  SecurityErrors2,
+        securityError                   SecurityErrors2,
         securityDHmismatch              NULL,   -- mismatch of DH parameters
         noRouteToDestination            NULL,   -- destination unreachable
         unallocatedNumber               NULL,   -- destination number unassigned
@@ -2005,7 +2002,8 @@ LocationConfirm ::= SEQUENCE --(LCF)
         serviceControl                  SEQUENCE OF ServiceControlSession OPTIONAL,
         modifiedSrcInfo                 SEQUENCE OF AliasAddress OPTIONAL,
         bandWidth                       BandWidth OPTIONAL,
-        language                        SEQUENCE OF IA5String(SIZE (1..32)) OPTIONAL
+        language                        SEQUENCE OF IA5String (SIZE (1..32)) OPTIONAL
+                                                -- RFC5646 language tag
 }
 
 LocationReject ::= SEQUENCE --(LRJ)
@@ -2125,7 +2123,7 @@ InfoRequest ::= SEQUENCE --(IRQ)
         cryptoTokens                    SEQUENCE OF CryptoH323Token OPTIONAL,
         integrityCheckValue             ICV OPTIONAL,
         uuiesRequested                  UUIEsRequested OPTIONAL,
-        callLinkage                     CallLinkage OPTIONAL, 
+        callLinkage                     CallLinkage OPTIONAL,
         usageInfoRequested              RasUsageInfoTypes OPTIONAL,
         segmentedResponseSupported      NULL OPTIONAL,
         nextSegmentRequested            INTEGER (0..65535) OPTIONAL,
@@ -2325,6 +2323,4 @@ ServiceControlResponse ::= SEQUENCE --(SCR)
         ...
 }
 
-
 END             -- of ASN.1
-
