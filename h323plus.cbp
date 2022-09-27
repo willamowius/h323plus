@@ -16,7 +16,7 @@
 			</Target>
 			<Target title="debugnoshared">
 				<Option platforms="Unix;" />
-				<Option output="lib/libh323_linux_x86_64__d_s.a" prefix_auto="1" extension_auto="1" />
+				<Option output="lib/libh323_linux_x86_64__d_s" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
@@ -140,6 +140,1433 @@
 		<Unit filename="include/transports.h" />
 		<Unit filename="include/x224.h" />
 		<Unit filename="include/x880.h" />
+		<Unit filename="plugins/Makefile" />
+		<Unit filename="plugins/Makefile.in" />
+		<Unit filename="plugins/aclocal.m4" />
+		<Unit filename="plugins/audio/EasyCodec/EasyCodecs.dsw" />
+		<Unit filename="plugins/audio/EasyCodec/EasyG722.dsp" />
+		<Unit filename="plugins/audio/EasyCodec/EasyG7231.dsp" />
+		<Unit filename="plugins/audio/EasyCodec/EasyG7231_2005.vcproj" />
+		<Unit filename="plugins/audio/EasyCodec/EasyG7231_2008.vcproj" />
+		<Unit filename="plugins/audio/EasyCodec/EasyG728.dsp" />
+		<Unit filename="plugins/audio/EasyCodec/EasyG728_2005.vcproj" />
+		<Unit filename="plugins/audio/EasyCodec/EasyG728_2008.vcproj" />
+		<Unit filename="plugins/audio/EasyCodec/EasyG729A.dsp" />
+		<Unit filename="plugins/audio/EasyCodec/EasyG729A_2005.vcproj" />
+		<Unit filename="plugins/audio/EasyCodec/EasyG729A_2008.vcproj" />
+		<Unit filename="plugins/audio/EasyCodec/ReadMe.txt" />
+		<Unit filename="plugins/audio/EasyCodec/easycodecs.cxx" />
+		<Unit filename="plugins/audio/EasyCodec/easycodecs.h" />
+		<Unit filename="plugins/audio/EasyCodec/g722codec.h" />
+		<Unit filename="plugins/audio/EasyCodec/g7231codec.h" />
+		<Unit filename="plugins/audio/EasyCodec/g728codec.h" />
+		<Unit filename="plugins/audio/EasyCodec/g729Acodec.h" />
+		<Unit filename="plugins/audio/G.722.1-stub/G7221-stub.cxx" />
+		<Unit filename="plugins/audio/G.722.1-stub/Makefile" />
+		<Unit filename="plugins/audio/G.722.1-stub/Makefile.in" />
+		<Unit filename="plugins/audio/G.722.1/G.722.1_2005.vcproj" />
+		<Unit filename="plugins/audio/G.722.1/G.722.1_2008.vcproj" />
+		<Unit filename="plugins/audio/G.722.1/G722-1/basop32.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.1/G722-1/basop32.h" />
+		<Unit filename="plugins/audio/G.722.1/G722-1/coef2sam.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.1/G722-1/common.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.1/G722-1/count.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.1/G722-1/count.h" />
+		<Unit filename="plugins/audio/G.722.1/G722-1/dct4_a.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.1/G722-1/dct4_a.h" />
+		<Unit filename="plugins/audio/G.722.1/G722-1/dct4_s.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.1/G722-1/dct4_s.h" />
+		<Unit filename="plugins/audio/G.722.1/G722-1/decode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.1/G722-1/decoder.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.1/G722-1/defs.h" />
+		<Unit filename="plugins/audio/G.722.1/G722-1/encode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.1/G722-1/encoder.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.1/G722-1/huff_def.h" />
+		<Unit filename="plugins/audio/G.722.1/G722-1/huff_tab.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.1/G722-1/huff_tab.h" />
+		<Unit filename="plugins/audio/G.722.1/G722-1/sam2coef.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.1/G722-1/tables.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.1/G722-1/tables.h" />
+		<Unit filename="plugins/audio/G.722.1/G722-1/typedef.h" />
+		<Unit filename="plugins/audio/G.722.1/G7221Codec.cxx" />
+		<Unit filename="plugins/audio/G.722.1/Makefile" />
+		<Unit filename="plugins/audio/G.722.1/Makefile.in" />
+		<Unit filename="plugins/audio/G.722.1/g7221_audio_pwplugin.so" />
+		<Unit filename="plugins/audio/G.722.1/obj/G7221Codec.o" />
+		<Unit filename="plugins/audio/G.722.1/obj/basop32.o" />
+		<Unit filename="plugins/audio/G.722.1/obj/coef2sam.o" />
+		<Unit filename="plugins/audio/G.722.1/obj/common.o" />
+		<Unit filename="plugins/audio/G.722.1/obj/count.o" />
+		<Unit filename="plugins/audio/G.722.1/obj/dct4_a.o" />
+		<Unit filename="plugins/audio/G.722.1/obj/dct4_s.o" />
+		<Unit filename="plugins/audio/G.722.1/obj/decoder.o" />
+		<Unit filename="plugins/audio/G.722.1/obj/encoder.o" />
+		<Unit filename="plugins/audio/G.722.1/obj/huff_tab.o" />
+		<Unit filename="plugins/audio/G.722.1/obj/sam2coef.o" />
+		<Unit filename="plugins/audio/G.722.1/obj/tables.o" />
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/dec.h" />
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/dec_acelp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/dec_acelp.h" />
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/dec_dtx.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/dec_dtx.h" />
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/dec_gain.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/dec_gain.h" />
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/dec_if.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/dec_if.h" />
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/dec_lpc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/dec_lpc.h" />
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/dec_main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/dec_main.h" />
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/dec_rom.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/dec_util.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/dec_util.h" />
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/enc.h" />
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/enc_acelp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/enc_acelp.h" />
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/enc_dtx.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/enc_dtx.h" />
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/enc_gain.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/enc_gain.h" />
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/enc_if.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/enc_if.h" />
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/enc_lpc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/enc_lpc.h" />
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/enc_main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/enc_main.h" />
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/enc_rom.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/enc_util.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/enc_util.h" />
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/if_rom.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/if_rom.h" />
+		<Unit filename="plugins/audio/G.722.2/AMR-WB/typedef.h" />
+		<Unit filename="plugins/audio/G.722.2/G.722.2_2005.vcproj" />
+		<Unit filename="plugins/audio/G.722.2/G.722.2_2008.vcproj" />
+		<Unit filename="plugins/audio/G.722.2/G7222Codec.cpp" />
+		<Unit filename="plugins/audio/G.722.2/Makefile" />
+		<Unit filename="plugins/audio/G.722.2/Makefile.in" />
+		<Unit filename="plugins/audio/G.722.2/g7222_audio_pwplugin.so" />
+		<Unit filename="plugins/audio/G.722.2/obj/G7222Codec.o" />
+		<Unit filename="plugins/audio/G.722.2/obj/dec_acelp.o" />
+		<Unit filename="plugins/audio/G.722.2/obj/dec_dtx.o" />
+		<Unit filename="plugins/audio/G.722.2/obj/dec_gain.o" />
+		<Unit filename="plugins/audio/G.722.2/obj/dec_if.o" />
+		<Unit filename="plugins/audio/G.722.2/obj/dec_lpc.o" />
+		<Unit filename="plugins/audio/G.722.2/obj/dec_main.o" />
+		<Unit filename="plugins/audio/G.722.2/obj/dec_rom.o" />
+		<Unit filename="plugins/audio/G.722.2/obj/dec_util.o" />
+		<Unit filename="plugins/audio/G.722.2/obj/enc_acelp.o" />
+		<Unit filename="plugins/audio/G.722.2/obj/enc_dtx.o" />
+		<Unit filename="plugins/audio/G.722.2/obj/enc_gain.o" />
+		<Unit filename="plugins/audio/G.722.2/obj/enc_if.o" />
+		<Unit filename="plugins/audio/G.722.2/obj/enc_lpc.o" />
+		<Unit filename="plugins/audio/G.722.2/obj/enc_main.o" />
+		<Unit filename="plugins/audio/G.722.2/obj/enc_rom.o" />
+		<Unit filename="plugins/audio/G.722.2/obj/enc_util.o" />
+		<Unit filename="plugins/audio/G.722.2/obj/if_rom.o" />
+		<Unit filename="plugins/audio/G722/Makefile" />
+		<Unit filename="plugins/audio/G722/Makefile.in" />
+		<Unit filename="plugins/audio/G722/VoIPCodecs/bitstream.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G722/VoIPCodecs/bitstream.h" />
+		<Unit filename="plugins/audio/G722/VoIPCodecs/dc_restore.h" />
+		<Unit filename="plugins/audio/G722/VoIPCodecs/g722.h" />
+		<Unit filename="plugins/audio/G722/VoIPCodecs/g722_decode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G722/VoIPCodecs/g722_encode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G722/VoIPCodecs/inttypes.h" />
+		<Unit filename="plugins/audio/G722/VoIPCodecs/telephony.h" />
+		<Unit filename="plugins/audio/G722/g722_2003.vcproj" />
+		<Unit filename="plugins/audio/G722/g722_2005.vcproj" />
+		<Unit filename="plugins/audio/G722/g722_2008.vcproj" />
+		<Unit filename="plugins/audio/G722/g722_audio_pwplugin.so" />
+		<Unit filename="plugins/audio/G722/g722codec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G722/obj/bitstream.o" />
+		<Unit filename="plugins/audio/G722/obj/g722_decode.o" />
+		<Unit filename="plugins/audio/G722/obj/g722_encode.o" />
+		<Unit filename="plugins/audio/G722/obj/g722codec.o" />
+		<Unit filename="plugins/audio/G7231ACM/README.txt" />
+		<Unit filename="plugins/audio/G7231ACM/g7231acm.cxx" />
+		<Unit filename="plugins/audio/G7231ACM/g7231acm.dsp" />
+		<Unit filename="plugins/audio/G7231ACM/g7231acm.vcproj" />
+		<Unit filename="plugins/audio/G726/G726.dsp" />
+		<Unit filename="plugins/audio/G726/G726.vcproj" />
+		<Unit filename="plugins/audio/G726/G726_2005.vcproj" />
+		<Unit filename="plugins/audio/G726/G726_2008.vcproj" />
+		<Unit filename="plugins/audio/G726/Makefile" />
+		<Unit filename="plugins/audio/G726/Makefile.in" />
+		<Unit filename="plugins/audio/G726/g711.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G726/g726/g726_16.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G726/g726/g726_24.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G726/g726/g726_32.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G726/g726/g726_40.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G726/g726/g72x.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G726/g726/g72x.h" />
+		<Unit filename="plugins/audio/G726/g726/private.h" />
+		<Unit filename="plugins/audio/G726/g726_audio_pwplugin.so" />
+		<Unit filename="plugins/audio/G726/g726codec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/G726/obj/g711.o" />
+		<Unit filename="plugins/audio/G726/obj/g726_16.o" />
+		<Unit filename="plugins/audio/G726/obj/g726_24.o" />
+		<Unit filename="plugins/audio/G726/obj/g726_32.o" />
+		<Unit filename="plugins/audio/G726/obj/g726_40.o" />
+		<Unit filename="plugins/audio/G726/obj/g726codec.o" />
+		<Unit filename="plugins/audio/G726/obj/g72x.o" />
+		<Unit filename="plugins/audio/GSM0610/COPYRIGHT" />
+		<Unit filename="plugins/audio/GSM0610/Makefile" />
+		<Unit filename="plugins/audio/GSM0610/Makefile.in" />
+		<Unit filename="plugins/audio/GSM0610/PART_OF_TOAST" />
+		<Unit filename="plugins/audio/GSM0610/README" />
+		<Unit filename="plugins/audio/GSM0610/gsm0610.dsp" />
+		<Unit filename="plugins/audio/GSM0610/gsm0610.vcproj" />
+		<Unit filename="plugins/audio/GSM0610/gsm0610_2005.vcproj" />
+		<Unit filename="plugins/audio/GSM0610/gsm0610_2008.vcproj" />
+		<Unit filename="plugins/audio/GSM0610/gsm0610_audio_pwplugin.so" />
+		<Unit filename="plugins/audio/GSM0610/gsm06_10_codec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/GSM0610/inc/config.h" />
+		<Unit filename="plugins/audio/GSM0610/inc/gsm.h" />
+		<Unit filename="plugins/audio/GSM0610/inc/private.h" />
+		<Unit filename="plugins/audio/GSM0610/inc/proto.h" />
+		<Unit filename="plugins/audio/GSM0610/inc/unproto.h" />
+		<Unit filename="plugins/audio/GSM0610/obj/add.o" />
+		<Unit filename="plugins/audio/GSM0610/obj/code.o" />
+		<Unit filename="plugins/audio/GSM0610/obj/decode.o" />
+		<Unit filename="plugins/audio/GSM0610/obj/gsm06_10_codec.o" />
+		<Unit filename="plugins/audio/GSM0610/obj/gsm_create.o" />
+		<Unit filename="plugins/audio/GSM0610/obj/gsm_decode.o" />
+		<Unit filename="plugins/audio/GSM0610/obj/gsm_destroy.o" />
+		<Unit filename="plugins/audio/GSM0610/obj/gsm_encode.o" />
+		<Unit filename="plugins/audio/GSM0610/obj/gsm_lpc.o" />
+		<Unit filename="plugins/audio/GSM0610/obj/gsm_option.o" />
+		<Unit filename="plugins/audio/GSM0610/obj/long_term.o" />
+		<Unit filename="plugins/audio/GSM0610/obj/preprocess.o" />
+		<Unit filename="plugins/audio/GSM0610/obj/rpe.o" />
+		<Unit filename="plugins/audio/GSM0610/obj/short_term.o" />
+		<Unit filename="plugins/audio/GSM0610/obj/table.o" />
+		<Unit filename="plugins/audio/GSM0610/src/add.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/GSM0610/src/code.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/GSM0610/src/decode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/GSM0610/src/gsm_create.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/GSM0610/src/gsm_decode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/GSM0610/src/gsm_destroy.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/GSM0610/src/gsm_encode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/GSM0610/src/gsm_lpc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/GSM0610/src/gsm_option.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/GSM0610/src/long_term.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/GSM0610/src/preprocess.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/GSM0610/src/rpe.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/GSM0610/src/short_term.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/GSM0610/src/table.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/IMA_ADPCM/IMA_ADPCM.dsp" />
+		<Unit filename="plugins/audio/IMA_ADPCM/IMA_ADPCM.vcproj" />
+		<Unit filename="plugins/audio/IMA_ADPCM/IMA_ADPCM_2005.vcproj" />
+		<Unit filename="plugins/audio/IMA_ADPCM/IMA_ADPCM_2008.vcproj" />
+		<Unit filename="plugins/audio/IMA_ADPCM/Makefile" />
+		<Unit filename="plugins/audio/IMA_ADPCM/Makefile.in" />
+		<Unit filename="plugins/audio/IMA_ADPCM/ima_adpcm.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/IMA_ADPCM/ima_adpcm_audio_pwplugin.so" />
+		<Unit filename="plugins/audio/IMA_ADPCM/obj/ima_adpcm.o" />
+		<Unit filename="plugins/audio/LPC_10/LPC_10.dsp" />
+		<Unit filename="plugins/audio/LPC_10/LPC_10.vcproj" />
+		<Unit filename="plugins/audio/LPC_10/LPC_10_2005.vcproj" />
+		<Unit filename="plugins/audio/LPC_10/LPC_10_2008.vcproj" />
+		<Unit filename="plugins/audio/LPC_10/Makefile" />
+		<Unit filename="plugins/audio/LPC_10/Makefile.in" />
+		<Unit filename="plugins/audio/LPC_10/README" />
+		<Unit filename="plugins/audio/LPC_10/lpc10.h" />
+		<Unit filename="plugins/audio/LPC_10/lpc10_audio_pwplugin.so" />
+		<Unit filename="plugins/audio/LPC_10/lpc_10_codec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/obj/analys.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/bsynz.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/chanwr.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/dcbias.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/decode_.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/deemp.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/difmag.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/dyptrk.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/encode_.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/energy.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/f2clib.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/ham84.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/hp100.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/invert.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/irc2pc.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/ivfilt.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/lpc_10_codec.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/lpcdec.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/lpcenc.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/lpcini.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/lpfilt.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/median.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/mload.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/onset.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/pitsyn.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/placea.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/placev.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/preemp.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/prepro.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/random.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/rcchk.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/synths.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/tbdm.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/voicin.o" />
+		<Unit filename="plugins/audio/LPC_10/obj/vparms.o" />
+		<Unit filename="plugins/audio/LPC_10/src/Makefile" />
+		<Unit filename="plugins/audio/LPC_10/src/README" />
+		<Unit filename="plugins/audio/LPC_10/src/analys.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/bsynz.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/chanwr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/dcbias.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/decode_.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/deemp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/difmag.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/dyptrk.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/encode_.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/energy.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/f2c.h" />
+		<Unit filename="plugins/audio/LPC_10/src/f2clib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/ham84.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/hp100.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/invert.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/irc2pc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/ivfilt.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/lpcdec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/lpcenc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/lpcini.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/lpfilt.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/makefile.dos" />
+		<Unit filename="plugins/audio/LPC_10/src/makefile.unx" />
+		<Unit filename="plugins/audio/LPC_10/src/median.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/mload.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/onset.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/pitsyn.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/placea.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/placev.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/preemp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/prepro.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/random.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/rcchk.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/synths.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/tbdm.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/voicin.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/LPC_10/src/vparms.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SBC/AUTHORS" />
+		<Unit filename="plugins/audio/SBC/COPYING" />
+		<Unit filename="plugins/audio/SBC/Makefile" />
+		<Unit filename="plugins/audio/SBC/Makefile.in" />
+		<Unit filename="plugins/audio/SBC/sbc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SBC/sbc.h" />
+		<Unit filename="plugins/audio/SBC/sbc_math.h" />
+		<Unit filename="plugins/audio/SBC/sbc_tables.h" />
+		<Unit filename="plugins/audio/SBC/sbccodec.cxx" />
+		<Unit filename="plugins/audio/SBC/sbccodec.h" />
+		<Unit filename="plugins/audio/SILK/Makefile" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_A2NLSF.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_CNG.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_FIX_Win32_debug.lib" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_FIX_Win32_mt.lib" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_HP_variable_cutoff_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_Inlines.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_LBRR_reset.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_LPC_inv_pred_gain.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_LPC_stabilize.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_LPC_synthesis_filter.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_LPC_synthesis_order16.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_LP_variable_cutoff.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_LSF_cos_table.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_LTP_analysis_filter_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_LTP_scale_ctrl_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_MA.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_NLSF2A.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_NLSF2A_stable.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_NLSF_MSVQ_decode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_NLSF_MSVQ_encode_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_NLSF_VQ_rate_distortion_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_NLSF_VQ_sum_error_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_NLSF_VQ_weights_laroia.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_NLSF_stabilize.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_NSQ.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_NSQ_del_dec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_PLC.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_PLC.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_SDK_API.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_SigProc_FIX.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_VAD.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_VQ_nearest_neighbor_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_allpass_int.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_ana_filt_bank_1.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_apply_sine_window.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_array_maxabs.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_autocorr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_biquad.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_biquad_alt.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_burg_modified.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_bwexpander.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_bwexpander_32.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_code_signs.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_common_pitch_est_defines.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_control.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_control_codec_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_corrMatrix_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_create_init_destroy.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_dec_API.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_decode_core.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_decode_frame.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_decode_indices_v4.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_decode_parameters.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_decode_parameters_v4.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_decode_pulses.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_decoder_set_fs.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_define.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_define_FIX.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_detect_SWB_input.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_enc_API.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_encode_frame_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_encode_parameters.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_encode_parameters_v4.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_encode_pulses.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_errors.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_find_LPC_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_find_LTP_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_find_pitch_lags_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_find_pred_coefs_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_gain_quant.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_init_encoder_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_inner_prod_aligned.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_interpolate.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_k2a.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_k2a_Q16.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_lin2log.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_log2lin.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_lowpass_int.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_lowpass_short.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_macros.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_main.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_main_FIX.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_noise_shape_analysis_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_perceptual_parameters_FIX.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_pitch_analysis_core.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_pitch_est_defines.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_pitch_est_tables.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_prefilter_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_process_NLSFs_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_process_gains_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_pulses_to_bytes.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_quant_LTP_gains_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_range_coder.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_regularize_correlations_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_resample_1_2.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_resample_1_2_coarse.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_resample_1_2_coarsest.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_resample_1_3.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_resample_2_1_coarse.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_resample_2_3.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_resample_2_3_coarse.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_resample_2_3_coarsest.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_resample_2_3_rom.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_resample_3_1.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_resample_3_2.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_resample_3_2_rom.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_resample_3_4.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_resample_4_3.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_resample_rom.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_residual_energy16_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_residual_energy_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_scale_copy_vector16.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_scale_vector.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_schur.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_schur64.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_shell_coder.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_sigm_Q15.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_solve_LS_FIX.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_sort.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_structs.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_structs_FIX.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_sum_sqr_shift.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_tables.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_tables_LTP.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_tables_NLSF_CB0_10.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_tables_NLSF_CB0_10.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_tables_NLSF_CB0_16.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_tables_NLSF_CB0_16.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_tables_NLSF_CB1_10.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_tables_NLSF_CB1_10.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_tables_NLSF_CB1_16.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_tables_NLSF_CB1_16.h" />
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_tables_gain.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_tables_other.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_tables_pitch_lag.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_tables_pulses_per_block.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_tables_sign.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_tables_type_offset.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/SILK/silkSrc/SKP_Silk_typedef.h" />
+		<Unit filename="plugins/audio/SILK/silk_2008.vcproj" />
+		<Unit filename="plugins/audio/SILK/silkcodec.cxx" />
+		<Unit filename="plugins/audio/Speex/AUTHORS" />
+		<Unit filename="plugins/audio/Speex/COPYING" />
+		<Unit filename="plugins/audio/Speex/Makefile" />
+		<Unit filename="plugins/audio/Speex/Makefile.in" />
+		<Unit filename="plugins/audio/Speex/PART_OF_SPEEX" />
+		<Unit filename="plugins/audio/Speex/README" />
+		<Unit filename="plugins/audio/Speex/Speex.dsp" />
+		<Unit filename="plugins/audio/Speex/Speex.vcproj" />
+		<Unit filename="plugins/audio/Speex/Speex_2005.vcproj" />
+		<Unit filename="plugins/audio/Speex/Speex_2008.vcproj" />
+		<Unit filename="plugins/audio/Speex/libspeex/Makefile.am" />
+		<Unit filename="plugins/audio/Speex/libspeex/Makefile.in" />
+		<Unit filename="plugins/audio/Speex/libspeex/_kiss_fft_guts.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/arch.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/bits.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/cb_search.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/cb_search.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/cb_search_arm4.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/cb_search_bfin.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/cb_search_sse.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/exc_10_16_table.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/exc_10_32_table.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/exc_20_32_table.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/exc_5_256_table.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/exc_5_64_table.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/exc_8_128_table.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/fftwrap.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/fftwrap.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/filters.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/filters.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/filters_arm4.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/filters_bfin.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/filters_sse.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/fixed_arm4.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/fixed_arm5e.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/fixed_bfin.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/fixed_debug.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/fixed_generic.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/gain_table.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/gain_table_lbr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/hexc_10_32_table.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/hexc_table.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/high_lsp_tables.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/jitter.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/kiss_fft.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/kiss_fft.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/kiss_fftr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/kiss_fftr.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/lbr_48k_tables.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/lpc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/lpc.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/lpc_bfin.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/lsp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/lsp.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/lsp_tables_nb.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/ltp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/ltp.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/ltp_arm4.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/ltp_bfin.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/ltp_sse.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/math_approx.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/math_approx.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/mdf.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/medfilter.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/medfilter.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/misc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/misc.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/misc_bfin.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/modes.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/modes.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/modes_noglobals.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/nb_celp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/nb_celp.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/pcm_wrapper.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/pcm_wrapper.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/pseudofloat.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/quant_lsp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/quant_lsp.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/sb_celp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/sb_celp.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/smallft.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/smallft.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/speex.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/speex.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/speex_bits.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/speex_callbacks.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/speex_callbacks.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/speex_config_types.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/speex_config_types.h.in" />
+		<Unit filename="plugins/audio/Speex/libspeex/speex_echo.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/speex_header.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/speex_header.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/speex_jitter.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/speex_noglobals.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/speex_preprocess.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/speex_preprocess.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/speex_stereo.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/speex_types.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/stack_alloc.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/stereo.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/testdenoise.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/testecho.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/testenc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/testenc_uwb.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/testenc_wb.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/vbr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/vbr.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/vorbis_psy.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/vorbis_psy.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/vq.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/Speex/libspeex/vq.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/vq_arm4.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/vq_bfin.h" />
+		<Unit filename="plugins/audio/Speex/libspeex/vq_sse.h" />
+		<Unit filename="plugins/audio/Speex/obj/bits.o" />
+		<Unit filename="plugins/audio/Speex/obj/cb_search.o" />
+		<Unit filename="plugins/audio/Speex/obj/exc_10_16_table.o" />
+		<Unit filename="plugins/audio/Speex/obj/exc_10_32_table.o" />
+		<Unit filename="plugins/audio/Speex/obj/exc_20_32_table.o" />
+		<Unit filename="plugins/audio/Speex/obj/exc_5_256_table.o" />
+		<Unit filename="plugins/audio/Speex/obj/exc_5_64_table.o" />
+		<Unit filename="plugins/audio/Speex/obj/exc_8_128_table.o" />
+		<Unit filename="plugins/audio/Speex/obj/fftwrap.o" />
+		<Unit filename="plugins/audio/Speex/obj/filters.o" />
+		<Unit filename="plugins/audio/Speex/obj/gain_table.o" />
+		<Unit filename="plugins/audio/Speex/obj/gain_table_lbr.o" />
+		<Unit filename="plugins/audio/Speex/obj/hexc_10_32_table.o" />
+		<Unit filename="plugins/audio/Speex/obj/hexc_table.o" />
+		<Unit filename="plugins/audio/Speex/obj/high_lsp_tables.o" />
+		<Unit filename="plugins/audio/Speex/obj/kiss_fft.o" />
+		<Unit filename="plugins/audio/Speex/obj/kiss_fftr.o" />
+		<Unit filename="plugins/audio/Speex/obj/lbr_48k_tables.o" />
+		<Unit filename="plugins/audio/Speex/obj/lpc.o" />
+		<Unit filename="plugins/audio/Speex/obj/lsp.o" />
+		<Unit filename="plugins/audio/Speex/obj/lsp_tables_nb.o" />
+		<Unit filename="plugins/audio/Speex/obj/ltp.o" />
+		<Unit filename="plugins/audio/Speex/obj/math_approx.o" />
+		<Unit filename="plugins/audio/Speex/obj/mdf.o" />
+		<Unit filename="plugins/audio/Speex/obj/medfilter.o" />
+		<Unit filename="plugins/audio/Speex/obj/misc.o" />
+		<Unit filename="plugins/audio/Speex/obj/modes.o" />
+		<Unit filename="plugins/audio/Speex/obj/nb_celp.o" />
+		<Unit filename="plugins/audio/Speex/obj/pcm_wrapper.o" />
+		<Unit filename="plugins/audio/Speex/obj/quant_lsp.o" />
+		<Unit filename="plugins/audio/Speex/obj/sb_celp.o" />
+		<Unit filename="plugins/audio/Speex/obj/smallft.o" />
+		<Unit filename="plugins/audio/Speex/obj/speex.o" />
+		<Unit filename="plugins/audio/Speex/obj/speex_callbacks.o" />
+		<Unit filename="plugins/audio/Speex/obj/speex_header.o" />
+		<Unit filename="plugins/audio/Speex/obj/speex_preprocess.o" />
+		<Unit filename="plugins/audio/Speex/obj/speexcodec.o" />
+		<Unit filename="plugins/audio/Speex/obj/vbr.o" />
+		<Unit filename="plugins/audio/Speex/obj/vorbis_psy.o" />
+		<Unit filename="plugins/audio/Speex/obj/vq.o" />
+		<Unit filename="plugins/audio/Speex/speex_audio_pwplugin.so" />
+		<Unit filename="plugins/audio/Speex/speexcodec.cxx" />
+		<Unit filename="plugins/audio/VoiceAgeG729/README.txt" />
+		<Unit filename="plugins/audio/VoiceAgeG729/VoiceAgeG729.dsp" />
+		<Unit filename="plugins/audio/VoiceAgeG729/VoiceAgeG729.vcproj" />
+		<Unit filename="plugins/audio/VoiceAgeG729/VoiceAgeG729_2005.vcproj" />
+		<Unit filename="plugins/audio/VoiceAgeG729/VoiceAgeG729_2008.vcproj" />
+		<Unit filename="plugins/audio/VoiceAgeG729/g729codec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/celt/Makefile" />
+		<Unit filename="plugins/audio/celt/Makefile.in" />
+		<Unit filename="plugins/audio/celt/celtcodec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/gsm-amr/Makefile" />
+		<Unit filename="plugins/audio/gsm-amr/Makefile.in" />
+		<Unit filename="plugins/audio/gsm-amr/amrcodec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/gsm-amr/gsmamr.dsp" />
+		<Unit filename="plugins/audio/gsm-amr/gsmamr.vcproj" />
+		<Unit filename="plugins/audio/gsm-amr/gsmamr_2005.vcproj" />
+		<Unit filename="plugins/audio/gsm-amr/gsmamr_2008.vcproj" />
+		<Unit filename="plugins/audio/gsm-amr/gsmamrcodec_pwplugin.so" />
+		<Unit filename="plugins/audio/gsm-amr/obj/amrcodec.o" />
+		<Unit filename="plugins/audio/gsm-amr/obj/interf_dec.o" />
+		<Unit filename="plugins/audio/gsm-amr/obj/interf_enc.o" />
+		<Unit filename="plugins/audio/gsm-amr/obj/sp_dec.o" />
+		<Unit filename="plugins/audio/gsm-amr/obj/sp_enc.o" />
+		<Unit filename="plugins/audio/gsm-amr/src/amrcodec.txt" />
+		<Unit filename="plugins/audio/gsm-amr/src/decoder.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/gsm-amr/src/encoder.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/gsm-amr/src/interf_dec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/gsm-amr/src/interf_dec.h" />
+		<Unit filename="plugins/audio/gsm-amr/src/interf_enc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/gsm-amr/src/interf_enc.h" />
+		<Unit filename="plugins/audio/gsm-amr/src/interf_rom.h" />
+		<Unit filename="plugins/audio/gsm-amr/src/makefile.gcc" />
+		<Unit filename="plugins/audio/gsm-amr/src/makefile.win32" />
+		<Unit filename="plugins/audio/gsm-amr/src/readme.txt" />
+		<Unit filename="plugins/audio/gsm-amr/src/rom_dec.h" />
+		<Unit filename="plugins/audio/gsm-amr/src/rom_enc.h" />
+		<Unit filename="plugins/audio/gsm-amr/src/sp_dec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/gsm-amr/src/sp_dec.h" />
+		<Unit filename="plugins/audio/gsm-amr/src/sp_enc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/gsm-amr/src/sp_enc.h" />
+		<Unit filename="plugins/audio/gsm-amr/src/typedef.h" />
+		<Unit filename="plugins/audio/iLBC/Makefile" />
+		<Unit filename="plugins/audio/iLBC/Makefile.in" />
+		<Unit filename="plugins/audio/iLBC/iLBC/FrameClassify.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/FrameClassify.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/LPCdecode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/LPCdecode.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/LPCencode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/LPCencode.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/StateConstructW.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/StateConstructW.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/StateSearchW.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/StateSearchW.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/anaFilter.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/anaFilter.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/constants.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/constants.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/createCB.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/createCB.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/doCPLC.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/doCPLC.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/draft-ietf-avt-ilbc-codec-05.txt" />
+		<Unit filename="plugins/audio/iLBC/iLBC/enhancer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/enhancer.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/extract-cfile.awk" />
+		<Unit filename="plugins/audio/iLBC/iLBC/filter.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/filter.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/gainquant.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/gainquant.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/getCBvec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/getCBvec.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/helpfun.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/helpfun.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/hpInput.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/hpInput.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/hpOutput.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/hpOutput.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/iCBConstruct.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/iCBConstruct.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/iCBSearch.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/iCBSearch.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/iLBC_decode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/iLBC_decode.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/iLBC_define.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/iLBC_encode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/iLBC_encode.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/lsf.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/lsf.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/packing.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/packing.h" />
+		<Unit filename="plugins/audio/iLBC/iLBC/syntFilter.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/iLBC/syntFilter.h" />
+		<Unit filename="plugins/audio/iLBC/ilbc_audio_pwplugin.so" />
+		<Unit filename="plugins/audio/iLBC/ilbccodec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/audio/iLBC/ilbccodec.dsp" />
+		<Unit filename="plugins/audio/iLBC/ilbccodec.vcproj" />
+		<Unit filename="plugins/audio/iLBC/ilbccodec_2005.vcproj" />
+		<Unit filename="plugins/audio/iLBC/ilbccodec_2008.vcproj" />
+		<Unit filename="plugins/audio/iLBC/obj/FrameClassify.o" />
+		<Unit filename="plugins/audio/iLBC/obj/LPCdecode.o" />
+		<Unit filename="plugins/audio/iLBC/obj/LPCencode.o" />
+		<Unit filename="plugins/audio/iLBC/obj/StateConstructW.o" />
+		<Unit filename="plugins/audio/iLBC/obj/StateSearchW.o" />
+		<Unit filename="plugins/audio/iLBC/obj/anaFilter.o" />
+		<Unit filename="plugins/audio/iLBC/obj/constants.o" />
+		<Unit filename="plugins/audio/iLBC/obj/createCB.o" />
+		<Unit filename="plugins/audio/iLBC/obj/doCPLC.o" />
+		<Unit filename="plugins/audio/iLBC/obj/enhancer.o" />
+		<Unit filename="plugins/audio/iLBC/obj/filter.o" />
+		<Unit filename="plugins/audio/iLBC/obj/gainquant.o" />
+		<Unit filename="plugins/audio/iLBC/obj/getCBvec.o" />
+		<Unit filename="plugins/audio/iLBC/obj/helpfun.o" />
+		<Unit filename="plugins/audio/iLBC/obj/hpInput.o" />
+		<Unit filename="plugins/audio/iLBC/obj/hpOutput.o" />
+		<Unit filename="plugins/audio/iLBC/obj/iCBConstruct.o" />
+		<Unit filename="plugins/audio/iLBC/obj/iCBSearch.o" />
+		<Unit filename="plugins/audio/iLBC/obj/iLBC_decode.o" />
+		<Unit filename="plugins/audio/iLBC/obj/iLBC_encode.o" />
+		<Unit filename="plugins/audio/iLBC/obj/ilbccodec.o" />
+		<Unit filename="plugins/audio/iLBC/obj/lsf.o" />
+		<Unit filename="plugins/audio/iLBC/obj/packing.o" />
+		<Unit filename="plugins/audio/iLBC/obj/syntFilter.o" />
+		<Unit filename="plugins/config.log" />
+		<Unit filename="plugins/config.status" />
+		<Unit filename="plugins/configure" />
+		<Unit filename="plugins/configure.ac" />
+		<Unit filename="plugins/plugin-config.h" />
+		<Unit filename="plugins/plugin-config.h.in" />
+		<Unit filename="plugins/video/H.261-vic/Makefile" />
+		<Unit filename="plugins/video/H.261-vic/Makefile.in" />
+		<Unit filename="plugins/video/H.261-vic/h261-vic_video_pwplugin.so" />
+		<Unit filename="plugins/video/H.261-vic/h261vic.cxx" />
+		<Unit filename="plugins/video/H.261-vic/h261vic.vcproj" />
+		<Unit filename="plugins/video/H.261-vic/h261vic_2005.vcproj" />
+		<Unit filename="plugins/video/H.261-vic/h261vic_2008.vcproj" />
+		<Unit filename="plugins/video/H.261-vic/h261vic_2010.vcxproj" />
+		<Unit filename="plugins/video/H.261-vic/h261vic_2010.vcxproj.filters" />
+		<Unit filename="plugins/video/H.261-vic/h261vic_2012.filters" />
+		<Unit filename="plugins/video/H.261-vic/h261vic_2012.vcxproj" />
+		<Unit filename="plugins/video/H.261-vic/h261vic_2015.filters" />
+		<Unit filename="plugins/video/H.261-vic/h261vic_2015.vcxproj" />
+		<Unit filename="plugins/video/H.261-vic/obj/bv.o" />
+		<Unit filename="plugins/video/H.261-vic/obj/dct.o" />
+		<Unit filename="plugins/video/H.261-vic/obj/encoder-h261.o" />
+		<Unit filename="plugins/video/H.261-vic/obj/h261vic.o" />
+		<Unit filename="plugins/video/H.261-vic/obj/huffcode.o" />
+		<Unit filename="plugins/video/H.261-vic/obj/p64.o" />
+		<Unit filename="plugins/video/H.261-vic/obj/p64encoder.o" />
+		<Unit filename="plugins/video/H.261-vic/obj/trace.o" />
+		<Unit filename="plugins/video/H.261-vic/obj/transmitter.o" />
+		<Unit filename="plugins/video/H.261-vic/obj/vid_coder.o" />
+		<Unit filename="plugins/video/H.261-vic/vic/bsd-endian.h" />
+		<Unit filename="plugins/video/H.261-vic/vic/bv.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/video/H.261-vic/vic/config.h" />
+		<Unit filename="plugins/video/H.261-vic/vic/crdef.h" />
+		<Unit filename="plugins/video/H.261-vic/vic/dct.cxx" />
+		<Unit filename="plugins/video/H.261-vic/vic/dct.h" />
+		<Unit filename="plugins/video/H.261-vic/vic/encoder-h261.cxx" />
+		<Unit filename="plugins/video/H.261-vic/vic/encoder-h261.h" />
+		<Unit filename="plugins/video/H.261-vic/vic/encoder.h" />
+		<Unit filename="plugins/video/H.261-vic/vic/grabber.h" />
+		<Unit filename="plugins/video/H.261-vic/vic/huffcode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="plugins/video/H.261-vic/vic/p64-huff.h" />
+		<Unit filename="plugins/video/H.261-vic/vic/p64.cxx" />
+		<Unit filename="plugins/video/H.261-vic/vic/p64.h" />
+		<Unit filename="plugins/video/H.261-vic/vic/p64encoder.cxx" />
+		<Unit filename="plugins/video/H.261-vic/vic/p64encoder.h" />
+		<Unit filename="plugins/video/H.261-vic/vic/transmitter.cxx" />
+		<Unit filename="plugins/video/H.261-vic/vic/transmitter.h" />
+		<Unit filename="plugins/video/H.261-vic/vic/vid_coder.cxx" />
+		<Unit filename="plugins/video/H.261-vic/vic/vid_coder.h" />
+		<Unit filename="plugins/video/H.261-vic/vic/videoframe.h" />
+		<Unit filename="plugins/video/H.263-1998/Makefile" />
+		<Unit filename="plugins/video/H.263-1998/Makefile.in" />
+		<Unit filename="plugins/video/H.263-1998/ReadMe.txt" />
+		<Unit filename="plugins/video/H.263-1998/ffmpeg_error_patch.txt" />
+		<Unit filename="plugins/video/H.263-1998/h263-1998.cxx" />
+		<Unit filename="plugins/video/H.263-1998/h263-1998.h" />
+		<Unit filename="plugins/video/H.263-1998/h263_2005.vcproj" />
+		<Unit filename="plugins/video/H.263-1998/h263_2008.sln" />
+		<Unit filename="plugins/video/H.263-1998/h263_2008.vcproj" />
+		<Unit filename="plugins/video/H.263-1998/h263pframe.cxx" />
+		<Unit filename="plugins/video/H.263-1998/h263pframe.h" />
+		<Unit filename="plugins/video/H.263-1998/rfc2190.cxx" />
+		<Unit filename="plugins/video/H.263-1998/rfc2190.h" />
+		<Unit filename="plugins/video/H.263-1998/tracer.h" />
+		<Unit filename="plugins/video/H.263-ffmpeg/Makefile" />
+		<Unit filename="plugins/video/H.263-ffmpeg/Makefile.in" />
+		<Unit filename="plugins/video/H.263-ffmpeg/ReadMe.txt" />
+		<Unit filename="plugins/video/H.263-ffmpeg/ffmpeg/avcodec.h" />
+		<Unit filename="plugins/video/H.263-ffmpeg/ffmpeg/common.h" />
+		<Unit filename="plugins/video/H.263-ffmpeg/h263ffmpeg.cxx" />
+		<Unit filename="plugins/video/H.263-ffmpeg/h263ffmpeg.vcproj" />
+		<Unit filename="plugins/video/H.263-ffmpeg/h263ffmpeg_2005.vcproj" />
+		<Unit filename="plugins/video/H.263-ffmpeg/h263ffmpeg_2008.vcproj" />
+		<Unit filename="plugins/video/H.263-stub/Makefile" />
+		<Unit filename="plugins/video/H.263-stub/Makefile.in" />
+		<Unit filename="plugins/video/H.263-stub/h263-stub.cxx" />
+		<Unit filename="plugins/video/H.264/Makefile" />
+		<Unit filename="plugins/video/H.264/Makefile.in" />
+		<Unit filename="plugins/video/H.264/ReadMe_VS.txt" />
+		<Unit filename="plugins/video/H.264/gpl/Makefile" />
+		<Unit filename="plugins/video/H.264/gpl/Makefile.in" />
+		<Unit filename="plugins/video/H.264/gpl/enc-ctx.cxx" />
+		<Unit filename="plugins/video/H.264/gpl/enc-ctx.h" />
+		<Unit filename="plugins/video/H.264/gpl/h264_helper_2008.vcproj" />
+		<Unit filename="plugins/video/H.264/gpl/h264helper_unix.cxx" />
+		<Unit filename="plugins/video/H.264/gpl/h264helper_win32.cxx" />
+		<Unit filename="plugins/video/H.264/gpl/x264loader_unix.cxx" />
+		<Unit filename="plugins/video/H.264/gpl/x264loader_unix.h" />
+		<Unit filename="plugins/video/H.264/gpl/x264loader_win32.cxx" />
+		<Unit filename="plugins/video/H.264/gpl/x264loader_win32.h" />
+		<Unit filename="plugins/video/H.264/h264-x264.cxx" />
+		<Unit filename="plugins/video/H.264/h264-x264.h" />
+		<Unit filename="plugins/video/H.264/h264-x264_2008.sln" />
+		<Unit filename="plugins/video/H.264/h264-x264_2008.vcproj" />
+		<Unit filename="plugins/video/H.264/h264pipe_static.cxx" />
+		<Unit filename="plugins/video/H.264/h264pipe_static.h" />
+		<Unit filename="plugins/video/H.264/h264pipe_unix.cxx" />
+		<Unit filename="plugins/video/H.264/h264pipe_unix.h" />
+		<Unit filename="plugins/video/H.264/h264pipe_win32.cxx" />
+		<Unit filename="plugins/video/H.264/h264pipe_win32.h" />
+		<Unit filename="plugins/video/H.264/shared/h264frame.cxx" />
+		<Unit filename="plugins/video/H.264/shared/h264frame.h" />
+		<Unit filename="plugins/video/H.264/shared/pipes.h" />
+		<Unit filename="plugins/video/common/critsect.h" />
+		<Unit filename="plugins/video/common/dyna.cxx" />
+		<Unit filename="plugins/video/common/dyna.h" />
+		<Unit filename="plugins/video/common/ffmpeg.h" />
+		<Unit filename="plugins/video/common/mpi.cxx" />
+		<Unit filename="plugins/video/common/mpi.h" />
+		<Unit filename="plugins/video/common/rtpframe.h" />
+		<Unit filename="plugins/video/common/trace.cxx" />
+		<Unit filename="plugins/video/common/trace.h" />
+		<Unit filename="plugins/video/common/vs-stdint.h" />
 		<Unit filename="src/channels.cxx" />
 		<Unit filename="src/codecs.cxx" />
 		<Unit filename="src/dllmain.cxx" />
@@ -252,10 +1679,6 @@
 		<Unit filename="src/transports.cxx" />
 		<Unit filename="src/x224.cxx" />
 		<Unit filename="src/x880.cxx" />
-		<Extensions>
-			<code_completion />
-			<envvars />
-			<debugger />
-		</Extensions>
+		<Extensions />
 	</Project>
 </CodeBlocks_project_file>
