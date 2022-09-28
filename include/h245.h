@@ -6594,7 +6594,7 @@ class H245_DataApplicationCapability_application_nlpid;
 class H245_DataApplicationCapability_application_t38fax;
 class H245_GenericCapability;
 class H245_ArrayOf_DataChannel;
-class H245_ExtendedDataCapability;
+class H245_ExtendedDataApplicationCapability;
 
 class H245_DataApplicationCapability_application : public PASN_Choice
 {
@@ -6620,7 +6620,7 @@ class H245_DataApplicationCapability_application : public PASN_Choice
       e_t38fax,
       e_genericDataCapability,
       e_dataChannel,
-      e_extendedDataCapability
+      e_extendedDataApplicationCapability
     };
 
 #if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
@@ -6666,10 +6666,10 @@ class H245_DataApplicationCapability_application : public PASN_Choice
     operator const H245_ArrayOf_DataChannel &() const;
 #endif
 #if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
-    operator H245_ExtendedDataCapability &() const;
+    operator H245_ExtendedDataApplicationCapability &() const;
 #else
-    operator H245_ExtendedDataCapability &();
-    operator const H245_ExtendedDataCapability &() const;
+    operator H245_ExtendedDataApplicationCapability &();
+    operator const H245_ExtendedDataApplicationCapability &() const;
 #endif
 
     PBoolean CreateObject();
@@ -12781,16 +12781,16 @@ class H245_DataApplicationCapability : public PASN_Sequence
 
 
 //
-// ExtendedDataCapability
+// ExtendedDataApplicationCapability
 //
 
-class H245_ExtendedDataCapability : public PASN_Sequence
+class H245_ExtendedDataApplicationCapability : public PASN_Sequence
 {
 #ifndef PASN_LEANANDMEAN
-    PCLASSINFO(H245_ExtendedDataCapability, PASN_Sequence);
+    PCLASSINFO(H245_ExtendedDataApplicationCapability, PASN_Sequence);
 #endif
   public:
-    H245_ExtendedDataCapability(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
+    H245_ExtendedDataApplicationCapability(unsigned tag = UniversalSequence, TagClass tagClass = UniversalTagClass);
 
     enum OptionalFields {
       e_dataCapabilityExtension

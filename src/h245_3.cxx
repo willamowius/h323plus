@@ -3989,17 +3989,17 @@ PObject * H245_DataApplicationCapability::Clone() const
 
 
 //
-// ExtendedDataCapability
+// ExtendedDataApplicationCapability
 //
 
-H245_ExtendedDataCapability::H245_ExtendedDataCapability(unsigned tag, PASN_Object::TagClass tagClass)
+H245_ExtendedDataApplicationCapability::H245_ExtendedDataApplicationCapability(unsigned tag, PASN_Object::TagClass tagClass)
   : PASN_Sequence(tag, tagClass, 1, TRUE, 0)
 {
 }
 
 
 #ifndef PASN_NOPRINTON
-void H245_ExtendedDataCapability::PrintOn(ostream & strm) const
+void H245_ExtendedDataApplicationCapability::PrintOn(ostream & strm) const
 {
   int indent = strm.precision() + 2;
   strm << "{\n";
@@ -4011,12 +4011,12 @@ void H245_ExtendedDataCapability::PrintOn(ostream & strm) const
 #endif
 
 
-PObject::Comparison H245_ExtendedDataCapability::Compare(const PObject & obj) const
+PObject::Comparison H245_ExtendedDataApplicationCapability::Compare(const PObject & obj) const
 {
 #ifndef PASN_LEANANDMEAN
-  PAssert(PIsDescendant(&obj, H245_ExtendedDataCapability), PInvalidCast);
+  PAssert(PIsDescendant(&obj, H245_ExtendedDataApplicationCapability), PInvalidCast);
 #endif
-  const H245_ExtendedDataCapability & other = (const H245_ExtendedDataCapability &)obj;
+  const H245_ExtendedDataApplicationCapability & other = (const H245_ExtendedDataApplicationCapability &)obj;
 
   Comparison result;
 
@@ -4029,7 +4029,7 @@ PObject::Comparison H245_ExtendedDataCapability::Compare(const PObject & obj) co
 }
 
 
-PINDEX H245_ExtendedDataCapability::GetDataLength() const
+PINDEX H245_ExtendedDataApplicationCapability::GetDataLength() const
 {
   PINDEX length = 0;
   length += m_dataCapability.GetObjectLength();
@@ -4039,7 +4039,7 @@ PINDEX H245_ExtendedDataCapability::GetDataLength() const
 }
 
 
-PBoolean H245_ExtendedDataCapability::Decode(PASN_Stream & strm)
+PBoolean H245_ExtendedDataApplicationCapability::Decode(PASN_Stream & strm)
 {
   if (!PreambleDecode(strm))
     return FALSE;
@@ -4053,7 +4053,7 @@ PBoolean H245_ExtendedDataCapability::Decode(PASN_Stream & strm)
 }
 
 
-void H245_ExtendedDataCapability::Encode(PASN_Stream & strm) const
+void H245_ExtendedDataApplicationCapability::Encode(PASN_Stream & strm) const
 {
   PreambleEncode(strm);
 
@@ -4065,12 +4065,12 @@ void H245_ExtendedDataCapability::Encode(PASN_Stream & strm) const
 }
 
 
-PObject * H245_ExtendedDataCapability::Clone() const
+PObject * H245_ExtendedDataApplicationCapability::Clone() const
 {
 #ifndef PASN_LEANANDMEAN
-  PAssert(IsClass(H245_ExtendedDataCapability::Class()), PInvalidCast);
+  PAssert(IsClass(H245_ExtendedDataApplicationCapability::Class()), PInvalidCast);
 #endif
-  return new H245_ExtendedDataCapability(*this);
+  return new H245_ExtendedDataApplicationCapability(*this);
 }
 
 

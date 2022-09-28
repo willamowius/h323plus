@@ -293,7 +293,7 @@ const static PASN_Names Names_H245_DataApplicationCapability_application[]={
      ,{"t38fax",12}
      ,{"genericDataCapability",13}
      ,{"dataChannel",14}
-     ,{"extendedDataCapability",15}
+     ,{"extendedDataApplicationCapability",15}
 };
 #endif
 //
@@ -465,24 +465,24 @@ H245_DataApplicationCapability_application::operator const H245_ArrayOf_DataChan
 
 
 #if defined(__GNUC__) && __GNUC__ <= 2 && __GNUC_MINOR__ < 9
-H245_DataApplicationCapability_application::operator H245_ExtendedDataCapability &() const
+H245_DataApplicationCapability_application::operator H245_ExtendedDataApplicationCapability &() const
 #else
-H245_DataApplicationCapability_application::operator H245_ExtendedDataCapability &()
+H245_DataApplicationCapability_application::operator H245_ExtendedDataApplicationCapability &()
 {
 #ifndef PASN_LEANANDMEAN
-  PAssert(PIsDescendant(PAssertNULL(choice), H245_ExtendedDataCapability), PInvalidCast);
+  PAssert(PIsDescendant(PAssertNULL(choice), H245_ExtendedDataApplicationCapability), PInvalidCast);
 #endif
-  return *(H245_ExtendedDataCapability *)choice;
+  return *(H245_ExtendedDataApplicationCapability *)choice;
 }
 
 
-H245_DataApplicationCapability_application::operator const H245_ExtendedDataCapability &() const
+H245_DataApplicationCapability_application::operator const H245_ExtendedDataApplicationCapability &() const
 #endif
 {
 #ifndef PASN_LEANANDMEAN
-  PAssert(PIsDescendant(PAssertNULL(choice), H245_ExtendedDataCapability), PInvalidCast);
+  PAssert(PIsDescendant(PAssertNULL(choice), H245_ExtendedDataApplicationCapability), PInvalidCast);
 #endif
-  return *(H245_ExtendedDataCapability *)choice;
+  return *(H245_ExtendedDataApplicationCapability *)choice;
 }
 
 
@@ -520,8 +520,8 @@ PBoolean H245_DataApplicationCapability_application::CreateObject()
     case e_dataChannel :
       choice = new H245_ArrayOf_DataChannel();
       return TRUE;
-    case e_extendedDataCapability :
-      choice = new H245_ExtendedDataCapability();
+    case e_extendedDataApplicationCapability :
+      choice = new H245_ExtendedDataApplicationCapability();
       return TRUE;
   }
 

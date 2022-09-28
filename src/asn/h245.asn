@@ -6,6 +6,8 @@
 --
 -- History of changes:
 --    2022-09-24 - Initial H.245v17 ASN.1 file
+--    2022-09-27 - For consistency, renamed ExtendedDataCapability as
+--                 ExtendedDataApplicationCapability
 --
 
 MULTIMEDIA-SYSTEM-CONTROL DEFINITIONS AUTOMATIC TAGS ::=
@@ -1262,13 +1264,13 @@ DataApplicationCapability ::= SEQUENCE
         },
         genericDataCapability GenericCapability,
         dataChannel SEQUENCE OF DataChannel,
-        extendedDataCapability ExtendedDataCapability
+        extendedDataApplicationCapability ExtendedDataApplicationCapability
     },
     maxBitRate INTEGER (0..4294967295), -- units 100 bit/s
     ...
 }
 
-ExtendedDataCapability ::= SEQUENCE
+ExtendedDataApplicationCapability ::= SEQUENCE
 {
     dataCapability SEQUENCE OF DataApplicationCapability,
     dataCapabilityExtension SEQUENCE OF GenericCapability OPTIONAL,
