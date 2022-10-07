@@ -68,7 +68,7 @@ static const BYTE SearchPattern[HASH_SIZE] = { // Must be 12 bytes
 #define SHA_BLOCKSIZE   64
 #endif
 
-#if (OPENSSL_VERSION_NUMBER < 0x10100000L) || defined(LIBRESSL_VERSION_NUMBER)
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
 
 namespace {
 
