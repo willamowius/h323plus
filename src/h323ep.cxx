@@ -439,7 +439,7 @@ PBoolean H323_TLSContext::SetDHParameters(const PBYTEArray & dh_p, const PBYTEAr
   BIGNUM* g = BN_bin2bn(dh_g, dh_g.GetSize(), NULL);
   if (p != NULL && g != NULL)
   {
-#if (OPENSSL_VERSION_NUMBER < 0x10100000L) || defined(LIBRESSL_VERSION_NUMBER)
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
     dh->p = p;
     dh->g = g;
 #else
