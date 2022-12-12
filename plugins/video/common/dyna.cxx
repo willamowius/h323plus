@@ -78,7 +78,7 @@ bool DynaLink::Open(const char *name)
   memset(ptlibPath, 0, sizeof(ptlibPath));
   char * env = ::getenv("PTLIBPLUGINDIR");
   if (env != NULL)
-    strncpy(ptlibPath, env, sizeof(ptlibPath));
+    strncpy(ptlibPath, env, sizeof(ptlibPath) - 1);
 
   char * p = ::strtok(ptlibPath, PATH_SEP);
   while (p != NULL) {
