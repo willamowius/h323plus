@@ -114,7 +114,7 @@ bool DynaLink::InternalOpen(const char * dir, const char *name)
   }
 TRACE(1, "\tDYNA\tLoading " << path);
 #ifndef _WIN32
-  if (strlen(path) < (sizeof(path) - strlen(".so"))
+  if (strlen(path) < (sizeof(path) - strlen(".so")))
     strcat(path, ".so");
 #endif
 
