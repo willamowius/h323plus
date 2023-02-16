@@ -666,6 +666,8 @@ void FFMPEGLibrary::AvcodecFree(void * ptr)
 
 void FFMPEGLibrary::AvSetDimensions(AVCodecContext *s, int width, int height)
 {
+  if (!s) return;
+
   WaitAndSignal m(processLock);
 
 #ifdef USE_DLL_AVCODEC
