@@ -371,7 +371,7 @@ void H263_Base_EncoderContext::SetFrameWidth (unsigned width)
   _inputFrame->linesize[1] = width / 2;
   _inputFrame->linesize[2] = width / 2;
 
-  CODEC_TRACER(tracer, "frame width set to width");
+  CODEC_TRACER(tracer, "frame width set to " << width);
 }
 
 void H263_Base_EncoderContext::SetFrameHeight (unsigned height)
