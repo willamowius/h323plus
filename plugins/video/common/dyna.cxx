@@ -62,13 +62,6 @@
 
 bool DynaLink::Open(const char *name)
 {
-#ifdef _WIN32
-  // first we try the DLL path
-  std::string dllPath = Trace::GetDLLPath();
-  if (InternalOpen(dllPath.c_str(), name))
-    return true;
-#endif
-
   // Then we try without a path
   if (InternalOpen("", name))
     return true;
