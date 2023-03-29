@@ -182,6 +182,10 @@ Word16 D_IF_conversion(Word16 *param, UWord8 *stream, UWord8 *frame_type,
 
       /* speech mode indicator */
       *speech_mode = (Word16)(*stream >> 4);
+      if (*speech_mode < 0 || *speech_mode >= NUM_OF_SPMODES) {
+        *speech_mode = 0;
+        *frame_type = RX_SPEECH_LOST;
+      }
       break;
 
    case MRNO_DATA:
@@ -514,6 +518,10 @@ Word16 D_IF_mms_conversion(Word16 *param, UWord8 *stream, UWord8 *frame_type,
 
       /* speech mode indicator */
       *speech_mode = (Word16)(*stream >> 4);
+      if (*speech_mode < 0 || *speech_mode >= NUM_OF_SPMODES) {
+        *speech_mode = 0;
+        *frame_type = RX_SPEECH_LOST;
+      }
       break;
 
    case MRNO_DATA:
