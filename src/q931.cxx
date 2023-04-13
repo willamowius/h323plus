@@ -613,8 +613,8 @@ unsigned Q931::SetBearerTransferRate(unsigned bitrate)
    if      (rawTransferRate <= 2)  return rawTransferRate;
    else if (rawTransferRate <= 6)  return  6;
    else if (rawTransferRate <= 24) return 24;
-   else if (rawTransferRate >= 30) return 30;
-   else return 32;  // Never called. Bug with Polycom RMX
+   else if (rawTransferRate <= 30) return 30;
+   else return 32;
 }
 
 void Q931::SetBearerCapabilities(InformationTransferCapability capability,
@@ -648,7 +648,7 @@ void Q931::SetBearerCapabilities(InformationTransferCapability capability,
           data[1] = 0x97;
           break;
         case 32 :
-          data[1] = 0x98;
+          data[1] = 0x18;
           data[2] = 0xA0;
           size = 4;
           break;
