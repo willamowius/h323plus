@@ -2731,7 +2731,7 @@ if (setup.m_conferenceGoal.GetTag() == H225_Setup_UUIE_conferenceGoal::e_create)
         break;
 
       default : // Is video or other data (eg T.120)
-        unsigned transferRate= 384000;  // default to 384 kb/s;
+        unsigned transferRate = 384000;  // default to 384 kb/s;
         OnBearerCapabilityTransferRate(transferRate);
         unsigned rate = setupPDU.GetQ931().SetBearerTransferRate(transferRate);
         setupPDU.GetQ931().SetBearerCapabilities(Q931::TransferUnrestrictedDigital, rate);
@@ -6950,7 +6950,7 @@ void H323Connection::MonitorCallStatus()
   if (!Lock())
     return;
 
-  if (roundTripDelayTimer > 0 && !roundTripDelayTimer.IsRunning()) {
+  if (roundTripDelayRate > 0 && !roundTripDelayTimer.IsRunning()) {
     roundTripDelayTimer.SetInterval(roundTripDelayRate);
     StartRoundTripDelay();
   }
