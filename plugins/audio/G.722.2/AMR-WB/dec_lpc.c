@@ -154,8 +154,12 @@ void D_LPC_isf_isp_conversion(Word16 isf[], Word16 isp[], Word16 m)
 
    for(i = 0; i < m; i++)
    {
-      ind = isp[i] >> 7;         /* ind = b7-b15 of isf[i]     */
-      offset = isp[i] & 0x007f;  /* offset = b0-b6 of isf[i]   */
+      Word16 val = isp[i];
+      /* If an input value is out of range then silently clamp it. */
+      if(val > 16383)
+        val = 16383;
+      ind = val >> 7;         /* ind = b7-b15 of isf[i]     */
+      offset = val & 0x007f;  /* offset = b0-b6 of isf[i]   */
 
       /* isp[i] = table[ind]+ ((table[ind+1]-table[ind])*offset) / 128 */
       tmp = (D_ROM_cos[ind + 1] - D_ROM_cos[ind]) * offset;
