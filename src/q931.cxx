@@ -614,7 +614,8 @@ unsigned Q931::SetBearerTransferRate(unsigned bitrate)
    else if (rawTransferRate <= 6)  return  6;
    else if (rawTransferRate <= 24) return 24;
    else if (rawTransferRate <= 30) return 30;
-   else return 32;
+   else if (rawTransferRate > 127) return 127;
+   else return rawTransferRate;
 }
 
 void Q931::SetBearerCapabilities(InformationTransferCapability capability,
@@ -646,11 +647,6 @@ void Q931::SetBearerCapabilities(InformationTransferCapability capability,
           break;
         case 30 :
           data[1] = 0x97;
-          break;
-        case 32 :
-          data[1] = 0x18;
-          data[2] = 0xA0;
-          size = 4;
           break;
         default :
           PAssert(transferRate > 0 && transferRate < 128, PInvalidParameter);
