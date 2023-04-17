@@ -326,7 +326,7 @@ H225_CryptoH323Token * H2351_Authenticator::CreateCryptoToken()
   }
 
   clearToken.IncludeOptionalField(H235_ClearToken::e_timeStamp);
-  clearToken.m_timeStamp = (int)PTime().GetTimeInSeconds();
+  clearToken.m_timeStamp = (unsigned)PTime().GetTimeInSeconds();
 
   clearToken.IncludeOptionalField(H235_ClearToken::e_random);
   clearToken.m_random = ++sentRandomSequenceNumber;
@@ -456,7 +456,7 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
 
   //first verify the timestamp
   PTime now;
-  int deltaTime = (int)now.GetTimeInSeconds() - crHashed.m_hashedVals.m_timeStamp;
+  int deltaTime = (unsigned)now.GetTimeInSeconds() - crHashed.m_hashedVals.m_timeStamp;
   if (PABS(deltaTime) > timestampGracePeriod) {
     PTRACE(1, "H235RAS\tInvalid timestamp ABS(" << now.GetTimeInSeconds() << '-'
            << (int)crHashed.m_hashedVals.m_timeStamp << ") > " << timestampGracePeriod);

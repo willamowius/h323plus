@@ -904,7 +904,7 @@ H225_CryptoH323Token * H235AuthSimpleMD5::CreateCryptoToken()
 #endif
 
   clearToken.IncludeOptionalField(H235_ClearToken::e_timeStamp);
-  clearToken.m_timeStamp = (int)time(NULL);
+  clearToken.m_timeStamp = (unsigned)time(NULL);
 
   // Encode it into PER
   PPER_Stream strm;
@@ -1119,7 +1119,7 @@ H235_ClearToken * H235AuthCAT::CreateClearToken()
 #endif
 
   clearToken->IncludeOptionalField(H235_ClearToken::e_timeStamp);
-  clearToken->m_timeStamp = (int)time(NULL);
+  clearToken->m_timeStamp = (unsigned)time(NULL);
   PUInt32b timeStamp = (DWORD)clearToken->m_timeStamp;
 
   clearToken->IncludeOptionalField(H235_ClearToken::e_random);
@@ -1317,7 +1317,7 @@ H235_ClearToken * H235AuthenticatorTSS::CreateClearToken()
   // Insert time stamp
   clearToken->m_tokenOID = OID_TSS;
   clearToken->IncludeOptionalField(H235_ClearToken::e_timeStamp);
-  clearToken->m_timeStamp = (int)time(NULL);
+  clearToken->m_timeStamp = (unsigned)time(NULL);
 
   return clearToken;
 }
