@@ -30,6 +30,7 @@
     <ProjectName>simpleplus</ProjectName>
     <ProjectGuid>{AC8B99A3-6DEA-48B0-A6A6-31A982FAAD0A}</ProjectGuid>
     <RootNamespace>simpleplus</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -114,8 +115,10 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Cpp\h323plus\include;C:\Cpp\ptlib\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Cpp\ptlib\Lib;C:\Cpp\h323plus\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)/include;$(SolutionDir)/../ptlib/include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)/lib;$(SolutionDir)/../ptlib/lib;$(LibraryPath)</LibraryPath>
+    <OutDir>.\Release_$(PlatformShortName)\</OutDir>
+    <IntDir>.\Release_$(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>./Debug\</OutDir>
@@ -126,8 +129,10 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Cpp\h323plus\include;C:\Cpp\ptlib\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Cpp\ptlib\Lib;C:\Cpp\h323plus\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)/include;$(SolutionDir)/../ptlib/include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)/lib;$(SolutionDir)/../ptlib/lib;$(LibraryPath)</LibraryPath>
+    <OutDir>./Debug_$(PlatformShortName)\</OutDir>
+    <IntDir>./Debug_$(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='No Trace|Win32'">
     <Midl>
@@ -276,10 +281,10 @@
       <PrecompiledHeaderFile>ptlib.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>
       </PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\Release/</AssemblerListingLocation>
-      <ObjectFileName>.\Release/</ObjectFileName>
+      <AssemblerListingLocation>./Release_$(PlatformShortName)/</AssemblerListingLocation>
+      <ObjectFileName>./Release_$(PlatformShortName)/</ObjectFileName>
       <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>Level2</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </ClCompile>
     <ResourceCompile>
@@ -287,10 +292,10 @@
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>h323plus.lib;ptlibs.lib;wsock32.lib;mpr.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>.\Release/simple.exe</OutputFile>
+      <AdditionalDependencies>h323plus_$(PlatformShortName).lib;ptlibs_$(PlatformShortName).lib;wsock32.lib;mpr.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>./Release_$(PlatformShortName)/simple.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ProgramDatabaseFile>.\Release/simple.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>.\Release_$(PlatformShortName)/simple.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
@@ -358,10 +363,10 @@
       <PrecompiledHeaderFile>ptlib.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>
       </PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\Debug/</AssemblerListingLocation>
+      <AssemblerListingLocation>./Debug_$(PlatformShortName)/</AssemblerListingLocation>
       <ObjectFileName>.\Debug/</ObjectFileName>
       <ProgramDataBaseFileName>.\Debug/</ProgramDataBaseFileName>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>Level2</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
@@ -370,8 +375,8 @@
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>h323plusd.lib;ptlibsd.lib;wsock32.lib;mpr.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>.\Debug/simple.exe</OutputFile>
+      <AdditionalDependencies>h323plus_$(PlatformShortName)_d.lib;ptlibs_$(PlatformShortName)_d.lib;wsock32.lib;mpr.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>.\Debug_$(PlatformShortName)/simple.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>.\Debug/simple.pdb</ProgramDatabaseFile>
