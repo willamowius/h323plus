@@ -44,7 +44,7 @@ extern "C" {
 #pragma warning(disable:4201)
 #endif
 
-#ifdef _WIN32
+#if _WIN32 || _WIN64
 #  ifdef PLUGIN_CODEC_DLL_EXPORTS
 #    define PLUGIN_CODEC_DLL_API __declspec(dllexport)
 #  else
@@ -647,7 +647,7 @@ struct PluginCodec_Video_SetFrameInfo {
 
 #ifdef OPAL_STATIC_CODEC
 
-#if _WIN32
+#if _WIN32 || _WIN64
 #pragma message("Building codec statically")
 #else
 #warning("Building codec statically")

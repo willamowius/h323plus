@@ -4,14 +4,14 @@
  * This code is based on the following files from the OPAL project which
  * have been removed from the current build and distributions but are still
  * available in the CVS "attic"
- * 
- *    src/codecs/h263codec.cxx 
- *    include/codecs/h263codec.h 
+ *
+ *    src/codecs/h263codec.cxx
+ *    include/codecs/h263codec.h
 
- * The original files, and this version of the original code, are released under the same 
+ * The original files, and this version of the original code, are released under the same
  * MPL 1.0 license. Substantial portions of the original code were contributed
  * by Salyens and March Networks and their right to be identified as copyright holders
- * of the original code portions and any parts now included in this new copy is asserted through 
+ * of the original code portions and any parts now included in this new copy is asserted through
  * their inclusion in the copyright notices below.
  *
  * Copyright (C) 2006 Post Increment
@@ -43,7 +43,7 @@
   Notes
   -----
 
-  This codec implements a H.263 encoder and decoder with RTP packaging as per 
+  This codec implements a H.263 encoder and decoder with RTP packaging as per
   RFC 2190 "RTP Payload Format for H.263 Video Streams". As per this specification,
   The RTP payload code is always set to 34
 
@@ -65,7 +65,7 @@
 
 #include <codec/opalplugin.h>
 
-#if defined(_WIN32) || defined(_WIN32_WCE)
+#if defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
   #include <windows.h>
   #define STRCMPI  _strcmpi
 #else
@@ -138,12 +138,12 @@ extern "C" {
 
 
 static struct StdSizes {
-  enum { 
-    SQCIF, 
-    QCIF, 
-    CIF, 
-    CIF4, 
-    CIF16, 
+  enum {
+    SQCIF,
+    QCIF,
+    CIF,
+    CIF4,
+    CIF16,
     NumStdSizes,
     UnknownStdSize = NumStdSizes
   };
@@ -168,38 +168,38 @@ class CriticalSection
 {
   public:
     CriticalSection()
-    { 
+    {
 #ifdef _WIN32
-      ::InitializeCriticalSection(&criticalSection); 
+      ::InitializeCriticalSection(&criticalSection);
 #else
       ::sem_init(&sem, 0, 1);
 #endif
     }
 
     ~CriticalSection()
-    { 
+    {
 #ifdef _WIN32
-      ::DeleteCriticalSection(&criticalSection); 
+      ::DeleteCriticalSection(&criticalSection);
 #else
       ::sem_destroy(&sem);
 #endif
     }
 
     void Wait()
-    { 
+    {
 #ifdef _WIN32
-      ::EnterCriticalSection(&criticalSection); 
+      ::EnterCriticalSection(&criticalSection);
 #else
       ::sem_wait(&sem);
 #endif
     }
 
     void Signal()
-    { 
+    {
 #ifdef _WIN32
-      ::LeaveCriticalSection(&criticalSection); 
+      ::LeaveCriticalSection(&criticalSection);
 #else
-      ::sem_post(&sem); 
+      ::sem_post(&sem);
 #endif
     }
 
@@ -208,12 +208,12 @@ class CriticalSection
     { }
     CriticalSection & operator=(const CriticalSection &) { return *this; }
 #ifdef _WIN32
-    mutable CRITICAL_SECTION criticalSection; 
+    mutable CRITICAL_SECTION criticalSection;
 #else
     mutable sem_t sem;
 #endif
 };
-    
+
 class WaitAndSignal {
   public:
     inline WaitAndSignal(const CriticalSection & cs)
@@ -223,7 +223,7 @@ class WaitAndSignal {
     ~WaitAndSignal()
     { sync.Signal(); }
 
-    WaitAndSignal & operator=(const WaitAndSignal &) 
+    WaitAndSignal & operator=(const WaitAndSignal &)
     { return *this; }
 
   protected:
@@ -286,7 +286,7 @@ class DynaLink
       memset(path, 0, sizeof(path));
       if (dir != NULL) {
         strcpy(path, dir);
-        if (path[strlen(path)-1] != DIR_SEPERATOR[0]) 
+        if (path[strlen(path)-1] != DIR_SEPERATOR[0])
           strcat(path, DIR_SEPERATOR);
       }
       strcat(path, name);
@@ -359,7 +359,7 @@ class DynaLink
 #endif // _WIN32
 };
 
-#endif  // USE_DLL_AVCODEC 
+#endif  // USE_DLL_AVCODEC
 
 /////////////////////////////////////////////////////////////////
 //
@@ -518,7 +518,7 @@ bool FFMPEGLibrary::Load()
     //cerr << "Failed to load avcodec_set_print_fn" << endl;
     return false;
   }
-   
+
   if (!GetFunction("av_free", (Function &)Favcodec_free)) {
     //cerr << "Failed to load avcodec_close" << endl;
     return false;
@@ -554,7 +554,7 @@ bool FFMPEGLibrary::Load()
   Favcodec_register(Favcodec_h263_encoder);
   Favcodec_register(Favcodec_h263p_encoder);
   Favcodec_register(Favcodec_h263_decoder);
-  
+
   //Favcodec_set_print_fn(h263_ffmpeg_printon);
 
   isLoadedOK = true;
@@ -671,7 +671,7 @@ class RTPFrame
 
     RTPFrame(unsigned char * _packet, int _maxPacketLen, unsigned char payloadType)
       : packet(_packet), maxPacketLen(_maxPacketLen), packetLen(_maxPacketLen)
-    { 
+    {
       if (packetLen > 0)
         packet[0] = 0x80;    // set version, no extensions, zero contrib count
       SetPayloadType(payloadType);
@@ -681,7 +681,7 @@ class RTPFrame
     {
       if (offs + 4 > packetLen)
         return 0;
-      return (packet[offs + 0] << 24) + (packet[offs+1] << 16) + (packet[offs+2] << 8) + packet[offs+3]; 
+      return (packet[offs + 0] << 24) + (packet[offs+1] << 16) + (packet[offs+2] << 8) + packet[offs+3];
     }
 
     inline void SetLong(unsigned offs, unsigned long n)
@@ -695,14 +695,14 @@ class RTPFrame
     }
 
     inline unsigned short GetShort(unsigned offs) const
-    { 
+    {
       if (offs + 2 > packetLen)
         return 0;
-      return (packet[offs + 0] << 8) + packet[offs + 1]; 
+      return (packet[offs + 0] << 8) + packet[offs + 1];
     }
 
-    inline void SetShort(unsigned offs, unsigned short n) 
-    { 
+    inline void SetShort(unsigned offs, unsigned short n)
+    {
       if (offs + 2 <= packetLen) {
         packet[offs + 0] = (BYTE)((n >> 8) & 0xff);
         packet[offs + 1] = (BYTE)(n & 0xff);
@@ -724,8 +724,8 @@ class RTPFrame
     inline int GetPayloadSize() const                  { return packetLen - GetHeaderSize(); }
     inline unsigned char * GetPayloadPtr() const       { return packet + GetHeaderSize(); }
 
-    inline unsigned int GetHeaderSize() const    
-    { 
+    inline unsigned int GetHeaderSize() const
+    {
       unsigned int sz = RTP_MIN_HEADER_SIZE + 4*GetContribSrcCount();
       if (GetExtension())
         sz += 4 + GetExtensionSize();
@@ -738,10 +738,10 @@ class RTPFrame
     inline void SetTimestamp(unsigned long n)        { SetLong(4, n); }
     inline void SetSyncSource(unsigned long n)       { SetLong(8, n); }
 
-    inline bool SetPayloadSize(int payloadSize)      
-    { 
+    inline bool SetPayloadSize(int payloadSize)
+    {
       if (GetHeaderSize() + payloadSize > maxPacketLen)
-        return true; 
+        return true;
       packetLen = GetHeaderSize() + payloadSize;
       return true;
     }
@@ -856,8 +856,8 @@ class H263EncoderContext
 		CriticalSection _mutex;
 };
 
-H263EncoderContext::H263EncoderContext() 
-{ 
+H263EncoderContext::H263EncoderContext()
+{
   if (!FFMPEGLibraryInstance.IsLoaded())
     return;
 
@@ -885,7 +885,7 @@ H263EncoderContext::H263EncoderContext()
   avcontext->codec = NULL;
 
   // set some reasonable values for quality as default
-  videoQuality = 20; 
+  videoQuality = 20;
   videoQMin = 10;
   videoQMax = 31;
   frameNum = 0;
@@ -1071,8 +1071,8 @@ int H263EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLen, BYTE *
   }
 
   // if this is the first frame, or the frame size has changed, deal wth it
-  if (frameNum == 0 || 
-      frameWidth != header->width || 
+  if (frameNum == 0 ||
+      frameWidth != header->width ||
       frameHeight != header->height) {
 
 //#ifndef h323pluslib
@@ -1132,10 +1132,10 @@ static void * create_encoder(const struct PluginCodec_Definition * /*codec*/)
   return new H263EncoderContext;
 }
 
-static int encoder_set_options(const PluginCodec_Definition *, 
+static int encoder_set_options(const PluginCodec_Definition *,
                                void * _context,
-                               const char * , 
-                               void * parm, 
+                               const char * ,
+                               void * parm,
                                unsigned * parmLen)
 {
   H263EncoderContext * context = (H263EncoderContext *)_context;
@@ -1151,13 +1151,13 @@ static int encoder_set_options(const PluginCodec_Definition *,
       context->frameWidth = atoi(option[1]);
     if (STRCMPI(option[0], PLUGINCODEC_OPTION_FRAME_HEIGHT) == 0)
       context->frameHeight = atoi(option[1]);
-    if (STRCMPI(option[0], "Encoding Quality") == 0) 
+    if (STRCMPI(option[0], "Encoding Quality") == 0)
       context->videoQuality = MIN(context->videoQMax, MAX(atoi(option[1]), context->videoQMin));
     if (STRCMPI(option[0], PLUGINCODEC_OPTION_TARGET_BIT_RATE) == 0)
       context->bitRate = atoi(option[1]);
 	  if (STRCMPI(option[0], PLUGINCODEC_OPTION_FRAME_TIME) == 0)
 		  context->frameRate = 90000/atoi(option[1]);
-    if (STRCMPI(option[0], "set_min_quality") == 0) 
+    if (STRCMPI(option[0], "set_min_quality") == 0)
       context->videoQMin = atoi(option[1]);
     if (STRCMPI(option[0], "set_max_quality") == 0)
       context->videoQMax = atoi(option[1]);
@@ -1175,11 +1175,11 @@ static void destroy_encoder(const struct PluginCodec_Definition * /*codec*/, voi
   delete context;
 }
 
-static int codec_encoder(const struct PluginCodec_Definition * , 
+static int codec_encoder(const struct PluginCodec_Definition * ,
                                            void * _context,
-                                     const void * from, 
+                                     const void * from,
                                        unsigned * fromLen,
-                                           void * to,         
+                                           void * to,
                                        unsigned * toLen,
                                    unsigned int * flag)
 {
@@ -1308,7 +1308,7 @@ bool H263DecoderContext::DecodeFrames(const BYTE * src, unsigned & srcLen, BYTE 
   // copy payload to a temporary buffer if there are not enough bytes after the end of the payload
   if (srcRTP.GetHeaderSize() + srcPayloadSize + FF_INPUT_BUFFER_PADDING_SIZE > srcLen) {
     if (srcPayloadSize + FF_INPUT_BUFFER_PADDING_SIZE > (int)sizeof(encFrameBuffer))
-      return 0; 
+      return 0;
 
     memcpy(encFrameBuffer, srcRTP.GetPayloadPtr(), srcPayloadSize);
     payload = encFrameBuffer;
@@ -1432,11 +1432,11 @@ static void destroy_decoder(const struct PluginCodec_Definition * /*codec*/, voi
   delete context;
 }
 
-static int codec_decoder(const struct PluginCodec_Definition *, 
+static int codec_decoder(const struct PluginCodec_Definition *,
                                            void * _context,
-                                     const void * from, 
+                                     const void * from,
                                        unsigned * fromLen,
-                                           void * to,         
+                                           void * to,
                                        unsigned * toLen,
                                    unsigned int * flag)
 {
@@ -1452,7 +1452,7 @@ static int decoder_get_output_data_size(const PluginCodec_Definition * codec, vo
 
 
 static int get_codec_options(const struct PluginCodec_Definition * codec,
-                             void *, 
+                             void *,
                              const char *,
                              void * parm,
                              unsigned * parmLen)
@@ -1476,7 +1476,7 @@ static char * num2str(int num)
 #define PMAX(a,b) ((a)>=(b)?(a):(b))
 #define PMIN(a,b) ((a)<=(b)?(a):(b))
 
-static void FindBoundingBox(const char * const * * parm, 
+static void FindBoundingBox(const char * const * * parm,
                                              int * mpi,
                                              int & minWidth,
                                              int & minHeight,
@@ -1484,7 +1484,7 @@ static void FindBoundingBox(const char * const * * parm,
                                              int & maxHeight,
                                              int & frameTime,
                                              int & bitRate)
-{ 
+{
   // initialise the MPI values to disabled
   int i;
   for (i = 0; i < 5; i++)
@@ -1550,9 +1550,9 @@ static void FindBoundingBox(const char * const * * parm,
   // if no MPIs specified, then the spec says to use QCIF
   if (frameTime == 0) {
     int ft;
-    if (frameRate != 0) 
+    if (frameRate != 0)
       ft = 90000 / frameRate;
-    else 
+    else
       ft = origFrameTime;
     mpi[1] = (ft + 1502) / 3003;
     minWidth  = maxWidth  = QCIF_WIDTH;
@@ -1585,9 +1585,9 @@ static void FindBoundingBox(const char * const * * parm,
 
   // turn off any MPI that are outside the final bounding box
   for (i = 0; i < 5; i++) {
-    if (StandardVideoSizes[i].width < minWidth || 
+    if (StandardVideoSizes[i].width < minWidth ||
         StandardVideoSizes[i].width > maxWidth ||
-        StandardVideoSizes[i].height < minHeight || 
+        StandardVideoSizes[i].height < minHeight ||
         StandardVideoSizes[i].height > maxHeight)
      mpi[i] = PLUGINCODEC_MPI_DISABLED;
   }
@@ -1728,7 +1728,7 @@ static struct PluginCodec_information licenseInfo = {
   ", Copyright (C) 1999-2000 Equivalence Pty. Ltd."
   "MPL 1.0",                                                    // source code license
   PluginCodec_License_MPL,                                      // source code license
-  
+
   "FFMPEG",                                                     // codec description
   "Michael Niedermayer, Fabrice Bellard",                       // codec author
   "4.7.1",                                                      // codec version
@@ -1992,7 +1992,7 @@ static struct PluginCodec_Option const * const xcifOptionTable[] = {
 
 static struct PluginCodec_Definition h263CodecDefn[] =
 {
-  { 
+  {
     // CIF only encoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
@@ -2004,7 +2004,7 @@ static struct PluginCodec_Definition h263CodecDefn[] =
     YUV420PDesc,                        // source format
     h263CIFDesc,                        // destination format
 
-    cifOptionTable,                     // user data 
+    cifOptionTable,                     // user data
 
     H263_CLOCKRATE,                     // samples per second
     H263_BITRATE,                       // raw bits per second
@@ -2025,10 +2025,10 @@ static struct PluginCodec_Definition h263CodecDefn[] =
     codec_encoder,                      // encode/decode
     h323EncoderControls,                // codec controls
 
-    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType 
+    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType
     NULL                                // h323CapabilityData
   },
-  { 
+  {
     // CIF only decoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
@@ -2040,7 +2040,7 @@ static struct PluginCodec_Definition h263CodecDefn[] =
     h263CIFDesc,                        // source format
     YUV420PDesc,                        // destination format
 
-    cifOptionTable,                     // user data 
+    cifOptionTable,                     // user data
 
     H263_CLOCKRATE,                     // samples per second
     H263_BITRATE,                       // raw bits per second
@@ -2061,11 +2061,11 @@ static struct PluginCodec_Definition h263CodecDefn[] =
     codec_decoder,                      // encode/decode
     h323DecoderControls,                // codec controls
 
-    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType 
+    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType
     NULL                                // h323CapabilityData
   },
 
-  { 
+  {
     // QCIF only encoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
@@ -2077,7 +2077,7 @@ static struct PluginCodec_Definition h263CodecDefn[] =
     YUV420PDesc,                        // source format
     h263QCIFDesc,                       // destination format
 
-    qcifOptionTable,                    // user data 
+    qcifOptionTable,                    // user data
 
     H263_CLOCKRATE,                     // samples per second
     H263_BITRATE,                       // raw bits per second
@@ -2098,10 +2098,10 @@ static struct PluginCodec_Definition h263CodecDefn[] =
     codec_encoder,                      // encode/decode
     h323EncoderControls,                // codec controls
 
-    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType 
+    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType
     NULL                                // h323CapabilityData
   },
-  { 
+  {
     // QCIF only decoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
@@ -2113,7 +2113,7 @@ static struct PluginCodec_Definition h263CodecDefn[] =
     h263QCIFDesc,                       // source format
     YUV420PDesc,                        // destination format
 
-    qcifOptionTable,                    // user data 
+    qcifOptionTable,                    // user data
 
     H263_CLOCKRATE,                     // samples per second
     H263_BITRATE,                       // raw bits per second
@@ -2134,11 +2134,11 @@ static struct PluginCodec_Definition h263CodecDefn[] =
     codec_decoder,                      // encode/decode
     h323DecoderControls,                // codec controls
 
-    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType 
+    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType
     NULL                                // h323CapabilityData
   },
 
-  { 
+  {
     // 720p encoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
@@ -2150,7 +2150,7 @@ static struct PluginCodec_Definition h263CodecDefn[] =
     YUV420PDesc,                        // source format
     h263720Desc,                        // destination format
 
-    cifOptionTable,                     // user data 
+    cifOptionTable,                     // user data
 
     H263_CLOCKRATE,                     // samples per second
     H263_BITRATE,                       // raw bits per second
@@ -2171,10 +2171,10 @@ static struct PluginCodec_Definition h263CodecDefn[] =
     codec_encoder,                      // encode/decode
     h323EncoderControls,                // codec controls
 
-    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType 
+    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType
     NULL                                // h323CapabilityData
   },
-  { 
+  {
     // 720p decoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
@@ -2186,7 +2186,7 @@ static struct PluginCodec_Definition h263CodecDefn[] =
     h263720Desc,                        // source format
     YUV420PDesc,                        // destination format
 
-    cifOptionTable,                     // user data 
+    cifOptionTable,                     // user data
 
     H263_CLOCKRATE,                     // samples per second
     H263_BITRATE,                       // raw bits per second
@@ -2207,11 +2207,11 @@ static struct PluginCodec_Definition h263CodecDefn[] =
     codec_decoder,                      // encode/decode
     h323DecoderControls,                // codec controls
 
-    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType 
+    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType
     NULL                                // h323CapabilityData
   },
 
-  { 
+  {
     // 4CIF H.239 encoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
@@ -2224,7 +2224,7 @@ static struct PluginCodec_Definition h263CodecDefn[] =
     YUV420PDesc,                        // source format
     h263Desc,                           // destination format
 
-    cif4OptionTable,                    // user data 
+    cif4OptionTable,                    // user data
 
     H263_CLOCKRATE,                     // samples per second
     H263_BITRATE,                       // raw bits per second
@@ -2245,10 +2245,10 @@ static struct PluginCodec_Definition h263CodecDefn[] =
     codec_encoder,                      // encode/decode
     h323EncoderControls,                // codec controls
 
-    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType 
+    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType
     NULL                                // h323CapabilityData
   },
-  { 
+  {
   // 4CIF H.239 decoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
@@ -2261,7 +2261,7 @@ static struct PluginCodec_Definition h263CodecDefn[] =
     h263Desc,                           // source format
     YUV420PDesc,                        // destination format
 
-    cif4OptionTable,                    // user data 
+    cif4OptionTable,                    // user data
 
     H263_CLOCKRATE,                     // samples per second
     H263_BITRATE,                       // raw bits per second
@@ -2282,7 +2282,7 @@ static struct PluginCodec_Definition h263CodecDefn[] =
     codec_decoder,                      // encode/decode
     h323DecoderControls,                // codec controls
 
-    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType 
+    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType
     NULL                                // h323CapabilityData
   }
 };

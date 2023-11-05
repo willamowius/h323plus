@@ -4,14 +4,14 @@
  * This code is based on the following files from the OPAL project which
  * have been removed from the current build and distributions but are still
  * available in the CVS "attic"
- * 
- *    src/codecs/h263codec.cxx 
- *    include/codecs/h263codec.h 
+ *
+ *    src/codecs/h263codec.cxx
+ *    include/codecs/h263codec.h
 
- * The original files, and this version of the original code, are released under the same 
+ * The original files, and this version of the original code, are released under the same
  * MPL 1.0 license. Substantial portions of the original code were contributed
  * by Salyens and March Networks and their right to be identified as copyright holders
- * of the original code portions and any parts now included in this new copy is asserted through 
+ * of the original code portions and any parts now included in this new copy is asserted through
  * their inclusion in the copyright notices below.
  *
  * Copyright (C) 2007 Matthias Schneider
@@ -54,7 +54,7 @@
 
 #ifdef _STATIC_LINK
   #define OPAL_STATIC_CODEC 1
-  #ifdef _WIN32
+  #if _WIN32 || _WIN64
     #pragma comment(lib,"avcodec.lib")
     #pragma comment(lib,"avutil.lib")
   #endif
@@ -78,8 +78,8 @@
 
 #include "tracer.h"
 
-#if defined(_WIN32) || defined(_WIN32_WCE)
-  
+#if defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
+
   #define STRCMPI  _strcmpi
   #define STRNCMPI strncmp
 #else
@@ -107,12 +107,12 @@ static const char h263720Desc[]   = { "H.263-720" };
 static const char sdpH263[]      = { "h263" };
 
 static struct StdSizes {
-  enum { 
-    SQCIF, 
-    QCIF, 
-    CIF, 
-    CIF4, 
-    CIF16, 
+  enum {
+    SQCIF,
+    QCIF,
+    CIF,
+    CIF4,
+    CIF16,
     NumStdSizes,
     UnknownStdSize = NumStdSizes
   };
@@ -147,7 +147,7 @@ static void logCallbackFFMPEG (void* v, int level, const char* fmt , va_list arg
     vsprintf(buffer + strlen(buffer), fmt, arg);
     if (strlen(buffer) > 0)
       buffer[strlen(buffer)-1] = 0;
-    if (severity == 4) 
+    if (severity == 4)
       { TRACE_UP (severity, buffer); }
     else
       { TRACE (severity, buffer); }
@@ -171,7 +171,7 @@ static void DumpRTPPayload(Tracer & tracer, const RTPFrame & rtp, int max)
     max = rtp.GetPayloadSize();
   unsigned char * ptr = rtp.GetPayloadPtr();
   tracer.GetStream() << hex << setfill('0') << setprecision(2);
-  while (max-- > 0) 
+  while (max-- > 0)
     tracer.GetStream() << (int) *ptr++ << ' ';
   tracer.GetStream() << setfill(' ') << dec;
 }
@@ -225,19 +225,19 @@ tracer.Start(); tracer.GetStream() << text; func(tracer, rtp); tracer.End()
 
 #else
 
-#define CODEC_TRACER_RTP(tracer, text, rtp, func) 
+#define CODEC_TRACER_RTP(tracer, text, rtp, func)
 
 #endif
-      
+
 /////////////////////////////////////////////////////////////////////////////
-      
+
 H263_Base_EncoderContext::H263_Base_EncoderContext(const char * _prefix)
   : _context(NULL)
   , prefix(_prefix)
 #if TRACE_FILE
   , tracer(_prefix, true)
 #endif
-{ 
+{
   _inputFrameBuffer = NULL;
   _codec = NULL;
   _inputFrame = NULL;
@@ -295,7 +295,7 @@ bool H263_Base_EncoderContext::Open(FF_CodecID codecId)
   _context->pix_fmt = PIX_FMT_YUV420P;
 
   // X-Lite does not like Custom Picture frequency clocks...
-  _context->time_base.num = 100; 
+  _context->time_base.num = 100;
   _context->time_base.den = 2997;
   _context->gop_size      = 125;
 
@@ -357,8 +357,8 @@ void H263_Base_EncoderContext::SetTargetBitrate (unsigned rate)
   /* ratecontrol qmin qmax limiting method
      0-> clipping, 1-> use a nice continous function to limit qscale wthin qmin/qmax.
   */
-  
-  _context->rc_qsquish = 0;            // limit q by clipping 
+
+  _context->rc_qsquish = 0;            // limit q by clipping
   _context->rc_eq = (char*) "1";       // rate control equation
 }
 
@@ -400,7 +400,7 @@ void H263_Base_EncoderContext::SetTSTO (unsigned tsto)
 
   // Lagrange multipliers - this is how the context defaults do it:
   _context->lmin = _context->qmin * FF_QP2LAMBDA;
-  _context->lmax = _context->qmax * FF_QP2LAMBDA; 
+  _context->lmax = _context->qmax * FF_QP2LAMBDA;
 
   CODEC_TRACER(tracer, "TSTO set to " << tsto);
 }
@@ -410,26 +410,26 @@ void H263_Base_EncoderContext::EnableAnnex (Annex annex)
   switch (annex) {
     case D:
       // Annex D: Unrestructed Motion Vectors
-      // Level 2+ 
+      // Level 2+
       // works with eyeBeam, signaled via  non-standard "D"
-//      _context->flags |= CODEC_FLAG_H263P_UMV; 
+//      _context->flags |= CODEC_FLAG_H263P_UMV;
       break;
     case F:
       // Annex F: Advanced Prediction Mode
       // does not work with eyeBeam
       // DO NOT ENABLE THIS FLAG. FFMPEG IS NOT THREAD_SAFE WHEN THIS FLAG IS SET
-      //_context->flags |= CODEC_FLAG_OBMC; 
+      //_context->flags |= CODEC_FLAG_OBMC;
       break;
     case I:
       // Annex I: Advanced Intra Coding
       // Level 3+
       // works with eyeBeam
-      _context->flags |= CODEC_FLAG_AC_PRED; 
+      _context->flags |= CODEC_FLAG_AC_PRED;
       break;
     case K:
-      // Annex K: 
+      // Annex K:
       // does not work with eyeBeam
-      //_context->flags |= CODEC_FLAG_H263P_SLICE_STRUCT;  
+      //_context->flags |= CODEC_FLAG_H263P_SLICE_STRUCT;
       break;
     case J:
       // Annex J: Deblocking Filter
@@ -455,30 +455,30 @@ void H263_Base_EncoderContext::DisableAnnex (Annex annex)
   switch (annex) {
     case D:
       // Annex D: Unrestructed Motion Vectors
-      // Level 2+ 
+      // Level 2+
       // works with eyeBeam, signaled via  non-standard "D"
-//      _context->flags &= ~CODEC_FLAG_H263P_UMV; 
+//      _context->flags &= ~CODEC_FLAG_H263P_UMV;
       break;
     case F:
       // Annex F: Advanced Prediction Mode
       // does not work with eyeBeam
-//      _context->flags &= ~CODEC_FLAG_OBMC; 
+//      _context->flags &= ~CODEC_FLAG_OBMC;
       break;
     case I:
       // Annex I: Advanced Intra Coding
       // Level 3+
       // works with eyeBeam
-      _context->flags &= ~CODEC_FLAG_AC_PRED; 
+      _context->flags &= ~CODEC_FLAG_AC_PRED;
       break;
     case K:
-      // Annex K: 
+      // Annex K:
       // does not work with eyeBeam
-//      _context->flags &= ~CODEC_FLAG_H263P_SLICE_STRUCT;  
+//      _context->flags &= ~CODEC_FLAG_H263P_SLICE_STRUCT;
       break;
     case J:
       // Annex J: Deblocking Filter
       // works with eyeBeam
-      _context->flags &= ~CODEC_FLAG_LOOP_FILTER;  
+      _context->flags &= ~CODEC_FLAG_LOOP_FILTER;
       break;
     case T:
       break;
@@ -550,15 +550,15 @@ void H263_Base_EncoderContext::AddInputFormat(inputFormats & fmt)
 {
     videoInputFormats.push_back(fmt);
 }
-    
+
 int H263_Base_EncoderContext::GetInputFormat(inputFormats & fmt, unsigned maxWidth, unsigned maxHeight)
 {
     for (std::list<inputFormats>::const_iterator r=videoInputFormats.begin(); r!=videoInputFormats.end(); ++r) {
         if ((r->w > maxWidth) && (r->h > maxHeight))
             continue;
 
-        for (int i= 0; i < StdSizes::NumStdSizes; i++) {  
-            if ((StandardVideoSizes[i].width == (int)r->w) && 
+        for (int i= 0; i < StdSizes::NumStdSizes; i++) {
+            if ((StandardVideoSizes[i].width == (int)r->w) &&
                 (StandardVideoSizes[i].height == (int)r->h)) {
                       fmt = *r;
                       return 1;
@@ -636,10 +636,10 @@ bool H263_RFC2190_EncoderContext::Open()
 
  // _context->flags &= ~CODEC_FLAG_H263P_AIV;    // -?
  // _context->flags &= ~CODEC_FLAG_H263P_SLICE_STRUCT;  // -?
-  
+
   SetMaxKeyFramePeriod(H263_KEY_FRAME_INTERVAL);
   SetMaxRTPFrameSize(H263_PAYLOAD_SIZE);
-  
+
   return true;
 }
 
@@ -651,10 +651,10 @@ bool H263_RFC2190_EncoderContext::InitContext()
 void H263_RFC2190_EncoderContext::SetMaxRTPFrameSize (unsigned /*size*/)
 {
   //_context->rtp_payload_size = (size * 6 / 7);
-  
+
   //if ((size * 6 / 7) > 0)
   // _context->rtp_payload_size = (size * 6 / 7);
-  // else  
+  // else
   // _context->rtp_payload_size = size;
   //_txH263PFrame->SetMaxPayloadSize(size);
 }
@@ -704,8 +704,8 @@ int H263_RFC2190_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
   }
 
   // if this is the first frame, or the frame size has changed, deal wth it
-  if ((_frameCount == 0) || 
-      ((unsigned) _width !=  header->width) || 
+  if ((_frameCount == 0) ||
+      ((unsigned) _width !=  header->width) ||
       ((unsigned) _height != header->height)) {
 
     TRACE_AND_LOG(tracer, 4, "First frame received or resolution has changed - reopening codec");
@@ -722,9 +722,9 @@ int H263_RFC2190_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
       _inputFrameBuffer = NULL;
 	}
 #if HAVE_POSIX_MEMALIGN
-    if (posix_memalign((void **)&_inputFrameBuffer, 64, header->width*header->height*3/2 + (FF_INPUT_BUFFER_PADDING_SIZE*2)) != 0) 
+    if (posix_memalign((void **)&_inputFrameBuffer, 64, header->width*header->height*3/2 + (FF_INPUT_BUFFER_PADDING_SIZE*2)) != 0)
 #else
-    if ((_inputFrameBuffer = (BYTE *)malloc(header->width*header->height*3/2 + (FF_INPUT_BUFFER_PADDING_SIZE*2))) == NULL) 
+    if ((_inputFrameBuffer = (BYTE *)malloc(header->width*header->height*3/2 + (FF_INPUT_BUFFER_PADDING_SIZE*2))) == NULL)
 #endif
     {
       TRACE_AND_LOG(tracer, 1, "Unable to allocate memory for frame buffer");
@@ -740,7 +740,7 @@ int H263_RFC2190_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
 
   int size = header->width * header->height;
   int frameSize = (size * 3) >> 1;
- 
+
   // we need FF_INPUT_BUFFER_PADDING_SIZE allocated bytes after the YVU420P image for the encoder
   memcpy (_inputFrameBuffer, OPAL_VIDEO_FRAME_DATA_PTR(header), frameSize);
   memset (_inputFrameBuffer + frameSize, 0 , FF_INPUT_BUFFER_PADDING_SIZE);
@@ -770,9 +770,9 @@ int H263_RFC2190_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
   if (packetizer.m_buffer == NULL) {
     packetizer.m_bufferSize = newOutputSize;
 #if HAVE_POSIX_MEMALIGN
-    if (posix_memalign((void **)&packetizer.m_buffer, 64, packetizer.m_bufferSize) != 0) 
+    if (posix_memalign((void **)&packetizer.m_buffer, 64, packetizer.m_bufferSize) != 0)
 #else
-    if ((packetizer.m_buffer = (BYTE *)malloc(packetizer.m_bufferSize)) == NULL) 
+    if ((packetizer.m_buffer = (BYTE *)malloc(packetizer.m_bufferSize)) == NULL)
 #endif
     {
       TRACE_AND_LOG(tracer, 1, "Unable to allocate memory for packet buffer");
@@ -782,7 +782,7 @@ int H263_RFC2190_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
 
   //CODEC_TRACER(tracer, "Encoder called with " << frameSize << " bytes and frame type " << _inputFrame->pict_type << " at " << header->width << "x" << header->height);
 
-  int encodedLen = FFMPEGLibraryInstance.AvcodecEncodeVideo(_context, packetizer.m_buffer, packetizer.m_bufferSize, _inputFrame);  
+  int encodedLen = FFMPEGLibraryInstance.AvcodecEncodeVideo(_context, packetizer.m_buffer, packetizer.m_bufferSize, _inputFrame);
 
   if (encodedLen < 0) {
     TRACE_AND_LOG(tracer, 1, "Encoder failed");
@@ -876,7 +876,7 @@ void H263_RFC2429_EncoderContext::SetMaxRTPFrameSize (unsigned size)
 {
    if ((size * 6 / 7) > 0)
     _context->rtp_payload_size = (size * 6 / 7);
-    else  
+    else
     _context->rtp_payload_size = size;
 
   _txH263PFrame->SetMaxPayloadSize((uint16_t)size);
@@ -920,8 +920,8 @@ int H263_RFC2429_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
   }
 
   // if this is the first frame, or the frame size has changed, deal wth it
-  if ((_frameCount == 0) || 
-      ((unsigned) _width !=  header->width) || 
+  if ((_frameCount == 0) ||
+      ((unsigned) _width !=  header->width) ||
       ((unsigned) _height != header->height)) {
 
     TRACE_AND_LOG(tracer, 4, "First frame received or resolution has changed - reopening codec");
@@ -952,7 +952,7 @@ int H263_RFC2429_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
 
   int size = header->width * header->height;
   int frameSize = (size * 3) >> 1;
- 
+
   // we need FF_INPUT_BUFFER_PADDING_SIZE allocated bytes after the YVU420P image for the encoder
   memset (_inputFrameBuffer, 0 , FF_INPUT_BUFFER_PADDING_SIZE);
   memcpy (_inputFrameBuffer + FF_INPUT_BUFFER_PADDING_SIZE, OPAL_VIDEO_FRAME_DATA_PTR(header), frameSize);
@@ -966,11 +966,11 @@ int H263_RFC2429_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
 #else
   _inputFrame->pict_type = (flags & forceIFrame) ? AV_PICTURE_TYPE_I : AV_PICTURE_TYPE_NONE;
 #endif
- 
+
   _txH263PFrame->BeginNewFrame();
   _txH263PFrame->SetTimestamp(srcRTP.GetTimestamp());
-  _txH263PFrame->SetFrameSize (FFMPEGLibraryInstance.AvcodecEncodeVideo(_context, _txH263PFrame->GetFramePtr(), frameSize, _inputFrame));  
-  _frameCount++; 
+  _txH263PFrame->SetFrameSize (FFMPEGLibraryInstance.AvcodecEncodeVideo(_context, _txH263PFrame->GetFramePtr(), frameSize, _inputFrame));
+  _frameCount++;
 
   if (_txH263PFrame->GetFrameSize() == 0) {
     TRACE_AND_LOG(tracer, 1, "Encoder internal error - there should be outstanding packets at this point");
@@ -1112,11 +1112,11 @@ bool H263_RFC2429_DecoderContext::DecodeFrames(const BYTE * src, unsigned & srcL
     _gotAGoodFrame = false;
     return true;
   }
-  
+
   if (srcRTP.GetMarker()==0)
   {
      return 1;
-  } 
+  }
 
   if (_rxH263PFrame->GetFrameSize()==0)
   {
@@ -1155,9 +1155,9 @@ bool H263_RFC2429_DecoderContext::DecodeFrames(const BYTE * src, unsigned & srcL
 
   _rxH263PFrame->BeginNewFrame();
 
-  if (!gotPicture) 
+  if (!gotPicture)
   {
-    TRACE_AND_LOG(tracer, 1, "Decoded "<< bytesDecoded << " bytes without getting a Picture"); 
+    TRACE_AND_LOG(tracer, 1, "Decoded "<< bytesDecoded << " bytes without getting a Picture");
     _skippedFrameCounter++;
     flags = (_gotAGoodFrame ? PluginCodec_ReturnCoderRequestIFrame : 0);
     _gotAGoodFrame = false;
@@ -1293,7 +1293,7 @@ bool H263_RFC2190_DecoderContext::DecodeFrames(const BYTE * src, unsigned & srcL
 
   if (!gotPicture) {
     flags = PluginCodec_ReturnCoderRequestIFrame;
-    TRACE_AND_LOG(tracer, 1, "Decoded "<< bytesDecoded << " bytes without getting a Picture"); 
+    TRACE_AND_LOG(tracer, 1, "Decoded "<< bytesDecoded << " bytes without getting a Picture");
     return ReturnEmptyFrame(dstRTP, dstLen, flags);
   }
 
@@ -1432,7 +1432,7 @@ static void * create_encoder(const struct PluginCodec_Definition * codec)
   else
     context = new H263_RFC2429_EncoderContext();
 
-  if (context->Open()) 
+  if (context->Open())
     return context;
 
   delete context;
@@ -1445,9 +1445,9 @@ static void destroy_encoder(const struct PluginCodec_Definition * /*codec*/, voi
   delete context;
 }
 
-static int codec_encoder(const struct PluginCodec_Definition * , 
+static int codec_encoder(const struct PluginCodec_Definition * ,
                                            void * _context,
-                                     const void * from, 
+                                     const void * from,
                                        unsigned * fromLen,
                                            void * to,
                                        unsigned * toLen,
@@ -1460,7 +1460,7 @@ static int codec_encoder(const struct PluginCodec_Definition * ,
 #define PMAX(a,b) ((a)>=(b)?(a):(b))
 #define PMIN(a,b) ((a)<=(b)?(a):(b))
 
-static void FindBoundingBox(const char * const * * parm, 
+static void FindBoundingBox(const char * const * * parm,
                                              int * mpi,
                                              int & minWidth,
                                              int & minHeight,
@@ -1535,9 +1535,9 @@ static void FindBoundingBox(const char * const * * parm,
   // if no MPIs specified, then the spec says to use QCIF
   if (frameTime == 0) {
     int ft;
-    if (frameRate != 0) 
+    if (frameRate != 0)
       ft = 90000 / frameRate;
-    else 
+    else
       ft = origFrameTime;
     mpi[1] = (ft + 1502) / 3003;
 
@@ -1578,9 +1578,9 @@ static void FindBoundingBox(const char * const * * parm,
 
   // turn off any MPI that are outside the final bounding box
   for (i = 0; i < 5; i++) {
-    if (StandardVideoSizes[i].width < minWidth || 
+    if (StandardVideoSizes[i].width < minWidth ||
         StandardVideoSizes[i].width > maxWidth ||
-        StandardVideoSizes[i].height < minHeight || 
+        StandardVideoSizes[i].height < minHeight ||
         StandardVideoSizes[i].height > maxHeight)
      mpi[i] = PLUGINCODEC_MPI_DISABLED;
   }
@@ -1677,10 +1677,10 @@ static int to_customised_options(const struct PluginCodec_Definition *, void *, 
   return 1;
 }
 
-static int encoder_set_options(const PluginCodec_Definition *, 
+static int encoder_set_options(const PluginCodec_Definition *,
                                void * _context,
-                               const char * , 
-                               void * parm, 
+                               const char * ,
+                               void * parm,
                                unsigned * parmLen)
 {
   H263_Base_EncoderContext * context = (H263_Base_EncoderContext *)_context;
@@ -1754,11 +1754,11 @@ static int encoder_set_options(const PluginCodec_Definition *,
   return 1;
 }
 
-int encoder_formats( 
-     const struct PluginCodec_Definition * codec, 
-     void * _context, 
-     const char *, 
-     void * parm, 
+int encoder_formats(
+     const struct PluginCodec_Definition * codec,
+     void * _context,
+     const char *,
+     void * parm,
      unsigned * parmLen)
 {
   TRACE(4,"Supported Formats");
@@ -1787,7 +1787,7 @@ int encoder_formats(
              token = strtok(NULL,",");
              j++;
            }
-           TRACE(4,"Frame Size w " << f.w << " h " << f.h << " r " << f.r); 
+           TRACE(4,"Frame Size w " << f.w << " h " << f.h << " r " << f.r);
            context->AddInputFormat(f);
        }
     }
@@ -1797,7 +1797,7 @@ int encoder_formats(
     inputFormats fmt;
 
       if (context->GetInputFormat(fmt, maxWidth, maxHeight)) {
-        TRACE(2,"Adjusted w " << fmt.w << " h " << fmt.h << " r " << fmt.r); 
+        TRACE(2,"Adjusted w " << fmt.w << " h " << fmt.h << " r " << fmt.r);
 
 	    context->Lock();
         context->CloseCodec();
@@ -1840,11 +1840,11 @@ static void destroy_decoder(const struct PluginCodec_Definition * /*codec*/, voi
   delete context;
 }
 
-static int codec_decoder(const struct PluginCodec_Definition *, 
+static int codec_decoder(const struct PluginCodec_Definition *,
                                            void * _context,
-                                     const void * from, 
+                                     const void * from,
                                        unsigned * fromLen,
-                                           void * to, 
+                                           void * to,
                                        unsigned * toLen,
                                    unsigned int * flag)
 {
@@ -1874,7 +1874,7 @@ static struct PluginCodec_information licenseInfo = {
   ", Copyright (C) 1999-2000 Equivalence Pty. Ltd.",
   "MPL 1.0",                                                    // source code license
   PluginCodec_License_MPL,                                      // source code license
-  
+
   "FFMPEG",                                                     // codec description
   "Michael Niedermayer, Fabrice Bellard",                       // codec author
   "",                                                           // codec version
@@ -2092,7 +2092,7 @@ static struct PluginCodec_Option const * const h263CIF4OptionTable[] = {
 /////////////////////////////////////////////////////////////////////////////
 
 static struct PluginCodec_Definition h263CodecDefn[] = {
-  { 
+  {
     // QCIF only encoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
@@ -2104,7 +2104,7 @@ static struct PluginCodec_Definition h263CodecDefn[] = {
     YUV420PDesc,                        // source format
     h263QCIFDesc,                       // destination format
 
-    h263QCIFOptionTable,                // user data 
+    h263QCIFOptionTable,                // user data
 
     H263_CLOCKRATE,                     // samples per second
     H263_BITRATE,                       // raw bits per second
@@ -2125,10 +2125,10 @@ static struct PluginCodec_Definition h263CodecDefn[] = {
     codec_encoder,                      // encode/decode
     EncoderControls,                // codec controls
 
-    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType 
+    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType
     NULL                                // h323CapabilityData
  },
- { 
+ {
     // QCIF only decoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
@@ -2140,7 +2140,7 @@ static struct PluginCodec_Definition h263CodecDefn[] = {
     h263QCIFDesc,                       // source format
     YUV420PDesc,                        // destination format
 
-    h263QCIFOptionTable,                // user data 
+    h263QCIFOptionTable,                // user data
 
     H263_CLOCKRATE,                     // samples per second
     H263_BITRATE,                       // raw bits per second
@@ -2161,11 +2161,11 @@ static struct PluginCodec_Definition h263CodecDefn[] = {
     codec_decoder,                      // encode/decode
     DecoderControls,                    // codec controls
 
-    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType 
+    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType
     NULL                                // h323CapabilityData
  },
 
- { 
+ {
     // CIF only encoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
@@ -2177,7 +2177,7 @@ static struct PluginCodec_Definition h263CodecDefn[] = {
     YUV420PDesc,                        // source format
     h263CIFDesc,                        // destination format
 
-    h263CIFOptionTable,                 // user data 
+    h263CIFOptionTable,                 // user data
 
     H263_CLOCKRATE,                     // samples per second
     H263_BITRATE,                       // raw bits per second
@@ -2198,10 +2198,10 @@ static struct PluginCodec_Definition h263CodecDefn[] = {
     codec_encoder,                      // encode/decode
     EncoderControls,					// codec controls
 
-    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType 
+    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType
     NULL                                // h323CapabilityData
   },
-  { 
+  {
     // CIF only decoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
@@ -2213,7 +2213,7 @@ static struct PluginCodec_Definition h263CodecDefn[] = {
     h263CIFDesc,                        // source format
     YUV420PDesc,                        // destination format
 
-    h263CIFOptionTable,                     // user data 
+    h263CIFOptionTable,                     // user data
 
     H263_CLOCKRATE,                     // samples per second
     H263_BITRATE,                       // raw bits per second
@@ -2234,11 +2234,11 @@ static struct PluginCodec_Definition h263CodecDefn[] = {
     codec_decoder,                      // encode/decode
     DecoderControls,					// codec controls
 
-    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType 
+    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType
     NULL                                // h323CapabilityData
   },
 
-  { 
+  {
     // 720p encoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
@@ -2251,7 +2251,7 @@ static struct PluginCodec_Definition h263CodecDefn[] = {
     YUV420PDesc,                        // source format
     h263720Desc,                        // destination format
 
-    h263CIF4OptionTable,                // user data 
+    h263CIF4OptionTable,                // user data
 
     H263_CLOCKRATE,                     // samples per second
     H263_CIF4_BITRATE,                  // raw bits per second
@@ -2272,10 +2272,10 @@ static struct PluginCodec_Definition h263CodecDefn[] = {
     codec_encoder,                      // encode/decode
     EncoderControls,                    // codec controls
 
-    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType 
+    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType
     NULL                                // h323CapabilityData
   },
-  { 
+  {
     // 720p decoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
@@ -2288,7 +2288,7 @@ static struct PluginCodec_Definition h263CodecDefn[] = {
     h263720Desc,                        // source format
     YUV420PDesc,                        // destination format
 
-    h263CIF4OptionTable,                // user data 
+    h263CIF4OptionTable,                // user data
 
     H263_CLOCKRATE,                     // samples per second
     H263_CIF4_BITRATE,                  // raw bits per second
@@ -2309,7 +2309,7 @@ static struct PluginCodec_Definition h263CodecDefn[] = {
     codec_decoder,                      // encode/decode
     DecoderControls,                    // codec controls
 
-    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType 
+    PluginCodec_H323VideoCodec_h263,    // h323CapabilityType
     NULL                                // h323CapabilityData
   }
 };
@@ -2324,7 +2324,7 @@ extern "C" {
     char * debug_level = getenv ("PTLIB_TRACE_CODECS");
     if (debug_level!=NULL) {
       Trace::SetLevel(atoi(debug_level));
-    } 
+    }
     else {
       Trace::SetLevel(0);
     }
@@ -2332,7 +2332,7 @@ extern "C" {
     debug_level = getenv ("PTLIB_TRACE_CODECS_USER_PLANE");
     if (debug_level!=NULL) {
       Trace::SetLevelUserPlane(atoi(debug_level));
-    } 
+    }
     else {
       Trace::SetLevelUserPlane(0);
     }

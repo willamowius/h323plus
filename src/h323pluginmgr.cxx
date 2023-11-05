@@ -4137,35 +4137,35 @@ static PFactory<H323StaticPluginCodec>::Worker<H323StaticPluginCodec_##name > st
 // Implementor may add more...
 
 #ifdef H323_STATIC_GSM
-    #if _WIN32
+    #if _WIN32 || _WIN64
         #pragma comment(lib,"GSM_0610_codec.lib")
     #endif
     INCLUDE_STATIC_CODEC(GSM_0610)
 #endif
 
 #ifdef H323_STATIC_G7221
-    #if _WIN32
+    #if _WIN32 || _WIN64
         #pragma comment(lib,"G7221_codec.lib")
     #endif
     INCLUDE_STATIC_CODEC(G7221)
 #endif
 
 #ifdef H323_STATIC_H261
-    #if _WIN32
+    #if _WIN32 || _WIN64
        #pragma comment(lib,"VIC_H261_codec.lib")
     #endif
     INCLUDE_STATIC_CODEC(VIC_H261)
 #endif
 
 #ifdef H323_STATIC_H263
-    #if _WIN32
+    #if _WIN32 || _WIN64
        #pragma comment(lib,"FFMPEG_H263P_codec.lib")
     #endif
     INCLUDE_STATIC_CODEC(FFMPEG_H263P)
 #endif
 
 #ifdef H323_STATIC_H264
-    #if _WIN32
+    #if _WIN32 || _WIN64
        #pragma comment(lib,"H264_codec.lib")
     #endif
     INCLUDE_STATIC_CODEC(H264)

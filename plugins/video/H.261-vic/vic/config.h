@@ -14,7 +14,7 @@ typedef unsigned int  u_int;
 typedef unsigned char BYTE;
 typedef unsigned long u_long;
 
-#ifndef _WIN32
+#if _WIN32 || _WIN64
 #include <netinet/in.h>
 #endif
 

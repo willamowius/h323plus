@@ -49,7 +49,7 @@
 #include <h460/h46018_h225.h>
 #include <h460/h460.h>
 
-#if _WIN32
+#if _WIN32 || _WIN64
 #pragma message("H.460.18/.19 Enabled. See Tandberg Patent License. http://www.tandberg.com/collateral/tandberg-ITU-license.pdf")
 #else
 #warning("H.460.18/.19 Enabled. See Tandberg Patent License. http://www.tandberg.com/collateral/tandberg-ITU-license.pdf")
@@ -81,7 +81,7 @@ H460_FeatureStd18::~H460_FeatureStd18()
 
 void H460_FeatureStd18::AttachEndPoint(H323EndPoint * _ep)
 {
-    EP =_ep; 
+    EP =_ep;
     handler = NULL;
 
     isEnabled = EP->H46018IsEnabled();
@@ -98,8 +98,8 @@ void H460_FeatureStd18::SetTransportSecurity(const H323TransportSecurity & callS
         handler->SetTransportSecurity(callSecurity);
 }
 
-PBoolean H460_FeatureStd18::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu) 
-{ 
+PBoolean H460_FeatureStd18::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu)
+{
     if (!isEnabled)
         return false;
 
@@ -109,7 +109,7 @@ PBoolean H460_FeatureStd18::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu
     if (list.GetSize() > 0) {
       for (PINDEX i=0; i < list.GetSize(); i++) {
 #if PTLIB_VER >= 2130
-          PString name = list[i].GetMethodName(); 
+          PString name = list[i].GetMethodName();
 #else
           PString name = list[i].GetName();
 #endif
@@ -119,27 +119,27 @@ PBoolean H460_FeatureStd18::OnSendGatekeeperRequest(H225_FeatureDescriptor & pdu
       }
     }
 
-    H460_FeatureStd feat = H460_FeatureStd(18); 
+    H460_FeatureStd feat = H460_FeatureStd(18);
     pdu = feat;
-    return TRUE; 
+    return TRUE;
 }
-    
-void H460_FeatureStd18::OnReceiveGatekeeperConfirm(const H225_FeatureDescriptor & pdu) 
+
+void H460_FeatureStd18::OnReceiveGatekeeperConfirm(const H225_FeatureDescriptor & pdu)
 {
     isEnabled = true;
 }
 
-PBoolean H460_FeatureStd18::OnSendRegistrationRequest(H225_FeatureDescriptor & pdu) 
+PBoolean H460_FeatureStd18::OnSendRegistrationRequest(H225_FeatureDescriptor & pdu)
 {
     if (!isEnabled)
         return FALSE;
 
-    H460_FeatureStd feat = H460_FeatureStd(18); 
+    H460_FeatureStd feat = H460_FeatureStd(18);
     pdu = feat;
-    return TRUE; 
+    return TRUE;
 }
 
-void H460_FeatureStd18::OnReceiveRegistrationConfirm(const H225_FeatureDescriptor & pdu) 
+void H460_FeatureStd18::OnReceiveRegistrationConfirm(const H225_FeatureDescriptor & pdu)
 {
     if (EP) {
       if (!EP->H46018IsEnabled()) return;
@@ -150,7 +150,7 @@ void H460_FeatureStd18::OnReceiveRegistrationConfirm(const H225_FeatureDescripto
     isEnabled = true;
 }
 
-void H460_FeatureStd18::OnReceiveServiceControlIndication(const H225_FeatureDescriptor & pdu) 
+void H460_FeatureStd18::OnReceiveServiceControlIndication(const H225_FeatureDescriptor & pdu)
 {
     if (handler == NULL)
         return;
@@ -161,7 +161,7 @@ void H460_FeatureStd18::OnReceiveServiceControlIndication(const H225_FeatureDesc
         PTRACE(4,"Std18\tERROR: Received SCI without Call Indication!");
         return;
     }
- 
+
     PTRACE(4,"Std18\tSCI: Processing Incoming call request.");
     PASN_OctetString raw = feat.Value(H460_FeatureID(1));
     handler->CreateH225Transport(raw);
@@ -222,7 +222,7 @@ PBoolean H460_FeatureStd19::FeatureAdvertised(int mtype)
 {
      switch (mtype) {
         case H460_MessageType::e_setup:
-        case H460_MessageType::e_callProceeding: 
+        case H460_MessageType::e_callProceeding:
         case H460_MessageType::e_alerting:
         case H460_MessageType::e_connect:
             return true;
@@ -231,8 +231,8 @@ PBoolean H460_FeatureStd19::FeatureAdvertised(int mtype)
      }
 }
 
-PBoolean H460_FeatureStd19::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu) 
-{ 
+PBoolean H460_FeatureStd19::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
+{
     if (!isEnabled || !isAvailable)
         return false;
 
@@ -250,16 +250,16 @@ PBoolean H460_FeatureStd19::OnSendSetup_UUIE(H225_FeatureDescriptor & pdu)
     }
 #endif
 
-    H460_FeatureStd feat = H460_FeatureStd(19); 
+    H460_FeatureStd feat = H460_FeatureStd(19);
 #ifdef H323_H46019M
     if (EP->H46019MIsSending())
         feat.Add(H46019_Multiplex);
 #endif
     pdu = feat;
-    return true; 
+    return true;
 }
 
-void H460_FeatureStd19::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu) 
+void H460_FeatureStd19::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
 {
     if (isEnabled && isAvailable) {
         remoteSupport = TRUE;
@@ -267,7 +267,7 @@ void H460_FeatureStd19::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
         CON->H46019SetCallReceiver();
 #ifdef H323_H46019M
         H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
-        if (feat.Contains(H46019_Multiplex) && EP->H46019MIsEnabled()) { 
+        if (feat.Contains(H46019_Multiplex) && EP->H46019MIsEnabled()) {
              EnableMultiplex();
              multiSupport = true;
         }
@@ -275,21 +275,21 @@ void H460_FeatureStd19::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
     }
 }
 
-PBoolean H460_FeatureStd19::OnSendCallProceeding_UUIE(H225_FeatureDescriptor & pdu) 
-{ 
+PBoolean H460_FeatureStd19::OnSendCallProceeding_UUIE(H225_FeatureDescriptor & pdu)
+{
     if (!isEnabled || !isAvailable || !remoteSupport)
         return FALSE;
 
-    H460_FeatureStd feat = H460_FeatureStd(19); 
+    H460_FeatureStd feat = H460_FeatureStd(19);
 #ifdef H323_H46019M
     if (multiSupport && EP->H46019MIsSending())
          feat.Add(H46019_Multiplex);
 #endif
     pdu = feat;
-    return TRUE; 
+    return TRUE;
 }
 
-void H460_FeatureStd19::OnReceiveCallProceeding_UUIE(const H225_FeatureDescriptor & pdu) 
+void H460_FeatureStd19::OnReceiveCallProceeding_UUIE(const H225_FeatureDescriptor & pdu)
 {
 //   Ignore message
 }
@@ -299,17 +299,17 @@ PBoolean H460_FeatureStd19::OnSendAlerting_UUIE(H225_FeatureDescriptor & pdu)
     if (!isEnabled || !isAvailable || !remoteSupport)
         return FALSE;
 
-    H460_FeatureStd feat = H460_FeatureStd(19); 
+    H460_FeatureStd feat = H460_FeatureStd(19);
 #ifdef H323_H46019M
     if (multiSupport && EP->H46019MIsSending())
          feat.Add(H46019_Multiplex);
 #endif
     pdu = feat;
-    return TRUE; 
+    return TRUE;
 }
 
-void H460_FeatureStd19::OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pdu) 
-{ 
+void H460_FeatureStd19::OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pdu)
+{
     if (!remoteSupport) {
         remoteSupport = TRUE;
         CON->H46019Enabled();
@@ -320,7 +320,7 @@ void H460_FeatureStd19::OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pd
              multiSupport = true;
         }
 #endif
-    } 
+    }
 }
 
 PBoolean H460_FeatureStd19::OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu)
@@ -328,16 +328,16 @@ PBoolean H460_FeatureStd19::OnSendCallConnect_UUIE(H225_FeatureDescriptor & pdu)
     if (!isEnabled || !isAvailable || !remoteSupport)
         return FALSE;
 
-    H460_FeatureStd feat = H460_FeatureStd(19); 
+    H460_FeatureStd feat = H460_FeatureStd(19);
 #ifdef H323_H46019M
     if (multiSupport && EP->H46019MIsSending())
          feat.Add(H46019_Multiplex);
 #endif
     pdu = feat;
-    return TRUE; 
+    return TRUE;
 }
 
-void H460_FeatureStd19::OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor & pdu) 
+void H460_FeatureStd19::OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor & pdu)
 {
     if (!remoteSupport) {
         remoteSupport = TRUE;
@@ -365,7 +365,7 @@ void H460_FeatureStd19::EnableMultiplex()
       bool h24Active= false;
       for (PINDEX i=0; i < list.GetSize(); i++) {
 #if PTLIB_VER >= 2130
-          PString name = list[i].GetMethodName(); 
+          PString name = list[i].GetMethodName();
 #else
           PString name = list[i].GetName();
 #endif
@@ -375,12 +375,12 @@ void H460_FeatureStd19::EnableMultiplex()
                   break;
           }
       }
-      if (h24Active) 
+      if (h24Active)
           return;
 
       for (PINDEX i=0; i < list.GetSize(); i++) {
 #if PTLIB_VER >= 2130
-          PString name = list[i].GetMethodName(); 
+          PString name = list[i].GetMethodName();
 #else
           PString name = list[i].GetName();
 #endif

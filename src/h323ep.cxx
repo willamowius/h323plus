@@ -715,7 +715,7 @@ H323EndPoint::H323EndPoint()
     username = PProcess::Current().GetName() & "User";
   localAliasNames.AppendString(username);
 
-#if defined(P_AUDIO) && defined(_WIN32)
+#if defined(P_AUDIO) && (defined(_WIN32) || defined(_WIN64))
   PString DefaultAudioDriver = "WindowsMultimedia";
   SetSoundChannelPlayDriver(DefaultAudioDriver);
   SetSoundChannelRecordDriver(DefaultAudioDriver);
@@ -792,7 +792,7 @@ H323EndPoint::H323EndPoint()
   rtpMuxID.max   = (unsigned)1000000;
 #endif
 
-#ifdef _WIN32
+#if _WIN32 || _WIN64
 
 #  if defined(H323_AUDIO_CODECS) && defined(P_AUDIO)
      // Windows MultiMedia stuff seems to need greater depth due to enormous

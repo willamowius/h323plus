@@ -34,7 +34,7 @@
   Notes
   -----
 
-  This codec implements a H.261 encoder and decoder with RTP packaging as per 
+  This codec implements a H.261 encoder and decoder with RTP packaging as per
   RFC 2032 "RTP Payload Format for H.261 Video Streams". As per this specification,
   The RTP payload code is always set to 31
 
@@ -52,7 +52,7 @@
 #define _CRT_NONSTDC_NO_DEPRECATE 1
 #define _CRT_SECURE_NO_WARNINGS 1
 
-#ifdef _WIN32
+#if _WIN32 || _WIN64
 #include <openh323buildopts.h>
 #if H323_STATIC_H261
   #define OPAL_STATIC_CODEC 1
@@ -71,7 +71,7 @@
 #include <codec/opalplugin.h>
 
 
-#if defined (_WIN32) || defined (_WIN32_WCE)
+#if defined (_WIN32) || defined(_WIN64) || defined (_WIN32_WCE)
   #ifndef _WIN32_WCE
     #define STRCMPI  _strcmpi
   #else
@@ -112,7 +112,7 @@ typedef unsigned int u_int;
 #include "vic/p64.h"
 #include "vic/p64encoder.h"
 
-#ifdef _WIN32
+#if _WIN32 || _WIN64
   #undef min
   #undef max
 #endif
@@ -127,7 +127,7 @@ typedef unsigned int u_int;
 #if DEBUG_OUTPUT
 #include <stdio.h>
 
-#ifdef _WIN32
+#if _WIN32 || _WIN64
 #include <io.h>
 #define CREAT(f) _open(f, _O_WRONLY | _O_TRUNC | _O_CREAT | _O_BINARY, 0600 )
 #else
@@ -140,12 +140,12 @@ typedef unsigned int u_int;
 static void debug_write_data(int & fd, const char * title, const char * filename, const void * buffer, size_t writeLen)
 {
   if (fd == -1) {
-   if ((fd = CREAT(filename)) < 0) 
+   if ((fd = CREAT(filename)) < 0)
     printf("cannot open %s file\n", title);
   }
   if (fd >= 0) {
     size_t len = write(fd, buffer, writeLen);
-    if (len != writeLen) 
+    if (len != writeLen)
       printf("failed to write %s buffer - %i != %i\n", title, len, writeLen);
     else
       printf("wrote %i bytes to %s\n", writeLen, title);
@@ -158,7 +158,7 @@ static void debug_write_data(int & fd, const char * title, const char * filename
 
 /////////////////////////////////////////////////////////////////////////////
 
-class H261EncoderContext 
+class H261EncoderContext
 {
   public:
     P64Encoder * videoEncoder;
@@ -169,7 +169,7 @@ class H261EncoderContext
     int videoQuality;
     unsigned long lastTimeStamp;
     CriticalSection mutex;
-  
+
     H261EncoderContext()
     {
       frameWidth = frameHeight = 0;
@@ -197,28 +197,28 @@ class H261EncoderContext
       h = frameHeight;
     }
 
-    /* The only way to influence the amount of data that the H.261 codec produces is 
+    /* The only way to influence the amount of data that the H.261 codec produces is
     to change the "quality" variable that specifies the static quantisation level for
     BACKGROUND blocks. This "quality" value divided by 2 is used as quantisation level
     for IDLE blocks. MOTION blocks are always transmitted with quantisation level 1.
     One could map the TSTO values 1-to-1 to the quality, but that would lead to sending
-    with lower quality than possible with higher bitrates. The following two mean-looking 
+    with lower quality than possible with higher bitrates. The following two mean-looking
     functions scale the TSTO value in dependence of the bitrate and resolution (CIF or QCIF).
-      
+
     At QCIF resolution, TSTO values 0..31 will be mapped to quality values 1..31 at
-    bitrates <=128kbit/s. At higher bitrates, the same TSTO values will be 
-    mapped to lower quality values, e.g. to 1..19 at 256kbit/s and 1..5 at 512kbit/s. Above 
+    bitrates <=128kbit/s. At higher bitrates, the same TSTO values will be
+    mapped to lower quality values, e.g. to 1..19 at 256kbit/s and 1..5 at 512kbit/s. Above
     approx. 656kbit/s, all TSTO values will be mapped to a quality of 1.
-      
-    At CIF, TSTO values 0..31 will be mapped to quality values 1..31 at up to 224kbit/s, to 1..11 
-    at 512kbit/s and to 1 at bitrates >=912kbit/s. 
-      
-    The basis of these functions is a nonlinear regression based on the observation of the 
+
+    At CIF, TSTO values 0..31 will be mapped to quality values 1..31 at up to 224kbit/s, to 1..11
+    at 512kbit/s and to 1 at bitrates >=912kbit/s.
+
+    The basis of these functions is a nonlinear regression based on the observation of the
     effectve framrate obtained at specific quality settings and bitrates. */
-    
+
     void SetQualityFromTSTO (int tsto, unsigned bitrate, int width, int height)
     {
-      if (tsto == -1) 
+      if (tsto == -1)
         return;
 
       if ((width==CIF_WIDTH) && (height==CIF_HEIGHT)) {
@@ -230,7 +230,7 @@ class H261EncoderContext
 			            + 2.5342
 			            , 1.0);
         videoQuality = std::max ((int)( floor ( tsto / factor)), 1);
-      } 
+      }
       else if ((width==QCIF_WIDTH) && (height==QCIF_HEIGHT)) {
         double bitrate_d = std::max((int)bitrate, 64000);
         double factor =  std::max ( 0.0036 * pow ((double) (bitrate_d / 64000), 4)
@@ -239,8 +239,8 @@ class H261EncoderContext
 				  - 0.5321 * (double) (bitrate_d / 64000)
 				  + 1.3438    -0.0844
 				  , 1.0);
-	videoQuality = std::max ((int)( floor ( tsto / factor)), 1); 
-      } 
+	videoQuality = std::max ((int)( floor ( tsto / factor)), 1);
+      }
       TRACE(4, "H261\tf(tsto=" << tsto << ", bitrate=" << bitrate << ", width=" << width <<", height=" << height << ")=" << videoQuality);
     }
 
@@ -281,7 +281,7 @@ debug_write_data(encoderOutput, "encoder output", "encoder.output", dstRTP.GetPa
       if (srcRTP.GetPayloadSize() < sizeof(PluginCodec_Video_FrameHeader)) {
         TRACE(1,"H261\tVideo grab too small");
         return 0;
-      } 
+      }
 
       PluginCodec_Video_FrameHeader * header = (PluginCodec_Video_FrameHeader *)srcRTP.GetPayloadPtr();
       if (header->x != 0 && header->y != 0) {
@@ -331,7 +331,7 @@ debug_write_data(encoderYUV, "encoder input", "encoder.yuv", OPAL_VIDEO_FRAME_DA
         dstLen = 0;
       else {
         unsigned payloadLength = 0;
-        videoEncoder->IncEncodeAndGetPacket((u_char *)dstRTP.GetPayloadPtr(), payloadLength); 
+        videoEncoder->IncEncodeAndGetPacket((u_char *)dstRTP.GetPayloadPtr(), payloadLength);
         dstLen = SetEncodedPacket(dstRTP, !videoEncoder->MoreToIncEncode(), RTP_RFC2032_PAYLOAD, lastTimeStamp, payloadLength, flags);
 
 #if DEBUG_OUTPUT
@@ -368,10 +368,10 @@ static void * create_encoder(const struct PluginCodec_Definition * /*codec*/)
   return new H261EncoderContext;
 }
 
-static int encoder_set_options(const PluginCodec_Definition *, 
+static int encoder_set_options(const PluginCodec_Definition *,
                                void * _context,
-                               const char * , 
-                               void * parm, 
+                               const char * ,
+                               void * parm,
                                unsigned * parmLen)
 {
   int width=0;
@@ -382,7 +382,7 @@ static int encoder_set_options(const PluginCodec_Definition *,
   H261EncoderContext * context = (H261EncoderContext *)_context;
   if (parmLen == NULL || *parmLen != sizeof(const char **))
     return 0;
-  
+
   context->GetFrameSize (width, height);	// fetch old value, needed for quality computation
   if (parm != NULL) {
     const char ** options = (const char **)parm;
@@ -410,11 +410,11 @@ static void destroy_encoder(const struct PluginCodec_Definition * /*codec*/, voi
   delete context;
 }
 
-static int codec_encoder(const struct PluginCodec_Definition * , 
+static int codec_encoder(const struct PluginCodec_Definition * ,
                                            void * _context,
-                                     const void * from, 
+                                     const void * from,
                                        unsigned * fromLen,
-                                           void * to,         
+                                           void * to,
                                        unsigned * toLen,
                                    unsigned int * flag)
 {
@@ -569,7 +569,7 @@ static struct PluginCodec_information licenseInfo = {
   "Copyright (C) 2004 by Post Increment, All Rights Reserved",  // source code copyright
   "MPL 1.0",                                                    // source code license
   PluginCodec_License_MPL,                                      // source code license
-  
+
   "VIC H.261",                                                   // codec description
   "",                                                            // codec author
   "",                                                            // codec version
@@ -602,10 +602,10 @@ static void * create_decoder(const struct PluginCodec_Definition *)
 
 
 static int decoder_set_options(
-      const struct PluginCodec_Definition *, 
-      void * _context, 
-      const char *, 
-      void * parm, 
+      const struct PluginCodec_Definition *,
+      void * _context,
+      const char *,
+      void * parm,
       unsigned * parmLen)
 {
   H261DecoderContext * context = (H261DecoderContext *)_context;
@@ -632,11 +632,11 @@ static void destroy_decoder(const struct PluginCodec_Definition * /*codec*/, voi
 }
 
 
-static int codec_decoder(const struct PluginCodec_Definition *, 
+static int codec_decoder(const struct PluginCodec_Definition *,
                                            void * _context,
-                                     const void * from, 
+                                     const void * from,
                                        unsigned * fromLen,
-                                           void * to,         
+                                           void * to,
                                        unsigned * toLen,
                                    unsigned int * flag)
 {
@@ -653,7 +653,7 @@ static int decoder_get_output_data_size(const PluginCodec_Definition * codec, vo
 
 
 static int get_codec_options(const struct PluginCodec_Definition * codec,
-                                 void *, 
+                                 void *,
                                  const char *,
                                  void * parm,
                                  unsigned * parmLen)
@@ -833,7 +833,7 @@ static int to_customised_options(const struct PluginCodec_Definition *, void *, 
 
   return 1;
 }
-  
+
 
 static int free_codec_options(const struct PluginCodec_Definition *, void *, const char *, void * parm, unsigned * parmLen)
 {
@@ -1007,7 +1007,7 @@ static struct PluginCodec_Option const * const xcifOptionTable[] = {
 
 static struct PluginCodec_Definition h261CodecDefn[] =
 {
-  { 
+  {
     // CIF only encoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
@@ -1019,7 +1019,7 @@ static struct PluginCodec_Definition h261CodecDefn[] =
     YUV420PDesc,                        // source format
     h261CIFDesc,                        // destination format
 
-    cifOptionTable,                     // user data 
+    cifOptionTable,                     // user data
 
     H261_CLOCKRATE,                     // samples per second
     H261_BITRATE,                       // raw bits per second
@@ -1031,7 +1031,7 @@ static struct PluginCodec_Definition h261CodecDefn[] =
       10,                                 // recommended frame rate
       60,                                 // maximum frame rate
     }},
-    
+
     RTP_RFC2032_PAYLOAD,                // IANA RTP payload code
     sdpH261,                            // RTP payload name
 
@@ -1040,10 +1040,10 @@ static struct PluginCodec_Definition h261CodecDefn[] =
     codec_encoder,                      // encode/decode
     h323EncoderControls,                // codec controls
 
-    PluginCodec_H323VideoCodec_h261,    // h323CapabilityType 
+    PluginCodec_H323VideoCodec_h261,    // h323CapabilityType
     NULL                                // h323CapabilityData
   },
-  { 
+  {
     // CIF only decoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
@@ -1055,7 +1055,7 @@ static struct PluginCodec_Definition h261CodecDefn[] =
     h261CIFDesc,                        // source format
     YUV420PDesc,                        // destination format
 
-    cifOptionTable,                     // user data 
+    cifOptionTable,                     // user data
 
     H261_CLOCKRATE,                     // samples per second
     H261_BITRATE,                       // raw bits per second
@@ -1067,7 +1067,7 @@ static struct PluginCodec_Definition h261CodecDefn[] =
       10,                               // recommended frame rate
       60,                               // maximum frame rate
     }},
-    
+
     RTP_RFC2032_PAYLOAD,                // IANA RTP payload code
     sdpH261,                            // RTP payload name
 
@@ -1076,11 +1076,11 @@ static struct PluginCodec_Definition h261CodecDefn[] =
     codec_decoder,                      // encode/decode
     h323DecoderControls,                // codec controls
 
-    PluginCodec_H323VideoCodec_h261,    // h323CapabilityType 
+    PluginCodec_H323VideoCodec_h261,    // h323CapabilityType
     NULL                                // h323CapabilityData
   },
 
-  { 
+  {
     // QCIF only encoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
@@ -1092,7 +1092,7 @@ static struct PluginCodec_Definition h261CodecDefn[] =
     YUV420PDesc,                        // source format
     h261QCIFDesc,                       // destination format
 
-    qcifOptionTable,                    // user data 
+    qcifOptionTable,                    // user data
 
     H261_CLOCKRATE,                     // samples per second
     H261_BITRATE,                       // raw bits per second
@@ -1104,7 +1104,7 @@ static struct PluginCodec_Definition h261CodecDefn[] =
       10,                                 // recommended frame rate
       60,                                 // maximum frame rate
     }},
-    
+
     RTP_RFC2032_PAYLOAD,                // IANA RTP payload code
     sdpH261,                            // RTP payload name
 
@@ -1113,10 +1113,10 @@ static struct PluginCodec_Definition h261CodecDefn[] =
     codec_encoder,                      // encode/decode
     h323EncoderControls,                // codec controls
 
-    PluginCodec_H323VideoCodec_h261,    // h323CapabilityType 
+    PluginCodec_H323VideoCodec_h261,    // h323CapabilityType
     NULL                                // h323CapabilityData
   },
-  { 
+  {
     // QCIF only decoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
@@ -1128,7 +1128,7 @@ static struct PluginCodec_Definition h261CodecDefn[] =
     h261QCIFDesc,                       // source format
     YUV420PDesc,                        // destination format
 
-    qcifOptionTable,                    // user data 
+    qcifOptionTable,                    // user data
 
     H261_CLOCKRATE,                     // samples per second
     H261_BITRATE,                       // raw bits per second
@@ -1140,7 +1140,7 @@ static struct PluginCodec_Definition h261CodecDefn[] =
       10,                               // recommended frame rate
       60,                               // maximum frame rate
     }},
-    
+
     RTP_RFC2032_PAYLOAD,                // IANA RTP payload code
     sdpH261,                            // RTP payload name
 
@@ -1149,12 +1149,12 @@ static struct PluginCodec_Definition h261CodecDefn[] =
     codec_decoder,                      // encode/decode
     h323DecoderControls,                // codec controls
 
-    PluginCodec_H323VideoCodec_h261,    // h323CapabilityType 
+    PluginCodec_H323VideoCodec_h261,    // h323CapabilityType
     NULL                                // h323CapabilityData
   },
 
 #ifdef WIN32
-  { 
+  {
     // 720p only encoder (only CIF)
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
@@ -1167,7 +1167,7 @@ static struct PluginCodec_Definition h261CodecDefn[] =
     YUV420PDesc,                        // source format
     h261720Desc,                        // destination format
 
-    cifOptionTable,                     // user data 
+    cifOptionTable,                     // user data
 
     H261_CLOCKRATE,                     // samples per second
     H261_BITRATE,                       // raw bits per second
@@ -1179,7 +1179,7 @@ static struct PluginCodec_Definition h261CodecDefn[] =
       10,                                 // recommended frame rate
       60,                                 // maximum frame rate
     }},
-    
+
     RTP_RFC2032_PAYLOAD,                // IANA RTP payload code
     sdpH261,                            // RTP payload name
 
@@ -1188,10 +1188,10 @@ static struct PluginCodec_Definition h261CodecDefn[] =
     codec_encoder,                      // encode/decode
     h323EncoderControls,                // codec controls
 
-    PluginCodec_H323VideoCodec_h261,    // h323CapabilityType 
+    PluginCodec_H323VideoCodec_h261,    // h323CapabilityType
     NULL                                // h323CapabilityData
   },
-  { 
+  {
     // 720p only decoder
     PLUGIN_CODEC_VERSION_OPTIONS,       // codec API version
     &licenseInfo,                       // license information
@@ -1204,7 +1204,7 @@ static struct PluginCodec_Definition h261CodecDefn[] =
     h261720Desc,                        // source format
     YUV420PDesc,                        // destination format
 
-    cifOptionTable,                     // user data 
+    cifOptionTable,                     // user data
 
     H261_CLOCKRATE,                     // samples per second
     H261_BITRATE,                       // raw bits per second
@@ -1216,7 +1216,7 @@ static struct PluginCodec_Definition h261CodecDefn[] =
       10,                               // recommended frame rate
       60,                               // maximum frame rate
     }},
-    
+
     RTP_RFC2032_PAYLOAD,                // IANA RTP payload code
     sdpH261,                            // RTP payload name
 
@@ -1225,7 +1225,7 @@ static struct PluginCodec_Definition h261CodecDefn[] =
     codec_decoder,                      // encode/decode
     h323DecoderControls,                // codec controls
 
-    PluginCodec_H323VideoCodec_h261,    // h323CapabilityType 
+    PluginCodec_H323VideoCodec_h261,    // h323CapabilityType
     NULL                                // h323CapabilityData
   }
 #endif

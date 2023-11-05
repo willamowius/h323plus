@@ -36,7 +36,7 @@
 #define _CRT_NONSTDC_NO_DEPRECATE 1
 #define _CRT_SECURE_NO_WARNINGS 1
 
-#ifdef _WIN32
+#if _WIN32 || _WIN64
 #include <openh323buildopts.h>
 #if H323_STATIC_G7221
   #define OPAL_STATIC_CODEC 1
@@ -58,7 +58,7 @@
 
 #include <codec/opalplugin.h>
 
-#if defined(_WIN32) || defined(_WIN32_WCE)
+#if defined(_WIN32) || defined(_WIN64) || defined(_WIN32_WCE)
   #include <malloc.h>
   #include <string.h>
   #define STRCMPI  _strcmpi
@@ -262,7 +262,7 @@ static int G7221Encode (const struct PluginCodec_Definition * codec,
 
   // Do some endian swapping, if needed
   if (LittleEndian)
-#if _WIN32
+#if _WIN32 || _WIN64
     _swab((char *)toPtr, (char *)toPtr, *toLen);
 #else
     swab(toPtr, toPtr, *toLen);
@@ -349,7 +349,7 @@ static int G7221Decode (const struct PluginCodec_Definition * codec,
 
   // Do some endian swapping, if needed
   if (LittleEndian)
-#ifdef _WIN32
+#if _WIN32 || _WIN64
     _swab((char *)fromPtr, (char *)fromPtr, G722_1_FRAME_BYTES (Context->bitsPerSec));
 #else
     swab((void *)fromPtr, (void *)fromPtr, G722_1_FRAME_BYTES (Context->bitsPerSec));

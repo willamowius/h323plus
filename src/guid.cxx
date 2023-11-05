@@ -102,7 +102,7 @@ OpalGloballyUniqueID::OpalGloballyUniqueID()
                             (  16            // Days from 15th October
                              + 31            // Days in December 1583
                              + 30            // Days in November 1583
-#ifdef _WIN32
+#if _WIN32 || _WIN64
                              + (1601-1583)*365   // Whole years
                              + (1601-1583)/4);   // Leap days
 

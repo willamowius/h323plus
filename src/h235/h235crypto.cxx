@@ -53,7 +53,7 @@ extern "C" {
 #include "rtp.h"
 
 #ifdef H323_H235_AES256
-#if _WIN32
+#if _WIN32 || _WIN64
 #pragma message("AES256 Encryption Enabled. Software may be subject to US export restrictions. http://www.bis.doc.gov/encryption/")
 #else
 #warning("AES256 Encryption Enabled. Software may be subject to US export restrictions. http://www.bis.doc.gov/encryption/")
