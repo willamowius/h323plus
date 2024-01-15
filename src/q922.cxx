@@ -220,7 +220,7 @@ PBoolean Q922_Frame::Encode(BYTE *buffer, PINDEX & size, BYTE & theBitIndex) con
   BYTE bitIndex = theBitIndex;
   BYTE onesCounter = 0;
 
-  // storing three FLAG sequencs.
+  // storing three FLAG sequences.
   // since the FLAG sequences may be not byte-aligned, the first FLAG sequence is encoded
   // into a dummy buffer and extracted from there
   buffer[0] = 0;
@@ -316,7 +316,7 @@ PBoolean Q922_Frame::FindFlagEnd(const BYTE *buffer,
   }
 
   // First FLAG sequence found, bit index determined.
-  // now check for additinal FLAG sequences
+  // now check for additional FLAG sequences
   BYTE octet = Q922_FLAG;
 
   while(octet == Q922_FLAG && octetIndex < bufferSize) {
@@ -379,7 +379,7 @@ BYTE Q922_Frame::DecodeByte(const BYTE *buffer,
 							BYTE & onesCounter)
 {
   // decoded byte is copied to destination.
-  // returns Q922_OK if decoding succesful,
+  // returns Q922_OK if decoding successful,
   // returns Q922_FLAG if ending FLAG detected,
   // returns Q922_ERROR if there was an error
 
@@ -477,7 +477,7 @@ void Q922_Frame::EncodeOctetNoEscape(BYTE octet,
 
   PINDEX i;
   for(i = 0; i < 8; i++) {
-    // reating one bit from the octet and write it to the buffer
+    // reading one bit from the octet and write it to the buffer
     BYTE bit = (BYTE)((octet >> i) & 0x01);
 
     EncodeBit(bit, buffer, octetIndex, bitIndex);
@@ -493,7 +493,7 @@ void Q922_Frame::EncodeBit(BYTE bit,
     buffer[octetIndex] = 0;
   }
 
-  // TODO: Clang Analysizer determines
+  // TODO: Clang Analyzer determines
   // The left expression of the compound assignment is an uninitialized value. The computed value will also be garbage
   buffer[octetIndex] |= ((bit & 0x01) << bitIndex);
 
