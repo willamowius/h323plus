@@ -874,7 +874,7 @@ public:
                   }
                   m_lastSequence = info.m_sequence;
 
-                  if (!fup) 
+                  if (!fup && m_frameCount > 0) 
                       fup = ((m_lossCount/m_frameCount)*100.0 > m_lossThreshold);
 
                   FrameOut(frame, info.m_receiveTime, (unsigned)m_calcClockRate, fup, flow);
