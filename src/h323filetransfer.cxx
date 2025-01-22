@@ -1722,7 +1722,7 @@ PBoolean H323FileIOChannel::Open()
     if (fileopen)
         return TRUE;
 
-    return TRUE;
+    return FALSE;
 }
 
 PBoolean H323FileIOChannel::Close()
