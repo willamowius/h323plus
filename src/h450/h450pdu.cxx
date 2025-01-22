@@ -2397,7 +2397,6 @@ void H45011Handler::OnReceivedCallIntrusionRequest(int /*linkedId*/,
 /*
   TBD
 */
-  return;
 }
 
 
@@ -2436,7 +2435,6 @@ void H45011Handler::OnReceivedCallIntrusionGetCIPL(int /*linkedId*/,
 /*
   TBD
 */
-  return;
 }
 
 
@@ -2451,7 +2449,6 @@ void H45011Handler::OnReceivedCallIntrusionIsolate(int /*linkedId*/,
 /*
   TBD
 */
-  return;
 }
 
 
@@ -2520,7 +2517,6 @@ void H45011Handler::OnReceivedCallIntrusionWOBRequest(int /*linkedId*/,
 /*
   TBD
 */
-  return;
 }
 
 
@@ -2535,7 +2531,6 @@ void H45011Handler::OnReceivedCallIntrusionSilentMonitor(int /*linkedId*/,
 /*
   TBD
 */
-  return;
 }
 
 
@@ -2550,7 +2545,6 @@ void H45011Handler::OnReceivedCallIntrusionNotification(int /*linkedId*/,
 /*
   TBD
 */
-  return;
 }
 
 
@@ -2565,7 +2559,6 @@ void H45011Handler::OnReceivedCfbOverride(int /*linkedId*/,
 /*
   TBD
 */
-  return;
 }
 
 
@@ -2580,7 +2573,6 @@ void H45011Handler::OnReceivedRemoteUserAlerting(int /*linkedId*/,
 /*
   TBD
 */
-  return;
 }
 
 
@@ -2595,7 +2587,6 @@ void H45011Handler::OnReceivedCallWaiting(int /*linkedId*/,
 /*
   TBD
 */
-  return;
 }
 
 
