@@ -279,7 +279,7 @@
     <ClInclude Include="version.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\h323plus_2008.vcxproj">
+    <ProjectReference Include="..\..\h323plus_2022.vcxproj">
       <Project>{71c46eaf-48c9-47ba-9532-27b51744548d}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
