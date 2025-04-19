@@ -18,7 +18,7 @@ makes extensive use of the C++ techniques of inheritance and polymorphism.
 
 This document is intended as reference guide, not a tutorial. For examples
 of using H323Plus, see the sample programs provided in the samples directory.
-A tutorial on using PTLib and OpenH323/H323Plus is also available at http://toncar.cz/openh323/tut/ .
+A tutorial on using PTLib and OpenH323/H323Plus is also available at https://toncar.cz/openh323/tut/ .
 
 Last updated 29 July, 2021
 
