@@ -12,7 +12,9 @@ obj_*_*_*_s
 obj_*_*_*_d_s
 obj_*_*_*
 Release
+Release_x64
 Debug
+Debug_x64
 autom4te.cache
 cov-int
 *.proj
