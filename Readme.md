@@ -15,5 +15,3 @@ API documentation: https://www.h323plus.org/api/annotated.html
 
 Tutorial: https://toncar.cz/openh323/tut/
 
-[![Follow @h323 on Twitter](https://img.shields.io/twitter/follow/h323.svg?style=social)](https://twitter.com/intent/follow?screen_name=h323)
-
