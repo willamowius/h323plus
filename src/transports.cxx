@@ -1208,7 +1208,11 @@ void H323Transport::CleanUpOnTermination()
 
   if (thread != NULL) {
     PTRACE(3, "H323\tH323Transport::CleanUpOnTermination for " << thread->GetThreadName());
-    PAssert(thread->WaitForTermination(10000), "Transport thread did not terminate");
+    if (!thread->WaitForTermination(10000)) {
+      PTRACE(1, "H323\tTransport thread did not terminate in 10 seconds; forcing termination");
+      thread->Terminate();
+      thread->WaitForTermination();
+    }
     delete thread;
     thread = NULL;
   }
