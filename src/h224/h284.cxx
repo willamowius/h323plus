@@ -69,7 +69,10 @@ PBoolean H284_Frame::ReadInstructions(H224_H284Handler & handler) const
     H284_ControlPoint * cp = NULL;
     int msgSize=0;
     while (sz < size) {
-        memcpy(info,GetClientDataPtr()+sz,4);
+        // header read always needs 4 bytes
+        if (size - sz < 4)
+            return FALSE;
+        memcpy(info,GetClientDataPtr() + sz, 4);
         cp = handler.GetControlPoint(info[0]);
         if (cp) {
             switch (cp->GetControlType()) {
@@ -83,10 +86,13 @@ PBoolean H284_Frame::ReadInstructions(H224_H284Handler & handler) const
                     msgSize = 4;
                     break;
             }
+            // instruction read needs msgSize bytes (4 or 8)
+            if (size - sz < msgSize)
+                return FALSE;
             H284_Instruction inst;
-            memcpy(inst.GetPointer(),GetClientDataPtr()+sz,msgSize);
+            memcpy(inst.GetPointer(), GetClientDataPtr() + sz, msgSize);
             cp->HandleInstruction(inst);
-            sz+=msgSize;
+            sz + =msgSize;
         } else {
             sz+=4;
         }
@@ -172,7 +178,7 @@ PBoolean H284_ControlPoint::SetData(const BYTE * data, int & length)
     else if (!viewport) sz = 16;
 
     SetSize(sz);
-    memcpy(theArray+1,(const void *)data,sz-1);
+    memcpy(theArray+1, (const void *)data, sz-1);
 
     length += sz;
     m_isActive = true;
@@ -182,7 +188,7 @@ PBoolean H284_ControlPoint::SetData(const BYTE * data, int & length)
 PBoolean H284_ControlPoint::Load(BYTE * data, int & length) const
 {
     int sz = GetSize();
-    memcpy((void *)data,theArray,sz);
+    memcpy((void *)data, theArray,sz);
     length += sz;
     return true;
 }
@@ -459,16 +465,19 @@ void H224_H284Handler::OnReceivedExtraCapabilities(const BYTE * extraCaps, PINDE
 
     PINDEX sz = 0;
     while (sz < size) {
+        // need at least 2 bytes to read the header
+        if (size - sz < 2)
+            return;
         BYTE info[2];
-        memcpy(info,extraCaps+sz,2);
+        memcpy(info,extraCaps + sz, 2);
         BYTE id = info[0];
         bool absolute = ((info[1]&0x80) != 0);
         bool viewport = ((info[1]&0x40) != 0);
         int step = 0;
-        if (OnReceivedControlData(id,extraCaps+sz,step)) {
+        if (OnReceivedControlData(id,extraCaps + sz, step)) {
             PTRACE(6,"H284\tP: " << sz << " found " << ControlIDAsString(id));
         } else {
-            int step = H284_CPSIZE;
+            step = H284_CPSIZE;
             if (!absolute) step = 4;
             else if (!viewport) step = 16;
             PTRACE(6,"H284\tP: " << sz << " skip " << id << " (" << ControlIDAsString(id) << ") step " << step);
@@ -484,7 +493,7 @@ void H224_H284Handler::Add(ControlPointID id)
     H284_ControlPoint * cp = new H284_ControlPoint(*this,id);
 
     if (OnAddControlPoint(id,*cp))
-        m_controlMap.insert(std::pair<BYTE,H284_ControlPoint*>(id,cp));
+        m_controlMap.insert(std::pair<BYTE,H284_ControlPoint*>(id, cp));
 }
 
 void H224_H284Handler::Add(ControlPointID id, PBoolean absolute, PBoolean viewport, WORD step,
@@ -495,8 +504,8 @@ void H224_H284Handler::Add(ControlPointID id, PBoolean absolute, PBoolean viewpo
     H284_ControlPoint * cp = new H284_ControlPoint(*this);
     cp->Set(id, absolute, viewport, step, min, max, current, vportMin, vportMax);
 
-    if (OnAddControlPoint(id,*cp))
-        m_controlMap.insert(std::pair<BYTE,H284_ControlPoint*>(id,cp));
+    if (OnAddControlPoint(id, *cp))
+        m_controlMap.insert(std::pair<BYTE,H284_ControlPoint*>(id, cp));
 }
 
 PBoolean H224_H284Handler::OnAddControlPoint(ControlPointID id,H284_ControlPoint & /*cp*/)
@@ -508,7 +517,7 @@ PBoolean H224_H284Handler::OnAddControlPoint(ControlPointID id,H284_ControlPoint
 PBoolean H224_H284Handler::OnReceivedControlData(BYTE id, const BYTE * data, int & length)
 {
     H284_ControlPoint * cp = GetControlPoint(id);
-    if (cp && cp->SetData(data,length))
+    if (cp && cp->SetData(data, length))
 		return true;
 
 	return false;
