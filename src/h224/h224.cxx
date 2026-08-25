@@ -606,14 +606,26 @@ PBoolean OpalH224Handler::OnReceivedCMEMessage(H224_Frame & frame)
 PBoolean OpalH224Handler::OnReceivedClientList(H224_Frame & frame)
 {
   BYTE *data = frame.GetClientDataPtr();
+  PINDEX dataSize = frame.GetClientDataSize();
 
+  if (dataSize < 3)
+    return FALSE;
   BYTE numberOfClients = data[2];
-
   PINDEX i = 3;
 
   while(numberOfClients > 0) {
+    if (i >= dataSize)
+      return FALSE;
 
     BYTE clientID = (BYTE)(data[i] & 0x7f);
+
+    // Determine how long this entry is before reading
+    PINDEX entrySize;
+    if (clientID == 0x7e)       entrySize = 2; // extended: ID byte + 1
+    else if (clientID == 0x7f)  entrySize = 6; // non-standard: ID byte + 5
+    else                        entrySize = 1; // standard: ID byte only
+    if (i + entrySize > dataSize)
+      return FALSE;
 
     for (std::map<BYTE,H224_Handler*>::iterator it = m_h224Handlers.begin(); it != m_h224Handlers.end(); ++it) {
       if (clientID == it->first) {
