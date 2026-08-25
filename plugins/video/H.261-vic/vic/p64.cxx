@@ -1045,9 +1045,23 @@ void P64Decoder::decode_block(u_int tc, u_int x, u_int y, u_int stride,
 			mvblka(in, out, stride);
 		return;
 	}
-	int sx = x + (mvdh_ / sf);
-	int sy = y + (mvdv_ / sf);
-	u_char* in = (u_char*)((intptr_t)back + sy * stride + sx);
+	// Clamp the motion-compensated reference-block origin so that the entire
+    // 8×8 read window stays inside the frame buffer.
+    // stride  = width_      (luma, sf=1) or width_/2    (chroma, sf=2)
+    // height_ / sf = height_ (luma)     or height_/2   (chroma)
+    const int max_x = (int)stride  - 8;
+    const int max_y = (int)(height_ / sf) - 8;
+
+    int sx = (int)x + mvdh_ / sf;
+    int sy = (int)y + mvdv_ / sf;
+
+    if      (sx < 0)     sx = 0;
+    else if (sx > max_x) sx = max_x;
+    if      (sy < 0)     sy = 0;
+    else if (sy > max_y) sy = max_y;
+
+    // sx and sy are now non-negative, so the intptr_t cast is no longer needed.
+    u_char* in = back + (u_int)sy * stride + (u_int)sx;
 	if (mt_ & MT_FILTER) {
 		filter(in, out, stride);
 		if (tc != 0) {
