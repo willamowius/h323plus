@@ -354,10 +354,18 @@ PBoolean Q931::Decode(const PBYTEArray & data)
 
     // For discriminator with high bit set there is no data
     if ((discriminator & 0x80) == 0) {
+      if (offset >= data.GetSize()) {
+        delete item;
+        return FALSE;
+      }
       int len = data[offset++];
 
       if (discriminator == UserUserIE) {
         // Special case of User-user field. See 7.2.2.31/H.225.0v4.
+        if (offset + 2 >= data.GetSize()) {   // need 2 more bytes (len_lo + proto_disc)
+            delete item;
+            return FALSE;
+        }
         len <<= 8;
         len |= data[offset++];
 
