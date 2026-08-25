@@ -212,6 +212,7 @@ class P64Decoder{
 	int bad_bits_;
 	int bad_GOBno_;
 	int bad_fmt_;		/* # times RTP fmt != H.261 fmt */
+    int t_over_; /* HUFFRQ() bitstream-overrun counter for the packet currently being decoded */
 
 	u_char mb_state_[16 * 64];
 	/* inverse quantization via table lookup */

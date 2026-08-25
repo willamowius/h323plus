@@ -193,7 +193,8 @@ P64Decoder::P64Decoder()
           gobquant_(0),  mt_(0), gob_(0), 
           mba_(0), mvdh_(0),  mvdv_(0),
 	  marks_(0),  mark_(0), 
-	  bad_psc_(0), bad_bits_(0), bad_GOBno_(0), bad_fmt_(0) 
+	  bad_psc_(0), bad_bits_(0), bad_GOBno_(0), bad_fmt_(0),
+	  t_over_(0)
 {
 	fmt_ = IT_CIF;/*XXX*/
 	inithuff();
@@ -249,7 +250,13 @@ void P64Decoder::init()
 #if BYTE_ORDER == LITTLE_ENDIAN
 #define HUFFRQ(bs, bb) \
  { \
-	register int t = *bs++; \
+	register int t; \
+	if ((bs) <= es_) { \
+		t = *(bs)++; \
+	} else { \
+		t = 0; \
+		++t_over_; \
+	} \
 	bb <<= 16; \
 	bb |= (t & 0xff) << 8; \
 	bb |= t >> 8; \
@@ -257,8 +264,15 @@ void P64Decoder::init()
 #else
 #define HUFFRQ(bs, bb) \
  { \
+	register int t; \
+	if ((bs) <= es_) { \
+		t = *(bs)++; \
+	} else { \
+		t = 0; \
+		++t_over_; \
+	} \
 	bb <<= 16; \
-	bb |= *bs++; \
+	bb |= t; \
 }
 #endif
 
@@ -1178,9 +1192,14 @@ bool P64Decoder::decode(const unsigned char *hdrPtr, int buffLen,
   const u_char *bp;
   int cc, sbit, ebit, gob;
   h261hdr_t h261hdr;
-  
+
+  // reset bitstream-overrun counter for this packet
+  t_over_ = 0;
+
   // preventing accidential crashes
-  if (buffLen == 0)
+  // (buffLen must hold at least the fixed-size H.261 RTP header,
+  // otherwise SWAP32() below reads past the end of the buffer)
+  if (buffLen < (int)sizeof(h261hdr_t))
     return false;
 
   // get 32 bit H261 header
@@ -1241,6 +1260,17 @@ bool P64Decoder::decode(const unsigned char *hdrPtr, int buffLen,
 
 		ndblk_++;
 		int v = decode_mb();
+
+		// HUFFRQ() ran past the end of the bitstream while
+		// decoding this macroblock -- the packet is truncated;
+		// stop instead of trusting the zero-filled bits we
+		// synthesized past es_.
+		if (t_over_) {
+			err("truncated bitstream in macroblock");
+			++bad_bits_;
+			return (false);
+		}
+
 		if (v == 0)
 			continue;
 
