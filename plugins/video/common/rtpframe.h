@@ -73,10 +73,16 @@ public:
     if (_frameLen < 12) 
       return 0;
     size += (_frame[0] & 0x0f) * 4;
+    if (size > _frameLen)
+      return 0;
     if (!(_frame[0] & 0x10))
       return size;
-    if ((size + 4) < _frameLen) 
-      return (size + 4 + (_frame[size + 2] << 8) + _frame[size + 3]);
+    if ((size + 4) < _frameLen) {
+      int extSize = size + 4 + (_frame[size + 2] << 8) + _frame[size + 3];
+      if (extSize > _frameLen)
+        return 0;
+      return extSize;
+    }
     return 0;
   }
 
