@@ -1925,6 +1925,7 @@ PBoolean H323PluginVideoCodec::WriteInternal(const BYTE * /*buffer*/, unsigned l
 
   rtp.m_sessionID = rtpInformation.m_sessionID;
 
+#if PTLIB_VER >= 290
 #ifdef H323_MEDIAENCODED
   if (((PVideoChannel *)rawDataChannel)->DisableDecode()) {
       if (RenderFrame(src.GetPayloadPtr(), &rtp)) {
@@ -1933,7 +1934,14 @@ PBoolean H323PluginVideoCodec::WriteInternal(const BYTE * /*buffer*/, unsigned l
       } else
          return FALSE;
   }
+#else
+  // just check DisableDecode
+  if (((PVideoChannel *)rawDataChannel)->DisableDecode()) {
+    written = length; // pretend we wrote the data, to avoid error message
+    return TRUE;
+  }
 #endif
+#endif // PTLIB_VER
 
 #if 0
   // get the size of the output buffer
