@@ -1122,6 +1122,10 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveControl(RTP_ControlFrame & 
         if (size >= 4) {
           PString reason;
           unsigned count = frame.GetCount() * 4; // bytes with SSRCs before optional reason
+          if (size < count) {
+            PTRACE(2, "RTP\tGoodbye packet invalid: SSRC list truncated");
+            break;
+          }
           if (size > count) {
             // verify that RTCP packed is indeed as long as length byte indicates
             if (size >= payload[count] + sizeof(DWORD) /*SSRC*/ + sizeof(unsigned char) /* length */) {
