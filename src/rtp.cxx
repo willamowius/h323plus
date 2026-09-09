@@ -1074,7 +1074,7 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveControl(RTP_ControlFrame & 
         break;
 
       case RTP_ControlFrame::e_ReceiverReport :
-        if (size >= (frame.GetCount() * sizeof(RTP_ControlFrame::ReceiverReport)))
+        if (size >= (sizeof(PUInt32b) + frame.GetCount() * sizeof(RTP_ControlFrame::ReceiverReport)))
           OnRxReceiverReport(*(const PUInt32b *)payload, BuildReceiverReportArray(frame, sizeof(PUInt32b)));
         else {
           PTRACE(2, "RTP\tReceiverReport packet truncated");
@@ -1146,9 +1146,10 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveControl(RTP_ControlFrame & 
         break;
 
       case RTP_ControlFrame::e_ApplDefined :
-        if (size >= 4) {
+        // need 4 for the leading SSRC + 4 bytes for the appl-defined name that follows
+        if (size >= 8) {
           PString str((const char *)(payload+4), 4);
-          OnRxApplDefined(str, frame.GetCount(), *(const PUInt32b *)payload, payload+8, frame.GetPayloadSize()-8);
+          OnRxApplDefined(str, frame.GetCount(), *(const PUInt32b *)payload, payload+8, size-8);
         }
         else {
           PTRACE(2, "RTP\tApplDefined packet truncated");
