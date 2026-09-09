@@ -1083,24 +1083,31 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveControl(RTP_ControlFrame & 
 
       case RTP_ControlFrame::e_SourceDescription :
         if (size >= frame.GetCount() * sizeof(RTP_ControlFrame::SourceDescription)) {
-          unsigned parsedBytes = 0; // bytes parsed so far
+          const BYTE * bufEnd = payload + size; // one past last valid byte
           SourceDescriptionArray descriptions;
           const RTP_ControlFrame::SourceDescription * sdes = (const RTP_ControlFrame::SourceDescription *)payload;
           for (PINDEX srcIdx = 0; srcIdx < (PINDEX)frame.GetCount(); srcIdx++) {
-            if (parsedBytes >= size) {
+            // Need at least the 4 byte src field before dereferencing sdes->src
+            if ((const BYTE *)sdes + sizeof(DWORD) > bufEnd) {
               PTRACE(2, "RTP\tSourceDescription packet truncated");
               break;
             }
             descriptions.SetAt(srcIdx, new SourceDescription(sdes->src));
             const RTP_ControlFrame::SourceDescription::Item * item = sdes->item;
-            while (item->type != RTP_ControlFrame::e_END) {
-              descriptions[srcIdx].items.SetAt(item->type, PString(item->data, item->length));
-              parsedBytes += item->length + 2;
-              if (parsedBytes >= size) {
-                PTRACE(2, "RTP\tSourceDescription packet truncated");
+            PBoolean truncated = FALSE;
+            // Only look at item->type once the 2 byte item header (type+length) is known to be in bounds
+            while ((const BYTE *)item + 2 <= bufEnd && item->type != RTP_ControlFrame::e_END) {
+              if ((const BYTE *)item->data + item->length > bufEnd) {
+                PTRACE(2, "RTP\tSourceDescription item truncated");
+                truncated = TRUE;
                 break;
               }
+              descriptions[srcIdx].items.SetAt(item->type, PString(item->data, item->length));
               item = item->GetNextItem();
+            }
+            if (truncated || (const BYTE *)item + 2 > bufEnd) {
+              PTRACE(2, "RTP\tSourceDescription packet truncated");
+              break;
             }
             sdes = (const RTP_ControlFrame::SourceDescription *)item->GetNextItem();
           }
