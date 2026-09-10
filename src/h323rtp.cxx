@@ -52,7 +52,7 @@ H323_RTP_Session::H323_RTP_Session(const H323Connection & conn)
 
 void H323_RTP_Session::OnTxStatistics(const RTP_Session & session) const
 {
-  //connection.OnRTPStatistics(session);
+  connection.OnRTPStatistics(session);
 }
 
 
