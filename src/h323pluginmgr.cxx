@@ -2733,17 +2733,17 @@ void H323PluginCodecManager::OnLoadPlugin(PDynaLink & dll, INT code)
     return;
   }
 
-  PTRACE(3, "H323PLUGIN\tLoading plugin codec " << dll.GetName());
-
   switch (code) {
 
     // plugin loaded
     case 0:
+      PTRACE(3, "H323PLUGIN\tLoading plugin codec " << dll.GetName());
       RegisterCodecs(count, codecs);
       break;
 
     // plugin unloaded
     case 1:
+      PTRACE(3, "H323PLUGIN\tUnloading plugin codec " << dll.GetName());
       UnregisterCodecs(count, codecs);
       break;
 
