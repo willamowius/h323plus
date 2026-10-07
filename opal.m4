@@ -558,6 +558,65 @@ AC_DEFUN([OPAL_LIBAVCODEC_SOURCE],
           fi
          ])
 
+dnl OPAL_LIBAVCODEC_MODERN_API
+dnl Find out whether libavcodec offers the avcodec_send_frame()/
+dnl avcodec_receive_packet() API introduced in FFmpeg 4.0 (libavcodec 58.18).
+dnl Codecs written against the old API (avcodec_init(), register_avcodec(),
+dnl the exported AVCodec objects, avcodec_encode_video(), rtp_callback)
+dnl cannot be built against such a libavcodec at all.
+dnl Arguments: $LIBAVCODEC_CFLAGS The cflags for compiling apps with libavcodec
+dnl Return:    $HAVE_LIBAVCODEC_MODERN yes or no
+AC_DEFUN([OPAL_LIBAVCODEC_MODERN_API],
+         [
+          AC_MSG_CHECKING(for the libavcodec send/receive API)
+          old_CFLAGS="$CFLAGS"
+          CFLAGS="$CFLAGS $LIBAVCODEC_CFLAGS"
+          AC_COMPILE_IFELSE(
+            [AC_LANG_PROGRAM([[#include <libavcodec/avcodec.h>]],
+                             [[
+                               #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58,18,100)
+                               #error libavcodec is too old
+                               #endif
+                               return avcodec_send_frame(0, 0);
+                             ]])],
+            [HAVE_LIBAVCODEC_MODERN=yes],
+            [HAVE_LIBAVCODEC_MODERN=no])
+          CFLAGS="$old_CFLAGS"
+          AC_MSG_RESULT($HAVE_LIBAVCODEC_MODERN)
+         ])
+
+dnl OPAL_LIBAVCODEC_CODEC
+dnl Check that libavcodec was built with a particular codec.  The exported
+dnl AVCodec objects that AC_CHECK_LIB used to look for (h263_encoder and
+dnl friends) became private in libavcodec 58, so ask the library instead.
+dnl Arguments: $LIBAVCODEC_CFLAGS, $LIBAVCODEC_LIBS
+dnl            $1 codec id without the AV_CODEC_ID_ prefix, e.g. H263P
+dnl            $2 encoder or decoder
+dnl            $3 name of the variable to set to yes or no
+dnl Return:    $$3 yes or no
+AC_DEFUN([OPAL_LIBAVCODEC_CODEC],
+         [
+          AC_MSG_CHECKING(libavcodec for an $1 $2)
+          old_CFLAGS="$CFLAGS"
+          old_LIBS="$LIBS"
+          CFLAGS="$CFLAGS $LIBAVCODEC_CFLAGS"
+          LIBS="$LIBS $LIBAVCODEC_LIBS"
+          AC_RUN_IFELSE(
+            [AC_LANG_PROGRAM([[#include <libavcodec/avcodec.h>]],
+                             [[return avcodec_find_$2(AV_CODEC_ID_$1) == 0;]])],
+            [$3=yes],
+            [$3=no],
+            [dnl when cross compiling we can only check that it links
+             AC_LINK_IFELSE(
+               [AC_LANG_PROGRAM([[#include <libavcodec/avcodec.h>]],
+                                [[return avcodec_find_$2(AV_CODEC_ID_$1) == 0;]])],
+               [$3=yes],
+               [$3=no])])
+          CFLAGS="$old_CFLAGS"
+          LIBS="$old_LIBS"
+          AC_MSG_RESULT($$3)
+         ])
+
 dnl OPAL_LIBAVCODEC_HEADER
 dnl Find out whether libavcodec headers reside in ffmpeg/ (old) or libavcodec/ (new)
 dnl Arguments: $LIBAVCODEC_CFLAGS The cflags for compiling apps with libavcodec

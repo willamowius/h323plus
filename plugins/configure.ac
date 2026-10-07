@@ -122,6 +122,8 @@ HAVE_IXJ=no
 HAVE_H263=yes
 HAVE_H263P=yes
 HAVE_H264=yes
+HAVE_H264_OPENH264=yes
+HAVE_LIBAVCODEC_MODERN=no
 HAVE_CELT=yes
 HAVE_SPANDSP=yes
 DEFAULT_TO_FULL_CAPABILITIES=yes
@@ -251,21 +253,55 @@ else
                      AC_SUBST(LIBAVCODEC_LIB_NAME)
                      HAVE_LIBAVCODEC=yes
                      OPAL_LIBAVCODEC_HACK
-                     case "$target_os" in
-                        cygwin* | mingw* ) 
-                                           LIBAVCODEC_LIB_NAME="avcodec.dll"
-                                           HAVE_H263=yes
-                                           HAVE_H263P=yes
-                                           HAVE_MPEG4=yes
-                                           HAVE_H264_DECODER=yes
-                                           ;;
-                                       * ) 
-                                           AC_CHECK_LIB(avcodec, h263p_encoder, [HAVE_H263=yes], [HAVE_H263=no])
-                                           AC_CHECK_LIB(avcodec, h263p_encoder, [HAVE_H263P=yes], [HAVE_H263P=no])
-                                           AC_CHECK_LIB(avcodec, mpeg4_encoder, [HAVE_MPEG4=yes], [HAVE_MPEG4=no])
-                                           AC_CHECK_LIB(avcodec, h264_decoder, [HAVE_H264_DECODER=yes], [HAVE_H264_DECODER=no])
-                                           ;;
-                     esac
+                     OPAL_LIBAVCODEC_MODERN_API
+
+                     dnl video/H.263-ffmpeg and video/MPEG4-ffmpeg reach
+                     dnl libavcodec through dlopen() and resolve avcodec_init,
+                     dnl register_avcodec and the exported AVCodec objects by
+                     dnl name.  None of those survive in libavcodec 58, so
+                     dnl those plugins are only offered against an older
+                     dnl library.  video/H.263-1998 is the other way round:
+                     dnl it needs the send/receive API.
+                     if test "x$HAVE_LIBAVCODEC_MODERN" = "xyes" ; then
+                       HAVE_H263=no
+                       HAVE_MPEG4=no
+                       case "$target_os" in
+                          cygwin* | mingw* )
+                                             LIBAVCODEC_LIB_NAME="avcodec.dll"
+                                             HAVE_H263P=yes
+                                             HAVE_H264_DECODER=yes
+                                             ;;
+                                         * )
+                                             OPAL_LIBAVCODEC_CODEC([H263],  [encoder], [HAVE_H263_ENCODER])
+                                             OPAL_LIBAVCODEC_CODEC([H263P], [encoder], [HAVE_H263P_ENCODER])
+                                             OPAL_LIBAVCODEC_CODEC([H263],  [decoder], [HAVE_H263_DECODER])
+                                             OPAL_LIBAVCODEC_CODEC([H264],  [decoder], [HAVE_H264_DECODER])
+                                             if test "x$HAVE_H263_ENCODER"  = "xyes" -a \
+                                                     "x$HAVE_H263P_ENCODER" = "xyes" -a \
+                                                     "x$HAVE_H263_DECODER"  = "xyes" ; then
+                                               HAVE_H263P=yes
+                                             else
+                                               HAVE_H263P=no
+                                             fi
+                                             ;;
+                       esac
+                     else
+                       case "$target_os" in
+                          cygwin* | mingw* )
+                                             LIBAVCODEC_LIB_NAME="avcodec.dll"
+                                             HAVE_H263=yes
+                                             HAVE_H263P=yes
+                                             HAVE_MPEG4=yes
+                                             HAVE_H264_DECODER=yes
+                                             ;;
+                                         * )
+                                             AC_CHECK_LIB(avcodec, h263p_encoder, [HAVE_H263=yes], [HAVE_H263=no])
+                                             AC_CHECK_LIB(avcodec, h263p_encoder, [HAVE_H263P=yes], [HAVE_H263P=no])
+                                             AC_CHECK_LIB(avcodec, mpeg4_encoder, [HAVE_MPEG4=yes], [HAVE_MPEG4=no])
+                                             AC_CHECK_LIB(avcodec, h264_decoder, [HAVE_H264_DECODER=yes], [HAVE_H264_DECODER=no])
+                                             ;;
+                       esac
+                     fi
                      AC_SUBST(HAVE_H263)
                      AC_SUBST(HAVE_H263P)
                      AC_SUBST(HAVE_MPEG4)
@@ -284,19 +320,6 @@ AC_SUBST(HAVE_LIBAVCODEC)
 
 OPAL_LIBAVCODEC_SOURCE()
 AC_SUBST(LIBAVCODEC_SOURCE_DIR)
-
-if test "x$HAVE_LIBAVCODEC" = "xyes" ; then
-  AC_MSG_CHECKING(if libavcodec has rtp_mode);
-  LIBAVINCDIR=`pkg-config --variable=includedir libavcodec`/libavcodec
-  AC_TRY_COMPILE([#include <libavcodec/avcodec.h>],
-                  [int main(int ac,char **av) { AVCodecContext c; c.rtp_mode = 1; return 0; }], [HAVE_LIBAVCODEC_RTP_MODE=1])
-  if test "x$HAVE_LIBAVCODEC_RTP_MODE" = "x1" ; then
-    AC_MSG_RESULT(yes);
-  else
-    AC_MSG_RESULT(no)
-  fi
-fi
-AC_SUBST(HAVE_LIBAVCODEC_RTP_MODE)
 
 dnl     ########################
 dnl     x264
@@ -394,6 +417,50 @@ if test "x$X264_LINK_STATIC" != "xyes"&& test "x$HAVE_LIBDL" != "xyes" ; then
 else
   OPAL_SIMPLE_OPTION([h264],[HAVE_H264], [enable H.264 support], [HAVE_X264], [HAVE_H264_DECODER])
 fi
+
+dnl     ########################
+dnl     OpenH264
+dnl     ########################
+
+AC_ARG_ENABLE([openh264],
+              [AC_HELP_STRING([--disable-openh264],[disable OpenH264 support])],
+              [HAVE_H264_OPENH264=$enableval])
+
+if test "x$HAVE_H264_OPENH264" = "xno" ; then
+  AC_MSG_RESULT(Manually disabled OpenH264)
+else
+  PKG_CHECK_MODULES([OPENH264],
+                    [openh264],
+                    [
+                     AC_SUBST(OPENH264_CFLAGS)
+                     AC_SUBST(OPENH264_LIBS)
+                     HAVE_H264_OPENH264=yes
+                    ],
+                    [
+                     dnl Cisco's own build of OpenH264 (as opposed to a
+                     dnl distro package like libopenh264-dev) does not
+                     dnl install a .pc file, so fall back to a manual
+                     dnl header/library check before giving up.
+                     AC_CHECK_HEADER([wels/codec_api.h],
+                       [
+                        AC_CHECK_LIB([openh264], [WelsCreateSVCEncoder],
+                          [
+                           OPENH264_CFLAGS=""
+                           OPENH264_LIBS="-lopenh264"
+                           AC_SUBST(OPENH264_CFLAGS)
+                           AC_SUBST(OPENH264_LIBS)
+                           HAVE_H264_OPENH264=yes
+                          ],
+                          [HAVE_H264_OPENH264=no]
+                        )
+                       ],
+                       [HAVE_H264_OPENH264=no]
+                     )
+                    ]
+                   )
+fi
+AC_SUBST(HAVE_H264_OPENH264)
+OPAL_MSG_CHECK([OpenH264], [$HAVE_H264_OPENH264])
 
 dnl ########################################################################
 dnl LID Devices
@@ -535,6 +602,9 @@ fi
 if test -d video/H.264/gpl; then
   AC_CONFIG_FILES(video/H.264/gpl/Makefile)
 fi
+if test -d video/H.264-openh264 ; then
+  AC_CONFIG_FILES(video/H.264-openh264/Makefile)
+fi
 if test -d video/THEORA ; then
   AC_CONFIG_FILES(video/THEORA/Makefile)
 fi
@@ -609,8 +679,9 @@ echo ""
 
 echo "                           H.261  :  yes"
 echo "                           H.263  :  ${HAVE_H263} (ffmpeg version)"
-echo "                     H.263/H.263+ :  ${HAVE_H263P}"
+echo "                     H.263/H.263+ :  ${HAVE_H263P} (H.263-1998)"
 echo "                           H.264  :  ${HAVE_H264}"
+echo "                  H.264-OpenH264  :  ${HAVE_H264_OPENH264}"
 echo "                          THEORA  :  ${HAVE_THEORA}"
 
 if test "x${HAVE_MPEG4}" = "xyes" ; then
@@ -623,6 +694,12 @@ else
 echo "                    MPEG4 Part 2  :  no"
 fi
 echo "                            CELT  :  ${HAVE_CELT}"
+
+if test "x${HAVE_LIBAVCODEC}" = "xyes" -a "x${HAVE_LIBAVCODEC_MODERN}" = "xyes" ; then
+echo ""
+echo " libavcodec provides the FFmpeg 4.0 send/receive API, so the older"
+echo " dlopen based H.263-ffmpeg and MPEG4-ffmpeg plugins are not built."
+fi
 
 echo ""
 echo "                     SpanDSP FAX  :  $HAVE_SPANDSP"

@@ -30,6 +30,11 @@ ifeq ($(HAVE_H264),yes)
 SUBDIRS += video/H.264 
 endif
 
+HAVE_H264_OPENH264=@HAVE_H264_OPENH264@
+ifeq ($(HAVE_H264_OPENH264),yes)
+SUBDIRS += video/H.264-openh264
+endif
+
 HAVE_H263P=@HAVE_H263P@
 ifeq ($(HAVE_H263P),yes)
 SUBDIRS += video/H.263-1998
