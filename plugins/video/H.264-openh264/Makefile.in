@@ -1,0 +1,74 @@
+#
+# Makefile for H.264-OpenH264
+#
+# Requires the OpenH264 SDK headers (wels/codec_api.h, wels/codec_ver.h)
+# and libopenh264 (either the system package, e.g. libopenh264-dev, or a
+# local build of https://github.com/cisco/openh264).
+#
+
+VC_PLUGIN_DIR=@VC_PLUGIN_DIR@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+target_os=@target_os@
+DL_LIBS =@DL_LIBS@
+
+COMMONDIR	= ../common
+PLUGINDIR	= ../../
+OBJDIR	= ./obj
+
+BASENAME=openh264
+SONAME	=$(BASENAME)
+
+CC	 	=@CC@
+CFLAGS 	=@CFLAGS@	-D__STDC_CONSTANT_MACROS
+CXX	 	=@CXX@
+LDSO	 	=@LDSO@
+PLUGINEXT	=@PLUGINEXT@
+STDCCFLAGS	=@STDCCFLAGS@
+LDFLAGS		=@LDFLAGS@
+
+# Adjust if the OpenH264 SDK headers/library are not on the default search
+# path, e.g.:
+#   OPENH264_CFLAGS = -I/usr/local/include
+#   OPENH264_LIBS   = -L/usr/local/lib -lopenh264
+OPENH264_CFLAGS =
+OPENH264_LIBS   = -lopenh264
+
+EXTRACCFLAGS    += $(OPENH264_CFLAGS) -I$(COMMONDIR) -I$(PLUGINDIR) -DLIB_DIR='"$(libdir)"' -DVC_PLUGIN_DIR='"$(VC_PLUGIN_DIR)"'
+
+STDCCFLAGS += -Wall -Wno-unused -Wformat -Wformat-security -Wreorder -fno-strict-aliasing
+
+vpath	%.cxx $(COMMONDIR)
+vpath	%.o   $(OBJDIR)
+
+SRCS    += h264frame.cxx \
+           openh264.cxx \
+           $(COMMONDIR)/trace.cxx
+
+$(OBJDIR)/%.o : %.cxx
+	@mkdir -p $(OBJDIR) >/dev/null 2>&1
+	$(CXX) -I../../../include $(EXTRACCFLAGS) $(STDCCFLAGS) $(OPTCCFLAGS) $(CFLAGS) -c $< -o $@
+
+PLUGIN	= ./$(BASENAME)_video_pwplugin.$(PLUGINEXT)
+
+OBJECTS = $(addprefix $(OBJDIR)/,$(patsubst %.c,%.o,$(patsubst %.cxx,%.o,$(notdir $(SRCS)))))
+
+$(PLUGIN): $(OBJECTS)
+ifeq (,$(findstring solaris,$(target_os)))
+	$(CXX) $(LDSO) -o $@ $^ $(DL_LIBS) $(OPENH264_LIBS)
+else
+	$(CXX) $(LDSO) $@ -o $@ $^ $(DL_LIBS) $(OPENH264_LIBS)
+endif
+
+install: $(PLUGIN)
+	mkdir -p $(DESTDIR)$(libdir)/$(VC_PLUGIN_DIR)
+	install $(PLUGIN) $(DESTDIR)$(libdir)/$(VC_PLUGIN_DIR)
+
+uninstall:
+	rm -f $(DESTDIR)$(libdir)/$(VC_PLUGIN_DIR)/$(PLUGIN)
+
+clean:
+	rm -f $(OBJECTS) $(PLUGIN)
+
+###########################################
