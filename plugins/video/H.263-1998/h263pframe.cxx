@@ -256,10 +256,10 @@ bool H263PFrame::SetFromRTPFrame(RTPFrame & frame, unsigned int & /*flags*/)
 
   remBytes = frame.GetPayloadSize() - headerPLEN - (headerV ? 3 : 2);
 
-  if ((_encodedFrame.pos + (headerP ? 2 : 0) + remBytes) > (_maxFrameSize - FF_INPUT_BUFFER_PADDING_SIZE)) {
+  if ((_encodedFrame.pos + (headerP ? 2 : 0) + remBytes) > (_maxFrameSize - AV_INPUT_BUFFER_PADDING_SIZE)) {
     TRACE(1, "H263+\tDeencap\tTrying to add " << remBytes 
          << " bytes to frame at position " << _encodedFrame.pos + (headerP ? 2 : 0) 
-         << " bytes while maximum frame size is  " << _maxFrameSize << "-" << FF_INPUT_BUFFER_PADDING_SIZE << " bytes");
+         << " bytes while maximum frame size is  " << _maxFrameSize << "-" << AV_INPUT_BUFFER_PADDING_SIZE << " bytes");
     return false;
   }
 

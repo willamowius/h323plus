@@ -49,6 +49,7 @@
 #ifndef __H263P_1998_H__
 #define __H263P_1998_H__ 1
 
+#include "../common/ffmpeg_compat.h"
 #include "h263pframe.h"
 #include "rfc2190.h"
 #include "critsect.h"
@@ -65,6 +66,30 @@ typedef unsigned char BYTE;
 #define H263P_FRAME_RATE          25
 #define H263P_KEY_FRAME_INTERVAL 125
 #define H263P_MIN_QUANT            2
+
+/* Smallest usable spread between qmin and qmax.  Below this the rate
+   controller cannot track the negotiated bit rate at all. */
+#define H263_MIN_QUANT_RANGE      10
+
+/* Default temporal/spatial trade off, 0..31.  Upstream defaulted to 0, which
+   pins the quantiser and makes the encoder ignore the negotiated bit rate. */
+/* STRINGIZE() comes from codec/opalplugin.h, which every user of this header
+   includes first; do not define it again here. */
+#define H263_DEFAULT_TSTO         31
+
+/* H263_MIN_BITS_PER_PIXEL and the resolution-downgrade logic it supported
+   were removed from GetInputFormat() (h263-1998.cxx) - a real deployment
+   showed that silently sending a smaller picture than the negotiated
+   capability's own size breaks at least one real decoder outright (see the
+   comment at GetInputFormat() for the full story). Left this constant's
+   history here rather than deleting it outright: 704x576 at 30 fps needs
+   roughly 0.08 bit/pixel to fit an ~984 kbit/s target, which is what
+   originally motivated it; 352x288 at the same rate and bit rate sits at
+   roughly 0.32. If a bit-rate-aware size decision is ever wanted again, it
+   belongs in capability/channel negotiation - deciding which of
+   H.263-QCIF/-CIF/-720 to offer or accept for a channel in the first place
+   - not in this encoder silently substituting a different size than the one
+   already negotiated for it. */
 
 #define H263_CLOCKRATE         90000
 #define H263_QCIF_BITRATE         192000
@@ -94,13 +119,7 @@ typedef unsigned char BYTE;
 #define SQCIF_WIDTH     128
 #define SQCIF_HEIGHT    96
 
-#if FF_API_CODEC_ID
-    #define FF_CodecID AVCodecID
-#else
-    #define FF_CodecID CodecID
-#endif
-
-#define MAX_YUV420P_FRAME_SIZE (((CIF16_WIDTH * CIF16_HEIGHT * 3) / 2) + (FF_INPUT_BUFFER_PADDING_SIZE*2))
+#define MAX_YUV420P_FRAME_SIZE (((CIF16_WIDTH * CIF16_HEIGHT * 3) / 2) + (AV_INPUT_BUFFER_PADDING_SIZE*2))
 enum Annex {
     D,
     F,
@@ -128,7 +147,7 @@ class H263_Base_EncoderContext
     virtual ~H263_Base_EncoderContext();
 
     virtual bool Open() = 0;
-    virtual bool Open(FF_CodecID codecId);
+    virtual bool Open(AVCodecID codecId);
 
     virtual int EncodeFrames(const BYTE * src, unsigned & srcLen, BYTE * dst, unsigned & dstLen, unsigned int & flags) = 0;
     void SetMaxKeyFramePeriod (unsigned period);
@@ -138,6 +157,17 @@ class H263_Base_EncoderContext
     void SetTSTO (unsigned tsto);
     void EnableAnnex (Annex annex);
     void DisableAnnex (Annex annex);
+
+    /* Sets the frame interval libavcodec's rate controller budgets against.
+       This used to be hardcoded to ~29.97 fps regardless of how often the
+       application actually called EncodeFrames(), which is fine when that
+       happens to match, and silently wrong otherwise: at half the assumed
+       rate (e.g. a 15 fps call), the controller believes only half as much
+       time has passed as really has between frames, so it budgets roughly
+       half the bits per frame that the negotiated bit rate actually allows -
+       and keeps re-encoding under VBV pressure even though the true output,
+       measured against wall clock time, is well within the negotiated rate. */
+    void SetTargetFrameTime (unsigned frameTime);
     bool OpenCodec();
     void CloseCodec();
 
@@ -151,16 +181,65 @@ class H263_Base_EncoderContext
 
     int m_targetBitRate;
 
+    /* Scratch space for encoder_formats() to rewrite FRAME_TIME/WIDTH/HEIGHT
+       in place after GetInputFormat() adjusts the resolution.  These used to
+       be strdup()'d via num2str() and never freed - a small, genuine leak
+       on every renegotiation.  Owned by the context and reused each call, so
+       there is nothing for a caller to free and nothing left behind when the
+       context is destroyed.  Public because encoder_formats() is a plain
+       function taking the context by pointer, not a member. */
+    char m_frameTimeStr[16];
+    char m_frameWidthStr[16];
+    char m_frameHeightStr[16];
+
   protected:
     virtual bool InitContext() = 0;
 
-    unsigned char * _inputFrameBuffer;
-    AVCodec        *_codec;
-    AVCodecContext *_context;
-    AVFrame        *_inputFrame;
+    /* libavcodec no longer supports opening and closing the same
+       AVCodecContext more than once, so every setter just records the value
+       and the context is built from scratch in OpenCodec().  Subclasses add
+       their codec specific AVOptions in ApplyCodecOptions(), which runs
+       after the context is allocated but before avcodec_open2(). */
+    virtual bool ApplyCodecOptions() { return true; }
 
-    int _frameCount;
-    int _width, _height;
+    /* Feed one YUV420P frame to the encoder and collect the result in
+       m_packet.  Returns 1 if a packet was produced, 0 if the encoder wants
+       more input, -1 on error.  The caller must av_packet_unref(m_packet). */
+    int EncodeOneFrame(unsigned int flags);
+
+    /* (Re)allocate the padded, aligned YUV420P staging buffer handed to
+       libavcodec. */
+    bool AllocateInputFrameBuffer(unsigned width, unsigned height);
+
+    /* Check that the RTP payload really holds the picture its header claims
+       before copying anything out of it. */
+    bool ValidateSourceFrame(const RTPFrame & srcRTP,
+                             const PluginCodec_Video_FrameHeader * header);
+
+    unsigned char  * _inputFrameBuffer;
+    size_t           _inputFrameBufferSize;
+    FFMPEG_AVCodec * _codec;
+    AVCodecContext * _context;
+    AVFrame        * _inputFrame;
+    AVPacket       * m_packet;
+
+    AVCodecID   _codecId;
+    int         _frameCount;
+    int         _width, _height;
+
+    // deferred encoder settings, applied in OpenCodec()
+    unsigned    _keyFramePeriod;
+    unsigned    _tsto;
+    unsigned    _maxRTPFrameSize;
+    unsigned    _annexFlags;        // bit (1 << Annex) set when enabled
+
+    /* Target time between frames, in 1/H263_CLOCKRATE (90000) second RTP
+       clock units - the same units PLUGINCODEC_OPTION_FRAME_TIME arrives in.
+       Defaults to 3003 (~29.97 fps), which is what OpenCodec() always used
+       before this was negotiable, so a caller that never sends this option
+       sees no change in behaviour. */
+    unsigned    _frameTime;
+
     CriticalSection _mutex;
     const char * prefix;
 #if TRACE_FILE
@@ -180,12 +259,9 @@ class H263_RFC2190_EncoderContext : public H263_Base_EncoderContext
     bool InitContext();
     void SetMaxRTPFrameSize (unsigned size);
     int EncodeFrames(const BYTE * src, unsigned & srcLen, BYTE * dst, unsigned & dstLen, unsigned int & flags);
-    void RTPCallBack(struct AVCodecContext *avctx, void * _data, int size, int mbCount);
   protected:
-    bool Init();
+    bool ApplyCodecOptions();
     RFC2190Packetizer packetizer;
-    unsigned currentMb;
-    unsigned currentBytes;
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -201,7 +277,7 @@ class H263_RFC2429_EncoderContext : public H263_Base_EncoderContext
     void SetMaxRTPFrameSize (unsigned size);
     int EncodeFrames(const BYTE * src, unsigned & srcLen, BYTE * dst, unsigned & dstLen, unsigned int & flags);
   protected:
-    bool Init();
+    bool ApplyCodecOptions();
     H263PFrame * _txH263PFrame;
 };
 
@@ -219,9 +295,14 @@ class H263_Base_DecoderContext
     bool OpenCodec();
     void CloseCodec();
 
-    AVCodec        *_codec;
+    /* Returns 1 when _outputFrame holds a decoded picture, 0 when the
+       decoder needs more data, -1 on error. */
+    int DecodeOneFrame(const BYTE * data, size_t length);
+
+    FFMPEG_AVCodec *_codec;
     AVCodecContext *_context;
     AVFrame        *_outputFrame;
+    AVPacket       *m_packet;
 
     int _frameCount;
     CriticalSection _mutex;

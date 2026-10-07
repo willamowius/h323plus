@@ -137,7 +137,7 @@ public:
 
   uint8_t* GetFramePtr ()
   {
-    memset (_encodedFrame.ptr + _encodedFrame.pos,0 , FF_INPUT_BUFFER_PADDING_SIZE);
+    memset (_encodedFrame.ptr + _encodedFrame.pos,0 , AV_INPUT_BUFFER_PADDING_SIZE);
     return (_encodedFrame.ptr);
   }
 

@@ -61,9 +61,6 @@
 #endif
 
 #include <codec/opalplugin.h>
-#ifndef OPAL_STATIC_CODEC
-#define USE_DLL_AVCODEC 1
-#endif
 
 #include "h263-1998.h"
 #include <limits>
@@ -72,9 +69,7 @@
 #include <string.h>
 
 #include "../common/mpi.h"
-#include "../common/ffmpeg.h"
 #include "../common/trace.h"
-#include "../common/dyna.h"
 
 #include "tracer.h"
 
@@ -88,10 +83,6 @@
 #endif
 
 DECLARE_TRACER
-
-extern "C" {
-#include LIBAVCODEC_HEADER
-};
 
 static const char * h263_Prefix = "H.263";
 static const char * h263P_Prefix = "H.263+";
@@ -128,9 +119,9 @@ static struct StdSizes {
   { CIF16_WIDTH, CIF16_HEIGHT, PLUGINCODEC_CIF16_MPI },
 };
 
-static FFMPEGLibrary FFMPEGLibraryInstance(CODEC_ID_H263P);
-
-// this callback may receive log data from all FFMPEG based codecs
+/*
+  This callback may receive log data from all FFMPEG based codecs.
+ */
 static void logCallbackFFMPEG (void* v, int level, const char* fmt , va_list arg)
 {
   char buffer[512];
@@ -138,10 +129,15 @@ static void logCallbackFFMPEG (void* v, int level, const char* fmt , va_list arg
   if (v) {
     switch (level)
     {
-      case AV_LOG_QUIET: severity = 0; break;
-      case AV_LOG_ERROR: severity = 1; break;
-      case AV_LOG_INFO:  severity = 4; break;
-      case AV_LOG_DEBUG: severity = 4; break;
+      case AV_LOG_QUIET:   severity = 0; break;
+      case AV_LOG_PANIC:   severity = 0; break;
+      case AV_LOG_FATAL:   severity = 0; break;
+      case AV_LOG_ERROR:   severity = 1; break;
+      case AV_LOG_WARNING: severity = 2; break;
+      case AV_LOG_INFO:    severity = 4; break;
+      case AV_LOG_VERBOSE: severity = 4; break;
+      case AV_LOG_DEBUG:   severity = 4; break;
+      case AV_LOG_TRACE:   severity = 4; break;
     }
     sprintf(buffer, "FFMPEG\t");
     vsprintf(buffer + strlen(buffer), fmt, arg);
@@ -167,8 +163,12 @@ static char * num2str(int num)
 
 static void DumpRTPPayload(Tracer & tracer, const RTPFrame & rtp, int max)
 {
-  if (max > rtp.GetPayloadSize())
-    max = rtp.GetPayloadSize();
+  // GetPayloadSize() returns unsigned; max is always called with a small
+  // positive literal (see the two call sites below), and payload sizes
+  // never approach INT_MAX, so comparing as int is safe and avoids
+  // -Wsign-compare
+  if (max > (int)rtp.GetPayloadSize())
+    max = (int)rtp.GetPayloadSize();
   unsigned char * ptr = rtp.GetPayloadPtr();
   tracer.GetStream() << hex << setfill('0') << setprecision(2);
   while (max-- > 0)
@@ -208,7 +208,13 @@ static ostream & RFC2190Dump(Tracer & tracer, const RTPFrame & rtp)
     tracer.GetStream() << "mode=" << mode << ",I=" << (iFrame ? "yes" : "no");
   }
   tracer.GetStream() << ",data=";
-  DumpRTPPayload(tracer, rtp, 10);
+  /* 32 bytes, not 10: enough to see a Mode A/B fragment's own header plus a
+     genuine GOB header's GN field with margin either side, so a field trace
+     can tell a GOB header (GN nonzero possible, non-zero low bits typical)
+     apart from a picture start code (fixed zero bits follow) without
+     guessing. 10 bytes left this ambiguous when checking a real trace against
+     this exact question. */
+  DumpRTPPayload(tracer, rtp, 32);
   return tracer.GetStream();
 }
 
@@ -216,7 +222,7 @@ static ostream & RFC2429Dump(Tracer & tracer, const RTPFrame & rtp)
 {
   RTPDump(tracer, rtp);
   tracer.GetStream() << ",data=";
-  DumpRTPPayload(tracer, rtp, 10);
+  DumpRTPPayload(tracer, rtp, 32);
   return tracer.GetStream();
 }
 
@@ -232,98 +238,81 @@ tracer.Start(); tracer.GetStream() << text; func(tracer, rtp); tracer.End()
 /////////////////////////////////////////////////////////////////////////////
 
 H263_Base_EncoderContext::H263_Base_EncoderContext(const char * _prefix)
-  : _context(NULL)
+  : _inputFrameBuffer(NULL)
+  , _inputFrameBufferSize(0)
+  , _codec(NULL)
+  , _context(NULL)
+  , _inputFrame(NULL)
+  , m_packet(NULL)
+  , _codecId(AV_CODEC_ID_NONE)
+  , _frameCount(0)
+  , _width(0)
+  , _height(0)
+  , _keyFramePeriod(H263_KEY_FRAME_INTERVAL)
+  , _tsto(H263_DEFAULT_TSTO)
+  , _maxRTPFrameSize(H263_PAYLOAD_SIZE)
+  , _annexFlags(0)
+  , _frameTime(3003)   // ~29.97 fps, matching the previous hardcoded default
   , prefix(_prefix)
 #if TRACE_FILE
   , tracer(_prefix, true)
 #endif
 {
-  _inputFrameBuffer = NULL;
-  _codec = NULL;
-  _inputFrame = NULL;
-  _frameCount = 0;
-  _width = 0;
-  _height= 0;
   m_targetBitRate = 0;
-
-  if (!FFMPEGLibraryInstance.IsLoaded()){
-    return;
-  }
 }
 
 H263_Base_EncoderContext::~H263_Base_EncoderContext()
 {
-  if (FFMPEGLibraryInstance.IsLoaded()) {
-    CloseCodec();
+  CloseCodec();
+
+  if (_inputFrame != NULL) {
+    av_frame_free(&_inputFrame);
+    _inputFrame = NULL;
   }
-  free(_inputFrameBuffer);
+  if (m_packet != NULL) {
+    av_packet_free(&m_packet);
+    m_packet = NULL;
+  }
+
+  av_free(_inputFrameBuffer);
   _inputFrameBuffer = NULL;
+  _inputFrameBufferSize = 0;
+
+  TRACE_AND_LOG(tracer, 3, "encoder closed");
 }
 
-bool H263_Base_EncoderContext::Open(FF_CodecID codecId)
+bool H263_Base_EncoderContext::Open(AVCodecID codecId)
 {
   TRACE_AND_LOG(tracer, 1, "Opening encoder");
 
-  _codec =  FFMPEGLibraryInstance.AvcodecFindEncoder(codecId);
+  _codecId = codecId;
+
+  _codec = avcodec_find_encoder(codecId);
   if (_codec == NULL) {
     TRACE_AND_LOG(tracer, 1, "Codec not found for encoder");
     return false;
   }
 
-  _context =  FFMPEGLibraryInstance.AvcodecAllocContext(_codec);
-  if (_context == NULL) {
-    TRACE_AND_LOG(tracer, 1, "Failed to allocate context for encoder");
+  _inputFrame = av_frame_alloc();
+  if (_inputFrame == NULL) {
+    TRACE_AND_LOG(tracer, 1, "Failed to allocate frame for encoder");
     return false;
   }
 
-  _inputFrame =  FFMPEGLibraryInstance.AvcodecAllocFrame();
-  if (_inputFrame == NULL) {
-    TRACE_AND_LOG(tracer, 1, "Failed to allocate frame for encoder");
+  m_packet = av_packet_alloc();
+  if (m_packet == NULL) {
+    TRACE_AND_LOG(tracer, 1, "Failed to allocate packet for encoder");
     return false;
   }
 
   if (!InitContext())
     return false;
 
-  _context->opaque = this;
+  _width  = CIF_WIDTH;
+  _height = CIF_HEIGHT;
 
-  _context->codec = NULL;
-  _context->mb_decision = FF_MB_DECISION_SIMPLE; // choose only one MB type at a time
-  _context->me_method = ME_EPZS;
-
-  _context->max_b_frames = 0;
-  _context->pix_fmt = PIX_FMT_YUV420P;
-
-  // X-Lite does not like Custom Picture frequency clocks...
-  _context->time_base.num = 100;
-  _context->time_base.den = 2997;
-  _context->gop_size      = 125;
-
-  // avoid copying input/output
-  _context->flags |= CODEC_FLAG_INPUT_PRESERVED; // we guarantee to preserve input for max_b_frames+1 frames
-  _context->flags |= CODEC_FLAG_EMU_EDGE;        // don't draw edges
-  _context->flags |= CODEC_FLAG_PASS1;
-
-  _context->error_concealment = 3;
-#if LIBAVCODEC_VERSION_MAJOR < 54
-  _context->error_recognition = 5;
-#else
-  _context->err_recognition = 5;
-#endif
-
-  // debugging flags
-  if (Trace::CanTraceUserPlane(4)) {
-    _context->debug |= FF_DEBUG_RC;
-    _context->debug |= FF_DEBUG_PICT_INFO;
-    _context->debug |= FF_DEBUG_MV;
-    _context->debug |= FF_DEBUG_QP;
-  }
-
-  _height = CIF_WIDTH; _width = CIF_HEIGHT;
-  SetFrameWidth(_height);
-  SetFrameHeight(_width);
   SetTargetBitrate(256000);
-  SetTSTO(0);
+  SetTSTO(H263_DEFAULT_TSTO);
   DisableAnnex(D);
   DisableAnnex(F);
   DisableAnnex(I);
@@ -340,200 +329,284 @@ bool H263_Base_EncoderContext::Open(FF_CodecID codecId)
 
 void H263_Base_EncoderContext::SetMaxKeyFramePeriod (unsigned period)
 {
-  _context->gop_size = period;
+  _keyFramePeriod = period;
 }
 
 void H263_Base_EncoderContext::SetTargetBitrate (unsigned rate)
 {
   m_targetBitRate = rate;
   CODEC_TRACER(tracer, "target bit rate set to " << m_targetBitRate);
-
-  _context->bit_rate = (m_targetBitRate * 3) >> 2;        // average bit rate
-  _context->bit_rate_tolerance = m_targetBitRate >> 1;
-  _context->rc_min_rate = 0;                   // minimum bitrate
-  _context->rc_max_rate = m_targetBitRate;                // maximum bitrate
-  _context->rc_buffer_size = (rate/1000) * 64;
-
-  /* ratecontrol qmin qmax limiting method
-     0-> clipping, 1-> use a nice continous function to limit qscale wthin qmin/qmax.
-  */
-
-  _context->rc_qsquish = 0;            // limit q by clipping
-  _context->rc_eq = (char*) "1";       // rate control equation
 }
 
 void H263_Base_EncoderContext::SetFrameWidth (unsigned width)
 {
   _width = width;
-  FFMPEGLibraryInstance.AvSetDimensions(_context, _width, _height);
-
-  _inputFrame->linesize[0] = width;
-  _inputFrame->linesize[1] = width / 2;
-  _inputFrame->linesize[2] = width / 2;
-
   CODEC_TRACER(tracer, "frame width set to " << width);
 }
 
 void H263_Base_EncoderContext::SetFrameHeight (unsigned height)
 {
   _height = height;
-  FFMPEGLibraryInstance.AvSetDimensions(_context, _width, _height);
   CODEC_TRACER(tracer, "frame height set to " << height);
 }
 
 void H263_Base_EncoderContext::SetTSTO (unsigned tsto)
 {
-  _inputFrame->quality = H263P_MIN_QUANT;
-
-  _context->max_qdiff = 10;  // was 3      // max q difference between frames
-  _context->qcompress = 0.5;               // qscale factor between easy & hard scenes (0.0-1.0)
-  _context->i_quant_factor = (float)-0.6;  // qscale factor between p and i frames
-  _context->i_quant_offset = (float)0.0;   // qscale offset between p and i frames
-  //_context->me_subpel_quality = 8;
-
-  _context->qmin = H263P_MIN_QUANT;
-  _context->qmax = round ( (31.0 - H263P_MIN_QUANT) / 31.0 * tsto + H263P_MIN_QUANT);
-  _context->qmax = min( _context->qmax, 31);
-
- // _context->mb_qmin = _context->qmin;
- // _context->mb_qmax = _context->qmax;
-
-  // Lagrange multipliers - this is how the context defaults do it:
-  _context->lmin = _context->qmin * FF_QP2LAMBDA;
-  _context->lmax = _context->qmax * FF_QP2LAMBDA;
-
+  _tsto = tsto;
   CODEC_TRACER(tracer, "TSTO set to " << tsto);
+}
+
+void H263_Base_EncoderContext::SetTargetFrameTime (unsigned frameTime)
+{
+  if (frameTime == 0)
+    return;   // guard against a bogus zero option value
+  _frameTime = frameTime;
+  CODEC_TRACER(tracer, "target frame time set to " << frameTime << " (" << ((double)H263_CLOCKRATE / frameTime) << " fps)");
 }
 
 void H263_Base_EncoderContext::EnableAnnex (Annex annex)
 {
-  switch (annex) {
-    case D:
-      // Annex D: Unrestructed Motion Vectors
-      // Level 2+
-      // works with eyeBeam, signaled via  non-standard "D"
-//      _context->flags |= CODEC_FLAG_H263P_UMV;
-      break;
-    case F:
-      // Annex F: Advanced Prediction Mode
-      // does not work with eyeBeam
-      // DO NOT ENABLE THIS FLAG. FFMPEG IS NOT THREAD_SAFE WHEN THIS FLAG IS SET
-      //_context->flags |= CODEC_FLAG_OBMC;
-      break;
-    case I:
-      // Annex I: Advanced Intra Coding
-      // Level 3+
-      // works with eyeBeam
-      _context->flags |= CODEC_FLAG_AC_PRED;
-      break;
-    case K:
-      // Annex K:
-      // does not work with eyeBeam
-      //_context->flags |= CODEC_FLAG_H263P_SLICE_STRUCT;
-      break;
-    case J:
-      // Annex J: Deblocking Filter
-      // works with eyeBeam
-      _context->flags |= CODEC_FLAG_LOOP_FILTER;
-      break;
-    case T:
-      break;
-    case S:
-      // Annex S: Alternative INTER VLC mode
-      // does not work with eyeBeam
-      //_context->flags |= CODEC_FLAG_H263P_AIV;
-      break;
-    case N:
-    case P:
-    default:
-      break;
-  }
+  _annexFlags |= (1 << annex);
 }
 
 void H263_Base_EncoderContext::DisableAnnex (Annex annex)
 {
-  switch (annex) {
-    case D:
-      // Annex D: Unrestructed Motion Vectors
-      // Level 2+
-      // works with eyeBeam, signaled via  non-standard "D"
-//      _context->flags &= ~CODEC_FLAG_H263P_UMV;
-      break;
-    case F:
-      // Annex F: Advanced Prediction Mode
-      // does not work with eyeBeam
-//      _context->flags &= ~CODEC_FLAG_OBMC;
-      break;
-    case I:
-      // Annex I: Advanced Intra Coding
-      // Level 3+
-      // works with eyeBeam
-      _context->flags &= ~CODEC_FLAG_AC_PRED;
-      break;
-    case K:
-      // Annex K:
-      // does not work with eyeBeam
-//      _context->flags &= ~CODEC_FLAG_H263P_SLICE_STRUCT;
-      break;
-    case J:
-      // Annex J: Deblocking Filter
-      // works with eyeBeam
-      _context->flags &= ~CODEC_FLAG_LOOP_FILTER;
-      break;
-    case T:
-      break;
-    case S:
-      // Annex S: Alternative INTER VLC mode
-      // does not work with eyeBeam
-//      _context->flags &= ~CODEC_FLAG_H263P_AIV;
-      break;
-    case N:
-    case P:
-    default:
-      break;
-  }
+  _annexFlags &= ~(1 << annex);
 }
 
-#define CODEC_TRACER_FLAG(tracer, flag) \
-CODEC_TRACER(tracer, #flag " is " << ((_context->flags & flag) ? "enabled" : "disabled"));
-
+/*
+  libavcodec does not allow an AVCodecContext to be opened, closed and
+  opened again, so the context is thrown away in CloseCodec() and rebuilt
+  from the recorded settings here.
+ */
 bool H263_Base_EncoderContext::OpenCodec()
 {
+  CloseCodec();
+
   if (_codec == NULL) {
     TRACE_AND_LOG(tracer, 1, "Codec not initialized");
     return false;
   }
 
+  _context = avcodec_alloc_context3(_codec);
+  if (_context == NULL) {
+    TRACE_AND_LOG(tracer, 1, "Failed to allocate context for encoder");
+    return false;
+  }
+
+  _context->opaque = this;
+
+  _context->width  = _width;
+  _context->height = _height;
+  _context->pix_fmt = AV_PIX_FMT_YUV420P;
+  _context->max_b_frames = 0;
+  _context->mb_decision = FF_MB_DECISION_SIMPLE;  // choose only one MB type at a time
+  _context->thread_count = 1;                     // the RTP fragmenting needs deterministic output
+  _context->time_base.num = _frameTime;
+  _context->time_base.den = H263_CLOCKRATE;
+  _context->framerate.num = H263_CLOCKRATE;
+  _context->framerate.den = _frameTime;
+
+  _context->gop_size = _keyFramePeriod;
+
+  _context->error_concealment = 3;
+  _context->err_recognition = 5;
+
+  // bit rate control
+  _context->bit_rate = (m_targetBitRate * 3) >> 2;       // average bit rate
+  _context->bit_rate_tolerance = m_targetBitRate >> 1;
+  _context->rc_min_rate = 0;                             // minimum bit rate
+  _context->rc_max_rate = m_targetBitRate;               // maximum bit rate
+  _context->rc_buffer_size = (m_targetBitRate / 1000) * 64;
+
+  // quantiser limits derived from the temporal/spatial trade off
+  _context->max_qdiff = 10;                 // max q difference between frames
+  _context->qcompress = 0.5;                // qscale factor between easy & hard scenes (0.0-1.0)
+  _context->i_quant_factor = (float)-0.6;   // qscale factor between p and i frames
+  _context->i_quant_offset = (float)0.0;    // qscale offset between p and i frames
+
+  /* The temporal/spatial trade off picks the worst quantiser we are willing
+     to use.  Note what happens at the bottom of the range: a TSTO of 0 gives
+     qmax == qmin, so every frame is coded at QP 2 and the rate controller has
+     nothing left to vary.  The output is then whatever the content happens to
+     need - several Mbit/s at 4CIF - no matter what bit rate was negotiated,
+     the encoder logs "rc buffer underflow" and "max bitrate possibly too
+     small" on every frame, and the far end drowns in packets.  So keep a
+     working range no matter what we are asked for. */
+  _context->qmin = H263P_MIN_QUANT;
+  _context->qmax = (int)round((31.0 - H263P_MIN_QUANT) / 31.0 * _tsto + H263P_MIN_QUANT);
+  if (_context->qmax > 31)
+    _context->qmax = 31;
+  if (_context->qmax < H263P_MIN_QUANT + H263_MIN_QUANT_RANGE)
+    _context->qmax = H263P_MIN_QUANT + H263_MIN_QUANT_RANGE;
+
+  // these used to be AVCodecContext fields and are private AVOptions now
+  FFMPEGSetPrivateOption(_context, "motion_est", "epzs");
+  FFMPEGSetPrivateOptionDouble(_context, "qsquish", 0);  // limit q by clipping
+  FFMPEGSetPrivateOption(_context, "rc_eq", "1");        // rate control equation
+  FFMPEGSetPrivateOption(_context, "lmin", (int64_t)(_context->qmin * FF_QP2LAMBDA));
+  FFMPEGSetPrivateOption(_context, "lmax", (int64_t)(_context->qmax * FF_QP2LAMBDA));
+
+  /* Annex support.
+     Annex D (unrestricted motion vectors), F (advanced prediction), I
+     (advanced intra coding), J (deblocking filter) and S (alternative inter
+     VLC) map onto H.263+ encoder options.  Annex F was disabled in the
+     original code because libavcodec was not thread safe with it, and
+     Annex D/S are left off for interoperability with eyeBeam - keep that
+     behaviour and only wire up the ones that were actually enabled. */
+  if (_annexFlags & (1 << I))
+    _context->flags |= AV_CODEC_FLAG_AC_PRED;
+  if (_annexFlags & (1 << J))
+    _context->flags |= AV_CODEC_FLAG_LOOP_FILTER;
+
+  if (!ApplyCodecOptions()) {
+    TRACE_AND_LOG(tracer, 1, "Failed to apply codec options");
+    avcodec_free_context(&_context);
+    return false;
+  }
+
+  // debugging flags
+  if (Trace::CanTraceUserPlane(4)) {
+    _context->debug |= FF_DEBUG_RC;
+    _context->debug |= FF_DEBUG_PICT_INFO;
+    _context->debug |= FF_DEBUG_QP;
+  }
+
   CODEC_TRACER(tracer, "Size is " << _width << "x" << _height);
-  CODEC_TRACER(tracer, "rc_max_rate is " <<  _context->rc_max_rate);
+  CODEC_TRACER(tracer, "rc_max_rate is " << _context->rc_max_rate);
   CODEC_TRACER(tracer, "GOP is " << _context->gop_size);
   CODEC_TRACER(tracer, "qmin set to " << _context->qmin);
   CODEC_TRACER(tracer, "qmax set to " << _context->qmax);
-//  CODEC_TRACER(tracer, "mb_qmin set to " << _context->mb_qmin);
-//  CODEC_TRACER(tracer, "mb_qmax set to " << _context->mb_qmax);
-  CODEC_TRACER(tracer, "qmin set to " << _context->qmin);
-  CODEC_TRACER(tracer, "qmax set to " << _context->qmax);
-
   CODEC_TRACER(tracer, "bit_rate set to " << _context->bit_rate);
-  CODEC_TRACER(tracer, "bit_rate_tolerance set to " <<_context->bit_rate_tolerance);
-  CODEC_TRACER(tracer, "rc_min_rate set to " << _context->rc_min_rate);
-  CODEC_TRACER_FLAG(tracer, CODEC_FLAG_H263P_UMV);
-  CODEC_TRACER_FLAG(tracer, CODEC_FLAG_OBMC);
-  CODEC_TRACER_FLAG(tracer, CODEC_FLAG_AC_PRED);
-  CODEC_TRACER_FLAG(tracer, CODEC_FLAG_H263P_SLICE_STRUCT)
-  CODEC_TRACER_FLAG(tracer, CODEC_FLAG_LOOP_FILTER);
-  CODEC_TRACER_FLAG(tracer, CODEC_FLAG_H263P_AIV);
+  CODEC_TRACER(tracer, "bit_rate_tolerance set to " << _context->bit_rate_tolerance);
 
-  return FFMPEGLibraryInstance.AvcodecOpen(_context, _codec) == 0;
+  int err = avcodec_open2(_context, _codec, NULL);
+  if (err < 0) {
+    char buf[AV_ERROR_MAX_STRING_SIZE];
+    av_strerror(err, buf, sizeof(buf));
+    TRACE_AND_LOG(tracer, 1, "Failed to open encoder: " << buf);
+    avcodec_free_context(&_context);
+    return false;
+  }
+
+  // the input frame describes the picture we hand to avcodec_send_frame()
+  _inputFrame->format = AV_PIX_FMT_YUV420P;
+  _inputFrame->width  = _width;
+  _inputFrame->height = _height;
+  _inputFrame->linesize[0] = _width;
+  _inputFrame->linesize[1] = _width / 2;
+  _inputFrame->linesize[2] = _width / 2;
+
+  TRACE_AND_LOG(tracer, 4, "Codec opened");
+
+  return true;
+}
+
+/*
+  The frame header states the picture dimensions, but nothing in the plugin
+  API guarantees the RTP payload actually holds a picture that big.  Taking
+  the header at its word means copying width*height*3/2 bytes out of a buffer
+  that may be much smaller, which reads whatever follows it on the heap.
+
+  The encoder then sees a picture that changes completely from frame to frame:
+  motion compensation collapses (mc_mb_var_sum ends up several times
+  mb_mb_var_sum), libavcodec's scene change detection fires over and over, and
+  the output is a run of I frames several times the negotiated bit rate.  It
+  also happens to be an out of bounds read of most of a megabyte driven by a
+  field that arrives from outside.
+ */
+bool H263_Base_EncoderContext::ValidateSourceFrame(const RTPFrame & srcRTP,
+                                                   const PluginCodec_Video_FrameHeader * header)
+{
+  if (header->x != 0 || header->y != 0) {
+    TRACE_AND_LOG(tracer, 1, "Video grab of partial frame unsupported, dropping frame");
+    return false;
+  }
+
+  if (header->width == 0 || header->height == 0 ||
+      (header->width & 1) != 0 || (header->height & 1) != 0 ||
+      header->width > CIF16_WIDTH || header->height > CIF16_HEIGHT) {
+    TRACE_AND_LOG(tracer, 1, "Implausible frame size " << header->width << "x" << header->height
+                              << ", dropping frame");
+    return false;
+  }
+
+  size_t needed = sizeof(PluginCodec_Video_FrameHeader)
+                + ((size_t)header->width * header->height * 3) / 2;
+  size_t have   = (size_t)srcRTP.GetPayloadSize();
+
+  if (have < needed) {
+    TRACE_AND_LOG(tracer, 1, "Frame buffer holds " << have << " bytes but the header claims "
+                              << header->width << "x" << header->height << ", which needs "
+                              << needed << " - dropping frame");
+    return false;
+  }
+
+  return true;
+}
+
+bool H263_Base_EncoderContext::AllocateInputFrameBuffer(unsigned width, unsigned height)
+{
+  size_t frameSize = (size_t)width * height * 3 / 2;
+  size_t required  = frameSize + AV_INPUT_BUFFER_PADDING_SIZE;
+
+  if (_inputFrameBuffer != NULL && _inputFrameBufferSize >= required)
+    return true;
+
+  av_free(_inputFrameBuffer);
+  _inputFrameBufferSize = 0;
+
+  // av_malloc() gives us the alignment libavcodec wants
+  _inputFrameBuffer = (unsigned char *)av_malloc(required);
+  if (_inputFrameBuffer == NULL)
+    return false;
+
+  _inputFrameBufferSize = required;
+  return true;
 }
 
 void H263_Base_EncoderContext::CloseCodec()
 {
-  if (_context != NULL) {
-    if (_context->codec != NULL) {
-      FFMPEGLibraryInstance.AvcodecClose(_context);
-    }
+  if (_context != NULL)
+    avcodec_free_context(&_context);
+  _context = NULL;
+}
+
+/*
+  Hand one YUV420P frame to the encoder and collect the result.  The old API
+  returned the encoded bytes from a single call; the send/receive API may
+  need more than one frame before it produces anything, although with
+  max_b_frames == 0 and no lookahead the H.263 encoder produces exactly one
+  packet per frame.  Returns 1 when m_packet holds a picture, 0 when the
+  encoder wants more input and -1 on error.
+ */
+int H263_Base_EncoderContext::EncodeOneFrame(unsigned int flags)
+{
+  _inputFrame->pict_type = (flags & PluginCodec_CoderForceIFrame) ? AV_PICTURE_TYPE_I : AV_PICTURE_TYPE_NONE;
+  _inputFrame->pts = _frameCount;
+
+  int err = avcodec_send_frame(_context, _inputFrame);
+  if (err < 0 && err != AVERROR(EAGAIN)) {
+    char buf[AV_ERROR_MAX_STRING_SIZE];
+    av_strerror(err, buf, sizeof(buf));
+    TRACE_AND_LOG(tracer, 1, "avcodec_send_frame failed: " << buf);
+    return -1;
   }
+
+  av_packet_unref(m_packet);
+
+  err = avcodec_receive_packet(_context, m_packet);
+  if (err == AVERROR(EAGAIN) || err == AVERROR_EOF)
+    return 0;
+
+  if (err < 0) {
+    char buf[AV_ERROR_MAX_STRING_SIZE];
+    av_strerror(err, buf, sizeof(buf));
+    TRACE_AND_LOG(tracer, 1, "avcodec_receive_packet failed: " << buf);
+    return -1;
+  }
+
+  return 1;
 }
 
 void H263_Base_EncoderContext::Lock()
@@ -553,18 +626,25 @@ void H263_Base_EncoderContext::AddInputFormat(inputFormats & fmt)
 
 int H263_Base_EncoderContext::GetInputFormat(inputFormats & fmt, unsigned maxWidth, unsigned maxHeight)
 {
+    /* Picks the largest size the camera offers that still fits within
+       maxWidth/maxHeight - which is the negotiated capability's own ceiling
+       (H.263-QCIF/H.263-CIF/H.263-720 each represent exactly one nominal
+       size, not a range h323plus can renegotiate at runtime).
+     */
     for (std::list<inputFormats>::const_iterator r=videoInputFormats.begin(); r!=videoInputFormats.end(); ++r) {
-        if ((r->w > maxWidth) && (r->h > maxHeight))
+        if (r->w > maxWidth || r->h > maxHeight)
             continue;
 
         for (int i= 0; i < StdSizes::NumStdSizes; i++) {
-            if ((StandardVideoSizes[i].width == (int)r->w) &&
-                (StandardVideoSizes[i].height == (int)r->h)) {
-                      fmt = *r;
-                      return 1;
-            }
+            if (StandardVideoSizes[i].width != (int)r->w ||
+                StandardVideoSizes[i].height != (int)r->h)
+                continue;
+
+            fmt = *r;
+            return 1;
         }
     }
+
     return 0;
 }
 
@@ -573,69 +653,18 @@ int H263_Base_EncoderContext::GetInputFormat(inputFormats & fmt, unsigned maxWid
 H263_RFC2190_EncoderContext::H263_RFC2190_EncoderContext()
   : H263_Base_EncoderContext("RFC2190")
 {
-  currentMb = 0;
-  currentBytes = 0;
 }
 
 H263_RFC2190_EncoderContext::~H263_RFC2190_EncoderContext()
 {
   WaitAndSignal m(_mutex);
-
   CloseCodec();
-
-  if (_context != NULL) {
-    FFMPEGLibraryInstance.AvcodecFree(_context);
-    _context = NULL;
-  }
-  if (_inputFrame != NULL) {
-    FFMPEGLibraryInstance.AvcodecFree(_inputFrame);
-    _inputFrame = NULL;
-  }
-
-  TRACE_AND_LOG(tracer, 3, "encoder closed");
-}
-
-//s->avctx->rtp_callback(s->avctx, s->ptr_lastgob, current_packet_size, number_mb)
-static void rtp_callback(struct AVCodecContext *avctx, void * _data, int size, int mb_nb)
-{
-  void * opaque = avctx->opaque;
-  H263_RFC2190_EncoderContext * context = (H263_RFC2190_EncoderContext *)opaque;
-  context->RTPCallBack(avctx, _data, size, mb_nb);
-}
-
-void H263_RFC2190_EncoderContext::RTPCallBack(struct AVCodecContext * /*avctx*/, void * _data, int size, int mbCount)
-{
-  // sometimes, FFmpeg encodes the same frame multiple times
-  // we need to detect this in order to avoid duplicating the encoded data
-  if ((_data == packetizer.m_buffer) && (packetizer.fragments.size() != 0)) {
-    packetizer.fragments.resize(0);
-    currentMb = 0;
-    currentBytes = 0;
-  }
-
-  // add the fragment to the list
-  RFC2190Packetizer::fragment frag;
-  frag.length = size;
-  frag.mbNum  = currentMb;
-  packetizer.fragments.push_back(frag);
-  currentMb = currentMb + mbCount;
-  currentBytes += size;
 }
 
 bool H263_RFC2190_EncoderContext::Open()
 {
-  if (!H263_Base_EncoderContext::Open(CODEC_ID_H263))
+  if (!H263_Base_EncoderContext::Open(AV_CODEC_ID_H263))
     return false;
-
-  _context->rtp_payload_size = 1400;
-  _context->rtp_callback = &rtp_callback;
-  _context->opaque = (H263_RFC2190_EncoderContext *)this; // used to separate out packets from different encode threads
-
-//  _context->flags &= ~CODEC_FLAG_H263P_UMV;
-  _context->flags &= ~CODEC_FLAG_4MV;
-
- // _context->flags &= ~CODEC_FLAG_H263P_AIV;    // -?
- // _context->flags &= ~CODEC_FLAG_H263P_SLICE_STRUCT;  // -?
 
   SetMaxKeyFramePeriod(H263_KEY_FRAME_INTERVAL);
   SetMaxRTPFrameSize(H263_PAYLOAD_SIZE);
@@ -648,15 +677,87 @@ bool H263_RFC2190_EncoderContext::InitContext()
   return true;
 }
 
-void H263_RFC2190_EncoderContext::SetMaxRTPFrameSize (unsigned /*size*/)
+/* PLUGINCODEC_OPTION_MAX_FRAME_SIZE is the largest RTP payload we may
+   produce, not the largest datagram, so the RTP header is not deducted
+   here - that matches what the RFC 2429 side does with the same option. */
+void H263_RFC2190_EncoderContext::SetMaxRTPFrameSize (unsigned size)
 {
-  //_context->rtp_payload_size = (size * 6 / 7);
+  if (size < (RFC2190_MODE_B_HEADER_SIZE + 16))
+    size = H263_PAYLOAD_SIZE;
+  _maxRTPFrameSize = size;
+}
 
-  //if ((size * 6 / 7) > 0)
-  // _context->rtp_payload_size = (size * 6 / 7);
-  // else
-  // _context->rtp_payload_size = size;
-  //_txH263PFrame->SetMaxPayloadSize(size);
+/*
+  RFC 2190 needs to split the encoded picture on macroblock boundaries.
+  AVCodecContext::rtp_callback used to report those boundaries while
+  encoding but was removed in FFmpeg 5.0.  There are two supported
+  replacements, and this uses only one of them - deliberately.
+
+  "ps" (formerly rtp_payload_size) tells the H.263/MPEG-style encoder to
+  insert a real GOB (resync) header into the ELEMENTARY BITSTREAM roughly
+  every "ps" bytes - this is what mpegvideo_enc.c calls "rtp_mode", and nothing
+  about it is RTP-specific despite the name; it works identically whether or
+  not the output is ever put on the wire as RTP at all.  The packetiser then
+  finds those GOB headers with FindResyncMarkerReverse() and splits there,
+  producing a Mode A packet - no per-fragment metadata needed, just "here are
+  the next N bytes of the stream".
+
+  "mb_info" is the OTHER replacement: set it and every encoded AVPacket
+  carries an AV_PKT_DATA_H263_MB_INFO side data block describing macroblock
+  boundaries, which the packetiser can split on when no GOB header falls
+  close enough to the target payload size, producing a Mode B packet with
+  accurate QUANT/GOBN/MBA/motion-vector-predictor fields.
+
+  Only "ps" is set here. Two reasons, and they compound:
+
+  1. Setting "mb_info" has a genuine, deterministic libavcodec bug: it
+     allocates the side data buffer at exactly mb_width*mb_height*12 bytes
+     and resets mb_info_size just ABOVE the vbv_retry label in
+     ff_mpv_encode_picture(), so every re-encode of a frame under rate
+     control pressure keeps appending 12 more bytes to a buffer sized for a
+     single pass, and write_mb_info() eventually writes past the end of it -
+     confirmed with ASan, and confirmed this is independent of whether "ps"
+     is also set (the accumulation is gated purely by whether "mb_info" is
+     non-zero, in update_mb_info(), nothing to do with rtp_mode/"ps").
+     Checked against FFmpeg master (September 2026); the reset is still
+     above the retry label. "mb_info" must never be set until upstream fixes
+     this.
+
+  2. NOT setting "ps" either (the previous state of this function) has its
+     own, separate cost: the GOB-header-writing code in mpegvideo_enc.c is
+     gated entirely on "ps" (via s->rtp_mode = !!s->rtp_payload_size), so
+     without it the encoder writes a picture start code and then nothing
+     else - no interior resync points anywhere in the bitstream at all.
+     Confirmed empirically: with neither option set, a CIF frame carries
+     exactly one start code and no GOB headers; with "ps" set, 2-4 GOB
+     headers appear per frame at typical payload sizes. Real H.263 encoders
+     - hardware and software alike - overwhelmingly emit periodic GOB
+     headers as a matter of course, and a hardware/embedded decoder that has
+     mostly been tested against that common case may not be as forgiving of
+     a bitstream that never has one as a lenient, reference decoder is. A
+     Polycom RealPresence Desktop decoding one good frame and then going
+     black matches this: byte-identical reassembly (verified in this
+     plugin's own tests) is not the same thing as producing the kind of
+     H.263 stream most decoders in the field actually expect to see.
+
+  With only "ps" set, the packetiser gets real GOB boundaries to split on
+  for the large majority of packets (Mode A, no metadata needed) and falls
+  back to a plain byte-boundary split only on the rare oversized GOB, which
+  never touches the vulnerable code path because "mb_info" is never enabled.
+ */
+bool H263_RFC2190_EncoderContext::ApplyCodecOptions()
+{
+  // 4 bytes of Mode A or 8 bytes of Mode B payload header come on top;
+  // budget for the larger one, same as the packetiser does
+  unsigned payload = _maxRTPFrameSize;
+  if (payload > RFC2190_MODE_B_HEADER_SIZE)
+    payload -= RFC2190_MODE_B_HEADER_SIZE;
+
+  _context->flags &= ~AV_CODEC_FLAG_4MV;
+
+  FFMPEGSetPrivateOption(_context, "ps", (int64_t)payload);
+
+  return true;
 }
 
 int H263_RFC2190_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLen, BYTE * dst, unsigned & dstLen, unsigned int & flags)
@@ -693,40 +794,28 @@ int H263_RFC2190_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
   }
 
   // make sure the source frame is legal
-  if (srcRTP.GetPayloadSize() < sizeof(PluginCodec_Video_FrameHeader)) {
-    TRACE_AND_LOG(tracer, 1, "Video grab too small, closing down video transmission thread.");
+  if ((size_t)srcRTP.GetPayloadSize() < sizeof(PluginCodec_Video_FrameHeader)) {
+    TRACE_AND_LOG(tracer, 1, "Video grab too small, dropping frame");
     return 0;
   }
   PluginCodec_Video_FrameHeader * header = (PluginCodec_Video_FrameHeader *)srcRTP.GetPayloadPtr();
-  if (header->x != 0 || header->y != 0) {
-    TRACE_AND_LOG(tracer, 1, "Video grab of partial frame unsupported, closing down video transmission thread.");
+  if (!ValidateSourceFrame(srcRTP, header))
     return 0;
-  }
 
-  // if this is the first frame, or the frame size has changed, deal wth it
-  if ((_frameCount == 0) ||
-      ((unsigned) _width !=  header->width) ||
+  // if this is the first frame, or the frame size has changed, deal with it
+  if ((_context == NULL) ||
+      (_frameCount == 0) ||
+      ((unsigned) _width  != header->width) ||
       ((unsigned) _height != header->height)) {
 
     TRACE_AND_LOG(tracer, 4, "First frame received or resolution has changed - reopening codec");
-    CloseCodec();
     SetFrameWidth(header->width);
     SetFrameHeight(header->height);
     if (!OpenCodec()) {
       TRACE_AND_LOG(tracer, 1, "Reopening codec failed");
       return 0;
     }
-
-    if (_inputFrameBuffer != NULL) {
-      free(_inputFrameBuffer);
-      _inputFrameBuffer = NULL;
-	}
-#if HAVE_POSIX_MEMALIGN
-    if (posix_memalign((void **)&_inputFrameBuffer, 64, header->width*header->height*3/2 + (FF_INPUT_BUFFER_PADDING_SIZE*2)) != 0)
-#else
-    if ((_inputFrameBuffer = (BYTE *)malloc(header->width*header->height*3/2 + (FF_INPUT_BUFFER_PADDING_SIZE*2))) == NULL)
-#endif
-    {
+    if (!AllocateInputFrameBuffer(header->width, header->height)) {
       TRACE_AND_LOG(tracer, 1, "Unable to allocate memory for frame buffer");
       return 0;
     }
@@ -734,61 +823,29 @@ int H263_RFC2190_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
 
   CODEC_TRACER(tracer, "Input:seq=" << _frameCount
                        << ",size=" << header->width << "x" << header->height
-                       << ",I=" << ((flags && forceIFrame) ? "yes" : "no"));
-
-  ++_frameCount;
+                       << ",I=" << ((flags & PluginCodec_CoderForceIFrame) ? "yes" : "no"));
 
   int size = header->width * header->height;
   int frameSize = (size * 3) >> 1;
 
-  // we need FF_INPUT_BUFFER_PADDING_SIZE allocated bytes after the YVU420P image for the encoder
-  memcpy (_inputFrameBuffer, OPAL_VIDEO_FRAME_DATA_PTR(header), frameSize);
-  memset (_inputFrameBuffer + frameSize, 0 , FF_INPUT_BUFFER_PADDING_SIZE);
-  _inputFrame->data[0] = _inputFrameBuffer;
+  // libavcodec reads in multiples of the SIMD width, so the plane needs
+  // AV_INPUT_BUFFER_PADDING_SIZE readable bytes behind it
+  memcpy(_inputFrameBuffer, OPAL_VIDEO_FRAME_DATA_PTR(header), frameSize);
+  memset(_inputFrameBuffer + frameSize, 0, AV_INPUT_BUFFER_PADDING_SIZE);
 
+  _inputFrame->data[0] = _inputFrameBuffer;
   _inputFrame->data[1] = _inputFrame->data[0] + size;
   _inputFrame->data[2] = _inputFrame->data[1] + (size / 4);
-#if LIBAVCODEC_VERSION_MAJOR < 54
-  _inputFrame->pict_type = (flags & forceIFrame) ? FF_I_TYPE : 0;
-#else
-  _inputFrame->pict_type = (flags & forceIFrame) ? AV_PICTURE_TYPE_I : AV_PICTURE_TYPE_NONE;
-#endif
 
-  currentMb = 0;
-  currentBytes = 0;
+  int gotPacket = EncodeOneFrame(flags);
+  ++_frameCount;
 
-  packetizer.fragments.resize(0);
-
-  size_t newOutputSize = 100000;
-
-  if (packetizer.m_buffer != NULL) {
-    if (packetizer.m_bufferSize < newOutputSize) {
-      free(packetizer.m_buffer);
-      packetizer.m_buffer = NULL;
-    }
-  }
-  if (packetizer.m_buffer == NULL) {
-    packetizer.m_bufferSize = newOutputSize;
-#if HAVE_POSIX_MEMALIGN
-    if (posix_memalign((void **)&packetizer.m_buffer, 64, packetizer.m_bufferSize) != 0)
-#else
-    if ((packetizer.m_buffer = (BYTE *)malloc(packetizer.m_bufferSize)) == NULL)
-#endif
-    {
-      TRACE_AND_LOG(tracer, 1, "Unable to allocate memory for packet buffer");
-      return 0;
-    }
-  }
-
-  //CODEC_TRACER(tracer, "Encoder called with " << frameSize << " bytes and frame type " << _inputFrame->pict_type << " at " << header->width << "x" << header->height);
-
-  int encodedLen = FFMPEGLibraryInstance.AvcodecEncodeVideo(_context, packetizer.m_buffer, packetizer.m_bufferSize, _inputFrame);
-
-  if (encodedLen < 0) {
+  if (gotPacket < 0) {
     TRACE_AND_LOG(tracer, 1, "Encoder failed");
     return 0;
   }
-  if (encodedLen == 0) {
+
+  if (gotPacket == 0) {
     TRACE_AND_LOG(tracer, 1, "Encoder returned empty frame");
     dstRTP.SetPayloadSize(0);
     dstLen = dstRTP.GetHeaderSize();
@@ -796,25 +853,45 @@ int H263_RFC2190_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
     return 1;
   }
 
-  packetizer.m_bufferLen = encodedLen;
-
-  // push the encoded frame through the packetizer
-#if TRACE_FILE
-  {
-    const unsigned char * p =  packetizer.m_buffer;
-    CODEC_TRACER(tracer, "Raw data: " << hex << setfill('0') << setprecision(2)
-                         << (int)p[0] << ' ' << (int)p[1] << ' ' << (int)p[2] << ' ' << (int)p[3] << ' ' << (int)p[4]
-                         << setfill(' ') << dec);
-  }
+  size_t mbInfoSize = 0;
+  const unsigned char * mbInfo = NULL;
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 0, 100)
+  size_t sideDataSize = 0;
+  mbInfo = av_packet_get_side_data(m_packet, AV_PKT_DATA_H263_MB_INFO, &sideDataSize);
+  mbInfoSize = sideDataSize;
+#else
+  int sideDataSize = 0;
+  mbInfo = av_packet_get_side_data(m_packet, AV_PKT_DATA_H263_MB_INFO, &sideDataSize);
+  mbInfoSize = (sideDataSize > 0) ? (size_t)sideDataSize : 0;
 #endif
 
-  if (packetizer.Open(srcRTP.GetTimestamp(), encodedLen) < 0) {
-    TRACE_AND_LOG(tracer, 1,  "Packetizer failed");
+  /* libavcodec sizes this block at one 12 byte entry per macroblock.  If it
+     comes back longer the encoder has overrun its own buffer, so do not add
+     to the damage by reading it. */
+  size_t maxMBInfo = (size_t)(((_width + 15) / 16) * ((_height + 15) / 16)) * 12;
+  if (mbInfoSize > maxMBInfo) {
+    TRACE_AND_LOG(tracer, 1, "Discarding implausible macroblock info: " << mbInfoSize
+                              << " bytes for " << (maxMBInfo / 12) << " macroblocks");
+    mbInfo = NULL;
+    mbInfoSize = 0;
+  }
+
+  int result = packetizer.Open(srcRTP.GetTimestamp(),
+                               m_packet->data, (size_t)m_packet->size,
+                               mbInfo, mbInfoSize,
+                               _maxRTPFrameSize);
+
+  CODEC_TRACER(tracer, "Encoder returned " << m_packet->size << " bytes as "
+                        << packetizer.GetFragmentCount() << " fragments ("
+                        << (mbInfoSize / 12) << " macroblock info entries)");
+
+  av_packet_unref(m_packet);
+
+  if (result < 0) {
+    TRACE_AND_LOG(tracer, 1, "Packetizer failed with code " << result);
     flags = 1;
     return 0;
   }
-
-  CODEC_TRACER(tracer, "Encoder returned " << encodedLen << " bytes as " << packetizer.fragments.size() << " frames");
 
   // return the first encoded block of data
   if (packetizer.GetPacket(dstRTP, flags)) {
@@ -839,25 +916,13 @@ H263_RFC2429_EncoderContext::~H263_RFC2429_EncoderContext()
 
   CloseCodec();
 
-  if (_txH263PFrame)
-    delete _txH263PFrame;
-
-  if (_context != NULL) {
-    FFMPEGLibraryInstance.AvcodecFree(_context);
-    _context = NULL;
-  }
-  if (_inputFrame != NULL) {
-    FFMPEGLibraryInstance.AvcodecFree(_inputFrame);
-    _inputFrame = NULL;
-  }
-
-  TRACE_AND_LOG(tracer, 3, "encoder closed");
+  delete _txH263PFrame;
+  _txH263PFrame = NULL;
 }
-
 
 bool H263_RFC2429_EncoderContext::Open()
 {
-  if (!H263_Base_EncoderContext::Open(CODEC_ID_H263P))
+  if (!H263_Base_EncoderContext::Open(AV_CODEC_ID_H263P))
     return false;
 
   SetMaxKeyFramePeriod(H263P_KEY_FRAME_INTERVAL);
@@ -874,14 +939,27 @@ bool H263_RFC2429_EncoderContext::InitContext()
 
 void H263_RFC2429_EncoderContext::SetMaxRTPFrameSize (unsigned size)
 {
-   if ((size * 6 / 7) > 0)
-    _context->rtp_payload_size = (size * 6 / 7);
-    else
-    _context->rtp_payload_size = size;
+  if (size < 32)
+    size = H263P_PAYLOAD_SIZE;
 
-  _txH263PFrame->SetMaxPayloadSize((uint16_t)size);
+  _maxRTPFrameSize = size;
+
+  if (_txH263PFrame != NULL)
+    _txH263PFrame->SetMaxPayloadSize((uint16_t)size);
 }
 
+bool H263_RFC2429_EncoderContext::ApplyCodecOptions()
+{
+  // rtp_payload_size is the private "ps" option these days; leave a little
+  // headroom for the RFC 2429 payload header
+  unsigned payload = (_maxRTPFrameSize * 6) / 7;
+  if (payload == 0)
+    payload = _maxRTPFrameSize;
+
+  FFMPEGSetPrivateOption(_context, "ps", (int64_t)payload);
+
+  return true;
+}
 
 int H263_RFC2429_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLen, BYTE * dst, unsigned & dstLen, unsigned int & flags)
 {
@@ -900,7 +978,7 @@ int H263_RFC2429_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
   dstLen = 0;
 
   // if there are RTP packets to return, return them
-  if  (_txH263PFrame->HasRTPFrames())
+  if (_txH263PFrame->HasRTPFrames())
   {
     _txH263PFrame->GetRTPFrame(dstRTP, flags);
     dstLen = dstRTP.GetFrameLen();
@@ -908,39 +986,29 @@ int H263_RFC2429_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
     return 1;
   }
 
-  if (srcRTP.GetPayloadSize() < sizeof(PluginCodec_Video_FrameHeader)) {
-    TRACE_AND_LOG(tracer, 1, "Video grab too small, closing down video transmission thread.");
+  if ((size_t)srcRTP.GetPayloadSize() < sizeof(PluginCodec_Video_FrameHeader)) {
+    TRACE_AND_LOG(tracer, 1, "Video grab too small, dropping frame");
     return 0;
   }
 
   PluginCodec_Video_FrameHeader * header = (PluginCodec_Video_FrameHeader *)srcRTP.GetPayloadPtr();
-  if (header->x != 0 || header->y != 0) {
-    TRACE_AND_LOG(tracer, 1, "Video grab of partial frame unsupported, closing down video transmission thread.");
+  if (!ValidateSourceFrame(srcRTP, header))
     return 0;
-  }
 
-  // if this is the first frame, or the frame size has changed, deal wth it
-  if ((_frameCount == 0) ||
-      ((unsigned) _width !=  header->width) ||
+  // if this is the first frame, or the frame size has changed, deal with it
+  if ((_context == NULL) ||
+      (_frameCount == 0) ||
+      ((unsigned) _width  != header->width) ||
       ((unsigned) _height != header->height)) {
 
     TRACE_AND_LOG(tracer, 4, "First frame received or resolution has changed - reopening codec");
-    CloseCodec();
     SetFrameWidth(header->width);
     SetFrameHeight(header->height);
     if (!OpenCodec()) {
       TRACE_AND_LOG(tracer, 1, "Reopening codec failed");
       return 0;
     }
-    if (_inputFrameBuffer != NULL) {
-      free(_inputFrameBuffer);
-	  _inputFrameBuffer = NULL;
-	}
-#if HAVE_POSIX_MEMALIGN
-    if (posix_memalign((void **)&_inputFrameBuffer, 64, header->width*header->height*3/2 + (FF_INPUT_BUFFER_PADDING_SIZE*2)) != 0) {
-#else
-    if ((_inputFrameBuffer = (BYTE *)malloc(header->width*header->height*3/2 + (FF_INPUT_BUFFER_PADDING_SIZE*2))) != NULL) {
-#endif
+    if (!AllocateInputFrameBuffer(header->width, header->height)) {
       TRACE_AND_LOG(tracer, 1, "Unable to allocate memory for frame buffer");
       return 0;
     }
@@ -948,36 +1016,45 @@ int H263_RFC2429_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
 
   CODEC_TRACER(tracer, "Input:seq=" << _frameCount
                        << ",size=" << header->width << "x" << header->height
-                       << ",I=" << ((flags && forceIFrame) ? "yes" : "no"));
+                       << ",I=" << ((flags & PluginCodec_CoderForceIFrame) ? "yes" : "no"));
 
   int size = header->width * header->height;
   int frameSize = (size * 3) >> 1;
 
-  // we need FF_INPUT_BUFFER_PADDING_SIZE allocated bytes after the YVU420P image for the encoder
-  memset (_inputFrameBuffer, 0 , FF_INPUT_BUFFER_PADDING_SIZE);
-  memcpy (_inputFrameBuffer + FF_INPUT_BUFFER_PADDING_SIZE, OPAL_VIDEO_FRAME_DATA_PTR(header), frameSize);
-  memset (_inputFrameBuffer + FF_INPUT_BUFFER_PADDING_SIZE + frameSize, 0 , FF_INPUT_BUFFER_PADDING_SIZE);
+  memcpy(_inputFrameBuffer, OPAL_VIDEO_FRAME_DATA_PTR(header), frameSize);
+  memset(_inputFrameBuffer + frameSize, 0, AV_INPUT_BUFFER_PADDING_SIZE);
 
-  _inputFrame->data[0] = _inputFrameBuffer + FF_INPUT_BUFFER_PADDING_SIZE;
+  _inputFrame->data[0] = _inputFrameBuffer;
   _inputFrame->data[1] = _inputFrame->data[0] + size;
   _inputFrame->data[2] = _inputFrame->data[1] + (size / 4);
-#if LIBAVCODEC_VERSION_MAJOR < 54
-  _inputFrame->pict_type = (flags & forceIFrame) ? FF_I_TYPE : 0;
-#else
-  _inputFrame->pict_type = (flags & forceIFrame) ? AV_PICTURE_TYPE_I : AV_PICTURE_TYPE_NONE;
-#endif
 
   _txH263PFrame->BeginNewFrame();
   _txH263PFrame->SetTimestamp(srcRTP.GetTimestamp());
-  _txH263PFrame->SetFrameSize (FFMPEGLibraryInstance.AvcodecEncodeVideo(_context, _txH263PFrame->GetFramePtr(), frameSize, _inputFrame));
+
+  int gotPacket = EncodeOneFrame(flags);
   _frameCount++;
 
-  if (_txH263PFrame->GetFrameSize() == 0) {
+  if (gotPacket < 0) {
+    TRACE_AND_LOG(tracer, 1, "Encoder failed");
+    return 0;
+  }
+
+  if (gotPacket == 0) {
     TRACE_AND_LOG(tracer, 1, "Encoder internal error - there should be outstanding packets at this point");
     return 1;
   }
 
-  CODEC_TRACER(tracer, "Encoder created " << _txH263PFrame->GetFrameSize() << " output frames");
+  if ((size_t)m_packet->size > (size_t)MAX_YUV420P_FRAME_SIZE) {
+    TRACE_AND_LOG(tracer, 1, "Encoded frame of " << m_packet->size << " bytes does not fit the frame buffer");
+    av_packet_unref(m_packet);
+    return 0;
+  }
+
+  memcpy(_txH263PFrame->GetFramePtr(), m_packet->data, m_packet->size);
+  _txH263PFrame->SetFrameSize(m_packet->size);
+  av_packet_unref(m_packet);
+
+  CODEC_TRACER(tracer, "Encoder created " << _txH263PFrame->GetFrameSize() << " bytes of output");
 
   if (_txH263PFrame->HasRTPFrames())
   {
@@ -992,44 +1069,37 @@ int H263_RFC2429_EncoderContext::EncodeFrames(const BYTE * src, unsigned & srcLe
 /////////////////////////////////////////////////////////////////////////////
 
 H263_Base_DecoderContext::H263_Base_DecoderContext(const char * _prefix)
-  : prefix(_prefix)
+  : _codec(NULL)
+  , _context(NULL)
+  , _outputFrame(NULL)
+  , m_packet(NULL)
+  , _frameCount(0)
+  , prefix(_prefix)
 #if TRACE_FILE
   , tracer(_prefix, false)
 #endif
 {
-  _frameCount = 0;
-  _outputFrame = NULL;
-  _context = NULL;
-
-  if ((_codec = FFMPEGLibraryInstance.AvcodecFindDecoder(CODEC_ID_H263)) == NULL) {
+  // AV_CODEC_ID_H263 decodes both H.263 and H.263+ streams
+  if ((_codec = avcodec_find_decoder(AV_CODEC_ID_H263)) == NULL) {
     TRACE_AND_LOG(tracer, 1, "Codec not found for decoder");
     return;
   }
 
-  _context = FFMPEGLibraryInstance.AvcodecAllocContext(_codec);
-  if (_context == NULL) {
-    TRACE_AND_LOG(tracer, 1, "Failed to allocate context for decoder");
-    return;
-  }
-
-  _outputFrame = FFMPEGLibraryInstance.AvcodecAllocFrame();
+  _outputFrame = av_frame_alloc();
   if (_outputFrame == NULL) {
     TRACE_AND_LOG(tracer, 1, "Failed to allocate frame for decoder");
     return;
   }
 
-  if (!OpenCodec()) { // decoder will re-initialise context with correct frame size
-    TRACE_AND_LOG(tracer, 1, "Failed to open codec for decoder");
+  m_packet = av_packet_alloc();
+  if (m_packet == NULL) {
+    TRACE_AND_LOG(tracer, 1, "Failed to allocate packet for decoder");
     return;
   }
 
-  _frameCount = 0;
-
-  // debugging flags
-  if (Trace::CanTrace(4)) {
-    _context->debug |= FF_DEBUG_RC;
-    _context->debug |= FF_DEBUG_PICT_INFO;
-    _context->debug |= FF_DEBUG_MV;
+  if (!OpenCodec()) {
+    TRACE_AND_LOG(tracer, 1, "Failed to open codec for decoder");
+    return;
   }
 
   TRACE_AND_LOG(tracer, 4, "Decoder created");
@@ -1039,13 +1109,13 @@ H263_Base_DecoderContext::~H263_Base_DecoderContext()
 {
   CloseCodec();
 
-  if (_context != NULL) {
-    FFMPEGLibraryInstance.AvcodecFree(_context);
-    _context = NULL;
-  }
   if (_outputFrame != NULL) {
-    FFMPEGLibraryInstance.AvcodecFree(_outputFrame);
+    av_frame_free(&_outputFrame);
     _outputFrame = NULL;
+  }
+  if (m_packet != NULL) {
+    av_packet_free(&m_packet);
+    m_packet = NULL;
   }
 }
 
@@ -1053,13 +1123,37 @@ bool H263_Base_DecoderContext::OpenCodec()
 {
   if (_codec == NULL) {
     TRACE_AND_LOG(tracer, 1, "Codec not initialized");
-    return 0;
-  }
-
-  if (FFMPEGLibraryInstance.AvcodecOpen(_context, _codec) < 0) {
-    TRACE_AND_LOG(tracer, 1, "Failed to open H.263 decoder");
     return false;
   }
+
+  CloseCodec();
+
+  _context = avcodec_alloc_context3(_codec);
+  if (_context == NULL) {
+    TRACE_AND_LOG(tracer, 1, "Failed to allocate context for decoder");
+    return false;
+  }
+
+  _context->opaque = this;
+  _context->workaround_bugs = FF_BUG_AUTODETECT;
+  _context->error_concealment = FF_EC_GUESS_MVS | FF_EC_DEBLOCK;
+
+  // debugging flags have to be set before the codec is opened
+  if (Trace::CanTrace(4)) {
+    _context->debug |= FF_DEBUG_RC;
+    _context->debug |= FF_DEBUG_PICT_INFO;
+  }
+
+  int err = avcodec_open2(_context, _codec, NULL);
+  if (err < 0) {
+    char buf[AV_ERROR_MAX_STRING_SIZE];
+    av_strerror(err, buf, sizeof(buf));
+    TRACE_AND_LOG(tracer, 1, "Failed to open H.263 decoder: " << buf);
+    avcodec_free_context(&_context);
+    return false;
+  }
+
+  _frameCount = 0;
 
   TRACE_AND_LOG(tracer, 4, "Codec opened");
 
@@ -1069,11 +1163,50 @@ bool H263_Base_DecoderContext::OpenCodec()
 void H263_Base_DecoderContext::CloseCodec()
 {
   if (_context != NULL) {
-    if (_context->codec != NULL) {
-      FFMPEGLibraryInstance.AvcodecClose(_context);
-      TRACE_AND_LOG(tracer, 4, "Closed H.263 decoder" );
-    }
+    avcodec_free_context(&_context);
+    _context = NULL;
+    TRACE_AND_LOG(tracer, 4, "Closed H.263 decoder");
   }
+}
+
+/*
+  One whole access unit goes in, at most one picture comes out.  Unlike
+  avcodec_decode_video2() the send/receive API does not report how many
+  bytes were consumed, so callers that used to look at the byte count now
+  just test the return value.
+ */
+int H263_Base_DecoderContext::DecodeOneFrame(const BYTE * data, size_t length)
+{
+  if (_context == NULL || m_packet == NULL || _outputFrame == NULL)
+    return -1;
+
+  av_packet_unref(m_packet);
+  m_packet->data = (uint8_t *)data;
+  m_packet->size = (int)length;
+
+  int err = avcodec_send_packet(_context, m_packet);
+  m_packet->data = NULL;
+  m_packet->size = 0;
+
+  if (err < 0 && err != AVERROR(EAGAIN)) {
+    char buf[AV_ERROR_MAX_STRING_SIZE];
+    av_strerror(err, buf, sizeof(buf));
+    TRACE_AND_LOG(tracer, 1, "avcodec_send_packet failed: " << buf);
+    return -1;
+  }
+
+  err = avcodec_receive_frame(_context, _outputFrame);
+  if (err == AVERROR(EAGAIN) || err == AVERROR_EOF)
+    return 0;
+
+  if (err < 0) {
+    char buf[AV_ERROR_MAX_STRING_SIZE];
+    av_strerror(err, buf, sizeof(buf));
+    TRACE_AND_LOG(tracer, 1, "avcodec_receive_frame failed: " << buf);
+    return -1;
+  }
+
+  return 1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -1148,31 +1281,21 @@ bool H263_RFC2429_DecoderContext::DecodeFrames(const BYTE * src, unsigned & srcL
     _gotIFrame = true;
   }
 
-  int gotPicture = 0;
-
   TRACE_AND_LOG(tracer, 4, "Decoding " << _rxH263PFrame->GetFrameSize()  << " bytes");
-  int bytesDecoded = FFMPEGLibraryInstance.AvcodecDecodeVideo(_context, _outputFrame, &gotPicture, _rxH263PFrame->GetFramePtr(), _rxH263PFrame->GetFrameSize());
+  int gotPicture = DecodeOneFrame(_rxH263PFrame->GetFramePtr(), _rxH263PFrame->GetFrameSize());
 
   _rxH263PFrame->BeginNewFrame();
 
-  if (!gotPicture)
+  if (gotPicture <= 0)
   {
-    TRACE_AND_LOG(tracer, 1, "Decoded "<< bytesDecoded << " bytes without getting a Picture");
+    TRACE_AND_LOG(tracer, 1, "Decoder did not produce a picture");
     _skippedFrameCounter++;
     flags = (_gotAGoodFrame ? PluginCodec_ReturnCoderRequestIFrame : 0);
     _gotAGoodFrame = false;
     return 1;
   }
 
-  TRACE_AND_LOG(tracer, 4, "Decoded " << bytesDecoded << " bytes"<< ", Resolution: " << _context->width << "x" << _context->height);
-
-  // if error occurred, tell the other end to send another I-frame and hopefully we can resync
-  if (bytesDecoded < 0) {
-    TRACE_AND_LOG(tracer, 1, "Decoded 0 bytes");
-    flags = (_gotAGoodFrame ? PluginCodec_ReturnCoderRequestIFrame : 0);
-    _gotAGoodFrame = false;
-    return 1;
-  }
+  TRACE_AND_LOG(tracer, 4, "Decoded a picture, Resolution: " << _outputFrame->width << "x" << _outputFrame->height);
 
   // if decoded frame size is not legal, request an I-Frame
   if (_context->width == 0 || _context->height == 0) {
@@ -1236,9 +1359,38 @@ H263_RFC2190_DecoderContext::~H263_RFC2190_DecoderContext()
 {
 }
 
+/*
+  Every DecodeFrames() path that has nothing to show yet (still waiting on
+  more RTP fragments, or the picture failed to decode) returns through here
+  with a zero length payload.
+
+  This used to also set PluginCodec_ReturnCoderLastFrame - the same flag the
+  success path at the end of DecodeFrames() sets - on every one of those
+  empty returns.  Per its own definition in opalplugin.h ("indicates when
+  video codec returns LAST DATA for frame"), that flag means data is being
+  returned, which is never true here: dstLen is 0.  h323plus's own
+  H323PluginVideoCodec::WriteInternal() (h323pluginmgr.cxx) trusts this flag
+  alone to decide a picture is ready, then reads width/height straight out of
+  the (empty) output buffer and calls SetFrameSize() on whatever garbage is
+  sitting there - which fails, and a failed SetFrameSize() makes
+  WriteInternal() return false, which makes H323_RTPChannel::Receive()
+  (channels.cxx) close the receive channel on the spot, no retry.
+
+  Every H.263 picture above a trivial size needs more than one RTP packet,
+  and every packet before the last one has its marker bit clear - so with
+  RFC2190Depacketizer::SetPacket() correctly waiting for that marker (fixed
+  earlier in this file; without the fix, an unmarked first fragment was
+  wrongly treated as a complete picture, which is a worse bug on its own),
+  the very first video packet of any real call now reliably took this path
+  and reliably hit that h323plus bug - regardless of which encoder sent it,
+  since nothing about the sender matters here.  Not setting the flag on an
+  empty return is what the flag's own definition already says to do, and it
+  is enough on its own: WriteInternal() has a separate, correct branch for
+  "no payload yet" (toLen < PLUGIN_RTP_HEADER_SIZE) that just waits for the
+  next packet.
+ */
 static bool ReturnEmptyFrame(RTPFrame & dstRTP, unsigned & dstLen, unsigned int & flags)
 {
-  flags |= PluginCodec_ReturnCoderLastFrame;
   dstRTP.SetPayloadSize(0);
   dstLen = 0;
   return true;
@@ -1282,34 +1434,22 @@ bool H263_RFC2190_DecoderContext::DecodeFrames(const BYTE * src, unsigned & srcL
 
   TRACE_AND_LOG(tracer, 4, "Decoder called with " << depacketizer.frame.size()  << " bytes");
 
-#if FFMPEG_HAS_DECODE_ERROR_COUNT
-  unsigned error_before = _context->decode_error_count;
-#endif
-
-  int gotPicture = 0;
-  int bytesDecoded = FFMPEGLibraryInstance.AvcodecDecodeVideo(_context, _outputFrame, &gotPicture, &depacketizer.frame[0], depacketizer.frame.size());
+  int gotPicture = DecodeOneFrame(&depacketizer.frame[0], depacketizer.frame.size());
 
   depacketizer.NewFrame();
 
-  if (!gotPicture) {
+  if (gotPicture <= 0) {
     flags = PluginCodec_ReturnCoderRequestIFrame;
-    TRACE_AND_LOG(tracer, 1, "Decoded "<< bytesDecoded << " bytes without getting a Picture");
+    TRACE_AND_LOG(tracer, 1, "Decoder did not produce a picture");
     return ReturnEmptyFrame(dstRTP, dstLen, flags);
   }
 
-  TRACE_AND_LOG(tracer, 4, "Decoder processed " << bytesDecoded << " bytes, creating frame at " << _context->width << "x" << _context->height);
+  TRACE_AND_LOG(tracer, 4, "Decoder created frame at " << _outputFrame->width << "x" << _outputFrame->height);
 
-  // if error occurred, tell the other end to send another I-frame and hopefully we can resync
-  if (bytesDecoded < 0
-#if FFMPEG_HAS_DECODE_ERROR_COUNT
-      || error_before != _context->decode_error_count
-#endif
-  ) {
+  /* AVCodecContext::decode_error_count is gone; the per frame
+     decode_error_flags carry the same information. */
+  if (_outputFrame->decode_error_flags != 0) {
     flags = PluginCodec_ReturnCoderRequestIFrame;
-    return ReturnEmptyFrame(dstRTP, dstLen, flags);
-  }
-
-  if (bytesDecoded == 0) {
     return ReturnEmptyFrame(dstRTP, dstLen, flags);
   }
 
@@ -1704,6 +1844,8 @@ static int encoder_set_options(const PluginCodec_Definition *,
       context->SetMaxKeyFramePeriod (atoi(option[1]));
     if (STRCMPI(option[0], PLUGINCODEC_OPTION_TEMPORAL_SPATIAL_TRADE_OFF) == 0)
        context->SetTSTO (atoi(option[1]));
+    if (STRCMPI(option[0], PLUGINCODEC_OPTION_FRAME_TIME) == 0)
+       context->SetTargetFrameTime (atoi(option[1]));
 
     if (STRCMPI(option[0], "Annex D") == 0) {
       if (atoi(option[1]) == 1) {
@@ -1807,12 +1949,21 @@ int encoder_formats(
 	    context->Unlock();
 
 	    for (int i = 0; options[i] != NULL; i += 2) {
-          if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_TIME) == 0)
-	         options[i+1] = num2str(H263_CLOCKRATE/(fmt.r/2));
-          if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_HEIGHT) == 0)
-	         options[i+1] = num2str(fmt.h);
-          if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_WIDTH) == 0)
-	         options[i+1] = num2str(fmt.w);
+          // Written into context-owned buffers, not strdup()'d: nothing here
+          // for a caller to free, and nothing leaked if it doesn't.
+          if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_TIME) == 0) {
+            snprintf(context->m_frameTimeStr, sizeof(context->m_frameTimeStr),
+                     "%d", H263_CLOCKRATE/(fmt.r/2));
+	         options[i+1] = context->m_frameTimeStr;
+          }
+          if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_HEIGHT) == 0) {
+            snprintf(context->m_frameHeightStr, sizeof(context->m_frameHeightStr), "%u", fmt.h);
+	         options[i+1] = context->m_frameHeightStr;
+          }
+          if (STRCMPI(options[i], PLUGINCODEC_OPTION_FRAME_WIDTH) == 0) {
+            snprintf(context->m_frameWidthStr, sizeof(context->m_frameWidthStr), "%u", fmt.w);
+	         options[i+1] = context->m_frameWidthStr;
+          }
 	    }
       }
 
@@ -2030,10 +2181,18 @@ static struct PluginCodec_Option const annexP =
 static struct PluginCodec_Option const annexT =
   { PluginCodec_BoolOption,    "Annex T",   true,  PluginCodec_AndMerge, "0", "T", "0" };
 
+/* A local, non signalled option: it controls how far the encoder may back
+   off on quality to hit the negotiated bit rate.  Without it in the tables
+   the plugin manager never calls SetTSTO() and the default applies. */
+static struct PluginCodec_Option const temporalSpatialTradeOff =
+  { PluginCodec_IntegerOption, PLUGINCODEC_OPTION_TEMPORAL_SPATIAL_TRADE_OFF, false, PluginCodec_NoMerge,
+    STRINGIZE(H263_DEFAULT_TSTO), NULL, NULL, 0, "0", "31" };
+
 static struct PluginCodec_Option const annexD =
   { PluginCodec_BoolOption,    "Annex D",   true,  PluginCodec_MinMerge, "1", "D", "0" };
 
 static struct PluginCodec_Option const * const h263POptionTable[] = {
+  &temporalSpatialTradeOff,
   &qcifMPI,
   &cifMPI,
   &sqcifMPI,
@@ -2054,6 +2213,7 @@ static struct PluginCodec_Option const * const h263POptionTable[] = {
 
 
 static struct PluginCodec_Option const * const h263OptionTable[] = {
+  &temporalSpatialTradeOff,
   &mediaPacketization,
   &maxBR,
   //&videoQuality,
@@ -2069,6 +2229,7 @@ static struct PluginCodec_Option const * const h263OptionTable[] = {
 };
 
 static struct PluginCodec_Option const * const h263QCIFOptionTable[] = {
+  &temporalSpatialTradeOff,
   &mediaPacketization,
   &maxBR,
   &qcifMPI,
@@ -2076,6 +2237,7 @@ static struct PluginCodec_Option const * const h263QCIFOptionTable[] = {
 };
 
 static struct PluginCodec_Option const * const h263CIFOptionTable[] = {
+  &temporalSpatialTradeOff,
   &mediaPacketization,
   &maxBR,
   &cifMPI,
@@ -2083,6 +2245,7 @@ static struct PluginCodec_Option const * const h263CIFOptionTable[] = {
 };
 
 static struct PluginCodec_Option const * const h263CIF4OptionTable[] = {
+  &temporalSpatialTradeOff,
   &mediaPacketization,
   &maxBR,
   &cif4MPI,
@@ -2337,14 +2500,16 @@ extern "C" {
       Trace::SetLevelUserPlane(0);
     }
 
-  if (!FFMPEGLibraryInstance.Load()) {
+  if (avcodec_find_encoder(AV_CODEC_ID_H263)  == NULL ||
+      avcodec_find_encoder(AV_CODEC_ID_H263P) == NULL ||
+      avcodec_find_decoder(AV_CODEC_ID_H263)  == NULL) {
     *count = 0;
-    TRACE(1, "H.263\tCodec\tDisabled");
+    TRACE(1, "H.263\tCodec\tDisabled - libavcodec has no H.263 encoder/decoder");
     return NULL;
   }
 
-  FFMPEGLibraryInstance.AvLogSetLevel(AV_LOG_DEBUG);
-  FFMPEGLibraryInstance.AvLogSetCallback(&logCallbackFFMPEG);
+  av_log_set_level(AV_LOG_DEBUG);
+  av_log_set_callback(&logCallbackFFMPEG);
 
     if (version < PLUGIN_CODEC_VERSION_OPTIONS) {
       *count = 0;

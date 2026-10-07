@@ -1,5 +1,5 @@
 /*
- * RFC 2190 packetiser and unpacketiser 
+ * RFC 2190 packetiser and unpacketiser
  *
  * Copyright (C) 2008 Post Increment
  *
@@ -21,12 +21,30 @@
 
 #include <iostream>
 #include <string.h>
-#include <malloc.h>
-using namespace std;
+#include <stdlib.h>
+#include <stdint.h>
 
 #include "rfc2190.h"
 
-#define MAX_PACKET_LEN 1024
+using namespace std;
+
+// Mode A uses a 4 byte payload header, Mode B an 8 byte one.  The fragment
+// search always budgets for the larger of the two, as FFmpeg's own RFC 2190
+// packetiser does - a Mode A packet then simply ends up 4 bytes shorter
+// than it strictly needs to be.
+// size of one AV_PKT_DATA_H263_MB_INFO entry
+#define MB_INFO_ENTRY_SIZE 12
+
+// the mb_info side data is little endian regardless of host byte order
+static inline uint32_t ReadLE32(const unsigned char * p)
+{
+  return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
+}
+
+static inline uint16_t ReadLE16(const unsigned char * p)
+{
+  return (uint16_t)((uint32_t)p[0] | ((uint32_t)p[1] << 8));
+}
 
 const unsigned char PSC[3]      = { 0x00, 0x00, 0x80 };
 const unsigned char PSC_Mask[3] = { 0xff, 0xff, 0xfc };
@@ -64,278 +82,339 @@ static int FindByteAlignedCode(const unsigned char * base, int len, const unsign
 static int FindPSC(const unsigned char * base, int len)
 { return FindByteAlignedCode(base, len, PSC, PSC_Mask, sizeof(PSC)); }
 
-#if 0
 
-static int FindGBSC(const unsigned char * base, int len, int & sbit)
+/* Scan backwards for the last byte aligned GOB/picture start code strictly
+   inside (start, end).  A start code is the 17 bit pattern
+   0000 0000 0000 0000 1, i.e. the bytes 00 00 1xxxxxxx once byte aligned.
+   Returns end if there is none, so the caller can fall back to mb_info. */
+static const unsigned char * FindResyncMarkerReverse(const unsigned char * start,
+                                                     const unsigned char * end,
+                                                     const unsigned char * bufferEnd)
 {
-  // a GBSC is the following bit sequence:
-  //
-  //               0000 0000 0000 0000 1
-  //
-  // as it may not be byte aligned, we look for byte aligned zero byte and then examine the bytes around it
-  // to see if it is a GOB header
-  // first check to see if we are already pointing to a GBSC
-  if ((base[0] == 0x00) && (base[1] == 0x00) && ((base[2] & 0x80) != 0x80))
-    return 0;
+  const unsigned char * p = end - 1;
+  if (p > bufferEnd - 3)
+    p = bufferEnd - 3;
 
-  const unsigned char * ptr = base + 1;
-  while (len > 5) {
-    if (ptr[0] == 0x00) {
-      int offs = (int)(ptr - base - 1);
-      sbit = 0;
-      if (                                   (ptr[1]         == 0x00) && ((ptr[2] & 0x80) == 0x80) ) return offs+1;
-      ++sbit;
-      if (    ((ptr[-1] & 0x01) == 0x00) &&  (ptr[1]         == 0x01)                              ) return offs;
-      ++sbit;
-      if (    ((ptr[-1] & 0x03) == 0x00) && ((ptr[1] & 0xfe) == 0x02)                              ) return offs;
-      ++sbit;
-      if (    ((ptr[-1] & 0x07) == 0x00) && ((ptr[1] & 0xfc) == 0x04)                              ) return offs;
-      ++sbit;
-      if (    ((ptr[-1] & 0x0f) == 0x00) && ((ptr[1] & 0xf8) == 0x08)                              ) return offs;
-      ++sbit;
-      if (    ((ptr[-1] & 0x1f) == 0x00) && ((ptr[1] & 0xf0) == 0x10)                              ) return offs;
-      ++sbit;
-      if (    ((ptr[-1] & 0x3f) == 0x00) && ((ptr[1] & 0xe0) == 0x20)                              ) return offs;
-      ++sbit;
-      if (    ((ptr[-1] & 0x7f) == 0x00) && ((ptr[1] & 0xc0) == 0x40)                              ) return offs;
-    }
-    ++ptr;
-    --len;
+  for (; p > start; --p) {
+    if (p[0] == 0 && p[1] == 0 && (p[2] & 0x80) != 0)
+      return p;
   }
 
-  return -1;
+  return end;
 }
 
-#endif
 
-///////////////////////////////////////////////////////////////////////////////////////3Y
+///////////////////////////////////////////////////////////////////////////////////////
 
 RFC2190Packetizer::RFC2190Packetizer()
+  : m_currentFragment(0)
+  , m_timestamp(0)
+  , m_TR(0)
+  , m_srcFormat(0)
+  , m_iFrame(true)
+  , m_annexD(false)
+  , m_annexE(false)
+  , m_annexF(false)
+  , m_annexG(false)
+  , m_pQuant(0)
+  , m_cpm(false)
 {
-  m_buffer = NULL;
-  m_bufferSize = 0;
-  m_bufferLen = 0;
-  TR = 0;
-  frameSize = 0;
-  iFrame = true;
-  annexD = 0;
-  annexE = 0;
-  annexF = 0;
-  annexG = 0;
-  pQuant = 0;
-  cpm = 0;
-  macroblocksPerGOB = 0;
-  timestamp = 0;
-  fragPtr = NULL;
 }
+
 
 RFC2190Packetizer::~RFC2190Packetizer()
 {
-  free(m_buffer);
-  m_buffer = NULL;
 }
 
-int RFC2190Packetizer::Open(unsigned long _timestamp, unsigned long /*maxLen*/)
+
+int RFC2190Packetizer::ParsePictureHeader()
 {
-  // do a sanity check on the fragment data - must be equal to maxLen
-  {
-    unsigned long len = 0;
-    FragmentListType::iterator r;
-    for (r = fragments.begin(); r != fragments.end(); ++r) 
-      len += r->length;
+  const unsigned char * data = &m_buffer[0];
+  size_t dataLen = m_buffer.size();
 
-//    if (len != maxLen) 
-//      cout << "rfc2190: mismatch between encoder length and fragment length - " << len << "/" << maxLen << endl;
-  }
-  
-  // save timestamp
-  timestamp = _timestamp;
-
-  const unsigned char * data = m_buffer;
-  size_t dataLen = m_bufferSize;
-
-  // make sure data is at least long enough to contain PSC, TR & minimum PTYPE, PQUANT and CPM
+  // must be long enough to hold PSC, TR and the mandatory part of PTYPE,
+  // PQUANT and CPM
   if (dataLen < 7)
     return -1;
 
-  // ensure data starts with PSC
+  // must start with a picture start code
   //     0         1         2
   // 0000 0000 0000 0000 1000 00..
-  if (FindPSC(data, dataLen) != 0)
+  if (FindPSC(data, (int)dataLen) != 0)
     return -2;
 
-  // get TR
-  //     2         3    
+  // TR
+  //     2         3
   // .... ..XX XXXX XX..
-  TR = ((data[2] << 6) & 0xfc) | (data[3] >> 2);
-      
-  // make sure mandatory part of PTYPE is present
-  //     3    
+  m_TR = ((data[2] << 6) & 0xfc) | (data[3] >> 2);
+
+  // mandatory part of PTYPE
+  //     3
   // .... ..10
   if ((data[3] & 0x03) != 2)
     return -3;
 
-  // we don't do split screen, document indicator, full picture freeze
-  //     4    
+  // split screen, document camera and freeze picture release are not supported
+  //     4
   // XXX. ....
   if ((data[4] & 0xe0) != 0)
     return -4;
 
-  // get image size
+  // source format
   //     4
   // ...X XX..
-  frameSize = (data[4] >> 2) & 0x7;
-  macroblocksPerGOB = MacroblocksPerGOBTable[frameSize];
-  if (macroblocksPerGOB == -1)
+  m_srcFormat = (data[4] >> 2) & 0x7;
+  if (MacroblocksPerGOBTable[m_srcFormat] == -1)
     return -6;
 
-  // get I-frame flag
+  // picture coding type
   //     4
   // .... ..X.
-  iFrame = (data[4] & 2) == 0;
+  m_iFrame = (data[4] & 0x02) == 0;
 
-  // get annex bits:
-  //   Annex D - unrestricted motion vector mode
-  //   Annex E - syntax-based arithmetic coding mode
-  //   Annex F - advanced prediction mode
-  //   Annex G - PB-frames mode
+  // annex bits:
+  //   Annex D - unrestricted motion vectors
+  //   Annex E - syntax based arithmetic coding
+  //   Annex F - advanced prediction
+  //   Annex G - PB frames
   //
   //     4         5
   // .... ...X XXX. ....
-  annexD = data[4] & 0x01;
-  annexE = data[5] & 0x80;
-  annexF = data[5] & 0x40;
-  annexG = data[5] & 0x20;
+  m_annexD = (data[4] & 0x01) != 0;
+  m_annexE = (data[5] & 0x80) != 0;
+  m_annexF = (data[5] & 0x40) != 0;
+  m_annexG = (data[5] & 0x20) != 0;
 
-  // annex G not supported 
-  if (annexG)
+  // PB frames are not supported
+  if (m_annexG)
     return -5;
 
-  // get PQUANT
+  // PQUANT
   //     5
   // ...X XXXX
-  pQuant = data[5] & 0x1f;
+  m_pQuant = data[5] & 0x1f;
 
-  // get CPM
+  // CPM
   //     6
   // X... ....
-  cpm = (data[6] & 0x80) != 0;
+  m_cpm = (data[6] & 0x80) != 0;
 
-  // ensure PEI is always 0
+  // PEI must be 0
   //     6
   // .X.. ....
-  if ((data[6] & 0x40) != 0) 
+  if (!m_cpm && (data[6] & 0x40) != 0)
     return -6;
-
-#if 0
-  cout << "TR=" << TR 
-       << ",size=" << frameSize 
-       << ",I=" << iFrame 
-       << ",D=" << annexD
-       << ",E=" << annexE
-       << ",F=" << annexF
-       << ",G=" << annexG
-       << ",PQUANT=" << pQuant
-       << endl;
-
-#endif
-
-  // split fragments longer than the maximum
-  FragmentListType::iterator r;
-  for (r = fragments.begin(); r != fragments.end(); ++r) {
-    while (r->length > MAX_PACKET_LEN) {
-      int oldLen = r->length;
-      int newLen = MAX_PACKET_LEN;
-      if ((oldLen - newLen) < MAX_PACKET_LEN)
-        newLen = oldLen / 2;
-      fragment oldFrag = *r;
-      r = fragments.erase(r);
-
-      fragment frag;
-      frag.length = newLen;
-      frag.mbNum  = oldFrag.mbNum;
-      r = fragments.insert(r, frag);
-
-      frag.length = oldLen - newLen;
-      frag.mbNum  = oldFrag.mbNum;
-      r = fragments.insert(r, frag);
-      // for loop will move r to next entry
-    }
-  }
-
-  // reset pointers to start of fragments
-  currFrag = fragments.begin();
-  fragPtr = m_buffer;
 
   return 0;
 }
 
+
+void RFC2190Packetizer::BuildFragments(const unsigned char * mbInfo,
+                                       size_t mbInfoLen,
+                                       size_t maxPayloadSize)
+{
+  m_fragments.clear();
+  m_currentFragment = 0;
+
+  const unsigned char * base = &m_buffer[0];
+  const unsigned char * bufferEnd = base + m_buffer.size();
+  const unsigned char * buf = base;
+
+  size_t size = m_buffer.size();
+  size_t mbInfoCount = mbInfoLen / MB_INFO_ENTRY_SIZE;
+  size_t mbInfoPos = 0;
+
+  // usable payload per packet, assuming the larger Mode B header
+  size_t maxData = (maxPayloadSize > RFC2190_MODE_B_HEADER_SIZE)
+                        ? maxPayloadSize - RFC2190_MODE_B_HEADER_SIZE : 1;
+
+  unsigned sBits = 0;
+  unsigned eBits = 0;
+
+  // state carried from one split point to the next, used for the Mode B
+  // header of the packet that *starts* at that point
+  Fragment state;
+  memset(&state, 0, sizeof(state));
+
+  while (size > 0) {
+    Fragment frag = state;
+    size_t len = (maxData < size) ? maxData : size;
+
+    eBits = 0;
+
+    // look for a nicer place to split the frame
+    if (len < size) {
+      const unsigned char * end = FindResyncMarkerReverse(buf, buf + len, bufferEnd);
+      len = (size_t)(end - buf);
+
+      if (len < maxData) {
+        /* A real GOB header starts the next fragment.  Read its GOB number
+           (GBSC is 16 zero bits then a 1, so end[2]'s top bit is that 1 and
+           the next 5 bits - the rest of end[2] - are GN) directly out of
+           the bitstream, the same source of truth the encoder itself used,
+           rather than trying to track it by counting splits.  This is what
+           lets the RARE fallback below still report a correct GOB number
+           even on a picture with no mb_info at all - which is the normal
+           case now, see ApplyCodecOptions() in h263-1998.cxx for why. */
+        if (end + 2 < bufferEnd)
+          state.gobn = (unsigned)((end[2] >> 2) & 0x1F);
+      }
+      else {
+        // no GOB header close enough to split on, fall back to the
+        // macroblock info
+
+        // skip entries before the current position
+        while (mbInfoPos < mbInfoCount) {
+          uint32_t pos = ReadLE32(&mbInfo[MB_INFO_ENTRY_SIZE*mbInfoPos]) / 8;
+          if (pos >= (uint32_t)(buf - base))
+            break;
+          mbInfoPos++;
+        }
+
+        // advance to the last entry that still fits
+        while (mbInfoPos + 1 < mbInfoCount) {
+          uint32_t pos = ReadLE32(&mbInfo[MB_INFO_ENTRY_SIZE*(mbInfoPos + 1)]) / 8;
+          if (pos >= (uint32_t)(end - base))
+            break;
+          mbInfoPos++;
+        }
+
+        if (mbInfoPos < mbInfoCount) {
+          const unsigned char * ptr = &mbInfo[MB_INFO_ENTRY_SIZE*mbInfoPos];
+          uint32_t bitPos = ReadLE32(ptr);
+          uint32_t bytePos = (bitPos + 7) / 8;
+          if (bytePos <= (uint32_t)(end - base)) {
+            state.quant = ptr[4];
+            state.gobn  = ptr[5];
+            state.mba   = (unsigned)ReadLE16(&ptr[6]);
+            state.hmv1  = (int)(int8_t)ptr[8];
+            state.vmv1  = (int)(int8_t)ptr[9];
+            state.hmv2  = (int)(int8_t)ptr[10];
+            state.vmv2  = (int)(int8_t)ptr[11];
+            eBits = 8*bytePos - bitPos;
+            len   = bytePos - (size_t)(buf - base);
+            mbInfoPos++;
+          }
+        }
+        // if there is no usable macroblock info we just split on a byte
+        // boundary and hope the far end copes; that is what happens when
+        // neither "mb_info" nor "ps" were accepted by the encoder
+      }
+    }
+
+    frag.offset = (size_t)(buf - base);
+    frag.length = len;
+    frag.sBit   = sBits;
+    frag.eBit   = eBits;
+    // Mode A is only legal when the fragment starts on a start code
+    frag.modeB  = !(size > 2 && buf[0] == 0 && buf[1] == 0);
+
+    m_fragments.push_back(frag);
+
+    if (eBits != 0) {
+      sBits = 8 - eBits;
+      len--;            // the shared byte is repeated in the next packet
+    }
+    else {
+      sBits = 0;
+    }
+
+    buf  += len;
+    size -= len;
+  }
+}
+
+
+int RFC2190Packetizer::Open(unsigned long timeStamp,
+                            const unsigned char * encoded,
+                            size_t encodedLen,
+                            const unsigned char * mbInfo,
+                            size_t mbInfoLen,
+                            size_t maxPayloadSize)
+{
+  m_timestamp = timeStamp;
+  m_fragments.clear();
+  m_currentFragment = 0;
+
+  m_buffer.assign(encoded, encoded + encodedLen);
+
+  int result = ParsePictureHeader();
+  if (result < 0)
+    return result;
+
+  if (mbInfo == NULL)
+    mbInfoLen = 0;
+
+  BuildFragments(mbInfo, mbInfoLen, maxPayloadSize);
+
+  return 0;
+}
+
+
 int RFC2190Packetizer::GetPacket(RTPFrame & outputFrame, unsigned int & flags)
 {
-  while ((fragments.size() != 0) && (currFrag != fragments.end())) {
-      
-    // set the timestamp
-    outputFrame.SetTimestamp(timestamp);
-    fragment frag = *currFrag++;
+  while (m_currentFragment < m_fragments.size()) {
 
+    const Fragment & frag = m_fragments[m_currentFragment++];
 
-    // if this fragment starts with a GBSC, then output as Mode A else output as Mode B
-    bool modeA = ((frag.length >= 3) &&
-                  (fragPtr[0] == 0x00) &&
-                  (fragPtr[1] == 0x00) &&
-                  ((fragPtr[2] & 0x80) == 0x80));
-
+    size_t hdrSize = frag.modeB ? RFC2190_MODE_B_HEADER_SIZE : RFC2190_MODE_A_HEADER_SIZE;
     size_t payloadRemaining = outputFrame.GetFrameLen() - outputFrame.GetHeaderSize();
 
-    // offset of the data
-    size_t offs = modeA ? 4 : 8;
+    if ((frag.length + hdrSize) > payloadRemaining)
+      continue;                 // will not fit, drop it
 
-    // make sure RTP storage is sufficient
-    if ((frag.length + offs) > payloadRemaining) {
-      //std::cout << "no room for Mode " << (modeA ? 'A' : 'B') << " frame - " << (frag.length+offs) << " > " << payloadRemaining << std::endl;
-      continue;
-    }
+    outputFrame.SetTimestamp(m_timestamp);
+    outputFrame.SetPayloadSize((int)(hdrSize + frag.length));
 
-    // set size of final frame
-    outputFrame.SetPayloadSize(offs + frag.length);
-
-    // get ptr to payload that is about to be created
     unsigned char * ptr = outputFrame.GetPayloadPtr();
 
-    if (modeA) {
-      int sBit = 0;
-      int eBit = 0;
-      ptr[0] = (unsigned char)(((sBit & 7) << 3) | (eBit & 7));
-      ptr[1] = (unsigned char)((frameSize << 5) | (iFrame ? 0 : 0x10) | (annexD ? 0x08 : 0) | (annexE ? 0x04 : 0) | (annexF ? 0x02 : 0));
-      ptr[2] = ptr[3] = 0;
+    if (!frag.modeB) {
+      // Mode A
+      //  0                   1                   2                   3
+      // |F|P|SBIT |EBIT | SRC |I|U|S|A|R      |DBQ| TRB |    TR         |
+      ptr[0] = (unsigned char)(((frag.sBit & 7) << 3) | (frag.eBit & 7));
+      ptr[1] = (unsigned char)((m_srcFormat << 5)
+                             | (m_iFrame  ? 0 : 0x10)
+                             | (m_annexD  ? 0x08 : 0)
+                             | (m_annexE  ? 0x04 : 0)
+                             | (m_annexF  ? 0x02 : 0));
+      ptr[2] = 0;
+      ptr[3] = (unsigned char)m_TR;
     }
-    else
-    {
-      // create the Mode B header
-      int sBit = 0;
-      int eBit = 0;
-      int gobn = frag.mbNum / macroblocksPerGOB;
-      int mba  = frag.mbNum % macroblocksPerGOB;
-      ptr[0] = (unsigned char)(0x80 | ((sBit & 7) << 3) | (eBit & 7));
-      ptr[1] = (unsigned char)(frameSize << 5);
-      ptr[2] = (unsigned char)(((gobn << 3) & 0xf8) | ((mba >> 6) & 0x7));
-      ptr[3] = (unsigned char)((mba << 2) & 0xfc);
-      ptr[4] = (iFrame ? 0 : 0x80) | (annexD ? 0x40 : 0) | (annexE ? 0x20 : 0) | (annexF ? 0x010: 0);
-      ptr[5] = ptr[6] = ptr[7] = 0;
+    else {
+      // Mode B
+      //  0                   1                   2                   3
+      // |F|P|SBIT |EBIT | SRC | QUANT   |  GOBN   |   MBA          |R  |
+      // |I|U|S|A| HMV1        | VMV1        | HMV2        | VMV2        |
+      int hmv1 = frag.hmv1 & 0x7f;
+      int vmv1 = frag.vmv1 & 0x7f;
+      int hmv2 = frag.hmv2 & 0x7f;
+      int vmv2 = frag.vmv2 & 0x7f;
+      ptr[0] = (unsigned char)(0x80 | ((frag.sBit & 7) << 3) | (frag.eBit & 7));
+      ptr[1] = (unsigned char)((m_srcFormat << 5) | (frag.quant & 0x1f));
+      ptr[2] = (unsigned char)(((frag.gobn << 3) & 0xf8) | ((frag.mba >> 6) & 0x07));
+      ptr[3] = (unsigned char)((frag.mba << 2) & 0xfc);
+      ptr[4] = (unsigned char)((m_iFrame ? 0 : 0x80)
+                             | (m_annexD ? 0x40 : 0)
+                             | (m_annexE ? 0x20 : 0)
+                             | (m_annexF ? 0x10 : 0)
+                             | ((hmv1 >> 3) & 0x0f));
+      ptr[5] = (unsigned char)(((hmv1 << 5) & 0xe0) | ((vmv1 >> 2) & 0x1f));
+      ptr[6] = (unsigned char)(((vmv1 << 6) & 0xc0) | ((hmv2 >> 1) & 0x3f));
+      ptr[7] = (unsigned char)(((hmv2 << 7) & 0x80) | (vmv2 & 0x7f));
     }
 
-    // copy the data
-    memcpy(ptr + offs, fragPtr, frag.length);
+    memcpy(ptr + hdrSize, &m_buffer[frag.offset], frag.length);
 
-    fragPtr += frag.length;
-
-    // set marker bit
     flags = 0;
-    if (currFrag == fragments.end()) {
+    if (m_currentFragment == m_fragments.size()) {
       flags |= 1;
       outputFrame.SetMarker(1);
     }
-    if (iFrame)
+    else {
+      outputFrame.SetMarker(0);
+    }
+    if (m_iFrame)
       flags |= 2;
 
     return 1;
@@ -402,13 +481,10 @@ int RFC2190Depacketizer::SetPacket(const RTPFrame & inputFrame, bool & requestIF
   unsigned int sbit = (payload[0] >> 3) & 0x07;
   unsigned hdrLen;
 
-  char mode;
-
   // handle mode A frames
   if ((payload[0] & 0x80) == 0) {
     isIFrame = (payload[1] & 0x10) == 0;
     hdrLen = 4;
-    mode = 'A';
 
 #if 0
     // sanity check data
@@ -428,7 +504,6 @@ int RFC2190Depacketizer::SetPacket(const RTPFrame & inputFrame, bool & requestIF
       return LostSync(requestIFrame, "mode B payload too small");
     isIFrame = (payload[4] & 0x80) == 0;
     hdrLen = 8;
-    mode = 'B';
   }
 
   // handle mode C frames
@@ -437,7 +512,6 @@ int RFC2190Depacketizer::SetPacket(const RTPFrame & inputFrame, bool & requestIF
       return LostSync(requestIFrame, "mode C payload too small");
     isIFrame = (payload[4] & 0x80) == 0;
     hdrLen = 12;
-    mode = 'C';
   }
 
   // if ebit and sbit do not add up, then we have lost sync
@@ -468,9 +542,10 @@ int RFC2190Depacketizer::SetPacket(const RTPFrame & inputFrame, bool & requestIF
   // keep ebit for next time
   lastEbit = payload[0] & 0x07;
 
-  // return 0 if no frame yet, return 1 if frame is available
-//  if (!inputFrame.GetMarker()) 
-//    return 0;
+  /* Return 0 while the picture is still being reassembled and 1 once the
+     marker bit says it is complete. */
+  if (!inputFrame.GetMarker())
+    return 0;
 
   return 1;
 }

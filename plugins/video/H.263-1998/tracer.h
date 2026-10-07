@@ -17,6 +17,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #define TRACE_AND_LOG(tracer, level, text) \
     TRACE(level, tracer.GetPrefix() << "\t" << tracer.GetDirection() << "\t" << text); \
@@ -60,7 +61,7 @@ class Tracer
         if (sequence == 0) 
           baseTime = time(NULL);
         char name[100];
-        sprintf(name, "h263_%u_%i.log", baseTime, ++sequence);
+        sprintf(name, "h263_%lu_%i.log", (unsigned long)baseTime, ++sequence);
         file = creat(name, 0777);
 
         if (file == -1) {
@@ -104,7 +105,9 @@ std::cerr << "Code trace file " << name << " opened" << std::endl;
     {
       stream << std::endl;
       std::string str = stream.str();
-      ::write(file, str.c_str(), str.length());
+      if (::write(file, str.c_str(), str.length()) < 0) {
+        // nothing sensible to do in a trace logger if the write itself fails
+      }
       stream.clear();
       stream.str("");
       mutex.Signal();
