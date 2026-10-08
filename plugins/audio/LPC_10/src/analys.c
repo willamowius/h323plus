@@ -246,7 +246,7 @@ static integer c__1 = 1;
     extern /* Subroutine */ int onset_(real *, integer *, integer *, integer *
 	    , integer *, integer *, integer *, struct lpc10_encoder_state *);
     integer *osptr;
-    extern /* Subroutine */ placea_(integer *, integer *
+    extern /* Subroutine */ int placea_(integer *, integer *
 	    , integer *, integer *, integer *, integer *, integer *, integer *
 	    , integer *), dcbias_(integer *, real *, real *), placev_(integer 
 	    *, integer *, integer *, integer *, integer *, integer *, integer 

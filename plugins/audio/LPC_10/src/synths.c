@@ -185,7 +185,7 @@ static real c_b2 = .7f;
     extern /* Subroutine */ int deemp_(real *, integer *, struct lpc10_decoder_state *);
     real ratio;
     integer ipiti[16];
-    extern /* Subroutine */ bsynz_(real *, integer *, 
+    extern /* Subroutine */ int bsynz_(real *, integer *, 
 	    integer *, real *, real *, real *, real *, struct lpc10_decoder_state *), irc2pc_(real *, real *
 	    , integer *, real *, real *);
     real g2pass;
