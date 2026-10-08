@@ -97,6 +97,8 @@ void H264Frame::SetFromFrame (const NALSource * nals, unsigned numberOfNALs) {
   uint8_t* currentPositionInFrame = (uint8_t*) _encodedFrame;
   if (_NALs) free(_NALs);
   _NALs = (h264_nal_t *)malloc(encodedNALS * sizeof(h264_nal_t));
+  if (_NALs == NULL)
+    return;
   _numberOfNALsReserved = encodedNALS;
 
   _encodedFrameLen = 0;
