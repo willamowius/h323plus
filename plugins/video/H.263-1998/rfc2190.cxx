@@ -342,8 +342,10 @@ int RFC2190Packetizer::Open(unsigned long timeStamp,
   if (result < 0)
     return result;
 
-  if (mbInfo == NULL)
+  if (mbInfo == NULL) {
     mbInfoLen = 0;
+    return 0;
+  }
 
   BuildFragments(mbInfo, mbInfoLen, maxPayloadSize);
 
