@@ -604,15 +604,24 @@ PBoolean PNatMethod_H46019::CreateSocketPair(PUDPSocket * & socket1,
            muxSockets.rtp = new H46019MultiplexSocket(true);
            muxSockets.rtcp = new H46019MultiplexSocket(false);
            muxPortInfo.currentPort = muxPortInfo.basePort-1;
-            while ((!OpenSocket(*muxSockets.rtp, muxPortInfo, binding)) ||
-                   (!OpenSocket(*muxSockets.rtcp, muxPortInfo, binding)) ||
-                   (muxSockets.rtcp->GetPort() != muxSockets.rtp->GetPort() + 1) )
-                {
-                    delete muxSockets.rtp;
-                    delete muxSockets.rtcp;
-                    muxSockets.rtp = new H46019MultiplexSocket(true);    /// Data
-                    muxSockets.rtcp = new H46019MultiplexSocket(false);    /// Signal
+            unsigned attempts = (unsigned)muxPortInfo.maxPort - muxPortInfo.basePort + 1;
+            for (;;) {
+                PBoolean opened = OpenSocket(*muxSockets.rtp, muxPortInfo, binding) &&
+                                  OpenSocket(*muxSockets.rtcp, muxPortInfo, binding);
+                if (opened && (muxSockets.rtcp->GetPort() == muxSockets.rtp->GetPort() + 1))
+                    break;
+
+                delete muxSockets.rtp;
+                delete muxSockets.rtcp;
+                muxSockets.rtp = NULL;
+                muxSockets.rtcp = NULL;
+                if (!opened || --attempts == 0) {
+                    PTRACE(1, "H46019\tUnable to allocate sequential multiplex UDP port pair");
+                    return FALSE;
                 }
+                muxSockets.rtp = new H46019MultiplexSocket(true);    /// Data
+                muxSockets.rtcp = new H46019MultiplexSocket(false);    /// Signal
+            }
                PTRACE(4, "H46019\tMultiplex UDP ports "
                      << muxSockets.rtp->GetPort() << '-' << muxSockets.rtcp->GetPort());
 
@@ -633,15 +642,24 @@ PBoolean PNatMethod_H46019::CreateSocketPair(PUDPSocket * & socket1,
        socket2 = new H46019UDPSocket(*handler,info,false);    /// Signal
 
         /// Make sure we have sequential ports
-        while ((!OpenSocket(*socket1, pairedPortInfo,binding)) ||
-               (!OpenSocket(*socket2, pairedPortInfo,binding)) ||
-               (socket2->GetPort() != socket1->GetPort() + 1) )
-            {
-                delete socket1;
-                delete socket2;
-                socket1 = new H46019UDPSocket(*handler,info,true);    /// Data
-                socket2 = new H46019UDPSocket(*handler,info,false);    /// Signal
+        unsigned attempts = (unsigned)pairedPortInfo.maxPort - pairedPortInfo.basePort + 1;
+        for (;;) {
+            PBoolean opened = OpenSocket(*socket1, pairedPortInfo, binding) &&
+                              OpenSocket(*socket2, pairedPortInfo, binding);
+            if (opened && (socket2->GetPort() == socket1->GetPort() + 1))
+                break;
+
+            delete socket1;
+            delete socket2;
+            socket1 = NULL;
+            socket2 = NULL;
+            if (!opened || --attempts == 0) {
+                PTRACE(1, "H46019\tUnable to allocate sequential UDP port pair");
+                return FALSE;
             }
+            socket1 = new H46019UDPSocket(*handler,info,true);    /// Data
+            socket2 = new H46019UDPSocket(*handler,info,false);    /// Signal
+        }
 
             PTRACE(5, "H46019\tUDP ports "
                    << socket1->GetPort() << '-' << socket2->GetPort());
@@ -656,22 +674,22 @@ PBoolean PNatMethod_H46019::OpenSocket(PUDPSocket & socket, PortInfo & portInfo,
 {
     PWaitAndSignal mutex(portInfo.mutex);
 
-    WORD startPort = portInfo.currentPort;
+    // try each port in the range at most once
+    unsigned numPorts = (portInfo.maxPort >= portInfo.basePort) ? (unsigned)portInfo.maxPort - portInfo.basePort + 1 : 1;
 
-    do {
+    for (unsigned i = 0; i < numPorts; ++i) {
         portInfo.currentPort++;
-        if (portInfo.currentPort > portInfo.maxPort)
+        if (portInfo.currentPort > portInfo.maxPort || portInfo.currentPort < portInfo.basePort)
             portInfo.currentPort = portInfo.basePort;
 
         if (socket.Listen(binding,1, portInfo.currentPort)) {
             socket.SetReadTimeout(500);
             return true;
         }
-
-    } while (portInfo.currentPort != startPort);
+    }
 
     PTRACE(2, "H46019\tFailed to bind to " << binding << " local UDP port range "
-        << portInfo.currentPort << '-' << portInfo.maxPort);
+        << portInfo.basePort << '-' << portInfo.maxPort);
       return false;
 }
 
