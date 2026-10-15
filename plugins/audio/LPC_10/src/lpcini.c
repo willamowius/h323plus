@@ -46,13 +46,7 @@ extern int lpcini_(void);
 
 #include "f2c.h"
 
-#if defined(_WIN32) || defined(_WIN32_WCE)
-  #ifdef _MSC_VER
-    #include <malloc.h>
-  #endif
-#else
-	extern void * malloc();
-#endif
+#include <malloc.h>
 
 /* Common Block Declarations */
 
