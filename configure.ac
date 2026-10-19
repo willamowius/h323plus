@@ -447,7 +447,7 @@ dnl MSWIN_DISPLAY h248,H.248
 dnl MSWIN_DEFINE  h248,H323_H248
 
 AC_ARG_ENABLE(h248,
-       [  --disable-h248          enable H.248])
+       [  --disable-h248          disable H.248])
 if test "${enable_h248}x" = "x" ; then
   enable_h248=$default_h248
 fi
