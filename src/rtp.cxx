@@ -1127,14 +1127,15 @@ RTP_Session::SendReceiveStatus RTP_Session::OnReceiveControl(RTP_ControlFrame & 
             break;
           }
           if (size > count) {
-            // verify that RTCP packed is indeed as long as length byte indicates
-            if (size >= payload[count] + sizeof(DWORD) /*SSRC*/ + sizeof(unsigned char) /* length */) {
+            // verify that the RTCP packet is as long as the reason length byte indicates:
+            // SSRC list (count bytes) + length byte + reason text
+            if (count + 1 + payload[count] <= size) {
               reason = PString((const char *)(payload+count+1), payload[count]);
             } else {
               PTRACE(2, "RTP\tGoodbye packet invalid");
             }
           }
-          PDWORDArray sources(count);
+          PDWORDArray sources(frame.GetCount());   // one entry per SSRC, count is in bytes
           for (PINDEX i = 0; i < (PINDEX)frame.GetCount(); i++) {
             sources[i] = ((const PUInt32b *)payload)[i];
           }
