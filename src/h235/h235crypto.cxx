@@ -861,6 +861,11 @@ PBoolean H235Session::ReadFrameInPlace(RTP_DataFrame & frame)
 {
     memcpy(m_ivSequence, frame.GetSequenceNumberPtr(), 6);
     m_padding = frame.GetPadding();
+    // the RTP payload size comes from the network: make sure the scratch buffer is big enough.
+    // The plaintext is never longer than the ciphertext, but EVP_DecryptUpdate/Final and the
+    // CTS helpers need room for inLength + 1 block in the output buffer.
+    if (m_frameBuffer.GetSize() < frame.GetPayloadSize() + 64)
+        m_frameBuffer.SetSize(frame.GetPayloadSize() + 64);
     frame.SetPayloadSize(m_context.DecryptInPlace(frame.GetPayloadPtr(), frame.GetPayloadSize(), m_frameBuffer.GetPointer(), m_ivSequence, m_padding));
     memmove(frame.GetPayloadPtr(), m_frameBuffer.GetPointer(), frame.GetPayloadSize());
     frame.SetPadding(m_padding);
@@ -886,6 +891,9 @@ PBoolean H235Session::WriteFrameInPlace(RTP_DataFrame & frame)
 {
     memcpy(m_ivSequence, frame.GetSequenceNumberPtr(), 6);
     m_padding = frame.GetPadding();
+    // encryption can add up to one block of padding
+    if (m_frameBuffer.GetSize() < frame.GetPayloadSize() + 64)
+        m_frameBuffer.SetSize(frame.GetPayloadSize() + 64);
     frame.SetPayloadSize(m_context.EncryptInPlace(frame.GetPayloadPtr(), frame.GetPayloadSize(), m_frameBuffer.GetPointer(), m_ivSequence, m_padding));
     memmove(frame.GetPayloadPtr(), m_frameBuffer.GetPointer(), frame.GetPayloadSize());
     frame.SetPadding(m_padding);
