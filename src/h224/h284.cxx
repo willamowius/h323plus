@@ -72,7 +72,7 @@ PBoolean H284_Frame::ReadInstructions(H224_H284Handler & handler) const
         // header read always needs 4 bytes
         if (size - sz < 4)
             return FALSE;
-        memcpy(info,GetClientDataPtr() + sz, 4);
+        memcpy(info, GetClientDataPtr() + sz, 4);
         cp = handler.GetControlPoint(info[0]);
         if (cp) {
             switch (cp->GetControlType()) {
@@ -92,9 +92,9 @@ PBoolean H284_Frame::ReadInstructions(H224_H284Handler & handler) const
             H284_Instruction inst;
             memcpy(inst.GetPointer(), GetClientDataPtr() + sz, msgSize);
             cp->HandleInstruction(inst);
-            sz + =msgSize;
+            sz += msgSize;
         } else {
-            sz+=4;
+            sz += 4;
         }
     }
 
