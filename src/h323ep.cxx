@@ -200,12 +200,14 @@ int tls_verify_cb(int ok, X509_STORE_CTX * store)
         int depth = X509_STORE_CTX_get_error_depth(store);
         int err = X509_STORE_CTX_get_error(store);
 
-        PTRACE(6, "TLS\tError with certificate at depth " << depth);
-        X509_NAME_oneline(X509_get_issuer_name(cert), data, 256);
-        PTRACE(6, "TLS\t  issuer  = " << data);
-        X509_NAME_oneline(X509_get_subject_name(cert), data, 256);
-        PTRACE(6, "TLS\t  subject = " << data);
-        PTRACE(6, "TLS\t  err " << err << ": " << X509_verify_cert_error_string(err));
+        PTRACE(2, "TLS\tError with certificate at depth " << depth);
+        if (cert != NULL) {   // OpenSSL doesn't always provide a current certificate
+            X509_NAME_oneline(X509_get_issuer_name(cert), data, 256);
+            PTRACE(6, "TLS\t  issuer  = " << data);
+            X509_NAME_oneline(X509_get_subject_name(cert), data, 256);
+            PTRACE(6, "TLS\t  subject = " << data);
+        }
+        PTRACE(2, "TLS\t  err " << err << ": " << X509_verify_cert_error_string(err));
     }
     return ok;
 }
