@@ -25,7 +25,7 @@ CFLAGS 	=@CFLAGS@	-D__STDC_CONSTANT_MACROS
 CXX	 	=@CXX@
 LDSO	 	=@LDSO@
 PLUGINEXT	=@PLUGINEXT@
-STDCCFLAGS	=@STDCCFLAGS@
+STDCCFLAGS	=@STDCCFLAGS@ -Wno-single-bit-bitfield-constant-conversion
 LDFLAGS		=@LDFLAGS@
 
 # Adjust if the OpenH264 SDK headers/library are not on the default search
