@@ -42,13 +42,18 @@ STDCCFLAGS += -Wall -Wno-unused -Wformat -Wformat-security -Wreorder -fno-strict
 vpath	%.cxx $(COMMONDIR)
 vpath	%.o   $(OBJDIR)
 
+ifeq ($(VERBOSE),)
+Q_CC = @echo [CC] `echo $< | sed s^@OPALDIR@/^^` ;
+Q_LD = @echo [LD] `echo $(PLUGIN) | sed s^@OPALDIR@/^^` ;
+endif
+
 SRCS    += h264frame.cxx \
            openh264.cxx \
            $(COMMONDIR)/trace.cxx
 
 $(OBJDIR)/%.o : %.cxx
 	@mkdir -p $(OBJDIR) >/dev/null 2>&1
-	$(CXX) -I../../../include $(EXTRACCFLAGS) $(STDCCFLAGS) $(OPTCCFLAGS) $(CFLAGS) -c $< -o $@
+	$(Q_CC)$(CXX) -I../../../include $(EXTRACCFLAGS) $(STDCCFLAGS) $(OPTCCFLAGS) $(CFLAGS) -c $< -o $@
 
 PLUGIN	= ./$(BASENAME)_video_pwplugin.$(PLUGINEXT)
 
@@ -56,9 +61,9 @@ OBJECTS = $(addprefix $(OBJDIR)/,$(patsubst %.c,%.o,$(patsubst %.cxx,%.o,$(notdi
 
 $(PLUGIN): $(OBJECTS)
 ifeq (,$(findstring solaris,$(target_os)))
-	$(CXX) $(LDSO) -o $@ $^ $(DL_LIBS) $(OPENH264_LIBS)
+	$(Q_LD)$(CXX) $(LDSO) -o $@ $^ $(DL_LIBS) $(OPENH264_LIBS)
 else
-	$(CXX) $(LDSO) $@ -o $@ $^ $(DL_LIBS) $(OPENH264_LIBS)
+	$(Q_LD)$(CXX) $(LDSO) $@ -o $@ $^ $(DL_LIBS) $(OPENH264_LIBS)
 endif
 
 install: $(PLUGIN)
