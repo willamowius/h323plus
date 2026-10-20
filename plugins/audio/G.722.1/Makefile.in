@@ -23,7 +23,7 @@ CC		=@CC@
 CXX		=@CXX@
 LDSO		=@LDSO@
 PLUGINEXT	=@PLUGINEXT@
-STDCCFLAGS	=@STDCCFLAGS@
+STDCCFLAGS	=@STDCCFLAGS@ -Wno-single-bit-bitfield-constant-conversion -Wno-register -Wno-c++11-narrowing -Wno-deprecated
 LDFLAGS		=@LDFLAGS@
 EXTRACFLAGS     =-I$(PLUGINDIR)
 

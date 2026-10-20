@@ -13,7 +13,6 @@ libdir=@libdir@
 target_os=@target_os@
 
 SONAME	= g7222
-STDCCFLAGS += @STDCCFLAGS@ -fPIC
 
 SRCDIR	= ./AMR-WB
 OBJDIR	= ./obj
@@ -23,7 +22,7 @@ CC		=@CC@
 CXX		=@CXX@
 LDSO		=@LDSO@
 PLUGINEXT	=@PLUGINEXT@
-STDCCFLAGS	=@STDCCFLAGS@
+STDCCFLAGS	=@STDCCFLAGS@ -Wno-c++11-narrowing
 LDFLAGS		=@LDFLAGS@
 EXTRACFLAGS     =-I$(PLUGINDIR)
 
