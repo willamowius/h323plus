@@ -46,7 +46,11 @@ extern int lpcini_(void);
 
 #include "f2c.h"
 
+#ifdef __OpenBSD__
+#include <stdlib.h>
+#else
 #include <malloc.h>
+#endif
 
 /* Common Block Declarations */
 
