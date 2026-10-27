@@ -420,6 +420,9 @@ H235Authenticator::ValidationResult H2351_Authenticator::ValidateCryptoToken(
                                             const H225_CryptoH323Token & cryptoToken,
                                             const PBYTEArray & rawPDU)
 {
+  if (!IsActive())
+    return e_Disabled;
+
   //verify the token is of correct type
   if (cryptoToken.GetTag() != H225_CryptoH323Token::e_nestedcryptoToken) {
     PTRACE(4, "H235\tNo nested crypto token!");
