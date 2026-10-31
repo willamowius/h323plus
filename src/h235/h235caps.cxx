@@ -52,6 +52,15 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+static H235SecurityCapability * FindSecurityCapability(H323Capabilities * caps, unsigned capNumber)
+{
+  H323Capability * cap = caps->FindCapability(capNumber);
+  if (cap == NULL || !PIsDescendant(cap, H235SecurityCapability))
+    return NULL;
+  return (H235SecurityCapability *)cap;
+}
+
+
 H235SecurityCapability::H235SecurityCapability(H323Capabilities * capabilities, unsigned capabilityNo)
 : m_capabilities(capabilities), m_capNumber(capabilityNo)
 {
@@ -509,7 +518,7 @@ PBoolean H323SecureCapability::OnSendingPDU(H245_DataType & dataType) const
     // if not found or no matching algorithm then assume no encryption.
     H235SecurityCapability * secCap = NULL;
     if (m_capabilities) {
-        secCap = (H235SecurityCapability *)m_capabilities->FindCapability(m_secNo);
+        secCap = FindSecurityCapability(m_capabilities, m_secNo);
         if (secCap && secCap->GetAlgorithmCount() > 0) {
            (PRemoveConst(H323SecureCapability,this))->SetEncryptionActive(true);
            (PRemoveConst(H323SecureCapability,this))->SetEncryptionAlgorithm(secCap->GetAlgorithm());
@@ -568,7 +577,7 @@ PBoolean H323SecureCapability::OnReceivedPDU(const H245_DataType & dataType,PBoo
     const H245_H235Media & h235Media = dataType;
 
     if (m_capabilities) {
-        H235SecurityCapability * secCap = (H235SecurityCapability *)m_capabilities->FindCapability(m_secNo);
+        H235SecurityCapability * secCap = FindSecurityCapability(m_capabilities, m_secNo);
         if (!secCap || !secCap->OnReceivedPDU(h235Media.m_encryptionAuthenticationAndIntegrity, e_OLC)) {
             PTRACE(4,"H235\tFailed to locate security capability " << m_secNo);
             return false;
@@ -883,7 +892,7 @@ PBoolean H323SecureExtendedCapability::OnSendingPDU(H245_DataType & dataType) co
     // if not found or no matching algorithm then assume no encryption.
     H235SecurityCapability * secCap = NULL;
     if (m_capabilities) {
-        secCap = (H235SecurityCapability *)m_capabilities->FindCapability(m_secNo);
+        secCap = FindSecurityCapability(m_capabilities, m_secNo);
         if (secCap && secCap->GetAlgorithmCount() > 0) {
            (PRemoveConst(H323SecureExtendedCapability,this))->SetEncryptionActive(true);
            (PRemoveConst(H323SecureExtendedCapability,this))->SetEncryptionAlgorithm(secCap->GetAlgorithm());
@@ -934,7 +943,7 @@ PBoolean H323SecureExtendedCapability::OnReceivedPDU(const H245_DataType & dataT
     const H245_H235Media & h235Media = dataType;
 
     if (m_capabilities) {
-        H235SecurityCapability * secCap = (H235SecurityCapability *)m_capabilities->FindCapability(m_secNo);
+        H235SecurityCapability * secCap = FindSecurityCapability(m_capabilities, m_secNo);
         if (!secCap || !secCap->OnReceivedPDU(h235Media.m_encryptionAuthenticationAndIntegrity, e_OLC)) {
             PTRACE(4,"H235\tFailed to locate security capability " << m_secNo);
             return false;
@@ -1182,7 +1191,7 @@ PBoolean H323SecureDataCapability::OnSendingPDU(H245_DataType & dataType) const
     // if not found or no matching algorithm then assume no encryption.
     H235SecurityCapability * secCap = NULL;
     if (m_capabilities) {
-        secCap = (H235SecurityCapability *)m_capabilities->FindCapability(m_secNo);
+        secCap = FindSecurityCapability(m_capabilities, m_secNo);
         if (secCap && secCap->GetAlgorithmCount() > 0) {
            (PRemoveConst(H323SecureDataCapability,this))->SetEncryptionActive(true);
            (PRemoveConst(H323SecureDataCapability,this))->SetEncryptionAlgorithm(secCap->GetAlgorithm());
@@ -1211,7 +1220,7 @@ PBoolean H323SecureDataCapability::OnReceivedPDU(const H245_DataType & dataType,
 
     const H245_H235Media & h235Media = dataType;
     if (m_capabilities) {
-        H235SecurityCapability * secCap = (H235SecurityCapability *)m_capabilities->FindCapability(m_secNo);
+        H235SecurityCapability * secCap = FindSecurityCapability(m_capabilities, m_secNo);
         if (!secCap || !secCap->OnReceivedPDU(h235Media.m_encryptionAuthenticationAndIntegrity, e_OLC)) {
             PTRACE(4,"H235\tFailed to locate security capability " << m_secNo);
             return false;
@@ -1348,7 +1357,7 @@ void H235Capabilities::AddSecure(PINDEX descriptorNum, PINDEX simultaneous, H323
     SetCapability(descriptorNum, simultaneous, secCap);
 
     capability->SetCapabilityList(this);
-    capability->SetAssociatedCapability(secNumber);
+    capability->SetAssociatedCapability(secCap->GetCapabilityNumber());
 
     PTRACE(3, "H323\tAdded Secure Capability: " << *capability);
 }
