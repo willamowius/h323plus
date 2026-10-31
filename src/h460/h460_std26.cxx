@@ -378,12 +378,23 @@ PBoolean H46026UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD 
         return false;
     }
 
-    m_rtpMutex.Wait();
-      memcpy(buf,m_rtpQueue.front()->GetPointer(), m_rtpQueue.front()->GetSize());
-      lastReadCount = m_rtpQueue.front()->GetSize();
-      delete m_rtpQueue.front();
-      m_rtpQueue.pop();
-    m_rtpMutex.Signal();
+    PWaitAndSignal m(m_rtpMutex);
+    if (m_rtpQueue.empty())
+        return false;
+
+    PBYTEArray * frame = m_rtpQueue.front();
+    m_rtpQueue.pop();
+    PINDEX frameSize = frame->GetSize();
+    if (frameSize > len) {
+        PTRACE(2, "H46026\tDropping frame size " << frameSize << " exceeds buffer " << len << " c: " << m_crv << " s: " << m_session);
+        delete frame;
+        lastReadCount = 0;
+        SetErrorValues(BufferTooSmall, EMSGSIZE, LastReadError);  // RTP_UDP ignores the packet
+        return false;
+    }
+    memcpy(buf, frame->GetPointer(), frameSize);
+    lastReadCount = frameSize;
+    delete frame;
 
     return true;
 }
