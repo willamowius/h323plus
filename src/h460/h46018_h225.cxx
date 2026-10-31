@@ -1594,6 +1594,7 @@ void H46019UDPSocket::BuildProbe(RTP_ControlFrame & report, bool probing)
     report.SetPayloadSize(sizeof(probe_packet));
 
     probe_packet data;
+    memset((void *)&data, 0, sizeof(data));  // do not leak padding bytes
     data.SSRC = SSRC;
     data.Length = sizeof(probe_packet);
     PString id = "24.1";
