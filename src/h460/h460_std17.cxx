@@ -646,6 +646,7 @@ void H46017Transport::SocketWrite(PThread &, H323_INT)
     PINDEX sz = 0;
     int packetLength = 0;
     while (!closeTransport) {
+        sz = tpkt.GetSize() - 4;  // capacity after TPKT header
         if (m_socketMgr->SocketOut(tpkt.GetPointer()+4,sz)) {
             packetLength = sz + 4;
             tpkt[2] = (BYTE)(packetLength >> 8);

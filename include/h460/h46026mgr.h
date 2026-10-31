@@ -170,6 +170,8 @@ public:
             False: there is no data or data is not ready.
         WARNING: This function does not block and returns immediately if false.
         Best practise would be to call from a threaded loop and use PThread::Sleep
+        On entry len must contain the capacity of data, on return the length copied.
+        Packets larger than the capacity are dropped.
      */
     PBoolean SocketOut(BYTE * data, PINDEX & len);
     PBoolean SocketOut(PBYTEArray & data, PINDEX & len);

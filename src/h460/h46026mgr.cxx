@@ -563,11 +563,15 @@ void H46026ChannelManager::SignalMsgIn(const Q931 & pdu)
 
 PBoolean H46026ChannelManager::SocketOut(PBYTEArray & data, PINDEX & len)
 {
+    len = data.GetSize();
     return SocketOut(data.GetPointer(), len);
 }
 
 PBoolean H46026ChannelManager::SocketOut(BYTE * data, PINDEX & len)
 {
+    PINDEX capacity = len;
+    len = 0;
+
     if (!m_socketPacketReady)
         return false;
 
@@ -578,12 +582,18 @@ PBoolean H46026ChannelManager::SocketOut(BYTE * data, PINDEX & len)
     PBoolean gotPacket = false;
     m_queueMutex.Wait();
         if (!m_socketQueue.empty()) {
-            PTRACE(6,"H46026\tSending #" << m_socketQueue.top().second.id << " delay " << m_socketQueue.top().second.delay << "ms");
-            m_currentPacketTime = nowTime + m_socketQueue.top().second.delay;
-            len = m_socketQueue.top().first.GetSize();
-            memcpy(data, (const BYTE *)m_socketQueue.top().first, len);
-            m_socketQueue.pop();
-            gotPacket = true;
+            PINDEX packetSize = m_socketQueue.top().first.GetSize();
+            if (packetSize > capacity) {
+                PTRACE(2,"H46026\tDropping #" << m_socketQueue.top().second.id << " size " << packetSize << " exceeds buffer " << capacity);
+                m_socketQueue.pop();
+            } else {
+                PTRACE(6,"H46026\tSending #" << m_socketQueue.top().second.id << " delay " << m_socketQueue.top().second.delay << "ms");
+                m_currentPacketTime = nowTime + m_socketQueue.top().second.delay;
+                len = packetSize;
+                memcpy(data, (const BYTE *)m_socketQueue.top().first, len);
+                m_socketQueue.pop();
+                gotPacket = true;
+            }
         } else {
             m_currentPacketTime = nowTime;
         }
