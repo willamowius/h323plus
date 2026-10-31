@@ -314,6 +314,10 @@ H235Authenticator::ValidationResult H2356_Authenticator::ValidateTokens(const PA
     if (!IsActive() || (m_tokenState == e_clearDisable))
         return e_Disabled;
 
+    // local capabilities hold raw pointers into m_dhLocalMap once security is initialised
+    if (m_tokenState == e_clearComplete)
+        return e_OK;
+
     const H225_ArrayOf_ClearToken & tokens = (const H225_ArrayOf_ClearToken &)clearTokens;
     if (tokens.GetSize() == 0) {
         DeleteObjectsInMap(m_dhLocalMap);
