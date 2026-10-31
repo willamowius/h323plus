@@ -272,6 +272,7 @@ public:
 
     H46017Transport * GetTransport();
     void AttachRasTransport(H46017RasTransport * _ras);
+    void DetachRasTransport(H46017RasTransport * _ras);
     H46017RasTransport * GetRasTransport();
 
     void TransportClosed();
@@ -363,6 +364,9 @@ class H46017RasTransport : public H323TransportUDP
     virtual PChannel::Errors GetErrorCode(ErrorGroup group = NumErrorGroups) const;
 
     virtual void CleanUpOnTermination();
+
+    // the handler is going away, the RAS transport is owned by the gatekeeper
+    void DetachHandler();
 
   protected:
     H46017Handler * m_handler;

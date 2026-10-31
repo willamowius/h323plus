@@ -412,6 +412,8 @@ PBoolean H46017Transport::HandleH46017RAS(const H323SignalPDU & pdu)
     std::list<PBYTEArray> ras;
     if ((pdu.GetQ931().GetMessageType() == Q931::FacilityMsg) && FindH46017RAS(pdu.m_h323_uu_pdu, ras)) {
        H46017RasTransport * rasTransport = Feature->GetRasTransport();
+       if (rasTransport == NULL)
+          return false;
        for (std::list<PBYTEArray>::iterator r = ras.begin(); r != ras.end(); ++r) {
            if (!rasTransport->ReceivedPDU(*r))
               return false;
@@ -684,8 +686,10 @@ H46017Handler::~H46017Handler()
         curtransport = NULL;
     }
 
+    // the RAS transport is owned and deleted by the gatekeeper
     if (ras != NULL) {
-        delete ras;
+        ras->DetachHandler();
+        ras->Close();
         ras = NULL;
     }
 }
@@ -731,8 +735,15 @@ H46017Transport * H46017Handler::GetTransport()
 void H46017Handler::AttachRasTransport(H46017RasTransport * _ras)
 {
     ras = _ras;
-    if (!ras)
+    if (!ras && curtransport)
         curtransport->Close();
+}
+
+void H46017Handler::DetachRasTransport(H46017RasTransport * _ras)
+{
+    // ignore an old RAS transport being cleaned up after a new one was attached
+    if (ras == _ras)
+        AttachRasTransport(NULL);
 }
 
 H46017RasTransport * H46017Handler::GetRasTransport()
@@ -745,7 +756,7 @@ PBoolean H46017Handler::RegisterGatekeeper()
     if (!curtransport->IsOpen())
         return false;
 
-    if (ras) delete ras;
+    // don't delete ras, it is owned by the current gatekeeper and deleted when it is replaced
 
     PString dummyAddress("0.0.0.0:0");
     if (!ep.SetGatekeeper(dummyAddress, new H46017RasTransport(ep, this)))
@@ -841,6 +852,8 @@ PBoolean H46017RasTransport::ReadPDU(PBYTEArray & pdu)
 
 PBoolean H46017RasTransport::WritePDU(const PBYTEArray & pdu)
 {
+    if (m_handler == NULL || m_handler->GetTransport() == NULL)
+        return false;
     return m_handler->GetTransport()->WriteRasPDU(pdu);
 }
 
@@ -865,8 +878,14 @@ PChannel::Errors H46017RasTransport::GetErrorCode(ErrorGroup /*group*/) const
 void H46017RasTransport::CleanUpOnTermination()
 {
     PTRACE(4,"H46017\tRAS transport cleanup");
-    m_handler->AttachRasTransport(NULL);
+    if (m_handler)
+        m_handler->DetachRasTransport(this);
     H323Transport::CleanUpOnTermination();
+}
+
+void H46017RasTransport::DetachHandler()
+{
+    m_handler = NULL;
 }
 
 #endif // H323_H46017
