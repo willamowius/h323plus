@@ -1391,11 +1391,25 @@ PBoolean H46019UDPSocket::ReadMultiplexBuffer(void * buf, PINDEX & len, Address 
         return false;
 
     m_multiMutex.Wait();
+    if (m_multQueue.empty()) {
+        m_multiMutex.Signal();
+        return false;
+    }
     H46019MultiPacket & packet = m_multQueue.front();
+
+    PINDEX packetSize = packet.frame.GetSize();
+    if (packetSize > len) {
+        PTRACE(2, "H46019M\tDropping packet size " << packetSize << " exceeds buffer " << len);
+        m_multQueue.pop();
+        m_multiMutex.Signal();
+        m_multiBuffer--;
+        SetErrorValues(BufferTooSmall, EMSGSIZE, LastReadError);  // RTP_UDP ignores the packet
+        return false;
+    }
 
     addr = packet.fromAddr;
     port = packet.fromPort;
-    len = packet.frame.GetSize();
+    len = packetSize;
     memcpy(buf, packet.frame.GetPointer(), len);
 
     m_multQueue.pop();
@@ -1679,7 +1693,8 @@ void H46019UDPSocket::H46024Adirect(bool starter)
 PBoolean H46019UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD & port)
 {
 #ifdef H323_H46019M
-    while (ReadSocket(buf, len, addr, port)) {
+    // ReadSocket() returns the packet size in readLen, restore the buffer capacity for every read
+    for (PINDEX readLen = len; ReadSocket(buf, readLen, addr, port); readLen = len) {
 #else
     while (PUDPSocket::ReadFrom(buf, len, addr, port)) {
 #endif
@@ -1708,8 +1723,8 @@ PBoolean H46019UDPSocket::ReadFrom(void * buf, PINDEX len, Address & addr, WORD 
             case e_idle:                                // RTCP only
             case e_probing:                                // RTCP only
             case e_verify_receiver:                        // RTCP only
-                frame.SetSize(len);
-                memcpy(frame.GetPointer(), buf, len);
+                frame.SetSize(GetLastReadCount());
+                memcpy(frame.GetPointer(), buf, GetLastReadCount());
                 if (ReceivedProbePacket(frame, probe, success)) {
                     if (success)
                         ProbeReceived(probe, addr,port);
