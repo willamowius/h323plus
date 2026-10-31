@@ -365,6 +365,11 @@ bool H264Frame::EncapsulateFU(RTPFrame & frame, unsigned int & flags) {
 }
 
 bool H264Frame::SetFromRTPFrame(RTPFrame & frame, unsigned int & flags) {
+  // a bogus CSRC count or extension length can make the header larger than the packet
+  if (frame.GetPayloadSize() == 0 || frame.GetPayloadSize() > (unsigned)frame.GetFrameLen()) {
+    TRACE(1, "H264\tDeencap\tInvalid RTP payload size");
+    return false;
+  }
   uint8_t curNALType = *(frame.GetPayloadPtr()) & 0x1f;
 
   if (curNALType >= H264_NAL_TYPE_NON_IDR_SLICE &&
@@ -413,24 +418,26 @@ bool H264Frame::DeencapsulateSTAP (RTPFrame & frame, unsigned int & /*flags*/) {
   TRACE_UP(4, "H264\tDeencap\tDeencapsulating a STAP of " << curSTAPLen << " bytes");
   while (curSTAPLen > 0)
   {
+    // validate before reading or copying anything
+    if (curSTAPLen < 3)
+    {
+      TRACE(1, "H264\tDeencap\tError deencapsulating STAP, not enough bytes left for a length field + NAL header");
+      return false;
+    }
     // first, theres a 2 byte length field
     uint32_t len = (curSTAP[0] << 8) | curSTAP[1];
+    if (len == 0 || (len + 2) > curSTAPLen)
+    {
+      TRACE(1, "H264\tDeencap\tError deencapsulating STAP, STAP header says its " << len + 2 << " bytes long but there are only " << curSTAPLen << " bytes left of the packet");
+      return false;
+    }
     curSTAP += 2;
     // then the header, followed by the body.  We'll add the header
     // in the AddDataToEncodedFrame - that's why the nal body is dptr + 1
     TRACE_UP(4, "H264\tDeencap\tDeencapsulating an NAL unit of " << len << " bytes (type " << (int)(*curSTAP & 0x1f) << ") from STAP");
     AddDataToEncodedFrame(curSTAP + 1,  len - 1, *curSTAP, 1);
     curSTAP += len;
-    if ((len + 2) > curSTAPLen)
-    {
-      curSTAPLen = 0;
-      TRACE(1, "H264\tDeencap\tError deencapsulating STAP, STAP header says its " << len + 2 << " bytes long but there are only " << curSTAPLen << " bytes left of the packet");
-      return false;
-    }
-    else
-    {
-      curSTAPLen -= (len + 2);
-    }
+    curSTAPLen -= (len + 2);
   }
   return true;
 }
@@ -439,6 +446,12 @@ bool H264Frame::DeencapsulateFU (RTPFrame & frame, unsigned int & /*flags*/) {
   uint8_t* curFUPtr = frame.GetPayloadPtr();
   uint32_t curFULen = frame.GetPayloadSize(); 
   uint8_t header;
+
+  // need FU indicator + FU header
+  if (curFULen < 2) {
+    TRACE(1, "H264\tDeencap\tError deencapsulating FU, packet too short (" << curFULen << " bytes) for FU indicator + header");
+    return false;
+  }
 
   if ((curFUPtr[1] & 0x80) && !(curFUPtr[1] & 0x40))
   {
