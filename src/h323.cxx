@@ -7475,7 +7475,8 @@ void H323Connection::OnReceiveServiceControlSessions(const H225_ArrayOf_ServiceC
     PString baseDN;
 
     for (PINDEX j = 0; j < serviceControlSessions.GetSize(); j++) {
-      H323ServiceControlSession & sess = serviceControlSessions[j];
+      POrdinalKey key = (const POrdinalKey &)serviceControlSessions.GetKeyAt(j);
+      H323ServiceControlSession & sess = serviceControlSessions[key];
       switch (sess.GetType()) {
          case H323ServiceControlSession::e_CallCredit:
             ((H323CallCreditServiceControl &)sess).GetValue(amount,credit,time);
