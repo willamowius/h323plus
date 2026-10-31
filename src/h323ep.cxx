@@ -2735,13 +2735,13 @@ void H323EndPoint::CleanUpConnections()
     H323Connection * connectionToDelete = connectionsActive.RemoveAt(token);
 
     // Unlock the structures yet again to avoid possible race conditions when
-    // deleting the connection as well as the delte of a conncetion descendant
+    // deleting the connection as well as the delete of a connection descendant
     // is application writer dependent and may cause deadlocks or just consume
     // lots of time.
     connectionsMutex.Signal();
 
     // Finally we get to delete it!
-    // TODO: Clang Analysizer determines a false positive
+    // TODO: Clang Analyzer determines a false positive
     // Argument to 'delete' is a constant address (x), which is not memory allocated by 'new'
     delete connectionToDelete;
 
@@ -2772,7 +2772,7 @@ H323Connection * H323EndPoint::FindConnectionWithLock(const PString & token)
 {
   PWaitAndSignal mutex(connectionsMutex);
 
-  /*We have a very yucky polling loop here as a semi permanant measure.
+  /*We have a very yucky polling loop here as a semi permanent measure.
     Why? We cannot call Lock() inside the connectionsMutex critical section as
     it will cause a deadlock with something like a RELEASE-COMPLETE coming in
     on separate thread. But if we put it outside there is a small window where
