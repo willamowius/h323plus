@@ -424,26 +424,44 @@ H460_FeatureContent  H460_FeatureParameter::operator=( H460_Feature * value )
     return m_content;
 }
 
+// Make sure a received parameter has the content type the caller expects,
+// replace missing or mismatched content with an empty object of the right type
+static void CheckContentType(H225_Content & content, unsigned tag)
+{
+    if (content.IsValid() && content.GetTag() == tag)
+        return;
+    if (tag == H225_Content::e_number32 && content.IsValid() &&
+        (content.GetTag() == H225_Content::e_number8 || content.GetTag() == H225_Content::e_number16))
+        return;
+    PTRACE(2, "H460\tParameter content " << (content.IsValid() ? content.GetTagName() : PString("missing"))
+           << " has wrong type, expected " << tag);
+    content.SetTag(tag);
+}
+
 H460_FeatureParameter::operator PASN_OctetString &()
 {
+    CheckContentType(m_content, H225_Content::e_raw);
     PASN_OctetString & content = m_content;
     return content;
 };
 
 H460_FeatureParameter::operator PString ()
 {
+    CheckContentType(m_content, H225_Content::e_text);
     PASN_IA5String & content = m_content;
     return content.GetValue();
 };
 
 H460_FeatureParameter::operator PASN_BMPString &()
 {
+    CheckContentType(m_content, H225_Content::e_unicode);
     PASN_BMPString & content = m_content;
     return content;
 };
 
 H460_FeatureParameter::operator PBoolean ()
 {
+    CheckContentType(m_content, H225_Content::e_bool);
     PASN_Boolean & content = m_content;
     PBoolean con = content;
     return con;
@@ -451,24 +469,28 @@ H460_FeatureParameter::operator PBoolean ()
 
 H460_FeatureParameter::operator unsigned()
 {
+    CheckContentType(m_content, H225_Content::e_number32);
     PASN_Integer & content = m_content;
     return content;
 };
 
 H460_FeatureParameter::operator H460_FeatureID &()
 {
+    CheckContentType(m_content, H225_Content::e_id);
     H225_GenericIdentifier & content = m_content;
     return (H460_FeatureID &)content;
 };
 
 H460_FeatureParameter::operator H225_AliasAddress &()
 {
+    CheckContentType(m_content, H225_Content::e_alias);
     H225_AliasAddress & content = m_content;
     return content;
 };
 
 H460_FeatureParameter::operator H323TransportAddress ()
 {
+    CheckContentType(m_content, H225_Content::e_transport);
     H225_TransportAddress & content = m_content;
     return content;
 
@@ -476,19 +498,24 @@ H460_FeatureParameter::operator H323TransportAddress ()
 
 H460_FeatureParameter::operator H225_ArrayOf_EnumeratedParameter &()
 {
+    CheckContentType(m_content, H225_Content::e_compound);
     H225_ArrayOf_EnumeratedParameter & content = m_content;
     return content;
 };
 
 H460_FeatureParameter::operator PURL ()
 {
+    CheckContentType(m_content, H225_Content::e_alias);
     H225_AliasAddress & content = m_content;
+    if (content.GetTag() != H225_AliasAddress::e_url_ID)
+        return PURL();
     PASN_IA5String & Surl = content;
     return Surl.GetValue();
 };
 
 H460_FeatureParameter::operator OpalGloballyUniqueID ()
 {
+    CheckContentType(m_content, H225_Content::e_id);
     H225_GenericIdentifier & content = m_content;
     if (content.GetTag() == H225_GenericIdentifier::e_nonStandard) {
        H225_GloballyUniqueID & id = content;
