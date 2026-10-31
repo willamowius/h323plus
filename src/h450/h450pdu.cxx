@@ -2647,26 +2647,30 @@ void H45011Handler::OnReceivedCIGetCIPLResult(X880_ReturnResult & returnResult)
 
       // Send ciNotification.inv (ciImpending) to  intruding (A)
       H323Connection* conn = endpoint.FindConnectionWithLock(intrudingCallToken);
-      conn->SetIntrusionImpending ();
+      if (conn != NULL) {
+        conn->SetIntrusionImpending ();
 
-      //Send Ringing to intruding (A)
-	  conn->AnsweringCall (conn->AnswerCallPending);
+        //Send Ringing to intruding (A)
+        conn->AnsweringCall (conn->AnswerCallPending);
 
-      // MUST RETURN ciNotification.inv (callForceRelesed) to active call (C) when releasing call !!!!!!
-      ciSendState = e_ci_sAttachToReleseComplete;
-      ciReturnState = e_ci_rCallForceReleased;
+        // MUST RETURN ciNotification.inv (callForceRelesed) to active call (C) when releasing call !!!!!!
+        ciSendState = e_ci_sAttachToReleseComplete;
+        ciReturnState = e_ci_rCallForceReleased;
 
-      //Send Forced Release Accepted when Answering call to intruding (A)
-      conn->SetForcedReleaseAccepted();
+        //Send Forced Release Accepted when Answering call to intruding (A)
+        conn->SetForcedReleaseAccepted();
       conn->Unlock ();
+      }
     }
     else {
       PTRACE(4 ,"H450.11\tCICL<CIPL -> Clear Call");
       // Clear Call with intruding (A)
       H323Connection* conn = endpoint.FindConnectionWithLock(intrudingCallToken);
-      conn->SetIntrusionNotAuthorized();
-      conn->Unlock();
-      endpoint.ClearCall (intrudingCallToken);
+      if (conn != NULL) {
+        conn->SetIntrusionNotAuthorized();
+        conn->Unlock();
+        endpoint.ClearCall (intrudingCallToken);
+      }
     }
   }
 
@@ -2753,17 +2757,19 @@ PBoolean H45011Handler::OnReceivedGetCIPLReturnError(int PTRACE_PARAM(errorCode)
 
   // Send ciNotification.inv (ciImpending) to intruding (A)
   H323Connection* conn = endpoint.FindConnectionWithLock(intrudingCallToken);
-  conn->SetIntrusionImpending ();
+  if (conn != NULL) {
+    conn->SetIntrusionImpending ();
 
-  //Send Ringing to intruding (A)
-  conn->AnsweringCall (conn->AnswerCallPending);
+    //Send Ringing to intruding (A)
+    conn->AnsweringCall (conn->AnswerCallPending);
 
-  ciSendState = e_ci_sAttachToReleseComplete;
-  ciReturnState = e_ci_rCallForceReleased;
+    ciSendState = e_ci_sAttachToReleseComplete;
+    ciReturnState = e_ci_rCallForceReleased;
 
-  //Forced Release Accepted to send when Answering call to intruding (A)
-  conn->SetForcedReleaseAccepted();
-  conn->Unlock ();
+    //Forced Release Accepted to send when Answering call to intruding (A)
+    conn->SetForcedReleaseAccepted();
+    conn->Unlock ();
+  }
 
   return FALSE;
 }
@@ -2869,8 +2875,10 @@ void H45011Handler::OnCallIntrudeTimeOut(PTimer &,  H323_INT)
         PTRACE(4, "H450.11\tOnCallIntrudeTimeOut Trying to answer Call");
         if(endpoint.HasConnection(intrudingCallToken)){
           H323Connection* conn = endpoint.FindConnectionWithLock(intrudingCallToken);
-          conn->AnsweringCall (conn->AnswerCallNow);
-          conn->Unlock ();
+          if (conn != NULL) {
+            conn->AnsweringCall (conn->AnswerCallNow);
+            conn->Unlock ();
+          }
         }
       }
       break;
@@ -2894,12 +2902,14 @@ PBoolean H45011Handler::OnReceivedReject(int PTRACE_PARAM(problemType), int PTRA
     case e_ci_GetCIPL:
     {
       H323Connection* conn = endpoint.FindConnectionWithLock(intrudingCallToken);
-      conn->SetIntrusionImpending ();
+      if (conn != NULL) {
+        conn->SetIntrusionImpending ();
 
-      //Send Ringing to  intruding (A)
-      conn->AnsweringCall (conn->AnswerCallPending);
-      conn->SetForcedReleaseAccepted();
-      conn->Unlock ();
+        //Send Ringing to  intruding (A)
+        conn->AnsweringCall (conn->AnswerCallPending);
+        conn->SetForcedReleaseAccepted();
+        conn->Unlock ();
+      }
       break;
     }
 
