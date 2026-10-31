@@ -2215,10 +2215,25 @@ PBoolean H323CodecExtendedVideoCapability::OnReceivedPDU(const H245_VideoCapabil
 
     for (PINDEX c =0; c < cap.m_collapsing.GetSize(); c++) {
         const H245_GenericParameter & param = cap.m_collapsing[c];
+        if (param.m_parameterIdentifier.GetTag() != H245_ParameterIdentifier::e_standard) {
+            PTRACE(4,"H239\tERROR: Role Identifer not standard");
+            return FALSE;
+        }
         const PASN_Integer & id = param.m_parameterIdentifier;
         if (id.GetValue() != 1) {
             PTRACE(4,"H239\tERROR: Unknown Role Identifer");
             return FALSE;
+        }
+        switch (param.m_parameterValue.GetTag()) {
+            case H245_ParameterValue::e_booleanArray:
+            case H245_ParameterValue::e_unsignedMin:
+            case H245_ParameterValue::e_unsignedMax:
+            case H245_ParameterValue::e_unsigned32Min:
+            case H245_ParameterValue::e_unsigned32Max:
+                break;
+            default:
+                PTRACE(4,"H239\tERROR: Role value not an integer");
+                return FALSE;
         }
         const PASN_Integer & role = param.m_parameterValue;
         switch (role.GetValue()) {
