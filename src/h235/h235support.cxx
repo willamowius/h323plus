@@ -593,6 +593,21 @@ PBoolean H235_DiffieHellman::LoadedFromFile()
   return m_loadFromFile;
 }
 
+static void SaveBignum(PConfig & config, const char * key, const BIGNUM * bn)
+{
+  if (bn == NULL)
+    return;
+
+  int len = BN_num_bytes(bn);
+  if (len <= 0)
+    return;
+
+  PBYTEArray data(len);
+  if (BN_bn2bin(bn, data.GetPointer()) == len)
+    config.SetString(key, PBase64::Encode(data.GetPointer(), len, ""));
+  memset(data.GetPointer(), 0, len);
+}
+
 PBoolean H235_DiffieHellman::Save(const PFilePath & dhFile, const PString & oid)
 {
   if (!dh)
@@ -607,36 +622,10 @@ PBoolean H235_DiffieHellman::Save(const PFilePath & dhFile, const PString & oid)
   DH_get0_pqg(dh, &dh_p, NULL, &dh_g);
 
   PConfig config(dhFile, oid);
-  PString str = PString();
-  int len = BN_num_bytes(pub_key);
-  unsigned char * data = (unsigned char *)OPENSSL_malloc(len);
-
-  if (data != NULL && BN_bn2bin(dh_p, data) > 0) {
-    str = PBase64::Encode(data, len, "");
-    config.SetString("PRIME",str);
-  }
-  OPENSSL_free(data);
-
-  data = (unsigned char *)OPENSSL_malloc(len);
-  if (data != NULL && BN_bn2bin(dh_g, data) > 0) {
-    str = PBase64::Encode(data, len, "");
-    config.SetString("GENERATOR",str);
-  }
-  OPENSSL_free(data);
-
-  data = (unsigned char *)OPENSSL_malloc(len);
-  if (data != NULL && BN_bn2bin(pub_key, data) > 0) {
-    str = PBase64::Encode(data, len, "");
-    config.SetString("PUBLIC",str);
-  }
-  OPENSSL_free(data);
-
-  data = (unsigned char *)OPENSSL_malloc(len);
-  if (data != NULL && BN_bn2bin(priv_key, data) > 0) {
-    PString str = PBase64::Encode(data, len, "");
-    config.SetString("PRIVATE",str);
-  }
-  OPENSSL_free(data);
+  SaveBignum(config, "PRIME", dh_p);
+  SaveBignum(config, "GENERATOR", dh_g);
+  SaveBignum(config, "PUBLIC", pub_key);
+  SaveBignum(config, "PRIVATE", priv_key);
   return true;
 }
 
