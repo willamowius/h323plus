@@ -1256,8 +1256,10 @@ void H4502Handler::OnReceivedInitiateReturnError(const bool timerExpiry)
 
   if (!transferringCallToken.IsEmpty()) {
 	  H323Connection* primaryConnection = endpoint.FindConnectionWithLock(transferringCallToken);
-	  primaryConnection->OnReceivedInitiateReturnError();
-	  primaryConnection->Unlock();
+    if (primaryConnection != NULL) {
+      primaryConnection->OnReceivedInitiateReturnError();
+      primaryConnection->Unlock();
+    };
   } else {
       endpoint.OnReceivedInitiateReturnError();
   }
