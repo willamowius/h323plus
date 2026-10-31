@@ -4783,6 +4783,8 @@ H323Channel * H323Connection::CreateLogicalChannel(const H245_OpenLogicalChannel
     const H245_ArrayOf_GenericInformation & cape = open.m_genericInformation;
     for (PINDEX i = 0; i < cape.GetSize(); i++) {
        const H245_GenericMessage & gcap = cape[i];
+       if (gcap.m_messageIdentifier.GetTag() != H245_CapabilityIdentifier::e_standard)
+        continue;
        const PASN_ObjectId & object_id = gcap.m_messageIdentifier;
        if (object_id.AsString() == OpalPluginCodec_Identifer_H239_Video) {
            if (gcap.HasOptionalField(H245_GenericMessage::e_messageContent)) {
