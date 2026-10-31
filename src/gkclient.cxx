@@ -1658,6 +1658,8 @@ PBoolean H323Gatekeeper::OnReceiveServiceControlIndication(const H225_ServiceCon
   OnServiceControlSessions(sci.m_serviceControl, connection);
 #endif
 
+  if (connection != NULL)
+    connection->Unlock();
 
   H323RasPDU response(authenticators);
   response.BuildServiceControlResponse(sci.m_requestSeqNum);
