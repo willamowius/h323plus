@@ -334,10 +334,18 @@ PBoolean H235_DiffieHellman::Encode_G(PASN_BitString & g) const
     const BIGNUM *dh_p = NULL, *dh_g = NULL;
     DH_get0_pqg(dh, &dh_p, NULL, &dh_g);
 
+    if (dh_p == NULL || dh_g == NULL)
+        return false;
+
     int len_p = BN_num_bytes(dh_p);
     int len_g = BN_num_bytes(dh_g);
     int bits_p = BN_num_bits(dh_p);
     //int bits_g = BN_num_bits(dh_g); // unused
+
+    if (len_g > len_p) {
+        PTRACE(1, "H235_DH\tFailed to encode G: len g > len prime");
+        return false;
+    }
 
     if (len_p <= 128) { // Key lengths <= 1024 bits
         // Backwards compatibility G is padded out to the length of P
@@ -460,10 +468,37 @@ PBoolean H235_DiffieHellman::GenerateHalfKey()
 
 void H235_DiffieHellman::SetDHReceived(const PASN_BitString & p, const PASN_BitString & g)
 {
-    PTRACE(4, "H235\tReplacing local DH parameters with those of remote");
+    PWaitAndSignal m(vbMutex);
 
-    Decode_P(p);
-    Decode_G(g);
+    if (dh == NULL || p.GetSize() == 0)
+        return;
+
+    const BIGNUM *cur_p = NULL, *cur_g = NULL;
+    DH_get0_pqg(dh, &cur_p, NULL, &cur_g);
+
+    BIGNUM * new_p = BN_bin2bn(p.GetDataPointer(), p.GetDataLength() - 1, NULL);
+    BIGNUM * new_g = (g.GetSize() > 0) ? BN_bin2bn(g.GetDataPointer(), g.GetDataLength() - 1, NULL) : NULL;
+    const BIGNUM * eff_g = new_g ? new_g : cur_g;
+    BIGNUM * p_minus_1 = new_p ? BN_dup(new_p) : NULL;
+
+    // The OID fixes the group size: require an odd prime of the same size and 1 < g < p-1
+    bool ok = new_p != NULL && cur_p != NULL && eff_g != NULL && p_minus_1 != NULL
+           && (g.GetSize() == 0 || new_g != NULL)
+           && BN_num_bits(new_p) == BN_num_bits(cur_p)
+           && BN_is_odd(new_p)
+           && BN_sub_word(p_minus_1, 1)
+           && BN_cmp(eff_g, BN_value_one()) > 0
+           && BN_cmp(eff_g, p_minus_1) < 0;
+    BN_free(p_minus_1);
+
+    if (!ok || !DH_set0_pqg(dh, new_p, NULL, new_g)) {
+        PTRACE(1, "H235_DH\tRejecting invalid DH parameters from remote");
+        BN_free(new_p);
+        BN_free(new_g);
+        return;
+    }
+
+    PTRACE(4, "H235\tReplacing local DH parameters with those of remote");
     m_wasDHReceived = true;
 }
 
