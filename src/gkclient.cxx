@@ -1305,15 +1305,18 @@ PBoolean H323Gatekeeper::OnReceiveDisengageRequest(const H225_DisengageRequest &
 
     dcf.IncludeOptionalField(H225_DisengageConfirm::e_usageInformation);
     SetRasUsageInformation(*connection, dcf.m_usageInformation);
-
-    connection->ClearCall(H323Connection::EndedByGatekeeper);
-    connection->Unlock();
   }
 
 #ifdef H323_H248
+  // process while we still hold the lock on the connection
   if (drq.HasOptionalField(H225_DisengageRequest::e_serviceControl))
     OnServiceControlSessions(drq.m_serviceControl, connection);
 #endif
+
+  if (connection != NULL) {
+    connection->ClearCall(H323Connection::EndedByGatekeeper);
+    connection->Unlock();
+  }
 
   return WritePDU(response);
 }
