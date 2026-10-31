@@ -703,13 +703,13 @@ PBoolean H245NegLogicalChannel::HandleOpen(const H245_OpenLogicalChannel & pdu)
 
   channel = connection.CreateLogicalChannel(pdu, FALSE, cause);
 
-  if (channel != NULL) {
-	  if (!connection.OnOpenLogicalChannel(pdu, ack, cause, channel->GetSessionID())) {
-		  delete channel;
-		  channel = NULL;
-          return false;
-	  }
+  // if rejected by the application, fall through to send OLCReject and release the mutex
+  if (channel != NULL && !connection.OnOpenLogicalChannel(pdu, ack, cause, channel->GetSessionID())) {
+    delete channel;
+    channel = NULL;
+  }
 
+  if (channel != NULL) {
     channel->SetNumber(channelNumber);
     channel->OnSendOpenAck(pdu, ack);
     if (channel->GetDirection() == H323Channel::IsBidirectional) {
