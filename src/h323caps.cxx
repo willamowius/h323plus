@@ -565,11 +565,12 @@ PObject::Comparison H323NonStandardCapabilityInfo::CompareData(const PBYTEArray 
   if (comparisonOffset >= data.GetSize())
     return PObject::GreaterThan;
 
+  // compare against remaining sizes, comparisonOffset+len may overflow
   PINDEX len = comparisonLength;
-  if (comparisonOffset+len > nonStandardData.GetSize())
+  if (len > nonStandardData.GetSize() - comparisonOffset)
     len = nonStandardData.GetSize() - comparisonOffset;
 
-  if (comparisonOffset+len > data.GetSize())
+  if (len > data.GetSize() - comparisonOffset)
     return PObject::GreaterThan;
 
   int cmp = memcmp((const BYTE *)nonStandardData + comparisonOffset,
