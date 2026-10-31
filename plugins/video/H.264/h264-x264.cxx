@@ -471,7 +471,20 @@ int H264DecoderContext::DecodeFrames(const u_char * src, unsigned & srcLen, u_ch
 #endif
 
   TRACE_UP(4, "H264\tDecoder\tDecoded " << bytesDecoded << " bytes"<< ", Resolution: " << _context->width << "x" << _context->height);
+  if (_context->width <= 0 || _context->height <= 0) {
+    TRACE(1, "H264\tDecoder\tReceived frame with invalid size " << _context->width << "x" << _context->height);
+    flags = (_gotAGoodFrame ? requestIFrame : 0);
+    _gotAGoodFrame = false;
+    return 1;
+  }
   int frameBytes = (_context->width * _context->height * 3) / 2;
+  // dstRTP still holds the capacity of the caller's buffer
+  if ((sizeof(PluginCodec_Video_FrameHeader) + frameBytes + dstRTP.GetHeaderSize()) > (unsigned)dstRTP.GetFrameLen()) {
+    TRACE(1, "H264\tDecoder\tOutput buffer too small for " << _context->width << "x" << _context->height << " frame");
+    flags = (_gotAGoodFrame ? requestIFrame : 0);
+    _gotAGoodFrame = false;
+    return 1;
+  }
   PluginCodec_Video_FrameHeader * header = (PluginCodec_Video_FrameHeader *)dstRTP.GetPayloadPtr();
   header->x = header->y = 0;
   header->width = _context->width;
