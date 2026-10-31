@@ -3936,7 +3936,7 @@ PBoolean H323Connection::IsMediaOnHold() const
 }
 
 
-PChannel * H323Connection::SwapHoldMediaChannels(PChannel * newChannel,unsigned sessionId)
+PChannel * H323Connection::SwapHoldMediaChannels(PChannel * newChannel, unsigned sessionId)
 {
   if (IsMediaOnHold()) {
       if (newChannel == NULL) {
@@ -3955,7 +3955,7 @@ PChannel * H323Connection::SwapHoldMediaChannels(PChannel * newChannel,unsigned 
     if (!channel) {
          PTRACE(4, "H4504\tLogical Channel " << i << " Empty or closed! Session ID: " << sessionId);
         // Fire off to ensure if channel is being Held that it is retrieved in derived application
-         OnCallRetrieve(TRUE,sessionId, 0, newChannel);
+         OnCallRetrieve(TRUE, sessionId, 0, newChannel);
          return NULL;
     }
 
@@ -3964,6 +3964,10 @@ PChannel * H323Connection::SwapHoldMediaChannels(PChannel * newChannel,unsigned 
       const H323ChannelNumber & channelNumber = channel->GetNumber();
 
       H323_RTPChannel * chan2 = reinterpret_cast<H323_RTPChannel*>(channel);
+      if (chan2 == NULL) {
+         PTRACE(2, "H4504\tError: Not a H323_RTPChannel");
+         return NULL;
+      }
 
       H323Codec * c = channel->GetCodec();
       if (!c) {
