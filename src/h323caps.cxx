@@ -2283,6 +2283,9 @@ PBoolean H323CodecExtendedVideoCapability::IsMatch(const PASN_Choice & subTypePD
         return false;
 
    const H245_ExtendedVideoCapability & gen = (const H245_ExtendedVideoCapability &)subTypePDU.GetObject();
+   if (gen.m_videoCapability.GetSize() == 0 || extCapabilities.GetSize() == 0)
+        return false;
+
    const H245_VideoCapability & vid = (const H245_VideoCapability &)gen.m_videoCapability[0];
    return extCapabilities[0].IsMatch(vid);
 
