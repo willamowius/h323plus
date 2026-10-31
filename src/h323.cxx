@@ -3963,11 +3963,11 @@ PChannel * H323Connection::SwapHoldMediaChannels(PChannel * newChannel, unsigned
     if (session_id == sessionId) {
       const H323ChannelNumber & channelNumber = channel->GetNumber();
 
-      H323_RTPChannel * chan2 = reinterpret_cast<H323_RTPChannel*>(channel);
-      if (chan2 == NULL) {
+      if (!PIsDescendant(channel, H323_RTPChannel)) {
          PTRACE(2, "H4504\tError: Not a H323_RTPChannel");
          return NULL;
       }
+      H323_RTPChannel * chan2 = reinterpret_cast<H323_RTPChannel*>(channel);
 
       H323Codec * c = channel->GetCodec();
       if (!c) {
