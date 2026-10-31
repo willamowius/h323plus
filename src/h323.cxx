@@ -3400,8 +3400,14 @@ PBoolean H323Connection::InternalEndSessionCheck(PPER_Stream & strm)
     return FALSE;
   }
 
-  PTRACE(3, "H245\tChecking for end session on PDU: " << pdu.GetTagName()
-         << ' ' << ((PASN_Choice &)pdu.GetObject()).GetTagName());
+#if PTRACING
+  if (PTrace::CanTrace(3)) {
+    // unknown extensions are decoded as PASN_OctetString, not PASN_Choice
+    const PASN_Object & obj = pdu.GetObject();
+    PTRACE(3, "H245\tChecking for end session on PDU: " << pdu.GetTagName()
+           << ' ' << (PIsDescendant(&obj, PASN_Choice) ? ((const PASN_Choice &)obj).GetTagName() : PString("<unknown>")));
+  }
+#endif
 
   if (pdu.GetTag() != H245_MultimediaSystemControlMessage::e_command)
     return TRUE;
