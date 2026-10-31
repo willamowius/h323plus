@@ -1304,9 +1304,16 @@ bool H263_RFC2429_DecoderContext::DecodeFrames(const BYTE * src, unsigned & srcL
     _gotAGoodFrame = false;
     return 1;
   }
+  int frameBytes = (_context->width * _context->height * 12) / 8;
+  // dstRTP still holds the capacity of the caller's buffer
+  if ((sizeof(PluginCodec_Video_FrameHeader) + frameBytes + dstRTP.GetHeaderSize()) > (unsigned)dstRTP.GetFrameLen()) {
+    TRACE_AND_LOG(tracer, 1, "Destination buffer " << dstRTP.GetFrameLen() << " too small for frame of size " << _context->width << "x" << _context->height);
+    flags = (_gotAGoodFrame ? PluginCodec_ReturnCoderRequestIFrame : 0);
+    _gotAGoodFrame = false;
+    return 1;
+  }
   _gotAGoodFrame = true;
 
-  int frameBytes = (_context->width * _context->height * 12) / 8;
   PluginCodec_Video_FrameHeader * header = (PluginCodec_Video_FrameHeader *)dstRTP.GetPayloadPtr();
   header->x = header->y = 0;
   header->width = _context->width;
