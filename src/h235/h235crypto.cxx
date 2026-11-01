@@ -828,7 +828,11 @@ PBoolean H235Session::CreateSession(PBoolean isMaster)
 
     m_isMaster = isMaster;
     PBYTEArray dhSessionkey;
-    m_dh.ComputeSessionKey(dhSessionkey);
+    if (!m_dh.ComputeSessionKey(dhSessionkey) ||
+        dhSessionkey.GetSize() < (PINDEX)m_dhkeyLen) {
+        PTRACE(1, "H235\tFailed to compute DH session key");
+        return false;
+    }
     PBYTEArray shortSessionKey;
     shortSessionKey.SetSize(m_dhkeyLen);
     memcpy(shortSessionKey.GetPointer(), dhSessionkey.GetPointer() + dhSessionkey.GetSize() - shortSessionKey.GetSize(), shortSessionKey.GetSize());
