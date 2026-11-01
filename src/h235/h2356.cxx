@@ -335,19 +335,23 @@ H235Authenticator::ValidationResult H2356_Authenticator::ValidateTokens(const PA
                 if (it->second != NULL) {
                     if (token.HasOptionalField(H235_ClearToken::e_dhkey)) {  // For keysize up to and including 2048
                         const H235_DHset & dh = token.m_dhkey;
-                        it->second->SetRemoteHalfKey(dh.m_halfkey);
                         if (!m_tokenState && dh.m_modSize.GetSize() > 0)  	// replace p and g if included and received first
                             it->second->SetDHReceived(dh.m_modSize,dh.m_generator);
+                        it->second->SetRemoteHalfKey(dh.m_halfkey);   // validated against the final p
 
                     } else if (token.HasOptionalField(H235_ClearToken::e_dhkeyext)) {  // For keysize greater then 2048
                         const H235_DHsetExt & dh = token.m_dhkeyext;
-                        it->second->SetRemoteHalfKey(dh.m_halfkey);
                         if (!m_tokenState && dh.HasOptionalField(H235_DHsetExt::e_modSize) &&   // replace p and g if included if received first
                                              dh.HasOptionalField(H235_DHsetExt::e_generator))
                             it->second->SetDHReceived(dh.m_modSize,dh.m_generator);
+                        it->second->SetRemoteHalfKey(dh.m_halfkey);   // validated against the final p
 
                     } else {
                         PTRACE(2, "H2356\tERROR DH Parameters missing " << it->first << " skipping.");
+                        continue;
+                    }
+                    if (!it->second->ReceivedFromRemote()) {
+                        PTRACE(2, "H2356\tERROR Invalid DH half key " << it->first << " skipping.");
                         continue;
                     }
                     selectOID = it->first;

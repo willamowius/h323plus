@@ -436,13 +436,39 @@ void H235_DiffieHellman::SetRemoteKey(bignum_st * remKey)
 
 void H235_DiffieHellman::SetRemoteHalfKey(const PASN_BitString & hk)
 {
-  const unsigned char *data = hk.GetDataPointer();
-  if (m_remKey)
-    BN_free(m_remKey);
-  m_remKey = BN_bin2bn(data, hk.GetDataLength() - 1, NULL);
+  PWaitAndSignal m(vbMutex);
 
-  if (m_remKey)
-    m_wasReceived = true;
+  if (m_remKey) {
+    BN_free(m_remKey);
+    m_remKey = NULL;
+  }
+  m_wasReceived = false;
+
+  if (hk.GetSize() == 0)
+    return;
+
+  BIGNUM * key = BN_bin2bn(hk.GetDataPointer(), hk.GetDataLength() - 1, NULL);
+  if (key == NULL)
+    return;
+
+  const BIGNUM * p = NULL;
+  if (dh != NULL)
+    DH_get0_pqg(dh, &p, NULL, NULL);
+
+  // a valid peer public key satisfies 1 < key < p-1
+  BIGNUM * p_minus_1 = p ? BN_dup(p) : NULL;
+  bool ok = !BN_is_zero(key) && !BN_is_one(key)
+         && (p == NULL || (p_minus_1 != NULL && BN_sub_word(p_minus_1, 1) && BN_cmp(key, p_minus_1) < 0));
+  BN_free(p_minus_1);
+
+  if (!ok) {
+    PTRACE(1, "H235_DH\tRejecting invalid remote half key");
+    BN_free(key);
+    return;
+  }
+
+  m_remKey = key;
+  m_wasReceived = true;
 }
 
 PBoolean H235_DiffieHellman::GenerateHalfKey()
