@@ -2855,8 +2855,19 @@ class H323EndPoint : public PObject
     const PTimeInterval & GetCallIntrusionT6() const { return callIntrusionT6; }
 
     /**Get the dictionary of <callIdentities, connections>
+       use the functions below for thread safe access!
      */
     H323CallIdentityDict& GetCallIdentityDictionary() { return secondaryConnectionsActive; }
+
+    /**Thread-safe access to secondaryConnectionsActive dictionary
+     */
+    void AddCallIdentity(const PString & callIdentity, H323Connection & connection);
+    void RemoveCallIdentity(const PString & callIdentity);
+
+    /**Find the connection for a callIdentity
+       Returns the connection locked, caller must Unlock() it
+     */
+    H323Connection * FindCallIdentityWithLock(const PString & callIdentity);
 
     /**Get the next available invoke Id for H450 operations
       */
@@ -3061,7 +3072,7 @@ class H323EndPoint : public PObject
 
 #ifdef H323_H450
 
-    /* Protect against absence of a response to the ctIdentify reqest
+    /* Protect against absence of a response to the ctIdentify request
        (Transferring Endpoint - Call Transfer with a secondary Call) */
     PTimeInterval callTransferT1;
     /* Protect against failure of completion of the call transfer operation
@@ -3131,7 +3142,7 @@ class H323EndPoint : public PObject
     PBoolean isSecureCall;               /// Flag to Specify Call to make is Authenticated.
     EPSecurityPolicy CallAuthPolicy;   /// Incoming Call Authentication acceptance level
     H235AuthenticatorList EPAuthList;  /// List of Usernames & Password to check incoming call Against
-    PBoolean m_disableMD5Authenticators; /// Disable MD5 based authenticatos (MD5 + CAT)
+    PBoolean m_disableMD5Authenticators; /// Disable MD5 based authenticators (MD5 + CAT)
 
 #ifdef H323_H460
     H460_FeatureSet features;

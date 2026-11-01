@@ -2734,6 +2734,16 @@ void H323EndPoint::CleanUpConnections()
     // cause its destructor to be called.
     H323Connection * connectionToDelete = connectionsActive.RemoveAt(token);
 
+#ifdef H323_H450
+    // Remove any callIdentity entries still pointing at this connection
+    for (PINDEX i = secondaryConnectionsActive.GetSize(); i-- > 0; ) {
+      if (&secondaryConnectionsActive.GetDataAt(i) == connectionToDelete) {
+        PString callIdentity = secondaryConnectionsActive.GetKeyAt(i); // copy, the entry gets erased
+        secondaryConnectionsActive.RemoveAt(callIdentity);
+      }
+    }
+#endif
+
     // Unlock the structures yet again to avoid possible race conditions when
     // deleting the connection as well as the delete of a connection descendant
     // is application writer dependent and may cause deadlocks or just consume
@@ -2755,6 +2765,36 @@ void H323EndPoint::CleanUpConnections()
   // Signal thread that may be waiting on ClearAllCalls()
   connectionsAreCleaned.Signal();
 }
+
+#ifdef H323_H450
+void H323EndPoint::AddCallIdentity(const PString & callIdentity, H323Connection & connection)
+{
+  PWaitAndSignal mutex(connectionsMutex);
+  secondaryConnectionsActive.SetAt(callIdentity, &connection);
+}
+
+void H323EndPoint::RemoveCallIdentity(const PString & callIdentity)
+{
+  PWaitAndSignal mutex(connectionsMutex);
+  // PSTLDictionary::RemoveAt() removes entry 0 if the key is missing, so check first
+  if (secondaryConnectionsActive.Contains(callIdentity))
+    secondaryConnectionsActive.RemoveAt(callIdentity);
+}
+
+H323Connection * H323EndPoint::FindCallIdentityWithLock(const PString & callIdentity)
+{
+  PString token;
+  {
+    PWaitAndSignal mutex(connectionsMutex);
+    H323Connection * conn = secondaryConnectionsActive.GetAt(callIdentity);
+    if (conn == NULL)
+      return NULL;
+    token = conn->GetCallToken(); // pointer valid while connectionsMutex held
+  }
+  // lock the connection the same deadlock-avoiding way as other lookups
+  return FindConnectionWithLock(token);
+}
+#endif // H323_H450
 
 PBoolean H323EndPoint::WillConnectionMutexBlock()
 {

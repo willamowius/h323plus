@@ -949,7 +949,7 @@ void H4502Handler::OnReceivedCallTransferIdentify(int /*linkedId*/)
   ctIdentifyResult.m_callIdentity = pstrId;
 
   // Store the callIdentity of this connection in the dictionary
-  endpoint.GetCallIdentityDictionary().SetAt(pstrId, &connection);
+  endpoint.AddCallIdentity(pstrId, connection);
 
   H4501_ArrayOf_AliasAddress& aliasAddress = ctIdentifyResult.m_reroutingNumber.m_destinationAddress;
 
@@ -1064,10 +1064,12 @@ void H4502Handler::OnReceivedCallTransferSetup(int /*linkedId*/,
     // appear to be an elegant solution to compare the destination address information.
 
     // Get this callIdentity from our dictionary (if present)
-    H323Connection *secondaryCall = endpoint.GetCallIdentityDictionary().GetAt(callIdentity);
+    H323Connection * secondaryCall = endpoint.FindCallIdentityWithLock(callIdentity);
 
-    if (secondaryCall != NULL)
+    if (secondaryCall != NULL) {
       secondaryCall->HandleConsultationTransfer(callIdentity, connection);
+      secondaryCall->Unlock();
+    }
     else  // Mismatched callIdentity
       SendReturnError(H4502_CallTransferErrors::e_unrecognizedCallIdentity);
   }
@@ -1385,7 +1387,7 @@ void H4502Handler::HandleConsultationTransfer(const PString & callIdentity,
     case e_ctAwaitSetup:
       {
         // Remove this callIdentity, connection pair from our dictionary as we no longer need it
-        endpoint.GetCallIdentityDictionary().RemoveAt(callIdentity);
+        endpoint.RemoveCallIdentity(callIdentity);
 
         // Stop timer CT-T2
         StopctTimer();
