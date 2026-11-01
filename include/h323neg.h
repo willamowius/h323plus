@@ -232,7 +232,11 @@ class H245NegLogicalChannels : public H245Negotiator
   public:
     H245NegLogicalChannels(H323EndPoint & endpoint, H323Connection & connection);
 
-    virtual void Add(H323Channel & channel);
+    /**Add an already established channel (eg from fast start).
+       Returns FALSE and doesn't take ownership if channel with
+       same number and direction already exists.
+      */
+    virtual PBoolean Add(H323Channel & channel);
 
     virtual PBoolean Open(
       const H323Capability & capability,

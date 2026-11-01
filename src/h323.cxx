@@ -1365,6 +1365,38 @@ void H323Connection::SetRemoteVersions(const H225_ProtocolIdentifier & protocolI
          << " and implying H.245 version " << h245version);
 }
 
+static PBoolean IsDuplicateFastStartChannel(const H323LogicalChannelList & channels,
+                                            const H323Channel & channel)
+{
+  // A remote channel number may appear in several fast start proposals for
+  // the same RTP session (alternatives), but never for different sessions.
+  for (PINDEX i = 0; i < channels.GetSize(); i++) {
+    if (channels[i].GetNumber() == channel.GetNumber() &&
+        channels[i].GetSessionID() != channel.GetSessionID())
+      return TRUE;
+  }
+  return FALSE;
+}
+
+// Hand the started fast start channels over to the logical channel dictionary.
+// Ownership stays with the list until the caller calls DisallowDeleteObjects().
+static PINDEX TransferFastStartChannels(H323LogicalChannelList & channels, H245NegLogicalChannels & logicalChannels)
+{
+  for (PINDEX i = 0; i < channels.GetSize(); i++) {
+    H323Channel & channel = channels[i];
+    if (!channel.IsRunning()) {
+      channels.RemoveAt(i--);
+      continue;
+    }
+    if (!logicalChannels.Add(channel)) {
+      PTRACE(2, "H225\tDropping fast start channel with duplicate number " << channel.GetNumber());
+      channel.CleanUpOnTermination();
+      channels.RemoveAt(i--);
+    }
+  }
+  return channels.GetSize();
+}
+
 PBoolean H323Connection::DecodeFastStartCaps(const H225_ArrayOf_PASN_OctetString & fastStartCaps)
 {
   if (!capabilityExchangeProcedure->HasReceivedCapabilities())
@@ -1383,6 +1415,12 @@ PBoolean H323Connection::DecodeFastStartCaps(const H225_ArrayOf_PASN_OctetString
       if (channel != NULL) {
         if (channel->GetDirection() == H323Channel::IsTransmitter)
           channel->SetNumber(logicalChannels->GetNextChannelNumber());
+        else if (IsDuplicateFastStartChannel(fastStartChannels, *channel)) {
+          PTRACE(2, "H225\tIgnoring fast start channel " << channel->GetNumber()
+                 << " already used for another RTP session");
+          delete channel;
+          continue;
+        }
         fastStartChannels.Append(channel);
       }
     }
@@ -1399,7 +1437,6 @@ PBoolean H323Connection::DecodeFastStartCaps(const H225_ArrayOf_PASN_OctetString
 
   return !fastStartChannels.IsEmpty();
 }
-
 
 
 PBoolean H323Connection::OnReceivedSignalSetup(const H323SignalPDU & setupPDU)
@@ -2942,16 +2979,9 @@ PBoolean H323Connection::SendFastStartAcknowledge(H225_ArrayOf_PASN_OctetString 
     OnSelectLogicalChannels();
 
   // Remove any channels that were not started by OnSelectLogicalChannels(),
-  // those that were started are put into the logical channel dictionary
-  for (i = 0; i < fastStartChannels.GetSize(); i++) {
-    if (fastStartChannels[i].IsRunning())
-      logicalChannels->Add(fastStartChannels[i]);
-    else
-      fastStartChannels.RemoveAt(i--);
-  }
-
-  // None left, so didn't open any channels fast
-  if (fastStartChannels.IsEmpty()) {
+  // those that were started are put into the logical channel dictionary.
+  // If none are left, we didn't open any channels fast.
+  if (TransferFastStartChannels(fastStartChannels, *logicalChannels) == 0) {
     fastStartState = FastStartDisabled;
     return FALSE;
   }
@@ -3054,12 +3084,7 @@ PBoolean H323Connection::HandleFastStartAcknowledge(const H225_ArrayOf_PASN_Octe
 
   // Remove any channels that were not started by above, those that were
   // started are put into the logical channel dictionary
-  for (i = 0; i < fastStartChannels.GetSize(); i++) {
-    if (fastStartChannels[i].IsRunning())
-      logicalChannels->Add(fastStartChannels[i]);
-    else
-      fastStartChannels.RemoveAt(i--);
-  }
+  TransferFastStartChannels(fastStartChannels, *logicalChannels);
 
   // The channels we just transferred to the logical channels dictionary
   // should not be deleted via this structure now.

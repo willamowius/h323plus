@@ -1063,11 +1063,17 @@ H245NegLogicalChannels::H245NegLogicalChannels(H323EndPoint & end,
 }
 
 
-void H245NegLogicalChannels::Add(H323Channel & channel)
+PBoolean H245NegLogicalChannels::Add(H323Channel & channel)
 {
-  mutex.Wait();
+  PWaitAndSignal wait(mutex);
+
+  if (channels.Contains(channel.GetNumber())) {
+    PTRACE(2, "H245\tRefusing to add duplicate logical channel " << channel.GetNumber());
+    return FALSE;
+  }
+
   channels.SetAt(channel.GetNumber(), new H245NegLogicalChannel(endpoint, connection, channel));
-  mutex.Signal();
+  return TRUE;
 }
 
 PBoolean H245NegLogicalChannels::Open(const H323Capability & capability,
