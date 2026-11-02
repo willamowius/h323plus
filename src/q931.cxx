@@ -404,9 +404,20 @@ PBoolean Q931::Encode(PBYTEArray & data) const
   unsigned discriminator;
   for (discriminator = 0; discriminator < 256; discriminator++) {
     if (informationElements.Contains(discriminator)) {
-      if (discriminator < 128)
-        totalBytes += informationElements[discriminator].GetSize() +
-                            (discriminator != UserUserIE ? 2 : 4);
+      if (discriminator < 128) {
+        PINDEX len = informationElements[discriminator].GetSize();
+        if (discriminator == UserUserIE) {
+          // 16 bit length field that also counts the protocol discriminator,
+          // truncating would produce broken ASN.1, so refuse to encode
+          if (len > 65534) {
+            PTRACE(1, "Q931\tUser-User IE too large (" << len << " bytes), can't encode message");
+            return FALSE;
+          }
+        }
+        else if (len > 255)
+          len = 255;
+        totalBytes += len + (discriminator != UserUserIE ? 2 : 4);
+      }
       else
         totalBytes++;
     }
@@ -435,6 +446,11 @@ PBoolean Q931::Encode(PBYTEArray & data) const
         int len = informationElements[discriminator].GetSize();
 
         if (discriminator != UserUserIE) {
+          // the length field of all IEs except User-User is a single octet
+          if (len > 255) {
+            PTRACE(1, "Q931\tIE " << discriminator << " too large (" << len << " bytes), truncating");
+            len = 255;
+          }
           data[offset++] = (BYTE)discriminator;
           data[offset++] = (BYTE)len;
         }
