@@ -267,7 +267,7 @@ void H460_FeatureStd19::OnReceiveSetup_UUIE(const H225_FeatureDescriptor & pdu)
         CON->H46019SetCallReceiver();
 #ifdef H323_H46019M
         H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
-        if (feat.Contains(H46019_Multiplex) && EP->H46019MIsEnabled()) {
+        if (feat.Contains(H46019_Multiplex) && EP && EP->H46019MIsEnabled()) {
              EnableMultiplex();
              multiSupport = true;
         }
@@ -315,7 +315,7 @@ void H460_FeatureStd19::OnReceiveAlerting_UUIE(const H225_FeatureDescriptor & pd
         CON->H46019Enabled();
 #ifdef H323_H46019M
         H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
-        if (feat.Contains(H46019_Multiplex) && EP->H46019MIsEnabled()) {
+        if (feat.Contains(H46019_Multiplex) && EP && EP->H46019MIsEnabled()) {
              EnableMultiplex();
              multiSupport = true;
         }
@@ -344,7 +344,7 @@ void H460_FeatureStd19::OnReceiveCallConnect_UUIE(const H225_FeatureDescriptor &
         CON->H46019Enabled();
 #ifdef H323_H46019M
         H460_FeatureStd & feat = (H460_FeatureStd &)pdu;
-        if (feat.Contains(H46019_Multiplex) && EP->H46019MIsEnabled()) {
+        if (feat.Contains(H46019_Multiplex) && EP && EP->H46019MIsEnabled()) {
              EnableMultiplex();
              multiSupport = true;
         }
