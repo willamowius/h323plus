@@ -682,18 +682,22 @@ void H323Gatekeeper::RegistrationTimeToLive()
 
 PBoolean H323Gatekeeper::UnregistrationRequest(int reason)
 {
-  if (PAssertNULL(transport) == NULL)
-    return FALSE;
-
   H323RasPDU pdu;
   H225_UnregistrationRequest & urq = pdu.BuildUnregistrationRequest(GetNextSequenceNumber());
 
-  H225_TransportAddress rasAddress;
-  transport->SetUpTransportPDU(rasAddress, TRUE);
+  {
+    // the monitor thread may be replacing the transport in MakeRequest() (moving to an alternate gatekeeper)
+    PWaitAndSignal transportLock(transportMutex);
+    if (PAssertNULL(transport) == NULL)
+      return FALSE;
 
-  H323SetTransportAddresses(*transport,
-                            endpoint.GetInterfaceAddresses(TRUE, transport),
-                            urq.m_callSignalAddress);
+    H225_TransportAddress rasAddress;
+    transport->SetUpTransportPDU(rasAddress, TRUE);
+
+    H323SetTransportAddresses(*transport,
+                              endpoint.GetInterfaceAddresses(TRUE, transport),
+                              urq.m_callSignalAddress);
+  }
 
   urq.IncludeOptionalField(H225_UnregistrationRequest::e_endpointAlias);
   H323SetAliasAddresses(endpoint.GetAliasNames(), urq.m_endpointAlias);
@@ -1822,6 +1826,7 @@ PBoolean H323Gatekeeper::MakeRequestWithReregister(Request & request, unsigned u
 void H323Gatekeeper::Connect(const H323TransportAddress & address,
                              const PString & gkid)
 {
+  PWaitAndSignal transportLock(transportMutex);
   if (transport == NULL)
       transport = new H323TransportUDP(endpoint, PIPSocket::Address::GetAny(4));
 
@@ -1895,16 +1900,22 @@ PBoolean H323Gatekeeper::MakeRequest(Request & request)
       }
 
       altInfo = &alternates[alt++];
-      if (transport) {
-        transport->GetLocalAddress().GetIpAndPort(localAddress,localPort);
-        transport->CleanUpOnTermination();
-        delete transport;
-      }
+      {
+        // other threads use the transport without requestMutex (eg. UnregistrationRequest() when the endpoint
+        // shuts down), it must not be deleted under them
+        PWaitAndSignal transportLock(transportMutex);
+        if (transport) {
+          transport->GetLocalAddress().GetIpAndPort(localAddress,localPort);
+          transport->CleanUpOnTermination();
+          delete transport;
+          transport = NULL;
+        }
 
-      transport = new H323TransportUDP(endpoint,localAddress,localPort);
-      transport->SetRemoteAddress (altInfo->rasAddress);
-      transport->Connect();
-      gatekeeperIdentifier = altInfo->gatekeeperIdentifier;
+        transport = new H323TransportUDP(endpoint,localAddress,localPort);
+        transport->SetRemoteAddress (altInfo->rasAddress);
+        transport->Connect();
+        gatekeeperIdentifier = altInfo->gatekeeperIdentifier;
+      }
       StartChannel();
     } while (altInfo->registrationState == AlternateInfo::RegistrationFailed);
 

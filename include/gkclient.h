@@ -377,6 +377,7 @@ class H323Gatekeeper : public H225_RAS
     H323List<AlternateInfo> alternates;
     PBoolean                alternatePermanent;
     PSemaphore              requestMutex;
+    PMutex                  transportMutex;  // MakeRequest() replaces the transport when it moves to an alternate
     H235Authenticators      authenticators;
     AlternateInfo           assignedGK;
 	PBoolean                moveAlternate;
